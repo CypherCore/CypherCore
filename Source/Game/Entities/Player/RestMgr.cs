@@ -2,164 +2,191 @@
 
 namespace Game.Entities
 {
-    public class RestMgr
-    {
-        Player _player;
-        long _restTime;
-        uint _innAreaTriggerId;
-        float[] _restBonus = new float[(int)RestTypes.Max];
-        RestFlag _restFlagMask;
+	public class RestMgr
+	{
+		private uint _innAreaTriggerId;
+		private Player _player;
+		private float[] _restBonus = new float[(int)RestTypes.Max];
+		private RestFlag _restFlagMask;
+		private long _restTime;
 
-        public RestMgr(Player player)
-        {
-            _player = player;
-        }
+		public RestMgr(Player player)
+		{
+			_player = player;
+		}
 
-        public void SetRestBonus(RestTypes restType, float restBonus)
-        {
-            uint next_level_xp;
-            bool affectedByRaF = false;
+		public void SetRestBonus(RestTypes restType, float restBonus)
+		{
+			uint next_level_xp;
+			bool affectedByRaF = false;
 
-            switch (restType)
-            {
-                case RestTypes.XP:
-                    // Reset restBonus (XP only) for max level players
-                    if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                        restBonus = 0;
+			switch (restType)
+			{
+				case RestTypes.XP:
+					// Reset restBonus (XP only) for max level players
+					if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+						restBonus = 0;
 
-                    next_level_xp = _player.m_activePlayerData.NextLevelXP;
-                    affectedByRaF = true;
-                    break;
-                case RestTypes.Honor:
-                    // Reset restBonus (Honor only) for players with max honor level.
-                    if (_player.IsMaxHonorLevel())
-                        restBonus = 0;
+					next_level_xp = _player._activePlayerData.NextLevelXP;
+					affectedByRaF = true;
 
-                    next_level_xp = _player.m_activePlayerData.HonorNextLevel;
-                    break;
-                default:
-                    return;
-            }
+					break;
+				case RestTypes.Honor:
+					// Reset restBonus (Honor only) for players with max honor level.
+					if (_player.IsMaxHonorLevel())
+						restBonus = 0;
 
-            float rest_bonus_max = next_level_xp * 1.5f / 2;
+					next_level_xp = _player._activePlayerData.HonorNextLevel;
 
-            if (restBonus < 0)
-                restBonus = 0;
+					break;
+				default:
+					return;
+			}
 
-            if (restBonus > rest_bonus_max)
-                restBonus = rest_bonus_max;
+			float rest_bonus_max = next_level_xp * 1.5f / 2;
 
-            uint oldBonus = (uint)(_restBonus[(int)restType]);
-            _restBonus[(int)restType] = restBonus;
+			if (restBonus < 0)
+				restBonus = 0;
 
-            PlayerRestState oldRestState = (PlayerRestState)(int)_player.m_activePlayerData.RestInfo[(int)restType].StateID;
-            PlayerRestState newRestState = PlayerRestState.Normal;
+			if (restBonus > rest_bonus_max)
+				restBonus = rest_bonus_max;
 
-            if (affectedByRaF && _player.GetsRecruitAFriendBonus(true) && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
-                newRestState = PlayerRestState.RAFLinked;
-            else if (_restBonus[(int)restType] >= 1)
-                newRestState = PlayerRestState.Rested;
+			uint oldBonus = (uint)(_restBonus[(int)restType]);
+			_restBonus[(int)restType] = restBonus;
 
-            if (oldBonus == restBonus && oldRestState == newRestState)
-                return;
+			PlayerRestState oldRestState = (PlayerRestState)(int)_player._activePlayerData.RestInfo[(int)restType].StateID;
+			PlayerRestState newRestState = PlayerRestState.Normal;
 
-            // update data for client
-            _player.SetRestThreshold(restType, (uint)_restBonus[(int)restType]);
-            _player.SetRestState(restType, newRestState);
-        }
+			if (affectedByRaF &&
+			    _player.GetsRecruitAFriendBonus(true) &&
+			    (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
+				newRestState = PlayerRestState.RAFLinked;
+			else if (_restBonus[(int)restType] >= 1)
+				newRestState = PlayerRestState.Rested;
 
-        public void AddRestBonus(RestTypes restType, float restBonus)
-        {
-            // Don't add extra rest bonus to max level players. Note: Might need different condition in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
-            if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                restBonus = 0;
+			if (oldBonus == restBonus &&
+			    oldRestState == newRestState)
+				return;
 
-            float totalRestBonus = GetRestBonus(restType) + restBonus;
-            SetRestBonus(restType, totalRestBonus);
-        }
+			// update data for client
+			_player.SetRestThreshold(restType, (uint)_restBonus[(int)restType]);
+			_player.SetRestState(restType, newRestState);
+		}
 
-        public void SetRestFlag(RestFlag restFlag, uint triggerId = 0)
-        {
-            RestFlag oldRestMask = _restFlagMask;
-            _restFlagMask |= restFlag;
+		public void AddRestBonus(RestTypes restType, float restBonus)
+		{
+			// Don't add extra rest bonus to max level players. Note: Might need different condition in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
+			if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+				restBonus = 0;
 
-            if (oldRestMask == 0 && _restFlagMask != 0) // only set flag/time on the first rest state
-            {
-                _restTime = GameTime.GetGameTime();
-                _player.SetPlayerFlag(PlayerFlags.Resting);
-            }
+			float totalRestBonus = GetRestBonus(restType) + restBonus;
+			SetRestBonus(restType, totalRestBonus);
+		}
 
-            if (triggerId != 0)
-                _innAreaTriggerId = triggerId;
-        }
+		public void SetRestFlag(RestFlag restFlag, uint triggerId = 0)
+		{
+			RestFlag oldRestMask = _restFlagMask;
+			_restFlagMask |= restFlag;
 
-        public void RemoveRestFlag(RestFlag restFlag)
-        {
-            RestFlag oldRestMask = _restFlagMask;
-            _restFlagMask &= ~restFlag;
+			if (oldRestMask == 0 &&
+			    _restFlagMask != 0) // only set flag/time on the first rest state
+			{
+				_restTime = GameTime.GetGameTime();
+				_player.SetPlayerFlag(PlayerFlags.Resting);
+			}
 
-            if (oldRestMask != 0 && _restFlagMask == 0) // only remove flag/time on the last rest state remove
-            {
-                _restTime = 0;
-                _player.RemovePlayerFlag(PlayerFlags.Resting);
-            }
-        }
+			if (triggerId != 0)
+				_innAreaTriggerId = triggerId;
+		}
 
-        public uint GetRestBonusFor(RestTypes restType, uint xp)
-        {
-            uint rested_bonus = (uint)GetRestBonus(restType); // xp for each rested bonus
+		public void RemoveRestFlag(RestFlag restFlag)
+		{
+			RestFlag oldRestMask = _restFlagMask;
+			_restFlagMask &= ~restFlag;
 
-            if (rested_bonus > xp) // max rested_bonus == xp or (r+x) = 200% xp
-                rested_bonus = xp;
+			if (oldRestMask != 0 &&
+			    _restFlagMask == 0) // only remove flag/time on the last rest state remove
+			{
+				_restTime = 0;
+				_player.RemovePlayerFlag(PlayerFlags.Resting);
+			}
+		}
 
-            uint rested_loss = rested_bonus;
-            if (restType == RestTypes.XP)
-               MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
+		public uint GetRestBonusFor(RestTypes restType, uint xp)
+		{
+			uint rested_bonus = (uint)GetRestBonus(restType); // xp for each rested bonus
 
-            SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
+			if (rested_bonus > xp) // max rested_bonus == xp or (r+x) = 200% xp
+				rested_bonus = xp;
 
-            Log.outDebug(LogFilter.Player, "RestMgr.GetRestBonus: Player '{0}' ({1}) gain {2} xp (+{3} Rested Bonus). Rested points={4}",
-                _player.GetGUID().ToString(), _player.GetName(), xp + rested_bonus, rested_bonus, GetRestBonus(restType));
-            return rested_bonus;
-        }
+			uint rested_loss = rested_bonus;
 
-        public void Update(uint now)
-        {
-            if (RandomHelper.randChance(3) && _restTime > 0) // freeze update
-            {
-                long timeDiff = now - _restTime;
-                if (timeDiff >= 10)
-                {
-                    _restTime = now;
+			if (restType == RestTypes.XP)
+				MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
-                    float bubble = 0.125f * WorldConfig.GetFloatValue(WorldCfg.RateRestIngame);
-                    AddRestBonus(RestTypes.XP, timeDiff * CalcExtraPerSec(RestTypes.XP, bubble));
-                }
-            }
-        }
+			SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
 
-        public void LoadRestBonus(RestTypes restType, PlayerRestState state, float restBonus)
-        {
-            _restBonus[(int)restType] = restBonus;
-            _player.SetRestState(restType, state);
-            _player.SetRestThreshold(restType, (uint)restBonus);
-        }
+			Log.outDebug(LogFilter.Player,
+			             "RestMgr.GetRestBonus: Player '{0}' ({1}) gain {2} xp (+{3} Rested Bonus). Rested points={4}",
+			             _player.GetGUID().ToString(),
+			             _player.GetName(),
+			             xp + rested_bonus,
+			             rested_bonus,
+			             GetRestBonus(restType));
 
-        public float CalcExtraPerSec(RestTypes restType, float bubble)
-        {
-            switch (restType)
-            {
-                case RestTypes.Honor:
-                    return _player.m_activePlayerData.HonorNextLevel / 72000.0f * bubble;
-                case RestTypes.XP:
-                    return _player.m_activePlayerData.NextLevelXP / 72000.0f * bubble;
-                default:
-                    return 0.0f;
-            }
-        }
+			return rested_bonus;
+		}
 
-        public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
-        public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
-        public uint GetInnTriggerId() { return _innAreaTriggerId; }
-    }
+		public void Update(uint now)
+		{
+			if (RandomHelper.randChance(3) &&
+			    _restTime > 0) // freeze update
+			{
+				long timeDiff = now - _restTime;
+
+				if (timeDiff >= 10)
+				{
+					_restTime = now;
+
+					float bubble = 0.125f * WorldConfig.GetFloatValue(WorldCfg.RateRestIngame);
+					AddRestBonus(RestTypes.XP, timeDiff * CalcExtraPerSec(RestTypes.XP, bubble));
+				}
+			}
+		}
+
+		public void LoadRestBonus(RestTypes restType, PlayerRestState state, float restBonus)
+		{
+			_restBonus[(int)restType] = restBonus;
+			_player.SetRestState(restType, state);
+			_player.SetRestThreshold(restType, (uint)restBonus);
+		}
+
+		public float CalcExtraPerSec(RestTypes restType, float bubble)
+		{
+			switch (restType)
+			{
+				case RestTypes.Honor:
+					return _player._activePlayerData.HonorNextLevel / 72000.0f * bubble;
+				case RestTypes.XP:
+					return _player._activePlayerData.NextLevelXP / 72000.0f * bubble;
+				default:
+					return 0.0f;
+			}
+		}
+
+		public float GetRestBonus(RestTypes restType)
+		{
+			return _restBonus[(int)restType];
+		}
+
+		public bool HasRestFlag(RestFlag restFlag)
+		{
+			return (_restFlagMask & restFlag) != 0;
+		}
+
+		public uint GetInnTriggerId()
+		{
+			return _innAreaTriggerId;
+		}
+	}
 }

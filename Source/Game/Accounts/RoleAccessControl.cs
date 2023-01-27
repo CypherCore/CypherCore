@@ -1,370 +1,484 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Database;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Constants;
+using Framework.Database;
 
 namespace Game.Accounts
 {
-    public class RBACData
-    {
-        uint _id;                                        // Account id
-        string _name;                                 // Account name
-        int _realmId;                                    // RealmId Affected
-        byte _secLevel;                                   // Account SecurityLevel
-        List<uint> _grantedPerms = new();             // Granted permissions
-        List<uint> _deniedPerms = new();              // Denied permissions
-        List<uint> _globalPerms = new();              // Calculated permissions
+	public class RBACData
+	{
+		private List<uint> _deniedPerms = new();  // Denied permissions
+		private List<uint> _globalPerms = new();  // Calculated permissions
+		private List<uint> _grantedPerms = new(); // Granted permissions
+		private uint _id;                         // Account id
+		private string _name;                     // Account name
+		private int _realmId;                     // RealmId Affected
+		private byte _secLevel;                   // Account SecurityLevel
 
-        public RBACData(uint id, string name, int realmId, byte secLevel = 255)
-        {
-            _id = id;
-            _name = name;
-            _realmId = realmId;
-            _secLevel = secLevel;
-        }
+		public RBACData(uint id, string name, int realmId, byte secLevel = 255)
+		{
+			_id       = id;
+			_name     = name;
+			_realmId  = realmId;
+			_secLevel = secLevel;
+		}
 
-        public RBACCommandResult GrantPermission(uint permissionId, int realmId = 0)
-        {
-            // Check if permission Id exists
-            RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
-            if (perm == null)
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.IdDoesNotExists;
-            }
+		public RBACCommandResult GrantPermission(uint permissionId, int realmId = 0)
+		{
+			// Check if permission Id exists
+			RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
 
-            // Check if already added in denied list
-            if (HasDeniedPermission(permissionId))
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission in deny list",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.InDeniedList;
-            }
+			if (perm == null)
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            // Already added?
-            if (HasGrantedPermission(permissionId))
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission already granted",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.CantAddAlreadyAdded;
-            }
+				return RBACCommandResult.IdDoesNotExists;
+			}
 
-            AddGrantedPermission(permissionId);
+			// Check if already added in denied list
+			if (HasDeniedPermission(permissionId))
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission in deny list",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            // Do not save to db when loading data from DB (realmId = 0)
-            if (realmId != 0)
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
-                               GetId(), GetName(), permissionId, realmId);
-                SavePermission(permissionId, true, realmId);
-                CalculateNewPermissions();
-            }
-            else
-                Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
-                               GetId(), GetName(), permissionId, realmId);
+				return RBACCommandResult.InDeniedList;
+			}
 
-            return RBACCommandResult.OK;
-        }
+			// Already added?
+			if (HasGrantedPermission(permissionId))
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission already granted",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-        public RBACCommandResult DenyPermission(uint permissionId, int realmId = 0)
-        {
-            // Check if permission Id exists
-            RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
-            if (perm == null)
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.IdDoesNotExists;
-            }
+				return RBACCommandResult.CantAddAlreadyAdded;
+			}
 
-            // Check if already added in granted list
-            if (HasGrantedPermission(permissionId))
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission in grant list",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.InGrantedList;
-            }
+			AddGrantedPermission(permissionId);
 
-            // Already added?
-            if (HasDeniedPermission(permissionId))
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission already denied",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.CantAddAlreadyAdded;
-            }
+			// Do not save to db when loading data from DB (realmId = 0)
+			if (realmId != 0)
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            AddDeniedPermission(permissionId);
+				SavePermission(permissionId, true, realmId);
+				CalculateNewPermissions();
+			}
+			else
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
+			}
 
-            // Do not save to db when loading data from DB (realmId = 0)
-            if (realmId != 0)
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
-                               GetId(), GetName(), permissionId, realmId);
-                SavePermission(permissionId, false, realmId);
-                CalculateNewPermissions();
-            }
-            else
-                Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
-                               GetId(), GetName(), permissionId, realmId);
+			return RBACCommandResult.OK;
+		}
 
-            return RBACCommandResult.OK;
-        }
+		public RBACCommandResult DenyPermission(uint permissionId, int realmId = 0)
+		{
+			// Check if permission Id exists
+			RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
 
-        void SavePermission(uint permission, bool granted, int realmId)
-        {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, permission);
-            stmt.AddValue(2, granted);
-            stmt.AddValue(3, realmId);
-            DB.Login.Execute(stmt);
-        }
+			if (perm == null)
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-        public RBACCommandResult RevokePermission(uint permissionId, int realmId = 0)
-        {
-            // Check if it's present in any list
-            if (!HasGrantedPermission(permissionId) && !HasDeniedPermission(permissionId))
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Not granted or revoked",
-                               GetId(), GetName(), permissionId, realmId);
-                return RBACCommandResult.CantRevokeNotInList;
-            }
+				return RBACCommandResult.IdDoesNotExists;
+			}
 
-            RemoveGrantedPermission(permissionId);
-            RemoveDeniedPermission(permissionId);
+			// Check if already added in granted list
+			if (HasGrantedPermission(permissionId))
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission in grant list",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            // Do not save to db when loading data from DB (realmId = 0)
-            if (realmId != 0)
-            {
-                Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
-                               GetId(), GetName(), permissionId, realmId);
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
-                stmt.AddValue(0, GetId());
-                stmt.AddValue(1, permissionId);
-                stmt.AddValue(2, realmId);
-                DB.Login.Execute(stmt);
+				return RBACCommandResult.InGrantedList;
+			}
 
-                CalculateNewPermissions();
-            }
-            else
-                Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
-                               GetId(), GetName(), permissionId, realmId);
+			// Already added?
+			if (HasDeniedPermission(permissionId))
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission already denied",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            return RBACCommandResult.OK;
-        }
+				return RBACCommandResult.CantAddAlreadyAdded;
+			}
 
-        public void LoadFromDB()
-        {
-            ClearData();
+			AddDeniedPermission(permissionId);
 
-            Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
-            // Load account permissions (granted and denied) that affect current realm
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetRealmId());
+			// Do not save to db when loading data from DB (realmId = 0)
+			if (realmId != 0)
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            LoadFromDBCallback(DB.Login.Query(stmt));
-        }
+				SavePermission(permissionId, false, realmId);
+				CalculateNewPermissions();
+			}
+			else
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
+			}
 
-        public QueryCallback LoadFromDBAsync()
-        {
-            ClearData();
+			return RBACCommandResult.OK;
+		}
 
-            Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
-            // Load account permissions (granted and denied) that affect current realm
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetRealmId());
+		private void SavePermission(uint permission, bool granted, int realmId)
+		{
+			PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
+			stmt.AddValue(0, GetId());
+			stmt.AddValue(1, permission);
+			stmt.AddValue(2, granted);
+			stmt.AddValue(3, realmId);
+			DB.Login.Execute(stmt);
+		}
 
-            return DB.Login.AsyncQuery(stmt);
-        }
+		public RBACCommandResult RevokePermission(uint permissionId, int realmId = 0)
+		{
+			// Check if it's present in any list
+			if (!HasGrantedPermission(permissionId) &&
+			    !HasDeniedPermission(permissionId))
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Not granted or revoked",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-        public void LoadFromDBCallback(SQLResult result)
-        {
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    if (result.Read<bool>(1))
-                        GrantPermission(result.Read<uint>(0));
-                    else
-                        DenyPermission(result.Read<uint>(0));
+				return RBACCommandResult.CantRevokeNotInList;
+			}
 
-                } while (result.NextRow());
-            }
+			RemoveGrantedPermission(permissionId);
+			RemoveDeniedPermission(permissionId);
 
-            // Add default permissions
-            List<uint> permissions = Global.AccountMgr.GetRBACDefaultPermissions(_secLevel);
-            foreach (var id in permissions)
-                GrantPermission(id);
+			// Do not save to db when loading data from DB (realmId = 0)
+			if (realmId != 0)
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
 
-            // Force calculation of permissions
-            CalculateNewPermissions();
-        }
+				PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
+				stmt.AddValue(0, GetId());
+				stmt.AddValue(1, permissionId);
+				stmt.AddValue(2, realmId);
+				DB.Login.Execute(stmt);
 
-        void CalculateNewPermissions()
-        {
-            Log.outDebug(LogFilter.Rbac, "RBACData.CalculateNewPermissions [Id: {0} Name: {1}]", GetId(), GetName());
+				CalculateNewPermissions();
+			}
+			else
+			{
+				Log.outDebug(LogFilter.Rbac,
+				             "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok",
+				             GetId(),
+				             GetName(),
+				             permissionId,
+				             realmId);
+			}
 
-            // Get the list of granted permissions
-            _globalPerms = GetGrantedPermissions();
-            ExpandPermissions(_globalPerms);
-            List<uint> revoked = GetDeniedPermissions();
-            ExpandPermissions(revoked);
-            RemovePermissions(_globalPerms, revoked);
-        }
+			return RBACCommandResult.OK;
+		}
 
-        public void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
-        {
-            foreach (var id in permsFrom)
-                permsTo.Add(id);
-        }
+		public void LoadFromDB()
+		{
+			ClearData();
+
+			Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
+			// Load account permissions (granted and denied) that affect current realm
+			PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
+			stmt.AddValue(0, GetId());
+			stmt.AddValue(1, GetRealmId());
+
+			LoadFromDBCallback(DB.Login.Query(stmt));
+		}
+
+		public QueryCallback LoadFromDBAsync()
+		{
+			ClearData();
+
+			Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
+			// Load account permissions (granted and denied) that affect current realm
+			PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
+			stmt.AddValue(0, GetId());
+			stmt.AddValue(1, GetRealmId());
+
+			return DB.Login.AsyncQuery(stmt);
+		}
+
+		public void LoadFromDBCallback(SQLResult result)
+		{
+			if (!result.IsEmpty())
+				do
+				{
+					if (result.Read<bool>(1))
+						GrantPermission(result.Read<uint>(0));
+					else
+						DenyPermission(result.Read<uint>(0));
+				} while (result.NextRow());
+
+			// Add default permissions
+			List<uint> permissions = Global.AccountMgr.GetRBACDefaultPermissions(_secLevel);
+
+			foreach (var id in permissions)
+				GrantPermission(id);
+
+			// Force calculation of permissions
+			CalculateNewPermissions();
+		}
+
+		private void CalculateNewPermissions()
+		{
+			Log.outDebug(LogFilter.Rbac, "RBACData.CalculateNewPermissions [Id: {0} Name: {1}]", GetId(), GetName());
+
+			// Get the list of granted permissions
+			_globalPerms = GetGrantedPermissions();
+			ExpandPermissions(_globalPerms);
+			List<uint> revoked = GetDeniedPermissions();
+			ExpandPermissions(revoked);
+			RemovePermissions(_globalPerms, revoked);
+		}
+
+		public void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
+		{
+			foreach (var id in permsFrom)
+				permsTo.Add(id);
+		}
 
         /// <summary>
-        /// Removes a list of permissions from another list
+        ///  Removes a list of permissions from another list
         /// </summary>
         /// <param name="permsFrom"></param>
         /// <param name="permsToRemove"></param>
-        void RemovePermissions(List<uint> permsFrom, List<uint> permsToRemove)
-        {
-            foreach (var id in permsToRemove)
-                permsFrom.Remove(id);
-        }
+        private void RemovePermissions(List<uint> permsFrom, List<uint> permsToRemove)
+		{
+			foreach (var id in permsToRemove)
+				permsFrom.Remove(id);
+		}
 
-        void ExpandPermissions(List<uint> permissions)
-        {
-            List<uint> toCheck = new(permissions);
-            permissions.Clear();
+		private void ExpandPermissions(List<uint> permissions)
+		{
+			List<uint> toCheck = new(permissions);
+			permissions.Clear();
 
-            while (!toCheck.Empty())
-            {
-                // remove the permission from original list
-                uint permissionId = toCheck.FirstOrDefault();
-                toCheck.RemoveAt(0);
+			while (!toCheck.Empty())
+			{
+				// remove the permission from original list
+				uint permissionId = toCheck.FirstOrDefault();
+				toCheck.RemoveAt(0);
 
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(permissionId);
-                if (permission == null)
-                    continue;
+				RBACPermission permission = Global.AccountMgr.GetRBACPermission(permissionId);
 
-                // insert into the final list (expanded list)
-                permissions.Add(permissionId);
+				if (permission == null)
+					continue;
 
-                // add all linked permissions (that are not already expanded) to the list of permissions to be checked
-                List<uint> linkedPerms = permission.GetLinkedPermissions();
-                foreach (var id in linkedPerms)
-                    if (!permissions.Contains(id))
-                        toCheck.Add(id);
-            }
+				// insert into the final list (expanded list)
+				permissions.Add(permissionId);
 
-            //Log.outDebug(LogFilter.General, "RBACData:ExpandPermissions: Expanded: {0}", GetDebugPermissionString(permissions));
-        }
+				// add all linked permissions (that are not already expanded) to the list of permissions to be checked
+				List<uint> linkedPerms = permission.GetLinkedPermissions();
 
-        void ClearData()
-        {
-            _grantedPerms.Clear();
-            _deniedPerms.Clear();
-            _globalPerms.Clear();
-        }
+				foreach (var id in linkedPerms)
+					if (!permissions.Contains(id))
+						toCheck.Add(id);
+			}
 
-        // Gets the Name of the Object
-        public string GetName() { return _name; }
-        // Gets the Id of the Object
-        public uint GetId() { return _id; }
+			//Log.outDebug(LogFilter.General, "RBACData:ExpandPermissions: Expanded: {0}", GetDebugPermissionString(permissions));
+		}
 
-        public bool HasPermission(RBACPermissions permission)
-        {
-            return _globalPerms.Contains((uint)permission);
-        }
+		private void ClearData()
+		{
+			_grantedPerms.Clear();
+			_deniedPerms.Clear();
+			_globalPerms.Clear();
+		}
 
-        // Returns all the granted permissions (after computation)
-        public List<uint> GetPermissions() { return _globalPerms; }
-        // Returns all the granted permissions
-        public List<uint> GetGrantedPermissions() { return _grantedPerms; }
-        // Returns all the denied permissions
-        public List<uint> GetDeniedPermissions() { return _deniedPerms; }
+		// Gets the Name of the Object
+		public string GetName()
+		{
+			return _name;
+		}
 
-        public void SetSecurityLevel(byte id)
-        {
-            _secLevel = id;
-            LoadFromDB();
-        }
+		// Gets the Id of the Object
+		public uint GetId()
+		{
+			return _id;
+		}
 
-        public byte GetSecurityLevel() { return _secLevel; }
-        int GetRealmId() { return _realmId; }
+		public bool HasPermission(RBACPermissions permission)
+		{
+			return _globalPerms.Contains((uint)permission);
+		}
 
-        // Checks if a permission is granted
-        bool HasGrantedPermission(uint permissionId)
-        {
-            return _grantedPerms.Contains(permissionId);
-        }
+		// Returns all the granted permissions (after computation)
+		public List<uint> GetPermissions()
+		{
+			return _globalPerms;
+		}
 
-        // Checks if a permission is denied
-        bool HasDeniedPermission(uint permissionId)
-        {
-            return _deniedPerms.Contains(permissionId);
-        }
+		// Returns all the granted permissions
+		public List<uint> GetGrantedPermissions()
+		{
+			return _grantedPerms;
+		}
 
-        // Adds a new granted permission
-        void AddGrantedPermission(uint permissionId)
-        {
-            _grantedPerms.Add(permissionId);
-        }
+		// Returns all the denied permissions
+		public List<uint> GetDeniedPermissions()
+		{
+			return _deniedPerms;
+		}
 
-        // Removes a granted permission
-        void RemoveGrantedPermission(uint permissionId)
-        {
-            _grantedPerms.Remove(permissionId);
-        }
+		public void SetSecurityLevel(byte id)
+		{
+			_secLevel = id;
+			LoadFromDB();
+		}
 
-        // Adds a new denied permission
-        void AddDeniedPermission(uint permissionId)
-        {
-            _deniedPerms.Add(permissionId);
-        }
+		public byte GetSecurityLevel()
+		{
+			return _secLevel;
+		}
 
-        // Removes a denied permission
-        void RemoveDeniedPermission(uint permissionId)
-        {
-            _deniedPerms.Remove(permissionId);
-        }
-    }
+		private int GetRealmId()
+		{
+			return _realmId;
+		}
 
-    public class RBACPermission
-    {
-        uint _id;                                 // id of the object
-        string _name;                             // name of the object
-        List<uint> _perms = new();     // Set of permissions
+		// Checks if a permission is granted
+		private bool HasGrantedPermission(uint permissionId)
+		{
+			return _grantedPerms.Contains(permissionId);
+		}
 
-        public RBACPermission(uint id = 0, string name = "")
-        {
-            _id = id;
-            _name = name;
-        }
+		// Checks if a permission is denied
+		private bool HasDeniedPermission(uint permissionId)
+		{
+			return _deniedPerms.Contains(permissionId);
+		}
 
-        // Gets the Name of the Object
-        public string GetName() { return _name; }
-        // Gets the Id of the Object
-        public uint GetId() { return _id; }
+		// Adds a new granted permission
+		private void AddGrantedPermission(uint permissionId)
+		{
+			_grantedPerms.Add(permissionId);
+		}
 
-        // Gets the Permissions linked to this permission
-        public List<uint> GetLinkedPermissions() { return _perms; }
-        // Adds a new linked Permission
-        public void AddLinkedPermission(uint id) { _perms.Add(id); }
-        // Removes a linked Permission
-        public void RemoveLinkedPermission(uint id) { _perms.Remove(id); }
-    }
+		// Removes a granted permission
+		private void RemoveGrantedPermission(uint permissionId)
+		{
+			_grantedPerms.Remove(permissionId);
+		}
 
-    public enum RBACCommandResult
-    {
-        OK,
-        CantAddAlreadyAdded,
-        CantRevokeNotInList,
-        InGrantedList,
-        InDeniedList,
-        IdDoesNotExists
-    }
+		// Adds a new denied permission
+		private void AddDeniedPermission(uint permissionId)
+		{
+			_deniedPerms.Add(permissionId);
+		}
+
+		// Removes a denied permission
+		private void RemoveDeniedPermission(uint permissionId)
+		{
+			_deniedPerms.Remove(permissionId);
+		}
+	}
+
+	public class RBACPermission
+	{
+		private uint _id;                  // id of the object
+		private string _name;              // name of the object
+		private List<uint> _perms = new(); // Set of permissions
+
+		public RBACPermission(uint id = 0, string name = "")
+		{
+			_id   = id;
+			_name = name;
+		}
+
+		// Gets the Name of the Object
+		public string GetName()
+		{
+			return _name;
+		}
+
+		// Gets the Id of the Object
+		public uint GetId()
+		{
+			return _id;
+		}
+
+		// Gets the Permissions linked to this permission
+		public List<uint> GetLinkedPermissions()
+		{
+			return _perms;
+		}
+
+		// Adds a new linked Permission
+		public void AddLinkedPermission(uint id)
+		{
+			_perms.Add(id);
+		}
+
+		// Removes a linked Permission
+		public void RemoveLinkedPermission(uint id)
+		{
+			_perms.Remove(id);
+		}
+	}
+
+	public enum RBACCommandResult
+	{
+		OK,
+		CantAddAlreadyAdded,
+		CantRevokeNotInList,
+		InGrantedList,
+		InDeniedList,
+		IdDoesNotExists
+	}
 }

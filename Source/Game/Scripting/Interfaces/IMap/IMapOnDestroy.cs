@@ -2,12 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Maps;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-    public interface IMapOnDestroy<T> : IScriptObject where T : Map
-    {
-        void OnDestroy(T map);
-    }
+	public interface IMapOnDestroy<T> : IScriptObject where T : Map
+	{
+		void OnDestroy(T map);
+	}
 }

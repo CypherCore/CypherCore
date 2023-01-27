@@ -2,12 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IScene
 {
-    public interface ISceneOnSceneChancel : IScriptObject
-    {
-        void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate);
-    }
+	public interface ISceneOnSceneChancel : IScriptObject
+	{
+		void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate);
+	}
 }

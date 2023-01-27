@@ -5,10 +5,9 @@ using System.Runtime.Serialization;
 
 namespace Framework.Web
 {
-    [DataContract]
-    public class RealmListTicketClientInformation
-    {
-        [DataMember(Name = "info")]
-        public RealmListTicketInformation Info { get; set; } = new RealmListTicketInformation();
-    }
+	[DataContract]
+	public class RealmListTicketClientInformation
+	{
+		[DataMember(Name = "info")] public RealmListTicketInformation Info { get; set; } = new();
+	}
 }

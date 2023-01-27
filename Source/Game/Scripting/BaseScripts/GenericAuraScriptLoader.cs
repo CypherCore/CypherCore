@@ -5,16 +5,18 @@ using System;
 
 namespace Game.Scripting.BaseScripts
 {
-    public class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
-    {
-        public GenericAuraScriptLoader(string name, object[] args) : base(name)
-        {
-            _args = args;
-        }
+	public class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
+	{
+		private object[] _args;
 
-        public override AuraScript GetAuraScript() { return (A)Activator.CreateInstance(typeof(A), _args); }
+		public GenericAuraScriptLoader(string name, object[] args) : base(name)
+		{
+			_args = args;
+		}
 
-        object[] _args;
-    }
-
+		public override AuraScript GetAuraScript()
+		{
+			return (A)Activator.CreateInstance(typeof(A), _args);
+		}
+	}
 }

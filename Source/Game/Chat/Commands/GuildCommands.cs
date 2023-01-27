@@ -8,200 +8,231 @@ using Game.Guilds;
 
 namespace Game.Chat
 {
-    [CommandGroup("guild")]
-    class GuildCommands
-    {
-        [Command("create", RBACPermissions.CommandGuildCreate, true)]
-        static bool HandleGuildCreateCommand(CommandHandler handler, StringArguments args)
-        {
-            if (args.Empty())
-                return false;
+	[CommandGroup("guild")]
+	internal class GuildCommands
+	{
+		[Command("create", RBACPermissions.CommandGuildCreate, true)]
+		private static bool HandleGuildCreateCommand(CommandHandler handler, StringArguments args)
+		{
+			if (args.Empty())
+				return false;
 
-            Player target;
-            if (!handler.ExtractPlayerTarget(args[0] != '"' ? args : null, out target))
-                return false;
+			Player target;
 
-            string guildName = handler.ExtractQuotedArg(args.NextString());
-            if (string.IsNullOrEmpty(guildName))
-                return false;
+			if (!handler.ExtractPlayerTarget(args[0] != '"' ? args : null, out target))
+				return false;
 
-            if (target.GetGuildId() != 0)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerInGuild);
-                return false;
-            }
+			string guildName = handler.ExtractQuotedArg(args.NextString());
 
-            if (Global.GuildMgr.GetGuildByName(guildName))
-            {
-                handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists);
-                return false;
-            }
+			if (string.IsNullOrEmpty(guildName))
+				return false;
 
-            if (Global.ObjectMgr.IsReservedName(guildName) || !ObjectManager.IsValidCharterName(guildName))
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
+			if (target.GetGuildId() != 0)
+			{
+				handler.SendSysMessage(CypherStrings.PlayerInGuild);
 
-            Guild guild = new();
-            if (!guild.Create(target, guildName))
-            {
-                handler.SendSysMessage(CypherStrings.GuildNotCreated);
-                return false;
-            }
+				return false;
+			}
 
-            Global.GuildMgr.AddGuild(guild);
+			if (Global.GuildMgr.GetGuildByName(guildName))
+			{
+				handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists);
 
-            return true;
-        }
+				return false;
+			}
 
-        [Command("delete", RBACPermissions.CommandGuildDelete, true)]
-        static bool HandleGuildDeleteCommand(CommandHandler handler, QuotedString guildName)
-        {
-            if (guildName.IsEmpty())
-                return false;
+			if (Global.ObjectMgr.IsReservedName(guildName) ||
+			    !ObjectManager.IsValidCharterName(guildName))
+			{
+				handler.SendSysMessage(CypherStrings.BadValue);
 
-            Guild guild = Global.GuildMgr.GetGuildByName(guildName);
-            if (guild == null)
-                return false;
+				return false;
+			}
 
-            guild.Disband();
-            return true;
-        }
+			Guild guild = new();
 
-        [Command("invite", RBACPermissions.CommandGuildInvite, true)]
-        static bool HandleGuildInviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier, QuotedString guildName)
-        {
-            if (targetIdentifier == null)
-                targetIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (targetIdentifier == null)
-                return false;
+			if (!guild.Create(target, guildName))
+			{
+				handler.SendSysMessage(CypherStrings.GuildNotCreated);
 
-            if (guildName.IsEmpty())
-                return false;
+				return false;
+			}
 
-            Guild targetGuild = Global.GuildMgr.GetGuildByName(guildName);
-            if (targetGuild == null)
-                return false;
+			Global.GuildMgr.AddGuild(guild);
 
-            targetGuild.AddMember(null, targetIdentifier.GetGUID());
+			return true;
+		}
 
-            return true;
-        }
+		[Command("delete", RBACPermissions.CommandGuildDelete, true)]
+		private static bool HandleGuildDeleteCommand(CommandHandler handler, QuotedString guildName)
+		{
+			if (guildName.IsEmpty())
+				return false;
 
-        [Command("uninvite", RBACPermissions.CommandGuildUninvite, true)]
-        static bool HandleGuildUninviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier, QuotedString guildName)
-        {
-            if (targetIdentifier == null)
-                targetIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (targetIdentifier == null)
-                return false;
+			Guild guild = Global.GuildMgr.GetGuildByName(guildName);
 
-            ulong guildId = targetIdentifier.IsConnected() ? targetIdentifier.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetIdentifier.GetGUID());
-            if (guildId == 0)
-                return false;
+			if (guild == null)
+				return false;
 
-            Guild targetGuild = Global.GuildMgr.GetGuildById(guildId);
-            if (targetGuild == null)
-                return false;
+			guild.Disband();
 
-            targetGuild.DeleteMember(null, targetIdentifier.GetGUID(), false, true, true);
-            return true;
-        }
+			return true;
+		}
 
-        [Command("rank", RBACPermissions.CommandGuildRank, true)]
-        static bool HandleGuildRankCommand(CommandHandler handler, PlayerIdentifier player, byte rank)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null)
-                return false;
+		[Command("invite", RBACPermissions.CommandGuildInvite, true)]
+		private static bool HandleGuildInviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier, QuotedString guildName)
+		{
+			if (targetIdentifier == null)
+				targetIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            ulong guildId = player.IsConnected() ? player.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(player.GetGUID());
-            if (guildId == 0)
-                return false;
+			if (targetIdentifier == null)
+				return false;
 
-            Guild targetGuild = Global.GuildMgr.GetGuildById(guildId);
-            if (!targetGuild)
-                return false;
+			if (guildName.IsEmpty())
+				return false;
 
-            return targetGuild.ChangeMemberRank(null, player.GetGUID(), (GuildRankId)rank);
-        }
+			Guild targetGuild = Global.GuildMgr.GetGuildByName(guildName);
 
-        [Command("rename", RBACPermissions.CommandGuildRename, true)]
-        static bool HandleGuildRenameCommand(CommandHandler handler, QuotedString oldGuildName, QuotedString newGuildName)
-        {
-            if (oldGuildName.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
+			if (targetGuild == null)
+				return false;
 
-            if (newGuildName.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.InsertGuildName);
-                return false;
-            }
+			targetGuild.AddMember(null, targetIdentifier.GetGUID());
 
-            Guild guild = Global.GuildMgr.GetGuildByName(oldGuildName);
-            if (!guild)
-            {
-                handler.SendSysMessage(CypherStrings.CommandCouldnotfind, oldGuildName);
-                return false;
-            }
+			return true;
+		}
 
-            if (Global.GuildMgr.GetGuildByName(newGuildName))
-            {
-                handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists, newGuildName);
-                return false;
-            }
+		[Command("uninvite", RBACPermissions.CommandGuildUninvite, true)]
+		private static bool HandleGuildUninviteCommand(CommandHandler handler, PlayerIdentifier targetIdentifier, QuotedString guildName)
+		{
+			if (targetIdentifier == null)
+				targetIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            if (!guild.SetName(newGuildName))
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
+			if (targetIdentifier == null)
+				return false;
 
-            handler.SendSysMessage(CypherStrings.GuildRenameDone, oldGuildName, newGuildName);
-            return true;
-        }
+			ulong guildId = targetIdentifier.IsConnected() ? targetIdentifier.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetIdentifier.GetGUID());
 
-        [Command("info", RBACPermissions.CommandGuildInfo, true)]
-        static bool HandleGuildInfoCommand(CommandHandler handler, StringArguments args)
-        {
-            Guild guild = null;
-            Player target = handler.GetSelectedPlayerOrSelf();
+			if (guildId == 0)
+				return false;
 
-            if (!args.Empty() && args[0] != '\0')
-            {
-                if (char.IsDigit(args[0]))
-                    guild = Global.GuildMgr.GetGuildById(args.NextUInt64());
-                else
-                    guild = Global.GuildMgr.GetGuildByName(args.NextString());
-            }
-            else if (target)
-                guild = target.GetGuild();
+			Guild targetGuild = Global.GuildMgr.GetGuildById(guildId);
 
-            if (!guild)
-                return false;
+			if (targetGuild == null)
+				return false;
 
-            // Display Guild Information
-            handler.SendSysMessage(CypherStrings.GuildInfoName, guild.GetName(), guild.GetId()); // Guild Id + Name
+			targetGuild.DeleteMember(null, targetIdentifier.GetGUID(), false, true, true);
 
-            string guildMasterName;
-            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(guild.GetLeaderGUID(), out guildMasterName))
-                handler.SendSysMessage(CypherStrings.GuildInfoGuildMaster, guildMasterName, guild.GetLeaderGUID().ToString()); // Guild Master
+			return true;
+		}
 
-            // Format creation date
+		[Command("rank", RBACPermissions.CommandGuildRank, true)]
+		private static bool HandleGuildRankCommand(CommandHandler handler, PlayerIdentifier player, byte rank)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            var createdDateTime = Time.UnixTimeToDateTime(guild.GetCreatedDate());
-            handler.SendSysMessage(CypherStrings.GuildInfoCreationDate, createdDateTime.ToLongDateString()); // Creation Date
-            handler.SendSysMessage(CypherStrings.GuildInfoMemberCount, guild.GetMembersCount()); // Number of Members
-            handler.SendSysMessage(CypherStrings.GuildInfoBankGold, guild.GetBankMoney() / 100 / 100); // Bank Gold (in gold coins)
-            handler.SendSysMessage(CypherStrings.GuildInfoLevel, guild.GetLevel()); // Level
-            handler.SendSysMessage(CypherStrings.GuildInfoMotd, guild.GetMOTD()); // Message of the Day
-            handler.SendSysMessage(CypherStrings.GuildInfoExtraInfo, guild.GetInfo()); // Extra Information
-            return true;
-        }
-    }
+			if (player == null)
+				return false;
+
+			ulong guildId = player.IsConnected() ? player.GetConnectedPlayer().GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(player.GetGUID());
+
+			if (guildId == 0)
+				return false;
+
+			Guild targetGuild = Global.GuildMgr.GetGuildById(guildId);
+
+			if (!targetGuild)
+				return false;
+
+			return targetGuild.ChangeMemberRank(null, player.GetGUID(), (GuildRankId)rank);
+		}
+
+		[Command("rename", RBACPermissions.CommandGuildRename, true)]
+		private static bool HandleGuildRenameCommand(CommandHandler handler, QuotedString oldGuildName, QuotedString newGuildName)
+		{
+			if (oldGuildName.IsEmpty())
+			{
+				handler.SendSysMessage(CypherStrings.BadValue);
+
+				return false;
+			}
+
+			if (newGuildName.IsEmpty())
+			{
+				handler.SendSysMessage(CypherStrings.InsertGuildName);
+
+				return false;
+			}
+
+			Guild guild = Global.GuildMgr.GetGuildByName(oldGuildName);
+
+			if (!guild)
+			{
+				handler.SendSysMessage(CypherStrings.CommandCouldnotfind, oldGuildName);
+
+				return false;
+			}
+
+			if (Global.GuildMgr.GetGuildByName(newGuildName))
+			{
+				handler.SendSysMessage(CypherStrings.GuildRenameAlreadyExists, newGuildName);
+
+				return false;
+			}
+
+			if (!guild.SetName(newGuildName))
+			{
+				handler.SendSysMessage(CypherStrings.BadValue);
+
+				return false;
+			}
+
+			handler.SendSysMessage(CypherStrings.GuildRenameDone, oldGuildName, newGuildName);
+
+			return true;
+		}
+
+		[Command("info", RBACPermissions.CommandGuildInfo, true)]
+		private static bool HandleGuildInfoCommand(CommandHandler handler, StringArguments args)
+		{
+			Guild  guild  = null;
+			Player target = handler.GetSelectedPlayerOrSelf();
+
+			if (!args.Empty() &&
+			    args[0] != '\0')
+			{
+				if (char.IsDigit(args[0]))
+					guild = Global.GuildMgr.GetGuildById(args.NextUInt64());
+				else
+					guild = Global.GuildMgr.GetGuildByName(args.NextString());
+			}
+			else if (target)
+			{
+				guild = target.GetGuild();
+			}
+
+			if (!guild)
+				return false;
+
+			// Display Guild Information
+			handler.SendSysMessage(CypherStrings.GuildInfoName, guild.GetName(), guild.GetId()); // Guild Id + Name
+
+			string guildMasterName;
+
+			if (Global.CharacterCacheStorage.GetCharacterNameByGuid(guild.GetLeaderGUID(), out guildMasterName))
+				handler.SendSysMessage(CypherStrings.GuildInfoGuildMaster, guildMasterName, guild.GetLeaderGUID().ToString()); // Guild Master
+
+			// Format creation date
+
+			var createdDateTime = Time.UnixTimeToDateTime(guild.GetCreatedDate());
+			handler.SendSysMessage(CypherStrings.GuildInfoCreationDate, createdDateTime.ToLongDateString()); // Creation Date
+			handler.SendSysMessage(CypherStrings.GuildInfoMemberCount, guild.GetMembersCount());             // Number of Members
+			handler.SendSysMessage(CypherStrings.GuildInfoBankGold, guild.GetBankMoney() / 100 / 100);       // Bank Gold (in gold coins)
+			handler.SendSysMessage(CypherStrings.GuildInfoLevel, guild.GetLevel());                          // Level
+			handler.SendSysMessage(CypherStrings.GuildInfoMotd, guild.GetMOTD());                            // Message of the Day
+			handler.SendSysMessage(CypherStrings.GuildInfoExtraInfo, guild.GetInfo());                       // Extra Information
+
+			return true;
+		}
+	}
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
 	internal static partial class GroupOperations
 	{
@@ -9,37 +7,37 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 			for (int i = 0; i < 256; ++i)
 				r[i] = (sbyte)(1 & (a[i >> 3] >> (i & 7)));
 
-            for (int i = 0; i < 256; ++i)
-            {
-                if (r[i] != 0)
-                {
-                    for (int b = 1; b <= 6 && (i + b) < 256; ++b)
-                    {
-                        if (r[i + b] != 0)
-                        {
-                            if (r[i] + (r[i + b] << b) <= 15)
-                            {
-                                r[i] += (sbyte)(r[i + b] << b); r[i + b] = 0;
-                            }
-                            else if (r[i] - (r[i + b] << b) >= -15)
-                            {
-                                r[i] -= (sbyte)(r[i + b] << b);
-                                for (int k = i + b; k < 256; ++k)
-                                {
-                                    if (r[k] == 0)
-                                    {
-                                        r[k] = 1;
-                                        break;
-                                    }
-                                    r[k] = 0;
-                                }
-                            }
-                            else
-                                break;
-                        }
-                    }
-                }
-            }
+			for (int i = 0; i < 256; ++i)
+				if (r[i] != 0)
+					for (int b = 1; b <= 6 && (i + b) < 256; ++b)
+						if (r[i + b] != 0)
+						{
+							if (r[i] + (r[i + b] << b) <= 15)
+							{
+								r[i]     += (sbyte)(r[i + b] << b);
+								r[i + b] =  0;
+							}
+							else if (r[i] - (r[i + b] << b) >= -15)
+							{
+								r[i] -= (sbyte)(r[i + b] << b);
+
+								for (int k = i + b; k < 256; ++k)
+								{
+									if (r[k] == 0)
+									{
+										r[k] = 1;
+
+										break;
+									}
+
+									r[k] = 0;
+								}
+							}
+							else
+							{
+								break;
+							}
+						}
 		}
 
 		/*
@@ -52,34 +50,49 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		public static void ge_double_scalarmult_vartime(out GroupElementP2 r, byte[] a, ref GroupElementP3 A, byte[] b)
 		{
 			GroupElementPreComp[] Bi = LookupTables.Base2;
-            // todo: Perhaps remove these allocations?
-			sbyte[] aslide = new sbyte[256];
-			sbyte[] bslide = new sbyte[256];
-			GroupElementCached[] Ai = new GroupElementCached[8]; /* A,3A,5A,7A,9A,11A,13A,15A */
-			GroupElementP1P1 t;
-			GroupElementP3 u;
-			GroupElementP3 A2;
-			int i;
+			// todo: Perhaps remove these allocations?
+			sbyte[]              aslide = new sbyte[256];
+			sbyte[]              bslide = new sbyte[256];
+			GroupElementCached[] Ai     = new GroupElementCached[8]; /* A,3A,5A,7A,9A,11A,13A,15A */
+			GroupElementP1P1     t;
+			GroupElementP3       u;
+			GroupElementP3       A2;
+			int                  i;
 
 			slide(aslide, a);
 			slide(bslide, b);
 
 			ge_p3_to_cached(out Ai[0], ref A);
-			ge_p3_dbl(out t, ref A); ge_p1p1_to_p3(out A2, ref t);
-			ge_add(out t, ref A2, ref Ai[0]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[1], ref u);
-			ge_add(out t, ref A2, ref Ai[1]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[2], ref u);
-			ge_add(out t, ref A2, ref Ai[2]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[3], ref u);
-			ge_add(out t, ref A2, ref Ai[3]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[4], ref u);
-			ge_add(out t, ref A2, ref Ai[4]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[5], ref u);
-			ge_add(out t, ref A2, ref Ai[5]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[6], ref u);
-			ge_add(out t, ref A2, ref Ai[6]); ge_p1p1_to_p3(out u, ref t); ge_p3_to_cached(out Ai[7], ref u);
+			ge_p3_dbl(out t, ref A);
+			ge_p1p1_to_p3(out A2, ref t);
+			ge_add(out t, ref A2, ref Ai[0]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[1], ref u);
+			ge_add(out t, ref A2, ref Ai[1]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[2], ref u);
+			ge_add(out t, ref A2, ref Ai[2]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[3], ref u);
+			ge_add(out t, ref A2, ref Ai[3]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[4], ref u);
+			ge_add(out t, ref A2, ref Ai[4]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[5], ref u);
+			ge_add(out t, ref A2, ref Ai[5]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[6], ref u);
+			ge_add(out t, ref A2, ref Ai[6]);
+			ge_p1p1_to_p3(out u, ref t);
+			ge_p3_to_cached(out Ai[7], ref u);
 
 			ge_p2_0(out r);
 
 			for (i = 255; i >= 0; --i)
-			{
-				if ((aslide[i] != 0) || (bslide[i] != 0)) break;
-			}
+				if ((aslide[i] != 0) ||
+				    (bslide[i] != 0))
+					break;
 
 			for (; i >= 0; --i)
 			{
@@ -110,6 +123,5 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 				ge_p1p1_to_p2(out r, ref t);
 			}
 		}
-
 	}
 }

@@ -2,140 +2,163 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class TaxiNodeStatusQuery : ClientPacket
-    {
-        public TaxiNodeStatusQuery(WorldPacket packet) : base(packet) { }
+	internal class TaxiNodeStatusQuery : ClientPacket
+	{
+		public ObjectGuid UnitGUID;
 
-        public override void Read()
-        {
-            UnitGUID = _worldPacket.ReadPackedGuid();
-        }
+		public TaxiNodeStatusQuery(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public ObjectGuid UnitGUID;
-    }
+		public override void Read()
+		{
+			UnitGUID = _worldPacket.ReadPackedGuid();
+		}
+	}
 
-    class TaxiNodeStatusPkt : ServerPacket
-    {
-        public TaxiNodeStatusPkt() : base(ServerOpcodes.TaxiNodeStatus) { }
+	internal class TaxiNodeStatusPkt : ServerPacket
+	{
+		public TaxiNodeStatus Status; // replace with TaxiStatus enum
+		public ObjectGuid Unit;
 
-        public override void Write()
-        {
-            _worldPacket .WritePackedGuid( Unit);
-            _worldPacket.WriteBits(Status, 2);
-            _worldPacket.FlushBits();
-        }
+		public TaxiNodeStatusPkt() : base(ServerOpcodes.TaxiNodeStatus)
+		{
+		}
 
-        public TaxiNodeStatus Status; // replace with TaxiStatus enum
-        public ObjectGuid Unit;
-    }
+		public override void Write()
+		{
+			_worldPacket.WritePackedGuid(Unit);
+			_worldPacket.WriteBits(Status, 2);
+			_worldPacket.FlushBits();
+		}
+	}
 
-    public class ShowTaxiNodes : ServerPacket
-    {
-        public ShowTaxiNodes() : base(ServerOpcodes.ShowTaxiNodes) { }
+	public class ShowTaxiNodes : ServerPacket
+	{
+		public byte[] CanLandNodes = null; // Nodes known by player
+		public byte[] CanUseNodes = null;  // Nodes available for use - this can temporarily disable a known node
 
-        public override void Write()
-        {
-            _worldPacket.WriteBit(WindowInfo.HasValue);
-            _worldPacket.FlushBits();
+		public ShowTaxiNodesWindowInfo? WindowInfo;
 
-            _worldPacket.WriteInt32(CanLandNodes.Length);
-            _worldPacket.WriteInt32(CanUseNodes.Length);
+		public ShowTaxiNodes() : base(ServerOpcodes.ShowTaxiNodes)
+		{
+		}
 
-            if (WindowInfo.HasValue)
-            {
-                _worldPacket.WritePackedGuid(WindowInfo.Value.UnitGUID);
-                _worldPacket.WriteInt32(WindowInfo.Value.CurrentNode);
-            }
+		public override void Write()
+		{
+			_worldPacket.WriteBit(WindowInfo.HasValue);
+			_worldPacket.FlushBits();
 
-            foreach (var node in CanLandNodes)
-                _worldPacket.WriteUInt8(node);
+			_worldPacket.WriteInt32(CanLandNodes.Length);
+			_worldPacket.WriteInt32(CanUseNodes.Length);
 
-            foreach (var node in CanUseNodes)
-                _worldPacket.WriteUInt8(node);
-        }
+			if (WindowInfo.HasValue)
+			{
+				_worldPacket.WritePackedGuid(WindowInfo.Value.UnitGUID);
+				_worldPacket.WriteInt32(WindowInfo.Value.CurrentNode);
+			}
 
-        public ShowTaxiNodesWindowInfo? WindowInfo;
-        public byte[] CanLandNodes = null; // Nodes known by player
-        public byte[] CanUseNodes = null; // Nodes available for use - this can temporarily disable a known node
-    }
+			foreach (var node in CanLandNodes)
+				_worldPacket.WriteUInt8(node);
 
-    class EnableTaxiNode : ClientPacket
-    {
-        public EnableTaxiNode(WorldPacket packet) : base(packet) { }
+			foreach (var node in CanUseNodes)
+				_worldPacket.WriteUInt8(node);
+		}
+	}
 
-        public override void Read()
-        {
-            Unit = _worldPacket.ReadPackedGuid();
-        }
+	internal class EnableTaxiNode : ClientPacket
+	{
+		public ObjectGuid Unit;
 
-        public ObjectGuid Unit;
-    }
+		public EnableTaxiNode(WorldPacket packet) : base(packet)
+		{
+		}
 
-    class TaxiQueryAvailableNodes : ClientPacket
-    {
-        public TaxiQueryAvailableNodes(WorldPacket packet) : base(packet) { }
+		public override void Read()
+		{
+			Unit = _worldPacket.ReadPackedGuid();
+		}
+	}
 
-        public override void Read()
-        {
-            Unit = _worldPacket.ReadPackedGuid();
-        }
+	internal class TaxiQueryAvailableNodes : ClientPacket
+	{
+		public ObjectGuid Unit;
 
-        public ObjectGuid Unit;
-    }
+		public TaxiQueryAvailableNodes(WorldPacket packet) : base(packet)
+		{
+		}
 
-    class ActivateTaxi : ClientPacket
-    {
-        public ActivateTaxi(WorldPacket packet) : base(packet) { }
+		public override void Read()
+		{
+			Unit = _worldPacket.ReadPackedGuid();
+		}
+	}
 
-        public override void Read()
-        {
-            Vendor = _worldPacket.ReadPackedGuid();
-            Node = _worldPacket.ReadUInt32();
-            GroundMountID = _worldPacket.ReadUInt32();
-            FlyingMountID = _worldPacket.ReadUInt32();
-        }
+	internal class ActivateTaxi : ClientPacket
+	{
+		public uint FlyingMountID;
+		public uint GroundMountID;
+		public uint Node;
 
-        public ObjectGuid Vendor;
-        public uint Node;
-        public uint GroundMountID;
-        public uint FlyingMountID;
-    }
+		public ObjectGuid Vendor;
 
-    class NewTaxiPath : ServerPacket
-    {
-        public NewTaxiPath() : base(ServerOpcodes.NewTaxiPath) { }
+		public ActivateTaxi(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public override void Write() { }
-    }
+		public override void Read()
+		{
+			Vendor        = _worldPacket.ReadPackedGuid();
+			Node          = _worldPacket.ReadUInt32();
+			GroundMountID = _worldPacket.ReadUInt32();
+			FlyingMountID = _worldPacket.ReadUInt32();
+		}
+	}
 
-    class ActivateTaxiReplyPkt : ServerPacket
-    {
-        public ActivateTaxiReplyPkt() : base(ServerOpcodes.ActivateTaxiReply) { }
+	internal class NewTaxiPath : ServerPacket
+	{
+		public NewTaxiPath() : base(ServerOpcodes.NewTaxiPath)
+		{
+		}
 
-        public override void Write()
-        {
-            _worldPacket.WriteBits(Reply, 4);
-            _worldPacket.FlushBits();
-        }
+		public override void Write()
+		{
+		}
+	}
 
-        public ActivateTaxiReply Reply;
-    }
+	internal class ActivateTaxiReplyPkt : ServerPacket
+	{
+		public ActivateTaxiReply Reply;
 
-    class TaxiRequestEarlyLanding : ClientPacket
-    {
-        public TaxiRequestEarlyLanding(WorldPacket packet) : base(packet) { }
+		public ActivateTaxiReplyPkt() : base(ServerOpcodes.ActivateTaxiReply)
+		{
+		}
 
-        public override void Read() { }
-    }
+		public override void Write()
+		{
+			_worldPacket.WriteBits(Reply, 4);
+			_worldPacket.FlushBits();
+		}
+	}
 
-    public struct ShowTaxiNodesWindowInfo
-    {
-        public ObjectGuid UnitGUID;
-        public int CurrentNode;
-    }
+	internal class TaxiRequestEarlyLanding : ClientPacket
+	{
+		public TaxiRequestEarlyLanding(WorldPacket packet) : base(packet)
+		{
+		}
+
+		public override void Read()
+		{
+		}
+	}
+
+	public struct ShowTaxiNodesWindowInfo
+	{
+		public ObjectGuid UnitGUID;
+		public int CurrentNode;
+	}
 }

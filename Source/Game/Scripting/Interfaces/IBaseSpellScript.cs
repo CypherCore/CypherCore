@@ -5,21 +5,21 @@ using Game.Spells;
 
 namespace Game.Scripting.Interfaces
 {
-    public interface IBaseSpellScript
-    {
-        byte m_currentScriptState { get; set; }
-        string m_scriptName { get; set; }
-        uint m_scriptSpellId { get; set; }
+	public interface IBaseSpellScript
+	{
+		byte _currentScriptState { get; set; }
+		string _scriptName { get; set; }
+		uint _scriptSpellId { get; set; }
 
-        bool Load();
-        void Register();
-        void Unload();
-        bool Validate(SpellInfo spellInfo);
-        bool ValidateSpellInfo(params uint[] spellIds);
-        string _GetScriptName();
-        void _Init(string scriptname, uint spellId);
-        void _Register();
-        void _Unload();
-        bool _Validate(SpellInfo entry);
-    }
+		bool Load();
+		void Register();
+		void Unload();
+		bool Validate(SpellInfo spellInfo);
+		bool ValidateSpellInfo(params uint[] spellIds);
+		string _GetScriptName();
+		void _Init(string scriptname, uint spellId);
+		void _Register();
+		void _Unload();
+		bool _Validate(SpellInfo entry);
+	}
 }

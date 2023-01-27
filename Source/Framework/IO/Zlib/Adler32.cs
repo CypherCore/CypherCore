@@ -6,10 +6,10 @@
 
 namespace Framework.IO
 {
-    public static partial class ZLib
+	public static partial class ZLib
 	{
-		private const uint BASE=65521;	// largest prime smaller than 65536
-		private const uint NMAX=5552;	// NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1
+		private const uint BASE = 65521; // largest prime smaller than 65536
+		private const uint NMAX = 5552;  // NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1
 
 		// =========================================================================
 
@@ -33,103 +33,140 @@ namespace Framework.IO
 		public static uint adler32(uint adler, byte[] buf, uint ind, uint len)
 		{
 			// initial Adler-32 value (deferred check for len==1 speed)
-			if(buf==null) return 1;
+			if (buf == null) return 1;
 
 			// split Adler-32 into component sums
-			uint sum2=(adler>>16)&0xffff;
-			adler&=0xffff;
+			uint sum2 = (adler >> 16) & 0xffff;
+			adler &= 0xffff;
 
 			//uint ind=0; // index in buf
 
 			// in case user likes doing a byte at a time, keep it fast
-			if(len==1)
+			if (len == 1)
 			{
-				adler+=buf[ind];
-				if(adler>=BASE) adler-=BASE;
-				sum2+=adler;
-				if(sum2>=BASE) sum2-=BASE;
-				return adler|(sum2<<16);
+				adler += buf[ind];
+				if (adler >= BASE) adler -= BASE;
+				sum2 += adler;
+				if (sum2 >= BASE) sum2 -= BASE;
+
+				return adler | (sum2 << 16);
 			}
 
 			// in case short lengths are provided, keep it somewhat fast
-			if(len<16)
+			if (len < 16)
 			{
-				while(len--!=0)
+				while (len-- != 0)
 				{
-					adler+=buf[ind++];
-					sum2+=adler;
+					adler += buf[ind++];
+					sum2  += adler;
 				}
-				if(adler>=BASE) adler-=BASE;
-				sum2%=BASE;				// only added so many BASE's
-				return adler|(sum2<<16);
+
+				if (adler >= BASE) adler -= BASE;
+				sum2 %= BASE; // only added so many BASE's
+
+				return adler | (sum2 << 16);
 			}
 
 			// do length NMAX blocks -- requires just one modulo operation
-			while(len>=NMAX)
+			while (len >= NMAX)
 			{
-				len-=NMAX;
-				uint n=NMAX/16;				// NMAX is divisible by 16
+				len -= NMAX;
+				uint n = NMAX / 16; // NMAX is divisible by 16
+
 				do
 				{
 					// 16 sums unrolled
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-				} while(--n!=0);
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+				} while (--n != 0);
 
-				adler%=BASE;
-				sum2%=BASE;
+				adler %= BASE;
+				sum2  %= BASE;
 			}
 
 			// do remaining bytes (less than NMAX, still just one modulo)
-			if(len!=0)
-			{ // avoid modulos if none remaining
-				while(len>=16)
+			if (len != 0)
+			{
+				// avoid modulos if none remaining
+				while (len >= 16)
 				{
-					len-=16;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
-					adler+=buf[ind++]; sum2+=adler;
+					len   -= 16;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
+					adler += buf[ind++];
+					sum2  += adler;
 				}
 
-				while(len--!=0)
+				while (len-- != 0)
 				{
-					adler+=buf[ind++];
-					sum2+=adler;
+					adler += buf[ind++];
+					sum2  += adler;
 				}
 
-				adler%=BASE;
-				sum2%=BASE;
+				adler %= BASE;
+				sum2  %= BASE;
 			}
 
 			// return recombined sums
-			return adler|(sum2<<16);
+			return adler | (sum2 << 16);
 		}
 
 		// =========================================================================
@@ -140,17 +177,19 @@ namespace Framework.IO
 		// seq1 and seq2 concatenated, requiring only adler1, adler2, and len2.
 
 		public static uint adler32_combine_(uint adler1, uint adler2, uint len2)
-		{ // the derivation of this formula is left as an exercise for the reader
-			uint rem=len2%BASE;
-			uint sum1=adler1&0xffff;
-			uint sum2=(rem*sum1)%BASE;
-			sum1+=(adler2&0xffff)+BASE-1;
-			sum2+=((adler1>>16)&0xffff)+((adler2>>16)&0xffff)+BASE-rem;
-			if(sum1>=BASE) sum1-=BASE;
-			if(sum1>=BASE) sum1-=BASE;
-			if(sum2>=(BASE<<1)) sum2-=(BASE<<1);
-			if(sum2>=BASE) sum2-=BASE;
-			return sum1|(sum2<<16);
+		{
+			// the derivation of this formula is left as an exercise for the reader
+			uint rem  = len2 % BASE;
+			uint sum1 = adler1 & 0xffff;
+			uint sum2 = (rem * sum1) % BASE;
+			sum1 += (adler2 & 0xffff) + BASE - 1;
+			sum2 += ((adler1 >> 16) & 0xffff) + ((adler2 >> 16) & 0xffff) + BASE - rem;
+			if (sum1 >= BASE) sum1        -= BASE;
+			if (sum1 >= BASE) sum1        -= BASE;
+			if (sum2 >= (BASE << 1)) sum2 -= (BASE << 1);
+			if (sum2 >= BASE) sum2        -= BASE;
+
+			return sum1 | (sum2 << 16);
 		}
 
 		// =========================================================================

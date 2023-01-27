@@ -8,52 +8,57 @@ using Game.Networking.Packets;
 
 namespace Game
 {
-    public partial class WorldSession
-    {
-        [WorldPacketHandler(ClientOpcodes.GetGarrisonInfo)]
-        void HandleGetGarrisonInfo(GetGarrisonInfo getGarrisonInfo)
-        {
-            Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.SendInfo();
-        }
+	public partial class WorldSession
+	{
+		[WorldPacketHandler(ClientOpcodes.GetGarrisonInfo)]
+		private void HandleGetGarrisonInfo(GetGarrisonInfo getGarrisonInfo)
+		{
+			Garrison garrison = _player.GetGarrison();
 
-        [WorldPacketHandler(ClientOpcodes.GarrisonPurchaseBuilding)]
-        void HandleGarrisonPurchaseBuilding(GarrisonPurchaseBuilding garrisonPurchaseBuilding)
-        {
-            if (!_player.GetNPCIfCanInteractWith(garrisonPurchaseBuilding.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
-                return;
+			if (garrison != null)
+				garrison.SendInfo();
+		}
 
-            Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.PlaceBuilding(garrisonPurchaseBuilding.PlotInstanceID, garrisonPurchaseBuilding.BuildingID);
-        }
+		[WorldPacketHandler(ClientOpcodes.GarrisonPurchaseBuilding)]
+		private void HandleGarrisonPurchaseBuilding(GarrisonPurchaseBuilding garrisonPurchaseBuilding)
+		{
+			if (!_player.GetNPCIfCanInteractWith(garrisonPurchaseBuilding.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
+				return;
 
-        [WorldPacketHandler(ClientOpcodes.GarrisonCancelConstruction)]
-        void HandleGarrisonCancelConstruction(GarrisonCancelConstruction garrisonCancelConstruction)
-        {
-            if (!_player.GetNPCIfCanInteractWith(garrisonCancelConstruction.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
-                return;
+			Garrison garrison = _player.GetGarrison();
 
-            Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.CancelBuildingConstruction(garrisonCancelConstruction.PlotInstanceID);
-        }
+			if (garrison != null)
+				garrison.PlaceBuilding(garrisonPurchaseBuilding.PlotInstanceID, garrisonPurchaseBuilding.BuildingID);
+		}
 
-        [WorldPacketHandler(ClientOpcodes.GarrisonRequestBlueprintAndSpecializationData)]
-        void HandleGarrisonRequestBlueprintAndSpecializationData(GarrisonRequestBlueprintAndSpecializationData garrisonRequestBlueprintAndSpecializationData)
-        {
-            Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.SendBlueprintAndSpecializationData();
-        }
+		[WorldPacketHandler(ClientOpcodes.GarrisonCancelConstruction)]
+		private void HandleGarrisonCancelConstruction(GarrisonCancelConstruction garrisonCancelConstruction)
+		{
+			if (!_player.GetNPCIfCanInteractWith(garrisonCancelConstruction.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
+				return;
 
-        [WorldPacketHandler(ClientOpcodes.GarrisonGetMapData)]
-        void HandleGarrisonGetMapData(GarrisonGetMapData garrisonGetMapData)
-        {
-            Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.SendMapData(_player);
-        }
-    }
+			Garrison garrison = _player.GetGarrison();
+
+			if (garrison != null)
+				garrison.CancelBuildingConstruction(garrisonCancelConstruction.PlotInstanceID);
+		}
+
+		[WorldPacketHandler(ClientOpcodes.GarrisonRequestBlueprintAndSpecializationData)]
+		private void HandleGarrisonRequestBlueprintAndSpecializationData(GarrisonRequestBlueprintAndSpecializationData garrisonRequestBlueprintAndSpecializationData)
+		{
+			Garrison garrison = _player.GetGarrison();
+
+			if (garrison != null)
+				garrison.SendBlueprintAndSpecializationData();
+		}
+
+		[WorldPacketHandler(ClientOpcodes.GarrisonGetMapData)]
+		private void HandleGarrisonGetMapData(GarrisonGetMapData garrisonGetMapData)
+		{
+			Garrison garrison = _player.GetGarrison();
+
+			if (garrison != null)
+				garrison.SendMapData(_player);
+		}
+	}
 }

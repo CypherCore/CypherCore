@@ -1,349 +1,379 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.Scripting;
 using Game.Scripting.Interfaces.IDynamicObject;
 using Game.Spells;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class DynamicObject : WorldObject
-    {
-        public DynamicObject(bool isWorldObject) : base(isWorldObject)
-        {
-            ObjectTypeMask |= TypeMask.DynamicObject;
-            ObjectTypeId = TypeId.DynamicObject;
+	public class DynamicObject : WorldObject
+	{
+		private Aura _aura;
+		private Unit _caster;
+		private int _duration; // for non-aura dynobjects
 
-            m_updateFlag.Stationary = true;
+		private DynamicObjectData _dynamicObjectData;
+		private bool _isViewpoint;
+		private Aura _removedAura;
 
-            m_dynamicObjectData = new DynamicObjectData();
-        }
+		public DynamicObject(bool isWorldObject) : base(isWorldObject)
+		{
+			ObjectTypeMask |= TypeMask.DynamicObject;
+			ObjectTypeId   =  TypeId.DynamicObject;
 
-        public override void Dispose()
-        {
-            // make sure all references were properly removed
-            Cypher.Assert(_aura == null);
-            Cypher.Assert(!_caster);
-            Cypher.Assert(!_isViewpoint);
-            _removedAura = null;
+			_updateFlag.Stationary = true;
 
-            base.Dispose();
-        }
+			_dynamicObjectData = new DynamicObjectData();
+		}
 
-        public override void AddToWorld()
-        {
-            // Register the dynamicObject for guid lookup and for caster
-            if (!IsInWorld)
-            {
-                GetMap().GetObjectsStore().Add(GetGUID(), this);
-                base.AddToWorld();
-                BindToCaster();
-            }
-        }
+		public override void Dispose()
+		{
+			// make sure all references were properly removed
+			Cypher.Assert(_aura == null);
+			Cypher.Assert(!_caster);
+			Cypher.Assert(!_isViewpoint);
+			_removedAura = null;
 
-        public override void RemoveFromWorld()
-        {
-            // Remove the dynamicObject from the accessor and from all lists of objects in world
-            if (IsInWorld)
-            {
-                if (_isViewpoint)
-                    RemoveCasterViewpoint();
+			base.Dispose();
+		}
 
-                if (_aura != null)
-                    RemoveAura();
+		public override void AddToWorld()
+		{
+			// Register the dynamicObject for guid lookup and for caster
+			if (!IsInWorld)
+			{
+				GetMap().GetObjectsStore().Add(GetGUID(), this);
+				base.AddToWorld();
+				BindToCaster();
+			}
+		}
 
-                // dynobj could get removed in Aura.RemoveAura
-                if (!IsInWorld)
-                    return;
+		public override void RemoveFromWorld()
+		{
+			// Remove the dynamicObject from the accessor and from all lists of objects in world
+			if (IsInWorld)
+			{
+				if (_isViewpoint)
+					RemoveCasterViewpoint();
 
-                UnbindFromCaster();
-                base.RemoveFromWorld();
-                GetMap().GetObjectsStore().Remove(GetGUID());
-            }
-        }
+				if (_aura != null)
+					RemoveAura();
 
-        public bool CreateDynamicObject(ulong guidlow, Unit caster, SpellInfo spell, Position pos, float radius, DynamicObjectType type, SpellCastVisualField spellVisual)
-        {
-            SetMap(caster.GetMap());
-            Relocate(pos);
-            if (!IsPositionValid())
-            {
-                Log.outError(LogFilter.Server, "DynamicObject (spell {0}) not created. Suggested coordinates isn't valid (X: {1} Y: {2})", spell.Id, GetPositionX(), GetPositionY());
-                return false;
-            }
+				// dynobj could get removed in Aura.RemoveAura
+				if (!IsInWorld)
+					return;
 
-            _Create(ObjectGuid.Create(HighGuid.DynamicObject, GetMapId(), spell.Id, guidlow));
-            PhasingHandler.InheritPhaseShift(this, caster);
+				UnbindFromCaster();
+				base.RemoveFromWorld();
+				GetMap().GetObjectsStore().Remove(GetGUID());
+			}
+		}
 
-            UpdatePositionData();
-            SetZoneScript();
+		public bool CreateDynamicObject(ulong guidlow, Unit caster, SpellInfo spell, Position pos, float radius, DynamicObjectType type, SpellCastVisualField spellVisual)
+		{
+			SetMap(caster.GetMap());
+			Relocate(pos);
 
-            SetEntry(spell.Id);
-            SetObjectScale(1f);
+			if (!IsPositionValid())
+			{
+				Log.outError(LogFilter.Server, "DynamicObject (spell {0}) not created. Suggested coordinates isn't valid (X: {1} Y: {2})", spell.Id, GetPositionX(), GetPositionY());
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Caster), caster.GetGUID());
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Type), (byte)type);
+				return false;
+			}
 
-            SpellCastVisualField spellCastVisual = m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellVisual);
-            SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
-            SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, spellVisual.ScriptVisualID);
+			_Create(ObjectGuid.Create(HighGuid.DynamicObject, GetMapId(), spell.Id, guidlow));
+			PhasingHandler.InheritPhaseShift(this, caster);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellID), spell.Id);
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Radius), radius);
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
+			UpdatePositionData();
+			SetZoneScript();
 
-            if (IsWorldObject())
-                SetActive(true);    //must before add to map to be put in world container
+			SetEntry(spell.Id);
+			SetObjectScale(1f);
 
-            ITransport transport = caster.GetTransport();
-            if (transport != null)
-            {
-                float x, y, z, o;
-                pos.GetPosition(out x, out y, out z, out o);
-                transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-                m_movementInfo.transport.pos.Relocate(x, y, z, o);
+			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Caster), caster.GetGUID());
+			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Type), (byte)type);
 
-                // This object must be added to transport before adding to map for the client to properly display it
-                transport.AddPassenger(this);
-            }
+			SpellCastVisualField spellCastVisual = _values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.SpellVisual);
+			SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
+			SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, spellVisual.ScriptVisualID);
 
-            if (!GetMap().AddToMap(this))
-            {
-                // Returning false will cause the object to be deleted - remove from transport
-                if (transport != null)
-                    transport.RemovePassenger(this);
-                return false;
-            }
+			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.SpellID), spell.Id);
+			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Radius), radius);
+			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
 
-            return true;
-        }
+			if (IsWorldObject())
+				SetActive(true); //must before add to map to be put in world container
 
-        public override void Update(uint diff)
-        {
-            // caster has to be always available and in the same map
-            Cypher.Assert(_caster != null);
-            Cypher.Assert(_caster.GetMap() == GetMap());
+			ITransport transport = caster.GetTransport();
 
-            bool expired = false;
+			if (transport != null)
+			{
+				float x, y, z, o;
+				pos.GetPosition(out x, out y, out z, out o);
+				transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+				_movementInfo.transport.pos.Relocate(x, y, z, o);
 
-            if (_aura != null)
-            {
-                if (!_aura.IsRemoved())
-                    _aura.UpdateOwner(diff, this);
+				// This object must be added to transport before adding to map for the client to properly display it
+				transport.AddPassenger(this);
+			}
 
-                // _aura may be set to null in Aura.UpdateOwner call
-                if (_aura != null && (_aura.IsRemoved() || _aura.IsExpired()))
-                    expired = true;
-            }
-            else
-            {
-                if (GetDuration() > diff)
-                    _duration -= (int)diff;
-                else
-                    expired = true;
-            }
+			if (!GetMap().AddToMap(this))
+			{
+				// Returning false will cause the object to be deleted - remove from transport
+				if (transport != null)
+					transport.RemovePassenger(this);
 
-            if (expired)
-                Remove();
-            else
-                Global.ScriptMgr.ForEach<IDynamicObjectOnUpdate>(p => p.OnUpdate(this, diff));
-        }
+				return false;
+			}
 
-        public void Remove()
-        {
-            if (IsInWorld)
-                AddObjectToRemoveList();
-        }
+			return true;
+		}
 
-        int GetDuration()
-        {
-            if (_aura == null)
-                return _duration;
-            else
-                return _aura.GetDuration();
-        }
+		public override void Update(uint diff)
+		{
+			// caster has to be always available and in the same map
+			Cypher.Assert(_caster != null);
+			Cypher.Assert(_caster.GetMap() == GetMap());
 
-        public void SetDuration(int newDuration)
-        {
-            if (_aura == null)
-                _duration = newDuration;
-            else
-                _aura.SetDuration(newDuration);
-        }
+			bool expired = false;
 
-        public void Delay(int delaytime)
-        {
-            SetDuration(GetDuration() - delaytime);
-        }
+			if (_aura != null)
+			{
+				if (!_aura.IsRemoved())
+					_aura.UpdateOwner(diff, this);
 
-        public void SetAura(Aura aura)
-        {
-            Cypher.Assert(_aura == null && aura != null);
-            _aura = aura;
-        }
+				// _aura may be set to null in Aura.UpdateOwner call
+				if (_aura != null &&
+				    (_aura.IsRemoved() || _aura.IsExpired()))
+					expired = true;
+			}
+			else
+			{
+				if (GetDuration() > diff)
+					_duration -= (int)diff;
+				else
+					expired = true;
+			}
 
-        void RemoveAura()
-        {
-            Cypher.Assert(_aura != null && _removedAura == null);
-            _removedAura = _aura;
-            _aura = null;
-            if (!_removedAura.IsRemoved())
-                _removedAura._Remove(AuraRemoveMode.Default);
-        }
+			if (expired)
+				Remove();
+			else
+				Global.ScriptMgr.ForEach<IDynamicObjectOnUpdate>(p => p.OnUpdate(this, diff));
+		}
 
-        public void SetCasterViewpoint()
-        {
-            Player caster = _caster.ToPlayer();
-            if (caster != null)
-            {
-                caster.SetViewpoint(this, true);
-                _isViewpoint = true;
-            }
-        }
+		public void Remove()
+		{
+			if (IsInWorld)
+				AddObjectToRemoveList();
+		}
 
-        void RemoveCasterViewpoint()
-        {
-            Player caster = _caster.ToPlayer();
-            if (caster != null)
-            {
-                caster.SetViewpoint(this, false);
-                _isViewpoint = false;
-            }
-        }
+		private int GetDuration()
+		{
+			if (_aura == null)
+				return _duration;
+			else
+				return _aura.GetDuration();
+		}
 
-        public override uint GetFaction()
-        {
-            Cypher.Assert(_caster != null);
-            return _caster.GetFaction();
-        }
+		public void SetDuration(int newDuration)
+		{
+			if (_aura == null)
+				_duration = newDuration;
+			else
+				_aura.SetDuration(newDuration);
+		}
 
-        void BindToCaster()
-        {
-            Cypher.Assert(_caster == null);
-            _caster = Global.ObjAccessor.GetUnit(this, GetCasterGUID());
-            Cypher.Assert(_caster != null);
-            Cypher.Assert(_caster.GetMap() == GetMap());
-            _caster._RegisterDynObject(this);
-        }
+		public void Delay(int delaytime)
+		{
+			SetDuration(GetDuration() - delaytime);
+		}
 
-        void UnbindFromCaster()
-        {
-            Cypher.Assert(_caster != null);
-            _caster._UnregisterDynObject(this);
-            _caster = null;
-        }
+		public void SetAura(Aura aura)
+		{
+			Cypher.Assert(_aura == null && aura != null);
+			_aura = aura;
+		}
 
-        public SpellInfo GetSpellInfo()
-        {
-            return Global.SpellMgr.GetSpellInfo(GetSpellId(), GetMap().GetDifficultyID());
-        }
+		private void RemoveAura()
+		{
+			Cypher.Assert(_aura != null && _removedAura == null);
+			_removedAura = _aura;
+			_aura        = null;
 
-        public override void BuildValuesCreate(WorldPacket data, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
+			if (!_removedAura.IsRemoved())
+				_removedAura._Remove(AuraRemoveMode.Default);
+		}
 
-            buffer.WriteUInt8((byte)flags);
-            m_objectData.WriteCreate(buffer, flags, this, target);
-            m_dynamicObjectData.WriteCreate(buffer, flags, this, target);
+		public void SetCasterViewpoint()
+		{
+			Player caster = _caster.ToPlayer();
 
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
-        }
+			if (caster != null)
+			{
+				caster.SetViewpoint(this, true);
+				_isViewpoint = true;
+			}
+		}
 
-        public override void BuildValuesUpdate(WorldPacket data, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
+		private void RemoveCasterViewpoint()
+		{
+			Player caster = _caster.ToPlayer();
 
-            buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
-            if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(buffer, flags, this, target);
+			if (caster != null)
+			{
+				caster.SetViewpoint(this, false);
+				_isViewpoint = false;
+			}
+		}
 
-            if (m_values.HasChanged(TypeId.DynamicObject))
-                m_dynamicObjectData.WriteUpdate(buffer, flags, this, target);
+		public override uint GetFaction()
+		{
+			Cypher.Assert(_caster != null);
 
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
-        }
+			return _caster.GetFaction();
+		}
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
-        {
-            UpdateMask valuesMask = new((int)TypeId.Max);
-            if (requestedObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Object);
+		private void BindToCaster()
+		{
+			Cypher.Assert(_caster == null);
+			_caster = Global.ObjAccessor.GetUnit(this, GetCasterGUID());
+			Cypher.Assert(_caster != null);
+			Cypher.Assert(_caster.GetMap() == GetMap());
+			_caster._RegisterDynObject(this);
+		}
 
-            if (requestedDynamicObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.DynamicObject);
+		private void UnbindFromCaster()
+		{
+			Cypher.Assert(_caster != null);
+			_caster._UnregisterDynObject(this);
+			_caster = null;
+		}
 
-            WorldPacket buffer = new();
-            buffer.WriteUInt32(valuesMask.GetBlock(0));
+		public SpellInfo GetSpellInfo()
+		{
+			return Global.SpellMgr.GetSpellInfo(GetSpellId(), GetMap().GetDifficultyID());
+		}
 
-            if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+		public override void BuildValuesCreate(WorldPacket data, Player target)
+		{
+			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
+			WorldPacket     buffer = new();
 
-            if (valuesMask[(int)TypeId.DynamicObject])
-                m_dynamicObjectData.WriteUpdate(buffer, requestedDynamicObjectMask, true, this, target);
+			buffer.WriteUInt8((byte)flags);
+			_objectData.WriteCreate(buffer, flags, this, target);
+			_dynamicObjectData.WriteCreate(buffer, flags, this, target);
 
-            WorldPacket buffer1 = new();
-            buffer1.WriteUInt8((byte)UpdateType.Values);
-            buffer1.WritePackedGuid(GetGUID());
-            buffer1.WriteUInt32(buffer.GetSize());
-            buffer1.WriteBytes(buffer.GetData());
+			data.WriteUInt32(buffer.GetSize());
+			data.WriteBytes(buffer);
+		}
 
-            data.AddUpdateBlock(buffer1);
-        }
+		public override void BuildValuesUpdate(WorldPacket data, Player target)
+		{
+			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
+			WorldPacket     buffer = new();
 
-        public override void ClearUpdateMask(bool remove)
-        {
-            m_values.ClearChangesMask(m_dynamicObjectData);
-            base.ClearUpdateMask(remove);
-        }
+			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
 
-        public Unit GetCaster() { return _caster; }
-        public uint GetSpellId() { return m_dynamicObjectData.SpellID; }
-        public ObjectGuid GetCasterGUID() { return m_dynamicObjectData.Caster; }
-        public override ObjectGuid GetOwnerGUID() { return GetCasterGUID(); }
-        public float GetRadius() { return m_dynamicObjectData.Radius; }
+			if (_values.HasChanged(TypeId.Object))
+				_objectData.WriteUpdate(buffer, flags, this, target);
 
-        DynamicObjectData m_dynamicObjectData;
-        Aura _aura;
-        Aura _removedAura;
-        Unit _caster;
-        int _duration; // for non-aura dynobjects
-        bool _isViewpoint;
+			if (_values.HasChanged(TypeId.DynamicObject))
+				_dynamicObjectData.WriteUpdate(buffer, flags, this, target);
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            DynamicObject Owner;
-            ObjectFieldData ObjectMask = new();
-            DynamicObjectData DynamicObjectMask = new();
+			data.WriteUInt32(buffer.GetSize());
+			data.WriteBytes(buffer);
+		}
 
-            public ValuesUpdateForPlayerWithMaskSender(DynamicObject owner)
-            {
-                Owner = owner;
-            }
+		private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
+		{
+			UpdateMask valuesMask = new((int)TypeId.Max);
 
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
+			if (requestedObjectMask.IsAnySet())
+				valuesMask.Set((int)TypeId.Object);
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), DynamicObjectMask.GetUpdateMask(), player);
+			if (requestedDynamicObjectMask.IsAnySet())
+				valuesMask.Set((int)TypeId.DynamicObject);
 
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
-        }
-    }
+			WorldPacket buffer = new();
+			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
-    public enum DynamicObjectType
-    {
-        Portal = 0x0,      // unused
-        AreaSpell = 0x1,
-        FarsightFocus = 0x2
-    }
+			if (valuesMask[(int)TypeId.Object])
+				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+			if (valuesMask[(int)TypeId.DynamicObject])
+				_dynamicObjectData.WriteUpdate(buffer, requestedDynamicObjectMask, true, this, target);
+
+			WorldPacket buffer1 = new();
+			buffer1.WriteUInt8((byte)UpdateType.Values);
+			buffer1.WritePackedGuid(GetGUID());
+			buffer1.WriteUInt32(buffer.GetSize());
+			buffer1.WriteBytes(buffer.GetData());
+
+			data.AddUpdateBlock(buffer1);
+		}
+
+		public override void ClearUpdateMask(bool remove)
+		{
+			_values.ClearChangesMask(_dynamicObjectData);
+			base.ClearUpdateMask(remove);
+		}
+
+		public Unit GetCaster()
+		{
+			return _caster;
+		}
+
+		public uint GetSpellId()
+		{
+			return _dynamicObjectData.SpellID;
+		}
+
+		public ObjectGuid GetCasterGUID()
+		{
+			return _dynamicObjectData.Caster;
+		}
+
+		public override ObjectGuid GetOwnerGUID()
+		{
+			return GetCasterGUID();
+		}
+
+		public float GetRadius()
+		{
+			return _dynamicObjectData.Radius;
+		}
+
+		private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+		{
+			private DynamicObjectData DynamicObjectMask = new();
+			private ObjectFieldData ObjectMask = new();
+			private DynamicObject Owner;
+
+			public ValuesUpdateForPlayerWithMaskSender(DynamicObject owner)
+			{
+				Owner = owner;
+			}
+
+			public void Invoke(Player player)
+			{
+				UpdateData udata = new(Owner.GetMapId());
+
+				Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), DynamicObjectMask.GetUpdateMask(), player);
+
+				udata.BuildPacket(out UpdateObject packet);
+				player.SendPacket(packet);
+			}
+		}
+	}
+
+	public enum DynamicObjectType
+	{
+		Portal = 0x0, // unused
+		AreaSpell = 0x1,
+		FarsightFocus = 0x2
+	}
 }

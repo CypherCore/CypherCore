@@ -3,7 +3,7 @@
 
 namespace Game
 {
-    public partial class WorldSession
-    {
-    }
+	public partial class WorldSession
+	{
+	}
 }

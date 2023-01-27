@@ -1,493 +1,540 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Collections;
-using Framework.Constants;
 using System;
 using System.Collections.Generic;
-using Game.Networking.Packets;
+using Framework.Collections;
+using Framework.Constants;
 using Game.Maps;
+using Game.Networking.Packets;
 
 namespace Game.Entities
 {
-    public class CreatureTemplate
-    {
-        public uint Entry;
-        public uint[] DifficultyEntry = new uint[SharedConst.MaxCreatureDifficulties];
-        public uint[] KillCredit = new uint[SharedConst.MaxCreatureKillCredit];
-        public List<CreatureModel> Models = new();
-        public string Name;
-        public string FemaleName;
-        public string SubName;
-        public string TitleAlt;
-        public string IconName;
-        public uint GossipMenuId;
-        public short Minlevel;
-        public Dictionary<Difficulty, CreatureLevelScaling> scalingStorage = new();
-        public short Maxlevel;
-        public int HealthScalingExpansion;
-        public uint RequiredExpansion;
-        public uint VignetteID; // @todo Read Vignette.db2
-        public uint Faction;
-        public ulong Npcflag;
-        public float SpeedWalk;
-        public float SpeedRun;
-        public float Scale;
-        public CreatureEliteType Rank;
-        public uint DmgSchool;
-        public uint BaseAttackTime;
-        public uint RangeAttackTime;
-        public float BaseVariance;
-        public float RangeVariance;
-        public uint UnitClass;
-        public UnitFlags UnitFlags;
-        public uint UnitFlags2;
-        public uint UnitFlags3;
-        public uint DynamicFlags;
-        public CreatureFamily Family;
-        public Class TrainerClass;
-        public CreatureType CreatureType;
-        public CreatureTypeFlags TypeFlags;
-        public uint TypeFlags2;
-        public uint LootId;
-        public uint PickPocketId;
-        public uint SkinLootId;
-        public int[] Resistance = new int[7];
-        public uint[] Spells = new uint[8];
-        public uint VehicleId;
-        public uint MinGold;
-        public uint MaxGold;
-        public string AIName;
-        public uint MovementType;
-        public CreatureMovementData Movement = new();
-        public float HoverHeight;
-        public float ModHealth;
-        public float ModHealthExtra;
-        public float ModMana;
-        public float ModManaExtra;
-        public float ModArmor;
-        public float ModDamage;
-        public float ModExperience;
-        public bool RacialLeader;
-        public uint MovementId;
-        public int CreatureDifficultyID;
-        public int WidgetSetID;
-        public int WidgetSetUnitConditionID;
-        public bool RegenHealth;
-        public ulong MechanicImmuneMask;
-        public uint SpellSchoolImmuneMask;
-        public CreatureFlagsExtra FlagsExtra;
-        public uint ScriptID;
-        public string StringId;
+	public class CreatureTemplate
+	{
+		public string AIName;
+		public uint BaseAttackTime;
+		public float BaseVariance;
+		public int CreatureDifficultyID;
+		public CreatureType CreatureType;
+		public uint[] DifficultyEntry = new uint[SharedConst.MaxCreatureDifficulties];
+		public uint DmgSchool;
+		public uint DynamicFlags;
+		public uint Entry;
+		public uint Faction;
+		public CreatureFamily Family;
+		public string FemaleName;
+		public CreatureFlagsExtra FlagsExtra;
+		public uint GossipMenuId;
+		public int HealthScalingExpansion;
+		public float HoverHeight;
+		public string IconName;
+		public uint[] KillCredit = new uint[SharedConst.MaxCreatureKillCredit];
+		public uint LootId;
+		public uint MaxGold;
+		public short Maxlevel;
+		public ulong MechanicImmuneMask;
+		public uint MinGold;
+		public short Minlevel;
+		public float ModArmor;
+		public float ModDamage;
+		public List<CreatureModel> Models = new();
+		public float ModExperience;
+		public float ModHealth;
+		public float ModHealthExtra;
+		public float ModMana;
+		public float ModManaExtra;
+		public CreatureMovementData Movement = new();
+		public uint MovementId;
+		public uint MovementType;
+		public string Name;
+		public ulong Npcflag;
+		public uint PickPocketId;
 
-        public QueryCreatureResponse QueryData;
+		public QueryCreatureResponse QueryData;
+		public bool RacialLeader;
+		public uint RangeAttackTime;
+		public float RangeVariance;
+		public CreatureEliteType Rank;
+		public bool RegenHealth;
+		public uint RequiredExpansion;
+		public int[] Resistance = new int[7];
+		public float Scale;
+		public Dictionary<Difficulty, CreatureLevelScaling> scalingStorage = new();
+		public uint ScriptID;
+		public uint SkinLootId;
+		public float SpeedRun;
+		public float SpeedWalk;
+		public uint[] Spells = new uint[8];
+		public uint SpellSchoolImmuneMask;
+		public string StringId;
+		public string SubName;
+		public string TitleAlt;
+		public Class TrainerClass;
+		public CreatureTypeFlags TypeFlags;
+		public uint TypeFlags2;
+		public uint UnitClass;
+		public UnitFlags UnitFlags;
+		public uint UnitFlags2;
+		public uint UnitFlags3;
+		public uint VehicleId;
+		public uint VignetteID; // @todo Read Vignette.db2
+		public int WidgetSetID;
+		public int WidgetSetUnitConditionID;
 
-        public CreatureModel GetModelByIdx(int idx)
-        {
-            return idx < Models.Count ? Models[idx] : null;
-        }
+		public CreatureModel GetModelByIdx(int idx)
+		{
+			return idx < Models.Count ? Models[idx] : null;
+		}
 
-        public CreatureModel GetRandomValidModel()
-        {
-            if (Models.Empty())
-                return null;
+		public CreatureModel GetRandomValidModel()
+		{
+			if (Models.Empty())
+				return null;
 
-            // If only one element, ignore the Probability (even if 0)
-            if (Models.Count == 1)
-                return Models[0];
+			// If only one element, ignore the Probability (even if 0)
+			if (Models.Count == 1)
+				return Models[0];
 
-            var selectedItr = Models.SelectRandomElementByWeight(model =>
-            {
-                return model.Probability;
-            });
+			var selectedItr = Models.SelectRandomElementByWeight(model => { return model.Probability; });
 
-            return selectedItr;
-        }
-        public CreatureModel GetFirstValidModel()
-        {
-            foreach (CreatureModel model in Models)
-                if (model.CreatureDisplayID != 0)
-                    return model;
+			return selectedItr;
+		}
 
-            return null;
-        }
+		public CreatureModel GetFirstValidModel()
+		{
+			foreach (CreatureModel model in Models)
+				if (model.CreatureDisplayID != 0)
+					return model;
 
-        public CreatureModel GetModelWithDisplayId(uint displayId)
-        {
-            foreach (CreatureModel model in Models)
-                if (displayId == model.CreatureDisplayID)
-                    return model;
+			return null;
+		}
 
-            return null;
-        }
+		public CreatureModel GetModelWithDisplayId(uint displayId)
+		{
+			foreach (CreatureModel model in Models)
+				if (displayId == model.CreatureDisplayID)
+					return model;
 
-        public CreatureModel GetFirstInvisibleModel()
-        {
-            foreach (CreatureModel model in Models)
-            {
-                CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
-                if (modelInfo != null && modelInfo.IsTrigger)
-                    return model;
-            }
+			return null;
+		}
 
-            return CreatureModel.DefaultInvisibleModel;
-        }
+		public CreatureModel GetFirstInvisibleModel()
+		{
+			foreach (CreatureModel model in Models)
+			{
+				CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
 
-        public CreatureModel GetFirstVisibleModel()
-        {
-            foreach (CreatureModel model in Models)
-            {
-                CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
-                if (modelInfo != null && !modelInfo.IsTrigger)
-                    return model;
-            }
+				if (modelInfo != null &&
+				    modelInfo.IsTrigger)
+					return model;
+			}
 
-            return CreatureModel.DefaultVisibleModel;
-        }
+			return CreatureModel.DefaultInvisibleModel;
+		}
 
-        public int[] GetMinMaxLevel()
-        {
-            return new[]
-            {
-                HealthScalingExpansion != (int)Expansion.LevelCurrent ? Minlevel : Minlevel + SharedConst.MaxLevel,
-                HealthScalingExpansion != (int)Expansion.LevelCurrent ? Maxlevel : Maxlevel + SharedConst.MaxLevel
-            };
-        }
+		public CreatureModel GetFirstVisibleModel()
+		{
+			foreach (CreatureModel model in Models)
+			{
+				CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
 
-        public int GetHealthScalingExpansion()
-        {
-            return HealthScalingExpansion == (int)Expansion.LevelCurrent ? (int)Expansion.WarlordsOfDraenor : HealthScalingExpansion;
-        }
+				if (modelInfo != null &&
+				    !modelInfo.IsTrigger)
+					return model;
+			}
 
-        public SkillType GetRequiredLootSkill()
-        {
-            if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithHerbalism))
-                return SkillType.Herbalism;
-            else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithMining))
-                return SkillType.Mining;
-            else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithEngineering))
-                return SkillType.Engineering;
-            else
-                return SkillType.Skinning;                          // normal case
-        }
+			return CreatureModel.DefaultVisibleModel;
+		}
 
-        public bool IsExotic()
-        {
-            return (TypeFlags & CreatureTypeFlags.TameableExotic) != 0;
-        }
-        public bool IsTameable(bool canTameExotic)
-        {
-            if (CreatureType != CreatureType.Beast || Family == CreatureFamily.None || !TypeFlags.HasAnyFlag(CreatureTypeFlags.Tameable))
-                return false;
+		public int[] GetMinMaxLevel()
+		{
+			return new[]
+			       {
+				       HealthScalingExpansion != (int)Expansion.LevelCurrent ? Minlevel : Minlevel + SharedConst.MaxLevel, HealthScalingExpansion != (int)Expansion.LevelCurrent ? Maxlevel : Maxlevel + SharedConst.MaxLevel
+			       };
+		}
 
-            // if can tame exotic then can tame any tameable
-            return canTameExotic || !IsExotic();
-        }
+		public int GetHealthScalingExpansion()
+		{
+			return HealthScalingExpansion == (int)Expansion.LevelCurrent ? (int)Expansion.WarlordsOfDraenor : HealthScalingExpansion;
+		}
 
-        public static int DifficultyIDToDifficultyEntryIndex(uint difficulty)
-        {
-            switch ((Difficulty)difficulty)
-            {
-                case Difficulty.None:
-                case Difficulty.Normal:
-                case Difficulty.Raid10N:
-                case Difficulty.Raid40:
-                case Difficulty.Scenario3ManN:
-                case Difficulty.NormalRaid:
-                    return -1;
-                case Difficulty.Heroic:
-                case Difficulty.Raid25N:
-                case Difficulty.Scenario3ManHC:
-                case Difficulty.HeroicRaid:
-                    return 0;
-                case Difficulty.Raid10HC:
-                case Difficulty.MythicKeystone:
-                case Difficulty.MythicRaid:
-                    return 1;
-                case Difficulty.Raid25HC:
-                    return 2;
-                case Difficulty.LFR:
-                case Difficulty.LFRNew:
-                case Difficulty.EventRaid:
-                case Difficulty.EventDungeon:
-                case Difficulty.EventScenario:
-                default:
-                    return -1;
-            }
-        }
+		public SkillType GetRequiredLootSkill()
+		{
+			if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithHerbalism))
+				return SkillType.Herbalism;
+			else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithMining))
+				return SkillType.Mining;
+			else if (TypeFlags.HasAnyFlag(CreatureTypeFlags.SkinWithEngineering))
+				return SkillType.Engineering;
+			else
+				return SkillType.Skinning; // normal case
+		}
 
-        public void InitializeQueryData()
-        {
-            QueryData = new QueryCreatureResponse();
+		public bool IsExotic()
+		{
+			return (TypeFlags & CreatureTypeFlags.TameableExotic) != 0;
+		}
 
-            QueryData.CreatureID = Entry;
-            QueryData.Allow = true;
+		public bool IsTameable(bool canTameExotic)
+		{
+			if (CreatureType != CreatureType.Beast ||
+			    Family == CreatureFamily.None ||
+			    !TypeFlags.HasAnyFlag(CreatureTypeFlags.Tameable))
+				return false;
 
-            CreatureStats stats = new();
-            stats.Leader = RacialLeader;
+			// if can tame exotic then can tame any tameable
+			return canTameExotic || !IsExotic();
+		}
 
-            stats.Name[0] = Name;
-            stats.NameAlt[0] = FemaleName;
+		public static int DifficultyIDToDifficultyEntryIndex(uint difficulty)
+		{
+			switch ((Difficulty)difficulty)
+			{
+				case Difficulty.None:
+				case Difficulty.Normal:
+				case Difficulty.Raid10N:
+				case Difficulty.Raid40:
+				case Difficulty.Scenario3ManN:
+				case Difficulty.NormalRaid:
+					return -1;
+				case Difficulty.Heroic:
+				case Difficulty.Raid25N:
+				case Difficulty.Scenario3ManHC:
+				case Difficulty.HeroicRaid:
+					return 0;
+				case Difficulty.Raid10HC:
+				case Difficulty.MythicKeystone:
+				case Difficulty.MythicRaid:
+					return 1;
+				case Difficulty.Raid25HC:
+					return 2;
+				case Difficulty.LFR:
+				case Difficulty.LFRNew:
+				case Difficulty.EventRaid:
+				case Difficulty.EventDungeon:
+				case Difficulty.EventScenario:
+				default:
+					return -1;
+			}
+		}
 
-            stats.Flags[0] = (uint)TypeFlags;
-            stats.Flags[1] = TypeFlags2;
+		public void InitializeQueryData()
+		{
+			QueryData = new QueryCreatureResponse();
 
-            stats.CreatureType = (int)CreatureType;
-            stats.CreatureFamily = (int)Family;
-            stats.Classification = (int)Rank;
+			QueryData.CreatureID = Entry;
+			QueryData.Allow      = true;
 
-            for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
-                stats.ProxyCreatureID[i] = KillCredit[i];
+			CreatureStats stats = new();
+			stats.Leader = RacialLeader;
 
-            foreach (var model in Models)
-            {
-                stats.Display.TotalProbability += model.Probability;
-                stats.Display.CreatureDisplay.Add(new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
-            }
+			stats.Name[0]    = Name;
+			stats.NameAlt[0] = FemaleName;
 
-            stats.HpMulti = ModHealth;
-            stats.EnergyMulti = ModMana;
+			stats.Flags[0] = (uint)TypeFlags;
+			stats.Flags[1] = TypeFlags2;
 
-            stats.CreatureMovementInfoID = MovementId;
-            stats.RequiredExpansion = RequiredExpansion;
-            stats.HealthScalingExpansion = HealthScalingExpansion;
-            stats.VignetteID = VignetteID;
-            stats.Class = (int)UnitClass;
-            stats.CreatureDifficultyID = CreatureDifficultyID;
-            stats.WidgetSetID = WidgetSetID;
-            stats.WidgetSetUnitConditionID = WidgetSetUnitConditionID;
+			stats.CreatureType   = (int)CreatureType;
+			stats.CreatureFamily = (int)Family;
+			stats.Classification = (int)Rank;
 
-            stats.Title = SubName;
-            stats.TitleAlt = TitleAlt;
-            stats.CursorName = IconName;
+			for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
+				stats.ProxyCreatureID[i] = KillCredit[i];
 
-            var items = Global.ObjectMgr.GetCreatureQuestItemList(Entry);
-            if (items != null)
-                stats.QuestItems.AddRange(items);
+			foreach (var model in Models)
+			{
+				stats.Display.TotalProbability += model.Probability;
+				stats.Display.CreatureDisplay.Add(new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
+			}
 
-            QueryData.Stats = stats;
-        }
+			stats.HpMulti     = ModHealth;
+			stats.EnergyMulti = ModMana;
 
-        public CreatureLevelScaling GetLevelScaling(Difficulty difficulty)
-        {
-            var creatureLevelScaling = scalingStorage.LookupByKey(difficulty);
-            if (creatureLevelScaling != null)
-                return creatureLevelScaling;
+			stats.CreatureMovementInfoID   = MovementId;
+			stats.RequiredExpansion        = RequiredExpansion;
+			stats.HealthScalingExpansion   = HealthScalingExpansion;
+			stats.VignetteID               = VignetteID;
+			stats.Class                    = (int)UnitClass;
+			stats.CreatureDifficultyID     = CreatureDifficultyID;
+			stats.WidgetSetID              = WidgetSetID;
+			stats.WidgetSetUnitConditionID = WidgetSetUnitConditionID;
 
-            return new CreatureLevelScaling();
-        }
-    }
+			stats.Title      = SubName;
+			stats.TitleAlt   = TitleAlt;
+			stats.CursorName = IconName;
 
-    public class CreatureBaseStats
-    {
-        public uint BaseMana;
-        public uint AttackPower;
-        public uint RangedAttackPower;
+			var items = Global.ObjectMgr.GetCreatureQuestItemList(Entry);
 
-        // Helpers
-        public uint GenerateMana(CreatureTemplate info)
-        {
-            // Mana can be 0.
-            if (BaseMana == 0)
-                return 0;
+			if (items != null)
+				stats.QuestItems.AddRange(items);
 
-            return (uint)Math.Ceiling(BaseMana * info.ModMana * info.ModManaExtra);
-        }
-    }
+			QueryData.Stats = stats;
+		}
 
-    public class CreatureLocale
-    {
-        public StringArray Name = new((int)Locale.Total);
-        public StringArray NameAlt = new((int)Locale.Total);
-        public StringArray Title = new((int)Locale.Total);
-        public StringArray TitleAlt = new((int)Locale.Total);
-    }
+		public CreatureLevelScaling GetLevelScaling(Difficulty difficulty)
+		{
+			var creatureLevelScaling = scalingStorage.LookupByKey(difficulty);
 
-    public struct EquipmentItem
-    {
-        public uint ItemId;
-        public ushort AppearanceModId;
-        public ushort ItemVisual;
-    }
+			if (creatureLevelScaling != null)
+				return creatureLevelScaling;
 
-    public class EquipmentInfo
-    {
-        public EquipmentItem[] Items = new EquipmentItem[SharedConst.MaxEquipmentItems];
-    }
+			return new CreatureLevelScaling();
+		}
+	}
 
-    public class CreatureData : SpawnData
-    {
-        public uint displayid;
-        public sbyte equipmentId;
-        public float WanderDistance;
-        public uint currentwaypoint;
-        public uint curhealth;
-        public uint curmana;
-        public byte movementType;
-        public ulong npcflag;
-        public uint unit_flags;                                  // enum UnitFlags mask values
-        public uint unit_flags2;                                 // enum UnitFlags2 mask values
-        public uint unit_flags3;                                 // enum UnitFlags3 mask values
-        public uint dynamicflags;
+	public class CreatureBaseStats
+	{
+		public uint AttackPower;
+		public uint BaseMana;
+		public uint RangedAttackPower;
 
-        public CreatureData() : base(SpawnObjectType.Creature) { }
-    }
+		// Helpers
+		public uint GenerateMana(CreatureTemplate info)
+		{
+			// Mana can be 0.
+			if (BaseMana == 0)
+				return 0;
 
-    public class CreatureMovementData
-    {
-        public CreatureGroundMovementType Ground;
-        public CreatureFlightMovementType Flight;
-        public bool Swim;
-        public bool Rooted;
-        public CreatureChaseMovementType Chase;
-        public CreatureRandomMovementType Random;
-        public uint InteractionPauseTimer;
+			return (uint)Math.Ceiling(BaseMana * info.ModMana * info.ModManaExtra);
+		}
+	}
 
-        public CreatureMovementData()
-        {
-            Ground = CreatureGroundMovementType.Run;
-            Flight = CreatureFlightMovementType.None;
-            Swim = true;
-            Rooted = false;
-            Chase = CreatureChaseMovementType.Run;
-            Random = CreatureRandomMovementType.Walk;
-            InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
-        }
+	public class CreatureLocale
+	{
+		public StringArray Name = new((int)Locale.Total);
+		public StringArray NameAlt = new((int)Locale.Total);
+		public StringArray Title = new((int)Locale.Total);
+		public StringArray TitleAlt = new((int)Locale.Total);
+	}
 
-        public bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
-        public bool IsSwimAllowed() { return Swim; }
-        public bool IsFlightAllowed() { return Flight != CreatureFlightMovementType.None; }
-        public bool IsRooted() { return Rooted; }
+	public struct EquipmentItem
+	{
+		public uint ItemId;
+		public ushort AppearanceModId;
+		public ushort ItemVisual;
+	}
 
-        public CreatureChaseMovementType GetChase() { return Chase; }
-        public CreatureRandomMovementType GetRandom() { return Random; }
+	public class EquipmentInfo
+	{
+		public EquipmentItem[] Items = new EquipmentItem[SharedConst.MaxEquipmentItems];
+	}
 
-        public uint GetInteractionPauseTimer() { return InteractionPauseTimer; }
+	public class CreatureData : SpawnData
+	{
+		public uint curhealth;
+		public uint curmana;
+		public uint currentwaypoint;
+		public uint displayid;
+		public uint dynamicflags;
+		public sbyte equipmentId;
+		public byte movementType;
+		public ulong npcflag;
+		public uint unit_flags;  // enum UnitFlags mask values
+		public uint unit_flags2; // enum UnitFlags2 mask values
+		public uint unit_flags3; // enum UnitFlags3 mask values
+		public float WanderDistance;
 
-        public override string ToString()
-        {
-            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
-        }
-    }
-    
-    public class CreatureModelInfo
-    {
-        public float BoundingRadius;
-        public float CombatReach;
-        public sbyte gender;
-        public uint DisplayIdOtherGender;
-        public bool IsTrigger;
-    }
+		public CreatureData() : base(SpawnObjectType.Creature)
+		{
+		}
+	}
 
-    public class CreatureModel
-    {
-        public static CreatureModel DefaultInvisibleModel = new(11686, 1.0f, 1.0f);
-        public static CreatureModel DefaultVisibleModel = new(17519, 1.0f, 1.0f);
+	public class CreatureMovementData
+	{
+		public CreatureChaseMovementType Chase;
+		public CreatureFlightMovementType Flight;
+		public CreatureGroundMovementType Ground;
+		public uint InteractionPauseTimer;
+		public CreatureRandomMovementType Random;
+		public bool Rooted;
+		public bool Swim;
 
-        public uint CreatureDisplayID;
-        public float DisplayScale;
-        public float Probability;
+		public CreatureMovementData()
+		{
+			Ground                = CreatureGroundMovementType.Run;
+			Flight                = CreatureFlightMovementType.None;
+			Swim                  = true;
+			Rooted                = false;
+			Chase                 = CreatureChaseMovementType.Run;
+			Random                = CreatureRandomMovementType.Walk;
+			InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
+		}
 
-        public CreatureModel() { }
-        public CreatureModel(uint creatureDisplayID, float displayScale, float probability)
-        {
-            CreatureDisplayID = creatureDisplayID;
-            DisplayScale = displayScale;
-            Probability = probability;
-        }
-    }
+		public bool IsGroundAllowed()
+		{
+			return Ground != CreatureGroundMovementType.None;
+		}
 
-    public class CreatureSummonedData
-    {
-        public uint? CreatureIDVisibleToSummoner;
-        public uint? GroundMountDisplayID;
-        public uint? FlyingMountDisplayID;
-    }
+		public bool IsSwimAllowed()
+		{
+			return Swim;
+		}
 
-    public class CreatureAddon
-    {
-        public uint path_id;
-        public uint mount;
-        public byte standState;
-        public byte animTier;
-        public byte sheathState;
-        public byte pvpFlags;
-        public byte visFlags;
-        public uint emote;
-        public ushort aiAnimKit;
-        public ushort movementAnimKit;
-        public ushort meleeAnimKit;
-        public List<uint> auras = new();
-        public VisibilityDistanceType visibilityDistanceType;
-    }
+		public bool IsFlightAllowed()
+		{
+			return Flight != CreatureFlightMovementType.None;
+		}
 
-    public class VendorItem
-    {
-        public VendorItem() { }
-        public VendorItem(uint _item, int _maxcount, uint _incrtime, uint _ExtendedCost, ItemVendorType _Type)
-        {
-            item = _item;
-            maxcount = (uint)_maxcount;
-            incrtime = _incrtime;
-            ExtendedCost = _ExtendedCost;
-            Type = _Type;
-        }
+		public bool IsRooted()
+		{
+			return Rooted;
+		}
 
-        public uint item;
-        public uint maxcount;                                        // 0 for infinity item amount
-        public uint incrtime;                                        // time for restore items amount if maxcount != 0
-        public uint ExtendedCost;
-        public ItemVendorType Type;
-        public List<uint> BonusListIDs = new();
-        public uint PlayerConditionId;
-        public bool IgnoreFiltering;
-    }
+		public CreatureChaseMovementType GetChase()
+		{
+			return Chase;
+		}
 
-    public class VendorItemData
-    {
-        List<VendorItem> m_items = new();
+		public CreatureRandomMovementType GetRandom()
+		{
+			return Random;
+		}
 
-        public VendorItem GetItem(uint slot)
-        {
-            if (slot >= m_items.Count)
-                return null;
+		public uint GetInteractionPauseTimer()
+		{
+			return InteractionPauseTimer;
+		}
 
-            return m_items[(int)slot];
-        }
-        public bool Empty()
-        {
-            return m_items.Count == 0;
-        }
-        public int GetItemCount()
-        {
-            return m_items.Count;
-        }
-        public void AddItem(VendorItem vItem)
-        {
-            m_items.Add(vItem);
-        }
-        public bool RemoveItem(uint item_id, ItemVendorType type)
-        {
-            int i = m_items.RemoveAll(p => p.item == item_id && p.Type == type);
-            if (i == 0)
-                return false;
-            else
-                return true;
-        }
-        public VendorItem FindItemCostPair(uint item_id, uint extendedCost, ItemVendorType type)
-        {
-            return m_items.Find(p => p.item == item_id && p.ExtendedCost == extendedCost && p.Type == type);
-        }
-        public void Clear()
-        {
-            m_items.Clear();
-        }
-    }
+		public override string ToString()
+		{
+			return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}, InteractionPauseTimer: {InteractionPauseTimer}";
+		}
+	}
 
-    public class CreatureLevelScaling
-    {
-        public short DeltaLevelMin;
-        public short DeltaLevelMax;
-        public uint ContentTuningID;
-    }
+	public class CreatureModelInfo
+	{
+		public float BoundingRadius;
+		public float CombatReach;
+		public uint DisplayIdOtherGender;
+		public sbyte gender;
+		public bool IsTrigger;
+	}
+
+	public class CreatureModel
+	{
+		public static CreatureModel DefaultInvisibleModel = new(11686, 1.0f, 1.0f);
+		public static CreatureModel DefaultVisibleModel = new(17519, 1.0f, 1.0f);
+
+		public uint CreatureDisplayID;
+		public float DisplayScale;
+		public float Probability;
+
+		public CreatureModel()
+		{
+		}
+
+		public CreatureModel(uint creatureDisplayID, float displayScale, float probability)
+		{
+			CreatureDisplayID = creatureDisplayID;
+			DisplayScale      = displayScale;
+			Probability       = probability;
+		}
+	}
+
+	public class CreatureSummonedData
+	{
+		public uint? CreatureIDVisibleToSummoner;
+		public uint? FlyingMountDisplayID;
+		public uint? GroundMountDisplayID;
+	}
+
+	public class CreatureAddon
+	{
+		public ushort aiAnimKit;
+		public byte animTier;
+		public List<uint> auras = new();
+		public uint emote;
+		public ushort meleeAnimKit;
+		public uint mount;
+		public ushort movementAnimKit;
+		public uint path_id;
+		public byte pvpFlags;
+		public byte sheathState;
+		public byte standState;
+		public byte visFlags;
+		public VisibilityDistanceType visibilityDistanceType;
+	}
+
+	public class VendorItem
+	{
+		public List<uint> BonusListIDs = new();
+		public uint ExtendedCost;
+		public bool IgnoreFiltering;
+		public uint incrtime; // time for restore items amount if maxcount != 0
+
+		public uint item;
+		public uint maxcount; // 0 for infinity item amount
+		public uint PlayerConditionId;
+		public ItemVendorType Type;
+
+		public VendorItem()
+		{
+		}
+
+		public VendorItem(uint _item, int _maxcount, uint _incrtime, uint _ExtendedCost, ItemVendorType _Type)
+		{
+			item         = _item;
+			maxcount     = (uint)_maxcount;
+			incrtime     = _incrtime;
+			ExtendedCost = _ExtendedCost;
+			Type         = _Type;
+		}
+	}
+
+	public class VendorItemData
+	{
+		private List<VendorItem> _items = new();
+
+		public VendorItem GetItem(uint slot)
+		{
+			if (slot >= _items.Count)
+				return null;
+
+			return _items[(int)slot];
+		}
+
+		public bool Empty()
+		{
+			return _items.Count == 0;
+		}
+
+		public int GetItemCount()
+		{
+			return _items.Count;
+		}
+
+		public void AddItem(VendorItem vItem)
+		{
+			_items.Add(vItem);
+		}
+
+		public bool RemoveItem(uint item_id, ItemVendorType type)
+		{
+			int i = _items.RemoveAll(p => p.item == item_id && p.Type == type);
+
+			if (i == 0)
+				return false;
+			else
+				return true;
+		}
+
+		public VendorItem FindItemCostPair(uint item_id, uint extendedCost, ItemVendorType type)
+		{
+			return _items.Find(p => p.item == item_id && p.ExtendedCost == extendedCost && p.Type == type);
+		}
+
+		public void Clear()
+		{
+			_items.Clear();
+		}
+	}
+
+	public class CreatureLevelScaling
+	{
+		public uint ContentTuningID;
+		public short DeltaLevelMax;
+		public short DeltaLevelMin;
+	}
 }

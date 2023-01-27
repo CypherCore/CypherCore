@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IItem
 {
-    public interface IItemOnExpire : IScriptObject
-    {
-        bool OnExpire(Player player, ItemTemplate proto);
-    }
+	public interface IItemOnExpire : IScriptObject
+	{
+		bool OnExpire(Player player, ItemTemplate proto);
+	}
 }

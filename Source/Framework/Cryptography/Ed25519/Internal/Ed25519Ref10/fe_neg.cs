@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
 	internal static partial class FieldOperations
 	{
@@ -15,26 +13,26 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		*/
 		internal static void fe_neg(out FieldElement h, ref FieldElement f)
 		{
-            int f0 = f.x0;
-            int f1 = f.x1;
-            int f2 = f.x2;
-            int f3 = f.x3;
-            int f4 = f.x4;
-            int f5 = f.x5;
-            int f6 = f.x6;
-            int f7 = f.x7;
-            int f8 = f.x8;
-            int f9 = f.x9;
-            int h0 = -f0;
-            int h1 = -f1;
-            int h2 = -f2;
-            int h3 = -f3;
-            int h4 = -f4;
-            int h5 = -f5;
-            int h6 = -f6;
-            int h7 = -f7;
-            int h8 = -f8;
-            int h9 = -f9;
+			int f0 = f.x0;
+			int f1 = f.x1;
+			int f2 = f.x2;
+			int f3 = f.x3;
+			int f4 = f.x4;
+			int f5 = f.x5;
+			int f6 = f.x6;
+			int f7 = f.x7;
+			int f8 = f.x8;
+			int f9 = f.x9;
+			int h0 = -f0;
+			int h1 = -f1;
+			int h2 = -f2;
+			int h3 = -f3;
+			int h4 = -f4;
+			int h5 = -f5;
+			int h6 = -f6;
+			int h7 = -f7;
+			int h8 = -f8;
+			int h9 = -f9;
 
 			h.x0 = h0;
 			h.x1 = h1;

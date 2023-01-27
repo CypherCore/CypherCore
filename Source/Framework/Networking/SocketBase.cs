@@ -7,127 +7,138 @@ using System.Net.Sockets;
 
 namespace Framework.Networking
 {
-    public interface ISocket
-    {
-        void Accept();
-        bool Update();
-        bool IsOpen();
-        void CloseSocket();
-    }
+	public interface ISocket
+	{
+		void Accept();
+		bool Update();
+		bool IsOpen();
+		void CloseSocket();
+	}
 
-    public abstract class SocketBase : ISocket, IDisposable
-    {
-        Socket _socket;
-        IPEndPoint _remoteIPEndPoint;
+	public abstract class SocketBase : ISocket, IDisposable
+	{
+		public delegate void SocketReadCallback(SocketAsyncEventArgs args);
 
-        SocketAsyncEventArgs receiveSocketAsyncEventArgsWithCallback;
-        SocketAsyncEventArgs receiveSocketAsyncEventArgs;
+		private IPEndPoint _remoteIPEndPoint;
+		private Socket _socket;
+		private SocketAsyncEventArgs receiveSocketAsyncEventArgs;
 
-        public delegate void SocketReadCallback(SocketAsyncEventArgs args);
+		private SocketAsyncEventArgs receiveSocketAsyncEventArgsWithCallback;
 
-        protected SocketBase(Socket socket)
-        {
-            _socket = socket;
-            _remoteIPEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
+		protected SocketBase(Socket socket)
+		{
+			_socket           = socket;
+			_remoteIPEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
 
-            receiveSocketAsyncEventArgsWithCallback = new SocketAsyncEventArgs();
-            receiveSocketAsyncEventArgsWithCallback.SetBuffer(new byte[0x4000], 0, 0x4000);
+			receiveSocketAsyncEventArgsWithCallback = new SocketAsyncEventArgs();
+			receiveSocketAsyncEventArgsWithCallback.SetBuffer(new byte[0x4000], 0, 0x4000);
 
-            receiveSocketAsyncEventArgs = new SocketAsyncEventArgs();
-            receiveSocketAsyncEventArgs.SetBuffer(new byte[0x4000], 0, 0x4000);
-            receiveSocketAsyncEventArgs.Completed += (sender, args) => ProcessReadAsync(args);
-        }
+			receiveSocketAsyncEventArgs = new SocketAsyncEventArgs();
+			receiveSocketAsyncEventArgs.SetBuffer(new byte[0x4000], 0, 0x4000);
+			receiveSocketAsyncEventArgs.Completed += (sender, args) => ProcessReadAsync(args);
+		}
 
-        public virtual void Dispose()
-        {
-            _socket.Dispose();
-        }
+		public virtual void Dispose()
+		{
+			_socket.Dispose();
+		}
 
-        public abstract void Accept();
+		public abstract void Accept();
 
-        public virtual bool Update()
-        {
-            return IsOpen();
-        }
+		public virtual bool Update()
+		{
+			return IsOpen();
+		}
 
-        public IPEndPoint GetRemoteIpAddress()
-        {
-            return _remoteIPEndPoint;
-        }
+		public void CloseSocket()
+		{
+			if (_socket == null ||
+			    !_socket.Connected)
+				return;
 
-        public void AsyncReadWithCallback(SocketReadCallback callback)
-        {
-            if (!IsOpen())
-                return;
+			try
+			{
+				_socket.Shutdown(SocketShutdown.Both);
+				_socket.Close();
+			}
+			catch (Exception ex)
+			{
+				Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpAddress()} errored when shutting down socket: {ex.Message}");
+			}
 
-            receiveSocketAsyncEventArgsWithCallback.Completed += (sender, args) => callback(args);
-            receiveSocketAsyncEventArgsWithCallback.SetBuffer(0, 0x4000);
-            if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgsWithCallback))
-                callback(receiveSocketAsyncEventArgsWithCallback);
-        }
+			OnClose();
+		}
 
-        public void AsyncRead()
-        {
-            if (!IsOpen())
-                return;
+		public bool IsOpen()
+		{
+			return _socket.Connected;
+		}
 
-            receiveSocketAsyncEventArgs.SetBuffer(0, 0x4000);
-            if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgs))
-                ProcessReadAsync(receiveSocketAsyncEventArgs);
-        }
+		public IPEndPoint GetRemoteIpAddress()
+		{
+			return _remoteIPEndPoint;
+		}
 
-        void ProcessReadAsync(SocketAsyncEventArgs args)
-        {
-            if (args.SocketError != SocketError.Success)
-            {
-                CloseSocket();
-                return;
-            }
+		public void AsyncReadWithCallback(SocketReadCallback callback)
+		{
+			if (!IsOpen())
+				return;
 
-            if (args.BytesTransferred == 0)
-            {
-                CloseSocket();
-                return;
-            }
+			receiveSocketAsyncEventArgsWithCallback.Completed += (sender, args) => callback(args);
+			receiveSocketAsyncEventArgsWithCallback.SetBuffer(0, 0x4000);
 
-            ReadHandler(args);
-        }
+			if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgsWithCallback))
+				callback(receiveSocketAsyncEventArgsWithCallback);
+		}
 
-        public abstract void ReadHandler(SocketAsyncEventArgs args);
+		public void AsyncRead()
+		{
+			if (!IsOpen())
+				return;
 
-        public void AsyncWrite(byte[] data)
-        {
-            if (!IsOpen())
-                return;
+			receiveSocketAsyncEventArgs.SetBuffer(0, 0x4000);
 
-            _socket.Send(data);
-        }
+			if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgs))
+				ProcessReadAsync(receiveSocketAsyncEventArgs);
+		}
 
-        public void CloseSocket()
-        {
-            if (_socket == null || !_socket.Connected)
-                return;
+		private void ProcessReadAsync(SocketAsyncEventArgs args)
+		{
+			if (args.SocketError != SocketError.Success)
+			{
+				CloseSocket();
 
-            try
-            {
-                _socket.Shutdown(SocketShutdown.Both);
-                _socket.Close();
-            }
-            catch (Exception ex)
-            {
-                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpAddress()} errored when shutting down socket: {ex.Message}");
-            }
+				return;
+			}
 
-            OnClose();
-        }
+			if (args.BytesTransferred == 0)
+			{
+				CloseSocket();
 
-        public virtual void OnClose() { Dispose(); }
+				return;
+			}
 
-        public bool IsOpen() { return _socket.Connected; }
+			ReadHandler(args);
+		}
 
-        public void SetNoDelay(bool enable)
-        {
-            _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
-        }
-    }
+		public abstract void ReadHandler(SocketAsyncEventArgs args);
+
+		public void AsyncWrite(byte[] data)
+		{
+			if (!IsOpen())
+				return;
+
+			_socket.Send(data);
+		}
+
+		public virtual void OnClose()
+		{
+			Dispose();
+		}
+
+		public void SetNoDelay(bool enable)
+		{
+			_socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
+		}
+	}
 }

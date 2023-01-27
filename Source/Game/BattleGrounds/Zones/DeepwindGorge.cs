@@ -3,7 +3,7 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class DeepwindGorge
-    {
-    }
+	internal class DeepwindGorge
+	{
+	}
 }

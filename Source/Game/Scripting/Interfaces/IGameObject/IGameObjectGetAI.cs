@@ -3,12 +3,11 @@
 
 using Game.AI;
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IGameObject
 {
-    public interface IGameObjectGetAI : IScriptObject
-    {
-        GameObjectAI GetAI(GameObject go);
-    }
+	public interface IGameObjectGetAI : IScriptObject
+	{
+		GameObjectAI GetAI(GameObject go);
+	}
 }

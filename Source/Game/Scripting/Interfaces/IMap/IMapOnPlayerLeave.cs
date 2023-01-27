@@ -6,8 +6,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-    public interface IMapOnPlayerLeave<T> : IScriptObject where T : Map
-    {
-        void OnPlayerLeave(T map, Player player);
-    }
+	public interface IMapOnPlayerLeave<T> : IScriptObject where T : Map
+	{
+		void OnPlayerLeave(T map, Player player);
+	}
 }

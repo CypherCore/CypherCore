@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
 	internal static partial class GroupOperations
 	{
-		public static void ge_tobytes(byte[] s, int offset, ref  GroupElementP2 h)
+		public static void ge_tobytes(byte[] s, int offset, ref GroupElementP2 h)
 		{
 			FieldElement recip;
 			FieldElement x, y;

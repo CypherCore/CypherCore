@@ -1,236 +1,360 @@
-﻿using Framework.Constants;
+﻿using System;
+using System.Collections.Generic;
+using Framework.Constants;
 using Game.Entities;
 using Game.Scripting.Interfaces;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Scripting
 {
-    public class AuraScript : BaseSpellScript, IAuraScript
-    {
-        public AuraScript()
-        {
-            m_aura = null;
-            m_auraApplication = null;
-            m_defaultActionPrevented = false;
-        }
+	public class AuraScript : BaseSpellScript, IAuraScript
+	{
+		private Aura _aura;
+		private AuraApplication _auraApplication;
+		private bool _defaultActionPrevented;
+		private Stack<ScriptStateStore> _scriptStates = new();
 
-        public bool _Load(Aura aura)
-        {
-            m_aura = aura;
-            _PrepareScriptCall((AuraScriptHookType)SpellScriptState.Loading, null);
-            bool load = Load();
-            _FinishScriptCall();
-            return load;
-        }
-        public void _PrepareScriptCall(AuraScriptHookType hookType, AuraApplication aurApp = null)
-        {
-            m_scriptStates.Push(new ScriptStateStore(m_currentScriptState, m_auraApplication, m_defaultActionPrevented));
-            m_currentScriptState = (byte)hookType;
-            m_defaultActionPrevented = false;
-            m_auraApplication = aurApp;
-        }
-        public void _FinishScriptCall()
-        {
-            ScriptStateStore stateStore = m_scriptStates.Peek();
-            m_currentScriptState = stateStore._currentScriptState;
-            m_auraApplication = stateStore._auraApplication;
-            m_defaultActionPrevented = stateStore._defaultActionPrevented;
-            m_scriptStates.Pop();
-        }
-        public bool _IsDefaultActionPrevented()
-        {
-            switch ((AuraScriptHookType)m_currentScriptState)
-            {
-                case AuraScriptHookType.EffectApply:
-                case AuraScriptHookType.EffectRemove:
-                case AuraScriptHookType.EffectPeriodic:
-                case AuraScriptHookType.EffectAbsorb:
-                case AuraScriptHookType.EffectSplit:
-                case AuraScriptHookType.PrepareProc:
-                case AuraScriptHookType.Proc:
-                case AuraScriptHookType.EffectProc:
-                    return m_defaultActionPrevented;
-                default:
-                    throw new Exception("AuraScript._IsDefaultActionPrevented is called in a wrong place");
-            }
-        }
+		public AuraScript()
+		{
+			_aura                   = null;
+			_auraApplication        = null;
+			_defaultActionPrevented = false;
+		}
 
-        Aura m_aura;
-        AuraApplication m_auraApplication;
-        bool m_defaultActionPrevented;
+		public bool _Load(Aura aura)
+		{
+			_aura = aura;
+			_PrepareScriptCall((AuraScriptHookType)SpellScriptState.Loading, null);
+			bool load = Load();
+			_FinishScriptCall();
 
-        class ScriptStateStore
-        {
-            public AuraApplication _auraApplication;
-            public byte _currentScriptState;
-            public bool _defaultActionPrevented;
-            public ScriptStateStore(byte currentScriptState, AuraApplication auraApplication, bool defaultActionPrevented)
-            {
-                _auraApplication = auraApplication;
-                _currentScriptState = currentScriptState;
-                _defaultActionPrevented = defaultActionPrevented;
-            }
-        }
-        Stack<ScriptStateStore> m_scriptStates = new();
+			return load;
+		}
+
+		public void _PrepareScriptCall(AuraScriptHookType hookType, AuraApplication aurApp = null)
+		{
+			_scriptStates.Push(new ScriptStateStore(_currentScriptState, _auraApplication, _defaultActionPrevented));
+			_currentScriptState     = (byte)hookType;
+			_defaultActionPrevented = false;
+			_auraApplication        = aurApp;
+		}
+
+		public void _FinishScriptCall()
+		{
+			ScriptStateStore stateStore = _scriptStates.Peek();
+			_currentScriptState     = stateStore._currentScriptState;
+			_auraApplication        = stateStore._auraApplication;
+			_defaultActionPrevented = stateStore._defaultActionPrevented;
+			_scriptStates.Pop();
+		}
+
+		public bool _IsDefaultActionPrevented()
+		{
+			switch ((AuraScriptHookType)_currentScriptState)
+			{
+				case AuraScriptHookType.EffectApply:
+				case AuraScriptHookType.EffectRemove:
+				case AuraScriptHookType.EffectPeriodic:
+				case AuraScriptHookType.EffectAbsorb:
+				case AuraScriptHookType.EffectSplit:
+				case AuraScriptHookType.PrepareProc:
+				case AuraScriptHookType.Proc:
+				case AuraScriptHookType.EffectProc:
+					return _defaultActionPrevented;
+				default:
+					throw new Exception("AuraScript._IsDefaultActionPrevented is called in a wrong place");
+			}
+		}
 
 
+		// prevents default action of a hook from being executed (works only while called in a hook which default action can be prevented)
+		public void PreventDefaultAction()
+		{
+			switch ((AuraScriptHookType)_currentScriptState)
+			{
+				case AuraScriptHookType.EffectApply:
+				case AuraScriptHookType.EffectRemove:
+				case AuraScriptHookType.EffectPeriodic:
+				case AuraScriptHookType.EffectAbsorb:
+				case AuraScriptHookType.EffectSplit:
+				case AuraScriptHookType.PrepareProc:
+				case AuraScriptHookType.EffectProc:
+					_defaultActionPrevented = true;
 
-        // prevents default action of a hook from being executed (works only while called in a hook which default action can be prevented)
-        public void PreventDefaultAction()
-        {
-            switch ((AuraScriptHookType)m_currentScriptState)
-            {
-                case AuraScriptHookType.EffectApply:
-                case AuraScriptHookType.EffectRemove:
-                case AuraScriptHookType.EffectPeriodic:
-                case AuraScriptHookType.EffectAbsorb:
-                case AuraScriptHookType.EffectSplit:
-                case AuraScriptHookType.PrepareProc:
-                case AuraScriptHookType.EffectProc:
-                    m_defaultActionPrevented = true;
-                    break;
-                default:
-                    Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.PreventDefaultAction called in a hook in which the call won't have effect!", m_scriptName, m_scriptSpellId);
-                    break;
-            }
-        }
+					break;
+				default:
+					Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.PreventDefaultAction called in a hook in which the call won't have effect!", _scriptName, _scriptSpellId);
 
-        // AuraScript interface - functions which are redirecting to Aura class
+					break;
+			}
+		}
 
-        // returns proto of the spell
-        public SpellInfo GetSpellInfo() { return m_aura.GetSpellInfo(); }
+		// AuraScript interface - functions which are redirecting to Aura class
 
-        public SpellEffectInfo GetEffectInfo(uint effIndex)
-        {
-            return m_aura.GetSpellInfo().GetEffect(effIndex);
-        }
+		// returns proto of the spell
+		public SpellInfo GetSpellInfo()
+		{
+			return _aura.GetSpellInfo();
+		}
 
-        // returns spellid of the spell
-        public uint GetId() { return m_aura.GetId(); }
+		public SpellEffectInfo GetEffectInfo(uint effIndex)
+		{
+			return _aura.GetSpellInfo().GetEffect(effIndex);
+		}
 
-        // returns guid of object which casted the aura (m_originalCaster of the Spell class)
-        public ObjectGuid GetCasterGUID() { return m_aura.GetCasterGUID(); }
-        // returns unit which casted the aura or null if not avalible (caster logged out for example)
-        public Unit GetCaster()
-        {
-            WorldObject caster = m_aura.GetCaster();
-            if (caster != null)
-                return caster.ToUnit();
+		// returns spellid of the spell
+		public uint GetId()
+		{
+			return _aura.GetId();
+		}
 
-            return null;
-        }
-        // returns gameobject which cast the aura or NULL if not available
-        public GameObject GetGObjCaster()
-        {
-            WorldObject caster = m_aura.GetCaster();
-            if (caster != null)
-                return caster.ToGameObject();
+		// returns guid of object which casted the aura (_originalCaster of the Spell class)
+		public ObjectGuid GetCasterGUID()
+		{
+			return _aura.GetCasterGUID();
+		}
 
-            return null;
-        }
-        // returns object on which aura was casted, target for non-area auras, area aura source for area auras
-        public WorldObject GetOwner() { return m_aura.GetOwner(); }
-        // returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)
-        public Unit GetUnitOwner() { return m_aura.GetUnitOwner(); }
-        // returns owner if it's dynobj, null otherwise
-        DynamicObject GetDynobjOwner() { return m_aura.GetDynobjOwner(); }
+		// returns unit which casted the aura or null if not avalible (caster logged out for example)
+		public Unit GetCaster()
+		{
+			WorldObject caster = _aura.GetCaster();
 
-        // removes aura with remove mode (see AuraRemoveMode enum)
-        public void Remove(AuraRemoveMode removeMode = 0) { m_aura.Remove(removeMode); }
-        // returns aura object of script
-        public Aura GetAura() { return m_aura; }
+			if (caster != null)
+				return caster.ToUnit();
 
-        // returns type of the aura, may be dynobj owned aura or unit owned aura
-        AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
+			return null;
+		}
 
-        // aura duration manipulation - when duration goes to 0 aura is removed
-        public int GetDuration() { return m_aura.GetDuration(); }
-        public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
-        // sets duration to maxduration
-        void RefreshDuration() { m_aura.RefreshDuration(); }
-        long GetApplyTime() { return m_aura.GetApplyTime(); }
-        public int GetMaxDuration() { return m_aura.GetMaxDuration(); }
-        public void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
-        int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
-        // expired - duration just went to 0
-        public bool IsExpired() { return m_aura.IsExpired(); }
-        // permament - has infinite duration
-        bool IsPermanent() { return m_aura.IsPermanent(); }
+		// returns gameobject which cast the aura or NULL if not available
+		public GameObject GetGObjCaster()
+		{
+			WorldObject caster = _aura.GetCaster();
 
-        // charges manipulation - 0 - not charged aura
-        byte GetCharges() { return m_aura.GetCharges(); }
-        void SetCharges(byte charges) { m_aura.SetCharges(charges); }
-        byte CalcMaxCharges() { return m_aura.CalcMaxCharges(); }
-        bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModCharges(num, removeMode); }
-        // returns true if last charge dropped
-        bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.DropCharge(removeMode); }
+			if (caster != null)
+				return caster.ToGameObject();
 
-        // stack amount manipulation
-        public byte GetStackAmount() { return m_aura.GetStackAmount(); }
-        void SetStackAmount(byte num) { m_aura.SetStackAmount(num); }
-        public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModStackAmount(num, removeMode); }
+			return null;
+		}
 
-        // passive - "working in background", not saved, not removed by immunities, not seen by player
-        bool IsPassive() { return m_aura.IsPassive(); }
-        // death persistent - not removed on death
-        bool IsDeathPersistent() { return m_aura.IsDeathPersistent(); }
+		// returns object on which aura was casted, target for non-area auras, area aura source for area auras
+		public WorldObject GetOwner()
+		{
+			return _aura.GetOwner();
+		}
 
-        // check if aura has effect of given effindex
-        public bool HasEffect(byte effIndex) { return m_aura.HasEffect(effIndex); }
-        // returns aura effect of given effect index or null
-        public AuraEffect GetEffect(byte effIndex) { return m_aura.GetEffect(effIndex); }
+		// returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)
+		public Unit GetUnitOwner()
+		{
+			return _aura.GetUnitOwner();
+		}
 
-        // check if aura has effect of given aura type
-        bool HasEffectType(AuraType type)
-        {
-            return m_aura.HasEffectType(type);
-        }
+		// removes aura with remove mode (see AuraRemoveMode enum)
+		public void Remove(AuraRemoveMode removeMode = 0)
+		{
+			_aura.Remove(removeMode);
+		}
 
-        // AuraScript interface - functions which are redirecting to AuraApplication class
-        // Do not call these in hooks in which AuraApplication is not avalible, otherwise result will differ from expected (the functions will return null)
+		// returns aura object of script
+		public Aura GetAura()
+		{
+			return _aura;
+		}
 
-        // returns currently processed target of an aura
-        // Return value does not need to be null-checked, the only situation this will (always)
-        // return null is when the call happens in an unsupported hook, in other cases, it is always valid
-        public Unit GetTarget()
-        {
-            switch ((AuraScriptHookType)m_currentScriptState)
-            {
-                case AuraScriptHookType.EffectApply:
-                case AuraScriptHookType.EffectRemove:
-                case AuraScriptHookType.EffectAfterApply:
-                case AuraScriptHookType.EffectAfterRemove:
-                case AuraScriptHookType.EffectPeriodic:
-                case AuraScriptHookType.EffectAbsorb:
-                case AuraScriptHookType.EffectAfterAbsorb:
-                case AuraScriptHookType.EffectManaShield:
-                case AuraScriptHookType.EffectAfterManaShield:
-                case AuraScriptHookType.EffectSplit:
-                case AuraScriptHookType.CheckProc:
-                case AuraScriptHookType.CheckEffectProc:
-                case AuraScriptHookType.PrepareProc:
-                case AuraScriptHookType.Proc:
-                case AuraScriptHookType.AfterProc:
-                case AuraScriptHookType.EffectProc:
-                case AuraScriptHookType.EffectAfterProc:
-                case AuraScriptHookType.EnterLeaveCombat:
-                    return m_auraApplication.GetTarget();
-                default:
-                    Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.GetTarget called in a hook in which the call won't have effect!", m_scriptName, m_scriptSpellId);
-                    break;
-            }
+		// aura duration manipulation - when duration goes to 0 aura is removed
+		public int GetDuration()
+		{
+			return _aura.GetDuration();
+		}
 
-            return null;
-        }
-        // returns AuraApplication object of currently processed target
-        public AuraApplication GetTargetApplication() { return m_auraApplication; }
+		public void SetDuration(int duration, bool withMods = false)
+		{
+			_aura.SetDuration(duration, withMods);
+		}
 
-        public Difficulty GetCastDifficulty()
-        {
-            return GetAura().GetCastDifficulty();
-        }
-    }
+		public int GetMaxDuration()
+		{
+			return _aura.GetMaxDuration();
+		}
+
+		public void SetMaxDuration(int duration)
+		{
+			_aura.SetMaxDuration(duration);
+		}
+
+		// expired - duration just went to 0
+		public bool IsExpired()
+		{
+			return _aura.IsExpired();
+		}
+
+		// stack amount manipulation
+		public byte GetStackAmount()
+		{
+			return _aura.GetStackAmount();
+		}
+
+		public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+		{
+			return _aura.ModStackAmount(num, removeMode);
+		}
+
+		// check if aura has effect of given effindex
+		public bool HasEffect(byte effIndex)
+		{
+			return _aura.HasEffect(effIndex);
+		}
+
+		// returns aura effect of given effect index or null
+		public AuraEffect GetEffect(byte effIndex)
+		{
+			return _aura.GetEffect(effIndex);
+		}
+
+		// AuraScript interface - functions which are redirecting to AuraApplication class
+		// Do not call these in hooks in which AuraApplication is not avalible, otherwise result will differ from expected (the functions will return null)
+
+		// returns currently processed target of an aura
+		// Return value does not need to be null-checked, the only situation this will (always)
+		// return null is when the call happens in an unsupported hook, in other cases, it is always valid
+		public Unit GetTarget()
+		{
+			switch ((AuraScriptHookType)_currentScriptState)
+			{
+				case AuraScriptHookType.EffectApply:
+				case AuraScriptHookType.EffectRemove:
+				case AuraScriptHookType.EffectAfterApply:
+				case AuraScriptHookType.EffectAfterRemove:
+				case AuraScriptHookType.EffectPeriodic:
+				case AuraScriptHookType.EffectAbsorb:
+				case AuraScriptHookType.EffectAfterAbsorb:
+				case AuraScriptHookType.EffectManaShield:
+				case AuraScriptHookType.EffectAfterManaShield:
+				case AuraScriptHookType.EffectSplit:
+				case AuraScriptHookType.CheckProc:
+				case AuraScriptHookType.CheckEffectProc:
+				case AuraScriptHookType.PrepareProc:
+				case AuraScriptHookType.Proc:
+				case AuraScriptHookType.AfterProc:
+				case AuraScriptHookType.EffectProc:
+				case AuraScriptHookType.EffectAfterProc:
+				case AuraScriptHookType.EnterLeaveCombat:
+					return _auraApplication.GetTarget();
+				default:
+					Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.GetTarget called in a hook in which the call won't have effect!", _scriptName, _scriptSpellId);
+
+					break;
+			}
+
+			return null;
+		}
+
+		// returns AuraApplication object of currently processed target
+		public AuraApplication GetTargetApplication()
+		{
+			return _auraApplication;
+		}
+
+		public Difficulty GetCastDifficulty()
+		{
+			return GetAura().GetCastDifficulty();
+		}
+
+		// returns owner if it's dynobj, null otherwise
+		private DynamicObject GetDynobjOwner()
+		{
+			return _aura.GetDynobjOwner();
+		}
+
+		// returns type of the aura, may be dynobj owned aura or unit owned aura
+		private AuraObjectType GetAuraType()
+		{
+			return _aura.GetAuraType();
+		}
+
+		// sets duration to maxduration
+		private void RefreshDuration()
+		{
+			_aura.RefreshDuration();
+		}
+
+		private long GetApplyTime()
+		{
+			return _aura.GetApplyTime();
+		}
+
+		private int CalcMaxDuration()
+		{
+			return _aura.CalcMaxDuration();
+		}
+
+		// permament - has infinite duration
+		private bool IsPermanent()
+		{
+			return _aura.IsPermanent();
+		}
+
+		// charges manipulation - 0 - not charged aura
+		private byte GetCharges()
+		{
+			return _aura.GetCharges();
+		}
+
+		private void SetCharges(byte charges)
+		{
+			_aura.SetCharges(charges);
+		}
+
+		private byte CalcMaxCharges()
+		{
+			return _aura.CalcMaxCharges();
+		}
+
+		private bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+		{
+			return _aura.ModCharges(num, removeMode);
+		}
+
+		// returns true if last charge dropped
+		private bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default)
+		{
+			return _aura.DropCharge(removeMode);
+		}
+
+		private void SetStackAmount(byte num)
+		{
+			_aura.SetStackAmount(num);
+		}
+
+		// passive - "working in background", not saved, not removed by immunities, not seen by player
+		private bool IsPassive()
+		{
+			return _aura.IsPassive();
+		}
+
+		// death persistent - not removed on death
+		private bool IsDeathPersistent()
+		{
+			return _aura.IsDeathPersistent();
+		}
+
+		// check if aura has effect of given aura type
+		private bool HasEffectType(AuraType type)
+		{
+			return _aura.HasEffectType(type);
+		}
+
+		private class ScriptStateStore
+		{
+			public AuraApplication _auraApplication;
+			public byte _currentScriptState;
+			public bool _defaultActionPrevented;
+
+			public ScriptStateStore(byte currentScriptState, AuraApplication auraApplication, bool defaultActionPrevented)
+			{
+				_auraApplication        = auraApplication;
+				_currentScriptState     = currentScriptState;
+				_defaultActionPrevented = defaultActionPrevented;
+			}
+		}
+	}
 }

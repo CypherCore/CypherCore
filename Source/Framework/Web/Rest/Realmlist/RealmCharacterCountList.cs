@@ -6,10 +6,9 @@ using System.Runtime.Serialization;
 
 namespace Framework.Web
 {
-    [DataContract]
-    public class RealmCharacterCountList
-    {
-        [DataMember(Name = "counts")]
-        public IList<RealmCharacterCountEntry> Counts { get; set; } = new List<RealmCharacterCountEntry>();
-    }
+	[DataContract]
+	public class RealmCharacterCountList
+	{
+		[DataMember(Name = "counts")] public IList<RealmCharacterCountEntry> Counts { get; set; } = new List<RealmCharacterCountEntry>();
+	}
 }

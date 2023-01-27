@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IFormula
 {
-    public interface IFormulaOnHonorCalculation : IScriptObject
-    {
-        void OnHonorCalculation(float honor, uint level, float multiplier);
-    }
+	public interface IFormulaOnHonorCalculation : IScriptObject
+	{
+		void OnHonorCalculation(float honor, uint level, float multiplier);
+	}
 }

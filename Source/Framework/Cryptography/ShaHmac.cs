@@ -7,129 +7,130 @@ using System.Text;
 
 namespace Framework.Cryptography
 {
-    public class Sha256
-    {
-        public Sha256()
-        {
-            sha = SHA256.Create();
-            sha.Initialize();
-        }
+	public class Sha256
+	{
+		private SHA256 sha;
 
-        public void Process(byte[] data, int length)
-        {
-            sha.TransformBlock(data, 0, length, data, 0);
-        }
+		public Sha256()
+		{
+			sha = SHA256.Create();
+			sha.Initialize();
+		}
 
-        public void Process(uint data)
-        {
-            var bytes = BitConverter.GetBytes(data);
+		public byte[] Digest { get; private set; }
 
-            sha.TransformBlock(bytes, 0, 4, bytes, 0);
-        }
+		public void Process(byte[] data, int length)
+		{
+			sha.TransformBlock(data, 0, length, data, 0);
+		}
 
-        public void Process(string data)
-        {
-            var bytes = Encoding.UTF8.GetBytes(data);
+		public void Process(uint data)
+		{
+			var bytes = BitConverter.GetBytes(data);
 
-            sha.TransformBlock(bytes, 0, bytes.Length, bytes, 0);
-        }
+			sha.TransformBlock(bytes, 0, 4, bytes, 0);
+		}
 
-        public void Finish(byte[] data)
-        {
-            sha.TransformFinalBlock(data, 0, data.Length);
+		public void Process(string data)
+		{
+			var bytes = Encoding.UTF8.GetBytes(data);
 
-            Digest = sha.Hash;
-        }
+			sha.TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+		}
 
-        public void Finish(byte[] data, int offset, int length)
-        {
-            sha.TransformFinalBlock(data, offset, length);
+		public void Finish(byte[] data)
+		{
+			sha.TransformFinalBlock(data, 0, data.Length);
 
-            Digest = sha.Hash;
-        }
+			Digest = sha.Hash;
+		}
 
-        SHA256 sha;
-        public byte[] Digest { get; private set; }
-    }
+		public void Finish(byte[] data, int offset, int length)
+		{
+			sha.TransformFinalBlock(data, offset, length);
 
-    public class HmacHash : HMACSHA1
-    {
-        public HmacHash(byte[] key) : base(key)
-        {
-            Initialize();
-        }
+			Digest = sha.Hash;
+		}
+	}
 
-        public void Process(byte[] data, int length)
-        {
-            TransformBlock(data, 0, length, data, 0);
-        }
+	public class HmacHash : HMACSHA1
+	{
+		public HmacHash(byte[] key) : base(key)
+		{
+			Initialize();
+		}
 
-        public void Process(uint data)
-        {
-            var bytes = BitConverter.GetBytes(data);
+		public byte[] Digest { get; private set; }
 
-            TransformBlock(bytes, 0, bytes.Length, bytes, 0);
-        }
+		public void Process(byte[] data, int length)
+		{
+			TransformBlock(data, 0, length, data, 0);
+		}
 
-        public void Process(string data)
-        {
-            var bytes = Encoding.ASCII.GetBytes(data);
+		public void Process(uint data)
+		{
+			var bytes = BitConverter.GetBytes(data);
 
-            TransformBlock(bytes, 0, bytes.Length, bytes, 0);
-        }
+			TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+		}
 
-        public void Finish(byte[] data, int length)
-        {
-            TransformFinalBlock(data, 0, length);
+		public void Process(string data)
+		{
+			var bytes = Encoding.ASCII.GetBytes(data);
 
-            Digest = Hash;
-        }
+			TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+		}
 
-        public void Finish(string data)
-        {
-            var bytes = Encoding.ASCII.GetBytes(data);
+		public void Finish(byte[] data, int length)
+		{
+			TransformFinalBlock(data, 0, length);
 
-            TransformFinalBlock(bytes, 0, bytes.Length);
+			Digest = Hash;
+		}
 
-            Digest = Hash;
-        }
+		public void Finish(string data)
+		{
+			var bytes = Encoding.ASCII.GetBytes(data);
 
-        public byte[] Digest { get; private set; }
-    }
+			TransformFinalBlock(bytes, 0, bytes.Length);
 
-    public class HmacSha256 : HMACSHA256
-    {
-        public HmacSha256(byte[] key) : base(key)
-        {
-            Initialize();
-        }
+			Digest = Hash;
+		}
+	}
 
-        public void Process(byte[] data, int length)
-        {
-            TransformBlock(data, 0, length, data, 0);
-        }
+	public class HmacSha256 : HMACSHA256
+	{
+		public HmacSha256(byte[] key) : base(key)
+		{
+			Initialize();
+		}
 
-        public void Process(uint data)
-        {
-            var bytes = BitConverter.GetBytes(data);
+		public byte[] Digest { get; private set; }
 
-            TransformBlock(bytes, 0, bytes.Length, bytes, 0);
-        }
+		public void Process(byte[] data, int length)
+		{
+			TransformBlock(data, 0, length, data, 0);
+		}
 
-        public void Process(string data)
-        {
-            var bytes = Encoding.ASCII.GetBytes(data);
+		public void Process(uint data)
+		{
+			var bytes = BitConverter.GetBytes(data);
 
-            TransformBlock(bytes, 0, bytes.Length, bytes, 0);
-        }
+			TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+		}
 
-        public void Finish(byte[] data, int length)
-        {
-            TransformFinalBlock(data, 0, length);
+		public void Process(string data)
+		{
+			var bytes = Encoding.ASCII.GetBytes(data);
 
-            Digest = Hash;
-        }
+			TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+		}
 
-        public byte[] Digest { get; private set; }
-    }
+		public void Finish(byte[] data, int length)
+		{
+			TransformFinalBlock(data, 0, length);
+
+			Digest = Hash;
+		}
+	}
 }

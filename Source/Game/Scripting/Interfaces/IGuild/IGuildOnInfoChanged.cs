@@ -5,8 +5,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-    public interface IGuildOnInfoChanged : IScriptObject
-    {
-        void OnInfoChanged(Guilds.Guild guild, string newInfo);
-    }
+	public interface IGuildOnInfoChanged : IScriptObject
+	{
+		void OnInfoChanged(Guild guild, string newInfo);
+	}
 }

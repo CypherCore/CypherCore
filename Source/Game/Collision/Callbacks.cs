@@ -1,274 +1,322 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.GameMath;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Framework.Constants;
+using Framework.GameMath;
 
 namespace Game.Collision
 {
-    public class WorkerCallback
-    {
-        public virtual void Invoke(Vector3 point, uint entry) { }
-        public virtual void Invoke(Vector3 point, GameObjectModel obj) { }
-        public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
-        public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
-    }
+	public class WorkerCallback
+	{
+		public virtual void Invoke(Vector3 point, uint entry)
+		{
+		}
 
-    public class TriBoundFunc
-    {
-        public TriBoundFunc(List<Vector3> vert)
-        {
-            vertices = vert;
-        }
+		public virtual void Invoke(Vector3 point, GameObjectModel obj)
+		{
+		}
 
-        public void Invoke(MeshTriangle tri, out AxisAlignedBox value)
-        {
-            Vector3 lo = vertices[(int)tri.idx0];
-            Vector3 hi = lo;
+		public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
+		{
+			return false;
+		}
 
-            lo = Vector3.Min(Vector3.Min(lo, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
-            hi = Vector3.Max(Vector3.Max(hi, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
+		public virtual bool Invoke(Ray r, IModel obj, ref float distance)
+		{
+			return false;
+		}
+	}
 
-            value = new AxisAlignedBox(lo, hi);
-        }
+	public class TriBoundFunc
+	{
+		private List<Vector3> vertices;
 
-        List<Vector3> vertices;
-    }
+		public TriBoundFunc(List<Vector3> vert)
+		{
+			vertices = vert;
+		}
 
-    public class WModelAreaCallback : WorkerCallback
-    {
-        public WModelAreaCallback(List<GroupModel> vals, Vector3 down)
-        {
-            prims = vals;
-            hit = null;
-            zDist = float.PositiveInfinity;
-            zVec = down;
-        }
+		public void Invoke(MeshTriangle tri, out AxisAlignedBox value)
+		{
+			Vector3 lo = vertices[(int)tri.idx0];
+			Vector3 hi = lo;
 
-        List<GroupModel> prims;
-        public GroupModel hit;
-        public float zDist;
-        Vector3 zVec;
-        public override void Invoke(Vector3 point, uint entry)
-        {
-            float group_Z;
-            if (prims[(int)entry].IsInsideObject(point, zVec, out group_Z))
-            {
-                if (group_Z < zDist)
-                {
-                    zDist = group_Z;
-                    hit = prims[(int)entry];
-                }
-            }
-        }
-    }
+			lo = Vector3.Min(Vector3.Min(lo, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
+			hi = Vector3.Max(Vector3.Max(hi, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
 
-    public class WModelRayCallBack : WorkerCallback
-    {
-        public WModelRayCallBack(List<GroupModel> mod)
-        {
-            models = mod;
-            hit = false;
-        }
-        public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
-        {
-            bool result = models[(int)entry].IntersectRay(ray, ref distance, pStopAtFirstHit);
-            if (result) hit = true;
-            return hit;
-        }
-        List<GroupModel> models;
-        public bool hit;
-    }
+			value = new AxisAlignedBox(lo, hi);
+		}
+	}
 
-    public class GModelRayCallback : WorkerCallback
-    {
-        public GModelRayCallback(List<MeshTriangle> tris, List<Vector3> vert)
-        {
-            vertices = vert;
-            triangles = tris;
-            hit = false;
-        }
-        public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
-        {
-            hit = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance) || hit;
-            return hit;
-        }
+	public class WModelAreaCallback : WorkerCallback
+	{
+		public GroupModel hit;
 
-        bool IntersectTriangle(MeshTriangle tri, List<Vector3> points, Ray ray, ref float distance)
-        {
-            const float EPS = 1e-5f;
+		private List<GroupModel> prims;
+		public float zDist;
+		private Vector3 zVec;
 
-            // See RTR2 ch. 13.7 for the algorithm.
+		public WModelAreaCallback(List<GroupModel> vals, Vector3 down)
+		{
+			prims = vals;
+			hit   = null;
+			zDist = float.PositiveInfinity;
+			zVec  = down;
+		}
 
-            Vector3 e1 = points[(int)tri.idx1] - points[(int)tri.idx0];
-            Vector3 e2 = points[(int)tri.idx2] - points[(int)tri.idx0];
-            Vector3 p = Vector3.Cross(ray.Direction, e2);
-            float a = Vector3.Dot(e1, p);
+		public override void Invoke(Vector3 point, uint entry)
+		{
+			float group_Z;
 
-            if (Math.Abs(a) < EPS)
-            {
-                // Determinant is ill-conditioned; abort early
-                return false;
-            }
+			if (prims[(int)entry].IsInsideObject(point, zVec, out group_Z))
+				if (group_Z < zDist)
+				{
+					zDist = group_Z;
+					hit   = prims[(int)entry];
+				}
+		}
+	}
 
-            float f = 1.0f / a;
-            Vector3 s = ray.Origin - points[(int)tri.idx0];
-            float u = f * Vector3.Dot(s, p);
+	public class WModelRayCallBack : WorkerCallback
+	{
+		public bool hit;
+		private List<GroupModel> models;
 
-            if ((u < 0.0f) || (u > 1.0f))
-            {
-                // We hit the plane of the m_geometry, but outside the m_geometry
-                return false;
-            }
+		public WModelRayCallBack(List<GroupModel> mod)
+		{
+			models = mod;
+			hit    = false;
+		}
 
-            Vector3 q = Vector3.Cross(s, e1);
-            float v = f * Vector3.Dot(ray.Direction, q);
+		public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
+		{
+			bool result     = models[(int)entry].IntersectRay(ray, ref distance, pStopAtFirstHit);
+			if (result) hit = true;
 
-            if ((v < 0.0f) || ((u + v) > 1.0f))
-            {
-                // We hit the plane of the triangle, but outside the triangle
-                return false;
-            }
+			return hit;
+		}
+	}
 
-            float t = f * Vector3.Dot(e2, q);
+	public class GModelRayCallback : WorkerCallback
+	{
+		public bool hit;
+		private List<MeshTriangle> triangles;
 
-            if ((t > 0.0f) && (t < distance))
-            {
-                // This is a new hit, closer than the previous one
-                distance = t;
-                return true;
-            }
-            // This hit is after the previous hit, so ignore it
-            return false;
-        }
+		private List<Vector3> vertices;
 
-        List<Vector3> vertices;
-        List<MeshTriangle> triangles;
-        public bool hit;
-    }
+		public GModelRayCallback(List<MeshTriangle> tris, List<Vector3> vert)
+		{
+			vertices  = vert;
+			triangles = tris;
+			hit       = false;
+		}
 
-    public class MapRayCallback : WorkerCallback
-    {
-        public MapRayCallback(ModelInstance[] val, ModelIgnoreFlags ignoreFlags)
-        {
-            prims = val;
-            hit = false;
-            flags = ignoreFlags;
-        }
-        public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit = true)
-        {
-            if (prims[entry] == null)
-                return false;
-            bool result = prims[entry].IntersectRay(ray, ref distance, pStopAtFirstHit, flags);
-            if (result)
-                hit = true;
-            return result;
-        }
-        public bool DidHit() { return hit; }
+		public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
+		{
+			hit = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance) || hit;
 
-        ModelInstance[] prims;
-        bool hit;
-        ModelIgnoreFlags flags;
-    }
+			return hit;
+		}
 
-    public class AreaInfoCallback : WorkerCallback
-    {
-        public AreaInfoCallback(ModelInstance[] val)
-        {
-            prims = val;
-        }
-        public override void Invoke(Vector3 point, uint entry)
-        {
-            if (prims[entry] == null)
-                return;
+		private bool IntersectTriangle(MeshTriangle tri, List<Vector3> points, Ray ray, ref float distance)
+		{
+			const float EPS = 1e-5f;
 
-            prims[entry].IntersectPoint(point, aInfo);
-        }
+			// See RTR2 ch. 13.7 for the algorithm.
 
-        ModelInstance[] prims;
-        public AreaInfo aInfo = new();
-    }
+			Vector3 e1 = points[(int)tri.idx1] - points[(int)tri.idx0];
+			Vector3 e2 = points[(int)tri.idx2] - points[(int)tri.idx0];
+			Vector3 p  = Vector3.Cross(ray.Direction, e2);
+			float   a  = Vector3.Dot(e1, p);
 
-    public class LocationInfoCallback : WorkerCallback
-    {
-        public LocationInfoCallback(ModelInstance[] val, LocationInfo info)
-        {
-            prims = val;
-            locInfo = info;
-            result = false;
-        }
+			if (Math.Abs(a) < EPS)
+				// Determinant is ill-conditioned; abort early
+				return false;
 
-        public override void Invoke(Vector3 point, uint entry)
-        {
-            if (prims[entry] != null && prims[entry].GetLocationInfo(point, locInfo))
-                result = true;
-        }
+			float   f = 1.0f / a;
+			Vector3 s = ray.Origin - points[(int)tri.idx0];
+			float   u = f * Vector3.Dot(s, p);
 
-        ModelInstance[] prims;
-        LocationInfo locInfo;
-        public bool result;
-    }
+			if ((u < 0.0f) ||
+			    (u > 1.0f))
+				// We hit the plane of the _geometry, but outside the _geometry
+				return false;
 
-    public class DynamicTreeIntersectionCallback : WorkerCallback
-    {
-        public DynamicTreeIntersectionCallback(PhaseShift phaseShift)
-        {
-            _didHit = false;
-            _phaseShift = phaseShift;
-        }
+			Vector3 q = Vector3.Cross(s, e1);
+			float   v = f * Vector3.Dot(ray.Direction, q);
 
-        public override bool Invoke(Ray r, IModel obj, ref float distance)
-        {
-            _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift, ModelIgnoreFlags.Nothing);
-            return _didHit;
-        }
+			if ((v < 0.0f) ||
+			    ((u + v) > 1.0f))
+				// We hit the plane of the triangle, but outside the triangle
+				return false;
 
-        public bool DidHit() { return _didHit; }
+			float t = f * Vector3.Dot(e2, q);
 
-        bool _didHit;
-        PhaseShift _phaseShift;
-    }
+			if ((t > 0.0f) &&
+			    (t < distance))
+			{
+				// This is a new hit, closer than the previous one
+				distance = t;
 
-    public class DynamicTreeAreaInfoCallback : WorkerCallback
-    {
-        public DynamicTreeAreaInfoCallback(PhaseShift phaseShift)
-        {
-            _phaseShift = phaseShift;
-            _areaInfo = new AreaInfo();
-        }
+				return true;
+			}
 
-        public override void Invoke(Vector3 p, GameObjectModel obj)
-        {
-            obj.IntersectPoint(p, _areaInfo, _phaseShift);
-        }
+			// This hit is after the previous hit, so ignore it
+			return false;
+		}
+	}
 
-        public AreaInfo GetAreaInfo() { return _areaInfo; }
+	public class MapRayCallback : WorkerCallback
+	{
+		private ModelIgnoreFlags flags;
+		private bool hit;
 
-        PhaseShift _phaseShift;
-        AreaInfo _areaInfo;
-    }
+		private ModelInstance[] prims;
 
-    public class DynamicTreeLocationInfoCallback : WorkerCallback
-    {
-        public DynamicTreeLocationInfoCallback(PhaseShift phaseShift)
-        {
-            _phaseShift = phaseShift;
-        }
+		public MapRayCallback(ModelInstance[] val, ModelIgnoreFlags ignoreFlags)
+		{
+			prims = val;
+			hit   = false;
+			flags = ignoreFlags;
+		}
 
-        public override void Invoke(Vector3 p, GameObjectModel obj)
-        {
-            if (obj.GetLocationInfo(p, _locationInfo, _phaseShift))
-                _hitModel = obj;
-        }
+		public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit = true)
+		{
+			if (prims[entry] == null)
+				return false;
 
-        public LocationInfo GetLocationInfo() { return _locationInfo; }
-        public GameObjectModel GetHitModel() { return _hitModel; }
+			bool result = prims[entry].IntersectRay(ray, ref distance, pStopAtFirstHit, flags);
 
-        PhaseShift _phaseShift;
-        LocationInfo _locationInfo = new();
-        GameObjectModel _hitModel = new();
-    }
+			if (result)
+				hit = true;
+
+			return result;
+		}
+
+		public bool DidHit()
+		{
+			return hit;
+		}
+	}
+
+	public class AreaInfoCallback : WorkerCallback
+	{
+		public AreaInfo aInfo = new();
+
+		private ModelInstance[] prims;
+
+		public AreaInfoCallback(ModelInstance[] val)
+		{
+			prims = val;
+		}
+
+		public override void Invoke(Vector3 point, uint entry)
+		{
+			if (prims[entry] == null)
+				return;
+
+			prims[entry].IntersectPoint(point, aInfo);
+		}
+	}
+
+	public class LocationInfoCallback : WorkerCallback
+	{
+		private LocationInfo locInfo;
+
+		private ModelInstance[] prims;
+		public bool result;
+
+		public LocationInfoCallback(ModelInstance[] val, LocationInfo info)
+		{
+			prims   = val;
+			locInfo = info;
+			result  = false;
+		}
+
+		public override void Invoke(Vector3 point, uint entry)
+		{
+			if (prims[entry] != null &&
+			    prims[entry].GetLocationInfo(point, locInfo))
+				result = true;
+		}
+	}
+
+	public class DynamicTreeIntersectionCallback : WorkerCallback
+	{
+		private bool _didHit;
+		private PhaseShift _phaseShift;
+
+		public DynamicTreeIntersectionCallback(PhaseShift phaseShift)
+		{
+			_didHit     = false;
+			_phaseShift = phaseShift;
+		}
+
+		public override bool Invoke(Ray r, IModel obj, ref float distance)
+		{
+			_didHit = obj.IntersectRay(r, ref distance, true, _phaseShift, ModelIgnoreFlags.Nothing);
+
+			return _didHit;
+		}
+
+		public bool DidHit()
+		{
+			return _didHit;
+		}
+	}
+
+	public class DynamicTreeAreaInfoCallback : WorkerCallback
+	{
+		private AreaInfo _areaInfo;
+
+		private PhaseShift _phaseShift;
+
+		public DynamicTreeAreaInfoCallback(PhaseShift phaseShift)
+		{
+			_phaseShift = phaseShift;
+			_areaInfo   = new AreaInfo();
+		}
+
+		public override void Invoke(Vector3 p, GameObjectModel obj)
+		{
+			obj.IntersectPoint(p, _areaInfo, _phaseShift);
+		}
+
+		public AreaInfo GetAreaInfo()
+		{
+			return _areaInfo;
+		}
+	}
+
+	public class DynamicTreeLocationInfoCallback : WorkerCallback
+	{
+		private GameObjectModel _hitModel = new();
+		private LocationInfo _locationInfo = new();
+
+		private PhaseShift _phaseShift;
+
+		public DynamicTreeLocationInfoCallback(PhaseShift phaseShift)
+		{
+			_phaseShift = phaseShift;
+		}
+
+		public override void Invoke(Vector3 p, GameObjectModel obj)
+		{
+			if (obj.GetLocationInfo(p, _locationInfo, _phaseShift))
+				_hitModel = obj;
+		}
+
+		public LocationInfo GetLocationInfo()
+		{
+			return _locationInfo;
+		}
+
+		public GameObjectModel GetHitModel()
+		{
+			return _hitModel;
+		}
+	}
 }

@@ -6,8 +6,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-    public interface IGuildOnMemberWithDrawMoney : IScriptObject
-    {
-        void OnMemberWitdrawMoney(Guilds.Guild guild, Player player, ulong amount, bool isRepair);
-    }
+	public interface IGuildOnMemberWithDrawMoney : IScriptObject
+	{
+		void OnMemberWitdrawMoney(Guild guild, Player player, ulong amount, bool isRepair);
+	}
 }

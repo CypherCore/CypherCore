@@ -1,110 +1,112 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Threading;
 using System.Threading;
+using Framework.Threading;
 
 namespace Game.Maps
 {
-    public class MapUpdater
-    {
-        ProducerConsumerQueue<MapUpdateRequest> _queue = new();
+	public class MapUpdater
+	{
+		private volatile bool _cancelationToken;
 
-        Thread[] _workerThreads;
-        volatile bool _cancelationToken;
+		private object _lock = new();
+		private int _pendingRequests;
+		private ProducerConsumerQueue<MapUpdateRequest> _queue = new();
 
-        object _lock = new();
-        int _pendingRequests;
+		private Thread[] _workerThreads;
 
-        public MapUpdater(int numThreads)
-        {
-            _workerThreads = new Thread[numThreads];
-            for (var i = 0; i < numThreads; ++i)
-            {
-                _workerThreads[i] = new Thread(WorkerThread);
-                _workerThreads[i].Start();
-            }
-        }
+		public MapUpdater(int numThreads)
+		{
+			_workerThreads = new Thread[numThreads];
 
-        public void Deactivate()
-        {
-            _cancelationToken = true;
+			for (var i = 0; i < numThreads; ++i)
+			{
+				_workerThreads[i] = new Thread(WorkerThread);
+				_workerThreads[i].Start();
+			}
+		}
 
-            Wait();
+		public void Deactivate()
+		{
+			_cancelationToken = true;
 
-            _queue.Cancel();
-            foreach (var thread in _workerThreads)
-                thread.Join();
-        }
+			Wait();
 
-        public void Wait()
-        {
-            lock (_lock)
-            {
-                while (_pendingRequests > 0)
-                    Monitor.Wait(_lock);
-            }
-        }
+			_queue.Cancel();
 
-        public void ScheduleUpdate(Map map, uint diff)
-        {
-            lock (_lock)
-            {
-                ++_pendingRequests;
+			foreach (var thread in _workerThreads)
+				thread.Join();
+		}
 
-                _queue.Push(new MapUpdateRequest(map, this, diff));
-            }
-        }
+		public void Wait()
+		{
+			lock (_lock)
+			{
+				while (_pendingRequests > 0)
+					Monitor.Wait(_lock);
+			}
+		}
 
-        public void UpdateFinished()
-        {
-            lock (_lock)
-            {
-                --_pendingRequests;
+		public void ScheduleUpdate(Map map, uint diff)
+		{
+			lock (_lock)
+			{
+				++_pendingRequests;
 
-                Monitor.PulseAll(_lock);
-            }
-        }
+				_queue.Push(new MapUpdateRequest(map, this, diff));
+			}
+		}
 
-        void WorkerThread()
-        {
-            while (true)
-            {
-                MapUpdateRequest request;
+		public void UpdateFinished()
+		{
+			lock (_lock)
+			{
+				--_pendingRequests;
 
-                _queue.WaitAndPop(out request);
+				Monitor.PulseAll(_lock);
+			}
+		}
 
-                if (_cancelationToken)
-                    return;
+		private void WorkerThread()
+		{
+			while (true)
+			{
+				MapUpdateRequest request;
 
-                request.Call();
-            }
-        }
-    }
+				_queue.WaitAndPop(out request);
 
-    public class MapUpdateRequest
-    {
-        Map m_map;
-        MapUpdater m_updater;
-        uint m_diff;
+				if (_cancelationToken)
+					return;
 
-        public MapUpdateRequest(Map m, uint d)
-        {
-            m_map = m;
-            m_diff = d;
-        }
+				request.Call();
+			}
+		}
+	}
 
-        public MapUpdateRequest(Map m, MapUpdater u, uint d)
-        {
-            m_map = m;
-            m_updater = u;
-            m_diff = d;
-        }
+	public class MapUpdateRequest
+	{
+		private uint _diff;
+		private Map _map;
+		private MapUpdater _updater;
 
-        public void Call()
-        {
-            m_map.Update(m_diff);
-            m_updater.UpdateFinished();
-        }
-    }
+		public MapUpdateRequest(Map m, uint d)
+		{
+			_map  = m;
+			_diff = d;
+		}
+
+		public MapUpdateRequest(Map m, MapUpdater u, uint d)
+		{
+			_map     = m;
+			_updater = u;
+			_diff    = d;
+		}
+
+		public void Call()
+		{
+			_map.Update(_diff);
+			_updater.UpdateFinished();
+		}
+	}
 }

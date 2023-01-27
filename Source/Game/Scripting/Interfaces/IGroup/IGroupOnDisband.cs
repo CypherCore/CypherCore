@@ -2,12 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Groups;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
-    public interface IGroupOnDisband : IScriptObject
-    {
-        void OnDisband(Groups.Group group);
-    }
+	public interface IGroupOnDisband : IScriptObject
+	{
+		void OnDisband(Group group);
+	}
 }

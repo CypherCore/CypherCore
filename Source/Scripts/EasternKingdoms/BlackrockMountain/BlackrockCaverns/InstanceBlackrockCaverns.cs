@@ -9,80 +9,77 @@ using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
 {
-    struct DataTypes
-    {
-        // Encounter States // Boss GUIDs
-        public const uint RomoggBonecrusher = 0;
-        public const uint Corla = 1;
-        public const uint KarshSteelbender = 2;
-        public const uint Beauty = 3;
-        public const uint AscendantLordObsidius = 4;
+	internal struct DataTypes
+	{
+		// Encounter States // Boss GUIDs
+		public const uint RomoggBonecrusher = 0;
+		public const uint Corla = 1;
+		public const uint KarshSteelbender = 2;
+		public const uint Beauty = 3;
+		public const uint AscendantLordObsidius = 4;
 
-        // Additional Objects
-        public const uint RazTheCrazed = 5;
-    }
+		// Additional Objects
+		public const uint RazTheCrazed = 5;
+	}
 
-    struct CreatureIds
-    {
-        public const uint TwilightFlameCaller = 39708;
-        public const uint RazTheCrazed = 39670;
-        public const uint RomoggBonecrusher = 39665;
-    }
+	internal struct CreatureIds
+	{
+		public const uint TwilightFlameCaller = 39708;
+		public const uint RazTheCrazed = 39670;
+		public const uint RomoggBonecrusher = 39665;
+	}
 
-    [Script]
-    class instance_blackrock_caverns : InstanceMapScript, IInstanceMapGetInstanceScript
-    {
-        static ObjectData[] creatureData =
-        {
-            new ObjectData(CreatureIds.RazTheCrazed, DataTypes.RazTheCrazed)
-        };
+	[Script]
+	internal class instance_blackrock_caverns : InstanceMapScript, IInstanceMapGetInstanceScript
+	{
+		private static ObjectData[] creatureData =
+		{
+			new(CreatureIds.RazTheCrazed, DataTypes.RazTheCrazed)
+		};
 
-        static DungeonEncounterData[] encounters =
-        {
-            new DungeonEncounterData(DataTypes.RomoggBonecrusher, 1040),
-            new DungeonEncounterData(DataTypes.Corla, 1038),
-            new DungeonEncounterData(DataTypes.KarshSteelbender, 1039),
-            new DungeonEncounterData(DataTypes.Beauty, 1037),
-            new DungeonEncounterData(DataTypes.AscendantLordObsidius, 1036)
-        };
+		private static DungeonEncounterData[] encounters =
+		{
+			new(DataTypes.RomoggBonecrusher, 1040), new(DataTypes.Corla, 1038), new(DataTypes.KarshSteelbender, 1039), new(DataTypes.Beauty, 1037), new(DataTypes.AscendantLordObsidius, 1036)
+		};
 
-        public instance_blackrock_caverns() : base(nameof(instance_blackrock_caverns), 645) { }
+		public instance_blackrock_caverns() : base(nameof(instance_blackrock_caverns), 645)
+		{
+		}
 
-        class instance_blackrock_caverns_InstanceMapScript : InstanceScript
-        {
-            public instance_blackrock_caverns_InstanceMapScript(InstanceMap map) : base(map)
-            {
-                SetHeaders("BRC");
-                SetBossNumber(5);
-                LoadObjectData(creatureData, null);
-                LoadDungeonEncounterData(encounters);
-            }
+		public InstanceScript GetInstanceScript(InstanceMap map)
+		{
+			return new instance_blackrock_caverns_InstanceMapScript(map);
+		}
 
-            public override bool SetBossState(uint type, EncounterState state)
-            {
-                if (!base.SetBossState(type, state))
-                    return false;
+		private class instance_blackrock_caverns_InstanceMapScript : InstanceScript
+		{
+			public instance_blackrock_caverns_InstanceMapScript(InstanceMap map) : base(map)
+			{
+				SetHeaders("BRC");
+				SetBossNumber(5);
+				LoadObjectData(creatureData, null);
+				LoadDungeonEncounterData(encounters);
+			}
 
-                switch (type)
-                {
-                    case DataTypes.RomoggBonecrusher:
-                    case DataTypes.Corla:
-                    case DataTypes.KarshSteelbender:
-                    case DataTypes.Beauty:
-                    case DataTypes.AscendantLordObsidius:
-                        break;
-                    default:
-                        break;
-                }
+			public override bool SetBossState(uint type, EncounterState state)
+			{
+				if (!base.SetBossState(type, state))
+					return false;
 
-                return true;
-            }
-        }
+				switch (type)
+				{
+					case DataTypes.RomoggBonecrusher:
+					case DataTypes.Corla:
+					case DataTypes.KarshSteelbender:
+					case DataTypes.Beauty:
+					case DataTypes.AscendantLordObsidius:
+						break;
+					default:
+						break;
+				}
 
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_blackrock_caverns_InstanceMapScript(map);
-        }
-    }
+				return true;
+			}
+		}
+	}
 }
-

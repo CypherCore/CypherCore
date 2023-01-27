@@ -6,79 +6,91 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class PlayScene : ServerPacket
-    {
-        public PlayScene() : base(ServerOpcodes.PlayScene, ConnectionType.Instance) { }
+	internal class PlayScene : ServerPacket
+	{
+		public bool Encrypted;
+		public Position Location;
+		public uint PlaybackFlags;
 
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(SceneID);
-            _worldPacket.WriteUInt32(PlaybackFlags);
-            _worldPacket.WriteUInt32(SceneInstanceID);
-            _worldPacket.WriteUInt32(SceneScriptPackageID);
-            _worldPacket.WritePackedGuid(TransportGUID);
-            _worldPacket.WriteXYZO(Location);
-            _worldPacket.WriteBit(Encrypted);
-            _worldPacket.FlushBits();
-        }
+		public uint SceneID;
+		public uint SceneInstanceID;
+		public uint SceneScriptPackageID;
+		public ObjectGuid TransportGUID;
 
-        public uint SceneID;
-        public uint PlaybackFlags;
-        public uint SceneInstanceID;
-        public uint SceneScriptPackageID;
-        public ObjectGuid TransportGUID;
-        public Position Location;
-        public bool Encrypted;
-    }
+		public PlayScene() : base(ServerOpcodes.PlayScene, ConnectionType.Instance)
+		{
+		}
 
-    class CancelScene : ServerPacket
-    {
-        public CancelScene() : base(ServerOpcodes.CancelScene, ConnectionType.Instance) { }
+		public override void Write()
+		{
+			_worldPacket.WriteUInt32(SceneID);
+			_worldPacket.WriteUInt32(PlaybackFlags);
+			_worldPacket.WriteUInt32(SceneInstanceID);
+			_worldPacket.WriteUInt32(SceneScriptPackageID);
+			_worldPacket.WritePackedGuid(TransportGUID);
+			_worldPacket.WriteXYZO(Location);
+			_worldPacket.WriteBit(Encrypted);
+			_worldPacket.FlushBits();
+		}
+	}
 
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(SceneInstanceID);
-        }
+	internal class CancelScene : ServerPacket
+	{
+		public uint SceneInstanceID;
 
-        public uint SceneInstanceID;
-    }
+		public CancelScene() : base(ServerOpcodes.CancelScene, ConnectionType.Instance)
+		{
+		}
 
-    class SceneTriggerEvent : ClientPacket
-    {
-        public SceneTriggerEvent(WorldPacket packet) : base(packet) { }
+		public override void Write()
+		{
+			_worldPacket.WriteUInt32(SceneInstanceID);
+		}
+	}
 
-        public override void Read()
-        {
-            uint len = _worldPacket.ReadBits<uint>(6);
-            SceneInstanceID = _worldPacket.ReadUInt32();
-            _Event = _worldPacket.ReadString(len);
-        }
+	internal class SceneTriggerEvent : ClientPacket
+	{
+		public string _Event;
 
-        public uint SceneInstanceID;
-        public string _Event;
-    }
+		public uint SceneInstanceID;
 
-    class ScenePlaybackComplete : ClientPacket
-    {
-        public ScenePlaybackComplete(WorldPacket packet) : base(packet) { }
+		public SceneTriggerEvent(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public override void Read()
-        {
-            SceneInstanceID = _worldPacket.ReadUInt32();
-        }
+		public override void Read()
+		{
+			uint len = _worldPacket.ReadBits<uint>(6);
+			SceneInstanceID = _worldPacket.ReadUInt32();
+			_Event          = _worldPacket.ReadString(len);
+		}
+	}
 
-        public uint SceneInstanceID;
-    }
+	internal class ScenePlaybackComplete : ClientPacket
+	{
+		public uint SceneInstanceID;
 
-    class ScenePlaybackCanceled : ClientPacket
-    {
-        public ScenePlaybackCanceled(WorldPacket packet) : base(packet) { }
+		public ScenePlaybackComplete(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public override void Read()
-        {
-            SceneInstanceID = _worldPacket.ReadUInt32();
-        }
+		public override void Read()
+		{
+			SceneInstanceID = _worldPacket.ReadUInt32();
+		}
+	}
 
-        public uint SceneInstanceID;
-    }
+	internal class ScenePlaybackCanceled : ClientPacket
+	{
+		public uint SceneInstanceID;
+
+		public ScenePlaybackCanceled(WorldPacket packet) : base(packet)
+		{
+		}
+
+		public override void Read()
+		{
+			SceneInstanceID = _worldPacket.ReadUInt32();
+		}
+	}
 }

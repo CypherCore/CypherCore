@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IVehicle
 {
-    public interface IVehicleOnReset : IScriptObject
-    {
-        void OnReset(Vehicle veh);
-    }
+	public interface IVehicleOnReset : IScriptObject
+	{
+		void OnReset(Vehicle veh);
+	}
 }

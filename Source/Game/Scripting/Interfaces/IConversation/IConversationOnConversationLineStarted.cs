@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IConversation
 {
-    public interface IConversationOnConversationLineStarted : IScriptObject
-    {
-        void OnConversationLineStarted(Entities.Conversation conversation, uint lineId, Player sender);
-    }
+	public interface IConversationOnConversationLineStarted : IScriptObject
+	{
+		void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender);
+	}
 }

@@ -6,283 +6,305 @@ using System.Text.RegularExpressions;
 
 namespace Framework.IO
 {
-    public sealed class StringArguments
-    {
-        public StringArguments(string args)
-        {
-            if (!args.IsEmpty())
-                activestring = args.TrimStart(' ');
-            activeposition = -1;
-        }
+	public sealed class StringArguments
+	{
+		private int activeposition;
 
-        public StringArguments(StringArguments args)
-        {
-            activestring = args.activestring;
-            activeposition = args.activeposition;
-            Current = args.Current;
-        }
+		private string activestring;
+		private string Current;
 
-        public bool Empty()
-        {
-            return activestring.IsEmpty();
-        }
+		public StringArguments(string args)
+		{
+			if (!args.IsEmpty())
+				activestring = args.TrimStart(' ');
 
-        public void MoveToNextChar(char c)
-        {
-            for (var i = activeposition; i < activestring.Length; ++i)
-                if (activestring[i] == c)
-                    break;
-        }
+			activeposition = -1;
+		}
 
-        public string NextString(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return "";
+		public StringArguments(StringArguments args)
+		{
+			activestring   = args.activestring;
+			activeposition = args.activeposition;
+			Current        = args.Current;
+		}
 
-            return Current;
-        }
+		public char this[int index] => activestring[index];
 
-        public bool NextBoolean(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return false;
+		public bool Empty()
+		{
+			return activestring.IsEmpty();
+		}
 
-            bool value;
-            if (bool.TryParse(Current, out value))
-                return value;
-            
-            if ((Current == "1") || Current.Equals("y", StringComparison.OrdinalIgnoreCase) || Current.Equals("on", StringComparison.OrdinalIgnoreCase) || Current.Equals("yes", StringComparison.OrdinalIgnoreCase) || Current.Equals("true", StringComparison.OrdinalIgnoreCase))
-                    return true;
-            if ((Current == "0") || Current.Equals("n", StringComparison.OrdinalIgnoreCase) || Current.Equals("off", StringComparison.OrdinalIgnoreCase) || Current.Equals("no", StringComparison.OrdinalIgnoreCase) || Current.Equals("false", StringComparison.OrdinalIgnoreCase))
-                return false;
+		public void MoveToNextChar(char c)
+		{
+			for (var i = activeposition; i < activestring.Length; ++i)
+				if (activestring[i] == c)
+					break;
+		}
 
-            return false;
-        }
+		public string NextString(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return "";
 
-        public char NextChar(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			return Current;
+		}
 
-            char value;
-            if (char.TryParse(Current, out value))
-                return value;
+		public bool NextBoolean(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return false;
 
-            return default;
-        }
+			bool value;
 
-        public byte NextByte(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			if (bool.TryParse(Current, out value))
+				return value;
 
-            byte value;
-            if (byte.TryParse(Current, out value))
-                return value;
+			if ((Current == "1") ||
+			    Current.Equals("y", StringComparison.OrdinalIgnoreCase) ||
+			    Current.Equals("on", StringComparison.OrdinalIgnoreCase) ||
+			    Current.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+			    Current.Equals("true", StringComparison.OrdinalIgnoreCase))
+				return true;
 
-            return default;
-        }
+			if ((Current == "0") ||
+			    Current.Equals("n", StringComparison.OrdinalIgnoreCase) ||
+			    Current.Equals("off", StringComparison.OrdinalIgnoreCase) ||
+			    Current.Equals("no", StringComparison.OrdinalIgnoreCase) ||
+			    Current.Equals("false", StringComparison.OrdinalIgnoreCase))
+				return false;
 
-        public sbyte NextSByte(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			return false;
+		}
 
-            sbyte value;
-            if (sbyte.TryParse(Current, out value))
-                return value;
+		public char NextChar(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            return default;
-        }
+			char value;
 
-        public ushort NextUInt16(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			if (char.TryParse(Current, out value))
+				return value;
 
-            ushort value;
-            if (ushort.TryParse(Current, out value))
-                return value;
+			return default;
+		}
 
-            return default;
-        }
+		public byte NextByte(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-        public short NextInt16(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			byte value;
 
-            short value;
-            if (short.TryParse(Current, out value))
-                return value;
+			if (byte.TryParse(Current, out value))
+				return value;
 
-            return default;
-        }
+			return default;
+		}
 
-        public uint NextUInt32(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+		public sbyte NextSByte(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            uint value;
-            if (uint.TryParse(Current, out value))
-                return value;
+			sbyte value;
 
-            return default;
-        }
+			if (sbyte.TryParse(Current, out value))
+				return value;
 
-        public int NextInt32(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			return default;
+		}
 
-            int value;
-            if (int.TryParse(Current, out value))
-                return value;
+		public ushort NextUInt16(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            return default;
-        }
+			ushort value;
 
-        public ulong NextUInt64(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			if (ushort.TryParse(Current, out value))
+				return value;
 
-            ulong value;
-            if (ulong.TryParse(Current, out value))
-                return value;
+			return default;
+		}
 
-            return default;
-        }
+		public short NextInt16(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-        public long NextInt64(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			short value;
 
-            long value;
-            if (long.TryParse(Current, out value))
-                return value;
+			if (short.TryParse(Current, out value))
+				return value;
 
-            return default;
-        }
+			return default;
+		}
 
-        public float NextSingle(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+		public uint NextUInt32(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            float value;
-            if (float.TryParse(Current, out value))
-                return value;
+			uint value;
 
-            return default;
-        }
+			if (uint.TryParse(Current, out value))
+				return value;
 
-        public double NextDouble(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			return default;
+		}
 
-            double value;
-            if (double.TryParse(Current, out value))
-                return value;
+		public int NextInt32(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            return default;
-        }
+			int value;
 
-        public decimal NextDecimal(string delimiters = " ")
-        {
-            if (!MoveNext(delimiters))
-                return default;
+			if (int.TryParse(Current, out value))
+				return value;
 
-            decimal value;
-            if (decimal.TryParse(Current, out value))
-                return value;
+			return default;
+		}
 
-            return default;
-        }
+		public ulong NextUInt64(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-        public void AlignToNextChar()
-        {
-            while (activeposition < activestring.Length && activestring[activeposition] != ' ')            
-                activeposition++;            
-        }
+			ulong value;
 
-        public char this[int index]
-        {
-            get { return activestring[index]; }
-        }
+			if (ulong.TryParse(Current, out value))
+				return value;
 
-        public string GetString()
-        {
-            return activestring;
-        }
+			return default;
+		}
 
-        public void Reset()
-        {
-            activeposition = -1;
-            Current = null;
-        }
+		public long NextInt64(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-        public bool IsAtEnd()
-        {
-            return activestring.IsEmpty() || activeposition == activestring.Length;
-        }
+			long value;
 
-        public int GetCurrentPosition()
-        {
-            return activeposition;
-        }
+			if (long.TryParse(Current, out value))
+				return value;
 
-        public void SetCurrentPosition(int currentPosition)
-        {
-            activeposition = currentPosition;
-        }
+			return default;
+		}
 
-        bool MoveNext(string delimiters)
-        {
-            //the stringtotokenize was never set:
-            if (activestring == null)
-                return false;
+		public float NextSingle(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            //all tokens have already been extracted:
-            if (activeposition == activestring.Length)
-                return false;
+			float value;
 
-            //bypass delimiters:
-            activeposition++;
-            while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) > -1)
-            {
-                activeposition++;
-            }
+			if (float.TryParse(Current, out value))
+				return value;
 
-            //only delimiters were left, so return null:
-            if (activeposition == activestring.Length)
-                return false;
+			return default;
+		}
 
-            //get starting position of string to return:
-            int startingposition = activeposition;
+		public double NextDouble(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
 
-            //read until next delimiter:
-            do
-            {
-                activeposition++;
-            } while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) == -1);
+			double value;
 
-            Current = activestring.Substring(startingposition, activeposition - startingposition);
-            return true;
-        }
+			if (double.TryParse(Current, out value))
+				return value;
 
-        bool Match(string pattern, out Match m)
-        {
-            Regex r = new(pattern);
-            m = r.Match(activestring);
-            return m.Success;
-        }
+			return default;
+		}
 
-        private string activestring;
-        private int activeposition;
-        private string Current;
-    }
+		public decimal NextDecimal(string delimiters = " ")
+		{
+			if (!MoveNext(delimiters))
+				return default;
+
+			decimal value;
+
+			if (decimal.TryParse(Current, out value))
+				return value;
+
+			return default;
+		}
+
+		public void AlignToNextChar()
+		{
+			while (activeposition < activestring.Length && activestring[activeposition] != ' ')
+				activeposition++;
+		}
+
+		public string GetString()
+		{
+			return activestring;
+		}
+
+		public void Reset()
+		{
+			activeposition = -1;
+			Current        = null;
+		}
+
+		public bool IsAtEnd()
+		{
+			return activestring.IsEmpty() || activeposition == activestring.Length;
+		}
+
+		public int GetCurrentPosition()
+		{
+			return activeposition;
+		}
+
+		public void SetCurrentPosition(int currentPosition)
+		{
+			activeposition = currentPosition;
+		}
+
+		private bool MoveNext(string delimiters)
+		{
+			//the stringtotokenize was never set:
+			if (activestring == null)
+				return false;
+
+			//all tokens have already been extracted:
+			if (activeposition == activestring.Length)
+				return false;
+
+			//bypass delimiters:
+			activeposition++;
+
+			while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) > -1)
+				activeposition++;
+
+			//only delimiters were left, so return null:
+			if (activeposition == activestring.Length)
+				return false;
+
+			//get starting position of string to return:
+			int startingposition = activeposition;
+
+			//read until next delimiter:
+			do
+			{
+				activeposition++;
+			} while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) == -1);
+
+			Current = activestring.Substring(startingposition, activeposition - startingposition);
+
+			return true;
+		}
+
+		private bool Match(string pattern, out Match m)
+		{
+			Regex r = new(pattern);
+			m = r.Match(activestring);
+
+			return m.Success;
+		}
+	}
 }

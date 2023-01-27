@@ -5,8 +5,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IWorldState
 {
-    public interface IWorldStateOnValueChange : IScriptObject
-    {
-        void OnValueChange(int worldStateId, int oldValue, int newValue, Map map);
-    }
+	public interface IWorldStateOnValueChange : IScriptObject
+	{
+		void OnValueChange(int worldStateId, int oldValue, int newValue, Map map);
+	}
 }

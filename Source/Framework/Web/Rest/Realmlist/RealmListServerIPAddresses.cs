@@ -6,10 +6,9 @@ using System.Runtime.Serialization;
 
 namespace Framework.Web
 {
-    [DataContract]
-    public class RealmListServerIPAddresses
-    {
-        [DataMember(Name = "families")]
-        public IList<AddressFamily> Families { get; set; } = new List<AddressFamily>();
-    }
+	[DataContract]
+	public class RealmListServerIPAddresses
+	{
+		[DataMember(Name = "families")] public IList<AddressFamily> Families { get; set; } = new List<AddressFamily>();
+	}
 }

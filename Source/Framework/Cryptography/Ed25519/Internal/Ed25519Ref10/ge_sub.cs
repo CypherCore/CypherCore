@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
 	internal static partial class GroupOperations
 	{
@@ -8,7 +6,7 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		r = p - q
 		*/
 
-		public static void ge_sub(out GroupElementP1P1 r, ref  GroupElementP3 p, ref  GroupElementCached q)
+		public static void ge_sub(out GroupElementP1P1 r, ref GroupElementP3 p, ref GroupElementCached q)
 		{
 			FieldElement t0;
 
@@ -69,6 +67,5 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 
 			/* qhasm: return */
 		}
-
 	}
 }

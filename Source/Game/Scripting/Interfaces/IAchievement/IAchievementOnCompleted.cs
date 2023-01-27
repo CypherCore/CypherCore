@@ -3,12 +3,11 @@
 
 using Game.DataStorage;
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IAchievement
 {
-    public interface IAchievementOnCompleted : IScriptObject
-    {
-        void OnCompleted(Player player, AchievementRecord achievement);
-    }
+	public interface IAchievementOnCompleted : IScriptObject
+	{
+		void OnCompleted(Player player, AchievementRecord achievement);
+	}
 }

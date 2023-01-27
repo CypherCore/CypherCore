@@ -9,65 +9,72 @@ using Game.Networking.Packets;
 
 namespace Game
 {
-    public partial class WorldSession
-    {
-        [WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
-        void HandleAttackSwing(AttackSwing packet)
-        {
-            Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
-            if (!enemy)
-            {
-                // stop attack state at client
-                SendAttackStop(null);
-                return;
-            }
+	public partial class WorldSession
+	{
+		[WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
+		private void HandleAttackSwing(AttackSwing packet)
+		{
+			Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
 
-            if (!GetPlayer().IsValidAttackTarget(enemy))
-            {
-                // stop attack state at client
-                SendAttackStop(enemy);
-                return;
-            }
+			if (!enemy)
+			{
+				// stop attack state at client
+				SendAttackStop(null);
 
-            //! Client explicitly checks the following before sending CMSG_ATTACKSWING packet,
-            //! so we'll place the same check here. Note that it might be possible to reuse this snippet
-            //! in other places as well.
-            Vehicle vehicle = GetPlayer().GetVehicle();
-            if (vehicle)
-            {
-                VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
-                Cypher.Assert(seat != null);
-                if (!seat.HasFlag(VehicleSeatFlags.CanAttack))
-                {
-                    SendAttackStop(enemy);
-                    return;
-                }
-            }
+				return;
+			}
 
-            GetPlayer().Attack(enemy, true);
-        }
+			if (!GetPlayer().IsValidAttackTarget(enemy))
+			{
+				// stop attack state at client
+				SendAttackStop(enemy);
 
-        [WorldPacketHandler(ClientOpcodes.AttackStop, Processing = PacketProcessing.Inplace)]
-        void HandleAttackStop(AttackStop packet)
-        {
-            GetPlayer().AttackStop();
-        }
+				return;
+			}
 
-        [WorldPacketHandler(ClientOpcodes.SetSheathed, Processing = PacketProcessing.Inplace)]
-        void HandleSetSheathed(SetSheathed packet)
-        {
-            if (packet.CurrentSheathState >= (int)SheathState.Max)
-            {
-                Log.outError(LogFilter.Network, "Unknown sheath state {0} ??", packet.CurrentSheathState);
-                return;
-            }
+			//! Client explicitly checks the following before sending CMSG_ATTACKSWING packet,
+			//! so we'll place the same check here. Note that it might be possible to reuse this snippet
+			//! in other places as well.
+			Vehicle vehicle = GetPlayer().GetVehicle();
 
-            GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
-        }
+			if (vehicle)
+			{
+				VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
+				Cypher.Assert(seat != null);
 
-        void SendAttackStop(Unit enemy)
-        {
-            SendPacket(new SAttackStop(GetPlayer(), enemy));
-        }
-    }
+				if (!seat.HasFlag(VehicleSeatFlags.CanAttack))
+				{
+					SendAttackStop(enemy);
+
+					return;
+				}
+			}
+
+			GetPlayer().Attack(enemy, true);
+		}
+
+		[WorldPacketHandler(ClientOpcodes.AttackStop, Processing = PacketProcessing.Inplace)]
+		private void HandleAttackStop(AttackStop packet)
+		{
+			GetPlayer().AttackStop();
+		}
+
+		[WorldPacketHandler(ClientOpcodes.SetSheathed, Processing = PacketProcessing.Inplace)]
+		private void HandleSetSheathed(SetSheathed packet)
+		{
+			if (packet.CurrentSheathState >= (int)SheathState.Max)
+			{
+				Log.outError(LogFilter.Network, "Unknown sheath state {0} ??", packet.CurrentSheathState);
+
+				return;
+			}
+
+			GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
+		}
+
+		private void SendAttackStop(Unit enemy)
+		{
+			SendPacket(new SAttackStop(GetPlayer(), enemy));
+		}
+	}
 }

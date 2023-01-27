@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Game.Entities;
+﻿using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IAura
 {
-    public interface IAuraAfterProc : IAuraScript
-    {
-        bool AfterProc(ProcEventInfo info);
-    }
+	public interface IAuraAfterProc : IAuraScript
+	{
+		bool AfterProc(ProcEventInfo info);
+	}
 }

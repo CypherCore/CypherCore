@@ -3,7 +3,7 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class TempleofKotmogu
-    {
-    }
+	internal class TempleofKotmogu
+	{
+	}
 }

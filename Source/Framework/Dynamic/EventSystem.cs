@@ -7,168 +7,211 @@ using System.Linq;
 
 namespace Framework.Dynamic
 {
-    public class EventSystem
-    {
-        public EventSystem()
-        {
-            m_time = 0;
-        }
+	public class EventSystem
+	{
+		private MultiMap<ulong, BasicEvent> _events = new();
 
-        public void Update(uint p_time)
-        {
-            // update time
-            m_time += p_time;
+		private ulong _time;
 
-            // main event loop
-            KeyValuePair<ulong, BasicEvent> i;
-            while ((i = m_events.FirstOrDefault()).Value != null && i.Key <= m_time)
-            {
-                var Event = i.Value;
-                m_events.Remove(i);
+		public EventSystem()
+		{
+			_time = 0;
+		}
 
-                if (Event.IsRunning())
-                {
-                    Event.Execute(m_time, p_time);
-                    continue;
-                }
+		public void Update(uint p_time)
+		{
+			// update time
+			_time += p_time;
 
-                if (Event.IsAbortScheduled())
-                {
-                    Event.Abort(m_time);
-                    // Mark the event as aborted
-                    Event.SetAborted();
-                }
+			// main event loop
+			KeyValuePair<ulong, BasicEvent> i;
 
-                if (Event.IsDeletable())
-                    continue;
+			while ((i = _events.FirstOrDefault()).Value != null && i.Key <= _time)
+			{
+				var Event = i.Value;
+				_events.Remove(i);
 
-                // Reschedule non deletable events to be checked at
-                // the next update tick
-                AddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
-            }
-        }
+				if (Event.IsRunning())
+				{
+					Event.Execute(_time, p_time);
 
-        public void KillAllEvents(bool force)
-        {
-            foreach (var pair in m_events.KeyValueList)
-            {
-                // Abort events which weren't aborted already
-                if (!pair.Value.IsAborted())
-                {
-                    pair.Value.SetAborted();
-                    pair.Value.Abort(m_time);
-                }
+					continue;
+				}
 
-                // Skip non-deletable events when we are
-                // not forcing the event cancellation.
-                if (!force && !pair.Value.IsDeletable())
-                    continue;
+				if (Event.IsAbortScheduled())
+				{
+					Event.Abort(_time);
+					// Mark the event as aborted
+					Event.SetAborted();
+				}
 
-                if (!force)
-                    m_events.Remove(pair);
-            }
+				if (Event.IsDeletable())
+					continue;
 
-            // fast clear event list (in force case)
-            if (force)
-                m_events.Clear();
-        }
+				// Reschedule non deletable events to be checked at
+				// the next update tick
+				AddEvent(Event, CalculateTime(TimeSpan.FromMilliseconds(1)), false);
+			}
+		}
 
-        public void AddEvent(BasicEvent Event, TimeSpan e_time, bool set_addtime = true)
-        {
-            if (set_addtime)
-                Event.m_addTime = m_time;
+		public void KillAllEvents(bool force)
+		{
+			foreach (var pair in _events.KeyValueList)
+			{
+				// Abort events which weren't aborted already
+				if (!pair.Value.IsAborted())
+				{
+					pair.Value.SetAborted();
+					pair.Value.Abort(_time);
+				}
 
-            Event.m_execTime = (ulong)e_time.TotalMilliseconds;
-            m_events.Add((ulong)e_time.TotalMilliseconds, Event);
-        }
+				// Skip non-deletable events when we are
+				// not forcing the event cancellation.
+				if (!force &&
+				    !pair.Value.IsDeletable())
+					continue;
 
-        public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
-        
-        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime(offset)); }
+				if (!force)
+					_events.Remove(pair);
+			}
 
-        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset, TimeSpan offset2) { AddEvent(Event, CalculateTime(RandomHelper.RandTime(offset, offset2))); }
+			// fast clear event list (in force case)
+			if (force)
+				_events.Clear();
+		}
 
-        public void AddEventAtOffset(Action action, TimeSpan offset) { AddEventAtOffset(new LambdaBasicEvent(action), offset); }
+		public void AddEvent(BasicEvent Event, TimeSpan e_time, bool set_addtime = true)
+		{
+			if (set_addtime)
+				Event._addTime = _time;
 
-        public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
-        {
-            foreach (var pair in m_events)
-            {
-                if (pair.Value != Event)
-                    continue;
+			Event._execTime = (ulong)e_time.TotalMilliseconds;
+			_events.Add((ulong)e_time.TotalMilliseconds, Event);
+		}
 
-                Event.m_execTime = (ulong)newTime.TotalMilliseconds;
-                m_events.Remove(pair);
-                m_events.Add((ulong)newTime.TotalMilliseconds, Event);
-                break;
-            }
-        }
+		public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true)
+		{
+			AddEvent(new LambdaBasicEvent(action), e_time, set_addtime);
+		}
 
-        public TimeSpan CalculateTime(TimeSpan t_offset)
-        {
-            return TimeSpan.FromMilliseconds(m_time) + t_offset;
-        }
+		public void AddEventAtOffset(BasicEvent Event, TimeSpan offset)
+		{
+			AddEvent(Event, CalculateTime(offset));
+		}
 
-        public MultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
+		public void AddEventAtOffset(BasicEvent Event, TimeSpan offset, TimeSpan offset2)
+		{
+			AddEvent(Event, CalculateTime(RandomHelper.RandTime(offset, offset2)));
+		}
 
-        ulong m_time;
-        MultiMap<ulong, BasicEvent> m_events = new();
-    }
+		public void AddEventAtOffset(Action action, TimeSpan offset)
+		{
+			AddEventAtOffset(new LambdaBasicEvent(action), offset);
+		}
 
-    public class BasicEvent
-    {
-        public BasicEvent() { m_abortState = AbortState.Running; }
+		public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
+		{
+			foreach (var pair in _events)
+			{
+				if (pair.Value != Event)
+					continue;
 
-        public void ScheduleAbort()
-        {
-            Cypher.Assert(IsRunning(), "Tried to scheduled the abortion of an event twice!");
-            m_abortState = AbortState.Scheduled;
-        }
+				Event._execTime = (ulong)newTime.TotalMilliseconds;
+				_events.Remove(pair);
+				_events.Add((ulong)newTime.TotalMilliseconds, Event);
 
-        public void SetAborted()
-        {
-            Cypher.Assert(!IsAborted(), "Tried to abort an already aborted event!");
-            m_abortState = AbortState.Aborted;
-        }
+				break;
+			}
+		}
 
-        // this method executes when the event is triggered
-        // return false if event does not want to be deleted
-        // e_time is execution time, p_time is update interval
-        public virtual bool Execute(ulong e_time, uint p_time) { return true; }
+		public TimeSpan CalculateTime(TimeSpan t_offset)
+		{
+			return TimeSpan.FromMilliseconds(_time) + t_offset;
+		}
 
-        public virtual bool IsDeletable() { return true; }   // this event can be safely deleted
+		public MultiMap<ulong, BasicEvent> GetEvents()
+		{
+			return _events;
+		}
+	}
 
-        public virtual void Abort(ulong e_time) { } // this method executes when the event is aborted
+	public class BasicEvent
+	{
+		private AbortState _abortState; // set by externals when the event is aborted, aborted events don't execute
+		public ulong _addTime;          // time when the event was added to queue, filled by event handler
+		public ulong _execTime;         // planned time of next execution, filled by event handler
 
-        public bool IsRunning() { return m_abortState == AbortState.Running; }
-        public bool IsAbortScheduled() { return m_abortState == AbortState.Scheduled; }
-        public bool IsAborted() { return m_abortState == AbortState.Aborted; }
+		public BasicEvent()
+		{
+			_abortState = AbortState.Running;
+		}
 
-        AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
-        public ulong m_addTime; // time when the event was added to queue, filled by event handler
-        public ulong m_execTime; // planned time of next execution, filled by event handler
-    }
+		public void ScheduleAbort()
+		{
+			Cypher.Assert(IsRunning(), "Tried to scheduled the abortion of an event twice!");
+			_abortState = AbortState.Scheduled;
+		}
 
-    class LambdaBasicEvent : BasicEvent
-    {
-        Action _callback;
+		public void SetAborted()
+		{
+			Cypher.Assert(!IsAborted(), "Tried to abort an already aborted event!");
+			_abortState = AbortState.Aborted;
+		}
 
-        public LambdaBasicEvent(Action callback) : base()
-        {
-            _callback = callback;
-        }
+		// this method executes when the event is triggered
+		// return false if event does not want to be deleted
+		// e_time is execution time, p_time is update interval
+		public virtual bool Execute(ulong e_time, uint p_time)
+		{
+			return true;
+		}
 
-        public override bool Execute(ulong e_time, uint p_time)
-        {
-            _callback();
-            return true;
-        }
-    }
-    
-    enum AbortState
-    {
-        Running,
-        Scheduled,
-        Aborted
-    }
+		public virtual bool IsDeletable()
+		{
+			return true;
+		} // this event can be safely deleted
+
+		public virtual void Abort(ulong e_time)
+		{
+		} // this method executes when the event is aborted
+
+		public bool IsRunning()
+		{
+			return _abortState == AbortState.Running;
+		}
+
+		public bool IsAbortScheduled()
+		{
+			return _abortState == AbortState.Scheduled;
+		}
+
+		public bool IsAborted()
+		{
+			return _abortState == AbortState.Aborted;
+		}
+	}
+
+	internal class LambdaBasicEvent : BasicEvent
+	{
+		private Action _callback;
+
+		public LambdaBasicEvent(Action callback) : base()
+		{
+			_callback = callback;
+		}
+
+		public override bool Execute(ulong e_time, uint p_time)
+		{
+			_callback();
+
+			return true;
+		}
+	}
+
+	internal enum AbortState
+	{
+		Running,
+		Scheduled,
+		Aborted
+	}
 }

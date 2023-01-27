@@ -1,137 +1,148 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using MySqlConnector;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using MySqlConnector;
 
 namespace Framework.Database
 {
-    public class SQLTransaction
-    {
-        public List<MySqlCommand> commands { get; }
+	public class SQLTransaction
+	{
+		public SQLTransaction()
+		{
+			commands = new List<MySqlCommand>();
+		}
 
-        public SQLTransaction()
-        {
-            commands = new List<MySqlCommand>();
-        }
+		public List<MySqlCommand> commands { get; }
 
-        public void Append(PreparedStatement stmt)
-        {
-            MySqlCommand cmd = new(stmt.CommandText);
-            foreach (var parameter in stmt.Parameters)
-                cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
+		public void Append(PreparedStatement stmt)
+		{
+			MySqlCommand cmd = new(stmt.CommandText);
 
-            commands.Add(cmd);
-        }
+			foreach (var parameter in stmt.Parameters)
+				cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
-        public void Append(string sql, params object[] args)
-        {
-            commands.Add(new MySqlCommand(string.Format(sql, args)));
-        }
-    }
+			commands.Add(cmd);
+		}
 
-    class TransactionTask : ISqlOperation
-    {
-        public TransactionTask(SQLTransaction trans)
-        {
-            m_trans = trans;
-        }
+		public void Append(string sql, params object[] args)
+		{
+			commands.Add(new MySqlCommand(string.Format(sql, args)));
+		}
+	}
 
-        public virtual bool Execute<T>(MySqlBase<T> mySqlBase)
-        {
-            MySqlErrorCode errorCode = TryExecute(mySqlBase);
-            if (errorCode == MySqlErrorCode.None)
-                return true;
+	internal class TransactionTask : ISqlOperation
+	{
+		public static object _deadlockLock = new();
 
-            if (errorCode == MySqlErrorCode.LockDeadlock)
-            {
-                // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
-                lock (_deadlockLock)
-                {
-                    byte loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
-                    for (byte i = 0; i < loopBreaker; ++i)
-                        if (TryExecute(mySqlBase) == MySqlErrorCode.None)
-                            return true;
-                }
-            }
+		private SQLTransaction _trans;
 
-            return false;
-        }
+		public TransactionTask(SQLTransaction trans)
+		{
+			_trans = trans;
+		}
 
-        public MySqlErrorCode TryExecute<T>(MySqlBase<T> mySqlBase)
-        {
-            return mySqlBase.DirectCommitTransaction(m_trans);
-        }
+		public virtual bool Execute<T>(MySqlBase<T> mySqlBase)
+		{
+			MySqlErrorCode errorCode = TryExecute(mySqlBase);
 
-        SQLTransaction m_trans;
-        public static object _deadlockLock = new();
-    }
+			if (errorCode == MySqlErrorCode.None)
+				return true;
 
-    class TransactionWithResultTask : TransactionTask
-    {
-        public TransactionWithResultTask(SQLTransaction trans) : base(trans) { }
+			if (errorCode == MySqlErrorCode.LockDeadlock)
+				// Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
+				lock (_deadlockLock)
+				{
+					byte loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
 
-        public override bool Execute<T>(MySqlBase<T> mySqlBase)
-        {
-            MySqlErrorCode errorCode = TryExecute(mySqlBase);
-            if (errorCode == MySqlErrorCode.None)
-            {
-                m_result.SetResult(true);
-                return true;
-            }
+					for (byte i = 0; i < loopBreaker; ++i)
+						if (TryExecute(mySqlBase) == MySqlErrorCode.None)
+							return true;
+				}
 
-            if (errorCode == MySqlErrorCode.LockDeadlock)
-            {
-                // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
-                lock (_deadlockLock)
-                {
-                    byte loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
-                    for (byte i = 0; i < loopBreaker; ++i)
-                    {
-                        if (TryExecute(mySqlBase) == MySqlErrorCode.None)
-                        {
-                            m_result.SetResult(true);
-                            return true;
-                        }
-                    }
-                }
-            }
+			return false;
+		}
 
-            m_result.SetResult(false);
-            return false;
-        }
+		public MySqlErrorCode TryExecute<T>(MySqlBase<T> mySqlBase)
+		{
+			return mySqlBase.DirectCommitTransaction(_trans);
+		}
+	}
 
-        public Task<bool> GetFuture() { return m_result.Task; }
+	internal class TransactionWithResultTask : TransactionTask
+	{
+		private TaskCompletionSource<bool> _result = new();
 
-        TaskCompletionSource<bool> m_result = new();
-    }
+		public TransactionWithResultTask(SQLTransaction trans) : base(trans)
+		{
+		}
 
-    public class TransactionCallback : ISqlCallback
-    {
-        public TransactionCallback(Task<bool> future)
-        {
-            m_future = future;
-        }
+		public override bool Execute<T>(MySqlBase<T> mySqlBase)
+		{
+			MySqlErrorCode errorCode = TryExecute(mySqlBase);
 
-        public void AfterComplete(Action<bool> callback)
-        {
-            m_callback = callback;
-        }
+			if (errorCode == MySqlErrorCode.None)
+			{
+				_result.SetResult(true);
 
-        public bool InvokeIfReady()
-        {
-            if (m_future != null && m_future.Wait(0))
-            {
-                m_callback(m_future.Result);
-                return true;
-            }
+				return true;
+			}
 
-            return false;
-        }
+			if (errorCode == MySqlErrorCode.LockDeadlock)
+				// Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
+				lock (_deadlockLock)
+				{
+					byte loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
 
-        Task<bool> m_future;
-        Action<bool> m_callback;
-    }
+					for (byte i = 0; i < loopBreaker; ++i)
+						if (TryExecute(mySqlBase) == MySqlErrorCode.None)
+						{
+							_result.SetResult(true);
+
+							return true;
+						}
+				}
+
+			_result.SetResult(false);
+
+			return false;
+		}
+
+		public Task<bool> GetFuture()
+		{
+			return _result.Task;
+		}
+	}
+
+	public class TransactionCallback : ISqlCallback
+	{
+		private Action<bool> _callback;
+
+		private Task<bool> _future;
+
+		public TransactionCallback(Task<bool> future)
+		{
+			_future = future;
+		}
+
+		public bool InvokeIfReady()
+		{
+			if (_future != null &&
+			    _future.Wait(0))
+			{
+				_callback(_future.Result);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public void AfterComplete(Action<bool> callback)
+		{
+			_callback = callback;
+		}
+	}
 }

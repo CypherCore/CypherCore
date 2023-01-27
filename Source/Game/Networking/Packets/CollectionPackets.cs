@@ -3,27 +3,30 @@
 
 namespace Game.Networking.Packets
 {
-    public enum CollectionType
-    {
-        None = -1,
-        Toybox = 1,
-        Appearance = 3,
-        TransmogSet = 4
-    }
+	public enum CollectionType
+	{
+		None = -1,
+		Toybox = 1,
+		Appearance = 3,
+		TransmogSet = 4
+	}
 
-    class CollectionItemSetFavorite : ClientPacket
-    {
-        public CollectionItemSetFavorite(WorldPacket packet) : base(packet) { }
+	internal class CollectionItemSetFavorite : ClientPacket
+	{
+		public uint Id;
+		public bool IsFavorite;
 
-        public override void Read()
-        {
-            Type = (CollectionType)_worldPacket.ReadUInt32();
-            Id = _worldPacket.ReadUInt32();
-            IsFavorite = _worldPacket.HasBit();
-        }
+		public CollectionType Type;
 
-        public CollectionType Type;
-        public uint Id;
-        public bool IsFavorite;
-    }
+		public CollectionItemSetFavorite(WorldPacket packet) : base(packet)
+		{
+		}
+
+		public override void Read()
+		{
+			Type       = (CollectionType)_worldPacket.ReadUInt32();
+			Id         = _worldPacket.ReadUInt32();
+			IsFavorite = _worldPacket.HasBit();
+		}
+	}
 }

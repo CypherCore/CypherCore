@@ -3,12 +3,11 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IQuest
 {
-    public interface IQuestOnQuestStatusChange : IScriptObject
-    {
-        void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus);
-    }
+	public interface IQuestOnQuestStatusChange : IScriptObject
+	{
+		void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus);
+	}
 }

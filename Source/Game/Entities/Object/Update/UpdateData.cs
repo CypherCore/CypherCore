@@ -1,88 +1,99 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.IO;
 using Game.Networking;
 using Game.Networking.Packets;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class UpdateData
-    {
-        uint MapId;
-        uint BlockCount;
-        List<ObjectGuid> destroyGUIDs = new();
-        List<ObjectGuid> outOfRangeGUIDs = new();
-        ByteBuffer data = new();
+	public class UpdateData
+	{
+		private uint BlockCount;
+		private ByteBuffer data = new();
+		private List<ObjectGuid> destroyGUIDs = new();
+		private uint MapId;
+		private List<ObjectGuid> outOfRangeGUIDs = new();
 
-        public UpdateData(uint mapId)
-        {
-            MapId = mapId;
-        }
+		public UpdateData(uint mapId)
+		{
+			MapId = mapId;
+		}
 
-        public void AddDestroyObject(ObjectGuid guid)
-        {
-            destroyGUIDs.Add(guid);
-        }
+		public void AddDestroyObject(ObjectGuid guid)
+		{
+			destroyGUIDs.Add(guid);
+		}
 
-        public void AddOutOfRangeGUID(List<ObjectGuid> guids)
-        {
-            outOfRangeGUIDs.AddRange(guids);
-        }
+		public void AddOutOfRangeGUID(List<ObjectGuid> guids)
+		{
+			outOfRangeGUIDs.AddRange(guids);
+		}
 
-        public void AddOutOfRangeGUID(ObjectGuid guid)
-        {
-            outOfRangeGUIDs.Add(guid);
-        }
+		public void AddOutOfRangeGUID(ObjectGuid guid)
+		{
+			outOfRangeGUIDs.Add(guid);
+		}
 
-        public void AddUpdateBlock(ByteBuffer block)
-        {
-            data.WriteBytes(block.GetData());
-            ++BlockCount;
-        }
+		public void AddUpdateBlock(ByteBuffer block)
+		{
+			data.WriteBytes(block.GetData());
+			++BlockCount;
+		}
 
-        public bool BuildPacket(out UpdateObject packet)
-        {
-            packet = new UpdateObject();
+		public bool BuildPacket(out UpdateObject packet)
+		{
+			packet = new UpdateObject();
 
-            packet.NumObjUpdates = BlockCount;
-            packet.MapID = (ushort)MapId;
+			packet.NumObjUpdates = BlockCount;
+			packet.MapID         = (ushort)MapId;
 
-            WorldPacket buffer = new();
-            if (buffer.WriteBit(!outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty()))
-            {
-                buffer.WriteUInt16((ushort)destroyGUIDs.Count);
-                buffer.WriteInt32(destroyGUIDs.Count + outOfRangeGUIDs.Count);
+			WorldPacket buffer = new();
 
-                foreach (var destroyGuid in destroyGUIDs)
-                    buffer.WritePackedGuid(destroyGuid);
+			if (buffer.WriteBit(!outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty()))
+			{
+				buffer.WriteUInt16((ushort)destroyGUIDs.Count);
+				buffer.WriteInt32(destroyGUIDs.Count + outOfRangeGUIDs.Count);
 
-                foreach (var outOfRangeGuid in outOfRangeGUIDs)
-                    buffer.WritePackedGuid(outOfRangeGuid);
-            }
+				foreach (var destroyGuid in destroyGUIDs)
+					buffer.WritePackedGuid(destroyGuid);
 
-            var bytes = data.GetData();
-            buffer.WriteInt32(bytes.Length);
-            buffer.WriteBytes(bytes);
+				foreach (var outOfRangeGuid in outOfRangeGUIDs)
+					buffer.WritePackedGuid(outOfRangeGuid);
+			}
 
-            packet.Data = buffer.GetData();
-            return true;
-        }
+			var bytes = data.GetData();
+			buffer.WriteInt32(bytes.Length);
+			buffer.WriteBytes(bytes);
 
-        public void Clear()
-        {
-            data.Clear();
-            destroyGUIDs.Clear();
-            outOfRangeGUIDs.Clear();
-            BlockCount = 0;
-            MapId = 0;
-        }
+			packet.Data = buffer.GetData();
 
-        public bool HasData() { return BlockCount > 0 || !outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty(); }
+			return true;
+		}
 
-        public List<ObjectGuid> GetOutOfRangeGUIDs() { return outOfRangeGUIDs; }
+		public void Clear()
+		{
+			data.Clear();
+			destroyGUIDs.Clear();
+			outOfRangeGUIDs.Clear();
+			BlockCount = 0;
+			MapId      = 0;
+		}
 
-        public void SetMapId(ushort mapId) { MapId = mapId; }
-    }
+		public bool HasData()
+		{
+			return BlockCount > 0 || !outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty();
+		}
+
+		public List<ObjectGuid> GetOutOfRangeGUIDs()
+		{
+			return outOfRangeGUIDs;
+		}
+
+		public void SetMapId(ushort mapId)
+		{
+			MapId = mapId;
+		}
+	}
 }

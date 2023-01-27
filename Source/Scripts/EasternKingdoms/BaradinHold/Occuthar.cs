@@ -1,6 +1,8 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
@@ -10,275 +12,288 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 {
-    struct SpellIds
-    {
-        public const uint SearingShadows = 96913;
-        public const uint FocusedFireFirstDamage = 97212;
-        public const uint FocusedFireTrigger = 96872;
-        public const uint FocusedFireVisual = 96886;
-        public const uint FocusedFire = 96884;
-        public const uint EyesOfOccuthar = 96920;
-        public const uint GazeOfOccuthar = 96942;
-        public const uint OccutharsDestuction = 96968;
-        public const uint Berserk = 47008;
-    }
+	internal struct SpellIds
+	{
+		public const uint SearingShadows = 96913;
+		public const uint FocusedFireFirstDamage = 97212;
+		public const uint FocusedFireTrigger = 96872;
+		public const uint FocusedFireVisual = 96886;
+		public const uint FocusedFire = 96884;
+		public const uint EyesOfOccuthar = 96920;
+		public const uint GazeOfOccuthar = 96942;
+		public const uint OccutharsDestuction = 96968;
+		public const uint Berserk = 47008;
+	}
 
-    struct EventIds
-    {
-        public const uint SearingShadows = 1;
-        public const uint FocusedFire = 2;
-        public const uint EyesOfOccuthar = 3;
-        public const uint Berserk = 4;
+	internal struct EventIds
+	{
+		public const uint SearingShadows = 1;
+		public const uint FocusedFire = 2;
+		public const uint EyesOfOccuthar = 3;
+		public const uint Berserk = 4;
 
-        public const uint FocusedFireFirstDamage = 1;
-    }
+		public const uint FocusedFireFirstDamage = 1;
+	}
 
-    struct MiscConst
-    {
-        public const uint MaxOccutharVehicleSeats = 7;
-    }
+	internal struct MiscConst
+	{
+		public const uint MaxOccutharVehicleSeats = 7;
+	}
 
-    [Script]
-    class boss_occuthar : BossAI
-    {
-        Vehicle _vehicle;
+	[Script]
+	internal class boss_occuthar : BossAI
+	{
+		private Vehicle _vehicle;
 
-        public boss_occuthar(Creature creature) : base(creature, DataTypes.Occuthar)
-        {
-            _vehicle = me.GetVehicleKit();
-            Cypher.Assert(_vehicle != null);
-        }
+		public boss_occuthar(Creature creature) : base(creature, DataTypes.Occuthar)
+		{
+			_vehicle = me.GetVehicleKit();
+			Cypher.Assert(_vehicle != null);
+		}
 
-        public override void JustEngagedWith(Unit who)
-        {
-            base.JustEngagedWith(who);
-            instance.SendEncounterUnit(EncounterFrameType.Engage, me);
-            _events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(8));
-            _events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
-            _events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(30));
-            _events.ScheduleEvent(EventIds.Berserk, TimeSpan.FromMinutes(5));
-        }
+		public override void JustEngagedWith(Unit who)
+		{
+			base.JustEngagedWith(who);
+			instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+			_events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(8));
+			_events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
+			_events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(30));
+			_events.ScheduleEvent(EventIds.Berserk, TimeSpan.FromMinutes(5));
+		}
 
-        public override void EnterEvadeMode(EvadeReason why)
-        {
-            base.EnterEvadeMode(why);
-            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-            _DespawnAtEvade();
-        }
+		public override void EnterEvadeMode(EvadeReason why)
+		{
+			base.EnterEvadeMode(why);
+			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			_DespawnAtEvade();
+		}
 
-        public override void JustDied(Unit killer)
-        {
-            _JustDied();
-            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-        }
+		public override void JustDied(Unit killer)
+		{
+			_JustDied();
+			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+		}
 
-        public override void JustSummoned(Creature summon)
-        {
-            summons.Summon(summon);
+		public override void JustSummoned(Creature summon)
+		{
+			summons.Summon(summon);
 
-            if (summon.GetEntry() == CreatureIds.FocusFireDummy)
-            {
-                DoCast(summon, SpellIds.FocusedFire);
+			if (summon.GetEntry() == CreatureIds.FocusFireDummy)
+			{
+				DoCast(summon, SpellIds.FocusedFire);
 
-                for (sbyte i = 0; i < MiscConst.MaxOccutharVehicleSeats; ++i)
-                {
-                    Unit vehicle = _vehicle.GetPassenger(i);
-                    if (vehicle)
-                        vehicle.CastSpell(summon, SpellIds.FocusedFireVisual);
-                }
-            }
-        }
+				for (sbyte i = 0; i < MiscConst.MaxOccutharVehicleSeats; ++i)
+				{
+					Unit vehicle = _vehicle.GetPassenger(i);
 
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
+					if (vehicle)
+						vehicle.CastSpell(summon, SpellIds.FocusedFireVisual);
+				}
+			}
+		}
 
-            _events.Update(diff);
+		public override void UpdateAI(uint diff)
+		{
+			if (!UpdateVictim())
+				return;
 
-            if (me.HasUnitState(UnitState.Casting))
-                return;
+			_events.Update(diff);
 
-            _events.ExecuteEvents(eventId =>
-            {
-                switch (eventId)
-                {
-                    case EventIds.SearingShadows:
-                        DoCastAOE(SpellIds.SearingShadows);
-                        _events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(25));
-                        break;
-                    case EventIds.FocusedFire:
-                        DoCastAOE(SpellIds.FocusedFireTrigger, new CastSpellExtraArgs(true));
-                        _events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
-                        break;
-                    case EventIds.EyesOfOccuthar:
-                        DoCastAOE(SpellIds.EyesOfOccuthar);
-                        _events.RescheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
-                        _events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(60));
-                        break;
-                    case EventIds.Berserk:
-                        DoCast(me, SpellIds.Berserk, new CastSpellExtraArgs(true));
-                        break;
-                    default:
-                        break;
-                }
-            });
+			if (me.HasUnitState(UnitState.Casting))
+				return;
 
-            DoMeleeAttackIfReady();
-        }
-    }
+			_events.ExecuteEvents(eventId =>
+			                      {
+				                      switch (eventId)
+				                      {
+					                      case EventIds.SearingShadows:
+						                      DoCastAOE(SpellIds.SearingShadows);
+						                      _events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(25));
 
-    [Script]
-    class npc_eyestalk : ScriptedAI
-    {
-        InstanceScript _instance;
-        byte _damageCount;
+						                      break;
+					                      case EventIds.FocusedFire:
+						                      DoCastAOE(SpellIds.FocusedFireTrigger, new CastSpellExtraArgs(true));
+						                      _events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
 
-        public npc_eyestalk(Creature creature) : base(creature)
-        {
-            _instance = creature.GetInstanceScript();
-        }
+						                      break;
+					                      case EventIds.EyesOfOccuthar:
+						                      DoCastAOE(SpellIds.EyesOfOccuthar);
+						                      _events.RescheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
+						                      _events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(60));
 
-        public override void IsSummonedBy(WorldObject summoner)
-        {
-            // player is the spellcaster so register summon manually
-            Creature occuthar = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.Occuthar));
-            if (occuthar != null)
-                occuthar.GetAI().JustSummoned(me);
-        }
+						                      break;
+					                      case EventIds.Berserk:
+						                      DoCast(me, SpellIds.Berserk, new CastSpellExtraArgs(true));
 
-        public override void Reset()
-        {
-            _events.Reset();
-            _events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(0));
-        }
+						                      break;
+					                      default:
+						                      break;
+				                      }
+			                      });
 
-        public override void UpdateAI(uint diff)
-        {
-            _events.Update(diff);
+			DoMeleeAttackIfReady();
+		}
+	}
 
-            if (_events.ExecuteEvent() == EventIds.FocusedFireFirstDamage)
-            {
-                DoCastAOE(SpellIds.FocusedFireFirstDamage);
-                if (++_damageCount < 2)
-                    _events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(1));
-            }
-        }
+	[Script]
+	internal class npc_eyestalk : ScriptedAI
+	{
+		private byte _damageCount;
+		private InstanceScript _instance;
 
-        public override void EnterEvadeMode(EvadeReason why) { } // Never evade
-    }
+		public npc_eyestalk(Creature creature) : base(creature)
+		{
+			_instance = creature.GetInstanceScript();
+		}
 
-    [Script] // 96872 - Focused Fire
-    class spell_occuthar_focused_fire_SpellScript : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        void FilterTargets(List<WorldObject> targets)
-        {
-            if (targets.Count < 2)
-                return;
+		public override void IsSummonedBy(WorldObject summoner)
+		{
+			// player is the spellcaster so register summon manually
+			Creature occuthar = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.Occuthar));
 
-            targets.RemoveAll(target => GetCaster().GetVictim() == target);
+			if (occuthar != null)
+				occuthar.GetAI().JustSummoned(me);
+		}
 
-            if (targets.Count >= 2)
-                targets.RandomResize(1);
-        }
+		public override void Reset()
+		{
+			_events.Reset();
+			_events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(0));
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-        }
-    }
+		public override void UpdateAI(uint diff)
+		{
+			_events.Update(diff);
 
-    [Script] // Id - 96931 Eyes of Occu'thar
-    class spell_occuthar_eyes_of_occuthar_SpellScript : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
-        }
+			if (_events.ExecuteEvent() == EventIds.FocusedFireFirstDamage)
+			{
+				DoCastAOE(SpellIds.FocusedFireFirstDamage);
 
-        public override bool Load()
-        {
-            return GetCaster().IsPlayer();
-        }
+				if (++_damageCount < 2)
+					_events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(1));
+			}
+		}
 
-        void FilterTargets(List<WorldObject> targets)
-        {
-            if (targets.Empty())
-                return;
+		public override void EnterEvadeMode(EvadeReason why)
+		{
+		} // Never evade
+	}
 
-            targets.RandomResize(1);
-        }
+	[Script] // 96872 - Focused Fire
+	internal class spell_occuthar_focused_fire_SpellScript : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        void HandleScript(uint effIndex)
-        {
-            GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
-        }
+		private void FilterTargets(List<WorldObject> targets)
+		{
+			if (targets.Count < 2)
+				return;
 
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
-    }
+			targets.RemoveAll(target => GetCaster().GetVictim() == target);
 
-    [Script] // Id - 96932 Eyes of Occu'thar
-    class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript, IAfterHit
-    {
-        public override bool Load()
-        {
-            InstanceMap instance = GetCaster().GetMap().ToInstanceMap();
-            if (instance != null)
-                return instance.GetScriptName() == nameof(instance_baradin_hold);
+			if (targets.Count >= 2)
+				targets.RandomResize(1);
+		}
 
-            return false;
-        }
+		public override void Register()
+		{
+			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+		}
+	}
 
-        public void AfterHit()
-        {
-            Position pos = GetHitUnit().GetPosition();
+	[Script] // Id - 96931 Eyes of Occu'thar
+	internal class spell_occuthar_eyes_of_occuthar_SpellScript : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-            Creature occuthar = ObjectAccessor.GetCreature(GetCaster(), GetCaster().GetInstanceScript().GetGuidData(DataTypes.Occuthar));
-            if (occuthar != null)
-            {
-                Creature creature = occuthar.SummonCreature(CreatureIds.EyeOfOccuthar, pos);
-                if (creature != null)
-                    creature.CastSpell(GetHitUnit(), SpellIds.GazeOfOccuthar, false);
-            }
-        }
-    }
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+		}
 
-    [Script] // 96942 / 101009 - Gaze of Occu'thar
-    class spell_occuthar_occuthars_destruction_AuraScript : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        public override bool Load()
-        {
-            return GetCaster() && GetCaster().GetTypeId() == TypeId.Unit;
-        }
+		public override bool Load()
+		{
+			return GetCaster().IsPlayer();
+		}
 
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                if (IsExpired())
-                    caster.CastSpell((WorldObject)null, SpellIds.OccutharsDestuction, new CastSpellExtraArgs(aurEff));
+		private void FilterTargets(List<WorldObject> targets)
+		{
+			if (targets.Empty())
+				return;
 
-                caster.ToCreature().DespawnOrUnsummon(TimeSpan.FromMilliseconds(500));
-            }
-        }
+			targets.RandomResize(1);
+		}
 
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnRemove, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-        }
-    }
+		private void HandleScript(uint effIndex)
+		{
+			GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
+			SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+		}
+	}
+
+	[Script] // Id - 96932 Eyes of Occu'thar
+	internal class spell_occuthar_eyes_of_occuthar_vehicle_SpellScript : SpellScript, IAfterHit
+	{
+		public override bool Load()
+		{
+			InstanceMap instance = GetCaster().GetMap().ToInstanceMap();
+
+			if (instance != null)
+				return instance.GetScriptName() == nameof(instance_baradin_hold);
+
+			return false;
+		}
+
+		public void AfterHit()
+		{
+			Position pos = GetHitUnit().GetPosition();
+
+			Creature occuthar = ObjectAccessor.GetCreature(GetCaster(), GetCaster().GetInstanceScript().GetGuidData(DataTypes.Occuthar));
+
+			if (occuthar != null)
+			{
+				Creature creature = occuthar.SummonCreature(CreatureIds.EyeOfOccuthar, pos);
+
+				if (creature != null)
+					creature.CastSpell(GetHitUnit(), SpellIds.GazeOfOccuthar, false);
+			}
+		}
+	}
+
+	[Script] // 96942 / 101009 - Gaze of Occu'thar
+	internal class spell_occuthar_occuthars_destruction_AuraScript : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> Effects { get; } = new();
+
+		public override bool Load()
+		{
+			return GetCaster() && GetCaster().GetTypeId() == TypeId.Unit;
+		}
+
+		private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+		{
+			Unit caster = GetCaster();
+
+			if (caster)
+			{
+				if (IsExpired())
+					caster.CastSpell((WorldObject)null, SpellIds.OccutharsDestuction, new CastSpellExtraArgs(aurEff));
+
+				caster.ToCreature().DespawnOrUnsummon(TimeSpan.FromMilliseconds(500));
+			}
+		}
+
+		public override void Register()
+		{
+			Effects.Add(new EffectApplyHandler(OnRemove, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+		}
+	}
 }
-

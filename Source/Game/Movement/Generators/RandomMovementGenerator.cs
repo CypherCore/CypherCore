@@ -1,207 +1,232 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.Entities;
-using System;
 
 namespace Game.Movement
 {
-    public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
-    {
-        public RandomMovementGenerator(float spawnDist = 0.0f)
-        {
-            _timer = new TimeTracker();
-            _reference = new();
-            _wanderDistance = spawnDist;
+	public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
+	{
+		private PathGenerator _path;
+		private Position _reference;
+		private TimeTracker _timer;
+		private float _wanderDistance;
+		private uint _wanderSteps;
 
-            Mode = MovementGeneratorMode.Default;
-            Priority = MovementGeneratorPriority.Normal;
-            Flags = MovementGeneratorFlags.InitializationPending;
-            BaseUnitState = UnitState.Roaming;
-        }
+		public RandomMovementGenerator(float spawnDist = 0.0f)
+		{
+			_timer          = new TimeTracker();
+			_reference      = new Position();
+			_wanderDistance = spawnDist;
 
-        public override void DoInitialize(Creature owner)
-        {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.Paused);
-            AddFlag(MovementGeneratorFlags.Initialized);
+			Mode          = MovementGeneratorMode.Default;
+			Priority      = MovementGeneratorPriority.Normal;
+			Flags         = MovementGeneratorFlags.InitializationPending;
+			BaseUnitState = UnitState.Roaming;
+		}
 
-            if (owner == null || !owner.IsAlive())
-                return;
+		public override void DoInitialize(Creature owner)
+		{
+			RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.Paused);
+			AddFlag(MovementGeneratorFlags.Initialized);
 
-            _reference = owner.GetPosition();
-            owner.StopMoving();
+			if (owner == null ||
+			    !owner.IsAlive())
+				return;
 
-            if (_wanderDistance == 0f)
-                _wanderDistance = owner.GetWanderDistance();
+			_reference = owner.GetPosition();
+			owner.StopMoving();
 
-            // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
-            _wanderSteps = RandomHelper.URand(2, 10);
+			if (_wanderDistance == 0f)
+				_wanderDistance = owner.GetWanderDistance();
 
-            _timer.Reset(0);
-            _path = null;
-        }
+			// Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
+			_wanderSteps = RandomHelper.URand(2, 10);
 
-        public override void DoReset(Creature owner)
-        {
-            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            DoInitialize(owner);
-        }
+			_timer.Reset(0);
+			_path = null;
+		}
 
-        public override bool DoUpdate(Creature owner, uint diff)
-        {
-            if (!owner || !owner.IsAlive())
-                return true;
+		public override void DoReset(Creature owner)
+		{
+			RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
+			DoInitialize(owner);
+		}
 
-            if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
-                return true;
+		public override bool DoUpdate(Creature owner, uint diff)
+		{
+			if (!owner ||
+			    !owner.IsAlive())
+				return true;
 
-            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
-            {
-                AddFlag(MovementGeneratorFlags.Interrupted);
-                owner.StopMoving();
-                _path = null;
-                return true;
-            }
-            else
-                RemoveFlag(MovementGeneratorFlags.Interrupted);
+			if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
+				return true;
 
-            _timer.Update(diff);
-            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
-                SetRandomLocation(owner);
+			if (owner.HasUnitState(UnitState.NotMove) ||
+			    owner.IsMovementPreventedByCasting())
+			{
+				AddFlag(MovementGeneratorFlags.Interrupted);
+				owner.StopMoving();
+				_path = null;
 
-            return true;
-        }
+				return true;
+			}
+			else
+			{
+				RemoveFlag(MovementGeneratorFlags.Interrupted);
+			}
 
-        public override void DoDeactivate(Creature owner)
-        {
-            AddFlag(MovementGeneratorFlags.Deactivated);
-            owner.ClearUnitState(UnitState.RoamingMove);
-        }
+			_timer.Update(diff);
 
-        public override void DoFinalize(Creature owner, bool active, bool movementInform)
-        {
-            AddFlag(MovementGeneratorFlags.Finalized);
-            if (active)
-            {
-                owner.ClearUnitState(UnitState.RoamingMove);
-                owner.StopMoving();
+			if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) ||
+			    (_timer.Passed() && owner.MoveSpline.Finalized()))
+				SetRandomLocation(owner);
 
-                // TODO: Research if this modification is needed, which most likely isnt
-                owner.SetWalk(false);
-            }
-        }
+			return true;
+		}
 
-        public override void Pause(uint timer = 0)
-        {
-            if (timer != 0)
-            {
-                AddFlag(MovementGeneratorFlags.TimedPaused);
-                _timer.Reset(timer);
-                RemoveFlag(MovementGeneratorFlags.Paused);
-            }
-            else
-            {
-                AddFlag(MovementGeneratorFlags.Paused);
-                RemoveFlag(MovementGeneratorFlags.TimedPaused);
-            }
-        }
+		public override void DoDeactivate(Creature owner)
+		{
+			AddFlag(MovementGeneratorFlags.Deactivated);
+			owner.ClearUnitState(UnitState.RoamingMove);
+		}
 
-        public override void Resume(uint overrideTimer = 0)
-        {
-            if (overrideTimer != 0)
-                _timer.Reset(overrideTimer);
+		public override void DoFinalize(Creature owner, bool active, bool movementInform)
+		{
+			AddFlag(MovementGeneratorFlags.Finalized);
 
-            RemoveFlag(MovementGeneratorFlags.Paused);
-        }
+			if (active)
+			{
+				owner.ClearUnitState(UnitState.RoamingMove);
+				owner.StopMoving();
 
-        void SetRandomLocation(Creature owner)
-        {
-            if (owner == null)
-                return;
+				// TODO: Research if this modification is needed, which most likely isnt
+				owner.SetWalk(false);
+			}
+		}
 
-            if (owner.HasUnitState(UnitState.NotMove | UnitState.LostControl) || owner.IsMovementPreventedByCasting())
-            {
-                AddFlag(MovementGeneratorFlags.Interrupted);
-                owner.StopMoving();
-                _path = null;
-                return;
-            }
+		public override void Pause(uint timer = 0)
+		{
+			if (timer != 0)
+			{
+				AddFlag(MovementGeneratorFlags.TimedPaused);
+				_timer.Reset(timer);
+				RemoveFlag(MovementGeneratorFlags.Paused);
+			}
+			else
+			{
+				AddFlag(MovementGeneratorFlags.Paused);
+				RemoveFlag(MovementGeneratorFlags.TimedPaused);
+			}
+		}
 
-            Position position = new(_reference);
-            float distance = RandomHelper.FRand(0.0f, _wanderDistance);
-            float angle = RandomHelper.FRand(0.0f, MathF.PI * 2.0f);
-            owner.MovePositionToFirstCollision(position, distance, angle);
+		public override void Resume(uint overrideTimer = 0)
+		{
+			if (overrideTimer != 0)
+				_timer.Reset(overrideTimer);
 
-            // Check if the destination is in LOS
-            if (!owner.IsWithinLOS(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ()))
-            {
-                // Retry later on
-                _timer.Reset(200);
-                return;
-            }
+			RemoveFlag(MovementGeneratorFlags.Paused);
+		}
 
-            if (_path == null)
-            {
-                _path = new PathGenerator(owner);
-                _path.SetPathLengthLimit(30.0f);
-            }
+		private void SetRandomLocation(Creature owner)
+		{
+			if (owner == null)
+				return;
 
-            bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
-            // PATHFIND_FARFROMPOLY shouldn't be checked as creatures in water are most likely far from poly
-            if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut))// || _path.GetPathType().HasFlag(PathType.FarFromPoly))
-            {
-                _timer.Reset(100);
-                return;
-            }
+			if (owner.HasUnitState(UnitState.NotMove | UnitState.LostControl) ||
+			    owner.IsMovementPreventedByCasting())
+			{
+				AddFlag(MovementGeneratorFlags.Interrupted);
+				owner.StopMoving();
+				_path = null;
 
-            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.TimedPaused);
+				return;
+			}
 
-            owner.AddUnitState(UnitState.RoamingMove);
+			Position position = new(_reference);
+			float    distance = RandomHelper.FRand(0.0f, _wanderDistance);
+			float    angle    = RandomHelper.FRand(0.0f, MathF.PI * 2.0f);
+			owner.MovePositionToFirstCollision(position, distance, angle);
 
-            bool walk = true;
-            switch (owner.GetMovementTemplate().GetRandom())
-            {
-                case CreatureRandomMovementType.CanRun:
-                    walk = owner.IsWalking();
-                    break;
-                case CreatureRandomMovementType.AlwaysRun:
-                    walk = false;
-                    break;
-                default:
-                    break;
-            }
+			// Check if the destination is in LOS
+			if (!owner.IsWithinLOS(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ()))
+			{
+				// Retry later on
+				_timer.Reset(200);
 
-            MoveSplineInit init = new(owner);
-            init.MovebyPath(_path.GetPath());
-            init.SetWalk(walk);
-            uint splineDuration = (uint)init.Launch();
+				return;
+			}
 
-            --_wanderSteps;
-            if (_wanderSteps != 0) // Creature has yet to do steps before pausing
-                _timer.Reset(splineDuration);
-            else
-            {
-                // Creature has made all its steps, time for a little break
-                _timer.Reset(splineDuration + RandomHelper.URand(4, 10) * Time.InMilliseconds); // Retails seems to use rounded numbers so we do as well
-                _wanderSteps = RandomHelper.URand(2, 10);
-            }
+			if (_path == null)
+			{
+				_path = new PathGenerator(owner);
+				_path.SetPathLengthLimit(30.0f);
+			}
 
-            // Call for creature group update
-            owner.SignalFormationMovement();
-        }
+			bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
 
-        public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
+			// PATHFIND_FARFROMPOLY shouldn't be checked as creatures in water are most likely far from poly
+			if (!result ||
+			    _path.GetPathType().HasFlag(PathType.NoPath) ||
+			    _path.GetPathType().HasFlag(PathType.Shortcut)) // || _path.GetPathType().HasFlag(PathType.FarFromPoly))
+			{
+				_timer.Reset(100);
 
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Random;
-        }
+				return;
+			}
 
-        PathGenerator _path;
-        TimeTracker _timer;
-        Position _reference;
-        float _wanderDistance;
-        uint _wanderSteps;
-    }
+			RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.TimedPaused);
+
+			owner.AddUnitState(UnitState.RoamingMove);
+
+			bool walk = true;
+
+			switch (owner.GetMovementTemplate().GetRandom())
+			{
+				case CreatureRandomMovementType.CanRun:
+					walk = owner.IsWalking();
+
+					break;
+				case CreatureRandomMovementType.AlwaysRun:
+					walk = false;
+
+					break;
+				default:
+					break;
+			}
+
+			MoveSplineInit init = new(owner);
+			init.MovebyPath(_path.GetPath());
+			init.SetWalk(walk);
+			uint splineDuration = (uint)init.Launch();
+
+			--_wanderSteps;
+
+			if (_wanderSteps != 0) // Creature has yet to do steps before pausing
+			{
+				_timer.Reset(splineDuration);
+			}
+			else
+			{
+				// Creature has made all its steps, time for a little break
+				_timer.Reset(splineDuration + RandomHelper.URand(4, 10) * Time.InMilliseconds); // Retails seems to use rounded numbers so we do as well
+				_wanderSteps = RandomHelper.URand(2, 10);
+			}
+
+			// Call for creature group update
+			owner.SignalFormationMovement();
+		}
+
+		public override void UnitSpeedChanged()
+		{
+			AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
+		}
+
+		public override MovementGeneratorType GetMovementGeneratorType()
+		{
+			return MovementGeneratorType.Random;
+		}
+	}
 }

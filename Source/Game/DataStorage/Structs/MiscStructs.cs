@@ -3,30 +3,30 @@
 
 namespace Game.DataStorage
 {
-    public struct WMOAreaTableTripple
-    {
-        public WMOAreaTableTripple(int r, int a, int g)
-        {
-            groupId = g;
-            rootId = r;
-            adtId = a;
-        }
+	public struct WMOAreaTableTripple
+	{
+		public WMOAreaTableTripple(int r, int a, int g)
+		{
+			groupId = g;
+			rootId  = r;
+			adtId   = a;
+		}
 
-        // ordered by entropy; that way memcmp will have a minimal medium runtime
-        int groupId;
-        int rootId;
-        int adtId;
-    }
+		// ordered by entropy; that way memcmp will have a minimal medium runtime
+		private int groupId;
+		private int rootId;
+		private int adtId;
+	}
 
-    public class TaxiPathBySourceAndDestination
-    {
-        public TaxiPathBySourceAndDestination(uint _id, uint _price)
-        {
-            Id = _id;
-            price = _price;
-        }
+	public class TaxiPathBySourceAndDestination
+	{
+		public uint Id;
+		public uint price;
 
-        public uint Id;
-        public uint price;
-    }
+		public TaxiPathBySourceAndDestination(uint _id, uint _price)
+		{
+			Id    = _id;
+			price = _price;
+		}
+	}
 }

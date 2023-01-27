@@ -5,8 +5,8 @@ using Framework.Constants;
 
 namespace Game.Scripting.Interfaces.IFormula
 {
-    public interface IFormulaOnColorCodeCaclculation : IScriptObject
-    {
-        void OnColorCodeCalculation(XPColorChar color, uint playerLevel, uint mobLevel);
-    }
+	public interface IFormulaOnColorCodeCaclculation : IScriptObject
+	{
+		void OnColorCodeCalculation(XPColorChar color, uint playerLevel, uint mobLevel);
+	}
 }

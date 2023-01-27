@@ -9,20 +9,20 @@ namespace Framework.IO
 {
 	public static partial class ZLib
 	{
-		private const int OS_CODE=0x0b;
+		private const int OS_CODE = 0x0b;
 
-		static readonly string[] z_errmsg=new string[9]
-		{
-			"need dictionary",		// Z_NEED_DICT       2
-			"stream end",			// Z_STREAM_END      1
-			"",						// Z_OK              0
-			"file error",			// Z_ERRNO          -1
-			"stream error",			// Z_STREAM_ERROR   -2
-			"data error",			// Z_DATA_ERROR     -3
-			"insufficient memory",	// Z_MEM_ERROR      -4
-			"buffer error",			// Z_BUF_ERROR      -5
-			"incompatible version"	// Z_VERSION_ERROR  -6
-		};
+		private static readonly string[] z_errmsg = new string[9]
+		                                            {
+			                                            "need dictionary",     // Z_NEED_DICT       2
+			                                            "stream end",          // Z_STREAM_END      1
+			                                            "",                    // Z_OK              0
+			                                            "file error",          // Z_ERRNO          -1
+			                                            "stream error",        // Z_STREAM_ERROR   -2
+			                                            "data error",          // Z_DATA_ERROR     -3
+			                                            "insufficient memory", // Z_MEM_ERROR      -4
+			                                            "buffer error",        // Z_BUF_ERROR      -5
+			                                            "incompatible version" // Z_VERSION_ERROR  -6
+		                                            };
 
 		// =========================================================================
 
@@ -77,17 +77,26 @@ namespace Framework.IO
 
 		public static uint zlibCompileFlags()
 		{
-			uint flags=2;
-			flags+=1<<2;
+			uint flags = 2;
+			flags += 1 << 2;
 
-			switch(IntPtr.Size)
+			switch (nint.Size)
 			{
-				case 4: flags+=1<<4; break;
-				case 8: flags+=2<<4; break;
-				default: flags+=3<<4; break;
+				case 4:
+					flags += 1 << 4;
+
+					break;
+				case 8:
+					flags += 2 << 4;
+
+					break;
+				default:
+					flags += 3 << 4;
+
+					break;
 			}
 
-			flags+=1<<6;
+			flags += 1 << 6;
 
 			return flags;
 		}
@@ -97,9 +106,10 @@ namespace Framework.IO
 		// exported to allow conversion of error code to string for compress() and uncompress()
 		public static string zError(int err)
 		{
-			if(err<-6||err>2) throw new ArgumentOutOfRangeException("err", "must be -6<=err<=2");
+			if (err < -6 ||
+			    err > 2) throw new ArgumentOutOfRangeException("err", "must be -6<=err<=2");
 
-			return z_errmsg[2-err];
+			return z_errmsg[2 - err];
 		}
 	}
 }

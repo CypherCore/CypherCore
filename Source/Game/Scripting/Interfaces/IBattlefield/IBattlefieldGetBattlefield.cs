@@ -3,12 +3,11 @@
 
 using Game.BattleFields;
 using Game.Maps;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IBattlefield
 {
-    public interface IBattlefieldGetBattlefield : IScriptObject
-    {
-        BattleField GetBattlefield(Map map);
-    }
+	public interface IBattlefieldGetBattlefield : IScriptObject
+	{
+		BattleField GetBattlefield(Map map);
+	}
 }

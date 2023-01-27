@@ -1,97 +1,103 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.GameMath;
 using System.Collections.Generic;
 using System.Numerics;
+using Framework.GameMath;
 
 namespace Game.Collision
 {
-    public class BIHWrap<T> where T : IModel
-    {
-        public void Insert(T obj)
-        {
-            ++unbalanced_times;
-            m_objects_to_push.Add(obj);
-        }
-        public void Remove(T obj)
-        {
-            ++unbalanced_times;
-            uint Idx;
-            if (m_obj2Idx.TryGetValue(obj, out Idx))
-                m_objects[(int)Idx] = null;
-            else
-                m_objects_to_push.Remove(obj);
-        }
+	public class BIHWrap<T> where T : IModel
+	{
+		private Dictionary<T, uint> _obj2Idx = new();
+		private List<T> _objects = new();
+		private HashSet<T> _objects_to_push = new();
 
-        public void Balance()
-        {
-            if (unbalanced_times == 0)
-                return;
+		private BIH _tree = new();
+		private int unbalanced_times;
 
-            unbalanced_times = 0;
-            m_objects.Clear();
-            m_objects.AddRange(m_obj2Idx.Keys);
-            m_objects.AddRange(m_objects_to_push);
+		public void Insert(T obj)
+		{
+			++unbalanced_times;
+			_objects_to_push.Add(obj);
+		}
 
-            m_tree.Build(m_objects);
-        }
+		public void Remove(T obj)
+		{
+			++unbalanced_times;
+			uint Idx;
 
-        public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float maxDist)
-        {
-            Balance();
-            MDLCallback temp_cb = new(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
-            m_tree.IntersectRay(ray, temp_cb, ref maxDist, true);
-        }
+			if (_obj2Idx.TryGetValue(obj, out Idx))
+				_objects[(int)Idx] = null;
+			else
+				_objects_to_push.Remove(obj);
+		}
 
-        public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
-        {
-            Balance();
-            MDLCallback callback = new(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
-            m_tree.IntersectPoint(point, callback);
-        }
+		public void Balance()
+		{
+			if (unbalanced_times == 0)
+				return;
 
-        BIH m_tree = new();
-        List<T> m_objects = new();
-        Dictionary<T, uint> m_obj2Idx = new();
-        HashSet<T> m_objects_to_push = new();
-        int unbalanced_times;
+			unbalanced_times = 0;
+			_objects.Clear();
+			_objects.AddRange(_obj2Idx.Keys);
+			_objects.AddRange(_objects_to_push);
 
-        public class MDLCallback : WorkerCallback
-        {
-            T[] objects;
-            WorkerCallback _callback;
-            uint objects_size;
+			_tree.Build(_objects);
+		}
 
-            public MDLCallback(WorkerCallback callback, T[] objects_array, uint size)
-            {
-                objects = objects_array;
-                _callback = callback;
-                objects_size = size;
-            }
+		public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float maxDist)
+		{
+			Balance();
+			MDLCallback temp_cb = new(intersectCallback, _objects.ToArray(), (uint)_objects.Count);
+			_tree.IntersectRay(ray, temp_cb, ref maxDist, true);
+		}
 
-            /// Intersect ray
-            public override bool Invoke(Ray ray, uint idx, ref float maxDist, bool stopAtFirst)
-            {
-                if (idx >= objects_size)
-                    return false;
+		public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
+		{
+			Balance();
+			MDLCallback callback = new(intersectCallback, _objects.ToArray(), (uint)_objects.Count);
+			_tree.IntersectPoint(point, callback);
+		}
 
-                T obj = objects[idx];
-                if (obj != null)
-                    return _callback.Invoke(ray, obj, ref maxDist);
-                return false;
-            }
+		public class MDLCallback : WorkerCallback
+		{
+			private WorkerCallback _callback;
+			private T[] objects;
+			private uint objects_size;
 
-            /// Intersect point
-            public override void Invoke(Vector3 p, uint idx)
-            {
-                if (idx >= objects_size)
-                    return;
+			public MDLCallback(WorkerCallback callback, T[] objects_array, uint size)
+			{
+				objects      = objects_array;
+				_callback    = callback;
+				objects_size = size;
+			}
 
-                T obj = objects[idx];
-                if (obj != null)
-                    _callback.Invoke(p, obj as GameObjectModel);
-            }
-        }
-    }
+			/// Intersect ray
+			public override bool Invoke(Ray ray, uint idx, ref float maxDist, bool stopAtFirst)
+			{
+				if (idx >= objects_size)
+					return false;
+
+				T obj = objects[idx];
+
+				if (obj != null)
+					return _callback.Invoke(ray, obj, ref maxDist);
+
+				return false;
+			}
+
+			/// Intersect point
+			public override void Invoke(Vector3 p, uint idx)
+			{
+				if (idx >= objects_size)
+					return;
+
+				T obj = objects[idx];
+
+				if (obj != null)
+					_callback.Invoke(p, obj as GameObjectModel);
+			}
+		}
+	}
 }

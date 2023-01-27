@@ -3,12 +3,11 @@
 
 using Game.Entities;
 using Game.Groups;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
-    public interface IGroupOnInviteMember : IScriptObject
-    {
-        void OnInviteMember(Groups.Group group, ObjectGuid guid);
-    }
+	public interface IGroupOnInviteMember : IScriptObject
+	{
+		void OnInviteMember(Group group, ObjectGuid guid);
+	}
 }

@@ -6,61 +6,64 @@ using System.Security.Cryptography;
 
 namespace Framework.Cryptography
 {
-    public sealed class WorldCrypt : IDisposable
-    {
-        public void Initialize(byte[] key)
-        {
-            if (IsInitialized)
-                throw new InvalidOperationException("PacketCrypt already initialized!");
+	public sealed class WorldCrypt : IDisposable
+	{
+		private ulong _clientCounter;
+		private AesGcm _clientDecrypt;
+		private ulong _serverCounter;
 
-            _serverEncrypt = new AesGcm(key);
-            _clientDecrypt = new AesGcm(key);
+		private AesGcm _serverEncrypt;
 
-            IsInitialized = true;
-        }
+		public bool IsInitialized { get; set; }
 
-        public bool Encrypt(ref byte[] data, ref byte[] tag)
-        {
-            try
-            {
-                if (IsInitialized)
-                    _serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
+		public void Dispose()
+		{
+			IsInitialized = false;
+		}
 
-                ++_serverCounter;
-                return true;
-            }
-            catch (CryptographicException)
-            {
-                return false;
-            }
-        }
+		public void Initialize(byte[] key)
+		{
+			if (IsInitialized)
+				throw new InvalidOperationException("PacketCrypt already initialized!");
 
-        public bool Decrypt(byte[] data, byte[] tag)
-        {
-            try
-            {
-                if (IsInitialized)
-                    _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
+			_serverEncrypt = new AesGcm(key);
+			_clientDecrypt = new AesGcm(key);
 
-                ++_clientCounter;
-                return true;
-            }
-            catch (CryptographicException)
-            {
-                return false;
-            }
-        }
+			IsInitialized = true;
+		}
 
-        public void Dispose()
-        {
-            IsInitialized = false;
-        }
+		public bool Encrypt(ref byte[] data, ref byte[] tag)
+		{
+			try
+			{
+				if (IsInitialized)
+					_serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
 
-        public bool IsInitialized { get; set; }
+				++_serverCounter;
 
-        AesGcm _serverEncrypt;
-        AesGcm _clientDecrypt;
-        ulong _clientCounter;
-        ulong _serverCounter;
-    }
+				return true;
+			}
+			catch (CryptographicException)
+			{
+				return false;
+			}
+		}
+
+		public bool Decrypt(byte[] data, byte[] tag)
+		{
+			try
+			{
+				if (IsInitialized)
+					_clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
+
+				++_clientCounter;
+
+				return true;
+			}
+			catch (CryptographicException)
+			{
+				return false;
+			}
+		}
+	}
 }

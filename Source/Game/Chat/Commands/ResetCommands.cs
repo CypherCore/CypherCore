@@ -1,247 +1,269 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting.Interfaces.IPlayer;
-using System.Collections.Generic;
 
 namespace Game.Chat
 {
-    [CommandGroup("reset")]
-    class ResetCommands
-    {
-        [Command("achievements", RBACPermissions.CommandResetAchievements, true)]
-        static bool HandleResetAchievementsCommand(CommandHandler handler, PlayerIdentifier player)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null)
-                return false;
+	[CommandGroup("reset")]
+	internal class ResetCommands
+	{
+		[Command("achievements", RBACPermissions.CommandResetAchievements, true)]
+		private static bool HandleResetAchievementsCommand(CommandHandler handler, PlayerIdentifier player)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            if (player.IsConnected())
-                player.GetConnectedPlayer().ResetAchievements();
-            else
-                PlayerAchievementMgr.DeleteFromDB(player.GetGUID());
+			if (player == null)
+				return false;
 
-            return true;
-        }
+			if (player.IsConnected())
+				player.GetConnectedPlayer().ResetAchievements();
+			else
+				PlayerAchievementMgr.DeleteFromDB(player.GetGUID());
 
-        [Command("honor", RBACPermissions.CommandResetHonor, true)]
-        static bool HandleResetHonorCommand(CommandHandler handler, PlayerIdentifier player)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null || !player.IsConnected())
-                return false;
+			return true;
+		}
 
-            player.GetConnectedPlayer().ResetHonorStats();
-            player.GetConnectedPlayer().UpdateCriteria(CriteriaType.HonorableKills);
+		[Command("honor", RBACPermissions.CommandResetHonor, true)]
+		private static bool HandleResetHonorCommand(CommandHandler handler, PlayerIdentifier player)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            return true;
-        }
+			if (player == null ||
+			    !player.IsConnected())
+				return false;
 
-        static bool HandleResetStatsOrLevelHelper(Player player)
-        {
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
-            if (classEntry == null)
-            {
-                Log.outError(LogFilter.Server, "Class {0} not found in DBC (Wrong DBC files?)", player.GetClass());
-                return false;
-            }
+			player.GetConnectedPlayer().ResetHonorStats();
+			player.GetConnectedPlayer().UpdateCriteria(CriteriaType.HonorableKills);
 
-            PowerType powerType = classEntry.DisplayPower;
+			return true;
+		}
 
-            // reset m_form if no aura
-            if (!player.HasAuraType(AuraType.ModShapeshift))
-                player.SetShapeshiftForm(ShapeShiftForm.None);
+		private static bool HandleResetStatsOrLevelHelper(Player player)
+		{
+			ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
 
-            player.SetFactionForRace(player.GetRace());
-            player.SetPowerType(powerType);
+			if (classEntry == null)
+			{
+				Log.outError(LogFilter.Server, "Class {0} not found in DBC (Wrong DBC files?)", player.GetClass());
 
-            // reset only if player not in some form;
-            if (player.GetShapeshiftForm() == ShapeShiftForm.None)
-                player.InitDisplayIds();
+				return false;
+			}
 
-            player.ReplaceAllPvpFlags(UnitPVPStateFlags.PvP);
+			PowerType powerType = classEntry.DisplayPower;
 
-            player.ReplaceAllUnitFlags(UnitFlags.PlayerControlled);
+			// reset _form if no aura
+			if (!player.HasAuraType(AuraType.ModShapeshift))
+				player.SetShapeshiftForm(ShapeShiftForm.None);
 
-            //-1 is default value
-            player.SetWatchedFactionIndex(0xFFFFFFFF);
-            return true;
-        }
+			player.SetFactionForRace(player.GetRace());
+			player.SetPowerType(powerType);
 
-        [Command("level", RBACPermissions.CommandResetLevel, true)]
-        static bool HandleResetLevelCommand(CommandHandler handler, PlayerIdentifier player)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null || !player.IsConnected())
-                return false;
+			// reset only if player not in some form;
+			if (player.GetShapeshiftForm() == ShapeShiftForm.None)
+				player.InitDisplayIds();
 
-            Player target = player.GetConnectedPlayer();
+			player.ReplaceAllPvpFlags(UnitPVPStateFlags.PvP);
 
-            if (!HandleResetStatsOrLevelHelper(target))
-                return false;
+			player.ReplaceAllUnitFlags(UnitFlags.PlayerControlled);
 
-            byte oldLevel = (byte)target.GetLevel();
+			//-1 is default value
+			player.SetWatchedFactionIndex(0xFFFFFFFF);
 
-            // set starting level
-            uint startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
+			return true;
+		}
 
-            target._ApplyAllLevelScaleItemMods(false);
-            target.SetLevel(startLevel);
-            target.InitRunes();
-            target.InitStatsForLevel(true);
-            target.InitTaxiNodesForLevel();
-            target.InitTalentForLevel();
-            target.SetXP(0);
+		[Command("level", RBACPermissions.CommandResetLevel, true)]
+		private static bool HandleResetLevelCommand(CommandHandler handler, PlayerIdentifier player)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            target._ApplyAllLevelScaleItemMods(true);
+			if (player == null ||
+			    !player.IsConnected())
+				return false;
 
-            // reset level for pet
-            Pet pet = target.GetPet();
-            if (pet)
-                pet.SynchronizeLevelWithOwner();
+			Player target = player.GetConnectedPlayer();
 
-            Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(target, oldLevel));
+			if (!HandleResetStatsOrLevelHelper(target))
+				return false;
 
-            return true;
-        }
+			byte oldLevel = (byte)target.GetLevel();
 
-        [Command("spells", RBACPermissions.CommandResetSpells, true)]
-        static bool HandleResetSpellsCommand(CommandHandler handler, PlayerIdentifier player)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null)
-                return false;
+			// set starting level
+			uint startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
 
-            if (player.IsConnected())
-            {
-                var target = player.GetConnectedPlayer();
-                target.ResetSpells();
+			target._ApplyAllLevelScaleItemMods(false);
+			target.SetLevel(startLevel);
+			target.InitRunes();
+			target.InitStatsForLevel(true);
+			target.InitTaxiNodesForLevel();
+			target.InitTalentForLevel();
+			target.SetXP(0);
 
-                target.SendSysMessage(CypherStrings.ResetSpells);
-                if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
-                    handler.SendSysMessage(CypherStrings.ResetSpellsOnline, handler.GetNameLink(target));
-            }
-            else
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)AtLoginFlags.ResetSpells);
-                stmt.AddValue(1, player.GetGUID().GetCounter());
-                DB.Characters.Execute(stmt);
+			target._ApplyAllLevelScaleItemMods(true);
 
-                handler.SendSysMessage(CypherStrings.ResetSpellsOffline, player.GetName());
-            }
+			// reset level for pet
+			Pet pet = target.GetPet();
 
-            return true;
-        }
+			if (pet)
+				pet.SynchronizeLevelWithOwner();
 
-        [Command("stats", RBACPermissions.CommandResetStats, true)]
-        static bool HandleResetStatsCommand(CommandHandler handler, PlayerIdentifier player)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null || !player.IsConnected())
-                return false;
+			Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(target, oldLevel));
 
-            var target = player.GetConnectedPlayer();
+			return true;
+		}
 
-            if (!HandleResetStatsOrLevelHelper(target))
-                return false;
+		[Command("spells", RBACPermissions.CommandResetSpells, true)]
+		private static bool HandleResetSpellsCommand(CommandHandler handler, PlayerIdentifier player)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
 
-            target.InitRunes();
-            target.InitStatsForLevel(true);
-            target.InitTaxiNodesForLevel();
-            target.InitTalentForLevel();
+			if (player == null)
+				return false;
 
-            return true;
-        }
+			if (player.IsConnected())
+			{
+				var target = player.GetConnectedPlayer();
+				target.ResetSpells();
 
-        [Command("talents", RBACPermissions.CommandResetTalents, true)]
-        static bool HandleResetTalentsCommand(CommandHandler handler, PlayerIdentifier player)
-        {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null)
-                return false;
+				target.SendSysMessage(CypherStrings.ResetSpells);
 
-            if (player.IsConnected())
-            {
-                var target = player.GetConnectedPlayer();
-                target.ResetTalents(true);
-                target.ResetTalentSpecialization();
-                target.SendTalentsInfoData();
-                target.SendSysMessage(CypherStrings.ResetTalents);
-                if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
-                    handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));
+				if (handler.GetSession() == null ||
+				    handler.GetSession().GetPlayer() != target)
+					handler.SendSysMessage(CypherStrings.ResetSpellsOnline, handler.GetNameLink(target));
+			}
+			else
+			{
+				PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+				stmt.AddValue(0, (ushort)AtLoginFlags.ResetSpells);
+				stmt.AddValue(1, player.GetGUID().GetCounter());
+				DB.Characters.Execute(stmt);
 
-                /* TODO: 6.x remove/update pet talents
-                Pet* pet = target.GetPet();
-                Pet.resetTalentsForAllPetsOf(target, pet);
-                if (pet)
-                    target.SendTalentsInfoData(true);
-                */
-                return true;
-            }
-            else if (!player.GetGUID().IsEmpty())
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                stmt.AddValue(0, (ushort)(AtLoginFlags.None | AtLoginFlags.ResetPetTalents));
-                stmt.AddValue(1, player.GetGUID().GetCounter());
-                DB.Characters.Execute(stmt);
+				handler.SendSysMessage(CypherStrings.ResetSpellsOffline, player.GetName());
+			}
 
-                string nameLink = handler.PlayerLink(player.GetName());
-                handler.SendSysMessage(CypherStrings.ResetTalentsOffline, nameLink);
-                return true;
-            }
+			return true;
+		}
 
-            handler.SendSysMessage(CypherStrings.NoCharSelected);
-            return false;
-        }
+		[Command("stats", RBACPermissions.CommandResetStats, true)]
+		private static bool HandleResetStatsCommand(CommandHandler handler, PlayerIdentifier player)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
 
-        [Command("all", RBACPermissions.CommandResetAll, true)]
-        static bool HandleResetAllCommand(CommandHandler handler, string subCommand)
-        {
-            AtLoginFlags atLogin;
+			if (player == null ||
+			    !player.IsConnected())
+				return false;
 
-            // Command specially created as single command to prevent using short case names
-            if (subCommand == "spells")
-            {
-                atLogin = AtLoginFlags.ResetSpells;
-                Global.WorldMgr.SendWorldText(CypherStrings.ResetallSpells);
-                if (handler.GetSession() == null)
-                    handler.SendSysMessage(CypherStrings.ResetallSpells);
-            }
-            else if (subCommand == "talents")
-            {
-                atLogin = AtLoginFlags.ResetTalents | AtLoginFlags.ResetPetTalents;
-                Global.WorldMgr.SendWorldText(CypherStrings.ResetallTalents);
-                if (handler.GetSession() == null)
-                    handler.SendSysMessage(CypherStrings.ResetallTalents);
-            }
-            else
-            {
-                handler.SendSysMessage(CypherStrings.ResetallUnknownCase, subCommand);
-                return false;
-            }
+			var target = player.GetConnectedPlayer();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
-            stmt.AddValue(0, (ushort)atLogin);
-            DB.Characters.Execute(stmt);
+			if (!HandleResetStatsOrLevelHelper(target))
+				return false;
 
-            var plist = Global.ObjAccessor.GetPlayers();
-            foreach (var player in plist)
-                player.SetAtLoginFlag(atLogin);
+			target.InitRunes();
+			target.InitStatsForLevel(true);
+			target.InitTaxiNodesForLevel();
+			target.InitTalentForLevel();
 
-            return true;
-        }
-    }
+			return true;
+		}
+
+		[Command("talents", RBACPermissions.CommandResetTalents, true)]
+		private static bool HandleResetTalentsCommand(CommandHandler handler, PlayerIdentifier player)
+		{
+			if (player == null)
+				player = PlayerIdentifier.FromTargetOrSelf(handler);
+
+			if (player == null)
+				return false;
+
+			if (player.IsConnected())
+			{
+				var target = player.GetConnectedPlayer();
+				target.ResetTalents(true);
+				target.ResetTalentSpecialization();
+				target.SendTalentsInfoData();
+				target.SendSysMessage(CypherStrings.ResetTalents);
+
+				if (handler.GetSession() == null ||
+				    handler.GetSession().GetPlayer() != target)
+					handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));
+
+				/* TODO: 6.x remove/update pet talents
+				Pet* pet = target.GetPet();
+				Pet.resetTalentsForAllPetsOf(target, pet);
+				if (pet)
+				    target.SendTalentsInfoData(true);
+				*/
+				return true;
+			}
+			else if (!player.GetGUID().IsEmpty())
+			{
+				PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+				stmt.AddValue(0, (ushort)(AtLoginFlags.None | AtLoginFlags.ResetPetTalents));
+				stmt.AddValue(1, player.GetGUID().GetCounter());
+				DB.Characters.Execute(stmt);
+
+				string nameLink = handler.PlayerLink(player.GetName());
+				handler.SendSysMessage(CypherStrings.ResetTalentsOffline, nameLink);
+
+				return true;
+			}
+
+			handler.SendSysMessage(CypherStrings.NoCharSelected);
+
+			return false;
+		}
+
+		[Command("all", RBACPermissions.CommandResetAll, true)]
+		private static bool HandleResetAllCommand(CommandHandler handler, string subCommand)
+		{
+			AtLoginFlags atLogin;
+
+			// Command specially created as single command to prevent using short case names
+			if (subCommand == "spells")
+			{
+				atLogin = AtLoginFlags.ResetSpells;
+				Global.WorldMgr.SendWorldText(CypherStrings.ResetallSpells);
+
+				if (handler.GetSession() == null)
+					handler.SendSysMessage(CypherStrings.ResetallSpells);
+			}
+			else if (subCommand == "talents")
+			{
+				atLogin = AtLoginFlags.ResetTalents | AtLoginFlags.ResetPetTalents;
+				Global.WorldMgr.SendWorldText(CypherStrings.ResetallTalents);
+
+				if (handler.GetSession() == null)
+					handler.SendSysMessage(CypherStrings.ResetallTalents);
+			}
+			else
+			{
+				handler.SendSysMessage(CypherStrings.ResetallUnknownCase, subCommand);
+
+				return false;
+			}
+
+			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
+			stmt.AddValue(0, (ushort)atLogin);
+			DB.Characters.Execute(stmt);
+
+			var plist = Global.ObjAccessor.GetPlayers();
+
+			foreach (var player in plist)
+				player.SetAtLoginFlag(atLogin);
+
+			return true;
+		}
+	}
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
 	/*
 	ge means group element.
@@ -21,7 +19,7 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		public FieldElement X;
 		public FieldElement Y;
 		public FieldElement Z;
-	} ;
+	};
 
 	internal struct GroupElementP3
 	{
@@ -29,7 +27,7 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		public FieldElement Y;
 		public FieldElement Z;
 		public FieldElement T;
-	} ;
+	};
 
 	internal struct GroupElementP1P1
 	{
@@ -37,7 +35,7 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		public FieldElement Y;
 		public FieldElement Z;
 		public FieldElement T;
-	} ;
+	};
 
 	internal struct GroupElementPreComp
 	{
@@ -47,11 +45,11 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 
 		public GroupElementPreComp(FieldElement yplusx, FieldElement yminusx, FieldElement xy2d)
 		{
-			this.yplusx = yplusx;
+			this.yplusx  = yplusx;
 			this.yminusx = yminusx;
-			this.xy2d = xy2d;
+			this.xy2d    = xy2d;
 		}
-	} ;
+	};
 
 	internal struct GroupElementCached
 	{
@@ -59,5 +57,5 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		public FieldElement YminusX;
 		public FieldElement Z;
 		public FieldElement T2d;
-	} ;
+	};
 }

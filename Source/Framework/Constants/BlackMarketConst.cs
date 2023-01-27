@@ -3,24 +3,25 @@
 
 namespace Framework.Constants
 {
-    public struct BlackMarketConst
-    {
-        public const ulong MaxBid = 1000000UL* MoneyConstants.Gold;
-    }
-    public enum BlackMarketError
-    {
-        Ok = 0,
-        ItemNotFound = 1,
-        AlreadyBid = 2,
-        HigherBid = 4,
-        DatabaseError = 6,
-        NotEnoughMoney = 7,
-        RestrictedAccountTrial = 9
-    }
+	public struct BlackMarketConst
+	{
+		public const ulong MaxBid = 1000000UL * MoneyConstants.Gold;
+	}
 
-    public enum BMAHMailAuctionAnswers
-    {
-        Outbid = 0,
-        Won = 1,
-    }
+	public enum BlackMarketError
+	{
+		Ok = 0,
+		ItemNotFound = 1,
+		AlreadyBid = 2,
+		HigherBid = 4,
+		DatabaseError = 6,
+		NotEnoughMoney = 7,
+		RestrictedAccountTrial = 9
+	}
+
+	public enum BMAHMailAuctionAnswers
+	{
+		Outbid = 0,
+		Won = 1
+	}
 }

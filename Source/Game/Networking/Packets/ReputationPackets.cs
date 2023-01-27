@@ -1,105 +1,117 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using System.Collections.Generic;
+using Framework.Constants;
 
 namespace Game.Networking.Packets
 {
-    public class InitializeFactions : ServerPacket
-    {
-        const ushort FactionCount = 443;
+	public class InitializeFactions : ServerPacket
+	{
+		private const ushort FactionCount = 443;
+		public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
+		public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
 
-        public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance) { }
+		public int[] FactionStandings = new int[FactionCount];
 
-        public override void Write()
-        {
-            for (ushort i = 0; i < FactionCount; ++i)
-            {
-                _worldPacket.WriteUInt16((ushort)((ushort)FactionFlags[i] & 0xFF));
-                _worldPacket.WriteInt32(FactionStandings[i]);
-            }
+		public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance)
+		{
+		}
 
-            for (ushort i = 0; i < FactionCount; ++i)
-                _worldPacket.WriteBit(FactionHasBonus[i]);
+		public override void Write()
+		{
+			for (ushort i = 0; i < FactionCount; ++i)
+			{
+				_worldPacket.WriteUInt16((ushort)((ushort)FactionFlags[i] & 0xFF));
+				_worldPacket.WriteInt32(FactionStandings[i]);
+			}
 
-            _worldPacket.FlushBits();
-        }
+			for (ushort i = 0; i < FactionCount; ++i)
+				_worldPacket.WriteBit(FactionHasBonus[i]);
 
-        public int[] FactionStandings = new int[FactionCount];
-        public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
-        public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
-    }
+			_worldPacket.FlushBits();
+		}
+	}
 
-    class RequestForcedReactions : ClientPacket
-    {
-        public RequestForcedReactions(WorldPacket packet) : base(packet) { }
+	internal class RequestForcedReactions : ClientPacket
+	{
+		public RequestForcedReactions(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public override void Read() { }
-    }
+		public override void Read()
+		{
+		}
+	}
 
-    class SetForcedReactions : ServerPacket
-    {
-        public SetForcedReactions() : base(ServerOpcodes.SetForcedReactions, ConnectionType.Instance) { }
+	internal class SetForcedReactions : ServerPacket
+	{
+		public List<ForcedReaction> Reactions = new();
 
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(Reactions.Count);
-            foreach (ForcedReaction reaction in Reactions)
-                reaction.Write(_worldPacket);
-        }
+		public SetForcedReactions() : base(ServerOpcodes.SetForcedReactions, ConnectionType.Instance)
+		{
+		}
 
-        public List<ForcedReaction> Reactions = new();
-    }
+		public override void Write()
+		{
+			_worldPacket.WriteInt32(Reactions.Count);
 
-    class SetFactionStanding : ServerPacket
-    {
-        public SetFactionStanding() : base(ServerOpcodes.SetFactionStanding, ConnectionType.Instance) { }
+			foreach (ForcedReaction reaction in Reactions)
+				reaction.Write(_worldPacket);
+		}
+	}
 
-        public override void Write()
-        {
-            _worldPacket.WriteFloat(BonusFromAchievementSystem);
+	internal class SetFactionStanding : ServerPacket
+	{
+		public float BonusFromAchievementSystem;
+		public List<FactionStandingData> Faction = new();
+		public bool ShowVisual;
 
-            _worldPacket.WriteInt32(Faction.Count);
-            foreach (FactionStandingData factionStanding in Faction)
-                factionStanding.Write(_worldPacket);
+		public SetFactionStanding() : base(ServerOpcodes.SetFactionStanding, ConnectionType.Instance)
+		{
+		}
 
-            _worldPacket.WriteBit(ShowVisual);
-            _worldPacket.FlushBits();
-        }
+		public override void Write()
+		{
+			_worldPacket.WriteFloat(BonusFromAchievementSystem);
 
-        public float BonusFromAchievementSystem;
-        public List<FactionStandingData> Faction = new();
-        public bool ShowVisual;
-    }
+			_worldPacket.WriteInt32(Faction.Count);
 
-    struct ForcedReaction
-    {
-        public void Write(WorldPacket data)
-        {
-            data.WriteInt32(Faction);
-            data.WriteInt32(Reaction);
-        }
+			foreach (FactionStandingData factionStanding in Faction)
+				factionStanding.Write(_worldPacket);
 
-        public int Faction;
-        public int Reaction;
-    }
+			_worldPacket.WriteBit(ShowVisual);
+			_worldPacket.FlushBits();
+		}
+	}
 
-    struct FactionStandingData
-    {
-        public FactionStandingData(int index, int standing)
-        {
-            Index = index;
-            Standing = standing;
-        }
+	internal struct ForcedReaction
+	{
+		public void Write(WorldPacket data)
+		{
+			data.WriteInt32(Faction);
+			data.WriteInt32(Reaction);
+		}
 
-        public void Write(WorldPacket data)
-        {
-            data.WriteInt32(Index);
-            data.WriteInt32(Standing);
-        }
+		public int Faction;
+		public int Reaction;
+	}
 
-        int Index;
-        int Standing;
-    }
+	internal struct FactionStandingData
+	{
+		public FactionStandingData(int index, int standing)
+		{
+			Index    = index;
+			Standing = standing;
+		}
+
+		public void Write(WorldPacket data)
+		{
+			data.WriteInt32(Index);
+			data.WriteInt32(Standing);
+		}
+
+		private int Index;
+		private int Standing;
+	}
 }

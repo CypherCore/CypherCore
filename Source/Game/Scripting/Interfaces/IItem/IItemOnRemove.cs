@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IItem
 {
-    public interface IItemOnRemove : IScriptObject
-    {
-        bool OnRemove(Player player, Item item);
-    }
+	public interface IItemOnRemove : IScriptObject
+	{
+		bool OnRemove(Player player, Item item);
+	}
 }

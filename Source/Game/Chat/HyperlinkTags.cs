@@ -6,149 +6,189 @@ using Game.Entities;
 
 namespace Game.Chat
 {
-    class HyperlinkDataTokenizer
-    {
-        public HyperlinkDataTokenizer(string arg, bool allowEmptyTokens = false)
-        {
-            _arg = new(arg);
-            _allowEmptyTokens = allowEmptyTokens;
-        }
+	internal class HyperlinkDataTokenizer
+	{
+		private bool _allowEmptyTokens;
 
-        public bool TryConsumeTo(out byte val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+		private StringArguments _arg;
 
-            val = _arg.NextByte(":");
-            return true;
-        }
-        public bool TryConsumeTo(out ushort val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
-            val = _arg.NextUInt16(":");
-            return true;
-        }
-        public bool TryConsumeTo(out uint val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+		public HyperlinkDataTokenizer(string arg, bool allowEmptyTokens = false)
+		{
+			_arg              = new StringArguments(arg);
+			_allowEmptyTokens = allowEmptyTokens;
+		}
 
-            val = _arg.NextUInt32(":");
-            return true;
-        }
-        public bool TryConsumeTo(out ulong val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+		public bool TryConsumeTo(out byte val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
 
-            val = _arg.NextUInt64(":");
-            return true;
-        }
-        public bool TryConsumeTo(out sbyte val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+				return _allowEmptyTokens;
+			}
 
-            val = _arg.NextSByte(":");
-            return true;
-        }
-        public bool TryConsumeTo(out short val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+			val = _arg.NextByte(":");
 
-            val = _arg.NextInt16(":");
-            return true;
-        }
-        public bool TryConsumeTo(out int val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+			return true;
+		}
 
-            val = _arg.NextInt32(":");
-            return true;
-        }
-        public bool TryConsumeTo(out long val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+		public bool TryConsumeTo(out ushort val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
 
-            val = _arg.NextInt64(":");
-            return true;
-        }
-        public bool TryConsumeTo(out float val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+				return _allowEmptyTokens;
+			}
 
-            val = _arg.NextSingle(":");
-            return true;
-        }
-        public bool TryConsumeTo(out ObjectGuid val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+			val = _arg.NextUInt16(":");
 
-            val = ObjectGuid.FromString(_arg.NextString(":"));
-            return true;
-        }
-        public bool TryConsumeTo(out string val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+			return true;
+		}
 
-            val = _arg.NextString(":");
-            return true;
-        }
-        public bool TryConsumeTo(out bool val)
-        {
-            if (IsEmpty())
-            {
-                val = default;
-                return _allowEmptyTokens;
-            }
+		public bool TryConsumeTo(out uint val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
 
-            val = _arg.NextBoolean(":");
-            return true;
-        }
+				return _allowEmptyTokens;
+			}
 
-        public bool IsEmpty() { return _arg.Empty(); }
+			val = _arg.NextUInt32(":");
 
-        StringArguments _arg;
-        bool _allowEmptyTokens;
-    }
+			return true;
+		}
+
+		public bool TryConsumeTo(out ulong val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextUInt64(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out sbyte val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextSByte(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out short val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextInt16(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out int val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextInt32(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out long val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextInt64(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out float val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextSingle(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out ObjectGuid val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = ObjectGuid.FromString(_arg.NextString(":"));
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out string val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextString(":");
+
+			return true;
+		}
+
+		public bool TryConsumeTo(out bool val)
+		{
+			if (IsEmpty())
+			{
+				val = default;
+
+				return _allowEmptyTokens;
+			}
+
+			val = _arg.NextBoolean(":");
+
+			return true;
+		}
+
+		public bool IsEmpty()
+		{
+			return _arg.Empty();
+		}
+	}
 }

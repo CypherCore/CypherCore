@@ -6,14 +6,14 @@ using System.Runtime.CompilerServices;
 
 public class Cypher
 {
-    public static void Assert(bool value, string message = "", [CallerMemberName]string memberName = "")
-    {
-        if (!value)
-        {
-            if (!message.IsEmpty())
-                Log.outFatal(LogFilter.Server, message);
+	public static void Assert(bool value, string message = "", [CallerMemberName] string memberName = "")
+	{
+		if (!value)
+		{
+			if (!message.IsEmpty())
+				Log.outFatal(LogFilter.Server, message);
 
-            throw new Exception(memberName);
-        }
-    }
+			throw new Exception(memberName);
+		}
+	}
 }

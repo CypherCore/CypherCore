@@ -2,12 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IAchievement
 {
-    public interface IAchievementCriteriaOnCheck : IScriptObject
-    {
-        bool OnCheck(Player source, Unit target);
-    }
+	public interface IAchievementCriteriaOnCheck : IScriptObject
+	{
+		bool OnCheck(Player source, Unit target);
+	}
 }

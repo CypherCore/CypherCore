@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IItem
 {
-    public interface IItemOnQuestAccept : IScriptObject
-    {
-        bool OnQuestAccept(Player player, Item item, Quest quest);
-    }
+	public interface IItemOnQuestAccept : IScriptObject
+	{
+		bool OnQuestAccept(Player player, Item item, Quest quest);
+	}
 }

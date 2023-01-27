@@ -1,223 +1,253 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Game.Entities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using Framework.Constants;
+using Game.Entities;
 
 namespace Game.Networking
 {
-    public static class PacketManager
-    {
-        public static void Initialize()
-        {
-            Assembly currentAsm = Assembly.GetExecutingAssembly();
-            foreach (var type in currentAsm.GetTypes())
-            {
-                foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
-                {
-                    foreach (var msgAttr in methodInfo.GetCustomAttributes<WorldPacketHandlerAttribute>())
-                    {
-                        if (msgAttr == null)
-                            continue;
+	public static class PacketManager
+	{
+		private static ConcurrentDictionary<ClientOpcodes, PacketHandler> _clientPacketTable = new();
 
-                        if (msgAttr.Opcode == ClientOpcodes.Unknown)
-                        {
-                            Log.outError(LogFilter.Network, "Opcode {0} does not have a value", msgAttr.Opcode);
-                            continue;
-                        }
+		public static void Initialize()
+		{
+			Assembly currentAsm = Assembly.GetExecutingAssembly();
 
-                        if (_clientPacketTable.ContainsKey(msgAttr.Opcode))
-                        {
-                            Log.outError(LogFilter.Network, "Tried to override OpcodeHandler of {0} with {1} (Opcode {2})", _clientPacketTable[msgAttr.Opcode].ToString(), methodInfo.Name, msgAttr.Opcode);
-                            continue;
-                        }
+			foreach (var type in currentAsm.GetTypes())
+			{
+				foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+				{
+					foreach (var msgAttr in methodInfo.GetCustomAttributes<WorldPacketHandlerAttribute>())
+					{
+						if (msgAttr == null)
+							continue;
 
-                        var parameters = methodInfo.GetParameters();
-                        if (parameters.Length == 0)
-                        {
-                            Log.outError(LogFilter.Network, "Method: {0} Has no paramters", methodInfo.Name);
-                            continue;
-                        }
+						if (msgAttr.Opcode == ClientOpcodes.Unknown)
+						{
+							Log.outError(LogFilter.Network, "Opcode {0} does not have a value", msgAttr.Opcode);
 
-                        if (parameters[0].ParameterType.BaseType != typeof(ClientPacket))
-                        {
-                            Log.outError(LogFilter.Network, "Method: {0} has wrong BaseType", methodInfo.Name);
-                            continue;
-                        }
+							continue;
+						}
 
-                        _clientPacketTable[msgAttr.Opcode] = new PacketHandler(methodInfo, msgAttr.Status, msgAttr.Processing, parameters[0].ParameterType);
-                    }
-                }
-            }
-        }
+						if (_clientPacketTable.ContainsKey(msgAttr.Opcode))
+						{
+							Log.outError(LogFilter.Network, "Tried to override OpcodeHandler of {0} with {1} (Opcode {2})", _clientPacketTable[msgAttr.Opcode].ToString(), methodInfo.Name, msgAttr.Opcode);
 
-        public static bool TryPeek(this ConcurrentQueue<WorldPacket> queue, out WorldPacket result, PacketFilter filter)
-        {
-            result = null;
+							continue;
+						}
 
-            if (queue.IsEmpty)
-                return false;
+						var parameters = methodInfo.GetParameters();
 
-            if (!queue.TryPeek(out result))
-                return false;
+						if (parameters.Length == 0)
+						{
+							Log.outError(LogFilter.Network, "Method: {0} Has no paramters", methodInfo.Name);
 
-            if (!filter.Process(result))
-                return false;
+							continue;
+						}
 
-            return true;
-        }
+						if (parameters[0].ParameterType.BaseType != typeof(ClientPacket))
+						{
+							Log.outError(LogFilter.Network, "Method: {0} has wrong BaseType", methodInfo.Name);
 
-        public static PacketHandler GetHandler(ClientOpcodes opcode)
-        {
-            return _clientPacketTable.LookupByKey(opcode);
-        }
+							continue;
+						}
 
-        public static bool ContainsHandler(ClientOpcodes opcode)
-        {
-            return _clientPacketTable.ContainsKey(opcode);
-        }
+						_clientPacketTable[msgAttr.Opcode] = new PacketHandler(methodInfo, msgAttr.Status, msgAttr.Processing, parameters[0].ParameterType);
+					}
+				}
+			}
+		}
 
-        static ConcurrentDictionary<ClientOpcodes, PacketHandler> _clientPacketTable = new();
+		public static bool TryPeek(this ConcurrentQueue<WorldPacket> queue, out WorldPacket result, PacketFilter filter)
+		{
+			result = null;
 
-        public static bool IsInstanceOnlyOpcode(ServerOpcodes opcode)
-        {
-            switch (opcode)
-            {
-                case ServerOpcodes.QuestGiverStatus: // ClientQuest
-                case ServerOpcodes.DuelRequested: // Client
-                case ServerOpcodes.DuelInBounds: // Client
-                case ServerOpcodes.QueryTimeResponse: // Client
-                case ServerOpcodes.DuelWinner: // Client
-                case ServerOpcodes.DuelComplete: // Client
-                case ServerOpcodes.DuelOutOfBounds: // Client
-                case ServerOpcodes.AttackStop: // Client
-                case ServerOpcodes.AttackStart: // Client
-                case ServerOpcodes.MountResult: // Client
-                    return true;
-                default:
-                    return false;
-            }
-        }
-    }
+			if (queue.IsEmpty)
+				return false;
 
-    public class PacketHandler
-    {
-        public PacketHandler(MethodInfo info, SessionStatus status, PacketProcessing processingplace, Type type)
-        {
-            methodCaller = (Action<WorldSession, ClientPacket>)GetType().GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, new object[] { info });
-            sessionStatus = status;
-            ProcessingPlace = processingplace;
-            packetType = type;
-        }
+			if (!queue.TryPeek(out result))
+				return false;
 
-        public void Invoke(WorldSession session, WorldPacket packet)
-        {
-            if (packetType == null)
-                return;
+			if (!filter.Process(result))
+				return false;
 
-            using var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet);
-            clientPacket.Read();
-            clientPacket.LogPacket(session);
-            methodCaller(session, clientPacket);
-        }
+			return true;
+		}
 
-        static Action<WorldSession, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
-        {
-            // create first delegate. It is not fine because its 
-            // signature contains unknown types T and P1
-            Action<WorldSession, P1> d = (Action<WorldSession, P1>)method.CreateDelegate(typeof(Action<WorldSession, P1>));
-            // create another delegate having necessary signature. 
-            // It encapsulates first delegate with a closure
-            return delegate (WorldSession target, ClientPacket p) { d(target, (P1)p); };
-        }
+		public static PacketHandler GetHandler(ClientOpcodes opcode)
+		{
+			return _clientPacketTable.LookupByKey(opcode);
+		}
 
-        Action<WorldSession, ClientPacket> methodCaller;
-        Type packetType;
-        public PacketProcessing ProcessingPlace { get; private set; }
-        public SessionStatus sessionStatus { get; private set; }
-    }
+		public static bool ContainsHandler(ClientOpcodes opcode)
+		{
+			return _clientPacketTable.ContainsKey(opcode);
+		}
 
-    public abstract class PacketFilter
-    {
-        protected PacketFilter(WorldSession pSession)
-        {
-            m_pSession = pSession;
-        }
+		public static bool IsInstanceOnlyOpcode(ServerOpcodes opcode)
+		{
+			switch (opcode)
+			{
+				case ServerOpcodes.QuestGiverStatus:  // ClientQuest
+				case ServerOpcodes.DuelRequested:     // Client
+				case ServerOpcodes.DuelInBounds:      // Client
+				case ServerOpcodes.QueryTimeResponse: // Client
+				case ServerOpcodes.DuelWinner:        // Client
+				case ServerOpcodes.DuelComplete:      // Client
+				case ServerOpcodes.DuelOutOfBounds:   // Client
+				case ServerOpcodes.AttackStop:        // Client
+				case ServerOpcodes.AttackStart:       // Client
+				case ServerOpcodes.MountResult:       // Client
+					return true;
+				default:
+					return false;
+			}
+		}
+	}
 
-        public abstract bool Process(WorldPacket packet);
+	public class PacketHandler
+	{
+		private Action<WorldSession, ClientPacket> methodCaller;
+		private Type packetType;
 
-        public virtual bool ProcessUnsafe() { return false; }
+		public PacketHandler(MethodInfo info, SessionStatus status, PacketProcessing processingplace, Type type)
+		{
+			methodCaller = (Action<WorldSession, ClientPacket>)GetType()
+			                                                   .GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic)
+			                                                   .MakeGenericMethod(type)
+			                                                   .Invoke(null,
+			                                                           new object[]
+			                                                           {
+				                                                           info
+			                                                           });
 
-        protected WorldSession m_pSession;
-    }
+			sessionStatus   = status;
+			ProcessingPlace = processingplace;
+			packetType      = type;
+		}
 
-    public class MapSessionFilter : PacketFilter
-    {
-        public MapSessionFilter(WorldSession pSession) : base(pSession) { }
+		public PacketProcessing ProcessingPlace { get; private set; }
+		public SessionStatus sessionStatus { get; private set; }
 
-        public override bool Process(WorldPacket packet)
-        {
-            PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
-            //check if packet handler is supposed to be safe
-            if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
-                return true;
+		public void Invoke(WorldSession session, WorldPacket packet)
+		{
+			if (packetType == null)
+				return;
 
-            //we do not process thread-unsafe packets
-            if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
-                return false;
+			using var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet);
+			clientPacket.Read();
+			clientPacket.LogPacket(session);
+			methodCaller(session, clientPacket);
+		}
 
-            Player player = m_pSession.GetPlayer();
-            if (!player)
-                return false;
+		private static Action<WorldSession, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
+		{
+			// create first delegate. It is not fine because its 
+			// signature contains unknown types T and P1
+			Action<WorldSession, P1> d = (Action<WorldSession, P1>)method.CreateDelegate(typeof(Action<WorldSession, P1>));
 
-            //in Map.Update() we do not process packets where player is not in world!
-            return player.IsInWorld;
-        }
-    }
+			// create another delegate having necessary signature. 
+			// It encapsulates first delegate with a closure
+			return delegate(WorldSession target, ClientPacket p) { d(target, (P1)p); };
+		}
+	}
 
-    public class WorldSessionFilter : PacketFilter
-    {
-        public WorldSessionFilter(WorldSession pSession) : base(pSession) { }
+	public abstract class PacketFilter
+	{
+		protected WorldSession _pSession;
 
-        public override bool Process(WorldPacket packet)
-        {
-            PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
-            //check if packet handler is supposed to be safe
-            if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
-                return true;
+		protected PacketFilter(WorldSession pSession)
+		{
+			_pSession = pSession;
+		}
 
-            //thread-unsafe packets should be processed in World.UpdateSessions()
-            if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
-                return true;
+		public abstract bool Process(WorldPacket packet);
 
-            //no player attached? . our client! ^^
-            Player player = m_pSession.GetPlayer();
-            if (!player)
-                return true;
+		public virtual bool ProcessUnsafe()
+		{
+			return false;
+		}
+	}
 
-            //lets process all packets for non-in-the-world player
-            return !player.IsInWorld;
-        }
+	public class MapSessionFilter : PacketFilter
+	{
+		public MapSessionFilter(WorldSession pSession) : base(pSession)
+		{
+		}
 
-        public override bool ProcessUnsafe() { return true; }
-    }
+		public override bool Process(WorldPacket packet)
+		{
+			PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public sealed class WorldPacketHandlerAttribute : Attribute
-    {
-        public WorldPacketHandlerAttribute(ClientOpcodes opcode)
-        {
-            Opcode = opcode;
-            Status = SessionStatus.Loggedin;
-            Processing = PacketProcessing.ThreadUnsafe;
-        }
+			//check if packet handler is supposed to be safe
+			if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
+				return true;
 
-        public ClientOpcodes Opcode { get; private set; }
-        public SessionStatus Status { get; set; }
-        public PacketProcessing Processing { get; set; }
-    }
+			//we do not process thread-unsafe packets
+			if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
+				return false;
+
+			Player player = _pSession.GetPlayer();
+
+			if (!player)
+				return false;
+
+			//in Map.Update() we do not process packets where player is not in world!
+			return player.IsInWorld;
+		}
+	}
+
+	public class WorldSessionFilter : PacketFilter
+	{
+		public WorldSessionFilter(WorldSession pSession) : base(pSession)
+		{
+		}
+
+		public override bool Process(WorldPacket packet)
+		{
+			PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
+
+			//check if packet handler is supposed to be safe
+			if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
+				return true;
+
+			//thread-unsafe packets should be processed in World.UpdateSessions()
+			if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
+				return true;
+
+			//no player attached? . our client! ^^
+			Player player = _pSession.GetPlayer();
+
+			if (!player)
+				return true;
+
+			//lets process all packets for non-in-the-world player
+			return !player.IsInWorld;
+		}
+
+		public override bool ProcessUnsafe()
+		{
+			return true;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	public sealed class WorldPacketHandlerAttribute : Attribute
+	{
+		public WorldPacketHandlerAttribute(ClientOpcodes opcode)
+		{
+			Opcode     = opcode;
+			Status     = SessionStatus.Loggedin;
+			Processing = PacketProcessing.ThreadUnsafe;
+		}
+
+		public ClientOpcodes Opcode { get; private set; }
+		public SessionStatus Status { get; set; }
+		public PacketProcessing Processing { get; set; }
+	}
 }

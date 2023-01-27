@@ -6,106 +6,123 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class PlayerAzeriteItemGains : ServerPacket
-    {
-        public PlayerAzeriteItemGains() : base(ServerOpcodes.PlayerAzeriteItemGains) { }
+	internal class PlayerAzeriteItemGains : ServerPacket
+	{
+		public ObjectGuid ItemGUID;
+		public ulong XP;
 
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt64(XP);
-        }
+		public PlayerAzeriteItemGains() : base(ServerOpcodes.PlayerAzeriteItemGains)
+		{
+		}
 
-        public ObjectGuid ItemGUID;
-        public ulong XP;
-    }
+		public override void Write()
+		{
+			_worldPacket.WritePackedGuid(ItemGUID);
+			_worldPacket.WriteUInt64(XP);
+		}
+	}
 
-    class AzeriteEssenceUnlockMilestone : ClientPacket
-    {
-        public AzeriteEssenceUnlockMilestone(WorldPacket packet) : base(packet) { }
+	internal class AzeriteEssenceUnlockMilestone : ClientPacket
+	{
+		public int AzeriteItemMilestonePowerID;
 
-        public override void Read()
-        {
-            AzeriteItemMilestonePowerID = _worldPacket.ReadInt32();
-        }
+		public AzeriteEssenceUnlockMilestone(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public int AzeriteItemMilestonePowerID;
-    }
+		public override void Read()
+		{
+			AzeriteItemMilestonePowerID = _worldPacket.ReadInt32();
+		}
+	}
 
-    class AzeriteEssenceActivateEssence : ClientPacket
-    {
-        public AzeriteEssenceActivateEssence(WorldPacket packet) : base(packet) { }
+	internal class AzeriteEssenceActivateEssence : ClientPacket
+	{
+		public uint AzeriteEssenceID;
+		public byte Slot;
 
-        public override void Read()
-        {
-            AzeriteEssenceID = _worldPacket.ReadUInt32();
-            Slot = _worldPacket.ReadUInt8();
-        }
+		public AzeriteEssenceActivateEssence(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public uint AzeriteEssenceID;
-        public byte Slot;
-    }
+		public override void Read()
+		{
+			AzeriteEssenceID = _worldPacket.ReadUInt32();
+			Slot             = _worldPacket.ReadUInt8();
+		}
+	}
 
-    class ActivateEssenceFailed : ServerPacket
-    {
-        public ActivateEssenceFailed() : base(ServerOpcodes.ActivateEssenceFailed) { }
+	internal class ActivateEssenceFailed : ServerPacket
+	{
+		public uint Arg;
+		public uint AzeriteEssenceID;
 
-        public override void Write()
-        {
-            _worldPacket.WriteBits((int)Reason, 4);
-            _worldPacket.WriteBit(Slot.HasValue);
-            _worldPacket.WriteUInt32(Arg);
-            _worldPacket.WriteUInt32(AzeriteEssenceID);
-            if (Slot.HasValue)
-                _worldPacket.WriteUInt8(Slot.Value);
-        }
+		public AzeriteEssenceActivateResult Reason;
+		public byte? Slot;
 
-        public AzeriteEssenceActivateResult Reason;
-        public uint Arg;
-        public uint AzeriteEssenceID;
-        public byte? Slot;
-    }
+		public ActivateEssenceFailed() : base(ServerOpcodes.ActivateEssenceFailed)
+		{
+		}
 
-    class AzeriteEmpoweredItemViewed : ClientPacket
-    {
-        public AzeriteEmpoweredItemViewed(WorldPacket packet) : base(packet) { }
+		public override void Write()
+		{
+			_worldPacket.WriteBits((int)Reason, 4);
+			_worldPacket.WriteBit(Slot.HasValue);
+			_worldPacket.WriteUInt32(Arg);
+			_worldPacket.WriteUInt32(AzeriteEssenceID);
 
-        public override void Read()
-        {
-            ItemGUID = _worldPacket.ReadPackedGuid();
-        }
+			if (Slot.HasValue)
+				_worldPacket.WriteUInt8(Slot.Value);
+		}
+	}
 
-        public ObjectGuid ItemGUID;
-    }
+	internal class AzeriteEmpoweredItemViewed : ClientPacket
+	{
+		public ObjectGuid ItemGUID;
 
-    class AzeriteEmpoweredItemSelectPower : ClientPacket
-    {
-        public AzeriteEmpoweredItemSelectPower(WorldPacket packet) : base(packet) { }
+		public AzeriteEmpoweredItemViewed(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public override void Read()
-        {
-            Tier = _worldPacket.ReadInt32();
-            AzeritePowerID = _worldPacket.ReadInt32();
-            ContainerSlot = _worldPacket.ReadUInt8();
-            Slot = _worldPacket.ReadUInt8();
-        }
+		public override void Read()
+		{
+			ItemGUID = _worldPacket.ReadPackedGuid();
+		}
+	}
 
-        public int Tier;
-        public int AzeritePowerID;
-        public byte ContainerSlot;
-        public byte Slot;
-    }
+	internal class AzeriteEmpoweredItemSelectPower : ClientPacket
+	{
+		public int AzeritePowerID;
+		public byte ContainerSlot;
+		public byte Slot;
 
-    class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
-    {
-        public PlayerAzeriteItemEquippedStatusChanged() : base(ServerOpcodes.PlayerAzeriteItemEquippedStatusChanged) { }
+		public int Tier;
 
-        public override void Write()
-        {
-            _worldPacket.WriteBit(IsHeartEquipped);
-            _worldPacket.FlushBits();
-        }
+		public AzeriteEmpoweredItemSelectPower(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public bool IsHeartEquipped;
-    }
+		public override void Read()
+		{
+			Tier           = _worldPacket.ReadInt32();
+			AzeritePowerID = _worldPacket.ReadInt32();
+			ContainerSlot  = _worldPacket.ReadUInt8();
+			Slot           = _worldPacket.ReadUInt8();
+		}
+	}
+
+	internal class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
+	{
+		public bool IsHeartEquipped;
+
+		public PlayerAzeriteItemEquippedStatusChanged() : base(ServerOpcodes.PlayerAzeriteItemEquippedStatusChanged)
+		{
+		}
+
+		public override void Write()
+		{
+			_worldPacket.WriteBit(IsHeartEquipped);
+			_worldPacket.FlushBits();
+		}
+	}
 }

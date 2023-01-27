@@ -5,228 +5,233 @@ using System.Linq;
 
 namespace System.Collections.Generic
 {
-    public sealed class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
-    {
-        static List<object> _emptyList = new List<object>();
-        public MultiMap() { }
+	public sealed class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
+	{
+		private static List<object> _emptyList = new();
 
-        public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> initialData)
-        {
-            foreach (var item in initialData)
-            {
-                Add(item);
-            }
-        }
+		private Dictionary<TKey, List<TValue>> _interalStorage = new();
 
-        public void Add(TKey key, TValue value)
-        {
-            if (!_interalStorage.TryGetValue(key, out var val))
-            {
-                val = new List<TValue>();
-                _interalStorage.Add(key, val);
-            }
+		public MultiMap()
+		{
+		}
 
-            val.Add(value);
-        }
+		public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> initialData)
+		{
+			foreach (var item in initialData)
+				Add(item);
+		}
 
-        public void AddRange(TKey key, IEnumerable<TValue> valueList)
-        {
-            if (!_interalStorage.TryGetValue(key, out var val))
-            {
-                val = new List<TValue>();
-                _interalStorage.Add(key, val);
-            }
+		public void Add(TKey key, TValue value)
+		{
+			if (!_interalStorage.TryGetValue(key, out var val))
+			{
+				val = new List<TValue>();
+				_interalStorage.Add(key, val);
+			}
 
-            val.AddRange(valueList);
-        }
+			val.Add(value);
+		}
 
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            Add(item.Key, item.Value);
-        }
+		public void AddRange(TKey key, IEnumerable<TValue> valueList)
+		{
+			if (!_interalStorage.TryGetValue(key, out var val))
+			{
+				val = new List<TValue>();
+				_interalStorage.Add(key, val);
+			}
 
-        public bool Remove(TKey key)
-        {
-            return _interalStorage.Remove(key);
-        }
+			val.AddRange(valueList);
+		}
 
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            if (!ContainsKey(item.Key))
-                return false;
+		public void Add(KeyValuePair<TKey, TValue> item)
+		{
+			Add(item.Key, item.Value);
+		}
 
-            bool val = _interalStorage[item.Key].Remove(item.Value);
+		public bool Remove(TKey key)
+		{
+			return _interalStorage.Remove(key);
+		}
 
-            if (!val)
-                return false;
+		public bool Remove(KeyValuePair<TKey, TValue> item)
+		{
+			if (!ContainsKey(item.Key))
+				return false;
 
-            if (_interalStorage[item.Key].Empty())
-                _interalStorage.Remove(item.Key);
+			bool val = _interalStorage[item.Key].Remove(item.Value);
 
-            return true;
-        }
+			if (!val)
+				return false;
 
-        public bool Remove(TKey key, TValue value)
-        {
-            if (!ContainsKey(key))
-                return false;
+			if (_interalStorage[item.Key].Empty())
+				_interalStorage.Remove(item.Key);
 
-            bool val = _interalStorage[key].Remove(value);
-            if (!val)
-                return false;
+			return true;
+		}
 
-            if (_interalStorage[key].Empty())
-                _interalStorage.Remove(key);
+		public bool Remove(TKey key, TValue value)
+		{
+			if (!ContainsKey(key))
+				return false;
 
-            return true;
-        }
+			bool val = _interalStorage[key].Remove(value);
 
-        public bool ContainsKey(TKey key)
-        {
-            return _interalStorage.ContainsKey(key);
-        }
+			if (!val)
+				return false;
 
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            List<TValue> valueList;
-            if (_interalStorage.TryGetValue(item.Key, out valueList))
-                return valueList.Contains(item.Value);
-            return false;
-        }
+			if (_interalStorage[key].Empty())
+				_interalStorage.Remove(key);
 
-        public bool Contains(TKey key, TValue item)
-        {
-            if (!_interalStorage.ContainsKey(key)) return false;
-            return _interalStorage[key].Contains(item);
-        }
+			return true;
+		}
 
-        public List<TValue> LookupByKey(TKey key)
-        {
-            if (_interalStorage.TryGetValue(key, out var values))
-                return values;
+		public bool ContainsKey(TKey key)
+		{
+			return _interalStorage.ContainsKey(key);
+		}
 
-            return _emptyList.Cast<TValue>().ToList();
-        }
+		public bool Contains(KeyValuePair<TKey, TValue> item)
+		{
+			List<TValue> valueList;
 
-        public List<TValue> LookupByKey(object key)
-        {
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-            if (_interalStorage.ContainsKey(newkey))
-                return _interalStorage[newkey];
+			if (_interalStorage.TryGetValue(item.Key, out valueList))
+				return valueList.Contains(item.Value);
 
-            return _emptyList.Cast<TValue>().ToList();
-        }
+			return false;
+		}
 
-        bool TryGetValue(TKey key, out TValue value)
-        {
-            value = default(TValue);
-            if (_interalStorage.TryGetValue(key, out var val))
-            {
-                value = val.LastOrDefault();
-                return true;
-            }
+		public bool Contains(TKey key, TValue item)
+		{
+			if (!_interalStorage.ContainsKey(key)) return false;
 
-            return false;
-        }
+			return _interalStorage[key].Contains(item);
+		}
 
-        public List<TValue> this[TKey key]
-        {
-            get
-            {
-                if (!_interalStorage.TryGetValue(key, out var val))
-                    return _emptyList.Cast<TValue>().ToList();
-                return val;
-            }
-            set
-            {
-                if (!_interalStorage.ContainsKey(key))
-                    _interalStorage.Add(key, value);
-                else
-                    _interalStorage[key] = value;
-            }
-        }
+		public List<TValue> LookupByKey(TKey key)
+		{
+			if (_interalStorage.TryGetValue(key, out var values))
+				return values;
 
-        public ICollection<TKey> Keys
-        {
-            get { return _interalStorage.Keys; }
-        }
+			return _emptyList.Cast<TValue>().ToList();
+		}
 
-        public ICollection<TValue> Values
-        {
-            get
-            {
-                List<TValue> retVal = new();
-                foreach (var item in _interalStorage)
-                {
-                    retVal.AddRange(item.Value);
-                }
-                return retVal;
-            }
-        }
+		public List<TValue> LookupByKey(object key)
+		{
+			TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
 
-        public IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList
-        {
-            get
-            {
-                foreach (var pair in _interalStorage)
-                    foreach (var value in pair.Value)
-                        yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
-            }
-        }
+			if (_interalStorage.ContainsKey(newkey))
+				return _interalStorage[newkey];
 
-        public void Clear()
-        {
-            _interalStorage.Clear();
-        }
+			return _emptyList.Cast<TValue>().ToList();
+		}
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-        {
-            if (array == null)
-                throw new ArgumentNullException("array");
+		public List<TValue> this[TKey key]
+		{
+			get
+			{
+				if (!_interalStorage.TryGetValue(key, out var val))
+					return _emptyList.Cast<TValue>().ToList();
 
-            if (arrayIndex < 0)
-                throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "argument 'arrayIndex' cannot be negative");
+				return val;
+			}
+			set
+			{
+				if (!_interalStorage.ContainsKey(key))
+					_interalStorage.Add(key, value);
+				else
+					_interalStorage[key] = value;
+			}
+		}
 
-            if (arrayIndex >= array.Length || Count > array.Length - arrayIndex)
-                array = new KeyValuePair<TKey, TValue>[Count];
+		public ICollection<TKey> Keys => _interalStorage.Keys;
 
-            int index = arrayIndex;
-            foreach (KeyValuePair<TKey, TValue> pair in this)
-                array[index++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
+		public ICollection<TValue> Values
+		{
+			get
+			{
+				List<TValue> retVal = new();
 
-        }
+				foreach (var item in _interalStorage)
+					retVal.AddRange(item.Value);
 
-        public int Count
-        {
-            get
-            {
-                int count = 0;
-                foreach (var item in _interalStorage)
-                {
-                    count += item.Value.Count;
-                }
-                return count;
-            }
-        }
+				return retVal;
+			}
+		}
+
+		public IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList
+		{
+			get
+			{
+				foreach (var pair in _interalStorage)
+					foreach (var value in pair.Value)
+						yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
+			}
+		}
+
+		public void Clear()
+		{
+			_interalStorage.Clear();
+		}
+
+		public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+		{
+			if (array == null)
+				throw new ArgumentNullException("array");
+
+			if (arrayIndex < 0)
+				throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "argument 'arrayIndex' cannot be negative");
+
+			if (arrayIndex >= array.Length ||
+			    Count > array.Length - arrayIndex)
+				array = new KeyValuePair<TKey, TValue>[Count];
+
+			int index = arrayIndex;
+
+			foreach (KeyValuePair<TKey, TValue> pair in this)
+				array[index++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
+		}
+
+		public int Count
+		{
+			get
+			{
+				int count = 0;
+
+				foreach (var item in _interalStorage)
+					count += item.Value.Count;
+
+				return count;
+			}
+		}
 
 
+		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+		{
+			return new MultiMapEnumerator<TKey, TValue>(this);
+		}
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return new MultiMapEnumerator<TKey, TValue>(this);
-        }
+		public bool Empty()
+		{
+			return _interalStorage == null || _interalStorage.Count == 0;
+		}
 
-        public bool Empty()
-        {
-            return _interalStorage == null || _interalStorage.Count == 0;  
-        }
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+		private bool TryGetValue(TKey key, out TValue value)
+		{
+			value = default;
 
-        private Dictionary<TKey, List<TValue>> _interalStorage = new();
-    }
-    
+			if (_interalStorage.TryGetValue(key, out var val))
+			{
+				value = val.LastOrDefault();
+
+				return true;
+			}
+
+			return false;
+		}
+	}
 }

@@ -2,77 +2,86 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 
 namespace Game.Chat
 {
-    [CommandGroup("scene")]
-    class SceneCommands
-    {
-        [Command("cancel", RBACPermissions.CommandSceneCancel)]
-        static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
-        {
-            Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                return false;
-            }
+	[CommandGroup("scene")]
+	internal class SceneCommands
+	{
+		[Command("cancel", RBACPermissions.CommandSceneCancel)]
+		private static bool HandleCancelSceneCommand(CommandHandler handler, uint sceneScriptPackageId)
+		{
+			Player target = handler.GetSelectedPlayerOrSelf();
 
-            if (!CliDB.SceneScriptPackageStorage.HasRecord(sceneScriptPackageId))
-                return false;
+			if (!target)
+			{
+				handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-            target.GetSceneMgr().CancelSceneByPackageId(sceneScriptPackageId);
-            return true;
-        }
+				return false;
+			}
 
-        [Command("debug", RBACPermissions.CommandSceneDebug)]
-        static bool HandleDebugSceneCommand(CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-            if (player)
-            {
-                player.GetSceneMgr().ToggleDebugSceneMode();
-                handler.SendSysMessage(player.GetSceneMgr().IsInDebugSceneMode() ? CypherStrings.CommandSceneDebugOn : CypherStrings.CommandSceneDebugOff);
-            }
+			if (!CliDB.SceneScriptPackageStorage.HasRecord(sceneScriptPackageId))
+				return false;
 
-            return true;
-        }
+			target.GetSceneMgr().CancelSceneByPackageId(sceneScriptPackageId);
 
-        [Command("play", RBACPermissions.CommandScenePlay)]
-        static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
-        {
-            Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                return false;
-            }
+			return true;
+		}
 
-            if (Global.ObjectMgr.GetSceneTemplate(sceneId) == null)
-                return false;
+		[Command("debug", RBACPermissions.CommandSceneDebug)]
+		private static bool HandleDebugSceneCommand(CommandHandler handler)
+		{
+			Player player = handler.GetSession().GetPlayer();
 
-            target.GetSceneMgr().PlayScene(sceneId);
-            return true;
-        }
+			if (player)
+			{
+				player.GetSceneMgr().ToggleDebugSceneMode();
+				handler.SendSysMessage(player.GetSceneMgr().IsInDebugSceneMode() ? CypherStrings.CommandSceneDebugOn : CypherStrings.CommandSceneDebugOff);
+			}
 
-        [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
-        {
-            Player target = handler.GetSelectedPlayerOrSelf();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                return false;
-            }
+			return true;
+		}
 
-            if (!CliDB.SceneScriptPackageStorage.HasRecord(sceneScriptPackageId))
-                return false;
+		[Command("play", RBACPermissions.CommandScenePlay)]
+		private static bool HandlePlaySceneCommand(CommandHandler handler, uint sceneId)
+		{
+			Player target = handler.GetSelectedPlayerOrSelf();
 
-            target.GetSceneMgr().PlaySceneByPackageId(sceneScriptPackageId, flags.GetValueOrDefault(0));
-            return true;
-        }
-    }
+			if (!target)
+			{
+				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+
+				return false;
+			}
+
+			if (Global.ObjectMgr.GetSceneTemplate(sceneId) == null)
+				return false;
+
+			target.GetSceneMgr().PlayScene(sceneId);
+
+			return true;
+		}
+
+		[Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
+		private static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
+		{
+			Player target = handler.GetSelectedPlayerOrSelf();
+
+			if (!target)
+			{
+				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+
+				return false;
+			}
+
+			if (!CliDB.SceneScriptPackageStorage.HasRecord(sceneScriptPackageId))
+				return false;
+
+			target.GetSceneMgr().PlaySceneByPackageId(sceneScriptPackageId, flags.GetValueOrDefault(0));
+
+			return true;
+		}
+	}
 }

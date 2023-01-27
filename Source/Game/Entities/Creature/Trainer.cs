@@ -1,220 +1,241 @@
-﻿using Framework.Constants;
+﻿using System;
+using System.Collections.Generic;
+using Framework.Constants;
 using Game.BattlePets;
 using Game.Networking.Packets;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class TrainerSpell
-    {
-        public uint SpellId;
-        public uint MoneyCost;
-        public uint ReqSkillLine;
-        public uint ReqSkillRank;
-        public Array<uint> ReqAbility = new(3);
-        public byte ReqLevel;
+	public class TrainerSpell
+	{
+		public uint MoneyCost;
+		public Array<uint> ReqAbility = new(3);
+		public byte ReqLevel;
+		public uint ReqSkillLine;
+		public uint ReqSkillRank;
+		public uint SpellId;
 
-        public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell); }
-    }
+		public bool IsCastable()
+		{
+			return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell);
+		}
+	}
 
-    public class Trainer
-    {
-        public Trainer(uint id, TrainerType type, string greeting, List<TrainerSpell> spells)
-        {
-            _id = id;
-            _type = type;
-            _spells = spells;
+	public class Trainer
+	{
+		private string[] _greeting = new string[(int)Locale.Total];
 
-            _greeting[(int)Locale.enUS] = greeting;
-        }
+		private uint _id;
+		private List<TrainerSpell> _spells;
+		private TrainerType _type;
 
-        public void SendSpells(Creature npc, Player player, Locale locale)
-        {
-            float reputationDiscount = player.GetReputationPriceDiscount(npc);
+		public Trainer(uint id, TrainerType type, string greeting, List<TrainerSpell> spells)
+		{
+			_id     = id;
+			_type   = type;
+			_spells = spells;
 
-            TrainerList trainerList = new();
-            trainerList.TrainerGUID = npc.GetGUID();
-            trainerList.TrainerType = (int)_type;
-            trainerList.TrainerID = (int)_id;
-            trainerList.Greeting = GetGreeting(locale);
+			_greeting[(int)Locale.enUS] = greeting;
+		}
 
-            foreach (TrainerSpell trainerSpell in _spells)
-            {
-                if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
-                    continue;
+		public void SendSpells(Creature npc, Player player, Locale locale)
+		{
+			float reputationDiscount = player.GetReputationPriceDiscount(npc);
 
-                if (!Global.ConditionMgr.IsObjectMeetingTrainerSpellConditions(_id, trainerSpell.SpellId, player))
-                {
-                    Log.outDebug(LogFilter.Condition, $"SendSpells: conditions not met for trainer id {_id} spell {trainerSpell.SpellId} player '{player.GetName()}' ({player.GetGUID()})");
-                    continue;
-                }
+			TrainerList trainerList = new();
+			trainerList.TrainerGUID = npc.GetGUID();
+			trainerList.TrainerType = (int)_type;
+			trainerList.TrainerID   = (int)_id;
+			trainerList.Greeting    = GetGreeting(locale);
 
-                TrainerListSpell trainerListSpell = new();
-                trainerListSpell.SpellID = trainerSpell.SpellId;
-                trainerListSpell.MoneyCost = (uint)(trainerSpell.MoneyCost * reputationDiscount);
-                trainerListSpell.ReqSkillLine = trainerSpell.ReqSkillLine;
-                trainerListSpell.ReqSkillRank = trainerSpell.ReqSkillRank;
-                trainerListSpell.ReqAbility = trainerSpell.ReqAbility.ToArray();
-                trainerListSpell.Usable = GetSpellState(player, trainerSpell);
-                trainerListSpell.ReqLevel = trainerSpell.ReqLevel;
-                trainerList.Spells.Add(trainerListSpell);
-            }
+			foreach (TrainerSpell trainerSpell in _spells)
+			{
+				if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
+					continue;
 
-            player.SendPacket(trainerList);
-        }
+				if (!Global.ConditionMgr.IsObjectMeetingTrainerSpellConditions(_id, trainerSpell.SpellId, player))
+				{
+					Log.outDebug(LogFilter.Condition, $"SendSpells: conditions not met for trainer id {_id} spell {trainerSpell.SpellId} player '{player.GetName()}' ({player.GetGUID()})");
 
-        public void TeachSpell(Creature npc, Player player, uint spellId)
-        {
-            TrainerSpell trainerSpell = GetSpell(spellId);
-            if (trainerSpell == null || !CanTeachSpell(player, trainerSpell))
-            {
-                SendTeachFailure(npc, player, spellId, TrainerFailReason.Unavailable);
-                return;
-            }
+					continue;
+				}
 
-            bool sendSpellVisual = true;
-            var speciesEntry = BattlePetMgr.GetBattlePetSpeciesBySpell(trainerSpell.SpellId);
-            if (speciesEntry != null)
-            {
-                if (player.GetSession().GetBattlePetMgr().HasMaxPetCount(speciesEntry, player.GetGUID()))
-                {
-                    // Don't send any error to client (intended)
-                    return;
-                }
+				TrainerListSpell trainerListSpell = new();
+				trainerListSpell.SpellID      = trainerSpell.SpellId;
+				trainerListSpell.MoneyCost    = (uint)(trainerSpell.MoneyCost * reputationDiscount);
+				trainerListSpell.ReqSkillLine = trainerSpell.ReqSkillLine;
+				trainerListSpell.ReqSkillRank = trainerSpell.ReqSkillRank;
+				trainerListSpell.ReqAbility   = trainerSpell.ReqAbility.ToArray();
+				trainerListSpell.Usable       = GetSpellState(player, trainerSpell);
+				trainerListSpell.ReqLevel     = trainerSpell.ReqLevel;
+				trainerList.Spells.Add(trainerListSpell);
+			}
 
-                sendSpellVisual = false;
-            }
+			player.SendPacket(trainerList);
+		}
 
-            float reputationDiscount = player.GetReputationPriceDiscount(npc);
-            long moneyCost = (long)(trainerSpell.MoneyCost * reputationDiscount);
-            if (!player.HasEnoughMoney(moneyCost))
-            {
-                SendTeachFailure(npc, player, spellId, TrainerFailReason.NotEnoughMoney);
-                return;
-            }
+		public void TeachSpell(Creature npc, Player player, uint spellId)
+		{
+			TrainerSpell trainerSpell = GetSpell(spellId);
 
-            player.ModifyMoney(-moneyCost);
+			if (trainerSpell == null ||
+			    !CanTeachSpell(player, trainerSpell))
+			{
+				SendTeachFailure(npc, player, spellId, TrainerFailReason.Unavailable);
 
-            if (sendSpellVisual)
-            {
-                npc.SendPlaySpellVisualKit(179, 0, 0);     // 53 SpellCastDirected
-                player.SendPlaySpellVisualKit(362, 1, 0);  // 113 EmoteSalute
-            }
+				return;
+			}
 
-            // learn explicitly or cast explicitly
-            if (trainerSpell.IsCastable())
-                player.CastSpell(player, trainerSpell.SpellId, true);
-            else
-            {
-                bool dependent = false;
+			bool sendSpellVisual = true;
+			var  speciesEntry    = BattlePetMgr.GetBattlePetSpeciesBySpell(trainerSpell.SpellId);
 
-                if (speciesEntry != null)
-                {
-                    player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
-                    // If the spell summons a battle pet, we fake that it has been learned and the battle pet is added
-                    // marking as dependent prevents saving the spell to database (intended)
-                    dependent = true;
-                }
+			if (speciesEntry != null)
+			{
+				if (player.GetSession().GetBattlePetMgr().HasMaxPetCount(speciesEntry, player.GetGUID()))
+					// Don't send any error to client (intended)
+					return;
 
-                player.LearnSpell(trainerSpell.SpellId, dependent);
-            }
-        }
+				sendSpellVisual = false;
+			}
 
-        TrainerSpell GetSpell(uint spellId)
-        {
-            return _spells.Find(trainerSpell => trainerSpell.SpellId == spellId);
-        }
+			float reputationDiscount = player.GetReputationPriceDiscount(npc);
+			long  moneyCost          = (long)(trainerSpell.MoneyCost * reputationDiscount);
 
-        bool CanTeachSpell(Player player, TrainerSpell trainerSpell)
-        {
-            TrainerSpellState state = GetSpellState(player, trainerSpell);
-            if (state != TrainerSpellState.Available)
-                return false;
+			if (!player.HasEnoughMoney(moneyCost))
+			{
+				SendTeachFailure(npc, player, spellId, TrainerFailReason.NotEnoughMoney);
 
-            SpellInfo trainerSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None);
-            if (trainerSpellInfo.IsPrimaryProfessionFirstRank() && player.GetFreePrimaryProfessionPoints() == 0)
-                return false;
+				return;
+			}
 
-            foreach (SpellEffectInfo effect in trainerSpellInfo.GetEffects())
-            {
-                if (!effect.IsEffect(SpellEffectName.LearnSpell))
-                    continue;
+			player.ModifyMoney(-moneyCost);
 
-                SpellInfo learnedSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
-                if (learnedSpellInfo != null && learnedSpellInfo.IsPrimaryProfessionFirstRank() && player.GetFreePrimaryProfessionPoints() == 0)
-                    return false;
-            }
+			if (sendSpellVisual)
+			{
+				npc.SendPlaySpellVisualKit(179, 0, 0);    // 53 SpellCastDirected
+				player.SendPlaySpellVisualKit(362, 1, 0); // 113 EmoteSalute
+			}
 
-            return true;
-        }
+			// learn explicitly or cast explicitly
+			if (trainerSpell.IsCastable())
+			{
+				player.CastSpell(player, trainerSpell.SpellId, true);
+			}
+			else
+			{
+				bool dependent = false;
 
-        TrainerSpellState GetSpellState(Player player, TrainerSpell trainerSpell)
-        {
-            if (player.HasSpell(trainerSpell.SpellId))
-                return TrainerSpellState.Known;
+				if (speciesEntry != null)
+				{
+					player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+					// If the spell summons a battle pet, we fake that it has been learned and the battle pet is added
+					// marking as dependent prevents saving the spell to database (intended)
+					dependent = true;
+				}
 
-            // check race/class requirement
-            if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
-                return TrainerSpellState.Unavailable;
+				player.LearnSpell(trainerSpell.SpellId, dependent);
+			}
+		}
 
-            // check skill requirement
-            if (trainerSpell.ReqSkillLine != 0 && player.GetBaseSkillValue((SkillType)trainerSpell.ReqSkillLine) < trainerSpell.ReqSkillRank)
-                return TrainerSpellState.Unavailable;
+		private TrainerSpell GetSpell(uint spellId)
+		{
+			return _spells.Find(trainerSpell => trainerSpell.SpellId == spellId);
+		}
 
-            foreach (uint reqAbility in trainerSpell.ReqAbility)
-                if (reqAbility != 0 && !player.HasSpell(reqAbility))
-                    return TrainerSpellState.Unavailable;
+		private bool CanTeachSpell(Player player, TrainerSpell trainerSpell)
+		{
+			TrainerSpellState state = GetSpellState(player, trainerSpell);
 
-            // check level requirement
-            if (player.GetLevel() < trainerSpell.ReqLevel)
-                return TrainerSpellState.Unavailable;
+			if (state != TrainerSpellState.Available)
+				return false;
 
-            // check ranks
-            bool hasLearnSpellEffect = false;
-            bool knowsAllLearnedSpells = true;
-            foreach (var spellEffectInfo in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
-            {
-                if (!spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
-                    continue;
+			SpellInfo trainerSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None);
 
-                hasLearnSpellEffect = true;
-                if (!player.HasSpell(spellEffectInfo.TriggerSpell))
-                    knowsAllLearnedSpells = false;
-            }
+			if (trainerSpellInfo.IsPrimaryProfessionFirstRank() &&
+			    player.GetFreePrimaryProfessionPoints() == 0)
+				return false;
 
-            if (hasLearnSpellEffect && knowsAllLearnedSpells)
-                return TrainerSpellState.Known;
+			foreach (SpellEffectInfo effect in trainerSpellInfo.GetEffects())
+			{
+				if (!effect.IsEffect(SpellEffectName.LearnSpell))
+					continue;
 
-            return TrainerSpellState.Available;
-        }
+				SpellInfo learnedSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
 
-        void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
-        {
-            TrainerBuyFailed trainerBuyFailed = new();
-            trainerBuyFailed.TrainerGUID = npc.GetGUID();
-            trainerBuyFailed.SpellID = spellId;
-            trainerBuyFailed.TrainerFailedReason = reason;
-            player.SendPacket(trainerBuyFailed);
-        }
+				if (learnedSpellInfo != null &&
+				    learnedSpellInfo.IsPrimaryProfessionFirstRank() &&
+				    player.GetFreePrimaryProfessionPoints() == 0)
+					return false;
+			}
 
-        string GetGreeting(Locale locale)
-        {
-            if (_greeting[(int)locale].IsEmpty())
-                return _greeting[(int)Locale.enUS];
+			return true;
+		}
 
-            return _greeting[(int)locale];
-        }
+		private TrainerSpellState GetSpellState(Player player, TrainerSpell trainerSpell)
+		{
+			if (player.HasSpell(trainerSpell.SpellId))
+				return TrainerSpellState.Known;
 
-        public void AddGreetingLocale(Locale locale, string greeting)
-        {
-            _greeting[(int)locale] = greeting;
-        }
+			// check race/class requirement
+			if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
+				return TrainerSpellState.Unavailable;
 
-        uint _id;
-        TrainerType _type;
-        List<TrainerSpell> _spells;
-        string[] _greeting = new string[(int)Locale.Total];
-    }
+			// check skill requirement
+			if (trainerSpell.ReqSkillLine != 0 &&
+			    player.GetBaseSkillValue((SkillType)trainerSpell.ReqSkillLine) < trainerSpell.ReqSkillRank)
+				return TrainerSpellState.Unavailable;
+
+			foreach (uint reqAbility in trainerSpell.ReqAbility)
+				if (reqAbility != 0 &&
+				    !player.HasSpell(reqAbility))
+					return TrainerSpellState.Unavailable;
+
+			// check level requirement
+			if (player.GetLevel() < trainerSpell.ReqLevel)
+				return TrainerSpellState.Unavailable;
+
+			// check ranks
+			bool hasLearnSpellEffect   = false;
+			bool knowsAllLearnedSpells = true;
+
+			foreach (var spellEffectInfo in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
+			{
+				if (!spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
+					continue;
+
+				hasLearnSpellEffect = true;
+
+				if (!player.HasSpell(spellEffectInfo.TriggerSpell))
+					knowsAllLearnedSpells = false;
+			}
+
+			if (hasLearnSpellEffect && knowsAllLearnedSpells)
+				return TrainerSpellState.Known;
+
+			return TrainerSpellState.Available;
+		}
+
+		private void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
+		{
+			TrainerBuyFailed trainerBuyFailed = new();
+			trainerBuyFailed.TrainerGUID         = npc.GetGUID();
+			trainerBuyFailed.SpellID             = spellId;
+			trainerBuyFailed.TrainerFailedReason = reason;
+			player.SendPacket(trainerBuyFailed);
+		}
+
+		private string GetGreeting(Locale locale)
+		{
+			if (_greeting[(int)locale].IsEmpty())
+				return _greeting[(int)Locale.enUS];
+
+			return _greeting[(int)locale];
+		}
+
+		public void AddGreetingLocale(Locale locale, string greeting)
+		{
+			_greeting[(int)locale] = greeting;
+		}
+	}
 }

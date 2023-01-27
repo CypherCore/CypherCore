@@ -3,39 +3,39 @@
 
 namespace Game.DataStorage
 {
-    public sealed class NameGenRecord
-    {
-        public uint Id;
-        public string Name;
-        public byte RaceID;
-        public byte Sex;
-    }
+	public sealed class NameGenRecord
+	{
+		public uint Id;
+		public string Name;
+		public byte RaceID;
+		public byte Sex;
+	}
 
-    public sealed class NamesProfanityRecord
-    {
-        public uint Id;
-        public string Name;
-        public sbyte Language;
-    }
+	public sealed class NamesProfanityRecord
+	{
+		public uint Id;
+		public sbyte Language;
+		public string Name;
+	}
 
-    public sealed class NamesReservedRecord
-    {
-        public uint Id;
-        public string Name;
-    }
+	public sealed class NamesReservedRecord
+	{
+		public uint Id;
+		public string Name;
+	}
 
-    public sealed class NamesReservedLocaleRecord
-    {
-        public uint Id;
-        public string Name;
-        public byte LocaleMask;
-    }
+	public sealed class NamesReservedLocaleRecord
+	{
+		public uint Id;
+		public byte LocaleMask;
+		public string Name;
+	}
 
-    public sealed class NumTalentsAtLevelRecord
-    {
-        public uint Id;
-        public uint NumTalents;
-        public uint NumTalentsDeathKnight;
-        public uint NumTalentsDemonHunter;
-    }
+	public sealed class NumTalentsAtLevelRecord
+	{
+		public uint Id;
+		public uint NumTalents;
+		public uint NumTalentsDeathKnight;
+		public uint NumTalentsDemonHunter;
+	}
 }

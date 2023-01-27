@@ -5,8 +5,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-    public interface IGuildOnMOTDChanged : IScriptObject
-    {
-        void OnMOTDChanged(Guilds.Guild guild, string newMotd);
-    }
+	public interface IGuildOnMOTDChanged : IScriptObject
+	{
+		void OnMOTDChanged(Guild guild, string newMotd);
+	}
 }

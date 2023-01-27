@@ -3,12 +3,11 @@
 
 using Game.Entities;
 using Game.Groups;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
-    public interface IGroupOnChangeLeader : IScriptObject
-    {
-        void OnChangeLeader(Groups.Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid);
-    }
+	public interface IGroupOnChangeLeader : IScriptObject
+	{
+		void OnChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid);
+	}
 }

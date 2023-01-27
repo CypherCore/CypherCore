@@ -1,6 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Text;
 using Bgs.Protocol;
 using Bgs.Protocol.GameUtilities.V1;
 using Framework.Constants;
@@ -8,212 +11,230 @@ using Framework.Database;
 using Framework.Serialization;
 using Framework.Web;
 using Google.Protobuf;
-using System;
-using System.Collections.Generic;
+using Attribute = Bgs.Protocol.Attribute;
 
 namespace BNetServer.Networking
 {
-    public partial class Session
-    {
-        [Service(OriginalHash.GameUtilitiesService, 1)]
-        BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
-        {
-            if (!authed)
-                return BattlenetRpcErrorCode.Denied;
+	public partial class Session
+	{
+		[Service(OriginalHash.GameUtilitiesService, 1)]
+		private BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
+		{
+			if (!authed)
+				return BattlenetRpcErrorCode.Denied;
 
-            Bgs.Protocol.Attribute command = null;
-            Dictionary<string, Variant> Params = new();
-            string removeSuffix(string str)
-            {
-                var pos = str.LastIndexOf('_');
-                if (pos != -1)
-                    return str.Substring(0, pos);
+			Attribute                   command = null;
+			Dictionary<string, Variant> Params  = new();
 
-                return str;
-            }
+			string removeSuffix(string str)
+			{
+				var pos = str.LastIndexOf('_');
 
-            for (int i = 0; i < request.Attribute.Count; ++i)
-            {
-                Bgs.Protocol.Attribute attr = request.Attribute[i];
-                if (attr.Name.Contains("Command_"))
-                { 
-                    command = attr;
-                    Params[removeSuffix(attr.Name)] = attr.Value;
-                }
-                else
-                    Params[attr.Name] = attr.Value;
-            }
+				if (pos != -1)
+					return str.Substring(0, pos);
 
-            if (command == null)
-            {
-                Log.outError(LogFilter.SessionRpc, $"{GetClientInfo()} sent ClientRequest with no command.");
-                return BattlenetRpcErrorCode.RpcMalformedRequest;
-            }
+				return str;
+			}
 
-            return removeSuffix(command.Name) switch
-            {
-                "Command_RealmListTicketRequest_v1" => GetRealmListTicket(Params, response),
-                "Command_LastCharPlayedRequest_v1" => GetLastCharPlayed(Params, response),
-                "Command_RealmListRequest_v1" => GetRealmList(Params, response),
-                "Command_RealmJoinRequest_v1" => JoinRealm(Params, response),
-                _ => BattlenetRpcErrorCode.RpcNotImplemented
-            };
-        }
+			for (int i = 0; i < request.Attribute.Count; ++i)
+			{
+				Attribute attr = request.Attribute[i];
 
-        [Service(OriginalHash.GameUtilitiesService, 10)]
-        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
-        {
-            if (!authed)
-                return BattlenetRpcErrorCode.Denied;
+				if (attr.Name.Contains("Command_"))
+				{
+					command                         = attr;
+					Params[removeSuffix(attr.Name)] = attr.Value;
+				}
+				else
+				{
+					Params[attr.Name] = attr.Value;
+				}
+			}
 
-            if (request.AttributeKey.Contains("Command_RealmListRequest_v1"))
-            {
-                Global.RealmMgr.WriteSubRegions(response);
-                return BattlenetRpcErrorCode.Ok;
-            }
+			if (command == null)
+			{
+				Log.outError(LogFilter.SessionRpc, $"{GetClientInfo()} sent ClientRequest with no command.");
 
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
+				return BattlenetRpcErrorCode.RpcMalformedRequest;
+			}
 
-        BattlenetRpcErrorCode GetRealmListTicket(Dictionary<string, Variant> Params, ClientResponse response)
-        {
-            Variant identity = Params.LookupByKey("Param_Identity");
-            if (identity != null)
-            {
-                var realmListTicketIdentity = Json.CreateObject<RealmListTicketIdentity>(identity.BlobValue.ToStringUtf8(), true);
-                var gameAccount = accountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
-                if (gameAccount != null)
-                    gameAccountInfo = gameAccount;
-            }
+			return removeSuffix(command.Name) switch
+			       {
+				       "Command_RealmListTicketRequest_v1" => GetRealmListTicket(Params, response),
+				       "Command_LastCharPlayedRequest_v1"  => GetLastCharPlayed(Params, response),
+				       "Command_RealmListRequest_v1"       => GetRealmList(Params, response),
+				       "Command_RealmJoinRequest_v1"       => JoinRealm(Params, response),
+				       _                                   => BattlenetRpcErrorCode.RpcNotImplemented
+			       };
+		}
 
-            if (gameAccountInfo == null)
-                return BattlenetRpcErrorCode.UtilServerInvalidIdentityArgs;
+		[Service(OriginalHash.GameUtilitiesService, 10)]
+		private BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
+		{
+			if (!authed)
+				return BattlenetRpcErrorCode.Denied;
 
-            if (gameAccountInfo.IsPermanenetlyBanned)
-                return BattlenetRpcErrorCode.GameAccountBanned;
-            else if (gameAccountInfo.IsBanned)
-                return BattlenetRpcErrorCode.GameAccountSuspended;
+			if (request.AttributeKey.Contains("Command_RealmListRequest_v1"))
+			{
+				Global.RealmMgr.WriteSubRegions(response);
 
-            bool clientInfoOk = false;
-            Variant clientInfo = Params.LookupByKey("Param_ClientInfo");
-            if (clientInfo != null)
-            {
-                var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
-                clientInfoOk = true;
-                int i = 0;
-                foreach (byte b in realmListTicketClientInformation.Info.Secret)
-                    clientSecret[i++] = b;
-            }
+				return BattlenetRpcErrorCode.Ok;
+			}
 
-            if (!clientInfoOk)
-                return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
+			return BattlenetRpcErrorCode.RpcNotImplemented;
+		}
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
-            stmt.AddValue(0, GetRemoteIpEndPoint().ToString());
-            stmt.AddValue(1, (byte)locale.ToEnum<Locale>());
-            stmt.AddValue(2, os);
-            stmt.AddValue(3, accountInfo.Id);
+		private BattlenetRpcErrorCode GetRealmListTicket(Dictionary<string, Variant> Params, ClientResponse response)
+		{
+			Variant identity = Params.LookupByKey("Param_Identity");
 
-            DB.Login.Execute(stmt);
+			if (identity != null)
+			{
+				var realmListTicketIdentity = Json.CreateObject<RealmListTicketIdentity>(identity.BlobValue.ToStringUtf8(), true);
+				var gameAccount             = accountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
 
-            var attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_RealmListTicket";
-            attribute.Value = new Variant();
-            attribute.Value.BlobValue = ByteString.CopyFrom("AuthRealmListTicket", System.Text.Encoding.UTF8);
-            response.Attribute.Add(attribute);
+				if (gameAccount != null)
+					gameAccountInfo = gameAccount;
+			}
 
-            return BattlenetRpcErrorCode.Ok;
-        }
+			if (gameAccountInfo == null)
+				return BattlenetRpcErrorCode.UtilServerInvalidIdentityArgs;
 
-        BattlenetRpcErrorCode GetLastCharPlayed(Dictionary<string, Variant> Params, ClientResponse response)
-        {
-            Variant subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1");
-            if (subRegion != null)
-            {
-                var lastPlayerChar = gameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
-                if (lastPlayerChar != null)
-                {
-                    var compressed = Global.RealmMgr.GetRealmEntryJSON(lastPlayerChar.RealmId, build);
-                    if (compressed.Length == 0)
-                        return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
+			if (gameAccountInfo.IsPermanenetlyBanned)
+				return BattlenetRpcErrorCode.GameAccountBanned;
+			else if (gameAccountInfo.IsBanned)
+				return BattlenetRpcErrorCode.GameAccountSuspended;
 
-                    var attribute = new Bgs.Protocol.Attribute();
-                    attribute.Name = "Param_RealmEntry";
-                    attribute.Value = new Variant();
-                    attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
-                    response.Attribute.Add(attribute);
+			bool    clientInfoOk = false;
+			Variant clientInfo   = Params.LookupByKey("Param_ClientInfo");
 
-                    attribute = new Bgs.Protocol.Attribute();
-                    attribute.Name = "Param_CharacterName";
-                    attribute.Value = new Variant();
-                    attribute.Value.StringValue = lastPlayerChar.CharacterName;
-                    response.Attribute.Add(attribute);
+			if (clientInfo != null)
+			{
+				var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
+				clientInfoOk = true;
+				int i = 0;
 
-                    attribute = new Bgs.Protocol.Attribute();
-                    attribute.Name = "Param_CharacterGUID";
-                    attribute.Value = new Variant();
-                    attribute.Value.BlobValue = ByteString.CopyFrom(BitConverter.GetBytes(lastPlayerChar.CharacterGUID));
-                    response.Attribute.Add(attribute);
+				foreach (byte b in realmListTicketClientInformation.Info.Secret)
+					clientSecret[i++] = b;
+			}
 
-                    attribute = new Bgs.Protocol.Attribute();
-                    attribute.Name = "Param_LastPlayedTime";
-                    attribute.Value = new Variant();
-                    attribute.Value.IntValue = (int)lastPlayerChar.LastPlayedTime;
-                    response.Attribute.Add(attribute);
-                }
+			if (!clientInfoOk)
+				return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
 
-                return BattlenetRpcErrorCode.Ok;
-            }
+			PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
+			stmt.AddValue(0, GetRemoteIpEndPoint().ToString());
+			stmt.AddValue(1, (byte)locale.ToEnum<Locale>());
+			stmt.AddValue(2, os);
+			stmt.AddValue(3, accountInfo.Id);
 
-            return BattlenetRpcErrorCode.UtilServerUnknownRealm;
-        }
+			DB.Login.Execute(stmt);
 
-        BattlenetRpcErrorCode GetRealmList(Dictionary<string, Variant> Params, ClientResponse response)
-        {
-            if (gameAccountInfo == null)
-                return BattlenetRpcErrorCode.UserServerBadWowAccount;
+			var attribute = new Attribute();
+			attribute.Name            = "Param_RealmListTicket";
+			attribute.Value           = new Variant();
+			attribute.Value.BlobValue = ByteString.CopyFrom("AuthRealmListTicket", Encoding.UTF8);
+			response.Attribute.Add(attribute);
 
-            string subRegionId = "";
-            Variant subRegion = Params.LookupByKey("Command_RealmListRequest_v1");
-            if (subRegion != null)
-                subRegionId = subRegion.StringValue;
+			return BattlenetRpcErrorCode.Ok;
+		}
 
-            var compressed = Global.RealmMgr.GetRealmList(build, subRegionId);
-            if (compressed.Length == 0)
-                return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
+		private BattlenetRpcErrorCode GetLastCharPlayed(Dictionary<string, Variant> Params, ClientResponse response)
+		{
+			Variant subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1");
 
-            var attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_RealmList";
-            attribute.Value = new Variant();
-            attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
-            response.Attribute.Add(attribute);
+			if (subRegion != null)
+			{
+				var lastPlayerChar = gameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
 
-            var realmCharacterCounts = new RealmCharacterCountList();
-            foreach (var characterCount in gameAccountInfo.CharacterCounts)
-            {
-                var countEntry = new RealmCharacterCountEntry();
-                countEntry.WowRealmAddress = (int)characterCount.Key;
-                countEntry.Count = characterCount.Value;
-                realmCharacterCounts.Counts.Add(countEntry);
-            }
+				if (lastPlayerChar != null)
+				{
+					var compressed = Global.RealmMgr.GetRealmEntryJSON(lastPlayerChar.RealmId, build);
 
-            compressed = Json.Deflate("JSONRealmCharacterCountList", realmCharacterCounts);
+					if (compressed.Length == 0)
+						return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
-            attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_CharacterCountList";
-            attribute.Value = new Variant();
-            attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
-            response.Attribute.Add(attribute);
-            return BattlenetRpcErrorCode.Ok;
-        }
+					var attribute = new Attribute();
+					attribute.Name            = "Param_RealmEntry";
+					attribute.Value           = new Variant();
+					attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
+					response.Attribute.Add(attribute);
 
-        BattlenetRpcErrorCode JoinRealm(Dictionary<string, Variant> Params, ClientResponse response)
-        {
-            Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
-            if (realmAddress != null)
-                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, gameAccountInfo.Name, response);
+					attribute                   = new Attribute();
+					attribute.Name              = "Param_CharacterName";
+					attribute.Value             = new Variant();
+					attribute.Value.StringValue = lastPlayerChar.CharacterName;
+					response.Attribute.Add(attribute);
 
-            return BattlenetRpcErrorCode.WowServicesInvalidJoinTicket;
-        }
-    }
+					attribute                 = new Attribute();
+					attribute.Name            = "Param_CharacterGUID";
+					attribute.Value           = new Variant();
+					attribute.Value.BlobValue = ByteString.CopyFrom(BitConverter.GetBytes(lastPlayerChar.CharacterGUID));
+					response.Attribute.Add(attribute);
+
+					attribute                = new Attribute();
+					attribute.Name           = "Param_LastPlayedTime";
+					attribute.Value          = new Variant();
+					attribute.Value.IntValue = (int)lastPlayerChar.LastPlayedTime;
+					response.Attribute.Add(attribute);
+				}
+
+				return BattlenetRpcErrorCode.Ok;
+			}
+
+			return BattlenetRpcErrorCode.UtilServerUnknownRealm;
+		}
+
+		private BattlenetRpcErrorCode GetRealmList(Dictionary<string, Variant> Params, ClientResponse response)
+		{
+			if (gameAccountInfo == null)
+				return BattlenetRpcErrorCode.UserServerBadWowAccount;
+
+			string  subRegionId = "";
+			Variant subRegion   = Params.LookupByKey("Command_RealmListRequest_v1");
+
+			if (subRegion != null)
+				subRegionId = subRegion.StringValue;
+
+			var compressed = Global.RealmMgr.GetRealmList(build, subRegionId);
+
+			if (compressed.Length == 0)
+				return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
+
+			var attribute = new Attribute();
+			attribute.Name            = "Param_RealmList";
+			attribute.Value           = new Variant();
+			attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
+			response.Attribute.Add(attribute);
+
+			var realmCharacterCounts = new RealmCharacterCountList();
+
+			foreach (var characterCount in gameAccountInfo.CharacterCounts)
+			{
+				var countEntry = new RealmCharacterCountEntry();
+				countEntry.WowRealmAddress = (int)characterCount.Key;
+				countEntry.Count           = characterCount.Value;
+				realmCharacterCounts.Counts.Add(countEntry);
+			}
+
+			compressed = Json.Deflate("JSONRealmCharacterCountList", realmCharacterCounts);
+
+			attribute                 = new Attribute();
+			attribute.Name            = "Param_CharacterCountList";
+			attribute.Value           = new Variant();
+			attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
+			response.Attribute.Add(attribute);
+
+			return BattlenetRpcErrorCode.Ok;
+		}
+
+		private BattlenetRpcErrorCode JoinRealm(Dictionary<string, Variant> Params, ClientResponse response)
+		{
+			Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
+
+			if (realmAddress != null)
+				return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, gameAccountInfo.Name, response);
+
+			return BattlenetRpcErrorCode.WowServicesInvalidJoinTicket;
+		}
+	}
 }

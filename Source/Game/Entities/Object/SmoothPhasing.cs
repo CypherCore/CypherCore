@@ -5,71 +5,74 @@ using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public class SmoothPhasing
-    {
-        SmoothPhasingInfo smoothPhasingInfoSingle;
-        Dictionary<ObjectGuid, SmoothPhasingInfo> smoothPhasingInfoViewerDependent = new();
+	public class SmoothPhasing
+	{
+		private SmoothPhasingInfo smoothPhasingInfoSingle;
+		private Dictionary<ObjectGuid, SmoothPhasingInfo> smoothPhasingInfoViewerDependent = new();
 
-        public void SetViewerDependentInfo(ObjectGuid seer, SmoothPhasingInfo info)
-        {
-            smoothPhasingInfoViewerDependent[seer] = info;
-        }
+		public void SetViewerDependentInfo(ObjectGuid seer, SmoothPhasingInfo info)
+		{
+			smoothPhasingInfoViewerDependent[seer] = info;
+		}
 
-        public void ClearViewerDependentInfo(ObjectGuid seer)
-        {
-            smoothPhasingInfoViewerDependent.Remove(seer);
-        }
+		public void ClearViewerDependentInfo(ObjectGuid seer)
+		{
+			smoothPhasingInfoViewerDependent.Remove(seer);
+		}
 
-        public void SetSingleInfo(SmoothPhasingInfo info)
-        {
-            smoothPhasingInfoSingle = info;
-        }
+		public void SetSingleInfo(SmoothPhasingInfo info)
+		{
+			smoothPhasingInfoSingle = info;
+		}
 
-        public bool IsReplacing(ObjectGuid guid)
-        {
-            return smoothPhasingInfoSingle != null && smoothPhasingInfoSingle.ReplaceObject == guid;
-        }
+		public bool IsReplacing(ObjectGuid guid)
+		{
+			return smoothPhasingInfoSingle != null && smoothPhasingInfoSingle.ReplaceObject == guid;
+		}
 
-        public bool IsBeingReplacedForSeer(ObjectGuid seer)
-        {
-            SmoothPhasingInfo smoothPhasingInfo = smoothPhasingInfoViewerDependent.LookupByKey(seer);
-            if (smoothPhasingInfo != null)
-                return !smoothPhasingInfo.Disabled;
+		public bool IsBeingReplacedForSeer(ObjectGuid seer)
+		{
+			SmoothPhasingInfo smoothPhasingInfo = smoothPhasingInfoViewerDependent.LookupByKey(seer);
 
-            return false;
-        }
+			if (smoothPhasingInfo != null)
+				return !smoothPhasingInfo.Disabled;
 
-        public SmoothPhasingInfo GetInfoForSeer(ObjectGuid seer)
-        {
-            if (smoothPhasingInfoViewerDependent.TryGetValue(seer, out SmoothPhasingInfo value))
-                return value;
+			return false;
+		}
 
-            return smoothPhasingInfoSingle;
-        }
+		public SmoothPhasingInfo GetInfoForSeer(ObjectGuid seer)
+		{
+			if (smoothPhasingInfoViewerDependent.TryGetValue(seer, out SmoothPhasingInfo value))
+				return value;
 
-        public void DisableReplacementForSeer(ObjectGuid seer)
-        {
-            SmoothPhasingInfo smoothPhasingInfo = smoothPhasingInfoViewerDependent.LookupByKey(seer);
-            if (smoothPhasingInfo != null)
-                smoothPhasingInfo.Disabled = true;
-        }
-    }
+			return smoothPhasingInfoSingle;
+		}
 
-    public class SmoothPhasingInfo
-    {
-        // Fields visible on client
-        public ObjectGuid? ReplaceObject;
-        public bool ReplaceActive = true;
-        public bool StopAnimKits = true;
+		public void DisableReplacementForSeer(ObjectGuid seer)
+		{
+			SmoothPhasingInfo smoothPhasingInfo = smoothPhasingInfoViewerDependent.LookupByKey(seer);
 
-        // Serverside fields
-        public bool Disabled = false;
+			if (smoothPhasingInfo != null)
+				smoothPhasingInfo.Disabled = true;
+		}
+	}
 
-        public SmoothPhasingInfo(ObjectGuid replaceObject, bool replaceActive, bool stopAnimKits)
-        {
-            ReplaceObject = replaceObject;
-            ReplaceActive = replaceActive;
-            StopAnimKits = stopAnimKits;
-        }
-    }
+	public class SmoothPhasingInfo
+	{
+		// Serverside fields
+		public bool Disabled = false;
+
+		public bool ReplaceActive = true;
+
+		// Fields visible on client
+		public ObjectGuid? ReplaceObject;
+		public bool StopAnimKits = true;
+
+		public SmoothPhasingInfo(ObjectGuid replaceObject, bool replaceActive, bool stopAnimKits)
+		{
+			ReplaceObject = replaceObject;
+			ReplaceActive = replaceActive;
+			StopAnimKits  = stopAnimKits;
+		}
+	}
 }

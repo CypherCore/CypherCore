@@ -5,16 +5,18 @@ using System;
 
 namespace Game.Scripting.BaseScripts
 {
-    public class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
-    {
-        public GenericSpellScriptLoader(string name, object[] args) : base(name)
-        {
-            _args = args;
-        }
+	public class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
+	{
+		private object[] _args;
 
-        public override SpellScript GetSpellScript() { return (S)Activator.CreateInstance(typeof(S), _args); }
+		public GenericSpellScriptLoader(string name, object[] args) : base(name)
+		{
+			_args = args;
+		}
 
-        object[] _args;
-    }
-
+		public override SpellScript GetSpellScript()
+		{
+			return (S)Activator.CreateInstance(typeof(S), _args);
+		}
+	}
 }

@@ -2,58 +2,58 @@
 
 public class GameTime
 {
-    static long StartTime = Time.UnixTime;
+	private static long StartTime = Time.UnixTime;
 
-    static long _gameTime = Time.UnixTime;
-    static uint _gameMSTime = 0;
+	private static long _gameTime = Time.UnixTime;
+	private static uint _gameMSTime = 0;
 
-    static DateTime _gameTimeSystemPoint = DateTime.MinValue;
-    static DateTime _gameTimeSteadyPoint = DateTime.MinValue;
+	private static DateTime _gameTimeSystemPoint = DateTime.MinValue;
+	private static DateTime _gameTimeSteadyPoint = DateTime.MinValue;
 
-    static DateTime _dateTime;
+	private static DateTime _dateTime;
 
-    public static long GetStartTime()
-    {
-        return StartTime;
-    }
+	public static long GetStartTime()
+	{
+		return StartTime;
+	}
 
-    public static long GetGameTime()
-    {
-        return _gameTime;
-    }
+	public static long GetGameTime()
+	{
+		return _gameTime;
+	}
 
-    public static uint GetGameTimeMS()
-    {
-        return _gameMSTime;
-    }
+	public static uint GetGameTimeMS()
+	{
+		return _gameMSTime;
+	}
 
-    public static DateTime GetSystemTime()
-    {
-        return _gameTimeSystemPoint;
-    }
+	public static DateTime GetSystemTime()
+	{
+		return _gameTimeSystemPoint;
+	}
 
-    public static DateTime Now()
-    {
-        return _gameTimeSteadyPoint;
-    }
+	public static DateTime Now()
+	{
+		return _gameTimeSteadyPoint;
+	}
 
-    public static uint GetUptime()
-    {
-        return (uint)(_gameTime - StartTime);
-    }
+	public static uint GetUptime()
+	{
+		return (uint)(_gameTime - StartTime);
+	}
 
-    public static DateTime GetDateAndTime()
-    {
-        return _dateTime;
-    }
+	public static DateTime GetDateAndTime()
+	{
+		return _dateTime;
+	}
 
-    public static void UpdateGameTimers()
-    {
-        _gameTime = Time.UnixTime;
-        _gameMSTime = Time.GetMSTime();
-        _gameTimeSystemPoint = DateTime.Now;
-        _gameTimeSteadyPoint = DateTime.Now;
+	public static void UpdateGameTimers()
+	{
+		_gameTime            = Time.UnixTime;
+		_gameMSTime          = Time.GetMSTime();
+		_gameTimeSystemPoint = DateTime.Now;
+		_gameTimeSteadyPoint = DateTime.Now;
 
-        _dateTime = Time.UnixTimeToDateTime(_gameTime);
-    }
+		_dateTime = Time.UnixTimeToDateTime(_gameTime);
+	}
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
 	internal static partial class GroupOperations
 	{
@@ -13,6 +11,5 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 			FieldOperations.fe_mul(out r.Y, ref p.Y, ref p.Z);
 			FieldOperations.fe_mul(out r.Z, ref p.Z, ref p.T);
 		}
-
 	}
 }

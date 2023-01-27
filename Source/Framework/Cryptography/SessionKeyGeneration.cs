@@ -5,103 +5,105 @@ using System.Security.Cryptography;
 
 namespace Framework.Cryptography
 {
-    public class SessionKeyGenerator256
-    {
-        public SessionKeyGenerator256(byte[] buff, int size = 0)
-        {
-            if (size == 0)
-                size = buff.Length;
+	public class SessionKeyGenerator256
+	{
+		private byte[] o0 = new byte[32];
+		private byte[] o1 = new byte[32];
+		private byte[] o2 = new byte[32];
 
-            int halfSize = size / 2;
+		private SHA256 sh;
+		private uint taken;
 
-            sh = SHA256.Create();
-            sh.TransformFinalBlock(buff, 0, halfSize);
-            o1 = sh.Hash;
+		public SessionKeyGenerator256(byte[] buff, int size = 0)
+		{
+			if (size == 0)
+				size = buff.Length;
 
-            sh.Initialize();
-            sh.TransformFinalBlock(buff, halfSize, size - halfSize);
-            o2 = sh.Hash;
+			int halfSize = size / 2;
 
-            FillUp();
-        }
+			sh = SHA256.Create();
+			sh.TransformFinalBlock(buff, 0, halfSize);
+			o1 = sh.Hash;
 
-        public void Generate(byte[] buf, uint sz)
-        {
-            for (uint i = 0; i < sz; ++i)
-            {
-                if (taken == 32)
-                    FillUp();
+			sh.Initialize();
+			sh.TransformFinalBlock(buff, halfSize, size - halfSize);
+			o2 = sh.Hash;
 
-                buf[i] = o0[taken];
-                taken++;
-            }
-        }
+			FillUp();
+		}
 
-        void FillUp()
-        {
-            sh.Initialize();
-            sh.TransformBlock(o1, 0, 32, o1, 0);
-            sh.TransformBlock(o0, 0, 32, o0, 0);
-            sh.TransformFinalBlock(o2, 0, 32);
-            o0 = sh.Hash;
+		public void Generate(byte[] buf, uint sz)
+		{
+			for (uint i = 0; i < sz; ++i)
+			{
+				if (taken == 32)
+					FillUp();
 
-            taken = 0;
-        }
+				buf[i] = o0[taken];
+				taken++;
+			}
+		}
 
-        SHA256 sh;        
-        uint taken;
-        byte[] o0 = new byte[32];
-        byte[] o1 = new byte[32];
-        byte[] o2 = new byte[32];
-    }
+		private void FillUp()
+		{
+			sh.Initialize();
+			sh.TransformBlock(o1, 0, 32, o1, 0);
+			sh.TransformBlock(o0, 0, 32, o0, 0);
+			sh.TransformFinalBlock(o2, 0, 32);
+			o0 = sh.Hash;
 
-    public class SessionKeyGenerator
-    {
-        public SessionKeyGenerator(byte[] buff, int size = 0)
-        {
-            if (size == 0)
-                size = buff.Length;
+			taken = 0;
+		}
+	}
 
-            int halfSize = size / 2;
+	public class SessionKeyGenerator
+	{
+		private byte[] o0 = new byte[32];
+		private byte[] o1 = new byte[32];
+		private byte[] o2 = new byte[32];
 
-            sh = SHA1.Create();
-            sh.TransformFinalBlock(buff, 0, halfSize);
-            o1 = sh.Hash;
+		private SHA1 sh;
+		private uint taken;
 
-            sh.Initialize();
-            sh.TransformFinalBlock(buff, halfSize, size - halfSize);
-            o2 = sh.Hash;
+		public SessionKeyGenerator(byte[] buff, int size = 0)
+		{
+			if (size == 0)
+				size = buff.Length;
 
-            FillUp();
-        }
+			int halfSize = size / 2;
 
-        public void Generate(byte[] buf, uint sz)
-        {
-            for (uint i = 0; i < sz; ++i)
-            {
-                if (taken == 20)
-                    FillUp();
+			sh = SHA1.Create();
+			sh.TransformFinalBlock(buff, 0, halfSize);
+			o1 = sh.Hash;
 
-                buf[i] = o0[taken];
-                taken++;
-            }
-        }
+			sh.Initialize();
+			sh.TransformFinalBlock(buff, halfSize, size - halfSize);
+			o2 = sh.Hash;
 
-        void FillUp()
-        {
-            sh.Initialize();
-            sh.TransformBlock(o1, 0, 20, o1, 0);
-            sh.TransformBlock(o0, 0, 20, o0, 0);
-            sh.TransformFinalBlock(o2, 0, 20);
-            o0 = sh.Hash;
+			FillUp();
+		}
 
-            taken = 0;
-        }
+		public void Generate(byte[] buf, uint sz)
+		{
+			for (uint i = 0; i < sz; ++i)
+			{
+				if (taken == 20)
+					FillUp();
 
-        SHA1 sh;
-        uint taken;
-        byte[] o0 = new byte[32];
-        byte[] o1 = new byte[32];
-        byte[] o2 = new byte[32];
-    }
+				buf[i] = o0[taken];
+				taken++;
+			}
+		}
+
+		private void FillUp()
+		{
+			sh.Initialize();
+			sh.TransformBlock(o1, 0, 20, o1, 0);
+			sh.TransformBlock(o0, 0, 20, o0, 0);
+			sh.TransformFinalBlock(o2, 0, 20);
+			o0 = sh.Hash;
+
+			taken = 0;
+		}
+	}
 }

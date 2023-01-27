@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
@@ -8,392 +10,422 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.Events.Midsummer
 {
-    struct SpellIds
-    {
-        //Brazierhit
-        public const uint TorchTossingTraining = 45716;
-        public const uint TorchTossingPractice = 46630;
-        public const uint TorchTossingTrainingSuccessAlliance = 45719;
-        public const uint TorchTossingTrainingSuccessHorde = 46651;
-        public const uint TargetIndicatorCosmetic = 46901;
-        public const uint TargetIndicator = 45723;
-        public const uint BraziersHit = 45724;
+	internal struct SpellIds
+	{
+		//Brazierhit
+		public const uint TorchTossingTraining = 45716;
+		public const uint TorchTossingPractice = 46630;
+		public const uint TorchTossingTrainingSuccessAlliance = 45719;
+		public const uint TorchTossingTrainingSuccessHorde = 46651;
+		public const uint TargetIndicatorCosmetic = 46901;
+		public const uint TargetIndicator = 45723;
+		public const uint BraziersHit = 45724;
 
-        //RibbonPoleData
-        public const uint HasFullMidsummerSet = 58933;
-        public const uint BurningHotPoleDance = 58934;
-        public const uint RibbonPolePeriodicVisual = 45406;
-        public const uint RibbonDance = 29175;
-        public const uint TestRibbonPole1 = 29705;
-        public const uint TestRibbonPole2 = 29726;
-        public const uint TestRibbonPole3 = 29727;
+		//RibbonPoleData
+		public const uint HasFullMidsummerSet = 58933;
+		public const uint BurningHotPoleDance = 58934;
+		public const uint RibbonPolePeriodicVisual = 45406;
+		public const uint RibbonDance = 29175;
+		public const uint TestRibbonPole1 = 29705;
+		public const uint TestRibbonPole2 = 29726;
+		public const uint TestRibbonPole3 = 29727;
 
-        //Jugglingtorch
-        public const uint JuggleTorchSlow = 45792;
-        public const uint JuggleTorchMedium = 45806;
-        public const uint JuggleTorchFast = 45816;
-        public const uint JuggleTorchSelf = 45638;
-        public const uint JuggleTorchShadowSlow = 46120;
-        public const uint JuggleTorchShadowMedium = 46118;
-        public const uint JuggleTorchShadowFast = 46117;
-        public const uint JuggleTorchShadowSelf = 46121;
-        public const uint GiveTorch = 45280;
+		//Jugglingtorch
+		public const uint JuggleTorchSlow = 45792;
+		public const uint JuggleTorchMedium = 45806;
+		public const uint JuggleTorchFast = 45816;
+		public const uint JuggleTorchSelf = 45638;
+		public const uint JuggleTorchShadowSlow = 46120;
+		public const uint JuggleTorchShadowMedium = 46118;
+		public const uint JuggleTorchShadowFast = 46117;
+		public const uint JuggleTorchShadowSelf = 46121;
+		public const uint GiveTorch = 45280;
 
-        //Flingtorch
-        public const uint FlingTorchTriggered = 45669;
-        public const uint FlingTorchShadow = 46105;
-        public const uint JuggleTorchMissed = 45676;
-        public const uint TorchesCaught = 45693;
-        public const uint TorchCatchingSuccessAlliance = 46081;
-        public const uint TorchCatchingSuccessHorde = 46654;
-        public const uint TorchCatchingRemoveTorches = 46084;
-    }
+		//Flingtorch
+		public const uint FlingTorchTriggered = 45669;
+		public const uint FlingTorchShadow = 46105;
+		public const uint JuggleTorchMissed = 45676;
+		public const uint TorchesCaught = 45693;
+		public const uint TorchCatchingSuccessAlliance = 46081;
+		public const uint TorchCatchingSuccessHorde = 46654;
+		public const uint TorchCatchingRemoveTorches = 46084;
+	}
 
-    struct QuestIds
-    {
-        //JugglingTorch
-        public const uint TorchCatchingA = 11657;
-        public const uint TorchCatchingH = 11923;
-        public const uint MoreTorchCatchingA = 11924;
-        public const uint MoreTorchCatchingH = 11925;
-    }
+	internal struct QuestIds
+	{
+		//JugglingTorch
+		public const uint TorchCatchingA = 11657;
+		public const uint TorchCatchingH = 11923;
+		public const uint MoreTorchCatchingA = 11924;
+		public const uint MoreTorchCatchingH = 11925;
+	}
 
-    [Script] // 45724 - Braziers Hit!
-    class spell_midsummer_braziers_hit : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
-        }
+	[Script] // 45724 - Braziers Hit!
+	internal class spell_midsummer_braziers_hit : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> Effects { get; } = new();
 
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Player player = GetTarget().ToPlayer();
-            if (!player)
-                return;
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
+		}
 
-            if ((player.HasAura(SpellIds.TorchTossingTraining) && GetStackAmount() == 8) || (player.HasAura(SpellIds.TorchTossingPractice) && GetStackAmount() == 20))
-            {
-                if (player.GetTeam() == Team.Alliance)
-                    player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessAlliance, true);
-                else if (player.GetTeam() == Team.Horde)
-                    player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessHorde, true);
-                Remove();
-            }
-        }
+		private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+		{
+			Player player = GetTarget().ToPlayer();
 
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
-        }
-    }
+			if (!player)
+				return;
 
-    [Script] // 45907 - Torch Target Picker
-    class spell_midsummer_torch_target_picker : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.TargetIndicatorCosmetic, SpellIds.TargetIndicator);
-        }
+			if ((player.HasAura(SpellIds.TorchTossingTraining) && GetStackAmount() == 8) ||
+			    (player.HasAura(SpellIds.TorchTossingPractice) && GetStackAmount() == 20))
+			{
+				if (player.GetTeam() == Team.Alliance)
+					player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessAlliance, true);
+				else if (player.GetTeam() == Team.Horde)
+					player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessHorde, true);
 
-        void HandleScript(uint effIndex)
-        {
-            Unit target = GetHitUnit();
-            target.CastSpell(target, SpellIds.TargetIndicatorCosmetic, true);
-            target.CastSpell(target, SpellIds.TargetIndicator, true);
-        }
+				Remove();
+			}
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
-    }
+		public override void Register()
+		{
+			Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
+		}
+	}
 
-    [Script] // 46054 - Torch Toss (land)
-    class spell_midsummer_torch_toss_land : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.BraziersHit);
-        }
+	[Script] // 45907 - Torch Target Picker
+	internal class spell_midsummer_torch_target_picker : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        void HandleScript(uint effIndex)
-        {
-            GetHitUnit().CastSpell(GetCaster(), SpellIds.BraziersHit, true);
-        }
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.TargetIndicatorCosmetic, SpellIds.TargetIndicator);
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
-    }
+		private void HandleScript(uint effIndex)
+		{
+			Unit target = GetHitUnit();
+			target.CastSpell(target, SpellIds.TargetIndicatorCosmetic, true);
+			target.CastSpell(target, SpellIds.TargetIndicator, true);
+		}
 
-    [Script] // 29705, 29726, 29727 - Test Ribbon Pole Channel
-    class spell_midsummer_test_ribbon_pole_channel : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.RibbonPolePeriodicVisual, SpellIds.BurningHotPoleDance, SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance);
-        }
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+		}
+	}
 
-        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(SpellIds.RibbonPolePeriodicVisual);
-        }
+	[Script] // 46054 - Torch Toss (land)
+	internal class spell_midsummer_torch_toss_land : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        void PeriodicTick(AuraEffect aurEff)
-        {
-            Unit target = GetTarget();
-            target.CastSpell(target, SpellIds.RibbonPolePeriodicVisual, true);
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.BraziersHit);
+		}
 
-            Aura aur = target.GetAura(SpellIds.RibbonDance);
-            if (aur != null)
-            {
-                aur.SetMaxDuration(Math.Min(3600000, aur.GetMaxDuration() + 180000));
-                aur.RefreshDuration();
+		private void HandleScript(uint effIndex)
+		{
+			GetHitUnit().CastSpell(GetCaster(), SpellIds.BraziersHit, true);
+		}
 
-                if (aur.GetMaxDuration() == 3600000 && target.HasAura(SpellIds.HasFullMidsummerSet))
-                    target.CastSpell(target, SpellIds.BurningHotPoleDance, true);
-            }
-            else
-                target.CastSpell(target, SpellIds.RibbonDance, true);
-        }
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+		}
+	}
 
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
-        }
-    }
+	[Script] // 29705, 29726, 29727 - Test Ribbon Pole Channel
+	internal class spell_midsummer_test_ribbon_pole_channel : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> Effects { get; } = new();
 
-    [Script] // 45406 - Holiday - Midsummer, Ribbon Pole Periodic Visual
-    class spell_midsummer_ribbon_pole_periodic_visual : AuraScript, IHasAuraEffects
-    {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.TestRibbonPole1, SpellIds.TestRibbonPole2, SpellIds.TestRibbonPole3);
-        }
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.RibbonPolePeriodicVisual, SpellIds.BurningHotPoleDance, SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance);
+		}
 
-        void PeriodicTick(AuraEffect aurEff)
-        {
-            Unit target = GetTarget();
-            if (!target.HasAura(SpellIds.TestRibbonPole1) && !target.HasAura(SpellIds.TestRibbonPole2) && !target.HasAura(SpellIds.TestRibbonPole3))
-                Remove();
-        }
+		private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+		{
+			GetTarget().RemoveAurasDueToSpell(SpellIds.RibbonPolePeriodicVisual);
+		}
 
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
-        }
-    }
+		private void PeriodicTick(AuraEffect aurEff)
+		{
+			Unit target = GetTarget();
+			target.CastSpell(target, SpellIds.RibbonPolePeriodicVisual, true);
 
-    [Script] // 45819 - Throw Torch
-    class spell_midsummer_juggle_torch : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.JuggleTorchSlow, SpellIds.JuggleTorchMedium, SpellIds.JuggleTorchFast, SpellIds.JuggleTorchSelf,
-                SpellIds.JuggleTorchShadowSlow, SpellIds.JuggleTorchShadowMedium, SpellIds.JuggleTorchShadowFast, SpellIds.JuggleTorchShadowSelf);
-        }
+			Aura aur = target.GetAura(SpellIds.RibbonDance);
 
-        void HandleDummy(uint effIndex)
-        {
-            if (GetExplTargetDest() == null)
-                return;
+			if (aur != null)
+			{
+				aur.SetMaxDuration(Math.Min(3600000, aur.GetMaxDuration() + 180000));
+				aur.RefreshDuration();
 
-            Position spellDest = GetExplTargetDest();
-            float distance = GetCaster().GetExactDist2d(spellDest.GetPositionX(), spellDest.GetPositionY());
+				if (aur.GetMaxDuration() == 3600000 &&
+				    target.HasAura(SpellIds.HasFullMidsummerSet))
+					target.CastSpell(target, SpellIds.BurningHotPoleDance, true);
+			}
+			else
+			{
+				target.CastSpell(target, SpellIds.RibbonDance, true);
+			}
+		}
 
-            uint torchSpellID = 0;
-            uint torchShadowSpellID = 0;
+		public override void Register()
+		{
+			Effects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+			Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+		}
+	}
 
-            if (distance <= 1.5f)
-            {
-                torchSpellID = SpellIds.JuggleTorchSelf;
-                torchShadowSpellID = SpellIds.JuggleTorchShadowSelf;
-                spellDest = GetCaster().GetPosition();
-            }
-            else if (distance <= 10.0f)
-            {
-                torchSpellID = SpellIds.JuggleTorchSlow;
-                torchShadowSpellID = SpellIds.JuggleTorchShadowSlow;
-            }
-            else if (distance <= 20.0f)
-            {
-                torchSpellID = SpellIds.JuggleTorchMedium;
-                torchShadowSpellID = SpellIds.JuggleTorchShadowMedium;
-            }
-            else
-            {
-                torchSpellID = SpellIds.JuggleTorchFast;
-                torchShadowSpellID = SpellIds.JuggleTorchShadowFast;
-            }
+	[Script] // 45406 - Holiday - Midsummer, Ribbon Pole Periodic Visual
+	internal class spell_midsummer_ribbon_pole_periodic_visual : AuraScript, IHasAuraEffects
+	{
+		public List<IAuraEffectHandler> Effects { get; } = new();
 
-            GetCaster().CastSpell(spellDest, torchSpellID, new CastSpellExtraArgs(false));
-            GetCaster().CastSpell(spellDest, torchShadowSpellID, new CastSpellExtraArgs(false));
-        }
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.TestRibbonPole1, SpellIds.TestRibbonPole2, SpellIds.TestRibbonPole3);
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
-    }
+		private void PeriodicTick(AuraEffect aurEff)
+		{
+			Unit target = GetTarget();
 
-    [Script] // 45644 - Juggle Torch (Catch)
-    class spell_midsummer_torch_catch : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GiveTorch);
-        }
+			if (!target.HasAura(SpellIds.TestRibbonPole1) &&
+			    !target.HasAura(SpellIds.TestRibbonPole2) &&
+			    !target.HasAura(SpellIds.TestRibbonPole3))
+				Remove();
+		}
 
-        void HandleDummy(uint effIndex)
-        {
-            Player player = GetHitPlayer();
-            if (!player)
-                return;
+		public override void Register()
+		{
+			Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+		}
+	}
 
-            if (player.GetQuestStatus(QuestIds.TorchCatchingA) == QuestStatus.Rewarded || player.GetQuestStatus(QuestIds.TorchCatchingH) == QuestStatus.Rewarded)
-                player.CastSpell(player, SpellIds.GiveTorch);
-        }
+	[Script] // 45819 - Throw Torch
+	internal class spell_midsummer_juggle_torch : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
-    }
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.JuggleTorchSlow,
+			                         SpellIds.JuggleTorchMedium,
+			                         SpellIds.JuggleTorchFast,
+			                         SpellIds.JuggleTorchSelf,
+			                         SpellIds.JuggleTorchShadowSlow,
+			                         SpellIds.JuggleTorchShadowMedium,
+			                         SpellIds.JuggleTorchShadowFast,
+			                         SpellIds.JuggleTorchShadowSelf);
+		}
 
-    [Script] // 46747 - Fling torch
-    class spell_midsummer_fling_torch : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.FlingTorchShadow);
-        }
+		private void HandleDummy(uint effIndex)
+		{
+			if (GetExplTargetDest() == null)
+				return;
 
-        void HandleDummy(uint effIndex)
-        {
-            Position dest = GetCaster().GetFirstCollisionPosition(30.0f, (float)RandomHelper.NextDouble() * (2 * MathF.PI));
-            GetCaster().CastSpell(dest, SpellIds.FlingTorchTriggered, new CastSpellExtraArgs(true));
-            GetCaster().CastSpell(dest, SpellIds.FlingTorchShadow, new CastSpellExtraArgs(false));
-        }
+			Position spellDest = GetExplTargetDest();
+			float    distance  = GetCaster().GetExactDist2d(spellDest.GetPositionX(), spellDest.GetPositionY());
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
-    }
+			uint torchSpellID       = 0;
+			uint torchShadowSpellID = 0;
 
-    [Script] // 45669 - Fling Torch
-    class spell_midsummer_fling_torch_triggered : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.JuggleTorchMissed);
-        }
+			if (distance <= 1.5f)
+			{
+				torchSpellID       = SpellIds.JuggleTorchSelf;
+				torchShadowSpellID = SpellIds.JuggleTorchShadowSelf;
+				spellDest          = GetCaster().GetPosition();
+			}
+			else if (distance <= 10.0f)
+			{
+				torchSpellID       = SpellIds.JuggleTorchSlow;
+				torchShadowSpellID = SpellIds.JuggleTorchShadowSlow;
+			}
+			else if (distance <= 20.0f)
+			{
+				torchSpellID       = SpellIds.JuggleTorchMedium;
+				torchShadowSpellID = SpellIds.JuggleTorchShadowMedium;
+			}
+			else
+			{
+				torchSpellID       = SpellIds.JuggleTorchFast;
+				torchShadowSpellID = SpellIds.JuggleTorchShadowFast;
+			}
 
-        void HandleTriggerMissile(uint effIndex)
-        {
-            Position pos = GetHitDest();
-            if (pos != null)
-        {
-                if (GetCaster().GetExactDist2d(pos) > 3.0f)
-                {
-                    PreventHitEffect(effIndex);
-                    GetCaster().CastSpell(GetExplTargetDest(), SpellIds.JuggleTorchMissed, new CastSpellExtraArgs(false));
-                    GetCaster().RemoveAura(SpellIds.TorchesCaught);
-                }
-            }
-        }
+			GetCaster().CastSpell(spellDest, torchSpellID, new CastSpellExtraArgs(false));
+			GetCaster().CastSpell(spellDest, torchShadowSpellID, new CastSpellExtraArgs(false));
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHit));
-        }
-    }
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+		}
+	}
 
-    [Script] // 45671 - Juggle Torch (Catch, Quest)
-    class spell_midsummer_fling_torch_catch : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.TorchCatchingSuccessAlliance, SpellIds.TorchCatchingSuccessHorde, SpellIds.TorchCatchingRemoveTorches, SpellIds.FlingTorchShadow);
-        }
+	[Script] // 45644 - Juggle Torch (Catch)
+	internal class spell_midsummer_torch_catch : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        void HandleScriptEffect(uint effIndex)
-        {
-            Player player = GetHitPlayer();
-            if (!player)
-                return;
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.GiveTorch);
+		}
 
-            if (GetExplTargetDest() == null)
-                return;
+		private void HandleDummy(uint effIndex)
+		{
+			Player player = GetHitPlayer();
 
-            // Only the caster can catch the torch
-            if (player.GetGUID() != GetCaster().GetGUID())
-                return;
+			if (!player)
+				return;
 
-            byte requiredCatches = 0;
-            // Number of required catches depends on quest - 4 for the normal quest, 10 for the daily version
-            if (player.GetQuestStatus(QuestIds.TorchCatchingA) == QuestStatus.Incomplete || player.GetQuestStatus(QuestIds.TorchCatchingH) == QuestStatus.Incomplete)
-                requiredCatches = 3;
-            else if (player.GetQuestStatus(QuestIds.MoreTorchCatchingA) == QuestStatus.Incomplete || player.GetQuestStatus(QuestIds.MoreTorchCatchingH) == QuestStatus.Incomplete)
-                requiredCatches = 9;
+			if (player.GetQuestStatus(QuestIds.TorchCatchingA) == QuestStatus.Rewarded ||
+			    player.GetQuestStatus(QuestIds.TorchCatchingH) == QuestStatus.Rewarded)
+				player.CastSpell(player, SpellIds.GiveTorch);
+		}
 
-            // Used quest item without being on quest - do nothing
-            if (requiredCatches == 0)
-                return;
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+		}
+	}
 
-            if (player.GetAuraCount(SpellIds.TorchesCaught) >= requiredCatches)
-            {
-                player.CastSpell(player, (player.GetTeam() == Team.Alliance) ? SpellIds.TorchCatchingSuccessAlliance : SpellIds.TorchCatchingSuccessHorde);
-                player.CastSpell(player, SpellIds.TorchCatchingRemoveTorches);
-                player.RemoveAura(SpellIds.TorchesCaught);
-            }
-            else
-            {
-                Position dest = player.GetFirstCollisionPosition(15.0f, (float)RandomHelper.NextDouble() * (2 * MathF.PI));
-                player.CastSpell(player, SpellIds.TorchesCaught);
-                player.CastSpell(dest, SpellIds.FlingTorchTriggered, new CastSpellExtraArgs(true));
-                player.CastSpell(dest, SpellIds.FlingTorchShadow, new CastSpellExtraArgs(false));
-            }
-        }
+	[Script] // 46747 - Fling torch
+	internal class spell_midsummer_fling_torch : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
 
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
-    }
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.FlingTorchShadow);
+		}
 
-    [Script] // 45676 - Juggle Torch (Quest, Missed)
-    class spell_midsummer_fling_torch_missed : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        void FilterTargets(List<WorldObject> targets)
-        {
-            // This spell only hits the caster
-            targets.RemoveAll(obj => obj.GetGUID() != GetCaster().GetGUID());
-        }
+		private void HandleDummy(uint effIndex)
+		{
+			Position dest = GetCaster().GetFirstCollisionPosition(30.0f, (float)RandomHelper.NextDouble() * (2 * MathF.PI));
+			GetCaster().CastSpell(dest, SpellIds.FlingTorchTriggered, new CastSpellExtraArgs(true));
+			GetCaster().CastSpell(dest, SpellIds.FlingTorchShadow, new CastSpellExtraArgs(false));
+		}
 
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEntry));
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitDestAreaEntry));
-        }
-    }
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+		}
+	}
+
+	[Script] // 45669 - Fling Torch
+	internal class spell_midsummer_fling_torch_triggered : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
+
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.JuggleTorchMissed);
+		}
+
+		private void HandleTriggerMissile(uint effIndex)
+		{
+			Position pos = GetHitDest();
+
+			if (pos != null)
+				if (GetCaster().GetExactDist2d(pos) > 3.0f)
+				{
+					PreventHitEffect(effIndex);
+					GetCaster().CastSpell(GetExplTargetDest(), SpellIds.JuggleTorchMissed, new CastSpellExtraArgs(false));
+					GetCaster().RemoveAura(SpellIds.TorchesCaught);
+				}
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHit));
+		}
+	}
+
+	[Script] // 45671 - Juggle Torch (Catch, Quest)
+	internal class spell_midsummer_fling_torch_catch : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
+
+		public override bool Validate(SpellInfo spellInfo)
+		{
+			return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.TorchCatchingSuccessAlliance, SpellIds.TorchCatchingSuccessHorde, SpellIds.TorchCatchingRemoveTorches, SpellIds.FlingTorchShadow);
+		}
+
+		private void HandleScriptEffect(uint effIndex)
+		{
+			Player player = GetHitPlayer();
+
+			if (!player)
+				return;
+
+			if (GetExplTargetDest() == null)
+				return;
+
+			// Only the caster can catch the torch
+			if (player.GetGUID() != GetCaster().GetGUID())
+				return;
+
+			byte requiredCatches = 0;
+
+			// Number of required catches depends on quest - 4 for the normal quest, 10 for the daily version
+			if (player.GetQuestStatus(QuestIds.TorchCatchingA) == QuestStatus.Incomplete ||
+			    player.GetQuestStatus(QuestIds.TorchCatchingH) == QuestStatus.Incomplete)
+				requiredCatches = 3;
+			else if (player.GetQuestStatus(QuestIds.MoreTorchCatchingA) == QuestStatus.Incomplete ||
+			         player.GetQuestStatus(QuestIds.MoreTorchCatchingH) == QuestStatus.Incomplete)
+				requiredCatches = 9;
+
+			// Used quest item without being on quest - do nothing
+			if (requiredCatches == 0)
+				return;
+
+			if (player.GetAuraCount(SpellIds.TorchesCaught) >= requiredCatches)
+			{
+				player.CastSpell(player, (player.GetTeam() == Team.Alliance) ? SpellIds.TorchCatchingSuccessAlliance : SpellIds.TorchCatchingSuccessHorde);
+				player.CastSpell(player, SpellIds.TorchCatchingRemoveTorches);
+				player.RemoveAura(SpellIds.TorchesCaught);
+			}
+			else
+			{
+				Position dest = player.GetFirstCollisionPosition(15.0f, (float)RandomHelper.NextDouble() * (2 * MathF.PI));
+				player.CastSpell(player, SpellIds.TorchesCaught);
+				player.CastSpell(dest, SpellIds.FlingTorchTriggered, new CastSpellExtraArgs(true));
+				player.CastSpell(dest, SpellIds.FlingTorchShadow, new CastSpellExtraArgs(false));
+			}
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+		}
+	}
+
+	[Script] // 45676 - Juggle Torch (Quest, Missed)
+	internal class spell_midsummer_fling_torch_missed : SpellScript, IHasSpellEffects
+	{
+		public List<ISpellEffect> SpellEffects { get; } = new();
+
+		private void FilterTargets(List<WorldObject> targets)
+		{
+			// This spell only hits the caster
+			targets.RemoveAll(obj => obj.GetGUID() != GetCaster().GetGUID());
+		}
+
+		public override void Register()
+		{
+			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEntry));
+			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitDestAreaEntry));
+		}
+	}
 }

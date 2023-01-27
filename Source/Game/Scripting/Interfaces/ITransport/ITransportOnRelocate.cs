@@ -2,12 +2,11 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.ITransport
 {
-    public interface ITransportOnRelocate : IScriptObject
-    {
-        void OnRelocate(Transport transport, uint mapId, float x, float y, float z);
-    }
+	public interface ITransportOnRelocate : IScriptObject
+	{
+		void OnRelocate(Transport transport, uint mapId, float x, float y, float z);
+	}
 }

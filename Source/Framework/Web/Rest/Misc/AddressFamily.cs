@@ -6,13 +6,11 @@ using System.Runtime.Serialization;
 
 namespace Framework.Web
 {
-    [DataContract]
-    public class AddressFamily
-    {
-        [DataMember(Name = "family")]
-        public int Id { get; set; }
+	[DataContract]
+	public class AddressFamily
+	{
+		[DataMember(Name = "family")] public int Id { get; set; }
 
-        [DataMember(Name = "addresses")]
-        public IList<Address> Addresses { get; set; } = new List<Address>();
-    }
+		[DataMember(Name = "addresses")] public IList<Address> Addresses { get; set; } = new List<Address>();
+	}
 }

@@ -1,101 +1,100 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Loots;
 using Game.Spells;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public partial class Creature
-    {
-        CreatureTemplate m_creatureInfo;
-        CreatureData m_creatureData;
+	public partial class Creature
+	{
+		private bool _AlreadyCallAssistance;
+		private bool _AlreadySearchedAssistance;
+		private uint _boundaryCheckTime; // (msecs) remaining time for next evade boundary check
+		private bool _cannotReachTarget;
+		private uint _cannotReachTimer;
+		public float _CombatDistance;
+		private uint _combatPulseDelay; // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
+		private uint _combatPulseTime;  // (msecs) remaining time for next zone-in-combat pulse
+		private uint _corpseDelay;      // (secs) delay between death and corpse disappearance
+		public long _corpseRemoveTime;  // (msecs)timer for death or corpse disappearance
+		private CreatureData _creatureData;
+		private CreatureTemplate _creatureInfo;
+		private (uint nodeId, uint pathId) _currentWaypointNodeInfo;
+		private byte _equipmentId;
 
-        string[] m_stringIds = new string[3];
-        string m_scriptStringId;
+		//Formation var
+		private CreatureGroup _formation;
 
-        SpellFocusInfo _spellFocusInfo;
+		private Position _homePosition;
+		private bool _ignoreCorpseDecayRatio;
 
-        long _lastDamagedTime; // Part of Evade mechanics
-        MultiMap<byte, byte> m_textRepeat = new();
+		private bool _isMissingCanSwimFlagOutOfCombat;
+		public bool _isTempWorldObject; //true when possessed
 
-        // Regenerate health
-        bool _regenerateHealth; // Set on creation
-        bool _regenerateHealthLock; // Dynamically set
+		private long _lastDamagedTime; // Part of Evade mechanics
+		public Loot _loot;
 
-        bool _isMissingCanSwimFlagOutOfCombat;
+		private LootModes _LootMode; // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
 
-        public ulong m_PlayerDamageReq;
-        public float m_SightDistance;
-        public float m_CombatDistance;
-        public bool m_isTempWorldObject; //true when possessed
+		private SpellSchoolMask _meleeDamageSchoolMask;
+		public uint _originalEntry;
+		private sbyte _originalEquipmentId; // can be -1
 
-        ReactStates reactState;                           // for AI, not charmInfo
-        public MovementGeneratorType DefaultMovementType { get; set; }
-        public ulong m_spawnId;
-        byte m_equipmentId;
-        sbyte m_originalEquipmentId; // can be -1
+		internal Dictionary<ObjectGuid, Loot> _personalLoot = new();
 
-        bool m_AlreadyCallAssistance;
-        bool m_AlreadySearchedAssistance;
-        bool m_cannotReachTarget;
-        uint m_cannotReachTimer;
+		// Timers
+		private long _pickpocketLootRestore;
 
-        SpellSchoolMask m_meleeDamageSchoolMask;
-        public uint m_originalEntry;
+		public ulong _PlayerDamageReq;
 
-        Position m_homePosition;
-        Position m_transportHomePosition = new();
+		// Regenerate health
+		private bool _regenerateHealth;     // Set on creation
+		private bool _regenerateHealthLock; // Dynamically set
+		private bool _respawnCompatibilityMode;
+		private uint _respawnDelay; // (secs) delay between corpse disappearance and respawning
+		private long _respawnTime;  // (secs) time of next respawn
+		private string _scriptStringId;
+		public float _SightDistance;
+		public ulong _spawnId;
 
-        bool DisableReputationGain;
+		private SpellFocusInfo _spellFocusInfo;
 
-        LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
+		public uint[] _spells = new uint[SharedConst.MaxCreatureSpells];
 
-        // Waypoint path
-        uint _waypointPathId;
-        (uint nodeId, uint pathId) _currentWaypointNodeInfo;
+		private string[] _stringIds = new string[3];
+		private HashSet<ObjectGuid> _tapList = new();
+		private MultiMap<byte, byte> _textRepeat = new();
+		private Position _transportHomePosition = new();
 
-        //Formation var
-        CreatureGroup m_formation;
-        bool triggerJustAppeared;
-        bool m_respawnCompatibilityMode;
+		// vendor items
+		private List<VendorItemCount> _vendorItemCounts = new();
+		private float _wanderDistance;
 
-        public uint[] m_spells = new uint[SharedConst.MaxCreatureSpells];
+		// Waypoint path
+		private uint _waypointPathId;
 
-        // Timers
-        long _pickpocketLootRestore;
-        public long m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
-        long m_respawnTime;                               // (secs) time of next respawn
-        uint m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
-        uint m_corpseDelay;                               // (secs) delay between death and corpse disappearance
-        bool m_ignoreCorpseDecayRatio;
-        float m_wanderDistance;
-        uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
-        uint m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
-        uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
+		private bool DisableReputationGain;
 
-        // vendor items
-        List<VendorItemCount> m_vendorItemCounts = new();
+		private ReactStates reactState; // for AI, not charmInfo
+		private bool triggerJustAppeared;
+		public MovementGeneratorType DefaultMovementType { get; set; }
+	}
 
-        internal Dictionary<ObjectGuid, Loot> m_personalLoot = new();
-        public Loot _loot;
-        HashSet<ObjectGuid> m_tapList = new();
-    }
+	public enum ObjectCellMoveState
+	{
+		None,    // not in move list
+		Active,  // in move list
+		Inactive // in move list but should not move
+	}
 
-    public enum ObjectCellMoveState
-    {
-        None,    // not in move list
-        Active,  // in move list
-        Inactive // in move list but should not move
-    }
-
-    struct SpellFocusInfo
-    {
-        public Spell Spell;
-        public uint Delay;         // ms until the creature's target should snap back (0 = no snapback scheduled)
-        public ObjectGuid Target;        // the creature's "real" target while casting
-        public float Orientation; // the creature's "real" orientation while casting
-    }
+	internal struct SpellFocusInfo
+	{
+		public Spell Spell;
+		public uint Delay;        // ms until the creature's target should snap back (0 = no snapback scheduled)
+		public ObjectGuid Target; // the creature's "real" target while casting
+		public float Orientation; // the creature's "real" orientation while casting
+	}
 }

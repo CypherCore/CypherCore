@@ -1,66 +1,70 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
 
 namespace Game.Entities
 {
-    public class PowerPctOrderPred : IComparer<WorldObject>
-    {
-        public PowerPctOrderPred(PowerType power, bool ascending = true)
-        {
-            m_power = power;
-            m_ascending = ascending;
-        }
+	public class PowerPctOrderPred : IComparer<WorldObject>
+	{
+		private bool _ascending;
 
-        public int Compare(WorldObject objA, WorldObject objB)
-        {
-            Unit a = objA.ToUnit();
-            Unit b = objB.ToUnit();
-            float rA = a != null ? a.GetPowerPct(m_power) : 0.0f;
-            float rB = b != null ? b.GetPowerPct(m_power) : 0.0f;
-            return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
-        }
+		private PowerType _power;
 
-        PowerType m_power;
-        bool m_ascending;
-    }
+		public PowerPctOrderPred(PowerType power, bool ascending = true)
+		{
+			_power     = power;
+			_ascending = ascending;
+		}
 
-    public class HealthPctOrderPred : IComparer<WorldObject>
-    {
-        public HealthPctOrderPred(bool ascending = true)
-        {
-            m_ascending = ascending;
-        }
+		public int Compare(WorldObject objA, WorldObject objB)
+		{
+			Unit  a  = objA.ToUnit();
+			Unit  b  = objB.ToUnit();
+			float rA = a != null ? a.GetPowerPct(_power) : 0.0f;
+			float rB = b != null ? b.GetPowerPct(_power) : 0.0f;
 
-        public int Compare(WorldObject objA, WorldObject objB)
-        {
-            Unit a = objA.ToUnit();
-            Unit b = objB.ToUnit();
-            float rA = a.GetMaxHealth() != 0 ? a.GetHealth() / (float)a.GetMaxHealth() : 0.0f;
-            float rB = b.GetMaxHealth() != 0 ? b.GetHealth() / (float)b.GetMaxHealth() : 0.0f;
-            return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
-        }
+			return Convert.ToInt32(_ascending ? rA < rB : rA > rB);
+		}
+	}
 
-        bool m_ascending;
-    }
+	public class HealthPctOrderPred : IComparer<WorldObject>
+	{
+		private bool _ascending;
 
-    public class ObjectDistanceOrderPred : IComparer<WorldObject>
-    {
-        public ObjectDistanceOrderPred(WorldObject pRefObj, bool ascending = true)
-        {
-            m_refObj = pRefObj;
-            m_ascending = ascending;
-        }
+		public HealthPctOrderPred(bool ascending = true)
+		{
+			_ascending = ascending;
+		}
 
-        public int Compare(WorldObject pLeft, WorldObject pRight)
-        {
-            return (m_ascending ? m_refObj.GetDistanceOrder(pLeft, pRight) : !m_refObj.GetDistanceOrder(pLeft, pRight)) ? 1 : 0;
-        }
+		public int Compare(WorldObject objA, WorldObject objB)
+		{
+			Unit  a  = objA.ToUnit();
+			Unit  b  = objB.ToUnit();
+			float rA = a.GetMaxHealth() != 0 ? a.GetHealth() / (float)a.GetMaxHealth() : 0.0f;
+			float rB = b.GetMaxHealth() != 0 ? b.GetHealth() / (float)b.GetMaxHealth() : 0.0f;
 
-        WorldObject m_refObj;
-        bool m_ascending;
-    }
+			return Convert.ToInt32(_ascending ? rA < rB : rA > rB);
+		}
+	}
+
+	public class ObjectDistanceOrderPred : IComparer<WorldObject>
+	{
+		private bool _ascending;
+
+		private WorldObject _refObj;
+
+		public ObjectDistanceOrderPred(WorldObject pRefObj, bool ascending = true)
+		{
+			_refObj    = pRefObj;
+			_ascending = ascending;
+		}
+
+		public int Compare(WorldObject pLeft, WorldObject pRight)
+		{
+			return (_ascending ? _refObj.GetDistanceOrder(pLeft, pRight) : !_refObj.GetDistanceOrder(pLeft, pRight)) ? 1 : 0;
+		}
+	}
 }

@@ -1,48 +1,48 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Threading;
 using System.Threading;
+using Framework.Threading;
 
 namespace Framework.Database
 {
-    public interface ISqlOperation
-    {
-        bool Execute<T>(MySqlBase<T> mySqlBase);
-    }
+	public interface ISqlOperation
+	{
+		bool Execute<T>(MySqlBase<T> mySqlBase);
+	}
 
-    class DatabaseWorker<T>
-    {
-        Thread _workerThread;
-        volatile bool _cancelationToken;
-        ProducerConsumerQueue<ISqlOperation> _queue;
-        MySqlBase<T> _mySqlBase;
+	internal class DatabaseWorker<T>
+	{
+		private volatile bool _cancelationToken;
+		private MySqlBase<T> _mySqlBase;
+		private ProducerConsumerQueue<ISqlOperation> _queue;
+		private Thread _workerThread;
 
-        public DatabaseWorker(ProducerConsumerQueue<ISqlOperation> newQueue, MySqlBase<T> mySqlBase)
-        {
-            _queue = newQueue;
-            _mySqlBase = mySqlBase;
-            _cancelationToken = false;
-            _workerThread = new Thread(WorkerThread);
-            _workerThread.Start();
-        }
+		public DatabaseWorker(ProducerConsumerQueue<ISqlOperation> newQueue, MySqlBase<T> mySqlBase)
+		{
+			_queue            = newQueue;
+			_mySqlBase        = mySqlBase;
+			_cancelationToken = false;
+			_workerThread     = new Thread(WorkerThread);
+			_workerThread.Start();
+		}
 
-        void WorkerThread()
-        {
-            if (_queue == null)
-                return;
+		private void WorkerThread()
+		{
+			if (_queue == null)
+				return;
 
-            for (; ; )
-            {
-                ISqlOperation operation;
+			for (;;)
+			{
+				ISqlOperation operation;
 
-                _queue.WaitAndPop(out operation);
+				_queue.WaitAndPop(out operation);
 
-                if (_cancelationToken || operation == null)
-                    return;
+				if (_cancelationToken || operation == null)
+					return;
 
-                operation.Execute(_mySqlBase);
-            }
-        }
-    }
+				operation.Execute(_mySqlBase);
+			}
+		}
+	}
 }

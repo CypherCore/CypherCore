@@ -1,294 +1,379 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Groups;
 using Game.Maps;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
-    public partial class Player
-    {
-        Player GetNextRandomRaidMember(float radius)
-        {
-            Group group = GetGroup();
-            if (!group)
-                return null;
+	public partial class Player
+	{
+		private Player GetNextRandomRaidMember(float radius)
+		{
+			Group group = GetGroup();
 
-            List<Player> nearMembers = new();
+			if (!group)
+				return null;
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-            {
-                Player Target = refe.GetSource();
+			List<Player> nearMembers = new();
 
-                // IsHostileTo check duel and controlled by enemy
-                if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
-                    !Target.HasInvisibilityAura() && !IsHostileTo(Target))
-                    nearMembers.Add(Target);
-            }
+			for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+			{
+				Player Target = refe.GetSource();
 
-            if (nearMembers.Empty())
-                return null;
+				// IsHostileTo check duel and controlled by enemy
+				if (Target &&
+				    Target != this &&
+				    IsWithinDistInMap(Target, radius) &&
+				    !Target.HasInvisibilityAura() &&
+				    !IsHostileTo(Target))
+					nearMembers.Add(Target);
+			}
 
-            int randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
-            return nearMembers[randTarget];
-        }
+			if (nearMembers.Empty())
+				return null;
 
-        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
-        {
-            Group grp = GetGroup();
-            if (!grp)
-                return PartyResult.NotInGroup;
+			int randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
 
-            if (grp.IsLFGGroup())
-            {
-                ObjectGuid gguid = grp.GetGUID();
-                if (Global.LFGMgr.GetKicksLeft(gguid) == 0)
-                    return PartyResult.PartyLfgBootLimit;
+			return nearMembers[randTarget];
+		}
 
-                LfgState state = Global.LFGMgr.GetState(gguid);
-                if (Global.LFGMgr.IsVoteKickActive(gguid))
-                    return PartyResult.PartyLfgBootInProgress;
+		public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
+		{
+			Group grp = GetGroup();
 
-                if (grp.GetMembersCount() <= SharedConst.LFGKickVotesNeeded)
-                    return PartyResult.PartyLfgBootTooFewPlayers;
+			if (!grp)
+				return PartyResult.NotInGroup;
 
-                if (state == LfgState.FinishedDungeon)
-                    return PartyResult.PartyLfgBootDungeonComplete;
+			if (grp.IsLFGGroup())
+			{
+				ObjectGuid gguid = grp.GetGUID();
 
-                Player player = Global.ObjAccessor.FindConnectedPlayer(guidMember);
-                if (!player.m_lootRolls.Empty())
-                    return PartyResult.PartyLfgBootLootRolls;
+				if (Global.LFGMgr.GetKicksLeft(gguid) == 0)
+					return PartyResult.PartyLfgBootLimit;
 
-                // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
-                    if (refe.GetSource() && refe.GetSource().IsInMap(this) && refe.GetSource().IsInCombat())
-                        return PartyResult.PartyLfgBootInCombat;
+				LfgState state = Global.LFGMgr.GetState(gguid);
 
-                /* Missing support for these types
-                    return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
-                    return ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S;
-                */
-            }
-            else
-            {
-                if (!grp.IsLeader(GetGUID()) && !grp.IsAssistant(GetGUID()))
-                    return PartyResult.NotLeader;
+				if (Global.LFGMgr.IsVoteKickActive(gguid))
+					return PartyResult.PartyLfgBootInProgress;
 
-                if (InBattleground())
-                    return PartyResult.InviteRestricted;
+				if (grp.GetMembersCount() <= SharedConst.LFGKickVotesNeeded)
+					return PartyResult.PartyLfgBootTooFewPlayers;
 
-                if (grp.IsLeader(guidMember))
-                    return PartyResult.NotLeader;
-            }
+				if (state == LfgState.FinishedDungeon)
+					return PartyResult.PartyLfgBootDungeonComplete;
 
-            return PartyResult.Ok;
-        }
+				Player player = Global.ObjAccessor.FindConnectedPlayer(guidMember);
 
-        public bool IsUsingLfg()
-        {
-            return Global.LFGMgr.GetState(GetGUID()) != LfgState.None;
-        }
+				if (!player._lootRolls.Empty())
+					return PartyResult.PartyLfgBootLootRolls;
 
-        bool InRandomLfgDungeon()
-        {
-            if (Global.LFGMgr.SelectedRandomLfgDungeon(GetGUID()))
-            {
-                Map map = GetMap();
-                return Global.LFGMgr.InLfgDungeonMap(GetGUID(), map.GetId(), map.GetDifficultyID());
-            }
+				// @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
+				for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
+					if (refe.GetSource() &&
+					    refe.GetSource().IsInMap(this) &&
+					    refe.GetSource().IsInCombat())
+						return PartyResult.PartyLfgBootInCombat;
 
-            return false;
-        }
+				/* Missing support for these types
+				    return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
+				    return ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S;
+				*/
+			}
+			else
+			{
+				if (!grp.IsLeader(GetGUID()) &&
+				    !grp.IsAssistant(GetGUID()))
+					return PartyResult.NotLeader;
 
-        public void SetBattlegroundOrBattlefieldRaid(Group group, byte subgroup)
-        {
-            //we must move references from m_group to m_originalGroup
-            SetOriginalGroup(GetGroup(), GetSubGroup());
+				if (InBattleground())
+					return PartyResult.InviteRestricted;
 
-            m_group.Unlink();
-            m_group.Link(group, this);
-            m_group.SetSubGroup(subgroup);
-        }
+				if (grp.IsLeader(guidMember))
+					return PartyResult.NotLeader;
+			}
 
-        public void RemoveFromBattlegroundOrBattlefieldRaid()
-        {
-            //remove existing reference
-            m_group.Unlink();
-            Group group = GetOriginalGroup();
-            if (group)
-            {
-                m_group.Link(group, this);
-                m_group.SetSubGroup(GetOriginalSubGroup());
-            }
-            SetOriginalGroup(null);
-        }
+			return PartyResult.Ok;
+		}
 
-        public void SetOriginalGroup(Group group, byte subgroup = 0)
-        {
-            if (!group)
-                m_originalGroup.Unlink();
-            else
-            {
-                m_originalGroup.Link(group, this);
-                m_originalGroup.SetSubGroup(subgroup);
-            }
-        }
+		public bool IsUsingLfg()
+		{
+			return Global.LFGMgr.GetState(GetGUID()) != LfgState.None;
+		}
 
-        public bool IsInGroup(ObjectGuid groupGuid)
-        {
-            Group group = GetGroup();
-            if (group != null)
-                if (group.GetGUID() == groupGuid)
-                    return true;
+		private bool InRandomLfgDungeon()
+		{
+			if (Global.LFGMgr.SelectedRandomLfgDungeon(GetGUID()))
+			{
+				Map map = GetMap();
 
-            Group originalGroup = GetOriginalGroup();
-            if (originalGroup != null)
-                if (originalGroup.GetGUID() == groupGuid)
-                    return true;
+				return Global.LFGMgr.InLfgDungeonMap(GetGUID(), map.GetId(), map.GetDifficultyID());
+			}
 
-            return false;
-        }
-        
-        public void SetGroup(Group group, byte subgroup = 0)
-        {
-            if (!group)
-                m_group.Unlink();
-            else
-            {
-                m_group.Link(group, this);
-                m_group.SetSubGroup(subgroup);
-            }
+			return false;
+		}
 
-            UpdateObjectVisibility(false);
-        }
+		public void SetBattlegroundOrBattlefieldRaid(Group group, byte subgroup)
+		{
+			//we must move references from _group to _originalGroup
+			SetOriginalGroup(GetGroup(), GetSubGroup());
 
-        public void SetPartyType(GroupCategory category, GroupType type)
-        {
-            Cypher.Assert(category < GroupCategory.Max);
-            byte value = m_playerData.PartyType;
-            value &= (byte)~((byte)0xFF << ((byte)category * 4));
-            value |= (byte)((byte)type << ((byte)category * 4));
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PartyType), value);
-        }
+			_group.Unlink();
+			_group.Link(group, this);
+			_group.SetSubGroup(subgroup);
+		}
 
-        public void ResetGroupUpdateSequenceIfNeeded(Group group)
-        {
-            GroupCategory category = group.GetGroupCategory();
-            // Rejoining the last group should not reset the sequence
-            if (m_groupUpdateSequences[(int)category].GroupGuid != group.GetGUID())
-            {
-                GroupUpdateCounter groupUpdate;
-                groupUpdate.GroupGuid = group.GetGUID();
-                groupUpdate.UpdateSequenceNumber = 1;
-                m_groupUpdateSequences[(int) category] = groupUpdate;
-            }
-        }
+		public void RemoveFromBattlegroundOrBattlefieldRaid()
+		{
+			//remove existing reference
+			_group.Unlink();
+			Group group = GetOriginalGroup();
 
-        public int NextGroupUpdateSequenceNumber(GroupCategory category)
-        {
-            return m_groupUpdateSequences[(int)category].UpdateSequenceNumber++;
-        }
+			if (group)
+			{
+				_group.Link(group, this);
+				_group.SetSubGroup(GetOriginalSubGroup());
+			}
 
-        public bool IsAtGroupRewardDistance(WorldObject pRewardSource)
-        {
-            if (!pRewardSource || !IsInMap(pRewardSource))
-                return false;
+			SetOriginalGroup(null);
+		}
 
-            WorldObject player = GetCorpse();
-            if (!player || IsAlive())
-                player = this;
+		public void SetOriginalGroup(Group group, byte subgroup = 0)
+		{
+			if (!group)
+			{
+				_originalGroup.Unlink();
+			}
+			else
+			{
+				_originalGroup.Link(group, this);
+				_originalGroup.SetSubGroup(subgroup);
+			}
+		}
 
-            if (player.GetMap().IsDungeon())
-                return true;
+		public bool IsInGroup(ObjectGuid groupGuid)
+		{
+			Group group = GetGroup();
 
-            return pRewardSource.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.GroupXpDistance);
-        }
+			if (group != null)
+				if (group.GetGUID() == groupGuid)
+					return true;
 
-        public Group GetGroupInvite() { return m_groupInvite; }
-        public void SetGroupInvite(Group group) { m_groupInvite = group; }
-        public Group GetGroup() { return m_group.GetTarget(); }
-        public GroupReference GetGroupRef() { return m_group; }
-        public byte GetSubGroup() { return m_group.GetSubGroup(); }
-        public GroupUpdateFlags GetGroupUpdateFlag() { return m_groupUpdateMask; }
-        public void SetGroupUpdateFlag(GroupUpdateFlags flag) { m_groupUpdateMask |= flag; }
-        public void RemoveGroupUpdateFlag(GroupUpdateFlags flag) { m_groupUpdateMask &= ~flag; }
+			Group originalGroup = GetOriginalGroup();
 
-        public Group GetOriginalGroup() { return m_originalGroup.GetTarget(); }
-        public GroupReference GetOriginalGroupRef() { return m_originalGroup; }
-        public byte GetOriginalSubGroup() { return m_originalGroup.GetSubGroup(); }
+			if (originalGroup != null)
+				if (originalGroup.GetGUID() == groupGuid)
+					return true;
 
-        public void SetPassOnGroupLoot(bool bPassOnGroupLoot) { m_bPassOnGroupLoot = bPassOnGroupLoot; }
-        public bool GetPassOnGroupLoot() { return m_bPassOnGroupLoot; }
+			return false;
+		}
 
-        public bool IsGroupVisibleFor(Player p)
-        {
-            switch (WorldConfig.GetIntValue(WorldCfg.GroupVisibility))
-            {
-                default: 
-                    return IsInSameGroupWith(p);
-                case 1: 
-                    return IsInSameRaidWith(p);
-                case 2: 
-                    return GetTeam() == p.GetTeam();
-                case 3:
-                    return false;
-            }
-        }
-        public bool IsInSameGroupWith(Player p)
-        {
-            return p == this || (GetGroup() &&
-                GetGroup() == p.GetGroup() && GetGroup().SameSubGroup(this, p));
-        }
+		public void SetGroup(Group group, byte subgroup = 0)
+		{
+			if (!group)
+			{
+				_group.Unlink();
+			}
+			else
+			{
+				_group.Link(group, this);
+				_group.SetSubGroup(subgroup);
+			}
 
-        public bool IsInSameRaidWith(Player p)
-        {
-            return p == this || (GetGroup() != null && GetGroup() == p.GetGroup());
-        }
+			UpdateObjectVisibility(false);
+		}
 
-        public void UninviteFromGroup()
-        {
-            Group group = GetGroupInvite();
-            if (!group)
-                return;
+		public void SetPartyType(GroupCategory category, GroupType type)
+		{
+			Cypher.Assert(category < GroupCategory.Max);
+			byte value = _playerData.PartyType;
+			value &= (byte)~((byte)0xFF << ((byte)category * 4));
+			value |= (byte)((byte)type << ((byte)category * 4));
+			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.PartyType), value);
+		}
 
-            group.RemoveInvite(this);
+		public void ResetGroupUpdateSequenceIfNeeded(Group group)
+		{
+			GroupCategory category = group.GetGroupCategory();
 
-            if (group.IsCreated())
-            {
-                if (group.GetMembersCount() <= 1) // group has just 1 member => disband
-                    group.Disband(true);
-            }
-            else
-            {
-                if (group.GetInviteeCount() <= 1)
-                    group.RemoveAllInvites();
-            }
-        }
+			// Rejoining the last group should not reset the sequence
+			if (_groupUpdateSequences[(int)category].GroupGuid != group.GetGUID())
+			{
+				GroupUpdateCounter groupUpdate;
+				groupUpdate.GroupGuid                = group.GetGUID();
+				groupUpdate.UpdateSequenceNumber     = 1;
+				_groupUpdateSequences[(int)category] = groupUpdate;
+			}
+		}
 
-        public void RemoveFromGroup(RemoveMethod method = RemoveMethod.Default) { RemoveFromGroup(GetGroup(), GetGUID(), method); }
-        public static void RemoveFromGroup(Group group, ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default, string reason = null)
-        {
-            if (!group)
-                return;
+		public int NextGroupUpdateSequenceNumber(GroupCategory category)
+		{
+			return _groupUpdateSequences[(int)category].UpdateSequenceNumber++;
+		}
 
-            group.RemoveMember(guid, method, kicker, reason);
-        }
+		public bool IsAtGroupRewardDistance(WorldObject pRewardSource)
+		{
+			if (!pRewardSource ||
+			    !IsInMap(pRewardSource))
+				return false;
 
-        void SendUpdateToOutOfRangeGroupMembers()
-        {
-            if (m_groupUpdateMask == GroupUpdateFlags.None)
-                return;
-            Group group = GetGroup();
-            if (group)
-                group.UpdatePlayerOutOfRange(this);
+			WorldObject player = GetCorpse();
 
-            m_groupUpdateMask = GroupUpdateFlags.None;
+			if (!player ||
+			    IsAlive())
+				player = this;
 
-            Pet pet = GetPet();
-            if (pet)
-                pet.ResetGroupUpdateFlag();
-        }
-    }
+			if (player.GetMap().IsDungeon())
+				return true;
+
+			return pRewardSource.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.GroupXpDistance);
+		}
+
+		public Group GetGroupInvite()
+		{
+			return _groupInvite;
+		}
+
+		public void SetGroupInvite(Group group)
+		{
+			_groupInvite = group;
+		}
+
+		public Group GetGroup()
+		{
+			return _group.GetTarget();
+		}
+
+		public GroupReference GetGroupRef()
+		{
+			return _group;
+		}
+
+		public byte GetSubGroup()
+		{
+			return _group.GetSubGroup();
+		}
+
+		public GroupUpdateFlags GetGroupUpdateFlag()
+		{
+			return _groupUpdateMask;
+		}
+
+		public void SetGroupUpdateFlag(GroupUpdateFlags flag)
+		{
+			_groupUpdateMask |= flag;
+		}
+
+		public void RemoveGroupUpdateFlag(GroupUpdateFlags flag)
+		{
+			_groupUpdateMask &= ~flag;
+		}
+
+		public Group GetOriginalGroup()
+		{
+			return _originalGroup.GetTarget();
+		}
+
+		public GroupReference GetOriginalGroupRef()
+		{
+			return _originalGroup;
+		}
+
+		public byte GetOriginalSubGroup()
+		{
+			return _originalGroup.GetSubGroup();
+		}
+
+		public void SetPassOnGroupLoot(bool bPassOnGroupLoot)
+		{
+			_bPassOnGroupLoot = bPassOnGroupLoot;
+		}
+
+		public bool GetPassOnGroupLoot()
+		{
+			return _bPassOnGroupLoot;
+		}
+
+		public bool IsGroupVisibleFor(Player p)
+		{
+			switch (WorldConfig.GetIntValue(WorldCfg.GroupVisibility))
+			{
+				default:
+					return IsInSameGroupWith(p);
+				case 1:
+					return IsInSameRaidWith(p);
+				case 2:
+					return GetTeam() == p.GetTeam();
+				case 3:
+					return false;
+			}
+		}
+
+		public bool IsInSameGroupWith(Player p)
+		{
+			return p == this ||
+			       (GetGroup() &&
+			        GetGroup() == p.GetGroup() &&
+			        GetGroup().SameSubGroup(this, p));
+		}
+
+		public bool IsInSameRaidWith(Player p)
+		{
+			return p == this || (GetGroup() != null && GetGroup() == p.GetGroup());
+		}
+
+		public void UninviteFromGroup()
+		{
+			Group group = GetGroupInvite();
+
+			if (!group)
+				return;
+
+			group.RemoveInvite(this);
+
+			if (group.IsCreated())
+			{
+				if (group.GetMembersCount() <= 1) // group has just 1 member => disband
+					group.Disband(true);
+			}
+			else
+			{
+				if (group.GetInviteeCount() <= 1)
+					group.RemoveAllInvites();
+			}
+		}
+
+		public void RemoveFromGroup(RemoveMethod method = RemoveMethod.Default)
+		{
+			RemoveFromGroup(GetGroup(), GetGUID(), method);
+		}
+
+		public static void RemoveFromGroup(Group group, ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default, string reason = null)
+		{
+			if (!group)
+				return;
+
+			group.RemoveMember(guid, method, kicker, reason);
+		}
+
+		private void SendUpdateToOutOfRangeGroupMembers()
+		{
+			if (_groupUpdateMask == GroupUpdateFlags.None)
+				return;
+
+			Group group = GetGroup();
+
+			if (group)
+				group.UpdatePlayerOutOfRange(this);
+
+			_groupUpdateMask = GroupUpdateFlags.None;
+
+			Pet pet = GetPet();
+
+			if (pet)
+				pet.ResetGroupUpdateFlag();
+		}
+	}
 }

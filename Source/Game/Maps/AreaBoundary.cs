@@ -5,233 +5,263 @@ using Game.Entities;
 
 namespace Game.Maps
 {
-    public class AreaBoundary
-    {
-        public AreaBoundary(bool isInverted)
-        {
-            _isInvertedBoundary = isInverted;
-        }
+	public class AreaBoundary
+	{
+		private bool _isInvertedBoundary;
 
-        public bool IsWithinBoundary(Position pos) { return pos != null && (IsWithinBoundaryArea(pos) != _isInvertedBoundary); }
+		public AreaBoundary(bool isInverted)
+		{
+			_isInvertedBoundary = isInverted;
+		}
 
-        public virtual bool IsWithinBoundaryArea(Position pos) { return false; }
+		public bool IsWithinBoundary(Position pos)
+		{
+			return pos != null && (IsWithinBoundaryArea(pos) != _isInvertedBoundary);
+		}
 
-        bool _isInvertedBoundary;
+		public virtual bool IsWithinBoundaryArea(Position pos)
+		{
+			return false;
+		}
 
-        public class DoublePosition : Position
-        {
-            public DoublePosition(double x = 0.0, double y = 0.0, double z = 0.0, float o = 0f) : base((float)x, (float)y, (float)z, o)
-            {
-                doublePosX = x;
-                doublePosY = y;
-                doublePosZ = z;
-            }
-            public DoublePosition(float x, float y = 0f, float z = 0f, float o = 0f) : base(x, y, z, o)
-            {
-                doublePosX = x;
-                doublePosY = y;
-                doublePosZ = z;
-            }
-            public DoublePosition(Position pos) : this(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()) { }
+		public class DoublePosition : Position
+		{
+			private double doublePosX;
+			private double doublePosY;
+			private double doublePosZ;
 
-            public double GetDoublePositionX() { return doublePosX; }
-            public double GetDoublePositionY() { return doublePosY; }
-            public double GetDoublePositionZ() { return doublePosZ; }
+			public DoublePosition(double x = 0.0, double y = 0.0, double z = 0.0, float o = 0f) : base((float)x, (float)y, (float)z, o)
+			{
+				doublePosX = x;
+				doublePosY = y;
+				doublePosZ = z;
+			}
 
-            public double GetDoubleExactDist2dSq(DoublePosition pos)
-            {
-                double offX = GetDoublePositionX() - pos.GetDoublePositionX();
-                double offY = GetDoublePositionY() - pos.GetDoublePositionY();
-                return (offX * offX) + (offY * offY);
-            }
+			public DoublePosition(float x, float y = 0f, float z = 0f, float o = 0f) : base(x, y, z, o)
+			{
+				doublePosX = x;
+				doublePosY = y;
+				doublePosZ = z;
+			}
 
-            public Position Sync()
-            {
-                posX = (float)doublePosX;
-                posY = (float)doublePosY;
-                posZ = (float)doublePosZ;
-                return this;
-            }
+			public DoublePosition(Position pos) : this(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation())
+			{
+			}
 
-            double doublePosX;
-            double doublePosY;
-            double doublePosZ;
-        }
-    }
+			public double GetDoublePositionX()
+			{
+				return doublePosX;
+			}
 
-    public class RectangleBoundary : AreaBoundary
-    {
-        // X axis is north/south, Y axis is east/west, larger values are northwest
-        public RectangleBoundary(float southX, float northX, float eastY, float westY, bool isInverted = false) : base(isInverted)
-        {
-            _minX = southX;
-            _maxX = northX;
-            _minY = eastY;
-            _maxY = westY;
-        }
+			public double GetDoublePositionY()
+			{
+				return doublePosY;
+			}
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            return !(pos.GetPositionX() < _minX || pos.GetPositionX() > _maxX || pos.GetPositionY() < _minY || pos.GetPositionY() > _maxY);
-        }
+			public double GetDoublePositionZ()
+			{
+				return doublePosZ;
+			}
 
-        float _minX;
-        float _maxX;
-        float _minY;
-        float _maxY;
-    }
+			public double GetDoubleExactDist2dSq(DoublePosition pos)
+			{
+				double offX = GetDoublePositionX() - pos.GetDoublePositionX();
+				double offY = GetDoublePositionY() - pos.GetDoublePositionY();
 
-    public class CircleBoundary : AreaBoundary
-    {
-        public CircleBoundary(Position center, double radius, bool isInverted = false) : base(isInverted)
-        {
-            _center = new DoublePosition(center);
-            _radiusSq = radius * radius;
-        }
-        public CircleBoundary(Position center, Position pointOnCircle, bool isInverted = false) : base(isInverted)
-        {
-            _center = new DoublePosition(center);
-            _radiusSq = _center.GetDoubleExactDist2dSq(new DoublePosition(pointOnCircle));
-        }
+				return (offX * offX) + (offY * offY);
+			}
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            double offX = _center.GetDoublePositionX() - pos.GetPositionX();
-            double offY = _center.GetDoublePositionY() - pos.GetPositionY();
-            return offX * offX + offY * offY <= _radiusSq;
-        }
+			public Position Sync()
+			{
+				posX = (float)doublePosX;
+				posY = (float)doublePosY;
+				posZ = (float)doublePosZ;
 
-        DoublePosition _center;
-        double _radiusSq;
-    }
+				return this;
+			}
+		}
+	}
 
-    public class EllipseBoundary : AreaBoundary
-    {
-        public EllipseBoundary(Position center, double radiusX, double radiusY, bool isInverted = false) : base(isInverted)
-        {
-            _center = new DoublePosition(center);
-            _radiusYSq = radiusY * radiusY;
-            _scaleXSq = _radiusYSq / (radiusX * radiusX);
-        }
+	public class RectangleBoundary : AreaBoundary
+	{
+		private float _maxX;
+		private float _maxY;
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            double offX = _center.GetDoublePositionX() - pos.GetPositionX();
-            double offY = _center.GetDoublePositionY() - pos.GetPositionY();
-            return (offX * offX) * _scaleXSq + (offY * offY) <= _radiusYSq;
-        }
+		private float _minX;
 
-        DoublePosition _center;
-        double _radiusYSq;
-        double _scaleXSq;
-    }
+		private float _minY;
 
-    public class TriangleBoundary : AreaBoundary
-    {
-        public TriangleBoundary(Position pointA, Position pointB, Position pointC, bool isInverted = false) : base(isInverted)
-        {
-            _a = new DoublePosition(pointA);
-            _b = new DoublePosition(pointB);
-            _c = new DoublePosition(pointC);
-            
-            _abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
-            _bcx = _c.GetDoublePositionX() - _b.GetDoublePositionX();
-            _cax = _a.GetDoublePositionX() - _c.GetDoublePositionX();
-            _aby = _b.GetDoublePositionY() - _a.GetDoublePositionY();
-            _bcy = _c.GetDoublePositionY() - _b.GetDoublePositionY();
-            _cay = _a.GetDoublePositionY() - _c.GetDoublePositionY();
-        }
+		// X axis is north/south, Y axis is east/west, larger values are northwest
+		public RectangleBoundary(float southX, float northX, float eastY, float westY, bool isInverted = false) : base(isInverted)
+		{
+			_minX = southX;
+			_maxX = northX;
+			_minY = eastY;
+			_maxY = westY;
+		}
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            // half-plane signs
-            bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
-            bool sign2 = ((-_c.GetDoublePositionX() + pos.GetPositionX()) * _bcy - (-_c.GetDoublePositionY() + pos.GetPositionY()) * _bcx) < 0;
-            bool sign3 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _cay - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _cax) < 0;
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			return !(pos.GetPositionX() < _minX || pos.GetPositionX() > _maxX || pos.GetPositionY() < _minY || pos.GetPositionY() > _maxY);
+		}
+	}
 
-            // if all signs are the same, the point is inside the triangle
-            return ((sign1 == sign2) && (sign2 == sign3));
-        }
+	public class CircleBoundary : AreaBoundary
+	{
+		private DoublePosition _center;
+		private double _radiusSq;
 
-        DoublePosition _a;
-        DoublePosition _b;
-        DoublePosition _c;
-        double _abx;
-        double _bcx;
-        double _cax;
-        double _aby;
-        double _bcy;
-        double _cay;
-    }
+		public CircleBoundary(Position center, double radius, bool isInverted = false) : base(isInverted)
+		{
+			_center   = new DoublePosition(center);
+			_radiusSq = radius * radius;
+		}
 
-    public class ParallelogramBoundary : AreaBoundary
-    {
-        // Note: AB must be orthogonal to AD
-        public ParallelogramBoundary(Position cornerA, Position cornerB, Position cornerD, bool isInverted = false) : base(isInverted)
-        {
-            _a = new DoublePosition(cornerA);
-            _b = new DoublePosition(cornerB);
-            _d = new DoublePosition(cornerD);
-            _c = new DoublePosition(_d.GetDoublePositionX() + (_b.GetDoublePositionX() - _a.GetDoublePositionX()), _d.GetDoublePositionY() + (_b.GetDoublePositionY() - _a.GetDoublePositionY()));
-            _abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
-            _dax = _a.GetDoublePositionX() - _d.GetDoublePositionX();
-            _aby = _b.GetDoublePositionY() - _a.GetDoublePositionY();
-            _day = _a.GetDoublePositionY() - _d.GetDoublePositionY();
-        }
+		public CircleBoundary(Position center, Position pointOnCircle, bool isInverted = false) : base(isInverted)
+		{
+			_center   = new DoublePosition(center);
+			_radiusSq = _center.GetDoubleExactDist2dSq(new DoublePosition(pointOnCircle));
+		}
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            // half-plane signs
-            bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
-            bool sign2 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _day - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _dax) < 0;
-            bool sign3 = ((-_d.GetDoublePositionY() + pos.GetPositionY()) * _abx - (-_d.GetDoublePositionX() + pos.GetPositionX()) * _aby) < 0; // AB = -CD
-            bool sign4 = ((-_c.GetDoublePositionY() + pos.GetPositionY()) * _dax - (-_c.GetDoublePositionX() + pos.GetPositionX()) * _day) < 0; // DA = -BC
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			double offX = _center.GetDoublePositionX() - pos.GetPositionX();
+			double offY = _center.GetDoublePositionY() - pos.GetPositionY();
 
-            // if all signs are equal, the point is inside
-            return ((sign1 == sign2) && (sign2 == sign3) && (sign3 == sign4));
-        }
+			return offX * offX + offY * offY <= _radiusSq;
+		}
+	}
 
-        DoublePosition _a;
-        DoublePosition _b;
-        DoublePosition _d;
-        DoublePosition _c;
-        double _abx;
-        double _dax;
-        double _aby;
-        double _day;
-    }
+	public class EllipseBoundary : AreaBoundary
+	{
+		private DoublePosition _center;
+		private double _radiusYSq;
+		private double _scaleXSq;
 
-    public class ZRangeBoundary : AreaBoundary
-    {
-        public ZRangeBoundary(float minZ, float maxZ, bool isInverted = false) : base(isInverted)
-        {
-            _minZ = minZ;
-            _maxZ = maxZ;
-        }
+		public EllipseBoundary(Position center, double radiusX, double radiusY, bool isInverted = false) : base(isInverted)
+		{
+			_center    = new DoublePosition(center);
+			_radiusYSq = radiusY * radiusY;
+			_scaleXSq  = _radiusYSq / (radiusX * radiusX);
+		}
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            return (_minZ <= pos.GetPositionZ() && pos.GetPositionZ() <= _maxZ);
-        }
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			double offX = _center.GetDoublePositionX() - pos.GetPositionX();
+			double offY = _center.GetDoublePositionY() - pos.GetPositionY();
 
-        float _minZ;
-        float _maxZ;
-    }
+			return (offX * offX) * _scaleXSq + (offY * offY) <= _radiusYSq;
+		}
+	}
 
-    class BoundaryUnionBoundary : AreaBoundary
-    {
-        public BoundaryUnionBoundary(AreaBoundary b1, AreaBoundary b2, bool isInverted = false) : base(isInverted)
-        {
-            _b1 = b1;
-            _b2 = b2;
-        }
+	public class TriangleBoundary : AreaBoundary
+	{
+		private DoublePosition _a;
+		private double _abx;
+		private double _aby;
+		private DoublePosition _b;
+		private double _bcx;
+		private double _bcy;
+		private DoublePosition _c;
+		private double _cax;
+		private double _cay;
 
-        public override bool IsWithinBoundaryArea(Position pos)
-        {
-            return _b1.IsWithinBoundary(pos) || _b2.IsWithinBoundary(pos);
-        }
+		public TriangleBoundary(Position pointA, Position pointB, Position pointC, bool isInverted = false) : base(isInverted)
+		{
+			_a = new DoublePosition(pointA);
+			_b = new DoublePosition(pointB);
+			_c = new DoublePosition(pointC);
 
-        AreaBoundary _b1;
-        AreaBoundary _b2;
-    }
+			_abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
+			_bcx = _c.GetDoublePositionX() - _b.GetDoublePositionX();
+			_cax = _a.GetDoublePositionX() - _c.GetDoublePositionX();
+			_aby = _b.GetDoublePositionY() - _a.GetDoublePositionY();
+			_bcy = _c.GetDoublePositionY() - _b.GetDoublePositionY();
+			_cay = _a.GetDoublePositionY() - _c.GetDoublePositionY();
+		}
+
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			// half-plane signs
+			bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
+			bool sign2 = ((-_c.GetDoublePositionX() + pos.GetPositionX()) * _bcy - (-_c.GetDoublePositionY() + pos.GetPositionY()) * _bcx) < 0;
+			bool sign3 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _cay - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _cax) < 0;
+
+			// if all signs are the same, the point is inside the triangle
+			return ((sign1 == sign2) && (sign2 == sign3));
+		}
+	}
+
+	public class ParallelogramBoundary : AreaBoundary
+	{
+		private DoublePosition _a;
+		private double _abx;
+		private double _aby;
+		private DoublePosition _b;
+		private DoublePosition _c;
+		private DoublePosition _d;
+		private double _dax;
+
+		private double _day;
+
+		// Note: AB must be orthogonal to AD
+		public ParallelogramBoundary(Position cornerA, Position cornerB, Position cornerD, bool isInverted = false) : base(isInverted)
+		{
+			_a   = new DoublePosition(cornerA);
+			_b   = new DoublePosition(cornerB);
+			_d   = new DoublePosition(cornerD);
+			_c   = new DoublePosition(_d.GetDoublePositionX() + (_b.GetDoublePositionX() - _a.GetDoublePositionX()), _d.GetDoublePositionY() + (_b.GetDoublePositionY() - _a.GetDoublePositionY()));
+			_abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
+			_dax = _a.GetDoublePositionX() - _d.GetDoublePositionX();
+			_aby = _b.GetDoublePositionY() - _a.GetDoublePositionY();
+			_day = _a.GetDoublePositionY() - _d.GetDoublePositionY();
+		}
+
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			// half-plane signs
+			bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
+			bool sign2 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _day - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _dax) < 0;
+			bool sign3 = ((-_d.GetDoublePositionY() + pos.GetPositionY()) * _abx - (-_d.GetDoublePositionX() + pos.GetPositionX()) * _aby) < 0; // AB = -CD
+			bool sign4 = ((-_c.GetDoublePositionY() + pos.GetPositionY()) * _dax - (-_c.GetDoublePositionX() + pos.GetPositionX()) * _day) < 0; // DA = -BC
+
+			// if all signs are equal, the point is inside
+			return ((sign1 == sign2) && (sign2 == sign3) && (sign3 == sign4));
+		}
+	}
+
+	public class ZRangeBoundary : AreaBoundary
+	{
+		private float _maxZ;
+
+		private float _minZ;
+
+		public ZRangeBoundary(float minZ, float maxZ, bool isInverted = false) : base(isInverted)
+		{
+			_minZ = minZ;
+			_maxZ = maxZ;
+		}
+
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			return (_minZ <= pos.GetPositionZ() && pos.GetPositionZ() <= _maxZ);
+		}
+	}
+
+	internal class BoundaryUnionBoundary : AreaBoundary
+	{
+		private AreaBoundary _b1;
+		private AreaBoundary _b2;
+
+		public BoundaryUnionBoundary(AreaBoundary b1, AreaBoundary b2, bool isInverted = false) : base(isInverted)
+		{
+			_b1 = b1;
+			_b2 = b2;
+		}
+
+		public override bool IsWithinBoundaryArea(Position pos)
+		{
+			return _b1.IsWithinBoundary(pos) || _b2.IsWithinBoundary(pos);
+		}
+	}
 }

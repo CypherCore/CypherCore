@@ -3,12 +3,11 @@
 
 using Game.AI;
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.ICreature
 {
-    public interface ICreatureGetAI : IScriptObject
-    {
-        CreatureAI GetAI(Creature creature);
-    }
+	public interface ICreatureGetAI : IScriptObject
+	{
+		CreatureAI GetAI(Creature creature);
+	}
 }

@@ -3,9 +3,13 @@
 
 namespace Game.Scripting.Interfaces
 {
-    public interface IScriptObject
-    {
-        string GetName();
-        bool IsDatabaseBound() { return false; }
-    }
+	public interface IScriptObject
+	{
+		string GetName();
+
+		bool IsDatabaseBound()
+		{
+			return false;
+		}
+	}
 }

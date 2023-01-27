@@ -1,165 +1,176 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Dynamic;
-using Game.Entities;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    public class WhoIsRequest : ClientPacket
-    {
-        public WhoIsRequest(WorldPacket packet) : base(packet) { }
+	public class WhoIsRequest : ClientPacket
+	{
+		public string CharName;
 
-        public override void Read()
-        {
-            CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
-        }
+		public WhoIsRequest(WorldPacket packet) : base(packet)
+		{
+		}
 
-        public string CharName;
-    }
+		public override void Read()
+		{
+			CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+		}
+	}
 
-    public class WhoIsResponse : ServerPacket
-    {
-        public WhoIsResponse() : base(ServerOpcodes.WhoIs) { }
+	public class WhoIsResponse : ServerPacket
+	{
+		public string AccountName;
 
-        public override void Write()
-        {
-            _worldPacket.WriteBits(AccountName.GetByteCount(), 11);
-            _worldPacket.WriteString(AccountName);
-        }
+		public WhoIsResponse() : base(ServerOpcodes.WhoIs)
+		{
+		}
 
-        public string AccountName;
-    }
+		public override void Write()
+		{
+			_worldPacket.WriteBits(AccountName.GetByteCount(), 11);
+			_worldPacket.WriteString(AccountName);
+		}
+	}
 
-    public class WhoRequestPkt : ClientPacket
-    {
-        public WhoRequestPkt(WorldPacket packet) : base(packet) { }
+	public class WhoRequestPkt : ClientPacket
+	{
+		public List<int> Areas = new();
 
-        public override void Read()
-        {
-            uint areasCount = _worldPacket.ReadBits<uint>(4);
+		public WhoRequest Request = new();
+		public uint RequestID;
 
-            Request.Read(_worldPacket);
-            RequestID = _worldPacket.ReadUInt32();
+		public WhoRequestPkt(WorldPacket packet) : base(packet)
+		{
+		}
 
-            for (int i = 0; i < areasCount; ++i)
-                Areas.Add(_worldPacket.ReadInt32());
-        }
+		public override void Read()
+		{
+			uint areasCount = _worldPacket.ReadBits<uint>(4);
 
-        public WhoRequest Request = new();
-        public uint RequestID;
-        public List<int> Areas= new();
-    }
+			Request.Read(_worldPacket);
+			RequestID = _worldPacket.ReadUInt32();
 
-    public class WhoResponsePkt : ServerPacket
-    {
-        public WhoResponsePkt() : base(ServerOpcodes.Who) { }
+			for (int i = 0; i < areasCount; ++i)
+				Areas.Add(_worldPacket.ReadInt32());
+		}
+	}
 
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(RequestID);
-            _worldPacket.WriteBits(Response.Count, 6);
-            _worldPacket.FlushBits();
+	public class WhoResponsePkt : ServerPacket
+	{
+		public uint RequestID;
+		public List<WhoEntry> Response = new();
 
-            Response.ForEach(p => p.Write(_worldPacket));
-        }
+		public WhoResponsePkt() : base(ServerOpcodes.Who)
+		{
+		}
 
-        public uint RequestID;
-        public List<WhoEntry> Response = new();
-    }
+		public override void Write()
+		{
+			_worldPacket.WriteUInt32(RequestID);
+			_worldPacket.WriteBits(Response.Count, 6);
+			_worldPacket.FlushBits();
 
-    public struct WhoRequestServerInfo
-    {
-        public void Read(WorldPacket data)
-        {
-            FactionGroup = data.ReadInt32();
-            Locale = data.ReadInt32();
-            RequesterVirtualRealmAddress = data.ReadUInt32();
-        }
+			Response.ForEach(p => p.Write(_worldPacket));
+		}
+	}
 
-        public int FactionGroup;
-        public int Locale;
-        public uint RequesterVirtualRealmAddress;
-    }
+	public struct WhoRequestServerInfo
+	{
+		public void Read(WorldPacket data)
+		{
+			FactionGroup                 = data.ReadInt32();
+			Locale                       = data.ReadInt32();
+			RequesterVirtualRealmAddress = data.ReadUInt32();
+		}
 
-    public class WhoRequest
-    {
-        public void Read(WorldPacket data)
-        {
-            MinLevel = data.ReadInt32();
-            MaxLevel = data.ReadInt32();
-            RaceFilter = data.ReadInt64();
-            ClassFilter = data.ReadInt32();
+		public int FactionGroup;
+		public int Locale;
+		public uint RequesterVirtualRealmAddress;
+	}
 
-            uint nameLength = data.ReadBits<uint>(6);
-            uint virtualRealmNameLength = data.ReadBits<uint>(9);
-            uint guildNameLength = data.ReadBits<uint>(7);
-            uint guildVirtualRealmNameLength = data.ReadBits<uint>(9);
-            uint wordsCount = data.ReadBits<uint>(3);
+	public class WhoRequest
+	{
+		public int ClassFilter = -1;
+		public bool ExactName;
+		public string Guild;
+		public string GuildVirtualRealmName;
+		public int MaxLevel;
 
-            ShowEnemies = data.HasBit();
-            ShowArenaPlayers = data.HasBit();
-            ExactName = data.HasBit();
-            if (data.HasBit())
-                ServerInfo = new();
+		public int MinLevel;
+		public string Name;
+		public long RaceFilter;
+		public WhoRequestServerInfo? ServerInfo;
+		public bool ShowArenaPlayers;
+		public bool ShowEnemies;
+		public string VirtualRealmName;
+		public List<string> Words = new();
 
-            data.ResetBitPos();
+		public void Read(WorldPacket data)
+		{
+			MinLevel    = data.ReadInt32();
+			MaxLevel    = data.ReadInt32();
+			RaceFilter  = data.ReadInt64();
+			ClassFilter = data.ReadInt32();
 
-            for (int i = 0; i < wordsCount; ++i)
-            {
-                Words.Add(data.ReadString(data.ReadBits<uint>(7)));
-                data.ResetBitPos();
-            }
+			uint nameLength                  = data.ReadBits<uint>(6);
+			uint virtualRealmNameLength      = data.ReadBits<uint>(9);
+			uint guildNameLength             = data.ReadBits<uint>(7);
+			uint guildVirtualRealmNameLength = data.ReadBits<uint>(9);
+			uint wordsCount                  = data.ReadBits<uint>(3);
 
-            Name = data.ReadString(nameLength);
-            VirtualRealmName = data.ReadString(virtualRealmNameLength);
-            Guild = data.ReadString(guildNameLength);
-            GuildVirtualRealmName = data.ReadString(guildVirtualRealmNameLength);
+			ShowEnemies      = data.HasBit();
+			ShowArenaPlayers = data.HasBit();
+			ExactName        = data.HasBit();
 
-            if (ServerInfo.HasValue)
-                ServerInfo.Value.Read(data);
-        }
+			if (data.HasBit())
+				ServerInfo = new WhoRequestServerInfo();
 
-        public int MinLevel;
-        public int MaxLevel;
-        public string Name;
-        public string VirtualRealmName;
-        public string Guild;
-        public string GuildVirtualRealmName;
-        public long RaceFilter;
-        public int ClassFilter = -1;
-        public List<string> Words = new();
-        public bool ShowEnemies;
-        public bool ShowArenaPlayers;
-        public bool ExactName;
-        public WhoRequestServerInfo? ServerInfo;
-    }
+			data.ResetBitPos();
 
-    public class WhoEntry
-    {
-        public void Write(WorldPacket data)
-        {
-            PlayerData.Write(data);
+			for (int i = 0; i < wordsCount; ++i)
+			{
+				Words.Add(data.ReadString(data.ReadBits<uint>(7)));
+				data.ResetBitPos();
+			}
 
-            data.WritePackedGuid(GuildGUID);
-            data.WriteUInt32(GuildVirtualRealmAddress);
-            data.WriteInt32(AreaID);
+			Name                  = data.ReadString(nameLength);
+			VirtualRealmName      = data.ReadString(virtualRealmNameLength);
+			Guild                 = data.ReadString(guildNameLength);
+			GuildVirtualRealmName = data.ReadString(guildVirtualRealmNameLength);
 
-            data.WriteBits(GuildName.GetByteCount(), 7);
-            data.WriteBit(IsGM);
-            data.WriteString(GuildName);
+			if (ServerInfo.HasValue)
+				ServerInfo.Value.Read(data);
+		}
+	}
 
-            data.FlushBits();
-        }
+	public class WhoEntry
+	{
+		public int AreaID;
+		public ObjectGuid GuildGUID;
+		public string GuildName = "";
+		public uint GuildVirtualRealmAddress;
+		public bool IsGM;
 
-        public PlayerGuidLookupData PlayerData = new();
-        public ObjectGuid GuildGUID;
-        public uint GuildVirtualRealmAddress;
-        public string GuildName = "";
-        public int AreaID;
-        public bool IsGM;
-    }
+		public PlayerGuidLookupData PlayerData = new();
+
+		public void Write(WorldPacket data)
+		{
+			PlayerData.Write(data);
+
+			data.WritePackedGuid(GuildGUID);
+			data.WriteUInt32(GuildVirtualRealmAddress);
+			data.WriteInt32(AreaID);
+
+			data.WriteBits(GuildName.GetByteCount(), 7);
+			data.WriteBit(IsGM);
+			data.WriteString(GuildName);
+
+			data.FlushBits();
+		}
+	}
 }

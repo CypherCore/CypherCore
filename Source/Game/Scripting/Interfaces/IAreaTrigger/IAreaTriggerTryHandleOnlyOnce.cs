@@ -3,12 +3,11 @@
 
 using Game.DataStorage;
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IAreaTrigger
 {
-    public interface IAreaTriggerTryHandleOnlyOnce : IScriptObject
-    {
-        bool TryHandleOnce(Player player, AreaTriggerRecord trigger);
-    }
+	public interface IAreaTriggerTryHandleOnlyOnce : IScriptObject
+	{
+		bool TryHandleOnce(Player player, AreaTriggerRecord trigger);
+	}
 }

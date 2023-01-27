@@ -1,6 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Threading;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
@@ -8,206 +12,214 @@ using Framework.Networking;
 using Game;
 using Game.Chat;
 using Game.Networking;
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Threading;
 
 namespace WorldServer
 {
-    public class Server
-    {
-        static void Main()
-        {
-            //Set Culture
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+	public class Server
+	{
+		private static void Main()
+		{
+			//Set Culture
+			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+			Thread.CurrentThread.CurrentCulture     = CultureInfo.InvariantCulture;
 
-            Console.CancelKeyPress += (o, e) => Global.WorldMgr.StopNow(ShutdownExitCode.Shutdown);
+			Console.CancelKeyPress += (o, e) => Global.WorldMgr.StopNow(ShutdownExitCode.Shutdown);
 
-            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+			AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
 
-            if (!ConfigMgr.Load(Process.GetCurrentProcess().ProcessName + ".conf"))
-                ExitNow();
+			if (!ConfigMgr.Load(Process.GetCurrentProcess().ProcessName + ".conf"))
+				ExitNow();
 
-            if (!StartDB())
-                ExitNow();
+			if (!StartDB())
+				ExitNow();
 
-            // Server startup begin
-            uint startupBegin = Time.GetMSTime();
+			// Server startup begin
+			uint startupBegin = Time.GetMSTime();
 
-            // set server offline (not connectable)
-            DB.Login.DirectExecute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
+			// set server offline (not connectable)
+			DB.Login.DirectExecute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
 
-            Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
+			Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
 
-            Global.WorldMgr.SetInitialWorldSettings();
+			Global.WorldMgr.SetInitialWorldSettings();
 
-            // Start the Remote Access port (acceptor) if enabled
-            if (ConfigMgr.GetDefaultValue("Ra.Enable", false))
-            {
-                int raPort = ConfigMgr.GetDefaultValue("Ra.Port", 3443);
-                string raListener = ConfigMgr.GetDefaultValue("Ra.IP", "0.0.0.0");
-                AsyncAcceptor raAcceptor = new();
-                if (!raAcceptor.Start(raListener, raPort))
-                    Log.outError(LogFilter.Server, "Failed to initialize RemoteAccess Socket Server");
-                else
-                    raAcceptor.AsyncAccept<RASocket>();
-            }
+			// Start the Remote Access port (acceptor) if enabled
+			if (ConfigMgr.GetDefaultValue("Ra.Enable", false))
+			{
+				int           raPort     = ConfigMgr.GetDefaultValue("Ra.Port", 3443);
+				string        raListener = ConfigMgr.GetDefaultValue("Ra.IP", "0.0.0.0");
+				AsyncAcceptor raAcceptor = new();
 
-            // Launch the worldserver listener socket
-            int worldPort = WorldConfig.GetIntValue(WorldCfg.PortWorld);
-            string worldListener = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
+				if (!raAcceptor.Start(raListener, raPort))
+					Log.outError(LogFilter.Server, "Failed to initialize RemoteAccess Socket Server");
+				else
+					raAcceptor.AsyncAccept<RASocket>();
+			}
 
-            int networkThreads = ConfigMgr.GetDefaultValue("Network.Threads", 1);
-            if (networkThreads <= 0)
-            {
-                Log.outError(LogFilter.Server, "Network.Threads must be greater than 0");
-                ExitNow();
-                return;
-            }
+			// Launch the worldserver listener socket
+			int    worldPort     = WorldConfig.GetIntValue(WorldCfg.PortWorld);
+			string worldListener = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
 
-            var WorldSocketMgr = new WorldSocketManager();
-            if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
-            {
-                Log.outError(LogFilter.Network, "Failed to start Realm Network");
-                ExitNow();
-            }
+			int networkThreads = ConfigMgr.GetDefaultValue("Network.Threads", 1);
 
-            // set server online (allow connecting now)
-            DB.Login.DirectExecute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
-            Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
-            Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
+			if (networkThreads <= 0)
+			{
+				Log.outError(LogFilter.Server, "Network.Threads must be greater than 0");
+				ExitNow();
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+				return;
+			}
 
-            uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
-            Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
+			var WorldSocketMgr = new WorldSocketManager();
 
-            //- Launch CliRunnable thread
-            if (ConfigMgr.GetDefaultValue("Console.Enable", true))
-            {
-                Thread commandThread = new(CommandManager.InitConsole);
-                commandThread.Start();
-            }
+			if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
+			{
+				Log.outError(LogFilter.Network, "Failed to start Realm Network");
+				ExitNow();
+			}
 
-            WorldUpdateLoop();
+			// set server online (allow connecting now)
+			DB.Login.DirectExecute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
+			Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
+			Global.WorldMgr.GetRealm().Flags           = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
 
-            try
-            {
-                // Shutdown starts here
-                Global.WorldMgr.KickAll();                                     // save and kick all players
-                Global.WorldMgr.UpdateSessions(1);                             // real players unload required UpdateSessions call
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
 
-                // unload Battlegroundtemplates before different singletons destroyed
-                Global.BattlegroundMgr.DeleteAllBattlegrounds();
+			uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
+			Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
 
-                WorldSocketMgr.StopNetwork();
+			//- Launch CliRunnable thread
+			if (ConfigMgr.GetDefaultValue("Console.Enable", true))
+			{
+				Thread commandThread = new(CommandManager.InitConsole);
+				commandThread.Start();
+			}
 
-                Global.MapMgr.UnloadAll();                     // unload all grids (including locked in memory)
-                Global.TerrainMgr.UnloadAll();
-                Global.InstanceLockMgr.Unload();
-                Global.ScriptMgr.Unload();
+			WorldUpdateLoop();
 
-                // set server offline
-                DB.Login.DirectExecute("UPDATE realmlist SET flag = flag | {0} WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
-                Global.RealmMgr.Close();
+			try
+			{
+				// Shutdown starts here
+				Global.WorldMgr.KickAll();         // save and kick all players
+				Global.WorldMgr.UpdateSessions(1); // real players unload required UpdateSessions call
 
-                ClearOnlineAccounts();
+				// unload Battlegroundtemplates before different singletons destroyed
+				Global.BattlegroundMgr.DeleteAllBattlegrounds();
 
-                ExitNow();
-            }
-            catch (Exception ex)
-            {
-                Log.outException(ex);
-                ExitNow();
-            }
-        }
+				WorldSocketMgr.StopNetwork();
 
-        static bool StartDB()
-        {
-            // Load databases
-            DatabaseLoader loader = new(DatabaseTypeFlags.All);
-            loader.AddDatabase(DB.Login, "Login");
-            loader.AddDatabase(DB.Characters, "Character");
-            loader.AddDatabase(DB.World, "World");
-            loader.AddDatabase(DB.Hotfix, "Hotfix");
+				Global.MapMgr.UnloadAll(); // unload all grids (including locked in memory)
+				Global.TerrainMgr.UnloadAll();
+				Global.InstanceLockMgr.Unload();
+				Global.ScriptMgr.Unload();
 
-            if (!loader.Load())
-                return false;
+				// set server offline
+				DB.Login.DirectExecute("UPDATE realmlist SET flag = flag | {0} WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
+				Global.RealmMgr.Close();
 
-            // Get the realm Id from the configuration file
-            Global.WorldMgr.GetRealm().Id.Index = ConfigMgr.GetDefaultValue("RealmID", 0u);
-            if (Global.WorldMgr.GetRealm().Id.Index == 0)
-            {
-                Log.outError(LogFilter.Server, "Realm ID not defined in configuration file");
-                return false;
-            }
-            Log.outInfo(LogFilter.ServerLoading, "Realm running as realm ID {0} ", Global.WorldMgr.GetRealm().Id.Index);
+				ClearOnlineAccounts();
 
-            // Clean the database before starting
-            ClearOnlineAccounts();
+				ExitNow();
+			}
+			catch (Exception ex)
+			{
+				Log.outException(ex);
+				ExitNow();
+			}
+		}
 
-            Log.outInfo(LogFilter.Server, "Using World DB: {0}", Global.WorldMgr.LoadDBVersion());
-            return true;
-        }
+		private static bool StartDB()
+		{
+			// Load databases
+			DatabaseLoader loader = new(DatabaseTypeFlags.All);
+			loader.AddDatabase(DB.Login, "Login");
+			loader.AddDatabase(DB.Characters, "Character");
+			loader.AddDatabase(DB.World, "World");
+			loader.AddDatabase(DB.Hotfix, "Hotfix");
 
-        static void ClearOnlineAccounts()
-        {
-            // Reset online status for all accounts with characters on the current realm
-            DB.Login.DirectExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {0})", Global.WorldMgr.GetRealm().Id.Index);
+			if (!loader.Load())
+				return false;
 
-            // Reset online status for all characters
-            DB.Characters.DirectExecute("UPDATE characters SET online = 0 WHERE online <> 0");
+			// Get the realm Id from the configuration file
+			Global.WorldMgr.GetRealm().Id.Index = ConfigMgr.GetDefaultValue("RealmID", 0u);
 
-            // Battlegroundinstance ids reset at server restart
-            DB.Characters.DirectExecute("UPDATE character_battleground_data SET instanceId = 0");
-        }
+			if (Global.WorldMgr.GetRealm().Id.Index == 0)
+			{
+				Log.outError(LogFilter.Server, "Realm ID not defined in configuration file");
 
-        static void WorldUpdateLoop()
-        {
-            int minUpdateDiff = ConfigMgr.GetDefaultValue("MinWorldUpdateTime", 1);
-            uint realPrevTime = Time.GetMSTime();
+				return false;
+			}
 
-            uint maxCoreStuckTime = ConfigMgr.GetDefaultValue("MaxCoreStuckTime", 60u) * 1000u;
-            uint halfMaxCoreStuckTime = maxCoreStuckTime / 2;
-            if (halfMaxCoreStuckTime == 0)
-                halfMaxCoreStuckTime = uint.MaxValue;
+			Log.outInfo(LogFilter.ServerLoading, "Realm running as realm ID {0} ", Global.WorldMgr.GetRealm().Id.Index);
 
-            while (!Global.WorldMgr.IsStopped)
-            {
-                var realCurrTime = Time.GetMSTime();
+			// Clean the database before starting
+			ClearOnlineAccounts();
 
-                uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
-                if (diff < minUpdateDiff)
-                {
-                    uint sleepTime = (uint)(minUpdateDiff - diff);
-                    if (sleepTime >= halfMaxCoreStuckTime)
-                        Log.outError(LogFilter.Server, $"WorldUpdateLoop() waiting for {sleepTime} ms with MaxCoreStuckTime set to {maxCoreStuckTime} ms");
+			Log.outInfo(LogFilter.Server, "Using World DB: {0}", Global.WorldMgr.LoadDBVersion());
 
-                    // sleep until enough time passes that we can update all timers
-                    Thread.Sleep(TimeSpan.FromMilliseconds(sleepTime));
-                    continue;
-                }
+			return true;
+		}
 
-                Global.WorldMgr.Update(diff);
-                realPrevTime = realCurrTime;
-            }
-        }
+		private static void ClearOnlineAccounts()
+		{
+			// Reset online status for all accounts with characters on the current realm
+			DB.Login.DirectExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {0})", Global.WorldMgr.GetRealm().Id.Index);
 
-        static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
-        {
-            var ex = e.ExceptionObject as Exception;
-            Log.outException(ex);
-        }
+			// Reset online status for all characters
+			DB.Characters.DirectExecute("UPDATE characters SET online = 0 WHERE online <> 0");
 
-        static void ExitNow()
-        {
-            Log.outInfo(LogFilter.Server, "Halting process...");
-            Thread.Sleep(5000);
-            Environment.Exit(Global.WorldMgr.GetExitCode());
-        }
-    }
+			// Battlegroundinstance ids reset at server restart
+			DB.Characters.DirectExecute("UPDATE character_battleground_data SET instanceId = 0");
+		}
+
+		private static void WorldUpdateLoop()
+		{
+			int  minUpdateDiff = ConfigMgr.GetDefaultValue("MinWorldUpdateTime", 1);
+			uint realPrevTime  = Time.GetMSTime();
+
+			uint maxCoreStuckTime     = ConfigMgr.GetDefaultValue("MaxCoreStuckTime", 60u) * 1000u;
+			uint halfMaxCoreStuckTime = maxCoreStuckTime / 2;
+
+			if (halfMaxCoreStuckTime == 0)
+				halfMaxCoreStuckTime = uint.MaxValue;
+
+			while (!Global.WorldMgr.IsStopped)
+			{
+				var realCurrTime = Time.GetMSTime();
+
+				uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
+
+				if (diff < minUpdateDiff)
+				{
+					uint sleepTime = (uint)(minUpdateDiff - diff);
+
+					if (sleepTime >= halfMaxCoreStuckTime)
+						Log.outError(LogFilter.Server, $"WorldUpdateLoop() waiting for {sleepTime} ms with MaxCoreStuckTime set to {maxCoreStuckTime} ms");
+
+					// sleep until enough time passes that we can update all timers
+					Thread.Sleep(TimeSpan.FromMilliseconds(sleepTime));
+
+					continue;
+				}
+
+				Global.WorldMgr.Update(diff);
+				realPrevTime = realCurrTime;
+			}
+		}
+
+		private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
+		{
+			var ex = e.ExceptionObject as Exception;
+			Log.outException(ex);
+		}
+
+		private static void ExitNow()
+		{
+			Log.outInfo(LogFilter.Server, "Halting process...");
+			Thread.Sleep(5000);
+			Environment.Exit(Global.WorldMgr.GetExitCode());
+		}
+	}
 }

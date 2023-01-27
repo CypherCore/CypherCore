@@ -1,250 +1,274 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
-using System;
 
 namespace Game.Movement
 {
-    public class FleeingMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
-    {
-        public const float MIN_QUIET_DISTANCE = 28.0f;
-        public const float MAX_QUIET_DISTANCE = 43.0f;
+	public class FleeingMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
+	{
+		public const float MIN_QUIET_DISTANCE = 28.0f;
+		public const float MAX_QUIET_DISTANCE = 43.0f;
+		private ObjectGuid _fleeTargetGUID;
 
-        public FleeingMovementGenerator(ObjectGuid fright)
-        {
-            _fleeTargetGUID = fright;
-            _timer = new TimeTracker();
+		private PathGenerator _path;
+		private TimeTracker _timer;
 
-            Mode = MovementGeneratorMode.Default;
-            Priority = MovementGeneratorPriority.Highest;
-            Flags = MovementGeneratorFlags.InitializationPending;
-            BaseUnitState = UnitState.Fleeing;
-        }
+		public FleeingMovementGenerator(ObjectGuid fright)
+		{
+			_fleeTargetGUID = fright;
+			_timer          = new TimeTracker();
 
-        public override void DoInitialize(T owner)
-        {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            AddFlag(MovementGeneratorFlags.Initialized);
+			Mode          = MovementGeneratorMode.Default;
+			Priority      = MovementGeneratorPriority.Highest;
+			Flags         = MovementGeneratorFlags.InitializationPending;
+			BaseUnitState = UnitState.Fleeing;
+		}
 
-            if (owner == null || !owner.IsAlive())
-                return;
+		public override void DoInitialize(T owner)
+		{
+			RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
+			AddFlag(MovementGeneratorFlags.Initialized);
 
-            // TODO: UNIT_FIELD_FLAGS should not be handled by generators
-            owner.SetUnitFlag(UnitFlags.Fleeing);
-            _path = null;
-            SetTargetLocation(owner);
-        }
+			if (owner == null ||
+			    !owner.IsAlive())
+				return;
 
-        public override void DoReset(T owner)
-        {
-            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            DoInitialize(owner);
-        }
+			// TODO: UNIT_FIELD_FLAGS should not be handled by generators
+			owner.SetUnitFlag(UnitFlags.Fleeing);
+			_path = null;
+			SetTargetLocation(owner);
+		}
 
-        public override bool DoUpdate(T owner, uint diff)
-        {
-            if (owner == null || !owner.IsAlive())
-                return false;
+		public override void DoReset(T owner)
+		{
+			RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
+			DoInitialize(owner);
+		}
 
-            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
-            {
-                AddFlag(MovementGeneratorFlags.Interrupted);
-                owner.StopMoving();
-                _path = null;
-                return true;
-            }
-            else
-                RemoveFlag(MovementGeneratorFlags.Interrupted);
+		public override bool DoUpdate(T owner, uint diff)
+		{
+			if (owner == null ||
+			    !owner.IsAlive())
+				return false;
 
-            _timer.Update(diff);
-            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
-            {
-                RemoveFlag(MovementGeneratorFlags.Transitory);
-                SetTargetLocation(owner);
-            }
+			if (owner.HasUnitState(UnitState.NotMove) ||
+			    owner.IsMovementPreventedByCasting())
+			{
+				AddFlag(MovementGeneratorFlags.Interrupted);
+				owner.StopMoving();
+				_path = null;
 
-            return true;
-        }
+				return true;
+			}
+			else
+			{
+				RemoveFlag(MovementGeneratorFlags.Interrupted);
+			}
 
-        public override void DoDeactivate(T owner)
-        {
-            AddFlag(MovementGeneratorFlags.Deactivated);
-            owner.ClearUnitState(UnitState.FleeingMove);
-        }
+			_timer.Update(diff);
 
-        public override void DoFinalize(T owner, bool active, bool movementInform)
-        {
-            AddFlag(MovementGeneratorFlags.Finalized);
+			if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) ||
+			    (_timer.Passed() && owner.MoveSpline.Finalized()))
+			{
+				RemoveFlag(MovementGeneratorFlags.Transitory);
+				SetTargetLocation(owner);
+			}
 
-            if (active)
-            {
-                if (owner.IsPlayer())
-                {
-                    owner.RemoveUnitFlag(UnitFlags.Fleeing);
-                    owner.ClearUnitState(UnitState.FleeingMove);
-                    owner.StopMoving();
-                }
-                else
-                {
-                    owner.RemoveUnitFlag(UnitFlags.Fleeing);
-                    owner.ClearUnitState(UnitState.FleeingMove);
-                    if (owner.GetVictim() != null)
-                        owner.SetTarget(owner.GetVictim().GetGUID());
-                }
-            }
-        }
+			return true;
+		}
 
-        void SetTargetLocation(T owner)
-        {
-            if (owner == null || !owner.IsAlive())
-                return;
+		public override void DoDeactivate(T owner)
+		{
+			AddFlag(MovementGeneratorFlags.Deactivated);
+			owner.ClearUnitState(UnitState.FleeingMove);
+		}
 
-            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
-            {
-                AddFlag(MovementGeneratorFlags.Interrupted);
-                owner.StopMoving();
-                _path = null;
-                return;
-            }
+		public override void DoFinalize(T owner, bool active, bool movementInform)
+		{
+			AddFlag(MovementGeneratorFlags.Finalized);
 
-            Position destination = new (owner.GetPosition());
-            GetPoint(owner, destination);
+			if (active)
+			{
+				if (owner.IsPlayer())
+				{
+					owner.RemoveUnitFlag(UnitFlags.Fleeing);
+					owner.ClearUnitState(UnitState.FleeingMove);
+					owner.StopMoving();
+				}
+				else
+				{
+					owner.RemoveUnitFlag(UnitFlags.Fleeing);
+					owner.ClearUnitState(UnitState.FleeingMove);
 
-            // Add LOS check for target point
-            if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
-            {
-                _timer.Reset(200);
-                return;
-            }
+					if (owner.GetVictim() != null)
+						owner.SetTarget(owner.GetVictim().GetGUID());
+				}
+			}
+		}
 
-            if (_path == null)
-            {
-                _path = new PathGenerator(owner);
-                _path.SetPathLengthLimit(30.0f);
-            }
+		private void SetTargetLocation(T owner)
+		{
+			if (owner == null ||
+			    !owner.IsAlive())
+				return;
 
-            bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
-            if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut) || _path.GetPathType().HasFlag(PathType.FarFromPoly))
-            {
-                _timer.Reset(100);
-                return;
-            }
+			if (owner.HasUnitState(UnitState.NotMove) ||
+			    owner.IsMovementPreventedByCasting())
+			{
+				AddFlag(MovementGeneratorFlags.Interrupted);
+				owner.StopMoving();
+				_path = null;
 
-            owner.AddUnitState(UnitState.FleeingMove);
+				return;
+			}
 
-            MoveSplineInit init = new(owner);
-            init.MovebyPath(_path.GetPath());
-            init.SetWalk(false);
-            uint traveltime = (uint)init.Launch();
-            _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
-        }
+			Position destination = new(owner.GetPosition());
+			GetPoint(owner, destination);
 
-        void GetPoint(T owner, Position position)
-        {
-            float casterDistance, casterAngle;
-            Unit fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
-            if (fleeTarget != null)
-            {
-                casterDistance = fleeTarget.GetDistance(owner);
-                if (casterDistance > 0.2f)
-                    casterAngle = fleeTarget.GetAbsoluteAngle(owner);
-                else
-                    casterAngle = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
-            }
-            else
-            {
-                casterDistance = 0.0f;
-                casterAngle = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
-            }
+			// Add LOS check for target point
+			if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
+			{
+				_timer.Reset(200);
 
-            float distance, angle;
-            if (casterDistance < MIN_QUIET_DISTANCE)
-            {
-                distance = RandomHelper.FRand(0.4f, 1.3f) * (MIN_QUIET_DISTANCE - casterDistance);
-                angle = casterAngle + RandomHelper.FRand(-MathF.PI / 8.0f, MathF.PI / 8.0f);
-            }
-            else if (casterDistance > MAX_QUIET_DISTANCE)
-            {
-                distance = RandomHelper.FRand(0.4f, 1.0f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-                angle = -casterAngle + RandomHelper.FRand(-MathF.PI / 4.0f, MathF.PI / 4.0f);
-            }
-            else    // we are inside quiet range
-            {
-                distance = RandomHelper.FRand(0.6f, 1.2f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-                angle = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
-            }
+				return;
+			}
 
-            owner.MovePositionToFirstCollision(position, distance, angle);
-        }
+			if (_path == null)
+			{
+				_path = new PathGenerator(owner);
+				_path.SetPathLengthLimit(30.0f);
+			}
 
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Fleeing;
-        }
+			bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
 
-        public override void UnitSpeedChanged()
-        {
-            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
-        }
+			if (!result ||
+			    _path.GetPathType().HasFlag(PathType.NoPath) ||
+			    _path.GetPathType().HasFlag(PathType.Shortcut) ||
+			    _path.GetPathType().HasFlag(PathType.FarFromPoly))
+			{
+				_timer.Reset(100);
 
-        PathGenerator _path;
-        ObjectGuid _fleeTargetGUID;
-        TimeTracker _timer;
-    }
+				return;
+			}
 
-    public class TimedFleeingMovementGenerator : FleeingMovementGenerator<Creature>
-    {
-        public TimedFleeingMovementGenerator(ObjectGuid fright, uint time) : base(fright)
-        {
-            _totalFleeTime = new TimeTracker(time);
-        }
+			owner.AddUnitState(UnitState.FleeingMove);
 
-        public override bool Update(Unit owner, uint diff)
-        {
-            if (owner == null || !owner.IsAlive())
-                return false;
+			MoveSplineInit init = new(owner);
+			init.MovebyPath(_path.GetPath());
+			init.SetWalk(false);
+			uint traveltime = (uint)init.Launch();
+			_timer.Reset(traveltime + RandomHelper.URand(800, 1500));
+		}
 
-            _totalFleeTime.Update(diff);
-            if (_totalFleeTime.Passed())
-                return false;
+		private void GetPoint(T owner, Position position)
+		{
+			float casterDistance, casterAngle;
+			Unit  fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
 
-            return DoUpdate(owner.ToCreature(), diff);
-        }
+			if (fleeTarget != null)
+			{
+				casterDistance = fleeTarget.GetDistance(owner);
 
-        public override void Finalize(Unit owner, bool active, bool movementInform)
-        {
-            AddFlag(MovementGeneratorFlags.Finalized);
-            if (!active)
-                return;
+				if (casterDistance > 0.2f)
+					casterAngle = fleeTarget.GetAbsoluteAngle(owner);
+				else
+					casterAngle = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
+			}
+			else
+			{
+				casterDistance = 0.0f;
+				casterAngle    = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
+			}
 
-            owner.RemoveUnitFlag(UnitFlags.Fleeing);
-            Unit victim = owner.GetVictim();
-            if (victim != null)
-            {
-                if (owner.IsAlive())
-                {
-                    owner.AttackStop();
-                    owner.ToCreature().GetAI().AttackStart(victim);
-                }
-            }
+			float distance, angle;
 
-            if (movementInform)
-            {
-                Creature ownerCreature = owner.ToCreature();
-                CreatureAI ai = ownerCreature != null ? ownerCreature.GetAI() : null;
-                if (ai != null)
-                    ai.MovementInform(MovementGeneratorType.TimedFleeing, 0);
-            }
-        }
+			if (casterDistance < MIN_QUIET_DISTANCE)
+			{
+				distance = RandomHelper.FRand(0.4f, 1.3f) * (MIN_QUIET_DISTANCE - casterDistance);
+				angle    = casterAngle + RandomHelper.FRand(-MathF.PI / 8.0f, MathF.PI / 8.0f);
+			}
+			else if (casterDistance > MAX_QUIET_DISTANCE)
+			{
+				distance = RandomHelper.FRand(0.4f, 1.0f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
+				angle    = -casterAngle + RandomHelper.FRand(-MathF.PI / 4.0f, MathF.PI / 4.0f);
+			}
+			else // we are inside quiet range
+			{
+				distance = RandomHelper.FRand(0.6f, 1.2f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
+				angle    = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
+			}
 
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.TimedFleeing;
-        }
+			owner.MovePositionToFirstCollision(position, distance, angle);
+		}
 
-        TimeTracker _totalFleeTime;
-    }
+		public override MovementGeneratorType GetMovementGeneratorType()
+		{
+			return MovementGeneratorType.Fleeing;
+		}
+
+		public override void UnitSpeedChanged()
+		{
+			AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
+		}
+	}
+
+	public class TimedFleeingMovementGenerator : FleeingMovementGenerator<Creature>
+	{
+		private TimeTracker _totalFleeTime;
+
+		public TimedFleeingMovementGenerator(ObjectGuid fright, uint time) : base(fright)
+		{
+			_totalFleeTime = new TimeTracker(time);
+		}
+
+		public override bool Update(Unit owner, uint diff)
+		{
+			if (owner == null ||
+			    !owner.IsAlive())
+				return false;
+
+			_totalFleeTime.Update(diff);
+
+			if (_totalFleeTime.Passed())
+				return false;
+
+			return DoUpdate(owner.ToCreature(), diff);
+		}
+
+		public override void Finalize(Unit owner, bool active, bool movementInform)
+		{
+			AddFlag(MovementGeneratorFlags.Finalized);
+
+			if (!active)
+				return;
+
+			owner.RemoveUnitFlag(UnitFlags.Fleeing);
+			Unit victim = owner.GetVictim();
+
+			if (victim != null)
+				if (owner.IsAlive())
+				{
+					owner.AttackStop();
+					owner.ToCreature().GetAI().AttackStart(victim);
+				}
+
+			if (movementInform)
+			{
+				Creature   ownerCreature = owner.ToCreature();
+				CreatureAI ai            = ownerCreature != null ? ownerCreature.GetAI() : null;
+
+				if (ai != null)
+					ai.MovementInform(MovementGeneratorType.TimedFleeing, 0);
+			}
+		}
+
+		public override MovementGeneratorType GetMovementGeneratorType()
+		{
+			return MovementGeneratorType.TimedFleeing;
+		}
+	}
 }

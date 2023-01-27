@@ -1,128 +1,138 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
-using System.Collections.Generic;
 
 namespace Game.Garrisons
 {
-    class GarrisonMap : Map
-    {
-        public GarrisonMap(uint id, long expiry, uint instanceId, ObjectGuid owner) : base(id, expiry, instanceId, Difficulty.Normal)
-        {
-            _owner = owner;
-            InitVisibilityDistance();
-        }
+	internal class GarrisonMap : Map
+	{
+		private Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
 
-        public override void LoadGridObjects(Grid grid, Cell cell)
-        {
-            base.LoadGridObjects(grid, cell);
+		private ObjectGuid _owner;
 
-            GarrisonGridLoader loader = new(grid, this, cell);
-            loader.LoadN();
-        }
+		public GarrisonMap(uint id, long expiry, uint instanceId, ObjectGuid owner) : base(id, expiry, instanceId, Difficulty.Normal)
+		{
+			_owner = owner;
+			InitVisibilityDistance();
+		}
 
-        public Garrison GetGarrison()
-        {
-            if (_loadingPlayer)
-                return _loadingPlayer.GetGarrison();
+		public override void LoadGridObjects(Grid grid, Cell cell)
+		{
+			base.LoadGridObjects(grid, cell);
 
-            Player owner = Global.ObjAccessor.FindConnectedPlayer(_owner);
-            if (owner)
-                return owner.GetGarrison();
+			GarrisonGridLoader loader = new(grid, this, cell);
+			loader.LoadN();
+		}
 
-            return null;
-        }
+		public Garrison GetGarrison()
+		{
+			if (_loadingPlayer)
+				return _loadingPlayer.GetGarrison();
 
-        public override void InitVisibilityDistance()
-        {
-            //init visibility distance for instances
-            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
-            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
-        }
+			Player owner = Global.ObjAccessor.FindConnectedPlayer(_owner);
 
-        public override bool AddPlayerToMap(Player player, bool initPlayer = true)
-        {
-            if (player.GetGUID() == _owner)
-                _loadingPlayer = player;
+			if (owner)
+				return owner.GetGarrison();
 
-            bool result = base.AddPlayerToMap(player, initPlayer);
+			return null;
+		}
 
-            if (player.GetGUID() == _owner)
-                _loadingPlayer = null;
+		public override void InitVisibilityDistance()
+		{
+			//init visibility distance for instances
+			_VisibleDistance        = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
+			_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
+		}
 
-            return result;
-        }
+		public override bool AddPlayerToMap(Player player, bool initPlayer = true)
+		{
+			if (player.GetGUID() == _owner)
+				_loadingPlayer = player;
 
-        ObjectGuid _owner;
-        Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
-    }
+			bool result = base.AddPlayerToMap(player, initPlayer);
 
-    class GarrisonGridLoader : Notifier
-    {
-        public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
-        {
-            i_cell = cell;
-            i_grid = grid;
-            i_map = map;
-            i_garrison = map.GetGarrison();
-        }
+			if (player.GetGUID() == _owner)
+				_loadingPlayer = null;
 
-        public void LoadN()
-        {
-            if (i_garrison != null)
-            {
-                i_cell.data.cell_y = 0;
-                for (uint x = 0; x < MapConst.MaxCells; ++x)
-                {
-                    i_cell.data.cell_x = x;
-                    for (uint y = 0; y < MapConst.MaxCells; ++y)
-                    {
-                        i_cell.data.cell_y = y;
+			return result;
+		}
+	}
 
-                        //Load creatures and game objects
-                        var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                        i_grid.VisitGrid(x, y, visitor);
-                    }
-                }
-            }
+	internal class GarrisonGridLoader : Notifier
+	{
+		private Cell i_cell;
+		private uint i_creatures;
+		private uint i_gameObjects;
+		private Garrison i_garrison;
+		private Grid i_grid;
+		private GarrisonMap i_map;
 
-            Log.outDebug(LogFilter.Maps, "{0} GameObjects and {1} Creatures loaded for grid {2} on map {3}", i_gameObjects, i_creatures, i_grid.GetGridId(), i_map.GetId());
-        }
+		public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
+		{
+			i_cell     = cell;
+			i_grid     = grid;
+			i_map      = map;
+			i_garrison = map.GetGarrison();
+		}
 
-        public override void Visit(IList<GameObject> objs)
-        {
-            ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
-            if (!plots.Empty())
-            {
-                CellCoord cellCoord = i_cell.GetCellCoord();
-                foreach (Garrison.Plot plot in plots)
-                {
-                    Position spawn = plot.PacketInfo.PlotPos;
-                    if (cellCoord != GridDefines.ComputeCellCoord(spawn.GetPositionX(), spawn.GetPositionY()))
-                        continue;
+		public void LoadN()
+		{
+			if (i_garrison != null)
+			{
+				i_cell.data.cell_y = 0;
 
-                    GameObject go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
-                    if (!go)
-                        continue;
+				for (uint x = 0; x < MapConst.MaxCells; ++x)
+				{
+					i_cell.data.cell_x = x;
 
-                    var cell = new Cell(cellCoord);
-                    i_map.AddToGrid(go, cell);
-                    go.AddToWorld();
-                    ++i_gameObjects;
-                }
-            }
-        }
+					for (uint y = 0; y < MapConst.MaxCells; ++y)
+					{
+						i_cell.data.cell_y = y;
 
-        public override void Visit(IList<Creature> objs) { }
+						//Load creatures and game objects
+						var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
+						i_grid.VisitGrid(x, y, visitor);
+					}
+				}
+			}
 
-        Cell i_cell;
-        Grid i_grid;
-        GarrisonMap i_map;
-        Garrison i_garrison;
-        uint i_gameObjects;
-        uint i_creatures;
-    }
+			Log.outDebug(LogFilter.Maps, "{0} GameObjects and {1} Creatures loaded for grid {2} on map {3}", i_gameObjects, i_creatures, i_grid.GetGridId(), i_map.GetId());
+		}
+
+		public override void Visit(IList<GameObject> objs)
+		{
+			ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
+
+			if (!plots.Empty())
+			{
+				CellCoord cellCoord = i_cell.GetCellCoord();
+
+				foreach (Garrison.Plot plot in plots)
+				{
+					Position spawn = plot.PacketInfo.PlotPos;
+
+					if (cellCoord != GridDefines.ComputeCellCoord(spawn.GetPositionX(), spawn.GetPositionY()))
+						continue;
+
+					GameObject go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
+
+					if (!go)
+						continue;
+
+					var cell = new Cell(cellCoord);
+					i_map.AddToGrid(go, cell);
+					go.AddToWorld();
+					++i_gameObjects;
+				}
+			}
+		}
+
+		public override void Visit(IList<Creature> objs)
+		{
+		}
+	}
 }
