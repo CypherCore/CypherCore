@@ -4761,7 +4761,7 @@ namespace Game.Maps
         protected List<Player> m_activePlayers = new();
         TerrainInfo m_terrain;
 
-        SortedMultiMap<long, ScriptAction> m_scriptSchedule = new();
+        MultiMap<long, ScriptAction> m_scriptSchedule = new();
 
         BitSet marked_cells = new(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
         public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new();
