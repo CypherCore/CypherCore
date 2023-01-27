@@ -1422,7 +1422,7 @@ namespace Game.Movement
 
 	public struct ChaseAngle
 	{
-		public float RelativeAngle; // we want to be at this angle relative to the target (0 = front, M_PI = back)
+		public float RelativeAngle; // we want to be at this angle relative to the target (0 = front, _PI = back)
 		public float Tolerance;     // but we'll tolerate anything within +- this much
 
 		public ChaseAngle(float angle, float tol = MathFunctions.PiOver4)
