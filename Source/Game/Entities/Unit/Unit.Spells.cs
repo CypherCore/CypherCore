@@ -2471,13 +2471,18 @@ namespace Game.Entities
 
         // Auras
         public List<Aura> GetSingleCastAuras() { return m_scAuras; }
-        public List<KeyValuePair<uint, Aura>> GetOwnedAuras()
+        public IEnumerable<KeyValuePair<uint, Aura>> GetOwnedAuras()
         {
             return m_ownedAuras.KeyValueList;
         }
-        public List<KeyValuePair<uint, AuraApplication>> GetAppliedAuras()
+        public IEnumerable<KeyValuePair<uint, AuraApplication>> GetAppliedAuras()
         {
             return m_appliedAuras.KeyValueList;
+        }
+
+        public int GetAppliedAurasCount()
+        {
+            return m_appliedAuras.Count;
         }
 
         public Aura AddAura(uint spellId, Unit target)

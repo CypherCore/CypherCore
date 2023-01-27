@@ -1210,7 +1210,7 @@ namespace Game.Movement
                 return;
 
             _baseUnitStatesMap.Remove((uint)movement.BaseUnitState, movement);
-            if (!_baseUnitStatesMap.ContainsKey(movement.BaseUnitState))
+            if (!_baseUnitStatesMap.ContainsKey((uint)movement.BaseUnitState))
                 _owner.ClearUnitState(movement.BaseUnitState);
         }
 
