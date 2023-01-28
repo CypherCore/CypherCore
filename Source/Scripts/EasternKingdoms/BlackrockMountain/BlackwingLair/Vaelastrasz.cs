@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 
 			DoCast(me, SpellIds.Essenceofthered);
 			me.SetHealth(me.CountPctFromMaxHealth(30));
-			// now drop damage requirement to be able to take loot
+			// now drop Damage requirement to be able to take loot
 			me.ResetPlayerDamageReq();
 
 			_scheduler.Schedule(TimeSpan.FromSeconds(10),
@@ -105,8 +105,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 			_scheduler.Schedule(TimeSpan.FromSeconds(15),
 			                    task =>
 			                    {
-				                    //selects a random target that isn't the current victim and is a mana user (selects mana users) but not pets
-				                    //it also ignores targets who have the aura. We don't want to place the debuff on the same target twice.
+				                    //selects a random Target that isn't the current victim and is a mana user (selects mana users) but not pets
+				                    //it also ignores targets who have the aura. We don't want to place the debuff on the same Target twice.
 				                    Unit target = SelectTarget(SelectTargetMethod.Random, 1, u => { return u && !u.IsPet() && u.GetPowerType() == PowerType.Mana && !u.HasAura(SpellIds.Burningadrenaline); });
 
 				                    if (target != null)
@@ -214,7 +214,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 		{
 			//The tooltip says the on death the AoE occurs. According to information: http://qaliaresponse.stage.lithium.com/t5/WoW-Mayhem/Surviving-Burning-Adrenaline-For-tanks/td-p/48609
 			//Burning Adrenaline can be survived therefore Blizzard's implementation was an AoE bomb that went off if you were still alive and dealt
-			//damage to the target. You don't have to die for it to go off. It can go off whether you live or die.
+			//Damage to the Target. You don't have to die for it to go off. It can go off whether you live or die.
 			GetTarget().CastSpell(GetTarget(), SpellIds.BurningadrenalineExplosion, true);
 		}
 

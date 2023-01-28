@@ -103,14 +103,14 @@ namespace Game
 
 						if (data == null)
 						{
-							Log.outError(LogFilter.Sql, "`pool_creature` has a non existing creature spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
+							Log.outError(LogFilter.Sql, "`pool_creature` has a non existing creature spawn (GUID: {0}) defined for pool Id ({1}), skipped.", guid, pool_id);
 
 							continue;
 						}
 
 						if (!mPoolTemplate.ContainsKey(pool_id))
 						{
-							Log.outError(LogFilter.Sql, "`pool_creature` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
+							Log.outError(LogFilter.Sql, "`pool_creature` pool Id ({0}) is not in `pool_template`, skipped.", pool_id);
 
 							continue;
 						}
@@ -118,7 +118,7 @@ namespace Game
 						if (chance < 0 ||
 						    chance > 100)
 						{
-							Log.outError(LogFilter.Sql, "`pool_creature` has an invalid chance ({0}) for creature guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+							Log.outError(LogFilter.Sql, "`pool_creature` has an invalid chance ({0}) for creature Guid ({1}) in pool Id ({2}), skipped.", chance, guid, pool_id);
 
 							continue;
 						}
@@ -130,7 +130,7 @@ namespace Game
 
 						if (pPoolTemplate.MapId != data.MapId)
 						{
-							Log.outError(LogFilter.Sql, $"`pool_creature` has creature spawns on multiple different maps for creature guid ({guid}) in pool id ({pool_id}), skipped.");
+							Log.outError(LogFilter.Sql, $"`pool_creature` has creature spawns on multiple different maps for creature Guid ({guid}) in pool Id ({pool_id}), skipped.");
 
 							continue;
 						}
@@ -180,7 +180,7 @@ namespace Game
 
 						if (data == null)
 						{
-							Log.outError(LogFilter.Sql, "`pool_gameobject` has a non existing gameobject spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
+							Log.outError(LogFilter.Sql, "`pool_gameobject` has a non existing gameobject spawn (GUID: {0}) defined for pool Id ({1}), skipped.", guid, pool_id);
 
 							continue;
 						}
@@ -192,14 +192,14 @@ namespace Game
 						    goinfo.type != GameObjectTypes.GatheringNode &&
 						    goinfo.type != GameObjectTypes.Goober)
 						{
-							Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, Type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
+							Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, Type: {1}) defined for pool Id ({2}), skipped.", guid, goinfo.type, pool_id);
 
 							continue;
 						}
 
 						if (!mPoolTemplate.ContainsKey(pool_id))
 						{
-							Log.outError(LogFilter.Sql, "`pool_gameobject` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
+							Log.outError(LogFilter.Sql, "`pool_gameobject` pool Id ({0}) is not in `pool_template`, skipped.", pool_id);
 
 							continue;
 						}
@@ -207,7 +207,7 @@ namespace Game
 						if (chance < 0 ||
 						    chance > 100)
 						{
-							Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid chance ({0}) for gameobject guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+							Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid chance ({0}) for gameobject Guid ({1}) in pool Id ({2}), skipped.", chance, guid, pool_id);
 
 							continue;
 						}
@@ -219,7 +219,7 @@ namespace Game
 
 						if (pPoolTemplate.MapId != data.MapId)
 						{
-							Log.outError(LogFilter.Sql, $"`pool_gameobject` has gameobject spawns on multiple different maps for gameobject guid ({guid}) in pool id ({pool_id}), skipped.");
+							Log.outError(LogFilter.Sql, $"`pool_gameobject` has gameobject spawns on multiple different maps for gameobject Guid ({guid}) in pool Id ({pool_id}), skipped.");
 
 							continue;
 						}
@@ -267,7 +267,7 @@ namespace Game
 
 						if (!mPoolTemplate.ContainsKey(mother_pool_id))
 						{
-							Log.outError(LogFilter.Sql, "`pool_pool` mother_pool id ({0}) is not in `pool_template`, skipped.", mother_pool_id);
+							Log.outError(LogFilter.Sql, "`pool_pool` mother_pool Id ({0}) is not in `pool_template`, skipped.", mother_pool_id);
 
 							continue;
 						}
@@ -289,7 +289,7 @@ namespace Game
 						if (chance < 0 ||
 						    chance > 100)
 						{
-							Log.outError(LogFilter.Sql, "`pool_pool` has an invalid chance ({0}) for pool id ({1}) in mother pool id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
+							Log.outError(LogFilter.Sql, "`pool_pool` has an invalid chance ({0}) for pool Id ({1}) in mother pool Id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
 
 							continue;
 						}
@@ -324,7 +324,7 @@ namespace Game
 
 								if (mPoolTemplate[poolItr].MapId != poolData.MapId)
 								{
-									Log.outError(LogFilter.Sql, $"`pool_pool` has child pools on multiple maps in pool id ({poolItr}), skipped.");
+									Log.outError(LogFilter.Sql, $"`pool_pool` has child pools on multiple maps in pool Id ({poolItr}), skipped.");
 									mPoolPoolGroups[poolItr].RemoveOneRelation(id);
 									mPoolSearchMap.Remove(poolItr);
 									--count;
@@ -693,7 +693,7 @@ namespace Game
 
 					foreach (var creature in creatureBounds)
 					{
-						// For dynamic spawns, save respawn time here
+						// For dynamic spawns, save respawn Time here
 						if (saveRespawnTime && !creature.GetRespawnCompatibilityMode())
 							creature.SaveRespawnTime();
 
@@ -711,7 +711,7 @@ namespace Game
 
 					foreach (var go in gameobjectBounds)
 					{
-						// For dynamic spawns, save respawn time here
+						// For dynamic spawns, save respawn Time here
 						if (saveRespawnTime && !go.GetRespawnCompatibilityMode())
 							go.SaveRespawnTime();
 
@@ -757,7 +757,7 @@ namespace Game
 			int count = (int)(limit - spawns.GetSpawnedObjects(poolId));
 
 			// If triggered from some object respawn this object is still marked as spawned
-			// and also counted into _SpawnedPoolAmount so we need increase count to be
+			// and also counted into _SpawnedPoolAmount so we need increase Count to be
 			// spawned by 1
 			if (triggerFrom != 0)
 				++count;
@@ -776,7 +776,7 @@ namespace Game
 					{
 						roll -= obj.chance;
 
-						// Triggering object is marked as spawned at this time and can be also rolled (respawn case)
+						// Triggering object is marked as spawned at this Time and can be also rolled (respawn case)
 						// so this need explicit check for this case
 						if (roll < 0 &&
 						    (obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)))
@@ -809,7 +809,7 @@ namespace Game
 					}
 			}
 
-			// One spawn one despawn no count increase
+			// One spawn one despawn no Count increase
 			if (triggerFrom != 0)
 				DespawnObject(spawns, triggerFrom);
 		}

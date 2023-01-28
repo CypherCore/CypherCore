@@ -954,7 +954,7 @@ namespace Game.Entities
 			public uint Timeto10thfloor;        // 20 Time to 10th floor (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
 			public uint Reached10thfloor;       // 21 Reached 10th floor, References: GameEvents, NoValue = 0
 			public uint onlychargeheightcheck;  // 22 only charge height check. (yards), int, Min value: 0, Max value: 65535, Default value: 0
-			public uint onlychargetimecheck;    // 23 only charge time check, int, Min value: 0, Max value: 65535, Default value: 0
+			public uint onlychargetimecheck;    // 23 only charge Time check, int, Min value: 0, Max value: 65535, Default value: 0
 			public uint InteractRadiusOverride; // 24 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
 		}
 
@@ -995,7 +995,7 @@ namespace Game.Entities
 			public uint InitStopped;                              // 9 Init Stopped, enum { false, true, }; Default: false
 			public uint TrueInfiniteAOI;                          // 10 True Infinite AOI (programmer only!), enum { false, true, }; Default: false
 			public uint InteractRadiusOverride;                   // 11 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
-			public uint Allowareaexplorationwhileonthistransport; // 12 Allow area exploration while on this transport, enum { false, true, }; Default: false
+			public uint Allowareaexplorationwhileonthistransport; // 12 Allow area exploration while on this Transport, enum { false, true, }; Default: false
 		}
 
 		public struct duelflag
@@ -1125,7 +1125,7 @@ namespace Game.Entities
 			public uint highlight;                    // 19 highlight, enum { false, true, }; Default: true
 			public uint startingValue;                // 20 startingValue, int, Min value: 0, Max value: 100, Default value: 50
 			public uint unidirectional;               // 21 unidirectional, enum { false, true, }; Default: false
-			public uint killbonustime;                // 22 kill bonus time %, int, Min value: 0, Max value: 100, Default value: 0
+			public uint killbonustime;                // 22 kill bonus Time %, int, Min value: 0, Max value: 100, Default value: 0
 			public uint speedWorldState1;             // 23 speedWorldState1, References: WorldState, NoValue = 0
 			public uint speedWorldState2;             // 24 speedWorldState2, References: WorldState, NoValue = 0
 			public uint UncontestedTime;              // 25 Uncontested Time, int, Min value: 0, Max value: 65535, Default value: 0

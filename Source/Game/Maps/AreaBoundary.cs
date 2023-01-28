@@ -73,9 +73,9 @@ namespace Game.Maps
 
 			public Position Sync()
 			{
-				posX = (float)doublePosX;
-				posY = (float)doublePosY;
-				posZ = (float)doublePosZ;
+				X = (float)doublePosX;
+				Y = (float)doublePosY;
+				Z = (float)doublePosZ;
 
 				return this;
 			}

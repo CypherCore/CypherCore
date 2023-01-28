@@ -231,7 +231,7 @@ namespace Game.AI
 							target.ToUnit().HandleEmoteCommand((Emote)e.Action.emote.emoteId);
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction. SMART_ACTION_PLAY_EMOTE: target: {0} (GuidLow: {1}), emote: {2}",
+							             "SmartScript.ProcessAction. SMART_ACTION_PLAY_EMOTE: Target: {0} (GuidLow: {1}), Emote: {2}",
 							             target.GetName(),
 							             target.GetGUID().ToString(),
 							             e.Action.emote.emoteId);
@@ -250,7 +250,7 @@ namespace Game.AI
 								target.PlayDirectSound(e.Action.sound.soundId, e.Action.sound.onlySelf != 0 ? target.ToPlayer() : null, e.Action.sound.keyBroadcastTextId);
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction. SMART_ACTION_SOUND: target: {0} (GuidLow: {1}), sound: {2}, onlyself: {3}",
+							             "SmartScript.ProcessAction. SMART_ACTION_SOUND: Target: {0} (GuidLow: {1}), sound: {2}, onlyself: {3}",
 							             target.GetName(),
 							             target.GetGUID().ToString(),
 							             e.Action.sound.soundId,
@@ -429,7 +429,7 @@ namespace Game.AI
 							target.ToUnit().HandleEmoteCommand((Emote)emote);
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction. SMART_ACTION_RANDOM_EMOTE: Creature guidLow {0} handle random emote {1}",
+							             "SmartScript.ProcessAction. SMART_ACTION_RANDOM_EMOTE: Creature guidLow {0} handle random Emote {1}",
 							             target.GetGUID().ToString(),
 							             emote);
 						}
@@ -549,7 +549,7 @@ namespace Game.AI
 						else
 						{
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the target (Guid: {1} Entry: {2} Type: {3}) already has the aura",
+							             "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the Target (Guid: {1} Entry: {2} Type: {3}) already has the aura",
 							             e.Action.cast.spell,
 							             target.GetGUID(),
 							             target.GetEntry(),
@@ -642,7 +642,7 @@ namespace Game.AI
 							tempLastInvoker.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction. SMART_ACTION_INVOKER_CAST: Invoker {0} casts spell {1} on target {2} with castflags {3}",
+							             "SmartScript.ProcessAction. SMART_ACTION_INVOKER_CAST: Invoker {0} casts spell {1} on Target {2} with castflags {3}",
 							             tempLastInvoker.GetGUID().ToString(),
 							             e.Action.cast.spell,
 							             target.GetGUID().ToString(),
@@ -650,7 +650,7 @@ namespace Game.AI
 						}
 						else
 						{
-							Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({1}) already has the aura", e.Action.cast.spell, target.GetGUID().ToString());
+							Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the Target ({1}) already has the aura", e.Action.cast.spell, target.GetGUID().ToString());
 						}
 					}
 
@@ -771,8 +771,8 @@ namespace Game.AI
 					// Reset home position to respawn position if specified in the parameters
 					if (e.Action.evade.toRespawnPosition == 0)
 					{
-						_me.GetRespawnPosition(out float homeX, out float homeY, out float homeZ, out float homeO);
-						_me.SetHomePosition(homeX, homeY, homeZ, homeO);
+						var pos = _me.GetRespawnPosition();
+						_me.SetHomePosition(pos);
 					}
 
 					_me.GetAI().EnterEvadeMode();
@@ -900,7 +900,7 @@ namespace Game.AI
 							((SmartAI)_me.GetAI()).SetFollow(target.ToUnit(), e.Action.follow.dist + 0.1f, angle, e.Action.follow.credit, e.Action.follow.entry, e.Action.follow.creditType);
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction: SMART_ACTION_FOLLOW: Creature {0} following target {1}",
+							             "SmartScript.ProcessAction: SMART_ACTION_FOLLOW: Creature {0} following Target {1}",
 							             _me.GetGUID().ToString(),
 							             target.GetGUID().ToString());
 
@@ -968,7 +968,7 @@ namespace Game.AI
 							}
 						}
 					}
-					else // Specific target Type
+					else // Specific Target Type
 					{
 						foreach (var target in targets)
 							if (IsPlayer(target))
@@ -1011,7 +1011,7 @@ namespace Game.AI
 
 					if (instance == null)
 					{
-						Log.outError(LogFilter.Sql, "SmartScript: Event {0} attempt to set instance data without instance script. EntryOrGuid {1}", e.GetEventType(), e.EntryOrGuid);
+						Log.outError(LogFilter.Sql, "SmartScript: Event {0} attempt to set instance _data without instance script. EntryOrGuid {1}", e.GetEventType(), e.EntryOrGuid);
 
 						break;
 					}
@@ -1022,7 +1022,7 @@ namespace Game.AI
 							instance.SetData(e.Action.setInstanceData.field, e.Action.setInstanceData.data);
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction: SMART_ACTION_SET_INST_DATA: SetData Field: {0}, data: {1}",
+							             "SmartScript.ProcessAction: SMART_ACTION_SET_INST_DATA: SetData Field: {0}, _data: {1}",
 							             e.Action.setInstanceData.field,
 							             e.Action.setInstanceData.data);
 
@@ -1057,7 +1057,7 @@ namespace Game.AI
 
 					if (instance == null)
 					{
-						Log.outError(LogFilter.Sql, "SmartScript: Event {0} attempt to set instance data without instance script. EntryOrGuid {1}", e.GetEventType(), e.EntryOrGuid);
+						Log.outError(LogFilter.Sql, "SmartScript: Event {0} attempt to set instance _data without instance script. EntryOrGuid {1}", e.GetEventType(), e.EntryOrGuid);
 
 						break;
 					}
@@ -1068,7 +1068,7 @@ namespace Game.AI
 					instance.SetGuidData(e.Action.setInstanceData64.field, targets.First().GetGUID());
 
 					Log.outDebug(LogFilter.ScriptsAi,
-					             "SmartScript.ProcessAction: SMART_ACTION_SET_INST_DATA64: Field: {0}, data: {1}",
+					             "SmartScript.ProcessAction: SMART_ACTION_SET_INST_DATA64: Field: {0}, _data: {1}",
 					             e.Action.setInstanceData64.field,
 					             targets.First().GetGUID());
 
@@ -1485,7 +1485,7 @@ namespace Game.AI
 								if (ai != null)
 									ai.GetScript().StoreCounter(e.Action.setCounter.counterId, e.Action.setCounter.value, e.Action.setCounter.reset);
 								else
-									Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SET_COUNTER is not using SmartAI, skipping");
+									Log.outError(LogFilter.Sql, "SmartScript: Action Target for SMART_ACTION_SET_COUNTER is not using SmartAI, skipping");
 							}
 							else if (IsGameObject(target))
 							{
@@ -1494,7 +1494,7 @@ namespace Game.AI
 								if (ai != null)
 									ai.GetScript().StoreCounter(e.Action.setCounter.counterId, e.Action.setCounter.value, e.Action.setCounter.reset);
 								else
-									Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SET_COUNTER is not using SmartGameObjectAI, skipping");
+									Log.outError(LogFilter.Sql, "SmartScript: Action Target for SMART_ACTION_SET_COUNTER is not using SmartGameObjectAI, skipping");
 							}
 					}
 					else
@@ -1617,7 +1617,7 @@ namespace Game.AI
 							ITransport trans = _me.GetDirectTransport();
 
 							if (trans != null)
-								trans.CalculatePassengerPosition(ref dest.posX, ref dest.posY, ref dest.posZ, ref dest.Orientation);
+								trans.CalculatePassengerPosition(ref dest.X, ref dest.Y, ref dest.Z, ref dest.Orientation);
 						}
 
 						_me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0);
@@ -1640,12 +1640,12 @@ namespace Game.AI
 					foreach (var target in targets)
 						if (IsCreature(target))
 						{
-							Log.outWarn(LogFilter.Sql, $"Invalid creature target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToCreature().GetSpawnId()}) specified for SMART_ACTION_ENABLE_TEMP_GOBJ");
+							Log.outWarn(LogFilter.Sql, $"Invalid creature Target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToCreature().GetSpawnId()}) specified for SMART_ACTION_ENABLE_TEMP_GOBJ");
 						}
 						else if (IsGameObject(target))
 						{
 							if (target.ToGameObject().IsSpawnedByDefault())
-								Log.outWarn(LogFilter.Sql, $"Invalid gameobject target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToGameObject().GetSpawnId()}) for SMART_ACTION_ENABLE_TEMP_GOBJ - the object is spawned by default");
+								Log.outWarn(LogFilter.Sql, $"Invalid gameobject Target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToGameObject().GetSpawnId()}) for SMART_ACTION_ENABLE_TEMP_GOBJ - the object is spawned by default");
 							else
 								target.ToGameObject().SetRespawnTime((int)e.Action.enableTempGO.duration);
 						}
@@ -1677,7 +1677,7 @@ namespace Game.AI
 
 								if (eInfo == null)
 								{
-									Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_EQUIP uses non-existent equipment info id {0} for creature {1}", equipId, npc.GetEntry());
+									Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_EQUIP uses non-existent equipment info Id {0} for creature {1}", equipId, npc.GetEntry());
 
 									break;
 								}
@@ -1777,7 +1777,7 @@ namespace Game.AI
 				{
 					if (e.GetTargetType() == SmartTargets.None)
 					{
-						Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
+						Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 Target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
 
 						break;
 					}
@@ -1875,7 +1875,7 @@ namespace Game.AI
 							}
 							else
 							{
-								Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the target ({1}) already has the aura", e.Action.crossCast.spell, target.GetGUID().ToString());
+								Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not cast because it has flag SMARTCAST_AURA_NOT_PRESENT and the Target ({1}) already has the aura", e.Action.crossCast.spell, target.GetGUID().ToString());
 							}
 						}
 					}
@@ -1896,7 +1896,7 @@ namespace Game.AI
 
 					if (e.GetTargetType() == SmartTargets.None)
 					{
-						Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
+						Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 Target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
 
 						break;
 					}
@@ -1944,7 +1944,7 @@ namespace Game.AI
 
 					if (e.GetTargetType() == SmartTargets.None)
 					{
-						Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
+						Log.outError(LogFilter.Sql, "SmartScript: Entry {0} SourceType {1} Event {2} Action {3} is using TARGET_NONE(0) for Script9 Target. Please correct target_type in database.", e.EntryOrGuid, e.GetScriptType(), e.GetEventType(), e.GetActionType());
 
 						break;
 					}
@@ -2161,18 +2161,18 @@ namespace Game.AI
 							SmartAI ai = (SmartAI)target.ToCreature().GetAI();
 
 							if (ai != null)
-								ai.GetScript().StoreTargetList(new List<WorldObject>(storedTargets), e.Action.sendTargetToTarget.id); // store a copy of target list
+								ai.GetScript().StoreTargetList(new List<WorldObject>(storedTargets), e.Action.sendTargetToTarget.id); // store a copy of Target list
 							else
-								Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SEND_TARGET_TO_TARGET is not using SmartAI, skipping");
+								Log.outError(LogFilter.Sql, "SmartScript: Action Target for SMART_ACTION_SEND_TARGET_TO_TARGET is not using SmartAI, skipping");
 						}
 						else if (IsGameObject(target))
 						{
 							SmartGameObjectAI ai = (SmartGameObjectAI)target.ToGameObject().GetAI();
 
 							if (ai != null)
-								ai.GetScript().StoreTargetList(new List<WorldObject>(storedTargets), e.Action.sendTargetToTarget.id); // store a copy of target list
+								ai.GetScript().StoreTargetList(new List<WorldObject>(storedTargets), e.Action.sendTargetToTarget.id); // store a copy of Target list
 							else
-								Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SEND_TARGET_TO_TARGET is not using SmartGameObjectAI, skipping");
+								Log.outError(LogFilter.Sql, "SmartScript: Action Target for SMART_ACTION_SEND_TARGET_TO_TARGET is not using SmartGameObjectAI, skipping");
 						}
 
 					break;
@@ -2240,7 +2240,7 @@ namespace Game.AI
 							         e.GetTargetType() == SmartTargets.ClosestUnspawnedGameobject)
 								target.ToCreature().SetHomePosition(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
 							else
-								Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SET_HOME_POS is invalid, skipping");
+								Log.outError(LogFilter.Sql, "SmartScript: Action Target for SMART_ACTION_SET_HOME_POS is invalid, skipping");
 						}
 
 					break;
@@ -2302,7 +2302,7 @@ namespace Game.AI
 
 					if (!Global.GameEventMgr.IsActiveEvent(eventId))
 					{
-						Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: At case SMART_ACTION_GAME_EVENT_STOP, inactive event (id: {0})", eventId);
+						Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: At case SMART_ACTION_GAME_EVENT_STOP, inactive event (Id: {0})", eventId);
 
 						break;
 					}
@@ -2317,7 +2317,7 @@ namespace Game.AI
 
 					if (Global.GameEventMgr.IsActiveEvent(eventId))
 					{
-						Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: At case SMART_ACTION_GAME_EVENT_START, already activated event (id: {0})", eventId);
+						Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: At case SMART_ACTION_GAME_EVENT_START, already activated event (Id: {0})", eventId);
 
 						break;
 					}
@@ -2402,7 +2402,7 @@ namespace Game.AI
 								target.PlayDirectSound(sound, onlySelf ? target.ToPlayer() : null);
 
 							Log.outDebug(LogFilter.ScriptsAi,
-							             "SmartScript.ProcessAction:: SMART_ACTION_RANDOM_SOUND: target: {0} ({1}), sound: {2}, onlyself: {3}",
+							             "SmartScript.ProcessAction:: SMART_ACTION_RANDOM_SOUND: Target: {0} ({1}), sound: {2}, onlyself: {3}",
 							             target.GetName(),
 							             target.GetGUID().ToString(),
 							             sound,
@@ -2582,7 +2582,7 @@ namespace Game.AI
 							else if (e.Action.animKit.type == 3)
 								target.ToCreature().SetMovementAnimKitId((ushort)e.Action.animKit.animKit);
 
-							Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: target: {target.GetName()} ({target.GetGUID()}), AnimKit: {e.Action.animKit.animKit}, Type: {e.Action.animKit.type}");
+							Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: Target: {target.GetName()} ({target.GetGUID()}), AnimKit: {e.Action.animKit.animKit}, Type: {e.Action.animKit.type}");
 						}
 						else if (IsGameObject(target))
 						{
@@ -2600,7 +2600,7 @@ namespace Game.AI
 									break;
 							}
 
-							Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: target: {0} ({1}), AnimKit: {2}, Type: {3}", target.GetName(), target.GetGUID().ToString(), e.Action.animKit.animKit, e.Action.animKit.type);
+							Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_PLAY_ANIMKIT: Target: {0} ({1}), AnimKit: {2}, Type: {3}", target.GetName(), target.GetGUID().ToString(), e.Action.animKit.animKit, e.Action.animKit.type);
 						}
 
 					break;
@@ -2663,7 +2663,7 @@ namespace Game.AI
 							                              e.Action.spellVisualKit.kitType,
 							                              e.Action.spellVisualKit.duration);
 
-							Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_SPELL_VISUAL_KIT: target: {target.GetName()} ({target.GetGUID()}), SpellVisualKit: {e.Action.spellVisualKit.spellVisualKitId}");
+							Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_PLAY_SPELL_VISUAL_KIT: Target: {target.GetName()} ({target.GetGUID()}), SpellVisualKit: {e.Action.spellVisualKit.spellVisualKitId}");
 						}
 
 					break;
@@ -2735,7 +2735,7 @@ namespace Game.AI
 							                                                            null);
 
 							if (!conversation)
-								Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, target {playerTarget.GetName()} - failed to create");
+								Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: Id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, Target {playerTarget.GetName()} - failed to create");
 						}
 					}
 
@@ -2801,7 +2801,7 @@ namespace Game.AI
 					else
 					{
 						WorldObject baseObject = GetBaseObject();
-						Log.outWarn(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_ADD_TO_STORED_TARGET_LIST: var {e.Action.addToStoredTargets.id}, baseObject {(baseObject == null ? "" : baseObject.GetName())}, event {e.EventId} - tried to add no targets to stored target list");
+						Log.outWarn(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_ADD_TO_STORED_TARGET_LIST: var {e.Action.addToStoredTargets.id}, baseObject {(baseObject == null ? "" : baseObject.GetName())}, event {e.EventId} - tried to add no targets to stored Target list");
 					}
 
 					break;
@@ -2819,7 +2819,7 @@ namespace Game.AI
 								((SmartAI)summon.GetAI()).SetTimedActionList(e, (uint)e.EntryOrGuid, privateObjectOwner, e.EventId + 1);
 					}
 
-					// if target is position then targets container was empty
+					// if Target is position then targets container was empty
 					if (e.GetTargetType() != SmartTargets.Position)
 					{
 						foreach (WorldObject target in targets)
@@ -2896,7 +2896,7 @@ namespace Game.AI
 
 		private void ProcessTimedAction(SmartScriptHolder e, uint min, uint max, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
 		{
-			// We may want to execute Action rarely and because of this if condition is not fulfilled the Action will be rechecked in a long time
+			// We may want to execute Action rarely and because of this if condition is not fulfilled the Action will be rechecked in a long Time
 			if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(e.EntryOrGuid, e.EventId, e.SourceType, unit, GetBaseObject()))
 			{
 				RecalcTimer(e, min, max);
@@ -4381,7 +4381,7 @@ namespace Game.AI
 				if (e.EntryOrGuid == 15294 &&
 				    _me.GetGUID().GetCounter() == 55039 &&
 				    e.Timer != 0)
-					Log.outError(LogFilter.Server, "Called UpdateTimer: reduce timer: e.timer: {0}, diff: {1}  current time: {2}", e.Timer, diff, Time.GetMSTime());
+					Log.outError(LogFilter.Server, "Called UpdateTimer: reduce timer: e.timer: {0}, diff: {1}  current Time: {2}", e.Timer, diff, Time.GetMSTime());
 			}
 		}
 
@@ -4667,13 +4667,13 @@ namespace Game.AI
 			{
 				_scriptType    = SmartScriptType.Scene;
 				_sceneTemplate = scene;
-				Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: Scene with id {scene.SceneId}");
+				Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: Scene with Id {scene.SceneId}");
 			}
 			else if (qst != null)
 			{
 				_scriptType = SmartScriptType.Quest;
 				_quest      = qst;
-				Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is Quest with id {qst.Id}");
+				Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is Quest with Id {qst.Id}");
 			}
 			else
 			{
@@ -4685,7 +4685,7 @@ namespace Game.AI
 			GetScript(); //load copy of script
 
 			foreach (var holder in _events)
-				InitTimer(holder); //calculate timers for first time use
+				InitTimer(holder); //calculate timers for first Time use
 
 			ProcessEventsFor(SmartEvents.AiInit);
 			InstallEvents();
@@ -4903,7 +4903,7 @@ namespace Game.AI
 
 			if (!smart &&
 			    !silent)
-				Log.outError(LogFilter.Sql, "SmartScript: Action target Creature (GUID: {0} Entry: {1}) is not using SmartAI, Action skipped to prevent crash.", creature != null ? creature.GetSpawnId() : (_me != null ? _me.GetSpawnId() : 0), creature != null ? creature.GetEntry() : (_me != null ? _me.GetEntry() : 0));
+				Log.outError(LogFilter.Sql, "SmartScript: Action Target Creature (GUID: {0} Entry: {1}) is not using SmartAI, Action skipped to prevent crash.", creature != null ? creature.GetSpawnId() : (_me != null ? _me.GetSpawnId() : 0), creature != null ? creature.GetEntry() : (_me != null ? _me.GetEntry() : 0));
 
 			return smart;
 		}
@@ -4920,7 +4920,7 @@ namespace Game.AI
 
 			if (!smart &&
 			    !silent)
-				Log.outError(LogFilter.Sql, "SmartScript: Action target GameObject (GUID: {0} Entry: {1}) is not using SmartGameObjectAI, Action skipped to prevent crash.", gameObject != null ? gameObject.GetSpawnId() : (_go != null ? _go.GetSpawnId() : 0), gameObject != null ? gameObject.GetEntry() : (_go != null ? _go.GetEntry() : 0));
+				Log.outError(LogFilter.Sql, "SmartScript: Action Target GameObject (GUID: {0} Entry: {1}) is not using SmartGameObjectAI, Action skipped to prevent crash.", gameObject != null ? gameObject.GetSpawnId() : (_go != null ? _go.GetSpawnId() : 0), gameObject != null ? gameObject.GetEntry() : (_go != null ? _go.GetEntry() : 0));
 
 			return smart;
 		}

@@ -154,7 +154,7 @@ namespace Game.Chat
 			string     zoneName = "";
 			string     onlineState;
 
-			// Parse the guid to uint32...
+			// Parse the Guid to uint32...
 			ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
 
 			// ... and try to extract a player out of it.
@@ -198,9 +198,9 @@ namespace Game.Chat
 			// We get the group members after successfully detecting a group.
 			var members = groupTarget.GetMemberSlots();
 
-			// To avoid a cluster fuck, namely trying multiple queries to simply get a group member count...
+			// To avoid a cluster fuck, namely trying multiple queries to simply get a group member Count...
 			handler.SendSysMessage(CypherStrings.GroupType, (groupTarget.IsRaidGroup() ? "raid" : "party"), members.Count);
-			// ... we simply move the group Type and member count print after retrieving the slots and simply output it's size.
+			// ... we simply move the group Type and member Count print after retrieving the slots and simply output it's size.
 
 			// While rather dirty codestyle-wise, it saves space (if only a little). For each member, we look several informations up.
 			foreach (var slot in members)

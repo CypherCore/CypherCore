@@ -22,11 +22,11 @@ namespace Game.Cache
 			_characterCacheStore.Clear();
 			uint oldMSTime = Time.GetMSTime();
 
-			SQLResult result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
+			SQLResult result = DB.Characters.Query("SELECT Guid, Name, account, race, Gender, class, level, deleteDate FROM characters");
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "No character name data loaded, empty query");
+				Log.outInfo(LogFilter.ServerLoading, "No character Name _data loaded, empty query");
 
 				return;
 			}
@@ -87,7 +87,7 @@ namespace Game.Cache
 			invalidatePlayer.Guid = guid;
 			Global.WorldMgr.SendGlobalMessage(invalidatePlayer);
 
-			// Correct name -> pointer storage
+			// Correct Name -> pointer storage
 			_characterCacheByNameStore.Remove(oldName);
 			_characterCacheByNameStore[name] = characterCacheEntry;
 		}

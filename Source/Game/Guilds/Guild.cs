@@ -28,7 +28,7 @@ namespace Game.Guilds
 
 		public bool Create(Player pLeader, string name)
 		{
-			// Check if guild with such name already exists
+			// Check if guild with such Name already exists
 			if (Global.GuildMgr.GetGuildByName(name) != null)
 				return false;
 
@@ -572,7 +572,7 @@ namespace Game.Guilds
 
 			BroadcastPacket(new GuildEventTabAdded());
 
-			SendPermissions(session); //Hack to force client to update permissions
+			SendPermissions(session); //Hack to Force client to update permissions
 		}
 
 		public void HandleInviteMember(WorldSession session, string name)
@@ -809,7 +809,7 @@ namespace Game.Guilds
 
 				member.ChangeRank(null, newRankId);
 				_LogEvent(demote ? GuildEventLogTypes.DemotePlayer : GuildEventLogTypes.PromotePlayer, player.GetGUID().GetCounter(), member.GetGUID().GetCounter(), (byte)newRankId);
-				//_BroadcastEvent(demote ? GuildEvents.Demotion : GuildEvents.Promotion, ObjectGuid.Empty, player.GetName(), name, _GetRankName((byte)newRankId));
+				//_BroadcastEvent(demote ? GuildEvents.Demotion : GuildEvents.Promotion, ObjectGuid.Empty, player.GetName(), Name, _GetRankName((byte)newRankId));
 			}
 		}
 
@@ -867,7 +867,7 @@ namespace Game.Guilds
 
 		public void HandleRemoveRank(WorldSession session, GuildRankOrder rankOrder)
 		{
-			// Cannot remove rank if total count is minimum allowed by the client or is not leader
+			// Cannot remove rank if total Count is minimum allowed by the client or is not leader
 			if (_GetRanksSize() <= GuildConst.MinRanks ||
 			    !_IsLeader(session.GetPlayer()))
 				return;
@@ -928,7 +928,7 @@ namespace Game.Guilds
 			    otherRankInfo == null)
 				return;
 
-			// can't shift guild master rank (rank id = 0) - there's already a client-side limitation for it so that's just a safe-guard
+			// can't shift guild master rank (rank Id = 0) - there's already a client-side limitation for it so that's just a safe-guard
 			if (rankInfo.GetId() == GuildRankId.GuildMaster ||
 			    otherRankInfo.GetId() == GuildRankId.GuildMaster)
 				return;
@@ -952,7 +952,7 @@ namespace Game.Guilds
 
 			DB.Characters.CommitTransaction(trans);
 
-			// force client to re-request SMSG_GUILD_RANKS
+			// Force client to re-request SMSG_GUILD_RANKS
 			BroadcastPacket(new GuildEventRanksUpdated());
 		}
 
@@ -1098,7 +1098,7 @@ namespace Game.Guilds
 			GuildChallengeUpdate updatePacket = new();
 
 			for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
-				updatePacket.CurrentCount[i] = 0; // @todo current count
+				updatePacket.CurrentCount[i] = 0; // @todo current Count
 
 			for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
 				updatePacket.MaxCount[i] = GuildConst.ChallengesMaxCount[i];
@@ -1428,12 +1428,12 @@ namespace Game.Guilds
 		{
 			if (_eventLog.CanInsert())
 			{
-				_eventLog.LoadEvent(new EventLogEntry(_id,                                     // guild id
-				                                      field.Read<uint>(1),                     // guid
+				_eventLog.LoadEvent(new EventLogEntry(_id,                                     // guild Id
+				                                      field.Read<uint>(1),                     // Guid
 				                                      field.Read<long>(6),                     // timestamp
 				                                      (GuildEventLogTypes)field.Read<byte>(2), // event Type
-				                                      field.Read<ulong>(3),                    // player guid 1
-				                                      field.Read<ulong>(4),                    // player guid 2
+				                                      field.Read<ulong>(3),                    // player Guid 1
+				                                      field.Read<ulong>(4),                    // player Guid 2
 				                                      field.Read<byte>(5)));                   // rank
 
 				return true;
@@ -1473,15 +1473,15 @@ namespace Game.Guilds
 						return false;
 					}
 
-					pLog.LoadEvent(new BankEventLogEntry(_id,                   // guild id
-					                                     guid,                  // guid
+					pLog.LoadEvent(new BankEventLogEntry(_id,                   // guild Id
+					                                     guid,                  // Guid
 					                                     field.Read<long>(8),   // timestamp
-					                                     dbTabId,               // tab id
+					                                     dbTabId,               // tab Id
 					                                     eventType,             // event Type
-					                                     field.Read<ulong>(4),  // player guid
+					                                     field.Read<ulong>(4),  // player Guid
 					                                     field.Read<ulong>(5),  // Item or money
-					                                     field.Read<ushort>(6), // itam stack count
-					                                     field.Read<byte>(7))); // dest tab id
+					                                     field.Read<ushort>(6), // itam stack Count
+					                                     field.Read<byte>(7))); // dest tab Id
 				}
 			}
 
@@ -1493,11 +1493,11 @@ namespace Game.Guilds
 			if (!_newsLog.CanInsert())
 				return;
 
-			var news = new NewsLogEntry(_id,                                                      // guild id
-			                            field.Read<uint>(1),                                      // guid
+			var news = new NewsLogEntry(_id,                                                      // guild Id
+			                            field.Read<uint>(1),                                      // Guid
 			                            field.Read<long>(6),                                      // timestamp //64 bits?
 			                            (GuildNews)field.Read<byte>(2),                           // Type
-			                            ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(3)), // player guid
+			                            ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(3)), // player Guid
 			                            field.Read<uint>(4),                                      // Flags
 			                            field.Read<uint>(5));                                     // value)
 
@@ -1521,7 +1521,7 @@ namespace Game.Guilds
 			if (tabId >= _GetPurchasedTabsSize())
 			{
 				Log.outError(LogFilter.Guild,
-				             "Invalid tab for Item (GUID: {0}, id: {1}) in guild bank, skipped.",
+				             "Invalid tab for Item (GUID: {0}, Id: {1}) in guild bank, skipped.",
 				             field.Read<uint>(0),
 				             field.Read<uint>(1));
 
@@ -1533,11 +1533,11 @@ namespace Game.Guilds
 
 		public bool Validate()
 		{
-			// Validate ranks data
+			// Validate ranks _data
 			// GUILD RANKS represent a sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges).
-			// The lower rank id is considered higher rank - so promotion does rank-- and demotion does rank++
+			// The lower rank Id is considered higher rank - so promotion does rank-- and demotion does rank++
 			// Between ranks in sequence cannot be gaps - so 0, 1, 2, 4 is impossible
-			// Min ranks count is 2 and max is 10.
+			// Min ranks Count is 2 and max is 10.
 			bool broken_ranks = false;
 			byte ranks        = _GetRanksSize();
 
@@ -1557,7 +1557,7 @@ namespace Game.Guilds
 
 					if (rankInfo.GetId() != (GuildRankId)rankId)
 					{
-						Log.outError(LogFilter.Guild, "Guild {0} has broken rank id {1}, creating default set of ranks...", _id, rankId);
+						Log.outError(LogFilter.Guild, "Guild {0} has broken rank Id {1}, creating default set of ranks...", _id, rankId);
 						broken_ranks = true;
 					}
 					else
@@ -1573,7 +1573,7 @@ namespace Game.Guilds
 				_CreateDefaultGuildRanks(trans, SharedConst.DefaultLocale);
 			}
 
-			// Validate members' data
+			// Validate members' _data
 			foreach (var member in _members.Values)
 				if (GetRankInfo(member.GetRankId()) == null)
 					member.ChangeRank(trans, _GetLowestRankId());
@@ -1741,7 +1741,7 @@ namespace Game.Guilds
 			}
 
 			// Remove all player signs from another petitions
-			// This will be prevent attempt to join many guilds and corrupt guild data integrity
+			// This will be prevent attempt to join many guilds and corrupt guild _data integrity
 			Player.RemovePetitionsAndSigns(guid);
 
 			ulong lowguid = guid.GetCounter();
@@ -1827,7 +1827,7 @@ namespace Game.Guilds
 		{
 			Player player = Global.ObjAccessor.FindPlayer(guid);
 
-			// Guild master can be deleted when loading guild and guid doesn't exist in characters table
+			// Guild master can be deleted when loading guild and Guid doesn't exist in characters table
 			// or when he is removed from guild by gm command
 			if (_leaderGuid == guid &&
 			    !isDisbanding)
@@ -1864,7 +1864,7 @@ namespace Game.Guilds
 
 			_members.Remove(guid);
 
-			// If player not online data in data field will be loaded from guild tabs no need to update it !!
+			// If player not online _data in _data field will be loaded from guild tabs no need to update it !!
 			if (player != null)
 			{
 				player.SetInGuild(0);
@@ -1977,7 +1977,7 @@ namespace Game.Guilds
 		// Private methods
 		private void _CreateNewBankTab()
 		{
-			byte tabId = _GetPurchasedTabsSize(); // Next free id
+			byte tabId = _GetPurchasedTabsSize(); // Next free Id
 			_bankTabs.Add(new BankTab(_id, tabId));
 
 			SQLTransaction trans = new();
@@ -2967,7 +2967,7 @@ namespace Game.Guilds
 				         field.Read<byte>(15),         // characters.level
 				         (Race)field.Read<byte>(16),   // characters.race
 				         (Class)field.Read<byte>(17),  // characters.class
-				         (Gender)field.Read<byte>(18), // characters.gender
+				         (Gender)field.Read<byte>(18), // characters.Gender
 				         field.Read<ushort>(19),       // characters.zone
 				         field.Read<uint>(20),         // characters.account
 				         0);
@@ -2982,7 +2982,7 @@ namespace Game.Guilds
 
 				if (_zoneId == 0)
 				{
-					Log.outError(LogFilter.Guild, "Player ({0}) has broken zone-data", _guid.ToString());
+					Log.outError(LogFilter.Guild, "Player ({0}) has broken zone-_data", _guid.ToString());
 					_zoneId = Player.GetZoneIdFromDB(_guid);
 				}
 
@@ -2995,21 +2995,21 @@ namespace Game.Guilds
 			{
 				if (_level < 1)
 				{
-					Log.outError(LogFilter.Guild, $"{_guid} has a broken data in field `characters`.`level`, deleting him from guild!");
+					Log.outError(LogFilter.Guild, $"{_guid} has a broken _data in field `characters`.`level`, deleting him from guild!");
 
 					return false;
 				}
 
 				if (!CliDB.ChrRacesStorage.ContainsKey((uint)_race))
 				{
-					Log.outError(LogFilter.Guild, $"{_guid} has a broken data in field `characters`.`race`, deleting him from guild!");
+					Log.outError(LogFilter.Guild, $"{_guid} has a broken _data in field `characters`.`race`, deleting him from guild!");
 
 					return false;
 				}
 
 				if (!CliDB.ChrClassesStorage.ContainsKey((uint)_class))
 				{
-					Log.outError(LogFilter.Guild, $"{_guid} has a broken data in field `characters`.`class`, deleting him from guild!");
+					Log.outError(LogFilter.Guild, $"{_guid} has a broken _data in field `characters`.`class`, deleting him from guild!");
 
 					return false;
 				}
@@ -3850,7 +3850,7 @@ namespace Game.Guilds
 
 				if (slotId >= GuildConst.MaxBankSlots)
 				{
-					Log.outError(LogFilter.Guild, "Invalid Slot for Item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
+					Log.outError(LogFilter.Guild, "Invalid Slot for Item (GUID: {0}, Id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
 
 					return false;
 				}
@@ -3859,7 +3859,7 @@ namespace Game.Guilds
 
 				if (proto == null)
 				{
-					Log.outError(LogFilter.Guild, "Unknown Item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
+					Log.outError(LogFilter.Guild, "Unknown Item (GUID: {0}, Id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
 
 					return false;
 				}
@@ -3868,7 +3868,7 @@ namespace Game.Guilds
 
 				if (!pItem.LoadFromDB(itemGuid, ObjectGuid.Empty, field, itemEntry))
 				{
-					Log.outError(LogFilter.Guild, "Item (GUID {0}, id: {1}) not found in item_instance, deleting from guild bank!", itemGuid, itemEntry);
+					Log.outError(LogFilter.Guild, "Item (GUID {0}, Id: {1}) not found in item_instance, deleting from guild bank!", itemGuid, itemEntry);
 
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM);
 					stmt.AddValue(0, _guildId);
@@ -4432,7 +4432,7 @@ namespace Game.Guilds
 				foreach (var pos in _vec)
 				{
 					Log.outDebug(LogFilter.Guild,
-					             "GUILD STORAGE: StoreItem tab = {0}, Slot = {1}, Item = {2}, count = {3}",
+					             "GUILD STORAGE: StoreItem tab = {0}, Slot = {1}, Item = {2}, Count = {3}",
 					             _container,
 					             _slotId,
 					             pItem.GetEntry(),
@@ -4571,7 +4571,7 @@ namespace Game.Guilds
 			public override InventoryResult CanStore(Item pItem, bool swap)
 			{
 				Log.outDebug(LogFilter.Guild,
-				             "GUILD STORAGE: CanStore() tab = {0}, Slot = {1}, Item = {2}, count = {3}",
+				             "GUILD STORAGE: CanStore() tab = {0}, Slot = {1}, Item = {2}, Count = {3}",
 				             _container,
 				             _slotId,
 				             pItem.GetEntry(),

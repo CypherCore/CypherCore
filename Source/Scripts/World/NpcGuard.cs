@@ -155,7 +155,7 @@ namespace Scripts.World.NpcGuard
 				                          bool      healing   = false;
 				                          SpellInfo spellInfo = null;
 
-				                          // Select a healing spell if less than 30% hp and Only 33% of the time
+				                          // Select a healing spell if less than 30% hp and Only 33% of the Time
 				                          if (me.HealthBelowPct(30) &&
 				                              RandomHelper.randChance(33))
 					                          spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Healing);

@@ -31,12 +31,12 @@ namespace Game.Entities
 				// update yesterday's contribution
 				if (_lastHonorUpdateTime >= yesterday)
 					// this is the first update today, reset today's contribution
-					SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), ActivePlayerData.TodayHonorableKills);
+					SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), ActivePlayerData.TodayHonorableKills);
 				else
 					// no honor/kills yesterday or today, reset
-					SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), (ushort)0);
+					SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), (ushort)0);
 
-				SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)0);
+				SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)0);
 			}
 
 			_lastHonorUpdateTime = now;
@@ -65,7 +65,7 @@ namespace Game.Entities
 			ObjectGuid victim_guid = ObjectGuid.Empty;
 			uint       victim_rank = 0;
 
-			// need call before fields update to have chance move yesterday data to appropriate fields before today data change.
+			// need call before fields update to have chance move yesterday _data to appropriate fields before today _data change.
 			UpdateHonorFields();
 
 			// do not reward honor in arenas, but return true to enable onkill spellproc
@@ -101,10 +101,10 @@ namespace Game.Entities
 						return false;
 
 					// PLAYER_CHOSEN_TITLE VALUES DESCRIPTION
-					//  [0]      Just name
-					//  [1..14]  Alliance honor titles and player name
-					//  [15..28] Horde honor titles and player name
-					//  [29..38] Other title and player name
+					//  [0]      Just Name
+					//  [1..14]  Alliance honor titles and player Name
+					//  [15..28] Horde honor titles and player Name
+					//  [29..38] Other title and player Name
 					//  [39+]    Nothing
 					// this is all wrong, should be going off PvpTitle, not PlayerTitle
 					uint victim_title = plrVictim.PlayerData.PlayerTitle;
@@ -125,10 +125,10 @@ namespace Game.Entities
 
 					honor_f = (float)Math.Ceiling(Formulas.HKHonorAtLevelF(k_level) * (v_level - k_grey) / (k_level - k_grey));
 
-					// count the number of playerkills in one day
-					ApplyModUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)1, true);
-					// and those in a lifetime
-					ApplyModUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 1u, true);
+					// Count the number of playerkills in one day
+					ApplyModUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)1, true);
+					// and those in a Lifetime
+					ApplyModUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 1u, true);
 					UpdateCriteria(CriteriaType.HonorableKills);
 					UpdateCriteria(CriteriaType.DeliverKillingBlowToClass, (uint)victim.GetClass());
 					UpdateCriteria(CriteriaType.DeliverKillingBlowToRace, (uint)victim.GetRace());
@@ -151,7 +151,7 @@ namespace Game.Entities
 				if (groupsize > 1)
 					honor_f /= groupsize;
 
-				// apply honor multiplier from aura (not stacking-get highest)
+				// apply honor Multiplier from aura (not stacking-get highest)
 				MathFunctions.AddPct(ref honor_f, GetMaxPositiveAuraModifier(AuraType.ModHonorGainPct));
 				honor_f += _restMgr.GetRestBonusFor(RestTypes.Honor, (uint)honor_f);
 			}
@@ -160,7 +160,7 @@ namespace Game.Entities
 			// Back to int now
 			honor = (int)honor_f;
 			// honor - for show honor points in log
-			// victim_guid - for show victim name in log
+			// victim_guid - for show victim Name in log
 			// victim_rank [1..4]  HK: <dishonored rank>
 			// victim_rank [5..19] HK: <alliance\horde rank>
 			// victim_rank [0, 20+] HK: <>
@@ -213,14 +213,14 @@ namespace Game.Entities
 
 		public void ResetHonorStats()
 		{
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)0);
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), (ushort)0);
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 0u);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)0);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), (ushort)0);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 0u);
 		}
 
 		private void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), honorLevel);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), honorLevel);
 			UpdateHonorNextLevel();
 
 			AddHonorXP(honor);
@@ -277,7 +277,7 @@ namespace Game.Entities
 				nextHonorLevelXP = ActivePlayerData.HonorNextLevel;
 			}
 
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
 		}
 
 		private void SetHonorLevel(byte level)
@@ -287,7 +287,7 @@ namespace Game.Entities
 			if (level == oldHonorLevel)
 				return;
 
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), level);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), level);
 			UpdateHonorNextLevel();
 
 			UpdateCriteria(CriteriaType.HonorLevelIncrease);
@@ -298,7 +298,7 @@ namespace Game.Entities
 			// 5500 at honor level 1
 			// no idea what between here
 			// 8800 at honor level ~14 (never goes above 8800)
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.HonorNextLevel), 8800u);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.HonorNextLevel), 8800u);
 		}
 
 		public uint GetHonorLevel()
@@ -606,7 +606,7 @@ namespace Game.Entities
 			{
 				_bgData.ClearTaxiPath();
 
-				// Mount spell id storing
+				// Mount spell Id storing
 				if (IsMounted())
 				{
 					var auras = GetAuraEffectsByType(AuraType.Mounted);
@@ -713,7 +713,7 @@ namespace Game.Entities
         /// <summary>
         ///  This player has been blamed to be inactive in a Battleground
         /// </summary>
-        /// <param name="reporter"></param>
+        /// <param Name="reporter"></param>
         public void ReportedAfkBy(Player reporter)
 		{
 			ReportPvPPlayerAFKResult reportAfkResult = new();

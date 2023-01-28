@@ -110,7 +110,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
 			List<WorldObject> targetsCopy = targets;
 			byte              size        = (byte)targetsCopy.Count;
-			// Selecting our prefered target size based on total targets (min 10 player: 2, max 30 player: 6)
+			// Selecting our prefered Target size based on total targets (min 10 player: 2, max 30 player: 6)
 			byte preferedSize = (byte)(Math.Min(Math.Max(MathF.Ceiling(size / 5), MinTargetsSize), MaxTargetsSize));
 
 			// Now we get rid of the tank as these abilities prefer non-tanks above tanks as long as there are alternatives
@@ -123,7 +123,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			}
 			else
 			{
-				// Our target list has enough alternative targets, resize
+				// Our Target list has enough alternative targets, resize
 				targetsCopy.RandomResize(preferedSize);
 				targets.Clear();
 				targets.AddRange(targetsCopy);

@@ -115,17 +115,17 @@ namespace Game
 
 		public void TriggerGuidWarning()
 		{
-			// Lock this only to prevent multiple maps triggering at the same time
+			// Lock this only to prevent multiple maps triggering at the same Time
 			lock (_guidAlertLock)
 			{
 				long gameTime = GameTime.GetGameTime();
 				long today    = (gameTime / Time.Day) * Time.Day;
 
-				// Check if our window to restart today has passed. 5 mins until quiet time
+				// Check if our window to restart today has passed. 5 mins until quiet Time
 				while (gameTime >= Time.GetLocalHourTimestamp(today, WorldConfig.GetUIntValue(WorldCfg.RespawnRestartQuietTime)) - 1810)
 					today += Time.Day;
 
-				// Schedule restart for 30 minutes before quiet time, or as long as we have
+				// Schedule restart for 30 minutes before quiet Time, or as long as we have
 				_warnShutdownTime = Time.GetLocalHourTimestamp(today, WorldConfig.GetUIntValue(WorldCfg.RespawnRestartQuietTime)) - 1800;
 
 				_guidWarn = true;
@@ -135,7 +135,7 @@ namespace Game
 
 		public void TriggerGuidAlert()
 		{
-			// Lock this only to prevent multiple maps triggering at the same time
+			// Lock this only to prevent multiple maps triggering at the same Time
 			lock (_guidAlertLock)
 			{
 				DoGuidAlertRestart();
@@ -227,7 +227,7 @@ namespace Game
 
 				if (old != null)
 				{
-					// prevent decrease sessions count if session queued
+					// prevent decrease sessions Count if session queued
 					if (RemoveQueuedPlayer(old))
 						decrease_session = false;
 
@@ -243,7 +243,7 @@ namespace Game
 			uint pLimit    = GetPlayerAmountLimit();
 			int  QueueSize = GetQueuedSessionCount(); //number of players in the queue
 
-			//so we don't count the user trying to
+			//so we don't Count the user trying to
 			//login as a session and queue the socket that we are using
 			if (decrease_session)
 				--Sessions;
@@ -255,7 +255,7 @@ namespace Game
 			{
 				AddQueuedPlayer(s);
 				UpdateMaxSessionCounters();
-				Log.outInfo(LogFilter.Server, "PlayerQueue: Account id {0} is in Queue Position ({1}).", s.GetAccountId(), ++QueueSize);
+				Log.outInfo(LogFilter.Server, "PlayerQueue: Account Id {0} is in Queue Position ({1}).", s.GetAccountId(), ++QueueSize);
 
 				return;
 			}
@@ -344,12 +344,12 @@ namespace Game
 
 		private bool RemoveQueuedPlayer(WorldSession sess)
 		{
-			// sessions count including queued to remove (if removed_session set)
+			// sessions Count including queued to remove (if removed_session set)
 			int sessions = GetActiveSessionCount();
 
 			uint position = 1;
 
-			// search to remove and count skipped positions
+			// search to remove and Count skipped positions
 			bool found = false;
 
 			foreach (var iter in _QueuedPlayer)
@@ -370,7 +370,7 @@ namespace Game
 			// iter point to next socked after removed or end()
 			// position store position of removed socket and then new position next socket after removed
 
-			// if session not queued then we need decrease sessions count
+			// if session not queued then we need decrease sessions Count
 			if (!found &&
 			    sessions != 0)
 				--sessions;
@@ -417,7 +417,7 @@ namespace Game
 			    !TerrainManager.ExistMapAndVMap(1, -2917.58f, -257.98f) ||
 			    (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!TerrainManager.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !TerrainManager.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
 			{
-				Log.outError(LogFilter.ServerLoading, "Unable to load map and vmap data for starting zones - server shutting down!");
+				Log.outError(LogFilter.ServerLoading, "Unable to load map and vmap _data for starting zones - server shutting down!");
 				Environment.Exit(1);
 			}
 
@@ -436,7 +436,7 @@ namespace Game
 			RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
 			uint      realm_zone  = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
-			DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Index); // One-time query
+			DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE Id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Index); // One-Time query
 
 			Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
 			// Load DB2s
@@ -455,7 +455,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading hotfix info...");
 			Global.DB2Mgr.LoadHotfixData();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading hotfix optional data...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading hotfix optional _data...");
 			Global.DB2Mgr.LoadHotfixOptionalData(_availableDbcLocaleMask);
 
 			//- Load M2 fly by cameras
@@ -472,7 +472,7 @@ namespace Game
 			foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
 				if (mapEntry.ParentMapID != -1)
 				{
-					Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, $"Inconsistent parent map data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
+					Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, $"Inconsistent parent map _data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
 					mapData.Add((uint)mapEntry.ParentMapID, mapEntry.Id);
 				}
 				else if (mapEntry.CosmeticParentMapID != -1)
@@ -532,7 +532,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading Instance Template...");
 			Global.ObjectMgr.LoadInstanceTemplate();
 
-			// Must be called before `respawn` data
+			// Must be called before `respawn` _data
 			Log.outInfo(LogFilter.ServerLoading, "Loading instances...");
 
 			Global.MapMgr.InitInstanceIds();
@@ -590,7 +590,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading Spell Learn Spells...");
 			Global.SpellMgr.LoadSpellLearnSpells();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading Spell Proc conditions and data...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading Spell Proc conditions and _data...");
 			Global.SpellMgr.LoadSpellProcs();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading Aggro Spells Definitions...");
@@ -683,7 +683,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading GameObject Addon Data...");
 			Global.ObjectMgr.LoadGameObjectAddons(); // must be after LoadGameObjects()
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading GameObject faction and flags overrides...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading GameObject faction and Flags overrides...");
 			Global.ObjectMgr.LoadGameObjectOverrides(); // must be after LoadGameObjects()
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading GameObject Quest Items...");
@@ -762,7 +762,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading LFG entrance positions..."); // Must be after areatriggers
 			Global.LFGMgr.LoadLFGDungeons();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading Dungeon boss data...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading Dungeon boss _data...");
 			Global.ObjectMgr.LoadInstanceEncounters();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading LFG rewards...");
@@ -771,10 +771,10 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading Graveyard-zone links...");
 			Global.ObjectMgr.LoadGraveyardZones();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading spell pet auras...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading spell pet Auras...");
 			Global.SpellMgr.LoadSpellPetAuras();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading Spell target coordinates...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading Spell Target coordinates...");
 			Global.SpellMgr.LoadSpellTargetPositions();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading linked spells...");
@@ -860,7 +860,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading character cache store...");
 			Global.CharacterCacheStorage.LoadCharacterCacheStorage();
 
-			// Load dynamic data tables from the database
+			// Load dynamic _data tables from the database
 			Log.outInfo(LogFilter.ServerLoading, "Loading Auctions...");
 			Global.AuctionHouseMgr.LoadAuctions();
 
@@ -957,7 +957,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading faction change title pairs...");
 			Global.ObjectMgr.LoadFactionChangeTitles();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading mount definitions...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading Mount definitions...");
 			CollectionMgr.LoadMountDefinitions();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading GM bugs...");
@@ -1006,7 +1006,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading SmartAI scripts...");
 			Global.SmartAIMgr.LoadFromDB();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading Calendar data...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading Calendar _data...");
 			Global.CalendarMgr.LoadFromDB();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading Petitions...");
@@ -1018,14 +1018,14 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading Item loot...");
 			Global.LootItemStorage.LoadStorageFromDB();
 
-			Log.outInfo(LogFilter.ServerLoading, "Initialize query data...");
+			Log.outInfo(LogFilter.ServerLoading, "Initialize query _data...");
 			Global.ObjectMgr.InitializeQueriesData(QueryDataGroup.All);
 
-			// Initialize game time and timers
-			Log.outInfo(LogFilter.ServerLoading, "Initialize game time and timers");
+			// Initialize game Time and timers
+			Log.outInfo(LogFilter.ServerLoading, "Initialize game Time and timers");
 			GameTime.UpdateGameTimers();
 
-			DB.Login.Execute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({0}, {1}, 0, '{2}')", _realm.Id.Index, GameTime.GetStartTime(), ""); // One-time query
+			DB.Login.Execute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({0}, {1}, 0, '{2}')", _realm.Id.Index, GameTime.GetStartTime(), ""); // One-Time query
 
 			_timers[WorldTimers.Auctions].SetInterval(Time.Minute * Time.InMilliseconds);
 			_timers[WorldTimers.AuctionsPending].SetInterval(250);
@@ -1103,22 +1103,22 @@ namespace Game
 			Global.WardenCheckMgr.LoadWardenOverrides();
 
 			Log.outInfo(LogFilter.ServerLoading, "Deleting expired bans...");
-			DB.Login.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate"); // One-time query
+			DB.Login.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate"); // One-Time query
 
 			Log.outInfo(LogFilter.ServerLoading, "Initializing quest reset times...");
 			InitQuestResetTimes();
 			CheckScheduledResetTimes();
 
-			Log.outInfo(LogFilter.ServerLoading, "Calculate random battleground reset time...");
+			Log.outInfo(LogFilter.ServerLoading, "Calculate random battleground reset Time...");
 			InitRandomBGResetTime();
 
-			Log.outInfo(LogFilter.ServerLoading, "Calculate deletion of old calendar events time...");
+			Log.outInfo(LogFilter.ServerLoading, "Calculate deletion of old calendar events Time...");
 			InitCalendarOldEventsDeletionTime();
 
-			Log.outInfo(LogFilter.ServerLoading, "Calculate Guild cap reset time...");
+			Log.outInfo(LogFilter.ServerLoading, "Calculate Guild cap reset Time...");
 			InitGuildResetTime();
 
-			Log.outInfo(LogFilter.ServerLoading, "Calculate next currency reset time...");
+			Log.outInfo(LogFilter.ServerLoading, "Calculate next currency reset Time...");
 			InitCurrencyResetTime();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading race and class expansion requirements...");
@@ -1137,7 +1137,7 @@ namespace Game
 			Global.ScenarioMgr.LoadDB2Data();
 			Global.ScenarioMgr.LoadDBData();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading scenario poi data");
+			Log.outInfo(LogFilter.ServerLoading, "Loading scenario poi _data");
 			Global.ScenarioMgr.LoadScenarioPOI();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading phase names...");
@@ -1159,7 +1159,7 @@ namespace Game
 
 			Log.outInfo(LogFilter.ServerLoading, "Using {0} DBC Locale", _defaultDbcLocale);
 
-			// load update time related configs
+			// load update Time related configs
 			_worldUpdateTime.LoadFromConfig();
 
 			SetPlayerAmountLimit((uint)ConfigMgr.GetDefaultValue("PlayerLimit", 100));
@@ -1268,7 +1268,7 @@ namespace Game
 				Log.outInfo(LogFilter.ServerLoading, "Using DataDir {0}", _dataPath);
 			}
 
-			Log.outInfo(LogFilter.ServerLoading, @"WORLD: MMap data directory is: {0}\mmaps", _dataPath);
+			Log.outInfo(LogFilter.ServerLoading, @"WORLD: MMap _data directory is: {0}\mmaps", _dataPath);
 
 			bool EnableIndoor = ConfigMgr.GetDefaultValue("vmap.EnableIndoorCheck", true);
 			bool EnableLOS    = ConfigMgr.GetDefaultValue("vmap.EnableLOS", true);
@@ -1281,7 +1281,7 @@ namespace Game
 			Global.VMapMgr.SetEnableHeightCalc(EnableHeight);
 
 			Log.outInfo(LogFilter.ServerLoading, "VMap support included. LineOfSight: {0}, getHeight: {1}, indoorCheck: {2}", EnableLOS, EnableHeight, EnableIndoor);
-			Log.outInfo(LogFilter.ServerLoading, @"VMap data directory is: {0}\vmaps", GetDataPath());
+			Log.outInfo(LogFilter.ServerLoading, @"VMap _data directory is: {0}\vmaps", GetDataPath());
 		}
 
 		public void SetForcedWarModeFactionBalanceState(int team, int reward = 0)
@@ -1325,7 +1325,7 @@ namespace Game
 
 		public void Update(uint diff)
 		{
-			///- Update the game time and check for shutdown time
+			///- Update the game Time and check for shutdown Time
 			UpdateGameTime();
 			long currentGameTime = GameTime.GetGameTime();
 
@@ -1504,7 +1504,7 @@ namespace Game
 			// Process Game events when necessary
 			if (_timers[WorldTimers.Events].Passed())
 			{
-				_timers[WorldTimers.Events].Reset(); // to give time for Update() to be processed
+				_timers[WorldTimers.Events].Reset(); // to give Time for Update() to be processed
 				uint nextGameEvent = Global.GameEventMgr.Update();
 				_timers[WorldTimers.Events].SetInterval(nextGameEvent);
 				_timers[WorldTimers.Events].Reset();
@@ -1532,7 +1532,7 @@ namespace Game
 
 		public void ForceGameEventUpdate()
 		{
-			_timers[WorldTimers.Events].Reset(); // to give time for Update() to be processed
+			_timers[WorldTimers.Events].Reset(); // to give Time for Update() to be processed
 			uint nextGameEvent = Global.GameEventMgr.Update();
 			_timers[WorldTimers.Events].SetInterval(nextGameEvent);
 			_timers[WorldTimers.Events].Reset();
@@ -1861,7 +1861,7 @@ namespace Game
 
 		private void UpdateGameTime()
 		{
-			// update the time
+			// update the Time
 			long lastGameTime = GameTime.GetGameTime();
 			GameTime.UpdateGameTimers();
 
@@ -1900,7 +1900,7 @@ namespace Game
 			_ShutdownMask = options;
 			_ExitCode     = exitcode;
 
-			// If the shutdown time is 0, evaluate shutdown on next tick (no message)
+			// If the shutdown Time is 0, evaluate shutdown on next tick (no message)
 			if (time == 0)
 			{
 				_ShutdownTimer = 1;
@@ -2095,7 +2095,7 @@ namespace Game
 			// Update faction balance
 			UpdateWarModeRewardValues();
 
-			// store next reset time
+			// store next reset Time
 			long now  = GameTime.GetGameTime();
 			long next = GetNextDailyResetTime(now);
 			Cypher.Assert(now < next);
@@ -2139,7 +2139,7 @@ namespace Game
 			// reselect pools
 			Global.QuestPoolMgr.ChangeWeeklyQuests();
 
-			// store next reset time
+			// store next reset Time
 			long now  = GameTime.GetGameTime();
 			long next = GetNextWeeklyResetTime(now);
 			Cypher.Assert(now < next);
@@ -2181,7 +2181,7 @@ namespace Game
 			// reselect pools
 			Global.QuestPoolMgr.ChangeMonthlyQuests();
 
-			// store next reset time
+			// store next reset Time
 			long now  = GameTime.GetGameTime();
 			long next = GetNextMonthlyResetTime(now);
 			Cypher.Assert(now < next);
@@ -2211,19 +2211,19 @@ namespace Game
 			long bgtime = GetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId);
 
 			if (bgtime == 0)
-				_NextRandomBGReset = GameTime.GetGameTime(); // game time not yet init
+				_NextRandomBGReset = GameTime.GetGameTime(); // game Time not yet init
 
-			// generate time by config
+			// generate Time by config
 			long curTime = GameTime.GetGameTime();
 
-			// current day reset time
+			// current day reset Time
 			long nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.RandomBgResetHour));
 
-			// next reset time before current moment
+			// next reset Time before current moment
 			if (curTime >= nextDayResetTime)
 				nextDayResetTime += Time.Day;
 
-			// normalize reset time
+			// normalize reset Time
 			_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
 			if (bgtime == 0)
@@ -2236,8 +2236,8 @@ namespace Game
 			long nextDeletionTime    = Time.GetLocalHourTimestamp(now, WorldConfig.GetUIntValue(WorldCfg.CalendarDeleteOldEventsHour));
 			long currentDeletionTime = GetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId);
 
-			// If the reset time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.
-			// In this case we set the reset time in the past and next world update will do the reset and schedule next one in the future.
+			// If the reset Time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.
+			// In this case we set the reset Time in the past and next world update will do the reset and schedule next one in the future.
 			if (currentDeletionTime < now)
 				_NextCalendarOldEventsDeletionTime = nextDeletionTime - Time.Day;
 			else
@@ -2252,7 +2252,7 @@ namespace Game
 			long gtime = GetPersistentWorldVariable(NextGuildDailyResetTimeVarId);
 
 			if (gtime == 0)
-				_NextGuildReset = GameTime.GetGameTime(); // game time not yet init
+				_NextGuildReset = GameTime.GetGameTime(); // game Time not yet init
 
 			long curTime          = GameTime.GetGameTime();
 			var  nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.GuildResetHour));
@@ -2260,7 +2260,7 @@ namespace Game
 			if (curTime >= nextDayResetTime)
 				nextDayResetTime += Time.Day;
 
-			// normalize reset time
+			// normalize reset Time
 			_NextGuildReset = gtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
 			if (gtime == 0)
@@ -2272,18 +2272,18 @@ namespace Game
 			long currencytime = GetPersistentWorldVariable(NextCurrencyResetTimeVarId);
 
 			if (currencytime == 0)
-				_NextCurrencyReset = GameTime.GetGameTime(); // game time not yet init
+				_NextCurrencyReset = GameTime.GetGameTime(); // game Time not yet init
 
-			// generate time by config
+			// generate Time by config
 			long curTime = GameTime.GetGameTime();
 
 			var nextWeekResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.CurrencyResetDay), WorldConfig.GetIntValue(WorldCfg.CurrencyResetHour));
 
-			// next reset time before current moment
+			// next reset Time before current moment
 			if (curTime >= nextWeekResetTime)
 				nextWeekResetTime += WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day;
 
-			// normalize reset time
+			// normalize reset Time
 			_NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day : nextWeekResetTime;
 
 			if (currencytime == 0)
@@ -2428,7 +2428,7 @@ namespace Game
 
 		public void ReloadRBAC()
 		{
-			// Passive reload, we mark the data as invalidated and next time a permission is checked it will be reloaded
+			// Passive reload, we mark the _data as invalidated and next Time a permission is checked it will be reloaded
 			Log.outInfo(LogFilter.Rbac, "World.ReloadRBAC()");
 
 			foreach (var session in _sessions.Values)
@@ -2502,7 +2502,7 @@ namespace Game
 			return _playerLimit;
 		}
 
-		/// Get the path where data (dbc, maps) are stored on disk
+		/// Get the path where _data (dbc, maps) are stored on disk
 		public string GetDataPath()
 		{
 			return _dataPath;
@@ -2595,7 +2595,7 @@ namespace Game
 
 		public bool LoadRealmInfo()
 		{
-			SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
+			SQLResult result = DB.Login.Query("SELECT Id, Name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE Id = {0}", _realm.Id.Index);
 
 			if (result.IsEmpty())
 				return false;

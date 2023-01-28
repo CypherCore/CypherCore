@@ -66,7 +66,7 @@ namespace Game.Entities
 		{
 			base.Update(diff);
 
-			if (_deathState == DeathState.Dead)
+			if (DeathState == DeathState.Dead)
 			{
 				UnSummon();
 
@@ -114,7 +114,7 @@ namespace Game.Entities
 
 				case TempSummonType.CorpseTimedDespawn:
 				{
-					if (_deathState == DeathState.Corpse)
+					if (DeathState == DeathState.Corpse)
 					{
 						if (_timer <= diff)
 						{
@@ -130,8 +130,8 @@ namespace Game.Entities
 				}
 				case TempSummonType.CorpseDespawn:
 				{
-					// if _deathState is DEAD, CORPSE was skipped
-					if (_deathState == DeathState.Corpse)
+					// if DeathState is DEAD, CORPSE was skipped
+					if (DeathState == DeathState.Corpse)
 					{
 						UnSummon();
 
@@ -142,7 +142,7 @@ namespace Game.Entities
 				}
 				case TempSummonType.TimedOrCorpseDespawn:
 				{
-					if (_deathState == DeathState.Corpse)
+					if (DeathState == DeathState.Corpse)
 					{
 						UnSummon();
 
@@ -214,9 +214,9 @@ namespace Game.Entities
 
 			if (owner != null &&
 			    IsTrigger() &&
-			    _spells[0] != 0)
+			    Spells[0] != 0)
 				if (owner.IsTypeId(TypeId.Player))
-					_ControlledByPlayer = true;
+					ControlledByPlayer = true;
 
 			if (owner != null &&
 			    owner.IsPlayer())
@@ -244,17 +244,17 @@ namespace Game.Entities
 
 				if (slot > 0)
 				{
-					if (!owner._SummonSlot[slot].IsEmpty() &&
-					    owner._SummonSlot[slot] != GetGUID())
+					if (!owner.SummonSlot[slot].IsEmpty() &&
+					    owner.SummonSlot[slot] != GetGUID())
 					{
-						Creature oldSummon = GetMap().GetCreature(owner._SummonSlot[slot]);
+						Creature oldSummon = GetMap().GetCreature(owner.SummonSlot[slot]);
 
 						if (oldSummon != null &&
 						    oldSummon.IsSummon())
 							oldSummon.ToTempSummon().UnSummon();
 					}
 
-					owner._SummonSlot[slot] = GetGUID();
+					owner.SummonSlot[slot] = GetGUID();
 				}
 
 				if (!_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
@@ -367,7 +367,7 @@ namespace Game.Entities
 			{
 				ForcedUnsummonDelayEvent pEvent = new(this);
 
-				_Events.AddEvent(pEvent, _Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+				Events.AddEvent(pEvent, Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
 
 				return;
 			}
@@ -409,13 +409,13 @@ namespace Game.Entities
 					Unit owner = GetSummonerUnit();
 
 					if (owner != null)
-						if (owner._SummonSlot[slot] == GetGUID())
-							owner._SummonSlot[slot].Clear();
+						if (owner.SummonSlot[slot] == GetGUID())
+							owner.SummonSlot[slot].Clear();
 				}
 			}
 
 			if (!GetOwnerGUID().IsEmpty())
-				Log.outError(LogFilter.Unit, "Unit {0} has owner guid when removed from world", GetEntry());
+				Log.outError(LogFilter.Unit, "Unit {0} has owner Guid when removed from world", GetEntry());
 
 			base.RemoveFromWorld();
 		}
@@ -518,7 +518,7 @@ namespace Game.Entities
 			    owner.GetMinionGUID() != GetGUID())
 				return;
 
-			foreach (Unit controlled in owner._Controlled)
+			foreach (Unit controlled in owner.Controlled)
 				if (controlled.GetEntry() == GetEntry() &&
 				    controlled.IsAlive())
 				{
@@ -658,7 +658,7 @@ namespace Game.Entities
 				GetOwner().ToPlayer().CharmSpellInitialize();
 		}
 
-		// @todo Move stat mods code to pet passive auras
+		// @todo Move stat mods code to pet passive Auras
 		public bool InitStatsForLevel(uint petlevel)
 		{
 			CreatureTemplate cinfo = GetCreatureTemplate();
@@ -704,7 +704,7 @@ namespace Game.Entities
 			SetObjectScale(GetNativeObjectScale());
 
 			// Resistance
-			// Hunters pet should not inherit resistances from creature_template, they have separate auras for that
+			// Hunters pet should not inherit resistances from creature_template, they have separate Auras for that
 			if (!IsHunterPet())
 				for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
 					SetStatFlatModifier(UnitMods.ResistanceStart + i, UnitModifierFlatType.Base, cinfo.Resistance[i]);
@@ -723,13 +723,13 @@ namespace Game.Entities
 				for (byte stat = 0; stat < (int)Stats.Max; ++stat)
 					SetCreateStat((Stats)stat, pInfo.stats[stat]);
 			}
-			else // not exist in DB, use some default fake data
+			else // not exist in DB, use some default fake _data
 			{
 				// remove elite bonuses included in DB values
 				CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
 				ApplyLevelScaling();
 
-				SetCreateHealth((uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, cinfo.GetHealthScalingExpansion(), _unitData.ContentTuningID, (Class)cinfo.UnitClass) * cinfo.ModHealth * cinfo.ModHealthExtra * GetHealthMod(cinfo.Rank)));
+				SetCreateHealth((uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, cinfo.GetHealthScalingExpansion(), UnitData.ContentTuningID, (Class)cinfo.UnitClass) * cinfo.ModHealth * cinfo.ModHealthExtra * GetHealthMod(cinfo.Rank)));
 				SetCreateMana(stats.GenerateMana(cinfo));
 
 				SetCreateStat(Stats.Strength, 22);
@@ -770,7 +770,7 @@ namespace Game.Entities
 			{
 				case PetType.Summon:
 				{
-					// the damage bonus used for pets is either fire or shadow damage, whatever is higher
+					// the Damage bonus used for pets is either fire or shadow Damage, whatever is higher
 					int fire   = GetOwner().ToPlayer().ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Fire];
 					int shadow = GetOwner().ToPlayer().ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow];
 					int val    = (fire > shadow) ? fire : shadow;
@@ -791,10 +791,10 @@ namespace Game.Entities
 					//these formula may not be correct; however, it is designed to be close to what it should be
 					//this makes dps 0.5 of pets level
 					SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
-					//damage range is then petlevel / 2
+					//Damage range is then petlevel / 2
 					SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, petlevel + (petlevel / 4));
 
-					//damage is increased afterwards as strength and pet scaling modify attack power
+					//Damage is increased afterwards as strength and pet scaling modify attack power
 					break;
 				}
 				default:
@@ -807,7 +807,7 @@ namespace Game.Entities
 
 							break;
 						}
-						case 1964: //force of nature
+						case 1964: //Force of nature
 						{
 							if (pInfo == null)
 								SetCreateHealth(30 + 30 * petlevel);
@@ -885,7 +885,7 @@ namespace Game.Entities
 							SetStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, GetOwner().GetStat(Stats.Stamina) * 0.3f); // Bonus Stamina (30% of player stamina)
 
 							if (!HasAura(58877))      //prevent apply twice for the 2 wolves
-								AddAura(58877, this); //Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
+								AddAura(58877, this); //Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of Damage done.
 
 							break;
 						}
@@ -1184,7 +1184,7 @@ namespace Game.Entities
 					bonusAP = owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * dmg_multiplier;
 					SetBonusDamage((int)(owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * dmg_multiplier));
 				}
-				//demons benefit from warlocks shadow or fire damage
+				//demons benefit from warlocks shadow or fire Damage
 				else if (IsPet())
 				{
 					int fire    = owner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - owner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
@@ -1197,7 +1197,7 @@ namespace Game.Entities
 					SetBonusDamage((int)(maximum * 0.15f));
 					bonusAP = maximum * 0.57f;
 				}
-				//water elementals benefit from mage's frost damage
+				//water elementals benefit from mage's frost Damage
 				else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
 				{
 					int frost = owner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Frost] - owner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Frost];
@@ -1211,14 +1211,14 @@ namespace Game.Entities
 
 			SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, val + bonusAP);
 
-			//in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
+			//in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store _data of meleeattackpower field in DB
 			float base_attPower      = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
 			float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
 
 			SetAttackPower((int)base_attPower);
 			SetAttackPowerMultiplier(attPowerMultiplier);
 
-			//automatically update weapon damage after attack power modification
+			//automatically update weapon Damage after attack power modification
 			UpdateDamagePhysical(WeaponAttackType.BaseAttack);
 		}
 
@@ -1232,7 +1232,7 @@ namespace Game.Entities
 
 			if (playerOwner != null)
 			{
-				//force of nature
+				//Force of nature
 				if (GetEntry() == ENTRY_TREANT)
 				{
 					int spellDmg = playerOwner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Nature] - playerOwner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Nature];
@@ -1265,8 +1265,8 @@ namespace Game.Entities
 			float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
 			float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
 
-			SetUpdateFieldStatValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.MinDamage), mindamage);
-			SetUpdateFieldStatValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.MaxDamage), maxdamage);
+			SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MinDamage), mindamage);
+			SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxDamage), maxdamage);
 		}
 
 		private void SetBonusDamage(int damage)
@@ -1346,7 +1346,7 @@ namespace Game.Entities
 	{
 		public uint entry;          // Entry of summoned creature
 		public Position pos;        // Position, where should be creature spawned
-		public uint time;           // Despawn time, usable only with certain temp summon types
+		public uint time;           // Despawn Time, usable only with certain temp summon types
 		public TempSummonType type; // Summon Type, see TempSummonType for available types
 	}
 

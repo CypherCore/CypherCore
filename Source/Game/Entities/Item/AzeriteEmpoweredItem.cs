@@ -123,7 +123,7 @@ namespace Game.Entities
 
 		public void SetSelectedAzeritePower(int tier, int azeritePowerId)
 		{
-			SetUpdateFieldValue(ref _values.ModifyValue(_azeriteEmpoweredItemData).ModifyValue(_azeriteEmpoweredItemData.Selections, tier), azeritePowerId);
+			SetUpdateFieldValue(ref Values.ModifyValue(_azeriteEmpoweredItemData).ModifyValue(_azeriteEmpoweredItemData.Selections, tier), azeritePowerId);
 
 			// Not added to UF::ItemData::BonusListIDs, client fakes it on its own too
 			_bonusData.AddBonusList(CliDB.AzeritePowerStorage.LookupByKey(azeritePowerId).ItemBonusListID);
@@ -132,7 +132,7 @@ namespace Game.Entities
 		private void ClearSelectedAzeritePowers()
 		{
 			for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
-				SetUpdateFieldValue(ref _values.ModifyValue(_azeriteEmpoweredItemData).ModifyValue(_azeriteEmpoweredItemData.Selections, i), 0);
+				SetUpdateFieldValue(ref Values.ModifyValue(_azeriteEmpoweredItemData).ModifyValue(_azeriteEmpoweredItemData.Selections, i), 0);
 
 			_bonusData = new BonusData(GetTemplate());
 
@@ -156,7 +156,7 @@ namespace Game.Entities
 			WorldPacket     buffer = new();
 
 			buffer.WriteUInt8((byte)flags);
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_itemData.WriteCreate(buffer, flags, this, target);
 			_azeriteEmpoweredItemData.WriteCreate(buffer, flags, this, target);
 
@@ -169,17 +169,17 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.Item))
+			if (Values.HasChanged(TypeId.Item))
 				_itemData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.AzeriteEmpoweredItem))
+			if (Values.HasChanged(TypeId.AzeriteEmpoweredItem))
 				_azeriteEmpoweredItemData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
-			data.WriteUInt32(_values.GetChangedObjectTypeMask());
+			data.WriteUInt32(Values.GetChangedObjectTypeMask());
 			data.WriteBytes(buffer);
 		}
 
@@ -203,7 +203,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.Item])
 				_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
@@ -222,7 +222,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_azeriteEmpoweredItemData);
+			Values.ClearChangesMask(_azeriteEmpoweredItemData);
 			base.ClearUpdateMask(remove);
 		}
 

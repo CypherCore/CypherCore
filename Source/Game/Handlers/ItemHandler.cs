@@ -32,7 +32,7 @@ namespace Game
 				return;
 
 			if (splitItem.Quantity == 0)
-				return; //check count - if zero it's fake packet
+				return; //check Count - if zero it's fake packet
 
 			if (!_player.IsValidPos(splitItem.FromPackSlot, splitItem.FromSlot, true))
 			{
@@ -41,7 +41,7 @@ namespace Game
 				return;
 			}
 
-			if (!_player.IsValidPos(splitItem.ToPackSlot, splitItem.ToSlot, false)) // can be autostore pos
+			if (!_player.IsValidPos(splitItem.ToPackSlot, splitItem.ToSlot, false)) // can be autostore Pos
 			{
 				_player.SendEquipError(InventoryResult.WrongSlot);
 
@@ -325,7 +325,7 @@ namespace Game
 
 				pl.AutoUnequipOffhandIfNeed();
 
-				// if inventory Item was moved, check if we can remove dependent auras, because they were not removed in Player::RemoveItem (update was set to false)
+				// if inventory Item was moved, check if we can remove dependent Auras, because they were not removed in Player::RemoveItem (update was set to false)
 				// do this after swaps are done, we pass nullptr because both weapons could be swapped and none of them should be ignored
 				if ((autoEquipItem.PackSlot == InventorySlots.Bag0 && autoEquipItem.Slot < InventorySlots.BagEnd) ||
 				    (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd))
@@ -517,7 +517,7 @@ namespace Game
 
 							if (pNewItem == null)
 							{
-								Log.outError(LogFilter.Network, "WORLD: HandleSellItemOpcode - could not create clone of Item {0}; count = {1}", pItem.GetEntry(), packet.Amount);
+								Log.outError(LogFilter.Network, "WORLD: HandleSellItemOpcode - could not create clone of Item {0}; Count = {1}", pItem.GetEntry(), packet.Amount);
 								pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
 
 								return;
@@ -614,7 +614,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.BuyItem, Processing = PacketProcessing.Inplace)]
 		private void HandleBuyItem(BuyItem packet)
 		{
-			// client expects count starting at 1, and we send vendorslot+1 to client already
+			// client expects Count starting at 1, and we send vendorslot+1 to client already
 			if (packet.Muid > 0)
 				--packet.Muid;
 			else
@@ -630,7 +630,7 @@ namespace Game
 					if (bagItem != null &&
 					    bagItem.IsBag())
 						bag = bagItem.GetSlot();
-					else if (packet.ContainerGUID == GetPlayer().GetGUID()) // The client sends the player guid when trying to store an Item in the default backpack
+					else if (packet.ContainerGUID == GetPlayer().GetGUID()) // The client sends the player Guid when trying to store an Item in the default backpack
 						bag = InventorySlots.Bag0;
 
 					GetPlayer().BuyItemFromVendorSlot(packet.VendorGUID, packet.Muid, packet.Item.ItemID, (byte)packet.Quantity, bag, (byte)packet.Slot);
@@ -662,7 +662,7 @@ namespace Game
 			if (!item)
 				return;
 
-			if (!GetPlayer().IsValidPos(packet.ContainerSlotB, ItemConst.NullSlot, false)) // can be autostore pos
+			if (!GetPlayer().IsValidPos(packet.ContainerSlotB, ItemConst.NullSlot, false)) // can be autostore Pos
 			{
 				GetPlayer().SendEquipError(InventoryResult.WrongSlot);
 
@@ -1048,7 +1048,7 @@ namespace Game
 			}
 
 			bool SocketBonusActivated = itemTarget.GemsFitSockets(); //save State of socketbonus
-			GetPlayer().ToggleMetaGemsActive(slot, false);           //turn off all metagems (except for the target Item)
+			GetPlayer().ToggleMetaGemsActive(slot, false);           //turn off all metagems (except for the Target Item)
 
 			//if a meta gem is being equipped, all information has to be written to the Item before testing if the conditions for the gem are met
 
@@ -1101,7 +1101,7 @@ namespace Game
 				//it is not displayed, client has an inbuilt system to determine if the bonus is activated
 			}
 
-			GetPlayer().ToggleMetaGemsActive(slot, true); //turn on all metagems (except for target Item)
+			GetPlayer().ToggleMetaGemsActive(slot, true); //turn on all metagems (except for Target Item)
 
 			GetPlayer().RemoveTradeableItem(itemTarget);
 			itemTarget.ClearSoulboundTradeable(GetPlayer()); // clear tradeable flag

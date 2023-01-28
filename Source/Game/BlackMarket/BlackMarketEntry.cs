@@ -114,7 +114,7 @@ namespace Game.BlackMarket
 
 			if (templ == null)
 			{
-				Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid id.", _marketId);
+				Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid Id.", _marketId);
 
 				return false;
 			}

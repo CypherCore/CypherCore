@@ -265,7 +265,7 @@ namespace Game.Movement
 		private void InitEndGridInfo()
 		{
 			int nodeCount = _path.Count;                  //! Number of nodes in path.
-			_endMapId = _path[nodeCount - 1].ContinentID; //! MapId of last node
+			_endMapId = _path[nodeCount - 1].ContinentID; //! _mapId of last node
 
 			if (nodeCount < 3)
 				_preloadTargetNode = 0;

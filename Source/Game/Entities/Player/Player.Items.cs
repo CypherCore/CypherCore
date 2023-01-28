@@ -61,7 +61,7 @@ namespace Game.Entities
 
 			if (iece == null)
 			{
-				Log.outDebug(LogFilter.Player, "Item refund: cannot find extendedcost data.");
+				Log.outDebug(LogFilter.Player, "Item refund: cannot find extendedcost _data.");
 
 				return;
 			}
@@ -99,10 +99,10 @@ namespace Game.Entities
 
 			ulong moneyRefund = item.GetPaidMoney(); // Item. will be invalidated in DestroyItem
 
-			// Save all relevant data to DB to prevent desynchronisation exploits
+			// Save all relevant _data to DB to prevent desynchronisation exploits
 			SQLTransaction trans = new();
 
-			// Delete any references to the refund data
+			// Delete any references to the refund _data
 			item.SetNotRefundable(this, true, trans, false);
 			GetSession().GetCollectionMgr().RemoveTemporaryAppearance(item);
 
@@ -151,7 +151,7 @@ namespace Game.Entities
 
 		public void SendRefundInfo(Item item)
 		{
-			// This function call unsets ITEM_FLAGS_REFUNDABLE if played time is over 2 hours.
+			// This function call unsets ITEM_FLAGS_REFUNDABLE if played Time is over 2 hours.
 			item.UpdatePlayedTime(this);
 
 			if (!item.IsRefundable())
@@ -173,7 +173,7 @@ namespace Game.Entities
 
 			if (iece == null)
 			{
-				Log.outDebug(LogFilter.Player, "Item refund: cannot find extendedcost data.");
+				Log.outDebug(LogFilter.Player, "Item refund: cannot find extendedcost _data.");
 
 				return;
 			}
@@ -183,13 +183,13 @@ namespace Game.Entities
 			setItemPurchaseData.PurchaseTime   = GetTotalPlayedTime() - item.GetPlayedTime();
 			setItemPurchaseData.Contents.Money = item.GetPaidMoney();
 
-			for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // Item cost data
+			for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // Item cost _data
 			{
 				setItemPurchaseData.Contents.Items[i].ItemCount = iece.ItemCount[i];
 				setItemPurchaseData.Contents.Items[i].ItemID    = iece.ItemID[i];
 			}
 
-			for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost data
+			for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost _data
 			{
 				if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
 					continue;
@@ -212,13 +212,13 @@ namespace Game.Entities
 				itemPurchaseRefundResult.Contents       = new ItemPurchaseContents();
 				itemPurchaseRefundResult.Contents.Money = item.GetPaidMoney();
 
-				for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // Item cost data
+				for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // Item cost _data
 				{
 					itemPurchaseRefundResult.Contents.Items[i].ItemCount = iece.ItemCount[i];
 					itemPurchaseRefundResult.Contents.Items[i].ItemID    = iece.ItemID[i];
 				}
 
-				for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost data
+				for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost _data
 				{
 					if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
 						continue;
@@ -244,7 +244,7 @@ namespace Game.Entities
 
 		private void UpdateSoulboundTradeItems()
 		{
-			// also checks for garbage data
+			// also checks for garbage _data
 			foreach (var guid in _itemSoulboundTradeable.ToList())
 			{
 				Item item = GetItemByGuid(guid);
@@ -585,7 +585,7 @@ namespace Game.Entities
 		private InventoryResult CanStoreItem(byte bag, byte slot, List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swap, out uint no_space_count)
 		{
 			no_space_count = 0;
-			Log.outDebug(LogFilter.Player, "STORAGE: CanStoreItem bag = {0}, Slot = {1}, Item = {2}, count = {3}", bag, slot, entry, count);
+			Log.outDebug(LogFilter.Player, "STORAGE: CanStoreItem bag = {0}, Slot = {1}, Item = {2}, Count = {3}", bag, slot, entry, count);
 
 			ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(entry);
 
@@ -614,7 +614,7 @@ namespace Game.Entities
 				}
 			}
 
-			// check count of items (skip for auto move for same player from bank)
+			// check Count of items (skip for auto move for same player from bank)
 			uint            no_similar_count = 0; // can't store this amount similar items
 			InventoryResult res              = CanTakeMoreSimilarItems(entry, count, pItem, ref no_similar_count);
 
@@ -706,7 +706,7 @@ namespace Game.Entities
 					}
 					else // equipped bag
 					{
-						// we need check 2 time (specialized/non_specialized), use NULL_BAG to prevent skipping bag
+						// we need check 2 Time (specialized/non_specialized), use NULL_BAG to prevent skipping bag
 						res = CanStoreItem_InBag(bag, dest, pProto, ref count, true, false, pItem, ItemConst.NullBag, slot);
 
 						if (res != InventoryResult.Ok)
@@ -1044,7 +1044,7 @@ namespace Game.Entities
 
 				uint remaining_count = item.GetCount();
 
-				Log.outDebug(LogFilter.Player, $"STORAGE: CanStoreItems {k + 1}. Item = {item.GetEntry()}, count = {remaining_count}");
+				Log.outDebug(LogFilter.Player, $"STORAGE: CanStoreItems {k + 1}. Item = {item.GetEntry()}, Count = {remaining_count}");
 				ItemTemplate pProto = item.GetTemplate();
 
 				// strange Item
@@ -1111,7 +1111,7 @@ namespace Game.Entities
 								    item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok &&
 								    bagCounts[t - InventorySlots.BagStart][j] < pProto.GetMaxStackSize())
 								{
-									// add count to stack so that later items in the list do not double-book
+									// add Count to stack so that later items in the list do not double-book
 									bagCounts[t - InventorySlots.BagStart][j] += remaining_count;
 									remaining_count                           =  bagCounts[t - InventorySlots.BagStart][j] < pProto.GetMaxStackSize() ? 0 : bagCounts[t - InventorySlots.BagStart][j] - pProto.GetMaxStackSize();
 
@@ -1233,7 +1233,7 @@ namespace Game.Entities
 			byte bag  = (byte)(pos >> 8);
 			byte slot = (byte)(pos & 255);
 
-			Log.outDebug(LogFilter.Player, "STORAGE: StoreItem bag = {0}, Slot = {1}, Item = {2}, count = {3}, guid = {4}", bag, slot, pItem.GetEntry(), count, pItem.GetGUID().ToString());
+			Log.outDebug(LogFilter.Player, "STORAGE: StoreItem bag = {0}, Slot = {1}, Item = {2}, Count = {3}, Guid = {4}", bag, slot, pItem.GetEntry(), count, pItem.GetGUID().ToString());
 
 			Item pItem2 = GetItemByPos(bag, slot);
 
@@ -1362,7 +1362,7 @@ namespace Game.Entities
 
 		private bool StoreNewItemInBestSlots(uint itemId, uint amount, ItemContext context)
 		{
-			Log.outDebug(LogFilter.Player, "STORAGE: Creating initial Item, itemId = {0}, count = {1}", itemId, amount);
+			Log.outDebug(LogFilter.Player, "STORAGE: Creating initial Item, ItemId = {0}, Count = {1}", itemId, amount);
 
 			var bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(itemId, context);
 
@@ -1436,7 +1436,7 @@ namespace Game.Entities
 					item.SetCreatePlayedTime(GetTotalPlayedTime());
 					AddTradeableItem(item);
 
-					// save data
+					// save _data
 					StringBuilder ss = new();
 
 					foreach (var guid in allowedLooters)
@@ -1803,7 +1803,7 @@ namespace Game.Entities
 
 				ApplyEquipCooldown(pItem);
 
-				// update expertise and armor penetration - passive auras may need it
+				// update expertise and armor penetration - passive Auras may need it
 
 				if (slot == EquipmentSlot.MainHand)
 					UpdateExpertise(WeaponAttackType.BaseAttack);
@@ -2111,7 +2111,7 @@ namespace Game.Entities
 
 						pItem.RemoveItemFlag2(ItemFieldFlags2.Equipped);
 
-						// remove Item dependent auras and casts (only weapon and armor slots)
+						// remove Item dependent Auras and casts (only weapon and armor slots)
 						if (slot < ProfessionSlots.End)
 						{
 							// update expertise
@@ -2134,7 +2134,7 @@ namespace Game.Entities
 								UpdateExpertise(WeaponAttackType.OffAttack);
 							}
 
-							// update armor penetration - passive auras may need it
+							// update armor penetration - passive Auras may need it
 							switch (slot)
 							{
 								case EquipmentSlot.MainHand:
@@ -2226,7 +2226,7 @@ namespace Game.Entities
 				if (tradeData.GetTradeSlotForItem(pSrcItem.GetGUID()) != TradeSlots.Invalid)
 					return;
 
-			Log.outDebug(LogFilter.Player, "STORAGE: SplitItem bag = {0}, Slot = {1}, Item = {2}, count = {3}", dstbag, dstslot, pSrcItem.GetEntry(), count);
+			Log.outDebug(LogFilter.Player, "STORAGE: SplitItem bag = {0}, Slot = {1}, Item = {2}, Count = {3}", dstbag, dstslot, pSrcItem.GetEntry(), count);
 			Item pNewItem = pSrcItem.CloneItem(count, this);
 
 			if (!pNewItem)
@@ -2238,7 +2238,7 @@ namespace Game.Entities
 
 			if (IsInventoryPos(dst))
 			{
-				// change Item amount before check (for unique max count check)
+				// change Item amount before check (for unique max Count check)
 				pSrcItem.SetCount(pSrcItem.GetCount() - count);
 
 				List<ItemPosCount> dest = new();
@@ -2260,7 +2260,7 @@ namespace Game.Entities
 			}
 			else if (IsBankPos(dst))
 			{
-				// change Item amount before check (for unique max count check)
+				// change Item amount before check (for unique max Count check)
 				pSrcItem.SetCount(pSrcItem.GetCount() - count);
 
 				List<ItemPosCount> dest = new();
@@ -2282,7 +2282,7 @@ namespace Game.Entities
 			}
 			else if (IsEquipmentPos(dst))
 			{
-				// change Item amount before check (for unique max count check), provide space for splitted items
+				// change Item amount before check (for unique max Count check), provide space for splitted items
 				pSrcItem.SetCount(pSrcItem.GetCount() - count);
 
 				ushort          dest;
@@ -2479,7 +2479,7 @@ namespace Game.Entities
 				return;
 			}
 
-			// attempt merge to / fill target Item
+			// attempt merge to / fill Target Item
 			if (!pSrcItem.IsBag() &&
 			    !pDstItem.IsBag())
 			{
@@ -2652,7 +2652,7 @@ namespace Game.Entities
 							if (bagItemProto == null ||
 							    !Item.ItemCanGoIntoBag(bagItemProto, emptyProto))
 							{
-								// one from items not go to empty target bag
+								// one from items not go to empty Target bag
 								SendEquipError(InventoryResult.BagInBag, pSrcItem, pDstItem);
 
 								return;
@@ -2670,7 +2670,7 @@ namespace Game.Entities
 						}
 
 						// Items swap
-						count = 0; // will pos in new bag
+						count = 0; // will Pos in new bag
 
 						for (byte i = 0; i < fullBag.GetBagSize(); ++i)
 						{
@@ -2718,7 +2718,7 @@ namespace Game.Entities
 			else if (IsEquipmentPos(src))
 				EquipItem(eDest2, pDstItem, true);
 
-			// if inventory Item was moved, check if we can remove dependent auras, because they were not removed in Player::RemoveItem (update was set to false)
+			// if inventory Item was moved, check if we can remove dependent Auras, because they were not removed in Player::RemoveItem (update was set to false)
 			// do this after swaps are done, we pass nullptr because both weapons could be swapped and none of them should be ignored
 			if ((srcbag == InventorySlots.Bag0 && srcslot < InventorySlots.BagEnd) ||
 			    (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd))
@@ -2815,7 +2815,7 @@ namespace Game.Entities
 				BuySucceeded packet = new();
 				packet.VendorGUID     = pVendor.GetGUID();
 				packet.Muid           = vendorslot + 1;
-				packet.NewQuantity    = crItem.maxcount > 0 ? new_count : 0xFFFFFFFF;
+				packet.NewQuantity    = crItem.Maxcount > 0 ? new_count : 0xFFFFFFFF;
 				packet.QuantityBought = count;
 				SendPacket(packet);
 
@@ -3538,7 +3538,7 @@ namespace Game.Entities
 
 			// store diff Item (cheating)
 			if (crItem == null ||
-			    crItem.item != currency ||
+			    crItem.Item != currency ||
 			    crItem.Type != ItemVendorType.Currency)
 			{
 				SendBuyError(BuyResult.CantFindItem, creature, currency);
@@ -3546,14 +3546,14 @@ namespace Game.Entities
 				return false;
 			}
 
-			if ((count % crItem.maxcount) != 0)
+			if ((count % crItem.Maxcount) != 0)
 			{
 				SendEquipError(InventoryResult.CantBuyQuantity);
 
 				return false;
 			}
 
-			uint                   stacks = count / crItem.maxcount;
+			uint                   stacks = count / crItem.Maxcount;
 			ItemExtendedCostRecord iece;
 
 			if (crItem.ExtendedCost != 0)
@@ -3747,7 +3747,7 @@ namespace Game.Entities
 
 			// store diff Item (cheating)
 			if (crItem == null ||
-			    crItem.item != item)
+			    crItem.Item != item)
 			{
 				SendBuyError(BuyResult.CantFindItem, creature, item);
 
@@ -3765,7 +3765,7 @@ namespace Game.Entities
 				}
 
 			// check current Item amount if it limited
-			if (crItem.maxcount != 0)
+			if (crItem.Maxcount != 0)
 				if (creature.GetVendorItemCurrentCount(crItem) < count)
 				{
 					SendBuyError(BuyResult.ItemAlreadySold, creature, item);
@@ -3881,7 +3881,7 @@ namespace Game.Entities
 
 				if (count > maxCount)
 				{
-					Log.outError(LogFilter.Player, "Player {0} tried to buy {1} Item id {2}, causing overflow", GetName(), count, pProto.GetId());
+					Log.outError(LogFilter.Player, "Player {0} tried to buy {1} Item Id {2}, causing overflow", GetName(), count, pProto.GetId());
 					count = (byte)maxCount;
 				}
 
@@ -3929,7 +3929,7 @@ namespace Game.Entities
 				return false;
 			}
 
-			if (crItem.maxcount != 0) // bought
+			if (crItem.Maxcount != 0) // bought
 			{
 				if (pProto.GetQuality() > ItemQuality.Epic ||
 				    (pProto.GetQuality() == ItemQuality.Epic && pProto.GetBaseItemLevel() >= GuildConst.MinNewsItemLevel))
@@ -3985,12 +3985,12 @@ namespace Game.Entities
 
 		public void SetBuybackPrice(uint slot, uint price)
 		{
-			SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BuybackPrice, (int)slot), price);
+			SetUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BuybackPrice, (int)slot), price);
 		}
 
 		public void SetBuybackTimestamp(uint slot, ulong timestamp)
 		{
-			SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BuybackTimestamp, (int)slot), timestamp);
+			SetUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BuybackTimestamp, (int)slot), timestamp);
 		}
 
 		public Item GetItemFromBuyBackSlot(uint slot)
@@ -4100,7 +4100,7 @@ namespace Game.Entities
 
 			Log.outInfo(LogFilter.Player, "applying mods for Item {0} ", item.GetGUID().ToString());
 
-			if (item.GetSocketColor(0) != 0) //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
+			if (item.GetSocketColor(0) != 0) //only (un)equipping of items with sockets can influence metagems, so no need to waste Time with normal items
 				CorrectMetaGemEnchants(slot, apply);
 
 			_ApplyItemBonuses(item, slot, apply);
@@ -4406,7 +4406,7 @@ namespace Game.Entities
 
 				if (proto.GetClass() == ItemClass.Armor &&
 				    (ItemSubClassArmor)proto.GetSubClass() == ItemSubClassArmor.Shield)
-					SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ShieldBlock), apply ? (uint)(armor * 2.5f) : 0);
+					SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ShieldBlock), apply ? (uint)(armor * 2.5f) : 0);
 			}
 
 			WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
@@ -4496,7 +4496,7 @@ namespace Game.Entities
 				if (effectSpellInfo == null)
 					continue;
 
-				// apply proc cooldown to equip auras if we have any
+				// apply proc cooldown to equip Auras if we have any
 				if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
 				{
 					SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(effectSpellInfo);
@@ -4973,7 +4973,7 @@ namespace Game.Entities
 
 			uint count = pItem.GetCount();
 
-			Log.outDebug(LogFilter.Player, "STORAGE: CanBankItem bag = {0}, Slot = {1}, Item = {2}, count = {3}", bag, slot, pItem.GetEntry(), count);
+			Log.outDebug(LogFilter.Player, "STORAGE: CanBankItem bag = {0}, Slot = {1}, Item = {2}, Count = {3}", bag, slot, pItem.GetEntry(), count);
 			ItemTemplate pProto = pItem.GetTemplate();
 
 			if (pProto == null)
@@ -4990,7 +4990,7 @@ namespace Game.Entities
 			if (pItem.IsCurrencyToken())
 			{
 				Log.outError(LogFilter.Player,
-				             "Possible hacking attempt: Player {0} [guid: {1}] tried to move token [guid: {2}, entry: {3}] out of the currency bag!",
+				             "Possible hacking attempt: Player {0} [Guid: {1}] tried to move token [Guid: {2}, entry: {3}] out of the currency bag!",
 				             GetName(),
 				             GetGUID().ToString(),
 				             pItem.GetGUID().ToString(),
@@ -4999,7 +4999,7 @@ namespace Game.Entities
 				return InventoryResult.CantSwap;
 			}
 
-			// check count of items (skip for auto move for same player from bank)
+			// check Count of items (skip for auto move for same player from bank)
 			InventoryResult res = CanTakeMoreSimilarItems(pItem);
 
 			if (res != InventoryResult.Ok)
@@ -5635,7 +5635,7 @@ namespace Game.Entities
 
 			if (pItem != null)
 			{
-				Log.outDebug(LogFilter.Player, "STORAGE: CanEquipItem Slot = {0}, Item = {1}, count = {2}", slot, pItem.GetEntry(), pItem.GetCount());
+				Log.outDebug(LogFilter.Player, "STORAGE: CanEquipItem Slot = {0}, Item = {1}, Count = {2}", slot, pItem.GetEntry(), pItem.GetCount());
 				ItemTemplate pProto = pItem.GetTemplate();
 
 				if (pProto != null)
@@ -5647,7 +5647,7 @@ namespace Game.Entities
 					if (pItem.IsBindedNotWith(this))
 						return InventoryResult.NotOwner;
 
-					// check count of items (skip for auto move for same player from bank)
+					// check Count of items (skip for auto move for same player from bank)
 					InventoryResult res = CanTakeMoreSimilarItems(pItem);
 
 					if (res != InventoryResult.Ok)
@@ -5942,7 +5942,7 @@ namespace Game.Entities
 			if (pItem == null)
 				return InventoryResult.Ok;
 
-			Log.outDebug(LogFilter.Player, "STORAGE: CanUnequipItem Slot = {0}, Item = {1}, count = {2}", pos, pItem.GetEntry(), pItem.GetCount());
+			Log.outDebug(LogFilter.Player, "STORAGE: CanUnequipItem Slot = {0}, Item = {1}, Count = {2}", pos, pItem.GetEntry(), pItem.GetCount());
 
 			ItemTemplate pProto = pItem.GetTemplate();
 
@@ -6286,7 +6286,7 @@ namespace Game.Entities
 		//Visual
 		public void SetVisibleItemSlot(uint slot, Item pItem)
 		{
-			var itemField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.VisibleItems, (int)slot);
+			var itemField = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.VisibleItems, (int)slot);
 
 			if (pItem != null)
 			{
@@ -6387,7 +6387,7 @@ namespace Game.Entities
 
 					if (slot < EquipmentSlot.End)
 					{
-						// update expertise and armor penetration - passive auras may need it
+						// update expertise and armor penetration - passive Auras may need it
 						switch (slot)
 						{
 							case EquipmentSlot.MainHand:
@@ -6443,7 +6443,7 @@ namespace Game.Entities
 
 		public uint DestroyItemCount(uint itemEntry, uint count, bool update, bool unequip_check = true)
 		{
-			Log.outDebug(LogFilter.Player, "STORAGE: DestroyItemCount Item = {0}, count = {1}", itemEntry, count);
+			Log.outDebug(LogFilter.Player, "STORAGE: DestroyItemCount Item = {0}, Count = {1}", itemEntry, count);
 			uint remcount = 0;
 
 			// in inventory
@@ -6735,7 +6735,7 @@ namespace Game.Entities
 			if (pItem == null)
 				return;
 
-			Log.outDebug(LogFilter.Player, "STORAGE: DestroyItemCount Item (GUID: {0}, Entry: {1}) count = {2}", pItem.GetGUID().ToString(), pItem.GetEntry(), count);
+			Log.outDebug(LogFilter.Player, "STORAGE: DestroyItemCount Item (GUID: {0}, Entry: {1}) Count = {2}", pItem.GetGUID().ToString(), pItem.GetEntry(), count);
 
 			if (pItem.GetCount() <= count)
 			{
@@ -6819,7 +6819,7 @@ namespace Game.Entities
 				}
 			}
 
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.NumBackpackSlots), slots);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.NumBackpackSlots), slots);
 		}
 
 		public byte GetBankBagSlotCount()
@@ -6829,7 +6829,7 @@ namespace Game.Entities
 
 		public void SetBankBagSlotCount(byte count)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.NumBankSlots), count);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.NumBankSlots), count);
 		}
 
 		//Loot
@@ -6840,7 +6840,7 @@ namespace Game.Entities
 
 		public void SetLootGUID(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.LootTargetGUID), guid);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.LootTargetGUID), guid);
 		}
 
 		public void StoreLootItem(ObjectGuid lootWorldObjectGuid, byte lootSlot, Loot loot, AELootResult aeResult = null)
@@ -6946,7 +6946,7 @@ namespace Game.Entities
         ///  if in a Battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
         ///  Called by remove insignia spell effect
         /// </summary>
-        /// <param name="looterPlr"></param>
+        /// <param Name="looterPlr"></param>
         public void RemovedInsignia(Player looterPlr)
 		{
 			// If player is not in battleground and not in worldpvpzone
@@ -7467,7 +7467,7 @@ namespace Game.Entities
 		public void UpdateAverageItemLevelTotal()
 		{
 			(InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[] bestItemLevels = new (InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[EquipmentSlot.End];
-			float                                                            sum            = 0;
+			float sum = 0;
 
 			ForEachItem(ItemSearchLocation.Everywhere,
 			            item =>
@@ -7497,7 +7497,7 @@ namespace Game.Entities
 						            InventoryType inventoryType = itemTemplate.GetInventoryType();
 
 						            ForEachEquipmentSlot(inventoryType,
-						                                 _canDualWield,
+						                                 CanDualWieldWep,
 						                                 _canTitanGrip,
 						                                 (slot, checkDuplicateGuid) =>
 						                                 {
@@ -7520,7 +7520,7 @@ namespace Game.Entities
 				            return true;
 			            });
 
-			// If main hand is a 2h weapon, count it twice
+			// If main hand is a 2h weapon, Count it twice
 			var mainHand = bestItemLevels[EquipmentSlot.MainHand];
 
 			if (!_canTitanGrip &&

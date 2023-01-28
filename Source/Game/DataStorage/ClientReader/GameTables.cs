@@ -33,7 +33,7 @@ namespace Game.DataStorage
 				}
 
 				List<T> data = new();
-				data.Add(new T()); // row id 0, unused
+				data.Add(new T()); // row Id 0, unused
 
 				string line;
 

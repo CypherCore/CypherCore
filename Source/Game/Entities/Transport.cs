@@ -18,7 +18,7 @@ namespace Game.Entities
 	{
 		ObjectGuid GetTransportGUID();
 
-		// This method transforms supplied transport offsets into global coordinates
+		// This method transforms supplied Transport offsets into global coordinates
 		void CalculatePassengerPosition(ref float x, ref float y, ref float z, ref float o);
 
 		// This method transforms supplied global coordinates into local offsets
@@ -32,11 +32,11 @@ namespace Game.Entities
 
 		public static void UpdatePassengerPosition(ITransport transport, Map map, WorldObject passenger, float x, float y, float z, float o, bool setHomePosition)
 		{
-			// transport teleported but passenger not yet (can happen for players)
+			// Transport teleported but passenger not yet (can happen for players)
 			if (passenger.GetMap() != map)
 				return;
 
-			// Do not use Unit::UpdatePosition here, we don't want to remove auras
+			// Do not use Unit::UpdatePosition here, we don't want to remove Auras
 			// as if regular movement occurred
 			switch (passenger.GetTypeId())
 			{
@@ -136,9 +136,9 @@ namespace Game.Entities
 
 		public Transport()
 		{
-			_updateFlag.ServerTime = true;
-			_updateFlag.Stationary = true;
-			_updateFlag.Rotation   = true;
+			UpdateFlag.ServerTime = true;
+			UpdateFlag.Stationary = true;
+			UpdateFlag.Rotation   = true;
 		}
 
 		public void AddPassenger(WorldObject passenger)
@@ -149,7 +149,7 @@ namespace Game.Entities
 			if (_passengers.Add(passenger))
 			{
 				passenger.SetTransport(this);
-				passenger._movementInfo.transport.guid = GetGUID();
+				passenger.MovementInfo.Transport.Guid = GetGUID();
 
 				Player player = passenger.ToPlayer();
 
@@ -164,8 +164,8 @@ namespace Game.Entities
 			    _staticPassengers.Remove(passenger)) // static passenger can remove itself in case of grid unload
 			{
 				passenger.SetTransport(null);
-				passenger._movementInfo.transport.Reset();
-				Log.outDebug(LogFilter.Transport, "Object {0} removed from transport {1}.", passenger.GetName(), GetName());
+				passenger.MovementInfo.Transport.Reset();
+				Log.outDebug(LogFilter.Transport, "Object {0} removed from Transport {1}.", passenger.GetName(), GetName());
 
 				Player plr = passenger.ToPlayer();
 
@@ -240,7 +240,7 @@ namespace Game.Entities
 
 			if (tInfo == null)
 			{
-				Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) will not be created, missing `transport_template` entry.", entry, goinfo.name);
+				Log.outError(LogFilter.Sql, "Transport {0} (Name: {1}) will not be created, missing `transport_template` entry.", entry, goinfo.name);
 
 				return false;
 			}
@@ -265,7 +265,7 @@ namespace Game.Entities
 			SetGoState(goinfo.MoTransport.allowstopping == 0 ? GameObjectState.Ready : GameObjectState.Active);
 			SetGoType(GameObjectTypes.MapObjTransport);
 			SetGoAnimProgress(255);
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 			SetName(goinfo.name);
 			SetLocalRotation(0.0f, 0.0f, 0.0f, 1.0f);
 			SetParentRotation(Quaternion.Identity);
@@ -390,10 +390,10 @@ namespace Game.Entities
 					else
 					{
 						/* There are four possible scenarios that trigger loading/unloading passengers:
-						  1. transport moves from inactive to active grid
-						  2. the grid that transport is currently in becomes active
-						  3. transport moves from active to inactive grid
-						  4. the grid that transport is currently in unloads
+						  1. Transport moves from inactive to active grid
+						  2. the grid that Transport is currently in becomes active
+						  3. Transport moves from active to inactive grid
+						  4. the grid that Transport is currently in unloads
 						*/
 						bool gridActive = GetMap().IsGridLoaded(GetPositionX(), GetPositionY());
 
@@ -402,7 +402,7 @@ namespace Game.Entities
 						else if (!_staticPassengers.Empty() &&
 						         !gridActive)
 							// 4. - if transports stopped on grid edge, some passengers can remain in active grids
-							//      unload all static passengers otherwise passengers won't load correctly when the grid that transport is currently in becomes active
+							//      unload all static passengers otherwise passengers won't load correctly when the grid that Transport is currently in becomes active
 							UnloadStaticPassengers();
 					}
 				}
@@ -434,15 +434,15 @@ namespace Game.Entities
 			data.SpawnPoint.GetPosition(out x, out y, out z, out o);
 
 			creature.SetTransport(this);
-			creature._movementInfo.transport.guid = GetGUID();
-			creature._movementInfo.transport.pos.Relocate(x, y, z, o);
-			creature._movementInfo.transport.seat = -1;
+			creature.MovementInfo.Transport.Guid = GetGUID();
+			creature.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
+			creature.MovementInfo.Transport.Seat = -1;
 			CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 			creature.Relocate(x, y, z, o);
 			creature.SetHomePosition(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ(), creature.GetOrientation());
-			creature.SetTransportHomePosition(creature._movementInfo.transport.pos);
+			creature.SetTransportHomePosition(creature.MovementInfo.Transport.Pos);
 
-			// @HACK - transport models are not added to map's dynamic LoS calculations
+			// @HACK - Transport models are not added to map's dynamic LoS calculations
 			//         because the current GameObjectModel cannot be moved without recreating
 			creature.AddUnitState(UnitState.IgnorePathfinding);
 
@@ -481,9 +481,9 @@ namespace Game.Entities
 			data.SpawnPoint.GetPosition(out x, out y, out z, out o);
 
 			go.SetTransport(this);
-			go._movementInfo.transport.guid = GetGUID();
-			go._movementInfo.transport.pos.Relocate(x, y, z, o);
-			go._movementInfo.transport.seat = -1;
+			go.MovementInfo.Transport.Guid = GetGUID();
+			go.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
+			go.MovementInfo.Transport.Seat = -1;
 			CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 			go.Relocate(x, y, z, o);
 			go.RelocateStationaryPosition(x, y, z, o);
@@ -614,13 +614,13 @@ namespace Game.Entities
 			summon.SetCreatedBySpell(spellId);
 
 			summon.SetTransport(this);
-			summon._movementInfo.transport.guid = GetGUID();
-			summon._movementInfo.transport.pos.Relocate(pos);
+			summon.MovementInfo.Transport.Guid = GetGUID();
+			summon.MovementInfo.Transport.Pos.Relocate(pos);
 			summon.Relocate(x, y, z, o);
 			summon.SetHomePosition(x, y, z, o);
 			summon.SetTransportHomePosition(pos);
 
-			// @HACK - transport models are not added to map's dynamic LoS calculations
+			// @HACK - Transport models are not added to map's dynamic LoS calculations
 			//         because the current GameObjectModel cannot be moved without recreating
 			summon.AddUnitState(UnitState.IgnorePathfinding);
 
@@ -651,10 +651,10 @@ namespace Game.Entities
 			UpdatePassengerPositions(_passengers);
 
 			/* There are four possible scenarios that trigger loading/unloading passengers:
-			 1. transport moves from inactive to active grid
-			 2. the grid that transport is currently in becomes active
-			 3. transport moves from active to inactive grid
-			 4. the grid that transport is currently in unloads
+			 1. Transport moves from inactive to active grid
+			 2. the grid that Transport is currently in becomes active
+			 3. Transport moves from active to inactive grid
+			 4. the grid that Transport is currently in unloads
 			 */
 			if (_staticPassengers.Empty() && newActive) // 1. and 2.
 				LoadStaticPassengers();
@@ -677,11 +677,11 @@ namespace Game.Entities
 
 			foreach (var cell in cells)
 			{
-				// Creatures on transport
+				// Creatures on Transport
 				foreach (var npc in cell.Value.creatures)
 					CreateNPCPassenger(npc, Global.ObjectMgr.GetCreatureData(npc));
 
-				// GameObjects on transport
+				// GameObjects on Transport
 				foreach (var go in cell.Value.gameobjects)
 					CreateGOPassenger(go, Global.ObjectMgr.GetGameObjectData(go));
 			}
@@ -743,7 +743,7 @@ namespace Game.Entities
 								continue;
 
 						float destX, destY, destZ, destO;
-						obj._movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
+						obj.MovementInfo.Transport.Pos.GetPosition(out destX, out destY, out destZ, out destO);
 						ITransport.CalculatePassengerPosition(ref destX, ref destY, ref destZ, ref destO, x, y, z, o);
 
 						obj.ToUnit().NearTeleportTo(destX, destY, destZ, destO);
@@ -793,7 +793,7 @@ namespace Game.Entities
 			foreach (WorldObject obj in passengersToTeleport)
 			{
 				float destX, destY, destZ, destO;
-				obj._movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
+				obj.MovementInfo.Transport.Pos.GetPosition(out destX, out destY, out destZ, out destO);
 				ITransport.CalculatePassengerPosition(ref destX, ref destY, ref destZ, ref destO, x, y, z, o);
 
 				switch (obj.GetTypeId())
@@ -821,7 +821,7 @@ namespace Game.Entities
 			foreach (WorldObject passenger in passengers)
 			{
 				float x, y, z, o;
-				passenger._movementInfo.transport.pos.GetPosition(out x, out y, out z, out o);
+				passenger.MovementInfo.Transport.Pos.GetPosition(out x, out y, out z, out o);
 				CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 				ITransport.UpdatePassengerPosition(this, GetMap(), passenger, x, y, z, o, true);
 			}

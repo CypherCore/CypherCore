@@ -30,14 +30,14 @@ namespace Game.Chat
 			Cypher.Assert(spellEffect != null && spellEffect.Effect == (uint)SpellEffectName.Language);
 
 			uint languageId = (uint)spellEffect.EffectMiscValue[0];
-			_langsMap.Add(languageId, new LanguageDesc(spellEffect.SpellID, 0)); // register without a skill id for now
+			_langsMap.Add(languageId, new LanguageDesc(spellEffect.SpellID, 0)); // register without a skill Id for now
 		}
 
 		public void LoadLanguages()
 		{
 			uint oldMSTime = Time.GetMSTime();
 
-			// Load languages from Languages.db2. Just the id, we don't need the name
+			// Load languages from Languages.db2. Just the Id, we don't need the Name
 			foreach (LanguagesRecord langEntry in CliDB.LanguagesStorage.Values)
 			{
 				var spellsRange = _langsMap.LookupByKey(langEntry.Id);
@@ -68,7 +68,7 @@ namespace Game.Chat
 			_langsMap.Add((uint)Language.Addon, new LanguageDesc());
 			_langsMap.Add((uint)Language.AddonLogged, new LanguageDesc());
 
-			// Log load time
+			// Log load Time
 			Log.outInfo(LogFilter.ServerLoading, $"Loaded {_langsMap.Count} languages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 		}
 
@@ -88,7 +88,7 @@ namespace Game.Chat
 				++wordsNum;
 			}
 
-			// log load time
+			// log load Time
 			Log.outInfo(LogFilter.ServerLoading, $"Loaded {_wordsMap.Count} word groups from {wordsNum} words in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 		}
 

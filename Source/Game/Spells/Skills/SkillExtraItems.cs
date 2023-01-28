@@ -37,7 +37,7 @@ namespace Game.Spells
 
 				if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
 				{
-					Log.outError(LogFilter.Sql, "Skill specialization {0} has non-existent spell id in `skill_extra_item_template`!", spellId);
+					Log.outError(LogFilter.Sql, "Skill specialization {0} has non-existent spell Id in `skill_extra_item_template`!", spellId);
 
 					continue;
 				}
@@ -46,7 +46,7 @@ namespace Game.Spells
 
 				if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Difficulty.None))
 				{
-					Log.outError(LogFilter.Sql, "Skill specialization {0} have not existed required specialization spell id {1} in `skill_extra_item_template`!", spellId, requiredSpecialization);
+					Log.outError(LogFilter.Sql, "Skill specialization {0} have not existed required specialization spell Id {1} in `skill_extra_item_template`!", spellId, requiredSpecialization);
 
 					continue;
 				}
@@ -110,7 +110,7 @@ namespace Game.Spells
 		// maximum number of extra items created per crafting
 		public byte additionalMaxNum;
 
-		// the spell id of the specialization required to create extra items
+		// the spell Id of the specialization required to create extra items
 		public uint requiredSpecialization;
 
 		public SkillExtraItemEntry(uint rS = 0, float aCC = 0f, byte aMN = 0)
@@ -150,7 +150,7 @@ namespace Game.Spells
 
 				if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
 				{
-					Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent spell id in `skill_perfect_item_template`!", spellId);
+					Log.outError(LogFilter.Sql, "Skill perfection _data for spell {0} has non-existent spell Id in `skill_perfect_item_template`!", spellId);
 
 					continue;
 				}
@@ -159,7 +159,7 @@ namespace Game.Spells
 
 				if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Difficulty.None))
 				{
-					Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent required specialization spell id {1} in `skill_perfect_item_template`!", spellId, requiredSpecialization);
+					Log.outError(LogFilter.Sql, "Skill perfection _data for spell {0} has non-existent required specialization spell Id {1} in `skill_perfect_item_template`!", spellId, requiredSpecialization);
 
 					continue;
 				}
@@ -168,7 +168,7 @@ namespace Game.Spells
 
 				if (perfectCreateChance <= 0.0f)
 				{
-					Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has impossibly low proc chance in `skill_perfect_item_template`!", spellId);
+					Log.outError(LogFilter.Sql, "Skill perfection _data for spell {0} has impossibly low proc chance in `skill_perfect_item_template`!", spellId);
 
 					continue;
 				}
@@ -177,7 +177,7 @@ namespace Game.Spells
 
 				if (Global.ObjectMgr.GetItemTemplate(perfectItemType) == null)
 				{
-					Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} references non-existent perfect Item id {1} in `skill_perfect_item_template`!", spellId, perfectItemType);
+					Log.outError(LogFilter.Sql, "Skill perfection _data for spell {0} references non-existent perfect Item Id {1} in `skill_perfect_item_template`!", spellId, perfectItemType);
 
 					continue;
 				}
@@ -221,7 +221,7 @@ namespace Game.Spells
 		// itemid of the resulting perfect Item
 		public uint perfectItemType;
 
-		// the spell id of the spell required - it's named "specialization" to conform with SkillExtraItemEntry
+		// the spell Id of the spell required - it's named "specialization" to conform with SkillExtraItemEntry
 		public uint requiredSpecialization;
 
 		public SkillPerfectItemEntry(uint rS = 0, float pCC = 0f, uint pIT = 0)

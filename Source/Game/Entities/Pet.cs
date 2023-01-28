@@ -22,7 +22,7 @@ namespace Game.Entities
 		private List<uint> _autospells = new();
 
 		private DeclinedName _declinedname;
-		private int _duration; // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
+		private int _duration; // Time until unsummon (used mostly for summoned guardians and not used for controlled pets)
 		private uint _focusRegenTimer;
 		private GroupUpdatePetFlags _groupUpdateMask;
 		private bool _loading;
@@ -62,10 +62,10 @@ namespace Game.Entities
 
 		public override void AddToWorld()
 		{
-			//- Register the pet for guid lookup
+			//- Register the pet for Guid lookup
 			if (!IsInWorld)
 			{
-				// Register the pet for guid lookup
+				// Register the pet for Guid lookup
 				base.AddToWorld();
 				InitializeAI();
 				ZoneScript zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();
@@ -75,7 +75,7 @@ namespace Game.Entities
 			}
 
 			// Prevent stuck pets when zoning. Pets default to "follow" when added to world
-			// so we'll reset flags and let the AI handle things
+			// so we'll reset Flags and let the AI handle things
 			if (GetCharmInfo() != null &&
 			    GetCharmInfo().HasCommandState(CommandStates.Follow))
 			{
@@ -338,7 +338,7 @@ namespace Game.Entities
 
 				Cypher.Assert(activePetIndex != -1);
 
-				// Check that we either have no pet (unsummoned by player) or it matches temporarily unsummoned pet by server (for example on flying mount)
+				// Check that we either have no pet (unsummoned by player) or it matches temporarily unsummoned pet by server (for example on flying Mount)
 				Cypher.Assert(!petStable.CurrentPetIndex.HasValue || petStable.CurrentPetIndex == activePetIndex);
 
 				petStable.SetCurrentActivePetIndex((uint)activePetIndex);
@@ -394,7 +394,7 @@ namespace Game.Entities
 				                    uint timediff = (uint)(GameTime.GetGameTime() - lastSaveTime);
 				                    _LoadAuras(holder.GetResult(PetLoginQueryLoad.Auras), holder.GetResult(PetLoginQueryLoad.AuraEffects), timediff);
 
-				                    // load Action bar, if data broken will fill later by default spells.
+				                    // load Action bar, if _data broken will fill later by default spells.
 				                    if (!isTemporarySummon)
 				                    {
 					                    _LoadSpells(holder.GetResult(PetLoginQueryLoad.Spells));
@@ -438,11 +438,11 @@ namespace Game.Entities
 						                    _declinedname = new DeclinedName();
 
 						                    for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-							                    _declinedname.name[i] = result.Read<string>(i);
+							                    _declinedname.Name[i] = result.Read<string>(i);
 					                    }
 				                    }
 
-				                    // must be after SetMinion (owner guid check)
+				                    // must be after SetMinion (owner Guid check)
 				                    LoadTemplateImmunities();
 				                    _loading = false;
 			                    });
@@ -485,7 +485,7 @@ namespace Game.Entities
 			int  curmana   = GetPower(PowerType.Mana);
 
 			SQLTransaction trans = new();
-			// save auras before possibly removing them    
+			// save Auras before possibly removing them    
 			_SaveAuras(trans);
 
 			if (mode == PetSaveMode.AsCurrent)
@@ -511,7 +511,7 @@ namespace Game.Entities
 				ulong ownerLowGUID = GetOwnerGUID().GetCounter();
 				trans = new SQLTransaction();
 
-				// remove current data
+				// remove current _data
 				PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
 				stmt.AddValue(0, GetCharmInfo().GetPetNumber());
 				trans.Append(stmt);
@@ -528,7 +528,7 @@ namespace Game.Entities
 				stmt.AddValue(2, ownerLowGUID);
 				stmt.AddValue(3, GetNativeDisplayId());
 				stmt.AddValue(4, GetLevel());
-				stmt.AddValue(5, _unitData.PetExperience);
+				stmt.AddValue(5, UnitData.PetExperience);
 				stmt.AddValue(6, (byte)GetReactState());
 				stmt.AddValue(7, (owner.GetPetStable().GetCurrentActivePetIndex().HasValue ? (short)owner.GetPetStable().GetCurrentActivePetIndex().Value : (short)PetSaveMode.NotInSlot));
 				stmt.AddValue(8, GetName());
@@ -539,7 +539,7 @@ namespace Game.Entities
 				stmt.AddValue(12, actionBar);
 
 				stmt.AddValue(13, GameTime.GetGameTime());
-				stmt.AddValue(14, _unitData.CreatedBySpell);
+				stmt.AddValue(14, UnitData.CreatedBySpell);
 				stmt.AddValue(15, (byte)GetPetType());
 				stmt.AddValue(16, GetSpecialization());
 				trans.Append(stmt);
@@ -560,7 +560,7 @@ namespace Game.Entities
 			petInfo.CreatureId       = GetEntry();
 			petInfo.DisplayId        = GetNativeDisplayId();
 			petInfo.Level            = (byte)GetLevel();
-			petInfo.Experience       = _unitData.PetExperience;
+			petInfo.Experience       = UnitData.PetExperience;
 			petInfo.ReactState       = GetReactState();
 			petInfo.Name             = GetName();
 			petInfo.WasRenamed       = !HasPetFlag(UnitPetFlags.CanBeRenamed);
@@ -568,7 +568,7 @@ namespace Game.Entities
 			petInfo.Mana             = (uint)GetPower(PowerType.Mana);
 			petInfo.ActionBar        = GenerateActionBarData();
 			petInfo.LastSaveTime     = (uint)GameTime.GetGameTime();
-			petInfo.CreatedBySpellId = _unitData.CreatedBySpell;
+			petInfo.CreatedBySpellId = UnitData.CreatedBySpell;
 			petInfo.Type             = GetPetType();
 			petInfo.SpecializationId = GetSpecialization();
 		}
@@ -635,12 +635,12 @@ namespace Game.Entities
 			if (_loading)
 				return;
 
-			switch (_deathState)
+			switch (DeathState)
 			{
 				case DeathState.Corpse:
 				{
 					if (GetPetType() != PetType.Hunter ||
-					    _corpseRemoveTime <= GameTime.GetGameTime())
+					    CorpseRemoveTime <= GameTime.GetGameTime())
 					{
 						Remove(PetSaveMode.NotInSlot); //hunters' pets never get removed because of death, NEVER!
 
@@ -746,8 +746,8 @@ namespace Game.Entities
 			if (petlevel >= maxlevel)
 				return;
 
-			uint nextLvlXP = _unitData.PetNextLevelExperience;
-			uint curXP     = _unitData.PetExperience;
+			uint nextLvlXP = UnitData.PetNextLevelExperience;
+			uint curXP     = UnitData.PetExperience;
 			uint newXP     = curXP + xp;
 
 			// Check how much XP the pet should receive, and hand off have any left from previous levelups
@@ -759,7 +759,7 @@ namespace Game.Entities
 
 				GivePetLevel((int)petlevel);
 
-				nextLvlXP = _unitData.PetNextLevelExperience;
+				nextLvlXP = UnitData.PetNextLevelExperience;
 			}
 
 			// Not affected by special conditions - give it new XP
@@ -945,7 +945,7 @@ namespace Game.Entities
 
 		private void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
 		{
-			Log.outDebug(LogFilter.Pet, "Loading auras for {0}", GetGUID().ToString());
+			Log.outDebug(LogFilter.Pet, "Loading Auras for {0}", GetGUID().ToString());
 
 			ObjectGuid                              casterGuid = default;
 			ObjectGuid                              itemGuid   = default;
@@ -977,7 +977,7 @@ namespace Game.Entities
 			if (!auraResult.IsEmpty())
 				do
 				{
-					// NULL guid stored - pet is the caster of the spell - see Pet._SaveAuras
+					// NULL Guid stored - pet is the caster of the spell - see Pet._SaveAuras
 					casterGuid.SetRawValue(auraResult.Read<byte[]>(0));
 
 					if (casterGuid.IsEmpty())
@@ -1078,7 +1078,7 @@ namespace Game.Entities
 				uint    recalculateMask;
 				AuraKey key = aura.GenerateKey(out recalculateMask);
 
-				// don't save guid of caster in case we are caster of the spell - guid for pet is generated every pet load, so it won't match saved guid anyways
+				// don't save Guid of caster in case we are caster of the spell - Guid for pet is generated every pet load, so it won't match saved Guid anyways
 				if (key.Caster == GetGUID())
 					key.Caster.Clear();
 
@@ -1484,8 +1484,8 @@ namespace Game.Entities
 			// TODO: counter should be constructed as (summon_count << 32) | petNumber
 			_Create(ObjectGuid.Create(HighGuid.Pet, map.GetId(), entry, guidlow));
 
-			_spawnId       = guidlow;
-			_originalEntry = entry;
+			SpawnId       = guidlow;
+			OriginalEntry = entry;
 
 			if (!InitEntry(entry))
 				return false;
@@ -1689,12 +1689,12 @@ namespace Game.Entities
 
 		public void SetPetExperience(uint xp)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.PetExperience), xp);
+			SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.PetExperience), xp);
 		}
 
 		public void SetPetNextLevelExperience(uint xp)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.PetNextLevelExperience), xp);
+			SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.PetNextLevelExperience), xp);
 		}
 
 		public ushort GetSpecialization()

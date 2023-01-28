@@ -35,7 +35,7 @@ namespace Game
 			}
 
 			//                                         0   1     2     3       4        5       6    7
-			SQLResult result = DB.World.Query("SELECT id, Type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
+			SQLResult result = DB.World.Query("SELECT Id, Type, _data, result, address, length, str, comment FROM warden_checks ORDER BY Id ASC");
 
 			if (result.IsEmpty())
 			{
@@ -55,7 +55,7 @@ namespace Game
 
 				if (category == WardenCheckCategory.Max)
 				{
-					Log.outError(LogFilter.Sql, $"Warden check with id {id} lists check Type {checkType} in `warden_checks`, which is not supported. Skipped.");
+					Log.outError(LogFilter.Sql, $"Warden check with Id {id} lists check Type {checkType} in `warden_checks`, which is not supported. Skipped.");
 
 					continue;
 				}
@@ -63,7 +63,7 @@ namespace Game
 				if ((checkType == WardenCheckType.LuaEval) &&
 				    (id > 9999))
 				{
-					Log.outError(LogFilter.Sql, $"Warden Lua check with id {id} found in `warden_checks`. Lua checks may have four-digit IDs at most. Skipped.");
+					Log.outError(LogFilter.Sql, $"Warden Lua check with Id {id} found in `warden_checks`. Lua checks may have four-digit IDs at most. Skipped.");
 
 					continue;
 				}
@@ -109,7 +109,7 @@ namespace Game
 				{
 					if (wardenCheck.Str.Length > WARDEN_MAX_LUA_CHECK_LENGTH)
 					{
-						Log.outError(LogFilter.Sql, $"Found over-long Lua check for Warden check with id {id} in `warden_checks`. Max length is {WARDEN_MAX_LUA_CHECK_LENGTH}. Skipped.");
+						Log.outError(LogFilter.Sql, $"Found over-long Lua check for Warden check with Id {id} in `warden_checks`. Max length is {WARDEN_MAX_LUA_CHECK_LENGTH}. Skipped.");
 
 						continue;
 					}

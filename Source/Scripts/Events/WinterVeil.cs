@@ -119,7 +119,7 @@ namespace Scripts.Events.WinterVeil
 				float speed    = caster.GetSpeedRate(UnitMoveType.Run);
 
 				caster.RemoveAurasByType(AuraType.Mounted);
-				//5 different spells used depending on mounted speed and if mount can fly or not
+				//5 different spells used depending on mounted speed and if Mount can fly or not
 
 				if (flyspeed >= 4.1f)
 					// Flying Reindeer

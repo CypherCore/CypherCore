@@ -35,7 +35,7 @@ namespace Game.Scenarios
 			if (firstStep != null)
 				SetStep(firstStep);
 			else
-				Log.outError(LogFilter.Scenario, "Scenario.Scenario: Could not launch Scenario (id: {0}), found no valid scenario step", _data.Entry.Id);
+				Log.outError(LogFilter.Scenario, "Scenario.Scenario: Could not launch Scenario (Id: {0}), found no valid scenario step", _data.Entry.Id);
 		}
 
 		~Scenario()
@@ -93,7 +93,7 @@ namespace Game.Scenarios
 			if (IsComplete())
 				CompleteScenario();
 			else
-				Log.outError(LogFilter.Scenario, "Scenario.CompleteStep: Scenario (id: {0}, step: {1}) was completed, but could not determine new step, or validate scenario completion.", step.ScenarioID, step.Id);
+				Log.outError(LogFilter.Scenario, "Scenario.CompleteStep: Scenario (Id: {0}, step: {1}) was completed, but could not determine new step, or validate scenario completion.", step.ScenarioID, step.Id);
 		}
 
 		public virtual void CompleteScenario()

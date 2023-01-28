@@ -19,25 +19,84 @@ using Game.Spells;
 
 namespace Game.Entities
 {
-	public abstract class WorldObject : WorldLocation, IDisposable
+    public abstract class WorldObject : WorldLocation, IDisposable
 	{
-		public WorldObject(bool isWorldObject)
+
+        #region Fields
+
+        public TypeMask ObjectTypeMask { get; set; }
+        protected TypeId ObjectTypeId { get; set; }
+        protected CreateObjectBits UpdateFlag;
+        private ObjectGuid _guid;
+        private bool _isNewObject;
+        private bool _isDestroyedObject;
+
+        public UpdateFieldHolder Values { get; set; }
+        public ObjectFieldData ObjectData { get; set; }
+
+        public uint LastUsedScriptID { get; set; }
+
+        private bool _objectUpdated;
+
+        private uint _zoneId;
+        private uint _areaId;
+        private float _staticFloorZ;
+        private bool _outdoors;
+        private ZLiquidStatus _liquidStatus;
+
+        // Event handler
+        public EventSystem Events = new();
+
+        public MovementInfo MovementInfo { get; set; }
+        private string _name;
+        protected bool IsActive;
+        private bool _isFarVisible;
+        private float? _visibilityDistanceOverride;
+        private bool _isWorldObject;
+        public ZoneScript ZoneScript { get; set; }
+
+        private ITransport _transport;
+        private Map _currMap;
+        public uint InstanceId { get; set; }
+        private PhaseShift _phaseShift = new();
+        private PhaseShift _suppressedPhaseShift = new(); // contains phases for current area but not applied due to conditions
+        private int _dbPhase;
+        public bool IsInWorld { get; set; }
+
+        private NotifyFlags _notifyflags;
+
+        private ObjectGuid _privateObjectOwner;
+
+        private SmoothPhasing _smoothPhasing;
+
+        public FlaggedArray32<StealthType> Stealth { get; set; } = new(2);
+        public FlaggedArray32<StealthType> StealthDetect { get; set; } = new(2);
+
+        public FlaggedArray64<InvisibilityType> Invisibility { get; set; } = new((int)InvisibilityType.Max);
+        public FlaggedArray64<InvisibilityType> InvisibilityDetect { get; set; } = new((int)InvisibilityType.Max);
+
+        public FlaggedArray32<ServerSideVisibilityType> ServerSideVisibility { get; set; } = new(2);
+        public FlaggedArray32<ServerSideVisibilityType> ServerSideVisibilityDetect { get; set; } = new(2);
+
+        #endregion
+
+        public WorldObject(bool isWorldObject)
 		{
 			_name          = "";
 			_isWorldObject = isWorldObject;
 
-			_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
-			_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
+			ServerSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
+			ServerSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
 			ObjectTypeId   = TypeId.Object;
 			ObjectTypeMask = TypeMask.Object;
 
-			_values = new UpdateFieldHolder(this);
+			Values = new UpdateFieldHolder(this);
 
-			_movementInfo = new MovementInfo();
-			_updateFlag.Clear();
+			MovementInfo = new MovementInfo();
+			UpdateFlag.Clear();
 
-			_objectData = new ObjectFieldData();
+			ObjectData = new ObjectFieldData();
 
 			_staticFloorZ = MapConst.VMAPInvalidHeightValue;
 		}
@@ -132,7 +191,7 @@ namespace Game.Entities
 
 			UpdateType       updateType     = _isNewObject ? UpdateType.CreateObject2 : UpdateType.CreateObject;
 			TypeId           tempObjectType = ObjectTypeId;
-			CreateObjectBits flags          = _updateFlag;
+			CreateObjectBits flags          = UpdateFlag;
 
 			if (target == this)
 			{
@@ -142,7 +201,7 @@ namespace Game.Entities
 			}
 
 			if (!flags.MovementUpdate &&
-			    !_movementInfo.transport.guid.IsEmpty())
+			    !MovementInfo.Transport.Guid.IsEmpty())
 				flags.MovementTransport = true;
 
 			if (GetAIAnimKitId() != 0 ||
@@ -271,10 +330,10 @@ namespace Game.Entities
 			{
 				Unit unit             = ToUnit();
 				bool HasFallDirection = unit.HasUnitMovementFlag(MovementFlag.Falling);
-				bool HasFall          = HasFallDirection || unit._movementInfo.jump.fallTime != 0;
+				bool HasFall          = HasFallDirection || unit.MovementInfo.Jump.FallTime != 0;
 				bool HasSpline        = unit.IsSplineEnabled();
-				bool HasInertia       = unit._movementInfo.inertia.HasValue;
-				bool HasAdvFlying     = unit._movementInfo.advFlying.HasValue;
+				bool HasInertia       = unit.MovementInfo.Inertia.HasValue;
+				bool HasAdvFlying     = unit.MovementInfo.AdvFlying.HasValue;
 
 				data.WritePackedGuid(GetGUID()); // MoverGUID
 
@@ -282,54 +341,54 @@ namespace Game.Entities
 				data.WriteUInt32((uint)unit.GetUnitMovementFlags2());
 				data.WriteUInt32((uint)unit.GetExtraUnitMovementFlags2());
 
-				data.WriteUInt32(unit._movementInfo.Time); // MoveTime
+				data.WriteUInt32(unit.MovementInfo.Time); // MoveTime
 				data.WriteFloat(unit.GetPositionX());
 				data.WriteFloat(unit.GetPositionY());
 				data.WriteFloat(unit.GetPositionZ());
 				data.WriteFloat(unit.GetOrientation());
 
-				data.WriteFloat(unit._movementInfo.Pitch);                // Pitch
-				data.WriteFloat(unit._movementInfo.stepUpStartElevation); // StepUpStartElevation
+				data.WriteFloat(unit.MovementInfo.Pitch);                // Pitch
+				data.WriteFloat(unit.MovementInfo.stepUpStartElevation); // StepUpStartElevation
 
 				data.WriteUInt32(0); // RemoveForcesIDs.size()
 				data.WriteUInt32(0); // MoveIndex
 
 				//for (public uint i = 0; i < RemoveForcesIDs.Count; ++i)
-				//    *data << ObjectGuid(RemoveForcesIDs);
+				//    *_data << ObjectGuid(RemoveForcesIDs);
 
-				data.WriteBit(!unit._movementInfo.transport.guid.IsEmpty()); // HasTransport
+				data.WriteBit(!unit.MovementInfo.Transport.Guid.IsEmpty()); // HasTransport
 				data.WriteBit(HasFall);                                      // HasFall
 				data.WriteBit(HasSpline);                                    // HasSpline - marks that the unit uses spline movement
 				data.WriteBit(false);                                        // HeightChangeFailed
 				data.WriteBit(false);                                        // RemoteTimeValid
 				data.WriteBit(HasInertia);                                   // HasInertia
 
-				if (!unit._movementInfo.transport.guid.IsEmpty())
-					MovementExtensions.WriteTransportInfo(data, unit._movementInfo.transport);
+				if (!unit.MovementInfo.Transport.Guid.IsEmpty())
+					MovementExtensions.WriteTransportInfo(data, unit.MovementInfo.Transport);
 
 				if (HasInertia)
 				{
-					data.WriteInt32(unit._movementInfo.inertia.Value.id);
-					data.WriteXYZ(unit._movementInfo.inertia.Value.force);
-					data.WriteUInt32(unit._movementInfo.inertia.Value.lifetime);
+					data.WriteInt32(unit.MovementInfo.Inertia.Value.Id);
+					data.WriteXYZ(unit.MovementInfo.Inertia.Value.Force);
+					data.WriteUInt32(unit.MovementInfo.Inertia.Value.Lifetime);
 				}
 
 				if (HasAdvFlying)
 				{
-					data.WriteFloat(unit._movementInfo.advFlying.Value.forwardVelocity);
-					data.WriteFloat(unit._movementInfo.advFlying.Value.upVelocity);
+					data.WriteFloat(unit.MovementInfo.AdvFlying.Value.ForwardVelocity);
+					data.WriteFloat(unit.MovementInfo.AdvFlying.Value.UpVelocity);
 				}
 
 				if (HasFall)
 				{
-					data.WriteUInt32(unit._movementInfo.jump.fallTime); // Time
-					data.WriteFloat(unit._movementInfo.jump.zspeed);    // JumpVelocity
+					data.WriteUInt32(unit.MovementInfo.Jump.FallTime); // Time
+					data.WriteFloat(unit.MovementInfo.Jump.Zspeed);    // JumpVelocity
 
 					if (data.WriteBit(HasFallDirection))
 					{
-						data.WriteFloat(unit._movementInfo.jump.sinAngle); // Direction
-						data.WriteFloat(unit._movementInfo.jump.cosAngle);
-						data.WriteFloat(unit._movementInfo.jump.xyspeed); // Speed
+						data.WriteFloat(unit.MovementInfo.Jump.SinAngle); // Direction
+						data.WriteFloat(unit.MovementInfo.Jump.CosAngle);
+						data.WriteFloat(unit.MovementInfo.Jump.XYspeed); // Speed
 					}
 				}
 
@@ -381,7 +440,7 @@ namespace Game.Entities
 					foreach (MovementForce force in movementForces.GetForces())
 						MovementExtensions.WriteMovementForceWithDirection(force, data, unit);
 
-				// HasMovementSpline - marks that spline data is present in packet
+				// HasMovementSpline - marks that spline _data is present in packet
 				if (HasSpline)
 					MovementExtensions.WriteCreateObjectSplineDataBlock(unit.MoveSpline, data);
 			}
@@ -428,7 +487,7 @@ namespace Game.Entities
 			if (flags.MovementTransport)
 			{
 				WorldObject self = this;
-				MovementExtensions.WriteTransportInfo(data, self._movementInfo.transport);
+				MovementExtensions.WriteTransportInfo(data, self.MovementInfo.Transport);
 			}
 
 			if (flags.AreaTrigger)
@@ -575,7 +634,7 @@ namespace Game.Entities
 					}
 
 				//if (hasMovementScript)
-				//    *data << *areaTrigger.GetMovementScript(); // AreaTriggerMovementScriptInfo
+				//    *_data << *areaTrigger.GetMovementScript(); // AreaTriggerMovementScriptInfo
 
 				if (hasOrbit)
 					areaTrigger.GetCircularMovementInfo().Write(data);
@@ -619,105 +678,105 @@ namespace Game.Entities
 
 				//    if (HasLocalScriptData)
 				//    {
-				//        data.WriteBits(Data.length(), 7);
-				//        data.FlushBits();
-				//        data.WriteString(Data);
+				//        _data.WriteBits(Data.length(), 7);
+				//        _data.FlushBits();
+				//        _data.WriteString(Data);
 				//    }
 
 				//    if (HasPetBattleFullUpdate)
 				//    {
 				//        for (std::size_t i = 0; i < 2; ++i)
 				//        {
-				//            *data << ObjectGuid(Players[i].CharacterID);
-				//            *data << int32(Players[i].TrapAbilityID);
-				//            *data << int32(Players[i].TrapStatus);
-				//            *data << uint16(Players[i].RoundTimeSecs);
-				//            *data << int8(Players[i].FrontPet);
-				//            *data << uint8(Players[i].InputFlags);
+				//            *_data << ObjectGuid(Players[i].CharacterID);
+				//            *_data << int32(Players[i].TrapAbilityID);
+				//            *_data << int32(Players[i].TrapStatus);
+				//            *_data << uint16(Players[i].RoundTimeSecs);
+				//            *_data << int8(Players[i].FrontPet);
+				//            *_data << uint8(Players[i].InputFlags);
 
-				//            data.WriteBits(Players[i].Pets.size(), 2);
-				//            data.FlushBits();
+				//            _data.WriteBits(Players[i].Pets.size(), 2);
+				//            _data.FlushBits();
 				//            for (std::size_t j = 0; j < Players[i].Pets.size(); ++j)
 				//            {
-				//                *data << ObjectGuid(Players[i].Pets[j].BattlePetGUID);
-				//                *data << int32(Players[i].Pets[j].SpeciesID);
-				//                *data << int32(Players[i].Pets[j].CreatureID);
-				//                *data << int32(Players[i].Pets[j].DisplayID);
-				//                *data << int16(Players[i].Pets[j].Level);
-				//                *data << int16(Players[i].Pets[j].Xp);
-				//                *data << int32(Players[i].Pets[j].CurHealth);
-				//                *data << int32(Players[i].Pets[j].MaxHealth);
-				//                *data << int32(Players[i].Pets[j].Power);
-				//                *data << int32(Players[i].Pets[j].Speed);
-				//                *data << int32(Players[i].Pets[j].NpcTeamMemberID);
-				//                *data << uint16(Players[i].Pets[j].BreedQuality);
-				//                *data << uint16(Players[i].Pets[j].StatusFlags);
-				//                *data << int8(Players[i].Pets[j].Slot);
+				//                *_data << ObjectGuid(Players[i].Pets[j].BattlePetGUID);
+				//                *_data << int32(Players[i].Pets[j].SpeciesID);
+				//                *_data << int32(Players[i].Pets[j].CreatureID);
+				//                *_data << int32(Players[i].Pets[j].DisplayID);
+				//                *_data << int16(Players[i].Pets[j].Level);
+				//                *_data << int16(Players[i].Pets[j].Xp);
+				//                *_data << int32(Players[i].Pets[j].CurHealth);
+				//                *_data << int32(Players[i].Pets[j].MaxHealth);
+				//                *_data << int32(Players[i].Pets[j].Power);
+				//                *_data << int32(Players[i].Pets[j].Speed);
+				//                *_data << int32(Players[i].Pets[j].NpcTeamMemberID);
+				//                *_data << uint16(Players[i].Pets[j].BreedQuality);
+				//                *_data << uint16(Players[i].Pets[j].StatusFlags);
+				//                *_data << int8(Players[i].Pets[j].Slot);
 
-				//                *data << uint(Players[i].Pets[j].Abilities.size());
-				//                *data << uint(Players[i].Pets[j].Auras.size());
-				//                *data << uint(Players[i].Pets[j].States.size());
+				//                *_data << uint(Players[i].Pets[j].Abilities.size());
+				//                *_data << uint(Players[i].Pets[j].Auras.size());
+				//                *_data << uint(Players[i].Pets[j].States.size());
 				//                for (std::size_t k = 0; k < Players[i].Pets[j].Abilities.size(); ++k)
 				//                {
-				//                    *data << int32(Players[i].Pets[j].Abilities[k].AbilityID);
-				//                    *data << int16(Players[i].Pets[j].Abilities[k].CooldownRemaining);
-				//                    *data << int16(Players[i].Pets[j].Abilities[k].LockdownRemaining);
-				//                    *data << int8(Players[i].Pets[j].Abilities[k].AbilityIndex);
-				//                    *data << uint8(Players[i].Pets[j].Abilities[k].Pboid);
+				//                    *_data << int32(Players[i].Pets[j].Abilities[k].AbilityID);
+				//                    *_data << int16(Players[i].Pets[j].Abilities[k].CooldownRemaining);
+				//                    *_data << int16(Players[i].Pets[j].Abilities[k].LockdownRemaining);
+				//                    *_data << int8(Players[i].Pets[j].Abilities[k].AbilityIndex);
+				//                    *_data << uint8(Players[i].Pets[j].Abilities[k].Pboid);
 				//                }
 
 				//                for (std::size_t k = 0; k < Players[i].Pets[j].Auras.size(); ++k)
 				//                {
-				//                    *data << int32(Players[i].Pets[j].Auras[k].AbilityID);
-				//                    *data << uint(Players[i].Pets[j].Auras[k].InstanceID);
-				//                    *data << int32(Players[i].Pets[j].Auras[k].RoundsRemaining);
-				//                    *data << int32(Players[i].Pets[j].Auras[k].CurrentRound);
-				//                    *data << uint8(Players[i].Pets[j].Auras[k].CasterPBOID);
+				//                    *_data << int32(Players[i].Pets[j].Auras[k].AbilityID);
+				//                    *_data << uint(Players[i].Pets[j].Auras[k].InstanceID);
+				//                    *_data << int32(Players[i].Pets[j].Auras[k].RoundsRemaining);
+				//                    *_data << int32(Players[i].Pets[j].Auras[k].CurrentRound);
+				//                    *_data << uint8(Players[i].Pets[j].Auras[k].CasterPBOID);
 				//                }
 
 				//                for (std::size_t k = 0; k < Players[i].Pets[j].States.size(); ++k)
 				//                {
-				//                    *data << uint(Players[i].Pets[j].States[k].StateID);
-				//                    *data << int32(Players[i].Pets[j].States[k].StateValue);
+				//                    *_data << uint(Players[i].Pets[j].States[k].StateID);
+				//                    *_data << int32(Players[i].Pets[j].States[k].StateValue);
 				//                }
 
-				//                data.WriteBits(Players[i].Pets[j].CustomName.length(), 7);
-				//                data.FlushBits();
-				//                data.WriteString(Players[i].Pets[j].CustomName);
+				//                _data.WriteBits(Players[i].Pets[j].CustomName.length(), 7);
+				//                _data.FlushBits();
+				//                _data.WriteString(Players[i].Pets[j].CustomName);
 				//            }
 				//        }
 
 				//        for (std::size_t i = 0; i < 3; ++i)
 				//        {
-				//            *data << uint(Enviros[j].Auras.size());
-				//            *data << uint(Enviros[j].States.size());
+				//            *_data << uint(Enviros[j].Auras.size());
+				//            *_data << uint(Enviros[j].States.size());
 				//            for (std::size_t j = 0; j < Enviros[j].Auras.size(); ++j)
 				//            {
-				//                *data << int32(Enviros[j].Auras[j].AbilityID);
-				//                *data << uint(Enviros[j].Auras[j].InstanceID);
-				//                *data << int32(Enviros[j].Auras[j].RoundsRemaining);
-				//                *data << int32(Enviros[j].Auras[j].CurrentRound);
-				//                *data << uint8(Enviros[j].Auras[j].CasterPBOID);
+				//                *_data << int32(Enviros[j].Auras[j].AbilityID);
+				//                *_data << uint(Enviros[j].Auras[j].InstanceID);
+				//                *_data << int32(Enviros[j].Auras[j].RoundsRemaining);
+				//                *_data << int32(Enviros[j].Auras[j].CurrentRound);
+				//                *_data << uint8(Enviros[j].Auras[j].CasterPBOID);
 				//            }
 
 				//            for (std::size_t j = 0; j < Enviros[j].States.size(); ++j)
 				//            {
-				//                *data << uint(Enviros[i].States[j].StateID);
-				//                *data << int32(Enviros[i].States[j].StateValue);
+				//                *_data << uint(Enviros[i].States[j].StateID);
+				//                *_data << int32(Enviros[i].States[j].StateValue);
 				//            }
 				//        }
 
-				//        *data << uint16(WaitingForFrontPetsMaxSecs);
-				//        *data << uint16(PvpMaxRoundTime);
-				//        *data << int32(CurRound);
-				//        *data << uint(NpcCreatureID);
-				//        *data << uint(NpcDisplayID);
-				//        *data << int8(CurPetBattleState);
-				//        *data << uint8(ForfeitPenalty);
-				//        *data << ObjectGuid(InitialWildPetGUID);
-				//        data.WriteBit(IsPVP);
-				//        data.WriteBit(CanAwardXP);
-				//        data.FlushBits();
+				//        *_data << uint16(WaitingForFrontPetsMaxSecs);
+				//        *_data << uint16(PvpMaxRoundTime);
+				//        *_data << int32(CurRound);
+				//        *_data << uint(NpcCreatureID);
+				//        *_data << uint(NpcDisplayID);
+				//        *_data << int8(CurPetBattleState);
+				//        *_data << uint8(ForfeitPenalty);
+				//        *_data << ObjectGuid(InitialWildPetGUID);
+				//        _data.WriteBit(IsPVP);
+				//        _data.WriteBit(CanAwardXP);
+				//        _data.FlushBits();
 				//    }
 			}
 
@@ -796,7 +855,7 @@ namespace Game.Entities
 
 		public virtual void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_objectData);
+			Values.ClearChangesMask(ObjectData);
 
 			if (_objectUpdated)
 			{
@@ -973,7 +1032,7 @@ namespace Game.Entities
 				return true;
 
 			if (IsTypeId(TypeId.Unit) &&
-			    ToCreature()._isTempWorldObject)
+			    ToCreature().IsTempWorldObject)
 				return true;
 
 			return false;
@@ -989,13 +1048,13 @@ namespace Game.Entities
 
 		public void SetActive(bool on)
 		{
-			if (_isActive == on)
+			if (IsActive == on)
 				return;
 
 			if (IsTypeId(TypeId.Player))
 				return;
 
-			_isActive = on;
+			IsActive = on;
 
 			if (on && !IsInWorld)
 				return;
@@ -1135,7 +1194,7 @@ namespace Game.Entities
 			Creature thisCreature = ToCreature();
 
 			if (thisCreature != null)
-				return thisCreature._SightDistance;
+				return thisCreature.SightDistance;
 
 			return 0.0f;
 		}
@@ -1174,7 +1233,7 @@ namespace Game.Entities
 				}
 				else if (IsCreature())
 				{
-					return ToCreature()._SightDistance;
+					return ToCreature().SightDistance;
 				}
 				else
 				{
@@ -1261,7 +1320,7 @@ namespace Game.Entities
 				{
 					if (thisPlayer.IsDead() &&
 					    thisPlayer.GetHealth() > 0 && // Cheap way to check for ghost State
-					    !Convert.ToBoolean(obj._serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & _serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & (uint)GhostVisibilityType.Ghost))
+					    !Convert.ToBoolean(obj.ServerSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & ServerSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & (uint)GhostVisibilityType.Ghost))
 					{
 						Corpse corpse = thisPlayer.GetCorpse();
 
@@ -1303,20 +1362,20 @@ namespace Game.Entities
 			}
 
 			// GM visibility off or hidden NPC
-			if (obj._serverSideVisibility.GetValue(ServerSideVisibilityType.GM) == 0)
+			if (obj.ServerSideVisibility.GetValue(ServerSideVisibilityType.GM) == 0)
 			{
 				// Stop checking other things for GMs
-				if (_serverSideVisibilityDetect.GetValue(ServerSideVisibilityType.GM) != 0)
+				if (ServerSideVisibilityDetect.GetValue(ServerSideVisibilityType.GM) != 0)
 					return true;
 			}
 			else
 			{
-				return _serverSideVisibilityDetect.GetValue(ServerSideVisibilityType.GM) >= obj._serverSideVisibility.GetValue(ServerSideVisibilityType.GM);
+				return ServerSideVisibilityDetect.GetValue(ServerSideVisibilityType.GM) >= obj.ServerSideVisibility.GetValue(ServerSideVisibilityType.GM);
 			}
 
 			// Ghost players, Spirit Healers, and some other NPCs
 			if (!corpseVisibility &&
-			    !Convert.ToBoolean(obj._serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & _serverSideVisibilityDetect.GetValue(ServerSideVisibilityType.Ghost)))
+			    !Convert.ToBoolean(obj.ServerSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & ServerSideVisibilityDetect.GetValue(ServerSideVisibilityType.Ghost)))
 			{
 				// Alive players can see dead players in some cases, but other objects can't do that
 				Player thisPlayer = ToPlayer();
@@ -1402,10 +1461,10 @@ namespace Game.Entities
 
 		private bool CanDetectInvisibilityOf(WorldObject obj)
 		{
-			ulong mask = obj._invisibility.GetFlags() & _invisibilityDetect.GetFlags();
+			ulong mask = obj.Invisibility.GetFlags() & InvisibilityDetect.GetFlags();
 
 			// Check for not detected types
-			if (mask != obj._invisibility.GetFlags())
+			if (mask != obj.Invisibility.GetFlags())
 				return false;
 
 			for (int i = 0; i < (int)InvisibilityType.Max; ++i)
@@ -1413,8 +1472,8 @@ namespace Game.Entities
 				if (!Convert.ToBoolean(mask & (1ul << i)))
 					continue;
 
-				int objInvisibilityValue       = obj._invisibility.GetValue((InvisibilityType)i);
-				int ownInvisibilityDetectValue = _invisibilityDetect.GetValue((InvisibilityType)i);
+				int objInvisibilityValue       = obj.Invisibility.GetValue((InvisibilityType)i);
+				int ownInvisibilityDetectValue = InvisibilityDetect.GetValue((InvisibilityType)i);
 
 				// Too low value to detect
 				if (ownInvisibilityDetectValue < objInvisibilityValue)
@@ -1430,7 +1489,7 @@ namespace Game.Entities
 			//   and it is also used in the range calculation.
 			// One stealth point increases the visibility range by 0.3 yard.
 
-			if (obj._stealth.GetFlags() == 0)
+			if (obj.Stealth.GetFlags() == 0)
 				return true;
 
 			float distance    = GetExactDist(obj);
@@ -1459,7 +1518,7 @@ namespace Game.Entities
 
 			for (int i = 0; i < (int)StealthType.Max; ++i)
 			{
-				if (!Convert.ToBoolean(obj._stealth.GetFlags() & (1 << i)))
+				if (!Convert.ToBoolean(obj.Stealth.GetFlags() & (1 << i)))
 					continue;
 
 				if (unit != null &&
@@ -1475,7 +1534,7 @@ namespace Game.Entities
 				detectionValue += (int)(GetLevelForTarget(obj) - 1) * 5;
 
 				// Apply modifiers
-				detectionValue += _stealthDetect.GetValue((StealthType)i);
+				detectionValue += StealthDetect.GetValue((StealthType)i);
 
 				if (go != null)
 				{
@@ -1485,7 +1544,7 @@ namespace Game.Entities
 						detectionValue -= (int)(owner.GetLevelForTarget(this) - 1) * 5;
 				}
 
-				detectionValue -= obj._stealth.GetValue((StealthType)i);
+				detectionValue -= obj.Stealth.GetValue((StealthType)i);
 
 				// Calculate max distance
 				float visibilityRange = detectionValue * 0.3f + combatReach;
@@ -1506,7 +1565,7 @@ namespace Game.Entities
 				if (checkAlert &&
 				    unit &&
 				    unit.ToCreature() &&
-				    visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature()._CombatDistance)
+				    visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature().CombatDistance)
 					return false;
 
 				if (distance > visibilityRange)
@@ -1559,7 +1618,7 @@ namespace Game.Entities
 
 			_currMap = map;
 			SetMapId(map.GetId());
-			instanceId = map.GetInstanceId();
+			InstanceId = map.GetInstanceId();
 
 			if (IsWorldObject())
 				_currMap.AddWorldObject(this);
@@ -1630,7 +1689,7 @@ namespace Game.Entities
 
 		public void SetZoneScript()
 		{
-			_zoneScript = FindZoneScript();
+			ZoneScript = FindZoneScript();
 		}
 
 		public Scenario GetScenario()
@@ -2063,11 +2122,11 @@ namespace Game.Entities
 
 		public int ModSpellDuration(SpellInfo spellInfo, WorldObject target, int duration, bool positive, uint effectMask)
 		{
-			// don't mod permanent auras duration
+			// don't mod permanent Auras duration
 			if (duration < 0)
 				return duration;
 
-			// some auras are not affected by duration modifiers
+			// some Auras are not affected by duration modifiers
 			if (spellInfo.HasAttribute(SpellAttr7.IgnoreDurationMods))
 				return duration;
 
@@ -2155,10 +2214,10 @@ namespace Game.Entities
 				castTime = 0;
 			else if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.IgnoreCasterModifiers)) &&
 			         ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
-				castTime = unitCaster.CanInstantCast() ? 0 : (int)(castTime * unitCaster._unitData.ModCastingSpeed);
+				castTime = unitCaster.CanInstantCast() ? 0 : (int)(castTime * unitCaster.UnitData.ModCastingSpeed);
 			else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) &&
 			         !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
-				castTime = (int)(castTime * unitCaster._modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
+				castTime = (int)(castTime * unitCaster.ModAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
 			else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) &&
 			         unitCaster.HasAura(67556)) // cooking with Chef Hat.
 				castTime = 500;
@@ -2187,10 +2246,10 @@ namespace Game.Entities
 
 			if (!(spellInfo.HasAttribute(SpellAttr0.IsAbility) || spellInfo.HasAttribute(SpellAttr0.IsTradeskill) || spellInfo.HasAttribute(SpellAttr3.IgnoreCasterModifiers)) &&
 			    ((IsPlayer() && spellInfo.SpellFamilyName != 0) || IsCreature()))
-				duration = (int)(duration * unitCaster._unitData.ModCastingSpeed);
+				duration = (int)(duration * unitCaster.UnitData.ModCastingSpeed);
 			else if (spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) &&
 			         !spellInfo.HasAttribute(SpellAttr2.AutoRepeat))
-				duration = (int)(duration * unitCaster._modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
+				duration = (int)(duration * unitCaster.ModAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
 		}
 
 		public virtual float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
@@ -2205,7 +2264,7 @@ namespace Game.Entities
 
 		private SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spellInfo)
 		{
-			// Can`t miss on dead target (on skinning for example)
+			// Can`t miss on dead Target (on skinning for example)
 			if (!victim.IsAlive() &&
 			    !victim.IsPlayer())
 				return SpellMissInfo.None;
@@ -2233,7 +2292,7 @@ namespace Game.Entities
 				int leveldif          = (int)(victim.GetLevelForTarget(this) - thisLevel);
 				int levelBasedHitDiff = leveldif;
 
-				// Base hit chance from attacker and victim levels
+				// Base hit chance from Attacker and victim levels
 				int modHitChance = 100;
 
 				if (levelBasedHitDiff >= 0)
@@ -2263,13 +2322,13 @@ namespace Game.Entities
 				if (modOwner != null)
 					modOwner.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref modHitChance);
 
-				// Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore target's avoidance effects
+				// Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore Target's avoidance effects
 				if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
-					// Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
+					// Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE Auras
 					modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
 
 				float HitChance = modHitChance;
-				// Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
+				// Increase hit chance from Attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and Attacker ratings
 				Unit unit = ToUnit();
 
 				if (unit != null)
@@ -2288,7 +2347,7 @@ namespace Game.Entities
 			    rand < tmp)
 				return SpellMissInfo.Miss;
 
-			// Chance resist mechanic (select max value from every mechanic spell effect)
+			// Chance Resist mechanic (select max value from every mechanic spell effect)
 			int resist_chance = victim.GetMechanicResistChance(spellInfo) * 100;
 
 			// Roll chance
@@ -2324,7 +2383,7 @@ namespace Game.Entities
 			if (victim.IsImmunedToSpell(spellInfo, this))
 				return SpellMissInfo.Immune;
 
-			// Damage immunity is only checked if the spell has damage effects, this immunity must not prevent aura apply
+			// Damage immunity is only checked if the spell has Damage effects, this immunity must not prevent aura apply
 			// returns SPELL_MISS_IMMUNE in that case, for other spells, the SMSG_SPELL_GO must show hit
 			if (spellInfo.HasOnlyDamageEffects() &&
 			    victim.IsImmunedToDamage(spellInfo))
@@ -2390,20 +2449,20 @@ namespace Game.Entities
 				switch (GetTypeId())
 				{
 					case TypeId.Player:
-						Log.outError(LogFilter.Unit, $"Player {ToPlayer().GetName()} has invalid faction (faction template id) #{factionId}");
+						Log.outError(LogFilter.Unit, $"Player {ToPlayer().GetName()} has invalid faction (faction template Id) #{factionId}");
 
 						break;
 					case TypeId.Unit:
-						Log.outError(LogFilter.Unit, $"Creature (template id: {ToCreature().GetCreatureTemplate().Entry}) has invalid faction (faction template Id) #{factionId}");
+						Log.outError(LogFilter.Unit, $"Creature (template Id: {ToCreature().GetCreatureTemplate().Entry}) has invalid faction (faction template Id) #{factionId}");
 
 						break;
 					case TypeId.GameObject:
-						if (factionId != 0) // Gameobjects may have faction template id = 0
-							Log.outError(LogFilter.Unit, $"GameObject (template id: {ToGameObject().GetGoInfo().entry}) has invalid faction (faction template Id) #{factionId}");
+						if (factionId != 0) // Gameobjects may have faction template Id = 0
+							Log.outError(LogFilter.Unit, $"GameObject (template Id: {ToGameObject().GetGoInfo().entry}) has invalid faction (faction template Id) #{factionId}");
 
 						break;
 					default:
-						Log.outError(LogFilter.Unit, $"Object (name={GetName()}, Type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
+						Log.outError(LogFilter.Unit, $"Object (Name={GetName()}, Type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
 
 						break;
 				}
@@ -2495,7 +2554,7 @@ namespace Game.Entities
 						if (selfPlayerOwner.IsInRaidWith(targetPlayerOwner))
 							return ReputationRank.Friendly; // return true to allow config option AllowTwoSide.Interaction.Group to work
 						// however client seems to allow mixed group parties, because in 13850 client it works like:
-						// return GetFactionReactionTo(GetFactionTemplateEntry(), target);
+						// return GetFactionReactionTo(GetFactionTemplateEntry(), Target);
 					}
 
 					// check FFA_PVP
@@ -2521,7 +2580,7 @@ namespace Game.Entities
 								if (targetFactionEntry != null)
 									if (targetFactionEntry.CanHaveReputation())
 									{
-										// check contested flags
+										// check contested Flags
 										if ((targetFactionTemplateEntry.Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0 &&
 										    selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
 											return ReputationRank.Hostile;
@@ -2556,7 +2615,7 @@ namespace Game.Entities
 
 			if (targetPlayerOwner != null)
 			{
-				// check contested flags
+				// check contested Flags
 				if ((factionTemplateEntry.Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0 &&
 				    targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
 					return ReputationRank.Hostile;
@@ -2686,7 +2745,7 @@ namespace Game.Entities
 
 			if (targets.Targets == null)
 			{
-				Log.outError(LogFilter.Unit, $"CastSpell: Invalid target passed to spell cast {spellId} by {GetGUID()}");
+				Log.outError(LogFilter.Unit, $"CastSpell: Invalid Target passed to spell cast {spellId} by {GetGUID()}");
 
 				return SpellCastResult.BadTargets;
 			}
@@ -2847,7 +2906,7 @@ namespace Game.Entities
 		{
 			Cypher.Assert(target != null);
 
-			// some positive spells can be casted at hostile target
+			// some positive spells can be casted at hostile Target
 			bool isPositiveSpell = bySpell != null && bySpell.IsPositive();
 
 			// can't attack self (spells can, attribute check)
@@ -2899,7 +2958,7 @@ namespace Game.Entities
 				if (playerAttacker.HasPlayerFlag(PlayerFlags.Uber))
 					return false;
 
-			// check flags
+			// check Flags
 			if (unitTarget != null &&
 			    unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1))
 				return false;
@@ -2910,7 +2969,7 @@ namespace Game.Entities
 			if (go?.GetGoType() == GameObjectTypes.Trap)
 				unitOrOwner = go.GetOwner();
 
-			// ignore immunity flags when assisting
+			// ignore immunity Flags when assisting
 			if (unitOrOwner != null &&
 			    unitTarget != null &&
 			    !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.CanAssistImmunePc)))
@@ -3006,7 +3065,7 @@ namespace Game.Entities
 				    playerAffectingAttacker.Duel.State == DuelState.InProgress)
 					return true;
 
-			// PvP case - can't attack when attacker or target are in sanctuary
+			// PvP case - can't attack when Attacker or Target are in sanctuary
 			// however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
 			if (unitTarget != null &&
 			    unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) &&
@@ -3038,7 +3097,7 @@ namespace Game.Entities
 		{
 			Cypher.Assert(target);
 
-			// some negative spells can be casted at friendly target
+			// some negative spells can be casted at friendly Target
 			bool isNegativeSpell = bySpell != null && !bySpell.IsPositive();
 
 			// can assist to self
@@ -3091,7 +3150,7 @@ namespace Game.Entities
 			    unitTarget.HasUnitFlag(UnitFlags.Uninteractible))
 				return false;
 
-			// check flags for negative spells
+			// check Flags for negative spells
 			if (isNegativeSpell &&
 			    unitTarget != null &&
 			    unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.OnTaxi | UnitFlags.NotAttackable1))
@@ -3153,8 +3212,8 @@ namespace Game.Entities
 							return false;
 				}
 			}
-			// PvC case - player can assist creature only if has specific Type flags
-			// !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
+			// PvC case - player can assist creature only if has specific Type Flags
+			// !Target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
 			else if (unit != null &&
 			         unit.HasUnitFlag(UnitFlags.PlayerControlled))
 			{
@@ -3191,7 +3250,7 @@ namespace Game.Entities
 					if (spellInfo.CheckExplicitTarget(this, magnet) == SpellCastResult.SpellCastOk &&
 					    IsValidAttackTarget(magnet, spellInfo))
 					{
-						/// @todo handle this charge drop by proc in cast phase on explicit target
+						/// @todo handle this charge drop by proc in cast phase on explicit Target
 						if (spellInfo.HasHitDelay())
 						{
 							// Set up missile speed based delay
@@ -3422,7 +3481,7 @@ namespace Game.Entities
 
 		public uint GetInstanceId()
 		{
-			return instanceId;
+			return InstanceId;
 		}
 
 		public virtual ushort GetAIAnimKitId()
@@ -3473,22 +3532,22 @@ namespace Game.Entities
 
 		public uint GetEntry()
 		{
-			return _objectData.EntryId;
+			return ObjectData.EntryId;
 		}
 
 		public void SetEntry(uint entry)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_objectData).ModifyValue(_objectData.EntryId), entry);
+			SetUpdateFieldValue(Values.ModifyValue(ObjectData).ModifyValue(ObjectData.EntryId), entry);
 		}
 
 		public float GetObjectScale()
 		{
-			return _objectData.Scale;
+			return ObjectData.Scale;
 		}
 
 		public virtual void SetObjectScale(float scale)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_objectData).ModifyValue(_objectData.Scale), scale);
+			SetUpdateFieldValue(Values.ModifyValue(ObjectData).ModifyValue(ObjectData.Scale), scale);
 		}
 
 		public TypeId GetTypeId()
@@ -3632,7 +3691,7 @@ namespace Game.Entities
 
 		public ZoneScript GetZoneScript()
 		{
-			return _zoneScript;
+			return ZoneScript;
 		}
 
 		public void AddToNotify(NotifyFlags f)
@@ -3657,7 +3716,7 @@ namespace Game.Entities
 
 		public bool IsActiveObject()
 		{
-			return _isActive;
+			return IsActive;
 		}
 
 		public bool IsPermanentWorldObject()
@@ -3677,37 +3736,37 @@ namespace Game.Entities
 
 		public float GetTransOffsetX()
 		{
-			return _movementInfo.transport.pos.GetPositionX();
+			return MovementInfo.Transport.Pos.GetPositionX();
 		}
 
 		public float GetTransOffsetY()
 		{
-			return _movementInfo.transport.pos.GetPositionY();
+			return MovementInfo.Transport.Pos.GetPositionY();
 		}
 
 		public float GetTransOffsetZ()
 		{
-			return _movementInfo.transport.pos.GetPositionZ();
+			return MovementInfo.Transport.Pos.GetPositionZ();
 		}
 
 		public float GetTransOffsetO()
 		{
-			return _movementInfo.transport.pos.GetOrientation();
+			return MovementInfo.Transport.Pos.GetOrientation();
 		}
 
 		private Position GetTransOffset()
 		{
-			return _movementInfo.transport.pos;
+			return MovementInfo.Transport.Pos;
 		}
 
 		public uint GetTransTime()
 		{
-			return _movementInfo.transport.time;
+			return MovementInfo.Transport.Time;
 		}
 
 		public sbyte GetTransSeat()
 		{
-			return _movementInfo.transport.seat;
+			return MovementInfo.Transport.Seat;
 		}
 
 		public virtual ObjectGuid GetTransGUID()
@@ -3822,8 +3881,8 @@ namespace Game.Entities
 			    obj.GetTransport() != null &&
 			    obj.GetTransport().GetTransportGUID() == GetTransport().GetTransportGUID())
 			{
-				thisOrTransport   = _movementInfo.transport.pos;
-				objOrObjTransport = obj._movementInfo.transport.pos;
+				thisOrTransport   = MovementInfo.Transport.Pos;
+				objOrObjTransport = obj.MovementInfo.Transport.Pos;
 			}
 
 
@@ -4085,13 +4144,13 @@ namespace Game.Entities
 			float new_dist = (float)RandomHelper.NextDouble() + (float)RandomHelper.NextDouble();
 			new_dist = distance * (new_dist > 1 ? new_dist - 2 : new_dist);
 
-			rand_x = (float)(pos.posX + new_dist * Math.Cos(angle));
-			rand_y = (float)(pos.posY + new_dist * Math.Sin(angle));
-			rand_z = pos.posZ;
+			rand_x = (float)(pos.X + new_dist * Math.Cos(angle));
+			rand_y = (float)(pos.Y + new_dist * Math.Sin(angle));
+			rand_z = pos.Z;
 
-			GridDefines.NormalizeMapCoord(ref rand_x);
-			GridDefines.NormalizeMapCoord(ref rand_y);
-			UpdateGroundPositionZ(rand_x, rand_y, ref rand_z); // update to LOS height if available
+            rand_x = GridDefines.NormalizeMapCoord(rand_x);
+            rand_y = GridDefines.NormalizeMapCoord(rand_y);
+            rand_z = UpdateGroundPositionZ(rand_x, rand_y, rand_z); // update to LOS height if available
 		}
 
 		public Position GetRandomPoint(Position srcPos, float distance)
@@ -4102,12 +4161,14 @@ namespace Game.Entities
 			return new Position(x, y, z, GetOrientation());
 		}
 
-		public void UpdateGroundPositionZ(float x, float y, ref float z)
+		public float UpdateGroundPositionZ(float x, float y, float z)
 		{
 			float newZ = GetMapHeight(x, y, z);
 
 			if (newZ > MapConst.InvalidHeight)
 				z = newZ + (IsUnit() ? ToUnit().GetHoverOffset() : 0.0f);
+
+			return z;
 		}
 
 		public void UpdateAllowedPositionZ(float x, float y, ref float z)
@@ -4210,8 +4271,8 @@ namespace Game.Entities
 			x = GetPositionX() + (effectiveReach + distance2d) * MathF.Cos(absAngle);
 			y = GetPositionY() + (effectiveReach + distance2d) * MathF.Sin(absAngle);
 
-			GridDefines.NormalizeMapCoord(ref x);
-			GridDefines.NormalizeMapCoord(ref y);
+			x = GridDefines.NormalizeMapCoord(x);
+			y = GridDefines.NormalizeMapCoord(y);
 		}
 
 		public void GetNearPoint(WorldObject searcher, out float x, out float y, out float z, float distance2d, float absAngle)
@@ -4289,11 +4350,11 @@ namespace Game.Entities
 		public void MovePosition(Position pos, float dist, float angle)
 		{
 			angle += GetOrientation();
-			float destx = pos.posX + dist * (float)Math.Cos(angle);
-			float desty = pos.posY + dist * (float)Math.Sin(angle);
+			float destx = pos.X + dist * (float)Math.Cos(angle);
+			float desty = pos.Y + dist * (float)Math.Sin(angle);
 
 			// Prevent invalid coordinates here, position is unchanged
-			if (!GridDefines.IsValidMapCoord(destx, desty, pos.posZ))
+			if (!GridDefines.IsValidMapCoord(destx, desty, pos.Z))
 			{
 				Log.outError(LogFilter.Server, "WorldObject.MovePosition invalid coordinates X: {0} and Y: {1} were passed!", destx, desty);
 
@@ -4301,20 +4362,20 @@ namespace Game.Entities
 			}
 
 			float ground = GetMapHeight(destx, desty, MapConst.MaxHeight);
-			float floor  = GetMapHeight(destx, desty, pos.posZ);
-			float destz  = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
+			float floor  = GetMapHeight(destx, desty, pos.Z);
+			float destz  = Math.Abs(ground - pos.Z) <= Math.Abs(floor - pos.Z) ? ground : floor;
 
 			float step = dist / 10.0f;
 
 			for (byte j = 0; j < 10; ++j)
 				// do not allow too big z changes
-				if (Math.Abs(pos.posZ - destz) > 6)
+				if (Math.Abs(pos.Z - destz) > 6)
 				{
 					destx  -= step * (float)Math.Cos(angle);
 					desty  -= step * (float)Math.Sin(angle);
 					ground =  GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
-					floor  =  GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
-					destz  =  Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
+					floor  =  GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.Z, true);
+					destz  =  Math.Abs(ground - pos.Z) <= Math.Abs(floor - pos.Z) ? ground : floor;
 				}
 				// we have correct destz now
 				else
@@ -4324,18 +4385,18 @@ namespace Game.Entities
 					break;
 				}
 
-			GridDefines.NormalizeMapCoord(ref pos.posX);
-			GridDefines.NormalizeMapCoord(ref pos.posY);
-			UpdateGroundPositionZ(pos.posX, pos.posY, ref pos.posZ);
+            pos.X = GridDefines.NormalizeMapCoord(pos.X);
+			pos.Y = GridDefines.NormalizeMapCoord(pos.Y);
+			pos.Z = UpdateGroundPositionZ(pos.X, pos.Y, pos.Z);
 			pos.SetOrientation(GetOrientation());
 		}
 
 		public void MovePositionToFirstCollision(Position pos, float dist, float angle)
 		{
 			angle += GetOrientation();
-			float destx = pos.posX + dist * (float)Math.Cos(angle);
-			float desty = pos.posY + dist * (float)Math.Sin(angle);
-			float destz = pos.posZ;
+			float destx = pos.X + dist * (float)Math.Cos(angle);
+			float desty = pos.Y + dist * (float)Math.Sin(angle);
+			float destz = pos.Z;
 
 			// Prevent invalid coordinates here, position is unchanged
 			if (!GridDefines.IsValidMapCoord(destx, desty))
@@ -4367,10 +4428,10 @@ namespace Game.Entities
 			// Unit is flying, check for potential collision via vmaps
 			if (path.GetPathType().HasFlag(PathType.NotUsingPath))
 			{
-				col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMapId(), GetMap().GetTerrain(), pos.posX, pos.posY),
-				                                     pos.posX,
-				                                     pos.posY,
-				                                     pos.posZ + halfHeight,
+				col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMapId(), GetMap().GetTerrain(), pos.X, pos.Y),
+				                                     pos.X,
+				                                     pos.Y,
+				                                     pos.Z + halfHeight,
 				                                     destx,
 				                                     desty,
 				                                     destz + halfHeight,
@@ -4386,12 +4447,12 @@ namespace Game.Entities
 				{
 					destx -= SharedConst.ContactDistance * MathF.Cos(angle);
 					desty -= SharedConst.ContactDistance * MathF.Sin(angle);
-					dist  =  MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
+					dist  =  MathF.Sqrt((pos.X - destx) * (pos.X - destx) + (pos.Y - desty) * (pos.Y - desty));
 				}
 			}
 
 			// check dynamic collision
-			col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
+			col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.X, pos.Y, pos.Z + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
 			destz -= halfHeight;
 
@@ -4400,12 +4461,12 @@ namespace Game.Entities
 			{
 				destx -= SharedConst.ContactDistance * (float)Math.Cos(angle);
 				desty -= SharedConst.ContactDistance * (float)Math.Sin(angle);
-				dist  =  (float)Math.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
+				dist  =  (float)Math.Sqrt((pos.X - destx) * (pos.X - destx) + (pos.Y - desty) * (pos.Y - desty));
 			}
 
 			float groundZ = MapConst.VMAPInvalidHeightValue;
-			GridDefines.NormalizeMapCoord(ref pos.posX);
-			GridDefines.NormalizeMapCoord(ref pos.posY);
+			pos.X = GridDefines.NormalizeMapCoord(pos.X);
+			pos.Y = GridDefines.NormalizeMapCoord(pos.Y);
 			UpdateAllowedPositionZ(destx, desty, ref destz, ref groundZ);
 
 			pos.SetOrientation(GetOrientation());
@@ -4423,10 +4484,10 @@ namespace Game.Entities
 						return;
 
 					// fall back to gridHeight if any
-					float gridHeight = GetMap().GetGridHeight(GetPhaseShift(), pos.posX, pos.posY);
+					float gridHeight = GetMap().GetGridHeight(GetPhaseShift(), pos.X, pos.Y);
 
 					if (gridHeight > MapConst.InvalidHeight)
-						pos.posZ = gridHeight + unit.GetHoverOffset();
+						pos.Z = gridHeight + unit.GetHoverOffset();
 				}
 			}
 		}
@@ -4461,7 +4522,7 @@ namespace Game.Entities
 
 		public void SetLocationInstanceId(uint _instanceId)
 		{
-			instanceId = _instanceId;
+			InstanceId = _instanceId;
 		}
 
 		public static implicit operator bool(WorldObject obj)
@@ -4469,498 +4530,5 @@ namespace Game.Entities
 			return obj != null;
 		}
 
-		#region Fields
-
-		public TypeMask ObjectTypeMask { get; set; }
-		protected TypeId ObjectTypeId { get; set; }
-		protected CreateObjectBits _updateFlag;
-		private ObjectGuid _guid;
-		private bool _isNewObject;
-		private bool _isDestroyedObject;
-
-		public UpdateFieldHolder _values;
-		public ObjectFieldData _objectData;
-
-		public uint LastUsedScriptID;
-
-		private bool _objectUpdated;
-
-		private uint _zoneId;
-		private uint _areaId;
-		private float _staticFloorZ;
-		private bool _outdoors;
-		private ZLiquidStatus _liquidStatus;
-
-		// Event handler
-		public EventSystem _Events = new();
-
-		public MovementInfo _movementInfo;
-		private string _name;
-		protected bool _isActive;
-		private bool _isFarVisible;
-		private float? _visibilityDistanceOverride;
-		private bool _isWorldObject;
-		public ZoneScript _zoneScript;
-
-		private ITransport _transport;
-		private Map _currMap;
-		public uint instanceId;
-		private PhaseShift _phaseShift = new();
-		private PhaseShift _suppressedPhaseShift = new(); // contains phases for current area but not applied due to conditions
-		private int _dbPhase;
-		public bool IsInWorld { get; set; }
-
-		private NotifyFlags _notifyflags;
-
-		private ObjectGuid _privateObjectOwner;
-
-		private SmoothPhasing _smoothPhasing;
-
-		public FlaggedArray32<StealthType> _stealth = new(2);
-		public FlaggedArray32<StealthType> _stealthDetect = new(2);
-
-		public FlaggedArray64<InvisibilityType> _invisibility = new((int)InvisibilityType.Max);
-		public FlaggedArray64<InvisibilityType> _invisibilityDetect = new((int)InvisibilityType.Max);
-
-		public FlaggedArray32<ServerSideVisibilityType> _serverSideVisibility = new(2);
-		public FlaggedArray32<ServerSideVisibilityType> _serverSideVisibilityDetect = new(2);
-
-		#endregion
-	}
-
-	public class MovementInfo
-	{
-		public AdvFlying? advFlying;
-		private MovementFlag flags;
-		private MovementFlag2 flags2;
-		private MovementFlags3 flags3;
-		public Inertia? inertia;
-		public JumpInfo jump;
-		public TransportInfo transport;
-
-		public MovementInfo()
-		{
-			Guid   = ObjectGuid.Empty;
-			flags  = MovementFlag.None;
-			flags2 = MovementFlag2.None;
-			Time   = 0;
-			Pitch  = 0.0f;
-
-			Pos = new Position();
-			transport.Reset();
-			jump.Reset();
-		}
-
-		public ObjectGuid Guid { get; set; }
-		public Position Pos { get; set; }
-		public uint Time { get; set; }
-		public float Pitch { get; set; }
-		public float stepUpStartElevation { get; set; }
-
-		public MovementFlag GetMovementFlags()
-		{
-			return flags;
-		}
-
-		public void SetMovementFlags(MovementFlag f)
-		{
-			flags = f;
-		}
-
-		public void AddMovementFlag(MovementFlag f)
-		{
-			flags |= f;
-		}
-
-		public void RemoveMovementFlag(MovementFlag f)
-		{
-			flags &= ~f;
-		}
-
-		public bool HasMovementFlag(MovementFlag f)
-		{
-			return (flags & f) != 0;
-		}
-
-		public MovementFlag2 GetMovementFlags2()
-		{
-			return flags2;
-		}
-
-		public void SetMovementFlags2(MovementFlag2 f)
-		{
-			flags2 = f;
-		}
-
-		public void AddMovementFlag2(MovementFlag2 f)
-		{
-			flags2 |= f;
-		}
-
-		public void RemoveMovementFlag2(MovementFlag2 f)
-		{
-			flags2 &= ~f;
-		}
-
-		public bool HasMovementFlag2(MovementFlag2 f)
-		{
-			return (flags2 & f) != 0;
-		}
-
-		public MovementFlags3 GetExtraMovementFlags2()
-		{
-			return flags3;
-		}
-
-		public void SetExtraMovementFlags2(MovementFlags3 flag)
-		{
-			flags3 = flag;
-		}
-
-		public void AddExtraMovementFlag2(MovementFlags3 flag)
-		{
-			flags3 |= flag;
-		}
-
-		public void RemoveExtraMovementFlag2(MovementFlags3 flag)
-		{
-			flags3 &= ~flag;
-		}
-
-		public bool HasExtraMovementFlag2(MovementFlags3 flag)
-		{
-			return (flags3 & flag) != 0;
-		}
-
-		public void SetFallTime(uint time)
-		{
-			jump.fallTime = time;
-		}
-
-		public void ResetTransport()
-		{
-			transport.Reset();
-		}
-
-		public void ResetJump()
-		{
-			jump.Reset();
-		}
-
-		public struct TransportInfo
-		{
-			public void Reset()
-			{
-				guid      = ObjectGuid.Empty;
-				pos       = new Position();
-				seat      = -1;
-				time      = 0;
-				prevTime  = 0;
-				vehicleId = 0;
-			}
-
-			public ObjectGuid guid;
-			public Position pos;
-			public sbyte seat;
-			public uint time;
-			public uint prevTime;
-			public uint vehicleId;
-		}
-
-		public struct Inertia
-		{
-			public int id;
-			public Position force;
-			public uint lifetime;
-		}
-
-		public struct JumpInfo
-		{
-			public void Reset()
-			{
-				fallTime = 0;
-				zspeed   = sinAngle = cosAngle = xyspeed = 0.0f;
-			}
-
-			public uint fallTime;
-			public float zspeed;
-			public float sinAngle;
-			public float cosAngle;
-			public float xyspeed;
-		}
-
-		// advflying
-		public struct AdvFlying
-		{
-			public float forwardVelocity;
-			public float upVelocity;
-		}
-	}
-
-	public class MovementForce
-	{
-		public Vector3 Direction;
-		public ObjectGuid ID;
-		public float Magnitude;
-		public Vector3 Origin;
-		public uint TransportID;
-		public MovementForceType Type;
-		public int Unused910;
-
-		public void Read(WorldPacket data)
-		{
-			ID          = data.ReadPackedGuid();
-			Origin      = data.ReadVector3();
-			Direction   = data.ReadVector3();
-			TransportID = data.ReadUInt32();
-			Magnitude   = data.ReadFloat();
-			Unused910   = data.ReadInt32();
-			Type        = (MovementForceType)data.ReadBits<byte>(2);
-		}
-
-		public void Write(WorldPacket data)
-		{
-			MovementExtensions.WriteMovementForceWithDirection(this, data);
-		}
-	}
-
-	public class MovementForces
-	{
-		private List<MovementForce> _forces = new();
-		private float _modMagnitude = 1.0f;
-
-		public List<MovementForce> GetForces()
-		{
-			return _forces;
-		}
-
-		public bool Add(MovementForce newForce)
-		{
-			var movementForce = FindMovementForce(newForce.ID);
-
-			if (movementForce == null)
-			{
-				_forces.Add(newForce);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		public bool Remove(ObjectGuid id)
-		{
-			var movementForce = FindMovementForce(id);
-
-			if (movementForce != null)
-			{
-				_forces.Remove(movementForce);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		public float GetModMagnitude()
-		{
-			return _modMagnitude;
-		}
-
-		public void SetModMagnitude(float modMagnitude)
-		{
-			_modMagnitude = modMagnitude;
-		}
-
-		public bool IsEmpty()
-		{
-			return _forces.Empty() && _modMagnitude == 1.0f;
-		}
-
-		private MovementForce FindMovementForce(ObjectGuid id)
-		{
-			return _forces.Find(force => force.ID == id);
-		}
-	}
-
-	public struct CreateObjectBits
-	{
-		public bool NoBirthAnim;
-		public bool EnablePortals;
-		public bool PlayHoverAnim;
-		public bool MovementUpdate;
-		public bool MovementTransport;
-		public bool Stationary;
-		public bool CombatVictim;
-		public bool ServerTime;
-		public bool Vehicle;
-		public bool AnimKit;
-		public bool Rotation;
-		public bool AreaTrigger;
-		public bool GameObject;
-		public bool SmoothPhasing;
-		public bool ThisIsYou;
-		public bool SceneObject;
-		public bool ActivePlayer;
-		public bool Conversation;
-
-		public void Clear()
-		{
-			NoBirthAnim       = false;
-			EnablePortals     = false;
-			PlayHoverAnim     = false;
-			MovementUpdate    = false;
-			MovementTransport = false;
-			Stationary        = false;
-			CombatVictim      = false;
-			ServerTime        = false;
-			Vehicle           = false;
-			AnimKit           = false;
-			Rotation          = false;
-			AreaTrigger       = false;
-			GameObject        = false;
-			SmoothPhasing     = false;
-			ThisIsYou         = false;
-			SceneObject       = false;
-			ActivePlayer      = false;
-			Conversation      = false;
-		}
-	}
-
-	internal class CombatLogSender : IDoWork<Player>
-	{
-		private CombatLogServerPacket i_message;
-
-		public CombatLogSender(CombatLogServerPacket msg)
-		{
-			i_message = msg;
-		}
-
-		public void Invoke(Player player)
-		{
-			i_message.Clear();
-			i_message.SetAdvancedCombatLogging(player.IsAdvancedCombatLoggingEnabled());
-
-			player.SendPacket(i_message);
-		}
-	}
-
-	public struct FindCreatureOptions
-	{
-		public FindCreatureOptions SetCreatureId(uint creatureId)
-		{
-			CreatureId = creatureId;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetStringId(string stringId)
-		{
-			StringId = stringId;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetIsAlive(bool isAlive)
-		{
-			IsAlive = isAlive;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetIsInCombat(bool isInCombat)
-		{
-			IsInCombat = isInCombat;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetIsSummon(bool isSummon)
-		{
-			IsSummon = isSummon;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetIgnorePhases(bool ignorePhases)
-		{
-			IgnorePhases = ignorePhases;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetIgnoreNotOwnedPrivateObjects(bool ignoreNotOwnedPrivateObjects)
-		{
-			IgnoreNotOwnedPrivateObjects = ignoreNotOwnedPrivateObjects;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetIgnorePrivateObjects(bool ignorePrivateObjects)
-		{
-			IgnorePrivateObjects = ignorePrivateObjects;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetHasAura(uint spellId)
-		{
-			AuraSpellId = spellId;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetOwner(ObjectGuid ownerGuid)
-		{
-			OwnerGuid = ownerGuid;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetCharmer(ObjectGuid charmerGuid)
-		{
-			CharmerGuid = charmerGuid;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetCreator(ObjectGuid creatorGuid)
-		{
-			CreatorGuid = creatorGuid;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetDemonCreator(ObjectGuid demonCreatorGuid)
-		{
-			DemonCreatorGuid = demonCreatorGuid;
-
-			return this;
-		}
-
-		public FindCreatureOptions SetPrivateObjectOwner(ObjectGuid privateObjectOwnerGuid)
-		{
-			PrivateObjectOwnerGuid = privateObjectOwnerGuid;
-
-			return this;
-		}
-
-		public uint? CreatureId;
-		public string StringId;
-
-		public bool? IsAlive;
-		public bool? IsInCombat;
-		public bool? IsSummon;
-
-		public bool IgnorePhases;
-		public bool IgnoreNotOwnedPrivateObjects;
-		public bool IgnorePrivateObjects;
-
-		public uint? AuraSpellId;
-		public ObjectGuid? OwnerGuid;
-		public ObjectGuid? CharmerGuid;
-		public ObjectGuid? CreatorGuid;
-		public ObjectGuid? DemonCreatorGuid;
-		public ObjectGuid? PrivateObjectOwnerGuid;
 	}
 }

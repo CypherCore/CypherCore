@@ -55,7 +55,7 @@ namespace Game
 				return;
 			}
 
-			// not set flags if player can't free move to prevent lost State at logout cancel
+			// not set Flags if player can't free move to prevent lost State at logout cancel
 			if (pl.CanFreeMove())
 			{
 				if (pl.GetStandState() == UnitStandStateType.Stand)
@@ -79,7 +79,7 @@ namespace Game
 
 			SendPacket(new LogoutCancelAck());
 
-			// not remove flags if can't free move - its not set in Logout request code.
+			// not remove Flags if can't free move - its not set in Logout request code.
 			if (GetPlayer().CanFreeMove())
 			{
 				//!we can move again

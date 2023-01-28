@@ -80,15 +80,15 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 	[Script]
 	internal class boss_netherspite : ScriptedAI
 	{
-		private ObjectGuid[] BeamerGUID = new ObjectGuid[3]; // guid's of auxiliary beaming portals
-		private ObjectGuid[] BeamTarget = new ObjectGuid[3]; // guid's of portals' current targets
+		private ObjectGuid[] BeamerGUID = new ObjectGuid[3]; // Guid's of auxiliary beaming portals
+		private ObjectGuid[] BeamTarget = new ObjectGuid[3]; // Guid's of portals' current targets
 		private bool Berserk;
 		private uint EmpowermentTimer;
 		private InstanceScript instance;
 		private uint NetherbreathTimer;
 		private uint NetherInfusionTimer;                    // berserking timer
 		private uint PhaseTimer;                             // timer for phase switching
-		private ObjectGuid[] PortalGUID = new ObjectGuid[3]; // guid's of portals
+		private ObjectGuid[] PortalGUID = new ObjectGuid[3]; // Guid's of portals
 
 		private bool PortalPhase;
 		private uint PortalTimer; // timer for beam checking
@@ -128,7 +128,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 			xh = target.GetPositionX();
 			yh = target.GetPositionY();
 
-			// check if target is between (not checking distance from the beam yet)
+			// check if Target is between (not checking distance from the beam yet)
 			if (dist(xn, yn, xh, yh) >= dist(xn, yn, xp, yp) ||
 			    dist(xp, yp, xh, yh) >= dist(xn, yn, xp, yp))
 				return false;
@@ -204,7 +204,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
 					var players = me.GetMap().GetPlayers();
 
-					// get the best suitable target
+					// get the best suitable Target
 					foreach (var player in players)
 						if (player &&
 						    player.IsAlive() // alive
@@ -219,14 +219,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 						    IsBetween(me, player, portal)) // on the beam
 							target = player;
 
-					// buff the target
+					// buff the Target
 					if (target.IsPlayer())
 						target.AddAura(MiscConst.PlayerBuff[j], target);
 					else
 						target.AddAura(MiscConst.NetherBuff[j], target);
 
-					// cast visual beam on the chosen target if switched
-					// simple target switching isn't working . using BeamerGUID to cast (workaround)
+					// cast visual beam on the chosen Target if switched
+					// simple Target switching isn't working . using BeamerGUID to cast (workaround)
 					if (!current ||
 					    target != current)
 					{
@@ -241,7 +241,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 							BeamerGUID[j].Clear();
 						}
 
-						// create new one and start beaming on the target
+						// create new one and start beaming on the Target
 						Creature beamer1 = portal.SummonCreature(MiscConst.PortalID[j], portal.GetPositionX(), portal.GetPositionY(), portal.GetPositionZ(), portal.GetOrientation(), TempSummonType.TimedDespawn, TimeSpan.FromMinutes(1));
 
 						if (beamer1)
@@ -251,7 +251,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 						}
 					}
 
-					// aggro target if Red Beam
+					// aggro Target if Red Beam
 					if (j == (int)Portals.Red &&
 					    me.GetVictim() != target &&
 					    target.IsPlayer())

@@ -29,7 +29,7 @@ namespace Game.Maps
 			Dictionary<uint, SharedInstanceLockData> instanceLockDataById = new();
 
 			//                                              0           1     2
-			SQLResult result = DB.Characters.Query("SELECT instanceId, data, completedEncountersMask FROM instance");
+			SQLResult result = DB.Characters.Query("SELECT InstanceId, _data, completedEncountersMask FROM instance");
 
 			if (!result.IsEmpty())
 				do
@@ -45,7 +45,7 @@ namespace Game.Maps
 				} while (result.NextRow());
 
 			//                                                  0     1      2       3           4           5     6                        7           8
-			SQLResult lockResult = DB.Characters.Query("SELECT guid, mapId, lockId, instanceId, difficulty, data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
+			SQLResult lockResult = DB.Characters.Query("SELECT Guid, mapId, lockId, InstanceId, difficulty, _data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
 
 			if (!result.IsEmpty())
 				do
@@ -57,7 +57,7 @@ namespace Game.Maps
 					Difficulty difficulty = (Difficulty)lockResult.Read<byte>(4);
 					DateTime   expiryTime = Time.UnixTimeToDateTime(lockResult.Read<long>(7));
 
-					// Mark instance id as being used
+					// Mark instance Id as being used
 					Global.MapMgr.RegisterInstanceId(instanceId);
 
 					InstanceLock instanceLock;
@@ -68,8 +68,8 @@ namespace Game.Maps
 
 						if (sharedData == null)
 						{
-							Log.outError(LogFilter.Instance, $"Missing instance data for instance id based lock (id {instanceId})");
-							DB.Characters.Execute($"DELETE FROM character_instance_lock WHERE instanceId = {instanceId}");
+							Log.outError(LogFilter.Instance, $"Missing instance _data for instance Id based lock (Id {instanceId})");
+							DB.Characters.Execute($"DELETE FROM character_instance_lock WHERE InstanceId = {instanceId}");
 
 							continue;
 						}
@@ -401,11 +401,11 @@ namespace Game.Maps
         /// <summary>
         ///  Resets instances that match given filter - for use in GM commands
         /// </summary>
-        /// <param name="playerGuid">Guid of player whose locks will be removed</param>
-        /// <param name="mapId">(Optional) Map id of instance locks to reset</param>
-        /// <param name="difficulty">(Optional) Difficulty of instance locks to reset</param>
-        /// <param name="locksReset">All locks that were reset</param>
-        /// <param name="locksFailedToReset">Locks that could not be reset because they are used by existing instance map</param>
+        /// <param Name="playerGuid">Guid of player whose locks will be removed</param>
+        /// <param Name="mapId">(Optional) Map Id of instance locks to reset</param>
+        /// <param Name="difficulty">(Optional) Difficulty of instance locks to reset</param>
+        /// <param Name="locksReset">All locks that were reset</param>
+        /// <param Name="locksFailedToReset">Locks that could not be reset because they are used by existing instance map</param>
         public void ResetInstanceLocksForPlayer(ObjectGuid playerGuid, uint? mapId, Difficulty? difficulty, List<InstanceLock> locksReset, List<InstanceLock> locksFailedToReset)
 		{
 			var playerLocks = _instanceLocksByPlayer.LookupByKey(playerGuid);
@@ -441,7 +441,7 @@ namespace Game.Maps
 				{
 					MapDb2Entries entries       = new(instanceLock.GetMapId(), instanceLock.GetDifficultyId());
 					DateTime      newExpiryTime = GetNextResetTime(entries) - TimeSpan.FromSeconds(entries.MapDifficulty.GetRaidDuration());
-					// set reset time to last reset time
+					// set reset Time to last reset Time
 					instanceLock.SetExpiryTime(newExpiryTime);
 					instanceLock.SetExtended(false);
 
@@ -496,7 +496,7 @@ namespace Game.Maps
 
 					if (dateTime.Day > resetDay ||
 					    (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
-						daysAdjust += 7; // passed it for current week, grab time from next week
+						daysAdjust += 7; // passed it for current week, grab Time from next week
 
 					hour =  resetHour;
 					day  += daysAdjust;
@@ -549,11 +549,11 @@ namespace Game.Maps
 
 			MapDb2Entries entries = new(_mapId, _difficultyId);
 
-			// return next reset time
+			// return next reset Time
 			if (IsExpired())
 				return Global.InstanceLockMgr.GetNextResetTime(entries);
 
-			// if not expired, return expiration time + 1 reset period
+			// if not expired, return expiration Time + 1 reset period
 			return GetExpiryTime() + TimeSpan.FromSeconds(entries.MapDifficulty.GetRaidDuration());
 		}
 
@@ -633,7 +633,7 @@ namespace Game.Maps
 	internal class SharedInstanceLock : InstanceLock
 	{
         /// <summary>
-        ///  Instance id based locks have two states
+        ///  Instance Id based locks have two states
         ///  One shared by everyone, which is the real State used by instance
         ///  and one for each player that shows in UI that might have less encounters completed
         /// </summary>

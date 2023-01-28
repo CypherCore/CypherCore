@@ -316,8 +316,8 @@ namespace Game
 
         /**
 		 * @brief Finds relevant TraitTree identifiers
-		 * @param traitConfig config data
-		 * @return Trait tree data
+		 * @param traitConfig config _data
+		 * @return Trait tree _data
 		 */
         public static List<Tree> GetTreesForConfig(TraitConfigPacket traitConfig)
 		{

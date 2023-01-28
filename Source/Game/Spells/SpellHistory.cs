@@ -357,7 +357,7 @@ namespace Game.Spells
 			else
 				cooldown = forcedCooldown.Value;
 
-			// overwrite time for selected category
+			// overwrite Time for selected category
 			if (onHold)
 			{
 				// use +MONTH as infinite cooldown marker
@@ -368,7 +368,7 @@ namespace Game.Spells
 			{
 				if (!forcedCooldown.HasValue)
 				{
-					// Now we have cooldown data (if found any), time to apply mods
+					// Now we have cooldown _data (if found any), Time to apply mods
 					Player modOwner = _owner.GetSpellModOwner();
 
 					if (modOwner)
@@ -390,14 +390,14 @@ namespace Game.Spells
 
 					if (_owner.HasAuraTypeWithAffectMask(AuraType.ModSpellCooldownByHaste, spellInfo))
 					{
-						cooldown         = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner._unitData.ModSpellHaste);
-						categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner._unitData.ModSpellHaste);
+						cooldown         = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.UnitData.ModSpellHaste);
+						categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.UnitData.ModSpellHaste);
 					}
 
 					if (_owner.HasAuraTypeWithAffectMask(AuraType.ModCooldownByHasteRegen, spellInfo))
 					{
-						cooldown         = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner._unitData.ModHasteRegen);
-						categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner._unitData.ModHasteRegen);
+						cooldown         = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.UnitData.ModHasteRegen);
+						categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.UnitData.ModHasteRegen);
 					}
 
 					int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
@@ -776,8 +776,8 @@ namespace Game.Spells
 				Creature creatureOwner = _owner.ToCreature();
 
 				for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-					if (creatureOwner._spells[i] != 0)
-						knownSpells.Add(creatureOwner._spells[i]);
+					if (creatureOwner.Spells[i] != 0)
+						knownSpells.Add(creatureOwner.Spells[i]);
 			}
 
 			SpellCooldownPkt spellCooldown = new();
@@ -969,10 +969,10 @@ namespace Game.Spells
 			recoveryTimeF *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
 
 			if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHaste))
-				recoveryTimeF *= _owner._unitData.ModSpellHaste;
+				recoveryTimeF *= _owner.UnitData.ModSpellHaste;
 
 			if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHasteRegen))
-				recoveryTimeF *= _owner._unitData.ModHasteRegen;
+				recoveryTimeF *= _owner.UnitData.ModHasteRegen;
 
 			return (int)Math.Floor(recoveryTimeF);
 		}
@@ -1057,7 +1057,7 @@ namespace Game.Spells
 						}
 			}
 
-			// if no cooldown found above then base at DBC data
+			// if no cooldown found above then base at DBC _data
 			if (tmpCooldown < TimeSpan.Zero &&
 			    tmpCategoryCooldown < TimeSpan.Zero)
 			{

@@ -137,7 +137,7 @@ namespace Game.Loots
 					// Finally add the LootItem to the container
 					loot.items.Add(li);
 
-					// Increment unlooted count
+					// Increment unlooted Count
 					++loot.unlootedCount;
 				}
 
@@ -188,7 +188,7 @@ namespace Game.Loots
 
 			if (_lootItemStorage.ContainsKey(containerId))
 			{
-				Log.outError(LogFilter.Misc, $"Trying to store Item loot by player: {player.GetGUID()} for container id: {containerId} that is already in storage!");
+				Log.outError(LogFilter.Misc, $"Trying to store Item loot by player: {player.GetGUID()} for container Id: {containerId} that is already in storage!");
 
 				return;
 			}
@@ -251,7 +251,7 @@ namespace Game.Loots
 
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
 
-			// container_id, ItemId, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
+			// container_id, ItemId, item_count, follow_rules, ffa, Blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
 			stmt.AddValue(0, _containerId);
 			stmt.AddValue(1, lootItem.itemid);
 			stmt.AddValue(2, lootItem.count);

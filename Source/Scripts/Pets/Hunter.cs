@@ -44,7 +44,7 @@ namespace Scripts.Pets
 				_isViper = me.GetEntry() == CreatureIds.Viper ? true : false;
 
 				me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
-				// Add delta to make them not all hit the same time
+				// Add delta to make them not all hit the same Time
 				me.SetBaseAttackTime(WeaponAttackType.BaseAttack, me.GetBaseAttackTime(WeaponAttackType.BaseAttack) + RandomHelper.URand(0, 6) * Time.InMilliseconds);
 
 				if (!_isViper &&
@@ -52,7 +52,7 @@ namespace Scripts.Pets
 					DoCast(me, SpellIds.DeadlyPoisonPassive, new CastSpellExtraArgs(true));
 			}
 
-			// Redefined for random target selection:
+			// Redefined for random Target selection:
 			public override void MoveInLineOfSight(Unit who)
 			{
 			}
@@ -73,7 +73,7 @@ namespace Scripts.Pets
 				if (me.IsSummon() &&
 				    !me.GetThreatManager().GetFixateTarget())
 				{
-					// find new target
+					// find new Target
 					Unit       summoner = me.ToTempSummon().GetSummonerUnit();
 					List<Unit> targets  = new();
 

@@ -80,7 +80,7 @@ namespace Game.Movement
 			}
 
 			// Update home position
-			// If target is not moving and destination has been predicted and if we are on the same spline, we stop as well
+			// If Target is not moving and destination has been predicted and if we are on the same spline, we stop as well
 			if (target.MoveSpline.Finalized() &&
 			    target.MoveSpline.GetId() == _lastLeaderSplineID &&
 			    _hasPredictedDestination)
@@ -165,7 +165,7 @@ namespace Game.Movement
 
 			// Destination calculation
 			/*
-			    According to sniff data, formation members have a periodic move interal of 1,2s.
+			    According to sniff _data, formation members have a periodic move interal of 1,2s.
 			    Each of these splines has a exact duration of 1650ms +- 1ms when no pathfinding is involved.
 			    To get a representative result like that we have to predict our formation leader's path
 			    and apply our formation shape based on that destination.

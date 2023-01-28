@@ -114,7 +114,7 @@ namespace Game.Spells
 			if (ssNonDiscoverableEntries.Length != 0)
 				Log.outError(LogFilter.Sql, "Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n{0}", ssNonDiscoverableEntries.ToString());
 
-			// report about empty data for explicit discovery spells
+			// report about empty _data for explicit discovery spells
 			foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
 			{
 				SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
@@ -127,7 +127,7 @@ namespace Game.Spells
 					continue;
 
 				if (!SkillDiscoveryStorage.ContainsKey((int)spellEntry.Id))
-					Log.outError(LogFilter.Sql, "Spell (ID: {0}) is 100% chance random discovery ability but not have data in `skill_discovery_template` table", spellEntry.Id);
+					Log.outError(LogFilter.Sql, "Spell (ID: {0}) is 100% chance random discovery ability but not have _data in `skill_discovery_template` table", spellEntry.Id);
 			}
 
 			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill discovery definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));

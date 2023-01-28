@@ -108,7 +108,7 @@ namespace Game.Mails
 	public class MailSender
 	{
 		private MailMessageType _messageType;
-		private ulong _senderId; // player low guid or other object entry
+		private ulong _senderId; // player low Guid or other object entry
 		private MailStationery _stationery;
 
 		public MailSender(MailMessageType messageType, ulong sender_guidlow_or_entry, MailStationery stationery = MailStationery.Default)

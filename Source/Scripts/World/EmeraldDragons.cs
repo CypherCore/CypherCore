@@ -119,8 +119,8 @@ namespace Scripts.World.EmeraldDragons
 			                    TimeSpan.FromSeconds(20),
 			                    task =>
 			                    {
-				                    // Seeping Fog appears only as "pairs", and only ONE pair at any given time!
-				                    // Despawntime is 2 minutes, so reschedule it for new cast after 2 minutes + a minor "random time" (30 seconds at max)
+				                    // Seeping Fog appears only as "pairs", and only ONE pair at any given Time!
+				                    // Despawntime is 2 minutes, so reschedule it for new cast after 2 minutes + a minor "random Time" (30 seconds at max)
 				                    DoCast(me, SpellIds.SeepingFogLeft, new CastSpellExtraArgs(true));
 				                    DoCast(me, SpellIds.SeepingFogRight, new CastSpellExtraArgs(true));
 				                    task.Repeat(TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(2.5));
@@ -180,7 +180,7 @@ namespace Scripts.World.EmeraldDragons
 
 			if (_roamTimer == 0)
 			{
-				// Chase target, but don't attack - otherwise just roam around
+				// Chase Target, but don't attack - otherwise just roam around
 				Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
 
 				if (target)

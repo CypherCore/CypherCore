@@ -13,8 +13,8 @@ namespace Game.Accounts
 		private List<uint> _deniedPerms = new();  // Denied permissions
 		private List<uint> _globalPerms = new();  // Calculated permissions
 		private List<uint> _grantedPerms = new(); // Granted permissions
-		private uint _id;                         // Account id
-		private string _name;                     // Account name
+		private uint _id;                         // Account Id
+		private string _name;                     // Account Name
 		private int _realmId;                     // RealmId Affected
 		private byte _secLevel;                   // Account SecurityLevel
 
@@ -71,7 +71,7 @@ namespace Game.Accounts
 
 			AddGrantedPermission(permissionId);
 
-			// Do not save to db when loading data from DB (realmId = 0)
+			// Do not save to db when loading _data from DB (realmId = 0)
 			if (realmId != 0)
 			{
 				Log.outDebug(LogFilter.Rbac,
@@ -142,7 +142,7 @@ namespace Game.Accounts
 
 			AddDeniedPermission(permissionId);
 
-			// Do not save to db when loading data from DB (realmId = 0)
+			// Do not save to db when loading _data from DB (realmId = 0)
 			if (realmId != 0)
 			{
 				Log.outDebug(LogFilter.Rbac,
@@ -197,7 +197,7 @@ namespace Game.Accounts
 			RemoveGrantedPermission(permissionId);
 			RemoveDeniedPermission(permissionId);
 
-			// Do not save to db when loading data from DB (realmId = 0)
+			// Do not save to db when loading _data from DB (realmId = 0)
 			if (realmId != 0)
 			{
 				Log.outDebug(LogFilter.Rbac,
@@ -296,8 +296,8 @@ namespace Game.Accounts
         /// <summary>
         ///  Removes a list of permissions from another list
         /// </summary>
-        /// <param name="permsFrom"></param>
-        /// <param name="permsToRemove"></param>
+        /// <param Name="permsFrom"></param>
+        /// <param Name="permsToRemove"></param>
         private void RemovePermissions(List<uint> permsFrom, List<uint> permsToRemove)
 		{
 			foreach (var id in permsToRemove)
@@ -431,8 +431,8 @@ namespace Game.Accounts
 
 	public class RBACPermission
 	{
-		private uint _id;                  // id of the object
-		private string _name;              // name of the object
+		private uint _id;                  // Id of the object
+		private string _name;              // Name of the object
 		private List<uint> _perms = new(); // Set of permissions
 
 		public RBACPermission(uint id = 0, string name = "")

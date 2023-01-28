@@ -67,7 +67,7 @@ namespace Game
 			_weeklyPools.Clear();
 			_monthlyPools.Clear();
 
-			// load template data from world DB
+			// load template _data from world DB
 			{
 				SQLResult result = DB.World.Query("SELECT qpm.questId, qpm.poolId, qpm.poolIndex, qpt.numActive FROM quest_pool_members qpm LEFT JOIN quest_pool_template qpt ON qpm.poolId = qpt.poolId");
 

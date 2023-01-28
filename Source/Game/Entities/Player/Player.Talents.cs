@@ -39,7 +39,7 @@ namespace Game.Entities
 								RemoveTalent(talent);
 			}
 
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.MaxTalentTiers), talentTiers);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.MaxTalentTiers), talentTiers);
 
 			if (!GetSession().HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
 				for (byte spec = 0; spec < PlayerConst.MaxSpecializations; ++spec)
@@ -203,7 +203,7 @@ namespace Game.Entities
 
 			if (spellid == 0)
 			{
-				Log.outError(LogFilter.Player, "Player.LearnTalent: Talent.dbc has no spellInfo for talent: {0} (spell id = 0)", talentId);
+				Log.outError(LogFilter.Player, "Player.LearnTalent: Talent.dbc has no spellInfo for talent: {0} (spell Id = 0)", talentId);
 
 				return TalentLearnResult.FailedUnknown;
 			}
@@ -279,7 +279,7 @@ namespace Game.Entities
 
 		private void SetPrimarySpecialization(uint spec)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.CurrentSpecID), spec);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.CurrentSpecID), spec);
 		}
 
 		public byte GetActiveTalentGroup()
@@ -295,7 +295,7 @@ namespace Game.Entities
 		// Loot Spec
 		public void SetLootSpecId(uint id)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LootSpecID), (ushort)id);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LootSpecID), (ushort)id);
 		}
 
 		public uint GetLootSpecId()
@@ -333,7 +333,7 @@ namespace Game.Entities
 
 			RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ChangeSpec);
 
-			// remove single target auras at other targets
+			// remove single Target Auras at other targets
 			var scAuras = GetSingleCastAuras();
 
 			foreach (var aura in scAuras)
@@ -579,7 +579,7 @@ namespace Game.Entities
 
 		public uint GetNextResetTalentsCost()
 		{
-			// The first time reset costs 1 gold
+			// The first Time reset costs 1 gold
 			if (GetTalentResetCost() < 1 * MoneyConstants.Gold)
 			{
 				return 1 * MoneyConstants.Gold;
@@ -705,7 +705,7 @@ namespace Game.Entities
 
 					if (talentInfo == null)
 					{
-						Log.outError(LogFilter.Player, "Player {0} has unknown talent id: {1}", GetName(), pair.Key);
+						Log.outError(LogFilter.Player, "Player {0} has unknown talent Id: {1}", GetName(), pair.Key);
 
 						continue;
 					}
@@ -731,7 +731,7 @@ namespace Game.Entities
 
 					if (talentInfo == null)
 					{
-						Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent id: {pvpTalents[slot]}");
+						Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent Id: {pvpTalents[slot]}");
 
 						continue;
 					}
@@ -962,7 +962,7 @@ namespace Game.Entities
 
 				if (entryIndex == null)
 				{
-					TraitConfig value = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, traitConfigIndex);
+					TraitConfig value = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, traitConfigIndex);
 					AddDynamicUpdateFieldValue(value.ModifyValue(value.Entries), grantedEntry);
 				}
 			}
@@ -982,7 +982,7 @@ namespace Game.Entities
 			setter.ModifyValue(setter.LocalIdentifier).SetValue(traitConfig.LocalIdentifier);
 			setter.ModifyValue(setter.TraitSystemID).SetValue(traitConfig.TraitSystemID);
 
-			AddDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs), setter);
+			AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs), setter);
 
 			foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
 			{
@@ -1039,7 +1039,7 @@ namespace Game.Entities
 
 			Action finalizeTraitConfigUpdate = () =>
 			                                   {
-				                                   TraitConfig newTraitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, index);
+				                                   TraitConfig newTraitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, index);
 				                                   SetUpdateFieldValue(newTraitConfig.ModifyValue(newTraitConfig.LocalIdentifier), newConfig.LocalIdentifier);
 
 				                                   ApplyTraitEntryChanges(newConfig.ID, newConfig, isActiveConfig, true);
@@ -1093,7 +1093,7 @@ namespace Game.Entities
 
 			foreach (int indexToRemove in entryIndicesToRemove)
 			{
-				TraitConfig traitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
+				TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
 				RemoveDynamicUpdateFieldValue(traitConfig.ModifyValue(traitConfig.Entries), indexToRemove);
 			}
 
@@ -1110,7 +1110,7 @@ namespace Game.Entities
 					if (consumeCurrencies)
 						costEntries.Add(newEntry);
 
-					TraitConfig newTraitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
+					TraitConfig newTraitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
 					TraitEntry  newUfEntry     = new();
 					newUfEntry.TraitNodeID      = newEntry.TraitNodeID;
 					newUfEntry.TraitNodeEntryID = newEntry.TraitNodeEntryID;
@@ -1132,7 +1132,7 @@ namespace Game.Entities
 						costEntries.Add(newEntry);
 					}
 
-					TraitConfig traitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
+					TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
 					TraitEntry  traitEntry  = traitConfig.ModifyValue(traitConfig.Entries, oldEntryIndex);
 					traitEntry.Rank         = newEntry.Rank;
 					traitEntry.GrantedRanks = newEntry.GrantedRanks;
@@ -1183,7 +1183,7 @@ namespace Game.Entities
 			if (editedIndex < 0)
 				return;
 
-			TraitConfig traitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
+			TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
 			SetUpdateFieldValue(traitConfig.ModifyValue(traitConfig.Name), newName);
 
 			_traitConfigStates[editedConfigId] = PlayerSpellState.Changed;
@@ -1196,7 +1196,7 @@ namespace Game.Entities
 			if (deletedIndex < 0)
 				return;
 
-			RemoveDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData)
+			RemoveDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData)
 			                                     .ModifyValue(ActivePlayerData.TraitConfigs),
 			                              deletedIndex);
 
@@ -1249,12 +1249,12 @@ namespace Game.Entities
 
 			if (useStarterBuild)
 			{
-				TraitConfig traitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
+				TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
 				SetUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
 			}
 			else
 			{
-				TraitConfig traitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
+				TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
 				RemoveUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
 			}
 
@@ -1273,7 +1273,7 @@ namespace Game.Entities
 			if (currentlyUsesSharedActionBars == usesSharedActionBars)
 				return;
 
-			TraitConfig traitConfig = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
+			TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
 
 			if (usesSharedActionBars)
 			{

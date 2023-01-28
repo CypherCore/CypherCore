@@ -56,7 +56,7 @@ namespace Game.Entities
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 mount definitions. DB table `mount_definitions` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Mount definitions. DB table `mount_definitions` is empty.");
 
 				return;
 			}
@@ -84,7 +84,7 @@ namespace Game.Entities
 				FactionSpecificMounts[spellId] = otherFactionSpellId;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} mount definitions in {1} ms", FactionSpecificMounts.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Mount definitions in {1} ms", FactionSpecificMounts.Count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public void LoadToys()

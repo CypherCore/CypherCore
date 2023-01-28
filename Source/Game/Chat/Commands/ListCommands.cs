@@ -33,7 +33,7 @@ namespace Game.Chat.Commands
 				return false;
 
 			uint      creatureCount = 0;
-			SQLResult result        = DB.World.Query("SELECT COUNT(guid) FROM creature WHERE id='{0}'", creatureId);
+			SQLResult result        = DB.World.Query("SELECT COUNT(Guid) FROM creature WHERE Id='{0}'", creatureId);
 
 			if (!result.IsEmpty())
 				creatureCount = result.Read<uint>(0);
@@ -42,7 +42,7 @@ namespace Game.Chat.Commands
 			{
 				Player player = handler.GetSession().GetPlayer();
 
-				result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM creature WHERE id = '{3}' ORDER BY order_ ASC LIMIT {4}",
+				result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM creature WHERE Id = '{3}' ORDER BY order_ ASC LIMIT {4}",
 				                        player.GetPositionX(),
 				                        player.GetPositionY(),
 				                        player.GetPositionZ(),
@@ -51,7 +51,7 @@ namespace Game.Chat.Commands
 			}
 			else
 			{
-				result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map FROM creature WHERE id = '{0}' LIMIT {1}",
+				result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map FROM creature WHERE Id = '{0}' LIMIT {1}",
 				                        creatureId,
 				                        count);
 			}
@@ -383,7 +383,7 @@ namespace Game.Chat.Commands
 				return false;
 
 			uint      objectCount = 0;
-			SQLResult result      = DB.World.Query("SELECT COUNT(guid) FROM gameobject WHERE id='{0}'", gameObjectId);
+			SQLResult result      = DB.World.Query("SELECT COUNT(Guid) FROM gameobject WHERE Id='{0}'", gameObjectId);
 
 			if (!result.IsEmpty())
 				objectCount = result.Read<uint>(0);
@@ -392,7 +392,7 @@ namespace Game.Chat.Commands
 			{
 				Player player = handler.GetSession().GetPlayer();
 
-				result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map, id, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE id = '{3}' ORDER BY order_ ASC LIMIT {4}",
+				result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map, Id, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE Id = '{3}' ORDER BY order_ ASC LIMIT {4}",
 				                        player.GetPositionX(),
 				                        player.GetPositionY(),
 				                        player.GetPositionZ(),
@@ -401,7 +401,7 @@ namespace Game.Chat.Commands
 			}
 			else
 			{
-				result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map, id FROM gameobject WHERE id = '{0}' LIMIT {1}",
+				result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map, Id FROM gameobject WHERE Id = '{0}' LIMIT {1}",
 				                        gameObjectId,
 				                        count);
 			}
@@ -584,7 +584,7 @@ namespace Game.Chat.Commands
 			return zoneEntry != null ? zoneEntry.AreaName[locale] : "<unknown zone>";
 		}
 
-		[CommandGroup("auras")]
+		[CommandGroup("Auras")]
 		private class ListAuraCommands
 		{
 			[Command("", RBACPermissions.CommandListAuras)]
@@ -593,13 +593,13 @@ namespace Game.Chat.Commands
 				return ListAurasCommand(handler, null, null);
 			}
 
-			[Command("id", RBACPermissions.CommandListAuras)]
+			[Command("Id", RBACPermissions.CommandListAuras)]
 			private static bool HandleListAurasByIdCommand(CommandHandler handler, uint spellId)
 			{
 				return ListAurasCommand(handler, spellId, null);
 			}
 
-			[Command("name", RBACPermissions.CommandListAuras)]
+			[Command("Name", RBACPermissions.CommandListAuras)]
 			private static bool HandleListAurasByNameCommand(CommandHandler handler, Tail namePart)
 			{
 				return ListAurasCommand(handler, null, namePart);

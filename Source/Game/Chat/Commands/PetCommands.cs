@@ -30,7 +30,7 @@ namespace Game.Chat
 			// Creatures with family CreatureFamily.None crashes the server
 			if (creatureTemplate.Family == CreatureFamily.None)
 			{
-				handler.SendSysMessage("This creature cannot be tamed. (Family id: 0).");
+				handler.SendSysMessage("This creature cannot be tamed. (Family Id: 0).");
 
 				return false;
 			}

@@ -22,7 +22,7 @@ namespace Game
 			Player       player   = GetPlayer();
 			AELootResult aeResult = player.GetAELootView().Count > 1 ? new AELootResult() : null;
 
-			// @todo Implement looting by LootObject guid
+			// @todo Implement looting by LootObject Guid
 			foreach (LootRequest req in packet.Loot)
 			{
 				Loot loot = player.GetAELootView().LookupByKey(req.Object);
@@ -199,7 +199,7 @@ namespace Game
 
 			if (!corpses.Empty())
 			{
-				// main target
+				// main Target
 				SendPacket(new AELootTargetsAck());
 
 				foreach (Creature creature in corpses)
@@ -214,7 +214,7 @@ namespace Game
 		private void HandleLootRelease(LootRelease packet)
 		{
 			// cheaters can modify lguid to prevent correct apply loot release code and re-loot
-			// use internal stored guid
+			// use internal stored Guid
 			Loot loot = GetPlayer().GetLootByWorldObjectGUID(packet.Unit);
 
 			if (loot != null)
@@ -353,8 +353,8 @@ namespace Game
 					}
 				}
 
-				// force dynflag update to update looter and lootable info
-				creature._values.ModifyValue(creature._objectData).ModifyValue(creature._objectData.DynamicFlags);
+				// Force dynflag update to update looter and lootable info
+				creature.Values.ModifyValue(creature.ObjectData).ModifyValue(creature.ObjectData.DynamicFlags);
 				creature.ForceUpdateFieldChange();
 			}
 		}
@@ -441,7 +441,7 @@ namespace Game
 					return;
 				}
 
-				// now move Item from loot to target inventory
+				// now move Item from loot to Target inventory
 				Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
 				aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());
 

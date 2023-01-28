@@ -120,7 +120,7 @@ namespace Game.Mails
 				foreach (var item in _items.Values)
 				{
 					item.SaveToDB(trans); // Item not in inventory and can be save standalone
-					// owner in data will set at mail receive and Item extracting
+					// owner in _data will set at mail receive and Item extracting
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
 					stmt.AddValue(0, receiver_guid);
 					stmt.AddValue(1, item.GetGUID().GetCounter());
@@ -152,7 +152,7 @@ namespace Game.Mails
 
 			long deliver_time = GameTime.GetGameTime() + deliver_delay;
 
-			//expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
+			//expire Time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
 			uint expire_delay;
 
 			// auction mail without any items and money
@@ -160,7 +160,7 @@ namespace Game.Mails
 			    _items.Empty() &&
 			    _money == 0)
 				expire_delay = WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay);
-			// default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
+			// default case: expire Time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
 			else if (_COD != 0)
 				expire_delay = 3 * Time.Day;
 			else
@@ -196,7 +196,7 @@ namespace Game.Mails
 				trans.Append(stmt);
 			}
 
-			// For online receiver update in game mail status and data
+			// For online receiver update in game mail status and _data
 			if (pReceiver != null)
 			{
 				pReceiver.AddNewMailDeliverTime(deliver_time);

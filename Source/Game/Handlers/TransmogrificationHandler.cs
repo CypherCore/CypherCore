@@ -99,7 +99,7 @@ namespace Game
 				// Slot of the transmogrified Item
 				if (transmogItem.Slot >= EquipmentSlot.End)
 				{
-					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player ({0}, name: {1}) tried to transmogrify wrong Slot {2} when transmogrifying items.", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
+					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player ({0}, Name: {1}) tried to transmogrify wrong Slot {2} when transmogrifying items.", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
 
 					return;
 				}
@@ -109,7 +109,7 @@ namespace Game
 
 				if (!itemTransmogrified)
 				{
-					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player (GUID: {0}, name: {1}) tried to transmogrify an invalid Item in a valid Slot (Slot: {2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
+					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player (GUID: {0}, Name: {1}) tried to transmogrify an invalid Item in a valid Slot (Slot: {2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
 
 					return;
 				}

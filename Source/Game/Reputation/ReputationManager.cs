@@ -115,7 +115,7 @@ namespace Game
 
 			if (factionEntry == null)
 			{
-				Log.outError(LogFilter.Player, "ReputationMgr.GetReputation: Can't get reputation of {0} for unknown faction (faction id) #{1}.", _player.GetName(), faction_id);
+				Log.outError(LogFilter.Player, "ReputationMgr.GetReputation: Can't get reputation of {0} for unknown faction (faction Id) #{1}.", _player.GetName(), faction_id);
 
 				return 0;
 			}
@@ -772,7 +772,7 @@ namespace Game
 
 		public void LoadFromDB(SQLResult result)
 		{
-			// Set initial reputations (so everything is nifty before DB data load)
+			// Set initial reputations (so everything is nifty before DB _data load)
 			Initialize();
 
 			if (!result.IsEmpty())

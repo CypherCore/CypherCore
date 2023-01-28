@@ -48,7 +48,7 @@ namespace Game.Maps
 		{
 		}
 
-		//All-purpose data storage 64 bit
+		//All-purpose _data storage 64 bit
 		public virtual ObjectGuid GetGuidData(uint DataId)
 		{
 			return ObjectGuid.Empty;
@@ -67,7 +67,7 @@ namespace Game.Maps
 		{
 		}
 
-		//All-purpose data storage 32 bit
+		//All-purpose _data storage 32 bit
 		public virtual uint GetData(uint dataId)
 		{
 			return 0;

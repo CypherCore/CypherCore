@@ -564,12 +564,12 @@ namespace Game
 			{
 				SendAuctionCommandResult(0, AuctionCommand.Cancel, AuctionResult.DatabaseError, throttle.DelayUntilNext);
 				//this code isn't possible ... maybe there should be assert
-				Log.outError(LogFilter.Network, $"CHEATER: {player.GetGUID()} tried to cancel auction (id: {removeItem.AuctionID}) of another player or auction is null");
+				Log.outError(LogFilter.Network, $"CHEATER: {player.GetGUID()} tried to cancel auction (Id: {removeItem.AuctionID}) of another player or auction is null");
 
 				return;
 			}
 
-			// client bug - instead of removing auction in the UI, it only substracts 1 from visible count
+			// client bug - instead of removing auction in the UI, it only substracts 1 from visible Count
 			uint auctionIdForClient = auction.IsCommodity() ? 0 : auction.Id;
 
 			// Now remove the auction
@@ -824,7 +824,7 @@ namespace Game
 				return;
 			}
 
-			/*TC_LOG_INFO("network", "CMSG_AUCTION_SELL_COMMODITY: %s %s is selling Item %s %s to auctioneer %s with count " UI64FMTD " with with unit price " UI64FMTD " and with time %u (in sec) in auctionhouse %u",
+			/*TC_LOG_INFO("network", "CMSG_AUCTION_SELL_COMMODITY: %s %s is selling Item %s %s to auctioneer %s with Count " UI64FMTD " with with unit price " UI64FMTD " and with Time %u (in sec) in auctionhouse %u",
 			    _player.GetGUID().ToString(), _player.GetName(), items2.begin().second.first.GetNameForLocaleIdx(sWorld.GetDefaultDbcLocale()),
 			    ([&items2]()
 		{
@@ -835,7 +835,7 @@ namespace Game
 			        ss << ',' << itr.first.ToString();
 			    return ss.str();
 			} ()),
-		creature.GetGUID().ToString(), totalCount, sellCommodity.UnitPrice, uint32(auctionTime.count()), auctionHouse.GetAuctionHouseId());*/
+		creature.GetGUID().ToString(), totalCount, sellCommodity.UnitPrice, uint32(auctionTime.Count()), auctionHouse.GetAuctionHouseId());*/
 
 			if (HasPermission(RBACPermissions.LogGmTrade))
 			{
@@ -1031,7 +1031,7 @@ namespace Game
 
 			Log.outInfo(LogFilter.Network,
 			            $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} is selling Item {item.GetGUID()} {item.GetTemplate().GetName()} " +
-			            $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with time {auctionTime.TotalSeconds} " +
+			            $"to auctioneer {creature.GetGUID()} with Count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with Time {auctionTime.TotalSeconds} " +
 			            $"(in sec) in auctionhouse {auctionHouse.GetAuctionHouseId()}");
 
 			// Add to pending auctions, or fail with insufficient funds error

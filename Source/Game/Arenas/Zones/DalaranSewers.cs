@@ -63,7 +63,7 @@ namespace Game.Arenas
 					player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
 
 					// Someone has get back into the pipes and the knockback has already been performed,
-					// so we reset the knockback count for kicking the player again into the arena.
+					// so we reset the knockback Count for kicking the player again into the arena.
 					_events.ScheduleEvent(DalaranSewersEvents.PipeKnockback, DalaranSewersData.PipeKnockbackDelay);
 
 					break;
@@ -214,7 +214,7 @@ namespace Game.Arenas
 
 	internal struct DalaranSewersData
 	{
-		// These values are NOT blizzlike... need the correct data!
+		// These values are NOT blizzlike... need the correct _data!
 		public static TimeSpan WaterfallTimerMin = TimeSpan.FromSeconds(30);
 		public static TimeSpan WaterfallTimerMax = TimeSpan.FromSeconds(60);
 		public static TimeSpan WaterWarningDuration = TimeSpan.FromSeconds(5);

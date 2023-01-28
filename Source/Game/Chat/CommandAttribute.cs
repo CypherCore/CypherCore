@@ -30,7 +30,7 @@ namespace Game.Chat
 		}
 
         /// <summary>
-        ///  Command's name.
+        ///  Command's Name.
         /// </summary>
         public string Name { get; private set; }
 

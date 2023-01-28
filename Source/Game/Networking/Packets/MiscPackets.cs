@@ -243,7 +243,7 @@ namespace Game.Networking.Packets
 		{
 			public uint Type;
 			public uint Quantity;
-			public uint? WeeklyQuantity;    // Currency count obtained this Week.  
+			public uint? WeeklyQuantity;    // Currency Count obtained this Week.  
 			public uint? MaxWeeklyQuantity; // Weekly Currency cap.
 			public uint? TrackedQuantity;
 			public int? MaxQuantity;
@@ -902,17 +902,17 @@ namespace Game.Networking.Packets
 			_worldPacket.WriteInt32(VisibleMapIDs.Count * 2); // size in bytes
 
 			foreach (ushort visibleMapId in VisibleMapIDs)
-				_worldPacket.WriteUInt16(visibleMapId); // Active terrain swap map id
+				_worldPacket.WriteUInt16(visibleMapId); // Active terrain swap map Id
 
 			_worldPacket.WriteInt32(PreloadMapIDs.Count * 2); // size in bytes
 
 			foreach (ushort preloadMapId in PreloadMapIDs)
-				_worldPacket.WriteUInt16(preloadMapId); // Inactive terrain swap map id
+				_worldPacket.WriteUInt16(preloadMapId); // Inactive terrain swap map Id
 
 			_worldPacket.WriteInt32(UiMapPhaseIDs.Count * 2); // size in bytes
 
 			foreach (ushort uiMapPhaseId in UiMapPhaseIDs)
-				_worldPacket.WriteUInt16(uiMapPhaseId); // UI map id, WorldMapArea.db2, controls map display
+				_worldPacket.WriteUInt16(uiMapPhaseId); // UI map Id, WorldMapArea.db2, controls map display
 		}
 	}
 

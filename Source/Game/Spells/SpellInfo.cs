@@ -383,7 +383,7 @@ namespace Game.Spells
 			return false;
 		}
 
-		// checks if spell targets are selected from area, doesn't include spell effects in check (like area wide auras for example)
+		// checks if spell targets are selected from area, doesn't include spell effects in check (like area wide Auras for example)
 		public bool IsTargetingArea()
 		{
 			foreach (var effectInfo in _effects)
@@ -703,7 +703,7 @@ namespace Game.Spells
 				    (auraSpellInfo.Mechanic != Mechanics.Banish || (IsRankOf(auraSpellInfo) && auraSpellInfo.Dispel != DispelType.None))) // Banish shouldn't be immune to itself, but Cyclone should
 					return true;
 
-			// Dispels other auras on immunity, check if this spell makes the unit immune to aura
+			// Dispels other Auras on immunity, check if this spell makes the unit immune to aura
 			if (HasAttribute(SpellAttr1.ImmunityPurgesEffect) &&
 			    CanSpellProvideImmunityAgainstAura(auraSpellInfo))
 				return true;
@@ -713,15 +713,15 @@ namespace Game.Spells
 
 		public bool CanDispelAura(SpellInfo auraSpellInfo)
 		{
-			// These auras (like Divine Shield) can't be dispelled
+			// These Auras (like Divine Shield) can't be dispelled
 			if (auraSpellInfo.HasAttribute(SpellAttr0.NoImmunities))
 				return false;
 
-			// These spells (like Mass Dispel) can dispel all auras
+			// These spells (like Mass Dispel) can dispel all Auras
 			if (HasAttribute(SpellAttr0.NoImmunities))
 				return true;
 
-			// These auras (Cyclone for example) are not dispelable
+			// These Auras (Cyclone for example) are not dispelable
 			if ((auraSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && auraSpellInfo.Mechanic != Mechanics.None) ||
 			    auraSpellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities))
 				return false;
@@ -731,7 +731,7 @@ namespace Game.Spells
 
 		public bool IsSingleTarget()
 		{
-			// all other single target spells have if it has AttributesEx5
+			// all other single Target spells have if it has AttributesEx5
 			if (HasAttribute(SpellAttr5.LimitN))
 				return true;
 
@@ -791,7 +791,7 @@ namespace Game.Spells
 		{
 			// talents that learn spells can have stance requirements that need ignore
 			// (this requirement only for client-side stance show in talent description)
-			/* TODO: 6.x fix this in proper way (probably spell flags/attributes?)
+			/* TODO: 6.x fix this in proper way (probably spell Flags/attributes?)
 			if (CliDB.GetTalentSpellCost(Id) > 0 && HasEffect(SpellEffects.LearnSpell))
 			return SpellCastResult.SpellCastOk;
 			*/
@@ -1040,15 +1040,15 @@ namespace Game.Spells
 
 			Unit unitTarget = target.ToUnit();
 
-			// creature/player specific target checks
+			// creature/player specific Target checks
 			if (unitTarget != null)
 			{
-				// spells cannot be cast if target has a pet in combat either
+				// spells cannot be cast if Target has a pet in combat either
 				if (HasAttribute(SpellAttr1.OnlyPeacefulTargets) &&
 				    (unitTarget.IsInCombat() || unitTarget.HasUnitFlag(UnitFlags.PetInCombat)))
 					return SpellCastResult.TargetAffectingCombat;
 
-				// only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can target ghosts
+				// only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can Target ghosts
 				if (HasAttribute(SpellAttr3.OnlyOnGhosts) != unitTarget.HasAuraType(AuraType.Ghost))
 				{
 					if (HasAttribute(SpellAttr3.OnlyOnGhosts))
@@ -1060,7 +1060,7 @@ namespace Game.Spells
 				if (caster != unitTarget)
 					if (caster.IsTypeId(TypeId.Player))
 					{
-						// Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
+						// Do not allow these spells to Target creatures not tapped by us (Banish, Polymorph, many quest spells)
 						if (HasAttribute(SpellAttr2.CannotCastOnTapped))
 						{
 							Creature targetCreature = unitTarget.ToCreature();
@@ -1100,12 +1100,12 @@ namespace Game.Spells
 						}
 					}
 			}
-			// corpse specific target checks
+			// corpse specific Target checks
 			else if (target.IsTypeId(TypeId.Corpse))
 			{
 				Corpse corpseTarget = target.ToCorpse();
 
-				// cannot target bare bones
+				// cannot Target bare bones
 				if (corpseTarget.GetCorpseType() == CorpseType.Bones)
 					return SpellCastResult.BadTargets;
 
@@ -1124,7 +1124,7 @@ namespace Game.Spells
 				return SpellCastResult.SpellCastOk;
 			}
 
-			// corpseOwner and unit specific target checks
+			// corpseOwner and unit specific Target checks
 			if (!unitTarget.IsPlayer())
 			{
 				if (HasAttribute(SpellAttr3.OnlyOnPlayer))
@@ -1143,7 +1143,7 @@ namespace Game.Spells
 			    !unitTarget.IsAlive())
 				return SpellCastResult.TargetsDead;
 
-			// check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
+			// check this flag only for implicit targets (chain and area), allow to explicitly Target units for spells like Shield of Righteousness
 			if (Implicit &&
 			    HasAttribute(SpellAttr6.DoNotChainToCrowdControlledTargets) &&
 			    !unitTarget.CanFreeMove())
@@ -1174,12 +1174,12 @@ namespace Game.Spells
 			    !HasAttribute(SpellCustomAttributes.AllowInflightTarget))
 				return SpellCastResult.BadTargets;
 
-			/* TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
-			not allow passengers to be implicitly hit by spells, however this target Type should be an exception,
+			/* TARGET_UNIT_MASTER gets Blocked here for passengers, because the whole idea of this check is to
+			not allow passengers to be implicitly hit by spells, however this Target Type should be an exception,
 			if this is left it kills spells that award kill credit from vehicle to master (few spells),
-			the use of these 2 covers passenger target check, logically, if vehicle cast this to master it should always hit
+			the use of these 2 covers passenger Target check, logically, if vehicle cast this to master it should always hit
 			him, because it would be it's passenger, there's no such case where this gets to fail legitimacy, this problem
-			cannot be solved from within the check in other way since target Type cannot be called for the spell currently
+			cannot be solved from within the check in other way since Target Type cannot be called for the spell currently
 			Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
 			Unit unitCaster = caster.ToUnit();
 
@@ -1337,7 +1337,7 @@ namespace Game.Spells
 
 		public bool CheckTargetCreatureType(Unit target)
 		{
-			// Curse of Doom & Exorcism: not find another way to fix spell target check :/
+			// Curse of Doom & Exorcism: not find another way to fix spell Target check :/
 			if (SpellFamilyName == SpellFamilyNames.Warlock &&
 			    GetCategory() == 1179)
 			{
@@ -1348,7 +1348,7 @@ namespace Game.Spells
 					return true;
 			}
 
-			// if target is magnet (i.e Grounding Totem) the check is skipped
+			// if Target is magnet (i.e Grounding Totem) the check is skipped
 			if (target.IsMagnet())
 				return true;
 
@@ -1605,11 +1605,11 @@ namespace Game.Spells
 				}
 				case SpellFamilyNames.Mage:
 				{
-					// family flags 18(Molten), 25(Frost/Ice), 28(Mage)
+					// family Flags 18(Molten), 25(Frost/Ice), 28(Mage)
 					if (SpellFamilyFlags[0].HasAnyFlag(0x12040000u))
 						_spellSpecific = SpellSpecificType.MageArmor;
 
-					// Arcane brillance and Arcane intelect (normal check fails because of flags difference)
+					// Arcane brillance and Arcane intelect (normal check fails because of Flags difference)
 					if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
 						_spellSpecific = SpellSpecificType.MageArcaneBrillance;
 
@@ -1672,14 +1672,14 @@ namespace Game.Spells
 				}
 				case SpellFamilyNames.Paladin:
 				{
-					// Collection of all the seal family flags. No other paladin spell has any of those.
+					// Collection of all the seal family Flags. No other paladin spell has any of those.
 					if (SpellFamilyFlags[1].HasAnyFlag(0xA2000800))
 						_spellSpecific = SpellSpecificType.Seal;
 
 					if (SpellFamilyFlags[0].HasAnyFlag(0x00002190u))
 						_spellSpecific = SpellSpecificType.Hand;
 
-					// only paladin auras have this (for palaldin class family)
+					// only paladin Auras have this (for palaldin class family)
 					switch (Id)
 					{
 						case 465:    // Devotion Aura
@@ -1697,7 +1697,7 @@ namespace Game.Spells
 				}
 				case SpellFamilyNames.Shaman:
 				{
-					// family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
+					// family Flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
 					if (SpellFamilyFlags[1].HasAnyFlag(0x420u) ||
 					    SpellFamilyFlags[0].HasAnyFlag(0x00000400u) ||
 					    Id == 23552)
@@ -1924,11 +1924,11 @@ namespace Game.Spells
 					if (SpellFamilyFlags[0].HasAnyFlag(0x2000u))
 						return DiminishingGroup.Stun;
 
-					// Rake -- 163505 -- no flags on the stun
+					// Rake -- 163505 -- no Flags on the stun
 					if (Id == 163505)
 						return DiminishingGroup.Stun;
 
-					// Incapacitating Roar -- 99, no flags on the stun, 14
+					// Incapacitating Roar -- 99, no Flags on the stun, 14
 					if (SpellFamilyFlags[1].HasAnyFlag(0x1u))
 						return DiminishingGroup.Incapacitate;
 
@@ -1944,7 +1944,7 @@ namespace Game.Spells
 					if (SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
 						return DiminishingGroup.AOEKnockback;
 
-					// Ursol's Vortex -- 118283, no family flags
+					// Ursol's Vortex -- 118283, no family Flags
 					if (Id == 118283)
 						return DiminishingGroup.AOEKnockback;
 
@@ -1992,7 +1992,7 @@ namespace Game.Spells
 				}
 				case SpellFamilyNames.Hunter:
 				{
-					// Charge (Tenacity pet) -- 53148, no flags
+					// Charge (Tenacity pet) -- 53148, no Flags
 					if (Id == 53148)
 						return DiminishingGroup.Root;
 
@@ -2002,7 +2002,7 @@ namespace Game.Spells
 					    Id == 212638)
 						return DiminishingGroup.Root;
 
-					// Binding Shot -- 117526, no flags
+					// Binding Shot -- 117526, no Flags
 					if (Id == 117526)
 						return DiminishingGroup.Stun;
 
@@ -2087,7 +2087,7 @@ namespace Game.Spells
 					if (SpellFamilyFlags[2].HasAnyFlag(0x100000u))
 						return DiminishingGroup.Stun;
 
-					// Gnaw (Ghoul) -- 91800, no flags
+					// Gnaw (Ghoul) -- 91800, no Flags
 					if (Id == 91800)
 						return DiminishingGroup.Stun;
 
@@ -2139,7 +2139,7 @@ namespace Game.Spells
 				}
 				case SpellFamilyNames.Monk:
 				{
-					// Disable -- 116706, no flags
+					// Disable -- 116706, no Flags
 					if (Id == 116706)
 						return DiminishingGroup.Root;
 
@@ -2152,7 +2152,7 @@ namespace Game.Spells
 					if (SpellFamilyFlags[1].HasAnyFlag(0x200u))
 						return DiminishingGroup.Stun;
 
-					// Incendiary Breath (honor talent) -- 202274, no flags
+					// Incendiary Breath (honor talent) -- 202274, no Flags
 					if (Id == 202274)
 						return DiminishingGroup.Incapacitate;
 
@@ -2608,7 +2608,7 @@ namespace Game.Spells
 						                          return (((uint)auraSpellInfo.GetSchoolMask() & schoolImmunity) != 0 && // Check for school mask
 						                                  CanDispelAura(auraSpellInfo) &&
 						                                  (IsPositive() != aurApp.IsPositive()) && // Check spell vs aura possitivity
-						                                  !auraSpellInfo.IsPassive() &&            // Don't remove passive auras
+						                                  !auraSpellInfo.IsPassive() &&            // Don't remove passive Auras
 						                                  auraSpellInfo.Id != Id);                 // Don't remove self
 					                          });
 
@@ -3161,7 +3161,7 @@ namespace Game.Spells
 			if (power.PowerType != PowerType.Health)
 			{
 				if (!optionalCost)
-					// Flat mod from caster auras by spell school and power Type
+					// Flat mod from caster Auras by spell school and power Type
 					foreach (AuraEffect aura in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchool))
 					{
 						if ((aura.GetMiscValue() & (int)schoolMask) == 0)
@@ -3173,7 +3173,7 @@ namespace Game.Spells
 						powerCost += aura.GetAmount();
 					}
 
-				// PCT mod from user auras by spell school and power Type
+				// PCT mod from user Auras by spell school and power Type
 				foreach (var schoolCostPct in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct))
 				{
 					if ((schoolCostPct.GetMiscValue() & (int)schoolMask) == 0)
@@ -3243,7 +3243,7 @@ namespace Game.Spells
 				}
 
 			if (power.PowerType == PowerType.Mana)
-				powerCost = (int)((float)powerCost * (1.0f + unitCaster._unitData.ManaCostMultiplier));
+				powerCost = (int)((float)powerCost * (1.0f + unitCaster.UnitData.ManaCostMultiplier));
 
 			// power cost cannot become negative if initially positive
 			if (initiallyNegative != (powerCost < 0))
@@ -3304,10 +3304,10 @@ namespace Game.Spells
 
 		private float CalcPPMHasteMod(SpellProcsPerMinuteModRecord mod, Unit caster)
 		{
-			float haste       = caster._unitData.ModHaste;
-			float rangedHaste = caster._unitData.ModRangedHaste;
-			float spellHaste  = caster._unitData.ModSpellHaste;
-			float regenHaste  = caster._unitData.ModHasteRegen;
+			float haste       = caster.UnitData.ModHaste;
+			float rangedHaste = caster.UnitData.ModRangedHaste;
+			float spellHaste  = caster.UnitData.ModSpellHaste;
+			float regenHaste  = caster.UnitData.ModHasteRegen;
 
 			switch (mod.Param)
 			{
@@ -3589,7 +3589,7 @@ namespace Game.Spells
 			bool                 dstSet     = false;
 			SpellCastTargetFlags targetMask = Targets;
 
-			// prepare target mask using effect target entries
+			// prepare Target mask using effect Target entries
 			foreach (var effectInfo in GetEffects())
 			{
 				if (!effectInfo.IsEffect())
@@ -3598,14 +3598,14 @@ namespace Game.Spells
 				targetMask |= effectInfo.TargetA.GetExplicitTargetMask(ref srcSet, ref dstSet);
 				targetMask |= effectInfo.TargetB.GetExplicitTargetMask(ref srcSet, ref dstSet);
 
-				// add explicit target flags based on spell effects which have SpellEffectImplicitTargetTypes.Explicit and no valid target provided
+				// add explicit Target Flags based on spell effects which have SpellEffectImplicitTargetTypes.Explicit and no valid Target provided
 				if (effectInfo.GetImplicitTargetType() != SpellEffectImplicitTargetTypes.Explicit)
 					continue;
 
-				// extend explicit target mask only if valid targets for effect could not be provided by target types
+				// extend explicit Target mask only if valid targets for effect could not be provided by Target types
 				SpellCastTargetFlags effectTargetMask = effectInfo.GetMissingTargetMask(srcSet, dstSet, targetMask);
 
-				// don't add explicit object/dest flags when spell has no max range
+				// don't add explicit object/dest Flags when spell has no max range
 				if (GetMaxRange(true) == 0.0f &&
 				    GetMaxRange(false) == 0.0f)
 					effectTargetMask &= ~(SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseMask | SpellCastTargetFlags.DestLocation);
@@ -3634,7 +3634,7 @@ namespace Game.Spells
 			if (!spellInfo.IsPositiveEffect(effect.EffectIndex))
 				return false;
 
-			// passive auras like talents are all positive
+			// passive Auras like talents are all positive
 			if (spellInfo.IsPassive())
 				return true;
 
@@ -3647,7 +3647,7 @@ namespace Game.Spells
 
 			visited.Add(Tuple.Create(spellInfo, effect.EffectIndex));
 
-			//We need scaling level info for some auras that compute bp 0 or positive but should be debuffs
+			//We need scaling level info for some Auras that compute bp 0 or positive but should be debuffs
 			float bpScalePerLevel = effect.RealPointsPerLevel;
 			int   bp              = effect.CalcValue();
 
@@ -3681,7 +3681,7 @@ namespace Game.Spells
 				case SpellFamilyNames.Rogue:
 					switch (spellInfo.Id)
 					{
-						// Envenom must be considered as a positive effect even though it deals damage
+						// Envenom must be considered as a positive effect even though it deals Damage
 						case 32645: // Envenom
 							return true;
 						case 40251: // Shadow of Death, Teron Gorefiend, Black Temple
@@ -3726,7 +3726,7 @@ namespace Game.Spells
 					case SpellEffectName.HealPct:
 						return true;
 					case SpellEffectName.Instakill:
-						if (otherEffect.EffectIndex != effect.EffectIndex && // for spells like 38044: instakill effect is negative but auras on target must count as buff
+						if (otherEffect.EffectIndex != effect.EffectIndex && // for spells like 38044: instakill effect is negative but Auras on Target must Count as buff
 						    otherEffect.TargetA.GetTarget() == effect.TargetA.GetTarget() &&
 						    otherEffect.TargetB.GetTarget() == effect.TargetB.GetTarget())
 							return false;
@@ -3808,7 +3808,7 @@ namespace Game.Spells
 					break;
 				case SpellEffectName.DispelMechanic:
 					if (!_isPositiveTarget(effect))
-						// non-positive mechanic dispel on negative target
+						// non-positive mechanic dispel on negative Target
 						switch ((Mechanics)effect.MiscValue)
 						{
 							case Mechanics.Bandage:
@@ -3866,7 +3866,7 @@ namespace Game.Spells
 							return false;
 
 						break;
-					case AuraType.ModAttackspeed: // some buffs have negative bp, check both target and bp
+					case AuraType.ModAttackspeed: // some buffs have negative bp, check both Target and bp
 					case AuraType.ModMeleeHaste:
 					case AuraType.ModDamageDone:
 					case AuraType.ModResistance:
@@ -3901,7 +3901,7 @@ namespace Game.Spells
 							return false;
 
 						break;
-					case AuraType.ModHealthRegenPercent: // check targets and basepoints (target enemy and negative bp -> negative)
+					case AuraType.ModHealthRegenPercent: // check targets and basepoints (Target enemy and negative bp -> negative)
 						if (!_isPositiveTarget(effect) &&
 						    bp < 0)
 							return false;
@@ -3924,8 +3924,8 @@ namespace Game.Spells
 								if (!spellTriggeredEffect.IsEffect())
 									continue;
 
-								// if non-positive trigger cast targeted to positive target this main cast is non-positive
-								// this will place this spell auras as debuffs
+								// if non-positive trigger cast targeted to positive Target this main cast is non-positive
+								// this will place this spell Auras as debuffs
 								if (_isPositiveTarget(spellTriggeredEffect) &&
 								    !_isPositiveEffectImpl(spellTriggeredProto, spellTriggeredEffect, visited))
 									return false;
@@ -3938,7 +3938,7 @@ namespace Game.Spells
 					case AuraType.ModDecreaseSpeed:
 					case AuraType.ModFear:
 					case AuraType.ModTaunt:
-					// special auras: they may have non negative target but still need to be marked as debuff
+					// special Auras: they may have non negative Target but still need to be marked as debuff
 					// checked again after all effects (SpellInfo::_InitializeSpellPositivity)
 					case AuraType.ModPacify:
 					case AuraType.ModPacifySilence:
@@ -3973,7 +3973,7 @@ namespace Game.Spells
 					case AuraType.ModShapeshift:
 					case AuraType.ModThreat:
 					case AuraType.ProcTriggerSpellWithValue:
-						// check target for positive and negative spells
+						// check Target for positive and negative spells
 						if (!_isPositiveTarget(effect))
 							return false;
 
@@ -4113,7 +4113,7 @@ namespace Game.Spells
 				switch (spellEffectInfo.ApplyAuraName)
 				{
 					// has other non positive effect?
-					// then it should be marked negative if has same target as negative effect (ex 8510, 8511, 8893, 10267)
+					// then it should be marked negative if has same Target as negative effect (ex 8510, 8511, 8893, 10267)
 					case AuraType.Dummy:
 					case AuraType.ModStun:
 					case AuraType.ModFear:
@@ -4461,7 +4461,7 @@ namespace Game.Spells
 	{
 		private static StaticData[] _data = new StaticData[(int)SpellEffectName.TotalSpellEffects]
 		                                    {
-			                                    // implicit target Type           used target object Type
+			                                    // implicit Target Type           used Target object Type
 			                                    new(SpellEffectImplicitTargetTypes.None, SpellTargetObjectTypes.None),            // 0
 			                                    new(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit),        // 1 SPELL_EFFECT_INSTAKILL
 			                                    new(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit),        // 2 SPELL_EFFECT_SCHOOL_DAMAGE
@@ -4909,7 +4909,7 @@ namespace Game.Spells
 				}
 			}
 
-			// random damage
+			// random Damage
 			if (casterUnit != null)
 			{
 				// bonus amount from combo points
@@ -5035,7 +5035,7 @@ namespace Game.Spells
 					if (_spellInfo.HasAttribute(SpellAttr0.ScalesWithCreatureLevel))
 						stat = ExpectedStatType.CreatureAutoAttackDps;
 
-					// TODO - add expansion and content tuning id args?
+					// TODO - add expansion and content tuning Id args?
 					uint                contentTuningId = _spellInfo.ContentTuningId; // content tuning should be passed as arg, the one stored in SpellInfo is fallback
 					int                 expansion       = -2;
 					ContentTuningRecord contentTuning   = CliDB.ContentTuningStorage.LookupByKey(contentTuningId);
@@ -5127,7 +5127,7 @@ namespace Game.Spells
 			var                  effImplicitTargetMask = SpellInfo.GetTargetFlagMask(GetUsedTargetObjectType());
 			SpellCastTargetFlags providedTargetMask    = GetProvidedTargetMask() | mask;
 
-			// remove all flags covered by effect target mask
+			// remove all Flags covered by effect Target mask
 			if (Convert.ToBoolean(providedTargetMask & SpellCastTargetFlags.UnitMask))
 				effImplicitTargetMask &= ~SpellCastTargetFlags.UnitMask;
 
@@ -5262,8 +5262,8 @@ namespace Game.Spells
 
 		public class StaticData
 		{
-			public SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target Type provided for effect
-			public SpellTargetObjectTypes UsedTargetObjectType;       // defines valid target object Type for spell effect
+			public SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what Target can be added to effect Target list if there's no valid Target Type provided for effect
+			public SpellTargetObjectTypes UsedTargetObjectType;       // defines valid Target object Type for spell effect
 
 			public StaticData(SpellEffectImplicitTargetTypes implicittarget, SpellTargetObjectTypes usedtarget)
 			{
@@ -5660,8 +5660,8 @@ namespace Game.Spells
 				DirectionType      = direction;
 			}
 
-			public SpellTargetObjectTypes ObjectType;       // Type of object returned by target Type
-			public SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting target
+			public SpellTargetObjectTypes ObjectType;       // Type of object returned by Target Type
+			public SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting Target
 			public SpellTargetSelectionCategories SelectionCategory;
 			public SpellTargetCheckTypes SelectionCheckType; // defines selection criteria
 			public SpellTargetDirectionTypes DirectionType;  // direction for cone and dest targets

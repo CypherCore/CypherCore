@@ -152,7 +152,7 @@ namespace Game
 		public void SendPetitionQuery(ObjectGuid petitionGuid)
 		{
 			QueryPetitionResponse responsePacket = new();
-			responsePacket.PetitionID = (uint)petitionGuid.GetCounter(); // PetitionID (in Trinity always same as GUID_LOPART(petition guid))
+			responsePacket.PetitionID = (uint)petitionGuid.GetCounter(); // PetitionID (in Trinity always same as GUID_LOPART(petition Guid))
 
 			Petition petition = Global.PetitionMgr.GetPetition(petitionGuid);
 
@@ -298,7 +298,7 @@ namespace Game
 			signResult.Error = PetitionSigns.Ok;
 			SendPacket(signResult);
 
-			// update signs count on charter
+			// update signs Count on charter
 			Item item = _player.GetItemByGuid(packet.PetitionGUID);
 
 			if (item != null)
@@ -407,7 +407,7 @@ namespace Game
 				return;
 			}
 
-			// Check if guild name is already taken
+			// Check if guild Name is already taken
 			if (Global.GuildMgr.GetGuildByName(name))
 			{
 				Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, name);
@@ -477,7 +477,7 @@ namespace Game
 			}
 
 			WorldPacket data = new(ServerOpcodes.PetitionShowList);
-			data.WritePackedGuid(guid); // npc guid
+			data.WritePackedGuid(guid); // npc Guid
 
 			ServerPetitionShowList packet = new();
 			packet.Unit  = guid;

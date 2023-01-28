@@ -173,7 +173,7 @@ namespace Game
 				if (_player != player)
 					return;
 
-				// do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
+				// do not allow to have more than 100 mails in mailbox.. mails Count is in opcode uint8!!! - so max can be 255..
 				if (mailsCount > 100)
 				{
 					player.SendMailResult(0, MailResponseType.Send, MailResponseResult.RecipientCapReached);

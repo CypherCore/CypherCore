@@ -1446,10 +1446,10 @@ namespace Game.Networking.Packets
 			TuningType                    = ContentTuningType.CreatureToPlayerDamage;
 			PlayerLevelDelta              = (short)target.ActivePlayerData.ScalingPlayerLevelDelta;
 			PlayerItemLevel               = (ushort)target.GetAverageItemLevel();
-			ScalingHealthItemLevelCurveID = (ushort)target._unitData.ScalingHealthItemLevelCurveID;
+			ScalingHealthItemLevelCurveID = (ushort)target.UnitData.ScalingHealthItemLevelCurveID;
 			TargetLevel                   = (byte)target.GetLevel();
 			Expansion                     = (byte)creatureTemplate.HealthScalingExpansion;
-			TargetScalingLevelDelta       = (sbyte)attacker._unitData.ScalingLevelDelta;
+			TargetScalingLevelDelta       = (sbyte)attacker.UnitData.ScalingLevelDelta;
 			TargetContentTuningID         = creatureScaling.ContentTuningID;
 
 			return true;
@@ -1463,10 +1463,10 @@ namespace Game.Networking.Packets
 			TuningType                    = ContentTuningType.PlayerToCreatureDamage;
 			PlayerLevelDelta              = (short)attacker.ActivePlayerData.ScalingPlayerLevelDelta;
 			PlayerItemLevel               = (ushort)attacker.GetAverageItemLevel();
-			ScalingHealthItemLevelCurveID = (ushort)target._unitData.ScalingHealthItemLevelCurveID;
+			ScalingHealthItemLevelCurveID = (ushort)target.UnitData.ScalingHealthItemLevelCurveID;
 			TargetLevel                   = (byte)target.GetLevel();
 			Expansion                     = (byte)creatureTemplate.HealthScalingExpansion;
-			TargetScalingLevelDelta       = (sbyte)target._unitData.ScalingLevelDelta;
+			TargetScalingLevelDelta       = (sbyte)target.UnitData.ScalingLevelDelta;
 			TargetContentTuningID         = creatureScaling.ContentTuningID;
 
 			return true;
@@ -1483,7 +1483,7 @@ namespace Game.Networking.Packets
 			PlayerItemLevel         = 0;
 			TargetLevel             = (byte)target.GetLevel();
 			Expansion               = (byte)creatureTemplate.HealthScalingExpansion;
-			TargetScalingLevelDelta = (sbyte)accessor._unitData.ScalingLevelDelta;
+			TargetScalingLevelDelta = (sbyte)accessor.UnitData.ScalingLevelDelta;
 			TargetContentTuningID   = creatureScaling.ContentTuningID;
 
 			return true;
@@ -1664,17 +1664,17 @@ namespace Game.Networking.Packets
 		{
 			Transport     = data.ReadPackedGuid();
 			Location      = new Position();
-			Location.posX = data.ReadFloat();
-			Location.posY = data.ReadFloat();
-			Location.posZ = data.ReadFloat();
+			Location.X = data.ReadFloat();
+			Location.Y = data.ReadFloat();
+			Location.Z = data.ReadFloat();
 		}
 
 		public void Write(WorldPacket data)
 		{
 			data.WritePackedGuid(Transport);
-			data.WriteFloat(Location.posX);
-			data.WriteFloat(Location.posY);
-			data.WriteFloat(Location.posZ);
+			data.WriteFloat(Location.X);
+			data.WriteFloat(Location.Y);
+			data.WriteFloat(Location.Z);
 		}
 	}
 

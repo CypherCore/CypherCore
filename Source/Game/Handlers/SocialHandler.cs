@@ -20,12 +20,12 @@ namespace Game
 		{
 			WhoRequest request = whoRequest.Request;
 
-			// zones count, client limit = 10 (2.0.10)
+			// zones Count, client limit = 10 (2.0.10)
 			// can't be received from real client or broken packet
 			if (whoRequest.Areas.Count > 10)
 				return;
 
-			// user entered strings count, client limit=4 (checked on 2.0.10)
+			// user entered strings Count, client limit=4 (checked on 2.0.10)
 			// can't be received from real client or broken packet
 			if (request.Words.Count > 4)
 				return;
@@ -68,14 +68,14 @@ namespace Game
 				    !HasPermission(RBACPermissions.WhoSeeAllSecLevels))
 					continue;
 
-				// check if target is globally visible for player
+				// check if Target is globally visible for player
 				if (_player.GetGUID() != target.Guid &&
 				    !target.IsVisible)
 					if (Global.AccountMgr.IsPlayerAccount(_player.GetSession().GetSecurity()) ||
 					    target.Security > _player.GetSession().GetSecurity())
 						continue;
 
-				// check if target's level is in level range
+				// check if Target's level is in level range
 				uint lvl = target.Level;
 
 				if (lvl < request.MinLevel ||
@@ -147,7 +147,7 @@ namespace Game
 
 				response.Response.Add(whoEntry);
 
-				// 50 is maximum player count sent to client
+				// 50 is maximum player Count sent to client
 				if (response.Response.Count >= 50)
 					break;
 			}

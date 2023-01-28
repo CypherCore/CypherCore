@@ -692,7 +692,7 @@ namespace Game.AI
 		public void SetIsRangedAttacker(bool state)
 		{
 			_isSelfRangedAttacker = state;
-		} // this allows overriding of the default ranged attacker detection
+		} // this allows overriding of the default ranged Attacker detection
 
 		public virtual Unit SelectAttackTarget()
 		{
@@ -1363,7 +1363,7 @@ namespace Game.AI
 					}
 					else
 					{
-						if (IsRangedAttacker()) // chase to zero if the target isn't in line of sight
+						if (IsRangedAttacker()) // chase to zero if the Target isn't in line of sight
 						{
 							bool inLOS = me.IsWithinLOSInMap(target);
 
@@ -1414,7 +1414,7 @@ namespace Game.AI
 				me.AttackStop();
 
 				if (me.GetMotionMaster().Size() <= 1)                           // if there is no current movement (we dont want to erase/overwrite any existing stuff)
-					me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // force re-sync of current position for all clients
+					me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // Force re-sync of current position for all clients
 			}
 			else
 			{

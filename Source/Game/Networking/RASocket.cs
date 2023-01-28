@@ -163,7 +163,7 @@ namespace Game.Networking
 
 		private bool CheckAccessLevelAndPassword(string email, string password)
 		{
-			//"SELECT a.id, a.username FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id WHERE ba.email = ?"
+			//"SELECT a.Id, a.username FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.Id WHERE ba.email = ?"
 			PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
 			stmt.AddValue(0, email);
 			SQLResult result = DB.Login.Query(stmt);

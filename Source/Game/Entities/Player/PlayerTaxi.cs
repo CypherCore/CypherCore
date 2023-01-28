@@ -157,7 +157,7 @@ namespace Game.Entities
 					return false;
 			}
 
-			// can't load taxi path without mount set (quest taxi path?)
+			// can't load taxi path without Mount set (quest taxi path?)
 			if (Global.ObjectMgr.GetTaxiMountDisplayId(GetTaxiSource(), team, true) == 0)
 				return false;
 

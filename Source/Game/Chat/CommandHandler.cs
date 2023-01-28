@@ -137,7 +137,7 @@ namespace Game.Chat
 
 					something1 = args.NextString(":|"); // extract something
 
-					args.NextString("]"); // restart scan tail and skip name with possible spaces
+					args.NextString("]"); // restart scan tail and skip Name with possible spaces
 					args.NextString();    // skip link tail (to allow continue strtok(NULL, s) use after return from function
 					found_idx = i;
 
@@ -163,7 +163,7 @@ namespace Game.Chat
 
 		private string ExtractPlayerNameFromLink(StringArguments args)
 		{
-			// |color|Hplayer:name|h[name]|h|r
+			// |color|Hplayer:Name|h[Name]|h|r
 			string name = ExtractKeyFromLink(args, "Hplayer");
 
 			if (name.IsEmpty())
@@ -239,9 +239,9 @@ namespace Game.Chat
 				"Hplayer", "Hcreature", "Hgameobject"
 			};
 
-			// |color|Hcreature:creature_guid|h[name]|h|r
-			// |color|Hgameobject:go_guid|h[name]|h|r
-			// |color|Hplayer:name|h[name]|h|r
+			// |color|Hcreature:creature_guid|h[Name]|h|r
+			// |color|Hgameobject:go_guid|h[Name]|h|r
+			// |color|Hplayer:Name|h[Name]|h|r
 			string idS = ExtractKeyFromLink(args, guidKeys, out type);
 
 			if (string.IsNullOrEmpty(idS))
@@ -294,11 +294,11 @@ namespace Game.Chat
 
 		public uint ExtractSpellIdFromLink(StringArguments args)
 		{
-			// number or [name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
-			// number or [name] Shift-click form |color|Hglyph:glyph_slot_id:glyph_prop_id|h[value]|h|r
-			// number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-			// number or [name] Shift-click form |color|Htalent:talent_id, rank|h[name]|h|r
-			// number or [name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[name]|h|r
+			// number or [Name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
+			// number or [Name] Shift-click form |color|Hglyph:glyph_slot_id:glyph_prop_id|h[value]|h|r
+			// number or [Name] Shift-click form |color|Hspell:spell_id|h[Name]|h|r
+			// number or [Name] Shift-click form |color|Htalent:talent_id, rank|h[Name]|h|r
+			// number or [Name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[Name]|h|r
 			string idS = ExtractKeyFromLink(args, spellKeys, out int type, out string param1Str);
 
 			if (string.IsNullOrEmpty(idS))
@@ -399,10 +399,10 @@ namespace Game.Chat
 			if (selected.IsEmpty())
 				return _session.GetPlayer();
 
-			// first try with selected target
+			// first try with selected Target
 			Player targetPlayer = Global.ObjAccessor.FindConnectedPlayer(selected);
 
-			// if the target is not a player, then return self
+			// if the Target is not a player, then return self
 			if (!targetPlayer)
 				targetPlayer = _session.GetPlayer();
 
@@ -518,7 +518,7 @@ namespace Game.Chat
 			else if (target_account != 0)
 				target_ac_sec = Global.AccountMgr.GetSecurity(target_account, (int)Global.WorldMgr.GetRealmId().Index);
 			else
-				return true; // caller must report error for (target == NULL && target_account == 0)
+				return true; // caller must report error for (Target == NULL && target_account == 0)
 
 			if (_session.GetSecurity() < target_ac_sec ||
 			    (strong && _session.GetSecurity() <= target_ac_sec))

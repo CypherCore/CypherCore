@@ -91,7 +91,7 @@ namespace Game.Entities
 
 			_bonusData = new BonusData(itemProto);
 			SetCount(1);
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), itemProto.MaxDurability);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), itemProto.MaxDurability);
 			SetDurability(itemProto.MaxDurability);
 
 			for (int i = 0; i < itemProto.Effects.Count; ++i)
@@ -176,7 +176,7 @@ namespace Game.Entities
 			}
 
 			SetExpiration(duration - diff);
-			SetState(ItemUpdateState.Changed, owner); // save new time in database
+			SetState(ItemUpdateState.Changed, owner); // save new Time in database
 		}
 
 		public virtual void SaveToDB(SQLTransaction trans)
@@ -428,7 +428,7 @@ namespace Game.Entities
 
 		public virtual bool LoadFromDB(ulong guid, ObjectGuid ownerGuid, SQLFields fields, uint entry)
 		{
-			// create Item before any checks for store correct guid
+			// create Item before any checks for store correct Guid
 			// and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting Item from DB
 			_Create(ObjectGuid.Create(HighGuid.Item, guid));
 
@@ -480,7 +480,7 @@ namespace Game.Entities
 			uint durability = fields.Read<uint>(10);
 			SetDurability(durability);
 			// update max durability (and durability) if need
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), proto.MaxDurability);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), proto.MaxDurability);
 
 			// do not overwrite durability for wrapped items
 			if (durability > proto.MaxDurability &&
@@ -565,13 +565,13 @@ namespace Game.Entities
 			SetModifier(ItemModifier.TimewalkerLevel, fields.Read<uint>(49));
 			SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<uint>(50));
 
-			// Enchants must be loaded after all other bonus/scaling data
+			// Enchants must be loaded after all other bonus/scaling _data
 			var enchantmentTokens = new StringArray(fields.Read<string>(8), ' ');
 
 			if (enchantmentTokens.Length == (int)EnchantmentSlot.Max * 3)
 				for (int i = 0; i < (int)EnchantmentSlot.Max; ++i)
 				{
-					ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, i);
+					ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, i);
 					SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), uint.Parse(enchantmentTokens[i * 3 + 0]));
 					SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), uint.Parse(enchantmentTokens[i * 3 + 1]));
 					SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), short.Parse(enchantmentTokens[i * 3 + 2]));
@@ -606,7 +606,7 @@ namespace Game.Entities
 			for (byte i = 0; i <= artifactTier; ++i)
 				InitArtifactPowers(GetTemplate().GetArtifactID(), i);
 
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactXP), xp);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactXP), xp);
 			SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearanceId);
 			SetModifier(ItemModifier.ArtifactTier, artifactTier);
 
@@ -816,7 +816,7 @@ namespace Game.Entities
 
 			if (player.GetGUID() != item.GetOwnerGUID())
 			{
-				Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - _owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
+				Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - _owner's Guid ({0}) and player's Guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
 
 				return;
 			}
@@ -837,7 +837,7 @@ namespace Game.Entities
 
 			if (player.GetGUID() != item.GetOwnerGUID())
 			{
-				Log.outError(LogFilter.Player, "Item.RemoveFromUpdateQueueOf - _owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
+				Log.outError(LogFilter.Player, "Item.RemoveFromUpdateQueueOf - _owner's Guid ({0}) and player's Guid ({1}) don't match!", item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
 
 				return;
 			}
@@ -891,7 +891,7 @@ namespace Game.Entities
 
 		public void SetCount(uint value)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.StackCount), value);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.StackCount), value);
 
 			Player player = GetOwner();
 
@@ -1026,7 +1026,7 @@ namespace Game.Entities
 			if (GetEntry() != proto.GetId())
 				return InventoryResult.CantStack;
 
-			// check free space (full stacks can't be target of merge
+			// check free space (full stacks can't be Target of merge
 			if (GetCount() >= proto.GetMaxStackSize())
 				return InventoryResult.CantStack;
 
@@ -1068,7 +1068,7 @@ namespace Game.Entities
 
 		public void SetEnchantment(EnchantmentSlot slot, uint id, uint duration, uint charges, ObjectGuid caster = default)
 		{
-			// Better lost small time at check in comparison lost time at Item save to DB.
+			// Better lost small Time at check in comparison lost Time at Item save to DB.
 			if ((GetEnchantmentId(slot) == id) &&
 			    (GetEnchantmentDuration(slot) == duration) &&
 			    (GetEnchantmentCharges(slot) == charges))
@@ -1094,7 +1094,7 @@ namespace Game.Entities
 			ApplyArtifactPowerEnchantmentBonuses(slot, GetEnchantmentId(slot), false, owner);
 			ApplyArtifactPowerEnchantmentBonuses(slot, id, true, owner);
 
-			ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
+			ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), id);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), duration);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)charges);
@@ -1106,7 +1106,7 @@ namespace Game.Entities
 			if (GetEnchantmentDuration(slot) == duration)
 				return;
 
-			ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
+			ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), duration);
 			SetState(ItemUpdateState.Changed, owner);
 			// Cannot use GetOwner() here, has to be passed as an argument to avoid freeze due to hashtable locking
@@ -1117,7 +1117,7 @@ namespace Game.Entities
 			if (GetEnchantmentCharges(slot) == charges)
 				return;
 
-			ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
+			ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)charges);
 			SetState(ItemUpdateState.Changed, GetOwner());
 		}
@@ -1127,7 +1127,7 @@ namespace Game.Entities
 			if (GetEnchantmentId(slot) == 0)
 				return;
 
-			ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
+			ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, (int)slot);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), 0u);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), 0u);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)0);
@@ -1213,7 +1213,7 @@ namespace Game.Entities
 				}
 			}
 
-			SocketedGem gemField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Gems, slot);
+			SocketedGem gemField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Gems, slot);
 			SetUpdateFieldValue(gemField.ModifyValue(gemField.ItemId), gem.ItemId);
 			SetUpdateFieldValue(gemField.ModifyValue(gemField.Context), gem.Context);
 
@@ -1306,7 +1306,7 @@ namespace Game.Entities
 		public static Item CreateItem(uint item, uint count, ItemContext context, Player player = null)
 		{
 			if (count < 1)
-				return null; //don't create Item at zero count
+				return null; //don't create Item at zero Count
 
 			var pProto = Global.ObjectMgr.GetItemTemplate(item);
 
@@ -1391,7 +1391,7 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_itemData.WriteCreate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize() + 1);
@@ -1404,15 +1404,15 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.Item))
+			if (Values.HasChanged(TypeId.Item))
 				_itemData.WriteUpdate(buffer, flags, this, target);
 
 
 			data.WriteUInt32(buffer.GetSize());
-			data.WriteUInt32(_values.GetChangedObjectTypeMask());
+			data.WriteUInt32(Values.GetChangedObjectTypeMask());
 			data.WriteBytes(buffer);
 		}
 
@@ -1449,7 +1449,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.Item])
 				_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
@@ -1465,7 +1465,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_itemData);
+			Values.ClearChangesMask(_itemData);
 			base.ClearUpdateMask(remove);
 		}
 
@@ -1542,9 +1542,9 @@ namespace Game.Entities
 
 		public void UpdatePlayedTime(Player owner)
 		{
-			// Get current played time
+			// Get current played Time
 			uint current_playtime = _itemData.CreatePlayedTime;
-			// Calculate time elapsed since last played time update
+			// Calculate Time elapsed since last played Time update
 			long curtime      = GameTime.GetGameTime();
 			uint elapsed      = (uint)(curtime - _lastPlayedTimeUpdate);
 			uint new_playtime = current_playtime + elapsed;
@@ -1553,7 +1553,7 @@ namespace Game.Entities
 			if (new_playtime <= 2 * Time.Hour)
 			{
 				// No? Proceed.
-				// Update the data field
+				// Update the _data field
 				SetCreatePlayedTime(new_playtime);
 				// Flag as changed to get saved to DB
 				SetState(ItemUpdateState.Changed, owner);
@@ -1927,9 +1927,9 @@ namespace Game.Entities
 		public uint GetItemLevel(Player owner)
 		{
 			ItemTemplate itemTemplate       = GetTemplate();
-			uint         minItemLevel       = owner._unitData.MinItemLevel;
-			uint         minItemLevelCutoff = owner._unitData.MinItemLevelCutoff;
-			uint         maxItemLevel       = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner._unitData.MaxItemLevel;
+			uint         minItemLevel       = owner.UnitData.MinItemLevel;
+			uint         minItemLevelCutoff = owner.UnitData.MinItemLevelCutoff;
+			uint         maxItemLevel       = itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.UnitData.MaxItemLevel;
 			bool         pvpBonus           = owner.IsUsingPvpItemLevels();
 
 			uint        azeriteLevel = 0;
@@ -2114,17 +2114,17 @@ namespace Game.Entities
 
 		public uint GetModifier(ItemModifier modifier)
 		{
-			int modifierIndex = _itemData.Modifiers._value.Values.FindIndexIf(mod => { return mod.Type == (byte)modifier; });
+			int modifierIndex = _itemData.Modifiers.Value.Values.FindIndexIf(mod => { return mod.Type == (byte)modifier; });
 
 			if (modifierIndex != -1)
-				return _itemData.Modifiers._value.Values[modifierIndex].Value;
+				return _itemData.Modifiers.Value.Values[modifierIndex].Value;
 
 			return 0;
 		}
 
 		public void SetModifier(ItemModifier modifier, uint value)
 		{
-			int modifierIndex = _itemData.Modifiers._value.Values.FindIndexIf(mod => { return mod.Type == (byte)modifier; });
+			int modifierIndex = _itemData.Modifiers.Value.Values.FindIndexIf(mod => { return mod.Type == (byte)modifier; });
 
 			if (value != 0)
 			{
@@ -2134,11 +2134,11 @@ namespace Game.Entities
 					mod.Value = value;
 					mod.Type  = (byte)modifier;
 
-					AddDynamicUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Modifiers)._value.ModifyValue(_itemData.Modifiers._value.Values), mod);
+					AddDynamicUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Modifiers).Value.ModifyValue(_itemData.Modifiers.Value.Values), mod);
 				}
 				else
 				{
-					ItemModList itemModList = _values.ModifyValue(_itemData).ModifyValue(_itemData.Modifiers);
+					ItemModList itemModList = Values.ModifyValue(_itemData).ModifyValue(_itemData.Modifiers);
 					itemModList.ModifyValue(itemModList.Values, modifierIndex);
 					SetUpdateFieldValue(ref itemModList.ModifyValue(itemModList.Values, modifierIndex).GetValue().Value, value);
 				}
@@ -2148,7 +2148,7 @@ namespace Game.Entities
 				if (modifierIndex == -1)
 					return;
 
-				RemoveDynamicUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Modifiers)._value.ModifyValue(_itemData.Modifiers._value.Values), modifierIndex);
+				RemoveDynamicUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Modifiers).Value.ModifyValue(_itemData.Modifiers.Value.Values), modifierIndex);
 			}
 		}
 
@@ -2235,12 +2235,12 @@ namespace Game.Entities
 				itemBonusKey.ItemID       = GetEntry();
 				itemBonusKey.BonusListIDs = GetBonusListIDs();
 				itemBonusKey.BonusListIDs.Add(bonusListID);
-				SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemBonusKey), itemBonusKey);
+				SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemBonusKey), itemBonusKey);
 
 				foreach (ItemBonusRecord bonus in bonuses)
 					_bonusData.AddBonus(bonus.BonusType, bonus.Value);
 
-				SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
+				SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
 			}
 		}
 
@@ -2252,21 +2252,21 @@ namespace Game.Entities
 			ItemBonusKey itemBonusKey = new();
 			itemBonusKey.ItemID       = GetEntry();
 			itemBonusKey.BonusListIDs = bonusListIDs;
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemBonusKey), itemBonusKey);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemBonusKey), itemBonusKey);
 
 			foreach (uint bonusListID in GetBonusListIDs())
 				_bonusData.AddBonusList(bonusListID);
 
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
 		}
 
 		public void ClearBonuses()
 		{
 			ItemBonusKey itemBonusKey = new();
 			itemBonusKey.ItemID = GetEntry();
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemBonusKey), itemBonusKey);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemBonusKey), itemBonusKey);
 			_bonusData = new BonusData(GetTemplate());
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
 		}
 
 		public bool IsArtifactDisabled()
@@ -2299,7 +2299,7 @@ namespace Game.Entities
 			powerField.PurchasedRank        = artifactPower.PurchasedRank;
 			powerField.CurrentRankWithBonus = artifactPower.CurrentRankWithBonus;
 
-			AddDynamicUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers), powerField);
+			AddDynamicUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers), powerField);
 		}
 
 		public void SetArtifactPower(ushort artifactPowerId, byte purchasedRank, byte currentRankWithBonus)
@@ -2308,7 +2308,7 @@ namespace Game.Entities
 
 			if (foundIndex != 0)
 			{
-				ArtifactPower artifactPower = _values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, foundIndex);
+				ArtifactPower artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, foundIndex);
 				SetUpdateFieldValue(ref artifactPower.PurchasedRank, purchasedRank);
 				SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, currentRankWithBonus);
 			}
@@ -2390,7 +2390,7 @@ namespace Game.Entities
 									else
 										newRank -= (byte)enchant.EffectPointsMin[i];
 
-									artifactPower = _values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
+									artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
 									SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
 
 									if (IsEquipped())
@@ -2418,7 +2418,7 @@ namespace Game.Entities
 								else
 									newRank -= (byte)enchant.EffectPointsMin[i];
 
-								ArtifactPower artifactPower = _values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
+								ArtifactPower artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
 								SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
 
 								if (IsEquipped())
@@ -2458,7 +2458,7 @@ namespace Game.Entities
 												else
 													newRank -= (byte)enchant.EffectPointsMin[i];
 
-												artifactPower = _values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
+												artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
 												SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
 
 												if (IsEquipped())
@@ -2488,7 +2488,7 @@ namespace Game.Entities
 
 		public void SetArtifactXP(ulong xp)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactXP), xp);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactXP), xp);
 		}
 
 		public void GiveArtifactXp(ulong amount, Item sourceItem, ArtifactCategory artifactCategoryId)
@@ -2536,18 +2536,18 @@ namespace Game.Entities
 
 		public void SetContext(ItemContext context)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Context), (int)context);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Context), (int)context);
 		}
 
 		public void SetPetitionId(uint petitionId)
 		{
-			ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, 0);
+			ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, 0);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), petitionId);
 		}
 
 		public void SetPetitionNumSignatures(uint signatures)
 		{
-			ItemEnchantment enchantmentField = _values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, 0);
+			ItemEnchantment enchantmentField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Enchantment, 0);
 			SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), signatures);
 		}
 
@@ -2613,7 +2613,7 @@ namespace Game.Entities
 
 			if (set == null)
 			{
-				Log.outError(LogFilter.Sql, "Item set {0} for Item (id {1}) not found, mods not applied.", setid, proto.GetId());
+				Log.outError(LogFilter.Sql, "Item set {0} for Item (Id {1}) not found, mods not applied.", setid, proto.GetId());
 
 				return;
 			}
@@ -2631,7 +2631,7 @@ namespace Game.Entities
 				{
 					uint maxLevel = (uint)Global.DB2Mgr.GetCurveXAxisRange(item.GetBonus().PlayerLevelToItemLevelCurveId).Item2;
 
-					var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.PlayerData.CtrOptions._value.ContentTuningConditionMask, true);
+					var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.PlayerData.CtrOptions.Value.ContentTuningConditionMask, true);
 
 					if (contentTuning.HasValue)
 						maxLevel = Math.Min(maxLevel, (uint)contentTuning.Value.MaxLevel);
@@ -2684,7 +2684,7 @@ namespace Game.Entities
 
 				if (spellInfo == null)
 				{
-					Log.outError(LogFilter.Player, "WORLD: unknown spell id {0} in items set {1} effects", itemSetSpell.SpellID, setid);
+					Log.outError(LogFilter.Player, "WORLD: unknown spell Id {0} in items set {1} effects", itemSetSpell.SpellID, setid);
 
 					continue;
 				}
@@ -2763,7 +2763,7 @@ namespace Game.Entities
 
 		public void SetOwnerGUID(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Owner), guid);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Owner), guid);
 		}
 
 		public ObjectGuid GetContainedIn()
@@ -2773,7 +2773,7 @@ namespace Game.Entities
 
 		public void SetContainedIn(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ContainedIn), guid);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ContainedIn), guid);
 		}
 
 		public ObjectGuid GetCreator()
@@ -2783,7 +2783,7 @@ namespace Game.Entities
 
 		public void SetCreator(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Creator), guid);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Creator), guid);
 		}
 
 		public ObjectGuid GetGiftCreator()
@@ -2793,12 +2793,12 @@ namespace Game.Entities
 
 		public void SetGiftCreator(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.GiftCreator), guid);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.GiftCreator), guid);
 		}
 
 		private void SetExpiration(uint expiration)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Expiration), expiration);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Expiration), expiration);
 		}
 
 		public ItemBondingType GetBonding()
@@ -2836,17 +2836,17 @@ namespace Game.Entities
 
 		public void SetItemFlag(ItemFieldFlags flags)
 		{
-			SetUpdateFieldFlagValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags), (uint)flags);
+			SetUpdateFieldFlagValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags), (uint)flags);
 		}
 
 		public void RemoveItemFlag(ItemFieldFlags flags)
 		{
-			RemoveUpdateFieldFlagValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags), (uint)flags);
+			RemoveUpdateFieldFlagValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags), (uint)flags);
 		}
 
 		public void ReplaceAllItemFlags(ItemFieldFlags flags)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags), (uint)flags);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags), (uint)flags);
 		}
 
 		public bool HasItemFlag2(ItemFieldFlags2 flag)
@@ -2856,17 +2856,17 @@ namespace Game.Entities
 
 		public void SetItemFlag2(ItemFieldFlags2 flags)
 		{
-			SetUpdateFieldFlagValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags2), (uint)flags);
+			SetUpdateFieldFlagValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags2), (uint)flags);
 		}
 
 		public void RemoveItemFlag2(ItemFieldFlags2 flags)
 		{
-			RemoveUpdateFieldFlagValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags2), (uint)flags);
+			RemoveUpdateFieldFlagValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags2), (uint)flags);
 		}
 
 		public void ReplaceAllItemFlags2(ItemFieldFlags2 flags)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags2), (uint)flags);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.DynamicFlags2), (uint)flags);
 		}
 
 		public Bag ToBag()
@@ -2931,12 +2931,12 @@ namespace Game.Entities
 
 		public void SetDurability(uint durability)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.Durability), durability);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Durability), durability);
 		}
 
 		public void SetMaxDurability(uint maxDurability)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), maxDurability);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), maxDurability);
 		}
 
 		public void SetInTrade(bool b = true)
@@ -3011,7 +3011,7 @@ namespace Game.Entities
 
 		public void SetCreatePlayedTime(uint createPlayedTime)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.CreatePlayedTime), createPlayedTime);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.CreatePlayedTime), createPlayedTime);
 		}
 
 		public string GetText()
@@ -3031,7 +3031,7 @@ namespace Game.Entities
 
 		public void SetSpellCharges(int index, int value)
 		{
-			SetUpdateFieldValue(ref _values.ModifyValue(_itemData).ModifyValue(_itemData.SpellCharges, index), value);
+			SetUpdateFieldValue(ref Values.ModifyValue(_itemData).ModifyValue(_itemData.SpellCharges, index), value);
 		}
 
 		public ItemUpdateState GetState()
@@ -3110,7 +3110,7 @@ namespace Game.Entities
 
 		public void SetAppearanceModId(uint appearanceModId)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)appearanceModId);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ItemAppearanceModID), (byte)appearanceModId);
 		}
 
 		public float GetRepairCostMultiplier()

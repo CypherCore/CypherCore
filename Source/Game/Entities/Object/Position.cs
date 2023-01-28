@@ -2,56 +2,54 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Numerics;
-using Game.DataStorage;
 using Game.Maps;
 
 namespace Game.Entities
 {
-	public class Position
-	{
-		public float Orientation;
-		public float posX;
-		public float posY;
-		public float posZ;
+    public class Position
+    {
+        public float Orientation;
+        public float X;
+        public float Y;
+        public float Z;
 
-		public Position(float x = 0f, float y = 0f, float z = 0f, float o = 0f)
+        public Position(float x = 0f, float y = 0f, float z = 0f, float o = 0f)
 		{
-			posX        = x;
-			posY        = y;
-			posZ        = z;
+			X        = x;
+			Y        = y;
+			Z        = z;
 			Orientation = NormalizeOrientation(o);
 		}
 
 		public Position(Vector3 vector)
 		{
-			posX = vector.X;
-			posY = vector.Y;
-			posZ = vector.Z;
+			X = vector.X;
+			Y = vector.Y;
+			Z = vector.Z;
 		}
 
 		public Position(Position position)
 		{
-			posX        = position.posX;
-			posY        = position.posY;
-			posZ        = position.posZ;
+			X        = position.X;
+			Y        = position.Y;
+			Z        = position.Z;
 			Orientation = position.Orientation;
 		}
 
 		public float GetPositionX()
 		{
-			return posX;
+			return X;
 		}
 
 		public float GetPositionY()
 		{
-			return posY;
+			return Y;
 		}
 
 		public float GetPositionZ()
 		{
-			return posZ;
+			return Z;
 		}
 
 		public float GetOrientation()
@@ -61,28 +59,28 @@ namespace Game.Entities
 
 		public void Relocate(float x, float y)
 		{
-			posX = x;
-			posY = y;
+			X = x;
+			Y = y;
 		}
 
 		public void Relocate(float x, float y, float z)
 		{
-			posX = x;
-			posY = y;
-			posZ = z;
+			X = x;
+			Y = y;
+			Z = z;
 		}
 
 		public void Relocate(float x, float y, float z, float o)
 		{
-			posX = x;
-			posY = y;
-			posZ = z;
+			X = x;
+			Y = y;
+			Z = z;
 			SetOrientation(o);
 		}
 
 		public void Relocate(Position loc)
 		{
-			Relocate(loc.posX, loc.posY, loc.posZ, loc.Orientation);
+			Relocate(loc.X, loc.Y, loc.Z, loc.Orientation);
 		}
 
 		public void Relocate(Vector3 pos)
@@ -92,15 +90,15 @@ namespace Game.Entities
 
 		public void RelocateOffset(Position offset)
 		{
-			posX =  (float)(posX + (offset.posX * Math.Cos(Orientation) + offset.posY * Math.Sin(Orientation + MathFunctions.PI)));
-			posY =  (float)(posY + (offset.posY * Math.Cos(Orientation) + offset.posX * Math.Sin(Orientation)));
-			posZ += offset.posZ;
+			X =  (float)(X + (offset.X * Math.Cos(Orientation) + offset.Y * Math.Sin(Orientation + MathFunctions.PI)));
+			Y =  (float)(Y + (offset.Y * Math.Cos(Orientation) + offset.X * Math.Sin(Orientation)));
+			Z += offset.Z;
 			SetOrientation(Orientation + offset.Orientation);
 		}
 
 		public bool IsPositionValid()
 		{
-			return GridDefines.IsValidMapCoord(posX, posY, posZ, Orientation);
+			return GridDefines.IsValidMapCoord(X, Y, Z, Orientation);
 		}
 
 		private float ToRelativeAngle(float absAngle)
@@ -118,24 +116,19 @@ namespace Game.Entities
 			return ToRelativeAngle(GetAbsoluteAngle(x, y));
 		}
 
-		public void GetPosition(out float x, out float y)
-		{
-			x = posX;
-			y = posY;
-		}
 
 		public void GetPosition(out float x, out float y, out float z)
 		{
-			x = posX;
-			y = posY;
-			z = posZ;
+			x = X;
+			y = Y;
+			z = Z;
 		}
 
 		public void GetPosition(out float x, out float y, out float z, out float o)
 		{
-			x = posX;
-			y = posY;
-			z = posZ;
+			x = X;
+			y = Y;
+			z = Z;
 			o = Orientation;
 		}
 
@@ -151,9 +144,9 @@ namespace Game.Entities
 			float dx = endPos.GetPositionX() - GetPositionX();
 			float dy = endPos.GetPositionY() - GetPositionY();
 
-			retOffset.posX = (float)(dx * Math.Cos(GetOrientation()) + dy * Math.Sin(GetOrientation()));
-			retOffset.posY = (float)(dy * Math.Cos(GetOrientation()) - dx * Math.Sin(GetOrientation()));
-			retOffset.posZ = endPos.GetPositionZ() - GetPositionZ();
+			retOffset.X = (float)(dx * Math.Cos(GetOrientation()) + dy * Math.Sin(GetOrientation()));
+			retOffset.Y = (float)(dy * Math.Cos(GetOrientation()) - dx * Math.Sin(GetOrientation()));
+			retOffset.Z = endPos.GetPositionZ() - GetPositionZ();
 			retOffset.SetOrientation(endPos.GetOrientation() - GetOrientation());
 		}
 
@@ -193,16 +186,16 @@ namespace Game.Entities
 
 		public float GetExactDistSq(float x, float y, float z)
 		{
-			float dz = z - posZ;
+			float dz = z - Z;
 
 			return GetExactDist2dSq(x, y) + dz * dz;
 		}
 
 		public float GetExactDistSq(Position pos)
 		{
-			float dx = posX - pos.posX;
-			float dy = posY - pos.posY;
-			float dz = posZ - pos.posZ;
+			float dx = X - pos.X;
+			float dy = Y - pos.Y;
+			float dz = Z - pos.Z;
 
 			return dx * dx + dy * dy + dz * dz;
 		}
@@ -219,16 +212,16 @@ namespace Game.Entities
 
 		public float GetExactDist2dSq(float x, float y)
 		{
-			float dx = x - posX;
-			float dy = y - posY;
+			float dx = x - X;
+			float dy = y - Y;
 
 			return dx * dx + dy * dy;
 		}
 
 		public float GetExactDist2dSq(Position pos)
 		{
-			float dx = pos.posX - posX;
-			float dy = pos.posY - posY;
+			float dx = pos.X - X;
+			float dy = pos.Y - Y;
 
 			return dx * dx + dy * dy;
 		}
@@ -349,114 +342,17 @@ namespace Game.Entities
 
 		public override string ToString()
 		{
-			return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation}";
+			return $"X: {X} Y: {Y} Z: {Z} O: {Orientation}";
 		}
 
 		public static implicit operator Vector2(Position position)
 		{
-			return new Vector2(position.posX, position.posY);
+			return new Vector2(position.X, position.Y);
 		}
 
 		public static implicit operator Vector3(Position position)
 		{
-			return new Vector3(position.posX, position.posY, position.posZ);
-		}
-	}
-
-	public class WorldLocation : Position
-	{
-		private uint _mapId;
-		public ObjectCellMoveState _moveState;
-
-		public Position _newPosition = new();
-		private Cell currentCell;
-
-		public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0)
-		{
-			_mapId = mapId;
-			Relocate(x, y, z, o);
-		}
-
-		public WorldLocation(uint mapId, Position pos)
-		{
-			_mapId = mapId;
-			Relocate(pos);
-		}
-
-		public WorldLocation(WorldLocation loc)
-		{
-			_mapId = loc._mapId;
-			Relocate(loc);
-		}
-
-		public WorldLocation(Position pos)
-		{
-			_mapId = 0xFFFFFFFF;
-			Relocate(pos);
-		}
-
-		public void WorldRelocate(uint mapId, Position pos)
-		{
-			_mapId = mapId;
-			Relocate(pos);
-		}
-
-		public void WorldRelocate(WorldLocation loc)
-		{
-			_mapId = loc._mapId;
-			Relocate(loc);
-		}
-
-		public void WorldRelocate(uint mapId = 0xFFFFFFFF, float x = 0.0f, float y = 0.0f, float z = 0.0f, float o = 0.0f)
-		{
-			_mapId = mapId;
-			Relocate(x, y, z, o);
-		}
-
-		public uint GetMapId()
-		{
-			return _mapId;
-		}
-
-		public void SetMapId(uint mapId)
-		{
-			_mapId = mapId;
-		}
-
-		public Cell GetCurrentCell()
-		{
-			if (currentCell == null)
-				Log.outError(LogFilter.Server, "Calling currentCell  but its null");
-
-			return currentCell;
-		}
-
-		public void SetCurrentCell(Cell cell)
-		{
-			currentCell = cell;
-		}
-
-		public void SetNewCellPosition(float x, float y, float z, float o)
-		{
-			_moveState = ObjectCellMoveState.Active;
-			_newPosition.Relocate(x, y, z, o);
-		}
-
-		public WorldLocation GetWorldLocation()
-		{
-			return this;
-		}
-
-		public virtual string GetDebugInfo()
-		{
-			var mapEntry = CliDB.MapStorage.LookupByKey(_mapId);
-
-			return $"MapID: {_mapId} Map name: '{(mapEntry != null ? mapEntry.MapName[Global.WorldMgr.GetDefaultDbcLocale()] : "<not found>")}' {base.ToString()}";
-		}
-
-		public override string ToString()
-		{
-			return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation} MapId: {_mapId}";
+			return new Vector3(position.X, position.Y, position.Z);
 		}
 	}
 }

@@ -105,7 +105,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[Command("target", RBACPermissions.CommandCastTarget)]
+		[Command("Target", RBACPermissions.CommandCastTarget)]
 		private static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
 		{
 			Creature caster = handler.GetSelectedCreature();

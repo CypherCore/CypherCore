@@ -272,7 +272,7 @@ namespace Game.Movement
 					{
 						if (_sourceUnit.CanFly())
 							buildShotrcut = true;
-						// Allow to build a shortcut if the unit is falling and it's trying to move downwards towards a target (i.e. charging)
+						// Allow to build a shortcut if the unit is falling and it's trying to move downwards towards a Target (i.e. charging)
 						else if (_sourceUnit.IsFalling() &&
 						         endPos.Z < startPos.Z)
 							buildShotrcut = true;
@@ -381,8 +381,8 @@ namespace Game.Movement
 			{
 				Log.outDebug(LogFilter.Maps, "BuildPolyPath : (startPolyFound && endPolyFound)\n");
 
-				// we moved along the path and the target did not move out of our old poly-path
-				// our path is a simple subpath case, we have all the data we need
+				// we moved along the path and the Target did not move out of our old poly-path
+				// our path is a simple subpath case, we have all the _data we need
 				// just "cut" it out
 
 				_polyLength = pathEndIndex - pathStartIndex + 1;
@@ -392,13 +392,13 @@ namespace Game.Movement
 			{
 				Log.outDebug(LogFilter.Maps, "BuildPolyPath : (startPolyFound && !endPolyFound)\n");
 
-				// we are moving on the old path but target moved out
+				// we are moving on the old path but Target moved out
 				// so we have atleast part of poly-path ready
 
 				_polyLength -= pathStartIndex;
 
 				// try to adjust the suffix of the path instead of recalculating entire length
-				// at given interval the target cannot get too far from its last location
+				// at given interval the Target cannot get too far from its last location
 				// thus we have less poly to cover
 				// sub-path of optimal path is optimal
 
@@ -409,7 +409,7 @@ namespace Game.Movement
 
 				ulong suffixStartPoly = _pathPolyRefs[prefixPolyLength - 1];
 
-				// we need any point on our suffix start poly to generate poly-path, so we need last poly in prefix data
+				// we need any point on our suffix start poly to generate poly-path, so we need last poly in prefix _data
 				float[] suffixEndPoint = new float[3];
 				bool    posOverPoly    = false;
 
@@ -476,10 +476,10 @@ namespace Game.Movement
 				Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . (!startPolyFound && !endPolyFound)\n");
 
 				// either we have no path at all . first run
-				// or something went really wrong . we aren't moving along the path to the target
+				// or something went really wrong . we aren't moving along the path to the Target
 				// just generate new path
 
-				// free and invalidate old path data
+				// free and invalidate old path _data
 				Clear();
 
 				uint dtResult;
@@ -573,7 +573,7 @@ namespace Game.Movement
 				if (_polyLength == 0 ||
 				    Detour.dtStatusFailed(dtResult))
 				{
-					// only happens if we passed bad data to findPath(), or navmesh is messed up
+					// only happens if we passed bad _data to findPath(), or navmesh is messed up
 					Log.outError(LogFilter.Maps, "{0}'s Path Build failed: 0 length path", _source.GetGUID().ToString());
 					BuildShortcut();
 					pathType = PathType.NoPath;
@@ -617,7 +617,7 @@ namespace Game.Movement
 				                                          _pathPolyRefs,
 				                                          (int)_polyLength,
 				                                          pathPoints, // [out] path corner points
-				                                          null,       // [out] flags
+				                                          null,       // [out] Flags
 				                                          null,       // [out] shortened path
 				                                          ref pointCount,
 				                                          (int)_pointPathLimit,
@@ -645,7 +645,7 @@ namespace Game.Movement
 			else if (pointCount < 2 ||
 			         Detour.dtStatusFailed(dtResult))
 			{
-				// only happens if pass bad data to findStraightPath or navmesh is broken
+				// only happens if pass bad _data to findStraightPath or navmesh is broken
 				// single point paths can be generated here
 				// @todo check the exact cases
 				Log.outDebug(LogFilter.Maps, "++ PathGenerator.BuildPointPath FAILED! path sized {0} returned\n", pointCount);
@@ -673,7 +673,7 @@ namespace Game.Movement
 			// first point is always our current location - we need the next one
 			SetActualEndPosition(_pathPoints[pointCount - 1]);
 
-			// force the given destination, if needed
+			// Force the given destination, if needed
 			if (_forceDestination && (!pathType.HasAnyFlag(PathType.Normal) || !InRange(GetEndPosition(), GetActualEndPosition(), 1.0f, 1.0f)))
 			{
 				// we may want to keep partial subpath
@@ -747,7 +747,7 @@ namespace Game.Movement
 			steerPos     = new float[3];
 			steerPosFlag = 0;
 
-			// Find steer target.
+			// Find steer Target.
 			float[] steerPath      = new float[3 * 3];
 			byte[]  steerPathFlags = new byte[3];
 			ulong[] steerPathPolys = new ulong[3];
@@ -817,7 +817,7 @@ namespace Game.Movement
 			Detour.dtVcopy(smoothPath, nsmoothPath * 3, iterPos, 0);
 			nsmoothPath++;
 
-			// Move towards target a small advancement at a time until target reached or
+			// Move towards Target a small advancement at a Time until Target reached or
 			// when ran out of memory to store the path.
 			while (npolys != 0 && nsmoothPath < maxSmoothPathSize)
 			{
@@ -833,7 +833,7 @@ namespace Game.Movement
 				Detour.dtVsub(delta, steerPos, iterPos);
 				float len = (float)Math.Sqrt(Detour.dtVdot(delta, delta));
 
-				// If the steer target is end of path or off-mesh link, do not move past the location.
+				// If the steer Target is end of path or off-mesh link, do not move past the location.
 				if ((endOfPath || offMeshConnection) &&
 				    len < 4.0f)
 					len = 1.0f;
@@ -942,7 +942,7 @@ namespace Game.Movement
 
 			Clear();
 
-			// make two point path, our curr pos is the start, and dest is the end
+			// make two point path, our curr Pos is the start, and dest is the end
 			_pathPoints = new Vector3[2];
 
 			// set start and a default next position
@@ -966,7 +966,7 @@ namespace Game.Movement
 				if (creature.CanWalk())
 					includeFlags |= NavTerrainFlag.Ground;
 
-				// creatures don't take environmental damage
+				// creatures don't take environmental Damage
 				if (creature.CanEnterWater())
 					includeFlags |= (NavTerrainFlag.Water | NavTerrainFlag.MagmaSlime);
 			}
@@ -1044,7 +1044,7 @@ namespace Game.Movement
 
 		public void ShortenPathUntilDist(Position pos, float dist)
 		{
-			ShortenPathUntilDist(new Vector3(pos.posX, pos.posY, pos.posZ), dist);
+			ShortenPathUntilDist(new Vector3(pos.X, pos.Y, pos.Z), dist);
 		}
 
 		public void ShortenPathUntilDist(Vector3 target, float dist)
@@ -1084,7 +1084,7 @@ namespace Game.Movement
 				if ((_pathPoints[i - 1] - target).LengthSquared() >= distSq)
 					break; // bingo!
 
-				// check if the shortened path is still in LoS with the target
+				// check if the shortened path is still in LoS with the Target
 				_source.GetHitSpherePointFor(new Position(_pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight), out x, out y, out z);
 
 				if (!_source.GetMap().IsInLineOfSight(_source.GetPhaseShift(), x, y, z, _pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight, LineOfSightChecks.All, ModelIgnoreFlags.Nothing))
@@ -1105,7 +1105,7 @@ namespace Game.Movement
 				}
 			}
 
-			// ok, _pathPoints[i] is too close, _pathPoints[i-1] is not, so our target point is somewhere between the two...
+			// ok, _pathPoints[i] is too close, _pathPoints[i-1] is not, so our Target point is somewhere between the two...
 			//   ... settle for a guesstimate since i'm not confident in doing trig on every chase motion tick...
 			// (@todo review this)
 			_pathPoints[i] += (_pathPoints[i - 1] - _pathPoints[i]).direction() * (dist - (_pathPoints[i] - target).Length());
@@ -1225,7 +1225,7 @@ namespace Game.Movement
 		Blank = 0x00,                                   // path not built yet
 		Normal = 0x01,                                  // normal path
 		Shortcut = 0x02,                                // travel through obstacles, terrain, air, etc (old behavior)
-		Incomplete = 0x04,                              // we have partial path to follow - getting closer to target
+		Incomplete = 0x04,                              // we have partial path to follow - getting closer to Target
 		NoPath = 0x08,                                  // no valid path at all or error in generating one
 		NotUsingPath = 0x10,                            // used when we are either flying/swiming or on map w/o mmaps
 		Short = 0x20,                                   // path is longer or equal to its limited path length

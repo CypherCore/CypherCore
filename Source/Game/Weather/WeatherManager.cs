@@ -214,7 +214,7 @@ namespace Game
 				}
 			}
 
-			// At this point, only weather that isn't doing anything remains but that have weather data
+			// At this point, only weather that isn't doing anything remains but that have weather _data
 			uint chance1 = _weatherChances.data[season].rainChance;
 			uint chance2 = chance1 + _weatherChances.data[season].snowChance;
 			uint chance3 = chance2 + _weatherChances.data[season].stormChance;

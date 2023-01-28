@@ -70,7 +70,7 @@ namespace Game.Entities
 
 		private InstanceMap CreateInstance(uint mapId, uint instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group)
 		{
-			// make sure we have a valid map id
+			// make sure we have a valid map Id
 			var entry = CliDB.MapStorage.LookupByKey(mapId);
 
 			if (entry == null)
@@ -128,9 +128,9 @@ namespace Game.Entities
         ///  create the instance if it's not created already
         ///  the player is not actually added to the instance(only in InstanceMap::Add)
         /// </summary>
-        /// <param name="mapId"></param>
-        /// <param name="player"></param>
-        /// <param name="loginInstanceId"></param>
+        /// <param Name="mapId"></param>
+        /// <param Name="player"></param>
+        /// <param Name="loginInstanceId"></param>
         /// <returns>the right instance for the object, based on its InstanceId</returns>
         public Map CreateMap(uint mapId, Player player)
 		{
@@ -145,12 +145,12 @@ namespace Game.Entities
 			lock (_mapsLock)
 			{
 				Map  map           = null;
-				uint newInstanceId = 0; // instanceId of the resulting map
+				uint newInstanceId = 0; // InstanceId of the resulting map
 
 				if (entry.IsBattlegroundOrArena())
 				{
 					// instantiate or find existing bg map for player
-					// the instance id is set in battlegroundid
+					// the instance Id is set in battlegroundid
 					newInstanceId = player.GetBattlegroundId();
 
 					if (newInstanceId == 0)
@@ -192,7 +192,7 @@ namespace Game.Entities
 					}
 					else
 					{
-						// Try finding instance id for normal dungeon
+						// Try finding instance Id for normal dungeon
 						if (!entries.MapDifficulty.HasResetSchedule())
 							newInstanceId = group ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
 
@@ -206,7 +206,7 @@ namespace Game.Entities
 					// it is possible that the save exists but the map doesn't
 					map = FindMap_i(mapId, newInstanceId);
 
-					// is is also possible that instance id is already in use by another group for boss-based locks
+					// is is also possible that instance Id is already in use by another group for boss-based locks
 					if (!entries.IsInstanceIdBound() &&
 					    instanceLock != null &&
 					    map != null &&
@@ -286,7 +286,7 @@ namespace Game.Entities
 
 				if (instanceLock != null)
 					newInstanceId = instanceLock.GetInstanceId();
-				else if (!entries.MapDifficulty.HasResetSchedule()) // Try finding instance id for normal dungeon
+				else if (!entries.MapDifficulty.HasResetSchedule()) // Try finding instance Id for normal dungeon
 					newInstanceId = group ? group.GetRecentInstanceId(mapId) : player.GetRecentInstanceId(mapId);
 
 				if (newInstanceId == 0)
@@ -294,7 +294,7 @@ namespace Game.Entities
 
 				Map map = FindMap(mapId, newInstanceId);
 
-				// is is possible that instance id is already in use by another group for boss-based locks
+				// is is possible that instance Id is already in use by another group for boss-based locks
 				if (!entries.IsInstanceIdBound() &&
 				    instanceLock != null &&
 				    map != null &&
@@ -359,7 +359,7 @@ namespace Game.Entities
 
 			map.UnloadAll();
 
-			// Free up the instance id and allow it to be reused for normal dungeons, bgs and arenas
+			// Free up the instance Id and allow it to be reused for normal dungeons, bgs and arenas
 			if (map.IsBattlegroundOrArena() ||
 			    (map.IsDungeon() && !map.GetMapDifficulty().HasResetSchedule()))
 				FreeInstanceId(map.GetInstanceId());
@@ -411,19 +411,19 @@ namespace Game.Entities
 			_nextInstanceId = 1;
 
 			ulong     maxExistingInstanceId = 0;
-			SQLResult result                = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM instance");
+			SQLResult result                = DB.Characters.Query("SELECT IFNULL(MAX(InstanceId), 0) FROM instance");
 
 			if (!result.IsEmpty())
 				maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
 
-			result = DB.Characters.Query("SELECT IFNULL(MAX(instanceId), 0) FROM character_instance_lock");
+			result = DB.Characters.Query("SELECT IFNULL(MAX(InstanceId), 0) FROM character_instance_lock");
 
 			if (!result.IsEmpty())
 				maxExistingInstanceId = Math.Max(maxExistingInstanceId, result.Read<ulong>(0));
 
 			_freeInstanceIds.Length = (int)(maxExistingInstanceId + 2); // make space for one extra to be able to access [_nextInstanceId] index in case all slots are taken
 
-			// never allow 0 id
+			// never allow 0 Id
 			_freeInstanceIds[0] = false;
 		}
 
@@ -432,7 +432,7 @@ namespace Game.Entities
 			_freeInstanceIds[(int)instanceId] = false;
 
 			// Instances are pulled in ascending order from db and nextInstanceId is initialized with 1,
-			// so if the instance id is used, increment until we find the first unused one for a potential new instance
+			// so if the instance Id is used, increment until we find the first unused one for a potential new instance
 			if (_nextInstanceId == instanceId)
 				++_nextInstanceId;
 		}
@@ -451,7 +451,7 @@ namespace Game.Entities
 			Cypher.Assert(newInstanceId < _freeInstanceIds.Length);
 			_freeInstanceIds[(int)newInstanceId] = false;
 
-			// Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
+			// Find the lowest available Id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
 			int nextFreeId = -1;
 
 			for (var i = (int)_nextInstanceId++; i < _freeInstanceIds.Length; i++)
@@ -478,7 +478,7 @@ namespace Game.Entities
 
 		public void FreeInstanceId(uint instanceId)
 		{
-			// If freed instance id is lower than the next id available for new instances, use the freed one instead
+			// If freed instance Id is lower than the next Id available for new instances, use the freed one instead
 			_nextInstanceId                   = Math.Min(instanceId, _nextInstanceId);
 			_freeInstanceIds[(int)instanceId] = true;
 		}

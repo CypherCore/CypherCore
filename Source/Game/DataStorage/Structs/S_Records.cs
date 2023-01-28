@@ -446,7 +446,7 @@ namespace Game.DataStorage
 		public int ManaCost;
 		public int ManaCostPerLevel;
 		public int ManaPerSecond;
-		public uint OptionalCost; // Spell uses [ManaCost, ManaCost+ManaCostAdditional] power - affects tooltip parsing as multiplier on SpellEffectEntry::EffectPointsPerResource
+		public uint OptionalCost; // Spell uses [ManaCost, ManaCost+ManaCostAdditional] power - affects tooltip parsing as Multiplier on SpellEffectEntry::EffectPointsPerResource
 		public float OptionalCostPct;
 		public byte OrderIndex;
 		public float PowerCostMaxPct;

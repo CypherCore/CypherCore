@@ -69,7 +69,7 @@ namespace Game
 				if (!mapIds.IsEmpty() &&
 				    worldState.MapIds.Empty())
 				{
-					Log.outError(LogFilter.Sql, $"Table `world_state` contains a world State {id} with nonempty MapIDs ({mapIds}) but no valid map id was found, ignored");
+					Log.outError(LogFilter.Sql, $"Table `world_state` contains a world State {id} with nonempty MapIDs ({mapIds}) but no valid map Id was found, ignored");
 
 					continue;
 				}
@@ -110,7 +110,7 @@ namespace Game
 					if (!areaIds.IsEmpty() &&
 					    worldState.AreaIds.Empty())
 					{
-						Log.outError(LogFilter.Sql, $"Table `world_state` contains a world State {id} with nonempty AreaIDs ({areaIds}) but no valid area id was found, ignored");
+						Log.outError(LogFilter.Sql, $"Table `world_state` contains a world State {id} with nonempty AreaIDs ({areaIds}) but no valid area Id was found, ignored");
 
 						continue;
 					}

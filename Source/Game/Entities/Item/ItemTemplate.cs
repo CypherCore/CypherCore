@@ -12,23 +12,23 @@ namespace Game.Entities
 	public class ItemTemplate
 	{
 		protected ItemRecord BasicData;
-		public List<ItemEffectRecord> Effects = new();
+		public List<ItemEffectRecord> Effects { get; set; } = new();
 		protected ItemSparseRecord ExtendedData;
-		public ItemFlagsCustom FlagsCu;
-		public uint FoodType;
-		public uint ItemSpecClassMask;
+		public ItemFlagsCustom FlagsCu { get; set; }
+        public uint FoodType { get; set; }
+        public uint ItemSpecClassMask { get; set; }
 
-		public uint MaxDurability;
-		public uint MaxMoneyLoot;
-		public uint MinMoneyLoot;
-		public uint RandomBonusListTemplateId;
+        public uint MaxDurability { get; set; }
+        public uint MaxMoneyLoot { get; set; }
+        public uint MinMoneyLoot { get; set; }
+        public uint RandomBonusListTemplateId { get; set; }
 
-		// extra fields, not part of db2 files
-		public uint ScriptId;
-		public BitSet[] Specializations = new BitSet[3];
-		public float SpellPPMRate;
+        // extra fields, not part of db2 files
+        public uint ScriptId { get; set; }
+        public BitSet[] Specializations { get; set; } = new BitSet[3];
+		public float SpellPPMRate { get; set; }
 
-		public ItemTemplate(ItemRecord item, ItemSparseRecord sparse)
+        public ItemTemplate(ItemRecord item, ItemSparseRecord sparse)
 		{
 			BasicData    = item;
 			ExtendedData = sparse;

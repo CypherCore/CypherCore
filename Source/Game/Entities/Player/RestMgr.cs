@@ -68,7 +68,7 @@ namespace Game.Entities
 			    oldRestState == newRestState)
 				return;
 
-			// update data for client
+			// update _data for client
 			_player.SetRestThreshold(restType, (uint)_restBonus[(int)restType]);
 			_player.SetRestState(restType, newRestState);
 		}
@@ -89,7 +89,7 @@ namespace Game.Entities
 			_restFlagMask |= restFlag;
 
 			if (oldRestMask == 0 &&
-			    _restFlagMask != 0) // only set flag/time on the first rest State
+			    _restFlagMask != 0) // only set flag/Time on the first rest State
 			{
 				_restTime = GameTime.GetGameTime();
 				_player.SetPlayerFlag(PlayerFlags.Resting);
@@ -105,7 +105,7 @@ namespace Game.Entities
 			_restFlagMask &= ~restFlag;
 
 			if (oldRestMask != 0 &&
-			    _restFlagMask == 0) // only remove flag/time on the last rest State remove
+			    _restFlagMask == 0) // only remove flag/Time on the last rest State remove
 			{
 				_restTime = 0;
 				_player.RemovePlayerFlag(PlayerFlags.Resting);

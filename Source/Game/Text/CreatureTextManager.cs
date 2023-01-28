@@ -93,7 +93,7 @@ namespace Game
 				if (temp.emote != 0)
 					if (!CliDB.EmotesStorage.ContainsKey((uint)temp.emote))
 					{
-						Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
+						Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but Emote does not exist.");
 						temp.emote = Emote.OneshotNone;
 					}
 

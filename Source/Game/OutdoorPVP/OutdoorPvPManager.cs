@@ -128,7 +128,7 @@ namespace Game.PvP
 				return;
 
 			outdoor.HandlePlayerEnterZone(player, zoneid);
-			Log.outDebug(LogFilter.Outdoorpvp, "Player {0} entered outdoorpvp id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
+			Log.outDebug(LogFilter.Outdoorpvp, "Player {0} entered outdoorpvp Id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
 		}
 
 		public void HandlePlayerLeaveZone(Player player, uint zoneid)
@@ -143,7 +143,7 @@ namespace Game.PvP
 				return;
 
 			outdoor.HandlePlayerLeaveZone(player, zoneid);
-			Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left outdoorpvp id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
+			Log.outDebug(LogFilter.Outdoorpvp, "Player {0} left outdoorpvp Id {1}", player.GetGUID().ToString(), outdoor.GetTypeId());
 		}
 
 		public OutdoorPvP GetOutdoorPvPToZoneId(Map map, uint zoneid)

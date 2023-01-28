@@ -178,7 +178,7 @@ namespace Game.Garrisons
 		{
 			if (_followerDbIdGenerator >= ulong.MaxValue)
 			{
-				Log.outFatal(LogFilter.Server, "Garrison follower db id overflow! Can't continue, shutting down server. ");
+				Log.outFatal(LogFilter.Server, "Garrison follower db Id overflow! Can't continue, shutting down server. ");
 				Global.WorldMgr.StopNow();
 			}
 

@@ -59,7 +59,7 @@ namespace Game
 
 				if (packet.Password.Length > 127)
 				{
-					Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more than {127} characters long - blocked");
+					Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to create a channel with a password more than {127} characters long - Blocked");
 
 					return;
 				}

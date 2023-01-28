@@ -292,7 +292,7 @@ namespace Game.BattleGrounds.Zones
 						else
 							UpdateWorldState(ABWorldStates.ResourcesHorde, (int)_TeamScores[team]);
 
-						// update Achievement flags
+						// update Achievement Flags
 						// we increased _TeamScores[team] so we just need to check if it is 500 more than other teams resources
 						int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
 
@@ -316,7 +316,7 @@ namespace Game.BattleGrounds.Zones
 
 		public override void StartingEventCloseDoors()
 		{
-			// despawn banners, auras and buffs
+			// despawn banners, Auras and buffs
 			for (int obj = ABObjectTypes.BannerNeutral; obj < ABBattlegroundNodes.DynamicNodesCount * 8; ++obj)
 				SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
 
@@ -1034,7 +1034,7 @@ namespace Game.BattleGrounds.Zones
 		public const int Max = 57;
 	}
 
-	// Object id templates from DB
+	// Object Id templates from DB
 	internal struct ABObjectIds
 	{
 		public const uint BannerA = 180058;

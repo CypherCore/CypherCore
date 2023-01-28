@@ -394,7 +394,7 @@ namespace Game.Scripting
 			if (resultMeta.IsEmpty() ||
 			    resultWP.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain data for 0 chains, consisting of 0 splines with 0 waypoints. DB tables `script_spline_chain_meta` and `script_spline_chain_waypoints` are empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain _data for 0 chains, consisting of 0 splines with 0 waypoints. DB tables `script_spline_chain_meta` and `script_spline_chain_waypoints` are empty.");
 			}
 			else
 			{
@@ -444,14 +444,14 @@ namespace Game.Scripting
 
 					if (chain == null)
 					{
-						Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint data for spline chain {1}. No such chain exists - entry skipped.", entry, chainId);
+						Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint _data for spline chain {1}. No such chain exists - entry skipped.", entry, chainId);
 
 						continue;
 					}
 
 					if (splineId >= chain.Count)
 					{
-						Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint data for spline ({1},{2}). The specified chain does not have a spline with this index - entry skipped.", entry, chainId, splineId);
+						Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint _data for spline ({1},{2}). The specified chain does not have a spline with this index - entry skipped.", entry, chainId, splineId);
 
 						continue;
 					}
@@ -460,7 +460,7 @@ namespace Game.Scripting
 
 					if (wpId != spline.Points.Count)
 					{
-						Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has orphaned waypoint data in spline ({1},{2}) at index {3}. Skipped.", entry, chainId, splineId, wpId);
+						Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has orphaned waypoint _data in spline ({1},{2}) at index {3}. Skipped.", entry, chainId, splineId, wpId);
 
 						continue;
 					}
@@ -469,7 +469,7 @@ namespace Game.Scripting
 					++wpCount;
 				} while (resultWP.NextRow());
 
-				Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain data for {0} chains, consisting of {1} splines with {2} waypoints in {3} ms", chainCount, splineCount, wpCount, Time.GetMSTimeDiffToNow(oldMSTime));
+				Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain _data for {0} chains, consisting of {1} splines with {2} waypoints in {3} ms", chainCount, splineCount, wpCount, Time.GetMSTimeDiffToNow(oldMSTime));
 			}
 		}
 

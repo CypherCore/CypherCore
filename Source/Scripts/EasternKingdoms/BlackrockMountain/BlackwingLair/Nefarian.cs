@@ -552,7 +552,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 
 						                      break;
 					                      case EventIds.Taillash:
-						                      // Cast Nyi since we need a better check for behind target
+						                      // Cast Nyi since we need a better check for behind Target
 						                      DoCastVictim(SpellIds.Taillash);
 						                      _events.ScheduleEvent(EventIds.Taillash, TimeSpan.FromSeconds(10));
 

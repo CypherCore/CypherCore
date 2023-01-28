@@ -40,7 +40,7 @@ namespace Game
 
 			DeleteFromDB(_owner.GetGUID());
 
-			// re-fill data
+			// re-fill _data
 			CheckAllQuestObjectiveCriteria(_owner);
 		}
 
@@ -88,8 +88,8 @@ namespace Game
 
 					if (criteria == null)
 					{
-						// Removing non-existing criteria data for all characters
-						Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
+						// Removing non-existing criteria _data for all characters
+						Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} _data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
 
 						PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
 						stmt.AddValue(0, criteriaId);

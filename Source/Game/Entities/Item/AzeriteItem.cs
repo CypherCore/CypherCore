@@ -22,7 +22,7 @@ namespace Game.Entities
 			ObjectTypeMask |= TypeMask.AzeriteItem;
 			ObjectTypeId   =  TypeId.AzeriteItem;
 
-			SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.DEBUGknowledgeWeek), -1);
+			SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.DEBUGknowledgeWeek), -1);
 		}
 
 		public override bool Create(ulong guidlow, uint itemId, ItemContext context, Player owner)
@@ -30,8 +30,8 @@ namespace Game.Entities
 			if (!base.Create(guidlow, itemId, context, owner))
 				return false;
 
-			SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Level), 1u);
-			SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.KnowledgeLevel), GetCurrentKnowledgeLevel());
+			SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Level), 1u);
+			SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.KnowledgeLevel), GetCurrentKnowledgeLevel());
 			UnlockDefaultMilestones();
 
 			return true;
@@ -137,9 +137,9 @@ namespace Game.Entities
 				needSave                   = true;
 			}
 
-			SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Xp), azeriteData.Xp);
-			SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Level), azeriteData.Level);
-			SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.KnowledgeLevel), azeriteData.KnowledgeLevel);
+			SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Xp), azeriteData.Xp);
+			SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Level), azeriteData.Level);
+			SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.KnowledgeLevel), azeriteData.KnowledgeLevel);
 
 			foreach (uint azeriteItemMilestonePowerId in azeriteData.AzeriteItemMilestonePowers)
 				AddUnlockedEssenceMilestone(azeriteItemMilestonePowerId);
@@ -170,7 +170,7 @@ namespace Game.Entities
 				    owner.GetPrimarySpecialization() == selectedEssenceData.SpecializationId)
 					selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(true);
 
-				AddDynamicUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences), selectedEssences);
+				AddDynamicUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences), selectedEssences);
 			}
 
 			// add selected essences for current spec
@@ -226,7 +226,7 @@ namespace Game.Entities
 
 		private uint GetCurrentKnowledgeLevel()
 		{
-			// count weeks from 14.01.2020
+			// Count weeks from 14.01.2020
 			DateTime now       = GameTime.GetDateAndTime();
 			DateTime beginDate = new(2020, 1, 14);
 			uint     knowledge = 0;
@@ -276,7 +276,7 @@ namespace Game.Entities
 					}
 				} while (remainingXP > 0 && level < PlayerConst.MaxAzeriteItemLevel);
 
-				SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Xp), currentXP);
+				SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Xp), currentXP);
 
 				owner.UpdateCriteria(CriteriaType.EarnArtifactXPForAzeriteItem, xp);
 
@@ -286,7 +286,7 @@ namespace Game.Entities
 					if (IsEquipped())
 						owner._ApplyItemBonuses(this, GetSlot(), false);
 
-					SetUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Level), level);
+					SetUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.Level), level);
 					UnlockDefaultMilestones();
 					owner.UpdateCriteria(CriteriaType.AzeriteLevelReached, level);
 
@@ -338,7 +338,7 @@ namespace Game.Entities
 
 		public void AddUnlockedEssenceMilestone(uint azeriteItemMilestonePowerId)
 		{
-			AddDynamicUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssenceMilestones), azeriteItemMilestonePowerId);
+			AddDynamicUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssenceMilestones), azeriteItemMilestonePowerId);
 		}
 
 		public uint GetEssenceRank(uint azeriteEssenceId)
@@ -358,7 +358,7 @@ namespace Game.Entities
 			if (rank == 0 &&
 			    index >= 0)
 			{
-				RemoveDynamicUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssences), index);
+				RemoveDynamicUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssences), index);
 
 				return;
 			}
@@ -371,11 +371,11 @@ namespace Game.Entities
 				UnlockedAzeriteEssence unlockedEssence = new();
 				unlockedEssence.AzeriteEssenceID = azeriteEssenceId;
 				unlockedEssence.Rank             = rank;
-				AddDynamicUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssences), unlockedEssence);
+				AddDynamicUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssences), unlockedEssence);
 			}
 			else
 			{
-				UnlockedAzeriteEssence actorField = _values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssences, index);
+				UnlockedAzeriteEssence actorField = Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.UnlockedEssences, index);
 				SetUpdateFieldValue(ref actorField.Rank, rank);
 			}
 		}
@@ -394,7 +394,7 @@ namespace Game.Entities
 			SelectedAzeriteEssences selectedEssences = new();
 			selectedEssences.ModifyValue(selectedEssences.SpecializationID).SetValue(specializationId);
 			selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(true);
-			AddDynamicUpdateFieldValue(_values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences), selectedEssences);
+			AddDynamicUpdateFieldValue(Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences), selectedEssences);
 		}
 
 		public void SetSelectedAzeriteEssences(uint specializationId)
@@ -403,7 +403,7 @@ namespace Game.Entities
 
 			if (index >= 0)
 			{
-				SelectedAzeriteEssences selectedEssences = _values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);
+				SelectedAzeriteEssences selectedEssences = Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);
 				SetUpdateFieldValue(selectedEssences.ModifyValue(selectedEssences.Enabled), false);
 			}
 
@@ -411,7 +411,7 @@ namespace Game.Entities
 
 			if (index >= 0)
 			{
-				SelectedAzeriteEssences selectedEssences = _values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);
+				SelectedAzeriteEssences selectedEssences = Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);
 				SetUpdateFieldValue(selectedEssences.ModifyValue(selectedEssences.Enabled), true);
 			}
 			else
@@ -425,7 +425,7 @@ namespace Game.Entities
 			//ASSERT(Slot < MAX_AZERITE_ESSENCE_SLOT);
 			int index = _azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled; });
 			//ASSERT(index >= 0);
-			SelectedAzeriteEssences selectedEssences = _values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);
+			SelectedAzeriteEssences selectedEssences = Values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);
 			SetUpdateFieldValue(ref selectedEssences.ModifyValue(selectedEssences.AzeriteEssenceID, slot), azeriteEssenceId);
 		}
 
@@ -435,7 +435,7 @@ namespace Game.Entities
 			WorldPacket     buffer = new();
 
 			buffer.WriteUInt8((byte)flags);
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_itemData.WriteCreate(buffer, flags, this, target);
 			_azeriteItemData.WriteCreate(buffer, flags, this, target);
 
@@ -448,17 +448,17 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.Item))
+			if (Values.HasChanged(TypeId.Item))
 				_itemData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.AzeriteItem))
+			if (Values.HasChanged(TypeId.AzeriteItem))
 				_azeriteItemData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
-			data.WriteUInt32(_values.GetChangedObjectTypeMask());
+			data.WriteUInt32(Values.GetChangedObjectTypeMask());
 			data.WriteBytes(buffer);
 		}
 
@@ -505,7 +505,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.Item])
 				_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
@@ -524,7 +524,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_azeriteItemData);
+			Values.ClearChangesMask(_azeriteItemData);
 			base.ClearUpdateMask(remove);
 		}
 

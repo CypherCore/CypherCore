@@ -207,7 +207,7 @@ namespace Game.Collision
 					if (prevAxis != -1 &&
 					    !float.IsNaN(prevClip))
 					{
-						// second time through - lets create the previous split
+						// second Time through - lets create the previous split
 						// since it produced empty space
 						int nextIndex0 = tempTree.Count;
 						// allocate child node
@@ -234,7 +234,7 @@ namespace Game.Collision
 							tempTree[nodeIndex + 2] = FloatToRawIntBits(prevClip);
 						}
 
-						// count Stats for the unused leaf
+						// Count Stats for the unused leaf
 						depth++;
 						stats.UpdateLeaf(depth, 0);
 						// now we keep going as we are, with a new nodeIndex:

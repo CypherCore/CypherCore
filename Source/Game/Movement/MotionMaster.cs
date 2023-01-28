@@ -338,7 +338,7 @@ namespace Game.Movement
 			if (top.HasFlag(MovementGeneratorFlags.Deactivated))
 				top.Reset(_owner);
 
-			Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (Type: {top.GetMovementGeneratorType()}, flags: {top.Flags})");
+			Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (Type: {top.GetMovementGeneratorType()}, Flags: {top.Flags})");
 
 			if (!top.Update(_owner, diff))
 			{
@@ -579,7 +579,7 @@ namespace Game.Movement
 
 			if (owner == null)
 			{
-				Log.outError(LogFilter.Movement, $"MotionMaster::MoveTargetedHome: '{_owner.GetGUID()}', attempted to move towards target home.");
+				Log.outError(LogFilter.Movement, $"MotionMaster::MoveTargetedHome: '{_owner.GetGUID()}', attempted to move towards Target home.");
 
 				return;
 			}
@@ -607,7 +607,7 @@ namespace Game.Movement
 
 		public void MoveFollow(Unit target, float dist, ChaseAngle angle, MovementSlot slot = MovementSlot.Active)
 		{
-			// Ignore movement request if target not exist
+			// Ignore movement request if Target not exist
 			if (!target ||
 			    target == _owner)
 				return;
@@ -627,7 +627,7 @@ namespace Game.Movement
 
 		public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
 		{
-			// Ignore movement request if target not exist
+			// Ignore movement request if Target not exist
 			if (!target ||
 			    target == _owner)
 				return;
@@ -663,7 +663,7 @@ namespace Game.Movement
 
 		public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null)
 		{
-			MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient);
+			MovePoint(id, pos.X, pos.Y, pos.Z, generatePath, finalOrient);
 		}
 
 		public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null)
@@ -687,7 +687,7 @@ namespace Game.Movement
 			}
 			else
 			{
-				// We are already close enough. We just need to turn toward the target without changing position.
+				// We are already close enough. We just need to turn toward the Target without changing position.
 				var initializer = (MoveSplineInit init) =>
 				                  {
 					                  init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
@@ -827,7 +827,7 @@ namespace Game.Movement
 
 		public void MoveJump(float x, float y, float z, float o, float speedXY, float speedZ, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
 		{
-			Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
+			Log.outDebug(LogFilter.Server, "Unit ({0}) Jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
 
 			if (speedXY < 0.01f)
 				return;
@@ -978,7 +978,7 @@ namespace Game.Movement
 
 			if (chain.Empty())
 			{
-				Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: creature with entry {0} tried to walk along non-existing spline chain with DB id {1}.", owner.GetEntry(), dbChainId);
+				Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: creature with entry {0} tried to walk along non-existing spline chain with DB Id {1}.", owner.GetEntry(), dbChainId);
 
 				return;
 			}
@@ -1422,7 +1422,7 @@ namespace Game.Movement
 
 	public struct ChaseAngle
 	{
-		public float RelativeAngle; // we want to be at this angle relative to the target (0 = front, _PI = back)
+		public float RelativeAngle; // we want to be at this angle relative to the Target (0 = front, _PI = back)
 		public float Tolerance;     // but we'll tolerate anything within +- this much
 
 		public ChaseAngle(float angle, float tol = MathFunctions.PiOver4)

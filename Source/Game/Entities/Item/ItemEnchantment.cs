@@ -38,7 +38,7 @@ namespace Game.Entities
 
 				if (Global.DB2Mgr.GetItemBonusList(bonusListId) == null)
 				{
-					Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by id {id} doesn't have exist in ItemBonus.db2");
+					Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by Id {id} doesn't have exist in ItemBonus.db2");
 
 					continue;
 				}
@@ -46,7 +46,7 @@ namespace Game.Entities
 				if (chance < 0.000001f ||
 				    chance > 100.0f)
 				{
-					Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by id {id} has invalid chance {chance}");
+					Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by Id {id} has invalid chance {chance}");
 
 					continue;
 				}
@@ -79,7 +79,7 @@ namespace Game.Entities
 
 			if (tab == null)
 			{
-				Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+				Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId Id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
 
 				return 0;
 			}

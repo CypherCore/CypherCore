@@ -90,7 +90,7 @@ namespace Game
 			if (!LoadMapData(basePath, mapId))
 				return false;
 
-			// get this mmap data
+			// get this mmap _data
 			MMapData mmap = loadedMMaps[mapId];
 			Cypher.Assert(mmap.navMesh != null);
 
@@ -143,7 +143,7 @@ namespace Game
 
 			ulong tileRef = 0;
 
-			// memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
+			// memory allocated for _data is now managed by detour, and will be deallocated when the tile is removed
 			if (Detour.dtStatusSucceed(mmap.navMesh.addTile(data, 1, 0, ref tileRef)))
 			{
 				mmap.loadedTileRefs.Add(packedGridPos, tileRef);
@@ -173,12 +173,12 @@ namespace Game
 
 			if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
 			{
-				Log.outError(LogFilter.Maps, "MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+				Log.outError(LogFilter.Maps, "MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0:D4} InstanceId {1}", mapId, instanceId);
 
 				return false;
 			}
 
-			Log.outDebug(LogFilter.Maps, "MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+			Log.outDebug(LogFilter.Maps, "MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {0:D4} InstanceId {1}", mapId, instanceId);
 			mmap.navMeshQueries.Add(instanceId, query);
 
 			return true;
@@ -281,13 +281,13 @@ namespace Game
 
 			if (!mmap.navMeshQueries.ContainsKey(instanceId))
 			{
-				Log.outDebug(LogFilter.Maps, "MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery mapId {0} instanceId {1}", mapId, instanceId);
+				Log.outDebug(LogFilter.Maps, "MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery mapId {0} InstanceId {1}", mapId, instanceId);
 
 				return false;
 			}
 
 			mmap.navMeshQueries.Remove(instanceId);
-			Log.outInfo(LogFilter.Maps, "MMAP:unloadMapInstance: Unloaded mapId {0} instanceId {1}", mapId, instanceId);
+			Log.outInfo(LogFilter.Maps, "MMAP:unloadMapInstance: Unloaded mapId {0} InstanceId {1}", mapId, instanceId);
 
 			return true;
 		}
@@ -329,7 +329,7 @@ namespace Game
 
 		public Detour.dtNavMesh navMesh;
 
-		public Dictionary<uint, Detour.dtNavMeshQuery> navMeshQueries = new(); // instanceId to query
+		public Dictionary<uint, Detour.dtNavMeshQuery> navMeshQueries = new(); // InstanceId to query
 
 		public MMapData(Detour.dtNavMesh mesh)
 		{

@@ -355,7 +355,7 @@ namespace Scripts.Spells.Shaman
 
 		public void AfterHit()
 		{
-			// Cooldown increased for each target effectively healed
+			// Cooldown increased for each Target effectively healed
 			if (GetHitHeal() != 0)
 				++_healedTargets;
 		}
@@ -516,7 +516,7 @@ namespace Scripts.Spells.Shaman
 			}
 		}
 
-		// Each target can only be stunned once by each earthquake - keep track of who we already stunned
+		// Each Target can only be stunned once by each earthquake - keep track of who we already stunned
 		public bool AddStunnedTarget(ObjectGuid guid)
 		{
 			return _stunnedUnits.Add(guid);
@@ -1050,8 +1050,8 @@ namespace Scripts.Spells.Shaman
 		}
 	}
 
-	// 285452 - Lava Burst damage
-	[Script] // 285466 - Lava Burst Overload damage
+	// 285452 - Lava Burst Damage
+	[Script] // 285466 - Lava Burst Overload Damage
 	internal class spell_sha_lava_crit_chance : SpellScript, ICalcCritChance
 	{
 		public override bool Validate(SpellInfo spellInfo)
@@ -1203,7 +1203,7 @@ namespace Scripts.Spells.Shaman
 
 		private void HandleTargetSelect(List<WorldObject> targets)
 		{
-			// choose one random target from targets
+			// choose one random Target from targets
 			if (targets.Count > 1)
 			{
 				WorldObject selected = targets.SelectRandom();
@@ -1276,7 +1276,7 @@ namespace Scripts.Spells.Shaman
 			var overloadSpellId = GetTriggeredSpellId(procInfo.GetSpellInfo().Id);
 			var originalCastId  = procInfo.GetProcSpell()._castId;
 
-			caster._Events.AddEventAtOffset(() =>
+			caster.Events.AddEventAtOffset(() =>
 			                                {
 				                                if (targets.Targets == null)
 					                                return;
@@ -1630,7 +1630,7 @@ namespace Scripts.Spells.Shaman
 			Unit caster = eventInfo.GetActor();
 			Unit target = eventInfo.GetProcTarget();
 
-			// try to find spell Flame Shock on the target
+			// try to find spell Flame Shock on the Target
 			AuraEffect flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
 
 			if (flameShock == null)

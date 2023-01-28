@@ -76,7 +76,7 @@ namespace Game.Chat
 		[Command("auctions", RBACPermissions.CommandReloadAuctions, true)]
 		private static bool HandleReloadAuctionsCommand(CommandHandler handler)
 		{
-			// Reload dynamic data tables from the database
+			// Reload dynamic _data tables from the database
 			Log.outInfo(LogFilter.Server, "Re-Loading Auctions...");
 			Global.AuctionHouseMgr.LoadAuctions();
 			handler.SendGlobalGMSysMessage("Auctions reloaded.");
@@ -686,7 +686,7 @@ namespace Game.Chat
 			Log.outInfo(LogFilter.Server, "Reloading RBAC tables...");
 			Global.AccountMgr.LoadRBAC();
 			Global.WorldMgr.ReloadRBAC();
-			handler.SendGlobalGMSysMessage("RBAC data reloaded.");
+			handler.SendGlobalGMSysMessage("RBAC _data reloaded.");
 
 			return true;
 		}
@@ -809,7 +809,7 @@ namespace Game.Chat
 		{
 			Log.outInfo(LogFilter.Server, "Re-Loading SpellArea Data...");
 			Global.SpellMgr.LoadSpellAreas();
-			handler.SendGlobalGMSysMessage("DB table `spell_area` (spell dependences from area/quest/auras State) reloaded.");
+			handler.SendGlobalGMSysMessage("DB table `spell_area` (spell dependences from area/quest/Auras State) reloaded.");
 
 			return true;
 		}
@@ -869,7 +869,7 @@ namespace Game.Chat
 		[Command("spell_pet_auras", RBACPermissions.CommandReloadSpellPetAuras, true)]
 		private static bool HandleReloadSpellPetAurasCommand(CommandHandler handler)
 		{
-			Log.outInfo(LogFilter.Server, "Re-Loading Spell pet auras...");
+			Log.outInfo(LogFilter.Server, "Re-Loading Spell pet Auras...");
 			Global.SpellMgr.LoadSpellPetAuras();
 			handler.SendGlobalGMSysMessage("DB table `spell_pet_auras` reloaded.");
 
@@ -879,9 +879,9 @@ namespace Game.Chat
 		[Command("spell_proc", RBACPermissions.CommandReloadSpellProc, true)]
 		private static bool HandleReloadSpellProcsCommand(CommandHandler handler)
 		{
-			Log.outInfo(LogFilter.Server, "Re-Loading Spell Proc conditions and data...");
+			Log.outInfo(LogFilter.Server, "Re-Loading Spell Proc conditions and _data...");
 			Global.SpellMgr.LoadSpellProcs();
-			handler.SendGlobalGMSysMessage("DB table `spell_proc` (spell proc conditions and data) reloaded.");
+			handler.SendGlobalGMSysMessage("DB table `spell_proc` (spell proc conditions and _data) reloaded.");
 
 			return true;
 		}
@@ -932,7 +932,7 @@ namespace Game.Chat
 		[Command("spell_target_position", RBACPermissions.CommandReloadSpellTargetPosition, true)]
 		private static bool HandleReloadSpellTargetPositionCommand(CommandHandler handler)
 		{
-			Log.outInfo(LogFilter.Server, "Re-Loading Spell target coordinates...");
+			Log.outInfo(LogFilter.Server, "Re-Loading Spell Target coordinates...");
 			Global.SpellMgr.LoadSpellTargetPositions();
 			handler.SendGlobalGMSysMessage("DB table `spell_target_position` (destination coordinates for spell targets) reloaded.");
 
@@ -1009,7 +1009,7 @@ namespace Game.Chat
 		private static bool HandleReloadWpCommand(CommandHandler handler, StringArguments args)
 		{
 			if (args != null)
-				Log.outInfo(LogFilter.Server, "Re-Loading Waypoints data from 'waypoints_data'");
+				Log.outInfo(LogFilter.Server, "Re-Loading Waypoints _data from 'waypoints_data'");
 
 			Global.WaypointMgr.Load();
 

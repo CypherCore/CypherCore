@@ -84,8 +84,8 @@ namespace Game.Networking.Packets
 			public byte ExperienceLevel;
 			public bool FirstLogin;
 			public CharacterFlags Flags;           // Character flag @see enum CharacterFlags
-			public CharacterCustomizeFlags Flags2; // Character customization flags @see enum CharacterCustomizeFlags
-			public uint Flags3;                    // Character flags 3 @todo research
+			public CharacterCustomizeFlags Flags2; // Character customization Flags @see enum CharacterCustomizeFlags
+			public uint Flags3;                    // Character Flags 3 @todo research
 			public uint Flags4;
 
 			public ObjectGuid Guid;
@@ -1170,7 +1170,7 @@ namespace Game.Networking.Packets
 				stringLengths[i] = _worldPacket.ReadBits<byte>(7);
 
 			for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-				DeclinedNames.name[i] = _worldPacket.ReadString(stringLengths[i]);
+				DeclinedNames.Name[i] = _worldPacket.ReadString(stringLengths[i]);
 		}
 	}
 
@@ -1193,7 +1193,7 @@ namespace Game.Networking.Packets
 	//Structs
 	public class CharacterCreateInfo
 	{
-		// Server side data
+		// Server side _data
 		public byte CharCount = 0;
 		public Class ClassId = Class.None;
 		public Array<ChrCustomizationChoice> Customizations = new(72);
@@ -1239,7 +1239,7 @@ namespace Game.Networking.Packets
 		public ObjectGuid CharacterGuid; // Guid of the character to restore
 		public int ClientToken = 0;      // @todo: research
 
-		// Server side data
+		// Server side _data
 		public string Name;
 	}
 }

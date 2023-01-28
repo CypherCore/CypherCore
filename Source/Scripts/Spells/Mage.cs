@@ -471,7 +471,7 @@ namespace Scripts.Spells.Mage
 			if (_count >= 7)
 				return true;
 
-			_caster._Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+			_caster.Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
 
 			return false;
 		}
@@ -489,7 +489,7 @@ namespace Scripts.Spells.Mage
 
 		private void EffectHit(uint effIndex)
 		{
-			GetCaster()._Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell()._castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+			GetCaster().Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell()._castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
 		}
 
 		public override void Register()
@@ -498,7 +498,7 @@ namespace Scripts.Spells.Mage
 		}
 	}
 
-	[Script] // 228601 - Comet Storm (damage)
+	[Script] // 228601 - Comet Storm (Damage)
 	internal class spell_mage_comet_storm_damage : SpellScript, IHasSpellEffects
 	{
 		public List<ISpellEffect> SpellEffects { get; } = new();
@@ -776,7 +776,7 @@ namespace Scripts.Spells.Mage
 
 			int index = _orderedTargets.IndexOf(target.GetGUID());
 
-			if (index == 0 // only primary target triggers these benefits
+			if (index == 0 // only primary Target triggers these benefits
 			    &&
 			    target.HasAuraState(AuraStateType.Frozen, GetSpellInfo(), caster))
 			{
@@ -796,7 +796,7 @@ namespace Scripts.Spells.Mage
 					caster.CastSpell(caster, SpellIds.ChainReaction, true);
 			}
 
-			// put target index for chain value multiplier into EFFECT_1 base points, otherwise triggered spell doesn't know which damage multiplier to apply
+			// put Target index for chain value Multiplier into EFFECT_1 base points, otherwise triggered spell doesn't know which Damage Multiplier to apply
 			CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.BasePoint1, index);
 			caster.CastSpell(target, SpellIds.IceLanceTrigger, args);
@@ -1100,7 +1100,7 @@ namespace Scripts.Spells.Mage
 			Unit caster = GetCaster();
 
 			if (caster != null)
-				if (aurEff.GetTickNumber() > 1) // First tick should deal base damage
+				if (aurEff.GetTickNumber() > 1) // First tick should deal base Damage
 					caster.CastSpell(caster, SpellIds.RayOfFrostBonus, true);
 		}
 

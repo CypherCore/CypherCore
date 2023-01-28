@@ -137,7 +137,7 @@ namespace Scripts.Spells.Druid
 
 		private void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
 		{
-			// reflect back damage to the attacker
+			// reflect back Damage to the Attacker
 			Unit target   = GetTarget();
 			Unit attacker = dmgInfo.GetAttacker();
 
@@ -300,7 +300,7 @@ namespace Scripts.Spells.Druid
 		private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
 			// counters are applied with a delay
-			GetTarget()._Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
+			GetTarget().Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
 		}
 
 		private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -553,7 +553,7 @@ namespace Scripts.Spells.Druid
 			{
 				Unit target = GetTarget();
 
-				// free automatic moonfire on target
+				// free automatic moonfire on Target
 				target.CastSpell(damageInfo.GetVictim(), SpellIds.MoonfireDamage, true);
 
 				// Cast aura
@@ -1478,7 +1478,7 @@ namespace Scripts.Spells.Druid
 
 		private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			// No need to check remove mode, it's safe for auras to remove each other in AfterRemove hook.
+			// No need to check remove mode, it's safe for Auras to remove each other in AfterRemove hook.
 			GetTarget().RemoveAura(SpellIds.FormStag);
 			GetTarget().RemoveAura(SpellIds.FormAquatic);
 			GetTarget().RemoveAura(SpellIds.FormFlight);
@@ -1599,7 +1599,7 @@ namespace Scripts.Spells.Druid
 			if (!caster)
 				return;
 
-			// calculate from base damage, not from aurEff.GetAmount() (already modified)
+			// calculate from base Damage, not from aurEff.GetAmount() (already modified)
 			float damage = caster.CalculateSpellDamage(GetUnitOwner(), aurEff.GetSpellEffectInfo());
 
 			// Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick

@@ -114,7 +114,7 @@ namespace Game.Entities
 
 				for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
 				{
-					uint      spellId   = _unit.ToCreature()._spells[i];
+					uint      spellId   = _unit.ToCreature().Spells[i];
 					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
 
 					if (spellInfo != null)
@@ -148,7 +148,7 @@ namespace Game.Entities
 
 			for (uint x = 0; x < SharedConst.MaxSpellCharm; ++x)
 			{
-				uint      spellId   = _unit.ToCreature()._spells[x];
+				uint      spellId   = _unit.ToCreature().Spells[x];
 				SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
 
 				if (spellInfo == null)
@@ -279,7 +279,7 @@ namespace Game.Entities
 			var tokens = new StringArray(data, ' ');
 
 			if (tokens.Length != (SharedConst.ActionBarIndexEnd - SharedConst.ActionBarIndexStart) * 2)
-				return; // non critical, will reset to default
+				return; // non Critical, will reset to default
 
 			byte index = 0;
 

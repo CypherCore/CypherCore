@@ -20,7 +20,7 @@ namespace Game
 			var oldMSTime = Time.GetMSTime();
 
 			//                                          0    1         2           3          4            5           6        7      8           9
-			SQLResult result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, Action, action_chance FROM waypoint_data ORDER BY id, point");
+			SQLResult result = DB.World.Query("SELECT Id, point, position_x, position_y, position_z, orientation, move_type, delay, Action, action_chance FROM waypoint_data ORDER BY Id, point");
 
 			if (result.IsEmpty())
 			{
@@ -43,8 +43,8 @@ namespace Game
 				if (!result.IsNull(5))
 					o = result.Read<float>(5);
 
-				GridDefines.NormalizeMapCoord(ref x);
-				GridDefines.NormalizeMapCoord(ref y);
+				x = GridDefines.NormalizeMapCoord(x);
+				y = GridDefines.NormalizeMapCoord(y);
 
 				WaypointNode waypoint = new();
 				waypoint.id          = result.Read<uint>(1);
@@ -101,8 +101,8 @@ namespace Game
 				if (!result.IsNull(4))
 					o = result.Read<float>(4);
 
-				GridDefines.NormalizeMapCoord(ref x);
-				GridDefines.NormalizeMapCoord(ref y);
+				x = GridDefines.NormalizeMapCoord(x);
+				y = GridDefines.NormalizeMapCoord(y);
 
 				WaypointNode waypoint = new();
 				waypoint.id          = result.Read<uint>(0);

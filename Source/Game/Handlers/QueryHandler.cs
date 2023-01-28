@@ -43,7 +43,7 @@ namespace Game
 			if (lookupData.Data.Initialize(guid, player))
 				lookupData.Result = (byte)ResponseCodes.Success;
 			else
-				lookupData.Result = (byte)ResponseCodes.Failure; // name unknown
+				lookupData.Result = (byte)ResponseCodes.Failure; // Name unknown
 		}
 
 		[WorldPacketHandler(ClientOpcodes.QueryTime, Processing = PacketProcessing.Inplace)]

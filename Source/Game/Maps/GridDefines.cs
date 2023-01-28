@@ -54,12 +54,15 @@ namespace Game.Maps
 			return IsValidMapCoord(loc.GetMapId(), loc);
 		}
 
-		public static void NormalizeMapCoord(ref float c)
+		public static float NormalizeMapCoord(float c)
 		{
 			if (c > MapConst.MapHalfSize - 0.5f)
-				c = MapConst.MapHalfSize - 0.5f;
-			else if (c < -(MapConst.MapHalfSize - 0.5f))
-				c = -(MapConst.MapHalfSize - 0.5f);
+				return MapConst.MapHalfSize - 0.5f;
+			
+            if (c < -(MapConst.MapHalfSize - 0.5f))
+                return -(MapConst.MapHalfSize - 0.5f);
+
+			return c;
 		}
 
 		public static GridCoord ComputeGridCoord(float x, float y)

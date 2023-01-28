@@ -740,7 +740,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 		private void Initialize()
 		{
 			// Hello, developer from the future! It's me again!
-			// This time, you're fixing Karazhan scripts. Awesome. These are a mess of hacks. An amalgamation of hacks, so to speak. Maybe even a Patchwerk thereof.
+			// This Time, you're fixing Karazhan scripts. Awesome. These are a mess of hacks. An amalgamation of hacks, so to speak. Maybe even a Patchwerk thereof.
 			// Anyway, I digress.
 			// @todo This line below is obviously a hack. Duh. I'm just coming in here to hackfix the encounter to actually be completable.
 			// It needs a rewrite. Badly. Please, take good care of it.
@@ -1119,7 +1119,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 			if (damage < me.GetHealth())
 				return;
 
-			//anything below only used if incoming damage will kill
+			//anything below only used if incoming Damage will kill
 
 			if (Phase == RAJPhase.Julianne)
 			{
@@ -1140,7 +1140,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
 			if (Phase == RAJPhase.Romulo)
 			{
-				Log.outError(LogFilter.Scripts, "boss_julianneAI: cannot take damage in PhaseRomulo, why was i here?");
+				Log.outError(LogFilter.Scripts, "boss_julianneAI: cannot take Damage in PhaseRomulo, why was i here?");
 				damage = 0;
 
 				return;
@@ -1226,7 +1226,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
 			if (DrinkPoisonTimer != 0)
 			{
-				//will do this TimeSpan.FromSeconds(2s)ecs after spell hit. this is time to display visual as expected
+				//will do this TimeSpan.FromSeconds(2s)ecs after spell hit. this is Time to display visual as expected
 				if (DrinkPoisonTimer <= diff)
 				{
 					MiscConst.PretendToDie(me);
@@ -1422,7 +1422,7 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 			if (damage < me.GetHealth())
 				return;
 
-			//anything below only used if incoming damage will kill
+			//anything below only used if incoming Damage will kill
 
 			if (Phase == RAJPhase.Romulo)
 			{

@@ -41,7 +41,7 @@ namespace Game.BattleFields
 		protected bool _IsEnabled;
 		private uint _LastResurectTimer; // Timer for resurect player every 30 sec
 		protected Map _Map;
-		protected uint _MapId;           // MapId where is Battlefield
+		protected uint _MapId;           // _mapId where is Battlefield
 		protected uint _MaxPlayer;       // Maximum number of player that participated to Battlefield
 		protected uint _MinLevel;        // Required level to participate at Battlefield
 		protected uint _MinPlayer;       // Minimum number of player for Battlefield start
@@ -114,7 +114,7 @@ namespace Game.BattleFields
 			}
 			else
 			{
-				// If time left is < 15 minutes invite player to join queue
+				// If Time left is < 15 minutes invite player to join queue
 				if (_Timer <= _StartGroupingTimer)
 					InvitePlayerToQueue(player);
 			}
@@ -155,7 +155,7 @@ namespace Game.BattleFields
 		{
 			if (_Timer <= diff)
 			{
-				// Battlefield ends on time
+				// Battlefield ends on Time
 				if (IsWarTime())
 					EndBattle(true);
 				else // Time to start a new battle!
@@ -850,7 +850,7 @@ namespace Game.BattleFields
 			return _IsEnabled;
 		}
 
-		// All-purpose data storage 64 bit
+		// All-purpose _data storage 64 bit
 		public virtual ulong GetData64(int dataId)
 		{
 			return _Data64[dataId];
@@ -861,7 +861,7 @@ namespace Game.BattleFields
 			_Data64[dataId] = value;
 		}
 
-		// All-purpose data storage 32 bit
+		// All-purpose _data storage 32 bit
 		public virtual uint GetData(int dataId)
 		{
 			return _Data32[dataId];
@@ -945,7 +945,7 @@ namespace Game.BattleFields
 		{
 		}
 
-		// Return if we can use mount in battlefield
+		// Return if we can use Mount in battlefield
 		public bool CanFlyIn()
 		{
 			return !_isActive;
@@ -1045,7 +1045,7 @@ namespace Game.BattleFields
 
 			foreach (var guid in _ResurrectQueue)
 			{
-				// Get player object from his guid
+				// Get player object from his Guid
 				Player player = Global.ObjAccessor.FindPlayer(guid);
 
 				if (!player)
@@ -1293,7 +1293,7 @@ namespace Game.BattleFields
 
 				if (capturePoint)
 				{
-					capturePoint.SetRespawnTime(0); // not save respawn time
+					capturePoint.SetRespawnTime(0); // not save respawn Time
 					capturePoint.Delete();
 					capturePoint.Dispose();
 				}

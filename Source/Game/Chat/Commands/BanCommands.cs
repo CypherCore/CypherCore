@@ -278,7 +278,7 @@ namespace Game.Chat.Commands
 
 		private static bool HandleBanInfoHelper(uint accountId, string accountName, CommandHandler handler)
 		{
-			SQLResult result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{0}' ORDER BY bandate ASC", accountId);
+			SQLResult result = DB.Login.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE Id = '{0}' ORDER BY bandate ASC", accountId);
 
 			if (result.IsEmpty())
 			{
@@ -549,7 +549,7 @@ namespace Game.Chat.Commands
 				{
 					uint accountid = result.Read<uint>(0);
 
-					SQLResult banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.id='{0}' AND account_banned.id=account.id", accountid);
+					SQLResult banResult = DB.Login.Query("SELECT account.username FROM account, account_banned WHERE account_banned.Id='{0}' AND account_banned.Id=account.Id", accountid);
 
 					if (!banResult.IsEmpty())
 						handler.SendSysMessage(banResult.Read<string>(0));
@@ -570,15 +570,15 @@ namespace Game.Chat.Commands
 
 					string accountName;
 
-					// "account" case, name can be get in same query
+					// "account" case, Name can be get in same query
 					if (result.GetFieldCount() > 1)
 						accountName = result.Read<string>(1);
-					// "character" case, name need extract from another DB
+					// "character" case, Name need extract from another DB
 					else
 						Global.AccountMgr.GetName(accountId, out accountName);
 
-					// No SQL injection. id is uint32.
-					SQLResult banInfo = DB.Login.Query("SELECT bandate, unbandate, bannedby, banreason FROM account_banned WHERE id = {0} ORDER BY unbandate", accountId);
+					// No SQL injection. Id is uint32.
+					SQLResult banInfo = DB.Login.Query("SELECT bandate, unbandate, bannedby, banreason FROM account_banned WHERE Id = {0} ORDER BY unbandate", accountId);
 
 					if (!banInfo.IsEmpty())
 						do

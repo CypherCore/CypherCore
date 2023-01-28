@@ -65,7 +65,7 @@ namespace Game.Scenarios
 
 					foreach (Criteria criteria in killCreatureCriteria)
 					{
-						// count creatures in despawned spawn groups
+						// Count creatures in despawned spawn groups
 						ulong progress = despawnedCreatureCountsById.LookupByKey(criteria.Entry.Asset);
 
 						if (progress != 0)

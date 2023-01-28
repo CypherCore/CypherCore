@@ -372,7 +372,7 @@ namespace Game.DataStorage
 
 			uint pathCount = TaxiPathStorage.GetNumRows();
 
-			// Calculate path nodes count
+			// Calculate path nodes Count
 			uint[] pathLength = new uint[pathCount]; // 0 and some other indexes not used
 
 			foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
@@ -383,7 +383,7 @@ namespace Game.DataStorage
 			for (uint i = 0; i < pathCount; ++i)
 				TaxiPathNodesByPath[i] = new TaxiPathNodeRecord[pathLength[i]];
 
-			// fill data
+			// fill _data
 			foreach (var entry in TaxiPathNodeStorage.Values)
 				TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
@@ -433,7 +433,7 @@ namespace Game.DataStorage
 				Environment.Exit(1);
 			}
 
-			Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 _data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
 
 			return availableDb2Locales;
 		}
@@ -465,7 +465,7 @@ namespace Game.DataStorage
 			StaminaMultByILvlGameTable           = ReadGameTable<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
 			XpGameTable                          = ReadGameTable<GtXpRecord>("xp.txt");
 
-			Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables _data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		#region Main Collections

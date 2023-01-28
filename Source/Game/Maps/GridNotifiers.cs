@@ -2440,7 +2440,7 @@ namespace Game.Maps
 
 		public bool Invoke(Unit u)
 		{
-			// Check contains checks for: live, uninteractible, non-attackable flags, flight check and GM check, ignore totems
+			// Check contains checks for: live, uninteractible, non-attackable Flags, flight check and GM check, ignore totems
 			if (u.IsTypeId(TypeId.Unit) &&
 			    u.IsTotem())
 				return false;

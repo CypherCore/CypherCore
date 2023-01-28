@@ -817,7 +817,7 @@ namespace Game
 			return HasFlag(QuestFlags.Unavailable);
 		}
 
-		// table data accessors:
+		// table _data accessors:
 		public bool IsRepeatable()
 		{
 			return SpecialFlags.HasAnyFlag(QuestSpecialFlags.Repeatable);
@@ -979,7 +979,7 @@ namespace Game
 		// quest_offer_reward_conditional
 		public List<QuestConditionalText> ConditionalOfferRewardText = new();
 
-		// quest_template_addon table (custom data)
+		// quest_template_addon table (custom _data)
 		public uint MaxLevel { get; set; }
 		public uint AllowableClasses { get; set; }
 		public uint SourceSpellID { get; set; }
@@ -997,7 +997,7 @@ namespace Game
 		public int RequiredMaxRepValue { get; set; }
 		public uint SourceItemIdCount { get; set; }
 		public uint RewardMailSenderEntry { get; set; }
-		public QuestSpecialFlags SpecialFlags { get; set; } // custom flags, not sniffed/WDB
+		public QuestSpecialFlags SpecialFlags { get; set; } // custom Flags, not sniffed/WDB
 		public BitArray _usedQuestObjectiveTypes = new((int)QuestObjectiveType.Max);
 		public uint ScriptId { get; set; }
 

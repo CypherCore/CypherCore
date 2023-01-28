@@ -250,7 +250,7 @@ namespace Scripts.Spells.Monk
 			// Prevent default Action (which would remove the aura)
 			PreventDefaultAction();
 
-			// make sure damage doesn't come from stagger damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
+			// make sure Damage doesn't come from stagger Damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
 			SpellInfo dmgSpellInfo = dmgInfo.GetSpellInfo();
 
 			if (dmgSpellInfo != null)
@@ -270,7 +270,7 @@ namespace Scripts.Spells.Monk
 			float newAmount = (baseAmount / (baseAmount + K));
 			newAmount *= multiplier;
 
-			// Absorb X percentage of the damage
+			// Absorb X percentage of the Damage
 			float absorbAmount = dmgInfo.GetDamage() * newAmount;
 
 			if (absorbAmount > 0)
@@ -414,7 +414,7 @@ namespace Scripts.Spells.Monk
 
 		private void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			// Calculate damage per tick
+			// Calculate Damage per tick
 			float total   = aurEff.GetAmount();
 			float perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() TODO: verify
 
@@ -424,7 +424,7 @@ namespace Scripts.Spells.Monk
 			if (effInfo != null)
 				effInfo.ChangeAmount((int)perTick);
 
-			// Set amount on damage aura (or cast it if needed)
+			// Set amount on Damage aura (or cast it if needed)
 			CastOrChangeTickDamage(perTick);
 		}
 
@@ -433,7 +433,7 @@ namespace Scripts.Spells.Monk
 			if (mode != AuraEffectHandleModes.Real)
 				return;
 
-			// Remove damage aura
+			// Remove Damage aura
 			GetTarget().RemoveAura(SpellIds.StaggerDamageAura);
 		}
 

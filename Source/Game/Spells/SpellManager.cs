@@ -36,7 +36,7 @@ namespace Game.Entities
 
 						if (parameters.Length < 3)
 						{
-							Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter count: {1} Should be 3. Can't load AuraEffect.", methodInfo.Name, parameters.Length);
+							Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter Count: {1} Should be 3. Can't load AuraEffect.", methodInfo.Name, parameters.Length);
 
 							continue;
 						}
@@ -490,7 +490,7 @@ namespace Game.Entities
 			if (!(eventInfo.GetTypeMask() & procEntry.ProcFlags))
 				return false;
 
-			// check XP or honor target requirement
+			// check XP or honor Target requirement
 			if (((uint)procEntry.AttributesMask & 0x0000001) != 0)
 			{
 				Player actor = eventInfo.GetActor().ToPlayer();
@@ -523,7 +523,7 @@ namespace Game.Entities
 			    !Convert.ToBoolean(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
 				return false;
 
-			// check spell family name/flags (if set) for spells
+			// check spell family Name/Flags (if set) for spells
 			if (eventInfo.GetTypeMask().HasFlag(ProcFlags.SpellMask))
 			{
 				SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
@@ -552,10 +552,10 @@ namespace Game.Entities
 				// get default values if hit mask not set
 				if (hitMask == 0)
 				{
-					// for taken procs allow normal + critical hits by default
+					// for taken procs allow normal + Critical hits by default
 					if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
 						hitMask |= ProcFlagsHit.Normal | ProcFlagsHit.Critical;
-					// for done procs allow normal + critical + absorbs by default
+					// for done procs allow normal + Critical + absorbs by default
 					else
 						hitMask |= ProcFlagsHit.Normal | ProcFlagsHit.Critical | ProcFlagsHit.Absorb;
 				}
@@ -1289,7 +1289,7 @@ namespace Game.Entities
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell Target coordinates. DB table `spell_target_position` is empty.");
 
 				return;
 			}
@@ -1320,7 +1320,7 @@ namespace Game.Entities
 				    st.target_Y == 0 &&
 				    st.target_Z == 0)
 				{
-					Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) target coordinates not provided.", spellId, effIndex);
+					Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) Target coordinates not provided.", spellId, effIndex);
 
 					continue;
 				}
@@ -1341,7 +1341,7 @@ namespace Game.Entities
 					continue;
 				}
 
-				// target facing is in degrees for 6484 & 9268... (blizz sucks)
+				// Target facing is in degrees for 6484 & 9268... (blizz sucks)
 				if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * Math.PI)
 					st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * (float)Math.PI / 180;
 				else
@@ -1356,7 +1356,7 @@ namespace Game.Entities
 				}
 				else
 				{
-					Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have target TARGET_DEST_DB (17).", spellId, effIndex);
+					Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have Target TARGET_DEST_DB (17).", spellId, effIndex);
 
 					continue;
 				}
@@ -1373,7 +1373,7 @@ namespace Game.Entities
 			mSpellGroupSpell.Clear();
 
 			//                                                0     1
-			SQLResult result = DB.World.Query("SELECT id, spell_id FROM spell_group");
+			SQLResult result = DB.World.Query("SELECT Id, spell_id FROM spell_group");
 
 			if (result.IsEmpty())
 			{
@@ -1392,7 +1392,7 @@ namespace Game.Entities
 				if (group_id <= 1000 &&
 				    group_id >= (uint)SpellGroup.CoreRangeMax)
 				{
-					Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` is in core range, but is not defined in core!", group_id);
+					Log.outError(LogFilter.Sql, "SpellGroup Id {0} listed in `spell_group` is in core range, but is not defined in core!", group_id);
 
 					continue;
 				}
@@ -1408,7 +1408,7 @@ namespace Game.Entities
 				{
 					if (!groups.Contains((uint)Math.Abs(group.Value)))
 					{
-						Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
+						Log.outError(LogFilter.Sql, "SpellGroup Id {0} listed in `spell_group` does not exist", Math.Abs(group.Value));
 						mSpellGroupSpell.Remove(group.Key);
 					}
 				}
@@ -1480,7 +1480,7 @@ namespace Game.Entities
 
 				if (spellGroup == null)
 				{
-					Log.outError(LogFilter.Sql, "SpellGroup id {0} listed in `spell_group_stack_rules` does not exist", group_id);
+					Log.outError(LogFilter.Sql, "SpellGroup Id {0} listed in `spell_group_stack_rules` does not exist", group_id);
 
 					continue;
 				}
@@ -1528,7 +1528,7 @@ namespace Game.Entities
 							AuraType auraName = spellEffectInfo.ApplyAuraName;
 
 							if (SubGroups.Contains(auraName))
-								// count as first aura
+								// Count as first aura
 								auraName = SubGroups[0];
 
 							frequencyContainer.Add(auraName);
@@ -1680,7 +1680,7 @@ namespace Game.Entities
 						if (procEntry.Cooldown == 0)
 							procEntry.Cooldown = spellInfo.ProcCooldown;
 
-						// validate data
+						// validate _data
 						if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
 							Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
 
@@ -1773,15 +1773,15 @@ namespace Game.Entities
 					}
 				} while (result.NextRow());
 
-				Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+				Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and _data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 			}
 			else
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and _data. DB table `spell_proc` is empty.");
 			}
 
 			// This generates default procs to retain compatibility with previous proc system
-			Log.outInfo(LogFilter.ServerLoading, "Generating spell proc data from SpellMap...");
+			Log.outInfo(LogFilter.ServerLoading, "Generating spell proc _data from SpellMap...");
 			count     = 0;
 			oldMSTime = Time.GetMSTime();
 
@@ -1791,7 +1791,7 @@ namespace Game.Entities
 				if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
 					continue;
 
-				// Nothing to do if no flags set
+				// Nothing to do if no Flags set
 				if (spellInfo.ProcFlags == null)
 					continue;
 
@@ -1811,7 +1811,7 @@ namespace Game.Entities
 
 					if (!IsTriggerAura(auraName))
 					{
-						// explicitly disable non proccing auras to avoid losing charges on self proc
+						// explicitly disable non proccing Auras to avoid losing charges on self proc
 						nonProcMask |= 1u << (int)spellEffectInfo.EffectIndex;
 
 						continue;
@@ -1822,7 +1822,7 @@ namespace Game.Entities
 					if (IsAlwaysTriggeredAura(auraName))
 						addTriggerFlag = true;
 
-					// many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
+					// many proc Auras with taken procFlag mask don't have attribute "can proc with triggered"
 					// they should proc nevertheless (example mage armor spells with judgement)
 					if (!addTriggerFlag &&
 					    spellInfo.ProcFlags.HasFlag(ProcFlags.TakenHitMask))
@@ -1875,7 +1875,7 @@ namespace Game.Entities
 
 					switch (spellEffectInfo.ApplyAuraName)
 					{
-						// Reflect auras should only proc off reflects
+						// Reflect Auras should only proc off reflects
 						case AuraType.ReflectSpells:
 						case AuraType.ReflectSpellsSchool:
 							procEntry.HitMask = ProcFlagsHit.Reflect;
@@ -1891,7 +1891,7 @@ namespace Game.Entities
 							procEntry.HitMask = ProcFlagsHit.Block;
 
 							break;
-						// proc auras with another aura reducing hit chance (eg 63767) only proc on missed attack
+						// proc Auras with another aura reducing hit chance (eg 63767) only proc on missed attack
 						case AuraType.ModHitChance:
 							if (spellEffectInfo.CalcValue() <= -100)
 								procEntry.HitMask = ProcFlagsHit.Miss;
@@ -1922,7 +1922,7 @@ namespace Game.Entities
 				++count;
 			}
 
-			Log.outInfo(LogFilter.ServerLoading, "Generated spell proc data for {0} spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Generated spell proc _data for {0} spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public void LoadSpellThreats()
@@ -1989,7 +1989,7 @@ namespace Game.Entities
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell pet auras. DB table `spell_pet_auras` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell pet Auras. DB table `spell_pet_auras` is empty.");
 
 				return;
 			}
@@ -2051,7 +2051,7 @@ namespace Game.Entities
 				++count;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell pet auras in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell pet Auras in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public void LoadSpellEnchantProcData()
@@ -2096,7 +2096,7 @@ namespace Game.Entities
 				++count;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} enchant proc data definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} enchant proc _data definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public void LoadSpellLinked()
@@ -2330,7 +2330,7 @@ namespace Game.Entities
 			mSpellAreaForAuraMap.Clear();
 
 			//                                            0     1         2              3               4                 5          6          7       8      9
-			SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
+			SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, Gender, Flags FROM spell_area");
 
 			if (result.IsEmpty())
 			{
@@ -2506,7 +2506,7 @@ namespace Game.Entities
 				    spellArea.gender != Gender.Female &&
 				    spellArea.gender != Gender.Male)
 				{
-					Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong gender ({1}) requirement", spell, spellArea.gender);
+					Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong Gender ({1}) requirement", spell, spellArea.gender);
 
 					continue;
 				}
@@ -2765,8 +2765,8 @@ namespace Game.Entities
 						difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
 					} while (difficultyEntry != null);
 
-				//first key = id, difficulty
-				//second key = id
+				//first key = Id, difficulty
+				//second key = Id
 
 
 				mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
@@ -2890,11 +2890,11 @@ namespace Game.Entities
 
 					if (effect.EffectRadiusIndex[0] != 0 &&
 					    !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[0]))
-						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid radius id {effect.EffectRadiusIndex[0]} at index {effect.EffectIndex}, set to 0");
+						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid radius Id {effect.EffectRadiusIndex[0]} at index {effect.EffectIndex}, set to 0");
 
 					if (effect.EffectRadiusIndex[1] != 0 &&
 					    !CliDB.SpellRadiusStorage.HasRecord(effect.EffectRadiusIndex[1]))
-						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid max radius id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
+						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid max radius Id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
 
 					spellEffects.Add((spellId, difficulty), effect);
 				} while (effectsResult.NextRow());
@@ -3094,7 +3094,7 @@ namespace Game.Entities
 					switch (spellEffectInfo.ApplyAuraName)
 					{
 						case AuraType.OpenStable: // No point in saving this, since the stable dialog can't be open on aura load anyway.
-						// Auras that require both caster & target to be in world cannot be saved
+						// Auras that require both caster & Target to be in world cannot be saved
 						case AuraType.ControlVehicle:
 						case AuraType.BindSight:
 						case AuraType.ModPossess:
@@ -3285,7 +3285,7 @@ namespace Game.Entities
 						}
 				}
 
-				// Remove normal school mask to properly calculate damage
+				// Remove normal school mask to properly calculate Damage
 				if (spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Normal) &&
 				    spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Magic))
 				{
@@ -3367,7 +3367,7 @@ namespace Game.Entities
 						}
 				}
 
-				// Saving to DB happens before removing from world - skip saving these auras
+				// Saving to DB happens before removing from world - skip saving these Auras
 				if (spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.LeaveWorld))
 					spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
 			}
@@ -3413,7 +3413,7 @@ namespace Game.Entities
 						spellInfo.AttributesCu &= ~SpellCustomAttributes.CanCrit;
 			}
 
-			// add custom attribute to liquid auras
+			// add custom attribute to liquid Auras
 			foreach (var liquid in CliDB.LiquidTypeStorage.Values)
 				if (liquid.SpellID != 0)
 					foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID))
@@ -3612,14 +3612,14 @@ namespace Game.Entities
 				              40245, // Simon Game Visual
 				              40246, // Simon Game Visual
 				              40247, // Simon Game Visual
-				              42835  // Spout, remove damage effect, only anim is needed
+				              42835  // Spout, remove Damage effect, only anim is needed
 			              },
 			              spellInfo => { ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; }); });
 
 			ApplySpellFix(new[]
 			              {
-				              63665, // Charge (Argent Tournament emote on riders)
-				              31298, // Sleep (needs target selection script)
+				              63665, // Charge (Argent Tournament Emote on riders)
+				              31298, // Sleep (needs Target selection script)
 				              51904, // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
 				              68933, // Wrath of Air Totem rank 2 (Aura)
 				              29200  // Purify Helboar Meat
@@ -3862,8 +3862,8 @@ namespace Game.Entities
 			              },
 			              spellInfo =>
 			              {
-				              // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
-				              // this is the only known exception, probably just wrong data
+				              // Target allys instead of enemies, Target A is src_caster, spells with effect like that have ally Target
+				              // this is the only known exception, probably just wrong _data
 				              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly); });
 				              ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.TargetB = new SpellImplicitTargetInfo(Targets.UnitSrcAreaAlly); });
 			              });
@@ -3877,8 +3877,8 @@ namespace Game.Entities
 
 			ApplySpellFix(new[]
 			              {
-				              70728, // Exploit Weakness (needs target selection script)
-				              70840  // Devious Minds (needs target selection script)
+				              70728, // Exploit Weakness (needs Target selection script)
+				              70840  // Devious Minds (needs Target selection script)
 			              },
 			              spellInfo =>
 			              {
@@ -3902,11 +3902,11 @@ namespace Game.Entities
 				                                  0,
 				                                  spellEffectInfo =>
 				                                  {
-					                                  spellEffectInfo.BasePoints = 0; // force seat 0, vehicle doesn't have the required seat flags for "no seat specified (-1)"
+					                                  spellEffectInfo.BasePoints = 0; // Force Seat 0, vehicle doesn't have the required Seat Flags for "no Seat specified (-1)"
 				                                  });
 			              });
 
-			// Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
+			// Easter Lay Noblegarden Egg Aura - Interrupt Flags copied from aura which this aura is linked with
 			ApplySpellFix(new[]
 			              {
 				              61719
@@ -3928,7 +3928,7 @@ namespace Game.Entities
 			              },
 			              spellInfo =>
 			              {
-				              /// @todo: remove this when basepoints of all Ride Vehicle auras are calculated correctly
+				              /// @todo: remove this when basepoints of all Ride Vehicle Auras are calculated correctly
 				              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.BasePoints = 1; });
 			              });
 
@@ -4209,7 +4209,7 @@ namespace Game.Entities
 			              },
 			              spellInfo =>
 			              {
-				              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(28); // 5 seconds, wrong DBC data?
+				              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(28); // 5 seconds, wrong DBC _data?
 			              });
 
 			// Potent Pheromones (Freya)
@@ -4220,7 +4220,7 @@ namespace Game.Entities
 			              spellInfo =>
 			              {
 				              // spell should dispel area aura, but doesn't have the attribute
-				              // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
+				              // may be db _data bug, or blizz may keep reapplying area Auras every update with checking immunity
 				              // that will be clear if we get more spells with problem like this
 				              spellInfo.AttributesEx |= SpellAttr1.ImmunityPurgesEffect;
 			              });
@@ -4232,7 +4232,7 @@ namespace Game.Entities
 			              },
 			              spellInfo =>
 			              {
-				              // DBC data is wrong for 0, it's a different dynobject target than 1
+				              // DBC _data is wrong for 0, it's a different dynobject Target than 1
 				              // Both effects should be shared by the same DynObject
 				              ApplySpellEffectFix(spellInfo, 0, spellEffectInfo => { spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestCasterLeft); });
 			              });
@@ -4370,7 +4370,7 @@ namespace Game.Entities
 			              },
 			              spellInfo =>
 			              {
-				              // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client
+				              // this spell initially granted Shadow Damage immunity, however it was removed but the _data was left in client
 				              ApplySpellEffectFix(spellInfo, 2, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; });
 			              });
 
@@ -4424,7 +4424,7 @@ namespace Game.Entities
 				              ApplySpellEffectFix(spellInfo, 1, spellEffectInfo => { spellEffectInfo.Effect = SpellEffectName.None; });
 			              });
 
-			// Unbound Plague (Professor Putricide) (needs target selection script)
+			// Unbound Plague (Professor Putricide) (needs Target selection script)
 			ApplySpellFix(new[]
 			              {
 				              70911
@@ -4475,7 +4475,7 @@ namespace Game.Entities
 				              spellInfo.DurationEntry = CliDB.SpellDurationStorage.LookupByKey(9); // 30 seconds (missing)
 			              });
 
-			// Summon Suppressor (needs target selection script)
+			// Summon Suppressor (needs Target selection script)
 			ApplySpellFix(new[]
 			              {
 				              70936
@@ -4839,7 +4839,7 @@ namespace Game.Entities
 			              },
 			              spellInfo =>
 			              {
-				              // Bad DBC data? Copying 25820 here due to spell description
+				              // Bad DBC _data? Copying 25820 here due to spell description
 				              // either is a periodic with chance on tick, or a proc
 
 				              ApplySpellEffectFix(spellInfo,
@@ -5011,7 +5011,7 @@ namespace Game.Entities
 						if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
 							spellInfo.ConeAngle = 90.0f;
 
-					// Area auras may not target area (they're self cast)
+					// Area Auras may not Target area (they're self cast)
 					if (spellEffectInfo.IsAreaAuraEffect() &&
 					    spellEffectInfo.IsTargetingArea())
 					{
@@ -5020,7 +5020,7 @@ namespace Game.Entities
 					}
 				}
 
-				// disable proc for magnet auras, they're handled differently
+				// disable proc for magnet Auras, they're handled differently
 				if (spellInfo.HasAura(AuraType.SpellMagnet))
 					spellInfo.ProcFlags = new ProcFlagsInit();
 
@@ -5279,7 +5279,7 @@ namespace Game.Entities
 	{
 		public float apPctMod; // Pct of AP that is added as Threat - default: 0.0f
 		public int flatMod;    // flat threat-value for this Spell  - default: 0
-		public float pctMod;   // threat-multiplier for this Spell  - default: 1.0f
+		public float pctMod;   // threat-Multiplier for this Spell  - default: 1.0f
 	}
 
 	public class SpellProcEntry
@@ -5288,7 +5288,7 @@ namespace Game.Entities
 		public SpellFamilyNames SpellFamilyName { get; set; }       // if nonzero - for matching proc condition based on candidate spell's SpellFamilyName
 		public FlagArray128 SpellFamilyMask { get; set; } = new(4); // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
 		public ProcFlagsInit ProcFlags { get; set; }                // if nonzero - owerwrite procFlags field for given Spell.dbc entry, bitmask for matching proc condition, see enum ProcFlags
-		public ProcFlagsSpellType SpellTypeMask { get; set; }       // if nonzero - bitmask for matching proc condition based on candidate spell's damage/heal effects, see enum ProcFlagsSpellType
+		public ProcFlagsSpellType SpellTypeMask { get; set; }       // if nonzero - bitmask for matching proc condition based on candidate spell's Damage/heal effects, see enum ProcFlagsSpellType
 		public ProcFlagsSpellPhase SpellPhaseMask { get; set; }     // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase
 		public ProcFlagsHit HitMask { get; set; }                   // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
 		public ProcAttributes AttributesMask { get; set; }          // bitmask, see ProcAttributes
@@ -5326,7 +5326,7 @@ namespace Game.Entities
 		public uint areaId;           // zone/subzone/or 0 is not limited to zone
 		public int auraSpell;         // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
 		public SpellAreaFlag flags;   // if SPELL_AREA_FLAG_AUTOCAST then auto applied at area enter, in other case just allowed to cast || if SPELL_AREA_FLAG_AUTOREMOVE then auto removed inside area (will allways be removed on leaved even without flag)
-		public Gender gender;         // can be applied only to gender
+		public Gender gender;         // can be applied only to Gender
 		public uint questEnd;         // quest end (quest must not be rewarded for spell apply)
 		public uint questEndStatus;   // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
 		public uint questStart;       // quest start (quest must be active or rewarded for spell apply)
@@ -5337,7 +5337,7 @@ namespace Game.Entities
 		// helpers
 		public bool IsFitToRequirements(Player player, uint newZone, uint newArea)
 		{
-			if (gender != Gender.None) // not in expected gender
+			if (gender != Gender.None) // not in expected Gender
 				if (player == null ||
 				    gender != player.GetNativeGender())
 					return false;

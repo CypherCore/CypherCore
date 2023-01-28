@@ -783,7 +783,7 @@ namespace Game.Garrisons
 
 						if (finalizer)
 						{
-							// set some spell id to make the object delete itself after use
+							// set some spell Id to make the object delete itself after use
 							finalizer.SetSpellId(finalizer.GetGoInfo().Goober.spell);
 							finalizer.SetRespawnTime(0);
 

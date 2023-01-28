@@ -458,11 +458,11 @@ namespace Game
 			if (!group)
 				return;
 
-			if (packet.Symbol == -1) // target icon request
+			if (packet.Symbol == -1) // Target icon request
 			{
 				group.SendTargetIconList(this, packet.PartyIndex);
 			}
-			else // target icon update
+			else // Target icon update
 			{
 				if (group.IsRaidGroup() &&
 				    !group.IsLeader(GetPlayer().GetGUID()) &&
@@ -501,7 +501,7 @@ namespace Game
 			// everything's fine, do it (is it 0 (PartyOperation.Invite) correct code)
 			SendPartyResult(PartyOperation.Invite, "", PartyResult.Ok);
 
-			// New 4.x: it is now possible to convert a raid to a group if member count is 5 or less
+			// New 4.x: it is now possible to convert a raid to a group if member Count is 5 or less
 			if (packet.Raid)
 				group.ConvertToRaid();
 			else
@@ -658,7 +658,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.RequestRaidInfo)]
 		private void HandleRequestRaidInfo(RequestRaidInfo packet)
 		{
-			// every time the player checks the character screen
+			// every Time the player checks the character screen
 			GetPlayer().SendRaidInfo();
 		}
 

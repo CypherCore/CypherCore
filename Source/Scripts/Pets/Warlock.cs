@@ -137,7 +137,7 @@ namespace Scripts.Pets
 				{
 					if (clicker.IsPlayer())
 					{
-						// don't allow using the gateway while having specific auras
+						// don't allow using the gateway while having specific Auras
 						uint[] aurasToCheck =
 						{
 							121164, 121175, 121176, 121177
@@ -160,12 +160,12 @@ namespace Scripts.Pets
 					if (owner == null)
 						return;
 
-					// only if target stepped through the portal
+					// only if Target stepped through the portal
 					if (!allowAnywhere &&
 					    me.GetDistance2d(target) > 1.0f)
 						return;
 
-					// check if target wasn't recently teleported
+					// check if Target wasn't recently teleported
 					if (target.HasAura(SpellIds.DEMONIC_GATEWAY_DEBUFF))
 						return;
 
@@ -328,7 +328,7 @@ namespace Scripts.Pets
 					// if we leave default State (ASSIST) it will passively be controlled by warlock
 					me.SetReactState(ReactStates.Passive);
 
-					// melee damage
+					// melee Damage
 					Unit owner = me.GetOwner();
 
 					if (me.GetOwner())
@@ -374,7 +374,7 @@ namespace Scripts.Pets
 					if (!me.HasAura(SpellIds.IMMOLATION))
 						DoCast(SpellIds.IMMOLATION);
 
-					// "The Infernal deals strong area of effect damage, and will be drawn to attack targets near the impact point"
+					// "The Infernal deals strong area of effect Damage, and will be drawn to attack targets near the impact point"
 					if (!me.GetVictim())
 					{
 						Unit preferredTarget = me.GetAttackerForHelper();

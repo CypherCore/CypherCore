@@ -46,8 +46,8 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.PetAction)]
 		private void HandlePetAction(PetAction packet)
 		{
-			ObjectGuid guid1 = packet.PetGUID;    //pet guid
-			ObjectGuid guid2 = packet.TargetGUID; //tag guid
+			ObjectGuid guid1 = packet.PetGUID;    //pet Guid
+			ObjectGuid guid2 = packet.TargetGUID; //tag Guid
 
 			uint         spellid = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(packet.Action);
 			ActiveStates flag    = (ActiveStates)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(packet.Action); //delete = 0x07 CastSpell = C1
@@ -85,16 +85,16 @@ namespace Game
 			    !(flag == ActiveStates.Command && spellid == (uint)CommandStates.Attack))
 				return;
 
-			if (GetPlayer()._Controlled.Count == 1)
+			if (GetPlayer().Controlled.Count == 1)
 			{
 				HandlePetActionHelper(pet, guid1, spellid, flag, guid2, packet.ActionPosition.X, packet.ActionPosition.Y, packet.ActionPosition.Z);
 			}
 			else
 			{
-				//If a pet is dismissed, _Controlled will change
+				//If a pet is dismissed, Controlled will change
 				List<Unit> controlled = new();
 
-				foreach (var unit in GetPlayer()._Controlled)
+				foreach (var unit in GetPlayer().Controlled)
 					if (unit.GetEntry() == pet.GetEntry() &&
 					    unit.IsAlive())
 						controlled.Add(unit);
@@ -199,7 +199,7 @@ namespace Game
 								if (!owner.IsValidAttackTarget(TargetUnit))
 									return;
 
-							// This is true if pet has no target or has target but targets differs.
+							// This is true if pet has no Target or has Target but targets differs.
 							if (pet.GetVictim() != TargetUnit ||
 							    !pet.GetCharmInfo().IsCommandAttack())
 							{
@@ -218,7 +218,7 @@ namespace Game
 									CreatureAI AI = pet.ToCreature().GetAI();
 
 									if (AI is PetAI)
-										((PetAI)AI)._AttackStart(TargetUnit); // force target switch
+										((PetAI)AI)._AttackStart(TargetUnit); // Force Target switch
 									else
 										AI.AttackStart(TargetUnit);
 
@@ -319,7 +319,7 @@ namespace Game
 
 					if (spellInfo == null)
 					{
-						Log.outError(LogFilter.Network, "WORLD: unknown PET spell id {0}", spellid);
+						Log.outError(LogFilter.Network, "WORLD: unknown PET spell Id {0}", spellid);
 
 						return;
 					}
@@ -335,7 +335,7 @@ namespace Game
 					    spellInfo.IsPassive())
 						return;
 
-					//  Clear the flags as if owner clicked 'attack'. AI will reset them
+					//  Clear the Flags as if owner clicked 'attack'. AI will reset them
 					//  after AttackStart, even if spell failed
 					if (pet.GetCharmInfo() != null)
 					{
@@ -349,7 +349,7 @@ namespace Game
 
 					SpellCastResult result = spell.CheckPetCast(unit_target);
 
-					//auto turn to target unless possessed
+					//auto turn to Target unless possessed
 					if (result == SpellCastResult.UnitNotInfront &&
 					    !pet.IsPossessed() &&
 					    !pet.IsVehicle())
@@ -408,7 +408,7 @@ namespace Game
 						    !GetPlayer().IsFriendlyTo(unit_target) &&
 						    !pet.IsPossessed() &&
 						    !pet.IsVehicle())
-							// This is true if pet has no target or has target but targets differs.
+							// This is true if pet has no Target or has Target but targets differs.
 							if (pet.GetVictim() != unit_target)
 							{
 								CreatureAI ai = pet.ToCreature().GetAI();
@@ -418,7 +418,7 @@ namespace Game
 									PetAI petAI = (PetAI)ai;
 
 									if (petAI != null)
-										petAI._AttackStart(unit_target); // force victim switch
+										petAI._AttackStart(unit_target); // Force victim switch
 									else
 										ai.AttackStart(unit_target);
 								}
@@ -440,7 +440,7 @@ namespace Game
 						spell.Finish(false);
 						spell.Dispose();
 
-						// reset specific flags in case of spell fail. AI will reset other flags
+						// reset specific Flags in case of spell fail. AI will reset other Flags
 						if (pet.GetCharmInfo() != null)
 							pet.GetCharmInfo().SetIsCommandAttack(false);
 					}
@@ -470,7 +470,7 @@ namespace Game
 			if (unit)
 			{
 				response.Allow     = true;
-				response.Timestamp = unit._unitData.PetNameTimestamp;
+				response.Timestamp = unit.UnitData.PetNameTimestamp;
 				response.Name      = unit.GetName();
 
 				Pet pet = unit.ToPet();
@@ -542,7 +542,7 @@ namespace Game
 
 			List<Unit> pets = new();
 
-			foreach (Unit controlled in _player._Controlled)
+			foreach (Unit controlled in _player.Controlled)
 				if (controlled.GetEntry() == pet.GetEntry() &&
 				    controlled.IsAlive())
 					pets.Add(controlled);
@@ -570,7 +570,7 @@ namespace Game
 							    petControlled.IsPet())
 								((Pet)petControlled).ToggleAutocast(spellInfo, true);
 							else
-								foreach (var unit in GetPlayer()._Controlled)
+								foreach (var unit in GetPlayer().Controlled)
 									if (unit.GetEntry() == petControlled.GetEntry())
 										unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, true);
 						}
@@ -581,7 +581,7 @@ namespace Game
 							    petControlled.IsPet())
 								petControlled.ToPet().ToggleAutocast(spellInfo, false);
 							else
-								foreach (var unit in GetPlayer()._Controlled)
+								foreach (var unit in GetPlayer().Controlled)
 									if (unit.GetEntry() == petControlled.GetEntry())
 										unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, false);
 						}
@@ -650,7 +650,7 @@ namespace Game
 				stmt.AddValue(1, GetPlayer().GetGUID().ToString());
 
 				for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-					stmt.AddValue(i + 1, packet.RenameData.DeclinedNames.name[i]);
+					stmt.AddValue(i + 1, packet.RenameData.DeclinedNames.Name[i]);
 
 				trans.Append(stmt);
 			}
@@ -709,14 +709,14 @@ namespace Game
 
 			if (spellInfo == null)
 			{
-				Log.outError(LogFilter.Network, "WorldSession.HandlePetSpellAutocast: Unknown spell id {0} used by {1}.", packet.SpellID, packet.PetGUID.ToString());
+				Log.outError(LogFilter.Network, "WorldSession.HandlePetSpellAutocast: Unknown spell Id {0} used by {1}.", packet.SpellID, packet.PetGUID.ToString());
 
 				return;
 			}
 
 			List<Unit> pets = new();
 
-			foreach (Unit controlled in _player._Controlled)
+			foreach (Unit controlled in _player.Controlled)
 				if (controlled.GetEntry() == pet.GetEntry() &&
 				    controlled.IsAlive())
 					pets.Add(controlled);
@@ -762,7 +762,7 @@ namespace Game
 
 			if (spellInfo == null)
 			{
-				Log.outError(LogFilter.Network, "WorldSession.HandlePetCastSpell: unknown spell id {0} tried to cast by {1}", petCastSpell.Cast.SpellID, petCastSpell.PetGUID.ToString());
+				Log.outError(LogFilter.Network, "WorldSession.HandlePetCastSpell: unknown spell Id {0} tried to cast by {1}", petCastSpell.Cast.SpellID, petCastSpell.PetGUID.ToString());
 
 				return;
 			}
@@ -788,7 +788,7 @@ namespace Game
 			{
 				bool allow = false;
 
-				// allow casting of spells triggered by clientside periodic trigger auras
+				// allow casting of spells triggered by clientside periodic trigger Auras
 				if (caster.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
 				{
 					allow            = true;
@@ -853,7 +853,7 @@ namespace Game
 			petNameInvalid.RenameData.NewName = name;
 
 			for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-				petNameInvalid.RenameData.DeclinedNames.name[i] = declinedName.name[i];
+				petNameInvalid.RenameData.DeclinedNames.Name[i] = declinedName.Name[i];
 
 			SendPacket(petNameInvalid);
 		}

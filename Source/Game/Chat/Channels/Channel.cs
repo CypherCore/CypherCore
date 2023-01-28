@@ -204,7 +204,7 @@ namespace Game.Chat
 			bool newChannel = _playersStore.Empty();
 
 			if (newChannel)
-				_nextActivityUpdateTime = 0; // force activity update on next channel tick
+				_nextActivityUpdateTime = 0; // Force activity update on next channel tick
 
 			PlayerInfo playerInfo = new();
 			playerInfo.SetInvisible(!player.IsGMVisible());
@@ -212,7 +212,7 @@ namespace Game.Chat
 
 			/*
 			 ChannelNameBuilder<YouJoinedAppend> builder = new ChannelNameBuilder(this, new YouJoinedAppend());
-			 SendToOne(builder, guid);
+			 SendToOne(builder, Guid);
 			*/
 
 			SendToOne(new ChannelNotifyJoinedBuilder(this), guid);
@@ -255,7 +255,7 @@ namespace Game.Chat
 			if (send)
 				/*
 				ChannelNameBuilder<YouLeftAppend> builder = new ChannelNameBuilder(this, new YouLeftAppend());
-				SendToOne(builder, guid);
+				SendToOne(builder, Guid);
 				*/
 				SendToOne(new ChannelNotifyLeftBuilder(this, suspend), guid);
 

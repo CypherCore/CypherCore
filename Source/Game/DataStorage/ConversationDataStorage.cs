@@ -218,7 +218,7 @@ namespace Game.DataStorage
 			{
 				if (Global.ObjectMgr.GetCreatureData(SpawnId) == null)
 				{
-					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature guid (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Guid (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
 
 					return false;
 				}
@@ -245,7 +245,7 @@ namespace Game.DataStorage
 			{
 				if (Global.ObjectMgr.GetCreatureTemplate(CreatureId) == null)
 				{
-					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
 
 					return false;
 				}
@@ -253,7 +253,7 @@ namespace Game.DataStorage
 				if (CreatureDisplayInfoId != 0 &&
 				    !CliDB.CreatureDisplayInfoStorage.ContainsKey(CreatureDisplayInfoId))
 				{
-					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display Id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
 
 					return false;
 				}
@@ -285,7 +285,7 @@ namespace Game.DataStorage
 			{
 				if (Global.ObjectMgr.GetCreatureTemplate(CreatureId) == null)
 				{
-					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
 
 					return false;
 				}
@@ -293,7 +293,7 @@ namespace Game.DataStorage
 				if (CreatureDisplayInfoId != 0 &&
 				    !CliDB.CreatureDisplayInfoStorage.ContainsKey(CreatureDisplayInfoId))
 				{
-					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+					Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display Id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
 
 					return false;
 				}

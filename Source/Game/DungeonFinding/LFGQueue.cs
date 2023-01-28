@@ -132,7 +132,7 @@ namespace Game.DungeonFinding
 		{
 			if (!QueueDataStore.ContainsKey(guid))
 			{
-				Log.outError(LogFilter.Lfg, "AddToQueue: Queue data not found for [{0}]", guid);
+				Log.outError(LogFilter.Lfg, "AddToQueue: Queue _data not found for [{0}]", guid);
 
 				return;
 			}
@@ -593,7 +593,7 @@ namespace Game.DungeonFinding
 					proposal.leader = rolePair.Key;
 				}
 
-				// Assing player data and roles
+				// Assing player _data and roles
 				LfgProposalPlayer data = new();
 				data.role  = rolePair.Value;
 				data.group = proposalGroups.LookupByKey(rolePair.Key);
@@ -606,7 +606,7 @@ namespace Game.DungeonFinding
 				proposal.players[rolePair.Key] = data;
 			}
 
-			// Mark proposal members as not queued (but not remove queue data)
+			// Mark proposal members as not queued (but not remove queue _data)
 			foreach (var guid in proposal.queues)
 			{
 				RemoveFromNewQueue(guid);

@@ -19,7 +19,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
 		public const uint ShazzrahCurse = 19713;
 		public const uint MagicGrounding = 19714;
 		public const uint Counterspell = 19715;
-		public const uint ShazzrahGateDummy = 23138; // Teleports to and attacks a random target.
+		public const uint ShazzrahGateDummy = 23138; // Teleports to and attacks a random Target.
 		public const uint ShazzrahGate = 23139;
 	}
 
@@ -144,7 +144,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
 				Creature creature = GetCaster().ToCreature();
 
 				if (creature)
-					creature.GetAI().AttackStart(target); // Attack the target which caster will teleport to.
+					creature.GetAI().AttackStart(target); // Attack the Target which caster will teleport to.
 			}
 		}
 

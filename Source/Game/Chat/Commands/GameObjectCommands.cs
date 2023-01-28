@@ -121,7 +121,7 @@ namespace Game.Chat
 			ulong spawnId = 0;
 
 			if (!isGuid.IsEmpty() &&
-			    isGuid.Equals("guid", StringComparison.OrdinalIgnoreCase))
+			    isGuid.Equals("Guid", StringComparison.OrdinalIgnoreCase))
 			{
 				spawnId   = data;
 				spawnData = Global.ObjectMgr.GetGameObjectData(spawnId);
@@ -249,9 +249,9 @@ namespace Game.Chat
 			obj.SaveToDB();
 			Global.ObjectMgr.AddGameObjectToGrid(obj.GetGameObjectData());
 
-			// Generate a completely new spawn with new guid
+			// Generate a completely new spawn with new Guid
 			// client caches recently deleted objects and brings them back to life
-			// when CreateObject block for this guid is received again
+			// when CreateObject block for this Guid is received again
 			// however it entirely skips parsing that block and only uses already known location
 			obj.Delete();
 
@@ -328,7 +328,7 @@ namespace Game.Chat
 
 				if (thisArg == "ignorerespawn")
 					ignoreRespawn = true;
-				else if (thisArg == "force")
+				else if (thisArg == "Force")
 					force = true;
 				else if (thisArg.IsEmpty() ||
 				         !thisArg.IsNumber())
@@ -358,7 +358,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[Command("target", RBACPermissions.CommandGobjectTarget)]
+		[Command("Target", RBACPermissions.CommandGobjectTarget)]
 		private static bool HandleGameObjectTargetCommand(CommandHandler handler, string objectIdStr)
 		{
 			Player    player = handler.GetSession().GetPlayer();
@@ -368,15 +368,15 @@ namespace Game.Chat
 			if (objectIdStr.IsEmpty())
 			{
 				if (uint.TryParse(objectIdStr, out uint objectId))
-					result = DB.World.Query("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
+					result = DB.World.Query("SELECT Guid, Id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND Id = '{4}' ORDER BY order_ ASC LIMIT 1",
 					                        player.GetPositionX(),
 					                        player.GetPositionY(),
 					                        player.GetPositionZ(),
 					                        player.GetMapId(),
 					                        objectId);
 				else
-					result = DB.World.Query("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ " +
-					                        "FROM gameobject LEFT JOIN gameobject_template ON gameobject_template.entry = gameobject.id WHERE map = {3} AND name LIKE CONCAT('%%', '{4}', '%%') ORDER BY order_ ASC LIMIT 1",
+					result = DB.World.Query("SELECT Guid, Id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ " +
+					                        "FROM gameobject LEFT JOIN gameobject_template ON gameobject_template.entry = gameobject.Id WHERE map = {3} AND Name LIKE CONCAT('%%', '{4}', '%%') ORDER BY order_ ASC LIMIT 1",
 					                        player.GetPositionX(),
 					                        player.GetPositionY(),
 					                        player.GetPositionZ(),
@@ -405,9 +405,9 @@ namespace Game.Chat
 				else
 					eventFilter.Append(')');
 
-				result = DB.World.Query("SELECT gameobject.guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, " +
+				result = DB.World.Query("SELECT gameobject.Guid, Id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, " +
 				                        "(POW(position_x - {0}, 2) + POW(position_y - {1}, 2) + POW(position_z - {2}, 2)) AS order_ FROM gameobject " +
-				                        "LEFT OUTER JOIN game_event_gameobject on gameobject.guid = game_event_gameobject.guid WHERE map = '{3}' {4} ORDER BY order_ ASC LIMIT 10",
+				                        "LEFT OUTER JOIN game_event_gameobject on gameobject.Guid = game_event_gameobject.Guid WHERE map = '{3}' {4} ORDER BY order_ ASC LIMIT 10",
 				                        handler.GetSession().GetPlayer().GetPositionX(),
 				                        handler.GetSession().GetPlayer().GetPositionY(),
 				                        handler.GetSession().GetPlayer().GetPositionZ(),
@@ -504,9 +504,9 @@ namespace Game.Chat
 			obj.SetLocalRotationAngles(oz.Value, oy.GetValueOrDefault(0f), ox.GetValueOrDefault(0f));
 			obj.SaveToDB();
 
-			// Generate a completely new spawn with new guid
+			// Generate a completely new spawn with new Guid
 			// client caches recently deleted objects and brings them back to life
-			// when CreateObject block for this guid is received again
+			// when CreateObject block for this Guid is received again
 			// however it entirely skips parsing that block and only uses already known location
 			obj.Delete();
 
@@ -561,7 +561,7 @@ namespace Game.Chat
 				if (spawnTimeSecs.HasValue)
 					obj.SetRespawnTime(spawnTimeSecs.Value);
 
-				// fill the gameobject data and save to the db
+				// fill the gameobject _data and save to the db
 				obj.SaveToDB(map.GetId(),
 				             new List<Difficulty>()
 				             {
@@ -570,13 +570,13 @@ namespace Game.Chat
 
 				ulong spawnId = obj.GetSpawnId();
 
-				// this will generate a new guid if the object is in an instance
+				// this will generate a new Guid if the object is in an instance
 				obj = GameObject.CreateGameObjectFromDB(spawnId, map);
 
 				if (!obj)
 					return false;
 
-				// TODO: is it really necessary to add both the real and DB table guid here ?
+				// TODO: is it really necessary to add both the real and DB table Guid here ?
 				Global.ObjectMgr.AddGameObjectToGrid(Global.ObjectMgr.GetGameObjectData(spawnId));
 				handler.SendSysMessage(CypherStrings.GameobjectAdd, objectId, objectInfo.name, spawnId, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
 

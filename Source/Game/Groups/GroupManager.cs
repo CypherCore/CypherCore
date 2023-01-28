@@ -68,7 +68,7 @@ namespace Game.Groups
 		{
 			if (NextGroupId >= 0xFFFFFFFE)
 			{
-				Log.outError(LogFilter.Server, "Group guid overflow!! Can't continue, shutting down server. ");
+				Log.outError(LogFilter.Server, "Group Guid overflow!! Can't continue, shutting down server. ");
 				Global.WorldMgr.StopNow();
 			}
 
@@ -102,18 +102,18 @@ namespace Game.Groups
 				uint oldMSTime = Time.GetMSTime();
 
 				// Delete all members that does not exist
-				DB.Characters.DirectExecute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
+				DB.Characters.DirectExecute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT Guid FROM characters)");
 				// Delete all groups whose leader does not exist
-				DB.Characters.DirectExecute("DELETE FROM `groups` WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
+				DB.Characters.DirectExecute("DELETE FROM `groups` WHERE leaderGuid NOT IN (SELECT Guid FROM characters)");
 				// Delete all groups with less than 2 members
-				DB.Characters.DirectExecute("DELETE FROM `groups` WHERE guid NOT IN (SELECT guid FROM group_member GROUP BY guid HAVING COUNT(guid) > 1)");
+				DB.Characters.DirectExecute("DELETE FROM `groups` WHERE Guid NOT IN (SELECT Guid FROM group_member GROUP BY Guid HAVING COUNT(Guid) > 1)");
 				// Delete all rows from group_member with no group
-				DB.Characters.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM `groups`)");
+				DB.Characters.DirectExecute("DELETE FROM group_member WHERE Guid NOT IN (SELECT Guid FROM `groups`)");
 
 				//                                                    0              1           2             3                 4      5          6      7         8       9
 				SQLResult result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
 				                                       //  10         11          12         13              14                  15                     16             17          18         19
-				                                       ", g.icon7, g.icon8, g.groupType, g.difficulty, g.raiddifficulty, g.legacyRaidDifficulty, g.masterLooterGuid, g.guid, lfg.dungeon, lfg.State FROM `groups` g LEFT JOIN lfg_data lfg ON lfg.guid = g.guid ORDER BY g.guid ASC");
+				                                       ", g.icon7, g.icon8, g.groupType, g.difficulty, g.raiddifficulty, g.legacyRaidDifficulty, g.masterLooterGuid, g.Guid, lfg.dungeon, lfg.State FROM `groups` g LEFT JOIN lfg_data lfg ON lfg.Guid = g.Guid ORDER BY g.Guid ASC");
 
 				if (result.IsEmpty())
 				{
@@ -151,7 +151,7 @@ namespace Game.Groups
 				uint oldMSTime = Time.GetMSTime();
 
 				//                                                0        1           2            3       4
-				SQLResult result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
+				SQLResult result = DB.Characters.Query("SELECT Guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY Guid");
 
 				if (result.IsEmpty())
 				{
@@ -169,7 +169,7 @@ namespace Game.Groups
 					if (group)
 						group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
 					else
-						Log.outError(LogFilter.Server, "GroupMgr:LoadGroups: Consistency failed, can't find group (storage id: {0})", result.Read<uint>(0));
+						Log.outError(LogFilter.Server, "GroupMgr:LoadGroups: Consistency failed, can't find group (storage Id: {0})", result.Read<uint>(0));
 
 					++count;
 				} while (result.NextRow());

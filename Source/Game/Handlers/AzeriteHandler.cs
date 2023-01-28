@@ -263,7 +263,7 @@ namespace Game
 
 			if (activateAzeritePower)
 			{
-				// apply all Item mods when azerite power grants a bonus, Item level changes and that affects Stats and auras that scale with Item level
+				// apply all Item mods when azerite power grants a bonus, Item level changes and that affects Stats and Auras that scale with Item level
 				if (azeritePower.ItemBonusListID != 0)
 					_player._ApplyItemMods(azeriteEmpoweredItem, azeriteEmpoweredItem.GetSlot(), true);
 				else

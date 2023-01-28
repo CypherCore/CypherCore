@@ -188,7 +188,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 					return;
 				}
 
-				//Return since we have no target
+				//Return since we have no Target
 				if (!UpdateVictim())
 					return;
 

@@ -301,7 +301,7 @@ namespace Game.DataStorage
 							_chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)raceModel.Sex), customizationOptionsForModel);
 					}
 
-					// link shapeshift displays to race/gender/form
+					// link shapeshift displays to race/Gender/form
 					foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel.LookupByKey(model.Id))
 					{
 						ShapeshiftFormModelData data = new();
@@ -786,7 +786,7 @@ namespace Game.DataStorage
 				    !_storage.ContainsKey(tableHash))
 					if (!_hotfixBlob.Any(p => p.ContainsKey((tableHash, recordId))))
 					{
-						Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
+						Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix Id {id} with RecordID: {recordId}");
 
 						continue;
 					}
@@ -866,7 +866,7 @@ namespace Game.DataStorage
 
 		public void LoadHotfixOptionalData(BitSet availableDb2Locales)
 		{
-			// Register allowed optional data keys
+			// Register allowed optional _data keys
 			_allowedHotfixOptionalData.Add(BroadcastTextStorage.GetTableHash(), Tuple.Create(TactKeyStorage.GetTableHash(), (AllowedHotfixOptionalData)ValidateBroadcastTextTactKeyOptionalData));
 
 			uint oldMSTime = Time.GetMSTime();
@@ -875,7 +875,7 @@ namespace Game.DataStorage
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix optional data records.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix optional _data records.");
 
 				return;
 			}
@@ -889,7 +889,7 @@ namespace Game.DataStorage
 
 				if (allowedHotfixes.Empty())
 				{
-					Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references DB2 store by hash 0x{tableHash:X} that is not allowed to have optional data");
+					Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references DB2 store by hash 0x{tableHash:X} that is not allowed to have optional _data");
 
 					continue;
 				}
@@ -923,7 +923,7 @@ namespace Game.DataStorage
 
 				if (allowedHotfixItr == null)
 				{
-					Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references non-allowed optional data key 0x{optionalData.Key:X} for DB2 store by hash 0x{tableHash:X} and RecordID: {recordId}");
+					Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references non-allowed optional _data key 0x{optionalData.Key:X} for DB2 store by hash 0x{tableHash:X} and RecordID: {recordId}");
 
 					continue;
 				}
@@ -932,7 +932,7 @@ namespace Game.DataStorage
 
 				if (!allowedHotfixItr.Item2(optionalData.Data))
 				{
-					Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` contains invalid data for DB2 store 0x{tableHash:X}, RecordID: {recordId} and Key: 0x{optionalData.Key:X}");
+					Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` contains invalid _data for DB2 store 0x{tableHash:X}, RecordID: {recordId} and Key: 0x{optionalData.Key:X}");
 
 					continue;
 				}
@@ -941,7 +941,7 @@ namespace Game.DataStorage
 				hotfixOptionalDataCount++;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixOptionalDataCount} hotfix optional data records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+			Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixOptionalDataCount} hotfix optional _data records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 		}
 
 		public bool ValidateBroadcastTextTactKeyOptionalData(byte[] data)
@@ -2003,7 +2003,7 @@ namespace Game.DataStorage
 				if (diffEntry == null)
 					return GetDefaultMapDifficulty(mapId, ref difficulty);
 
-				// pull new data
+				// pull new _data
 				mapDiff = GetMapDifficultyData(mapId, tmpDiff); // we are 10 normal or 25 normal
 			}
 

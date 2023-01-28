@@ -321,7 +321,7 @@ namespace Game
 
 		public uint GetCharactersCount(uint accountId)
 		{
-			// check character count
+			// check character Count
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
 			stmt.AddValue(0, accountId);
 			SQLResult result = DB.Characters.Query(stmt);
@@ -365,7 +365,7 @@ namespace Game
 			uint count3    = 0;
 
 			Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC: Loading permissions");
-			SQLResult result = DB.Login.Query("SELECT id, name FROM rbac_permissions");
+			SQLResult result = DB.Login.Query("SELECT Id, Name FROM rbac_permissions");
 
 			if (result.IsEmpty())
 			{
@@ -382,7 +382,7 @@ namespace Game
 			} while (result.NextRow());
 
 			Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC: Loading linked permissions");
-			result = DB.Login.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC");
+			result = DB.Login.Query("SELECT Id, linkedId FROM rbac_linked_permissions ORDER BY Id ASC");
 
 			if (result.IsEmpty())
 			{

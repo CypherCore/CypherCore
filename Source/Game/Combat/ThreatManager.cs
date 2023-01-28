@@ -337,7 +337,7 @@ namespace Game.Combat
 			PutThreatListRef(target.GetGUID(), newRefe);
 			target.GetThreatManager().PutThreatenedByMeRef(_owner.GetGUID(), newRefe);
 
-			// afterwards, we evaluate whether this is an online reference (it might not be an acceptable target, but we need to add it to our threat list before we check!)
+			// afterwards, we evaluate whether this is an online reference (it might not be an acceptable Target, but we need to add it to our threat list before we check!)
 			newRefe.UpdateOffline();
 
 			if (newRefe.IsOnline()) // we only add the threat if the ref is currently available
@@ -492,7 +492,7 @@ namespace Game.Combat
 			foreach (var pair in _myThreatListEntries)
 				pair.Value.UpdateOffline(); // AI notifies are processed in ::UpdateVictim caller
 
-			// fixated target is always preferred
+			// fixated Target is always preferred
 			if (_fixateRef != null &&
 			    _fixateRef.IsAvailable())
 				return _fixateRef;
@@ -510,7 +510,7 @@ namespace Game.Combat
 			if (!highest.IsAvailable())
 				return null;
 
-			// if we have no old victim, or old victim is still highest, then highest is our target and we're done
+			// if we have no old victim, or old victim is still highest, then highest is our Target and we're done
 			if (oldVictimRef == null ||
 			    highest == oldVictimRef)
 				return highest;
@@ -519,16 +519,16 @@ namespace Game.Combat
 			if (!CompareReferencesLT(oldVictimRef, highest, 1.1f))
 				return oldVictimRef;
 
-			// if highest threat breaks 130%, it's our new target regardless of range (and we're done)
+			// if highest threat breaks 130%, it's our new Target regardless of range (and we're done)
 			if (CompareReferencesLT(oldVictimRef, highest, 1.3f))
 				return highest;
 
-			// if it doesn't break 130%, we need to check if it's melee - if yes, it breaks 110% (we checked earlier) and is our new target
+			// if it doesn't break 130%, we need to check if it's melee - if yes, it breaks 110% (we checked earlier) and is our new Target
 			if (_owner.IsWithinMeleeRange(highest.GetVictim()))
 				return highest;
 
 			// If we get here, highest threat is ranged, but below 130% of current - there might be a melee that breaks 110% below us somewhere, so now we need to actually look at the next highest element
-			// luckily, this is a heap, so getting the next highest element is O(log n), and we're just gonna do that repeatedly until we've seen enough targets (or find a target)
+			// luckily, this is a heap, so getting the next highest element is O(log n), and we're just gonna do that repeatedly until we've seen enough targets (or find a Target)
 			foreach (var next in _sortedThreatList)
 			{
 				// if we've found current victim, we're done (nothing above is higher, and nothing below can be higher)
@@ -543,7 +543,7 @@ namespace Game.Combat
 				if (_owner.IsWithinMeleeRange(next.GetVictim()))
 					return next;
 
-				// otherwise the next highest target may still be a melee above 110% and we need to look further
+				// otherwise the next highest Target may still be a melee above 110% and we need to look further
 			}
 
 			// we should have found the old victim at some point in the loop above, so execution should never get to this point
@@ -884,7 +884,7 @@ namespace Game.Combat
 			return _threatenedByMe;
 		}
 
-		// Modify target's threat by +percent%
+		// Modify Target's threat by +percent%
 		public void ModifyThreatByPercent(Unit target, int percent)
 		{
 			if (percent != 0)
@@ -925,7 +925,7 @@ namespace Game.Combat
 		private TauntState _taunted;
 		private Unit _victim;
 		public OnlineState Online;
-		public int TempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
+		public int TempModifier; // Temporary effects (Auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
 
 		public ThreatReference(ThreatManager mgr, Unit victim)
 		{

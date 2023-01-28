@@ -10,7 +10,7 @@ namespace Game.Movement
 {
 	internal class ChaseMovementGenerator : MovementGenerator
 	{
-		private static uint RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
+		private static uint RANGE_CHECK_INTERVAL = 100; // Time (ms) until we attempt to recalculate
 
 		private AbstractFollower _abstractFollower;
 		private ChaseAngle? _angle;
@@ -59,14 +59,14 @@ namespace Game.Movement
 			    !owner.IsAlive())
 				return false;
 
-			// our target might have gone away
+			// our Target might have gone away
 			Unit target = _abstractFollower.GetTarget();
 
 			if (target == null ||
 			    !target.IsInWorld)
 				return false;
 
-			// the owner might be unable to move (rooted or casting), or we have lost the target, pause movement
+			// the owner might be unable to move (rooted or casting), or we have lost the Target, pause movement
 			if (owner.HasUnitState(UnitState.NotMove) ||
 			    owner.IsMovementPreventedByCasting() ||
 			    HasLostTarget(owner, target))
@@ -131,7 +131,7 @@ namespace Game.Movement
 				DoMovementInform(owner, target);
 			}
 
-			// if the target moved, we have to consider whether to adjust
+			// if the Target moved, we have to consider whether to adjust
 			if (_lastTargetPosition == null ||
 			    target.GetPosition() != _lastTargetPosition ||
 			    mutualChase != _mutualChase)
@@ -144,7 +144,7 @@ namespace Game.Movement
 				{
 					Creature cOwner = owner.ToCreature();
 
-					// can we get to the target?
+					// can we get to the Target?
 					if (cOwner != null &&
 					    !target.IsInAccessiblePlaceFor(cOwner))
 					{
@@ -166,7 +166,7 @@ namespace Game.Movement
 					float x, y, z;
 					bool  shortenPath;
 
-					// if we want to move toward the target and there's no fixed angle...
+					// if we want to move toward the Target and there's no fixed angle...
 					if (moveToward && !angle.HasValue)
 					{
 						// ...we'll pathfind to the center, then shorten the path

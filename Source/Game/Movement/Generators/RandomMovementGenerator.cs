@@ -210,7 +210,7 @@ namespace Game.Movement
 			}
 			else
 			{
-				// Creature has made all its steps, time for a little break
+				// Creature has made all its steps, Time for a little break
 				_timer.Reset(splineDuration + RandomHelper.URand(4, 10) * Time.InMilliseconds); // Retails seems to use rounded numbers so we do as well
 				_wanderSteps = RandomHelper.URand(2, 10);
 			}

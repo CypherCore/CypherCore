@@ -31,7 +31,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
@@ -58,7 +58,7 @@ namespace Game.Entities
 			ClearChangesMask(EntryId);
 			ClearChangesMask(DynamicFlags);
 			ClearChangesMask(Scale);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 
 		private uint GetViewerDependentEntryId(ObjectFieldData objectData, WorldObject obj, Player receiver)
@@ -104,7 +104,7 @@ namespace Game.Entities
 						unitDynFlags &= ~(uint)UnitDynFlags.CanSkin;
 				}
 
-				// unit UNIT_DYNFLAG_TRACK_UNIT should only be sent to caster of SPELL_AURA_MOD_STALKED auras
+				// unit UNIT_DYNFLAG_TRACK_UNIT should only be sent to caster of SPELL_AURA_MOD_STALKED Auras
 				if (unitDynFlags.HasAnyFlag((uint)UnitDynFlags.TrackUnit))
 					if (!unit.HasAuraTypeWithCaster(AuraType.ModStalked, receiver.GetGUID()))
 						unitDynFlags &= ~(uint)UnitDynFlags.TrackUnit;
@@ -210,7 +210,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -241,7 +241,7 @@ namespace Game.Entities
 			ClearChangesMask(Duration);
 			ClearChangesMask(Charges);
 			ClearChangesMask(Inactive);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -283,7 +283,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -313,7 +313,7 @@ namespace Game.Entities
 		public override void ClearChangesMask()
 		{
 			ClearChangesMask(Values);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -360,7 +360,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -392,7 +392,7 @@ namespace Game.Entities
 			ClearChangesMask(ItemId);
 			ClearChangesMask(Context);
 			ClearChangesMask(BonusListIDs);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -491,7 +491,7 @@ namespace Game.Entities
 			                                      });
 
 			AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-			WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+			WriteUpdate(data, ChangesMask & allowedMaskForTarget, false, owner, receiver);
 		}
 
 		public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
@@ -647,7 +647,7 @@ namespace Game.Entities
 			ClearChangesMask(DEBUGItemLevel);
 			ClearChangesMask(SpellCharges);
 			ClearChangesMask(Enchantment);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -670,26 +670,26 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Bag owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Bag owner, Player receiver)
 		{
-			data.WriteBits(_changesMask.GetBlocksMask(0), 2);
+			data.WriteBits(ChangesMask.GetBlocksMask(0), 2);
 
 			for (uint i = 0; i < 2; ++i)
-				if (_changesMask.GetBlock(i) != 0)
-					data.WriteBits(_changesMask.GetBlock(i), 32);
+				if (ChangesMask.GetBlock(i) != 0)
+					data.WriteBits(ChangesMask.GetBlock(i), 32);
 
 			data.FlushBits();
 
-			if (_changesMask[0])
-				if (_changesMask[1])
+			if (ChangesMask[0])
+				if (ChangesMask[1])
 					data.WriteUInt32(NumSlots);
 
-			if (_changesMask[2])
+			if (ChangesMask[2])
 				for (int i = 0; i < 36; ++i)
-					if (_changesMask[3 + i])
+					if (ChangesMask[3 + i])
 						data.WritePackedGuid(Slots[i]);
 		}
 
@@ -697,7 +697,7 @@ namespace Game.Entities
 		{
 			ClearChangesMask(NumSlots);
 			ClearChangesMask(Slots);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -717,28 +717,28 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteEmpoweredItem owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AzeriteEmpoweredItem owner, Player receiver)
 		{
-			data.WriteBits(_changesMask.GetBlocksMask(0), 1);
+			data.WriteBits(ChangesMask.GetBlocksMask(0), 1);
 
-			if (_changesMask.GetBlock(0) != 0)
-				data.WriteBits(_changesMask.GetBlock(0), 32);
+			if (ChangesMask.GetBlock(0) != 0)
+				data.WriteBits(ChangesMask.GetBlock(0), 32);
 
 			data.FlushBits();
 
-			if (_changesMask[0])
+			if (ChangesMask[0])
 				for (int i = 0; i < 5; ++i)
-					if (_changesMask[1 + i])
+					if (ChangesMask[1 + i])
 						data.WriteInt32(Selections[i]);
 		}
 
 		public override void ClearChangesMask()
 		{
 			ClearChangesMask(Selections);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -782,7 +782,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AzeriteItem owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -815,7 +815,7 @@ namespace Game.Entities
 			ClearChangesMask(Enabled);
 			ClearChangesMask(SpecializationID);
 			ClearChangesMask(AzeriteEssenceID);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -874,7 +874,7 @@ namespace Game.Entities
 			                                      });
 
 			AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-			WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+			WriteUpdate(data, ChangesMask & allowedMaskForTarget, false, owner, receiver);
 		}
 
 		public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
@@ -982,7 +982,7 @@ namespace Game.Entities
 			ClearChangesMask(AuraLevel);
 			ClearChangesMask(KnowledgeLevel);
 			ClearChangesMask(DEBUGknowledgeWeek);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -1044,7 +1044,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Unit owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -1075,7 +1075,7 @@ namespace Game.Entities
 			ClearChangesMask(SecondaryItemModifiedAppearanceID);
 			ClearChangesMask(ItemAppearanceModID);
 			ClearChangesMask(ItemVisual);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -1446,7 +1446,7 @@ namespace Game.Entities
 			                                      });
 
 			AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-			WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+			WriteUpdate(data, ChangesMask & allowedMaskForTarget, false, owner, receiver);
 		}
 
 		public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
@@ -2093,7 +2093,7 @@ namespace Game.Entities
 			ClearChangesMask(Resistances);
 			ClearChangesMask(BonusResistanceMods);
 			ClearChangesMask(ManaCostModifier);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 
 		private uint GetViewerDependentDisplayId(UnitData unitData, Unit unit, Player receiver)
@@ -2115,7 +2115,7 @@ namespace Game.Entities
 							displayId = summon.GetDisplayIdVisibleToSummoner().Value;
 					}
 
-				// this also applies for transform auras
+				// this also applies for transform Auras
 				SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransformSpell(), unit.GetMap().GetDifficultyID());
 
 				if (transform != null)
@@ -2199,7 +2199,7 @@ namespace Game.Entities
 
 		private uint GetViewerDependentAuraState(UnitData unitData, Unit unit, Player receiver)
 		{
-			// Check per caster aura states to not enable using a spell in client if specified aura is not by target
+			// Check per caster aura states to not enable using a spell in client if specified aura is not by Target
 			return unit.BuildAuraStateUpdateForTarget(receiver);
 		}
 
@@ -2276,7 +2276,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -2320,7 +2320,7 @@ namespace Game.Entities
 			ClearChangesMask(AcceptTime);
 			ClearChangesMask(ObjectiveFlags);
 			ClearChangesMask(ObjectiveProgress);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -2351,7 +2351,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -2394,7 +2394,7 @@ namespace Game.Entities
 			ClearChangesMask(EndTime);
 			ClearChangesMask(NextChargeTime);
 			ClearChangesMask(MaxCharges);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -2531,7 +2531,7 @@ namespace Game.Entities
 				data.WriteBit(HasQuestSession);
 
 			data.WriteBit(HasLevelLink);
-			DungeonScore._value.Write(data);
+			DungeonScore.Value.Write(data);
 			data.FlushBits();
 		}
 
@@ -2544,7 +2544,7 @@ namespace Game.Entities
 			                                      });
 
 			AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-			WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+			WriteUpdate(data, ChangesMask & allowedMaskForTarget, false, owner, receiver);
 		}
 
 		public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
@@ -2803,13 +2803,13 @@ namespace Game.Entities
 			ClearChangesMask(QuestLog);
 			ClearChangesMask(VisibleItems);
 			ClearChangesMask(AvgItemLevel);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 
 		private bool IsQuestLogChangesMaskSkipped()
 		{
 			return false;
-		} // bandwidth savings aren't worth the cpu time
+		} // bandwidth savings aren't worth the cpu Time
 	}
 
 	public class SkillInfo : BaseUpdateData<Player>
@@ -2842,7 +2842,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -2893,7 +2893,7 @@ namespace Game.Entities
 			ClearChangesMask(SkillMaxRank);
 			ClearChangesMask(SkillTempBonus);
 			ClearChangesMask(SkillPermBonus);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -2914,7 +2914,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -2937,7 +2937,7 @@ namespace Game.Entities
 		{
 			ClearChangesMask(Threshold);
 			ClearChangesMask(StateID);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -2991,7 +2991,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3081,7 +3081,7 @@ namespace Game.Entities
 			ClearChangesMask(WeeklyRoundsWon);
 			ClearChangesMask(SeasonRoundsPlayed);
 			ClearChangesMask(SeasonRoundsWon);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3247,7 +3247,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3270,7 +3270,7 @@ namespace Game.Entities
 		{
 			ClearChangesMask(Field_0);
 			ClearChangesMask(Field_10);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3293,7 +3293,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3320,7 +3320,7 @@ namespace Game.Entities
 		{
 			ClearChangesMask(Owner);
 			ClearChangesMask(QuestCompleted);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3341,7 +3341,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3364,7 +3364,7 @@ namespace Game.Entities
 		{
 			ClearChangesMask(QuestID);
 			ClearChangesMask(ReplayTime);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3442,7 +3442,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3521,7 +3521,7 @@ namespace Game.Entities
 			ClearChangesMask(CombatConfigFlags);
 			ClearChangesMask(LocalIdentifier);
 			ClearChangesMask(TraitSystemID);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3555,7 +3555,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3598,7 +3598,7 @@ namespace Game.Entities
 			ClearChangesMask(Quantity);
 			ClearChangesMask(ReagentQuality);
 			ClearChangesMask(DataSlotIndex);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3666,7 +3666,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3790,7 +3790,7 @@ namespace Game.Entities
 			ClearChangesMask(CustomerNotes);
 			ClearChangesMask(OutputItem);
 			ClearChangesMask(OutputItemData);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -3826,7 +3826,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -3879,7 +3879,7 @@ namespace Game.Entities
 			ClearChangesMask(Gems);
 			ClearChangesMask(Data);
 			ClearChangesMask(RecraftItemInfo);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -4015,7 +4015,7 @@ namespace Game.Entities
 		public UpdateField<uint> WatchedFactionIndex = new(66, 85);
 		public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 608, 612);
 		public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 608, 609);
-		public UpdateField<uint> WeeklyRewardsPeriodSinceOrigin = new(98, 112); // week count since Cfg_RegionsEntry::ChallengeOrigin
+		public UpdateField<uint> WeeklyRewardsPeriodSinceOrigin = new(98, 112); // week Count since Cfg_RegionsEntry::ChallengeOrigin
 		public UpdateField<uint> XP = new(34, 36);
 		public UpdateField<ushort> YesterdayHonorableKills = new(66, 83);
 
@@ -4271,7 +4271,7 @@ namespace Game.Entities
 			if (QuestSession.HasValue())
 				QuestSession.GetValue().WriteCreate(data, owner, receiver);
 
-			DungeonScore._value.Write(data);
+			DungeonScore.Value.Write(data);
 
 			for (int i = 0; i < PvpInfo.Size(); ++i)
 				PvpInfo[i].WriteCreate(data, owner, receiver);
@@ -4290,7 +4290,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
@@ -5140,7 +5140,7 @@ namespace Game.Entities
 			ClearChangesMask(BagSlotFlags);
 			ClearChangesMask(BankBagSlotFlags);
 			ClearChangesMask(QuestCompleted);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -5219,7 +5219,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, GameObject owner, Player receiver)
@@ -5366,7 +5366,7 @@ namespace Game.Entities
 			ClearChangesMask(UiWidgetItemID);
 			ClearChangesMask(UiWidgetItemQuality);
 			ClearChangesMask(UiWidgetItemUnknown1000);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 
 		private uint GetViewerGameObjectFlags(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
@@ -5412,33 +5412,33 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, DynamicObject owner, Player receiver)
 		{
-			data.WriteBits(_changesMask.GetBlock(0), 7);
+			data.WriteBits(ChangesMask.GetBlock(0), 7);
 
 			data.FlushBits();
 
-			if (_changesMask[0])
+			if (ChangesMask[0])
 			{
-				if (_changesMask[1])
+				if (ChangesMask[1])
 					data.WritePackedGuid(Caster);
 
-				if (_changesMask[2])
+				if (ChangesMask[2])
 					data.WriteUInt8(Type);
 
-				if (_changesMask[3])
+				if (ChangesMask[3])
 					((SpellCastVisualField)SpellVisual).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
 
-				if (_changesMask[4])
+				if (ChangesMask[4])
 					data.WriteUInt32(SpellID);
 
-				if (_changesMask[5])
+				if (ChangesMask[5])
 					data.WriteFloat(Radius);
 
-				if (_changesMask[6])
+				if (ChangesMask[6])
 					data.WriteUInt32(CastTime);
 			}
 		}
@@ -5451,7 +5451,7 @@ namespace Game.Entities
 			ClearChangesMask(SpellID);
 			ClearChangesMask(Radius);
 			ClearChangesMask(CastTime);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -5500,7 +5500,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Corpse owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Corpse owner, Player receiver)
@@ -5584,7 +5584,7 @@ namespace Game.Entities
 			ClearChangesMask(FactionTemplate);
 			ClearChangesMask(StateSpellVisualKitID);
 			ClearChangesMask(Items);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -5613,7 +5613,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -5649,7 +5649,7 @@ namespace Game.Entities
 			ClearChangesMask(StartTimeOffset);
 			ClearChangesMask(ParameterCurve);
 			ClearChangesMask(Points);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -5675,7 +5675,7 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
 		{
-			UpdateMask changesMask = _changesMask;
+			UpdateMask changesMask = ChangesMask;
 
 			if (ignoreChangesMask)
 				changesMask.SetAll();
@@ -5709,7 +5709,7 @@ namespace Game.Entities
 			ClearChangesMask(AnimationDataID);
 			ClearChangesMask(AnimKitID);
 			ClearChangesMask(AnimProgress);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -5772,54 +5772,54 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AreaTrigger owner, Player receiver)
 		{
-			data.WriteBits(_changesMask.GetBlock(0), 23);
+			data.WriteBits(ChangesMask.GetBlock(0), 23);
 
 			data.FlushBits();
 
-			if (_changesMask[0])
+			if (ChangesMask[0])
 			{
-				if (_changesMask[1])
+				if (ChangesMask[1])
 					OverrideScaleCurve.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
 
-				if (_changesMask[6])
+				if (ChangesMask[6])
 					data.WritePackedGuid(Caster);
 
-				if (_changesMask[7])
+				if (ChangesMask[7])
 					data.WriteUInt32(Duration);
 
-				if (_changesMask[8])
+				if (ChangesMask[8])
 					data.WriteUInt32(TimeToTarget);
 
-				if (_changesMask[9])
+				if (ChangesMask[9])
 					data.WriteUInt32(TimeToTargetScale);
 
-				if (_changesMask[10])
+				if (ChangesMask[10])
 					data.WriteUInt32(TimeToTargetExtraScale);
 
-				if (_changesMask[11])
+				if (ChangesMask[11])
 					data.WriteUInt32(Field_B0);
 
 				if (changesMask[12])
 					data.WriteUInt32(SpellID);
 
-				if (_changesMask[13])
+				if (ChangesMask[13])
 					data.WriteUInt32(SpellForVisuals);
 
-				if (_changesMask[14])
+				if (ChangesMask[14])
 					SpellVisual.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
 
-				if (_changesMask[15])
+				if (ChangesMask[15])
 					data.WriteFloat(BoundsRadius2D);
 
-				if (_changesMask[16])
+				if (ChangesMask[16])
 					data.WriteUInt32(DecalPropertiesID);
 
-				if (_changesMask[17])
+				if (ChangesMask[17])
 					data.WritePackedGuid(CreatingEffectGUID);
 
 				if (changesMask[18])
@@ -5834,7 +5834,7 @@ namespace Game.Entities
 				if (changesMask[21])
 					data.WriteVector3(Field_F8);
 
-				if (_changesMask[2])
+				if (ChangesMask[2])
 					ExtraScaleCurve.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
 
 				if (changesMask[3])
@@ -5875,7 +5875,7 @@ namespace Game.Entities
 			ClearChangesMask(Field_88);
 			ClearChangesMask(Field_F8);
 			ClearChangesMask(VisualAnim);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -5900,27 +5900,27 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
 		{
-			data.WriteBits(_changesMask.GetBlock(0), 5);
+			data.WriteBits(ChangesMask.GetBlock(0), 5);
 
 			data.FlushBits();
 
-			if (_changesMask[0])
+			if (ChangesMask[0])
 			{
-				if (_changesMask[1])
+				if (ChangesMask[1])
 					data.WriteInt32(ScriptPackageID);
 
-				if (_changesMask[2])
+				if (ChangesMask[2])
 					data.WriteUInt32(RndSeedVal);
 
-				if (_changesMask[3])
+				if (ChangesMask[3])
 					data.WritePackedGuid(CreatedBy);
 
-				if (_changesMask[4])
+				if (ChangesMask[4])
 					data.WriteUInt32(SceneType);
 			}
 		}
@@ -5931,7 +5931,7 @@ namespace Game.Entities
 			ClearChangesMask(RndSeedVal);
 			ClearChangesMask(CreatedBy);
 			ClearChangesMask(SceneType);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 	}
 
@@ -6043,16 +6043,16 @@ namespace Game.Entities
 
 		public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
 		{
-			WriteUpdate(data, _changesMask, false, owner, receiver);
+			WriteUpdate(data, ChangesMask, false, owner, receiver);
 		}
 
 		public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Conversation owner, Player receiver)
 		{
-			data.WriteBits(_changesMask.GetBlock(0), 6);
+			data.WriteBits(ChangesMask.GetBlock(0), 6);
 
-			if (_changesMask[0])
+			if (ChangesMask[0])
 			{
-				if (_changesMask[1])
+				if (ChangesMask[1])
 					data.WriteBit(DontPlayBroadcastTextSounds);
 
 				if (changesMask[2])
@@ -6067,8 +6067,8 @@ namespace Game.Entities
 
 			data.FlushBits();
 
-			if (_changesMask[0])
-				if (_changesMask[3])
+			if (ChangesMask[0])
+				if (ChangesMask[3])
 				{
 					if (!ignoreNestedChangesMask)
 						Actors.WriteUpdateMask(data);
@@ -6078,17 +6078,17 @@ namespace Game.Entities
 
 			data.FlushBits();
 
-			if (_changesMask[0])
+			if (ChangesMask[0])
 			{
-				if (_changesMask[3])
+				if (ChangesMask[3])
 					for (int i = 0; i < Actors.Size(); ++i)
 						if (Actors.HasChanged(i) || ignoreNestedChangesMask)
 							Actors[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
 
-				if (_changesMask[4])
+				if (ChangesMask[4])
 					data.WriteUInt32(GetViewerLastLineEndTime(this, owner, receiver));
 
-				if (_changesMask[5])
+				if (ChangesMask[5])
 					data.WriteUInt32(Progress);
 			}
 
@@ -6102,7 +6102,7 @@ namespace Game.Entities
 			ClearChangesMask(Actors);
 			ClearChangesMask(LastLineEndTime);
 			ClearChangesMask(Progress);
-			_changesMask.ResetAll();
+			ChangesMask.ResetAll();
 		}
 
 		public uint GetViewerLastLineEndTime(ConversationData conversationLineData, Conversation conversation, Player receiver)

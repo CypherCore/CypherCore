@@ -115,7 +115,7 @@ namespace Game
 			    diff > _recordUpdateTimeMin)
 				if (Time.GetMSTimeDiff(_lastRecordTime, gameTimeMs) > _recordUpdateTimeInverval)
 				{
-					Log.outDebug(LogFilter.Misc, $"Update time diff: {GetAverageUpdateTime()}. Players online: {sessionCount}.");
+					Log.outDebug(LogFilter.Misc, $"Update Time diff: {GetAverageUpdateTime()}. Players online: {sessionCount}.");
 					_lastRecordTime = gameTimeMs;
 				}
 		}

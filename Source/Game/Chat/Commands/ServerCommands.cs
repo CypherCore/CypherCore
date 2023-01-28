@@ -197,7 +197,7 @@ namespace Game.Chat
 
 			if (int.TryParse(delayStr, out delay))
 			{
-				//  Prevent interpret wrong arg value as 0 secs shutdown time
+				//  Prevent interpret wrong arg value as 0 secs shutdown Time
 				if ((delay == 0 && (delayStr[0] != '0' || (delayStr.Length > 1 && delayStr[1] != '\0'))) ||
 				    delay < 0)
 					return false;
@@ -233,7 +233,7 @@ namespace Game.Chat
 				if (!ParseExitCode(exitCodeStr, out exitCode))
 					return false;
 
-			// Override parameter "delay" with the configuration value if there are still players connected and "force" parameter was not specified
+			// Override parameter "delay" with the configuration value if there are still players connected and "Force" parameter was not specified
 			if (delay < WorldConfig.GetIntValue(WorldCfg.ForceShutdownThreshold) &&
 			    !shutdownMask.HasAnyFlag(ShutdownMask.Force) &&
 			    !IsOnlyUser(handler.GetSession()))
@@ -309,7 +309,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("force", RBACPermissions.CommandServerRestartCancel, true)]
+			[Command("Force", RBACPermissions.CommandServerRestartCancel, true)]
 			private static bool HandleServerForceRestartCommand(CommandHandler handler, StringArguments args)
 			{
 				return ShutdownServer(args, handler, ShutdownMask.Force | ShutdownMask.Restart, ShutdownExitCode.Restart);
@@ -336,7 +336,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("force", RBACPermissions.CommandServerShutdownCancel, true)]
+			[Command("Force", RBACPermissions.CommandServerShutdownCancel, true)]
 			private static bool HandleServerForceShutDownCommand(CommandHandler handler, StringArguments args)
 			{
 				return ShutdownServer(args, handler, ShutdownMask.Force, ShutdownExitCode.Shutdown);

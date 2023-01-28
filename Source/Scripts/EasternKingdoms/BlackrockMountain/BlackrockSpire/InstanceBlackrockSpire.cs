@@ -72,7 +72,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
 	internal struct GameObjectsIds
 	{
-		public const uint WhelpSpawner = 175622; // trap spawned by public const uint  id 175124
+		public const uint WhelpSpawner = 175622; // trap spawned by public const uint  Id 175124
 
 		// Doors
 		public const uint EmberseerIn = 175244;  // First door to Pyroguard Emberseer

@@ -129,7 +129,7 @@ namespace Game.Movement
 			Position destination = new(owner.GetPosition());
 			GetPoint(owner, destination);
 
-			// Add LOS check for target point
+			// Add LOS check for Target point
 			if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
 			{
 				_timer.Reset(200);

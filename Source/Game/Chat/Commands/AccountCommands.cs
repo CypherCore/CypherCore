@@ -602,7 +602,7 @@ namespace Game.Chat
 
 					++sessionsMatchCount;
 
-					// Apply optional count limit
+					// Apply optional Count limit
 					if (limit.HasValue &&
 					    sessionsMatchCount >= limit)
 						break;
@@ -686,7 +686,7 @@ namespace Game.Chat
 
 				if (!accountName.IsEmpty())
 				{
-					// Convert Account name to Upper Format
+					// Convert Account Name to Upper Format
 					accountName = accountName.ToUpper();
 
 					accountId = Global.AccountMgr.GetId(accountName);
@@ -743,7 +743,7 @@ namespace Game.Chat
 					return false;
 				}
 
-				// can set password only for target with less security
+				// can set password only for Target with less security
 				// This also restricts setting handler's own password
 				if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
 					return false;
@@ -827,7 +827,7 @@ namespace Game.Chat
 				else
 					playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
 
-				// can set security level only for target with less security and to less security that we have
+				// can set security level only for Target with less security and to less security that we have
 				// This is also reject self apply in fact
 				AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
 
@@ -841,7 +841,7 @@ namespace Game.Chat
 
 				PreparedStatement stmt;
 
-				// Check and abort if the target gm has a higher rank on one of the realms and the new realm is -1
+				// Check and abort if the Target gm has a higher rank on one of the realms and the new realm is -1
 				if (realmID == -1 &&
 				    !Global.AccountMgr.IsConsoleAccount(playerSecurity))
 				{
@@ -889,7 +889,7 @@ namespace Game.Chat
 						return false;
 					}
 
-					// can set email only for target with less security
+					// can set email only for Target with less security
 					// This also restricts setting handler's own email.
 					if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
 						return false;
@@ -939,7 +939,7 @@ namespace Game.Chat
 						return false;
 					}
 
-					// can set email only for target with less security
+					// can set email only for Target with less security
 					// This also restricts setting handler's own email.
 					if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
 						return false;

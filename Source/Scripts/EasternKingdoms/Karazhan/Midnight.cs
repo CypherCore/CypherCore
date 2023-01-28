@@ -115,7 +115,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
 
 		public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
 		{
-			// Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further damage.
+			// Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further Damage.
 			if (damage >= me.GetHealth() &&
 			    _phase != Phases.Mounted)
 				damage = (uint)(me.GetHealth() - 1);
@@ -309,7 +309,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
 
 		public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
 		{
-			// Midnight never dies, let health fall to 1 and prevent further damage.
+			// Midnight never dies, let health fall to 1 and prevent further Damage.
 			if (damage >= me.GetHealth())
 				damage = (uint)(me.GetHealth() - 1);
 

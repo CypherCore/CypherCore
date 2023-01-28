@@ -510,7 +510,7 @@ namespace Game.Networking.Packets
         /// < the error code that was generated when trying to perform the action. Possible values are @ ref AuctionError
         public int BagResult;
 
-		///< the id of the auction that triggered this notification
+		///< the Id of the auction that triggered this notification
 		public int Command;
 
 		///< the amount of money that the player bid in copper

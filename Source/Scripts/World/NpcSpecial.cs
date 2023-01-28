@@ -251,7 +251,7 @@ namespace Scripts.World.NpcSpecial
 	internal struct GossipMenus
 	{
 		//Wormhole
-		public const int MenuIdWormhole = 10668; // "This tear in the fabric of time and space looks ominous."
+		public const int MenuIdWormhole = 10668; // "This tear in the fabric of Time and space looks ominous."
 		public const int OptionIdWormhole1 = 0;  // "Borean Tundra"
 		public const int OptionIdWormhole2 = 1;  // "Howling Fjord"
 		public const int OptionIdWormhole3 = 2;  // "Sholazar Basin"
@@ -487,7 +487,7 @@ namespace Scripts.World.NpcSpecial
 			if (!(me.IsHostileTo(who) || who.IsHostileTo(me)))
 				return;
 
-			// check if they're a valid attack target
+			// check if they're a valid attack Target
 			if (!me.IsValidAttackTarget(who))
 				return;
 
@@ -527,7 +527,7 @@ namespace Scripts.World.NpcSpecial
 
 		public override void UpdateAI(uint diff)
 		{
-			// Reset flags after a certain time has passed so that the next player has to start the 'event' again
+			// Reset flags after a certain Time has passed so that the next player has to start the 'event' again
 			if (me.HasNpcFlag(NPCFlags.QuestGiver))
 			{
 				if (ResetFlagTimer <= diff)
@@ -615,7 +615,7 @@ namespace Scripts.World.NpcSpecial
 				// She responds to emotes not instantly but ~1500ms later
 				// If you first /bow, then /wave before dancing flames bow back, it doesnt bow at all and only does wave
 				// If you're performing emotes too fast, she will not respond to them
-				// Means she just replaces currently scheduled event with new after receiving new emote
+				// Means she just replaces currently scheduled event with new after receiving new Emote
 				_scheduler.CancelAll();
 
 				switch (emote)
@@ -1410,7 +1410,7 @@ namespace Scripts.World.NpcSpecial
 								                                                                             emoteTask.Repeat(TimeSpan.FromSeconds(1));
 						                                                                             };
 
-						                                                              // Play random emote or dance
+						                                                              // Play random Emote or dance
 						                                                              if (RandomHelper.randChance(50))
 						                                                              {
 							                                                              me.HandleEmoteCommand(BrewfestRandomEmote.SelectRandom());
@@ -1477,7 +1477,7 @@ namespace Scripts.World.NpcSpecial
 
 				if (_combatTimer[key] <= TimeSpan.Zero)
 				{
-					// The attacker has not dealt any damage to the dummy for over 5 seconds. End combat.
+					// The Attacker has not dealt any Damage to the dummy for over 5 seconds. End combat.
 					var pveRefs = me.GetCombatManager().GetPvECombatRefs();
 					var it      = pveRefs.LookupByKey(key);
 
@@ -2050,7 +2050,7 @@ namespace Scripts.World.NpcSpecial
 			                  };
 
 			who.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
-			who._Events.AddEvent(new CastFoodSpell(who, ChairSpells[who.GetEntry()]), who._Events.CalculateTime(TimeSpan.FromSeconds(1)));
+			who.Events.AddEvent(new CastFoodSpell(who, ChairSpells[who.GetEntry()]), who.Events.CalculateTime(TimeSpan.FromSeconds(1)));
 			Creature creature = who.ToCreature();
 
 			if (creature)

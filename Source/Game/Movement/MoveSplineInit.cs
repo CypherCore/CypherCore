@@ -69,7 +69,7 @@ namespace Game.Movement
 
 			// there is a big chance that current position is unknown if current State is not finalized, need compute it
 			// this also allows calculate spline position and update map position in much greater intervals
-			// Don't compute for transport movement if the unit is in a motion between two transports
+			// Don't compute for Transport movement if the unit is in a motion between two transports
 			if (!move_spline.Finalized() &&
 			    move_spline.onTransport == transport)
 			{
@@ -82,7 +82,7 @@ namespace Game.Movement
 				if (!transport)
 					pos = unit;
 				else
-					pos = unit._movementInfo.transport.pos;
+					pos = unit.MovementInfo.Transport.Pos;
 
 				real_position.X = pos.GetPositionX();
 				real_position.Y = pos.GetPositionY();
@@ -100,7 +100,7 @@ namespace Game.Movement
 			args.flags.SetUnsetFlag(SplineFlag.EnterCycle, args.flags.HasFlag(SplineFlag.Cyclic));
 			move_spline.onTransport = transport;
 
-			MovementFlag moveFlags = unit._movementInfo.GetMovementFlags();
+			MovementFlag moveFlags = unit.MovementInfo.GetMovementFlags();
 
 			if (!args.flags.HasFlag(SplineFlag.Backward))
 				moveFlags = (moveFlags & ~MovementFlag.Backward) | MovementFlag.Forward;
@@ -151,7 +151,7 @@ namespace Game.Movement
 			if (!args.Validate(unit))
 				return 0;
 
-			unit._movementInfo.SetMovementFlags(moveFlags);
+			unit.MovementInfo.SetMovementFlags(moveFlags);
 			move_spline.Initialize(args);
 
 			MonsterMove packet = new();
@@ -192,7 +192,7 @@ namespace Game.Movement
 				if (!transport)
 					pos = unit;
 				else
-					pos = unit._movementInfo.transport.pos;
+					pos = unit.MovementInfo.Transport.Pos;
 
 				loc.X = pos.GetPositionX();
 				loc.Y = pos.GetPositionY();
@@ -201,7 +201,7 @@ namespace Game.Movement
 			}
 
 			args.flags.Flags = SplineFlag.Done;
-			unit._movementInfo.RemoveMovementFlag(MovementFlag.Forward);
+			unit.MovementInfo.RemoveMovementFlag(MovementFlag.Forward);
 			move_spline.onTransport = transport;
 			move_spline.Initialize(args);
 
@@ -400,7 +400,7 @@ namespace Game.Movement
 		}
 	}
 
-	// Transforms coordinates from global to transport offsets
+	// Transforms coordinates from global to Transport offsets
 	public class TransportPathTransform
 	{
 		private Unit _owner;

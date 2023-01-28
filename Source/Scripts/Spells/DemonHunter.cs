@@ -225,7 +225,7 @@ namespace Scripts.Spells.DemonHunter
 			ObjectGuid firstTargetGUID = ObjectGuid.Empty;
 			ObjectGuid selectedTarget  = GetCaster().GetTarget();
 
-			// Prefer the selected target if he is one of the enemies
+			// Prefer the selected Target if he is one of the enemies
 			if (targetList.Count > 1 &&
 			    !selectedTarget.IsEmpty())
 			{

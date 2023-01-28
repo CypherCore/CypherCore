@@ -14,46 +14,46 @@ namespace Game.Networking.Packets
 	{
 		public static void ReadTransportInfo(WorldPacket data, ref MovementInfo.TransportInfo transportInfo)
 		{
-			transportInfo.guid            = data.ReadPackedGuid(); // Transport Guid
-			transportInfo.pos.posX        = data.ReadFloat();
-			transportInfo.pos.posY        = data.ReadFloat();
-			transportInfo.pos.posZ        = data.ReadFloat();
-			transportInfo.pos.Orientation = data.ReadFloat();
-			transportInfo.seat            = data.ReadInt8();   // VehicleSeatIndex
-			transportInfo.time            = data.ReadUInt32(); // MoveTime
+			transportInfo.Guid            = data.ReadPackedGuid(); // Transport Guid
+			transportInfo.Pos.X        = data.ReadFloat();
+			transportInfo.Pos.Y        = data.ReadFloat();
+			transportInfo.Pos.Z        = data.ReadFloat();
+			transportInfo.Pos.Orientation = data.ReadFloat();
+			transportInfo.Seat            = data.ReadInt8();   // VehicleSeatIndex
+			transportInfo.Time            = data.ReadUInt32(); // MoveTime
 
 			bool hasPrevTime  = data.HasBit();
 			bool hasVehicleId = data.HasBit();
 
 			if (hasPrevTime)
-				transportInfo.prevTime = data.ReadUInt32(); // PrevMoveTime
+				transportInfo.PrevTime = data.ReadUInt32(); // PrevMoveTime
 
 			if (hasVehicleId)
-				transportInfo.vehicleId = data.ReadUInt32(); // VehicleRecID
+				transportInfo.VehicleId = data.ReadUInt32(); // VehicleRecID
 		}
 
 		public static void WriteTransportInfo(WorldPacket data, MovementInfo.TransportInfo transportInfo)
 		{
-			bool hasPrevTime  = transportInfo.prevTime != 0;
-			bool hasVehicleId = transportInfo.vehicleId != 0;
+			bool hasPrevTime  = transportInfo.PrevTime != 0;
+			bool hasVehicleId = transportInfo.VehicleId != 0;
 
-			data.WritePackedGuid(transportInfo.guid); // Transport Guid
-			data.WriteFloat(transportInfo.pos.GetPositionX());
-			data.WriteFloat(transportInfo.pos.GetPositionY());
-			data.WriteFloat(transportInfo.pos.GetPositionZ());
-			data.WriteFloat(transportInfo.pos.GetOrientation());
-			data.WriteInt8(transportInfo.seat);   // VehicleSeatIndex
-			data.WriteUInt32(transportInfo.time); // MoveTime
+			data.WritePackedGuid(transportInfo.Guid); // Transport Guid
+			data.WriteFloat(transportInfo.Pos.GetPositionX());
+			data.WriteFloat(transportInfo.Pos.GetPositionY());
+			data.WriteFloat(transportInfo.Pos.GetPositionZ());
+			data.WriteFloat(transportInfo.Pos.GetOrientation());
+			data.WriteInt8(transportInfo.Seat);   // VehicleSeatIndex
+			data.WriteUInt32(transportInfo.Time); // MoveTime
 
 			data.WriteBit(hasPrevTime);
 			data.WriteBit(hasVehicleId);
 			data.FlushBits();
 
 			if (hasPrevTime)
-				data.WriteUInt32(transportInfo.prevTime); // PrevMoveTime
+				data.WriteUInt32(transportInfo.PrevTime); // PrevMoveTime
 
 			if (hasVehicleId)
-				data.WriteUInt32(transportInfo.vehicleId); // VehicleRecID
+				data.WriteUInt32(transportInfo.VehicleId); // VehicleRecID
 		}
 
 		public static MovementInfo ReadMovementInfo(WorldPacket data)
@@ -92,31 +92,31 @@ namespace Game.Networking.Packets
 			bool hasAdvFlying = data.HasBit();
 
 			if (hasTransport)
-				ReadTransportInfo(data, ref movementInfo.transport);
+				ReadTransportInfo(data, ref movementInfo.Transport);
 
 			if (hasInertia)
 			{
-				MovementInfo.Inertia inertia = new();
-				inertia.id       = data.ReadInt32();
-				inertia.force    = data.ReadPosition();
-				inertia.lifetime = data.ReadUInt32();
+				MovementInfo.MovementInertia inertia = new();
+				inertia.Id       = data.ReadInt32();
+				inertia.Force    = data.ReadPosition();
+				inertia.Lifetime = data.ReadUInt32();
 
-				movementInfo.inertia = inertia;
+				movementInfo.Inertia = inertia;
 			}
 
 			if (hasAdvFlying)
 			{
-				MovementInfo.AdvFlying advFlying = new();
+				MovementInfo.AdvanFlying advFlying = new();
 
-				advFlying.forwardVelocity = data.ReadFloat();
-				advFlying.upVelocity      = data.ReadFloat();
-				movementInfo.advFlying    = advFlying;
+				advFlying.ForwardVelocity = data.ReadFloat();
+				advFlying.UpVelocity      = data.ReadFloat();
+				movementInfo.AdvFlying    = advFlying;
 			}
 
 			if (hasFall)
 			{
-				movementInfo.jump.fallTime = data.ReadUInt32();
-				movementInfo.jump.zspeed   = data.ReadFloat();
+				movementInfo.Jump.FallTime = data.ReadUInt32();
+				movementInfo.Jump.Zspeed   = data.ReadFloat();
 
 				// ResetBitReader
 
@@ -124,9 +124,9 @@ namespace Game.Networking.Packets
 
 				if (hasFallDirection)
 				{
-					movementInfo.jump.sinAngle = data.ReadFloat();
-					movementInfo.jump.cosAngle = data.ReadFloat();
-					movementInfo.jump.xyspeed  = data.ReadFloat();
+					movementInfo.Jump.SinAngle = data.ReadFloat();
+					movementInfo.Jump.CosAngle = data.ReadFloat();
+					movementInfo.Jump.XYspeed  = data.ReadFloat();
 				}
 			}
 
@@ -135,12 +135,12 @@ namespace Game.Networking.Packets
 
 		public static void WriteMovementInfo(WorldPacket data, MovementInfo movementInfo)
 		{
-			bool hasTransportData = !movementInfo.transport.guid.IsEmpty();
+			bool hasTransportData = !movementInfo.Transport.Guid.IsEmpty();
 			bool hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
-			bool hasFallData      = hasFallDirection || movementInfo.jump.fallTime != 0;
+			bool hasFallData      = hasFallDirection || movementInfo.Jump.FallTime != 0;
 			bool hasSpline        = false; // todo 6.x send this infos
-			bool hasInertia       = movementInfo.inertia.HasValue;
-			bool hasAdvFlying     = movementInfo.advFlying.HasValue;
+			bool hasInertia       = movementInfo.Inertia.HasValue;
+			bool hasAdvFlying     = movementInfo.AdvFlying.HasValue;
 
 			data.WritePackedGuid(movementInfo.Guid);
 			data.WriteUInt32((uint)movementInfo.GetMovementFlags());
@@ -175,34 +175,34 @@ namespace Game.Networking.Packets
 			data.FlushBits();
 
 			if (hasTransportData)
-				WriteTransportInfo(data, movementInfo.transport);
+				WriteTransportInfo(data, movementInfo.Transport);
 
 			if (hasInertia)
 			{
-				data.WriteInt32(movementInfo.inertia.Value.id);
-				data.WriteXYZ(movementInfo.inertia.Value.force);
-				data.WriteUInt32(movementInfo.inertia.Value.lifetime);
+				data.WriteInt32(movementInfo.Inertia.Value.Id);
+				data.WriteXYZ(movementInfo.Inertia.Value.Force);
+				data.WriteUInt32(movementInfo.Inertia.Value.Lifetime);
 			}
 
 			if (hasAdvFlying)
 			{
-				data.WriteFloat(movementInfo.advFlying.Value.forwardVelocity);
-				data.WriteFloat(movementInfo.advFlying.Value.upVelocity);
+				data.WriteFloat(movementInfo.AdvFlying.Value.ForwardVelocity);
+				data.WriteFloat(movementInfo.AdvFlying.Value.UpVelocity);
 			}
 
 			if (hasFallData)
 			{
-				data.WriteUInt32(movementInfo.jump.fallTime);
-				data.WriteFloat(movementInfo.jump.zspeed);
+				data.WriteUInt32(movementInfo.Jump.FallTime);
+				data.WriteFloat(movementInfo.Jump.Zspeed);
 
 				data.WriteBit(hasFallDirection);
 				data.FlushBits();
 
 				if (hasFallDirection)
 				{
-					data.WriteFloat(movementInfo.jump.sinAngle);
-					data.WriteFloat(movementInfo.jump.cosAngle);
-					data.WriteFloat(movementInfo.jump.xyspeed);
+					data.WriteFloat(movementInfo.Jump.SinAngle);
+					data.WriteFloat(movementInfo.Jump.CosAngle);
+					data.WriteFloat(movementInfo.Jump.XYspeed);
 				}
 			}
 		}
@@ -238,15 +238,15 @@ namespace Game.Networking.Packets
 
 				//if (HasSplineFilterKey)
 				//{
-				//    data << uint32(FilterKeysCount);
+				//    _data << uint32(FilterKeysCount);
 				//    for (var i = 0; i < FilterKeysCount; ++i)
 				//    {
-				//        data << float(In);
-				//        data << float(Out);
+				//        _data << float(In);
+				//        _data << float(Out);
 				//    }
 
-				//    data.WriteBits(FilterFlags, 2);
-				//    data.FlushBits();
+				//    _data.WriteBits(FilterFlags, 2);
+				//    _data.FlushBits();
 				//}
 
 				switch (moveSpline.facing.type)
@@ -298,10 +298,10 @@ namespace Game.Networking.Packets
 				//{
 				//    for (WorldPackets::Movement::MonsterSplineUnknown901::Inner const& unkInner : unk.Data) size = 16
 				//    {
-				//        data << int32(unkInner.Unknown_1);
-				//        data << int32(unkInner.Unknown_2);
-				//        data << int32(unkInner.Unknown_3);
-				//        data << uint32(unkInner.Unknown_4);
+				//        _data << int32(unkInner.Unknown_1);
+				//        _data << int32(unkInner.Unknown_2);
+				//        _data << int32(unkInner.Unknown_3);
+				//        _data << uint32(unkInner.Unknown_4);
 				//    }
 				//}
 			}
@@ -336,16 +336,16 @@ namespace Game.Networking.Packets
 					if (lengthSquared > 0.0f)
 					{
 						float mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
-						tmp.posX *= mult;
-						tmp.posY *= mult;
-						tmp.posZ *= mult;
+						tmp.X *= mult;
+						tmp.Y *= mult;
+						tmp.Z *= mult;
 
 						float minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
 						                         (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
 						                         (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
 
 						if (lengthSquared > minLengthSquared)
-							direction = new Vector3(tmp.posX, tmp.posY, tmp.posZ);
+							direction = new Vector3(tmp.X, tmp.Y, tmp.Z);
 					}
 				}
 
@@ -533,7 +533,7 @@ namespace Game.Networking.Packets
 	public class MoveSetSpeed : ServerPacket
 	{
 		public ObjectGuid MoverGUID;
-		public uint SequenceIndex; // Unit movement packet index, incremented each time
+		public uint SequenceIndex; // Unit movement packet index, incremented each Time
 		public float Speed = 1.0f;
 
 		public MoveSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
@@ -582,7 +582,7 @@ namespace Game.Networking.Packets
 	public class MoveSetFlag : ServerPacket
 	{
 		public ObjectGuid MoverGUID;
-		public uint SequenceIndex; // Unit movement packet index, incremented each time
+		public uint SequenceIndex; // Unit movement packet index, incremented each Time
 
 		public MoveSetFlag(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
 		{
@@ -627,8 +627,8 @@ namespace Game.Networking.Packets
 
 		public struct ShipTransferPending
 		{
-			public uint Id;         // gameobject_template.entry of the transport the player is teleporting on
-			public int OriginMapID; // Map id the player is currently on (before teleport)
+			public uint Id;         // gameobject_template.entry of the Transport the player is teleporting on
+			public int OriginMapID; // Map Id the player is currently on (before teleport)
 		}
 	}
 
@@ -1533,10 +1533,10 @@ namespace Game.Networking.Packets
 		public Vector3 FaceSpot;
 		public uint FadeObjectTime;
 
-		public uint Flags; // Spline flags
+		public uint Flags; // Spline Flags
 		public bool Interpolate;
 		public MonsterSplineJumpExtraData? JumpExtraData;
-		public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by flags
+		public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by Flags
 		public uint MoveTime;
 		public List<Vector3> PackedDeltas = new();
 		public List<Vector3> Points = new(); // Spline path

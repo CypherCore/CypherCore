@@ -264,7 +264,7 @@ namespace Game.Chat.Commands
 				return true;
 			}
 
-			string assignedTo = ticket.GetAssignedToName(); // copy assignedto name because we need it after the ticket has been unnassigned
+			string assignedTo = ticket.GetAssignedToName(); // copy assignedto Name because we need it after the ticket has been unnassigned
 
 			ticket.SetUnassigned();
 			ticket.SaveToDB();

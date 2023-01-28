@@ -304,7 +304,7 @@ namespace Game.DataStorage
 	{
 		public byte ConsignmentRate;
 		public byte DepositRate;
-		public ushort FactionID; // id of faction.dbc for player factions associated with city
+		public ushort FactionID; // Id of faction.dbc for player factions associated with city
 		public uint Id;
 		public string Name;
 	}

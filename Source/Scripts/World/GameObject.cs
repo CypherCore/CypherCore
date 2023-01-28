@@ -636,7 +636,7 @@ namespace Scripts.World.GameObjects
 				                    if (Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
 				                    {
 					                    rnd = RandomHelper.URand(0, 2); // Select random music sample
-					                    task.Repeat(musicTime);         // Select new song music after play time is over
+					                    task.Repeat(musicTime);         // Select new song music after play Time is over
 				                    }
 			                    });
 
@@ -901,7 +901,7 @@ namespace Scripts.World.GameObjects
 				if (_rings == 0) // 00:00 and 12:00
 					_rings = 12;
 
-				// Dwarf hourly horn should only play a single time, each time the next hour begins.
+				// Dwarf hourly horn should only play a single Time, each Time the next hour begins.
 				if (_soundId == SoundIds.BellTolldwarfgnome)
 					_rings = 1;
 

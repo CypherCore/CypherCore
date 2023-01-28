@@ -39,7 +39,7 @@ namespace Game.Achievements
         /// <summary>
         ///  called at player login. The player might have fulfilled some achievements when the Achievement system wasn't working yet
         /// </summary>
-        /// <param name="referencePlayer"></param>
+        /// <param Name="referencePlayer"></param>
         public void CheckAllAchievementCriteria(Player referencePlayer)
 		{
 			// suppress sending packets
@@ -189,8 +189,8 @@ namespace Game.Achievements
 			if (tree == null)
 				return false;
 
-			// For SUMM achievements, we have to count the progress of each criteria of the Achievement.
-			// Oddly, the target count is NOT contained in the Achievement, but in each individual criteria
+			// For SUMM achievements, we have to Count the progress of each criteria of the Achievement.
+			// Oddly, the Target Count is NOT contained in the Achievement, but in each individual criteria
 			if (entry.Flags.HasAnyFlag(AchievementFlags.Summ))
 			{
 				long progress = 0;
@@ -247,7 +247,7 @@ namespace Game.Achievements
 			_achievementPoints = 0;
 			DeleteFromDB(_owner.GetGUID());
 
-			// re-fill data
+			// re-fill _data
 			CheckAllAchievementCriteria(_owner);
 		}
 
@@ -318,8 +318,8 @@ namespace Game.Achievements
 
 					if (criteria == null)
 					{
-						// Removing non-existing criteria data for all characters
-						Log.outError(LogFilter.Achievement, "Non-existing Achievement criteria {0} data removed from table `character_achievement_progress`.", id);
+						// Removing non-existing criteria _data for all characters
+						Log.outError(LogFilter.Achievement, "Non-existing Achievement criteria {0} _data removed from table `character_achievement_progress`.", id);
 
 						PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA);
 						stmt.AddValue(0, id);
@@ -575,7 +575,7 @@ namespace Game.Achievements
 				return;
 
 			// titles
-			//! Currently there's only one Achievement that deals with gender-specific titles.
+			//! Currently there's only one Achievement that deals with Gender-specific titles.
 			//! Since no common attributes were found, (not even in titleRewardFlags field)
 			//! we explicitly check by ID. Maybe in the future we could move the achievement_reward
 			//! condition fields to the condition system.
@@ -843,7 +843,7 @@ namespace Game.Achievements
 					if (criteria == null)
 					{
 						// we will remove not existed criteria for all guilds
-						Log.outError(LogFilter.Achievement, "Non-existing Achievement criteria {0} data removed from table `guild_achievement_progress`.", id);
+						Log.outError(LogFilter.Achievement, "Non-existing Achievement criteria {0} _data removed from table `guild_achievement_progress`.", id);
 
 						PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD);
 						stmt.AddValue(0, id);
@@ -1133,7 +1133,7 @@ namespace Game.Achievements
 
 	public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
 	{
-		// store achievements by referenced Achievement id to speed up lookup
+		// store achievements by referenced Achievement Id to speed up lookup
 		private MultiMap<uint, AchievementRecord> _achievementListByReferencedId = new();
 		private Dictionary<uint, AchievementRewardLocale> _achievementRewardLocales = new();
 
@@ -1287,7 +1287,7 @@ namespace Game.Achievements
 				if (achievement == null)
 				{
 					// Remove non-existing achievements from all characters
-					Log.outError(LogFilter.Achievement, "Non-existing Achievement {0} data has been removed from the table `character_achievement`.", achievementId);
+					Log.outError(LogFilter.Achievement, "Non-existing Achievement {0} _data has been removed from the table `character_achievement`.", achievementId);
 
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEVMENT);
 					stmt.AddValue(0, achievementId);
@@ -1346,7 +1346,7 @@ namespace Game.Achievements
 				    reward.TitleId[1] == 0 &&
 				    reward.SenderCreatureId == 0)
 				{
-					Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not contain title or Item reward data. Ignored.");
+					Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not contain title or Item reward _data. Ignored.");
 
 					continue;
 				}
@@ -1377,7 +1377,7 @@ namespace Game.Achievements
 					}
 				}
 
-				//check mail data before Item for report including wrong Item case
+				//check mail _data before Item for report including wrong Item case
 				if (reward.SenderCreatureId != 0)
 				{
 					if (Global.ObjectMgr.GetCreatureTemplate(reward.SenderCreatureId) == null)
@@ -1389,16 +1389,16 @@ namespace Game.Achievements
 				else
 				{
 					if (reward.ItemId != 0)
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains an Item reward. Item will not be rewarded.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender _data, but contains an Item reward. Item will not be rewarded.");
 
 					if (!reward.Subject.IsEmpty())
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains a mail subject.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender _data, but contains a mail subject.");
 
 					if (!reward.Body.IsEmpty())
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains mail text.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender _data, but contains mail text.");
 
 					if (reward.MailTemplateId != 0)
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but has a MailTemplateId.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender _data, but has a MailTemplateId.");
 				}
 
 				if (reward.MailTemplateId != 0)
@@ -1418,7 +1418,7 @@ namespace Game.Achievements
 				if (reward.ItemId != 0)
 					if (Global.ObjectMgr.GetItemTemplate(reward.ItemId) == null)
 					{
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid Item id {reward.ItemId}, reward mail will not contain the rewarded Item.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid Item Id {reward.ItemId}, reward mail will not contain the rewarded Item.");
 						reward.ItemId = 0;
 					}
 

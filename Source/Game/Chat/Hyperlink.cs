@@ -143,7 +143,7 @@ namespace Game.Chat
 					return null;
 			}
 
-			// link data start tag
+			// link _data start tag
 			if (currentString[pos++] != '|' ||
 			    currentString[pos++] != 'H')
 				return null;
@@ -155,14 +155,14 @@ namespace Game.Chat
 			while (pos < currentString.Length && currentString[pos] != '|' && currentString[pos++] != ':') // we only advance pointer to one past if the last thing is : (not for |), this is intentional!
 				++tagLength;
 
-			// ok, link data, skip to next |
+			// ok, link _data, skip to next |
 			int dataStart  = pos;
 			int dataLength = 0;
 
 			while (pos < currentString.Length && currentString[pos++] != '|')
 				++dataLength;
 
-			// ok, next should be link data end tag...
+			// ok, next should be link _data end tag...
 			if (currentString[pos++] != 'h')
 				return null;
 

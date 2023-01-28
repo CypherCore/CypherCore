@@ -543,7 +543,7 @@ namespace Game.Networking.Packets
 		public HitInfo hitInfo; // Flags
 		public uint MeleeSpellID;
 		public int OriginalDamage;
-		public int OverDamage = -1; // (damage - health) or -1 if unit is still alive
+		public int OverDamage = -1; // (Damage - health) or -1 if unit is still alive
 		public int RageGained;
 		public SubDamage? SubDmg;
 		public float Unk;
@@ -781,7 +781,7 @@ namespace Game.Networking.Packets
 	public struct SubDamage
 	{
 		public int SchoolMask;
-		public float FDamage; // Float damage (Most of the time equals to Damage)
+		public float FDamage; // Float Damage (Most of the Time equals to Damage)
 		public int Damage;
 		public int Absorbed;
 		public int Resisted;

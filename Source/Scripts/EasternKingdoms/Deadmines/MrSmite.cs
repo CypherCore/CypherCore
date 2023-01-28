@@ -184,7 +184,7 @@ namespace Scripts.EasternKingdoms.Deadmines
 						case 4:
 							me.SetReactState(ReactStates.Aggressive);
 							SetCombatMovement(true);
-							me.GetMotionMaster().MoveChase(me.GetVictim(), me._CombatDistance);
+							me.GetMotionMaster().MoveChase(me.GetVictim(), me.CombatDistance);
 							uiIsMoving = false;
 							uiPhase    = 0;
 

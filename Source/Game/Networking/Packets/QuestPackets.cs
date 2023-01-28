@@ -434,7 +434,7 @@ namespace Game.Networking.Packets
 	{
 		public bool FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
 
-		public ObjectGuid QuestGiverGUID; // NPC / GameObject guid for normal quest completion. Player guid for self-completed quests
+		public ObjectGuid QuestGiverGUID; // NPC / GameObject Guid for normal quest completion. Player Guid for self-completed quests
 		public uint QuestID;
 
 		public QuestGiverCompleteQuest(WorldPacket packet) : base(packet)
@@ -1144,9 +1144,9 @@ namespace Game.Networking.Packets
 		public float RewardMoneyMultiplier = 1.0f;
 		public uint RewardNextQuest;   // client will request this quest from NPC, if not 0
 		public uint RewardNumSkillUps; // reward skill points
-		public uint RewardSkillLineID; // reward skill id
+		public uint RewardSkillLineID; // reward skill Id
 		public uint RewardSpell;
-		public uint RewardTitle;        // new 2.4.0, player gets this title (id from CharTitles)
+		public uint RewardTitle;        // new 2.4.0, player gets this title (Id from CharTitles)
 		public uint RewardXPDifficulty; // used for calculating rewarded experience
 		public float RewardXPMultiplier = 1.0f;
 		public uint StartItem;

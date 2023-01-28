@@ -81,7 +81,7 @@ namespace Game.Entities
 			if (spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers))
 				return pdamage;
 
-			// For totems get damage bonus from owner
+			// For totems get Damage bonus from owner
 			if (IsTypeId(TypeId.Unit) &&
 			    IsTotem())
 			{
@@ -94,13 +94,13 @@ namespace Game.Entities
 			int   DoneTotal    = 0;
 			float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
 
-			// Done fixed damage bonus auras
+			// Done fixed Damage bonus Auras
 			int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
-			// modify spell power by victim's SPELL_AURA_MOD_DAMAGE_TAKEN auras (eg Amplify/Dampen Magic)
+			// modify spell power by victim's SPELL_AURA_MOD_DAMAGE_TAKEN Auras (eg Amplify/Dampen Magic)
 			DoneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)spellProto.GetSchoolMask());
 
-			// Pets just add their bonus damage to their spell damage
-			// note that their spell damage is just gain of their own auras
+			// Pets just add their bonus Damage to their spell Damage
+			// note that their spell Damage is just gain of their own Auras
 			if (HasUnitTypeMask(UnitTypeMask.Guardian))
 				DoneAdvertisedBenefit += ((Guardian)this).GetBonusDamage();
 
@@ -132,7 +132,7 @@ namespace Game.Entities
 			}
 			else
 			{
-				// No bonus damage for SPELL_DAMAGE_CLASS_NONE class spells by default
+				// No bonus Damage for SPELL_DAMAGE_CLASS_NONE class spells by default
 				if (spellProto.DmgClass == SpellDmgClass.None)
 					return (uint)Math.Max(pdamage * DoneTotalMod, 0.0f);
 			}
@@ -155,7 +155,7 @@ namespace Game.Entities
 			}
 
 			float tmpDamage = (float)((int)pdamage + DoneTotal) * DoneTotalMod;
-			// apply spellmod to Done damage (flat and pct)
+			// apply spellmod to Done Damage (flat and pct)
 			Player _modOwner = GetSpellModOwner();
 
 			if (_modOwner != null)
@@ -179,7 +179,7 @@ namespace Game.Entities
 			if (spellProto.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers))
 				return 1.0f;
 
-			// For totems get damage bonus from owner
+			// For totems get Damage bonus from owner
 			if (IsCreature() &&
 			    IsTotem())
 			{
@@ -189,10 +189,10 @@ namespace Game.Entities
 					return owner.SpellDamagePctDone(victim, spellProto, damagetype, spellEffectInfo);
 			}
 
-			// Done total percent damage auras
+			// Done total percent Damage Auras
 			float DoneTotalMod = 1.0f;
 
-			// Pet damage?
+			// Pet Damage?
 			if (IsTypeId(TypeId.Unit) &&
 			    !IsPet())
 				DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Rank);
@@ -239,7 +239,7 @@ namespace Game.Entities
 			else if (spellProto.Mechanic != 0)
 				MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
-			// Custom scripted damage
+			// Custom scripted Damage
 			switch (spellProto.SpellFamilyName)
 			{
 				case SpellFamilyNames.Mage:
@@ -260,7 +260,7 @@ namespace Game.Entities
 							MathFunctions.AddPct(ref DoneTotalMod, 30 * count);
 					}
 
-					// Drain Soul - increased damage for targets under 20% HP
+					// Drain Soul - increased Damage for targets under 20% HP
 					if (spellProto.Id == 198590)
 						if (HasAuraState(AuraStateType.Wounded20Percent))
 							DoneTotalMod *= 2;
@@ -279,7 +279,7 @@ namespace Game.Entities
 
 			float TakenTotalMod = 1.0f;
 
-			// Mod damage from spell mechanic
+			// Mod Damage from spell mechanic
 			ulong mechanicMask = spellProto.GetAllEffectsMechanicMask();
 
 			if (mechanicMask != 0)
@@ -298,7 +298,7 @@ namespace Game.Entities
 				if (cheatDeath.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
 					MathFunctions.AddPct(ref TakenTotalMod, cheatDeath.GetAmount());
 
-			// Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS should only benefit from mechanic damage mod auras.
+			// Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS should only benefit from mechanic Damage mod Auras.
 			if (!spellProto.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
 			{
 				// Versatility
@@ -306,7 +306,7 @@ namespace Game.Entities
 
 				if (modOwner)
 				{
-					// only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
+					// only 50% of SPELL_AURA_MOD_VERSATILITY for Damage reduction
 					float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
 					MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
 				}
@@ -329,7 +329,7 @@ namespace Game.Entities
 					TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModPeriodicDamageTaken, aurEff => (aurEff.GetMiscValue() & (uint)spellProto.GetSchoolMask()) != 0);
 			}
 
-			// Sanctified Wrath (bypass damage reduction)
+			// Sanctified Wrath (bypass Damage reduction)
 			if (caster != null &&
 			    TakenTotalMod < 1.0f)
 			{
@@ -400,10 +400,10 @@ namespace Game.Entities
 
 		public static int SpellCriticalHealingBonus(Unit caster, SpellInfo spellProto, int damage, Unit victim)
 		{
-			// Calculate critical bonus
+			// Calculate Critical bonus
 			int crit_bonus = damage;
 
-			// adds additional damage to critBonus (from talents)
+			// adds additional Damage to critBonus (from talents)
 			if (caster != null)
 			{
 				Player modOwner = caster.GetSpellModOwner();
@@ -459,13 +459,13 @@ namespace Game.Entities
 				}
 			}
 
-			// Done fixed damage bonus auras
+			// Done fixed Damage bonus Auras
 			uint DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto.GetSchoolMask());
-			// modify spell power by victim's SPELL_AURA_MOD_HEALING auras (eg Amplify/Dampen Magic)
+			// modify spell power by victim's SPELL_AURA_MOD_HEALING Auras (eg Amplify/Dampen Magic)
 			DoneAdvertisedBenefit += (uint)victim.GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)spellProto.GetSchoolMask());
 
-			// Pets just add their bonus damage to their spell damage
-			// note that their spell damage is just gain of their own auras
+			// Pets just add their bonus Damage to their spell Damage
+			// note that their spell Damage is just gain of their own Auras
 			if (HasUnitTypeMask(UnitTypeMask.Guardian))
 				DoneAdvertisedBenefit += (uint)((Guardian)this).GetBonusDamage();
 
@@ -574,7 +574,7 @@ namespace Game.Entities
 			// Healing done percent
 			DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
-			// bonus from missing health of target
+			// bonus from missing health of Target
 			float healthPctDiff = 100.0f - victim.GetHealthPct();
 
 			foreach (AuraEffect healingDonePctVsTargetHealth in GetAuraEffectsByType(AuraType.ModHealingDonePctVersusTargetHealth))
@@ -609,7 +609,7 @@ namespace Game.Entities
 
 			if (damagetype == DamageEffectType.DOT)
 			{
-				// Healing over time taken percent
+				// Healing over Time taken percent
 				float minval_hot = (float)GetMaxNegativeAuraModifier(AuraType.ModHotPct);
 
 				if (minval_hot != 0)
@@ -683,7 +683,7 @@ namespace Game.Entities
 			}
 
 			// percent done
-			// only players use intelligence for critical chance computations
+			// only players use intelligence for Critical chance computations
 			Player modOwner = GetSpellModOwner();
 
 			if (modOwner != null)
@@ -709,12 +709,12 @@ namespace Game.Entities
 				{
 					// taken
 					if (!spellInfo.IsPositive())
-						// Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+						// Modify Critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
 						crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
 
 					if (caster)
 					{
-						// scripted (increase crit chance ... against ... target by x%
+						// scripted (increase crit chance ... against ... Target by x%
 						var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
 
 						foreach (var eff in mOverrideClassScript)
@@ -808,7 +808,7 @@ namespace Game.Entities
 
 			WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
-			// Check damage class instead of attack Type to correctly handle judgements
+			// Check Damage class instead of attack Type to correctly handle judgements
 			// - they are meele, but can't be dodged/parried/deflected because of ranged dmg class
 			if (spellInfo.DmgClass == SpellDmgClass.Ranged)
 				attType = WeaponAttackType.RangedAttack;
@@ -822,7 +822,7 @@ namespace Game.Entities
 			if (roll < tmp)
 				return SpellMissInfo.Miss;
 
-			// Chance resist mechanic
+			// Chance Resist mechanic
 			int resist_chance = victim.GetMechanicResistChance(spellInfo) * 100;
 			tmp += resist_chance;
 
@@ -846,7 +846,7 @@ namespace Game.Entities
 				canBlock = false;
 			}
 
-			// Ranged attacks can only miss, resist and deflect and get blocked
+			// Ranged attacks can only miss, Resist and deflect and get Blocked
 			if (attType == WeaponAttackType.RangedAttack)
 			{
 				canParry = false;
@@ -1048,7 +1048,7 @@ namespace Game.Entities
 
 						break;
 					case SpellMissInfo.Block:
-						// spells can't be partially blocked (it's damage can though)
+						// spells can't be partially Blocked (it's Damage can though)
 						hitMask |= ProcFlagsHit.Block | ProcFlagsHit.FullBlock;
 
 						break;
@@ -1084,19 +1084,19 @@ namespace Game.Entities
 			else
 			{
 				// On block
-				if (damageInfo.blocked != 0)
+				if (damageInfo.Blocked != 0)
 				{
 					hitMask |= ProcFlagsHit.Block;
 
-					if (damageInfo.fullBlock)
+					if (damageInfo.FullBlock)
 						hitMask |= ProcFlagsHit.FullBlock;
 				}
 
-				// On absorb
-				if (damageInfo.absorb != 0)
+				// On Absorb
+				if (damageInfo.Absorb != 0)
 					hitMask |= ProcFlagsHit.Absorb;
 
-				// Don't set hit/crit hitMask if damage is nullified
+				// Don't set hit/crit hitMask if Damage is nullified
 				bool damageNullified = damageInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || hitMask.HasAnyFlag(ProcFlagsHit.FullBlock);
 
 				if (!damageNullified)
@@ -1130,7 +1130,7 @@ namespace Game.Entities
 
 		public Spell FindCurrentSpellBySpellId(uint spell_id)
 		{
-			foreach (var spell in _currentSpells.Values)
+			foreach (var spell in CurrentSpells.Values)
 			{
 				if (spell == null)
 					continue;
@@ -1173,7 +1173,7 @@ namespace Game.Entities
 					return false;
 
 			// channeled spells during channel stage (after the initial cast timer) allow movement with a specific spell attribute
-			spell = _currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
+			spell = CurrentSpells.LookupByKey(CurrentSpellTypes.Channeled);
 
 			if (spell != null)
 				if (spell.GetState() != SpellState.Finished &&
@@ -1238,7 +1238,7 @@ namespace Game.Entities
 				{
 					var eff = _modAuras[aType][i];
 
-					// Get auras with disease dispel Type by caster
+					// Get Auras with disease dispel Type by caster
 					if (eff.GetSpellInfo().Dispel == DispelType.Disease &&
 					    eff.GetCasterGUID() == casterGUID)
 					{
@@ -1277,7 +1277,7 @@ namespace Game.Entities
 				var auras = GetAuraEffectsByType(aura);
 
 				foreach (var eff in auras)
-					// Get auras by caster
+					// Get Auras by caster
 					if (eff.GetCasterGUID() == casterGUID)
 						++dots;
 			}
@@ -1417,7 +1417,7 @@ namespace Game.Entities
 					return true;
 			}
 
-			if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
+			if (immuneToAllEffects) //Return immune only if the Target is immune to all spell effects.
 				return true;
 
 			uint schoolMask = (uint)spellInfo.GetSchoolMask();
@@ -1564,13 +1564,13 @@ namespace Game.Entities
 			if (schoolMask == SpellSchoolMask.None)
 				return false;
 
-			// If _immuneToSchool Type contain this school Type, IMMUNE damage.
+			// If _immuneToSchool Type contain this school Type, IMMUNE Damage.
 			uint schoolImmunityMask = GetSchoolImmunityMask();
 
 			if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
 				return true;
 
-			// If _immuneToDamage Type contain magic, IMMUNE damage.
+			// If _immuneToDamage Type contain magic, IMMUNE Damage.
 			uint damageImmunityMask = GetDamageImmunityMask();
 
 			if (((SpellSchoolMask)damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
@@ -1597,7 +1597,7 @@ namespace Game.Entities
 
 			if (schoolMask != 0)
 			{
-				// If _immuneToSchool Type contain this school Type, IMMUNE damage.
+				// If _immuneToSchool Type contain this school Type, IMMUNE Damage.
 				uint schoolImmunityMask = 0;
 				var  schoolList         = _spellImmune[(int)SpellImmunity.School];
 
@@ -1610,7 +1610,7 @@ namespace Game.Entities
 				if ((schoolImmunityMask & schoolMask) == schoolMask)
 					return true;
 
-				// If _immuneToDamage Type contain magic, IMMUNE damage.
+				// If _immuneToDamage Type contain magic, IMMUNE Damage.
 				uint damageImmunityMask = GetDamageImmunityMask();
 
 				if ((damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
@@ -1658,7 +1658,7 @@ namespace Game.Entities
 
 			// For melee/ranged based attack need update Skills and set some Aura states if victim present
 			if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
-				// If exist crit/parry/dodge/block need update aura State (for victim and attacker)
+				// If exist crit/parry/dodge/block need update aura State (for victim and Attacker)
 				if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
 					// for victim
 					if (isVictim)
@@ -1724,7 +1724,7 @@ namespace Game.Entities
 				}
 			}
 
-			// use provided list of auras which can proc
+			// use provided list of Auras which can proc
 			if (procAuras != null)
 				foreach (AuraApplication aurApp in procAuras)
 				{
@@ -1739,7 +1739,7 @@ namespace Game.Entities
 
 		private void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
 		{
-			// prepare data for self trigger
+			// prepare _data for self trigger
 			ProcEventInfo                      myProcEventInfo       = new(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
 			List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new();
 
@@ -1763,7 +1763,7 @@ namespace Game.Entities
 					}
 			}
 
-			// prepare data for target trigger
+			// prepare _data for Target trigger
 			ProcEventInfo                      targetProcEventInfo       = new(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
 			List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new();
 
@@ -1800,12 +1800,12 @@ namespace Game.Entities
 		{
 			if (apply)
 			{
-				++_procDeep;
+				++ProcDeep;
 			}
 			else
 			{
-				Cypher.Assert(_procDeep != 0);
-				--_procDeep;
+				Cypher.Assert(ProcDeep != 0);
+				--ProcDeep;
 			}
 		}
 
@@ -1824,7 +1824,7 @@ namespace Game.Entities
 
 		public Spell GetCurrentSpell(CurrentSpellTypes spellType)
 		{
-			return _currentSpells.LookupByKey(spellType);
+			return CurrentSpells.LookupByKey(spellType);
 		}
 
 		public void SetCurrentCastSpell(Spell pSpell)
@@ -1851,7 +1851,7 @@ namespace Game.Entities
 					// autorepeat breaking
 					if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
 						// break autorepeat if not Auto Shot
-						if (_currentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id != 75)
+						if (CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id != 75)
 							InterruptSpell(CurrentSpellTypes.AutoRepeat);
 
 					if (pSpell._spellInfo.CalcCastTime() > 0)
@@ -1867,7 +1867,7 @@ namespace Game.Entities
 
 					// it also does break autorepeat if not Auto Shot
 					if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-					    _currentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id != 75)
+					    CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id != 75)
 						InterruptSpell(CurrentSpellTypes.AutoRepeat);
 
 					AddUnitState(UnitState.Casting);
@@ -1896,13 +1896,13 @@ namespace Game.Entities
 
 			// current spell (if it is still here) may be safely deleted now
 			if (GetCurrentSpell(CSpellType) != null)
-				_currentSpells[CSpellType].SetReferencedFromCurrent(false);
+				CurrentSpells[CSpellType].SetReferencedFromCurrent(false);
 
 			// set new current spell
-			_currentSpells[CSpellType] = pSpell;
+			CurrentSpells[CSpellType] = pSpell;
 			pSpell.SetReferencedFromCurrent(true);
 
-			pSpell._selfContainer = _currentSpells[pSpell.GetCurrentContainer()];
+			pSpell._selfContainer = CurrentSpells[pSpell.GetCurrentContainer()];
 		}
 
 		public bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true)
@@ -1943,7 +1943,7 @@ namespace Game.Entities
 
 		public static uint SpellCriticalDamageBonus(Unit caster, SpellInfo spellProto, uint damage, Unit victim = null)
 		{
-			// Calculate critical bonus
+			// Calculate Critical bonus
 			int   crit_bonus = (int)damage * 2;
 			float crit_mod   = 0.0f;
 
@@ -1958,7 +1958,7 @@ namespace Game.Entities
 
 				crit_bonus -= (int)damage;
 
-				// adds additional damage to critBonus (from talents)
+				// adds additional Damage to critBonus (from talents)
 				Player modOwner = caster.GetSpellModOwner();
 
 				if (modOwner != null)
@@ -2103,7 +2103,7 @@ namespace Game.Entities
 
 		public uint HealBySpell(HealInfo healInfo, bool critical = false)
 		{
-			// calculate heal absorb and reduce healing
+			// calculate heal Absorb and reduce healing
 			CalcHealAbsorb(healInfo);
 			DealHeal(healInfo);
 
@@ -2116,15 +2116,15 @@ namespace Game.Entities
 		{
 			if (val > 0.0f)
 			{
-				ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModCastingSpeed), val, !apply);
-				ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModSpellHaste), val, !apply);
-				ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModHasteRegen), val, !apply);
+				ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModCastingSpeed), val, !apply);
+				ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModSpellHaste), val, !apply);
+				ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHasteRegen), val, !apply);
 			}
 			else
 			{
-				ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModCastingSpeed), -val, apply);
-				ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModSpellHaste), -val, apply);
-				ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModHasteRegen), -val, apply);
+				ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModCastingSpeed), -val, apply);
+				ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModSpellHaste), -val, apply);
+				ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHasteRegen), -val, apply);
 			}
 		}
 
@@ -2163,19 +2163,19 @@ namespace Game.Entities
 			if (damage < 0)
 				return;
 
-			Unit victim = damageInfo.target;
+			Unit victim = damageInfo.Target;
 
 			if (victim == null ||
 			    !victim.IsAlive())
 				return;
 
-			SpellSchoolMask damageSchoolMask = damageInfo.schoolMask;
+			SpellSchoolMask damageSchoolMask = damageInfo.SchoolMask;
 
-			// Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS ignore resilience because their damage is based off another spell's damage.
+			// Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS ignore resilience because their Damage is based off another spell's Damage.
 			if (!spellInfo.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
 			{
 				if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
-					damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, (uint)damage, spellInfo, attackType);
+					damage = (int)CalcArmorReducedDamage(damageInfo.Attacker, victim, (uint)damage, spellInfo, attackType);
 
 				// Per-school calc
 				switch (spellInfo.DmgClass)
@@ -2198,31 +2198,31 @@ namespace Game.Entities
 
 							damage += (int)crit_bonus;
 
-							// Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
+							// Increase crit Damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
 							float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
 
 							if (critPctDamageMod != 0)
 								MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
 						}
 
-						// Spell weapon based damage CAN BE crit & blocked at same time
+						// Spell weapon based Damage CAN BE crit & Blocked at same Time
 						if (blocked)
 						{
-							// double blocked amount if block is critical
+							// double Blocked amount if block is Critical
 							float value = victim.GetBlockPercent(GetLevel());
 
 							if (victim.IsBlockCritical())
-								value *= 2; // double blocked percent
+								value *= 2; // double Blocked percent
 
-							damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
+							damageInfo.Blocked = (uint)MathFunctions.CalculatePct(damage, value);
 
-							if (damage <= damageInfo.blocked)
+							if (damage <= damageInfo.Blocked)
 							{
-								damageInfo.blocked   = (uint)damage;
-								damageInfo.fullBlock = true;
+								damageInfo.Blocked   = (uint)damage;
+								damageInfo.FullBlock = true;
 							}
 
-							damage -= (int)damageInfo.blocked;
+							damage -= (int)damageInfo.Blocked;
 						}
 
 						if (CanApplyResilience())
@@ -2234,7 +2234,7 @@ namespace Game.Entities
 					case SpellDmgClass.None:
 					case SpellDmgClass.Magic:
 					{
-						// If crit add critical bonus
+						// If crit add Critical bonus
 						if (crit)
 						{
 							damageInfo.HitInfo |= HitInfo.CriticalHit;
@@ -2252,26 +2252,26 @@ namespace Game.Entities
 			}
 
 			// Script Hook For CalculateSpellDamageTaken -- Allow scripts to change the Damage post class mitigation calculations
-			Global.ScriptMgr.ForEach<IUnitModifySpellDamageTaken>(p => p.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage, spellInfo));
+			Global.ScriptMgr.ForEach<IUnitModifySpellDamageTaken>(p => p.ModifySpellDamageTaken(damageInfo.Target, damageInfo.Attacker, ref damage, spellInfo));
 
-			// Calculate absorb resist
+			// Calculate Absorb Resist
 			if (damage < 0)
 				damage = 0;
 
-			damageInfo.damage         = (uint)damage;
-			damageInfo.originalDamage = (uint)damage;
+			damageInfo.Damage         = (uint)damage;
+			damageInfo.OriginalDamage = (uint)damage;
 			DamageInfo dmgInfo = new(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
 			CalcAbsorbResist(dmgInfo, spell);
-			damageInfo.absorb = dmgInfo.GetAbsorb();
-			damageInfo.resist = dmgInfo.GetResist();
+			damageInfo.Absorb = dmgInfo.GetAbsorb();
+			damageInfo.Resist = dmgInfo.GetResist();
 
-			if (damageInfo.absorb != 0)
-				damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
+			if (damageInfo.Absorb != 0)
+				damageInfo.HitInfo |= (damageInfo.Damage - damageInfo.Absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
 
-			if (damageInfo.resist != 0)
-				damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
+			if (damageInfo.Resist != 0)
+				damageInfo.HitInfo |= (damageInfo.Damage - damageInfo.Resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
 
-			damageInfo.damage = dmgInfo.GetDamage();
+			damageInfo.Damage = dmgInfo.GetDamage();
 		}
 
 		public void DealSpellDamage(SpellNonMeleeDamage damageInfo, bool durabilityLoss)
@@ -2279,7 +2279,7 @@ namespace Game.Entities
 			if (damageInfo == null)
 				return;
 
-			Unit victim = damageInfo.target;
+			Unit victim = damageInfo.Target;
 
 			if (victim == null)
 				return;
@@ -2297,36 +2297,36 @@ namespace Game.Entities
 			}
 
 			// Call default DealDamage
-			CleanDamage cleanDamage = new(damageInfo.cleanDamage, damageInfo.absorb, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
-			DealDamage(this, victim, damageInfo.damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.schoolMask, damageInfo.Spell, durabilityLoss);
+			CleanDamage cleanDamage = new(damageInfo.CleanDamage, damageInfo.Absorb, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
+			DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.SchoolMask, damageInfo.Spell, durabilityLoss);
 		}
 
 		public void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage log)
 		{
 			SpellNonMeleeDamageLog packet = new();
-			packet.Me             = log.target.GetGUID();
-			packet.CasterGUID     = log.attacker.GetGUID();
-			packet.CastID         = log.castId;
+			packet.Me             = log.Target.GetGUID();
+			packet.CasterGUID     = log.Attacker.GetGUID();
+			packet.CastID         = log.CastId;
 			packet.SpellID        = (int)(log.Spell != null ? log.Spell.Id : 0);
 			packet.Visual         = log.SpellVisual;
-			packet.Damage         = (int)log.damage;
-			packet.OriginalDamage = (int)log.originalDamage;
+			packet.Damage         = (int)log.Damage;
+			packet.OriginalDamage = (int)log.OriginalDamage;
 
-			if (log.damage > log.preHitHealth)
-				packet.Overkill = (int)(log.damage - log.preHitHealth);
+			if (log.Damage > log.PreHitHealth)
+				packet.Overkill = (int)(log.Damage - log.PreHitHealth);
 			else
 				packet.Overkill = -1;
 
-			packet.SchoolMask  = (byte)log.schoolMask;
-			packet.Absorbed    = (int)log.absorb;
-			packet.Resisted    = (int)log.resist;
-			packet.ShieldBlock = (int)log.blocked;
-			packet.Periodic    = log.periodicLog;
+			packet.SchoolMask  = (byte)log.SchoolMask;
+			packet.Absorbed    = (int)log.Absorb;
+			packet.Resisted    = (int)log.Resist;
+			packet.ShieldBlock = (int)log.Blocked;
+			packet.Periodic    = log.PeriodicLog;
 			packet.Flags       = (int)log.HitInfo;
 
 			ContentTuningParams contentTuningParams = new();
 
-			if (contentTuningParams.GenerateDataForUnits(log.attacker, log.target))
+			if (contentTuningParams.GenerateDataForUnits(log.Attacker, log.Target))
 				packet.ContentTuning = contentTuningParams;
 
 			SendCombatLogMessage(packet);
@@ -2334,7 +2334,7 @@ namespace Game.Entities
 
 		public void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo info)
 		{
-			AuraEffect aura = info.auraEff;
+			AuraEffect aura = info.AuraEff;
 
 			SpellPeriodicAuraLog data = new();
 			data.TargetGUID = GetGUID();
@@ -2344,13 +2344,13 @@ namespace Game.Entities
 
 			SpellPeriodicAuraLog.SpellLogEffect spellLogEffect = new();
 			spellLogEffect.Effect              = (uint)aura.GetAuraType();
-			spellLogEffect.Amount              = info.damage;
-			spellLogEffect.OriginalDamage      = (int)info.originalDamage;
-			spellLogEffect.OverHealOrKill      = (uint)info.overDamage;
+			spellLogEffect.Amount              = info.Damage;
+			spellLogEffect.OriginalDamage      = (int)info.OriginalDamage;
+			spellLogEffect.OverHealOrKill      = (uint)info.OverDamage;
 			spellLogEffect.SchoolMaskOrPower   = (uint)aura.GetSpellInfo().GetSchoolMask();
-			spellLogEffect.AbsorbedOrAmplitude = info.absorb;
-			spellLogEffect.Resisted            = info.resist;
-			spellLogEffect.Crit                = info.critical;
+			spellLogEffect.AbsorbedOrAmplitude = info.Absorb;
+			spellLogEffect.Resisted            = info.Resist;
+			spellLogEffect.Crit                = info.Critical;
 			// @todo: implement debug info
 
 			ContentTuningParams contentTuningParams = new();
@@ -2397,7 +2397,7 @@ namespace Game.Entities
 			if (IsCharmedOwnedByPlayerOrPlayer()) // if it is a player owned creature it should not remove the aura
 				return;
 
-			// don't remove vehicle auras, passengers aren't supposed to drop off the vehicle
+			// don't remove vehicle Auras, passengers aren't supposed to drop off the vehicle
 			// don't remove clone caster on evade (to be verified)
 			bool evadeAuraCheck(Aura aura)
 			{
@@ -2424,7 +2424,7 @@ namespace Game.Entities
 
 		public void RemoveAllAurasOnDeath()
 		{
-			// used just after dieing to remove all visible auras
+			// used just after dieing to remove all visible Auras
 			// and disable the mods for the passive ones
 			foreach (var app in GetAppliedAuras())
 			{
@@ -2495,7 +2495,7 @@ namespace Game.Entities
 
 		public DiminishingLevels GetDiminishing(DiminishingGroup group)
 		{
-			DiminishingReturn diminish = _Diminishing[(int)group];
+			DiminishingReturn diminish = _diminishing[(int)group];
 
 			if (diminish.HitCount == 0)
 				return DiminishingLevels.Level1;
@@ -2514,7 +2514,7 @@ namespace Game.Entities
 			DiminishingLevels currentLevel = GetDiminishing(group);
 			DiminishingLevels maxLevel     = auraSpellInfo.GetDiminishingReturnsMaxLevel();
 
-			DiminishingReturn diminish = _Diminishing[(int)group];
+			DiminishingReturn diminish = _diminishing[(int)group];
 
 			if (currentLevel < maxLevel)
 				diminish.HitCount = currentLevel + 1;
@@ -2640,7 +2640,7 @@ namespace Game.Entities
 		public void ApplyDiminishingAura(DiminishingGroup group, bool apply)
 		{
 			// Checking for existing in the table
-			DiminishingReturn diminish = _Diminishing[(int)group];
+			DiminishingReturn diminish = _diminishing[(int)group];
 
 			if (apply)
 			{
@@ -2650,7 +2650,7 @@ namespace Game.Entities
 			{
 				--diminish.Stack;
 
-				// Remember time after last aura from group removed
+				// Remember Time after last aura from group removed
 				if (diminish.Stack == 0)
 					diminish.HitTime = GameTime.GetGameTimeMS();
 			}
@@ -2659,7 +2659,7 @@ namespace Game.Entities
 		private void ClearDiminishings()
 		{
 			for (int i = 0; i < (int)DiminishingGroup.Max; ++i)
-				_Diminishing[i].Clear();
+				_diminishing[i].Clear();
 		}
 
 		// Interrupts
@@ -2667,17 +2667,17 @@ namespace Game.Entities
 		{
 			// generic spells are interrupted if they are not finished or delayed
 			if (GetCurrentSpell(CurrentSpellTypes.Generic) != null &&
-			    (spell_id == 0 || _currentSpells[CurrentSpellTypes.Generic]._spellInfo.Id == spell_id))
+			    (spell_id == 0 || CurrentSpells[CurrentSpellTypes.Generic]._spellInfo.Id == spell_id))
 				InterruptSpell(CurrentSpellTypes.Generic, withDelayed, withInstant);
 
 			// autorepeat spells are interrupted if they are not finished or delayed
 			if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-			    (spell_id == 0 || _currentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id == spell_id))
+			    (spell_id == 0 || CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id == spell_id))
 				InterruptSpell(CurrentSpellTypes.AutoRepeat, withDelayed, withInstant);
 
 			// channeled spells are interrupted if they are not finished, even if they are delayed
 			if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null &&
-			    (spell_id == 0 || _currentSpells[CurrentSpellTypes.Channeled]._spellInfo.Id == spell_id))
+			    (spell_id == 0 || CurrentSpells[CurrentSpellTypes.Channeled]._spellInfo.Id == spell_id))
 				InterruptSpell(CurrentSpellTypes.Channeled, true, true);
 		}
 
@@ -2686,7 +2686,7 @@ namespace Game.Entities
 			Cypher.Assert(spellType < CurrentSpellTypes.Max);
 
 			Log.outDebug(LogFilter.Unit, "Interrupt spell for unit {0}", GetEntry());
-			Spell spell = _currentSpells.LookupByKey(spellType);
+			Spell spell = CurrentSpells.LookupByKey(spellType);
 
 			if (spell != null &&
 			    (withDelayed || spell.GetState() != SpellState.Delayed) &&
@@ -2707,7 +2707,7 @@ namespace Game.Entities
 				}
 				else
 				{
-					_currentSpells[spellType] = null;
+					CurrentSpells[spellType] = null;
 					spell.SetReferencedFromCurrent(false);
 				}
 
@@ -3112,14 +3112,14 @@ namespace Game.Entities
 				if (aurApp == null)
 					continue;
 
-				// don't try to remove passive auras
+				// don't try to remove passive Auras
 				if (aura.IsPassive())
 					continue;
 
 				if (Convert.ToBoolean(aura.GetSpellInfo().GetDispelMask() & dispelMask))
 				{
-					// do not remove positive auras if friendly target
-					//               negative auras if non-friendly
+					// do not remove positive Auras if friendly Target
+					//               negative Auras if non-friendly
 					// unless we're reflecting (dispeller eliminates one of it's benefitial buffs)
 					if (isReflect != (aurApp.IsPositive() == IsFriendlyTo(caster)))
 						continue;
@@ -3130,8 +3130,8 @@ namespace Game.Entities
 					if (chance == 0)
 						continue;
 
-					// The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-					// Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
+					// The charges / stack amounts don't Count towards the total number of Auras that can be dispelled.
+					// Ie: A dispel on a Target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
 					// Polymorph instead of 1 / (5 + 1) . 16%.
 					bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
 					byte charges       = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
@@ -3181,7 +3181,7 @@ namespace Game.Entities
 			if (!HasInterruptFlag(flag))
 				return;
 
-			// interrupt auras
+			// interrupt Auras
 			for (var i = 0; i < _interruptableAuras.Count; i++)
 			{
 				Aura aura = _interruptableAuras[i].GetBase();
@@ -3216,7 +3216,7 @@ namespace Game.Entities
 			if (!HasInterruptFlag(flag))
 				return;
 
-			// interrupt auras
+			// interrupt Auras
 			for (var i = 0; i < _interruptableAuras.Count; i++)
 			{
 				Aura aura = _interruptableAuras[i].GetBase();
@@ -3336,7 +3336,7 @@ namespace Game.Entities
 						}
 						else
 						{
-							// single target State must be removed before aura creation to preserve existing single target aura
+							// single Target State must be removed before aura creation to preserve existing single Target aura
 							if (aura.IsSingleTarget())
 								aura.UnregisterSingleTarget();
 
@@ -3348,11 +3348,11 @@ namespace Game.Entities
 
 							if (newAura != null)
 							{
-								// created aura must not be single target aura, so stealer won't loose it on recast
+								// created aura must not be single Target aura, so stealer won't loose it on recast
 								if (newAura.IsSingleTarget())
 								{
 									newAura.UnregisterSingleTarget();
-									// bring back single target aura status to the old aura
+									// bring back single Target aura status to the old aura
 									aura.SetIsSingleTarget(true);
 									caster.GetSingleCastAuras().Add(aura);
 								}
@@ -3410,9 +3410,9 @@ namespace Game.Entities
 
 		public void RemoveNotOwnSingleTargetAuras(bool onPhaseChange = false)
 		{
-			// Iterate _ownedAuras - aura is marked as single target in Unit::AddAura (and pushed to _ownedAuras).
+			// Iterate _ownedAuras - aura is marked as single Target in Unit::AddAura (and pushed to _ownedAuras).
 			// _appliedAuras will NOT contain the aura before first Unit::Update after adding it to _ownedAuras.
-			// Quickly removing such an aura will lead to it not being unregistered from caster's single cast auras container
+			// Quickly removing such an aura will lead to it not being unregistered from caster's single cast Auras container
 			// leading to assertion failures if the aura was cast on a player that can
 			// (and is changing map at the point where this function is called).
 			// Such situation occurs when player is logging in inside an instance and fails the entry check for any reason.
@@ -3440,7 +3440,7 @@ namespace Game.Entities
 				}
 			}
 
-			// single target auras at other targets
+			// single Target Auras at other targets
 			for (var i = 0; i < _scAuras.Count; i++)
 			{
 				var aura = _scAuras[i];
@@ -3461,7 +3461,7 @@ namespace Game.Entities
 			_ownedAuras.Remove(keyValuePair);
 			_removedAuras.Add(aura);
 
-			// Unregister single target aura
+			// Unregister single Target aura
 			if (aura.IsSingleTarget())
 				aura.UnregisterSingleTarget();
 
@@ -3582,7 +3582,7 @@ namespace Game.Entities
 			Aura aura = aurApp.GetBase();
 			_UnapplyAura(appMap, mode);
 
-			// Remove aura - for Area and Target auras
+			// Remove aura - for Area and Target Auras
 			if (aura.GetOwner() == this)
 				aura.Remove(mode);
 		}
@@ -3756,7 +3756,7 @@ namespace Game.Entities
 
 		private void RemoveAreaAurasDueToLeaveWorld()
 		{
-			// make sure that all area auras not applied on self are removed
+			// make sure that all area Auras not applied on self are removed
 			foreach (var pair in GetOwnedAuras())
 			{
 				var appMap = pair.Value.GetApplicationMap();
@@ -3773,7 +3773,7 @@ namespace Game.Entities
 				}
 			}
 
-			// remove area auras owned by others
+			// remove area Auras owned by others
 			foreach (var pair in GetAppliedAuras())
 				if (pair.Value.GetBase().GetOwner() != this)
 					RemoveAura(pair);
@@ -3782,7 +3782,7 @@ namespace Game.Entities
 		public void RemoveAllAuras()
 		{
 			// this may be a dead loop if some events on aura remove will continiously apply aura on remove
-			// we want to have all auras removed, so use your brain when linking events
+			// we want to have all Auras removed, so use your brain when linking events
 			for (int counter = 0; !_appliedAuras.Empty() || !_ownedAuras.Empty(); counter++)
 			{
 				foreach (var aurAppIter in GetAppliedAuras())
@@ -3793,7 +3793,7 @@ namespace Game.Entities
 
 				const int maxIteration = 50;
 
-				// give this loop a few tries, if there are still auras then log as much information as possible
+				// give this loop a few tries, if there are still Auras then log as much information as possible
 				if (counter >= maxIteration)
 				{
 					StringBuilder sstr = new();
@@ -3826,16 +3826,16 @@ namespace Game.Entities
 		public void RemoveArenaAuras()
 		{
 			// in join, remove positive buffs, on end, remove negative
-			// used to remove positive visible auras in arenas
+			// used to remove positive visible Auras in arenas
 			RemoveAppliedAuras(aurApp =>
 			                   {
 				                   Aura aura = aurApp.GetBase();
 
-				                   return (!aura.GetSpellInfo().HasAttribute(SpellAttr4.AllowEnteringArena) // don't remove stances, shadowform, pally/hunter auras
+				                   return (!aura.GetSpellInfo().HasAttribute(SpellAttr4.AllowEnteringArena) // don't remove stances, shadowform, pally/hunter Auras
 				                           &&
-				                           !aura.IsPassive() // don't remove passive auras
+				                           !aura.IsPassive() // don't remove passive Auras
 				                           &&
-				                           (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.AllowAuraWhileDead))) || // not negative death persistent auras
+				                           (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.AllowAuraWhileDead))) || // not negative death persistent Auras
 				                          aura.GetSpellInfo().HasAttribute(SpellAttr5.RemoveEnteringArena);                              // special marker, always remove
 			                   });
 		}
@@ -3892,9 +3892,9 @@ namespace Game.Entities
 
 			if (apply)
 			{
-				if ((_unitData.AuraState & mask) == 0)
+				if ((UnitData.AuraState & mask) == 0)
 				{
-					SetUpdateFieldFlagValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.AuraState), mask);
+					SetUpdateFieldFlagValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.AuraState), mask);
 
 					if (IsTypeId(TypeId.Player))
 					{
@@ -3939,9 +3939,9 @@ namespace Game.Entities
 			}
 			else
 			{
-				if ((_unitData.AuraState & mask) != 0)
+				if ((UnitData.AuraState & mask) != 0)
 				{
-					RemoveUpdateFieldFlagValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.AuraState), mask);
+					RemoveUpdateFieldFlagValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.AuraState), mask);
 
 					foreach (var app in GetAppliedAuras())
 					{
@@ -3981,7 +3981,7 @@ namespace Game.Entities
 				}
 			}
 
-			return (_unitData.AuraState & (1 << ((int)flag - 1))) != 0;
+			return (UnitData.AuraState & (1 << ((int)flag - 1))) != 0;
 		}
 
 		private SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
@@ -4066,7 +4066,7 @@ namespace Game.Entities
 			if (auraState != 0)
 			{
 				bool canBreak = false;
-				// Get mask of all aurastates from remaining auras
+				// Get mask of all aurastates from remaining Auras
 				var list = _auraStateAuras.LookupByKey(auraState);
 
 				for (var i = 0; i < list.Count && !(auraStateFound && canBreak);)
@@ -4119,7 +4119,7 @@ namespace Game.Entities
 
 					if ((aStateMask & (uint)AuraStateType.PerCasterAuraStateMask) != 0)
 					{
-						_values.ModifyValue(_unitData).ModifyValue(_unitData.AuraState);
+						Values.ModifyValue(UnitData).ModifyValue(UnitData.AuraState);
 						ForceUpdateFieldChange();
 					}
 				}
@@ -4282,7 +4282,7 @@ namespace Game.Entities
 
 		public uint BuildAuraStateUpdateForTarget(Unit target)
 		{
-			uint auraStates = _unitData.AuraState & ~(uint)AuraStateType.PerCasterAuraStateMask;
+			uint auraStates = UnitData.AuraState & ~(uint)AuraStateType.PerCasterAuraStateMask;
 
 			foreach (var state in _auraStateAuras)
 				if (Convert.ToBoolean((1 << ((int)state.Key - 1)) & (uint)AuraStateType.PerCasterAuraStateMask))
@@ -4294,7 +4294,7 @@ namespace Game.Entities
 
 		public bool CanProc()
 		{
-			return _procDeep == 0;
+			return ProcDeep == 0;
 		}
 
 		public void _ApplyAuraEffect(Aura aura, uint effIndex)
@@ -4321,18 +4321,18 @@ namespace Game.Entities
 			if (aurApp.HasRemoveMode())
 				return;
 
-			// Update target aura State flag
+			// Update Target aura State flag
 			AuraStateType aState = aura.GetSpellInfo().GetAuraState();
 
 			if (aState != 0)
 			{
 				uint aStateMask = (1u << ((int)aState - 1));
 
-				// force update so the new caster registers it
+				// Force update so the new caster registers it
 				if (aStateMask.HasAnyFlag((uint)AuraStateType.PerCasterAuraStateMask) &&
-				    (_unitData.AuraState & aStateMask) != 0)
+				    (UnitData.AuraState & aStateMask) != 0)
 				{
-					_values.ModifyValue(_unitData).ModifyValue(_unitData.AuraState);
+					Values.ModifyValue(UnitData).ModifyValue(UnitData.AuraState);
 					ForceUpdateFieldChange();
 				}
 				else
@@ -4383,17 +4383,17 @@ namespace Game.Entities
 
 			if (aura.IsSingleTarget())
 			{
-				// @HACK: Player is not in world during loading auras.
-				//Single target auras are not saved or loaded from database
+				// @HACK: Player is not in world during loading Auras.
+				//Single Target Auras are not saved or loaded from database
 				//but may be created as a result of aura links (player mounts with passengers)
 				Cypher.Assert((IsInWorld && !IsDuringRemoveFromWorld()) || aura.GetCasterGUID() == GetGUID());
 
-				// register single target aura
+				// register single Target aura
 				caster._scAuras.Add(aura);
 
 				Queue<Aura> aurasSharingLimit = new();
 
-				// remove other single target auras
+				// remove other single Target Auras
 				foreach (Aura scAura in caster.GetSingleCastAuras())
 					if (scAura != aura &&
 					    scAura.IsSingleTargetWith(aura))
@@ -4418,7 +4418,7 @@ namespace Game.Entities
 			    !createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters())
 				createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
-			// passive and Incanter's Absorption and auras with different Type can stack with themselves any number of times
+			// passive and Incanter's Absorption and Auras with different Type can stack with themselves any number of times
 			if (!createInfo.GetSpellInfo().IsMultiSlotAura())
 			{
 				// check if cast Item changed
@@ -4453,7 +4453,7 @@ namespace Game.Entities
 						auraEff._baseAmount = bp;
 					}
 
-					// correct cast Item guid if needed
+					// correct cast Item Guid if needed
 					if (castItemGUID != foundAura.GetCastItemGUID())
 					{
 						foundAura.SetCastItemGUID(castItemGUID);
@@ -4548,7 +4548,7 @@ namespace Game.Entities
 					{
 						Aura auraBase = existingAurEff.GetBase();
 
-						// no removing of area auras from the original owner, as that completely cancels them
+						// no removing of area Auras from the original owner, as that completely cancels them
 						if (removeOtherAuraApplications && (!auraBase.IsArea() || auraBase.GetOwner() != this))
 						{
 							AuraApplication aurApp = existingAurEff.GetBase().GetApplicationOfTarget(GetGUID());
@@ -4604,7 +4604,7 @@ namespace Game.Entities
 			foreach (AuraEffect aurEff in mTotalAuraList)
 				if (predicate(aurEff))
 					// Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
-					// If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
+					// If the Aura Effect does not have this Stack Rule, it returns false so we can add to the Multiplier as usual
 					if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, aurEff.GetAmount(), sameEffectSpellGroup))
 						modifier += aurEff.GetAmount();
 
@@ -4633,11 +4633,11 @@ namespace Game.Entities
 			foreach (var aurEff in mTotalAuraList)
 				if (predicate(aurEff))
 					// Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
-					// If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
+					// If the Aura Effect does not have this Stack Rule, it returns false so we can add to the Multiplier as usual
 					if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, aurEff.GetAmount(), sameEffectSpellGroup))
 						MathFunctions.AddPct(ref multiplier, aurEff.GetAmount());
 
-			// Add the highest of the Same Effect Stack Rule SpellGroups to the multiplier
+			// Add the highest of the Same Effect Stack Rule SpellGroups to the Multiplier
 			foreach (var pair in sameEffectSpellGroup)
 				MathFunctions.AddPct(ref multiplier, pair.Value);
 

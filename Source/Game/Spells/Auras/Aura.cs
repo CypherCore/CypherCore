@@ -28,7 +28,7 @@ namespace Game.Spells
 		Default = 1, // scripted remove, remove by stack with aura with different ids and sc aura remove
 		Interrupt,
 		Cancel,
-		EnemySpell, // dispel and absorb aura destroy
+		EnemySpell, // dispel and Absorb aura destroy
 		Expire,     // aura duration has ended
 		Death
 	}
@@ -74,7 +74,7 @@ namespace Game.Spells
 			// Try find Slot for aura
 			byte slot = 0;
 
-			// Lookup for auras already applied from spell
+			// Lookup for Auras already applied from spell
 			foreach (AuraApplication visibleAura in GetTarget().GetVisibleAuras())
 			{
 				if (slot < visibleAura.GetSlot())
@@ -89,7 +89,7 @@ namespace Game.Spells
 				_slot = slot;
 				GetTarget().SetVisibleAura(this);
 				_needClientUpdate = true;
-				Log.outDebug(LogFilter.Spells, "Aura: {0} Effect: {1} put to unit visible auras Slot: {2}", GetBase().GetId(), GetEffectMask(), slot);
+				Log.outDebug(LogFilter.Spells, "Aura: {0} Effect: {1} put to unit visible Auras Slot: {2}", GetBase().GetId(), GetEffectMask(), slot);
 			}
 			else
 			{
@@ -270,7 +270,7 @@ namespace Game.Spells
 			auraData.Applications = aura.IsUsingStacks() ? aura.GetStackAmount() : aura.GetCharges();
 
 			if (!aura.GetCasterGUID().IsUnit())
-				auraData.CastUnit = ObjectGuid.Empty; // optional data is filled in, but cast unit contains empty guid in packet
+				auraData.CastUnit = ObjectGuid.Empty; // optional _data is filled in, but cast unit contains empty Guid in packet
 			else if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
 				auraData.CastUnit = aura.GetCasterGUID();
 
@@ -286,7 +286,7 @@ namespace Game.Spells
 
 				foreach (AuraEffect effect in GetBase().GetAuraEffects())
 					if (effect != null &&
-					    HasEffect(effect.GetEffIndex())) // Not all of aura's effects have to be applied on every target
+					    HasEffect(effect.GetEffIndex())) // Not all of aura's effects have to be applied on every Target
 					{
 						auraData.Points.Add(effect.GetAmount());
 
@@ -298,7 +298,7 @@ namespace Game.Spells
 					// When sending EstimatedPoints all effects (at least up to the last one that uses GetEstimatedAmount) must have proper value in packet
 					foreach (AuraEffect effect in GetBase().GetAuraEffects())
 						if (effect != null &&
-						    HasEffect(effect.GetEffIndex())) // Not all of aura's effects have to be applied on every target
+						    HasEffect(effect.GetEffIndex())) // Not all of aura's effects have to be applied on every Target
 							auraData.EstimatedPoints.Add(effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount()));
 			}
 		}
@@ -497,8 +497,8 @@ namespace Game.Spells
 		{
 			Cypher.Assert(target != null);
 			Cypher.Assert(auraApp != null);
-			// aura mustn't be already applied on target
-			//Cypher.Assert(!IsAppliedOnTarget(target.GetGUID()) && "Aura._ApplyForTarget: aura musn't be already applied on target");
+			// aura mustn't be already applied on Target
+			//Cypher.Assert(!IsAppliedOnTarget(Target.GetGUID()) && "Aura._ApplyForTarget: aura musn't be already applied on Target");
 
 			_applications[target.GetGUID()] = auraApp;
 
@@ -524,7 +524,7 @@ namespace Game.Spells
 			if (app == null)
 			{
 				Log.outError(LogFilter.Spells,
-				             "Aura._UnapplyForTarget, target: {0}, caster: {1}, spell: {2} was not found in owners application map!",
+				             "Aura._UnapplyForTarget, Target: {0}, caster: {1}, spell: {2} was not found in owners application map!",
 				             target.GetGUID().ToString(),
 				             caster ? caster.GetGUID().ToString() : "",
 				             auraApp.GetBase().GetSpellInfo().Id);
@@ -573,15 +573,15 @@ namespace Game.Spells
 
 			_updateTargetMapInterval = UPDATE_TARGET_MAP_INTERVAL;
 
-			// fill up to date target list
-			//       target, effMask
+			// fill up to date Target list
+			//       Target, effMask
 			Dictionary<Unit, uint> targets = new();
 
 			FillTargetMap(ref targets, caster);
 
 			List<Unit> targetsToRemove = new();
 
-			// mark all auras as ready to remove
+			// mark all Auras as ready to remove
 			foreach (var app in _applications)
 				// not found in current area - remove the aura
 				if (!targets.TryGetValue(app.Value.GetTarget(), out uint existing))
@@ -591,7 +591,7 @@ namespace Game.Spells
 				else
 				{
 					// needs readding - remove now, will be applied in next update cycle
-					// (dbcs do not have auras which apply on same Type of targets but have different radius, so this is not really needed)
+					// (dbcs do not have Auras which apply on same Type of targets but have different radius, so this is not really needed)
 					if (app.Value.GetTarget().IsImmunedToSpell(GetSpellInfo(), caster, true) ||
 					    !CanBeAppliedOn(app.Value.GetTarget()))
 					{
@@ -600,7 +600,7 @@ namespace Game.Spells
 						continue;
 					}
 
-					// check target immunities (for existing targets)
+					// check Target immunities (for existing targets)
 					foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
 						if (app.Value.GetTarget().IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster, true))
 							existing &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
@@ -612,20 +612,20 @@ namespace Game.Spells
 						continue;
 
 					// nothing to do - aura already applied
-					// remove from auras to register list
+					// remove from Auras to register list
 					targets.Remove(app.Value.GetTarget());
 				}
 
-			// register auras for units
+			// register Auras for units
 			foreach (var unit in targets.Keys.ToList())
 			{
 				bool addUnit = true;
-				// check target immunities
+				// check Target immunities
 				AuraApplication aurApp = GetApplicationOfTarget(unit.GetGUID());
 
 				if (aurApp == null)
 				{
-					// check target immunities (for new targets)
+					// check Target immunities (for new targets)
 					foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
 						if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
 							targets[unit] &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
@@ -639,17 +639,17 @@ namespace Game.Spells
 				if (addUnit && !unit.IsHighestExclusiveAura(this, true))
 					addUnit = false;
 
-				// Dynobj auras don't hit flying targets
+				// Dynobj Auras don't hit flying targets
 				if (GetAuraType() == AuraObjectType.DynObj &&
 				    unit.IsInFlight())
 					addUnit = false;
 
-				// Do not apply aura if it cannot stack with existing auras
+				// Do not apply aura if it cannot stack with existing Auras
 				if (addUnit)
 					// Allow to remove by stack when aura is going to be applied on owner
 					if (unit != GetOwner())
-						// check if not stacking aura already on target
-						// this one prevents unwanted usefull buff loss because of stacking and prevents overriding auras periodicaly by 2 near area aura owners
+						// check if not stacking aura already on Target
+						// this one prevents unwanted usefull buff loss because of stacking and prevents overriding Auras periodicaly by 2 near area aura owners
 						foreach (var iter in unit.GetAppliedAuras())
 						{
 							Aura aura = iter.Value.GetBase();
@@ -672,7 +672,7 @@ namespace Game.Spells
 					if (!_owner.IsSelfOrInSameMap(unit))
 						// @todo There is a crash caused by shadowfiend load addon
 						Log.outFatal(LogFilter.Spells,
-						             "Aura {0}: _owner {1} (map {2}) is not in the same map as target {3} (map {4}).",
+						             "Aura {0}: _owner {1} (map {2}) is not in the same map as Target {3} (map {4}).",
 						             GetSpellInfo().Id,
 						             _owner.GetName(),
 						             _owner.IsInWorld ? (int)_owner.GetMap().GetId() : -1,
@@ -691,7 +691,7 @@ namespace Game.Spells
 				}
 			}
 
-			// remove auras from units no longer needing them
+			// remove Auras from units no longer needing them
 			foreach (var unit in targetsToRemove)
 			{
 				AuraApplication aurApp = GetApplicationOfTarget(unit.GetGUID());
@@ -743,7 +743,7 @@ namespace Game.Spells
 			Cypher.Assert(owner == _owner);
 
 			Unit caster = GetCaster();
-			// Apply spellmods for channeled auras
+			// Apply spellmods for channeled Auras
 			// used for example when triggered spell of spell:10 is modded
 			Spell  modSpell = null;
 			Player modOwner = null;
@@ -898,7 +898,7 @@ namespace Game.Spells
 
 				// Calculate duration of periodics affected by haste.
 				if (_spellInfo.HasAttribute(SpellAttr8.HasteAffectsDuration))
-					duration = (int)(duration * caster._unitData.ModCastingSpeed);
+					duration = (int)(duration * caster.UnitData.ModCastingSpeed);
 
 				SetMaxDuration(duration);
 				SetDuration(duration);
@@ -1018,7 +1018,7 @@ namespace Game.Spells
 				return;
 
 			_dropEvent = new ChargeDropEvent(this, removeMode);
-			owner._Events.AddEvent(_dropEvent, owner._Events.CalculateTime(TimeSpan.FromMilliseconds(delay)));
+			owner.Events.AddEvent(_dropEvent, owner.Events.CalculateTime(TimeSpan.FromMilliseconds(delay)));
 		}
 
 		public void SetStackAmount(byte stackAmount)
@@ -1150,10 +1150,10 @@ namespace Game.Spells
 			if (GetSpellInfo().IsChanneled())
 				return false;
 
-			// Check if aura is single target, not only spell info
+			// Check if aura is single Target, not only spell info
 			if (GetCasterGUID() != GetOwner().GetGUID())
 			{
-				// owner == caster for area auras, check for possible bad data in DB
+				// owner == caster for area Auras, check for possible bad _data in DB
 				foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
 				{
 					if (!spellEffectInfo.IsEffect())
@@ -1172,12 +1172,12 @@ namespace Game.Spells
 			if (GetSpellInfo().HasAttribute(SpellCustomAttributes.AuraCannotBeSaved))
 				return false;
 
-			// don't save auras removed by proc system
+			// don't save Auras removed by proc system
 			if (IsUsingCharges() &&
 			    GetCharges() == 0)
 				return false;
 
-			// don't save permanent auras triggered by items, they'll be recasted on login if necessary
+			// don't save permanent Auras triggered by items, they'll be recasted on login if necessary
 			if (!GetCastItemGUID().IsEmpty() &&
 			    IsPermanent())
 				return false;
@@ -1193,7 +1193,7 @@ namespace Game.Spells
 
 			SpellSpecificType spec = GetSpellInfo().GetSpellSpecific();
 
-			// spell with single target specific types
+			// spell with single Target specific types
 			switch (spec)
 			{
 				case SpellSpecificType.MagePolymorph:
@@ -1364,11 +1364,11 @@ namespace Game.Spells
 				target.GetZoneAndAreaId(out zone, out area);
 
 				foreach (var spellArea in saBounds)
-					// some auras remove at aura remove
+					// some Auras remove at aura remove
 					if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) &&
 					    !spellArea.IsFitToRequirements((Player)target, zone, area))
 						target.RemoveAurasDueToSpell(spellArea.spellId);
-					// some auras applied at aura apply
+					// some Auras applied at aura apply
 					else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
 						if (!target.HasAura(spellArea.spellId))
 							target.CastSpell(target, spellArea.spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
@@ -1377,7 +1377,7 @@ namespace Game.Spells
 			// handle spell_linked_spell table
 			if (!onReapply)
 			{
-				// apply linked auras
+				// apply linked Auras
 				if (apply)
 				{
 					var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
@@ -1391,7 +1391,7 @@ namespace Game.Spells
 				}
 				else
 				{
-					// remove linked auras
+					// remove linked Auras
 					var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Remove, GetId());
 
 					if (spellTriggered != null)
@@ -1417,7 +1417,7 @@ namespace Game.Spells
 			}
 			else if (apply)
 			{
-				// modify stack amount of linked auras
+				// modify stack amount of linked Auras
 				var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Aura, GetId());
 
 				if (spellTriggered != null)
@@ -1513,7 +1513,7 @@ namespace Game.Spells
 									if (caster.GetSpellHistory().HasCooldown(aura.GetSpellInfo()))
 									{
 										// This additional check is needed to add a minimal delay before cooldown in in effect
-										// to allow all bubbles broken by a single damage source proc mana return
+										// to allow all bubbles broken by a single Damage source proc mana return
 										if (caster.GetSpellHistory().GetRemainingCooldown(aura.GetSpellInfo()) <= TimeSpan.FromSeconds(11))
 											break;
 									}
@@ -1609,7 +1609,7 @@ namespace Game.Spells
 
 					break;
 				case SpellFamilyNames.Warlock:
-					// Drain Soul - If the target is at or below 25% health, Drain Soul causes four times the normal damage
+					// Drain Soul - If the Target is at or below 25% health, Drain Soul causes four times the normal Damage
 					if (GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
 					{
 						if (caster == null)
@@ -1644,11 +1644,11 @@ namespace Game.Spells
 			if (!target.IsInWorld ||
 			    target.IsDuringRemoveFromWorld())
 			{
-				// area auras mustn't be applied
+				// area Auras mustn't be applied
 				if (GetOwner() != target)
 					return false;
 
-				// not selfcasted single target auras mustn't be applied
+				// not selfcasted single Target Auras mustn't be applied
 				if (GetCasterGUID() != GetOwner().GetGUID() &&
 				    GetSpellInfo().IsSingleTarget())
 					return false;
@@ -1675,7 +1675,7 @@ namespace Game.Spells
 			bool      sameCaster        = GetCasterGUID() == existingAura.GetCasterGUID();
 			SpellInfo existingSpellInfo = existingAura.GetSpellInfo();
 
-			// Dynobj auras do not stack when they come from the same spell cast by the same caster
+			// Dynobj Auras do not stack when they come from the same spell cast by the same caster
 			if (GetAuraType() == AuraObjectType.DynObj ||
 			    existingAura.GetAuraType() == AuraObjectType.DynObj)
 			{
@@ -1685,7 +1685,7 @@ namespace Game.Spells
 				return true;
 			}
 
-			// passive auras don't stack with another rank of the spell cast by same caster
+			// passive Auras don't stack with another rank of the spell cast by same caster
 			if (IsPassive() &&
 			    sameCaster &&
 			    (_spellInfo.IsDifferentRankOf(existingSpellInfo) || (_spellInfo.Id == existingSpellInfo.Id && _castItemGuid.IsEmpty())))
@@ -1728,14 +1728,14 @@ namespace Game.Spells
 
 			if (!sameCaster)
 			{
-				// Channeled auras can stack if not forbidden by db or aura Type
+				// Channeled Auras can stack if not forbidden by db or aura Type
 				if (existingAura.GetSpellInfo().IsChanneled())
 					return true;
 
 				if (_spellInfo.HasAttribute(SpellAttr3.DotStackingRule))
 					return true;
 
-				// check same periodic auras
+				// check same periodic Auras
 				bool hasPeriodicNonAreaEffect(SpellInfo spellInfo)
 				{
 					foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -1754,7 +1754,7 @@ namespace Game.Spells
 							case AuraType.ObsModHealth:
 							case AuraType.PeriodicTriggerSpellWithValue:
 							{
-								// periodic auras which target areas are not allowed to stack this way (replenishment for example)
+								// periodic Auras which Target areas are not allowed to stack this way (replenishment for example)
 								if (spellEffectInfo.IsTargetingArea())
 									return false;
 
@@ -1784,9 +1784,9 @@ namespace Game.Spells
 					return true;
 
 				if (veh.GetAvailableSeatCount() == 0)
-					return false; // No empty seat available
+					return false; // No empty Seat available
 
-				return true; // Empty seat available (skip rest)
+				return true; // Empty Seat available (skip rest)
 			}
 
 			if (HasEffectType(AuraType.ShowConfirmationPrompt) ||
@@ -1798,7 +1798,7 @@ namespace Game.Spells
 			// spell of same spell rank chain
 			if (_spellInfo.IsRankOf(existingSpellInfo))
 			{
-				// don't allow passive area auras to stack
+				// don't allow passive area Auras to stack
 				if (_spellInfo.IsMultiSlotAura() &&
 				    !IsArea())
 					return true;
@@ -1887,7 +1887,7 @@ namespace Game.Spells
 		{
 			SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
 
-			// only auras with spell proc entry can trigger proc
+			// only Auras with spell proc entry can trigger proc
 			if (procEntry == null)
 				return 0;
 
@@ -1896,7 +1896,7 @@ namespace Game.Spells
 
 			if (spell)
 			{
-				// Do not allow auras to proc from effect triggered from itself
+				// Do not allow Auras to proc from effect triggered from itself
 				if (spell.IsTriggeredByAura(_spellInfo))
 					return 0;
 
@@ -1951,7 +1951,7 @@ namespace Game.Spells
 			if (IsProcOnCooldown(now))
 				return 0;
 
-			// do checks against db data
+			// do checks against db _data
 
 			if (!SpellManager.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
 				return 0;
@@ -1985,7 +1985,7 @@ namespace Game.Spells
 
 			// Check if current equipment meets aura requirements
 			// do that only for passive spells
-			// @todo this needs to be unified for all kinds of auras
+			// @todo this needs to be unified for all kinds of Auras
 			Unit target = aurApp.GetTarget();
 
 			if (IsPassive() &&
@@ -2047,7 +2047,7 @@ namespace Game.Spells
 		private float CalcProcChance(SpellProcEntry procEntry, ProcEventInfo eventInfo)
 		{
 			float chance = procEntry.Chance;
-			// calculate chances depending on unit with caster's data
+			// calculate chances depending on unit with caster's _data
 			// so talents modifying chances and judgements will have properly calculated proc chance
 			Unit caster = GetCaster();
 
@@ -2613,7 +2613,7 @@ namespace Game.Spells
 			if (createInfo.GetOwner().IsTypeMask(TypeMask.Unit))
 				if (!createInfo.GetOwner().IsInWorld ||
 				    createInfo.GetOwner().ToUnit().IsDuringRemoveFromWorld())
-					// owner not in world so don't allow to own not self casted single target auras
+					// owner not in world so don't allow to own not self casted single Target Auras
 					if (createInfo.CasterGUID != createInfo.GetOwner().GetGUID() &&
 					    createInfo.GetSpellInfo().IsSingleTarget())
 						return null;
@@ -3077,7 +3077,7 @@ namespace Game.Spells
 		private WorldObject _owner;
 
 		private int _maxDuration;                              // Max aura duration
-		private int _duration;                                 // Current time
+		private int _duration;                                 // Current Time
 		private int _timeCla;                                  // Timer for power per sec calcultion
 		private List<SpellPowerRecord> _periodicCosts = new(); // Periodic costs
 		private int _updateTargetMapInterval;                  // Timer for UpdateTargetMapOfEffect
@@ -3091,7 +3091,7 @@ namespace Game.Spells
 		private Dictionary<ObjectGuid, AuraApplication> _applications = new();
 
 		private bool _isRemoved;
-		private bool _isSingleTarget; // true if it's a single target spell and registered at caster - can change at spell steal for example
+		private bool _isSingleTarget; // true if it's a single Target spell and registered at caster - can change at spell steal for example
 		private bool _isUsingCharges;
 
 		private ChargeDropEvent _dropEvent;
@@ -3108,7 +3108,7 @@ namespace Game.Spells
 	public class UnitAura : Aura
 	{
 		private DiminishingGroup _AuraDRGroup;                            // Diminishing
-		private Dictionary<ObjectGuid, uint> _staticApplications = new(); // non-area auras
+		private Dictionary<ObjectGuid, uint> _staticApplications = new(); // non-area Auras
 
 		public UnitAura(AuraCreateInfo createInfo) : base(createInfo)
 		{
@@ -3131,7 +3131,7 @@ namespace Game.Spells
 		{
 			base._UnapplyForTarget(target, caster, aurApp);
 
-			// unregister aura diminishing (and store last time)
+			// unregister aura diminishing (and store last Time)
 			if (_AuraDRGroup != DiminishingGroup.None)
 				target.ApplyDiminishingAura(_AuraDRGroup, false);
 		}
@@ -3170,7 +3170,7 @@ namespace Game.Spells
 				if (!HasEffect(spellEffectInfo.EffectIndex))
 					continue;
 
-				// area auras only
+				// area Auras only
 				if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
 					continue;
 
@@ -3257,7 +3257,7 @@ namespace Game.Spells
 					UnitListSearcher                searcher = new(GetUnitOwner(), units, check);
 					Cell.VisitAllObjects(GetUnitOwner(), searcher, radius + extraSearchRadius);
 
-					// by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+					// by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for Auras it is not acceptable
 					units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
 				}
 
@@ -3273,7 +3273,7 @@ namespace Game.Spells
 
 		public void AddStaticApplication(Unit target, uint effMask)
 		{
-			// only valid for non-area auras
+			// only valid for non-area Auras
 			foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
 				if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 &&
 				    !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
@@ -3330,7 +3330,7 @@ namespace Game.Spells
 				if (!HasEffect(spellEffectInfo.EffectIndex))
 					continue;
 
-				// we can't use effect Type like area auras to determine check Type, check targets
+				// we can't use effect Type like area Auras to determine check Type, check targets
 				SpellTargetCheckTypes selectionType = spellEffectInfo.TargetA.GetCheckType();
 
 				if (spellEffectInfo.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)
@@ -3343,7 +3343,7 @@ namespace Game.Spells
 				UnitListSearcher                searcher = new(GetDynobjOwner(), targetList, check);
 				Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
 
-				// by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+				// by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for Auras it is not acceptable
 				targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));
 
 				foreach (var unit in targetList)

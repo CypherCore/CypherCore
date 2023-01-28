@@ -108,7 +108,7 @@ namespace Game.Scripting
 			return _aura.GetId();
 		}
 
-		// returns guid of object which casted the aura (_originalCaster of the Spell class)
+		// returns Guid of object which casted the aura (_originalCaster of the Spell class)
 		public ObjectGuid GetCasterGUID()
 		{
 			return _aura.GetCasterGUID();
@@ -136,13 +136,13 @@ namespace Game.Scripting
 			return null;
 		}
 
-		// returns object on which aura was casted, target for non-area auras, area aura source for area auras
+		// returns object on which aura was casted, Target for non-area Auras, area aura source for area Auras
 		public WorldObject GetOwner()
 		{
 			return _aura.GetOwner();
 		}
 
-		// returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)
+		// returns owner if it's unit or unit derived object, null otherwise (only for persistent area Auras null is returned)
 		public Unit GetUnitOwner()
 		{
 			return _aura.GetUnitOwner();
@@ -213,7 +213,7 @@ namespace Game.Scripting
 		// AuraScript interface - functions which are redirecting to AuraApplication class
 		// Do not call these in hooks in which AuraApplication is not avalible, otherwise result will differ from expected (the functions will return null)
 
-		// returns currently processed target of an aura
+		// returns currently processed Target of an aura
 		// Return value does not need to be null-checked, the only situation this will (always)
 		// return null is when the call happens in an unsupported hook, in other cases, it is always valid
 		public Unit GetTarget()
@@ -248,7 +248,7 @@ namespace Game.Scripting
 			return null;
 		}
 
-		// returns AuraApplication object of currently processed target
+		// returns AuraApplication object of currently processed Target
 		public AuraApplication GetTargetApplication()
 		{
 			return _auraApplication;

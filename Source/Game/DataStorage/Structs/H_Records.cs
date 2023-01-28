@@ -23,7 +23,7 @@ namespace Game.DataStorage
 	{
 		public sbyte CalendarFilterType;
 		public byte[] CalendarFlags = new byte[SharedConst.MaxHolidayFlags];
-		public uint[] Date = new uint[SharedConst.MaxHolidayDates]; // dates in unix time starting at January, 1, 2000
+		public uint[] Date = new uint[SharedConst.MaxHolidayDates]; // dates in unix Time starting at January, 1, 2000
 		public ushort[] Duration = new ushort[SharedConst.MaxHolidayDurations];
 		public byte Flags;
 		public uint HolidayDescriptionID;

@@ -215,7 +215,7 @@ namespace Game
 
 			SendCalendarEventInviteRemove(calendarEvent, calendarInvite, (uint)calendarEvent.Flags);
 
-			// we need to find out how to use CALENDAR_INVITE_REMOVED_MAIL_SUBJECT to force client to display different mail
+			// we need to find out how to use CALENDAR_INVITE_REMOVED_MAIL_SUBJECT to Force client to display different mail
 			//if (itr._invitee != remover)
 			//    MailDraft(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody())
 			//        .SendMailTo(trans, MailReceiver(itr.GetInvitee()), calendarEvent, MAIL_CHECK_MASK_COPIED);

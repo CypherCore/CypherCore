@@ -80,7 +80,7 @@ namespace Game
 
 			if (entry == null)
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to bid on a nonexistent auction (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (Name: {1}) tried to bid on a nonexistent auction (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
 				SendBlackMarketBidOnItemResult(BlackMarketError.ItemNotFound, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
 
 				return;
@@ -88,7 +88,7 @@ namespace Game
 
 			if (entry.GetBidder() == player.GetGUID().GetCounter())
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to place a bid on an Item he already bid on. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (Name: {1}) tried to place a bid on an Item he already bid on. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
 				SendBlackMarketBidOnItemResult(BlackMarketError.AlreadyBid, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
 
 				return;
@@ -96,7 +96,7 @@ namespace Game
 
 			if (!entry.ValidateBid(blackMarketBidOnItem.BidAmount))
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to place an invalid bid. Amount: {2} (MarketId: {3}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.BidAmount, blackMarketBidOnItem.MarketID);
+				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (Name: {1}) tried to place an invalid bid. Amount: {2} (MarketId: {3}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.BidAmount, blackMarketBidOnItem.MarketID);
 				SendBlackMarketBidOnItemResult(BlackMarketError.HigherBid, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
 
 				return;
@@ -104,7 +104,7 @@ namespace Game
 
 			if (!player.HasEnoughMoney(blackMarketBidOnItem.BidAmount))
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) does not have enough money to place bid. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (Name: {1}) does not have enough money to place bid. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
 				SendBlackMarketBidOnItemResult(BlackMarketError.NotEnoughMoney, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
 
 				return;
@@ -112,7 +112,7 @@ namespace Game
 
 			if (entry.GetSecondsRemaining() <= 0)
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to bid on a completed auction. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
+				Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (Name: {1}) tried to bid on a completed auction. (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
 				SendBlackMarketBidOnItemResult(BlackMarketError.DatabaseError, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
 
 				return;

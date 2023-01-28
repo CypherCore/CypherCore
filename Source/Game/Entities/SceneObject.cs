@@ -22,8 +22,8 @@ namespace Game.Entities
 			ObjectTypeMask |= TypeMask.SceneObject;
 			ObjectTypeId   =  TypeId.SceneObject;
 
-			_updateFlag.Stationary  = true;
-			_updateFlag.SceneObject = true;
+			UpdateFlag.Stationary  = true;
+			UpdateFlag.SceneObject = true;
 
 			_sceneObjectData    = new SceneObjectData();
 			_stationaryPosition = new Position();
@@ -115,10 +115,10 @@ namespace Game.Entities
 			SetEntry(scriptPackageId);
 			SetObjectScale(1.0f);
 
-			SetUpdateFieldValue(_values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.ScriptPackageID), (int)scriptPackageId);
-			SetUpdateFieldValue(_values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.RndSeedVal), GameTime.GetGameTimeMS());
-			SetUpdateFieldValue(_values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.CreatedBy), creator.GetGUID());
-			SetUpdateFieldValue(_values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.SceneType), (uint)type);
+			SetUpdateFieldValue(Values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.ScriptPackageID), (int)scriptPackageId);
+			SetUpdateFieldValue(Values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.RndSeedVal), GameTime.GetGameTimeMS());
+			SetUpdateFieldValue(Values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.CreatedBy), creator.GetGUID());
+			SetUpdateFieldValue(Values.ModifyValue(_sceneObjectData).ModifyValue(_sceneObjectData.SceneType), (uint)type);
 
 			if (!GetMap().AddToMap(this))
 				return false;
@@ -131,7 +131,7 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_sceneObjectData.WriteCreate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -144,12 +144,12 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
+			buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.SceneObject))
+			if (Values.HasChanged(TypeId.SceneObject))
 				_sceneObjectData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -170,7 +170,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.SceneObject])
 				_sceneObjectData.WriteUpdate(buffer, requestedSceneObjectMask, true, this, target);
@@ -186,7 +186,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_sceneObjectData);
+			Values.ClearChangesMask(_sceneObjectData);
 			base.ClearUpdateMask(remove);
 		}
 

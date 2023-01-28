@@ -967,7 +967,7 @@ namespace Scripts.Spells.Items
 
 			if (protEff != null)
 			{
-				// The shield can grow to a maximum size of 20,000 damage absorbtion
+				// The shield can grow to a maximum size of 20,000 Damage absorbtion
 				protEff.SetAmount(Math.Min(protEff.GetAmount() + absorb, 20000));
 
 				// Refresh and return to prevent replacing the aura
@@ -1324,7 +1324,7 @@ namespace Scripts.Spells.Items
 			else
 				_player.HandleEmoteCommand(RandomHelper.RAND(Emote.OneshotApplaud, Emote.OneshotDancespecial, Emote.OneshotLaugh, Emote.OneshotCheer, Emote.OneshotChicken));
 
-			_player._Events.AddEventAtOffset(this, TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
+			_player.Events.AddEventAtOffset(this, TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
 
 			return false; // do not delete re-added event in EventProcessor::Update
 		}
@@ -1342,7 +1342,7 @@ namespace Scripts.Spells.Items
 			if (player == null)
 				return;
 
-			player._Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
+			player.Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
 		}
 
 		public override void Register()
@@ -1437,7 +1437,7 @@ namespace Scripts.Spells.Items
 		{
 			PreventDefaultAction();
 
-			// move loot to player inventory and despawn target
+			// move loot to player inventory and despawn Target
 			if (GetCaster() != null &&
 			    GetCaster().IsTypeId(TypeId.Player) &&
 			    GetTarget().IsTypeId(TypeId.Unit) &&
@@ -1941,7 +1941,7 @@ namespace Scripts.Spells.Items
 
 				if (roll < 2) // 2% for 30 sec self root (off-like chance unknown)
 					spellId = SpellIds.NetOMaticTriggered1;
-				else if (roll < 4) // 2% for 20 sec root, charge to target (off-like chance unknown)
+				else if (roll < 4) // 2% for 20 sec root, charge to Target (off-like chance unknown)
 					spellId = SpellIds.NetOMaticTriggered2;
 
 				GetCaster().CastSpell(target, spellId, true);

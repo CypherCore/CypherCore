@@ -53,24 +53,24 @@ namespace Game.Entities
 
 			if (owner)
 			{
-				if (_Properties.Slot >= (int)SummonSlot.Totem &&
+				if (_Properties.Slot >= (int)Framework.Constants.SummonSlot.Totem &&
 				    _Properties.Slot < SharedConst.MaxTotemSlot)
 				{
 					TotemCreated packet = new();
 					packet.Totem    = GetGUID();
-					packet.Slot     = (byte)(_Properties.Slot - (int)SummonSlot.Totem);
+					packet.Slot     = (byte)(_Properties.Slot - (int)Framework.Constants.SummonSlot.Totem);
 					packet.Duration = duration;
-					packet.SpellID  = _unitData.CreatedBySpell;
+					packet.SpellID  = UnitData.CreatedBySpell;
 					owner.ToPlayer().SendPacket(packet);
 				}
 
-				// set display id depending on caster's race
-				uint totemDisplayId = Global.SpellMgr.GetModelForTotem(_unitData.CreatedBySpell, owner.GetRace());
+				// set display Id depending on caster's race
+				uint totemDisplayId = Global.SpellMgr.GetModelForTotem(UnitData.CreatedBySpell, owner.GetRace());
 
 				if (totemDisplayId != 0)
 					SetDisplayId(totemDisplayId);
 				else
-					Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {_unitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
+					Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {UnitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
 			}
 
 			base.InitStats(duration);
@@ -79,7 +79,7 @@ namespace Game.Entities
 			SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
 
 			if (totemSpell != null)
-				if (totemSpell.CalcCastTime() != 0) // If spell has cast time -> its an active totem
+				if (totemSpell.CalcCastTime() != 0) // If spell has cast Time -> its an active totem
 					_type = TotemType.Active;
 
 			_duration = duration;
@@ -100,7 +100,7 @@ namespace Game.Entities
 		{
 			if (msTime != 0)
 			{
-				_Events.AddEvent(new ForcedUnsummonDelayEvent(this), _Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+				Events.AddEvent(new ForcedUnsummonDelayEvent(this), Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
 
 				return;
 			}
@@ -109,10 +109,10 @@ namespace Game.Entities
 			RemoveAurasDueToSpell(GetSpell(), GetGUID());
 
 			// clear owner's totem Slot
-			for (byte i = (int)SummonSlot.Totem; i < SharedConst.MaxTotemSlot; ++i)
-				if (GetOwner()._SummonSlot[i] == GetGUID())
+			for (byte i = (int)Framework.Constants.SummonSlot.Totem; i < SharedConst.MaxTotemSlot; ++i)
+				if (GetOwner().SummonSlot[i] == GetGUID())
 				{
-					GetOwner()._SummonSlot[i].Clear();
+					GetOwner().SummonSlot[i].Clear();
 
 					break;
 				}
@@ -126,7 +126,7 @@ namespace Game.Entities
 			{
 				owner.SendAutoRepeatCancel(this);
 
-				SpellInfo spell = Global.SpellMgr.GetSpellInfo(_unitData.CreatedBySpell, GetMap().GetDifficultyID());
+				SpellInfo spell = Global.SpellMgr.GetSpellInfo(UnitData.CreatedBySpell, GetMap().GetDifficultyID());
 
 				if (spell != null)
 					GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
@@ -150,8 +150,8 @@ namespace Game.Entities
 
 		public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
 		{
-			// immune to all positive spells, except of stoneclaw totem absorb and sentry totem bind sight
-			// totems positive spells have unit_caster target
+			// immune to all positive spells, except of stoneclaw totem Absorb and sentry totem bind sight
+			// totems positive spells have unit_caster Target
 			if (spellEffectInfo.Effect != SpellEffectName.Dummy &&
 			    spellEffectInfo.Effect != SpellEffectName.ScriptEffect &&
 			    spellInfo.IsPositive() &&
@@ -175,7 +175,7 @@ namespace Game.Entities
 
 		public uint GetSpell(byte slot = 0)
 		{
-			return _spells[slot];
+			return Spells[slot];
 		}
 
 		public uint GetTotemDuration()

@@ -1101,7 +1101,7 @@ namespace Game.Groups
 
 			byte prevSubGroup = slot.group;
 
-			// Abort if the player is already in the target sub group
+			// Abort if the player is already in the Target sub group
 			if (prevSubGroup == group)
 				return;
 
@@ -1281,13 +1281,13 @@ namespace Game.Groups
 			if (bgEntry == null)
 				return GroupJoinBattlegroundResult.BattlegroundJoinFailed; // shouldn't happen
 
-			// check for min / max count
+			// check for min / max Count
 			uint memberscount = GetMembersCount();
 
 			if (memberscount > bgEntry.MaxGroupSize)     // no MinPlayerCount for Battlegrounds
 				return GroupJoinBattlegroundResult.None; // ERR_GROUP_JOIN_Battleground_TOO_MANY handled on client side
 
-			// get a player as reference, to compare other players' Stats to (arena team id, queue id based on level, etc.)
+			// get a player as reference, to compare other players' Stats to (arena team Id, queue Id based on level, etc.)
 			Player reference = GetFirstMember().GetSource();
 
 			// no reference found, can't join this way
@@ -1332,7 +1332,7 @@ namespace Game.Groups
 				if (memberBracketEntry != bracketEntry)
 					return GroupJoinBattlegroundResult.JoinRangeIndex;
 
-				// don't let join rated matches if the arena team id doesn't match
+				// don't let join rated matches if the arena team Id doesn't match
 				if (isRated && member.GetArenaTeamId((byte)arenaSlot) != arenaTeamId)
 					return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
@@ -1541,7 +1541,7 @@ namespace Game.Groups
 
 		public void BroadcastGroupUpdate()
 		{
-			// FG: HACK: force flags update on group leave - for values update hack
+			// FG: HACK: Force Flags update on group leave - for values update hack
 			// -- not very efficient but safe
 			foreach (var member in _memberSlots)
 			{
@@ -1549,8 +1549,8 @@ namespace Game.Groups
 
 				if (pp && pp.IsInWorld)
 				{
-					pp._values.ModifyValue(pp._unitData).ModifyValue(pp._unitData.PvpFlags);
-					pp._values.ModifyValue(pp._unitData).ModifyValue(pp._unitData.FactionTemplate);
+					pp.Values.ModifyValue(pp.UnitData).ModifyValue(pp.UnitData.PvpFlags);
+					pp.Values.ModifyValue(pp.UnitData).ModifyValue(pp.UnitData.FactionTemplate);
 					pp.ForceUpdateFieldChange();
 					Log.outDebug(LogFilter.Server, "-- Forced group value update for '{0}'", pp.GetName());
 				}

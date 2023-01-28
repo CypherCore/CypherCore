@@ -373,7 +373,7 @@ namespace Game.Maps
 
 					if (bossInfo.state == EncounterState.Done)
 					{
-						Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance boss {id} State from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
+						Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance boss {id} State from {bossInfo.state} back to {state} for map {instance.GetId()}, instance Id {instance.GetInstanceId()}. Blocked!");
 
 						return false;
 					}
@@ -686,7 +686,7 @@ namespace Game.Maps
 
 			for (var i = 0; i < SharedConst.MaxSummonSlot; ++i)
 			{
-				ObjectGuid summonGUID = player._SummonSlot[i];
+				ObjectGuid summonGUID = player.SummonSlot[i];
 
 				if (!summonGUID.IsEmpty())
 				{
@@ -700,9 +700,9 @@ namespace Game.Maps
 			if (!includeControlled)
 				return;
 
-			for (var i = 0; i < player._Controlled.Count; ++i)
+			for (var i = 0; i < player.Controlled.Count; ++i)
 			{
-				Unit controlled = player._Controlled[i];
+				Unit controlled = player.Controlled[i];
 
 				if (controlled != null)
 					if (controlled.IsInWorld &&
@@ -729,7 +729,7 @@ namespace Game.Maps
 
 			for (var i = 0; i < SharedConst.MaxSummonSlot; ++i)
 			{
-				ObjectGuid summonGUID = player._SummonSlot[i];
+				ObjectGuid summonGUID = player.SummonSlot[i];
 
 				if (!summonGUID.IsEmpty())
 				{
@@ -743,9 +743,9 @@ namespace Game.Maps
 			if (!includeControlled)
 				return;
 
-			for (var i = 0; i < player._Controlled.Count; ++i)
+			for (var i = 0; i < player.Controlled.Count; ++i)
 			{
-				Unit controlled = player._Controlled[i];
+				Unit controlled = player.Controlled[i];
 
 				if (controlled != null)
 					if (controlled.IsInWorld &&
@@ -902,7 +902,7 @@ namespace Game.Maps
 						dungeonId = encounter.lastEncounterDungeon;
 
 						Log.outDebug(LogFilter.Lfg,
-						             "UpdateEncounterState: Instance {0} (instanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
+						             "UpdateEncounterState: Instance {0} (InstanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
 						             instance.GetMapName(),
 						             instance.GetInstanceId(),
 						             encounter.dbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()],
@@ -1064,7 +1064,7 @@ namespace Game.Maps
 			_temporaryEntranceId = worldSafeLocationId;
 		}
 
-		// Get's the current entrance id
+		// Get's the current entrance Id
 		public uint GetEntranceLocation()
 		{
 			return _temporaryEntranceId != 0 ? _temporaryEntranceId : _entranceId;
@@ -1147,7 +1147,7 @@ namespace Game.Maps
 			return _instanceSpawnGroups;
 		}
 
-		// Override this function to validate all additional data loads
+		// Override this function to validate all additional _data loads
 		public virtual void AfterDataLoad()
 		{
 		}

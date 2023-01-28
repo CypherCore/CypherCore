@@ -95,7 +95,7 @@ namespace Game.PvP
 						continue;
 
 					// creature kills must be notified, even if not inside objective / not outdoor pvp active
-					// player kills only count if active and inside objective
+					// player kills only Count if active and inside objective
 					if ((groupGuy.IsOutdoorPvPActive() && IsInsideObjective(groupGuy)) ||
 					    killed.IsTypeId(TypeId.Unit))
 						HandleKillImpl(groupGuy, killed);

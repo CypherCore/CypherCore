@@ -7,34 +7,23 @@ using Game.Spells;
 
 namespace Game.Entities
 {
-	public class TrainerSpell
+    public class Trainer
 	{
-		public uint MoneyCost;
-		public Array<uint> ReqAbility = new(3);
-		public byte ReqLevel;
-		public uint ReqSkillLine;
-		public uint ReqSkillRank;
-		public uint SpellId;
+		private readonly string[] _greeting = new string[(int)Locale.Total];
 
-		public bool IsCastable()
-		{
-			return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell);
-		}
-	}
-
-	public class Trainer
-	{
-		private string[] _greeting = new string[(int)Locale.Total];
-
-		private uint _id;
-		private List<TrainerSpell> _spells;
-		private TrainerType _type;
+		private readonly uint _id;
+		private readonly List<TrainerSpell> _spells;
+        private readonly Dictionary<uint, TrainerSpell> _spellMap = new();
+		private readonly TrainerType _type;
 
 		public Trainer(uint id, TrainerType type, string greeting, List<TrainerSpell> spells)
 		{
 			_id     = id;
 			_type   = type;
 			_spells = spells;
+
+            foreach (var spell in spells)
+                _spellMap[spell.SpellId] = spell;
 
 			_greeting[(int)Locale.enUS] = greeting;
 		}
@@ -56,7 +45,7 @@ namespace Game.Entities
 
 				if (!Global.ConditionMgr.IsObjectMeetingTrainerSpellConditions(_id, trainerSpell.SpellId, player))
 				{
-					Log.outDebug(LogFilter.Condition, $"SendSpells: conditions not met for trainer id {_id} spell {trainerSpell.SpellId} player '{player.GetName()}' ({player.GetGUID()})");
+					Log.outDebug(LogFilter.Condition, $"SendSpells: conditions not met for trainer Id {_id} spell {trainerSpell.SpellId} player '{player.GetName()}' ({player.GetGUID()})");
 
 					continue;
 				}
@@ -139,9 +128,10 @@ namespace Game.Entities
 		}
 
 		private TrainerSpell GetSpell(uint spellId)
-		{
-			return _spells.Find(trainerSpell => trainerSpell.SpellId == spellId);
-		}
+        {
+            return _spellMap.GetValueOrDefault(spellId);
+
+        }
 
 		private bool CanTeachSpell(Player player, TrainerSpell trainerSpell)
 		{

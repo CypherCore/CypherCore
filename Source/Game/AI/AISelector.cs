@@ -54,7 +54,7 @@ namespace Game.AI
 					return new VehicleAI(creature);
 			}
 
-			// select by NPC flags
+			// select by NPC Flags
 			if (creature.IsVehicle())
 			{
 				return new VehicleAI(creature);
@@ -82,7 +82,7 @@ namespace Game.AI
 			}
 			else if (creature.IsTrigger())
 			{
-				if (creature._spells[0] != 0)
+				if (creature.Spells[0] != 0)
 					return new TriggerAI(creature);
 				else
 					return new NullCreatureAI(creature);

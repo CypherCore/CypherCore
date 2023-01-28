@@ -44,7 +44,7 @@ namespace Game.BattleGrounds
 		public virtual void Dispose()
 		{
 			// remove objects and creatures
-			// (this is done automatically in mapmanager update, when the instance is reset after the reset time)
+			// (this is done automatically in mapmanager update, when the instance is reset after the reset Time)
 			for (var i = 0; i < BgCreatures.Length; ++i)
 				DelCreature(i);
 
@@ -141,7 +141,7 @@ namespace Game.BattleGrounds
 					break;
 			}
 
-			// Update start time and reset Stats timer
+			// Update start Time and reset Stats timer
 			SetElapsedTime(GetElapsedTime() + diff);
 
 			if (GetStatus() == BattlegroundStatus.WaitJoin)
@@ -201,7 +201,7 @@ namespace Game.BattleGrounds
 				for (var i = 0; i < _playerPositions.Count; ++i)
 				{
 					var playerPosition = _playerPositions[i];
-					// Update position data if we found player.
+					// Update position _data if we found player.
 					Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerPosition.Guid);
 
 					if (player != null)
@@ -272,7 +272,7 @@ namespace Game.BattleGrounds
 					_LastResurrectTime = 0;
 				}
 				else
-					// queue is clear and time passed, just update last resurrection time
+					// queue is clear and Time passed, just update last resurrection Time
 				{
 					_LastResurrectTime = 0;
 				}
@@ -321,7 +321,7 @@ namespace Game.BattleGrounds
 			}
 			else if (_PrematureCountDownTimer < diff)
 			{
-				// time's up!
+				// Time's up!
 				EndBattleground(GetPrematureWinner());
 				_PrematureCountDown = false;
 			}
@@ -396,7 +396,7 @@ namespace Game.BattleGrounds
 
 				if (!FindBgMap())
 				{
-					Log.outError(LogFilter.Battleground, $"Battleground._ProcessJoin: map (map id: {GetMapId()}, instance id: {_InstanceID}) is not created!");
+					Log.outError(LogFilter.Battleground, $"Battleground._ProcessJoin: map (map Id: {GetMapId()}, instance Id: {_InstanceID}) is not created!");
 					EndNow();
 
 					return;
@@ -466,7 +466,7 @@ namespace Game.BattleGrounds
 							player.ResetAllPowers();
 
 							if (!player.IsGameMaster())
-								// remove auras with duration lower than 30s
+								// remove Auras with duration lower than 30s
 								player.RemoveAppliedAuras(aurApp =>
 								                          {
 									                          Aura aura = aurApp.GetBase();
@@ -531,7 +531,7 @@ namespace Game.BattleGrounds
 				player = Global.ObjAccessor.FindPlayer(guid);
 
 				if (!player)
-					Log.outError(LogFilter.Battleground, $"Battleground.{context}: player ({guid}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+					Log.outError(LogFilter.Battleground, $"Battleground.{context}: player ({guid}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 			}
 
 			return player;
@@ -746,7 +746,7 @@ namespace Game.BattleGrounds
 			}
 
 			SetStatus(BattlegroundStatus.WaitLeave);
-			//we must set it this way, because end time is sent in packet!
+			//we must set it this way, because end Time is sent in packet!
 			SetRemainingTime(BattlegroundConst.AutocloseBattleground);
 
 			PVPMatchComplete pvpMatchComplete = new();
@@ -779,7 +779,7 @@ namespace Game.BattleGrounds
 					player.CombatStop();
 				}
 
-				// remove temporary currency bonus auras before rewarding player
+				// remove temporary currency bonus Auras before rewarding player
 				player.RemoveAura(BattlegroundConst.SpellHonorableDefender25y);
 				player.RemoveAura(BattlegroundConst.SpellHonorableDefender60y);
 
@@ -931,13 +931,13 @@ namespace Game.BattleGrounds
 
 			BattlegroundQueueTypeId bgQueueTypeId = GetQueueId();
 
-			if (participant) // if the player was a match participant, remove auras, calc rating, update queue
+			if (participant) // if the player was a match participant, remove Auras, calc rating, update queue
 			{
 				if (player)
 				{
 					player.ClearAfkReports();
 
-					// if arena, remove the specific arena auras
+					// if arena, remove the specific arena Auras
 					if (IsArena())
 					{
 						// unsummon current and summon old pet if there was one and there isn't a current pet
@@ -1011,7 +1011,7 @@ namespace Game.BattleGrounds
 
 			if (_InvitedAlliance > 0 ||
 			    _InvitedHorde > 0)
-				Log.outError(LogFilter.Battleground, $"Battleground.Reset: one of the counters is not 0 (Team.Alliance: {_InvitedAlliance}, Team.Horde: {_InvitedHorde}) for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.Reset: one of the counters is not 0 (Team.Alliance: {_InvitedAlliance}, Team.Horde: {_InvitedHorde}) for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 			_InvitedAlliance   = 0;
 			_InvitedHorde      = 0;
@@ -1033,7 +1033,7 @@ namespace Game.BattleGrounds
 
 			// add bg to update list
 			// This must be done here, because we need to have already invited some players when first BG.Update() method is executed
-			// and it doesn't matter if we call StartBattleground() more times, because _Battlegrounds is a map and instance id never changes
+			// and it doesn't matter if we call StartBattleground() more times, because _Battlegrounds is a map and instance Id never changes
 			Global.BattlegroundMgr.AddBattleground(this);
 
 			if (_IsRated)
@@ -1114,7 +1114,7 @@ namespace Game.BattleGrounds
 
 			player.RemoveAurasByType(AuraType.Mounted);
 
-			// add arena specific auras
+			// add arena specific Auras
 			if (IsArena())
 			{
 				player.RemoveArenaEnchantments(EnchantmentSlot.Temp);
@@ -1480,13 +1480,13 @@ namespace Game.BattleGrounds
 			}
 
 			// Must be created this way, adding to godatamap would add it to the base map of the instance
-			// and when loading it (in go.LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
+			// and when loading it (in go.LoadFromDB()), a new Guid would be assigned to the object, and a new object would be created
 			// So we must create it specific for this instance
 			GameObject go = GameObject.CreateGameObject(entry, GetBgMap(), new Position(x, y, z, o), rotation, 255, goState);
 
 			if (!go)
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.AddObject: cannot create gameobject (entry: {entry}) for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.AddObject: cannot create gameobject (entry: {entry}) for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 				return false;
 			}
@@ -1523,7 +1523,7 @@ namespace Game.BattleGrounds
 			}
 			else
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.DoorClose: door gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.DoorClose: door gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 			}
 		}
 
@@ -1538,7 +1538,7 @@ namespace Game.BattleGrounds
 			}
 			else
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.DoorOpen: door gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.DoorOpen: door gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 			}
 		}
 
@@ -1550,7 +1550,7 @@ namespace Game.BattleGrounds
 			GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
 
 			if (!obj)
-				Log.outError(LogFilter.Battleground, $"Battleground.GetBGObject: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.GetBGObject: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 			return obj;
 		}
@@ -1563,7 +1563,7 @@ namespace Game.BattleGrounds
 			Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
 
 			if (!creature)
-				Log.outError(LogFilter.Battleground, $"Battleground.GetBGCreature: creature (Type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.GetBGCreature: creature (Type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 			return creature;
 		}
@@ -1618,7 +1618,7 @@ namespace Game.BattleGrounds
 
 			if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: creature template (entry: {entry}) does not exist for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: creature template (entry: {entry}) does not exist for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 				return null;
 			}
@@ -1644,7 +1644,7 @@ namespace Game.BattleGrounds
 
 			if (!creature)
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: cannot create creature (entry: {entry}) for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: cannot create creature (entry: {entry}) for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 				return null;
 			}
@@ -1682,7 +1682,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outError(LogFilter.Battleground, $"Battleground.DelCreature: creature (Type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outError(LogFilter.Battleground, $"Battleground.DelCreature: creature (Type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 			BgCreatures[type].Clear();
 
 			return false;
@@ -1697,14 +1697,14 @@ namespace Game.BattleGrounds
 
 			if (obj)
 			{
-				obj.SetRespawnTime(0); // not save respawn time
+				obj.SetRespawnTime(0); // not save respawn Time
 				obj.Delete();
 				BgObjects[type].Clear();
 
 				return true;
 			}
 
-			Log.outError(LogFilter.Battleground, $"Battleground.DelObject: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outError(LogFilter.Battleground, $"Battleground.DelObject: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 			BgObjects[type].Clear();
 
 			return false;
@@ -1725,7 +1725,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outInfo(LogFilter.Battleground, $"Battleground::RemoveObjectFromWorld: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outInfo(LogFilter.Battleground, $"Battleground::RemoveObjectFromWorld: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 			return false;
 		}
@@ -1751,7 +1751,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outError(LogFilter.Battleground, $"Battleground.AddSpiritGuide: cannot create spirit guide (Type: {type}, entry: {entry}) for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outError(LogFilter.Battleground, $"Battleground.AddSpiritGuide: cannot create spirit guide (Type: {type}, entry: {entry}) for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 			EndNow();
 
 			return false;
@@ -1826,7 +1826,7 @@ namespace Game.BattleGrounds
 
 			if (index < 0)
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.HandleTriggerBuff: cannot find buff gameobject ({goGuid}, entry: {obj.GetEntry()}, Type: {obj.GetGoType()}) in internal data for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.HandleTriggerBuff: cannot find buff gameobject ({goGuid}, entry: {obj.GetEntry()}, Type: {obj.GetGoType()}) in internal _data for BG (map: {GetMapId()}, instance Id: {_InstanceID})!");
 
 				return;
 			}
@@ -1862,7 +1862,7 @@ namespace Game.BattleGrounds
 			// Add +1 kills to group and +1 killing_blows to killer
 			if (killer)
 			{
-				// Don't reward credit for killing ourselves, like fall damage of hellfire (warlock)
+				// Don't reward credit for killing ourselves, like fall Damage of hellfire (warlock)
 				if (killer == victim)
 					return;
 
@@ -1976,7 +1976,7 @@ namespace Game.BattleGrounds
 				if (BgObjects[i] == guid)
 					return i;
 
-			Log.outError(LogFilter.Battleground, $"Battleground.GetObjectType: player used gameobject ({guid}) which is not in internal data for BG (map: {GetMapId()}, instance id: {_InstanceID}), cheating?");
+			Log.outError(LogFilter.Battleground, $"Battleground.GetObjectType: player used gameobject ({guid}) which is not in internal _data for BG (map: {GetMapId()}, instance Id: {_InstanceID}), cheating?");
 
 			return -1;
 		}
@@ -2204,7 +2204,7 @@ namespace Game.BattleGrounds
 			_RandomTypeID = TypeID;
 		}
 
-		//here we can count minlevel and maxlevel for players
+		//here we can Count minlevel and maxlevel for players
 		public void SetInstanceID(uint InstanceID)
 		{
 			_InstanceID = InstanceID;
@@ -2479,7 +2479,7 @@ namespace Game.BattleGrounds
 		// Player lists, those need to be accessible by inherited classes
 		private Dictionary<ObjectGuid, BattlegroundPlayer> _Players = new();
 
-		// Spirit Guide guid + Player list GUIDS
+		// Spirit Guide Guid + Player list GUIDS
 		private MultiMap<ObjectGuid, ObjectGuid> _ReviveQueue = new();
 
 		// these are important variables used for starting messages
@@ -2509,7 +2509,7 @@ namespace Game.BattleGrounds
 		private BattlegroundTypeId _RandomTypeID;
 		private uint _InstanceID; // Battleground Instance's GUID!
 		private BattlegroundStatus _Status;
-		private uint _ClientInstanceID; // the instance-id which is sent to the client and without any other internal use
+		private uint _ClientInstanceID; // the instance-Id which is sent to the client and without any other internal use
 		private uint _StartTime;
 		private uint _CountdownTimer;
 		private uint _ResetStatTimer;
@@ -2539,7 +2539,7 @@ namespace Game.BattleGrounds
 		// Raid Group
 		private Group[] _BgRaids = new Group[SharedConst.PvpTeamsCount]; // 0 - Team.Alliance, 1 - Team.Horde
 
-		// Players count by team
+		// Players Count by team
 		private uint[] _PlayersCount = new uint[SharedConst.PvpTeamsCount];
 
 		// Arena team ids by team

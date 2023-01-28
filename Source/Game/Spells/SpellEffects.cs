@@ -131,10 +131,10 @@ namespace Game.Spells
 				Unit.CalcAbsorbResist(damageInfo);
 
 				SpellNonMeleeDamage log = new(unitCaster, unitTarget, _spellInfo, _SpellVisual, _spellInfo.GetSchoolMask(), _castId);
-				log.damage         = damageInfo.GetDamage();
-				log.originalDamage = (uint)damage;
-				log.absorb         = damageInfo.GetAbsorb();
-				log.resist         = damageInfo.GetResist();
+				log.Damage         = damageInfo.GetDamage();
+				log.OriginalDamage = (uint)damage;
+				log.Absorb         = damageInfo.GetAbsorb();
+				log.Resist         = damageInfo.GetResist();
 
 				if (unitCaster != null)
 					unitCaster.SendSpellNonMeleeDamageLog(log);
@@ -152,7 +152,7 @@ namespace Game.Spells
 			{
 				bool apply_direct_bonus = true;
 
-				// Meteor like spells (divided damage to targets)
+				// Meteor like spells (divided Damage to targets)
 				if (_spellInfo.HasAttribute(SpellCustomAttributes.ShareDamage))
 				{
 					long count = GetUnitTargetCountForEffect(effectInfo.EffectIndex);
@@ -187,7 +187,7 @@ namespace Game.Spells
 			    corpseTarget == null)
 				return;
 
-			// pet auras
+			// pet Auras
 			if (_caster.GetTypeId() == TypeId.Player)
 			{
 				PetAura petSpell = Global.SpellMgr.GetPetAura(_spellInfo.Id, (byte)effectInfo.EffectIndex);
@@ -336,11 +336,11 @@ namespace Game.Spells
 			var value          = damage;
 			var itemLevel      = _castItemLevel;
 
-			_caster._Events.AddEventAtOffset(() =>
+			_caster.Events.AddEventAtOffset(() =>
 			                                 {
 				                                 targets.Update(caster); // refresh pointers stored in targets
 
-				                                 // original caster guid only for GO cast
+				                                 // original caster Guid only for GO cast
 				                                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 				                                 args.SetOriginalCaster(originalCaster);
 				                                 args.OriginalCastId        = originalCastId;
@@ -434,7 +434,7 @@ namespace Game.Spells
 				for (int i = 0; i < SpellConst.MaxEffects; ++i)
 					args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
-			// original caster guid only for GO cast
+			// original caster Guid only for GO cast
 			_caster.CastSpell(targets, spellInfo.Id, args);
 		}
 
@@ -463,7 +463,7 @@ namespace Game.Spells
 
 			if (spellInfo == null)
 			{
-				Log.outError(LogFilter.Spells, "Spell.EffectForceCast of spell {0}: triggering unknown spell id {1}", _spellInfo.Id, triggered_spell_id);
+				Log.outError(LogFilter.Spells, "Spell.EffectForceCast of spell {0}: triggering unknown spell Id {1}", _spellInfo.Id, triggered_spell_id);
 
 				return;
 			}
@@ -532,7 +532,7 @@ namespace Game.Spells
 
 			if (spellInfo == null)
 			{
-				Log.outError(LogFilter.Spells, $"EffectTriggerRitualOfSummoning of spell {_spellInfo.Id}: triggering unknown spell id {triggered_spell_id}");
+				Log.outError(LogFilter.Spells, $"EffectTriggerRitualOfSummoning of spell {_spellInfo.Id}: triggering unknown spell Id {triggered_spell_id}");
 
 				return;
 			}
@@ -633,7 +633,7 @@ namespace Game.Spells
 			    unitTarget.IsInFlight())
 				return;
 
-			// If not exist data for dest location - return
+			// If not exist _data for dest location - return
 			if (!_targets.HasDst())
 			{
 				Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - does not have a destination for spellId {0}.", _spellInfo.Id);
@@ -687,7 +687,7 @@ namespace Game.Spells
 			if (!unitTarget)
 				return;
 
-			// If not exist data for dest location - return
+			// If not exist _data for dest location - return
 			if (!_targets.HasDst())
 			{
 				Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - does not have a destination for spellId {_spellInfo.Id}.");
@@ -713,7 +713,7 @@ namespace Game.Spells
 					playerTarget.SendPacket(new SpellVisualLoadScreen(effectInfo.MiscValueB, effectInfo.MiscValue));
 			}
 
-			unitTarget._Events.AddEventAtOffset(new DelayedSpellTeleportEvent(unitTarget, targetDest, unitTarget == _caster ? TeleportToOptions.Spell : 0, _spellInfo.Id), TimeSpan.FromMilliseconds(effectInfo.MiscValue));
+			unitTarget.Events.AddEventAtOffset(new DelayedSpellTeleportEvent(unitTarget, targetDest, unitTarget == _caster ? TeleportToOptions.Spell : 0, _spellInfo.Id), TimeSpan.FromMilliseconds(effectInfo.MiscValue));
 		}
 
 		[SpellEffectHandler(SpellEffectName.ApplyAura)]
@@ -727,7 +727,7 @@ namespace Game.Spells
 			    unitTarget == null)
 				return;
 
-			// register target/effect on aura
+			// register Target/effect on aura
 			AuraApplication aurApp = spellAura.GetApplicationOfTarget(unitTarget.GetGUID());
 
 			if (aurApp == null)
@@ -774,7 +774,7 @@ namespace Game.Spells
 
 			Unit unitCaster = GetUnitCasterForEffectHandlers();
 
-			// add spell damage bonus
+			// add spell Damage bonus
 			if (unitCaster != null)
 			{
 				uint bonus = unitCaster.SpellDamageBonusDone(unitTarget, _spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
@@ -809,7 +809,7 @@ namespace Game.Spells
 
 			WorldObject target = null;
 
-			// call events for object target if present
+			// call events for object Target if present
 			if (effectHandleMode == SpellEffectHandleMode.HitTarget)
 			{
 				if (unitTarget != null)
@@ -828,10 +828,10 @@ namespace Game.Spells
 				if (effectInfo.GetProvidedTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.GameobjectMask))
 					return;
 
-				// some spells have no target entries in dbc and they use focus target
+				// some spells have no Target entries in dbc and they use focus Target
 				if (focusObject != null)
 					target = focusObject;
-				// @todo there should be a possibility to pass dest target to event script
+				// @todo there should be a possibility to pass dest Target to event script
 			}
 
 			Log.outDebug(LogFilter.Spells, "Spell ScriptStart {0} for spellid {1} in EffectSendEvent ", effectInfo.MiscValue, _spellInfo.Id);
@@ -859,10 +859,10 @@ namespace Game.Spells
 
 			int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
 
-			// NO - Not a typo - EffectPowerBurn uses effect value multiplier - not effect damage multiplier
+			// NO - Not a typo - EffectPowerBurn uses effect value Multiplier - not effect Damage Multiplier
 			float dmgMultiplier = effectInfo.CalcValueMultiplier(GetUnitCasterForEffectHandlers(), this);
 
-			// add log data before multiplication (need power amount, not damage)
+			// add log _data before multiplication (need power amount, not Damage)
 			ExecuteLogEffectTakeTargetPower(effectInfo.Effect, unitTarget, powerType, (uint)newDamage, 0.0f);
 
 			newDamage = (int)(newDamage * dmgMultiplier);
@@ -1008,7 +1008,7 @@ namespace Game.Spells
 			uint absorb = damageInfo.GetAbsorb();
 			damage -= (int)absorb;
 
-			// get max possible damage, don't count overkill for heal
+			// get max possible Damage, don't Count overkill for heal
 			uint healthGain = (uint)(-unitTarget.GetHealthGain(-damage) * healMultiplier);
 
 			if (unitCaster != null &&
@@ -1675,7 +1675,7 @@ namespace Game.Spells
 			uint numSummons;
 
 			// some spells need to summon many units, for those spells number of summons is stored in effect value
-			// however so far noone found a generic check to find all of those (there's no related data in summonproperties.dbc
+			// however so far noone found a generic check to find all of those (there's no related _data in summonproperties.dbc
 			// and in spell attributes, possibly we need to add a table for those)
 			// so here's a list of MiscValueB values, which is currently most generic check
 			switch (effectInfo.MiscValueB)
@@ -1725,7 +1725,7 @@ namespace Game.Spells
 							SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
 
 							break;
-						// Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
+						// Summons a vehicle, but doesn't Force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
 						case SummonTitle.Vehicle:
 						case SummonTitle.Mount:
 						{
@@ -1847,7 +1847,7 @@ namespace Game.Spells
 					CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 					args.SetTriggeringSpell(this);
 
-					// if we have small value, it indicates seat position
+					// if we have small value, it indicates Seat position
 					if (basePoints > 0 &&
 					    basePoints < SharedConst.MaxVehicleSeats)
 						args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
@@ -1941,7 +1941,7 @@ namespace Game.Spells
 			dispelFailed.VictimGUID = unitTarget.GetGUID();
 			dispelFailed.SpellID    = _spellInfo.Id;
 
-			// dispel N = damage buffs (or while exist buffs for dispel)
+			// dispel N = Damage buffs (or while exist buffs for dispel)
 			for (int count = 0; count < damage && remaining > 0;)
 			{
 				// Random select buff for dispel
@@ -2030,12 +2030,12 @@ namespace Game.Spells
 			if (effectHandleMode != SpellEffectHandleMode.HitTarget)
 				return;
 
-			// Check for possible target
+			// Check for possible Target
 			if (unitTarget == null ||
 			    unitTarget.IsEngaged())
 				return;
 
-			// target must be OK to do this
+			// Target must be OK to do this
 			if (unitTarget.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing))
 				return;
 
@@ -2062,27 +2062,27 @@ namespace Game.Spells
 			{
 				creature.StartPickPocketRefillTimer();
 
-				creature._loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
+				creature.Loot = new Loot(creature.GetMap(), creature.GetGUID(), LootType.Pickpocketing, null);
 				uint lootid = creature.GetCreatureTemplate().PickPocketId;
 
 				if (lootid != 0)
-					creature._loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
+					creature.Loot.FillLoot(lootid, LootStorage.Pickpocketing, player, true);
 
 				// Generate extra money for pick pocket loot
 				uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
 				uint b = RandomHelper.URand(0, player.GetLevel() / 2);
-				creature._loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+				creature.Loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
 			}
-			else if (creature._loot != null)
+			else if (creature.Loot != null)
 			{
-				if (creature._loot.loot_type == LootType.Pickpocketing &&
-				    creature._loot.IsLooted())
-					player.SendLootError(creature._loot.GetGUID(), creature.GetGUID(), LootError.AlreadPickPocketed);
+				if (creature.Loot.loot_type == LootType.Pickpocketing &&
+				    creature.Loot.IsLooted())
+					player.SendLootError(creature.Loot.GetGUID(), creature.GetGUID(), LootError.AlreadPickPocketed);
 
 				return;
 			}
 
-			player.SendLoot(creature._loot);
+			player.SendLoot(creature.Loot);
 		}
 
 		[SpellEffectHandler(SpellEffectName.AddFarsight)]
@@ -2369,7 +2369,7 @@ namespace Game.Spells
 
 			if (enchant_id == 0)
 			{
-				Log.outError(LogFilter.Spells, "Spell {0} Effect {1} (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have 0 as enchanting id", _spellInfo.Id, effectInfo.EffectIndex);
+				Log.outError(LogFilter.Spells, "Spell {0} Effect {1} (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have 0 as enchanting Id", _spellInfo.Id, effectInfo.EffectIndex);
 
 				return;
 			}
@@ -2378,7 +2378,7 @@ namespace Game.Spells
 
 			if (pEnchant == null)
 			{
-				Log.outError(LogFilter.Spells, "Spell {0} Effect {1} (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have not existed enchanting id {2}", _spellInfo.Id, effectInfo.EffectIndex, enchant_id);
+				Log.outError(LogFilter.Spells, "Spell {0} Effect {1} (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have not existed enchanting Id {2}", _spellInfo.Id, effectInfo.EffectIndex, enchant_id);
 
 				return;
 			}
@@ -2557,7 +2557,7 @@ namespace Game.Spells
 
 				pet.SetCreatedBySpell(_spellInfo.Id);
 
-				// generate new name for summon pet
+				// generate new Name for summon pet
 				string new_name = Global.ObjectMgr.GeneratePetName(petentry);
 
 				if (!string.IsNullOrEmpty(new_name))
@@ -2609,8 +2609,8 @@ namespace Game.Spells
 			if (unitCaster == null)
 				return;
 
-			// this effect use before aura Taunt apply for prevent taunt already attacking target
-			// for spell as marked "non effective at already attacking target"
+			// this effect use before aura Taunt apply for prevent taunt already attacking Target
+			// for spell as marked "non effective at already attacking Target"
 			if (!unitTarget ||
 			    unitTarget.IsTotem())
 			{
@@ -2642,7 +2642,7 @@ namespace Game.Spells
 			}
 
 			if (!mgr.IsThreatListEmpty())
-				// Set threat equal to highest threat currently on target
+				// Set threat equal to highest threat currently on Target
 				mgr.MatchUnitThreatToHighestThreat(unitCaster);
 		}
 
@@ -2665,7 +2665,7 @@ namespace Game.Spells
 				return;
 
 			// multiple weapon dmg effect workaround
-			// execute only the last weapon damage
+			// execute only the last weapon Damage
 			// and handle all effects at once
 			for (var j = effectInfo.EffectIndex + 1; j < _spellInfo.GetEffects().Count; ++j)
 				switch (_spellInfo.GetEffect(j).Effect)
@@ -2678,7 +2678,7 @@ namespace Game.Spells
 				}
 
 			// some spell specific modifiers
-			float totalDamagePercentMod = 1.0f; // applied to final bonus+weapon damage
+			float totalDamagePercentMod = 1.0f; // applied to final bonus+weapon Damage
 			int   fixed_bonus           = 0;
 			int   spell_bonus           = 0; // bonus specific for spell
 
@@ -2718,11 +2718,11 @@ namespace Game.Spells
 
 						break;
 					default:
-						break; // not weapon damage effect, just skip
+						break; // not weapon Damage effect, just skip
 				}
 
 			// if (addPctMods) { percent mods are added in Unit::CalculateDamage } else { percent mods are added in Unit::MeleeDamageBonusDone }
-			// this distinction is neccessary to properly inform the client about his autoattack damage values from Script_UnitDamage
+			// this distinction is neccessary to properly inform the client about his autoattack Damage values from Script_UnitDamage
 			bool addPctMods = !_spellInfo.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers) && _spellSchoolMask.HasAnyFlag(SpellSchoolMask.Normal);
 
 			if (addPctMods)
@@ -2774,16 +2774,16 @@ namespace Game.Spells
 
 						break;
 					default:
-						break; // not weapon damage effect, just skip
+						break; // not weapon Damage effect, just skip
 				}
 
 			weaponDamage += (uint)spell_bonus;
 			weaponDamage =  (uint)(weaponDamage * totalDamagePercentMod);
 
-			// prevent negative damage
+			// prevent negative Damage
 			weaponDamage = Math.Max(weaponDamage, 0);
 
-			// Add melee damage bonuses (also check for negative)
+			// Add melee Damage bonuses (also check for negative)
 			weaponDamage =  unitCaster.MeleeDamageBonusDone(unitTarget, weaponDamage, _attackType, DamageEffectType.SpellDirect, _spellInfo, effectInfo);
 			_damage      += (int)unitTarget.MeleeDamageBonusTaken(unitCaster, weaponDamage, _attackType, DamageEffectType.SpellDirect, _spellInfo);
 		}
@@ -2826,7 +2826,7 @@ namespace Game.Spells
 
 			int addhealth;
 
-			// damage == 0 - heal for caster max health
+			// Damage == 0 - heal for caster max health
 			if (damage == 0)
 				addhealth = (int)unitCaster.GetMaxHealth();
 			else
@@ -3133,7 +3133,7 @@ namespace Game.Spells
 
 									if (parent != null)
 									{
-										// @todo a hack, range = 11, should after some time cast, otherwise too far
+										// @todo a hack, range = 11, should after some Time cast, otherwise too far
 										unitCaster.CastSpell(parent, 62496, new CastSpellExtraArgs(this));
 										unitTarget.CastSpell(parent, (uint)damage, new CastSpellExtraArgs().SetTriggeringSpell(this)); // DIFFICULTY_NONE, so effect always valid
 									}
@@ -3172,7 +3172,7 @@ namespace Game.Spells
 				foreach (var pair in unitTarget.GetThreatManager().GetThreatenedByMeList())
 					pair.Value.ScaleThreat(0.0f);
 
-			// makes spells cast before this time fizzle
+			// makes spells cast before this Time fizzle
 			unitTarget.LastSanctuaryTime = GameTime.GetGameTimeMS();
 		}
 
@@ -3190,7 +3190,7 @@ namespace Game.Spells
 			Player caster = _caster.ToPlayer();
 			Player target = unitTarget.ToPlayer();
 
-			// caster or target already have requested Duel
+			// caster or Target already have requested Duel
 			if (caster.Duel != null ||
 			    target.Duel != null ||
 			    target.GetSocial() == null ||
@@ -3223,9 +3223,9 @@ namespace Game.Spells
 
 			Position pos = new()
 			               {
-				               posX        = caster.GetPositionX() + (unitTarget.GetPositionX() - caster.GetPositionX()) / 2,
-				               posY        = caster.GetPositionY() + (unitTarget.GetPositionY() - caster.GetPositionY()) / 2,
-				               posZ        = caster.GetPositionZ(),
+				               X        = caster.GetPositionX() + (unitTarget.GetPositionX() - caster.GetPositionX()) / 2,
+				               Y        = caster.GetPositionY() + (unitTarget.GetPositionY() - caster.GetPositionY()) / 2,
+				               Z        = caster.GetPositionZ(),
 				               Orientation = caster.GetOrientation()
 			               };
 
@@ -3285,7 +3285,7 @@ namespace Game.Spells
 				return;
 
 			Log.outDebug(LogFilter.Spells, "Spell Effect: Stuck");
-			Log.outInfo(LogFilter.Spells, "Player {0} (guid {1}) used auto-unstuck future at map {2} ({3}, {4}, {5})", player.GetName(), player.GetGUID().ToString(), player.GetMapId(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+			Log.outInfo(LogFilter.Spells, "Player {0} (Guid {1}) used auto-unstuck future at map {2} ({3}, {4}, {5})", player.GetName(), player.GetGUID().ToString(), player.GetMapId(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
 
 			if (player.IsInFlight())
 				return;
@@ -3322,7 +3322,7 @@ namespace Game.Spells
 		[SpellEffectHandler(SpellEffectName.SummonPlayer)]
 		private void EffectSummonPlayer()
 		{
-			// workaround - this effect should not use target map
+			// workaround - this effect should not use Target map
 			if (effectHandleMode != SpellEffectHandleMode.HitTarget)
 				return;
 
@@ -3410,7 +3410,7 @@ namespace Game.Spells
 			if (effectHandleMode != SpellEffectHandleMode.HitTarget)
 				return;
 
-			// this is only Item spell effect applied to main-hand weapon of target player (players in area)
+			// this is only Item spell effect applied to main-hand weapon of Target player (players in area)
 			if (unitTarget == null ||
 			    !unitTarget.IsTypeId(TypeId.Player))
 				return;
@@ -3546,7 +3546,7 @@ namespace Game.Spells
 
 			uint count = 1;
 			player.DestroyItemCount(foodItem, ref count, true);
-			// @todo fix crash when a spell has two effects, both pointed at the same Item target
+			// @todo fix crash when a spell has two effects, both pointed at the same Item Target
 
 			CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 			args.SetTriggeringSpell(this);
@@ -3582,7 +3582,7 @@ namespace Game.Spells
 				return;
 
 			byte       slot = (byte)(effectInfo.Effect - SpellEffectName.SummonObjectSlot1);
-			ObjectGuid guid = unitCaster._ObjectSlot[slot];
+			ObjectGuid guid = unitCaster.ObjectSlot[slot];
 
 			if (!guid.IsEmpty())
 			{
@@ -3590,14 +3590,14 @@ namespace Game.Spells
 
 				if (obj != null)
 				{
-					// Recast case - null spell id to make auras not be removed on object remove from world
+					// Recast case - null spell Id to make Auras not be removed on object remove from world
 					if (_spellInfo.Id == obj.GetSpellId())
 						obj.SetSpellId(0);
 
 					unitCaster.RemoveGameObject(obj, true);
 				}
 
-				unitCaster._ObjectSlot[slot].Clear();
+				unitCaster.ObjectSlot[slot].Clear();
 			}
 
 			float x, y, z, o;
@@ -3635,7 +3635,7 @@ namespace Game.Spells
 
 			map.AddToMap(go);
 
-			unitCaster._ObjectSlot[slot] = go.GetGUID();
+			unitCaster.ObjectSlot[slot] = go.GetGUID();
 		}
 
 		[SpellEffectHandler(SpellEffectName.Resurrect)]
@@ -3721,7 +3721,7 @@ namespace Game.Spells
 				return;
 
 			Position pos = destTarget.GetPosition();
-			unitTarget.NearTeleportTo(pos.posX, pos.posY, pos.posZ, pos.Orientation, unitTarget == _caster);
+			unitTarget.NearTeleportTo(pos.X, pos.Y, pos.Z, pos.Orientation, unitTarget == _caster);
 		}
 
 		[SpellEffectHandler(SpellEffectName.Reputation)]
@@ -3808,7 +3808,7 @@ namespace Game.Spells
 			var notifierClear = new MessageDistDelivererToHostile<PacketSenderOwning<ClearTarget>>(unitCaster, clearTarget, dist);
 			Cell.VisitWorldObjects(_caster, notifierClear, dist);
 
-			// we should also force pets to remove us from current target
+			// we should also Force pets to remove us from current Target
 			List<Unit> attackerSet = new();
 
 			foreach (var unit in unitCaster.GetAttackers())
@@ -3884,7 +3884,7 @@ namespace Game.Spells
 			creature.SetUnitFlag3(UnitFlags3.AlreadySkinned);
 			creature.SetDynamicFlag(UnitDynFlags.Lootable);
 			Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
-			creature._personalLoot[player.GetGUID()] = loot;
+			creature.PersonalLoot[player.GetGUID()] = loot;
 			loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
 			player.SendLoot(loot);
 
@@ -3939,7 +3939,7 @@ namespace Game.Spells
 
 			if (effectHandleMode == SpellEffectHandleMode.LaunchTarget)
 			{
-				// charge changes fall time
+				// charge changes fall Time
 				if (unitCaster.IsPlayer())
 					unitCaster.ToPlayer().SetFallInformation(0, _caster.GetPositionZ());
 
@@ -3953,7 +3953,7 @@ namespace Game.Spells
 					spellEffectExtraData.SpellVisualId = (uint)effectInfo.MiscValueB;
 				}
 
-				// Spell is not using explicit target - no generated path
+				// Spell is not using explicit Target - no generated path
 				if (_preGeneratedPath == null)
 				{
 					Position pos = unitTarget.GetFirstCollisionPosition(unitTarget.GetCombatReach(), unitTarget.GetRelativeAngle(_caster.GetPosition()));
@@ -3962,7 +3962,7 @@ namespace Game.Spells
 					    _spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
 						speed = pos.GetExactDist(_caster) / speed;
 
-					unitCaster.GetMotionMaster().MoveCharge(pos.posX, pos.posY, pos.posZ, speed, EventId.Charge, false, unitTarget, spellEffectExtraData);
+					unitCaster.GetMotionMaster().MoveCharge(pos.X, pos.Y, pos.Z, speed, EventId.Charge, false, unitTarget, spellEffectExtraData);
 				}
 				else
 				{
@@ -4010,12 +4010,12 @@ namespace Game.Spells
 
 				if (!unitCaster.IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
 				{
-					float angle = unitCaster.GetRelativeAngle(pos.posX, pos.posY);
+					float angle = unitCaster.GetRelativeAngle(pos.X, pos.Y);
 					float dist  = unitCaster.GetDistance(pos);
 					pos = unitCaster.GetFirstCollisionPosition(dist, angle);
 				}
 
-				unitCaster.GetMotionMaster().MoveCharge(pos.posX, pos.posY, pos.posZ);
+				unitCaster.GetMotionMaster().MoveCharge(pos.X, pos.Y, pos.Z);
 			}
 			else if (effectHandleMode == SpellEffectHandleMode.Hit)
 			{
@@ -4048,7 +4048,7 @@ namespace Game.Spells
 						return;
 			}
 
-			// Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
+			// Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback Target if Target has ROOT/STUN
 			if (unitTarget.HasUnitState(UnitState.Root | UnitState.Stunned))
 				return;
 
@@ -4097,7 +4097,7 @@ namespace Game.Spells
 			// Disengage
 			unitTarget.JumpTo(speedxy, speedz, effectInfo.PositionFacing);
 
-			// changes fall time
+			// changes fall Time
 			if (_caster.GetTypeId() == TypeId.Player)
 				_caster.ToPlayer().SetFallInformation(0, _caster.GetPositionZ());
 		}
@@ -4210,7 +4210,7 @@ namespace Game.Spells
 
 			if (!_targets.HasDst())
 			{
-				Log.outError(LogFilter.Spells, $"Spell {_spellInfo.Id} with SPELL_EFFECT_PULL_TOWARDS_DEST has no dest target");
+				Log.outError(LogFilter.Spells, $"Spell {_spellInfo.Id} with SPELL_EFFECT_PULL_TOWARDS_DEST has no dest Target");
 
 				return;
 			}
@@ -4381,15 +4381,15 @@ namespace Game.Spells
 
 			for (byte slot = (int)SummonSlot.Totem; slot < SharedConst.MaxTotemSlot; ++slot)
 			{
-				if (unitCaster._SummonSlot[slot].IsEmpty())
+				if (unitCaster.SummonSlot[slot].IsEmpty())
 					continue;
 
-				Creature totem = unitCaster.GetMap().GetCreature(unitCaster._SummonSlot[slot]);
+				Creature totem = unitCaster.GetMap().GetCreature(unitCaster.SummonSlot[slot]);
 
 				if (totem != null &&
 				    totem.IsTotem())
 				{
-					uint      spell_id  = totem._unitData.CreatedBySpell;
+					uint      spell_id  = totem.UnitData.CreatedBySpell;
 					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, GetCastDifficulty());
 
 					if (spellInfo != null)
@@ -4580,12 +4580,12 @@ namespace Game.Spells
 				{
 					go.SetFaction(unitCaster.GetFaction());
 					ObjectGuid bobberGuid = go.GetGUID();
-					// client requires fishing bobber guid in channel object Slot 0 to be usable
+					// client requires fishing bobber Guid in channel object Slot 0 to be usable
 					unitCaster.SetChannelObject(0, bobberGuid);
 					unitCaster.AddGameObject(go); // will removed at spell cancel
 
-					// end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(_spellInfo))
-					// start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(_spellInfo)-FISHING_BOBBER_READY_TIME)
+					// end Time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(_spellInfo))
+					// start Time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(_spellInfo)-FISHING_BOBBER_READY_TIME)
 					int lastSec = 0;
 
 					switch (RandomHelper.IRand(0, 2))
@@ -4795,8 +4795,8 @@ namespace Game.Spells
 					if (chance == 0)
 						continue;
 
-					// The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-					// Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
+					// The charges / stack amounts don't Count towards the total number of Auras that can be dispelled.
+					// Ie: A dispel on a Target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
 					// Polymorph instead of 1 / (5 + 1) . 16%.
 					bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
 					byte charges       = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
@@ -4819,7 +4819,7 @@ namespace Game.Spells
 			dispelFailed.VictimGUID = unitTarget.GetGUID();
 			dispelFailed.SpellID    = _spellInfo.Id;
 
-			// dispel N = damage buffs (or while exist buffs for dispel)
+			// dispel N = Damage buffs (or while exist buffs for dispel)
 			for (int count = 0; count < damage && remaining > 0;)
 			{
 				// Random select buff for dispel
@@ -5041,7 +5041,7 @@ namespace Game.Spells
 			FactionTemplateRecord casterFaction = _caster.GetFactionTemplateEntry();
 			FactionTemplateRecord targetFaction = CliDB.FactionTemplateStorage.LookupByKey(gameObjTarget.GetFaction());
 
-			// Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
+			// Do not allow to Damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
 			if (targetFaction == null ||
 			    (casterFaction != null && !casterFaction.IsFriendlyTo(targetFaction)))
 				gameObjTarget.ModifyHealth(-damage, _caster, GetSpellInfo().Id);
@@ -5256,7 +5256,7 @@ namespace Game.Spells
 			if (unitTarget == null)
 				return;
 
-			// there may be need of specifying casterguid of removed auras
+			// there may be need of specifying casterguid of removed Auras
 			unitTarget.RemoveAurasDueToSpell(effectInfo.TriggerSpell);
 		}
 
@@ -5310,7 +5310,7 @@ namespace Game.Spells
 				    ab.GetButtonType() != ActionButtonType.Spell)
 					continue;
 
-				//! Action Button data is unverified when it's set so it can be "hacked"
+				//! Action Button _data is unverified when it's set so it can be "hacked"
 				//! to contain invalid spells, so filter here.
 				uint spell_id = (uint)ab.GetAction();
 

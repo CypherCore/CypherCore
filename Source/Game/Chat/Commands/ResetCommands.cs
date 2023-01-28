@@ -200,10 +200,10 @@ namespace Game.Chat
 					handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));
 
 				/* TODO: 6.x remove/update pet talents
-				Pet* pet = target.GetPet();
-				Pet.resetTalentsForAllPetsOf(target, pet);
+				Pet* pet = Target.GetPet();
+				Pet.resetTalentsForAllPetsOf(Target, pet);
 				if (pet)
-				    target.SendTalentsInfoData(true);
+				    Target.SendTalentsInfoData(true);
 				*/
 				return true;
 			}

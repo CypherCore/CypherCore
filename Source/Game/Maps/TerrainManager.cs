@@ -332,11 +332,11 @@ namespace Game.Maps
 			if (!_gridFileExists[GetBitsetIndex(gx, gy)])
 				return;
 
-			// map file name
+			// map file Name
 			string fileName = $"{Global.WorldMgr.GetDataPath()}/maps/{GetId():D4}_{gx:D2}_{gy:D2}.map";
 			Log.outInfo(LogFilter.Maps, $"Loading map {fileName}");
 
-			// loading data
+			// loading _data
 			GridMap    gridMap           = new();
 			LoadResult gridMapLoadResult = gridMap.LoadData(fileName);
 
@@ -360,16 +360,16 @@ namespace Game.Maps
 			switch (vmapLoadResult)
 			{
 				case LoadResult.Success:
-					Log.outDebug(LogFilter.Maps, $"VMAP loaded name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
+					Log.outDebug(LogFilter.Maps, $"VMAP loaded Name:{GetMapName()}, Id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
 
 					break;
 				case LoadResult.VersionMismatch:
 				case LoadResult.ReadFromFileFailed:
-					Log.outError(LogFilter.Maps, $"Could not load VMAP name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
+					Log.outError(LogFilter.Maps, $"Could not load VMAP Name:{GetMapName()}, Id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
 
 					break;
 				case LoadResult.DisabledInConfig:
-					Log.outDebug(LogFilter.Maps, $"Ignored VMAP name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
+					Log.outDebug(LogFilter.Maps, $"Ignored VMAP Name:{GetMapName()}, Id:{GetId()}, x:{gx}, y:{gy} (vmap rep.: x:{gx}, y:{gy})");
 
 					break;
 			}
@@ -383,9 +383,9 @@ namespace Game.Maps
 			bool mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
 
 			if (mmapLoadResult)
-				Log.outDebug(LogFilter.Maps, $"MMAP loaded name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
+				Log.outDebug(LogFilter.Maps, $"MMAP loaded Name:{GetMapName()}, Id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
 			else
-				Log.outWarn(LogFilter.Maps, $"Could not load MMAP name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
+				Log.outWarn(LogFilter.Maps, $"Could not load MMAP Name:{GetMapName()}, Id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
 		}
 
 		public void UnloadMap(int gx, int gy)
@@ -610,7 +610,7 @@ namespace Game.Maps
 					data.LiquidStatus = ZLiquidStatus.AboveWater;
 			}
 
-			// look up liquid data from grid map
+			// look up liquid _data from grid map
 			if (gmap != null && useGridLiquid)
 			{
 				LiquidData    gridMapLiquid = new();
@@ -648,7 +648,7 @@ namespace Game.Maps
 				if (liquid_level > ground_level &&
 				    MathFunctions.fuzzyGe(z, ground_level - MapConst.GroundHeightTolerance))
 				{
-					// All ok in water . store data
+					// All ok in water . store _data
 					if (data != null)
 					{
 						// hardcoded in client like this
@@ -960,7 +960,7 @@ namespace Game.Maps
 				return vmapHeight; // we have only vmapHeight (if have)
 			}
 
-			return mapHeight; // explicitly use map data
+			return mapHeight; // explicitly use map _data
 		}
 
 		public float GetWaterLevel(PhaseShift phaseShift, uint mapId, float x, float y)

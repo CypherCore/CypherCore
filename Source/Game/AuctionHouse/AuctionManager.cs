@@ -158,7 +158,7 @@ namespace Game
 				return;
 			}
 
-			// data needs to be at first place for Item.LoadFromDB
+			// _data needs to be at first place for Item.LoadFromDB
 			uint                       count            = 0;
 			MultiMap<uint, Item>       itemsByAuction   = new();
 			MultiMap<uint, ObjectGuid> biddersByAuction = new();
@@ -562,7 +562,7 @@ namespace Game
 
 		private MultiMap<ObjectGuid, uint> _playerOwnedAuctions = new();
 
-		// Map of throttled players for GetAll, and throttle expiry time
+		// Map of throttled players for GetAll, and throttle expiry Time
 		// Stored here, rather than player object to maintain persistence after logout
 		private Dictionary<ObjectGuid, PlayerReplicateThrottleData> _replicateThrottleMap = new();
 
@@ -1530,7 +1530,7 @@ namespace Game
 			if (!bidder)
 				bidder = Global.ObjAccessor.FindConnectedPlayer(auction.Bidder); // try lookup bidder when called from .Update
 
-			// data for gm.log
+			// _data for gm.log
 			string bidderName = "";
 			bool   logGmTrade = auction.ServerFlags.HasFlag(AuctionPostingServerFlag.GmLogBuyer);
 
@@ -1566,7 +1566,7 @@ namespace Game
 				                     Global.AuctionHouseMgr.BuildAuctionWonMailBody(auction.Owner, auction.BidAmount, auction.BuyoutOrUnitPrice));
 
 				// set owner to bidder (to prevent delete Item with sender char deleting)
-				// owner in `data` will set at mail receive and Item extracting
+				// owner in `_data` will set at mail receive and Item extracting
 				foreach (Item item in auction.Items)
 				{
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
@@ -1857,7 +1857,7 @@ namespace Game
 				auctionItem.AuctionBucketKey = new AuctionBucketKey(AuctionsBucketKey.ForItem(Items[0]));
 
 			// all
-			if (!Items[0]._itemData.Creator._value.IsEmpty())
+			if (!Items[0]._itemData.Creator.Value.IsEmpty())
 				auctionItem.Creator = Items[0]._itemData.Creator;
 		}
 

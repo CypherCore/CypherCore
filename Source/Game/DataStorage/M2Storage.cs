@@ -40,7 +40,7 @@ namespace Game.DataStorage
 
 			Vector4 dbcData = new(dbcentry.Origin.X, dbcentry.Origin.Y, dbcentry.Origin.Z, dbcentry.OriginFacing);
 
-			// Read target locations, only so that we can calculate orientation
+			// Read Target locations, only so that we can calculate orientation
 			for (uint k = 0; k < cam.target_positions.timestamps.number; ++k)
 			{
 				// Extract Target positions
@@ -59,7 +59,7 @@ namespace Game.DataStorage
 				for (var i = 0; i < targArray.number; ++i)
 					targPositions[i] = new M2SplineKey(reader);
 
-				// Read the data for this set
+				// Read the _data for this set
 				for (uint i = 0; i < targTsArray.number; ++i)
 				{
 					// Translate co-ordinates
@@ -92,7 +92,7 @@ namespace Game.DataStorage
 				for (var i = 0; i < posTsArray.number; ++i)
 					positions[i] = new M2SplineKey(reader);
 
-				// Read the data for this set
+				// Read the _data for this set
 				for (uint i = 0; i < posTsArray.number; ++i)
 				{
 					// Translate co-ordinates
@@ -105,7 +105,7 @@ namespace Game.DataStorage
 
 					if (targetcam.Count > 0)
 					{
-						// Find the target camera before and after this camera
+						// Find the Target camera before and after this camera
 						// Pre-load first Item
 						FlyByCamera lastTarget = targetcam[0];
 						FlyByCamera nextTarget = targetcam[0];
@@ -124,7 +124,7 @@ namespace Game.DataStorage
 						float y = lastTarget.locations.Y;
 						float z = lastTarget.locations.Z;
 
-						// Now, the timestamps for target cam and position can be different. So, if they differ we interpolate
+						// Now, the timestamps for Target cam and position can be different. So, if they differ we interpolate
 						if (lastTarget.timeStamp != posTimestamps[i])
 						{
 							uint  timeDiffTarget = nextTarget.timeStamp - lastTarget.timeStamp;

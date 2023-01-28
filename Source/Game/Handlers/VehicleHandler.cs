@@ -20,7 +20,7 @@ namespace Game
 				return;
 
 			GetPlayer().ValidateMovementInfo(packet.Status);
-			GetPlayer()._movementInfo = packet.Status;
+			GetPlayer().MovementInfo = packet.Status;
 
 			GetPlayer().ExitVehicle();
 		}
@@ -96,7 +96,7 @@ namespace Game
 			if (vehicle_base.GetGUID() != packet.Status.Guid)
 				return;
 
-			vehicle_base._movementInfo = packet.Status;
+			vehicle_base.MovementInfo = packet.Status;
 
 			if (packet.DstVehicle.IsEmpty())
 			{
@@ -217,7 +217,7 @@ namespace Game
 				if (seat.IsEjectable())
 					unit.ExitVehicle();
 				else
-					Log.outError(LogFilter.Network, "{0} attempted to eject {1} from non-ejectable seat.", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
+					Log.outError(LogFilter.Network, "{0} attempted to eject {1} from non-ejectable Seat.", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
 			}
 
 			else

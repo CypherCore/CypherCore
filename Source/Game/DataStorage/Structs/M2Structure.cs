@@ -25,9 +25,9 @@ namespace Game.DataStorage
 	{
 		public uint Magic;            // "MD20"
 		public uint Version;          // The version of the format.
-		public uint lName;            // Length of the model's name including the trailing \0
-		public uint ofsName;          // Offset to the name, it seems like models can get reloaded by this name.should be unique, i guess.
-		public uint GlobalModelFlags; // 0x0001: tilt x, 0x0002: tilt y, 0x0008: add 2 fields in header, 0x0020: load .phys data (MoP+), 0x0080: has _lod .skin files (MoP?+), 0x0100: is camera related.
+		public uint lName;            // Length of the model's Name including the trailing \0
+		public uint ofsName;          // Offset to the Name, it seems like models can get reloaded by this Name.should be unique, i guess.
+		public uint GlobalModelFlags; // 0x0001: tilt x, 0x0002: tilt y, 0x0008: add 2 fields in header, 0x0020: load .phys _data (MoP+), 0x0080: has _lod .skin files (MoP?+), 0x0100: is camera related.
 		public uint nGlobalSequences;
 		public uint ofsGlobalSequences; // A list of timestamps.
 		public uint nAnimations;
@@ -52,7 +52,7 @@ namespace Game.DataStorage
 		public uint nTexReplace;
 		public uint ofsTexReplace; // Replaceable Textures.
 		public uint nRenderFlags;
-		public uint ofsRenderFlags; // Blending modes / render flags.
+		public uint ofsRenderFlags; // Blending modes / render Flags.
 		public uint nBoneLookupTable;
 		public uint ofsBoneLookupTable; // A bone lookup table.
 		public uint nTexLookup;
@@ -84,12 +84,12 @@ namespace Game.DataStorage
 		public uint nCameras;   // Format of Cameras changed with version 271!
 		public uint ofsCameras; // The cameras are present in most models for having a model in the Character-Tab.
 		public uint nCameraLookup;
-		public uint ofsCameraLookup; // And lookup-time again.
+		public uint ofsCameraLookup; // And lookup-Time again.
 		public uint nRibbonEmitters;
 		public uint ofsRibbonEmitters; // Things swirling around. See the CoT-entrance for light-trails.
 		public uint nParticleEmitters;
 		public uint ofsParticleEmitters; // Spells and weapons, doodads and loginscreens use them. Blood dripping of a blade? Particles.
-		public uint nBlendMaps;          // This has to deal with blending. Exists IFF (flags & 0x8) != 0. When set, textures blending is overriden by the associated array. See M2/WotLK#Blend_mode_overrides
+		public uint nBlendMaps;          // This has to deal with blending. Exists IFF (Flags & 0x8) != 0. When set, textures blending is overriden by the associated array. See M2/WotLK#Blend_mode_overrides
 		public uint ofsBlendMaps;        // Same as above. Points to an array of uint16 of nBlendMaps entries -- From WoD information.};
 	}
 
@@ -114,7 +114,7 @@ namespace Game.DataStorage
 		public float near_clip;
 		public M2Track positions; // How the camera's position moves. Should be 3*3 floats.
 		public Vector3 position_base;
-		public M2Track target_positions; // How the target moves. Should be 3*3 floats.
+		public M2Track target_positions; // How the Target moves. Should be 3*3 floats.
 		public Vector3 target_position_base;
 		public M2Track rolldata; // The camera can have some roll-effect. Its 0 to 2*Pi.
 		public M2Track fovdata;  // FoV for this segment

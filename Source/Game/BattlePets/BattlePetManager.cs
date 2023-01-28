@@ -42,7 +42,7 @@ namespace Game.BattlePets
 
 		public static void Initialize()
 		{
-			SQLResult result = DB.Login.Query("SELECT MAX(guid) FROM battle_pets");
+			SQLResult result = DB.Login.Query("SELECT MAX(Guid) FROM battle_pets");
 
 			if (!result.IsEmpty())
 				Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Set(result.Read<ulong>(0) + 1);
@@ -100,7 +100,7 @@ namespace Game.BattlePets
 					continue;
 				}
 
-				// TODO: verify breed id (3 - 12 (male) or 3 - 22 (male and female)) if needed
+				// TODO: verify breed Id (3 - 12 (male) or 3 - 22 (male and female)) if needed
 
 				_availableBreedsPerSpecies.Add(speciesId, (byte)breedId);
 				++count;
@@ -220,7 +220,7 @@ namespace Game.BattlePets
 						{
 							if (ownerGuid.IsEmpty())
 							{
-								Log.outError(LogFilter.Misc, $"Battlenet account with id {_owner.GetBattlenetAccountId()} has battle pet of species {species} with BattlePetSpeciesFlags::NotAccountWide but no owner");
+								Log.outError(LogFilter.Misc, $"Battlenet account with Id {_owner.GetBattlenetAccountId()} has battle pet of species {species} with BattlePetSpeciesFlags::NotAccountWide but no owner");
 
 								continue;
 							}
@@ -229,7 +229,7 @@ namespace Game.BattlePets
 						{
 							if (!ownerGuid.IsEmpty())
 							{
-								Log.outError(LogFilter.Misc, $"Battlenet account with id {_owner.GetBattlenetAccountId()} has battle pet of species {species} without BattlePetSpeciesFlags::NotAccountWide but with owner");
+								Log.outError(LogFilter.Misc, $"Battlenet account with Id {_owner.GetBattlenetAccountId()} has battle pet of species {species} without BattlePetSpeciesFlags::NotAccountWide but with owner");
 
 								continue;
 							}
@@ -238,9 +238,9 @@ namespace Game.BattlePets
 						if (HasMaxPetCount(speciesEntry, ownerGuid))
 						{
 							if (ownerGuid.IsEmpty())
-								Log.outError(LogFilter.Misc, $"Battlenet account with id {_owner.GetBattlenetAccountId()} has more than maximum battle pets of species {species}");
+								Log.outError(LogFilter.Misc, $"Battlenet account with Id {_owner.GetBattlenetAccountId()} has more than maximum battle pets of species {species}");
 							else
-								Log.outError(LogFilter.Misc, $"Battlenet account with id {_owner.GetBattlenetAccountId()} has more than maximum battle pets of species {species} for player {ownerGuid}");
+								Log.outError(LogFilter.Misc, $"Battlenet account with Id {_owner.GetBattlenetAccountId()} has more than maximum battle pets of species {species} for player {ownerGuid}");
 
 							continue;
 						}
@@ -264,7 +264,7 @@ namespace Game.BattlePets
 							pet.DeclinedName = new DeclinedName();
 
 							for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-								pet.DeclinedName.name[i] = petsResult.Read<string>(12 + i);
+								pet.DeclinedName.Name[i] = petsResult.Read<string>(12 + i);
 						}
 
 						if (!ownerGuid.IsEmpty())
@@ -341,7 +341,7 @@ namespace Game.BattlePets
 							stmt.AddValue(0, pair.Key);
 
 							for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-								stmt.AddValue(i + 1, pair.Value.DeclinedName.name[i]);
+								stmt.AddValue(i + 1, pair.Value.DeclinedName.Name[i]);
 
 							trans.Append(stmt);
 						}
@@ -373,7 +373,7 @@ namespace Game.BattlePets
 							stmt.AddValue(0, pair.Key);
 
 							for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-								stmt.AddValue(i + 1, pair.Value.DeclinedName.name[i]);
+								stmt.AddValue(i + 1, pair.Value.DeclinedName.Name[i]);
 
 							trans.Append(stmt);
 						}
@@ -805,7 +805,7 @@ namespace Game.BattlePets
 		public void HealBattlePetsPct(byte pct)
 		{
 			// TODO: After each Pet Battle, any injured companion will automatically
-			// regain 50 % of the damage that was taken during combat
+			// regain 50 % of the Damage that was taken during combat
 			List<BattlePet> updates = new();
 
 			foreach (var pet in _pets.Values)
@@ -986,7 +986,7 @@ namespace Game.BattlePets
 			// get base breed Stats
 			var breedState = BattlePetMgr.BattlePetBreedStates.LookupByKey(PacketInfo.Breed);
 
-			if (breedState == null) // non existing breed id
+			if (breedState == null) // non existing breed Id
 				return;
 
 			float health = breedState[BattlePetState.StatStamina];

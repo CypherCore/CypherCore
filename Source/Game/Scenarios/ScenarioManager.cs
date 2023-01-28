@@ -50,7 +50,7 @@ namespace Game.Scenarios
 			if (scenarioData == null)
 			{
 				Log.outError(LogFilter.Scenario,
-				             "Table `scenarios` contained data linking scenario (Id: {0}) to map (Id: {1}), difficulty (Id: {2}) but no scenario data was found related to that scenario Id.",
+				             "Table `scenarios` contained _data linking scenario (Id: {0}) to map (Id: {1}), difficulty (Id: {2}) but no scenario _data was found related to that scenario Id.",
 				             scenarioID,
 				             map.GetId(),
 				             map.GetDifficultyID());
@@ -218,7 +218,7 @@ namespace Game.Scenarios
 					}
 				}
 
-				Log.outError(LogFilter.Sql, $"Table scenario_poi references unknown scenario poi points for criteria tree id {criteriaTreeID} POI id {blobIndex}");
+				Log.outError(LogFilter.Sql, $"Table scenario_poi references unknown scenario poi points for criteria tree Id {criteriaTreeID} POI Id {blobIndex}");
 			} while (result.NextRow());
 
 			Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scenario POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");

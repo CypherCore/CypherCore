@@ -59,7 +59,7 @@ namespace Game
 
 			if (packet.Size > 0xFFFF)
 			{
-				Log.outError(LogFilter.Network, "UpdateAccountData: Account data packet too big, size {0}", packet.Size);
+				Log.outError(LogFilter.Network, "UpdateAccountData: Account _data packet too big, size {0}", packet.Size);
 
 				return;
 			}
@@ -211,7 +211,7 @@ namespace Game
 
 			if (player.IsAlive())
 			{
-				// not using Player.UpdateQuestObjectiveProgress, ObjectID in quest_objectives can be set to -1, areatrigger_involvedrelation then holds correct id
+				// not using Player.UpdateQuestObjectiveProgress, ObjectID in quest_objectives can be set to -1, areatrigger_involvedrelation then holds correct Id
 				List<uint> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
 
 				if (quests != null)
@@ -330,7 +330,7 @@ namespace Game
 					switch (denyReason.Reason)
 					{
 						case TransferAbortReason.MapNotAllowed:
-							Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter map with id {at.target_mapId} which has no entry");
+							Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter map with Id {at.target_mapId} which has no entry");
 
 							break;
 						case TransferAbortReason.Difficulty:
@@ -870,7 +870,7 @@ namespace Game
 			if (!GetPlayer().HasPendingBind())
 			{
 				Log.outInfo(LogFilter.Network,
-				            "InstanceLockResponse: Player {0} (guid {1}) tried to bind himself/teleport to graveyard without a pending bind!",
+				            "InstanceLockResponse: Player {0} (Guid {1}) tried to bind himself/teleport to graveyard without a pending bind!",
 				            GetPlayer().GetName(),
 				            GetPlayer().GetGUID().ToString());
 

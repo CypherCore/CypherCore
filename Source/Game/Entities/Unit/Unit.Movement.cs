@@ -18,17 +18,17 @@ namespace Game.Entities
 	{
 		public bool IsGravityDisabled()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.DisableGravity);
+			return MovementInfo.HasMovementFlag(MovementFlag.DisableGravity);
 		}
 
 		public bool IsWalking()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.Walking);
+			return MovementInfo.HasMovementFlag(MovementFlag.Walking);
 		}
 
 		public bool IsHovering()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.Hover);
+			return MovementInfo.HasMovementFlag(MovementFlag.Hover);
 		}
 
 		public bool IsStopped()
@@ -38,12 +38,12 @@ namespace Game.Entities
 
 		public bool IsMoving()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.MaskMoving);
+			return MovementInfo.HasMovementFlag(MovementFlag.MaskMoving);
 		}
 
 		public bool IsTurning()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.MaskTurning);
+			return MovementInfo.HasMovementFlag(MovementFlag.MaskTurning);
 		}
 
 		public virtual bool CanFly()
@@ -53,12 +53,12 @@ namespace Game.Entities
 
 		public bool IsFlying()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.Flying | MovementFlag.DisableGravity);
+			return MovementInfo.HasMovementFlag(MovementFlag.Flying | MovementFlag.DisableGravity);
 		}
 
 		public bool IsFalling()
 		{
-			return _movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar) || MoveSpline.IsFalling();
+			return MovementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar) || MoveSpline.IsFalling();
 		}
 
 		public virtual bool CanEnterWater()
@@ -101,7 +101,7 @@ namespace Game.Entities
 
 		public float GetSpeed(UnitMoveType mtype)
 		{
-			return _speed_rate[(int)mtype] * (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
+			return SpeedRate[(int)mtype] * (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
 		}
 
 		public void SetSpeed(UnitMoveType mtype, float newValue)
@@ -113,10 +113,10 @@ namespace Game.Entities
 		{
 			rate = Math.Max(rate, 0.01f);
 
-			if (_speed_rate[(int)mtype] == rate)
+			if (SpeedRate[(int)mtype] == rate)
 				return;
 
-			_speed_rate[(int)mtype] = rate;
+			SpeedRate[(int)mtype] = rate;
 
 			PropagateSpeedChange();
 
@@ -163,7 +163,7 @@ namespace Game.Entities
 					Pet pet = ToPlayer().GetPet();
 
 					if (pet)
-						pet.SetSpeedRate(mtype, _speed_rate[(int)mtype]);
+						pet.SetSpeedRate(mtype, SpeedRate[(int)mtype]);
 				}
 			}
 
@@ -174,13 +174,13 @@ namespace Game.Entities
 				// Send notification to self
 				MoveSetSpeed selfpacket = new(moveTypeToOpcode[(int)mtype, 1]);
 				selfpacket.MoverGUID     = GetGUID();
-				selfpacket.SequenceIndex = _movementCounter++;
+				selfpacket.SequenceIndex = MovementCounter++;
 				selfpacket.Speed         = GetSpeed(mtype);
 				playerMover.SendPacket(selfpacket);
 
 				// Send notification to other players
 				MoveUpdateSpeed packet = new(moveTypeToOpcode[(int)mtype, 2]);
-				packet.Status = _movementInfo;
+				packet.Status = MovementInfo;
 				packet.Speed  = GetSpeed(mtype);
 				playerMover.SendMessageToSet(packet, false);
 			}
@@ -195,7 +195,7 @@ namespace Game.Entities
 
 		public float GetSpeedRate(UnitMoveType mtype)
 		{
-			return _speed_rate[(int)mtype];
+			return SpeedRate[(int)mtype];
 		}
 
 		public virtual MovementGeneratorType GetDefaultMovementType()
@@ -262,7 +262,7 @@ namespace Game.Entities
 			init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
 
 			if (GetTransport() != null)
-				init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
+				init.DisableTransportPathTransformations(); // It makes no sense to Target global orientation
 
 			init.SetFacing(ori);
 
@@ -280,7 +280,7 @@ namespace Game.Entities
 			// @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.
 			MoveSplineInit init = new(this);
 			init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
-			init.SetFacing(GetAbsoluteAngle(obj)); // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
+			init.SetFacing(GetAbsoluteAngle(obj)); // when on Transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
 
 			//GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
 			init.Launch();
@@ -338,7 +338,7 @@ namespace Game.Entities
 		{
 			MoveKnockBack moveKnockBack = new();
 			moveKnockBack.MoverGUID        = GetGUID();
-			moveKnockBack.SequenceIndex    = _movementCounter++;
+			moveKnockBack.SequenceIndex    = MovementCounter++;
 			moveKnockBack.Speeds.HorzSpeed = speedXY;
 			moveKnockBack.Speeds.VertSpeed = speedZ;
 			moveKnockBack.Direction        = new Vector2(vcos, vsin);
@@ -361,11 +361,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -397,11 +397,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableTransitionBetweenSwimAndFly : ServerOpcodes.MoveDisableTransitionBetweenSwimAndFly);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 
@@ -410,7 +410,7 @@ namespace Game.Entities
 
 		public bool SetCanTurnWhileFalling(bool enable)
 		{
-			// Temporarily disabled for short lived auras that unapply before client had time to ACK applying
+			// Temporarily disabled for short lived Auras that unapply before client had Time to ACK applying
 			//if (enable == HasUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling))
 			//return false;
 
@@ -425,11 +425,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanTurnWhileFalling : ServerOpcodes.MoveUnsetCanTurnWhileFalling);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 
@@ -452,11 +452,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableDoubleJump : ServerOpcodes.MoveDisableDoubleJump);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 
@@ -479,11 +479,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableInertia : ServerOpcodes.MoveEnableInertia);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 
@@ -532,7 +532,7 @@ namespace Game.Entities
 					return;
 				case UnitMoveType.Run:
 				{
-					if (IsMounted()) // Use on mount auras
+					if (IsMounted()) // Use on Mount Auras
 					{
 						main_speed_mod  =  GetMaxPositiveAuraModifier(AuraType.ModIncreaseMountedSpeed);
 						stack_bonus     =  GetTotalAuraMultiplier(AuraType.ModMountedSpeedAlways);
@@ -576,7 +576,7 @@ namespace Game.Entities
 						main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseMountedFlightSpeed);
 						stack_bonus    = GetTotalAuraMultiplier(AuraType.ModMountedFlightSpeedAlways);
 					}
-					else // Use not mount (shapeshift for example) auras (should stack)
+					else // Use not Mount (shapeshift for example) Auras (should stack)
 					{
 						main_speed_mod = GetTotalAuraModifier(AuraType.ModIncreaseFlightSpeed) + GetTotalAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
 					}
@@ -638,7 +638,7 @@ namespace Game.Entities
 
 					if (mtype == UnitMoveType.Run)
 					{
-						// force minimum speed rate @ aura 437 SPELL_AURA_MOD_MINIMUM_SPEED_RATE
+						// Force minimum speed rate @ aura 437 SPELL_AURA_MOD_MINIMUM_SPEED_RATE
 						int minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
 
 						if (minSpeedMod1 != 0)
@@ -707,7 +707,7 @@ namespace Game.Entities
 
 		public virtual bool UpdatePosition(Position obj, bool teleport = false)
 		{
-			return UpdatePosition(obj.posX, obj.posY, obj.posZ, obj.Orientation, teleport);
+			return UpdatePosition(obj.X, obj.Y, obj.Z, obj.Orientation, teleport);
 		}
 
 		public virtual bool UpdatePosition(float x, float y, float z, float orientation, bool teleport = false)
@@ -776,7 +776,7 @@ namespace Game.Entities
 
 		public float GetHoverOffset()
 		{
-			return HasUnitMovementFlag(MovementFlag.Hover) ? _unitData.HoverHeight : 0.0f;
+			return HasUnitMovementFlag(MovementFlag.Hover) ? UnitData.HoverHeight : 0.0f;
 		}
 
 		public bool IsWithinBoundaryRadius(Unit obj)
@@ -813,11 +813,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableGravity : ServerOpcodes.MoveEnableGravity);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -1003,7 +1003,7 @@ namespace Game.Entities
 			if (!IsControlledByPlayer())
 				return;
 
-			// remove appropriate auras if we are swimming/not swimming respectively
+			// remove appropriate Auras if we are swimming/not swimming respectively
 			if (IsInWater())
 				RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.UnderWater);
 			else
@@ -1033,7 +1033,7 @@ namespace Game.Entities
 					CastSpell(this, curLiquid.SpellID, true);
 			}
 
-			// mount capability depends on liquid State change
+			// Mount capability depends on liquid State change
 			if (oldLiquidStatus != GetLiquidStatus())
 				UpdateMountCapability();
 		}
@@ -1063,7 +1063,7 @@ namespace Game.Entities
 			if (enable)
 			{
 				AddUnitMovementFlag(MovementFlag.Falling);
-				_movementInfo.SetFallTime(0);
+				MovementInfo.SetFallTime(0);
 			}
 			else
 			{
@@ -1115,11 +1115,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanFly : ServerOpcodes.MoveUnsetCanFly);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -1149,11 +1149,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetWaterWalk : ServerOpcodes.MoveSetLandWalk);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -1168,7 +1168,7 @@ namespace Game.Entities
 
 		public bool SetFeatherFall(bool enable)
 		{
-			// Temporarily disabled for short lived auras that unapply before client had time to ACK applying
+			// Temporarily disabled for short lived Auras that unapply before client had Time to ACK applying
 			//if (enable == HasUnitMovementFlag(MovementFlag.FallingSlow))
 			//return false;
 
@@ -1184,11 +1184,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetFeatherFall : ServerOpcodes.MoveSetNormalFall);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -1206,7 +1206,7 @@ namespace Game.Entities
 			if (enable == HasUnitMovementFlag(MovementFlag.Hover))
 				return false;
 
-			float hoverHeight = _unitData.HoverHeight;
+			float hoverHeight = UnitData.HoverHeight;
 
 			if (enable)
 			{
@@ -1237,11 +1237,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetHovering : ServerOpcodes.MoveUnsetHovering);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -1328,9 +1328,9 @@ namespace Game.Entities
 
 		public void SetMovedUnit(Unit target)
 		{
-			_unitMovedByMe._playerMovingMe = null;
-			_unitMovedByMe                 = target;
-			_unitMovedByMe._playerMovingMe = ToPlayer();
+			UnitMovedByMe.PlayerMovingMe = null;
+			UnitMovedByMe                 = target;
+			UnitMovedByMe.PlayerMovingMe = ToPlayer();
 
 			MoveSetActiveMover packet = new();
 			packet.MoverGUID = target.GetGUID();
@@ -1437,7 +1437,7 @@ namespace Game.Entities
 
 		private void ApplyControlStatesIfNeeded()
 		{
-			// Unit States might have been already cleared but auras still present. I need to check with HasAuraType
+			// Unit States might have been already cleared but Auras still present. I need to check with HasAuraType
 			if (HasUnitState(UnitState.Stunned) ||
 			    HasAuraType(AuraType.ModStun) ||
 			    HasAuraType(AuraType.ModStunDisableGravity))
@@ -1518,11 +1518,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(apply ? ServerOpcodes.MoveRoot : ServerOpcodes.MoveUnroot);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, playerMover);
 			}
 			else
@@ -1567,8 +1567,8 @@ namespace Game.Entities
 
 			// block / allow control to real player in control (eg charmer)
 			if (IsPlayer())
-				if (_playerMovingMe)
-					_playerMovingMe.SetClientControl(this, !apply);
+				if (PlayerMovingMe)
+					PlayerMovingMe.SetClientControl(this, !apply);
 		}
 
 		private void SetConfused(bool apply)
@@ -1591,8 +1591,8 @@ namespace Game.Entities
 
 			// block / allow control to real player in control (eg charmer)
 			if (IsPlayer())
-				if (_playerMovingMe)
-					_playerMovingMe.SetClientControl(this, !apply);
+				if (PlayerMovingMe)
+					PlayerMovingMe.SetClientControl(this, !apply);
 		}
 
 		public bool CanFreeMove()
@@ -1619,7 +1619,7 @@ namespace Game.Entities
 
 			if (player != null)
 			{
-				// mount as a vehicle
+				// Mount as a vehicle
 				if (VehicleId != 0)
 					if (CreateVehicleKit(VehicleId, creatureEntry))
 					{
@@ -1716,7 +1716,7 @@ namespace Game.Entities
 				return false;
 
 			VehicleKit          =  new Vehicle(this, vehInfo, creatureEntry);
-			_updateFlag.Vehicle =  true;
+			UpdateFlag.Vehicle =  true;
 			UnitTypeMask        |= UnitTypeMask.Vehicle;
 
 			if (!loading)
@@ -1737,7 +1737,7 @@ namespace Game.Entities
 
 			VehicleKit = null;
 
-			_updateFlag.Vehicle =  false;
+			UpdateFlag.Vehicle =  false;
 			UnitTypeMask        &= ~UnitTypeMask.Vehicle;
 			RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
 		}
@@ -1750,7 +1750,7 @@ namespace Game.Entities
 			{
 				MoveSetVehicleRecID moveSetVehicleRec = new();
 				moveSetVehicleRec.MoverGUID     = GetGUID();
-				moveSetVehicleRec.SequenceIndex = _movementCounter++;
+				moveSetVehicleRec.SequenceIndex = MovementCounter++;
 				moveSetVehicleRec.VehicleRecID  = vehicleId;
 				player.SendPacket(moveSetVehicleRec);
 			}
@@ -1790,14 +1790,14 @@ namespace Game.Entities
 				{
 					MoveApplyMovementForce applyMovementForce = new();
 					applyMovementForce.MoverGUID     = GetGUID();
-					applyMovementForce.SequenceIndex = (int)_movementCounter++;
+					applyMovementForce.SequenceIndex = (int)MovementCounter++;
 					applyMovementForce.Force         = force;
 					movingPlayer.SendPacket(applyMovementForce);
 				}
 				else
 				{
 					MoveUpdateApplyMovementForce updateApplyMovementForce = new();
-					updateApplyMovementForce.Status = _movementInfo;
+					updateApplyMovementForce.Status = MovementInfo;
 					updateApplyMovementForce.Force  = force;
 					SendMessageToSet(updateApplyMovementForce, true);
 				}
@@ -1817,14 +1817,14 @@ namespace Game.Entities
 				{
 					MoveRemoveMovementForce moveRemoveMovementForce = new();
 					moveRemoveMovementForce.MoverGUID     = GetGUID();
-					moveRemoveMovementForce.SequenceIndex = (int)_movementCounter++;
+					moveRemoveMovementForce.SequenceIndex = (int)MovementCounter++;
 					moveRemoveMovementForce.ID            = id;
 					movingPlayer.SendPacket(moveRemoveMovementForce);
 				}
 				else
 				{
 					MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
-					updateRemoveMovementForce.Status      = _movementInfo;
+					updateRemoveMovementForce.Status      = MovementInfo;
 					updateRemoveMovementForce.TriggerGUID = id;
 					SendMessageToSet(updateRemoveMovementForce, true);
 				}
@@ -1855,11 +1855,11 @@ namespace Game.Entities
 			{
 				MoveSetFlag packet = new(ignoreMovementForcesOpcodeTable[ignore ? 1 : 0]);
 				packet.MoverGUID     = GetGUID();
-				packet.SequenceIndex = _movementCounter++;
+				packet.SequenceIndex = MovementCounter++;
 				movingPlayer.SendPacket(packet);
 
 				MoveUpdate moveUpdate = new();
-				moveUpdate.Status = _movementInfo;
+				moveUpdate.Status = MovementInfo;
 				SendMessageToSet(moveUpdate, movingPlayer);
 			}
 
@@ -1876,7 +1876,7 @@ namespace Game.Entities
 			{
 				MoveSetSpeed setModMovementForceMagnitude = new(ServerOpcodes.MoveSetModMovementForceMagnitude);
 				setModMovementForceMagnitude.MoverGUID     = GetGUID();
-				setModMovementForceMagnitude.SequenceIndex = _movementCounter++;
+				setModMovementForceMagnitude.SequenceIndex = MovementCounter++;
 				setModMovementForceMagnitude.Speed         = modMagnitude;
 				movingPlayer.SendPacket(setModMovementForceMagnitude);
 				++movingPlayer.MovementForceModMagnitudeChanges;
@@ -1884,7 +1884,7 @@ namespace Game.Entities
 			else
 			{
 				MoveUpdateSpeed updateModMovementForceMagnitude = new(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
-				updateModMovementForceMagnitude.Status = _movementInfo;
+				updateModMovementForceMagnitude.Status = MovementInfo;
 				updateModMovementForceMagnitude.Speed  = modMagnitude;
 				SendMessageToSet(updateModMovementForceMagnitude, true);
 			}
@@ -1920,7 +1920,7 @@ namespace Game.Entities
 
 		public Unit GetUnitBeingMoved()
 		{
-			return _unitMovedByMe;
+			return UnitMovedByMe;
 		}
 
 		private Player GetPlayerBeingMoved()
@@ -1935,82 +1935,82 @@ namespace Game.Entities
 
 		public Player GetPlayerMovingMe()
 		{
-			return _playerMovingMe;
+			return PlayerMovingMe;
 		}
 
 		public void AddUnitMovementFlag(MovementFlag f)
 		{
-			_movementInfo.AddMovementFlag(f);
+			MovementInfo.AddMovementFlag(f);
 		}
 
 		public void RemoveUnitMovementFlag(MovementFlag f)
 		{
-			_movementInfo.RemoveMovementFlag(f);
+			MovementInfo.RemoveMovementFlag(f);
 		}
 
 		public bool HasUnitMovementFlag(MovementFlag f)
 		{
-			return _movementInfo.HasMovementFlag(f);
+			return MovementInfo.HasMovementFlag(f);
 		}
 
 		public MovementFlag GetUnitMovementFlags()
 		{
-			return _movementInfo.GetMovementFlags();
+			return MovementInfo.GetMovementFlags();
 		}
 
 		public void SetUnitMovementFlags(MovementFlag f)
 		{
-			_movementInfo.SetMovementFlags(f);
+			MovementInfo.SetMovementFlags(f);
 		}
 
 		public void AddUnitMovementFlag2(MovementFlag2 f)
 		{
-			_movementInfo.AddMovementFlag2(f);
+			MovementInfo.AddMovementFlag2(f);
 		}
 
 		private void RemoveUnitMovementFlag2(MovementFlag2 f)
 		{
-			_movementInfo.RemoveMovementFlag2(f);
+			MovementInfo.RemoveMovementFlag2(f);
 		}
 
 		public bool HasUnitMovementFlag2(MovementFlag2 f)
 		{
-			return _movementInfo.HasMovementFlag2(f);
+			return MovementInfo.HasMovementFlag2(f);
 		}
 
 		public MovementFlag2 GetUnitMovementFlags2()
 		{
-			return _movementInfo.GetMovementFlags2();
+			return MovementInfo.GetMovementFlags2();
 		}
 
 		public void SetUnitMovementFlags2(MovementFlag2 f)
 		{
-			_movementInfo.SetMovementFlags2(f);
+			MovementInfo.SetMovementFlags2(f);
 		}
 
 		public void AddExtraUnitMovementFlag2(MovementFlags3 f)
 		{
-			_movementInfo.AddExtraMovementFlag2(f);
+			MovementInfo.AddExtraMovementFlag2(f);
 		}
 
 		public void RemoveExtraUnitMovementFlag2(MovementFlags3 f)
 		{
-			_movementInfo.RemoveExtraMovementFlag2(f);
+			MovementInfo.RemoveExtraMovementFlag2(f);
 		}
 
 		public bool HasExtraUnitMovementFlag2(MovementFlags3 f)
 		{
-			return _movementInfo.HasExtraMovementFlag2(f);
+			return MovementInfo.HasExtraMovementFlag2(f);
 		}
 
 		public MovementFlags3 GetExtraUnitMovementFlags2()
 		{
-			return _movementInfo.GetExtraMovementFlags2();
+			return MovementInfo.GetExtraMovementFlags2();
 		}
 
 		public void SetExtraUnitMovementFlags2(MovementFlags3 f)
 		{
-			_movementInfo.SetExtraMovementFlags2(f);
+			MovementInfo.SetExtraMovementFlags2(f);
 		}
 
 		//Spline
@@ -2029,11 +2029,11 @@ namespace Game.Entities
 
 			if (MoveSpline.IsCyclic())
 			{
-				splineSyncTimer.Update(diff);
+				_splineSyncTimer.Update(diff);
 
-				if (splineSyncTimer.Passed())
+				if (_splineSyncTimer.Passed())
 				{
-					splineSyncTimer.Reset(5000); // Retail value, do not change
+					_splineSyncTimer.Reset(5000); // Retail value, do not change
 
 					FlightSplineSync flightSplineSync = new();
 					flightSplineSync.Guid       = GetGUID();
@@ -2061,10 +2061,10 @@ namespace Game.Entities
 
 			if (MoveSpline.onTransport)
 			{
-				Position pos = _movementInfo.transport.pos;
-				pos.posX = loc.X;
-				pos.posY = loc.Y;
-				pos.posZ = loc.Z;
+				Position pos = MovementInfo.Transport.Pos;
+				pos.X = loc.X;
+				pos.Y = loc.Y;
+				pos.Z = loc.Z;
 				pos.SetOrientation(loc.W);
 
 				ITransport transport = GetDirectTransport();
@@ -2083,7 +2083,7 @@ namespace Game.Entities
 
 		private void InterruptMovementBasedAuras()
 		{
-			// TODO: Check if orientation transport offset changed instead of only global orientation
+			// TODO: Check if orientation Transport offset changed instead of only global orientation
 			if (_positionUpdateInfo.Turned)
 				RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
 
@@ -2094,7 +2094,7 @@ namespace Game.Entities
 
 		public void DisableSpline()
 		{
-			_movementInfo.RemoveMovementFlag(MovementFlag.Forward);
+			MovementInfo.RemoveMovementFlag(MovementFlag.Forward);
 			MoveSpline.Interrupt();
 		}
 
@@ -2117,7 +2117,7 @@ namespace Game.Entities
 			// SMSG_MOVE_TELEPORT is sent to self in order to trigger CMSG_MOVE_TELEPORT_ACK and update the position server side
 
 			MoveUpdateTeleport moveUpdateTeleport = new();
-			moveUpdateTeleport.Status = _movementInfo;
+			moveUpdateTeleport.Status = MovementInfo;
 
 			if (_movementForces != null)
 				moveUpdateTeleport.MovementForces = _movementForces.GetForces();
@@ -2145,7 +2145,7 @@ namespace Game.Entities
 					moveTeleport.TransportGUID = GetTransGUID();
 
 				moveTeleport.Facing        = o;
-				moveTeleport.SequenceIndex = _movementCounter++;
+				moveTeleport.SequenceIndex = MovementCounter++;
 				playerMover.SendPacket(moveTeleport);
 
 				broadcastSource = playerMover;
@@ -2153,7 +2153,7 @@ namespace Game.Entities
 			else
 			{
 				// This is the only packet sent for creatures which contains MovementInfo structure
-				// we do not update _movementInfo for creatures so it needs to be done manually here
+				// we do not update MovementInfo for creatures so it needs to be done manually here
 				moveUpdateTeleport.Status.Guid = GetGUID();
 				moveUpdateTeleport.Status.Pos.Relocate(pos);
 				moveUpdateTeleport.Status.Time = Time.GetMSTime();
@@ -2163,7 +2163,7 @@ namespace Game.Entities
 				{
 					pos.GetPosition(out float tx, out float ty, out float tz, out float to);
 					transportBase.CalculatePassengerOffset(ref tx, ref ty, ref tz, ref to);
-					moveUpdateTeleport.Status.transport.pos.Relocate(tx, ty, tz, to);
+					moveUpdateTeleport.Status.Transport.Pos.Relocate(tx, ty, tz, to);
 				}
 			}
 

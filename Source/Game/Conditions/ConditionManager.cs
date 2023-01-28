@@ -333,7 +333,7 @@ namespace Game
 
 				if (!conditions.Empty())
 				{
-					Log.outDebug(LogFilter.Condition, "GetConditionsForSmartEvent: found conditions for Smart Event entry or guid {0} eventId {1}", entryOrGuid, eventId);
+					Log.outDebug(LogFilter.Condition, "GetConditionsForSmartEvent: found conditions for Smart Event entry or Guid {0} eventId {1}", entryOrGuid, eventId);
 					ConditionSourceInfo sourceInfo = new(unit, baseObject);
 
 					return IsObjectMeetToConditions(sourceInfo, conditions);
@@ -383,7 +383,7 @@ namespace Game
 
 				if (!conditionList.Empty())
 				{
-					Log.outDebug(LogFilter.Condition, $"GetConditionsForTrainerSpell: found conditions for trainer id {trainerId} spell {spellId}");
+					Log.outDebug(LogFilter.Condition, $"GetConditionsForTrainerSpell: found conditions for trainer Id {trainerId} spell {spellId}");
 
 					return IsObjectMeetToConditions(player, conditionList);
 				}
@@ -491,29 +491,29 @@ namespace Game
 					if (iSourceTypeOrReferenceId >= 0)
 						rowType = "reference";
 
-					//check for useless data
+					//check for useless _data
 					if (cond.ConditionTarget != 0)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in ConditionTarget ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionTarget);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in ConditionTarget ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionTarget);
 
 					if (cond.ConditionValue1 != 0)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in value1 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in value1 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue1);
 
 					if (cond.ConditionValue2 != 0)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in value2 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue2);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in value2 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue2);
 
 					if (cond.ConditionValue3 != 0)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in value3 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue3);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in value3 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue3);
 
 					if (cond.NegativeCondition)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in NegativeCondition ({2})!", rowType, iSourceTypeOrReferenceId, cond.NegativeCondition);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in NegativeCondition ({2})!", rowType, iSourceTypeOrReferenceId, cond.NegativeCondition);
 
 					if (cond.SourceGroup != 0 &&
 					    iSourceTypeOrReferenceId < 0)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in SourceGroup ({2})!", rowType, iSourceTypeOrReferenceId, cond.SourceGroup);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in SourceGroup ({2})!", rowType, iSourceTypeOrReferenceId, cond.SourceGroup);
 
 					if (cond.SourceEntry != 0 &&
 					    iSourceTypeOrReferenceId < 0)
-						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in SourceEntry ({2})!", rowType, iSourceTypeOrReferenceId, cond.SourceEntry);
+						Log.outError(LogFilter.Sql, "Condition {0} {1} has useless _data in SourceEntry ({2})!", rowType, iSourceTypeOrReferenceId, cond.SourceEntry);
 				}
 				else if (!IsConditionTypeValid(cond)) //doesn't have reference, validate ConditionType
 				{
@@ -804,7 +804,7 @@ namespace Game
 								                                               cond.ConditionValue1 != (uint)TypeId.Unit &&
 								                                               cond.ConditionValue1 != (uint)TypeId.Player)
 								                                           {
-									                                           Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - target requires ConditionValue1 to be either TYPEID_UNIT ({(uint)TypeId.Unit}) or TYPEID_PLAYER ({(uint)TypeId.Player})");
+									                                           Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - Target requires ConditionValue1 to be either TYPEID_UNIT ({(uint)TypeId.Unit}) or TYPEID_PLAYER ({(uint)TypeId.Player})");
 
 									                                           return;
 								                                           }
@@ -812,7 +812,7 @@ namespace Game
 								                                           if (implicitTargetMask.HasFlag(SpellCastTargetFlags.GameobjectMask) &&
 								                                               cond.ConditionValue1 != (uint)TypeId.GameObject)
 								                                           {
-									                                           Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - target requires ConditionValue1 to be TYPEID_GAMEOBJECT ({(uint)TypeId.GameObject})");
+									                                           Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - Target requires ConditionValue1 to be TYPEID_GAMEOBJECT ({(uint)TypeId.GameObject})");
 
 									                                           return;
 								                                           }
@@ -820,7 +820,7 @@ namespace Game
 								                                           if (implicitTargetMask.HasFlag(SpellCastTargetFlags.CorpseMask) &&
 								                                               cond.ConditionValue1 != (uint)TypeId.Corpse)
 								                                           {
-									                                           Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - target requires ConditionValue1 to be TYPEID_CORPSE ({(uint)TypeId.Corpse})");
+									                                           Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - Target requires ConditionValue1 to be TYPEID_CORPSE ({(uint)TypeId.Corpse})");
 
 									                                           return;
 								                                           }
@@ -848,7 +848,7 @@ namespace Game
 
 				                                           foreach (var effectMask in sharedMasks)
 				                                           {
-					                                           // some effect indexes should have same data
+					                                           // some effect indexes should have same _data
 					                                           uint commonMask = (effectMask & conditionEffMask);
 
 					                                           if (commonMask != 0)
@@ -862,10 +862,10 @@ namespace Game
 						                                           if (firstEffIndex >= spellInfo.GetEffects().Count)
 							                                           return;
 
-						                                           // get shared data
+						                                           // get shared _data
 						                                           List<Condition> sharedList = spellInfo.GetEffect(firstEffIndex).ImplicitTargetConditions;
 
-						                                           // there's already data entry for that sharedMask
+						                                           // there's already _data entry for that sharedMask
 						                                           if (sharedList != null)
 						                                           {
 							                                           // we have overlapping masks in db
@@ -880,7 +880,7 @@ namespace Game
 								                                           return;
 							                                           }
 						                                           }
-						                                           // no data for shared mask, we can create new submask
+						                                           // no _data for shared mask, we can create new submask
 						                                           else
 						                                           {
 							                                           // add new list, create new shared mask
@@ -1502,7 +1502,7 @@ namespace Game
 					}
 					else
 					{
-						Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked Type id, ignoring.");
+						Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked Type Id, ignoring.");
 
 						return false;
 					}
@@ -1522,7 +1522,7 @@ namespace Game
 
 					if (spawnGroup.flags.HasAnyFlag(SpawnGroupFlags.System | SpawnGroupFlags.ManualSpawn))
 					{
-						Log.outError(LogFilter.Sql, $"{cond.ToString()} in `spawn_group_template` table cannot have SPAWNGROUP_FLAG_SYSTEM or SPAWNGROUP_FLAG_MANUAL_SPAWN flags, ignoring.");
+						Log.outError(LogFilter.Sql, $"{cond.ToString()} in `spawn_group_template` table cannot have SPAWNGROUP_FLAG_SYSTEM or SPAWNGROUP_FLAG_MANUAL_SPAWN Flags, ignoring.");
 
 						return false;
 					}
@@ -1573,7 +1573,7 @@ namespace Game
 
 					if (cond.ConditionValue2 == 0)
 					{
-						Log.outError(LogFilter.Sql, "{0} Zero Item count in ConditionValue2, skipped", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} Zero Item Count in ConditionValue2, skipped", cond.ToString());
 
 						return false;
 					}
@@ -1695,7 +1695,7 @@ namespace Game
 					if (cond.ConditionValue1 >= events.Length ||
 					    !events[cond.ConditionValue1].IsValid())
 					{
-						Log.outError(LogFilter.Sql, "{0} has non existing event id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has non existing event Id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
 
 						return false;
 					}
@@ -1708,7 +1708,7 @@ namespace Game
 
 					if (achievement == null)
 					{
-						Log.outError(LogFilter.Sql, "{0} has non existing achivement id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has non existing achivement Id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
 
 						return false;
 					}
@@ -1741,7 +1741,7 @@ namespace Game
 				{
 					if (!Player.IsValidGender((Gender)cond.ConditionValue1))
 					{
-						Log.outError(LogFilter.Sql, "{0} has invalid gender ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has invalid Gender ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
 
 						return false;
 					}
@@ -1838,14 +1838,14 @@ namespace Game
 									if (cond.ConditionValue2 != 0 &&
 									    creatureData.Id != cond.ConditionValue2)
 									{
-										Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match creature entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
+										Log.outError(LogFilter.Sql, "{0} has Guid {1} set but does not match creature entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
 
 										return false;
 									}
 								}
 								else
 								{
-									Log.outError(LogFilter.Sql, "{0} has non existing creature guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
+									Log.outError(LogFilter.Sql, "{0} has non existing creature Guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
 
 									return false;
 								}
@@ -1870,14 +1870,14 @@ namespace Game
 									if (cond.ConditionValue2 != 0 &&
 									    goData.Id != cond.ConditionValue2)
 									{
-										Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match gameobject entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
+										Log.outError(LogFilter.Sql, "{0} has Guid {1} set but does not match gameobject entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
 
 										return false;
 									}
 								}
 								else
 								{
-									Log.outError(LogFilter.Sql, "{0} has non existing gameobject guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
+									Log.outError(LogFilter.Sql, "{0} has non existing gameobject Guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
 
 									return false;
 								}
@@ -2087,7 +2087,7 @@ namespace Game
 
 					if (achievement == null)
 					{
-						Log.outError(LogFilter.Sql, "{0} has non existing realm first achivement id ({1}), skipped.", cond.ToString(), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has non existing realm first achivement Id ({1}), skipped.", cond.ToString(), cond.ConditionValue1);
 
 						return false;
 					}
@@ -2138,7 +2138,7 @@ namespace Game
 
 					if (cond.ConditionValue3 > limit)
 					{
-						Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has quest objective count {cond.ConditionValue3} in value3, but quest objective {cond.ConditionValue1} has a maximum objective count of {limit}, skipped.");
+						Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has quest objective Count {cond.ConditionValue3} in value3, but quest objective {cond.ConditionValue1} has a maximum objective Count of {limit}, skipped.");
 
 						return false;
 					}
@@ -2258,7 +2258,7 @@ namespace Game
 
 		private void LogUselessConditionValue(Condition cond, byte index, uint value)
 		{
-			Log.outError(LogFilter.Sql, "{0} has useless data in ConditionValue{1} ({2})!", cond.ToString(true), index, value);
+			Log.outError(LogFilter.Sql, "{0} has useless _data in ConditionValue{1} ({2})!", cond.ToString(true), index, value);
 		}
 
 		private void Clean()
@@ -3076,10 +3076,10 @@ namespace Game
 				case UnitConditionVariable.IsMoving:
 					return unit.HasUnitMovementFlag(MovementFlag.Forward | MovementFlag.Backward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight) ? 1 : 0;
 				case UnitConditionVariable.IsCasting:
-				case UnitConditionVariable.IsCastingSpell: // this is supposed to return spell id by client code but data always has 0 or 1
+				case UnitConditionVariable.IsCastingSpell: // this is supposed to return spell Id by client code but _data always has 0 or 1
 					return unit.GetCurrentSpell(CurrentSpellTypes.Generic) != null ? 1 : 0;
 				case UnitConditionVariable.IsChanneling:
-				case UnitConditionVariable.IsChannelingSpell: // this is supposed to return spell id by client code but data always has 0 or 1
+				case UnitConditionVariable.IsChannelingSpell: // this is supposed to return spell Id by client code but _data always has 0 or 1
 					return unit.GetChannelSpellId() != 0 ? 1 : 0;
 				case UnitConditionVariable.NumberOfMeleeAttackers:
 					return unit.GetAttackers()
@@ -3207,13 +3207,13 @@ namespace Game
 				case UnitConditionVariable.HasCritter:
 					return unit.GetCritterGUID().IsEmpty() ? 0 : 1;
 				case UnitConditionVariable.HasTotemInSlot1:
-					return unit._SummonSlot[(int)SummonSlot.Totem].IsEmpty() ? 0 : 1;
+					return unit.SummonSlot[(int)SummonSlot.Totem].IsEmpty() ? 0 : 1;
 				case UnitConditionVariable.HasTotemInSlot2:
-					return unit._SummonSlot[(int)SummonSlot.Totem2].IsEmpty() ? 0 : 1;
+					return unit.SummonSlot[(int)SummonSlot.Totem2].IsEmpty() ? 0 : 1;
 				case UnitConditionVariable.HasTotemInSlot3:
-					return unit._SummonSlot[(int)SummonSlot.Totem3].IsEmpty() ? 0 : 1;
+					return unit.SummonSlot[(int)SummonSlot.Totem3].IsEmpty() ? 0 : 1;
 				case UnitConditionVariable.HasTotemInSlot4:
-					return unit._SummonSlot[(int)SummonSlot.Totem4].IsEmpty() ? 0 : 1;
+					return unit.SummonSlot[(int)SummonSlot.Totem4].IsEmpty() ? 0 : 1;
 				case UnitConditionVariable.HasTotemInSlot5:
 					break;
 				case UnitConditionVariable.Creature:

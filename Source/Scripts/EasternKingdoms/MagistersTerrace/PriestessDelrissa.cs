@@ -320,7 +320,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
 			byte j = 0;
 
-			//it's empty, so first time
+			//it's empty, so first Time
 			if (LackeyEntryList.Empty())
 			{
 				//fill vector array with entries from Creature array
@@ -474,7 +474,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 			++uiLackeyDeathCount;
 
 			if (uiLackeyDeathCount == MiscConst.MaxActiveLackey)
-				//time to make her lootable and complete event if she died before lackeys
+				//Time to make her lootable and complete event if she died before lackeys
 				if (!delrissa.IsAlive())
 				{
 					delrissa.SetDynamicFlag(UnitDynFlags.Lootable);
@@ -984,7 +984,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 				                    //attempt find go summoned from spell (cast by me)
 				                    GameObject go = me.GetGameObject(SpellIds.FreezingTrap);
 
-				                    //if we have a go, we need to wait (only one trap at a time)
+				                    //if we have a go, we need to wait (only one trap at a Time)
 				                    if (go)
 				                    {
 					                    task.Repeat(TimeSpan.FromSeconds(2.5));

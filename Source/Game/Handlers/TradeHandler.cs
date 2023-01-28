@@ -125,7 +125,7 @@ namespace Game
 							               trader.GetName(),
 							               trader.GetSession().GetAccountId());
 
-						// adjust time (depends on /played)
+						// adjust Time (depends on /played)
 						if (myItems[i].IsBOPTradeable())
 							myItems[i].SetCreatePlayedTime(trader.GetTotalPlayedTime() - (GetPlayer().GetTotalPlayedTime() - myItems[i]._itemData.CreatePlayedTime));
 
@@ -150,7 +150,7 @@ namespace Game
 							               GetPlayer().GetSession().GetAccountId());
 
 
-						// adjust time (depends on /played)
+						// adjust Time (depends on /played)
 						if (hisItems[i].IsBOPTradeable())
 							hisItems[i].SetCreatePlayedTime(GetPlayer().GetTotalPlayedTime() - (trader.GetTotalPlayedTime() - hisItems[i]._itemData.CreatePlayedTime));
 

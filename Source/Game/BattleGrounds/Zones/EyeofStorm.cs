@@ -28,7 +28,7 @@ namespace Game.BattleGrounds.Zones
 		private ObjectGuid _DroppedFlagGUID;
 		private uint _FlagCapturedBgObjectType; // Type that should be despawned when flag is captured
 
-		private ObjectGuid _FlagKeeper;   // keepers guid
+		private ObjectGuid _FlagKeeper;   // keepers Guid
 		private EotSFlagState _FlagState; // for checking flag State
 		private int _FlagsTimer;
 
@@ -123,7 +123,7 @@ namespace Game.BattleGrounds.Zones
 				{
 					//check if player joined point
 					/*I used this order of calls, because although we will check if one player is in gameobject's distance 2 times
-					  but we can count of players on current point in CheckSomeoneLeftPoint
+					  but we can Count of players on current point in CheckSomeoneLeftPoint
 					*/
 					CheckSomeoneJoinedPoint();
 					//check if player left point
@@ -279,7 +279,7 @@ namespace Game.BattleGrounds.Zones
 						}
 						else
 						{
-							//player is neat flag, so update count:
+							//player is neat flag, so update Count:
 							_CurrentPointPlayersCount[2 * i + GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()))]++;
 							++j;
 						}
@@ -294,7 +294,7 @@ namespace Game.BattleGrounds.Zones
 			{
 				if (!_PlayersNearPoint[point].Empty())
 				{
-					//count new point bar status:
+					//Count new point bar status:
 					int pointDelta = (int)(_CurrentPointPlayersCount[2 * point]) - (int)(_CurrentPointPlayersCount[2 * point + 1]);
 					MathFunctions.RoundToInterval(ref pointDelta, -(int)EotSProgressBarConsts.PointMaxCapturersCount, EotSProgressBarConsts.PointMaxCapturersCount);
 					_PointBarStatus[point] += pointDelta;
@@ -575,7 +575,7 @@ namespace Game.BattleGrounds.Zones
 			    !AddObject(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectIds.NBannerEyEntry, 2270.84033203125f, 1784.1197509765625f, 1186.1473388671875f, 2.303830623626708984f, 0.0f, 0.0f, 0.913544654846191406f, 0.406738430261611938f, BattlegroundConst.RespawnOneDay) ||
 			    !AddObject(EotSObjectTypes.NBannerMageTowerLeft, EotSObjectIds.NBannerEyEntry, 2268.46533203125f, 1736.8385009765625f, 1186.742919921875f, 0.942476630210876464f, 0.0f, 0.0f, 0.453989982604980468f, 0.891006767749786376f, BattlegroundConst.RespawnOneDay) ||
 			    !AddObject(EotSObjectTypes.NBannerMageTowerRight, EotSObjectIds.NBannerEyEntry, 2300.9931640625f, 1741.5504150390625f, 1187.10693359375f, 5.375615119934082031f, 0.0f, 0.0f, -0.4383707046508789f, 0.898794233798980712f, BattlegroundConst.RespawnOneDay)
-			    // flags
+			    // Flags
 			    ||
 			    !AddObject(EotSObjectTypes.FlagNetherstorm, EotSObjectIds.Flag2EyEntry, 2174.444580078125f, 1569.421875f, 1159.852783203125f, 4.625123500823974609f, 0.0f, 0.0f, -0.73727703094482421f, 0.67559051513671875f, BattlegroundConst.RespawnOneDay) ||
 			    !AddObject(EotSObjectTypes.FlagFelReaver, EotSObjectIds.Flag1EyEntry, 2044.28f, 1729.68f, 1189.96f, -0.017453f, 0, 0, 0.008727f, -0.999962f, BattlegroundConst.RespawnOneDay) ||
@@ -675,7 +675,7 @@ namespace Game.BattleGrounds.Zones
 			if (send_message)
 			{
 				SendBroadcastText(EotSBroadcastTexts.FlagReset, ChatMsg.BgSystemNeutral);
-				PlaySoundToAll(EotSSoundIds.FlagReset); // flags respawned sound...
+				PlaySoundToAll(EotSSoundIds.FlagReset); // Flags respawned sound...
 			}
 
 			UpdateWorldState(EotSWorldStateIds.NetherstormFlag, 1);
@@ -732,7 +732,7 @@ namespace Game.BattleGrounds.Zones
 			_FlagsTimer = EotSMisc.FlagRespawnTime;
 			player.CastSpell(player, BattlegroundConst.SpellRecentlyDroppedFlag, true);
 			player.CastSpell(player, EotSMisc.SpellPlayerDroppedFlag, true);
-			//this does not work correctly :((it should remove flag carrier name)
+			//this does not work correctly :((it should remove flag carrier Name)
 			UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateHorde, (int)EotSFlagState.WaitRespawn);
 			UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (int)EotSFlagState.WaitRespawn);
 

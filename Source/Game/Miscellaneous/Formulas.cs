@@ -184,8 +184,8 @@ namespace Game
 
 				xpMod *= isBattleGround ? WorldConfig.GetFloatValue(WorldCfg.RateXpBgKill) : WorldConfig.GetFloatValue(WorldCfg.RateXpKill);
 
-				if (creature && creature._PlayerDamageReq != 0) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
-					xpMod *= 1.0f - 2.0f * creature._PlayerDamageReq / creature.GetMaxHealth();
+				if (creature && creature.PlayerDamageReq != 0) // if players dealt less than 50% of the Damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
+					xpMod *= 1.0f - 2.0f * creature.PlayerDamageReq / creature.GetMaxHealth();
 
 				gain = (uint)(gain * xpMod);
 			}

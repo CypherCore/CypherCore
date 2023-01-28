@@ -19,9 +19,9 @@ namespace Game.AI
 		public override void InitializeAI()
 		{
 			for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-				if (me._spells[i] != 0 &&
-				    Global.SpellMgr.HasSpellInfo(me._spells[i], me.GetMap().GetDifficultyID()))
-					_spells.Add(me._spells[i]);
+				if (me.Spells[i] != 0 &&
+				    Global.SpellMgr.HasSpellInfo(me.Spells[i], me.GetMap().GetDifficultyID()))
+					_spells.Add(me.Spells[i]);
 
 			base.InitializeAI();
 		}
@@ -211,17 +211,17 @@ namespace Game.AI
 
 		public ArcherAI(Creature creature) : base(creature)
 		{
-			if (creature._spells[0] == 0)
+			if (creature.Spells[0] == 0)
 				Log.outError(LogFilter.ScriptsAi, $"ArcherAI set for creature with spell1=0. AI will do nothing ({me.GetGUID()})");
 
-			var spellInfo = Global.SpellMgr.GetSpellInfo(creature._spells[0], creature.GetMap().GetDifficultyID());
+			var spellInfo = Global.SpellMgr.GetSpellInfo(creature.Spells[0], creature.GetMap().GetDifficultyID());
 			_minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
 
 			if (_minRange == 0)
 				_minRange = SharedConst.MeleeRange;
 
-			creature._CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
-			creature._SightDistance  = creature._CombatDistance;
+			creature.CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
+			creature.SightDistance  = creature.CombatDistance;
 		}
 
 		public override void AttackStart(Unit who)
@@ -239,7 +239,7 @@ namespace Game.AI
 			{
 				if (me.Attack(who, false) &&
 				    !who.IsFlying())
-					me.GetMotionMaster().MoveChase(who, me._CombatDistance);
+					me.GetMotionMaster().MoveChase(who, me.CombatDistance);
 			}
 
 			if (who.IsFlying())
@@ -252,7 +252,7 @@ namespace Game.AI
 				return;
 
 			if (!me.IsWithinCombatRange(me.GetVictim(), _minRange))
-				DoSpellAttackIfReady(me._spells[0]);
+				DoSpellAttackIfReady(me.Spells[0]);
 			else
 				DoMeleeAttackIfReady();
 		}
@@ -264,19 +264,19 @@ namespace Game.AI
 
 		public TurretAI(Creature creature) : base(creature)
 		{
-			if (creature._spells[0] == 0)
+			if (creature.Spells[0] == 0)
 				Log.outError(LogFilter.Server, $"TurretAI set for creature with spell1=0. AI will do nothing ({creature.GetGUID()})");
 
-			var spellInfo = Global.SpellMgr.GetSpellInfo(creature._spells[0], creature.GetMap().GetDifficultyID());
+			var spellInfo = Global.SpellMgr.GetSpellInfo(creature.Spells[0], creature.GetMap().GetDifficultyID());
 			_minRange                = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
-			creature._CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
-			creature._SightDistance  = creature._CombatDistance;
+			creature.CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
+			creature.SightDistance  = creature.CombatDistance;
 		}
 
 		public override bool CanAIAttack(Unit victim)
 		{
 			// todo use one function to replace it
-			if (!me.IsWithinCombatRange(victim, me._CombatDistance) ||
+			if (!me.IsWithinCombatRange(victim, me.CombatDistance) ||
 			    (_minRange != 0 && me.IsWithinCombatRange(victim, _minRange)))
 				return false;
 
@@ -294,7 +294,7 @@ namespace Game.AI
 			if (!UpdateVictim())
 				return;
 
-			DoSpellAttackIfReady(me._spells[0]);
+			DoSpellAttackIfReady(me.Spells[0]);
 		}
 	}
 

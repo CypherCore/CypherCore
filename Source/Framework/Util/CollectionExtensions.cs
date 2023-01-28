@@ -182,7 +182,18 @@ namespace System.Collections.Generic
 			while (list.Count <= index)
 				list.Add(defaultValue);
 		}
-	}
+
+        public static void AddToDictList<T, L>(this Dictionary<T, List<L>> dict, T key, L item)
+        {
+            if (!dict.TryGetValue(key, out var list))
+            {
+                list = new List<L>();
+                dict.Add(key, list);
+            }
+
+            list.Add(item);
+        }
+    }
 
 	public interface ICheck<in T>
 	{

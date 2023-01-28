@@ -32,7 +32,7 @@ namespace Game.Loots
 		public uint LootListId;
 		public bool needs_quest; // quest drop
 		public uint randomBonusListId;
-		public ObjectGuid rollWinnerGUID; // Stores the guid of person who won loot, if his bags are full only he can see the Item in loot list!
+		public ObjectGuid rollWinnerGUID; // Stores the Guid of person who won loot, if his bags are full only he can see the Item in loot list!
 
 		public LootItem()
 		{
@@ -55,8 +55,8 @@ namespace Game.Loots
         /// <summary>
         ///  Basic checks for player/Item compatibility - if false no chance to see the Item in the loot - used only for loot generation
         /// </summary>
-        /// <param name="player"></param>
-        /// <param name="loot"></param>
+        /// <param Name="player"></param>
+        /// <param Name="loot"></param>
         /// <returns></returns>
         public bool AllowedForPlayer(Player player, Loot loot)
 		{
@@ -458,7 +458,7 @@ namespace Game.Loots
 
 				_map = map;
 
-				// initialize the data needed for the roll
+				// initialize the _data needed for the roll
 				_lootItem = loot.items[(int)lootListId];
 
 				_loot                = loot;
@@ -609,7 +609,7 @@ namespace Game.Loots
 						    winnerPair.Value == null ||
 						    pair.Value.RollNumber > winnerPair.Value.RollNumber)
 						{
-							isSomeoneNeed = true; // first passage will force to set winner because need is prioritized
+							isSomeoneNeed = true; // first passage will Force to set winner because need is prioritized
 							winnerPair    = pair;
 						}
 
@@ -845,7 +845,7 @@ namespace Game.Loots
 			if (tab == null)
 			{
 				if (!noEmptyError)
-					Log.outError(LogFilter.Sql, "Table '{0}' loot id #{1} used but it doesn't have records.", store.GetName(), lootId);
+					Log.outError(LogFilter.Sql, "Table '{0}' loot Id #{1} used but it doesn't have records.", store.GetName(), lootId);
 
 				return false;
 			}

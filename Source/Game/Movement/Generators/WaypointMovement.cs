@@ -85,7 +85,7 @@ namespace Game.Movement
 			    _path.nodes.Empty())
 				return false;
 
-			Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator::GetResetPosition: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
+			Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator::GetResetPosition: tried to reference a node Id ({_currentNode}) which is not included in path ({_path.id})");
 			WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
 
 			x = waypoint.x;
@@ -255,7 +255,7 @@ namespace Game.Movement
 			    _path.nodes.Empty())
 				return;
 
-			Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
+			Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node Id ({_currentNode}) which is not included in path ({_path.id})");
 			WaypointNode waypoint = _path.nodes.ElementAt((int)_currentNode);
 
 			if (waypoint.delay != 0)
@@ -311,7 +311,7 @@ namespace Game.Movement
 			{
 				if (ComputeNextNode())
 				{
-					Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
+					Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node Id ({_currentNode}) which is not included in path ({_path.id})");
 					// inform AI
 					CreatureAI ai = owner.GetAI();
 
@@ -367,7 +367,7 @@ namespace Game.Movement
 					ai.WaypointStarted(_path.nodes[_currentNode].id, _path.id);
 			}
 
-			Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
+			Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node Id ({_currentNode}) which is not included in path ({_path.id})");
 			WaypointNode waypoint = _path.nodes[_currentNode];
 
 			RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.InformEnabled | MovementGeneratorFlags.TimedPaused);
@@ -376,11 +376,11 @@ namespace Game.Movement
 
 			MoveSplineInit init = new(owner);
 
-			//! If creature is on transport, we assume waypoints set in DB are already transport offsets
+			//! If creature is on Transport, we assume waypoints set in DB are already Transport offsets
 			if (transportPath)
 				init.DisableTransportPathTransformations();
 
-			//! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
+			//! Do not use formationDest here, MoveTo requires Transport offsets due to DisableTransportPathTransformations() call
 			//! but formationDest contains global coordinates
 			init.MoveTo(waypoint.x, waypoint.y, waypoint.z);
 

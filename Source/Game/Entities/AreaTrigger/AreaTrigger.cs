@@ -59,8 +59,8 @@ namespace Game.Entities
 			ObjectTypeMask |= TypeMask.AreaTrigger;
 			ObjectTypeId   =  TypeId.AreaTrigger;
 
-			_updateFlag.Stationary  = true;
-			_updateFlag.AreaTrigger = true;
+			UpdateFlag.Stationary  = true;
+			UpdateFlag.AreaTrigger = true;
 
 			_areaTriggerData = new AreaTriggerFieldData();
 
@@ -69,7 +69,7 @@ namespace Game.Entities
 
 		public override void AddToWorld()
 		{
-			// Register the AreaTrigger for guid lookup and for caster
+			// Register the AreaTrigger for Guid lookup and for caster
 			if (!IsInWorld)
 			{
 				GetMap().GetObjectsStore().Add(GetGUID(), this);
@@ -93,7 +93,7 @@ namespace Game.Entities
 				if (caster)
 					caster._UnregisterAreaTrigger(this);
 
-				// Handle removal of all units, calling OnUnitExit & deleting auras if needed
+				// Handle removal of all units, calling OnUnitExit & deleting Auras if needed
 				HandleUnitEnterExit(new List<Unit>());
 
 				_ai.OnRemove();
@@ -126,7 +126,7 @@ namespace Game.Entities
 
 			if (_areaTriggerCreateProperties == null)
 			{
-				Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (areaTriggerCreatePropertiesId {areaTriggerCreatePropertiesId}) not created. Invalid areatrigger create properties id ({areaTriggerCreatePropertiesId})");
+				Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (areaTriggerCreatePropertiesId {areaTriggerCreatePropertiesId}) not created. Invalid areatrigger create properties Id ({areaTriggerCreatePropertiesId})");
 
 				return false;
 			}
@@ -145,7 +145,7 @@ namespace Game.Entities
 			_shape           = GetCreateProperties().Shape;
 			_maxSearchRadius = GetCreateProperties().GetMaxSearchRadius();
 
-			var areaTriggerData = _values.ModifyValue(_areaTriggerData);
+			var areaTriggerData = Values.ModifyValue(_areaTriggerData);
 			SetUpdateFieldValue(areaTriggerData.ModifyValue(_areaTriggerData.Caster), caster.GetGUID());
 			SetUpdateFieldValue(areaTriggerData.ModifyValue(_areaTriggerData.CreatingEffectGUID), castId);
 
@@ -201,7 +201,7 @@ namespace Game.Entities
 			if (target &&
 			    GetTemplate() != null &&
 			    GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
-				_movementInfo.transport.guid = target.GetGUID();
+				MovementInfo.Transport.Guid = target.GetGUID();
 
 			UpdatePositionData();
 			SetZoneScript();
@@ -219,7 +219,7 @@ namespace Game.Entities
 				    GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
 					orbit.PathTarget = target.GetGUID();
 				else
-					orbit.Center = new Vector3(pos.posX, pos.posY, pos.posZ);
+					orbit.Center = new Vector3(pos.X, pos.Y, pos.Z);
 
 				InitOrbit(orbit, timeToTarget);
 			}
@@ -228,17 +228,17 @@ namespace Game.Entities
 				InitSplineOffsets(GetCreateProperties().SplinePoints, timeToTarget);
 			}
 
-			// movement on transport of areatriggers on unit is handled by themself
-			ITransport transport = _movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
+			// movement on Transport of areatriggers on unit is handled by themself
+			ITransport transport = MovementInfo.Transport.Guid.IsEmpty() ? caster.GetTransport() : null;
 
 			if (transport != null)
 			{
 				float x, y, z, o;
 				pos.GetPosition(out x, out y, out z, out o);
 				transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-				_movementInfo.transport.pos.Relocate(x, y, z, o);
+				MovementInfo.Transport.Pos.Relocate(x, y, z, o);
 
-				// This object must be added to transport before adding to map for the client to properly display it
+				// This object must be added to Transport before adding to map for the client to properly display it
 				transport.AddPassenger(this);
 			}
 
@@ -250,7 +250,7 @@ namespace Game.Entities
 
 			if (!GetMap().AddToMap(this))
 			{
-				// Returning false will cause the object to be deleted - remove from transport
+				// Returning false will cause the object to be deleted - remove from Transport
 				if (transport != null)
 					transport.RemovePassenger(this);
 
@@ -303,7 +303,7 @@ namespace Game.Entities
 
 			if (!IsPositionValid())
 			{
-				Log.outError(LogFilter.AreaTrigger, $"AreaTriggerServer (id {areaTriggerTemplate.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
+				Log.outError(LogFilter.AreaTrigger, $"AreaTriggerServer (Id {areaTriggerTemplate.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
 
 				return false;
 			}
@@ -390,7 +390,7 @@ namespace Game.Entities
 			_totalDuration = newDuration;
 
 			// negative duration (permanent areatrigger) sent as 0
-			SetUpdateFieldValue(_values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.Duration), (uint)Math.Max(newDuration, 0));
+			SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.Duration), (uint)Math.Max(newDuration, 0));
 		}
 
 		private void _UpdateDuration(int newDuration)
@@ -400,7 +400,7 @@ namespace Game.Entities
 			// should be sent in object create packets only
 			DoWithSuppressingObjectUpdates(() =>
 			                               {
-				                               SetUpdateFieldValue(_values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.Duration), (uint)_duration);
+				                               SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.Duration), (uint)_duration);
 				                               _areaTriggerData.ClearChanged(_areaTriggerData.Duration);
 			                               });
 		}
@@ -773,7 +773,7 @@ namespace Game.Entities
 								caster.CastSpell(unit,
 								                 action.Param,
 								                 new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-									                 .SetOriginalCastId(_areaTriggerData.CreatingEffectGUID._value.IsCast() ? _areaTriggerData.CreatingEffectGUID : ObjectGuid.Empty));
+									                 .SetOriginalCastId(_areaTriggerData.CreatingEffectGUID.Value.IsCast() ? _areaTriggerData.CreatingEffectGUID : ObjectGuid.Empty));
 
 								break;
 							case AreaTriggerActionTypes.AddAura:
@@ -842,7 +842,7 @@ namespace Game.Entities
 			// should be sent in object create packets only
 			DoWithSuppressingObjectUpdates(() =>
 			                               {
-				                               SetUpdateFieldValue(_values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.TimeToTarget), timeToTarget);
+				                               SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.TimeToTarget), timeToTarget);
 				                               _areaTriggerData.ClearChanged(_areaTriggerData.TimeToTarget);
 			                               });
 
@@ -875,7 +875,7 @@ namespace Game.Entities
 			// should be sent in object create packets only
 			DoWithSuppressingObjectUpdates(() =>
 			                               {
-				                               SetUpdateFieldValue(_values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.TimeToTarget), timeToTarget);
+				                               SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.TimeToTarget), timeToTarget);
 				                               _areaTriggerData.ClearChanged(_areaTriggerData.TimeToTarget);
 			                               });
 
@@ -927,7 +927,7 @@ namespace Game.Entities
 
 			AreaTriggerOrbitInfo cmi = _orbitInfo;
 
-			// AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
+			// AreaTrigger make exactly "Duration / TimeToTarget" loops during his life Time
 			float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
 
 			// We already made one circle and can't loop
@@ -1063,7 +1063,7 @@ namespace Game.Entities
 			WorldPacket     buffer = new();
 
 			buffer.WriteUInt8((byte)flags);
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_areaTriggerData.WriteCreate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -1075,12 +1075,12 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
+			buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.AreaTrigger))
+			if (Values.HasChanged(TypeId.AreaTrigger))
 				_areaTriggerData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -1101,7 +1101,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.AreaTrigger])
 				_areaTriggerData.WriteUpdate(buffer, requestedAreaTriggerMask, true, this, target);
@@ -1117,7 +1117,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_areaTriggerData);
+			Values.ClearChangesMask(_areaTriggerData);
 			base.ClearUpdateMask(remove);
 		}
 

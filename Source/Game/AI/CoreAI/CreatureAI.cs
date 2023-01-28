@@ -86,7 +86,7 @@ namespace Game.AI
 
 					creature.EngageWithTarget(player);
 
-					foreach (Unit pet in player._Controlled)
+					foreach (Unit pet in player.Controlled)
 						creature.EngageWithTarget(pet);
 
 					Unit vehicle = player.GetVehicleBase();
@@ -130,7 +130,7 @@ namespace Game.AI
 		// Distract creature, if player gets too close while stealthed/prowling
 		public void TriggerAlert(Unit who)
 		{
-			// If there's no target, or target isn't a player do nothing
+			// If there's no Target, or Target isn't a player do nothing
 			if (!who ||
 			    !who.IsTypeId(TypeId.Player))
 				return;
@@ -481,7 +481,7 @@ namespace Game.AI
 		public Creature DoSummonFlyer(uint entry, WorldObject obj, float flightZ, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
 		{
 			Position pos = obj.GetRandomNearPosition(radius);
-			pos.posZ += flightZ;
+			pos.Z += flightZ;
 
 			return me.SummonCreature(entry, pos, summonType, despawnTime);
 		}
@@ -573,7 +573,7 @@ namespace Game.AI
 		{
 		}
 
-		// Called when spell hits a target
+		// Called when spell hits a Target
 		public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
 		{
 		}
@@ -613,12 +613,12 @@ namespace Game.AI
 		{
 		}
 
-		// Called at text emote receive from player
+		// Called at text Emote receive from player
 		public virtual void ReceiveEmote(Player player, TextEmotes emoteId)
 		{
 		}
 
-		// Called when owner takes damage
+		// Called when owner takes Damage
 		public virtual void OwnerAttackedBy(Unit attacker)
 		{
 			OnOwnerCombatInteraction(attacker);

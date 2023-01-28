@@ -9,7 +9,7 @@ using Game.Spells;
 
 namespace Game.AI
 {
-	// default predicate function to select target based on distance, player and/or aura criteria
+	// default predicate function to select Target based on distance, player and/or aura criteria
 	public class DefaultTargetSelector : ICheck<Unit>
 	{
 		private int _aura;
@@ -18,11 +18,11 @@ namespace Game.AI
 		private Unit _me;
 		private bool _playerOnly;
 
-        /// <param name="unit">the reference unit</param>
-        /// <param name="dist">if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit</param>
-        /// <param name="playerOnly">self explaining</param>
-        /// <param name="withTank">allow current tank to be selected</param>
-        /// <param name="aura">if 0: ignored, if > 0: the target shall have the aura, if < 0, the target shall NOT have the aura</param>
+        /// <param Name="unit">the reference unit</param>
+        /// <param Name="dist">if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit</param>
+        /// <param Name="playerOnly">self explaining</param>
+        /// <param Name="withTank">allow current tank to be selected</param>
+        /// <param Name="aura">if 0: ignored, if > 0: the Target shall have the aura, if < 0, the Target shall NOT have the aura</param>
         public DefaultTargetSelector(Unit unit, float dist, bool playerOnly, bool withTank, int aura)
 		{
 			_me         = unit;
@@ -73,7 +73,7 @@ namespace Game.AI
 		}
 	}
 
-	// Target selector for spell casts checking range, auras and attributes
+	// Target selector for spell casts checking range, Auras and attributes
 	// todo Add more checks from Spell.CheckCast
 	public class SpellTargetSelector : ICheck<Unit>
 	{
@@ -160,7 +160,7 @@ namespace Game.AI
 		}
 	}
 
-	// Very simple target selector, will just skip main target
+	// Very simple Target selector, will just skip main Target
 	// NOTE: When passing to UnitAI.SelectTarget remember to use 0 as position for random selection
 	//       because tank will not be in the temporary list
 	public class NonTankTargetSelector : ICheck<Unit>

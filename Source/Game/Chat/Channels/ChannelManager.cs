@@ -46,7 +46,7 @@ namespace Game.Chat
 				DB.Characters.Execute(stmt);
 			}
 
-			SQLResult result = DB.Characters.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels");
+			SQLResult result = DB.Characters.Query("SELECT Name, team, announce, ownership, password, bannedList FROM channels");
 
 			if (result.IsEmpty())
 			{

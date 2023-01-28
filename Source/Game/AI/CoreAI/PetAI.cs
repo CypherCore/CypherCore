@@ -73,7 +73,7 @@ namespace Game.AI
 				    me.GetCharmInfo().IsAtStay())
 				{
 					// Every update we need to check targets only in certain cases
-					// Aggressive - Allow auto select if owner or pet don't have a target
+					// Aggressive - Allow auto select if owner or pet don't have a Target
 					// Stay - Only pick from pet or owner targets / attackers so targets won't run by
 					//   while chasing our owner. Don't do auto select.
 					// All other cases (ie: defensive) - Targets are assigned by DamageTaken(), OwnerAttackedBy(), OwnerAttacked(), etc.
@@ -125,7 +125,7 @@ namespace Game.AI
 						Spell spell     = new(me, spellInfo, TriggerCastFlags.None);
 						bool  spellUsed = false;
 
-						// Some spells can target enemy or friendly (DK Ghoul's Leap)
+						// Some spells can Target enemy or friendly (DK Ghoul's Leap)
 						// Check for enemy first (pet then owner)
 						Unit target = me.GetAttackerForHelper();
 
@@ -145,7 +145,7 @@ namespace Game.AI
 							if (!spellUsed)
 								spell.Dispose();
 
-							continue; // Pets must only jump to target
+							continue; // Pets must only Jump to Target
 						}
 
 						// No enemy, check friendly
@@ -219,10 +219,10 @@ namespace Game.AI
 			    me.GetVictim() != victim)
 				return;
 
-			// Clear target just in case. May help problem where health / focus / mana
+			// Clear Target just in case. May help problem where health / focus / mana
 			// regen gets stuck. Also resets attack command.
 			// Can't use StopAttack() because that activates movement handlers and ignores
-			// next target selection
+			// next Target selection
 			me.AttackStop();
 			me.InterruptNonMeleeSpells(false);
 
@@ -237,7 +237,7 @@ namespace Game.AI
 
 		public override void AttackStart(Unit target)
 		{
-			// Overrides Unit.AttackStart to prevent pet from switching off its assigned target
+			// Overrides Unit.AttackStart to prevent pet from switching off its assigned Target
 			if (target == null ||
 			    target == me)
 				return;
@@ -251,7 +251,7 @@ namespace Game.AI
 
 		public void _AttackStart(Unit target)
 		{
-			// Check all pet states to decide if we can attack this target
+			// Check all pet states to decide if we can attack this Target
 			if (!CanAttack(target))
 				return;
 
@@ -261,7 +261,7 @@ namespace Game.AI
 
 		public override void OwnerAttackedBy(Unit attacker)
 		{
-			// Called when owner takes damage. This function helps keep pets from running off
+			// Called when owner takes Damage. This function helps keep pets from running off
 			//  simply due to owner gaining aggro.
 
 			if (attacker == null ||
@@ -272,7 +272,7 @@ namespace Game.AI
 			if (me.HasReactState(ReactStates.Passive))
 				return;
 
-			// Prevent pet from disengaging from current target
+			// Prevent pet from disengaging from current Target
 			if (me.GetVictim() &&
 			    me.GetVictim().IsAlive())
 				return;
@@ -295,7 +295,7 @@ namespace Game.AI
 			if (me.HasReactState(ReactStates.Passive))
 				return;
 
-			// Prevent pet from disengaging from current target
+			// Prevent pet from disengaging from current Target
 			if (me.GetVictim() &&
 			    me.GetVictim().IsAlive())
 				return;
@@ -306,12 +306,12 @@ namespace Game.AI
 
 		private Unit SelectNextTarget(bool allowAutoSelect)
 		{
-			// Provides next target selection after current target death.
+			// Provides next Target selection after current Target death.
 			// This function should only be called internally by the AI
 			// Targets are not evaluated here for being valid targets, that is done in _CanAttack()
 			// The parameter: allowAutoSelect lets us disable aggressive pet auto targeting for certain situations
 
-			// Passive pets don't do next target selection
+			// Passive pets don't do next Target selection
 			if (me.HasReactState(ReactStates.Passive))
 				return null;
 
@@ -340,9 +340,9 @@ namespace Game.AI
 			if (ownerVictim)
 				return ownerVictim;
 
-			// Neither pet or owner had a target and aggressive pets can pick any target
+			// Neither pet or owner had a Target and aggressive pets can pick any Target
 			// To prevent aggressive pets from chain selecting targets and running off, we
-			//  only select a random target if certain conditions are met.
+			//  only select a random Target if certain conditions are met.
 			if (me.HasReactState(ReactStates.Aggressive) && allowAutoSelect)
 				if (!me.GetCharmInfo().IsReturning() ||
 				    me.GetCharmInfo().IsFollowing() ||
@@ -407,17 +407,17 @@ namespace Game.AI
 				}
 			}
 
-			me.RemoveUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates that we're actively going after a target - we're returning, so remove it
+			me.RemoveUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates that we're actively going after a Target - we're returning, so remove it
 		}
 
 		private void DoAttack(Unit target, bool chase)
 		{
-			// Handles attack with or without chase and also resets flags
+			// Handles attack with or without chase and also resets Flags
 			// for next update / creature kill
 
 			if (me.Attack(target, true))
 			{
-				me.SetUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates we're actively going after a target - that's what we're doing, so set it
+				me.SetUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates we're actively going after a Target - that's what we're doing, so set it
 
 				// Play sound to let the player know the pet is attacking something it picked on its own
 				if (me.HasReactState(ReactStates.Aggressive) &&
@@ -426,7 +426,7 @@ namespace Game.AI
 
 				if (chase)
 				{
-					bool oldCmdAttack = me.GetCharmInfo().IsCommandAttack(); // This needs to be reset after other flags are cleared
+					bool oldCmdAttack = me.GetCharmInfo().IsCommandAttack(); // This needs to be reset after other Flags are cleared
 					ClearCharmInfoFlags();
 					me.GetCharmInfo().SetIsCommandAttack(oldCmdAttack); // For passive pets commanded to attack so they will use spells
 
@@ -459,7 +459,7 @@ namespace Game.AI
 			{
 				case MovementGeneratorType.Point:
 				{
-					// Pet is returning to where stay was clicked. data should be
+					// Pet is returning to where stay was clicked. _data should be
 					// pet's GUIDLow since we set that as the waypoint ID
 					if (id == me.GetGUID().GetCounter() &&
 					    me.GetCharmInfo().IsReturning())
@@ -473,7 +473,7 @@ namespace Game.AI
 				}
 				case MovementGeneratorType.Follow:
 				{
-					// If data is owner's GUIDLow then we've reached follow point,
+					// If _data is owner's GUIDLow then we've reached follow point,
 					// otherwise we're probably chasing a creature
 					if (me.GetCharmerOrOwner() &&
 					    me.GetCharmInfo() != null &&
@@ -493,7 +493,7 @@ namespace Game.AI
 
 		public bool CanAttack(Unit victim)
 		{
-			// Evaluates wether a pet can attack a specific target based on CommandState, ReactState and other flags
+			// Evaluates wether a pet can attack a specific Target based on CommandState, ReactState and other Flags
 			// IMPORTANT: The order in which things are checked is important, be careful if you add or remove checks
 
 			// Hmmm...
@@ -501,8 +501,8 @@ namespace Game.AI
 				return false;
 
 			if (!victim.IsAlive())
-				// if target is invalid, pet should evade automaticly
-				// Clear target to prevent getting stuck on dead targets
+				// if Target is invalid, pet should evade automaticly
+				// Clear Target to prevent getting stuck on dead targets
 				//me.AttackStop();
 				//me.InterruptNonMeleeSpells(false);
 				return false;
@@ -526,7 +526,7 @@ namespace Game.AI
 			if (me.GetCharmInfo().IsReturning())
 				return !me.GetCharmInfo().IsCommandFollow();
 
-			// Stay - can attack if target is within range or commanded to
+			// Stay - can attack if Target is within range or commanded to
 			if (me.GetCharmInfo().HasCommandState(CommandStates.Stay))
 				return (me.IsWithinMeleeRange(victim) || me.GetCharmInfo().IsCommandAttack());
 
@@ -534,7 +534,7 @@ namespace Game.AI
 			if (me.GetVictim() &&
 			    me.GetVictim() != victim)
 			{
-				// Check if our owner selected this target and clicked "attack"
+				// Check if our owner selected this Target and clicked "attack"
 				Unit   ownerTarget;
 				Player owner = me.GetCharmerOrOwner().ToPlayer();
 
@@ -591,7 +591,7 @@ namespace Game.AI
 
 		private bool NeedToStop()
 		{
-			// This is needed for charmed creatures, as once their target was reset other effects can trigger threat
+			// This is needed for charmed creatures, as once their Target was reset other effects can trigger threat
 			if (me.IsCharmed() &&
 			    me.GetVictim() == me.GetCharmer())
 				return true;
@@ -644,7 +644,7 @@ namespace Game.AI
 			    !group)
 				return;
 
-			// owner is in group; group members filled in already (no raid . subgroupcount = whole count)
+			// owner is in group; group members filled in already (no raid . subgroupcount = whole Count)
 			if (group &&
 			    !group.IsRaidGroup() &&
 			    _allySet.Count == (group.GetMembersCount() + 2))
@@ -682,7 +682,7 @@ namespace Game.AI
 		}
 
         /// <summary>
-        ///  Quick access to set all flags to FALSE
+        ///  Quick access to set all Flags to FALSE
         /// </summary>
         private void ClearCharmInfoFlags()
 		{

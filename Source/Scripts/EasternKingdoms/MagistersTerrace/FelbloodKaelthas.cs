@@ -180,7 +180,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
 		public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
 		{
-			// Checking for lethal damage first so we trigger the outro phase without triggering phase two in case of oneshot attacks
+			// Checking for lethal Damage first so we trigger the outro phase without triggering phase two in case of oneshot attacks
 			if (damage >= me.GetHealth() &&
 			    _phase != Phase.Outro)
 			{
@@ -306,7 +306,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 				{
 					DoCast(unitTarget, MiscConst.GravityLapseTeleportSpells[_gravityLapseTargetCount], new CastSpellExtraArgs(true));
 
-					target._Events.AddEventAtOffset(() =>
+					target.Events.AddEventAtOffset(() =>
 					                                {
 						                                target.CastSpell(target, DungeonMode(SpellIds.GravityLapse, SpellIds.HGravityLapse));
 						                                target.CastSpell(target, SpellIds.GravityLapseFly);

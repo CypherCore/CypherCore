@@ -569,7 +569,7 @@ namespace Game.Chat.Commands
 				return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
 			}
 
-			[Command("id", RBACPermissions.CommandGo)]
+			[Command("Id", RBACPermissions.CommandGo)]
 			private static bool HandleGoCreatureCIdCommand(CommandHandler handler, uint id)
 			{
 				CreatureData spawnpoint = null;
@@ -620,7 +620,7 @@ namespace Game.Chat.Commands
 				return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
 			}
 
-			[Command("id", RBACPermissions.CommandGo)]
+			[Command("Id", RBACPermissions.CommandGo)]
 			private static bool HandleGoGameObjectGOIdCommand(CommandHandler handler, uint goId)
 			{
 				GameObjectData spawnpoint = null;

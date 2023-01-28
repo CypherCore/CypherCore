@@ -63,7 +63,7 @@ namespace Game.Chat
 						return true;
 					}
 
-					// send area in "id - [name]" format
+					// send area in "Id - [Name]" format
 					string ss = "";
 
 					if (handler.GetSession() != null)
@@ -258,8 +258,8 @@ namespace Game.Chat
 						return true;
 					}
 
-					// send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
-					// or              "id - [faction] [no reputation]" format
+					// send faction in "Id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
+					// or              "Id - [faction] [no reputation]" format
 					StringBuilder ss = new();
 
 					if (handler.GetSession() != null)
@@ -267,7 +267,7 @@ namespace Game.Chat
 					else
 						ss.Append(factionEntry.Id + " - " + name);
 
-					if (factionState != null) // and then target != NULL also
+					if (factionState != null) // and then Target != NULL also
 					{
 						uint   index    = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
 						string rankName = handler.GetCypherString((CypherStrings)index);
@@ -356,7 +356,7 @@ namespace Game.Chat
 						return true;
 					}
 
-					// send Item set in "id - [namedlink locale]" format
+					// send Item set in "Id - [namedlink locale]" format
 					if (handler.GetSession() != null)
 						handler.SendSysMessage(CypherStrings.ItemsetListChat, set.Id, set.Id, name, "");
 					else
@@ -508,7 +508,7 @@ namespace Game.Chat
 						valStr = string.Format(valFormat, curValue, maxValue, permValue, tempValue);
 					}
 
-					// send skill in "id - [namedlink locale]" format
+					// send skill in "Id - [namedlink locale]" format
 					if (handler.GetSession() != null)
 						handler.SendSysMessage(CypherStrings.SkillListChat, skillInfo.Id, skillInfo.Id, name, "", knownStr, valStr);
 					else
@@ -551,7 +551,7 @@ namespace Game.Chat
 					return true;
 				}
 
-				// send taxinode in "id - [name] (Map:m X:x Y:y Z:z)" format
+				// send taxinode in "Id - [Name] (Map:m X:x Y:y Z:z)" format
 				if (handler.GetSession() != null)
 					handler.SendSysMessage(CypherStrings.TaxinodeEntryListChat,
 					                       nodeEntry.Id,
@@ -627,7 +627,7 @@ namespace Game.Chat
 			// can be NULL in console call
 			Player target = handler.GetSelectedPlayer();
 
-			// title name have single string arg for player name
+			// title Name have single string arg for player Name
 			string targetName = target ? target.GetName() : "NAME";
 
 			uint counter = 0; // Counter for figure out that we found smth.
@@ -682,7 +682,7 @@ namespace Game.Chat
 
 						string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
 
-						// send title in "id (idx:idx) - [namedlink locale]" format
+						// send title in "Id (idx:idx) - [namedlink locale]" format
 						if (handler.GetSession() != null)
 							handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleNameStr, "", knownStr, activeStr);
 						else
@@ -743,7 +743,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("id", RBACPermissions.CommandLookupItemId, true)]
+			[Command("Id", RBACPermissions.CommandLookupItemId, true)]
 			private static bool HandleLookupItemIdCommand(CommandHandler handler, uint id)
 			{
 				ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(id);
@@ -820,7 +820,7 @@ namespace Game.Chat
 							return true;
 						}
 
-						// send Item set in "id - [namedlink locale]" format
+						// send Item set in "Id - [namedlink locale]" format
 						if (handler.GetSession())
 							handler.SendSysMessage(CypherStrings.ItemsetListChat, id, id, name, "");
 						else
@@ -926,7 +926,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("id", RBACPermissions.CommandLookupMapId, true)]
+			[Command("Id", RBACPermissions.CommandLookupMapId, true)]
 			private static bool HandleLookupMapIdCommand(CommandHandler handler, uint id)
 			{
 				var mapInfo = CliDB.MapStorage.LookupByKey(id);
@@ -1256,7 +1256,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("id", RBACPermissions.CommandLookupQuestId, true)]
+			[Command("Id", RBACPermissions.CommandLookupQuestId, true)]
 			private static bool HandleLookupQuestIdCommand(CommandHandler handler, uint id)
 			{
 				// can be NULL at console call
@@ -1401,7 +1401,7 @@ namespace Game.Chat
 							// find rank of learned spell for learning spell, or talent rank
 							uint rank = learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
-							// send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
+							// send spell in "Id - [Name, rank N] [talent] [passive] [learn] [known]" format
 							StringBuilder ss = new();
 
 							if (handler.GetSession() != null)
@@ -1409,7 +1409,7 @@ namespace Game.Chat
 							else
 								ss.Append(spellInfo.Id + " - " + name);
 
-							// include rank in link name
+							// include rank in link Name
 							if (rank != 0)
 								ss.Append(handler.GetCypherString(CypherStrings.SpellRank) + rank);
 
@@ -1445,7 +1445,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("id", RBACPermissions.CommandLookupSpellId)]
+			[Command("Id", RBACPermissions.CommandLookupSpellId)]
 			private static bool HandleLookupSpellIdCommand(CommandHandler handler, uint id)
 			{
 				// can be NULL at console call
@@ -1478,7 +1478,7 @@ namespace Game.Chat
 					// find rank of learned spell for learning spell, or talent rank
 					uint rank = learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
-					// send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
+					// send spell in "Id - [Name, rank N] [talent] [passive] [learn] [known]" format
 					StringBuilder ss = new();
 
 					if (handler.GetSession() != null)
@@ -1486,7 +1486,7 @@ namespace Game.Chat
 					else
 						ss.Append(id + " - " + name);
 
-					// include rank in link name
+					// include rank in link Name
 					if (rank != 0)
 						ss.Append(handler.GetCypherString(CypherStrings.SpellRank) + rank);
 

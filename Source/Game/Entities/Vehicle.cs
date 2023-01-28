@@ -30,9 +30,9 @@ namespace Game.Entities
 
 		private List<VehicleJoinEvent> _pendingJoinEvents = new();
 		private Status _status;             //< Internal variable for sanity checks
-		private VehicleRecord _vehicleInfo; //< DBC data for vehicle
+		private VehicleRecord _vehicleInfo; //< DBC _data for vehicle
 		public Dictionary<sbyte, VehicleSeat> Seats = new();
-		public uint UsableSeatNum; //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display flags
+		public uint UsableSeatNum; //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display Flags
 
 		public Vehicle(Unit unit, VehicleRecord vehInfo, uint creatureEntry)
 		{
@@ -60,7 +60,7 @@ namespace Game.Entities
 				}
 			}
 
-			// Set or remove correct flags based on available seats. Will overwrite db data (if wrong).
+			// Set or remove correct Flags based on available seats. Will overwrite db _data (if wrong).
 			if (UsableSeatNum != 0)
 				_me.SetNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 			else
@@ -92,7 +92,7 @@ namespace Game.Entities
 			Cypher.Assert(seat.Value != null);
 
 			Log.outDebug(LogFilter.Vehicle,
-			             "Unit {0} exit vehicle entry {1} id {2} dbguid {3} seat {4}",
+			             "Unit {0} exit vehicle entry {1} Id {2} dbguid {3} Seat {4}",
 			             unit.GetName(),
 			             _me.GetEntry(),
 			             _vehicleInfo.Id,
@@ -121,7 +121,7 @@ namespace Game.Entities
 				_me.RemoveCharmedBy(unit);
 
 			if (_me.IsInWorld)
-				unit._movementInfo.ResetTransport();
+				unit.MovementInfo.ResetTransport();
 
 			// only for flyable vehicles
 			if (unit.IsFlying())
@@ -151,7 +151,7 @@ namespace Game.Entities
 
 		public void AddPassenger(WorldObject passenger)
 		{
-			Log.outFatal(LogFilter.Vehicle, "Vehicle cannot directly gain passengers without auras");
+			Log.outFatal(LogFilter.Vehicle, "Vehicle cannot directly gain passengers without Auras");
 		}
 
 		public void CalculatePassengerPosition(ref float x, ref float y, ref float z, ref float o)
@@ -273,7 +273,7 @@ namespace Game.Entities
 				_me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
 				_me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
 
-				// ... Resistance, Split damage, Change Stats ...
+				// ... Resistance, Split Damage, Change Stats ...
 				_me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);
 				_me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SplitDamagePct, true);
 				_me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModResistance, true);
@@ -326,7 +326,7 @@ namespace Game.Entities
 			}
 
 			// Passengers always cast an aura with SPELL_AURA_CONTROL_VEHICLE on the vehicle
-			// We just remove the aura and the unapply handler will make the target leave the vehicle.
+			// We just remove the aura and the unapply handler will make the Target leave the vehicle.
 			// We don't need to iterate over Seats
 			_me.RemoveAurasByType(AuraType.ControlVehicle);
 		}
@@ -386,10 +386,10 @@ namespace Game.Entities
 		}
 
         /// <summary>
-        ///  Gets the vehicle seat addon data for the seat of a passenger
+        ///  Gets the vehicle Seat addon _data for the Seat of a passenger
         /// </summary>
-        /// <param name="passenger">Identifier for the current seat user</param>
-        /// <returns>The seat addon data for the currently used seat of a passenger</returns>
+        /// <param Name="passenger">Identifier for the current Seat user</param>
+        /// <returns>The Seat addon _data for the currently used Seat of a passenger</returns>
         public VehicleSeatAddon GetSeatAddonForSeatOfPassenger(Unit passenger)
 		{
 			foreach (var pair in Seats)
@@ -407,7 +407,7 @@ namespace Game.Entities
 			if (_status == Status.UnInstalling)
 			{
 				Log.outError(LogFilter.Vehicle,
-				             "Vehicle ({0}, Entry: {1}) attempts to install accessory (Entry: {2}) on seat {3} with STATUS_UNINSTALLING! " +
+				             "Vehicle ({0}, Entry: {1}) attempts to install accessory (Entry: {2}) on Seat {3} with STATUS_UNINSTALLING! " +
 				             "Check Uninstall/PassengerBoarded script hooks for errors.",
 				             _me.GetGUID().ToString(),
 				             GetCreatureEntry(),
@@ -417,7 +417,7 @@ namespace Game.Entities
 				return;
 			}
 
-			Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
+			Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on Seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
 
 			TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
 			Cypher.Assert(accessory);
@@ -448,7 +448,7 @@ namespace Game.Entities
 			}
 
 			Log.outDebug(LogFilter.Vehicle,
-			             "Unit {0} scheduling enter vehicle (entry: {1}, vehicleId: {2}, guid: {3} (dbguid: {4}) on seat {5}",
+			             "Unit {0} scheduling enter vehicle (entry: {1}, VehicleId: {2}, Guid: {3} (dbguid: {4}) on Seat {5}",
 			             unit.GetName(),
 			             _me.GetEntry(),
 			             _vehicleInfo.Id,
@@ -456,16 +456,16 @@ namespace Game.Entities
 			             (_me.IsTypeId(TypeId.Unit) ? _me.ToCreature().GetSpawnId() : 0),
 			             seatId);
 
-			// The seat selection code may kick other passengers off the vehicle.
+			// The Seat selection code may kick other passengers off the vehicle.
 			// While the validity of the following may be arguable, it is possible that when such a passenger
 			// exits the vehicle will dismiss. That's why the actual adding the passenger to the vehicle is scheduled
 			// asynchronously, so it can be cancelled easily in case the vehicle is uninstalled meanwhile.
 			VehicleJoinEvent e = new(this, unit);
-			unit._Events.AddEvent(e, unit._Events.CalculateTime(TimeSpan.Zero));
+			unit.Events.AddEvent(e, unit.Events.CalculateTime(TimeSpan.Zero));
 
 			KeyValuePair<sbyte, VehicleSeat> seat = new();
 
-			if (seatId < 0) // no specific seat requirement
+			if (seatId < 0) // no specific Seat requirement
 			{
 				foreach (var _seat in Seats)
 				{
@@ -477,7 +477,7 @@ namespace Game.Entities
 						break;
 				}
 
-				if (seat.Value == null) // no available seat
+				if (seat.Value == null) // no available Seat
 				{
 					e.ScheduleAbort();
 
@@ -530,7 +530,7 @@ namespace Game.Entities
 					Cypher.Assert(passenger.IsInWorld);
 
 					float px, py, pz, po;
-					passenger._movementInfo.transport.pos.GetPosition(out px, out py, out pz, out po);
+					passenger.MovementInfo.Transport.Pos.GetPosition(out px, out py, out pz, out po);
 					CalculatePassengerPosition(ref px, ref py, ref pz, ref po);
 
 					seatRelocation.Add(Tuple.Create(passenger, new Position(px, py, pz, po)));
@@ -677,7 +677,7 @@ namespace Game.Entities
 			StringBuilder str = new StringBuilder("Vehicle seats:\n");
 
 			foreach (var (id, seat) in Seats)
-				str.Append($"seat {id}: {(seat.IsEmpty() ? "empty" : seat.Passenger.Guid)}\n");
+				str.Append($"Seat {id}: {(seat.IsEmpty() ? "empty" : seat.Passenger.Guid)}\n");
 
 			str.Append("Vehicle pending events:");
 
@@ -690,7 +690,7 @@ namespace Game.Entities
 				str.Append("\n");
 
 				foreach (var joinEvent in _pendingJoinEvents)
-					str.Append($"seat {joinEvent.Seat.Key}: {joinEvent.Passenger.GetGUID()}\n");
+					str.Append($"Seat {joinEvent.Seat.Key}: {joinEvent.Passenger.GetGUID()}\n");
 			}
 
 			return str.ToString();
@@ -810,10 +810,10 @@ namespace Game.Entities
 			float y = veSeat.AttachmentOffset.Y;
 			float z = veSeat.AttachmentOffset.Z;
 
-			Passenger._movementInfo.transport.pos.Relocate(x, y, z, o);
-			Passenger._movementInfo.transport.time = 0;
-			Passenger._movementInfo.transport.seat = Seat.Key;
-			Passenger._movementInfo.transport.guid = Target.GetBase().GetGUID();
+			Passenger.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
+			Passenger.MovementInfo.Transport.Time = 0;
+			Passenger.MovementInfo.Transport.Seat = Seat.Key;
+			Passenger.MovementInfo.Transport.Guid = Target.GetBase().GetGUID();
 
 			if (Target.GetBase().IsTypeId(TypeId.Unit) &&
 			    Passenger.IsTypeId(TypeId.Player) &&
@@ -865,7 +865,7 @@ namespace Game.Entities
 
 		public override void Abort(ulong e_time)
 		{
-			// Check if the Vehicle was already uninstalled, in which case all auras were removed already
+			// Check if the Vehicle was already uninstalled, in which case all Auras were removed already
 			if (Target != null)
 			{
 				Log.outDebug(LogFilter.Vehicle,
@@ -879,7 +879,7 @@ namespace Game.Entities
 				// Remove the pending event when Abort was called on the event directly
 				Target.RemovePendingEvent(this);
 
-				// @SPELL_AURA_CONTROL_VEHICLE auras can be applied even when the passenger is not (yet) on the vehicle.
+				// @SPELL_AURA_CONTROL_VEHICLE Auras can be applied even when the passenger is not (yet) on the vehicle.
 				// When this code is triggered it means that something went wrong in @Vehicle.AddPassenger, and we should remove
 				// the aura manually.
 				Target.GetBase().RemoveAurasByType(AuraType.ControlVehicle, Passenger.GetGUID());

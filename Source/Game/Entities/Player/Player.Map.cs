@@ -126,7 +126,7 @@ namespace Game.Entities
 
 		private void UpdateArea(uint newArea)
 		{
-			// FFA_PVP flags are area and not zone id dependent
+			// FFA_PVP Flags are area and not zone Id dependent
 			// so apply them accordingly
 			_areaUpdateId = newArea;
 
@@ -191,7 +191,7 @@ namespace Game.Entities
 
 			GetMap().UpdatePlayerZoneStats(oldZone, newZone);
 
-			// call leave script hooks immedately (before updating flags)
+			// call leave script hooks immedately (before updating Flags)
 			if (oldZone != newZone)
 			{
 				Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, oldZone);
@@ -345,7 +345,7 @@ namespace Game.Entities
 
 		public void SetOverrideZonePVPType(ZonePVPTypeOverride type)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.OverrideZonePVPType), (uint)type);
+			SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.OverrideZonePVPType), (uint)type);
 		}
 
 		public void ConfirmPendingBind()
@@ -678,7 +678,7 @@ namespace Game.Entities
 
 		public override void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
 		{
-			// process liquid auras using generic unit code
+			// process liquid Auras using generic unit code
 			base.ProcessTerrainStatusUpdate(oldLiquidStatus, newLiquidData);
 
 			_mirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
@@ -692,7 +692,7 @@ namespace Game.Entities
 					if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.UnderWater))
 						_mirrorTimerFlags |= PlayerUnderwaterState.InWater;
 
-				// Fatigue bar State (if not on flight path or transport)
+				// Fatigue bar State (if not on flight path or Transport)
 				if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) &&
 				    !IsInFlight() &&
 				    GetTransport() == null)

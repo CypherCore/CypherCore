@@ -28,8 +28,8 @@ namespace Game.Entities
 			ObjectTypeMask |= TypeMask.GameObject;
 			ObjectTypeId   =  TypeId.GameObject;
 
-			_updateFlag.Stationary = true;
-			_updateFlag.Rotation   = true;
+			UpdateFlag.Stationary = true;
+			UpdateFlag.Rotation   = true;
 
 			_respawnDelayTime = 300;
 			_despawnDelay     = 0;
@@ -110,11 +110,11 @@ namespace Game.Entities
 
 		public override void AddToWorld()
 		{
-			//- Register the gameobject for guid lookup
+			//- Register the gameobject for Guid lookup
 			if (!IsInWorld)
 			{
-				if (_zoneScript != null)
-					_zoneScript.OnGameObjectCreate(this);
+				if (ZoneScript != null)
+					ZoneScript.OnGameObjectCreate(this);
 
 				GetMap().GetObjectsStore().Add(GetGUID(), this);
 
@@ -144,8 +144,8 @@ namespace Game.Entities
 			//- Remove the gameobject from the accessor
 			if (IsInWorld)
 			{
-				if (_zoneScript != null)
-					_zoneScript.OnGameObjectRemove(this);
+				if (ZoneScript != null)
+					ZoneScript.OnGameObjectRemove(this);
 
 				RemoveFromOwner();
 
@@ -203,7 +203,7 @@ namespace Game.Entities
 
 			if (!IsPositionValid())
 			{
-				Log.outError(LogFilter.Server, "Gameobject (Spawn id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
+				Log.outError(LogFilter.Server, "Gameobject (Spawn Id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
 
 				return false;
 			}
@@ -216,9 +216,9 @@ namespace Game.Entities
 
 			SetZoneScript();
 
-			if (_zoneScript != null)
+			if (ZoneScript != null)
 			{
-				entry = _zoneScript.GetGameObjectEntry(_spawnId, entry);
+				entry = ZoneScript.GetGameObjectEntry(_spawnId, entry);
 
 				if (entry == 0)
 					return false;
@@ -228,14 +228,14 @@ namespace Game.Entities
 
 			if (goInfo == null)
 			{
-				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing entry in `gameobject_template`. Map: {2} (X: {3} Y: {4} Z: {5})", GetSpawnId(), entry, map.GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+				Log.outError(LogFilter.Sql, "Gameobject (Spawn Id: {0} Entry: {1}) not created: non-existing entry in `gameobject_template`. Map: {2} (X: {3} Y: {4} Z: {5})", GetSpawnId(), entry, map.GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
 
 				return false;
 			}
 
 			if (goInfo.type == GameObjectTypes.MapObjTransport)
 			{
-				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject Type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
+				Log.outError(LogFilter.Sql, "Gameobject (Spawn Id: {0} Entry: {1}) not created: gameobject Type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
 
 				return false;
 			}
@@ -249,7 +249,7 @@ namespace Game.Entities
 			else
 			{
 				guid                   = ObjectGuid.Create(HighGuid.Transport, map.GenerateLowGuid(HighGuid.Transport));
-				_updateFlag.ServerTime = true;
+				UpdateFlag.ServerTime = true;
 			}
 
 			_Create(guid);
@@ -259,7 +259,7 @@ namespace Game.Entities
 
 			if (goInfo.type >= GameObjectTypes.Max)
 			{
-				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO Type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
+				Log.outError(LogFilter.Sql, "Gameobject (Spawn Id: {0} Entry: {1}) not created: non-existing GO Type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
 
 				return false;
 			}
@@ -289,7 +289,7 @@ namespace Game.Entities
 			{
 				if (_goTemplateAddon.WorldEffectID != 0)
 				{
-					_updateFlag.GameObject = true;
+					UpdateFlag.GameObject = true;
 					SetWorldEffectID(_goTemplateAddon.WorldEffectID);
 				}
 
@@ -299,7 +299,7 @@ namespace Game.Entities
 
 			SetEntry(goInfo.entry);
 
-			// set name for logs usage, doesn't affect anything ingame
+			// set Name for logs usage, doesn't affect anything ingame
 			SetName(goInfo.name);
 
 			SetDisplayId(goInfo.displayId);
@@ -312,7 +312,7 @@ namespace Game.Entities
 			SetGoState(goState);
 			SetGoArtKit(artKit);
 
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 
 			switch (goInfo.type)
 			{
@@ -326,7 +326,7 @@ namespace Game.Entities
 					_goValue.Building.MaxHealth = _goValue.Building.Health;
 					SetGoAnimProgress(255);
 					// yes, even after the updatefield rewrite this garbage hack is still in client
-					SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.ParentRotation), new Quaternion(goInfo.DestructibleBuilding.DestructibleModelRec, 0f, 0f, 0f));
+					SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.ParentRotation), new Quaternion(goInfo.DestructibleBuilding.DestructibleModelRec, 0f, 0f, 0f));
 
 					break;
 				case GameObjectTypes.Transport:
@@ -349,14 +349,14 @@ namespace Game.Entities
 				case GameObjectTypes.Trap:
 					if (goInfo.Trap.stealthed != 0)
 					{
-						_stealth.AddFlag(StealthType.Trap);
-						_stealth.AddValue(StealthType.Trap, 70);
+						Stealth.AddFlag(StealthType.Trap);
+						Stealth.AddValue(StealthType.Trap, 70);
 					}
 
 					if (goInfo.Trap.stealthAffected != 0)
 					{
-						_invisibility.AddFlag(InvisibilityType.Trap);
-						_invisibility.AddValue(InvisibilityType.Trap, 300);
+						Invisibility.AddFlag(InvisibilityType.Trap);
+						Invisibility.AddValue(InvisibilityType.Trap, 300);
 					}
 
 					break;
@@ -366,7 +366,7 @@ namespace Game.Entities
 
 					break;
 				case GameObjectTypes.CapturePoint:
-					SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpellVisualID), _goInfo.CapturePoint.SpellVisual1);
+					SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpellVisualID), _goInfo.CapturePoint.SpellVisual1);
 					_goValue.CapturePoint.AssaultTimer    = 0;
 					_goValue.CapturePoint.LastTeamCapture = TeamId.Neutral;
 					_goValue.CapturePoint.State           = BattlegroundCapturePointState.Neutral;
@@ -383,13 +383,13 @@ namespace Game.Entities
 			{
 				if (gameObjectAddon.invisibilityValue != 0)
 				{
-					_invisibility.AddFlag(gameObjectAddon.invisibilityType);
-					_invisibility.AddValue(gameObjectAddon.invisibilityType, gameObjectAddon.invisibilityValue);
+					Invisibility.AddFlag(gameObjectAddon.invisibilityType);
+					Invisibility.AddValue(gameObjectAddon.invisibilityType, gameObjectAddon.invisibilityValue);
 				}
 
 				if (gameObjectAddon.WorldEffectID != 0)
 				{
-					_updateFlag.GameObject = true;
+					UpdateFlag.GameObject = true;
 					SetWorldEffectID(gameObjectAddon.WorldEffectID);
 				}
 
@@ -435,7 +435,7 @@ namespace Game.Entities
 
 		public override void Update(uint diff)
 		{
-			_Events.Update(diff);
+			Events.Update(diff);
 
 			base.Update(diff);
 
@@ -582,7 +582,7 @@ namespace Game.Entities
 									if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
 										SetRespawnTime(Time.Week);
 									else
-										_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
+										_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy Time from master and add a little
 
 									SaveRespawnTime();
 
@@ -619,7 +619,7 @@ namespace Game.Entities
 
 										break;
 									case GameObjectTypes.FishingHole:
-										// Initialize a new max fish count on respawn
+										// Initialize a new max fish Count on respawn
 										_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
 
 										break;
@@ -635,7 +635,7 @@ namespace Game.Entities
 									return;
 								}
 
-								// Call AI Reset (required for example in SmartAI to clear one time events)
+								// Call AI Reset (required for example in SmartAI to clear one Time events)
 								if (GetAI() != null)
 									GetAI().Reset();
 
@@ -808,7 +808,7 @@ namespace Game.Entities
 							foreach (var (_, loot) in _personalLoot)
 								loot.Update();
 
-							// Non-consumable chest was partially looted and restock time passed, restock all loot now
+							// Non-consumable chest was partially looted and restock Time passed, restock all loot now
 							if (GetGoInfo().Chest.consumable == 0 &&
 							    GetGoInfo().Chest.chestRestockTime != 0 &&
 							    GameTime.GetGameTime() >= _restockTime)
@@ -828,7 +828,7 @@ namespace Game.Entities
 							if (goInfo.Trap.charges == 2 &&
 							    goInfo.Trap.spell != 0)
 							{
-								//todo NULL target won't work for target Type 1
+								//todo NULL Target won't work for Target Type 1
 								CastSpell(null, goInfo.Trap.spell);
 								SetLootState(LootState.JustDeactivated);
 							}
@@ -901,7 +901,7 @@ namespace Game.Entities
 							_usetimes = 0;
 						}
 
-						// Only goobers with a lock id or a reset time may reset their go State
+						// Only goobers with a lock Id or a reset Time may reset their go State
 						if (GetGoInfo().GetLockId() != 0 ||
 						    GetGoInfo().GetAutoCloseTime() != 0)
 							SetGoState(GameObjectState.Ready);
@@ -951,12 +951,12 @@ namespace Game.Entities
 
 					SetLootState(LootState.NotReady);
 
-					//burning flags in some Battlegrounds, if you find better condition, just add it
+					//burning Flags in some Battlegrounds, if you find better condition, just add it
 					if (GetGoInfo().IsDespawnAtAction() ||
 					    GetGoAnimProgress() > 0)
 					{
 						SendGameObjectDespawn();
-						//reset flags
+						//reset Flags
 						GameObjectOverride goOverride = GetGameObjectOverride();
 
 						if (goOverride != null)
@@ -987,7 +987,7 @@ namespace Game.Entities
 					_respawnTime = GameTime.GetGameTime() + respawnDelay;
 
 					// if option not set then object will be saved at grid unload
-					// Otherwise just save respawn time to map object memory
+					// Otherwise just save respawn Time to map object memory
 					SaveRespawnTime();
 
 					if (_respawnCompatibilityMode)
@@ -1151,7 +1151,7 @@ namespace Game.Entities
 
 			if (data == null)
 			{
-				Log.outError(LogFilter.Maps, "GameObject.SaveToDB failed, cannot get gameobject data!");
+				Log.outError(LogFilter.Maps, "GameObject.SaveToDB failed, cannot get gameobject _data!");
 
 				return;
 			}
@@ -1176,7 +1176,7 @@ namespace Game.Entities
 			if (_spawnId == 0)
 				_spawnId = Global.ObjectMgr.GenerateGameObjectSpawnId();
 
-			// update in loaded data (changing data only in this place)
+			// update in loaded _data (changing _data only in this place)
 			GameObjectData data = Global.ObjectMgr.NewOrExistGameObjectData(_spawnId);
 
 			if (data.SpawnId == 0)
@@ -1323,7 +1323,7 @@ namespace Game.Entities
 				                                    map.RemoveRespawnTime(SpawnObjectType.GameObject, spawnId, trans);
 			                                    });
 
-			// delete data from memory
+			// delete _data from memory
 			Global.ObjectMgr.DeleteGameObjectData(spawnId);
 
 			trans = new SQLTransaction();
@@ -1378,7 +1378,7 @@ namespace Game.Entities
 
 		public bool IsTransport()
 		{
-			// If something is marked as a transport, don't transmit an out of range packet for it.
+			// If something is marked as a Transport, don't transmit an out of range packet for it.
 			GameObjectTemplate gInfo = GetGoInfo();
 
 			if (gInfo == null)
@@ -1387,10 +1387,10 @@ namespace Game.Entities
 			return gInfo.type == GameObjectTypes.Transport || gInfo.type == GameObjectTypes.MapObjTransport;
 		}
 
-		// is Dynamic transport = non-stop Transport
+		// is Dynamic Transport = non-stop Transport
 		public bool IsDynTransport()
 		{
-			// If something is marked as a transport, don't transmit an out of range packet for it.
+			// If something is marked as a Transport, don't transmit an out of range packet for it.
 			GameObjectTemplate gInfo = GetGoInfo();
 
 			if (gInfo == null)
@@ -1741,7 +1741,7 @@ namespace Game.Entities
 					if (GetGoType() == GameObjectTypes.Transport)
 						SetGoState((GameObjectState)action);
 					else
-						Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-transport gameobject for transport only Action \"Go to Floor\" {action} in effect {effectIndex}");
+						Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-Transport gameobject for Transport only Action \"Go to Floor\" {action} in effect {effectIndex}");
 
 					break;
 				case GameObjectActions.PlayAnimKit:
@@ -1797,7 +1797,7 @@ namespace Game.Entities
 
 		public void SetGoArtKit(uint kit)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.ArtKit), kit);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.ArtKit), kit);
 			GameObjectData data = Global.ObjectMgr.GetGameObjectData(_spawnId);
 
 			if (data != null)
@@ -1859,7 +1859,7 @@ namespace Game.Entities
 					return;
 			}
 
-			// If cooldown data present in template
+			// If cooldown _data present in template
 			uint cooldown = GetGoInfo().GetCooldown();
 
 			if (cooldown != 0)
@@ -1874,7 +1874,7 @@ namespace Game.Entities
 			{
 				case GameObjectTypes.Door:   //0
 				case GameObjectTypes.Button: //1
-					//doors/buttons never really despawn, only reset to default State/flags
+					//doors/buttons never really despawn, only reset to default State/Flags
 					UseDoorOrButton(0, false, user);
 
 					return;
@@ -2074,13 +2074,13 @@ namespace Game.Entities
 								if (chairUser.IsSitState() &&
 								    chairUser.GetStandState() != UnitStandStateType.Sit &&
 								    chairUser.GetExactDist2d(x_i, y_i) < 0.1f)
-									continue; // This seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.
+									continue; // This Seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.
 
-								ChairListSlots[slot].Clear(); // This seat is unoccupied.
+								ChairListSlots[slot].Clear(); // This Seat is unoccupied.
 							}
 							else
 							{
-								ChairListSlots[slot].Clear(); // The seat may of had an occupant, but they're offline.
+								ChairListSlots[slot].Clear(); // The Seat may of had an occupant, but they're offline.
 							}
 						}
 
@@ -2149,7 +2149,7 @@ namespace Game.Entities
 
 						if (info.Goober.eventID != 0)
 						{
-							Log.outDebug(LogFilter.Scripts, "Goober ScriptStart id {0} for GO entry {1} (GUID {2}).", info.Goober.eventID, GetEntry(), GetSpawnId());
+							Log.outDebug(LogFilter.Scripts, "Goober ScriptStart Id {0} for GO entry {1} (GUID {2}).", info.Goober.eventID, GetEntry(), GetSpawnId());
 							GameEvents.Trigger(info.Goober.eventID, player, this);
 						}
 
@@ -2396,7 +2396,7 @@ namespace Game.Entities
 
 						// Cast casterTargetSpell at a random GO user
 						// on the current DB there is only one gameobject that uses this (Ritual of Doom)
-						// and its required target number is 1 (outter for loop will run once)
+						// and its required Target number is 1 (outter for loop will run once)
 						if (info.Ritual.casterTargetSpell != 0 &&
 						    info.Ritual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
 							for (uint i = 0; i < info.Ritual.casterTargetSpellTargets; i++)
@@ -2599,7 +2599,7 @@ namespace Game.Entities
 								GameEvents.Trigger(info.FlagDrop.eventID, player, this);
 						}
 
-						//this cause to call return, all flags must be deleted here!!
+						//this cause to call return, all Flags must be deleted here!!
 						spellId = 0;
 						Delete();
 					}
@@ -2805,7 +2805,7 @@ namespace Game.Entities
 				default:
 					if (GetGoType() >= GameObjectTypes.Max)
 						Log.outError(LogFilter.Server,
-						             "GameObject.Use(): unit (Type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown Type ({6})",
+						             "GameObject.Use(): unit (Type: {0}, Guid: {1}, Name: {2}) tries to use object (Guid: {3}, entry: {4}, Name: {5}) of unknown Type ({6})",
 						             user.GetTypeId(),
 						             user.GetGUID().ToString(),
 						             user.GetName(),
@@ -2824,7 +2824,7 @@ namespace Game.Entities
 			{
 				if (!user.IsTypeId(TypeId.Player) ||
 				    !Global.OutdoorPvPMgr.HandleCustomSpell(user.ToPlayer(), spellId, this))
-					Log.outError(LogFilter.Server, "WORLD: unknown spell id {0} at use Action for gameobject (Entry: {1} GoType: {2})", spellId, GetEntry(), GetGoType());
+					Log.outError(LogFilter.Server, "WORLD: unknown spell Id {0} at use Action for gameobject (Entry: {1} GoType: {2})", spellId, GetEntry(), GetGoType());
 				else
 					Log.outDebug(LogFilter.Outdoorpvp, "WORLD: {0} non-dbc spell was handled by OutdoorPvP", spellId);
 
@@ -2936,7 +2936,7 @@ namespace Game.Entities
 
 		public void SetParentRotation(Quaternion rotation)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.ParentRotation), rotation);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.ParentRotation), rotation);
 		}
 
 		public void SetLocalRotationAngles(float z_rot, float y_rot, float x_rot)
@@ -3087,7 +3087,7 @@ namespace Game.Entities
 			// Set the health bar, value = 255 * healthPct;
 			SetGoAnimProgress(_goValue.Building.Health * 255 / _goValue.Building.MaxHealth);
 
-			// dealing damage, send packet
+			// dealing Damage, send packet
 			Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
 
 			if (player != null)
@@ -3333,7 +3333,7 @@ namespace Game.Entities
 		public void SetGoState(GameObjectState state)
 		{
 			GameObjectState oldState = GetGoState();
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.State), (sbyte)state);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.State), (sbyte)state);
 
 			if (GetAI() != null)
 				GetAI().OnStateChanged(state);
@@ -3385,7 +3385,7 @@ namespace Game.Entities
 
 		public void SetDisplayId(uint displayid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.DisplayID), displayid);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.DisplayID), displayid);
 			UpdateModel();
 		}
 
@@ -3494,7 +3494,7 @@ namespace Game.Entities
 			WorldPacket     buffer = new();
 
 			buffer.WriteUInt8((byte)flags);
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_gameObjectData.WriteCreate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -3506,12 +3506,12 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
+			buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.GameObject))
+			if (Values.HasChanged(TypeId.GameObject))
 				_gameObjectData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -3532,7 +3532,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.GameObject])
 				_gameObjectData.WriteUpdate(buffer, requestedGameObjectMask, true, this, target);
@@ -3548,7 +3548,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_gameObjectData);
+			Values.ClearChangesMask(_gameObjectData);
 			base.ClearUpdateMask(remove);
 		}
 
@@ -3567,8 +3567,8 @@ namespace Game.Entities
 			DoWithSuppressingObjectUpdates(() =>
 			                               {
 				                               ObjectFieldData dynflagMask = new();
-				                               dynflagMask.MarkChanged(_objectData.DynamicFlags);
-				                               bool marked = (_objectData.GetUpdateMask() & dynflagMask.GetUpdateMask()).IsAnySet();
+				                               dynflagMask.MarkChanged(ObjectData.DynamicFlags);
+				                               bool marked = (ObjectData.GetUpdateMask() & dynflagMask.GetUpdateMask()).IsAnySet();
 
 				                               uint dynamicFlags = (uint)GetDynamicFlags();
 				                               dynamicFlags &= 0xFFFF; // remove high bits
@@ -3576,7 +3576,7 @@ namespace Game.Entities
 				                               ReplaceAllDynamicFlags((GameObjectDynamicLowFlags)dynamicFlags);
 
 				                               if (!marked)
-					                               _objectData.ClearChanged(_objectData.DynamicFlags);
+					                               ObjectData.ClearChanged(ObjectData.DynamicFlags);
 			                               });
 		}
 
@@ -3645,7 +3645,7 @@ namespace Game.Entities
 				// Following values are not blizzlike
 				case GameObjectTypes.GuildBank:
 				case GameObjectTypes.Mailbox:
-					// Successful mailbox interaction is rather critical to the client, failing it will start a minute-long cooldown until the next mail query may be executed.
+					// Successful mailbox interaction is rather Critical to the client, failing it will start a minute-long cooldown until the next mail query may be executed.
 					// And since movement info update is not sent with mailbox interaction query, server may find the player outside of interaction range. Thus we increase it.
 					return 10.0f; // 5.0f is blizzlike
 				default:
@@ -3689,7 +3689,7 @@ namespace Game.Entities
 
 		public void SetSpellVisualId(uint spellVisualId, ObjectGuid activatorGuid = default)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpellVisualID), spellVisualId);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.SpellVisualID), spellVisualId);
 
 			GameObjectPlaySpellVisual packet = new();
 			packet.ObjectGUID    = GetGUID();
@@ -3968,7 +3968,7 @@ namespace Game.Entities
 				Cypher.Assert(false);
 
 			_spawnedByDefault = false; // all object with owner is despawned after delay
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.CreatedBy), owner);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.CreatedBy), owner);
 		}
 
 		public override ObjectGuid GetOwnerGUID()
@@ -4041,47 +4041,47 @@ namespace Game.Entities
 
 		public void SetFlag(GameObjectFlags flags)
 		{
-			SetUpdateFieldFlagValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Flags), (uint)flags);
+			SetUpdateFieldFlagValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Flags), (uint)flags);
 		}
 
 		public void RemoveFlag(GameObjectFlags flags)
 		{
-			RemoveUpdateFieldFlagValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Flags), (uint)flags);
+			RemoveUpdateFieldFlagValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Flags), (uint)flags);
 		}
 
 		public void ReplaceAllFlags(GameObjectFlags flags)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Flags), (uint)flags);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Flags), (uint)flags);
 		}
 
 		public void SetLevel(uint level)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Level), level);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.Level), level);
 		}
 
 		public GameObjectDynamicLowFlags GetDynamicFlags()
 		{
-			return (GameObjectDynamicLowFlags)(uint)_objectData.DynamicFlags;
+			return (GameObjectDynamicLowFlags)(uint)ObjectData.DynamicFlags;
 		}
 
 		public bool HasDynamicFlag(GameObjectDynamicLowFlags flag)
 		{
-			return (_objectData.DynamicFlags & (uint)flag) != 0;
+			return (ObjectData.DynamicFlags & (uint)flag) != 0;
 		}
 
 		public void SetDynamicFlag(GameObjectDynamicLowFlags flag)
 		{
-			SetUpdateFieldFlagValue(_values.ModifyValue(_objectData).ModifyValue(_objectData.DynamicFlags), (uint)flag);
+			SetUpdateFieldFlagValue(Values.ModifyValue(ObjectData).ModifyValue(ObjectData.DynamicFlags), (uint)flag);
 		}
 
 		public void RemoveDynamicFlag(GameObjectDynamicLowFlags flag)
 		{
-			RemoveUpdateFieldFlagValue(_values.ModifyValue(_objectData).ModifyValue(_objectData.DynamicFlags), (uint)flag);
+			RemoveUpdateFieldFlagValue(Values.ModifyValue(ObjectData).ModifyValue(ObjectData.DynamicFlags), (uint)flag);
 		}
 
 		public void ReplaceAllDynamicFlags(GameObjectDynamicLowFlags flag)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_objectData).ModifyValue(_objectData.DynamicFlags), (uint)flag);
+			SetUpdateFieldValue(Values.ModifyValue(ObjectData).ModifyValue(ObjectData.DynamicFlags), (uint)flag);
 		}
 
 		public GameObjectTypes GetGoType()
@@ -4091,7 +4091,7 @@ namespace Game.Entities
 
 		public void SetGoType(GameObjectTypes type)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.TypeID), (sbyte)type);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.TypeID), (sbyte)type);
 		}
 
 		public GameObjectState GetGoState()
@@ -4111,7 +4111,7 @@ namespace Game.Entities
 
 		public void SetGoAnimProgress(uint animprogress)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.PercentHealth), (byte)animprogress);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.PercentHealth), (byte)animprogress);
 		}
 
 		public LootState GetLootState()
@@ -4259,7 +4259,7 @@ namespace Game.Entities
 
 		public override void SetFaction(uint faction)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.FactionTemplate), faction);
+			SetUpdateFieldValue(Values.ModifyValue(_gameObjectData).ModifyValue(_gameObjectData.FactionTemplate), faction);
 		}
 
 		public override float GetStationaryX()
@@ -4301,7 +4301,7 @@ namespace Game.Entities
 
 		private void UpdateDynamicFlagsForNearbyPlayers()
 		{
-			_values.ModifyValue(_objectData).ModifyValue(_objectData.DynamicFlags);
+			Values.ModifyValue(ObjectData).ModifyValue(ObjectData.DynamicFlags);
 			AddToObjectUpdateIfNeeded();
 		}
 
@@ -4363,17 +4363,17 @@ namespace Game.Entities
 		private GameObjectData _goData;
 		private ulong _spawnId;
 		private uint _spellId;
-		private long _respawnTime;      // (secs) time of next respawn (or despawn if GO have owner()),
+		private long _respawnTime;      // (secs) Time of next respawn (or despawn if GO have owner()),
 		private uint _respawnDelayTime; // (secs) if 0 then current GO State no dependent from timer
 		private uint _despawnDelay;
-		private TimeSpan _despawnRespawnTime; // override respawn time after delayed despawn
+		private TimeSpan _despawnRespawnTime; // override respawn Time after delayed despawn
 		private LootState _lootState;
 		private ObjectGuid _lootStateUnitGUID; // GUID of the unit passed with SetLootState(LootState, Unit*)
 		private bool _spawnedByDefault;
 		private long _restockTime;
 
-		private long _cooldownTime; // used as internal reaction delay time store (not State change reaction).
-		// For traps this: spell casting cooldown, for doors/buttons: reset time.
+		private long _cooldownTime; // used as internal reaction delay Time store (not State change reaction).
+		// For traps this: spell casting cooldown, for doors/buttons: reset Time.
 
 		private Player _ritualOwner; // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
 		private List<ObjectGuid> _unique_users = new();
@@ -4619,8 +4619,8 @@ namespace Game.Entities
 				{
 					_passengers.Add(passenger);
 					passenger.SetTransport(this);
-					passenger._movementInfo.transport.guid = GetTransportGUID();
-					Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} boarded transport {_owner.GetName()}.");
+					passenger.MovementInfo.Transport.Guid = GetTransportGUID();
+					Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} boarded Transport {_owner.GetName()}.");
 				}
 			}
 
@@ -4629,8 +4629,8 @@ namespace Game.Entities
 				if (_passengers.Remove(passenger))
 				{
 					passenger.SetTransport(null);
-					passenger._movementInfo.transport.Reset();
-					Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} removed from transport {_owner.GetName()}.");
+					passenger.MovementInfo.Transport.Reset();
+					Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} removed from Transport {_owner.GetName()}.");
 
 					Player plr = passenger.ToPlayer();
 
@@ -4905,7 +4905,7 @@ namespace Game.Entities
 				if (oldToNewStateDelta < 0)
 					oldToNewStateDelta += pauseTimesCount + 1;
 
-				// this additional check is neccessary because client doesn't check dynamic flags on progress update
+				// this additional check is neccessary because client doesn't check dynamic Flags on progress update
 				// instead it multiplies progress from dynamicflags field by -1 and then compares that against 0
 				// when calculating path progress while we simply check the flag if (!_owner.HasDynamicFlag(GO_DYNFLAG_LO_INVERTED_MOVEMENT))
 				bool isAtStartOfPath = _stateChangeProgress == 0;
@@ -4927,7 +4927,7 @@ namespace Game.Entities
 				foreach (WorldObject passenger in _passengers)
 				{
 					float x, y, z, o;
-					passenger._movementInfo.transport.pos.GetPosition(out x, out y, out z, out o);
+					passenger.MovementInfo.Transport.Pos.GetPosition(out x, out y, out z, out o);
 					CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 					ITransport.UpdatePassengerPosition(this, _owner.GetMap(), passenger, x, y, z, o, true);
 				}

@@ -16,7 +16,7 @@ namespace Game.Chat
 		[Command("getbossstate", RBACPermissions.CommandInstanceGetBossState)]
 		private static bool HandleInstanceGetBossStateCommand(CommandHandler handler, uint encounterId, PlayerIdentifier player)
 		{
-			// Character name must be provided when using this from console.
+			// Character Name must be provided when using this from console.
 			if (player == null ||
 			    handler.GetSession() == null)
 			{
@@ -99,7 +99,7 @@ namespace Game.Chat
 		[Command("setbossstate", RBACPermissions.CommandInstanceSetBossState)]
 		private static bool HandleInstanceSetBossStateCommand(CommandHandler handler, uint encounterId, EncounterState state, PlayerIdentifier player)
 		{
-			// Character name must be provided when using this from console.
+			// Character Name must be provided when using this from console.
 			if (player == null ||
 			    handler.GetSession() == null)
 			{

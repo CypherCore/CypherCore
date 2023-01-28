@@ -166,7 +166,7 @@ namespace Game.Networking.Packets
 					declinedNameLengths[i] = _worldPacket.ReadBits<byte>(7);
 
 				for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-					DeclinedNames.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
+					DeclinedNames.Name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
 			}
 
 			Name = _worldPacket.ReadString(nameLength);
@@ -219,10 +219,10 @@ namespace Game.Networking.Packets
 				_worldPacket.WriteBit(HasDeclined);
 
 				for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-					_worldPacket.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
+					_worldPacket.WriteBits(DeclinedNames.Name[i].GetByteCount(), 7);
 
 				for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-					_worldPacket.WriteString(DeclinedNames.name[i]);
+					_worldPacket.WriteString(DeclinedNames.Name[i]);
 
 				_worldPacket.WriteString(Name);
 			}

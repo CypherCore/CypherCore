@@ -329,7 +329,7 @@ namespace Game
 				return;
 			}
 
-			// if Action == 1, then instanceId is required
+			// if Action == 1, then InstanceId is required
 			if (ginfo.IsInvitedToBGInstanceGUID == 0 &&
 			    battlefieldPort.AcceptedInvite)
 			{
@@ -346,7 +346,7 @@ namespace Game
 
 			BattlegroundTypeId bgTypeId = (BattlegroundTypeId)bgQueueTypeId.BattlemasterListId;
 			// BGTemplateId returns Battleground_AA when it is arena queue.
-			// Do instance id search as there is no AA bg instances.
+			// Do instance Id search as there is no AA bg instances.
 			Battleground bg = Global.BattlegroundMgr.GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId == BattlegroundTypeId.AA ? BattlegroundTypeId.None : bgTypeId);
 
 			if (!bg)
@@ -354,7 +354,7 @@ namespace Game
 				if (battlefieldPort.AcceptedInvite)
 				{
 					Log.outDebug(LogFilter.Battleground,
-					             "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Cant find BG with id {5}!",
+					             "CMSG_BATTLEFIELD_PORT {0} Slot: {1}, Unk: {2}, Time: {3}, AcceptedInvite: {4}. Cant find BG with Id {5}!",
 					             GetPlayerInfo(),
 					             battlefieldPort.Ticket.Id,
 					             battlefieldPort.Ticket.Type,
@@ -369,7 +369,7 @@ namespace Game
 
 				if (!bg)
 				{
-					Log.outError(LogFilter.Network, "BattlegroundHandler: bg_template not found for Type id {0}.", bgTypeId);
+					Log.outError(LogFilter.Network, "BattlegroundHandler: bg_template not found for Type Id {0}.", bgTypeId);
 
 					return;
 				}
@@ -449,7 +449,7 @@ namespace Game
 				if (currentBg)
 					currentBg.RemovePlayerAtLeave(GetPlayer().GetGUID(), false, true);
 
-				// set the destination instance id
+				// set the destination instance Id
 				GetPlayer().SetBattlegroundId(bg.GetInstanceID(), bgTypeId);
 				// set the destination team
 				GetPlayer().SetBGTeam(ginfo.Team);
@@ -623,7 +623,7 @@ namespace Game
 			// get the team rating for queuing
 			uint arenaRating      = at.GetRating();
 			uint matchmakerRating = at.GetAverageMMR(grp);
-			// the arenateam id must match for everyone in the group
+			// the arenateam Id must match for everyone in the group
 
 			if (arenaRating <= 0)
 				arenaRating = 1;
@@ -638,7 +638,7 @@ namespace Game
 
 			if (err == 0)
 			{
-				Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for Type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
+				Log.outDebug(LogFilter.Battleground, "Battleground: arena team Id {0}, leader {1} queued with matchmaker rating {2} for Type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
 
 				ginfo   = bgQueue.AddGroup(GetPlayer(), grp, _player.GetTeam(), bracketEntry, false, arenaRating, matchmakerRating, ateamId);
 				avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());

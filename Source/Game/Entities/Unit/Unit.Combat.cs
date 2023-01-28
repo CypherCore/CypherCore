@@ -83,7 +83,7 @@ namespace Game.Entities
 		{
 			CombatStop(includingCast);
 
-			foreach (var minion in _Controlled)
+			foreach (var minion in Controlled)
 				minion.CombatStop(includingCast);
 		}
 
@@ -135,14 +135,14 @@ namespace Game.Entities
 
 		public void RemoveAllAttackers()
 		{
-			while (!attackerList.Empty())
+			while (!AttackerList.Empty())
 			{
-				var iter = attackerList.First();
+				var iter = AttackerList.First();
 
 				if (!iter.AttackStop())
 				{
-					Log.outError(LogFilter.Unit, "WORLD: Unit has an attacker that isn't attacking it!");
-					attackerList.Remove(iter);
+					Log.outError(LogFilter.Unit, "WORLD: Unit has an Attacker that isn't attacking it!");
+					AttackerList.Remove(iter);
 				}
 			}
 		}
@@ -257,7 +257,7 @@ namespace Game.Entities
 			foreach (CombatReference refe in refsToEnd)
 				refe.EndCombat();
 
-			foreach (var minion in _Controlled)
+			foreach (var minion in Controlled)
 				minion.StopAttackFaction(factionId);
 		}
 
@@ -284,10 +284,10 @@ namespace Game.Entities
 					return;
 			}
 
-			if (!extraAttacksTargets.ContainsKey(targetGUID))
-				extraAttacksTargets[targetGUID] = 0;
+			if (!_extraAttacksTargets.ContainsKey(targetGUID))
+				_extraAttacksTargets[targetGUID] = 0;
 
-			extraAttacksTargets[targetGUID] += count;
+			_extraAttacksTargets[targetGUID] += count;
 		}
 
 		public bool Attack(Unit victim, bool meleeAttack)
@@ -302,7 +302,7 @@ namespace Game.Entities
 			    !victim.IsAlive())
 				return false;
 
-			// player cannot attack in mount State
+			// player cannot attack in Mount State
 			if (IsTypeId(TypeId.Player) &&
 			    IsMounted())
 				return false;
@@ -330,9 +330,9 @@ namespace Game.Entities
 			if (HasAuraType(AuraType.ModUnattackable))
 				RemoveAurasByType(AuraType.ModUnattackable);
 
-			if (attacking != null)
+			if (Attacking != null)
 			{
-				if (attacking == victim)
+				if (Attacking == victim)
 				{
 					// switch to melee attack from ranged/magic
 					if (meleeAttack)
@@ -356,20 +356,20 @@ namespace Game.Entities
 					return false;
 				}
 
-				// switch target
+				// switch Target
 				InterruptSpell(CurrentSpellTypes.Melee);
 
 				if (!meleeAttack)
 					ClearUnitState(UnitState.MeleeAttacking);
 			}
 
-			if (attacking != null)
-				attacking._removeAttacker(this);
+			if (Attacking != null)
+				Attacking._removeAttacker(this);
 
-			attacking = victim;
-			attacking._addAttacker(this);
+			Attacking = victim;
+			Attacking._addAttacker(this);
 
-			// Set our target
+			// Set our Target
 			SetTarget(victim.GetGUID());
 
 			if (meleeAttack)
@@ -383,11 +383,11 @@ namespace Game.Entities
 				creature.SendAIReaction(AiReaction.Hostile);
 				creature.CallAssistance();
 
-				// Remove emote State - will be restored on creature reset
+				// Remove Emote State - will be restored on creature reset
 				SetEmoteState(Emote.OneshotNone);
 			}
 
-			// delay offhand weapon attack by 50% of the base attack time
+			// delay offhand weapon attack by 50% of the base attack Time
 			if (HaveOffhandWeapon() &&
 			    GetTypeId() != TypeId.Player)
 				SetAttackTimer(WeaponAttackType.OffAttack, Math.Max(GetAttackTimer(WeaponAttackType.OffAttack), GetAttackTimer(WeaponAttackType.BaseAttack) + MathFunctions.CalculatePct(GetBaseAttackTime(WeaponAttackType.BaseAttack), 50)));
@@ -398,7 +398,7 @@ namespace Game.Entities
 			// Let the pet know we've started attacking someting. Handles melee attacks only
 			// Spells such as auto-shot and others handled in WorldSession.HandleCastSpellOpcode
 			if (IsTypeId(TypeId.Player))
-				foreach (Unit controlled in _Controlled)
+				foreach (Unit controlled in Controlled)
 				{
 					Creature cControlled = controlled.ToCreature();
 
@@ -439,7 +439,7 @@ namespace Game.Entities
 
 		public ObjectGuid GetTarget()
 		{
-			return _unitData.Target;
+			return UnitData.Target;
 		}
 
 		public virtual void SetTarget(ObjectGuid guid)
@@ -448,15 +448,15 @@ namespace Game.Entities
 
 		public bool AttackStop()
 		{
-			if (attacking == null)
+			if (Attacking == null)
 				return false;
 
-			Unit victim = attacking;
+			Unit victim = Attacking;
 
-			attacking._removeAttacker(this);
-			attacking = null;
+			Attacking._removeAttacker(this);
+			Attacking = null;
 
-			// Clear our target
+			// Clear our Target
 			SetTarget(ObjectGuid.Empty);
 
 			ClearUnitState(UnitState.MeleeAttacking);
@@ -476,12 +476,12 @@ namespace Game.Entities
 
 		private void _addAttacker(Unit pAttacker)
 		{
-			attackerList.Add(pAttacker);
+			AttackerList.Add(pAttacker);
 		}
 
 		private void _removeAttacker(Unit pAttacker)
 		{
-			attackerList.Remove(pAttacker);
+			AttackerList.Remove(pAttacker);
 		}
 
 		public void SetLastExtraAttackSpell(uint spellId)
@@ -506,7 +506,7 @@ namespace Game.Entities
 
 		public Unit GetVictim()
 		{
-			return attacking;
+			return Attacking;
 		}
 
 		public Unit GetAttackerForHelper()
@@ -542,47 +542,47 @@ namespace Game.Entities
 
 		public List<Unit> GetAttackers()
 		{
-			return attackerList;
+			return AttackerList;
 		}
 
 		public override float GetCombatReach()
 		{
-			return _unitData.CombatReach;
+			return UnitData.CombatReach;
 		}
 
 		public void SetCombatReach(float combatReach)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.CombatReach), combatReach);
+			SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.CombatReach), combatReach);
 		}
 
 		public float GetBoundingRadius()
 		{
-			return _unitData.BoundingRadius;
+			return UnitData.BoundingRadius;
 		}
 
 		public void SetBoundingRadius(float boundingRadius)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.BoundingRadius), boundingRadius);
+			SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.BoundingRadius), boundingRadius);
 		}
 
 		public void ResetAttackTimer(WeaponAttackType type = WeaponAttackType.BaseAttack)
 		{
-			_attackTimer[(int)type] = (uint)(GetBaseAttackTime(type) * _modAttackSpeedPct[(int)type]);
+			AttackTimer[(int)type] = (uint)(GetBaseAttackTime(type) * ModAttackSpeedPct[(int)type]);
 		}
 
 		public void SetAttackTimer(WeaponAttackType type, uint time)
 		{
-			_attackTimer[(int)type] = time;
+			AttackTimer[(int)type] = time;
 		}
 
 		public uint GetAttackTimer(WeaponAttackType type)
 		{
-			return _attackTimer[(int)type];
+			return AttackTimer[(int)type];
 		}
 
 		public bool IsAttackReady(WeaponAttackType type = WeaponAttackType.BaseAttack)
 		{
-			return _attackTimer[(int)type] == 0;
+			return AttackTimer[(int)type] == 0;
 		}
 
 		public uint GetBaseAttackTime(WeaponAttackType att)
@@ -626,11 +626,11 @@ namespace Game.Entities
 			    GetCurrentSpell(CurrentSpellTypes.Melee) != null &&
 			    !extra)
 			{
-				_currentSpells[CurrentSpellTypes.Melee].Cast();
+				CurrentSpells[CurrentSpellTypes.Melee].Cast();
 			}
 			else
 			{
-				// attack can be redirected to another target
+				// attack can be redirected to another Target
 				victim = GetMeleeHitRedirectTarget(victim);
 
 				var        meleeAttackOverrides  = GetAuraEffectsByType(AuraType.OverrideAutoattackWithMeleeSpell);
@@ -660,7 +660,7 @@ namespace Game.Entities
 				{
 					CalcDamageInfo damageInfo;
 					CalculateMeleeDamage(victim, out damageInfo, attType);
-					// Send log damage message to client
+					// Send log Damage message to client
 					DealDamageMods(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
 					SendAttackStateUpdate(damageInfo);
 
@@ -672,7 +672,7 @@ namespace Game.Entities
 					ProcSkillsAndAuras(damageInfo.Attacker, damageInfo.Target, damageInfo.ProcAttacker, damageInfo.ProcVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
 
 					Log.outDebug(LogFilter.Unit,
-					             "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, blocked {4}, resisted {5}.",
+					             "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, Blocked {4}, resisted {5}.",
 					             GetGUID().ToString(),
 					             victim.GetGUID().ToString(),
 					             damageInfo.Damage,
@@ -696,7 +696,7 @@ namespace Game.Entities
 
 		public void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value)
 		{
-			_weaponDamage[(int)attType][(int)damageRange] = value;
+			WeaponDamage[(int)attType][(int)damageRange] = value;
 		}
 
 		public Unit GetMeleeHitRedirectTarget(Unit victim, SpellInfo spellInfo = null)
@@ -749,8 +749,8 @@ namespace Game.Entities
 			packet.OverDamage = (overkill < 0 ? -1 : overkill);
 
 			SubDamage subDmg = new();
-			subDmg.SchoolMask = (int)damageInfo.DamageSchoolMask; // School of sub damage
-			subDmg.FDamage    = damageInfo.Damage;                // sub damage
+			subDmg.SchoolMask = (int)damageInfo.DamageSchoolMask; // School of sub Damage
+			subDmg.FDamage    = damageInfo.Damage;                // sub Damage
 			subDmg.Damage     = (int)damageInfo.Damage;           // Sub Damage
 			subDmg.Absorbed   = (int)damageInfo.Absorb;
 			subDmg.Resisted   = (int)damageInfo.Resist;
@@ -840,7 +840,7 @@ namespace Game.Entities
 				isRewardAllowed = false;
 
 			// Reward player, his pets, and group/raid members
-			// call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
+			// call kill spell proc event (before real die and combat stop to triggering Auras removed at death/combat stop)
 			if (isRewardAllowed)
 			{
 				HashSet<Group> groups = new();
@@ -886,7 +886,7 @@ namespace Game.Entities
 					{
 						if (dungeonEncounter != null)
 						{
-							creature._personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id,
+							creature.PersonalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id,
 							                                                                          creature.GetCreatureTemplate().LootId,
 							                                                                          LootStorage.Creature,
 							                                                                          LootType.Corpse,
@@ -915,7 +915,7 @@ namespace Game.Entities
 							if (group)
 								loot.NotifyLootList(creature.GetMap());
 
-							creature._personalLoot[looter.GetGUID()] = loot; // trash mob loot is personal, generated with round robin rules
+							creature.PersonalLoot[looter.GetGUID()] = loot; // trash mob loot is personal, generated with round robin rules
 
 							// Update round robin looter only if the creature had loot
 							if (!loot.IsLooted())
@@ -940,7 +940,7 @@ namespace Game.Entities
 							if (creature.GetLootMode() > 0)
 								loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
 
-							creature._personalLoot[tapper.GetGUID()] = loot;
+							creature.PersonalLoot[tapper.GetGUID()] = loot;
 						}
 					}
 				}
@@ -968,11 +968,11 @@ namespace Game.Entities
 						ProcSkillsAndAuras(tapper, victim, new ProcFlagsInit(ProcFlags.None, ProcFlags2.TargetDies), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 			}
 
-			// Proc auras on death - must be before aura/combat remove
+			// Proc Auras on death - must be before aura/combat remove
 			ProcSkillsAndAuras(victim, victim, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.Death), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
-			// update get killing blow achievements, must be done before setDeathState to be able to require auras on target
-			// and before Spirit of Redemption as it also removes auras
+			// update get killing blow achievements, must be done before setDeathState to be able to require Auras on Target
+			// and before Spirit of Redemption as it also removes Auras
 			if (attacker != null)
 			{
 				Player killerPlayer = attacker.GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -987,9 +987,9 @@ namespace Game.Entities
 				victim.SetDeathState(DeathState.JustDied);
 			}
 
-			// Inform pets (if any) when player kills target)
-			// MUST come after victim.setDeathState(JUST_DIED); or pet next target
-			// selection will get stuck on same target and break pet react State
+			// Inform pets (if any) when player kills Target)
+			// MUST come after victim.setDeathState(JUST_DIED); or pet next Target
+			// selection will get stuck on same Target and break pet react State
 			foreach (Player tapper in tappers)
 			{
 				Pet pet = tapper.GetPet();
@@ -1033,7 +1033,7 @@ namespace Game.Entities
 				    attacker.IsAIEnabled())
 					attacker.ToCreature().GetAI().KilledUnit(victim);
 
-				// last damage from non Duel opponent or opponent controlled creature
+				// last Damage from non Duel opponent or opponent controlled creature
 				if (plrVictim.Duel != null)
 				{
 					plrVictim.Duel.Opponent.CombatStopWithPets(true);
@@ -1047,7 +1047,7 @@ namespace Game.Entities
 
 				if (!creature.IsPet())
 				{
-					// must be after setDeathState which resets dynamic flags
+					// must be after setDeathState which resets dynamic Flags
 					if (!creature.IsFullyLooted())
 						creature.SetDynamicFlag(UnitDynFlags.Lootable);
 					else
@@ -1251,7 +1251,7 @@ namespace Game.Entities
 
 			uint damage = 0;
 			damage += CalculateDamage(damageInfo.AttackType, false, true);
-			// Add melee damage bonus
+			// Add melee Damage bonus
 			damage = MeleeDamageBonusDone(damageInfo.Target, damage, damageInfo.AttackType, DamageEffectType.Direct, null, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
 			damage = damageInfo.Target.MeleeDamageBonusTaken(this, damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
 
@@ -1304,7 +1304,7 @@ namespace Game.Entities
 					// Crit bonus calc
 					damageInfo.Damage *= 2;
 
-					// Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
+					// Increase crit Damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
 					float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.DamageSchoolMask) - 1.0f) * 100;
 
 					if (mod != 0)
@@ -1332,7 +1332,7 @@ namespace Game.Entities
 				case MeleeHitOutcome.Block:
 					damageInfo.TargetState =  VictimState.Hit;
 					damageInfo.HitInfo     |= HitInfo.Block;
-					// 30% damage blocked, double blocked amount if block is critical
+					// 30% Damage Blocked, double Blocked amount if block is Critical
 					damageInfo.Blocked = MathFunctions.CalculatePct(damageInfo.Damage, damageInfo.Target.GetBlockPercent(GetLevel()));
 
 					if (damageInfo.Target.IsBlockCritical())
@@ -1360,7 +1360,7 @@ namespace Game.Entities
 				case MeleeHitOutcome.Crushing:
 					damageInfo.HitInfo     |= HitInfo.Crushing;
 					damageInfo.TargetState =  VictimState.Hit;
-					// 150% normal damage
+					// 150% normal Damage
 					damageInfo.Damage         += (damageInfo.Damage / 2);
 					damageInfo.OriginalDamage =  damageInfo.Damage;
 
@@ -1383,11 +1383,11 @@ namespace Game.Entities
 			damageInfo.Damage      -= (uint)resilienceReduction;
 			damageInfo.CleanDamage += (uint)resilienceReduction;
 
-			// Calculate absorb resist
+			// Calculate Absorb Resist
 			if (damageInfo.Damage > 0)
 			{
 				damageInfo.ProcVictim.Or(ProcFlags.TakeAnyDamage);
-				// Calculate absorb & resists
+				// Calculate Absorb & resists
 				DamageInfo dmgInfo = new(damageInfo);
 				CalcAbsorbResist(dmgInfo);
 				damageInfo.Absorb = dmgInfo.GetAbsorb();
@@ -1434,10 +1434,10 @@ namespace Game.Entities
 			uint attackerLevel = GetLevelForTarget(victim);
 			uint victimLevel   = GetLevelForTarget(this);
 
-			// check if attack comes from behind, nobody can parry or block if attacker is behind
+			// check if attack comes from behind, nobody can parry or block if Attacker is behind
 			bool canParryOrBlock = victim.HasInArc((float)Math.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection);
 
-			// only creatures can dodge if attacker is behind
+			// only creatures can dodge if Attacker is behind
 			bool canDodge = !victim.IsTypeId(TypeId.Player) || canParryOrBlock;
 
 			// if victim is casting or cc'd it can't avoid attacks
@@ -1455,7 +1455,7 @@ namespace Game.Entities
 			    roll < (sum += tmp))
 				return MeleeHitOutcome.Miss;
 
-			// always crit against a sitting target (except 0 crit chance)
+			// always crit against a sitting Target (except 0 crit chance)
 			if (victim.IsTypeId(TypeId.Player) &&
 			    crit_chance > 0 &&
 			    !victim.IsStandState())
@@ -1560,24 +1560,24 @@ namespace Game.Entities
 				switch (attType)
 				{
 					case WeaponAttackType.RangedAttack:
-						minDamage = _unitData.MinRangedDamage;
-						maxDamage = _unitData.MaxRangedDamage;
+						minDamage = UnitData.MinRangedDamage;
+						maxDamage = UnitData.MaxRangedDamage;
 
 						break;
 					case WeaponAttackType.BaseAttack:
-						minDamage = _unitData.MinDamage;
-						maxDamage = _unitData.MaxDamage;
+						minDamage = UnitData.MinDamage;
+						maxDamage = UnitData.MaxDamage;
 
 						if (IsInFeralForm())
 						{
-							minDamage += _unitData.MinOffHandDamage;
-							maxDamage += _unitData.MaxOffHandDamage;
+							minDamage += UnitData.MinOffHandDamage;
+							maxDamage += UnitData.MaxOffHandDamage;
 						}
 
 						break;
 					case WeaponAttackType.OffAttack:
-						minDamage = _unitData.MinOffHandDamage;
-						maxDamage = _unitData.MaxOffHandDamage;
+						minDamage = UnitData.MinOffHandDamage;
+						maxDamage = UnitData.MaxOffHandDamage;
 
 						break;
 					// Just for good manner
@@ -1604,7 +1604,7 @@ namespace Game.Entities
 			    !HaveOffhandWeapon())
 				return 0.0f;
 
-			return _weaponDamage[(int)attType][(int)type];
+			return WeaponDamage[(int)attType][(int)type];
 		}
 
 		public float GetAPMultiplier(WeaponAttackType attType, bool normalized)
@@ -1651,29 +1651,29 @@ namespace Game.Entities
 		{
 			if (attType == WeaponAttackType.RangedAttack)
 			{
-				float ap = _unitData.RangedAttackPower + _unitData.RangedAttackPowerModPos + _unitData.RangedAttackPowerModNeg;
+				float ap = UnitData.RangedAttackPower + UnitData.RangedAttackPowerModPos + UnitData.RangedAttackPowerModNeg;
 
 				if (includeWeapon)
-					ap += Math.Max(_unitData.MainHandWeaponAttackPower, _unitData.RangedWeaponAttackPower);
+					ap += Math.Max(UnitData.MainHandWeaponAttackPower, UnitData.RangedWeaponAttackPower);
 
 				if (ap < 0)
 					return 0.0f;
 
-				return ap * (1.0f + _unitData.RangedAttackPowerMultiplier);
+				return ap * (1.0f + UnitData.RangedAttackPowerMultiplier);
 			}
 			else
 			{
-				float ap = _unitData.AttackPower + _unitData.AttackPowerModPos + _unitData.AttackPowerModNeg;
+				float ap = UnitData.AttackPower + UnitData.AttackPowerModPos + UnitData.AttackPowerModNeg;
 
 				if (includeWeapon)
 				{
 					if (attType == WeaponAttackType.BaseAttack)
 					{
-						ap += Math.Max(_unitData.MainHandWeaponAttackPower, _unitData.RangedWeaponAttackPower);
+						ap += Math.Max(UnitData.MainHandWeaponAttackPower, UnitData.RangedWeaponAttackPower);
 					}
 					else
 					{
-						ap += _unitData.OffHandWeaponAttackPower;
+						ap += UnitData.OffHandWeaponAttackPower;
 						ap /= 2;
 					}
 				}
@@ -1681,7 +1681,7 @@ namespace Game.Entities
 				if (ap < 0)
 					return 0.0f;
 
-				return ap * (1.0f + _unitData.AttackPowerMultiplier);
+				return ap * (1.0f + UnitData.AttackPowerMultiplier);
 			}
 		}
 
@@ -1726,11 +1726,11 @@ namespace Game.Entities
 			{
 				case WeaponAttackType.BaseAttack:
 				case WeaponAttackType.OffAttack:
-					SetUpdateFieldValue(ref _values.ModifyValue(_unitData).ModifyValue(_unitData.AttackRoundBaseTime, (int)att), (uint)(_baseAttackSpeed[(int)att] * _modAttackSpeedPct[(int)att]));
+					SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.AttackRoundBaseTime, (int)att), (uint)(_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att]));
 
 					break;
 				case WeaponAttackType.RangedAttack:
-					SetUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.RangedAttackRoundBaseTime), (uint)(_baseAttackSpeed[(int)att] * _modAttackSpeedPct[(int)att]));
+					SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.RangedAttackRoundBaseTime), (uint)(_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att]));
 
 					break;
 				default:
@@ -1747,29 +1747,29 @@ namespace Game.Entities
 
 		public void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
 		{
-			float remainingTimePct = _attackTimer[(int)att] / (_baseAttackSpeed[(int)att] * _modAttackSpeedPct[(int)att]);
+			float remainingTimePct = AttackTimer[(int)att] / (_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att]);
 
 			if (val > 0.0f)
 			{
-				MathFunctions.ApplyPercentModFloatVar(ref _modAttackSpeedPct[(int)att], val, !apply);
+				MathFunctions.ApplyPercentModFloatVar(ref ModAttackSpeedPct[(int)att], val, !apply);
 
 				if (att == WeaponAttackType.BaseAttack)
-					ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModHaste), val, !apply);
+					ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), val, !apply);
 				else if (att == WeaponAttackType.RangedAttack)
-					ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModRangedHaste), val, !apply);
+					ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), val, !apply);
 			}
 			else
 			{
-				MathFunctions.ApplyPercentModFloatVar(ref _modAttackSpeedPct[(int)att], -val, apply);
+				MathFunctions.ApplyPercentModFloatVar(ref ModAttackSpeedPct[(int)att], -val, apply);
 
 				if (att == WeaponAttackType.BaseAttack)
-					ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModHaste), -val, apply);
+					ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), -val, apply);
 				else if (att == WeaponAttackType.RangedAttack)
-					ApplyPercentModUpdateFieldValue(_values.ModifyValue(_unitData).ModifyValue(_unitData.ModRangedHaste), -val, apply);
+					ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), -val, apply);
 			}
 
 			UpdateAttackTimeField(att);
-			_attackTimer[(int)att] = (uint)(_baseAttackSpeed[(int)att] * _modAttackSpeedPct[(int)att] * remainingTimePct);
+			AttackTimer[(int)att] = (uint)(_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att] * remainingTimePct);
 		}
 
         /// <summary>

@@ -159,7 +159,7 @@ namespace Game
 
 			if (_player.IsReagentBankUnlocked())
 			{
-				Log.outDebug(LogFilter.Network, $"WORLD: HandleBuyReagentBankOpcode - Player ({_player.GetGUID()}, name: {_player.GetName()}) tried to unlock reagent bank a 2nd time.");
+				Log.outDebug(LogFilter.Network, $"WORLD: HandleBuyReagentBankOpcode - Player ({_player.GetGUID()}, Name: {_player.GetName()}) tried to unlock reagent bank a 2nd Time.");
 
 				return;
 			}
@@ -168,7 +168,7 @@ namespace Game
 
 			if (!_player.HasEnoughMoney(price))
 			{
-				Log.outDebug(LogFilter.Network, $"WORLD: HandleBuyReagentBankOpcode - Player ({_player.GetGUID()}, name: {_player.GetName()}) without enough gold.");
+				Log.outDebug(LogFilter.Network, $"WORLD: HandleBuyReagentBankOpcode - Player ({_player.GetGUID()}, Name: {_player.GetName()}) without enough gold.");
 
 				return;
 			}

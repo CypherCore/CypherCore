@@ -100,12 +100,12 @@ namespace Game.Chat.Commands
 			if (enable)
 			{
 				handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.God);
-				handler.SendSysMessage("Godmode is ON. You won't take damage.");
+				handler.SendSysMessage("Godmode is ON. You won't take Damage.");
 			}
 			else
 			{
 				handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.God);
-				handler.SendSysMessage("Godmode is OFF. You can take damage.");
+				handler.SendSysMessage("Godmode is OFF. You can take Damage.");
 			}
 
 			return true;

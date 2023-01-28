@@ -25,7 +25,7 @@ namespace Game.Entities
 			ObjectTypeMask |= TypeMask.DynamicObject;
 			ObjectTypeId   =  TypeId.DynamicObject;
 
-			_updateFlag.Stationary = true;
+			UpdateFlag.Stationary = true;
 
 			_dynamicObjectData = new DynamicObjectData();
 		}
@@ -43,7 +43,7 @@ namespace Game.Entities
 
 		public override void AddToWorld()
 		{
-			// Register the dynamicObject for guid lookup and for caster
+			// Register the dynamicObject for Guid lookup and for caster
 			if (!IsInWorld)
 			{
 				GetMap().GetObjectsStore().Add(GetGUID(), this);
@@ -94,16 +94,16 @@ namespace Game.Entities
 			SetEntry(spell.Id);
 			SetObjectScale(1f);
 
-			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Caster), caster.GetGUID());
-			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Type), (byte)type);
+			SetUpdateFieldValue(Values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Caster), caster.GetGUID());
+			SetUpdateFieldValue(Values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Type), (byte)type);
 
-			SpellCastVisualField spellCastVisual = _values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.SpellVisual);
+			SpellCastVisualField spellCastVisual = Values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.SpellVisual);
 			SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
 			SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, spellVisual.ScriptVisualID);
 
-			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.SpellID), spell.Id);
-			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Radius), radius);
-			SetUpdateFieldValue(_values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
+			SetUpdateFieldValue(Values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.SpellID), spell.Id);
+			SetUpdateFieldValue(Values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.Radius), radius);
+			SetUpdateFieldValue(Values.ModifyValue(_dynamicObjectData).ModifyValue(_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
 
 			if (IsWorldObject())
 				SetActive(true); //must before add to map to be put in world container
@@ -115,15 +115,15 @@ namespace Game.Entities
 				float x, y, z, o;
 				pos.GetPosition(out x, out y, out z, out o);
 				transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-				_movementInfo.transport.pos.Relocate(x, y, z, o);
+				MovementInfo.Transport.Pos.Relocate(x, y, z, o);
 
-				// This object must be added to transport before adding to map for the client to properly display it
+				// This object must be added to Transport before adding to map for the client to properly display it
 				transport.AddPassenger(this);
 			}
 
 			if (!GetMap().AddToMap(this))
 			{
-				// Returning false will cause the object to be deleted - remove from transport
+				// Returning false will cause the object to be deleted - remove from Transport
 				if (transport != null)
 					transport.RemovePassenger(this);
 
@@ -264,7 +264,7 @@ namespace Game.Entities
 			WorldPacket     buffer = new();
 
 			buffer.WriteUInt8((byte)flags);
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_dynamicObjectData.WriteCreate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -276,12 +276,12 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
+			buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.DynamicObject))
+			if (Values.HasChanged(TypeId.DynamicObject))
 				_dynamicObjectData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -302,7 +302,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.DynamicObject])
 				_dynamicObjectData.WriteUpdate(buffer, requestedDynamicObjectMask, true, this, target);
@@ -318,7 +318,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_dynamicObjectData);
+			Values.ClearChangesMask(_dynamicObjectData);
 			base.ClearUpdateMask(remove);
 		}
 

@@ -31,15 +31,15 @@ namespace Game.Entities
 			ObjectTypeMask |= TypeMask.Conversation;
 			ObjectTypeId   =  TypeId.Conversation;
 
-			_updateFlag.Stationary   = true;
-			_updateFlag.Conversation = true;
+			UpdateFlag.Stationary   = true;
+			UpdateFlag.Conversation = true;
 
 			_conversationData = new ConversationData();
 		}
 
 		public override void AddToWorld()
 		{
-			//- Register the Conversation for guid lookup and for caster
+			//- Register the Conversation for Guid lookup and for caster
 			if (!IsInWorld)
 			{
 				GetMap().GetObjectsStore().Add(GetGUID(), this);
@@ -66,7 +66,7 @@ namespace Game.Entities
 				DoWithSuppressingObjectUpdates(() =>
 				                               {
 					                               // Only sent in CreateObject
-					                               ApplyModUpdateFieldValue(_values.ModifyValue(_conversationData).ModifyValue(_conversationData.Progress), diff, true);
+					                               ApplyModUpdateFieldValue(Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Progress), diff, true);
 					                               _conversationData.ClearChanged(_conversationData.Progress);
 				                               });
 			}
@@ -169,8 +169,8 @@ namespace Game.Entities
 			}
 
 			_duration = _lastLineEndTimes.Max();
-			SetUpdateFieldValue(_values.ModifyValue(_conversationData).ModifyValue(_conversationData.LastLineEndTime), (uint)_duration.TotalMilliseconds);
-			SetUpdateFieldValue(_values.ModifyValue(_conversationData).ModifyValue(_conversationData.Lines), lines);
+			SetUpdateFieldValue(Values.ModifyValue(_conversationData).ModifyValue(_conversationData.LastLineEndTime), (uint)_duration.TotalMilliseconds);
+			SetUpdateFieldValue(Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Lines), lines);
 
 			// conversations are despawned 5-20s after LastLineEndTime
 			_duration += TimeSpan.FromSeconds(10);
@@ -201,7 +201,7 @@ namespace Game.Entities
 
 		public void AddActor(int actorId, uint actorIdx, ObjectGuid actorGuid)
 		{
-			ConversationActorField actorField = _values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
+			ConversationActorField actorField = Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
 			SetUpdateFieldValue(ref actorField.CreatureID, 0u);
 			SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, 0u);
 			SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
@@ -212,7 +212,7 @@ namespace Game.Entities
 
 		public void AddActor(int actorId, uint actorIdx, ConversationActorType type, uint creatureId, uint creatureDisplayInfoId)
 		{
-			ConversationActorField actorField = _values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
+			ConversationActorField actorField = Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
 			SetUpdateFieldValue(ref actorField.CreatureID, creatureId);
 			SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, creatureDisplayInfoId);
 			SetUpdateFieldValue(ref actorField.ActorGUID, ObjectGuid.Empty);
@@ -241,7 +241,7 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_conversationData.WriteCreate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -254,12 +254,12 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
+			buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.Conversation))
+			if (Values.HasChanged(TypeId.Conversation))
 				_conversationData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -280,7 +280,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.Conversation])
 				_conversationData.WriteUpdate(buffer, requestedConversationMask, true, this, target);
@@ -296,7 +296,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_conversationData);
+			Values.ClearChangesMask(_conversationData);
 			base.ClearUpdateMask(remove);
 		}
 

@@ -211,7 +211,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.QuestGiverQueryQuest, Processing = PacketProcessing.Inplace)]
 		private void HandleQuestgiverQueryQuest(QuestGiverQueryQuest packet)
 		{
-			// Verify that the guid is valid and is a questgiver or involved in the requested quest
+			// Verify that the Guid is valid and is a questgiver or involved in the requested quest
 			var obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, (TypeMask.Unit | TypeMask.GameObject | TypeMask.Item));
 
 			if (!obj ||

@@ -59,7 +59,7 @@ namespace Game.Maps
 
 				if (!CliDB.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
 				{
-					Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
+					Log.outError(LogFilter.Sql, "Transport {0} (Name: {1}) has an invalid path specified in `gameobject_template`.`data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
 
 					continue;
 				}
@@ -96,7 +96,7 @@ namespace Game.Maps
 
 			uint oldMSTime = Time.GetMSTime();
 
-			SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
+			SQLResult result = DB.World.Query("SELECT Guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
 
 			uint count = 0;
 
@@ -113,42 +113,42 @@ namespace Game.Maps
 
 					if (transportTemplate == null)
 					{
-						Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown gameobject `entry` set, skipped.");
+						Log.outError(LogFilter.Sql, $"Table `transports` have Transport (GUID: {guid} Entry: {entry}) with unknown gameobject `entry` set, skipped.");
 
 						continue;
 					}
 
 					if ((phaseUseFlags & ~PhaseUseFlagsValues.All) != 0)
 					{
-						Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown `phaseUseFlags` set, removed unknown value.");
+						Log.outError(LogFilter.Sql, $"Table `transports` have Transport (GUID: {guid} Entry: {entry}) with unknown `phaseUseFlags` set, removed unknown value.");
 						phaseUseFlags &= PhaseUseFlagsValues.All;
 					}
 
 					if (phaseUseFlags.HasFlag(PhaseUseFlagsValues.AlwaysVisible) &&
 					    phaseUseFlags.HasFlag(PhaseUseFlagsValues.Inverse))
 					{
-						Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE, removing PHASE_USE_FLAGS_INVERSE.");
+						Log.outError(LogFilter.Sql, $"Table `transports` have Transport (GUID: {guid} Entry: {entry}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE, removing PHASE_USE_FLAGS_INVERSE.");
 						phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
 					}
 
 					if (phaseGroupId != 0 &&
 					    phaseId != 0)
 					{
-						Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
+						Log.outError(LogFilter.Sql, $"Table `transports` have Transport (GUID: {guid} Entry: {entry}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
 						phaseGroupId = 0;
 					}
 
 					if (phaseId != 0)
 						if (!CliDB.PhaseStorage.ContainsKey(phaseId))
 						{
-							Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseid` {phaseId} does not exist, set to 0");
+							Log.outError(LogFilter.Sql, $"Table `transports` have Transport (GUID: {guid} Entry: {entry}) with `phaseid` {phaseId} does not exist, set to 0");
 							phaseId = 0;
 						}
 
 					if (phaseGroupId != 0)
 						if (Global.DB2Mgr.GetPhasesForGroup(phaseGroupId) == null)
 						{
-							Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseGroup` {phaseGroupId} does not exist, set to 0");
+							Log.outError(LogFilter.Sql, $"Table `transports` have Transport (GUID: {guid} Entry: {entry}) with `phaseGroup` {phaseGroupId} does not exist, set to 0");
 							phaseGroupId = 0;
 						}
 
@@ -216,7 +216,7 @@ namespace Game.Maps
 				{
 					var pausePointIndex = pathPoints.IndexOf(pauses[pauseItr]);
 
-					if (pausePointIndex == pathPoints.Count - 1) // last point is a "fake" spline point, its position can never be reached so transport cannot stop there
+					if (pausePointIndex == pathPoints.Count - 1) // last point is a "fake" spline point, its position can never be reached so Transport cannot stop there
 						break;
 
 					for (; eventItr < events.Count; ++eventItr)
@@ -450,7 +450,7 @@ namespace Game.Maps
 				return null;
 			}
 
-			// create transport...
+			// create Transport...
 			Transport trans = new();
 
 			// ...at first waypoint
@@ -471,7 +471,7 @@ namespace Game.Maps
 			trans.SetMap(map);
 
 			if (instanceMap != null)
-				trans._zoneScript = instanceMap.GetInstanceScript();
+				trans.ZoneScript = instanceMap.GetInstanceScript();
 
 			// Passengers will be loaded once a player is near
 

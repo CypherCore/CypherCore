@@ -85,7 +85,7 @@ namespace Game.DataStorage
 					    !vertices.IsNull(5))
 						verticesTargetByCreateProperties.Add(areaTriggerCreatePropertiesId, new Vector2(vertices.Read<float>(4), vertices.Read<float>(5)));
 					else if (vertices.IsNull(4) != vertices.IsNull(5))
-						Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has listed invalid target vertices (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}, Index: {vertices.Read<uint>(1)}).");
+						Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has listed invalid Target vertices (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}, Index: {vertices.Read<uint>(1)}).");
 				} while (vertices.NextRow());
 			else
 				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger polygon polygon vertices. DB table `areatrigger_create_properties_polygon_vertex` is empty.");
@@ -118,7 +118,7 @@ namespace Game.DataStorage
 					if (areaTriggerTemplate.Id.IsServerSide &&
 					    areaTriggerTemplate.Flags != 0)
 					{
-						Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed server-side areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with none-zero flags");
+						Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed server-side areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with none-zero Flags");
 
 						continue;
 					}
@@ -276,7 +276,7 @@ namespace Game.DataStorage
 
 			// Load area trigger positions (to put them on the server)
 			//                                            0        1              2             3      4     5     6     7            8              9        10
-			SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, " +
+			SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, _mapId, X, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, " +
 			                                     //11     12          13          14          15          16          17          18          19          20
 			                                     "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName FROM `areatrigger`");
 
@@ -297,7 +297,7 @@ namespace Game.DataStorage
 
 					if (!GridDefines.IsValidMapCoord(location))
 					{
-						Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed an invalid position: SpawnId: {spawnId}, MapId: {location.GetMapId()}, Position: {location}");
+						Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed an invalid position: SpawnId: {spawnId}, _mapId: {location.GetMapId()}, Position: {location}");
 
 						continue;
 					}

@@ -67,7 +67,7 @@ namespace Game.Chat
 				return false;
 			}
 
-			if (force.Equals("force", StringComparison.OrdinalIgnoreCase))
+			if (force.Equals("Force", StringComparison.OrdinalIgnoreCase))
 				creatureTarget.ClearUnitState(UnitState.Evade);
 
 			creatureTarget.GetAI().EnterEvadeMode(why.GetValueOrDefault(EvadeReason.Other));
@@ -90,7 +90,7 @@ namespace Game.Chat
 			CreatureTemplate cInfo = target.GetCreatureTemplate();
 
 			uint  faction            = target.GetFaction();
-			ulong npcflags           = ((ulong)target._unitData.NpcFlags[1] << 32) | target._unitData.NpcFlags[0];
+			ulong npcflags           = ((ulong)target.UnitData.NpcFlags[1] << 32) | target.UnitData.NpcFlags[0];
 			ulong mechanicImmuneMask = cInfo.MechanicImmuneMask;
 			uint  displayid          = target.GetDisplayId();
 			uint  nativeid           = target.GetNativeDisplayId();
@@ -119,19 +119,19 @@ namespace Game.Chat
 			handler.SendSysMessage(CypherStrings.NpcinfoHealth, target.GetCreateHealth(), target.GetMaxHealth(), target.GetHealth());
 			handler.SendSysMessage(CypherStrings.NpcinfoMovementData, target.GetMovementTemplate().ToString());
 
-			handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, (uint)target._unitData.Flags);
+			handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, (uint)target.UnitData.Flags);
 
 			foreach (UnitFlags value in Enum.GetValues(typeof(UnitFlags)))
 				if (target.HasUnitFlag(value))
 					handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags)value, value);
 
-			handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, (uint)target._unitData.Flags2);
+			handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, (uint)target.UnitData.Flags2);
 
 			foreach (UnitFlags2 value in Enum.GetValues(typeof(UnitFlags2)))
 				if (target.HasUnitFlag2(value))
 					handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags2)value, value);
 
-			handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, (uint)target._unitData.Flags3);
+			handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, (uint)target.UnitData.Flags3);
 
 			foreach (UnitFlags3 value in Enum.GetValues(typeof(UnitFlags3)))
 				if (target.HasUnitFlag3(value))
@@ -165,7 +165,7 @@ namespace Game.Chat
 				if (cInfo.FlagsExtra.HasAnyFlag((CreatureFlagsExtra)value))
 					handler.SendSysMessage("{0} (0x{1:X})", (CreatureFlagsExtra)value, value);
 
-			handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, target._unitData.NpcFlags[0]);
+			handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, target.UnitData.NpcFlags[0]);
 
 			foreach (uint value in Enum.GetValues(typeof(NPCFlags)))
 				if (npcflags.HasAnyFlag(value))
@@ -195,7 +195,7 @@ namespace Game.Chat
 
 			ulong lowguid = spawnId.HasValue ? spawnId.Value : creature.GetSpawnId();
 
-			// Attempting creature load from DB data
+			// Attempting creature load from DB _data
 			CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
 
 			if (data == null)
@@ -346,7 +346,7 @@ namespace Game.Chat
 				return false;
 			}
 
-			Loot loot = creatureTarget._loot;
+			Loot loot = creatureTarget.Loot;
 
 			if (!creatureTarget.IsDead() ||
 			    loot == null ||
@@ -402,7 +402,7 @@ namespace Game.Chat
 			foreach (var variant in opts)
 				switch (variant)
 				{
-					case "force":
+					case "Force":
 						force = true;
 
 						break;
@@ -566,7 +566,7 @@ namespace Game.Chat
 
 			creature.Yell(text, Language.Universal);
 
-			// make an emote
+			// make an Emote
 			creature.HandleEmoteCommand(Emote.OneshotShout);
 
 			return true;
@@ -705,9 +705,9 @@ namespace Game.Chat
 				uint vendor_entry = vendor.GetEntry();
 
 				VendorItem vItem = new();
-				vItem.item         = itemId;
-				vItem.maxcount     = maxcount;
-				vItem.incrtime     = incrtime;
+				vItem.Item         = itemId;
+				vItem.Maxcount     = maxcount;
+				vItem.Incrtime     = incrtime;
 				vItem.ExtendedCost = extendedcost;
 				vItem.Type         = ItemVendorType.Item;
 
@@ -736,7 +736,7 @@ namespace Game.Chat
 			[Command("move", RBACPermissions.CommandNpcAddMove)]
 			private static bool HandleNpcAddMoveCommand(CommandHandler handler, ulong lowGuid)
 			{
-				// attempt check creature existence by DB data
+				// attempt check creature existence by DB _data
 				CreatureData data = Global.ObjectMgr.GetCreatureData(lowGuid);
 
 				if (data == null)
@@ -993,7 +993,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("data", RBACPermissions.CommandNpcSetData)]
+			[Command("_data", RBACPermissions.CommandNpcSetData)]
 			private static bool HandleNpcSetDataCommand(CommandHandler handler, uint data_1, uint data_2)
 			{
 				Creature creature = handler.GetSelectedCreature();
@@ -1154,7 +1154,7 @@ namespace Game.Chat
 
 				if (!Global.ObjectMgr.SetCreatureLinkedRespawn(creature.GetSpawnId(), linkguid))
 				{
-					handler.SendSysMessage("Selected creature can't link with guid '{0}'", linkguid);
+					handler.SendSysMessage("Selected creature can't link with Guid '{0}'", linkguid);
 
 					return false;
 				}
@@ -1224,7 +1224,7 @@ namespace Game.Chat
 					if (lowguid != 0)
 						creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
 
-					// attempt check creature existence by DB data
+					// attempt check creature existence by DB _data
 					if (creature == null)
 					{
 						CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
@@ -1242,7 +1242,7 @@ namespace Game.Chat
 					}
 				}
 
-				// now lowguid is low guid really existed creature
+				// now lowguid is low Guid really existed creature
 				// and creature point (maybe) to this creature or NULL
 
 				MovementGeneratorType move_type;

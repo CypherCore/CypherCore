@@ -74,7 +74,7 @@ namespace Game.Entities
 						return;
 
 					player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
-					_CinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+					_CinematicObject = player.SummonCreature(1, pos.X, pos.Y, pos.Z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
 
 					if (_CinematicObject)
 					{
@@ -157,7 +157,7 @@ namespace Game.Entities
 			    workDiff > endItr.timeStamp)
 				workDiff = (int)endItr.timeStamp;
 
-			// Never try to go back in time before the start of cinematic!
+			// Never try to go back in Time before the start of cinematic!
 			if (workDiff < 0)
 				workDiff = (int)_cinematicDiff;
 
@@ -180,24 +180,24 @@ namespace Game.Entities
 			if (workDiff > nextTimestamp)
 				workDiff = (int)nextTimestamp;
 
-			// Interpolate the position for this moment in time (or the adjusted moment in time)
+			// Interpolate the position for this moment in Time (or the adjusted moment in Time)
 			uint  timeDiff  = nextTimestamp - lastTimestamp;
 			uint  interDiff = (uint)(workDiff - lastTimestamp);
-			float xDiff     = nextPosition.posX - lastPosition.posX;
-			float yDiff     = nextPosition.posY - lastPosition.posY;
-			float zDiff     = nextPosition.posZ - lastPosition.posZ;
+			float xDiff     = nextPosition.X - lastPosition.X;
+			float yDiff     = nextPosition.Y - lastPosition.Y;
+			float zDiff     = nextPosition.Z - lastPosition.Z;
 
-			Position interPosition = new(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)),
-			                             lastPosition.posY +
+			Position interPosition = new(lastPosition.X + (xDiff * ((float)interDiff / timeDiff)),
+			                             lastPosition.Y +
 			                             (yDiff * ((float)interDiff / timeDiff)),
-			                             lastPosition.posZ + (zDiff * ((float)interDiff / timeDiff)));
+			                             lastPosition.Z + (zDiff * ((float)interDiff / timeDiff)));
 
 			// Advance (at speed) to this position. The remote sight object is used
 			// to send update information to player in cinematic
 			if (_CinematicObject && interPosition.IsPositionValid())
-				_CinematicObject.MonsterMoveWithSpeed(interPosition.posX, interPosition.posY, interPosition.posZ, 500.0f, false, true);
+				_CinematicObject.MonsterMoveWithSpeed(interPosition.X, interPosition.Y, interPosition.Z, 500.0f, false, true);
 
-			// If we never received an end packet 10 seconds after the final timestamp then force an end
+			// If we never received an end packet 10 seconds after the final timestamp then Force an end
 			if (_cinematicDiff > _cinematicLength + 10 * Time.InMilliseconds)
 				EndCinematic();
 		}

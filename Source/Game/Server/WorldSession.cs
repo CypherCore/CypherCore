@@ -50,7 +50,7 @@ namespace Game
 
             _Address = sock.GetRemoteIpAddress().Address.ToString();
             ResetTimeOutTime(false);
-            DB.Login.Execute("UPDATE account SET online = 1 WHERE id = {0};", GetAccountId());     // One-time query
+            DB.Login.Execute("UPDATE account SET online = 1 WHERE Id = {0};", GetAccountId());     // One-Time query
         }
 
         public void Dispose()
@@ -72,7 +72,7 @@ namespace Game
             // empty incoming packet queue
             _recvQueue.Clear();
 
-            DB.Login.Execute("UPDATE account SET online = 0 WHERE id = {0};", GetAccountId());     // One-time query
+            DB.Login.Execute("UPDATE account SET online = 0 WHERE Id = {0};", GetAccountId());     // One-Time query
         }
 
         public void LogoutPlayer(bool save)
@@ -93,7 +93,7 @@ namespace Game
                     DoLootReleaseAll();
 
                 // If the player just died before logging out, make him appear as a ghost
-                //FIXME: logout must be delayed in case lost connection with client in time of combat
+                //FIXME: logout must be delayed in case lost connection with client in Time of combat
                 if (GetPlayer().GetDeathTimer() != 0)
                 {
                     _player.CombatStop();
@@ -211,7 +211,7 @@ namespace Game
                 LogoutComplete logoutComplete = new();
                 SendPacket(logoutComplete);
 
-                //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+                //! Since each account can only have one online character at any given Time, ensure all characters for active account are marked as offline
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
                 stmt.AddValue(0, GetAccountId());
                 DB.Characters.Execute(stmt);
@@ -317,7 +317,7 @@ namespace Game
 
             if (!updater.ProcessUnsafe()) // <=> updater is of Type MapSessionFilter
             {
-                // Send time sync packet every 10s.
+                // Send Time sync packet every 10s.
                 if (_timeSyncTimer > 0)
                 {
                     if (diff >= _timeSyncTimer)
@@ -517,14 +517,14 @@ namespace Game
                 int type = result.Read<byte>(0);
                 if (type >= (int)AccountDataTypes.Max)
                 {
-                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account data Type ({1}), ignore.",
+                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account _data Type ({1}), ignore.",
                         mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
                     continue;
                 }
 
                 if (((int)mask & (1 << type)) == 0)
                 {
-                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account data Type ({1}), ignore.",
+                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account _data Type ({1}), ignore.",
                         mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
                     continue;
                 }
@@ -550,7 +550,7 @@ namespace Game
             }
             else
             {
-                // _player can be NULL and packet received after logout but _GUID still store correct guid
+                // _player can be NULL and packet received after logout but _GUID still store correct Guid
                 if (_GUIDLow == 0)
                     return;
 
@@ -891,7 +891,7 @@ namespace Game
             long movementTime = (long)time + _timeSyncClockDelta;
             if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
             {
-                Log.outWarn(LogFilter.Misc, "The computed movement time using clockDelta is erronous. Using fallback instead");
+                Log.outWarn(LogFilter.Misc, "The computed movement Time using clockDelta is erronous. Using fallback instead");
                 return GameTime.GetGameTimeMS();
             }
             else
@@ -989,7 +989,7 @@ namespace Game
         CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
         long _timeSyncClockDelta;
 
-        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
+        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server Time when packet with that counter was sent.
         uint _timeSyncNextCounter;
         uint _timeSyncTimer;
 
@@ -1056,7 +1056,7 @@ namespace Game
             if (++packetCounter.amountCounter <= maxPacketCounterAllowed)
                 return true;
 
-            Log.outWarn(LogFilter.Network, "AntiDOS: Account {0}, IP: {1}, Ping: {2}, Character: {3}, flooding packet (opc: {4} (0x{4}), count: {5})",
+            Log.outWarn(LogFilter.Network, "AntiDOS: Account {0}, IP: {1}, Ping: {2}, Character: {3}, flooding packet (opc: {4} (0x{4}), Count: {5})",
                 Session.GetAccountId(), Session.GetRemoteAddress(), Session.GetLatency(), Session.GetPlayerName(), packet.GetOpcode(), packetCounter.amountCounter);
 
             switch (_policy)

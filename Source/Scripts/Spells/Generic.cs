@@ -466,7 +466,7 @@ namespace Scripts.Spells.Generic
 
 		public override bool Load()
 		{
-			// Max absorb stored in 1 dummy effect
+			// Max Absorb stored in 1 dummy effect
 			limit = GetSpellInfo().GetEffect(1).CalcValue();
 
 			return true;
@@ -579,7 +579,7 @@ namespace Scripts.Spells.Generic
 
 		private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			// Remove all auras with spell id 46221, except the one currently being applied
+			// Remove all Auras with spell Id 46221, except the one currently being applied
 			Aura aur;
 
 			while ((aur = GetUnitOwner().GetOwnedAura(SpellIds.AnimalBlood, ObjectGuid.Empty, ObjectGuid.Empty, 0, GetAura())) != null)
@@ -613,7 +613,7 @@ namespace Scripts.Spells.Generic
 			LiquidData liquidStatus = new();
 
 			if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, liquidStatus, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
-				summonPos.posZ = liquidStatus.level;
+				summonPos.Z = liquidStatus.level;
 
 			dest.Relocate(summonPos);
 		}
@@ -1739,7 +1739,7 @@ namespace Scripts.Spells.Generic
 				return;
 
 			int       damage         = 0;
-			SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(caster._unitData.CreatedBySpell, GetCastDifficulty());
+			SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(caster.UnitData.CreatedBySpell, GetCastDifficulty());
 
 			if (createdBySpell != null)
 				damage = createdBySpell.GetEffect(2).CalcValue();
@@ -2000,7 +2000,7 @@ namespace Scripts.Spells.Generic
 
 		private void HandleScript(uint effIndex)
 		{
-			// Here the target is the water spout and determines the position where the player is knocked from
+			// Here the Target is the water spout and determines the position where the player is knocked from
 			Unit target = GetHitUnit();
 
 			if (target)
@@ -2038,7 +2038,7 @@ namespace Scripts.Spells.Generic
 
 		public void AfterHit()
 		{
-			// This hook is executed for every target, make sure we only credit instance once
+			// This hook is executed for every Target, make sure we only credit instance once
 			if (_handled)
 				return;
 
@@ -2227,8 +2227,8 @@ namespace Scripts.Spells.Generic
 	}
 
 	/*
-	 * There are only 3 possible flags Feign Death auras can apply: UNIT_DYNFLAG_DEAD, UnitFlags2.FeignDeath
-	 * and UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT. Some auras can apply only 2 flags
+	 * There are only 3 possible flags Feign Death Auras can apply: UNIT_DYNFLAG_DEAD, UnitFlags2.FeignDeath
+	 * and UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT. Some Auras can apply only 2 flags
 	 * 
 	 * spell_gen_feign_death_all_flags applies all 3 flags
 	 * spell_gen_feign_death_no_dyn_flag applies no UNIT_DYNFLAG_DEAD (does not make the creature appear dead)
@@ -2459,7 +2459,7 @@ namespace Scripts.Spells.Generic
 				caster.CastSpell(caster, SpellIds.TransporterMalfunctionPolymorph, true);
 			else if (r < 100) // Evil Twin               - 4/6 evil twin
 				caster.CastSpell(caster, SpellIds.TransporterEviltwin, true);
-			else // Transporter Malfunction - 1/6 miss the target
+			else // Transporter Malfunction - 1/6 miss the Target
 				caster.CastSpell(caster, SpellIds.TransporterMalfunctionMiss, true);
 		}
 
@@ -2659,7 +2659,7 @@ namespace Scripts.Spells.Generic
 			if (GetHitUnit().IsInRaidWith(GetCaster()))
 				GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue() + 1, true); // raid buff
 			else
-				GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true); // single-target buff
+				GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true); // single-Target buff
 		}
 
 		public override void Register()
@@ -2740,7 +2740,7 @@ namespace Scripts.Spells.Generic
 							return;
 					}
 
-					// If target isn't a training dummy there's a chance of failing the charge
+					// If Target isn't a training dummy there's a chance of failing the charge
 					if (!target.IsCharmedOwnedByPlayerOrPlayer() &&
 					    RandomHelper.randChance(12.5f))
 						spellId = SpellIds.MissEffect;
@@ -3148,7 +3148,7 @@ namespace Scripts.Spells.Generic
 
 		private void HandleScript(uint effIndex)
 		{
-			// Note: target here is always player; caster here is gameobject, creature or player (self cast)
+			// Note: Target here is always player; caster here is gameobject, creature or player (self cast)
 			Unit target = GetHitUnit();
 
 			if (target != null)
@@ -3329,7 +3329,7 @@ namespace Scripts.Spells.Generic
 			uint   spellId = GetSpellInfo().Id;
 
 			// Learn random explicit discovery recipe (if any)
-			// Players will now learn 3 recipes the very first time they perform Northrend Inscription Research (3.3.0 patch notes)
+			// Players will now learn 3 recipes the very first Time they perform Northrend Inscription Research (3.3.0 patch notes)
 			if (spellId == SpellIds.NorthrendInscriptionResearch &&
 			    !SkillDiscovery.HasDiscoveredAnySpell(spellId, caster))
 				for (int i = 0; i < 2; ++i)
@@ -3425,7 +3425,7 @@ namespace Scripts.Spells.Generic
 			HealInfo healInfo = new(target, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
 			target.HealBySpell(healInfo);
 
-			/// @todo: should proc other auras?
+			/// @todo: should proc other Auras?
 			int mana = target.GetMaxPower(PowerType.Mana);
 
 			if (mana != 0)
@@ -3456,7 +3456,7 @@ namespace Scripts.Spells.Generic
 
 		private void PeriodicTick(AuraEffect aurEff)
 		{
-			// they apply damage so no need to check for ticks here
+			// they apply Damage so no need to check for ticks here
 
 			if (GetTarget().HealthAbovePct(GetEffectInfo(1).CalcValue()))
 			{
@@ -3509,7 +3509,7 @@ namespace Scripts.Spells.Generic
 
 		private void PeriodicTick(AuraEffect aurEff)
 		{
-			// they apply damage so no need to check for ticks here
+			// they apply Damage so no need to check for ticks here
 
 			if (GetTarget().IsFullHealth())
 			{
@@ -4376,7 +4376,7 @@ namespace Scripts.Spells.Generic
 
 		private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			// Do what was done before to the target in HandleFreezeCommand
+			// Do what was done before to the Target in HandleFreezeCommand
 			Player player = GetTarget().ToPlayer();
 
 			if (player)
@@ -4410,7 +4410,7 @@ namespace Scripts.Spells.Generic
 
 		private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			// Do what was done before to the target in HandleUnfreezeCommand
+			// Do what was done before to the Target in HandleUnfreezeCommand
 			Player player = GetTarget().ToPlayer();
 
 			if (player)
@@ -5535,7 +5535,7 @@ namespace Scripts.Spells.Generic
 		}
 	}
 
-	// Note: this spell unsummons any creature owned by the caster. Set appropriate target conditions on the DB.
+	// Note: this spell unsummons any creature owned by the caster. Set appropriate Target conditions on the DB.
 	// 84065 - Despawn All Summons
 	// 83935 - Despawn All Summons
 	[Script] // 160938 - Despawn All Summons (Garrison Intro Only)

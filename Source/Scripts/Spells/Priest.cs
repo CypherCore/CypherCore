@@ -150,7 +150,7 @@ namespace Scripts.Spells.Priest
 			if (caster)
 				if (caster.IsFriendlyTo(unit))
 				{
-					// If target already has aura, increase duration to max 130% of initial duration
+					// If Target already has aura, increase duration to max 130% of initial duration
 					caster.CastSpell(unit, SpellIds.AngelicFeatherAura, true);
 					at.SetDuration(0);
 				}
@@ -881,14 +881,14 @@ namespace Scripts.Spells.Priest
 
 		private void OnTargetSelect(List<WorldObject> targets)
 		{
-			uint maxTargets = (uint)(GetEffectInfo(2).CalcValue(GetCaster()) + 1); // adding 1 for explicit target unit
+			uint maxTargets = (uint)(GetEffectInfo(2).CalcValue(GetCaster()) + 1); // adding 1 for explicit Target unit
 
 			if (targets.Count > maxTargets)
 			{
 				Unit explTarget = GetExplTargetUnit();
 
 				// Sort targets so units with no atonement are first, then units who are injured, then oher units
-				// Make sure explicit target unit is first
+				// Make sure explicit Target unit is first
 				targets.Sort((lhs, rhs) =>
 				             {
 					             if (lhs == explTarget) // explTarget > anything: always true
@@ -1161,7 +1161,7 @@ namespace Scripts.Spells.Priest
 				// Cast the spell to heal the owner
 				caster.CastSpell(target, SpellIds.PrayerOfMendingHeal, new CastSpellExtraArgs(aurEff));
 
-				// Only cast jump if stack is higher than 0
+				// Only cast Jump if stack is higher than 0
 				int stackAmount = GetStackAmount();
 
 				if (stackAmount > 1)
@@ -1204,7 +1204,7 @@ namespace Scripts.Spells.Priest
 
 		private void OnTargetSelect(List<WorldObject> targets)
 		{
-			// Find the best target - prefer players over pets
+			// Find the best Target - prefer players over pets
 			bool foundPlayer = false;
 
 			foreach (WorldObject worldObject in targets)
@@ -1218,7 +1218,7 @@ namespace Scripts.Spells.Priest
 			if (foundPlayer)
 				targets.RemoveAll(new ObjectTypeIdCheck(TypeId.Player, false));
 
-			// choose one random target from targets
+			// choose one random Target from targets
 			if (targets.Count > 1)
 			{
 				WorldObject selected = targets.SelectRandom();
@@ -1230,7 +1230,7 @@ namespace Scripts.Spells.Priest
 		private void HandleJump(uint effIndex)
 		{
 			Unit origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
-			Unit target     = GetHitUnit();        // the target we decided the aura should jump to
+			Unit target     = GetHitUnit();        // the Target we decided the aura should Jump to
 
 			if (origCaster)
 			{
@@ -1610,7 +1610,7 @@ namespace Scripts.Spells.Priest
 
 					if (aurEff != null)
 					{
-						// backfire damage
+						// backfire Damage
 						CastSpellExtraArgs args = new(aurEff);
 						args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 8);
 						caster.CastSpell(target, SpellIds.VampiricTouchDispel, args);

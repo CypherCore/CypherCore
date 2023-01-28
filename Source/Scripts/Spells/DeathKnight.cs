@@ -236,7 +236,7 @@ namespace Scripts.Spells.DeathKnight
 
 			Unit drw = null;
 
-			foreach (Unit controlled in caster._Controlled)
+			foreach (Unit controlled in caster.Controlled)
 				if (controlled.GetEntry() == CreatureIds.DancingRuneWeapon)
 				{
 					drw = controlled;
@@ -261,7 +261,7 @@ namespace Scripts.Spells.DeathKnight
 
 			int                 amount = (int)damageInfo.GetDamage() / 2;
 			SpellNonMeleeDamage log    = new(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
-			log.damage = (uint)amount;
+			log.Damage = (uint)amount;
 			Unit.DealDamage(drw, drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
 			drw.SendSpellNonMeleeDamageLog(log);
 		}
@@ -453,7 +453,7 @@ namespace Scripts.Spells.DeathKnight
 
 			if (enabler != null)
 			{
-				// Heals you for 25% of all damage taken in the last 5 sec,
+				// Heals you for 25% of all Damage taken in the last 5 sec,
 				int heal = MathFunctions.CalculatePct(enabler.CalculateAmount(GetCaster()), GetEffectInfo(1).CalcValue(GetCaster()));
 				// minimum 7.0% of maximum health.
 				int pctOfMaxHealth = MathFunctions.CalculatePct(GetEffectInfo(2).CalcValue(GetCaster()), caster.GetMaxHealth());
@@ -475,7 +475,7 @@ namespace Scripts.Spells.DeathKnight
 	[Script] // 89832 - Death Strike Enabler - SPELL_DK_DEATH_STRIKE_ENABLER
 	internal class spell_dk_death_strike_enabler : AuraScript, IAuraCheckProc, IHasAuraEffects
 	{
-		// Amount of seconds we calculate damage over
+		// Amount of seconds we calculate Damage over
 		private uint[] _damagePerSecond = new uint[5];
 
 		public bool CheckProc(ProcEventInfo eventInfo)
@@ -579,7 +579,7 @@ namespace Scripts.Spells.DeathKnight
 			{
 				SpellInfo spellInfo = aurEff.GetSpellInfo();
 
-				// search our Blood Plague and Frost Fever on target
+				// search our Blood Plague and Frost Fever on Target
 				if (spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight &&
 				    spellInfo.SpellFamilyFlags[2].HasAnyFlag(0x2u) &&
 				    aurEff.GetCasterGUID() == caster.GetGUID())

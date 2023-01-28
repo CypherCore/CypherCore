@@ -17,10 +17,10 @@ namespace Game.Arenas
 	{
 		private uint BackgroundColor; // ARGB format
 		private uint BorderColor;     // ARGB format
-		private byte BorderStyle;     // border image id
+		private byte BorderStyle;     // border image Id
 		private ObjectGuid CaptainGuid;
 		private uint EmblemColor; // ARGB format
-		private byte EmblemStyle; // icon id
+		private byte EmblemStyle; // icon Id
 
 		private List<ArenaTeamMember> Members = new();
 		private ArenaTeamStats stats;
@@ -40,11 +40,11 @@ namespace Game.Arenas
 			if (Global.CharacterCacheStorage.GetCharacterCacheByGuid(captainGuid) == null)
 				return false;
 
-			// Check if arena team name is already taken
+			// Check if arena team Name is already taken
 			if (Global.ArenaTeamMgr.GetArenaTeamByName(arenaTeamName) != null)
 				return false;
 
-			// Generate new arena team id
+			// Generate new arena team Id
 			teamId = Global.ArenaTeamMgr.GenerateArenaTeamId();
 
 			// Assign member variables
@@ -89,7 +89,7 @@ namespace Game.Arenas
 			if (GetMembersSize() >= GetArenaType() * 2)
 				return false;
 
-			// Get player name and class either from db or character cache
+			// Get player Name and class either from db or character cache
 			CharacterCacheEntry characterInfo;
 			Player              player = Global.ObjAccessor.FindPlayer(playerGuid);
 
@@ -139,10 +139,10 @@ namespace Game.Arenas
 				matchMakerRating = WorldConfig.GetUIntValue(WorldCfg.ArenaStartMatchmakerRating);
 
 			// Remove all player signatures from other petitions
-			// This will prevent player from joining too many arena teams and corrupt arena team data integrity
+			// This will prevent player from joining too many arena teams and corrupt arena team _data integrity
 			//Player.RemovePetitionsAndSigns(playerGuid, GetArenaType());
 
-			// Feed data to the struct
+			// Feed _data to the struct
 			ArenaTeamMember newMember = new();
 			newMember.Name             = playerName;
 			newMember.Guid             = playerGuid;
@@ -233,7 +233,7 @@ namespace Game.Arenas
 				// Delete member if character information is missing
 				if (string.IsNullOrEmpty(newMember.Name))
 				{
-					Log.outError(LogFilter.Sql, "ArenaTeam {0} has member with empty name - probably {1} doesn't exist, deleting him from memberlist!", arenaTeamId, newMember.Guid.ToString());
+					Log.outError(LogFilter.Sql, "ArenaTeam {0} has member with empty Name - probably {1} doesn't exist, deleting him from memberlist!", arenaTeamId, newMember.Guid.ToString());
 					DelMember(newMember.Guid, true);
 
 					continue;
@@ -327,7 +327,7 @@ namespace Game.Arenas
 					break;
 				}
 
-			// Remove arena team info from player data
+			// Remove arena team info from player _data
 			Player player = Global.ObjAccessor.FindPlayer(guid);
 
 			if (player)
@@ -406,15 +406,15 @@ namespace Game.Arenas
 
 		public void SendStats(WorldSession session)
 		{
-			/*WorldPacket data = new WorldPacket(ServerOpcodes.ArenaTeamStats);
-			data.WriteUInt32(GetId());                                // team id
-			data.WriteUInt32(Stats.Rating);                           // rating
-			data.WriteUInt32(Stats.WeekGames);                        // games this week
-			data.WriteUInt32(Stats.WeekWins);                         // wins this week
-			data.WriteUInt32(Stats.SeasonGames);                      // played this season
-			data.WriteUInt32(Stats.SeasonWins);                       // wins this season
-			data.WriteUInt32(Stats.Rank);                             // rank
-			session.SendPacket(data);*/
+			/*WorldPacket _data = new WorldPacket(ServerOpcodes.ArenaTeamStats);
+			_data.WriteUInt32(GetId());                                // team Id
+			_data.WriteUInt32(Stats.Rating);                           // rating
+			_data.WriteUInt32(Stats.WeekGames);                        // games this week
+			_data.WriteUInt32(Stats.WeekWins);                         // wins this week
+			_data.WriteUInt32(Stats.SeasonGames);                      // played this season
+			_data.WriteUInt32(Stats.SeasonWins);                       // wins this season
+			_data.WriteUInt32(Stats.Rank);                             // rank
+			session.SendPacket(_data);*/
 		}
 
 		public void NotifyStatsChanged()

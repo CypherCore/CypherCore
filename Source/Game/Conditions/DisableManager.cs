@@ -26,7 +26,7 @@ namespace Game
 			// reload case
 			_DisableMap.Clear();
 
-			SQLResult result = DB.World.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
+			SQLResult result = DB.World.Query("SELECT sourceType, entry, Flags, params_0, params_1 FROM disables");
 
 			if (result.IsEmpty())
 			{
@@ -69,7 +69,7 @@ namespace Game
 						if (flags == 0 ||
 						    flags > DisableFlags.MaxSpell)
 						{
-							Log.outError(LogFilter.Sql, "Disable flags for spell {0} are invalid, skipped.", entry);
+							Log.outError(LogFilter.Sql, "Disable Flags for spell {0} are invalid, skipped.", entry);
 
 							continue;
 						}
@@ -144,7 +144,7 @@ namespace Game
 
 						if (isFlagInvalid)
 						{
-							Log.outError(LogFilter.Sql, "Disable flags for map {0} are invalid, skipped.", entry);
+							Log.outError(LogFilter.Sql, "Disable Flags for map {0} are invalid, skipped.", entry);
 
 							continue;
 						}
@@ -160,7 +160,7 @@ namespace Game
 						}
 
 						if (flags != 0)
-							Log.outError(LogFilter.Sql, "Disable flags specified for Battleground{0}, useless data.", entry);
+							Log.outError(LogFilter.Sql, "Disable Flags specified for Battleground{0}, useless _data.", entry);
 
 						break;
 					case DisableType.OutdoorPVP:
@@ -172,7 +172,7 @@ namespace Game
 						}
 
 						if (flags != 0)
-							Log.outError(LogFilter.Sql, "Disable flags specified for outdoor PvP {0}, useless data.", entry);
+							Log.outError(LogFilter.Sql, "Disable Flags specified for outdoor PvP {0}, useless _data.", entry);
 
 						break;
 					case DisableType.Criteria:
@@ -184,7 +184,7 @@ namespace Game
 						}
 
 						if (flags != 0)
-							Log.outError(LogFilter.Sql, "Disable flags specified for Criteria {0}, useless data.", entry);
+							Log.outError(LogFilter.Sql, "Disable Flags specified for Criteria {0}, useless _data.", entry);
 
 						break;
 					case DisableType.VMAP:
@@ -315,7 +315,7 @@ namespace Game
 				}
 
 				if (pair.Value.flags != 0)
-					Log.outError(LogFilter.Sql, "Disable flags specified for quest {0}, useless data.", entry);
+					Log.outError(LogFilter.Sql, "Disable Flags specified for quest {0}, useless _data.", entry);
 			}
 
 			Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", _DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));

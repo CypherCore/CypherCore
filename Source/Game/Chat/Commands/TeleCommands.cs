@@ -247,7 +247,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[CommandGroup("name")]
+		[CommandGroup("Name")]
 		private class TeleNameCommands
 		{
 			[Command("", RBACPermissions.CommandTeleName, true)]
@@ -262,7 +262,7 @@ namespace Game.Chat
 				Player target = player.GetConnectedPlayer();
 
 				if (where is string &&
-				    where.Equals("$home")) // References target's _homebind
+				    where.Equals("$home")) // References Target's _homebind
 				{
 					if (target)
 					{
@@ -286,7 +286,7 @@ namespace Game.Chat
 					return true;
 				}
 
-				// id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
+				// Id, or string, or [Name] Shift-click form |color|Htele:Id|h[Name]|h|r
 				GameTele tele = where as GameTele;
 
 				return DoNameTeleport(handler, player, tele.mapId, new Position(tele.posX, tele.posY, tele.posZ, tele.orientation), tele.name);
@@ -295,7 +295,7 @@ namespace Game.Chat
 			[CommandGroup("npc")]
 			private class TeleNameNpcCommands
 			{
-				[Command("guid", RBACPermissions.CommandTeleName, true)]
+				[Command("Guid", RBACPermissions.CommandTeleName, true)]
 				private static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, PlayerIdentifier player, ulong spawnId)
 				{
 					if (player == null)
@@ -315,7 +315,7 @@ namespace Game.Chat
 					return DoNameTeleport(handler, player, spawnpoint.MapId, spawnpoint.SpawnPoint, creatureTemplate.Name);
 				}
 
-				[Command("id", RBACPermissions.CommandTeleName, true)]
+				[Command("Id", RBACPermissions.CommandTeleName, true)]
 				private static bool HandleTeleNameNpcIdCommand(CommandHandler handler, PlayerIdentifier player, uint creatureId)
 				{
 					if (player == null)
@@ -352,7 +352,7 @@ namespace Game.Chat
 					return DoNameTeleport(handler, player, spawnpoint.MapId, spawnpoint.SpawnPoint, creatureTemplate.Name);
 				}
 
-				[Command("name", RBACPermissions.CommandTeleName, true)]
+				[Command("Name", RBACPermissions.CommandTeleName, true)]
 				private static bool HandleTeleNameNpcNameCommand(CommandHandler handler, PlayerIdentifier player, Tail name)
 				{
 					string normalizedName = name;
@@ -362,7 +362,7 @@ namespace Game.Chat
 
 					WorldDatabase.EscapeString(ref normalizedName);
 
-					SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.name FROM creature c INNER JOIN creature_template ct ON c.id = ct.entry WHERE ct.name LIKE '{normalizedName}'");
+					SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.Name FROM creature c INNER JOIN creature_template ct ON c.Id = ct.entry WHERE ct.Name LIKE '{normalizedName}'");
 
 					if (result.IsEmpty())
 					{

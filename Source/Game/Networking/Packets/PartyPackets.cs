@@ -1190,7 +1190,7 @@ namespace Game.Networking.Packets
 
 		public ObjectGuid GUID;
 		public string Name;
-		public string VoiceStateID; // same as bgs.protocol.club.v1.MemberVoiceState.id
+		public string VoiceStateID; // same as bgs.protocol.club.v1.MemberVoiceState.Id
 		public byte Class;
 		public byte Subgroup;
 		public byte Flags;

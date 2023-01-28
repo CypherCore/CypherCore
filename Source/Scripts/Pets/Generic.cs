@@ -167,8 +167,8 @@ namespace Scripts.Pets
 				// Emote and sound never shows up in sniffs because both comes from spell visual directly.
 				// Both 69683 and 70050 can trigger spells at once and are not linked together in any way.
 				// Effect of 70050 is overlapped by effect of 69683 but not instantly (69683 is a series of spell casts, takes longer to execute).
-				// However, for some reason emote is not played if creature is idle and only if creature is moving or is already rooted.
-				// For now it's scripted manually in script below to play emote always.
+				// However, for some reason Emote is not played if creature is idle and only if creature is moving or is already rooted.
+				// For now it's scripted manually in script below to play Emote always.
 				if (RandomHelper.randChance(50))
 					GetTarget().CastSpell(GetTarget(), SpellIds.LichPetEmote, true);
 			}

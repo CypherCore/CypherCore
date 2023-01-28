@@ -179,7 +179,7 @@ namespace Game.BattleFields
 
 			if (relic)
 			{
-				// Update faction of relic, only attacker can click on
+				// Update faction of relic, only Attacker can click on
 				relic.SetFaction(WGConst.WintergraspFaction[GetAttackerTeam()]);
 				// Set in use (not allow to click on before last door is broken)
 				relic.SetFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
@@ -221,7 +221,7 @@ namespace Game.BattleFields
 			SetData(WGData.DamagedTowerAtt, 0);
 			SetData(WGData.DamagedTowerDef, 0);
 
-			// Update graveyard (in no war time all graveyard is to deffender, in war time, depend of base)
+			// Update graveyard (in no war Time all graveyard is to deffender, in war Time, depend of base)
 			foreach (var workShop in Workshops)
 				if (workShop != null)
 					workShop.UpdateGraveyardAndWorkshop();
@@ -851,7 +851,7 @@ namespace Game.BattleFields
 					}
 				}
 
-				// If all three south towers are destroyed (ie. all attack towers), remove ten minutes from battle time
+				// If all three south towers are destroyed (ie. all attack towers), remove ten minutes from battle Time
 				if (GetData(WGData.BrokenTowerAtt) == 3)
 				{
 					if ((int)(_Timer - 600000) < 0)
@@ -892,7 +892,7 @@ namespace Game.BattleFields
 					relic.SetRespawnTime(0);
 			}
 
-			// if destroy or damage event, search the wall/tower and update worldstate/send warning message
+			// if destroy or Damage event, search the wall/tower and update worldstate/send warning message
 			foreach (var building in BuildingsInZone)
 				if (go.GetGUID() == building.GetGUID())
 				{
@@ -920,7 +920,7 @@ namespace Game.BattleFields
 				UpdateData(WGData.DamagedTowerDef, 1);
 		}
 
-		// Update vehicle count WorldState to player
+		// Update vehicle Count WorldState to player
 		private void UpdateVehicleCountWG()
 		{
 			Global.WorldStateMgr.SetValue(WorldStates.BattlefieldWgVehicleH, (int)GetData(WGData.VehicleH), false, _Map);
@@ -1112,7 +1112,7 @@ namespace Game.BattleFields
 
 					break;
 				case WGGameObjectBuildingType.Tower:
-					_teamControl = _wg.GetAttackerTeam(); // The towers in the south should be the attacker's
+					_teamControl = _wg.GetAttackerTeam(); // The towers in the south should be the Attacker's
 
 					break;
 				default:
@@ -1171,7 +1171,7 @@ namespace Game.BattleFields
 			Global.WorldStateMgr.SetValueAndSaveInDb((int)_worldState, (int)_state, false, _wg.GetMap());
 
 			// Send warning message
-			if (_staticTowerInfo != null) // tower damage + name
+			if (_staticTowerInfo != null) // tower Damage + Name
 				_wg.SendWarning(_staticTowerInfo.DamagedTextId);
 
 			foreach (var guid in _CreatureTopList[_wg.GetAttackerTeam()])
@@ -1257,7 +1257,7 @@ namespace Game.BattleFields
 
 					break;
 				case WGGameObjectBuildingType.Tower:
-					_teamControl = _wg.GetAttackerTeam(); // The towers in the south should be the attacker's
+					_teamControl = _wg.GetAttackerTeam(); // The towers in the south should be the Attacker's
 
 					break;
 				default:

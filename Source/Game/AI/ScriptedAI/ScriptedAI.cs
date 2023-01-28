@@ -46,7 +46,7 @@ namespace Game.AI
 		//Called at World update tick
 		public override void UpdateAI(uint diff)
 		{
-			//Check if we have a current target
+			//Check if we have a current Target
 			if (!UpdateVictim())
 				return;
 
@@ -106,9 +106,9 @@ namespace Game.AI
         /// <summary>
         ///  Add specified amount of threat directly to victim (ignores redirection effects) - also puts victim in combat and engages them if necessary
         /// </summary>
-        /// <param name="victim"></param>
-        /// <param name="amount"></param>
-        /// <param name="who"></param>
+        /// <param Name="victim"></param>
+        /// <param Name="amount"></param>
+        /// <param Name="who"></param>
         public void AddThreat(Unit victim, float amount, Unit who = null)
 		{
 			if (!victim)
@@ -123,9 +123,9 @@ namespace Game.AI
         /// <summary>
         ///  Adds/removes the specified percentage from the specified victim's threat (to who, or me if not specified)
         /// </summary>
-        /// <param name="victim"></param>
-        /// <param name="pct"></param>
-        /// <param name="who"></param>
+        /// <param Name="victim"></param>
+        /// <param Name="pct"></param>
+        /// <param Name="who"></param>
         public void ModifyThreatByPercent(Unit victim, int pct, Unit who = null)
 		{
 			if (!victim)
@@ -140,8 +140,8 @@ namespace Game.AI
         /// <summary>
         ///  Resets the victim's threat level to who (or me if not specified) to zero
         /// </summary>
-        /// <param name="victim"></param>
-        /// <param name="who"></param>
+        /// <param Name="victim"></param>
+        /// <param Name="who"></param>
         public void ResetThreat(Unit victim, Unit who)
 		{
 			if (!victim)
@@ -156,7 +156,7 @@ namespace Game.AI
         /// <summary>
         ///  Resets the specified unit's threat list (me if not specified) - does not delete entries, just sets their threat to zero
         /// </summary>
-        /// <param name="who"></param>
+        /// <param Name="who"></param>
         public void ResetThreatList(Unit who = null)
 		{
 			if (!who)
@@ -168,8 +168,8 @@ namespace Game.AI
         /// <summary>
         ///  Returns the threat level of victim towards who (or me if not specified)
         /// </summary>
-        /// <param name="victim"></param>
-        /// <param name="who"></param>
+        /// <param Name="victim"></param>
+        /// <param Name="who"></param>
         /// <returns></returns>
         public float GetThreat(Unit victim, Unit who = null)
 		{
@@ -185,8 +185,8 @@ namespace Game.AI
         /// <summary>
         ///  Stops combat, ignoring restrictions, for the given creature
         /// </summary>
-        /// <param name="who"></param>
-        /// <param name="reset"></param>
+        /// <param Name="who"></param>
+        /// <param Name="reset"></param>
         private void ForceCombatStop(Creature who, bool reset = true)
 		{
 			if (who == null ||
@@ -210,10 +210,10 @@ namespace Game.AI
         /// <summary>
         ///  Stops combat, ignoring restrictions, for the found creatures
         /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="maxSearchRange"></param>
-        /// <param name="samePhase"></param>
-        /// <param name="reset"></param>
+        /// <param Name="entry"></param>
+        /// <param Name="maxSearchRange"></param>
+        /// <param Name="samePhase"></param>
+        /// <param Name="reset"></param>
         private void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
 		{
 			Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
@@ -237,10 +237,10 @@ namespace Game.AI
         /// <summary>
         ///  Stops combat, ignoring restrictions, for the found creatures
         /// </summary>
-        /// <param name="creatureEntries"></param>
-        /// <param name="maxSearchRange"></param>
-        /// <param name="samePhase"></param>
-        /// <param name="reset"></param>
+        /// <param Name="creatureEntries"></param>
+        /// <param Name="maxSearchRange"></param>
+        /// <param Name="samePhase"></param>
+        /// <param Name="reset"></param>
         private void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
 		{
 			foreach (var entry in creatureEntries)
@@ -256,7 +256,7 @@ namespace Game.AI
 		//Returns spells that meet the specified criteria from the creatures spell list
 		public SpellInfo SelectSpell(Unit target, SpellSchoolMask school, Mechanics mechanic, SelectTargetType targets, float rangeMin, float rangeMax, SelectEffect effect)
 		{
-			//No target so we can't cast
+			//No Target so we can't cast
 			if (target == null)
 				return null;
 
@@ -272,8 +272,8 @@ namespace Game.AI
 			//Check if each spell is viable(set it to null if not)
 			for (uint i = 0; i < SharedConst.MaxCreatureSpells; i++)
 			{
-				SpellInfo       tempSpell = Global.SpellMgr.GetSpellInfo(me._spells[i], me.GetMap().GetDifficultyID());
-				AISpellInfoType aiSpell   = GetAISpellInfo(me._spells[i], me.GetMap().GetDifficultyID());
+				SpellInfo       tempSpell = Global.SpellMgr.GetSpellInfo(me.Spells[i], me.GetMap().GetDifficultyID());
+				AISpellInfoType aiSpell   = GetAISpellInfo(me.Spells[i], me.GetMap().GetDifficultyID());
 
 				//This spell doesn't exist
 				if (tempSpell == null ||
@@ -324,7 +324,7 @@ namespace Game.AI
 				    me.GetSpellMaxRangeForTarget(target, tempSpell) > rangeMax)
 					continue;
 
-				//Check if our target is in range
+				//Check if our Target is in range
 				if (me.IsWithinDistInMap(target, me.GetSpellMinRangeForTarget(target, tempSpell)) ||
 				    !me.IsWithinDistInMap(target, me.GetSpellMaxRangeForTarget(target, tempSpell)))
 					continue;

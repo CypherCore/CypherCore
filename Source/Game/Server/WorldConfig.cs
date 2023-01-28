@@ -1007,7 +1007,7 @@ namespace Game
             // Allow 5-man parties to use raid warnings
             Values[WorldCfg.ChatPartyRaidWarnings] = GetDefaultValue("PartyRaidWarnings", false);
 
-            // Allow to cache data queries
+            // Allow to cache _data queries
             Values[WorldCfg.CacheDataQueries] = GetDefaultValue("CacheDataQueries", true);
 
             // Check Invalid Position

@@ -11,12 +11,12 @@ namespace Game.BattleGrounds.Zones
 {
 	public class BgStrandOfAncients : Battleground
 	{
-		/// Id of attacker team
+		/// Id of Attacker team
 		private int Attackers;
 
-		private Dictionary<uint /*id*/, uint /*timer*/> DemoliserRespawnList = new();
+		private Dictionary<uint /*Id*/, uint /*timer*/> DemoliserRespawnList = new();
 
-		// Max time of round
+		// Max Time of round
 		private uint EndRoundTimer;
 
 		// Status of each gate (Destroy/Damage/Intact)
@@ -46,7 +46,7 @@ namespace Game.BattleGrounds.Zones
 		// used for know we are in timer phase or not (used for worldstate update)
 		private bool TimerEnabled;
 
-		// Totale elapsed time of current round
+		// Totale elapsed Time of current round
 		private uint TotalTime;
 
 		// 5secs before starting the 1min countdown for second round
@@ -723,7 +723,7 @@ namespace Game.BattleGrounds.Zones
 			if (BgCreatures[0].IsEmpty())
 				return;
 
-			// set flags only for the demolishers on the beach, factory ones dont need it
+			// set Flags only for the demolishers on the beach, factory ones dont need it
 			for (byte i = SACreatureTypes.Demolisher1; i <= SACreatureTypes.Demolisher4; i++)
 			{
 				Creature dem = GetBGCreature(i);

@@ -214,11 +214,11 @@ namespace Game.BattleGrounds
 
 			//store pointer to arrayindex of player that was added first
 			uint lastPlayerAddedPointer = _WaitTimeLastPlayer[team_index][(int)bracket_id];
-			//remove his time from sum
+			//remove his Time from sum
 			_SumOfWaitTimes[team_index][(int)bracket_id] -= _WaitTimes[team_index][(int)bracket_id][lastPlayerAddedPointer];
-			//set average time to new
+			//set average Time to new
 			_WaitTimes[team_index][(int)bracket_id][lastPlayerAddedPointer] = timeInQueue;
-			//add new time to sum
+			//add new Time to sum
 			_SumOfWaitTimes[team_index][(int)bracket_id] += timeInQueue;
 			//set index of last player added to next one
 			lastPlayerAddedPointer++;
@@ -272,7 +272,7 @@ namespace Game.BattleGrounds
 			GroupQueueInfo group          = playerQueueInfo.GroupInfo;
 			GroupQueueInfo groupQueseInfo = null;
 			// mostly people with the highest levels are in Battlegrounds, thats why
-			// we count from MAX_Battleground_QUEUES - 1 to 0
+			// we Count from MAX_Battleground_QUEUES - 1 to 0
 
 			uint index = (group.Team == Team.Horde) ? BattlegroundConst.BgQueuePremadeHorde : BattlegroundConst.BgQueuePremadeAlliance;
 
@@ -312,7 +312,7 @@ namespace Game.BattleGrounds
 			if (group.Players.ContainsKey(guid))
 				group.Players.Remove(guid);
 
-			// if invited to bg, and should decrease invited count, then do it
+			// if invited to bg, and should decrease invited Count, then do it
 			if (decreaseInvitedCount && group.IsInvitedToBGInstanceGUID != 0)
 			{
 				Battleground bg = Global.BattlegroundMgr.GetBattleground(group.IsInvitedToBGInstanceGUID, (BattlegroundTypeId)_queueId.BattlemasterListId);
@@ -522,7 +522,7 @@ namespace Game.BattleGrounds
 					}
 				}
 
-			//count of groups in queue - used to stop cycles 
+			//Count of groups in queue - used to stop cycles 
 			int alyIndex = 0;
 
 			{
@@ -550,7 +550,7 @@ namespace Game.BattleGrounds
 			/*
 			if we reached this code, then we have to solve NP - complete problem called Subset sum problem
 			So one solution is to check all possible invitation subgroups, or we can use these conditions:
-			1. Last time when BattlegroundQueue.Update was executed we invited all possible players - so there is only small possibility
+			1. Last Time when BattlegroundQueue.Update was executed we invited all possible players - so there is only small possibility
 			    that we will invite now whole queue, because only 1 change has been made to queues from the last BattlegroundQueue.Update call
 			2. Other thing we should consider is group order in queue
 			*/
@@ -594,7 +594,7 @@ namespace Game.BattleGrounds
 					}
 				}
 
-				//count diffs after small update
+				//Count diffs after small update
 				diffAli   = (int)(aliFree - _SelectionPools[TeamId.Alliance].GetPlayerCount());
 				diffHorde = (int)(hordeFree - _SelectionPools[TeamId.Horde].GetPlayerCount());
 			}
@@ -640,7 +640,7 @@ namespace Game.BattleGrounds
 
 					for (uint i = 0; i < SharedConst.PvpTeamsCount; i++)
 						foreach (var groupQueueInfo in _QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueueNormalAlliance + i])
-							//if groupQueueInfo can join BG and player count is less that maxPlayers, then add group to selectionpool
+							//if groupQueueInfo can join BG and player Count is less that maxPlayers, then add group to selectionpool
 							if (groupQueueInfo.IsInvitedToBGInstanceGUID == 0 &&
 							    !_SelectionPools[i].AddGroup(groupQueueInfo, maxPlayers))
 								break;
@@ -697,7 +697,7 @@ namespace Game.BattleGrounds
 				}
 			}
 
-			//try to invite same number of players - this cycle may cause longer wait time even if there are enough players in queue, but we want ballanced bg
+			//try to invite same number of players - this cycle may cause longer wait Time even if there are enough players in queue, but we want ballanced bg
 			uint j = TeamId.Alliance;
 
 			if (_SelectionPools[TeamId.Horde].GetPlayerCount() < _SelectionPools[TeamId.Alliance].GetPlayerCount())
@@ -819,12 +819,12 @@ namespace Game.BattleGrounds
         ///  it must be called after fully adding the members of a group to ensure group joining
         ///  should be called from Battleground.RemovePlayer function in some cases
         /// </summary>
-        /// <param name="diff"></param>
-        /// <param name="bgTypeId"></param>
-        /// <param name="bracket_id"></param>
-        /// <param name="arenaType"></param>
-        /// <param name="isRated"></param>
-        /// <param name="arenaRating"></param>
+        /// <param Name="diff"></param>
+        /// <param Name="bgTypeId"></param>
+        /// <param Name="bracket_id"></param>
+        /// <param Name="arenaType"></param>
+        /// <param Name="isRated"></param>
+        /// <param Name="arenaRating"></param>
         public void BattlegroundQueueUpdate(uint diff, BattlegroundBracketId bracket_id, uint arenaRating)
 		{
 			//if no players in queue - do nothing
@@ -878,7 +878,7 @@ namespace Game.BattleGrounds
 
 			if (bracketEntry == null)
 			{
-				Log.outError(LogFilter.Battleground, "Battleground: Update: bg bracket entry not found for map {0} bracket id {1}", bg_template.GetMapId(), bracket_id);
+				Log.outError(LogFilter.Battleground, "Battleground: Update: bg bracket entry not found for map {0} bracket Id {1}", bg_template.GetMapId(), bracket_id);
 
 				return;
 			}
@@ -954,7 +954,7 @@ namespace Game.BattleGrounds
 			{
 				// found out the minimum and maximum ratings the newly added team should battle against
 				// arenaRating is the rating of the latest joined team, or 0
-				// 0 is on (automatic update call) and we must set it to team's with longest wait time
+				// 0 is on (automatic update call) and we must set it to team's with longest wait Time
 				if (arenaRating == 0)
 				{
 					GroupQueueInfo front1 = null;
@@ -988,10 +988,10 @@ namespace Game.BattleGrounds
 				//set rating range
 				uint arenaMinRating = (arenaRating <= Global.BattlegroundMgr.GetMaxRatingDifference()) ? 0 : arenaRating - Global.BattlegroundMgr.GetMaxRatingDifference();
 				uint arenaMaxRating = arenaRating + Global.BattlegroundMgr.GetMaxRatingDifference();
-				// if max rating difference is set and the time past since server startup is greater than the rating discard time
-				// (after what time the ratings aren't taken into account when making teams) then
-				// the discard time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
-				// else leave the discard time on 0, this way all ratings will be discarded
+				// if max rating difference is set and the Time past since server startup is greater than the rating discard Time
+				// (after what Time the ratings aren't taken into account when making teams) then
+				// the discard Time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
+				// else leave the discard Time on 0, this way all ratings will be discarded
 				int discardTime = (int)(GameTime.GetGameTimeMS() - Global.BattlegroundMgr.GetRatingDiscardTimer());
 
 				// we need to find 2 teams which will play next game
@@ -1091,12 +1091,12 @@ namespace Game.BattleGrounds
 
 			public bool AddGroup(GroupQueueInfo ginfo, uint desiredCount)
 			{
-				//if group is larger than desired count - don't allow to add it to pool
+				//if group is larger than desired Count - don't allow to add it to pool
 				if (ginfo.IsInvitedToBGInstanceGUID == 0 &&
 				    desiredCount >= PlayerCount + ginfo.Players.Count)
 				{
 					SelectedGroups.Add(ginfo);
-					// increase selected players count
+					// increase selected players Count
 					PlayerCount += (uint)ginfo.Players.Count;
 
 					return true;
@@ -1129,7 +1129,7 @@ namespace Game.BattleGrounds
 				//if pool is empty, do nothing
 				if (GetPlayerCount() != 0)
 				{
-					//update player count
+					//update player Count
 					GroupQueueInfo ginfo = groupToKick;
 					SelectedGroups.Remove(groupToKick);
 					PlayerCount -= (uint)ginfo.Players.Count;
@@ -1243,14 +1243,14 @@ namespace Game.BattleGrounds
     public class GroupQueueInfo
 	{
 		public uint ArenaMatchmakerRating;                              // if rated match, inited to the rating of the team
-		public uint ArenaTeamId;                                        // team id if rated match
+		public uint ArenaTeamId;                                        // team Id if rated match
 		public uint ArenaTeamRating;                                    // if rated match, inited to the rating of the team
 		public uint IsInvitedToBGInstanceGUID;                          // was invited to certain BG
-		public uint JoinTime;                                           // time when group was added
+		public uint JoinTime;                                           // Time when group was added
 		public uint OpponentsMatchmakerRating;                          // for rated arena matches
 		public uint OpponentsTeamRating;                                // for rated arena matches
 		public Dictionary<ObjectGuid, PlayerQueueInfo> Players = new(); // player queue info map
-		public uint RemoveInviteTime;                                   // time when we will remove invite for players in group
+		public uint RemoveInviteTime;                                   // Time when we will remove invite for players in group
 		public Team Team;                                               // Player team (ALLIANCE/HORDE)
 	}
 
@@ -1316,7 +1316,7 @@ namespace Game.BattleGrounds
 
     /// <summary>
     ///  This class is used to remove player from BG queue after 1 minute 20 seconds from first invitation
-    ///  We must store removeInvite time in case player left queue and joined and is invited again
+    ///  We must store removeInvite Time in case player left queue and joined and is invited again
     ///  We must store BGQueueTypeId, because Battleground can be deleted already, when player entered it
     /// </summary>
     internal class BGQueueRemoveEvent : BasicEvent
@@ -1356,7 +1356,7 @@ namespace Game.BattleGrounds
 
 				if (bgQueue.IsPlayerInvited(_PlayerGuid, _BgInstanceGUID, _RemoveTime))
 				{
-					Log.outDebug(LogFilter.Battleground, "Battleground: removing player {0} from bg queue for instance {1} because of not pressing enter battle in time.", player.GetGUID().ToString(), _BgInstanceGUID);
+					Log.outDebug(LogFilter.Battleground, "Battleground: removing player {0} from bg queue for instance {1} because of not pressing enter battle in Time.", player.GetGUID().ToString(), _BgInstanceGUID);
 
 					player.RemoveBattlegroundQueueId(_BgQueueTypeId);
 					bgQueue.RemovePlayer(_PlayerGuid, true);

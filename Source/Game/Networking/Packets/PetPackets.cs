@@ -239,10 +239,10 @@ namespace Game.Networking.Packets
 			if (RenameData.HasDeclinedNames)
 			{
 				for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-					_worldPacket.WriteBits(RenameData.DeclinedNames.name[i].GetByteCount(), 7);
+					_worldPacket.WriteBits(RenameData.DeclinedNames.Name[i].GetByteCount(), 7);
 
 				for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-					_worldPacket.WriteString(RenameData.DeclinedNames.name[i]);
+					_worldPacket.WriteString(RenameData.DeclinedNames.Name[i]);
 			}
 
 			_worldPacket.WriteString(RenameData.NewName);
@@ -275,7 +275,7 @@ namespace Game.Networking.Packets
 					count[i] = _worldPacket.ReadBits<uint>(7);
 
 				for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-					RenameData.DeclinedNames.name[i] = _worldPacket.ReadString(count[i]);
+					RenameData.DeclinedNames.Name[i] = _worldPacket.ReadString(count[i]);
 			}
 
 			RenameData.NewName = _worldPacket.ReadString(nameLen);

@@ -56,8 +56,8 @@ namespace Game
 
 		public Guild GetGuildByGuid(ObjectGuid guid)
 		{
-			// Full guids are only used when receiving/sending data to client
-			// everywhere else guild id is used
+			// Full guids are only used when receiving/sending _data to client
+			// everywhere else guild Id is used
 			if (guid.IsGuild())
 			{
 				ulong guildId = guid.GetCounter();
@@ -105,7 +105,7 @@ namespace Game
 				uint oldMSTime = Time.GetMSTime();
 
 				//          0          1       2             3              4              5              6
-				SQLResult result = DB.Characters.Query("SELECT g.guildid, g.name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, " +
+				SQLResult result = DB.Characters.Query("SELECT g.guildid, g.Name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, " +
 				                                       //   7                  8       9       10            11          12
 				                                       "g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, COUNT(gbt.guildid) " +
 				                                       "FROM guild g LEFT JOIN guild_bank_tab gbt ON g.guildid = gbt.guildid GROUP BY g.guildid ORDER BY g.guildid ASC");
@@ -175,14 +175,14 @@ namespace Game
 
 				// Delete orphaned guild member entries before loading the valid ones
 				DB.Characters.DirectExecute("DELETE gm FROM guild_member gm LEFT JOIN guild g ON gm.guildId = g.guildId WHERE g.guildId IS NULL");
-				DB.Characters.DirectExecute("DELETE gm FROM guild_member_withdraw gm LEFT JOIN guild_member g ON gm.guid = g.guid WHERE g.guid IS NULL");
+				DB.Characters.DirectExecute("DELETE gm FROM guild_member_withdraw gm LEFT JOIN guild_member g ON gm.Guid = g.Guid WHERE g.Guid IS NULL");
 
 				//           0           1        2     3      4        5       6       7       8       9       10
-				SQLResult result = DB.Characters.Query("SELECT gm.guildid, gm.guid, `rank`, pnote, offnote, w.tab0, w.tab1, w.tab2, w.tab3, w.tab4, w.tab5, " +
+				SQLResult result = DB.Characters.Query("SELECT gm.guildid, gm.Guid, `rank`, pnote, offnote, w.tab0, w.tab1, w.tab2, w.tab3, w.tab4, w.tab5, " +
 				                                       //  11      12      13       14      15       16      17       18        19      20         21
-				                                       "w.tab6, w.tab7, w.money, c.name, c.level, c.race, c.class, c.gender, c.zone, c.account, c.logout_time " +
-				                                       "FROM guild_member gm LEFT JOIN guild_member_withdraw w ON gm.guid = w.guid " +
-				                                       "LEFT JOIN characters c ON c.guid = gm.guid ORDER BY gm.guildid ASC");
+				                                       "w.tab6, w.tab7, w.money, c.Name, c.level, c.race, c.class, c.Gender, c.zone, c.account, c.logout_time " +
+				                                       "FROM guild_member gm LEFT JOIN guild_member_withdraw w ON gm.Guid = w.Guid " +
+				                                       "LEFT JOIN characters c ON c.Guid = gm.Guid ORDER BY gm.guildid ASC");
 
 				if (result.IsEmpty())
 				{
@@ -436,8 +436,8 @@ namespace Game
 				Log.outInfo(LogFilter.ServerLoading, "Loaded guild achievements and criterias in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
 			}
 
-			// 11. Validate loaded guild data
-			Log.outInfo(LogFilter.Server, "Validating data of loaded guilds...");
+			// 11. Validate loaded guild _data
+			Log.outInfo(LogFilter.Server, "Validating _data of loaded guilds...");
 
 			{
 				uint oldMSTime = Time.GetMSTime();
@@ -446,7 +446,7 @@ namespace Game
 					if (!guild.Value.Validate())
 						GuildStore.Remove(guild.Key);
 
-				Log.outInfo(LogFilter.ServerLoading, "Validated data of loaded guilds in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+				Log.outInfo(LogFilter.ServerLoading, "Validated _data of loaded guilds in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
 			}
 		}
 

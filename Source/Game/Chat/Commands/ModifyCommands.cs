@@ -119,22 +119,22 @@ namespace Game.Chat
 			if (!uint.TryParse(pfactionid, out uint factionid))
 			{
 				uint  _factionid = target.GetFaction();
-				uint  _flag      = target._unitData.Flags;
-				ulong _npcflag   = ((ulong)target._unitData.NpcFlags[0] << 32) | target._unitData.NpcFlags[1];
-				uint  _dyflag    = target._objectData.DynamicFlags;
+				uint  _flag      = target.UnitData.Flags;
+				ulong _npcflag   = ((ulong)target.UnitData.NpcFlags[0] << 32) | target.UnitData.NpcFlags[1];
+				uint  _dyflag    = target.ObjectData.DynamicFlags;
 				handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), _factionid, _flag, _npcflag, _dyflag);
 
 				return true;
 			}
 
 			if (!uint.TryParse(args.NextString(), out uint flag))
-				flag = target._unitData.Flags;
+				flag = target.UnitData.Flags;
 
 			if (!ulong.TryParse(args.NextString(), out ulong npcflag))
-				npcflag = ((ulong)target._unitData.NpcFlags[0] << 32) | target._unitData.NpcFlags[1];
+				npcflag = ((ulong)target.UnitData.NpcFlags[0] << 32) | target.UnitData.NpcFlags[1];
 
 			if (!uint.TryParse(args.NextString(), out uint dyflag))
-				dyflag = target._objectData.DynamicFlags;
+				dyflag = target.ObjectData.DynamicFlags;
 
 			if (!CliDB.FactionTemplateStorage.ContainsKey(factionid))
 			{
@@ -237,7 +237,7 @@ namespace Game.Chat
 			return false;
 		}
 
-		[Command("mount", RBACPermissions.CommandModifyMount)]
+		[Command("Mount", RBACPermissions.CommandModifyMount)]
 		private static bool HandleModifyMountCommand(CommandHandler handler, StringArguments args)
 		{
 			if (args.Empty())
@@ -369,10 +369,10 @@ namespace Game.Chat
 
 			int amount = args.NextInt32();
 
-			//target.ModifyCurrency(CurrencyTypes.HonorPoints, amount, true, true);
+			//Target.ModifyCurrency(CurrencyTypes.HonorPoints, amount, true, true);
 			handler.SendSysMessage("NOT IMPLEMENTED: {0} honor NOT added.", amount);
 
-			//handler.SendSysMessage(CypherStrings.CommandModifyHonor, handler.GetNameLink(target), target.GetCurrency((uint)CurrencyTypes.HonorPoints));
+			//handler.SendSysMessage(CypherStrings.CommandModifyHonor, handler.GetNameLink(Target), Target.GetCurrency((uint)CurrencyTypes.HonorPoints));
 			return true;
 		}
 
@@ -444,7 +444,7 @@ namespace Game.Chat
 				return false;
 			}
 
-			// try to find rank by name
+			// try to find rank by Name
 			if ((amount == 0) &&
 			    !(amount < 0) &&
 			    !rankTxt.IsNumber())
@@ -621,7 +621,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[Command("gender", RBACPermissions.CommandModifyGender)]
+		[Command("Gender", RBACPermissions.CommandModifyGender)]
 		private static bool HandleModifyGenderCommand(CommandHandler handler, StringArguments args)
 		{
 			if (args.Empty())
@@ -665,7 +665,7 @@ namespace Game.Chat
 				return false;
 			}
 
-			// Set gender
+			// Set Gender
 			target.SetGender(gender);
 			target.SetNativeGender(gender);
 

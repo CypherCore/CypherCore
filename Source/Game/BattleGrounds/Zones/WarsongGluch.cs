@@ -173,7 +173,7 @@ namespace Game.BattleGrounds.Zones
 				else if ((_flagState[TeamId.Alliance] == WSGFlagState.OnBase || _flagState[TeamId.Alliance] == WSGFlagState.WaitRespawn) &&
 				         (_flagState[TeamId.Horde] == WSGFlagState.OnBase || _flagState[TeamId.Horde] == WSGFlagState.WaitRespawn))
 				{
-					// Both flags are in base or awaiting respawn.
+					// Both Flags are in base or awaiting respawn.
 					// Remove assault debuffs, reset timers
 
 					Player player = Global.ObjAccessor.FindPlayer(_FlagKeepers[0]);
@@ -310,7 +310,7 @@ namespace Game.BattleGrounds.Zones
 				if (!IsHordeFlagPickedup())
 					return;
 
-				SetHordeFlagPicker(ObjectGuid.Empty); // must be before aura remove to prevent 2 events (drop+capture) at the same time
+				SetHordeFlagPicker(ObjectGuid.Empty); // must be before aura remove to prevent 2 events (drop+capture) at the same Time
 				// horde flag in base (but not respawned yet)
 				_flagState[TeamId.Horde] = WSGFlagState.WaitRespawn;
 				// Drop Horde Flag from Player
@@ -332,7 +332,7 @@ namespace Game.BattleGrounds.Zones
 				if (!IsAllianceFlagPickedup())
 					return;
 
-				SetAllianceFlagPicker(ObjectGuid.Empty); // must be before aura remove to prevent 2 events (drop+capture) at the same time
+				SetAllianceFlagPicker(ObjectGuid.Empty); // must be before aura remove to prevent 2 events (drop+capture) at the same Time
 				// alliance flag in base (but not respawned yet)
 				_flagState[TeamId.Alliance] = WSGFlagState.WaitRespawn;
 				// Drop Alliance Flag from Player
@@ -895,11 +895,11 @@ namespace Game.BattleGrounds.Zones
 
 			switch (type)
 			{
-				case ScoreType.FlagCaptures: // flags captured
+				case ScoreType.FlagCaptures: // Flags captured
 					player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, WSObjectives.CaptureFlag);
 
 					break;
-				case ScoreType.FlagReturns: // flags returned
+				case ScoreType.FlagReturns: // Flags returned
 					player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, WSObjectives.ReturnFlag);
 
 					break;

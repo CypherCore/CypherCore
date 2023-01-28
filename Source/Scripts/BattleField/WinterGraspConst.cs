@@ -570,10 +570,10 @@ namespace Game.BattleFields
 
 	internal class WintergraspTowerData
 	{
-		// Creature: Turrets and Guard // @todo: Killed on Tower destruction ? Tower damage ? Requires confirming
+		// Creature: Turrets and Guard // @todo: Killed on Tower destruction ? Tower Damage ? Requires confirming
 		public WintergraspObjectPositionData[] CreatureBottom = new WintergraspObjectPositionData[9];
 		public WintergraspGameObjectData[] GameObject = new WintergraspGameObjectData[6]; // Gameobject position and entry (Horde/Alliance)
-		public uint towerEntry;                                                           // Gameobject id of tower
+		public uint towerEntry;                                                           // Gameobject Id of tower
 	}
 
 	internal struct WintergraspObjectPositionData

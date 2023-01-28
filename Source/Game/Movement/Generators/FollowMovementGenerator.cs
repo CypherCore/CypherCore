@@ -59,7 +59,7 @@ namespace Game.Movement
 			    !owner.IsAlive())
 				return false;
 
-			// our target might have gone away
+			// our Target might have gone away
 			Unit target = _abstractFollower.GetTarget();
 
 			if (target == null ||

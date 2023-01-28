@@ -67,7 +67,7 @@ namespace Game.Chat
 						}
 						else
 						{
-							Log.outError(LogFilter.Sql, $"Table `command` contains data for non-existant command '{name}'. Skipped.");
+							Log.outError(LogFilter.Sql, $"Table `command` contains _data for non-existant command '{name}'. Skipped.");
 							cmd = null;
 
 							break;
@@ -78,7 +78,7 @@ namespace Game.Chat
 						continue;
 
 					if (!cmd._helpText.IsEmpty())
-						Log.outError(LogFilter.Sql, $"Table `command` contains duplicate data for command '{name}'. Skipped.");
+						Log.outError(LogFilter.Sql, $"Table `command` contains duplicate _data for command '{name}'. Skipped.");
 
 					if (cmd._helpString == 0)
 						cmd._helpText = help;

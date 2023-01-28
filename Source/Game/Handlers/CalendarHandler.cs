@@ -360,7 +360,7 @@ namespace Game
 			}
 			else
 			{
-				// Invitee offline, get data from database
+				// Invitee offline, get _data from database
 				ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(calendarInvite.Name);
 
 				if (!guid.IsEmpty())
@@ -391,7 +391,7 @@ namespace Game
 				return;
 			}
 
-			SQLResult result1 = DB.Characters.Query("SELECT flags FROM character_social WHERE guid = {0} AND friend = {1}", inviteeGuid, playerGuid);
+			SQLResult result1 = DB.Characters.Query("SELECT Flags FROM character_social WHERE Guid = {0} AND friend = {1}", inviteeGuid, playerGuid);
 
 			if (!result1.IsEmpty())
 				if (Convert.ToBoolean(result1.Read<byte>(0) & (byte)SocialFlag.Ignored))

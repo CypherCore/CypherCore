@@ -71,7 +71,7 @@ namespace Scripts.Events.LoveIsInTheAir
 			// Every 5 seconds
 			Unit target = GetTarget();
 
-			// If our player is no longer sit, Remove all auras
+			// If our player is no longer sit, Remove all Auras
 			if (target.GetStandState() != UnitStandStateType.Sit)
 			{
 				target.RemoveAura(SpellIds.RomanticPicnicAchiev);

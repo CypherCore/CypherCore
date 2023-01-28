@@ -79,7 +79,7 @@ namespace Game.Spells
 			if (_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
 			{
 				TargetLocation target = new();
-				target.Transport = _src.TransportGUID; // relative position guid here - transport for example
+				target.Transport = _src.TransportGUID; // relative position Guid here - Transport for example
 
 				if (!_src.TransportGUID.IsEmpty())
 					target.Location = _src.TransportOffset;
@@ -92,7 +92,7 @@ namespace Game.Spells
 			if (Convert.ToBoolean(_targetMask & SpellCastTargetFlags.DestLocation))
 			{
 				TargetLocation target = new();
-				target.Transport = _dst.TransportGUID; // relative position guid here - transport for example
+				target.Transport = _dst.TransportGUID; // relative position Guid here - Transport for example
 
 				if (!_dst.TransportGUID.IsEmpty())
 					target.Location = _dst.TransportOffset;
@@ -330,7 +330,7 @@ namespace Game.Spells
 				if (_targetMask.HasAnyFlag(SpellCastTargetFlags.Item))
 					_itemTarget = player.GetItemByGuid(_itemTargetGUID);
 				else if (_targetMask.HasAnyFlag(SpellCastTargetFlags.TradeItem))
-					if (_itemTargetGUID == ObjectGuid.TradeItem) // here it is not guid but Slot. Also prevents hacking slots
+					if (_itemTargetGUID == ObjectGuid.TradeItem) // here it is not Guid but Slot. Also prevents hacking slots
 					{
 						TradeData pTrade = player.GetTradeData();
 
@@ -342,7 +342,7 @@ namespace Game.Spells
 					_itemTargetEntry = _itemTarget.GetEntry();
 			}
 
-			// update positions by transport move
+			// update positions by Transport move
 			if (HasSrc() &&
 			    !_src.TransportGUID.IsEmpty())
 			{

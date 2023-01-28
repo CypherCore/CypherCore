@@ -94,13 +94,13 @@ namespace Game.DataStorage
 
 				var sections = reader.ReadArray<SectionHeader>(Header.SectionsCount);
 
-				// field meta data
+				// field meta _data
 				FieldMeta = reader.ReadArray<FieldMetaData>(Header.FieldCount);
 
-				// column meta data 
+				// column meta _data 
 				ColumnMeta = reader.ReadArray<ColumnMetaData>(Header.FieldCount);
 
-				// pallet data
+				// pallet _data
 				PalletData = new Value32[ColumnMeta.Length][];
 
 				for (int i = 0; i < ColumnMeta.Length; i++)
@@ -108,7 +108,7 @@ namespace Game.DataStorage
 					    ColumnMeta[i].CompressionType == DB2ColumnCompression.PalletArray)
 						PalletData[i] = reader.ReadArray<Value32>(ColumnMeta[i].AdditionalDataSize / 4);
 
-				// common data
+				// common _data
 				CommonData = new Dictionary<int, Value32>[ColumnMeta.Length];
 
 				for (int i = 0; i < ColumnMeta.Length; i++)
@@ -143,10 +143,10 @@ namespace Game.DataStorage
 
 					if (!Header.HasOffsetTable())
 					{
-						// records data
+						// records _data
 						recordsData = reader.ReadBytes((int)(sections[sectionIndex].NumRecords * Header.RecordSize));
 
-						// string data
+						// string _data
 						stringsTable = new Dictionary<long, string>();
 
 						long stringDataOffset = 0;
@@ -167,7 +167,7 @@ namespace Game.DataStorage
 					}
 					else
 					{
-						// sparse data with inlined strings
+						// sparse _data with inlined strings
 						recordsData = reader.ReadBytes(sections[sectionIndex].SparseTableOffset - sections[sectionIndex].FileOffset);
 
 						if (reader.BaseStream.Position != sections[sectionIndex].SparseTableOffset)
@@ -176,11 +176,11 @@ namespace Game.DataStorage
 
 					Array.Resize(ref recordsData, recordsData.Length + 8); // pad with extra zeros so we don't crash when reading
 
-					// index data
+					// index _data
 					int[] indexData    = reader.ReadArray<int>((uint)(sections[sectionIndex].IndexDataSize / 4));
 					bool  isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == sections[sectionIndex].NumRecords;
 
-					// duplicate rows data
+					// duplicate rows _data
 					Dictionary<int, int> copyData = new();
 
 					for (int i = 0; i < sections[sectionIndex].NumCopyRecords; i++)
@@ -189,7 +189,7 @@ namespace Game.DataStorage
 					if (sections[sectionIndex].NumSparseRecords > 0)
 						sparseEntries = reader.ReadArray<SparseEntry>((uint)sections[sectionIndex].NumSparseRecords);
 
-					// reference data
+					// reference _data
 					ReferenceData refData = null;
 
 					if (sections[sectionIndex].ParentLookupDataSize > 0)
@@ -724,7 +724,7 @@ namespace Game.DataStorage
 		public int StringTableSize;
 		public int SparseTableOffset;    // CatalogDataOffset, absolute value, {uint offset, ushort size}[MaxId - MinId + 1]
 		public int IndexDataSize;        // int indexData[IndexDataSize / 4]
-		public int ParentLookupDataSize; // uint NumRecords, uint minId, uint maxId, {uint id, uint index}[NumRecords], questionable usefulness...
+		public int ParentLookupDataSize; // uint NumRecords, uint minId, uint maxId, {uint Id, uint index}[NumRecords], questionable usefulness...
 		public int NumSparseRecords;
 		public int NumCopyRecords;
 	}

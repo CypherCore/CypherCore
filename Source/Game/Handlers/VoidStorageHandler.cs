@@ -30,7 +30,7 @@ namespace Game
 
 			if (GetPlayer().IsVoidStorageUnlocked())
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageUnlock - Player({0}, name: {1}) tried to unlock void storage a 2nd time.", GetPlayer().GetGUID().ToString(), GetPlayer().GetName());
+				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageUnlock - Player({0}, Name: {1}) tried to unlock void storage a 2nd Time.", GetPlayer().GetGUID().ToString(), GetPlayer().GetName());
 
 				return;
 			}
@@ -56,7 +56,7 @@ namespace Game
 
 			if (!GetPlayer().IsVoidStorageUnlocked())
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageQuery - {0} name: {1} queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
+				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageQuery - {0} Name: {1} queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
 				SendPacket(new VoidStorageFailed());
 
 				return;
@@ -99,7 +99,7 @@ namespace Game
 
 			if (!player.IsVoidStorageUnlocked())
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - Player ({0}, name: {1}) queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
+				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - Player ({0}, Name: {1}) queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
 
 				return;
 			}
@@ -238,7 +238,7 @@ namespace Game
 
 			if (!player.IsVoidStorageUnlocked())
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - Player ({0}, name: {1}) queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
+				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - Player ({0}, Name: {1}) queried void storage without unlocking it.", player.GetGUID().ToString(), player.GetName());
 
 				return;
 			}
@@ -247,7 +247,7 @@ namespace Game
 
 			if (player.GetVoidStorageItem(swapVoidItem.VoidItemGuid.GetCounter(), out oldSlot) == null)
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - Player (GUID: {0}, name: {1}) requested swapping an invalid Item (Slot: {2}, itemid: {3}).", player.GetGUID().ToString(), player.GetName(), swapVoidItem.DstSlot, swapVoidItem.VoidItemGuid.ToString());
+				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - Player (GUID: {0}, Name: {1}) requested swapping an invalid Item (Slot: {2}, itemid: {3}).", player.GetGUID().ToString(), player.GetName(), swapVoidItem.DstSlot, swapVoidItem.VoidItemGuid.ToString());
 
 				return;
 			}

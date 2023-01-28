@@ -585,7 +585,7 @@ namespace Game.Entities
 
 		private void HandleCounterOverflow()
 		{
-			Log.outFatal(LogFilter.Server, "{0} guid overflow!! Can't continue, shutting down server. ", _highGuid);
+			Log.outFatal(LogFilter.Server, "{0} Guid overflow!! Can't continue, shutting down server. ", _highGuid);
 			Global.WorldMgr.StopNow();
 		}
 

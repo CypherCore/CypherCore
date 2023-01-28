@@ -67,7 +67,7 @@ namespace Game.Chat
 						_player.LeaveBattleground(false); // Note: should be changed so _player gets no Deserter debuff
 					}
 
-					// all's well, set bg id
+					// all's well, set bg Id
 					// when porting out from the bg, it will be reset to 0
 					_player.SetBattlegroundId(target.GetBattlegroundId(), target.GetBattlegroundTypeId());
 
@@ -120,7 +120,7 @@ namespace Game.Chat
 				else
 					_player.SaveRecallPosition(); // save only in non-flight case
 
-				// to point to see at target with same orientation
+				// to point to see at Target with same orientation
 				float x, y, z;
 				target.GetClosePoint(out x, out y, out z, _player.GetCombatReach(), 1.0f);
 
@@ -234,7 +234,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[CommandNonGroup("damage", RBACPermissions.CommandDamage)]
+		[CommandNonGroup("Damage", RBACPermissions.CommandDamage)]
 		private static bool HandleDamageCommand(CommandHandler handler, StringArguments args)
 		{
 			if (args.Empty())
@@ -320,7 +320,7 @@ namespace Game.Chat
 
 			Player attacker = handler.GetSession().GetPlayer();
 
-			// flat melee damage without resistence/etc reduction
+			// flat melee Damage without resistence/etc reduction
 			if (string.IsNullOrEmpty(schoolStr))
 			{
 				Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
@@ -342,7 +342,7 @@ namespace Game.Chat
 
 			string spellStr = args.NextString();
 
-			// melee damage by specific school
+			// melee Damage by specific school
 			if (string.IsNullOrEmpty(spellStr))
 			{
 				DamageInfo dmgInfo = new(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
@@ -362,8 +362,8 @@ namespace Game.Chat
 				return true;
 			}
 
-			// non-melee damage
-			// number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+			// non-melee Damage
+			// number or [Name] Shift-click form |color|Hspell:spell_id|h[Name]|h|r or Htalent form
 			uint spellid = handler.ExtractSpellIdFromLink(args);
 
 			if (spellid == 0)
@@ -375,8 +375,8 @@ namespace Game.Chat
 				return false;
 
 			SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
-			damageInfo.damage = damage_;
-			Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+			damageInfo.Damage = damage_;
+			Unit.DealDamageMods(damageInfo.Attacker, damageInfo.Target, ref damageInfo.Damage, ref damageInfo.Absorb);
 			target.DealSpellDamage(damageInfo, true);
 			target.SendSpellNonMeleeDamageLog(damageInfo);
 
@@ -609,7 +609,7 @@ namespace Game.Chat
 				else // Apply the effect
 				{
 					// Add the freeze aura and set the proper duration
-					// Player combat status and flags are now handled
+					// Player combat status and Flags are now handled
 					// in Freeze Spell AuraScript (OnApply)
 					Aura freeze = player.AddAura(9454, player);
 
@@ -785,7 +785,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[CommandNonGroup("guid", RBACPermissions.CommandGuid)]
+		[CommandNonGroup("Guid", RBACPermissions.CommandGuid)]
 		private static bool HandleGUIDCommand(CommandHandler handler)
 		{
 			ObjectGuid guid = handler.GetSession().GetPlayer().GetTarget();
@@ -984,7 +984,7 @@ namespace Game.Chat
 			{
 				string player     = result.Read<string>(0);
 				int    remaintime = result.Read<int>(1);
-				// Save the frozen player to update remaining time in case of future .listfreeze uses
+				// Save the frozen player to update remaining Time in case of future .listfreeze uses
 				// before the frozen State expires
 				Player frozen = Global.ObjAccessor.FindPlayerByName(player);
 
@@ -995,7 +995,7 @@ namespace Game.Chat
 				if (remaintime == -1) // Permanent duration
 					handler.SendSysMessage(CypherStrings.CommandPermaFrozenPlayer, player);
 				else
-					// show time left (seconds)
+					// show Time left (seconds)
 					handler.SendSysMessage(CypherStrings.CommandTempFrozenPlayer, player, remaintime / Time.InMilliseconds);
 			} while (result.NextRow());
 
@@ -1310,10 +1310,10 @@ namespace Game.Chat
 			string            targetName;
 			PreparedStatement stmt;
 
-			// To make sure we get a target, we convert our guid to an omniversal...
+			// To make sure we get a Target, we convert our Guid to an omniversal...
 			ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
 
-			// ... and make sure we get a target, somehow.
+			// ... and make sure we get a Target, somehow.
 			if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
 			{
 				target     = Global.ObjAccessor.FindPlayer(parseGUID);
@@ -1329,11 +1329,11 @@ namespace Game.Chat
 			 * default as "does not exist" to prevent problems
 			 * The output is printed in the follow manner:
 			 *
-			 * Player %s %s (guid: %u)                   - I.    LANG_PINFO_PLAYER
+			 * Player %s %s (Guid: %u)                   - I.    LANG_PINFO_PLAYER
 			 * ** GM Mode active, Phase: -1              - II.   LANG_PINFO_GM_ACTIVE (if GM)
 			 * ** Banned: (Type, Reason, Time, By)       - III.  LANG_PINFO_BANNED (if banned)
 			 * ** Muted: (Reason, Time, By)              - IV.   LANG_PINFO_MUTED (if muted)
-			 * * Account: %s (id: %u), GM Level: %u      - V.    LANG_PINFO_ACC_ACCOUNT
+			 * * Account: %s (Id: %u), GM Level: %u      - V.    LANG_PINFO_ACC_ACCOUNT
 			 * * Last Login: %u (Failed Logins: %u)      - VI.   LANG_PINFO_ACC_LASTLOGIN
 			 * * Uses OS: %s - Latency: %u ms            - VII.  LANG_PINFO_ACC_OS
 			 * * Registration Email: %s - Email: %s      - VIII. LANG_PINFO_ACC_REGMAILS
@@ -1348,7 +1348,7 @@ namespace Game.Chat
 			 * ** Rank: %s                               - XVII. LANG_PINFO_CHR_GUILD_RANK (if in guild)
 			 * ** Note: %s                               - XVIII.LANG_PINFO_CHR_GUILD_NOTE (if in guild and has note)
 			 * ** O. Note: %s                            - XVIX. LANG_PINFO_CHR_GUILD_ONOTE (if in guild and has officer note)
-			 * * Played time: %s                         - XX.   LANG_PINFO_CHR_PLAYEDTIME
+			 * * Played Time: %s                         - XX.   LANG_PINFO_CHR_PLAYEDTIME
 			 * * Mails: %u Read/%u Total                 - XXI.  LANG_PINFO_CHR_MAILS (if has mails)
 			 *
 			 * Not all of them can be moved to the top. These should
@@ -1357,7 +1357,7 @@ namespace Game.Chat
 			 * For a cleaner overview, I segment each output in Roman numerals
 			 */
 
-			// Account data print variables
+			// Account _data print variables
 			string userName = handler.GetCypherString(CypherStrings.Error);
 			uint   accId;
 			ulong  lowguid      = targetGuid.GetCounter();
@@ -1371,18 +1371,18 @@ namespace Game.Chat
 			uint   latency      = 0;
 			string OS           = handler.GetCypherString(CypherStrings.Unknown);
 
-			// Mute data print variables
+			// Mute _data print variables
 			long   muteTime   = -1;
 			string muteReason = handler.GetCypherString(CypherStrings.NoReason);
 			string muteBy     = handler.GetCypherString(CypherStrings.Unknown);
 
-			// Ban data print variables
+			// Ban _data print variables
 			long   banTime   = -1;
 			string banType   = handler.GetCypherString(CypherStrings.Unknown);
 			string banReason = handler.GetCypherString(CypherStrings.NoReason);
 			string bannedBy  = handler.GetCypherString(CypherStrings.Unknown);
 
-			// Character data print variables
+			// Character _data print variables
 			Race   raceid;
 			Class  classid;
 			Gender gender;
@@ -1394,13 +1394,13 @@ namespace Game.Chat
 			uint   xp      = 0;
 			uint   xptotal = 0;
 
-			// Position data print
+			// Position _data print
 			uint   mapId;
 			uint   areaId;
 			string areaName = null;
 			string zoneName = null;
 
-			// Guild data print variables defined so that they exist, but are not necessarily used
+			// Guild _data print variables defined so that they exist, but are not necessarily used
 			ulong  guildId     = 0;
 			byte   guildRankId = 0;
 			string guildName   = "";
@@ -1408,7 +1408,7 @@ namespace Game.Chat
 			string note        = "";
 			string officeNote  = "";
 
-			// Mail data print is only defined if you have a mail
+			// Mail _data print is only defined if you have a mail
 
 			if (target)
 			{
@@ -1463,7 +1463,7 @@ namespace Game.Chat
 					alive = handler.GetCypherString(CypherStrings.Yes);
 			}
 
-			// Query the prepared statement for login data
+			// Query the prepared statement for login _data
 			stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO);
 			stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
 			stmt.AddValue(1, accId);
@@ -1527,7 +1527,7 @@ namespace Game.Chat
 				banReason = result2.Read<string>(3);
 			}
 
-			// Can be used to query data from Characters database
+			// Can be used to query _data from Characters database
 			stmt2 = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_XP);
 			stmt2.AddValue(0, lowguid);
 			SQLResult result4 = DB.Characters.Query(stmt2);
@@ -1613,7 +1613,7 @@ namespace Game.Chat
 			ulong copp = (money % MoneyConstants.Gold) % MoneyConstants.Silver;
 			handler.SendSysMessage(CypherStrings.PinfoChrMoney, gold, silv, copp);
 
-			// Position data
+			// Position _data
 			MapRecord       map  = CliDB.MapStorage.LookupByKey(mapId);
 			AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
 
@@ -1791,7 +1791,7 @@ namespace Game.Chat
 		{
 			Player player = handler.GetSession().GetPlayer();
 
-			// accept only explicitly selected target (not implicitly self targeting case)
+			// accept only explicitly selected Target (not implicitly self targeting case)
 			Creature target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
 
 			if (target)
@@ -1813,7 +1813,7 @@ namespace Game.Chat
 			var worker = new WorldObjectWorker(player, new RespawnDo());
 			Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
 
-			// Now handle any that had despawned, but had respawn time logged.
+			// Now handle any that had despawned, but had respawn Time logged.
 			List<RespawnInfo> data = new();
 			player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All);
 
@@ -1988,10 +1988,10 @@ namespace Game.Chat
 					else if (target.GetBattlegroundId() != 0 &&
 					         _player.GetBattlegroundId() != target.GetBattlegroundId())
 					{
-						target.LeaveBattleground(false); // Note: should be changed so target gets no Deserter debuff
+						target.LeaveBattleground(false); // Note: should be changed so Target gets no Deserter debuff
 					}
 
-					// all's well, set bg id
+					// all's well, set bg Id
 					// when porting out from the bg, it will be reset to 0
 					target.SetBattlegroundId(_player.GetBattlegroundId(), _player.GetBattlegroundTypeId());
 
@@ -2091,7 +2091,7 @@ namespace Game.Chat
 				ObjectManager.NormalizePlayerName(ref name);
 				player = Global.ObjAccessor.FindPlayerByName(name);
 			}
-			else // If no name was entered - use target
+			else // If no Name was entered - use Target
 			{
 				player = handler.GetSelectedPlayer();
 
@@ -2337,7 +2337,7 @@ namespace Game.Chat
 
 			uint itemId = 0;
 
-			if (args[0] == '[') // [name] manual form
+			if (args[0] == '[') // [Name] manual form
 			{
 				string itemName = args.NextString("]").Substring(1);
 
@@ -2366,7 +2366,7 @@ namespace Game.Chat
 					return false;
 				}
 			}
-			else // ItemId or [name] Shift-click form |color|Hitem:ItemId:0:0:0|h[name]|h|r
+			else // ItemId or [Name] Shift-click form |color|Hitem:ItemId:0:0:0|h[Name]|h|r
 			{
 				string idStr = handler.ExtractKeyFromLink(args, "Hitem");
 
@@ -2602,7 +2602,7 @@ namespace Game.Chat
 
 			uint itemId = 0;
 
-			if (tailArgs[0] == '[') // [name] manual form
+			if (tailArgs[0] == '[') // [Name] manual form
 			{
 				string itemNameStr = tailArgs.NextString("]");
 
@@ -2633,7 +2633,7 @@ namespace Game.Chat
 					return false;
 				}
 			}
-			else // ItemId or [name] Shift-click form |color|Hitem:ItemId:0:0:0|h[name]|h|r
+			else // ItemId or [Name] Shift-click form |color|Hitem:ItemId:0:0:0|h[Name]|h|r
 			{
 				string id = handler.ExtractKeyFromLink(tailArgs, "Hitem");
 

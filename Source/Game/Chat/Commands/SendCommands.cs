@@ -17,7 +17,7 @@ namespace Game.Chat.Commands
 		[Command("mail", RBACPermissions.CommandSendMail, true)]
 		private static bool HandleSendMailCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text)
 		{
-			// format: name "subject text" "mail text"
+			// format: Name "subject text" "mail text"
 			if (playerIdentifier == null)
 				playerIdentifier = PlayerIdentifier.FromTarget(handler);
 
@@ -48,7 +48,7 @@ namespace Game.Chat.Commands
 		[Command("items", RBACPermissions.CommandSendItems, true)]
 		private static bool HandleSendItemsCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text, string itemsStr)
 		{
-			// format: name "subject text" "mail text" item1[:count1] Item2[:count2] ... item12[:count12]
+			// format: Name "subject text" "mail text" item1[:count1] Item2[:count2] ... item12[:count12]
 			if (playerIdentifier == null)
 				playerIdentifier = PlayerIdentifier.FromTarget(handler);
 
@@ -141,7 +141,7 @@ namespace Game.Chat.Commands
 		[Command("money", RBACPermissions.CommandSendMoney, true)]
 		private static bool HandleSendMoneyCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text, long money)
 		{
-			// format: name "subject text" "mail text" money
+			// format: Name "subject text" "mail text" money
 			if (playerIdentifier == null)
 				playerIdentifier = PlayerIdentifier.FromTarget(handler);
 

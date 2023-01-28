@@ -149,7 +149,7 @@ namespace Game.AI
 		{
 		}
 
-		// Called when spell hits a target
+		// Called when spell hits a Target
 		public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
 		{
 		}

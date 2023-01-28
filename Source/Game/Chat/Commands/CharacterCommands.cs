@@ -54,7 +54,7 @@ namespace Game.Chat
 
 					string titleName = string.Format(name.ConvertFormatSyntax(), targetName);
 
-					// send title in "id (idx:idx) - [namedlink locale]" format
+					// send title in "Id (idx:idx) - [namedlink locale]" format
 					if (handler.GetSession() != null)
 						handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleName, loc, knownStr, activeStr);
 					else
@@ -120,7 +120,7 @@ namespace Game.Chat
 					return false;
 				}
 
-				// Remove declined name from db
+				// Remove declined Name from db
 				stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
 				stmt.AddValue(0, player.GetGUID().GetCounter());
 				DB.Characters.Execute(stmt);
@@ -607,7 +607,7 @@ namespace Game.Chat
 				{
 					DeletedInfo delInfo = foundList[0];
 
-					// update name
+					// update Name
 					delInfo.name = newCharName;
 
 					// if new account provided update deleted info
@@ -659,7 +659,7 @@ namespace Game.Chat
 						stmt.AddValue(0, guid);
 						result = DB.Characters.Query(stmt);
 					}
-					// search by name
+					// search by Name
 					else
 					{
 						if (!ObjectManager.NormalizePlayerName(ref searchString))
@@ -685,7 +685,7 @@ namespace Game.Chat
 						info.name      = result.Read<string>(1);
 						info.accountId = result.Read<uint>(2);
 
-						// account name will be empty for not existed account
+						// account Name will be empty for not existed account
 						Global.AccountMgr.GetName(info.accountId, out info.accountName);
 						info.deleteDate = result.Read<long>(3);
 						foundList.Add(info);
@@ -736,7 +736,7 @@ namespace Game.Chat
 					return;
 				}
 
-				// check character count
+				// check character Count
 				uint charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
 
 				if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
@@ -765,9 +765,9 @@ namespace Game.Chat
 			private struct DeletedInfo
 			{
 				public ObjectGuid guid;    // the GUID from the character
-				public string name;        // the character name
-				public uint accountId;     // the account id
-				public string accountName; // the account name
+				public string name;        // the character Name
+				public uint accountId;     // the account Id
+				public string accountName; // the account Name
 				public long deleteDate;    // the date at which the character has been deleted
 			}
 		}
@@ -780,8 +780,8 @@ namespace Game.Chat
 		private static bool HandlePDumpCopyCommand(CommandHandler handler, PlayerIdentifier player, AccountIdentifier account, [OptionalArg] string characterName, ulong? characterGUID)
 		{
 			/*
-			std::string name;
-			if (!ValidatePDumpTarget(handler, name, characterName, characterGUID))
+			std::string Name;
+			if (!ValidatePDumpTarget(handler, Name, characterName, characterGUID))
 			    return false;
 
 			std::string dump;
@@ -800,7 +800,7 @@ namespace Game.Chat
 			        return false;
 			}
 
-			switch (PlayerDumpReader().LoadDumpFromString(dump, account, name, characterGUID.value_or(0)))
+			switch (PlayerDumpReader().LoadDumpFromString(dump, account, Name, characterGUID.value_or(0)))
 			{
 			    case DUMP_SUCCESS:
 			        break;
@@ -852,19 +852,19 @@ namespace Game.Chat
 			    return false;
 			}
 
-			string name;
+			string Name;
 			if (nameStr)
 			{
-			    name = nameStr;
-			    // normalize the name if specified and check if it exists
-			    if (!ObjectManager.NormalizePlayerName(name))
+			    Name = nameStr;
+			    // normalize the Name if specified and check if it exists
+			    if (!ObjectManager.NormalizePlayerName(Name))
 			    {
 			        handler.SendSysMessage(LANG_INVALID_CHARACTER_NAME);
 
 			        return false;
 			    }
 
-			    if (ObjectMgr.CheckPlayerName(name, true) != CHAR_NAME_SUCCESS)
+			    if (ObjectMgr.CheckPlayerName(Name, true) != CHAR_NAME_SUCCESS)
 			    {
 			        handler.SendSysMessage(LANG_INVALID_CHARACTER_NAME);
 
@@ -874,27 +874,27 @@ namespace Game.Chat
 			    guidStr = strtok(NULL, " ");
 			}
 
-			public uint guid = 0;
+			public uint Guid = 0;
 
 			if (guidStr)
 			{
-			    guid = uint32(atoi(guidStr));
-			    if (!guid)
+			    Guid = uint32(atoi(guidStr));
+			    if (!Guid)
 			    {
 			        handler.SendSysMessage(LANG_INVALID_CHARACTER_GUID);
 
 			        return false;
 			    }
 
-			    if (Global.ObjectMgr.GetPlayerAccountIdByGUID(guid))
+			    if (Global.ObjectMgr.GetPlayerAccountIdByGUID(Guid))
 			    {
-			        handler.SendSysMessage(LANG_CHARACTER_GUID_IN_USE, guid);
+			        handler.SendSysMessage(LANG_CHARACTER_GUID_IN_USE, Guid);
 
 			        return false;
 			    }
 			}
 
-			switch (PlayerDumpReader().LoadDump(fileStr, accountId, name, guid))
+			switch (PlayerDumpReader().LoadDump(fileStr, accountId, Name, Guid))
 			{
 			    case DUMP_SUCCESS:
 			        handler.SendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);

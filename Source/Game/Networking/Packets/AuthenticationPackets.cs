@@ -103,7 +103,7 @@ namespace Game.Networking.Packets
 	{
 		public BattlenetRpcErrorCode Result; // the result of the authentication process, possible values are @ref BattlenetRpcErrorCode
 
-		public AuthSuccessInfo SuccessInfo; // contains the packet data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
+		public AuthSuccessInfo SuccessInfo; // contains the packet _data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
 		public AuthWaitInfo? WaitInfo;      // contains the queue wait information in case the account is in the login queue.
 
 		public AuthResponse() : base(ServerOpcodes.AuthResponse)
@@ -156,7 +156,7 @@ namespace Game.Networking.Packets
 					_worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.TimeRemain);
 					_worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.Unknown735);
 					// 3x same bit is not a mistake - preserves legacy client behavior of BillingPlanFlags::SESSION_IGR
-					_worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
+					_worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining Time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
 					_worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
 					_worldPacket.WriteBit(SuccessInfo.GameTimeInfo.InGameRoom); // not used anywhere in the client
 					_worldPacket.FlushBits();
@@ -438,7 +438,7 @@ namespace Game.Networking.Packets
 		}
 
 		public uint WaitCount; // position of the account in the login queue
-		public uint WaitTime;  // Wait time in login queue in minutes, if sent queued and this value is 0 client displays "unknown time"
+		public uint WaitTime;  // Wait Time in login queue in minutes, if sent queued and this value is 0 client displays "unknown Time"
 		public bool HasFCM;    // true if the account has a forced character migration pending. @todo implement
 	}
 
@@ -466,8 +466,8 @@ namespace Game.Networking.Packets
 
 		public bool IsLocal;               // true if the realm is the same as the account's home realm
 		public bool IsInternalRealm;       // @todo research
-		public string RealmNameActual;     // the name of the realm
-		public string RealmNameNormalized; // the name of the realm without spaces
+		public string RealmNameActual;     // the Name of the realm
+		public string RealmNameNormalized; // the Name of the realm without spaces
 	}
 
 	internal struct VirtualRealmInfo

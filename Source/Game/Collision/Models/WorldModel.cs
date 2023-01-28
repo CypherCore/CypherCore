@@ -251,7 +251,7 @@ namespace Game.Collision
 
 			meshTree.ReadFromFile(reader);
 
-			// write liquid data
+			// write liquid _data
 			if (reader.ReadStringFromChars(4) != "LIQU")
 				return false;
 
@@ -337,7 +337,7 @@ namespace Game.Collision
 
 		public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags)
 		{
-			// If the caller asked us to ignore certain objects we should check flags
+			// If the caller asked us to ignore certain objects we should check Flags
 			if ((ignoreFlags & ModelIgnoreFlags.M2) != ModelIgnoreFlags.Nothing)
 				// M2 models are not taken into account for LoS calculation if caller requested their ignoring.
 				if ((Flags & (uint)ModelFlags.M2) != 0)

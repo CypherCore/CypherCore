@@ -92,7 +92,7 @@ namespace Game.Entities
 				SetContainedIn(owner.GetGUID());
 			}
 
-			SetUpdateFieldValue(_values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), itemProto.MaxDurability);
+			SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.MaxDurability), itemProto.MaxDurability);
 			SetDurability(itemProto.MaxDurability);
 			SetCount(1);
 			SetContext(context);
@@ -185,7 +185,7 @@ namespace Game.Entities
 			WorldPacket     buffer = new();
 
 			buffer.WriteUInt8((byte)flags);
-			_objectData.WriteCreate(buffer, flags, this, target);
+			ObjectData.WriteCreate(buffer, flags, this, target);
 			_itemData.WriteCreate(buffer, flags, this, target);
 			_containerData.WriteCreate(buffer, flags, this, target);
 
@@ -198,15 +198,15 @@ namespace Game.Entities
 			UpdateFieldFlag flags  = GetUpdateFieldFlagsFor(target);
 			WorldPacket     buffer = new();
 
-			buffer.WriteUInt32(_values.GetChangedObjectTypeMask());
+			buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
 
-			if (_values.HasChanged(TypeId.Object))
-				_objectData.WriteUpdate(buffer, flags, this, target);
+			if (Values.HasChanged(TypeId.Object))
+				ObjectData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.Item))
+			if (Values.HasChanged(TypeId.Item))
 				_itemData.WriteUpdate(buffer, flags, this, target);
 
-			if (_values.HasChanged(TypeId.Container))
+			if (Values.HasChanged(TypeId.Container))
 				_containerData.WriteUpdate(buffer, flags, this, target);
 
 			data.WriteUInt32(buffer.GetSize());
@@ -233,7 +233,7 @@ namespace Game.Entities
 			buffer.WriteUInt32(valuesMask.GetBlock(0));
 
 			if (valuesMask[(int)TypeId.Object])
-				_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+				ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
 
 			if (valuesMask[(int)TypeId.Item])
 				_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
@@ -252,7 +252,7 @@ namespace Game.Entities
 
 		public override void ClearUpdateMask(bool remove)
 		{
-			_values.ClearChangesMask(_containerData);
+			Values.ClearChangesMask(_containerData);
 			base.ClearUpdateMask(remove);
 		}
 
@@ -290,12 +290,12 @@ namespace Game.Entities
 
 		private void SetBagSize(uint numSlots)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_containerData).ModifyValue(_containerData.NumSlots), numSlots);
+			SetUpdateFieldValue(Values.ModifyValue(_containerData).ModifyValue(_containerData.NumSlots), numSlots);
 		}
 
 		private void SetSlot(int slot, ObjectGuid guid)
 		{
-			SetUpdateFieldValue(ref _values.ModifyValue(_containerData).ModifyValue(_containerData.Slots, slot), guid);
+			SetUpdateFieldValue(ref Values.ModifyValue(_containerData).ModifyValue(_containerData.Slots, slot), guid);
 		}
 
 		private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>

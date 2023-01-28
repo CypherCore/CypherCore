@@ -487,7 +487,7 @@ namespace Scripts.Spells.Warrior
 				if (spellInfo != null &&
 				    (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.Wounded20Percent))))
 				{
-					// If triggered by Execute (while target is not under 20% hp) or Bladestorm deals normalized weapon damage
+					// If triggered by Execute (while Target is not under 20% hp) or Bladestorm deals normalized weapon Damage
 					GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack2, new CastSpellExtraArgs(aurEff));
 				}
 				else
@@ -513,7 +513,7 @@ namespace Scripts.Spells.Warrior
 		private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
 		{
 			Unit target = eventInfo.GetActionTarget();
-			//Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
+			//Get 25% of Damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
 			int                damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks());
 			CastSpellExtraArgs args   = new(TriggerCastFlags.FullMask);
 			args.AddSpellMod(SpellValueMod.BasePoint0, damage);

@@ -357,7 +357,7 @@ namespace Scripts.Spells.Warlock
 
 			if (target)
 			{
-				// Casting Banish on a banished target will Remove applied aura
+				// Casting Banish on a banished Target will Remove applied aura
 				Aura banishAura = target.GetAura(GetSpellInfo().Id, GetCaster().GetGUID());
 
 				if (banishAura != null)
@@ -409,9 +409,9 @@ namespace Scripts.Spells.Warlock
 				return;
 			}
 
-			// You take ${$s2/3}% reduced damage
+			// You take ${$s2/3}% reduced Damage
 			float damageReductionPct = (float)auraEffect.GetAmount() / 3;
-			// plus a random amount of up to ${$s2/3}% additional reduced damage
+			// plus a random amount of up to ${$s2/3}% additional reduced Damage
 			damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
 
 			absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), damageReductionPct);
@@ -631,7 +631,7 @@ namespace Scripts.Spells.Warlock
 			if (!caster)
 				return;
 
-			//! HACK for self damage, is not blizz :/
+			//! HACK for self Damage, is not blizz :/
 			uint damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
 
 			Player modOwner = caster.GetSpellModOwner();
@@ -640,8 +640,8 @@ namespace Scripts.Spells.Warlock
 				modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
 
 			SpellNonMeleeDamage damageInfo = new(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId());
-			damageInfo.periodicLog = true;
-			damageInfo.damage      = damage;
+			damageInfo.PeriodicLog = true;
+			damageInfo.Damage      = damage;
 			caster.DealSpellDamage(damageInfo, false);
 			caster.SendSpellNonMeleeDamageLog(damageInfo);
 		}
@@ -975,7 +975,7 @@ namespace Scripts.Spells.Warlock
 					swapTarget = swapScript.GetOriginalSwapSource();
 			}
 
-			// Soul Swap Exhale can't be cast on the same target than Soul Swap
+			// Soul Swap Exhale can't be cast on the same Target than Soul Swap
 			if (swapTarget &&
 			    currentTarget &&
 			    swapTarget == currentTarget)
@@ -1109,7 +1109,7 @@ namespace Scripts.Spells.Warlock
 
 				if (aurEff != null)
 				{
-					// backfire damage and silence
+					// backfire Damage and silence
 					CastSpellExtraArgs args = new(aurEff);
 					args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 9);
 					caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDispel, args);

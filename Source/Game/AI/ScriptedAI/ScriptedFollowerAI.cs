@@ -47,7 +47,7 @@ namespace Game.AI
 			    _questForFollow == 0)
 				return;
 
-			// @todo need a better check for quests with time limit.
+			// @todo need a better check for quests with Time limit.
 			Player player = GetLeaderForFollower();
 
 			if (player)

@@ -14,7 +14,7 @@ namespace Game.AI
 	public class UnitAI
 	{
         /// <summary>
-        ///  Select the best target (in
+        ///  Select the best Target (in
         ///  <targetType>
         ///   order) satisfying
         ///   <predicate>
@@ -111,7 +111,7 @@ namespace Game.AI
 		}
 
         /// <summary>
-        ///  Select the best target (in
+        ///  Select the best Target (in
         ///  <targetType>
         ///   order) from the threat list that fulfill the following:
         ///   - Not among the first
@@ -535,7 +535,7 @@ namespace Game.AI
 					                                     spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
 						                                 AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyFriend - 1);
 
-					                                 // Make sure that this spell includes a damage effect.
+					                                 // Make sure that this spell includes a Damage effect.
 					                                 if (spellEffectInfo.Effect == SpellEffectName.SchoolDamage ||
 					                                     spellEffectInfo.Effect == SpellEffectName.Instakill ||
 					                                     spellEffectInfo.Effect == SpellEffectName.EnvironmentalDamage ||
@@ -583,7 +583,7 @@ namespace Game.AI
 		// If this call is made, AI will be replaced on the next tick
 		// When replacement is made, OnCharmed is called with isNew = true
         /// </summary>
-        /// <param name="apply"></param>
+        /// <param Name="apply"></param>
         public virtual void OnCharmed(bool isNew)
 		{
 			if (!isNew)
@@ -633,7 +633,7 @@ namespace Game.AI
 		{
 		}
 
-		// Called at any Damage to any victim (before damage apply)
+		// Called at any Damage to any victim (before Damage apply)
 		public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType)
 		{
 		}

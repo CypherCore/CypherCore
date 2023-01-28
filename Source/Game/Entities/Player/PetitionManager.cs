@@ -21,7 +21,7 @@ namespace Game.Entities
 			uint oldMSTime = Time.GetMSTime();
 			_petitionStorage.Clear();
 
-			SQLResult result = DB.Characters.Query("SELECT petitionguid, ownerguid, name FROM petition");
+			SQLResult result = DB.Characters.Query("SELECT petitionguid, ownerguid, Name FROM petition");
 
 			if (result.IsEmpty())
 			{

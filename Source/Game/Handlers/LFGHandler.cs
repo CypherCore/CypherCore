@@ -51,7 +51,7 @@ namespace Game
 		{
 			Group group = GetPlayer().GetGroup();
 
-			Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent guid {2}.", GetPlayerInfo(), group ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
+			Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent Guid {2}.", GetPlayerInfo(), group ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
 
 			// Check cheating - only leader can leave the queue
 			if (!group ||

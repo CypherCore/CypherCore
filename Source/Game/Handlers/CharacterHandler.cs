@@ -30,7 +30,7 @@ namespace Game
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_EXPIRED_BANS);
 			DB.Characters.Execute(stmt);
 
-			// get all the data necessary for loading all characters (along with their pets) on the account
+			// get all the _data necessary for loading all characters (along with their pets) on the account
 			EnumCharactersQueryHolder holder = new();
 
 			if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), false))
@@ -102,7 +102,7 @@ namespace Game
 							_legitCharacters.Add(charInfo.Guid);
 					}
 
-					if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
+					if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded Name _data yet.
 						Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, false);
 
 					charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.ExperienceLevel);
@@ -131,7 +131,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.EnumCharactersDeletedByClient, Status = SessionStatus.Authed)]
 		private void HandleCharUndeleteEnum(EnumCharacters enumCharacters)
 		{
-			// get all the data necessary for loading all undeleted characters (along with their pets) on the account
+			// get all the _data necessary for loading all undeleted characters (along with their pets) on the account
 			EnumCharactersQueryHolder holder = new();
 
 			if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), true))
@@ -156,9 +156,9 @@ namespace Game
 				{
 					EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
 
-					Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
+					Log.outInfo(LogFilter.Network, "Loading undeleted char Guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
-					if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
+					if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded Name _data yet.
 						Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, true);
 
 					charEnum.Characters.Add(charInfo);
@@ -237,7 +237,7 @@ namespace Game
 				// check if we can use this option
 				var customizationOptionData = options.Find(option => { return option.Id == playerChoice.ChrCustomizationOptionID; });
 
-				// option not found for race/gender combination
+				// option not found for race/Gender combination
 				if (customizationOptionData == null)
 					return false;
 
@@ -430,16 +430,16 @@ namespace Game
 				}
 			}
 
-			// prevent character creating with invalid name
+			// prevent character creating with invalid Name
 			if (!ObjectManager.NormalizePlayerName(ref charCreate.CreateInfo.Name))
 			{
-				Log.outError(LogFilter.Network, "Account:[{0}] but tried to Create character with empty [name] ", GetAccountId());
+				Log.outError(LogFilter.Network, "Account:[{0}] but tried to Create character with empty [Name] ", GetAccountId());
 				SendCharCreate(ResponseCodes.CharNameNoName);
 
 				return;
 			}
 
-			// check name limitations
+			// check Name limitations
 			ResponseCodes res = ObjectManager.CheckPlayerName(charCreate.CreateInfo.Name, GetSessionDbcLocale(), true);
 
 			if (res != ResponseCodes.CharNameSuccess)
@@ -630,7 +630,7 @@ namespace Game
 						                                                    return;
 					                                                    }
 
-					                                                    // Check name uniqueness in the same step as saving to database
+					                                                    // Check Name uniqueness in the same step as saving to database
 					                                                    if (Global.CharacterCacheStorage.GetCharacterCacheByName(createInfo.Name) != null)
 					                                                    {
 						                                                    SendCharCreate(ResponseCodes.CharCreateDracthyrDuplicate);
@@ -787,7 +787,7 @@ namespace Game
 
 			if (!Player.IsValidGender((Gender)packet.Sex))
 			{
-				Log.outError(LogFilter.Network, "Invalid gender ({0}) sent by accountId: {1}", packet.Sex, GetAccountId());
+				Log.outError(LogFilter.Network, "Invalid Gender ({0}) sent by accountId: {1}", packet.Sex, GetAccountId());
 
 				return;
 			}
@@ -938,7 +938,7 @@ namespace Game
 
 			pCurrChar.SendInitialPacketsBeforeAddToMap();
 
-			//Show cinematic at the first time that player login
+			//Show cinematic at the first Time that player login
 			if (pCurrChar.GetCinematic() == 0)
 			{
 				pCurrChar.SetCinematic(1);
@@ -992,9 +992,9 @@ namespace Game
 				}
 				else
 				{
-					// remove wrong guild data
+					// remove wrong guild _data
 					Log.outError(LogFilter.Server,
-					             "Player {0} ({1}) marked as member of not existing guild (id: {2}), removing guild membership for player.",
+					             "Player {0} ({1}) marked as member of not existing guild (Id: {2}), removing guild membership for player.",
 					             pCurrChar.GetName(),
 					             pCurrChar.GetGUID().ToString(),
 					             pCurrChar.GetGuildId());
@@ -1040,10 +1040,10 @@ namespace Game
 				// not blizz like, we must correctly save and load player instead...
 				if (pCurrChar.GetRace() == Race.NightElf &&
 				    !pCurrChar.HasAura(20584))
-					pCurrChar.CastSpell(pCurrChar, 20584, new CastSpellExtraArgs(true)); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+					pCurrChar.CastSpell(pCurrChar, 20584, new CastSpellExtraArgs(true)); // Auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
 
 				if (!pCurrChar.HasAura(8326))
-					pCurrChar.CastSpell(pCurrChar, 8326, new CastSpellExtraArgs(true)); // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+					pCurrChar.CastSpell(pCurrChar, 8326, new CastSpellExtraArgs(true)); // Auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
 				pCurrChar.SetWaterWalking(true);
 			}
@@ -1173,7 +1173,7 @@ namespace Game
 				}
 			}
 
-			// show time before shutdown if shutdown planned.
+			// show Time before shutdown if shutdown planned.
 			if (Global.WorldMgr.IsShuttingDown())
 				Global.WorldMgr.ShutdownMsg(true, pCurrChar);
 
@@ -1330,7 +1330,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.CheckCharacterNameAvailability)]
 		private void HandleCheckCharacterNameAvailability(CheckCharacterNameAvailability checkCharacterNameAvailability)
 		{
-			// prevent character rename to invalid name
+			// prevent character rename to invalid Name
 			if (!ObjectManager.NormalizePlayerName(ref checkCharacterNameAvailability.Name))
 			{
 				SendPacket(new CheckCharacterNameAvailabilityResult(checkCharacterNameAvailability.SequenceIndex, ResponseCodes.CharNameNoName));
@@ -1347,7 +1347,7 @@ namespace Game
 				return;
 			}
 
-			// check name limitations
+			// check Name limitations
 			if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) &&
 			    Global.ObjectMgr.IsReservedName(checkCharacterNameAvailability.Name))
 			{
@@ -1356,7 +1356,7 @@ namespace Game
 				return;
 			}
 
-			// Ensure that there is no character with the desired new name
+			// Ensure that there is no character with the desired new Name
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
 			stmt.AddValue(0, checkCharacterNameAvailability.Name);
 
@@ -1386,7 +1386,7 @@ namespace Game
 				return;
 			}
 
-			// prevent character rename to invalid name
+			// prevent character rename to invalid Name
 			if (!ObjectManager.NormalizePlayerName(ref request.RenameInfo.NewName))
 			{
 				SendCharRename(ResponseCodes.CharNameNoName, request.RenameInfo);
@@ -1411,7 +1411,7 @@ namespace Game
 				return;
 			}
 
-			// Ensure that there is no character with the desired new name
+			// Ensure that there is no character with the desired new Name
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_FREE_NAME);
 			stmt.AddValue(0, request.RenameInfo.Guid.GetCounter());
 			stmt.AddValue(1, request.RenameInfo.NewName);
@@ -1429,7 +1429,7 @@ namespace Game
 			}
 
 			string oldName = result.Read<string>(0);
-			// check name limitations
+			// check Name limitations
 			AtLoginFlags atLoginFlags = (AtLoginFlags)result.Read<uint>(1);
 
 			if (!atLoginFlags.HasAnyFlag(AtLoginFlags.Rename))
@@ -1444,7 +1444,7 @@ namespace Game
 			SQLTransaction trans   = new();
 			ulong          lowGuid = renameInfo.Guid.GetCounter();
 
-			// Update name and at_login flag in the db
+			// Update Name and at_login flag in the db
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
 			stmt.AddValue(0, renameInfo.NewName);
 			stmt.AddValue(1, (ushort)atLoginFlags);
@@ -1458,7 +1458,7 @@ namespace Game
 			DB.Characters.CommitTransaction(trans);
 
 			Log.outInfo(LogFilter.Player,
-			            "Account: {0} (IP: {1}) Character:[{2}] ({3}) Changed name to: {4}",
+			            "Account: {0} (IP: {1}) Character:[{2}] ({3}) Changed Name to: {4}",
 			            GetAccountId(),
 			            GetRemoteAddress(),
 			            oldName,
@@ -1483,7 +1483,7 @@ namespace Game
 				return;
 			}
 
-			if (!char.IsLetter(name[0])) // name already stored as only single alphabet using
+			if (!char.IsLetter(name[0])) // Name already stored as only single alphabet using
 			{
 				SendSetPlayerDeclinedNamesResult(DeclinedNameResult.Error, packet.Player);
 
@@ -1492,7 +1492,7 @@ namespace Game
 
 			for (int i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
 			{
-				string declinedName = packet.DeclinedNames.name[i];
+				string declinedName = packet.DeclinedNames.Name[i];
 
 				if (!ObjectManager.NormalizePlayerName(ref declinedName))
 				{
@@ -1501,14 +1501,14 @@ namespace Game
 					return;
 				}
 
-				packet.DeclinedNames.name[i] = declinedName;
+				packet.DeclinedNames.Name[i] = declinedName;
 			}
 
 			for (int i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
 			{
-				string declinedName = packet.DeclinedNames.name[i];
+				string declinedName = packet.DeclinedNames.Name[i];
 				CharacterDatabase.EscapeString(ref declinedName);
-				packet.DeclinedNames.name[i] = declinedName;
+				packet.DeclinedNames.Name[i] = declinedName;
 			}
 
 			SQLTransaction trans = new();
@@ -1521,7 +1521,7 @@ namespace Game
 			stmt.AddValue(0, packet.Player.GetCounter());
 
 			for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-				stmt.AddValue(i + 1, packet.DeclinedNames.name[i]);
+				stmt.AddValue(i + 1, packet.DeclinedNames.Name[i]);
 
 			trans.Append(stmt);
 
@@ -1644,7 +1644,7 @@ namespace Game
 
 			atLoginFlags &= ~AtLoginFlags.Customize;
 
-			// prevent character rename to invalid name
+			// prevent character rename to invalid Name
 			if (!ObjectManager.NormalizePlayerName(ref customizeInfo.CharName))
 			{
 				SendCharCustomize(ResponseCodes.CharNameNoName, customizeInfo);
@@ -1661,7 +1661,7 @@ namespace Game
 				return;
 			}
 
-			// check name limitations
+			// check Name limitations
 			if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) &&
 			    Global.ObjectMgr.IsReservedName(customizeInfo.CharName))
 			{
@@ -1670,7 +1670,7 @@ namespace Game
 				return;
 			}
 
-			// character with this name already exist
+			// character with this Name already exist
 			// @todo: make async
 			ObjectGuid newGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(customizeInfo.CharName);
 
@@ -1689,7 +1689,7 @@ namespace Game
 			// Customize
 			Player.SaveCustomizations(trans, lowGuid, customizeInfo.Customizations);
 
-			// Name Change and update atLogin flags
+			// Name Change and update atLogin Flags
 			{
 				stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
 				stmt.AddValue(0, customizeInfo.CharName);
@@ -1740,11 +1740,11 @@ namespace Game
 						{
 							Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
 
-							// cheating check 1 (Item equipped but sent empty guid)
+							// cheating check 1 (Item equipped but sent empty Guid)
 							if (!item)
 								return;
 
-							// cheating check 2 (sent guid does not match equipped Item)
+							// cheating check 2 (sent Guid does not match equipped Item)
 							if (item.GetGUID() != itemGuid)
 								return;
 						}
@@ -1996,7 +1996,7 @@ namespace Game
 				return;
 			}
 
-			// prevent character rename to invalid name
+			// prevent character rename to invalid Name
 			if (!ObjectManager.NormalizePlayerName(ref factionChangeInfo.Name))
 			{
 				SendCharFactionChange(ResponseCodes.CharNameNoName, factionChangeInfo);
@@ -2013,7 +2013,7 @@ namespace Game
 				return;
 			}
 
-			// check name limitations
+			// check Name limitations
 			if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) &&
 			    Global.ObjectMgr.IsReservedName(factionChangeInfo.Name))
 			{
@@ -2022,7 +2022,7 @@ namespace Game
 				return;
 			}
 
-			// character with this name already exist
+			// character with this Name already exist
 			ObjectGuid newGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(factionChangeInfo.Name);
 
 			if (!newGuid.IsEmpty())
@@ -2049,7 +2049,7 @@ namespace Game
 			// resurrect the character in case he's dead
 			Player.OfflineResurrect(factionChangeInfo.Guid, trans);
 
-			// Name Change and update atLogin flags
+			// Name Change and update atLogin Flags
 			{
 				stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
 				stmt.AddValue(0, factionChangeInfo.Name);
@@ -2156,7 +2156,7 @@ namespace Game
 
 							break;
 						default:
-							Log.outError(LogFilter.Player, $"Could not find language data for race ({factionChangeInfo.RaceID}).");
+							Log.outError(LogFilter.Player, $"Could not find language _data for race ({factionChangeInfo.RaceID}).");
 							SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
 
 							return;
@@ -2306,7 +2306,7 @@ namespace Game
 						trans.Append(stmt);
 					}
 
-					// Mark all rewarded quests as "active" (will count for completed quests achievements)
+					// Mark all rewarded quests as "active" (will Count for completed quests achievements)
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE);
 					stmt.AddValue(0, lowGuid);
 					trans.Append(stmt);
@@ -2590,9 +2590,9 @@ namespace Game
 				                                                    }
 
 				                                                    // @todo: add more safety checks
-				                                                    // * max char count per account
-				                                                    // * max death knight count
-				                                                    // * max demon hunter count
+				                                                    // * max char Count per account
+				                                                    // * max death knight Count
+				                                                    // * max demon hunter Count
 				                                                    // * team violation
 
 				                                                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);

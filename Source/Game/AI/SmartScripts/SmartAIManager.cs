@@ -106,7 +106,7 @@ namespace Game.AI
 						{
 							if (Global.ObjectMgr.GetSceneTemplate((uint)temp.EntryOrGuid) == null)
 							{
-								Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
+								Log.outError(LogFilter.Sql, "SmartAIMgr.LoadFromDB: Scene Id ({0}) does not exist, skipped loading.", temp.EntryOrGuid);
 
 								continue;
 							}
@@ -117,7 +117,7 @@ namespace Game.AI
 						{
 							if (Global.ObjectMgr.GetQuestTemplate((uint)temp.EntryOrGuid) == null)
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Quest id ({temp.EntryOrGuid}) does not exist, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Quest Id ({temp.EntryOrGuid}) does not exist, skipped loading.");
 
 								continue;
 							}
@@ -162,7 +162,7 @@ namespace Game.AI
 
 							if (creature == null)
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature Guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
 
 								continue;
 							}
@@ -171,14 +171,14 @@ namespace Game.AI
 
 							if (creatureInfo == null)
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) Guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
 
 								continue;
 							}
 
 							if (creatureInfo.AIName != "SmartAI")
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) guid ({-temp.EntryOrGuid}) is not using SmartAI, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: Creature entry ({creature.Id}) Guid ({-temp.EntryOrGuid}) is not using SmartAI, skipped loading.");
 
 								continue;
 							}
@@ -191,7 +191,7 @@ namespace Game.AI
 
 							if (gameObject == null)
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject Guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
 
 								continue;
 							}
@@ -200,14 +200,14 @@ namespace Game.AI
 
 							if (gameObjectInfo == null)
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) Guid ({-temp.EntryOrGuid}) does not exist, skipped loading.");
 
 								continue;
 							}
 
 							if (gameObjectInfo.AIName != "SmartGameObjectAI")
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.EntryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: GameObject entry ({gameObject.Id}) Guid ({-temp.EntryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
 
 								continue;
 							}
@@ -254,7 +254,7 @@ namespace Game.AI
 				temp.Target.z          = result.Read<float>(29);
 				temp.Target.o          = result.Read<float>(30);
 
-				//check target
+				//check Target
 				if (!IsTargetValid(temp))
 					continue;
 
@@ -312,7 +312,7 @@ namespace Game.AI
 						break;
 				}
 
-				// creature entry / guid not found in storage, create empty event list for it and increase counters
+				// creature entry / Guid not found in storage, create empty event list for it and increase counters
 				if (!_eventMap[(int)source_type].ContainsKey(temp.EntryOrGuid))
 					++count;
 
@@ -397,7 +397,7 @@ namespace Game.AI
 				}
 
 				if (lastId != id)
-					Log.outError(LogFilter.Sql, $"SmartWaypointMgr.LoadFromDB: Path entry {entry}, unexpected point id {id}, expected {lastId}.");
+					Log.outError(LogFilter.Sql, $"SmartWaypointMgr.LoadFromDB: Path entry {entry}, unexpected point Id {id}, expected {lastId}.");
 
 				++lastId;
 
@@ -474,7 +474,7 @@ namespace Game.AI
 		private static bool IsTargetValid(SmartScriptHolder e)
 		{
 			if (Math.Abs(e.Target.o) > 2 * MathFunctions.PI)
-				Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has abs(`target.o` = {e.Target.o}) > 2*PI (orientation is expressed in radians)");
+				Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has abs(`Target.o` = {e.Target.o}) > 2*PI (orientation is expressed in radians)");
 
 			switch (e.GetTargetType())
 			{
@@ -515,14 +515,14 @@ namespace Game.AI
 
 					if (data == null)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid creature guid {guid} as target_param1, skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid creature Guid {guid} as target_param1, skipped.");
 
 						return false;
 					}
 					else if (e.Target.unitGUID.entry != 0 &&
 					         e.Target.unitGUID.entry != data.Id)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid creature entry {e.Target.unitGUID.entry} (expected {data.Id}) for guid {guid} as target_param1, skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid creature entry {e.Target.unitGUID.entry} (expected {data.Id}) for Guid {guid} as target_param1, skipped.");
 
 						return false;
 					}
@@ -540,14 +540,14 @@ namespace Game.AI
 
 					if (data == null)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid gameobject guid {guid} as target_param1, skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid gameobject Guid {guid} as target_param1, skipped.");
 
 						return false;
 					}
 					else if (e.Target.goGUID.entry != 0 &&
 					         e.Target.goGUID.entry != data.Id)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid gameobject entry {e.Target.goGUID.entry} (expected {data.Id}) for guid {guid} as target_param1, skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using invalid gameobject entry {e.Target.goGUID.entry} (expected {data.Id}) for Guid {guid} as target_param1, skipped.");
 
 						return false;
 					}
@@ -573,7 +573,7 @@ namespace Game.AI
 					    e.GetEventType() != SmartEvents.Link &&
 					    !EventHasInvoker(e.Event.type))
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {e.GetActionType()} has invoker target, but event does not provide any invoker!");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {e.GetActionType()} has invoker Target, but event does not provide any invoker!");
 
 						return false;
 					}
@@ -1059,7 +1059,7 @@ namespace Game.AI
 
 			if (e.Event.event_flags > SmartEventFlags.All)
 			{
-				Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid event flags ({2}), skipped.", e.EntryOrGuid, e.EventId, e.Event.event_flags);
+				Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid event Flags ({2}), skipped.", e.EntryOrGuid, e.EventId, e.Event.event_flags);
 
 				return false;
 			}
@@ -1074,7 +1074,7 @@ namespace Game.AI
 
 			if (e.GetScriptType() == SmartScriptType.TimedActionlist)
 			{
-				e.Event.type = SmartEvents.UpdateOoc; //force default OOC, can change when calling the script!
+				e.Event.type = SmartEvents.UpdateOoc; //Force default OOC, can change when calling the script!
 
 				if (!IsMinMaxValid(e, e.Event.minMaxRepeat.min, e.Event.minMaxRepeat.max))
 					return false;
@@ -1362,7 +1362,7 @@ namespace Game.AI
 						if (e.Event.distance.guid == 0 &&
 						    e.Event.distance.entry == 0)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_CREATURE did not provide creature guid or entry, skipped.");
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_CREATURE did not provide creature Guid or entry, skipped.");
 
 							return false;
 						}
@@ -1370,7 +1370,7 @@ namespace Game.AI
 						if (e.Event.distance.guid != 0 &&
 						    e.Event.distance.entry != 0)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_CREATURE provided both an entry and guid, skipped.");
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_CREATURE provided both an entry and Guid, skipped.");
 
 							return false;
 						}
@@ -1378,7 +1378,7 @@ namespace Game.AI
 						if (e.Event.distance.guid != 0 &&
 						    Global.ObjectMgr.GetCreatureData(e.Event.distance.guid) == null)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_CREATURE using invalid creature guid {0}, skipped.", e.Event.distance.guid);
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_CREATURE using invalid creature Guid {0}, skipped.", e.Event.distance.guid);
 
 							return false;
 						}
@@ -1396,7 +1396,7 @@ namespace Game.AI
 						if (e.Event.distance.guid == 0 &&
 						    e.Event.distance.entry == 0)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT did not provide gameobject guid or entry, skipped.");
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT did not provide gameobject Guid or entry, skipped.");
 
 							return false;
 						}
@@ -1404,7 +1404,7 @@ namespace Game.AI
 						if (e.Event.distance.guid != 0 &&
 						    e.Event.distance.entry != 0)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT provided both an entry and guid, skipped.");
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT provided both an entry and Guid, skipped.");
 
 							return false;
 						}
@@ -1412,7 +1412,7 @@ namespace Game.AI
 						if (e.Event.distance.guid != 0 &&
 						    Global.ObjectMgr.GetGameObjectData(e.Event.distance.guid) == null)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT using invalid gameobject guid {0}, skipped.", e.Event.distance.guid);
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT using invalid gameobject Guid {0}, skipped.", e.Event.distance.guid);
 
 							return false;
 						}
@@ -1432,7 +1432,7 @@ namespace Game.AI
 
 						if (e.Event.counter.id == 0)
 						{
-							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_COUNTER_SET using invalid counter id {0}, skipped.", e.Event.counter.id);
+							Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_COUNTER_SET using invalid counter Id {0}, skipped.", e.Event.counter.id);
 
 							return false;
 						}
@@ -1462,7 +1462,7 @@ namespace Game.AI
 					case SmartEvents.QuestObjCompletion:
 						if (Global.ObjectMgr.GetQuestObjective(e.Event.questObjective.id) == null)
 						{
-							Log.outError(LogFilter.Sql, $"SmartAIMgr: Event SMART_EVENT_QUEST_OBJ_COMPLETION using invalid objective id {e.Event.questObjective.id}, skipped.");
+							Log.outError(LogFilter.Sql, $"SmartAIMgr: Event SMART_EVENT_QUEST_OBJ_COMPLETION using invalid objective Id {e.Event.questObjective.id}, skipped.");
 
 							return false;
 						}
@@ -1578,7 +1578,7 @@ namespace Game.AI
 							}
 							else if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(e.Action.morphOrMount.model))
 							{
-								Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Model id {e.Action.morphOrMount.model}, skipped.");
+								Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Model Id {e.Action.morphOrMount.model}, skipped.");
 
 								return false;
 							}
@@ -1698,7 +1698,7 @@ namespace Game.AI
 						if (spellEffectInfo.IsEffect(SpellEffectName.KillCredit) ||
 						    spellEffectInfo.IsEffect(SpellEffectName.KillCredit2))
 							if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
-								Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {e.Action.cast.spell} targetA: {spellEffectInfo.TargetA.GetTarget()} - targetB: {spellEffectInfo.TargetB.GetTarget()}) has invalid target for this Action");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {e.Action.cast.spell} targetA: {spellEffectInfo.TargetA.GetTarget()} - targetB: {spellEffectInfo.TargetB.GetTarget()}) has invalid Target for this Action");
 
 					break;
 				}
@@ -1728,14 +1728,14 @@ namespace Game.AI
 
 						if (data == null)
 						{
-							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} specifies invalid CasterTargetType guid ({spawnType},{guid})");
+							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} specifies invalid CasterTargetType Guid ({spawnType},{guid})");
 
 							return false;
 						}
 						else if (e.Action.crossCast.targetParam2 != 0 &&
 						         e.Action.crossCast.targetParam2 != data.Id)
 						{
-							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} specifies invalid entry {e.Action.crossCast.targetParam2} (expected {data.Id}) for CasterTargetType guid ({spawnType},{guid})");
+							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} specifies invalid entry {e.Action.crossCast.targetParam2} (expected {data.Id}) for CasterTargetType Guid ({spawnType},{guid})");
 
 							return false;
 						}
@@ -1949,7 +1949,7 @@ namespace Game.AI
 					if (path == null ||
 					    path.nodes.Empty())
 					{
-						Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath id {e.Action.wpStart.pathID}, skipped.");
+						Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath Id {e.Action.wpStart.pathID}, skipped.");
 
 						return false;
 					}
@@ -2050,7 +2050,7 @@ namespace Game.AI
 						if (equipId != 0 &&
 						    Global.ObjectMgr.GetEquipmentInfo((uint)e.EntryOrGuid, equipId) == null)
 						{
-							Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_EQUIP uses non-existent equipment info id {0} for creature {1}, skipped.", equipId, e.EntryOrGuid);
+							Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_EQUIP uses non-existent equipment info Id {0} for creature {1}, skipped.", equipId, e.EntryOrGuid);
 
 							return false;
 						}
@@ -2062,7 +2062,7 @@ namespace Game.AI
 				{
 					if (e.Action.setInstanceData.type > 1)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid data Type {e.Action.setInstanceData.type} (value range 0-1), skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid _data Type {e.Action.setInstanceData.type} (value range 0-1), skipped.");
 
 						return false;
 					}
@@ -2115,7 +2115,7 @@ namespace Game.AI
 
 					if (Global.DB2Mgr.GetPhasesForGroup(phaseGroup).Empty())
 					{
-						Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_SET_INGAME_PHASE_GROUP uses invalid phase group id {0} for creature {1}, skipped", phaseGroup, e.EntryOrGuid);
+						Log.outError(LogFilter.Sql, "SmartScript: SMART_ACTION_SET_INGAME_PHASE_GROUP uses invalid phase group Id {0} for creature {1}, skipped", phaseGroup, e.EntryOrGuid);
 
 						return false;
 					}
@@ -2148,7 +2148,7 @@ namespace Game.AI
 				{
 					if (Global.ObjectMgr.GetSpawnData((SpawnObjectType)e.Action.respawnData.spawnType, e.Action.respawnData.spawnId) == null)
 					{
-						Log.outError(LogFilter.Sql, $"Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} specifies invalid spawn data ({e.Action.respawnData.spawnType},{e.Action.respawnData.spawnId})");
+						Log.outError(LogFilter.Sql, $"Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} specifies invalid spawn _data ({e.Action.respawnData.spawnType},{e.Action.respawnData.spawnId})");
 
 						return false;
 					}
@@ -2572,7 +2572,7 @@ namespace Game.AI
 
 							if (data == null)
 							{
-								Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using non-existent Creature guid {guid}, skipped.");
+								Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using non-existent Creature Guid {guid}, skipped.");
 
 								return false;
 							}
@@ -2592,7 +2592,7 @@ namespace Game.AI
 			if (entry == 0 ||
 			    !Global.CreatureTextMgr.TextExist(entry, (byte)id))
 			{
-				Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using non-existent Text id {id}, skipped.");
+				Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using non-existent Text Id {id}, skipped.");
 
 				return false;
 			}
@@ -2743,7 +2743,7 @@ namespace Game.AI
 			}
 			else
 			{
-				if (entry > 0) //first search is for guid (negative), do not drop error if not found
+				if (entry > 0) //first search is for Guid (negative), do not drop error if not found
 					Log.outDebug(LogFilter.ScriptsAi, "SmartAIMgr.GetScript: Could not load Script for Entry {0} ScriptType {1}.", entry, type);
 			}
 
@@ -3793,7 +3793,7 @@ namespace Game.AI
 			public uint quest;
 
 			public uint despawnTime;
-			//public uint reactState; DO NOT REUSE
+			//public uint _reactState; DO NOT REUSE
 		}
 
 		public struct WpPause

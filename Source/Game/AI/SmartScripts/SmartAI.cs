@@ -124,8 +124,8 @@ namespace Game.AI
 
 			foreach (WaypointNode waypoint in _path.nodes)
 			{
-				GridDefines.NormalizeMapCoord(ref waypoint.x);
-				GridDefines.NormalizeMapCoord(ref waypoint.y);
+                waypoint.x = GridDefines.NormalizeMapCoord(waypoint.x);
+                waypoint.y = GridDefines.NormalizeMapCoord(waypoint.y);
 				waypoint.moveType = _run ? WaypointMoveType.Run : WaypointMoveType.Walk;
 			}
 
@@ -400,7 +400,7 @@ namespace Game.AI
 								return true;
 				}
 
-				// no valid target found
+				// no valid Target found
 				return false;
 			}
 
@@ -485,7 +485,7 @@ namespace Game.AI
 
 			me.AddUnitState(UnitState.Evade);
 
-			GetScript().ProcessEventsFor(SmartEvents.Evade); // must be after _EnterEvadeMode (spells, auras, ...)
+			GetScript().ProcessEventsFor(SmartEvents.Evade); // must be after _EnterEvadeMode (spells, Auras, ...)
 
 			SetRun(_run);
 
@@ -727,7 +727,7 @@ namespace Game.AI
 
 			if (_invincibilityHpLevel != 0 &&
 			    (damage >= me.GetHealth() - _invincibilityHpLevel))
-				damage = (uint)(me.GetHealth() - _invincibilityHpLevel); // damage should not be nullified, because of player damage req.
+				damage = (uint)(me.GetHealth() - _invincibilityHpLevel); // Damage should not be nullified, because of player Damage req.
 		}
 
 		public override void HealReceived(Unit by, uint addhealth)

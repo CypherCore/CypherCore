@@ -45,9 +45,9 @@ namespace Game
 
 		public static void ForAllControlled(Unit unit, Action<Unit> func)
 		{
-			for (var i = 0; i < unit._Controlled.Count; ++i)
+			for (var i = 0; i < unit.Controlled.Count; ++i)
 			{
-				Unit controlled = unit._Controlled[i];
+				Unit controlled = unit.Controlled[i];
 
 				if (controlled.GetTypeId() != TypeId.Player &&
 				    controlled.GetVehicle() == null) // Player inside nested vehicle should not phase the root vehicle and its accessories (only direct root vehicle control does)
@@ -55,9 +55,9 @@ namespace Game
 			}
 
 			for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
-				if (!unit._SummonSlot[i].IsEmpty())
+				if (!unit.SummonSlot[i].IsEmpty())
 				{
-					Creature summon = unit.GetMap().GetCreature(unit._SummonSlot[i]);
+					Creature summon = unit.GetMap().GetCreature(unit.SummonSlot[i]);
 
 					if (summon)
 						func(summon);
@@ -694,14 +694,14 @@ namespace Game
 
 		public void VisitControlledOf(Unit unit, Action<Unit> func)
 		{
-			foreach (Unit controlled in unit._Controlled)
+			foreach (Unit controlled in unit.Controlled)
 				// Player inside nested vehicle should not phase the root vehicle and its accessories (only direct root vehicle control does)
 				if (!controlled.IsPlayer() &&
 				    controlled.GetVehicle() == null)
 					if (_visited.Add(controlled))
 						func(controlled);
 
-			foreach (ObjectGuid summonGuid in unit._SummonSlot)
+			foreach (ObjectGuid summonGuid in unit.SummonSlot)
 				if (!summonGuid.IsEmpty())
 				{
 					Creature summon = ObjectAccessor.GetCreature(unit, summonGuid);

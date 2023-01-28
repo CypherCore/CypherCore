@@ -31,7 +31,7 @@ namespace Game.Entities
 				}
 				else
 				{
-					SetBaseAttackTime(weaponAttackType, SharedConst.BaseAttackTime); // If there is no weapon reset attack time to base (might have been changed from forms)
+					SetBaseAttackTime(weaponAttackType, SharedConst.BaseAttackTime); // If there is no weapon reset attack Time to base (might have been changed from forms)
 				}
 			}
 		}
@@ -43,7 +43,7 @@ namespace Game.Entities
 
 			ObjectGuid creature_guid = pRewardSource.IsTypeId(TypeId.Unit) ? pRewardSource.GetGUID() : ObjectGuid.Empty;
 
-			// prepare data for near group iteration
+			// prepare _data for near group iteration
 			Group group = GetGroup();
 
 			if (group)
@@ -580,7 +580,7 @@ namespace Game.Entities
 					break;
 			}
 
-			// Victory emote spell
+			// Victory Emote spell
 			if (type != DuelCompleteType.Interrupted)
 				opponent.CastSpell(Duel.Opponent, 52852, true);
 
@@ -590,7 +590,7 @@ namespace Game.Entities
 			if (obj)
 				Duel.Initiator.RemoveGameObject(obj, true);
 
-			//remove auras
+			//remove Auras
 			var itsAuras = opponent.GetAppliedAuras();
 
 			foreach (var pair in itsAuras)
@@ -631,12 +631,12 @@ namespace Game.Entities
 
 		public void SetDuelArbiter(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.DuelArbiter), guid);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.DuelArbiter), guid);
 		}
 
 		private void SetDuelTeam(uint duelTeam)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.DuelTeam), duelTeam);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.DuelTeam), duelTeam);
 		}
 
 		//PVP
@@ -686,7 +686,7 @@ namespace Game.Entities
 				Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
 			}
 
-			foreach (Unit unit in _Controlled)
+			foreach (Unit unit in Controlled)
 				if (!unit.HasUnitState(UnitState.AttackPlayer))
 				{
 					unit.AddUnitState(UnitState.AttackPlayer);
@@ -759,7 +759,7 @@ namespace Game.Entities
 				{
 					SetPvpFlag(UnitPVPStateFlags.FFAPvp);
 
-					foreach (var unit in _Controlled)
+					foreach (var unit in Controlled)
 						unit.SetPvpFlag(UnitPVPStateFlags.FFAPvp);
 				}
 			}
@@ -767,7 +767,7 @@ namespace Game.Entities
 			{
 				RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
 
-				foreach (var unit in _Controlled)
+				foreach (var unit in Controlled)
 					unit.RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
 			}
 
@@ -793,7 +793,7 @@ namespace Game.Entities
 		{
 			base.SetPvP(state);
 
-			foreach (var unit in _Controlled)
+			foreach (var unit in Controlled)
 				unit.SetPvP(state);
 		}
 	}

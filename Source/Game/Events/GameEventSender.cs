@@ -12,7 +12,7 @@ namespace Game
 	{
 		public static void Trigger(uint gameEventId, WorldObject source, WorldObject target)
 		{
-			Cypher.Assert(source || target, "At least one of [source] or [target] must be provided");
+			Cypher.Assert(source || target, "At least one of [source] or [Target] must be provided");
 
 			WorldObject refForMapAndZoneScript = source ?? target;
 

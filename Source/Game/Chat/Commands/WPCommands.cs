@@ -43,7 +43,7 @@ namespace Game.Chat.Commands
 				pathId = optionalPathId.Value;
 			}
 
-			// path_id . ID of the Path
+			// PathId . ID of the Path
 			// point   . number of the waypoint (if not 0)
 
 			if (pathId == 0)
@@ -107,7 +107,7 @@ namespace Game.Chat.Commands
 					}
 					else
 					{
-						handler.SendSysMessage("|cff00ff00Wp Event: You have choosed an existing waypoint script guid: {0}|r", id);
+						handler.SendSysMessage("|cff00ff00Wp Event: You have choosed an existing waypoint script Guid: {0}|r", id);
 					}
 				}
 				else
@@ -130,7 +130,7 @@ namespace Game.Chat.Commands
 			{
 				if (id == 0)
 				{
-					handler.SendSysMessage("|cff33ffffWp Event: You must provide waypoint script id.|r");
+					handler.SendSysMessage("|cff33ffffWp Event: You must provide waypoint script Id.|r");
 
 					return true;
 				}
@@ -145,7 +145,7 @@ namespace Game.Chat.Commands
 
 				if (result.IsEmpty())
 				{
-					handler.SendSysMessage("|cff33ffffWp Event: No waypoint scripts found on id: {0}|r", id);
+					handler.SendSysMessage("|cff33ffffWp Event: No waypoint scripts found on Id: {0}|r", id);
 
 					return true;
 				}
@@ -163,7 +163,7 @@ namespace Game.Chat.Commands
 					a10 = result.Read<float>(8);
 					a11 = result.Read<float>(9);
 
-					handler.SendSysMessage("|cffff33ffid:|r|cff00ffff {0}|r|cff00ff00, guid: |r|cff00ffff{1}|r|cff00ff00, delay: |r|cff00ffff{2}|r|cff00ff00, command: |r|cff00ffff{3}|r|cff00ff00," +
+					handler.SendSysMessage("|cffff33ffid:|r|cff00ffff {0}|r|cff00ff00, Guid: |r|cff00ffff{1}|r|cff00ff00, delay: |r|cff00ffff{2}|r|cff00ff00, command: |r|cff00ffff{3}|r|cff00ff00," +
 					                       "datalong: |r|cff00ffff{4}|r|cff00ff00, datalong2: |r|cff00ffff{5}|r|cff00ff00, datatext: |r|cff00ffff{6}|r|cff00ff00, posx: |r|cff00ffff{7}|r|cff00ff00, " +
 					                       "posy: |r|cff00ffff{8}|r|cff00ff00, posz: |r|cff00ffff{9}|r|cff00ff00, orientation: |r|cff00ffff{10}|r",
 					                       id,
@@ -184,7 +184,7 @@ namespace Game.Chat.Commands
 			{
 				if (id == 0)
 				{
-					handler.SendSysMessage("|cffff33ffERROR: Waypoint script guid not present.|r");
+					handler.SendSysMessage("|cffff33ffERROR: Waypoint script Guid not present.|r");
 
 					return true;
 				}
@@ -213,7 +213,7 @@ namespace Game.Chat.Commands
 			{
 				if (id == 0)
 				{
-					handler.SendSysMessage("|cffff33ffERROR: No valid waypoint script id not present.|r");
+					handler.SendSysMessage("|cffff33ffERROR: No valid waypoint script Id not present.|r");
 
 					return true;
 				}
@@ -253,7 +253,7 @@ namespace Game.Chat.Commands
 					if (!uint.TryParse(arg2, out uint newid))
 						return false;
 
-					handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
+					handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script Guid: {0}|r|cff00ffff Id changed: |r|cff00ff00{1}|r", newid, id);
 
 					stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_ID);
 					stmt.AddValue(0, newid);
@@ -271,7 +271,7 @@ namespace Game.Chat.Commands
 
 					if (result.IsEmpty())
 					{
-						handler.SendSysMessage("|cffff33ffERROR: You have selected an non existing waypoint script guid.|r");
+						handler.SendSysMessage("|cffff33ffERROR: You have selected an non existing waypoint script Guid.|r");
 
 						return true;
 					}
@@ -337,7 +337,7 @@ namespace Game.Chat.Commands
 						if (!uint.TryParse(arg2, out uint arg3))
 							return false;
 
-						DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg, arg3, id); // Query can't be a prepared statement
+						DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE Guid='{2}'", arg, arg3, id); // Query can't be a prepared statement
 
 						handler.SendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff{0}|r|cff00ff00 dataint updated.|r", id);
 
@@ -345,7 +345,7 @@ namespace Game.Chat.Commands
 					}
 					else
 					{
-						DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg, arg, id); // Query can't be a prepared statement
+						DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE Guid='{2}'", arg, arg, id); // Query can't be a prepared statement
 					}
 				}
 
@@ -360,7 +360,7 @@ namespace Game.Chat.Commands
 		{
 			Creature target = handler.GetSelectedCreature();
 
-			// Did player provide a path_id?
+			// Did player provide a PathId?
 			if (!optionalPathId.HasValue)
 				return false;
 
@@ -425,12 +425,12 @@ namespace Game.Chat.Commands
 		[Command("modify", RBACPermissions.CommandWpModify)]
 		private static bool HandleWpModifyCommand(CommandHandler handler, string subCommand, [OptionalArg] string arg)
 		{
-			// first arg: add del text emote spell waittime move
+			// first arg: add del text Emote spell waittime move
 			if (subCommand.IsEmpty())
 				return false;
 
 			// Check
-			// Remember: "show" must also be the name of a column!
+			// Remember: "show" must also be the Name of a column!
 			if ((subCommand != "delay") &&
 			    (subCommand != "Action") &&
 			    (subCommand != "action_chance") &&
@@ -600,10 +600,10 @@ namespace Game.Chat.Commands
 
 			if (arg.IsEmpty())
 				// show_str check for present in list of correct values, no sql injection possible
-				DB.World.Execute("UPDATE waypoint_data SET {0}=null WHERE id='{1}' AND point='{2}'", subCommand, pathid, point); // Query can't be a prepared statement
+				DB.World.Execute("UPDATE waypoint_data SET {0}=null WHERE Id='{1}' AND point='{2}'", subCommand, pathid, point); // Query can't be a prepared statement
 			else
 				// show_str check for present in list of correct values, no sql injection possible
-				DB.World.Execute("UPDATE waypoint_data SET {0}='{1}' WHERE id='{2}' AND point='{3}'", subCommand, arg, pathid, point); // Query can't be a prepared statement
+				DB.World.Execute("UPDATE waypoint_data SET {0}='{1}' WHERE Id='{2}' AND point='{3}'", subCommand, arg, pathid, point); // Query can't be a prepared statement
 
 			handler.SendSysMessage(CypherStrings.WaypointChangedNo, subCommand);
 
@@ -997,7 +997,7 @@ namespace Game.Chat.Commands
 
 			if (!target)
 			{
-				handler.SendSysMessage("|cff33ffffYou must select a target.|r");
+				handler.SendSysMessage("|cff33ffffYou must select a Target.|r");
 
 				return true;
 			}
@@ -1014,7 +1014,7 @@ namespace Game.Chat.Commands
 			CreatureAddon addon = Global.ObjectMgr.GetCreatureAddon(guidLow);
 
 			if (addon == null ||
-			    addon.path_id == 0)
+			    addon.PathId == 0)
 			{
 				handler.SendSysMessage("|cffff33ffTarget does not have a loaded path.|r");
 

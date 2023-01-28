@@ -60,7 +60,7 @@ namespace Game.Maps
 			}
 			catch (JsonException ex)
 			{
-				Log.outError(LogFilter.Scripts, $"JSON parser error {ex.Message} at {ex.LineNumber} while loading data for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+				Log.outError(LogFilter.Scripts, $"JSON parser error {ex.Message} at {ex.LineNumber} while loading _data for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
 				return Result.MalformedJson;
 			}
@@ -94,14 +94,14 @@ namespace Game.Maps
 		{
 			if (!_doc.RootElement.TryGetProperty("Header", out JsonElement header))
 			{
-				Log.outError(LogFilter.Scripts, $"Missing data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+				Log.outError(LogFilter.Scripts, $"Missing _data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
 				return Result.MissingHeader;
 			}
 
 			if (header.GetString() != _instance.GetHeader())
 			{
-				Log.outError(LogFilter.Scripts, $"Incorrect data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}], expected \"{_instance.GetHeader()}\" got \"{header.GetString()}\"");
+				Log.outError(LogFilter.Scripts, $"Incorrect _data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}], expected \"{_instance.GetHeader()}\" got \"{header.GetString()}\"");
 
 				return Result.UnexpectedHeader;
 			}
@@ -129,7 +129,7 @@ namespace Game.Maps
 			{
 				if (bossId >= _instance.GetEncounterCount())
 				{
-					Log.outError(LogFilter.Scripts, $"Boss states has entry for boss with higher id ({bossId}) than number of bosses ({_instance.GetEncounterCount()}) for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+					Log.outError(LogFilter.Scripts, $"Boss states has entry for boss with higher Id ({bossId}) than number of bosses ({_instance.GetEncounterCount()}) for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
 					return Result.UnknownBoss;
 				}
@@ -164,7 +164,7 @@ namespace Game.Maps
 
 			if (moreData.ValueKind != JsonValueKind.Object)
 			{
-				Log.outError(LogFilter.Scripts, $"Additional data is not an object for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+				Log.outError(LogFilter.Scripts, $"Additional _data is not an object for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
 				return Result.AdditionalDataIsNotAnObject;
 			}
@@ -175,7 +175,7 @@ namespace Game.Maps
 				{
 					if (value.ValueKind != JsonValueKind.Number)
 					{
-						Log.outError(LogFilter.Scripts, $"Additional data value for key {valueBase.GetName()} is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+						Log.outError(LogFilter.Scripts, $"Additional _data value for key {valueBase.GetName()} is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
 						return Result.AdditionalDataUnexpectedValueType;
 					}

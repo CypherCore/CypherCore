@@ -66,7 +66,7 @@ namespace Game
 
 			if (movementInfo.Guid != mover.GetGUID())
 			{
-				Log.outError(LogFilter.Network, "HandleMovementOpcodes: guid error");
+				Log.outError(LogFilter.Network, "HandleMovementOpcodes: Guid error");
 
 				return;
 			}
@@ -83,28 +83,28 @@ namespace Game
 				plrMover.SetEmoteState(Emote.OneshotNone);
 
 			//handle special cases
-			if (!movementInfo.transport.guid.IsEmpty())
+			if (!movementInfo.Transport.Guid.IsEmpty())
 			{
 				// We were teleported, skip packets that were broadcast before teleport
 				if (movementInfo.Pos.GetExactDist2d(mover) > MapConst.SizeofGrids)
 					return;
 
-				if (Math.Abs(movementInfo.transport.pos.GetPositionX()) > 75f ||
-				    Math.Abs(movementInfo.transport.pos.GetPositionY()) > 75f ||
-				    Math.Abs(movementInfo.transport.pos.GetPositionZ()) > 75f)
+				if (Math.Abs(movementInfo.Transport.Pos.GetPositionX()) > 75f ||
+				    Math.Abs(movementInfo.Transport.Pos.GetPositionY()) > 75f ||
+				    Math.Abs(movementInfo.Transport.Pos.GetPositionZ()) > 75f)
 					return;
 
-				if (!GridDefines.IsValidMapCoord(movementInfo.Pos.posX + movementInfo.transport.pos.posX,
-				                                 movementInfo.Pos.posY + movementInfo.transport.pos.posY,
-				                                 movementInfo.Pos.posZ + movementInfo.transport.pos.posZ,
-				                                 movementInfo.Pos.Orientation + movementInfo.transport.pos.Orientation))
+				if (!GridDefines.IsValidMapCoord(movementInfo.Pos.X + movementInfo.Transport.Pos.X,
+				                                 movementInfo.Pos.Y + movementInfo.Transport.Pos.Y,
+				                                 movementInfo.Pos.Z + movementInfo.Transport.Pos.Z,
+				                                 movementInfo.Pos.Orientation + movementInfo.Transport.Pos.Orientation))
 					return;
 
 				if (plrMover)
 				{
 					if (plrMover.GetTransport() == null)
 					{
-						GameObject go = plrMover.GetMap().GetGameObject(movementInfo.transport.guid);
+						GameObject go = plrMover.GetMap().GetGameObject(movementInfo.Transport.Guid);
 
 						if (go != null)
 						{
@@ -114,10 +114,10 @@ namespace Game
 								transport.AddPassenger(plrMover);
 						}
 					}
-					else if (plrMover.GetTransport().GetTransportGUID() != movementInfo.transport.guid)
+					else if (plrMover.GetTransport().GetTransportGUID() != movementInfo.Transport.Guid)
 					{
 						plrMover.GetTransport().RemovePassenger(plrMover);
-						GameObject go = plrMover.GetMap().GetGameObject(movementInfo.transport.guid);
+						GameObject go = plrMover.GetMap().GetGameObject(movementInfo.Transport.Guid);
 
 						if (go != null)
 						{
@@ -137,14 +137,14 @@ namespace Game
 
 				if (mover.GetTransport() == null &&
 				    !mover.GetVehicle())
-					movementInfo.transport.Reset();
+					movementInfo.Transport.Reset();
 			}
-			else if (plrMover && plrMover.GetTransport() != null) // if we were on a transport, leave
+			else if (plrMover && plrMover.GetTransport() != null) // if we were on a Transport, leave
 			{
 				plrMover.GetTransport().RemovePassenger(plrMover);
 			}
 
-			// fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
+			// fall Damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
 			if (opcode == ClientOpcodes.MoveFallLand &&
 			    plrMover &&
 			    !plrMover.IsInFlight())
@@ -158,7 +158,7 @@ namespace Game
 
 			movementInfo.Guid   = mover.GetGUID();
 			movementInfo.Time   = AdjustClientMovementTime(movementInfo.Time);
-			mover._movementInfo = movementInfo;
+			mover.MovementInfo = movementInfo;
 
 			// Some vehicles allow the passenger to turn by himself
 			Vehicle vehicle = mover.GetVehicle();
@@ -181,7 +181,7 @@ namespace Game
 			mover.UpdatePosition(movementInfo.Pos);
 
 			MoveUpdate moveUpdate = new();
-			moveUpdate.Status = mover._movementInfo;
+			moveUpdate.Status = mover.MovementInfo;
 			mover.SendMessageToSet(moveUpdate, GetPlayer());
 
 			if (plrMover) // nothing is charmed, or player charmed
@@ -192,7 +192,7 @@ namespace Game
 
 				plrMover.UpdateFallInformationIfNeed(movementInfo, opcode);
 
-				if (movementInfo.Pos.posZ < plrMover.GetMap().GetMinHeight(plrMover.GetPhaseShift(), movementInfo.Pos.GetPositionX(), movementInfo.Pos.GetPositionY()))
+				if (movementInfo.Pos.Z < plrMover.GetMap().GetMinHeight(plrMover.GetPhaseShift(), movementInfo.Pos.GetPositionX(), movementInfo.Pos.GetPositionY()))
 				{
 					if (!(plrMover.GetBattleground() && plrMover.GetBattleground().HandlePlayerUnderMap(GetPlayer())))
 						// NOTE: this is actually called many times while falling
@@ -263,7 +263,7 @@ namespace Game
 			Map oldMap = player.GetMap();
 			Map newMap = GetPlayer().GetTeleportDestInstanceId().HasValue ? Global.MapMgr.FindMap(loc.GetMapId(), GetPlayer().GetTeleportDestInstanceId().Value) : Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
 
-			MovementInfo.TransportInfo transportInfo = player._movementInfo.transport;
+			MovementInfo.TransportInfo transportInfo = player.MovementInfo.Transport;
 			ITransport                 transport     = player.GetTransport();
 
 			if (transport != null)
@@ -295,19 +295,19 @@ namespace Game
 			player.SetMap(newMap);
 
 			ResumeToken resumeToken = new();
-			resumeToken.SequenceIndex = player._movementCounter;
+			resumeToken.SequenceIndex = player.MovementCounter;
 			resumeToken.Reason        = seamlessTeleport ? 2 : 1u;
 			SendPacket(resumeToken);
 
 			if (!seamlessTeleport)
 				player.SendInitialPacketsBeforeAddToMap();
 
-			// move player between transport copies on each map
-			Transport newTransport = newMap.GetTransport(transportInfo.guid);
+			// move player between Transport copies on each map
+			Transport newTransport = newMap.GetTransport(transportInfo.Guid);
 
 			if (newTransport != null)
 			{
-				player._movementInfo.transport = transportInfo;
+				player.MovementInfo.Transport = transportInfo;
 				newTransport.AddPassenger(player);
 			}
 
@@ -391,7 +391,7 @@ namespace Game
 
 			if (mapEntry.IsDungeon())
 			{
-				// check if this instance has a reset time and send it to player if so
+				// check if this instance has a reset Time and send it to player if so
 				MapDb2Entries entries = new(mapEntry.Id, newMap.GetDifficultyID());
 
 				if (entries.MapDifficulty.HasResetSchedule())
@@ -426,7 +426,7 @@ namespace Game
 			player.GetZoneAndAreaId(out uint newzone, out uint newarea);
 			player.UpdateZone(newzone, newarea);
 
-			// honorless target
+			// honorless Target
 			if (player.PvpInfo.IsHostile)
 				player.CastSpell(player, 2479, true);
 
@@ -495,7 +495,7 @@ namespace Game
 			// new zone
 			if (old_zone != newzone)
 			{
-				// honorless target
+				// honorless Target
 				if (plMover.PvpInfo.IsHostile)
 					plMover.CastSpell(plMover, 2479, true);
 
@@ -596,7 +596,7 @@ namespace Game
 				if (GetPlayer().GetSpeed(move_type) > packet.Speed) // must be greater - just correct
 				{
 					Log.outError(LogFilter.Network,
-					             "{0}SpeedChange player {1} is NOT correct (must be {2} instead {3}), force set to correct value",
+					             "{0}SpeedChange player {1} is NOT correct (must be {2} instead {3}), Force set to correct value",
 					             move_type,
 					             GetPlayer().GetName(),
 					             GetPlayer().GetSpeed(move_type),
@@ -607,7 +607,7 @@ namespace Game
 				else // must be lesser - cheating
 				{
 					Log.outDebug(LogFilter.Server,
-					             "Player {0} from account id {1} kicked for incorrect speed (must be {2} instead {3})",
+					             "Player {0} from account Id {1} kicked for incorrect speed (must be {2} instead {3})",
 					             GetPlayer().GetName(),
 					             GetPlayer().GetSession().GetAccountId(),
 					             GetPlayer().GetSpeed(move_type),
@@ -623,7 +623,7 @@ namespace Game
 		{
 			if (GetPlayer().IsInWorld)
 				if (_player.GetUnitBeingMoved().GetGUID() != packet.ActiveMover)
-					Log.outError(LogFilter.Network, "HandleSetActiveMover: incorrect mover guid: mover is {0} and should be {1},", packet.ActiveMover.ToString(), _player.GetUnitBeingMoved().GetGUID().ToString());
+					Log.outError(LogFilter.Network, "HandleSetActiveMover: incorrect mover Guid: mover is {0} and should be {1},", packet.ActiveMover.ToString(), _player.GetUnitBeingMoved().GetGUID().ToString());
 		}
 
 		[WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
@@ -635,10 +635,10 @@ namespace Game
 				return;
 
 			movementAck.Ack.Status.Time = AdjustClientMovementTime(movementAck.Ack.Status.Time);
-			GetPlayer()._movementInfo   = movementAck.Ack.Status;
+			GetPlayer().MovementInfo   = movementAck.Ack.Status;
 
 			MoveUpdateKnockBack updateKnockBack = new();
-			updateKnockBack.Status = GetPlayer()._movementInfo;
+			updateKnockBack.Status = GetPlayer().MovementInfo;
 			GetPlayer().SendMessageToSet(updateKnockBack, false);
 		}
 
@@ -682,10 +682,10 @@ namespace Game
 			Cypher.Assert(mover != null);
 			_player.ValidateMovementInfo(moveApplyMovementForceAck.Ack.Status);
 
-			// prevent tampered movement data
+			// prevent tampered movement _data
 			if (moveApplyMovementForceAck.Ack.Status.Guid != mover.GetGUID())
 			{
-				Log.outError(LogFilter.Network, $"HandleMoveApplyMovementForceAck: guid error, expected {mover.GetGUID()}, got {moveApplyMovementForceAck.Ack.Status.Guid}");
+				Log.outError(LogFilter.Network, $"HandleMoveApplyMovementForceAck: Guid error, expected {mover.GetGUID()}, got {moveApplyMovementForceAck.Ack.Status.Guid}");
 
 				return;
 			}
@@ -705,10 +705,10 @@ namespace Game
 			Cypher.Assert(mover != null);
 			_player.ValidateMovementInfo(moveRemoveMovementForceAck.Ack.Status);
 
-			// prevent tampered movement data
+			// prevent tampered movement _data
 			if (moveRemoveMovementForceAck.Ack.Status.Guid != mover.GetGUID())
 			{
-				Log.outError(LogFilter.Network, $"HandleMoveRemoveMovementForceAck: guid error, expected {mover.GetGUID()}, got {moveRemoveMovementForceAck.Ack.Status.Guid}");
+				Log.outError(LogFilter.Network, $"HandleMoveRemoveMovementForceAck: Guid error, expected {mover.GetGUID()}, got {moveRemoveMovementForceAck.Ack.Status.Guid}");
 
 				return;
 			}
@@ -728,10 +728,10 @@ namespace Game
 			Cypher.Assert(mover != null); // there must always be a mover
 			_player.ValidateMovementInfo(setModMovementForceMagnitudeAck.Ack.Status);
 
-			// prevent tampered movement data
+			// prevent tampered movement _data
 			if (setModMovementForceMagnitudeAck.Ack.Status.Guid != mover.GetGUID())
 			{
-				Log.outError(LogFilter.Network, $"HandleSetModMovementForceMagnitudeAck: guid error, expected {mover.GetGUID()}, got {setModMovementForceMagnitudeAck.Ack.Status.Guid}");
+				Log.outError(LogFilter.Network, $"HandleSetModMovementForceMagnitudeAck: Guid error, expected {mover.GetGUID()}, got {setModMovementForceMagnitudeAck.Ack.Status.Guid}");
 
 				return;
 			}
@@ -751,7 +751,7 @@ namespace Game
 
 					if (Math.Abs(expectedModMagnitude - setModMovementForceMagnitudeAck.Speed) > 0.01f)
 					{
-						Log.outDebug(LogFilter.Misc, $"Player {_player.GetName()} from account id {_player.GetSession().GetAccountId()} kicked for incorrect movement force magnitude (must be {expectedModMagnitude} instead {setModMovementForceMagnitudeAck.Speed})");
+						Log.outDebug(LogFilter.Misc, $"Player {_player.GetName()} from account Id {_player.GetSession().GetAccountId()} kicked for incorrect movement Force magnitude (must be {expectedModMagnitude} instead {setModMovementForceMagnitudeAck.Speed})");
 						_player.GetSession().KickPlayer("WorldSession::HandleMoveSetModMovementForceMagnitudeAck Incorrect magnitude");
 
 						return;
@@ -779,15 +779,15 @@ namespace Game
 				return;
 			}
 
-			// prevent tampered movement data
+			// prevent tampered movement _data
 			if (moveTimeSkipped.MoverGUID != mover.GetGUID())
 			{
-				Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong guid from the unit moved by {GetPlayer().GetGUID()}");
+				Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong Guid from the unit moved by {GetPlayer().GetGUID()}");
 
 				return;
 			}
 
-			mover._movementInfo.Time += moveTimeSkipped.TimeSkipped;
+			mover.MovementInfo.Time += moveTimeSkipped.TimeSkipped;
 
 			MoveSkipTime moveSkipTime = new();
 			moveSkipTime.MoverGUID   = moveTimeSkipped.MoverGUID;
@@ -853,20 +853,20 @@ namespace Game
 			uint serverTimeAtSent = _pendingTimeSyncRequests.LookupByKey(timeSyncResponse.SequenceIndex);
 			_pendingTimeSyncRequests.Remove(timeSyncResponse.SequenceIndex);
 
-			// time it took for the request to travel to the client, for the client to process it and reply and for response to travel back to the server.
+			// Time it took for the request to travel to the client, for the client to process it and reply and for response to travel back to the server.
 			// we are going to make 2 assumptions:
-			// 1) we assume that the request processing time equals 0.
-			// 2) we assume that the packet took as much time to travel from server to client than it took to travel from client to server.
+			// 1) we assume that the request processing Time equals 0.
+			// 2) we assume that the packet took as much Time to travel from server to client than it took to travel from client to server.
 			uint roundTripDuration = Time.GetMSTimeDiff(serverTimeAtSent, timeSyncResponse.GetReceivedTime());
 			uint lagDelay          = roundTripDuration / 2;
 
 			/*
 			clockDelta = serverTime - clientTime
 			where
-			serverTime: time that was displayed on the clock of the SERVER at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
-			clientTime:  time that was displayed on the clock of the CLIENT at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
+			serverTime: Time that was displayed on the clock of the SERVER at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
+			clientTime:  Time that was displayed on the clock of the CLIENT at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
 
-			Once clockDelta has been computed, we can compute the time of an event on server clock when we know the time of that same event on the client clock,
+			Once clockDelta has been computed, we can compute the Time of an event on server clock when we know the Time of that same event on the client clock,
 			using the following relation:
 			serverTime = clockDelta + clientTime
 			*/

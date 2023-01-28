@@ -20,17 +20,17 @@ namespace Game.Loots
 		private static void Initialize()
 		{
 			Creature      = new LootStore("creature_loot_template", "creature entry");
-			Disenchant    = new LootStore("disenchant_loot_template", "Item disenchant id");
-			Fishing       = new LootStore("fishing_loot_template", "area id");
+			Disenchant    = new LootStore("disenchant_loot_template", "Item disenchant Id");
+			Fishing       = new LootStore("fishing_loot_template", "area Id");
 			Gameobject    = new LootStore("gameobject_loot_template", "gameobject entry");
 			Items         = new LootStore("item_loot_template", "Item entry");
-			Mail          = new LootStore("mail_loot_template", "mail template id", false);
+			Mail          = new LootStore("mail_loot_template", "mail template Id", false);
 			Milling       = new LootStore("milling_loot_template", "Item entry (herb)");
 			Pickpocketing = new LootStore("pickpocketing_loot_template", "creature pickpocket lootid");
 			Prospecting   = new LootStore("prospecting_loot_template", "Item entry (ore)");
-			Reference     = new LootStore("reference_loot_template", "reference id", false);
-			Skinning      = new LootStore("skinning_loot_template", "creature skinning id");
-			Spell         = new LootStore("spell_loot_template", "spell id (random Item creating)", false);
+			Reference     = new LootStore("reference_loot_template", "reference Id", false);
+			Skinning      = new LootStore("skinning_loot_template", "creature skinning Id");
+			Spell         = new LootStore("spell_loot_template", "spell Id (random Item creating)", false);
 		}
 
 		public static void LoadLootTables()
@@ -419,7 +419,7 @@ namespace Game.Loots
 
 		public static void LoadLootTemplates_Spell()
 		{
-			// TODO: change this to use MiscValue from spell effect as id instead of spell id
+			// TODO: change this to use MiscValue from spell effect as Id instead of spell Id
 			Log.outInfo(LogFilter.ServerLoading, "Loading spell loot templates...");
 
 			uint oldMSTime = Time.GetMSTime();
@@ -507,9 +507,9 @@ namespace Game.Loots
 		public float chance;               // chance to drop for both quest and non-quest items, chance to be used for refs
 		public List<Condition> conditions; // additional loot condition
 		public byte groupid;
-		public uint itemid; // id of the Item
+		public uint itemid; // Id of the Item
 		public ushort lootmode;
-		public byte maxcount;    // max drop count for the Item mincount or Ref multiplicator
+		public byte maxcount;    // max drop Count for the Item mincount or Ref multiplicator
 		public byte mincount;    // mincount for drop items
 		public bool needs_quest; // quest drop (negative ChanceOrQuestChance in DB)
 		public uint reference;   // referenced TemplateleId
@@ -583,9 +583,9 @@ namespace Game.Loots
 					return false;
 				}
 
-				if (maxcount < mincount) // wrong max count
+				if (maxcount < mincount) // wrong max Count
 				{
-					Log.outError(LogFilter.Sql, "Table '{0}' entry {1} Item {2}: max count ({3}) less that min count ({4}) - skipped", store.GetName(), entry, itemid, maxcount, reference);
+					Log.outError(LogFilter.Sql, "Table '{0}' entry {1} Item {2}: max Count ({3}) less that min Count ({4}) - skipped", store.GetName(), entry, itemid, maxcount, reference);
 
 					return false;
 				}

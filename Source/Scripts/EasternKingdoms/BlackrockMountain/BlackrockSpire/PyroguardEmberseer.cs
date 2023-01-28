@@ -55,7 +55,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 			me.SetUnitFlag(UnitFlags.Uninteractible);
 			me.SetImmuneToPC(true);
 			_scheduler.CancelAll();
-			// Apply auras on spawn and reset
+			// Apply Auras on spawn and reset
 			// DoCast(me, SpellFireShieldTrigger); // Need to find this in old Dbc if possible
 			me.RemoveAura(SpellIds.EmberseerFullStrength);
 			me.RemoveAura(SpellIds.EmberseerGrowing);
@@ -72,7 +72,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 			_scheduler.Schedule(TimeSpan.FromSeconds(3),
 			                    task =>
 			                    {
-				                    // #### Spell isn't doing any damage ??? ####
+				                    // #### Spell isn't doing any Damage ??? ####
 				                    DoCast(me, SpellIds.FireShield);
 				                    task.Repeat(TimeSpan.FromSeconds(3));
 			                    });

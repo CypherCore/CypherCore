@@ -99,11 +99,11 @@ namespace Game.BattleGrounds
 				}
 			}
 
-			// if rating difference counts, maybe force-update queues
+			// if rating difference counts, maybe Force-update queues
 			if (WorldConfig.GetIntValue(WorldCfg.ArenaMaxRatingDifference) != 0 &&
 			    WorldConfig.GetIntValue(WorldCfg.ArenaRatedUpdateTimer) != 0)
 			{
-				// it's time to force update
+				// it's Time to Force update
 				if (_NextRatedArenaUpdate < diff)
 				{
 					// forced update for rated arenas (scan all, but skipped non rated)
@@ -242,7 +242,7 @@ namespace Game.BattleGrounds
 			// we create here an instanceid, which is just for
 			// displaying this to the client and without any other use..
 			// the client-instanceIds are unique for each Battleground-Type
-			// the instance-id just needs to be as low as possible, beginning with 1
+			// the instance-Id just needs to be as low as possible, beginning with 1
 			// the following works, because std.set is default ordered with "<"
 			// the optimalization would be to use as bitmask std.vector<uint32> - but that would only make code unreadable
 
@@ -442,11 +442,11 @@ namespace Game.BattleGrounds
 					}
 					else if (bgTemplate.StartLocation[TeamId.Alliance] != null) // reload case
 					{
-						Log.outError(LogFilter.Sql, $"Table `battleground_template` for id {bgTemplate.Id} contains a non-existing WorldSafeLocs.dbc id {startId} in field `AllianceStartLoc`. Ignoring.");
+						Log.outError(LogFilter.Sql, $"Table `battleground_template` for Id {bgTemplate.Id} contains a non-existing WorldSafeLocs.dbc Id {startId} in field `AllianceStartLoc`. Ignoring.");
 					}
 					else
 					{
-						Log.outError(LogFilter.Sql, $"Table `Battleground_template` for Id {bgTemplate.Id} has a non-existed WorldSafeLocs.dbc id {startId} in field `AllianceStartLoc`. BG not created.");
+						Log.outError(LogFilter.Sql, $"Table `Battleground_template` for Id {bgTemplate.Id} has a non-existed WorldSafeLocs.dbc Id {startId} in field `AllianceStartLoc`. BG not created.");
 
 						continue;
 					}
@@ -460,11 +460,11 @@ namespace Game.BattleGrounds
 					}
 					else if (bgTemplate.StartLocation[TeamId.Horde] != null) // reload case
 					{
-						Log.outError(LogFilter.Sql, $"Table `battleground_template` for id {bgTemplate.Id} contains a non-existing WorldSafeLocs.dbc id {startId} in field `HordeStartLoc`. Ignoring.");
+						Log.outError(LogFilter.Sql, $"Table `battleground_template` for Id {bgTemplate.Id} contains a non-existing WorldSafeLocs.dbc Id {startId} in field `HordeStartLoc`. Ignoring.");
 					}
 					else
 					{
-						Log.outError(LogFilter.Sql, $"Table `Battleground_template` for Id {bgTemplate.Id} has a non-existed WorldSafeLocs.dbc id {startId} in field `HordeStartLoc`. BG not created.");
+						Log.outError(LogFilter.Sql, $"Table `Battleground_template` for Id {bgTemplate.Id} has a non-existed WorldSafeLocs.dbc Id {startId} in field `HordeStartLoc`. BG not created.");
 
 						continue;
 					}
@@ -720,7 +720,7 @@ namespace Game.BattleGrounds
 				if (creature.Value.Npcflag.HasAnyFlag((uint)NPCFlags.BattleMaster) &&
 				    !mBattleMastersMap.ContainsKey(creature.Value.Entry))
 				{
-					Log.outError(LogFilter.Sql, "CreatureTemplate (Entry: {0}) has UNIT_NPC_FLAG_BATTLEMASTER but no data in `battlemaster_entry` table. Removing flag!", creature.Value.Entry);
+					Log.outError(LogFilter.Sql, "CreatureTemplate (Entry: {0}) has UNIT_NPC_FLAG_BATTLEMASTER but no _data in `battlemaster_entry` table. Removing flag!", creature.Value.Entry);
 					templates[creature.Key].Npcflag &= ~(uint)NPCFlags.BattleMaster;
 				}
 		}

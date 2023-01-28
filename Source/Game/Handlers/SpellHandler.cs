@@ -118,7 +118,7 @@ namespace Game
 
 			SpellCastTargets targets = new(user, packet.Cast);
 
-			// Note: If script stop casting it must send appropriate data to client to prevent stuck Item in gray State.
+			// Note: If script stop casting it must send appropriate _data to client to prevent stuck Item in gray State.
 			if (!Global.ScriptMgr.RunScriptRet<IItemOnUse>(p => p.OnUse(user, item, targets, packet.Cast.CastID), item.GetScriptId()))
 				// no script or script not process request by self
 				user.CastItemUseSpell(item, targets, packet.Cast.CastID, packet.Cast.Misc);
@@ -166,7 +166,7 @@ namespace Game
 				player.SendEquipError(InventoryResult.ClientLockedOut, item);
 
 				Log.outError(LogFilter.Network,
-				             "Possible hacking attempt: Player {0} [guid: {1}] tried to open Item [guid: {2}, entry: {3}] which is not openable!",
+				             "Possible hacking attempt: Player {0} [Guid: {1}] tried to open Item [Guid: {2}, entry: {3}] which is not openable!",
 				             player.GetName(),
 				             player.GetGUID().ToString(),
 				             item.GetGUID().ToString(),
@@ -185,7 +185,7 @@ namespace Game
 				if (lockInfo == null)
 				{
 					player.SendEquipError(InventoryResult.ItemLocked, item);
-					Log.outError(LogFilter.Network, "WORLD:OpenItem: Item [guid = {0}] has an unknown lockId: {1}!", item.GetGUID().ToString(), lockId);
+					Log.outError(LogFilter.Network, "WORLD:OpenItem: Item [Guid = {0}] has an unknown lockId: {1}!", item.GetGUID().ToString(), lockId);
 
 					return;
 				}
@@ -213,7 +213,7 @@ namespace Game
 			else
 			{
 				// If Item doesn't already have loot, attempt to load it. If that
-				// fails then this is first time opening, generate loot
+				// fails then this is first Time opening, generate loot
 				if (!item._lootGenerated &&
 				    !Global.LootItemStorage.LoadStoredLoot(item, player))
 				{
@@ -327,7 +327,7 @@ namespace Game
 
 			if (spellInfo == null)
 			{
-				Log.outError(LogFilter.Network, "WORLD: unknown spell id {0}", cast.Cast.SpellID);
+				Log.outError(LogFilter.Network, "WORLD: unknown spell Id {0}", cast.Cast.SpellID);
 
 				return;
 			}
@@ -370,7 +370,7 @@ namespace Game
 					if (go.GetSpellForLock(caster.ToPlayer()) == spellInfo)
 						allow = true;
 
-				// allow casting of spells triggered by clientside periodic trigger auras
+				// allow casting of spells triggered by clientside periodic trigger Auras
 				if (caster.HasAuraTypeWithTriggerSpell(AuraType.PeriodicTriggerSpellFromClient, spellInfo.Id))
 				{
 					allow       = true;
@@ -390,7 +390,7 @@ namespace Game
 
 			// Client is resending autoshot cast opcode when other spell is cast during shoot rotation
 			// Skip it to prevent "interrupt" message
-			// Also check targets! target may have changed and we need to interrupt current spell
+			// Also check targets! Target may have changed and we need to interrupt current spell
 			if (spellInfo.IsAutoRepeatRangedSpell())
 			{
 				Spell autoRepeatSpell = caster.GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
@@ -401,7 +401,7 @@ namespace Game
 						return;
 			}
 
-			// auto-selection buff level base at target level (in spellInfo)
+			// auto-selection buff level base at Target level (in spellInfo)
 			if (targets.GetUnitTarget() != null)
 			{
 				SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(caster));
@@ -460,7 +460,7 @@ namespace Game
 
 			// non channeled case:
 			// don't allow remove non positive spells
-			// don't allow cancelling passive auras (some of them are visible)
+			// don't allow cancelling passive Auras (some of them are visible)
 			if (!spellInfo.IsPositive() ||
 			    spellInfo.IsPassive())
 				return;
@@ -499,7 +499,7 @@ namespace Game
 		{
 			if (!Global.SpellMgr.HasSpellInfo(packet.SpellID, Difficulty.None))
 			{
-				Log.outError(LogFilter.Network, "WORLD: unknown PET spell id {0}", packet.SpellID);
+				Log.outError(LogFilter.Network, "WORLD: unknown PET spell Id {0}", packet.SpellID);
 
 				return;
 			}
@@ -598,13 +598,13 @@ namespace Game
 			if (slotId >= SharedConst.MaxTotemSlot)
 				return;
 
-			if (GetPlayer()._SummonSlot[slotId].IsEmpty())
+			if (GetPlayer().SummonSlot[slotId].IsEmpty())
 				return;
 
-			Creature totem = ObjectAccessor.GetCreature(GetPlayer(), _player._SummonSlot[slotId]);
+			Creature totem = ObjectAccessor.GetCreature(GetPlayer(), _player.SummonSlot[slotId]);
 
 			if (totem != null &&
-			    totem.IsTotem()) // && totem.GetGUID() == packet.TotemGUID)  Unknown why blizz doesnt send the guid when you right click it.
+			    totem.IsTotem()) // && totem.GetGUID() == packet.TotemGUID)  Unknown why blizz doesnt send the Guid when you right click it.
 				totem.ToTotem().UnSummon();
 		}
 
@@ -650,7 +650,7 @@ namespace Game
 		{
 			ObjectGuid guid = packet.UnitGUID;
 
-			// Get unit for which data is needed by client
+			// Get unit for which _data is needed by client
 			Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), guid);
 
 			if (!unit)
@@ -735,7 +735,7 @@ namespace Game
 			pos.Relocate(packet.CollisionPos);
 			spell._targets.ModDst(pos);
 
-			// we changed dest, recalculate flight time
+			// we changed dest, recalculate flight Time
 			spell.RecalculateDelayMomentForDst();
 
 			NotifyMissileTrajectoryCollision data = new();

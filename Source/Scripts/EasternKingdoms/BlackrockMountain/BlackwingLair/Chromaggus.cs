@@ -14,8 +14,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
 	internal struct SpellIds
 	{
 		// These spells are actually called elemental shield
-		// What they do is decrease all damage by 75% then they increase
-		// One school of damage by 1100%
+		// What they do is decrease all Damage by 75% then they increase
+		// One school of Damage by 1100%
 		public const uint FireVulnerability = 22277;
 		public const uint FrostVulnerability = 22278;
 		public const uint ShadowVulnerability = 22279;

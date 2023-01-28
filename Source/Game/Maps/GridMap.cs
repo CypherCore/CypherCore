@@ -16,17 +16,17 @@ namespace Game.Maps
 	{
 		public GridMap()
 		{
-			// Height level data
+			// Height level _data
 			_gridHeight    = MapConst.InvalidHeight;
 			_gridGetHeight = GetHeightFromFlat;
 
-			// Liquid data
+			// Liquid _data
 			_liquidLevel = MapConst.InvalidHeight;
 		}
 
 		public LoadResult LoadData(string filename)
 		{
-			// Unload old data if exist
+			// Unload old _data if exist
 			UnloadData();
 
 			// Not return error if file not found
@@ -47,7 +47,7 @@ namespace Game.Maps
 			if (header.areaMapOffset != 0 &&
 			    !LoadAreaData(reader, header.areaMapOffset))
 			{
-				Log.outError(LogFilter.Maps, "Error loading map area data");
+				Log.outError(LogFilter.Maps, "Error loading map area _data");
 
 				return LoadResult.ReadFromFileFailed;
 			}
@@ -55,7 +55,7 @@ namespace Game.Maps
 			if (header.heightMapOffset != 0 &&
 			    !LoadHeightData(reader, header.heightMapOffset))
 			{
-				Log.outError(LogFilter.Maps, "Error loading map height data");
+				Log.outError(LogFilter.Maps, "Error loading map height _data");
 
 				return LoadResult.ReadFromFileFailed;
 			}
@@ -63,7 +63,7 @@ namespace Game.Maps
 			if (header.liquidMapOffset != 0 &&
 			    !LoadLiquidData(reader, header.liquidMapOffset))
 			{
-				Log.outError(LogFilter.Maps, "Error loading map liquids data");
+				Log.outError(LogFilter.Maps, "Error loading map liquids _data");
 
 				return LoadResult.ReadFromFileFailed;
 			}
@@ -71,7 +71,7 @@ namespace Game.Maps
 			if (header.holesSize != 0 &&
 			    !LoadHolesData(reader, header.holesOffset))
 			{
-				Log.outError(LogFilter.Maps, "Error loading map holes data");
+				Log.outError(LogFilter.Maps, "Error loading map holes _data");
 
 				return LoadResult.ReadFromFileFailed;
 			}
@@ -684,7 +684,7 @@ namespace Game.Maps
 			    z < ground_level)
 				return ZLiquidStatus.NoWater;
 
-			// All ok in water . store data
+			// All ok in water . store _data
 			if (data != null)
 			{
 				data.entry       = entry;
@@ -732,7 +732,7 @@ namespace Game.Maps
 		private float _gridHeight;
 		private float _gridIntHeightMultiplier;
 
-		//Area data
+		//Area _data
 		public ushort[] _areaMap;
 
 		//Liquid Map

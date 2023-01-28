@@ -479,7 +479,7 @@ namespace Scripts.Spells.Quest
 			if (target)
 				if (target.IsTypeId(TypeId.Unit) &&
 				    target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
-					// Make sure nobody else is channeling the same target
+					// Make sure nobody else is channeling the same Target
 					if (!target.HasAura(SpellIds.ScourgingCrystalController))
 						GetCaster().CastSpell(target, SpellIds.ScourgingCrystalController, new CastSpellExtraArgs(GetCastItem()));
 		}
@@ -946,7 +946,7 @@ namespace Scripts.Spells.Quest
 			Player playerTarget = GetHitPlayer();
 
 			if (playerTarget)
-				// Check if found player target is on fly mount or using flying form
+				// Check if found player Target is on fly Mount or using flying form
 				if (playerTarget.HasAuraType(AuraType.Fly) ||
 				    playerTarget.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
 					playerTarget.CastSpell(playerTarget, SpellIds.FlakCannonTrigger, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle));
@@ -993,7 +993,7 @@ namespace Scripts.Spells.Quest
 			Cell.VisitWorldObjects(caster, searcher, 65.0f);
 
 			foreach (Player player in playerList)
-				// Check if found player target is on fly mount or using flying form
+				// Check if found player Target is on fly Mount or using flying form
 				if (player.HasAuraType(AuraType.Fly) ||
 				    player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
 					// Summom Fel Cannon (bunny version) at found player
@@ -1014,7 +1014,7 @@ namespace Scripts.Spells.Quest
 		{
 			Unit caster = GetCaster();
 
-			// This spell will be cast only if caster has one of these auras
+			// This spell will be cast only if caster has one of these Auras
 			if (!(caster.HasAuraType(AuraType.Fly) || caster.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed)))
 				return SpellCastResult.CantDoThatRightNow;
 

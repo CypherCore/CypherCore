@@ -66,7 +66,7 @@ namespace Game.BlackMarket
 				return;
 			}
 
-			_lastUpdate = GameTime.GetGameTime(); //Set update time before loading
+			_lastUpdate = GameTime.GetGameTime(); //Set update Time before loading
 
 			SQLTransaction trans = new();
 
@@ -221,7 +221,7 @@ namespace Game.BlackMarket
 			uint       bidderAccId;
 			ObjectGuid bidderGuid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
 			Player     bidder     = Global.ObjAccessor.FindConnectedPlayer(bidderGuid);
-			// data for gm.log
+			// _data for gm.log
 			string bidderName = "";
 			bool   logGmTrade;
 

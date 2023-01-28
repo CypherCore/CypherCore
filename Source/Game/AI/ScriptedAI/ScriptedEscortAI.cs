@@ -219,10 +219,8 @@ namespace Game.AI
 
 								if (_returnToStart)
 								{
-									Position respawnPosition = new();
-									float    orientation;
-									me.GetRespawnPosition(out respawnPosition.posX, out respawnPosition.posY, out respawnPosition.posZ, out orientation);
-									respawnPosition.SetOrientation(orientation);
+                                    var respawnPosition = me.GetRespawnPosition();
+									respawnPosition.SetOrientation(respawnPosition.Orientation);
 									me.GetMotionMaster().MovePoint(EscortPointIds.Home, respawnPosition);
 									Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: returning to spawn location: {respawnPosition} ({me.GetGUID()})");
 								}
@@ -344,7 +342,7 @@ namespace Game.AI
 			}
 			else if (moveType == MovementGeneratorType.Waypoint)
 			{
-				Cypher.Assert(Id < _path.nodes.Count, $"EscortAI::MovementInform: referenced movement id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
+				Cypher.Assert(Id < _path.nodes.Count, $"EscortAI::MovementInform: referenced movement Id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
 				WaypointNode waypoint = _path.nodes[(int)Id];
 
 				Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform: waypoint node {waypoint.id} reached ({me.GetGUID()})");
@@ -361,8 +359,8 @@ namespace Game.AI
 
 		public void AddWaypoint(uint id, float x, float y, float z, float orientation, TimeSpan waitTime)
 		{
-			GridDefines.NormalizeMapCoord(ref x);
-			GridDefines.NormalizeMapCoord(ref y);
+			x = GridDefines.NormalizeMapCoord(x);
+			y = GridDefines.NormalizeMapCoord(y);
 
 			WaypointNode waypoint = new();
 			waypoint.id          = id;
@@ -389,8 +387,8 @@ namespace Game.AI
 			foreach (WaypointNode value in path.nodes)
 			{
 				WaypointNode node = value;
-				GridDefines.NormalizeMapCoord(ref node.x);
-				GridDefines.NormalizeMapCoord(ref node.y);
+                node.x = GridDefines.NormalizeMapCoord(node.x);
+                node.y = GridDefines.NormalizeMapCoord(node.y);
 				node.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
 
 				_path.nodes.Add(node);

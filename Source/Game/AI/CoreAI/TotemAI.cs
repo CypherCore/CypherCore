@@ -53,7 +53,7 @@ namespace Game.AI
 				victim = checker.GetTarget();
 			}
 
-			// If have target
+			// If have Target
 			if (victim != null)
 			{
 				// remember

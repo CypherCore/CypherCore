@@ -33,7 +33,7 @@ namespace Game.Chat
 			if (player == null ||
 			    target == null)
 			{
-				handler.SendSysMessage("Invalid target/source selection.");
+				handler.SendSysMessage("Invalid Target/source selection.");
 
 				return true;
 			}

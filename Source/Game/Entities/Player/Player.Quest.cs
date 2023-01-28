@@ -224,11 +224,11 @@ namespace Game.Entities
 			dailyQuestsReset.Count = ActivePlayerData.DailyQuestsCompleted.Size();
 			SendPacket(dailyQuestsReset);
 
-			ClearDynamicUpdateFieldValues(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted));
+			ClearDynamicUpdateFieldValues(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted));
 
 			_dfQuests.Clear(); // Dungeon Finder Quests.
 
-			// DB data deleted in caller
+			// DB _data deleted in caller
 			_dailyQuestChanged  = false;
 			_lastDailyQuestTime = 0;
 
@@ -250,13 +250,13 @@ namespace Game.Entities
 			}
 
 			_weeklyquests.Clear();
-			// DB data deleted in caller
+			// DB _data deleted in caller
 			_weeklyQuestChanged = false;
 		}
 
 		public void ResetSeasonalQuestStatus(ushort event_id, long eventStartTime)
 		{
-			// DB data deleted in caller
+			// DB _data deleted in caller
 			_seasonalQuestChanged = false;
 
 			var eventList = _seasonalquests.LookupByKey(event_id);
@@ -293,7 +293,7 @@ namespace Game.Entities
 			}
 
 			_monthlyquests.Clear();
-			// DB data deleted in caller
+			// DB _data deleted in caller
 			_monthlyQuestChanged = false;
 		}
 
@@ -1000,7 +1000,7 @@ namespace Game.Entities
 
 			uint XP = (uint)(quest.XPValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateXpQuest));
 
-			// handle SPELL_AURA_MOD_XP_QUEST_PCT auras
+			// handle SPELL_AURA_MOD_XP_QUEST_PCT Auras
 			var ModXPPctAuras = GetAuraEffectsByType(AuraType.ModXpQuestPct);
 
 			foreach (var eff in ModXPPctAuras)
@@ -1275,7 +1275,7 @@ namespace Game.Entities
 
 			RewardReputation(quest);
 
-			// cast spells after mark quest complete (some spells have quest completed State requirements in spell_area data)
+			// cast spells after mark quest complete (some spells have quest completed State requirements in spell_area _data)
 			if (quest.RewardSpell > 0)
 			{
 				SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, GetMap().GetDifficultyID());
@@ -1584,7 +1584,7 @@ namespace Game.Entities
 
 					foreach (var exclusiveQuestId in bounds)
 					{
-						// skip checked quest id, only State of other quests in group is interesting
+						// skip checked quest Id, only State of other quests in group is interesting
 						if (exclusiveQuestId == prevId)
 							continue;
 
@@ -1623,13 +1623,13 @@ namespace Game.Entities
 			if (breadcrumbTargetQuestId == 0)
 				return true;
 
-			// If the target quest is not available
+			// If the Target quest is not available
 			if (!CanTakeQuest(Global.ObjectMgr.GetQuestTemplate(breadcrumbTargetQuestId), false))
 			{
 				if (msg)
 				{
 					SendCanTakeQuestResponse(QuestFailedReasons.None);
-					Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestBreadcrumbQuest: Sent INVALIDREASON_DONT_HAVE_REQ (QuestID: {qInfo.Id}) because target quest (QuestID: {breadcrumbTargetQuestId}) is not available to player '{GetName()}' ({GetGUID()}).");
+					Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestBreadcrumbQuest: Sent INVALIDREASON_DONT_HAVE_REQ (QuestID: {qInfo.Id}) because Target quest (QuestID: {breadcrumbTargetQuestId}) is not available to player '{GetName()}' ({GetGUID()}).");
 				}
 
 				return false;
@@ -1815,7 +1815,7 @@ namespace Game.Entities
 
 			foreach (var exclude_Id in range)
 			{
-				// skip checked quest id, only State of other quests in group is interesting
+				// skip checked quest Id, only State of other quests in group is interesting
 				if (exclude_Id == qInfo.Id)
 					continue;
 
@@ -2139,8 +2139,8 @@ namespace Game.Entities
 						aurasToCast.Add(spell.spellId);
 
 				// Auras matching the requirements will be inside the aurasToCast container.
-				// Auras not matching the requirements may prevent using auras matching the requirements.
-				// aurasToCast will erase conflicting auras in aurasToRemove container to handle spells used by multiple quests.
+				// Auras not matching the requirements may prevent using Auras matching the requirements.
+				// aurasToCast will erase conflicting Auras in aurasToRemove container to handle spells used by multiple quests.
 
 				for (var c = 0; c < aurasToRemove.Count;)
 				{
@@ -2395,7 +2395,7 @@ namespace Game.Entities
 		{
 			if (objective.StorageIndex < 0)
 			{
-				Log.outError(LogFilter.Player, $"Player.GetQuestObjectiveData: Called for quest {objective.QuestID} with invalid StorageIndex {objective.StorageIndex} (objective data is not tracked)");
+				Log.outError(LogFilter.Player, $"Player.GetQuestObjectiveData: Called for quest {objective.QuestID} with invalid StorageIndex {objective.StorageIndex} (objective _data is not tracked)");
 
 				return 0;
 			}
@@ -2415,7 +2415,7 @@ namespace Game.Entities
 
 		public void SetQuestSlot(ushort slot, uint quest_id)
 		{
-			var questLogField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			var questLogField = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
 			SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), 0u);
 			SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
@@ -2431,43 +2431,43 @@ namespace Game.Entities
 			if (counter >= SharedConst.MaxQuestCounts)
 				return;
 
-			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLog = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(ref questLog.ModifyValue(questLog.ObjectiveProgress, counter), count);
 		}
 
 		public void SetQuestSlotState(ushort slot, QuestSlotStateMask state)
 		{
-			QuestLog questLogField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLogField = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
 		}
 
 		public void RemoveQuestSlotState(ushort slot, QuestSlotStateMask state)
 		{
-			QuestLog questLogField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLogField = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			RemoveUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
 		}
 
 		public void SetQuestSlotEndTime(ushort slot, long endTime)
 		{
-			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLog = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), (uint)endTime);
 		}
 
 		public void SetQuestSlotAcceptTime(ushort slot, long acceptTime)
 		{
-			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLog = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(questLog.ModifyValue(questLog.AcceptTime), (uint)acceptTime);
 		}
 
 		private void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
 		{
-			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLog = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
 		}
 
 		private void RemoveQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
 		{
-			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
+			QuestLog questLog = Values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			RemoveUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
 		}
 
@@ -2484,9 +2484,9 @@ namespace Game.Entities
 			ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
 
 			if (completed)
-				SetUpdateFieldFlagValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.QuestCompleted, (int)fieldOffset), flag);
+				SetUpdateFieldFlagValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.QuestCompleted, (int)fieldOffset), flag);
 			else
-				RemoveUpdateFieldFlagValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.QuestCompleted, (int)fieldOffset), flag);
+				RemoveUpdateFieldFlagValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.QuestCompleted, (int)fieldOffset), flag);
 		}
 
 		public void AreaExploredOrEventHappens(uint questId)
@@ -2843,7 +2843,7 @@ namespace Game.Entities
 		{
 			if (objective.StorageIndex < 0)
 			{
-				Log.outError(LogFilter.Player, $"Player.SetQuestObjectiveData: called for quest {objective.QuestID} with invalid StorageIndex {objective.StorageIndex} (objective data is not tracked)");
+				Log.outError(LogFilter.Player, $"Player.SetQuestObjectiveData: called for quest {objective.QuestID} with invalid StorageIndex {objective.StorageIndex} (objective _data is not tracked)");
 
 				return;
 			}
@@ -2852,7 +2852,7 @@ namespace Game.Entities
 
 			if (status == null)
 			{
-				Log.outError(LogFilter.Player, $"Player.SetQuestObjectiveData: player '{GetName()}' ({GetGUID()}) doesn't have quest status data (QuestID: {objective.QuestID})");
+				Log.outError(LogFilter.Player, $"Player.SetQuestObjectiveData: player '{GetName()}' ({GetGUID()}) doesn't have quest status _data (QuestID: {objective.QuestID})");
 
 				return;
 			}
@@ -3309,7 +3309,7 @@ namespace Game.Entities
 						GameObjectFieldData goMask  = new();
 
 						if (_questObjectiveStatus.ContainsKey((QuestObjectiveType.GameObject, (int)obj.GetEntry())))
-							objMask.MarkChanged(obj._objectData.DynamicFlags);
+							objMask.MarkChanged(obj.ObjectData.DynamicFlags);
 
 						switch (obj.GetGoType())
 						{
@@ -3319,7 +3319,7 @@ namespace Game.Entities
 							case GameObjectTypes.Generic:
 							case GameObjectTypes.GatheringNode:
 								if (Global.ObjectMgr.IsGameObjectForQuests(obj.GetEntry()))
-									objMask.MarkChanged(obj._objectData.DynamicFlags);
+									objMask.MarkChanged(obj.ObjectData.DynamicFlags);
 
 								break;
 							default:
@@ -3338,7 +3338,7 @@ namespace Game.Entities
 					if (obj == null)
 						continue;
 
-					// check if this unit requires quest specific flags
+					// check if this unit requires quest specific Flags
 					if (!obj.HasNpcFlag(NPCFlags.SpellClick))
 						continue;
 
@@ -3352,7 +3352,7 @@ namespace Game.Entities
 						{
 							ObjectFieldData objMask  = new();
 							UnitData        unitMask = new();
-							unitMask.MarkChanged(_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
+							unitMask.MarkChanged(UnitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
 							obj.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
 
 							break;
@@ -3372,8 +3372,8 @@ namespace Game.Entities
 			{
 				if (!qQuest.IsDFQuest())
 				{
-					AddDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted), quest_id);
-					_lastDailyQuestTime = GameTime.GetGameTime(); // last daily quest time
+					AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted), quest_id);
+					_lastDailyQuestTime = GameTime.GetGameTime(); // last daily quest Time
 					_dailyQuestChanged  = true;
 				}
 				else
@@ -3447,7 +3447,7 @@ namespace Game.Entities
 
 					displayToast.BonusRoll = isBonusRoll;
 					displayToast.Item      = new ItemInstance(item);
-					displayToast.LootSpec  = 0; // loot spec that was selected when loot was generated (not at loot time)
+					displayToast.LootSpec  = 0; // loot spec that was selected when loot was generated (not at loot Time)
 					displayToast.Gender    = GetNativeGender();
 
 					break;

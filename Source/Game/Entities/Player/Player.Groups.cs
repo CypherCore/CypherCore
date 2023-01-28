@@ -191,7 +191,7 @@ namespace Game.Entities
 			byte value = PlayerData.PartyType;
 			value &= (byte)~((byte)0xFF << ((byte)category * 4));
 			value |= (byte)((byte)type << ((byte)category * 4));
-			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.PartyType), value);
+			SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.PartyType), value);
 		}
 
 		public void ResetGroupUpdateSequenceIfNeeded(Group group)

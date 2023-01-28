@@ -81,7 +81,7 @@ namespace Game.Scripting
         // Function in which handler functions are registered, must be implemented in script
         public virtual void Register() { }
         // Function called on server startup, if returns false script won't be used in core
-        // use for: dbc/template data presence/correctness checks
+        // use for: dbc/template _data presence/correctness checks
         public virtual bool Validate(SpellInfo spellInfo) { return true; }
         // Function called when script is created, if returns false script will be unloaded afterwards
         // use for: initializing local script variables (DO NOT USE CONSTRUCTOR FOR THIS PURPOSE!)
@@ -147,7 +147,7 @@ namespace Game.Scripting
 
         bool IsInModifiableHook()
         {
-            // after hit hook executed after damage/healing is already done
+            // after hit hook executed after Damage/healing is already done
             // modifying it at this point has no effect
             switch ((SpellScriptHookType)CurrentScriptState)
             {
@@ -178,17 +178,17 @@ namespace Game.Scripting
         // hooks are executed in following order, at specified event of spell:
         // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
         // 2. OnCheckCast - allows to override result of CheckCast function
-        // 3a. OnObjectAreaTargetSelect - executed just before adding selected targets to final target list (for area targets)
-        // 3b. OnObjectTargetSelect - executed just before adding selected target to final target list (for single unit targets)
+        // 3a. OnObjectAreaTargetSelect - executed just before adding selected targets to final Target list (for area targets)
+        // 3b. OnObjectTargetSelect - executed just before adding selected Target to final Target list (for single unit targets)
         // 4. OnCast - executed just before spell is launched (creates missile) or executed
         // 5. AfterCast - executed after spell missile is launched and immediate spell actions are done
         // 6. OnEffectLaunch - executed just before specified effect handler call - when spell missile is launched
-        // 7. OnEffectLaunchTarget - executed just before specified effect handler call - when spell missile is launched - called for each target from spell target map
+        // 7. OnEffectLaunchTarget - executed just before specified effect handler call - when spell missile is launched - called for each Target from spell Target map
         // 8. OnEffectHit - executed just before specified effect handler call - when spell missile hits dest
-        // 9. BeforeHit - executed just before spell hits a target - called for each target from spell target map
-        // 10. OnEffectHitTarget - executed just before specified effect handler call - called for each target from spell target map
-        // 11. OnHit - executed just before spell deals damage and procs auras - when spell hits target - called for each target from spell target map
-        // 12. AfterHit - executed just after spell finishes all it's jobs for target - called for each target from spell target map
+        // 9. BeforeHit - executed just before spell hits a Target - called for each Target from spell Target map
+        // 10. OnEffectHitTarget - executed just before specified effect handler call - called for each Target from spell Target map
+        // 11. OnHit - executed just before spell deals Damage and procs Auras - when spell hits Target - called for each Target from spell Target map
+        // 12. AfterHit - executed just after spell finishes all it's jobs for Target - called for each Target from spell Target map
 
         //
         // methods allowing interaction with Spell object
@@ -208,14 +208,14 @@ namespace Game.Scripting
 
         // methods useable after spell is prepared
         // accessors to the explicit targets of the spell
-        // explicit target - target selected by caster (player, game client, or script - DoCast(explicitTarget, ...), required for spell to be cast
+        // explicit Target - Target selected by caster (player, game client, or script - DoCast(explicitTarget, ...), required for spell to be cast
         // examples:
-        // -shadowstep - explicit target is the unit you want to go behind of
-        // -chain heal - explicit target is the unit to be healed first
-        // -holy nova/arcane explosion - explicit target = null because target you are selecting doesn't affect how spell targets are selected
+        // -shadowstep - explicit Target is the unit you want to go behind of
+        // -chain heal - explicit Target is the unit to be healed first
+        // -holy nova/arcane explosion - explicit Target = null because Target you are selecting doesn't affect how spell targets are selected
         // you can determine if spell requires explicit targets by dbc columns:
-        // - Targets - mask of explicit target types
-        // - ImplicitTargetXX set to TARGET_XXX_TARGET_YYY, _TARGET_ here means that explicit target is used by the effect, so spell needs one too
+        // - Targets - mask of explicit Target types
+        // - ImplicitTargetXX set to TARGET_XXX_TARGET_YYY, _TARGET_ here means that explicit Target is used by the effect, so spell needs one too
 
         // returns: WorldLocation which was selected as a spell destination or null
         public WorldLocation GetExplTargetDest()
@@ -230,16 +230,16 @@ namespace Game.Scripting
             m_spell._targets.SetDst(loc);
         }
 
-        // returns: WorldObject which was selected as an explicit spell target or null if there's no target
+        // returns: WorldObject which was selected as an explicit spell Target or null if there's no Target
         public WorldObject GetExplTargetWorldObject() { return m_spell._targets.GetObjectTarget(); }
 
-        // returns: Unit which was selected as an explicit spell target or null if there's no target
+        // returns: Unit which was selected as an explicit spell Target or null if there's no Target
         public Unit GetExplTargetUnit() { return m_spell._targets.GetUnitTarget(); }
 
-        // returns: GameObject which was selected as an explicit spell target or null if there's no target
+        // returns: GameObject which was selected as an explicit spell Target or null if there's no Target
         public GameObject GetExplTargetGObj() { return m_spell._targets.GetGOTarget(); }
 
-        // returns: Item which was selected as an explicit spell target or null if there's no target
+        // returns: Item which was selected as an explicit spell Target or null if there's no Target
         public Item GetExplTargetItem() { return m_spell._targets.GetItemTarget(); }
 
         public long GetUnitTargetCountForEffect(uint effect)
@@ -283,9 +283,9 @@ namespace Game.Scripting
         }
 
         /// <summary>
-        /// useable only during spell hit on target, or during spell launch on target
+        /// useable only during spell hit on Target, or during spell launch on Target
         /// </summary>
-        /// <returns>target of current effect if it was Unit otherwise null</returns>
+        /// <returns>Target of current effect if it was Unit otherwise null</returns>
         public Unit GetHitUnit()
         {
             if (!IsInTargetHook())
@@ -299,7 +299,7 @@ namespace Game.Scripting
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>target of current effect if it was Creature otherwise null</returns>
+        /// <returns>Target of current effect if it was Creature otherwise null</returns>
         public Creature GetHitCreature()
         {
             if (!IsInTargetHook())
@@ -316,7 +316,7 @@ namespace Game.Scripting
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>target of current effect if it was Player otherwise null</returns>
+        /// <returns>Target of current effect if it was Player otherwise null</returns>
         public Player GetHitPlayer()
         {
             if (!IsInTargetHook())
@@ -333,7 +333,7 @@ namespace Game.Scripting
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>target of current effect if it was Item otherwise null</returns>
+        /// <returns>Target of current effect if it was Item otherwise null</returns>
         public Item GetHitItem()
         {
             if (!IsInTargetHook())
@@ -347,7 +347,7 @@ namespace Game.Scripting
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>target of current effect if it was GameObject otherwise null</returns>
+        /// <returns>Target of current effect if it was GameObject otherwise null</returns>
         public GameObject GetHitGObj()
         {
             if (!IsInTargetHook())
@@ -361,7 +361,7 @@ namespace Game.Scripting
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>target of current effect if it was Corpse otherwise nullptr</returns>
+        /// <returns>Target of current effect if it was Corpse otherwise nullptr</returns>
         public Corpse GetHitCorpse()
         {
             if (!IsInTargetHook())
@@ -386,8 +386,8 @@ namespace Game.Scripting
             return m_spell.destTarget;
         }
 
-        // setter/getter for for damage done by spell to target of spell hit
-        // returns damage calculated before hit, and real dmg done after hit
+        // setter/getter for for Damage done by spell to Target of spell hit
+        // returns Damage calculated before hit, and real dmg done after hit
         public int GetHitDamage()
         {
             if (!IsInTargetHook())
@@ -407,7 +407,7 @@ namespace Game.Scripting
             m_spell._damage = damage;
         }
         public void PreventHitDamage() { SetHitDamage(0); }
-        // setter/getter for for heal done by spell to target of spell hit
+        // setter/getter for for heal done by spell to Target of spell hit
         // returns healing calculated before hit, and real dmg done after hit
         public int GetHitHeal()
         {
@@ -452,7 +452,7 @@ namespace Game.Scripting
             return false;
         }
 
-        // returns current spell hit target aura
+        // returns current spell hit Target aura
         public Aura GetHitAura(bool dynObjAura = false)
         {
             if (!IsInTargetHook())
@@ -471,7 +471,7 @@ namespace Game.Scripting
             return aura;
         }
 
-        // prevents applying aura on current spell hit target
+        // prevents applying aura on current spell hit Target
         public void PreventHitAura()
         {
             if (!IsInTargetHook())
@@ -489,9 +489,9 @@ namespace Game.Scripting
                 dynAura.Remove();
         }
 
-        // prevents effect execution on current spell hit target
+        // prevents effect execution on current spell hit Target
         // including other effect/hit scripts
-        // will not work on aura/damage/heal
+        // will not work on aura/Damage/heal
         // will not work if effects were already handled
         public void PreventHitEffect(uint effIndex)
         {
@@ -504,8 +504,8 @@ namespace Game.Scripting
             PreventHitDefaultEffect(effIndex);
         }
 
-        // prevents default effect execution on current spell hit target
-        // will not work on aura/damage/heal effects
+        // prevents default effect execution on current spell hit Target
+        // will not work on aura/Damage/heal effects
         // will not work if effects were already handled
         public void PreventHitDefaultEffect(uint effIndex)
         {

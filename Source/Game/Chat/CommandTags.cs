@@ -161,15 +161,15 @@ namespace Game.Chat
 			if (!next.IsSuccessful())
 				return next;
 
-			// first try parsing as account name
+			// first try parsing as account Name
 			_name    = text;
 			_id      = Global.AccountMgr.GetId(_name);
 			_session = Global.WorldMgr.FindSession(_id);
 
-			if (_id != 0) // account with name exists, we are done
+			if (_id != 0) // account with Name exists, we are done
 				return next;
 
-			// try parsing as account id instead
+			// try parsing as account Id instead
 			if (uint.TryParse(text, out uint id))
 				return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountNameNoExist, _name));
 

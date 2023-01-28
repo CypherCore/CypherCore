@@ -25,9 +25,9 @@ namespace Game.DungeonFinding
 		private uint _QueueTimer;                                         //< used to check interval of update
 		private Dictionary<ObjectGuid, LfgPlayerBoot> BootsStore = new(); //< Current player kicks
 		private MultiMap<byte, uint> CachedDungeonMapStore = new();       //< Stores all dungeons by groupType
-		private Dictionary<ObjectGuid, LFGGroupData> GroupsStore = new(); //< Group data
+		private Dictionary<ObjectGuid, LFGGroupData> GroupsStore = new(); //< Group _data
 		private Dictionary<uint, LFGDungeonData> LfgDungeonStore = new();
-		private Dictionary<ObjectGuid, LFGPlayerData> PlayersStore = new(); //< Player data
+		private Dictionary<ObjectGuid, LFGPlayerData> PlayersStore = new(); //< Player _data
 		private Dictionary<uint, LfgProposal> ProposalsStore = new();       //< Current Proposals
 
 		private Dictionary<byte, LFGQueue> QueuesStore = new(); //< Queues
@@ -184,7 +184,7 @@ namespace Game.DungeonFinding
 
 			LfgDungeonStore.Clear();
 
-			// Initialize Dungeon map with data from dbcs
+			// Initialize Dungeon map with _data from dbcs
 			foreach (var dungeon in CliDB.LFGDungeonsStorage.Values)
 			{
 				if (Global.DB2Mgr.GetMapDifficultyData((uint)dungeon.MapID, dungeon.DifficultyID) == null)
@@ -2571,7 +2571,7 @@ namespace Game.DungeonFinding
 		public uint id;
 		public bool isNew;
 		public ObjectGuid leader;
-		public Dictionary<ObjectGuid, LfgProposalPlayer> players = new(); // Players data
+		public Dictionary<ObjectGuid, LfgProposalPlayer> players = new(); // Players _data
 		public List<ObjectGuid> queues = new();
 		public List<ulong> showorder = new();
 		public LfgProposalState state;

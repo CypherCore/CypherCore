@@ -44,12 +44,12 @@ namespace Scripts.Pets
 					return;
 
 				// here mirror image casts on summoner spell (not present in client dbc) 49866
-				// here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcast by mirror images (Stats related?)
+				// here should be Auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcast by mirror images (Stats related?)
 				// Clone Me!
 				owner.CastSpell(me, SpellIds.CloneMe, true);
 			}
 
-			// custom UpdateVictim implementation to handle special target selection
+			// custom UpdateVictim implementation to handle special Target selection
 			// we prioritize between things that are in combat with owner based on the owner's threat to them
 			private new bool UpdateVictim()
 			{
@@ -81,7 +81,7 @@ namespace Scripts.Pets
 
 				if (mgr.HasPvPCombat())
 				{
-					// select pvp target
+					// select pvp Target
 					float minDistance = 0.0f;
 
 					foreach (var pair in mgr.GetPvPCombatRefs())
@@ -107,7 +107,7 @@ namespace Scripts.Pets
 
 				if (!selectedTarget)
 				{
-					// select pve target
+					// select pve Target
 					float maxThreat = 0.0f;
 
 					foreach (var pair in mgr.GetPvECombatRefs())

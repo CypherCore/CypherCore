@@ -21,7 +21,7 @@ namespace Scripts.DragonIsles
 		public const uint Stasis1 = 369735;             // triggers 366620
 		public const uint Stasis2 = 366620;             // triggers 366636
 		public const uint Stasis3 = 366636;             // removes 365560, sends first quest (64864)
-		public const uint Stasis4 = 365560;             // freeze the target
+		public const uint Stasis4 = 365560;             // freeze the Target
 		public const uint DracthyrMovieRoom01 = 394245; // scene for room 1
 		public const uint DracthyrMovieRoom02 = 394279; // scene for room 2
 		public const uint DracthyrMovieRoom03 = 394281; // scene for room 3

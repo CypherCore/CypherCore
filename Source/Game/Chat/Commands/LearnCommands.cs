@@ -105,13 +105,13 @@ namespace Game.Chat.Commands
 			private static bool HandleLearnDebugSpellsCommand(CommandHandler handler)
 			{
 				Player player = handler.GetPlayer();
-				player.LearnSpell(63364, false); /* 63364 - Saronite Barrier (reduces damage taken by 99%) */
-				player.LearnSpell(1908, false);  /*  1908 - Uber Heal Over Time (heals target to full constantly) */
-				player.LearnSpell(27680, false); /* 27680 - Berserk (+500% damage, +150% speed, 10m duration) */
-				player.LearnSpell(62555, false); /* 62555 - Berserk (+500% damage, +150% melee haste, 10m duration) */
-				player.LearnSpell(64238, false); /* 64238 - Berserk (+900% damage, +150% melee haste, 30m duration) */
-				player.LearnSpell(72525, false); /* 72525 - Berserk (+240% damage, +160% haste, infinite duration) */
-				player.LearnSpell(66776, false); /* 66776 - Rage (+300% damage, -95% damage taken, +100% speed, infinite duration) */
+				player.LearnSpell(63364, false); /* 63364 - Saronite Barrier (reduces Damage taken by 99%) */
+				player.LearnSpell(1908, false);  /*  1908 - Uber Heal Over Time (heals Target to full constantly) */
+				player.LearnSpell(27680, false); /* 27680 - Berserk (+500% Damage, +150% speed, 10m duration) */
+				player.LearnSpell(62555, false); /* 62555 - Berserk (+500% Damage, +150% melee haste, 10m duration) */
+				player.LearnSpell(64238, false); /* 64238 - Berserk (+900% Damage, +150% melee haste, 30m duration) */
+				player.LearnSpell(72525, false); /* 72525 - Berserk (+240% Damage, +160% haste, infinite duration) */
+				player.LearnSpell(66776, false); /* 66776 - Rage (+300% Damage, -95% Damage taken, +100% speed, infinite duration) */
 
 				return true;
 			}

@@ -114,10 +114,10 @@ namespace Game.Movement
 				spline.InitLengths(init);
 			}
 
-			// TODO: what to do in such cases? problem is in input data (all points are at same coords)
+			// TODO: what to do in such cases? problem is in input _data (all points are at same coords)
 			if (spline.Length() < 1)
 			{
-				Log.outError(LogFilter.Unit, "MoveSpline.init_spline: zero length spline, wrong input data?");
+				Log.outError(LogFilter.Unit, "MoveSpline.init_spline: zero length spline, wrong input _data?");
 				spline.Set_length(spline.Last(), spline.IsCyclic() ? 1000 : 1);
 			}
 
@@ -278,7 +278,7 @@ namespace Game.Movement
 			if (start_velocity > termVel)
 				start_velocity = termVel;
 
-			float terminal_time = (float)((isSafeFall ? SharedConst.terminal_safeFall_fallTime : SharedConst.terminal_fallTime) - start_velocity / SharedConst.gravity); // the time that needed to reach terminalVelocity
+			float terminal_time = (float)((isSafeFall ? SharedConst.terminal_safeFall_fallTime : SharedConst.terminal_fallTime) - start_velocity / SharedConst.gravity); // the Time that needed to reach terminalVelocity
 
 			if (t_passed > terminal_time)
 				result = termVel * (t_passed - terminal_time) +

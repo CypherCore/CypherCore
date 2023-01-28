@@ -146,7 +146,7 @@ namespace Game.Networking
 
 					if (_packetBuffer.GetRemainingSpace() > 0)
 					{
-						// Couldn't receive the whole header this time.
+						// Couldn't receive the whole header this Time.
 						AsyncReadWithCallback(InitializeHandler);
 
 						return;
@@ -211,7 +211,7 @@ namespace Game.Networking
 					currentReadIndex += readHeaderSize;
 
 					if (_headerBuffer.GetRemainingSpace() > 0)
-						break; // Couldn't receive the whole header this time.
+						break; // Couldn't receive the whole header this Time.
 
 					// We just received nice new header
 					if (!ReadHeader())
@@ -222,16 +222,16 @@ namespace Game.Networking
 					}
 				}
 
-				// We have full read header, now check the data payload
+				// We have full read header, now check the _data payload
 				if (_packetBuffer.GetRemainingSpace() > 0)
 				{
-					// need more data in the payload
+					// need more _data in the payload
 					int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
 					_packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
 					currentReadIndex += readDataSize;
 
 					if (_packetBuffer.GetRemainingSpace() > 0)
-						break; // Couldn't receive the whole data this time.
+						break; // Couldn't receive the whole _data this Time.
 				}
 
 				// just received fresh new payload
@@ -469,7 +469,7 @@ namespace Game.Networking
 
 			if (z_res != 0)
 			{
-				Log.outError(LogFilter.Network, "Can't compress packet data (zlib: deflate) Error code: {0} msg: {1}", z_res, _compressionStream.msg);
+				Log.outError(LogFilter.Network, "Can't compress packet _data (zlib: deflate) Error code: {0} msg: {1}", z_res, _compressionStream.msg);
 
 				return 0;
 			}
@@ -568,7 +568,7 @@ namespace Game.Networking
 			hmac.Process(_serverChallenge, 16);
 			hmac.Finish(AuthCheckSeed, 16);
 
-			// Check that Key and account name are the same on client and server
+			// Check that Key and account Name are the same on client and server
 			if (!hmac.Digest.Compare(authSession.Digest))
 			{
 				Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
@@ -614,7 +614,7 @@ namespace Game.Networking
 			stmt.AddValue(1, account.game.Id);
 			DB.Login.Execute(stmt);
 
-			// First reject the connection if packet contains invalid data or realm State doesn't allow logging in
+			// First reject the connection if packet contains invalid _data or realm State doesn't allow logging in
 			if (Global.WorldMgr.IsClosed())
 			{
 				SendAuthResponseError(BattlenetRpcErrorCode.Denied);
@@ -629,7 +629,7 @@ namespace Game.Networking
 				SendAuthResponseError(BattlenetRpcErrorCode.Denied);
 
 				Log.outError(LogFilter.Network,
-				             "WorldSocket.HandleAuthSession: Client {0} requested connecting with realm id {1} but this realm has id {2} set in config.",
+				             "WorldSocket.HandleAuthSession: Client {0} requested connecting with realm Id {1} but this realm has Id {2} set in config.",
 				             GetRemoteIpAddress().ToString(),
 				             authSession.RealmID,
 				             Global.WorldMgr.GetRealm().Id.Index);
@@ -939,11 +939,11 @@ namespace Game.Networking
 		public AccountInfo(SQLFields fields)
 		{
 			//         0             1           2          3                4            5           6          7            8      9     10          11
-			// SELECT a.id, a.sessionkey, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.id, aa.gmLevel,
+			// SELECT a.Id, a.sessionkey, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.Id, aa.gmLevel,
 			//                                                              12                                                            13    14
-			// bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id
-			// FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.id AND aa.RealmID IN (-1, ?)
-			// LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
+			// bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.Id
+			// FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.Id LEFT JOIN account_access aa ON a.Id = aa.Id AND aa.RealmID IN (-1, ?)
+			// LEFT JOIN battlenet_account_bans bab ON ba.Id = bab.Id LEFT JOIN account_banned ab ON a.Id = ab.Id LEFT JOIN account r ON a.Id = r.recruiter
 			// WHERE a.username = ? ORDER BY aa.RealmID DESC LIMIT 1
 			game.Id                = fields.Read<uint>(0);
 			game.SessionKey        = fields.Read<byte[]>(1);

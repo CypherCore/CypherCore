@@ -56,7 +56,7 @@ namespace Game
 
 		public override void InitializeModuleForClient(out ClientWardenModule module)
 		{
-			// data assign
+			// _data assign
 			module                = new ClientWardenModule();
 			module.CompressedData = WardenModuleWin.Module;
 			module.CompressedSize = (uint)WardenModuleWin.Module.Length;
@@ -186,7 +186,7 @@ namespace Game
 
 		public override void RequestChecks()
 		{
-			Log.outDebug(LogFilter.Warden, $"Request data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() && !_session.PlayerLoading()}");
+			Log.outDebug(LogFilter.Warden, $"Request _data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() && !_session.PlayerLoading()}");
 
 			// If all checks for a category are done, fill its todo list again
 			foreach (WardenCheckCategory category in Enum.GetValues<WardenCheckCategory>())
@@ -360,7 +360,7 @@ namespace Game
 
 		public override void HandleCheckResult(ByteBuffer buff)
 		{
-			Log.outDebug(LogFilter.Warden, "Handle data");
+			Log.outDebug(LogFilter.Warden, "Handle _data");
 
 			_dataSent            = false;
 			_clientResponseTimer = 0;
@@ -471,7 +471,7 @@ namespace Game
 
 						if (result != 0)
 						{
-							Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK not 0x00 account id {_session.GetAccountId()}", _session.GetAccountId());
+							Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK not 0x00 account Id {_session.GetAccountId()}", _session.GetAccountId());
 							checkFailed = id;
 
 							continue;

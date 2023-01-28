@@ -6,7 +6,7 @@ using Game.Entities;
 
 namespace Game.Miscellaneous
 {
-	/// Only returns true for the given attacker's current victim, if any
+	/// Only returns true for the given Attacker's current victim, if any
 	public class IsVictimOf : ICheck<WorldObject>
 	{
 		private WorldObject _victim;

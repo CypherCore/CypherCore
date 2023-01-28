@@ -23,7 +23,7 @@ namespace Game.DungeonFinding
 			if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
 				return;
 
-			// Temporal: Trying to determine when group data and LFG data gets desynched
+			// Temporal: Trying to determine when group _data and LFG _data gets desynched
 			ObjectGuid guid  = player.GetGUID();
 			ObjectGuid gguid = Global.LFGMgr.GetGroup(guid);
 
