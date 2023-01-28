@@ -488,8 +488,8 @@ namespace Game.BattleGrounds
 
 		/*
 		This function is inviting players to already running Battlegrounds
-		Invitation type is based on config file
-		large groups are disadvantageous, because they will be kicked first if invitation type = 1
+		Invitation Type is based on config file
+		large groups are disadvantageous, because they will be kicked first if invitation Type = 1
 		*/
 		private void FillPlayersToBG(Battleground bg, BattlegroundBracketId bracket_id)
 		{
@@ -834,7 +834,7 @@ namespace Game.BattleGrounds
 			    _QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueueNormalHorde].Empty())
 				return;
 
-			// Battleground with free slot for player should be always in the beggining of the queue
+			// Battleground with free Slot for player should be always in the beggining of the queue
 			// maybe it would be better to create bgfreeslotqueue for each bracket_id
 			var bgQueues = Global.BattlegroundMgr.GetBGFreeSlotQueueStore(_queueId);
 
@@ -1317,7 +1317,7 @@ namespace Game.BattleGrounds
     /// <summary>
     ///  This class is used to remove player from BG queue after 1 minute 20 seconds from first invitation
     ///  We must store removeInvite time in case player left queue and joined and is invited again
-    ///  We must store bgQueueTypeId, because Battleground can be deleted already, when player entered it
+    ///  We must store BGQueueTypeId, because Battleground can be deleted already, when player entered it
     /// </summary>
     internal class BGQueueRemoveEvent : BasicEvent
 	{

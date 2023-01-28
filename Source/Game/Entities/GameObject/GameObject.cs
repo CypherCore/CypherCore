@@ -121,7 +121,7 @@ namespace Game.Entities
 				if (_spawnId != 0)
 					GetMap().GetGameObjectBySpawnIdStore().Add(_spawnId, this);
 
-				// The state can be changed after GameObject.Create but before GameObject.AddToWorld
+				// The State can be changed after GameObject.Create but before GameObject.AddToWorld
 				bool toggledState = GetGoType() == GameObjectTypes.Chest ? GetLootState() == LootState.Ready : (GetGoState() == GameObjectState.Ready || IsTransport());
 
 				if (_model != null)
@@ -235,7 +235,7 @@ namespace Game.Entities
 
 			if (goInfo.type == GameObjectTypes.MapObjTransport)
 			{
-				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
+				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject Type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
 
 				return false;
 			}
@@ -259,7 +259,7 @@ namespace Game.Entities
 
 			if (goInfo.type >= GameObjectTypes.Max)
 			{
-				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
+				Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO Type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
 
 				return false;
 			}
@@ -672,7 +672,7 @@ namespace Game.Entities
 								break;
 							}
 
-							// Type 0 despawns after being triggered, type 1 does not.
+							// Type 0 despawns after being triggered, Type 1 does not.
 							// @todo This is activation radius. Casting radius must be selected from spell 
 							float radius;
 
@@ -828,7 +828,7 @@ namespace Game.Entities
 							if (goInfo.Trap.charges == 2 &&
 							    goInfo.Trap.spell != 0)
 							{
-								//todo NULL target won't work for target type 1
+								//todo NULL target won't work for target Type 1
 								CastSpell(null, goInfo.Trap.spell);
 								SetLootState(LootState.JustDeactivated);
 							}
@@ -881,7 +881,7 @@ namespace Game.Entities
 					if (linkedTrap)
 						linkedTrap.DespawnOrUnsummon();
 
-					//if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
+					//if Gameobject should cast spell, then this, but some GOs (Type = 10) should be destroyed
 					if (GetGoType() == GameObjectTypes.Goober)
 					{
 						uint spellId = GetGoInfo().Goober.spell;
@@ -901,7 +901,7 @@ namespace Game.Entities
 							_usetimes = 0;
 						}
 
-						// Only goobers with a lock id or a reset time may reset their go state
+						// Only goobers with a lock id or a reset time may reset their go State
 						if (GetGoInfo().GetLockId() != 0 ||
 						    GetGoInfo().GetAutoCloseTime() != 0)
 							SetGoState(GameObjectState.Ready);
@@ -1635,7 +1635,7 @@ namespace Game.Entities
 			switch (action)
 			{
 				case GameObjectActions.None:
-					Log.outFatal(LogFilter.Spells, $"Spell {spellId} has action type NONE in effect {effectIndex}");
+					Log.outFatal(LogFilter.Spells, $"Spell {spellId} has Action Type NONE in effect {effectIndex}");
 
 					break;
 				case GameObjectActions.AnimateCustom0:
@@ -1741,7 +1741,7 @@ namespace Game.Entities
 					if (GetGoType() == GameObjectTypes.Transport)
 						SetGoState((GameObjectState)action);
 					else
-						Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-transport gameobject for transport only action \"Go to Floor\" {action} in effect {effectIndex}");
+						Log.outError(LogFilter.Spells, $"Spell {spellId} targeted non-transport gameobject for transport only Action \"Go to Floor\" {action} in effect {effectIndex}");
 
 					break;
 				case GameObjectActions.PlayAnimKit:
@@ -1789,7 +1789,7 @@ namespace Game.Entities
 
 					break;
 				default:
-					Log.outError(LogFilter.Spells, $"Spell {spellId} has unhandled action {action} in effect {effectIndex}");
+					Log.outError(LogFilter.Spells, $"Spell {spellId} has unhandled Action {action} in effect {effectIndex}");
 
 					break;
 			}
@@ -1874,7 +1874,7 @@ namespace Game.Entities
 			{
 				case GameObjectTypes.Door:   //0
 				case GameObjectTypes.Button: //1
-					//doors/buttons never really despawn, only reset to default state/flags
+					//doors/buttons never really despawn, only reset to default State/flags
 					UseDoorOrButton(0, false, user);
 
 					return;
@@ -2039,9 +2039,9 @@ namespace Game.Entities
 					{
 						if (info.Chair.chairslots > 0) // sometimes chairs in DB have error in fields and we dont know number of slots
 							for (uint i = 0; i < info.Chair.chairslots; ++i)
-								ChairListSlots[i] = default; // Last user of current slot set to 0 (none sit here yet)
+								ChairListSlots[i] = default; // Last user of current Slot set to 0 (none sit here yet)
 						else
-							ChairListSlots[0] = default; // error in DB, make one default slot
+							ChairListSlots[0] = default; // error in DB, make one default Slot
 					}
 
 					// a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
@@ -2052,14 +2052,14 @@ namespace Game.Entities
 					float y_lowest     = GetPositionY();
 
 					// the object orientation + 1/2 pi
-					// every slot will be on that straight line
+					// every Slot will be on that straight line
 					float orthogonalOrientation = GetOrientation() + MathFunctions.PI * 0.5f;
-					// find nearest slot
+					// find nearest Slot
 					bool found_free_slot = false;
 
 					foreach (var (slot, sittingUnit) in ChairListSlots.ToList())
 					{
-						// the distance between this slot and the center of the go - imagine a 1D space
+						// the distance between this Slot and the center of the go - imagine a 1D space
 						float relativeDistance = (info.size * slot) - (info.size * (info.Chair.chairslots - 1) / 2.0f);
 
 						float x_i = (float)(GetPositionX() + relativeDistance * Math.Cos(orthogonalOrientation));
@@ -2086,7 +2086,7 @@ namespace Game.Entities
 
 						found_free_slot = true;
 
-						// calculate the distance between the player and this slot
+						// calculate the distance between the player and this Slot
 						float thisDistance = user.GetDistance2d(x_i, y_i);
 
 						if (thisDistance <= lowestDist)
@@ -2104,7 +2104,7 @@ namespace Game.Entities
 
 						if (guid.IsEmpty())
 						{
-							ChairListSlots[nearest_slot] = user.GetGUID(); //this slot in now used by player
+							ChairListSlots[nearest_slot] = user.GetGUID(); //this Slot in now used by player
 							user.NearTeleportTo(x_lowest, y_lowest, GetPositionZ(), GetOrientation());
 							user.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
 
@@ -2478,13 +2478,13 @@ namespace Game.Entities
 						return;
 
 					//required lvl checks!
-					var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+					var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 					if (userLevels.HasValue)
 						if (player.GetLevel() < userLevels.Value.MaxLevel)
 							return;
 
-					var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+					var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 					if (targetLevels.HasValue)
 						if (targetPlayer.GetLevel() < targetLevels.Value.MaxLevel)
@@ -2805,7 +2805,7 @@ namespace Game.Entities
 				default:
 					if (GetGoType() >= GameObjectTypes.Max)
 						Log.outError(LogFilter.Server,
-						             "GameObject.Use(): unit (type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown type ({6})",
+						             "GameObject.Use(): unit (Type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown Type ({6})",
 						             user.GetTypeId(),
 						             user.GetGUID().ToString(),
 						             user.GetName(),
@@ -2824,7 +2824,7 @@ namespace Game.Entities
 			{
 				if (!user.IsTypeId(TypeId.Player) ||
 				    !Global.OutdoorPvPMgr.HandleCustomSpell(user.ToPlayer(), spellId, this))
-					Log.outError(LogFilter.Server, "WORLD: unknown spell id {0} at use action for gameobject (Entry: {1} GoType: {2})", spellId, GetEntry(), GetGoType());
+					Log.outError(LogFilter.Server, "WORLD: unknown spell id {0} at use Action for gameobject (Entry: {1} GoType: {2})", spellId, GetEntry(), GetGoType());
 				else
 					Log.outDebug(LogFilter.Outdoorpvp, "WORLD: {0} non-dbc spell was handled by OutdoorPvP", spellId);
 
@@ -3263,7 +3263,7 @@ namespace Game.Entities
 			{
 				bool collision = false;
 
-				// Use the current go state
+				// Use the current go State
 				if ((GetGoState() != GameObjectState.Ready && (state == LootState.Activated || state == LootState.JustDeactivated)) ||
 				    state == LootState.Ready)
 					collision = !collision;
@@ -3961,7 +3961,7 @@ namespace Game.Entities
 
 		public void SetOwnerGUID(ObjectGuid owner)
 		{
-			// Owner already found and different than expected owner - remove object from old owner
+			// _owner already found and different than expected owner - remove object from old owner
 			if (!owner.IsEmpty() &&
 			    !GetOwnerGUID().IsEmpty() &&
 			    GetOwnerGUID() != owner)
@@ -4211,7 +4211,7 @@ namespace Game.Entities
 
 				if (player != null)
 				{
-					var userLevels = Global.DB2Mgr.GetContentTuningData(GetGoInfo().ContentTuningId, player._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+					var userLevels = Global.DB2Mgr.GetContentTuningData(GetGoInfo().ContentTuningId, player.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 					if (userLevels.HasValue)
 						return (byte)Math.Clamp(player.GetLevel(), userLevels.Value.MinLevel, userLevels.Value.MaxLevel);
@@ -4364,7 +4364,7 @@ namespace Game.Entities
 		private ulong _spawnId;
 		private uint _spellId;
 		private long _respawnTime;      // (secs) time of next respawn (or despawn if GO have owner()),
-		private uint _respawnDelayTime; // (secs) if 0 then current GO state no dependent from timer
+		private uint _respawnDelayTime; // (secs) if 0 then current GO State no dependent from timer
 		private uint _despawnDelay;
 		private TimeSpan _despawnRespawnTime; // override respawn time after delayed despawn
 		private LootState _lootState;
@@ -4372,7 +4372,7 @@ namespace Game.Entities
 		private bool _spawnedByDefault;
 		private long _restockTime;
 
-		private long _cooldownTime; // used as internal reaction delay time store (not state change reaction).
+		private long _cooldownTime; // used as internal reaction delay time store (not State change reaction).
 		// For traps this: spell casting cooldown, for doors/buttons: reset time.
 
 		private Player _ritualOwner; // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
@@ -4392,7 +4392,7 @@ namespace Game.Entities
 
 		private Dictionary<ObjectGuid, PerPlayerState> _perPlayerState;
 
-		private GameObjectState _prevGoState; // What state to set whenever resetting
+		private GameObjectState _prevGoState; // What State to set whenever resetting
 
 		private Dictionary<uint, ObjectGuid> ChairListSlots = new();
 		private List<ObjectGuid> _SkillupList = new();
@@ -4452,7 +4452,7 @@ namespace Game.Entities
 		}
 	}
 
-	// Base class for GameObject type specific implementations
+	// Base class for GameObject Type specific implementations
 	internal class GameObjectTypeBase
 	{
 		protected GameObject _owner;
@@ -4857,7 +4857,7 @@ namespace Game.Entities
 			{
 				Cypher.Assert(newState >= GameObjectState.TransportActive);
 
-				// transports without stop frames just keep animating in state 24
+				// transports without stop frames just keep animating in State 24
 				if (_stopFrames.Empty())
 				{
 					if (newState != GameObjectState.TransportActive)

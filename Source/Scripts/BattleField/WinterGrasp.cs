@@ -285,7 +285,7 @@ namespace Game.BattleFields
 
 			_titansRelicGUID.Clear();
 
-			// change collision wall state closed
+			// change collision wall State closed
 			foreach (BfWGGameObjectBuilding building in BuildingsInZone)
 				building.RebuildGate();
 
@@ -359,10 +359,10 @@ namespace Game.BattleFields
 					// Complete victory quests
 					player.AreaExploredOrEventHappens(WintergraspQuests.VictoryAlliance);
 					player.AreaExploredOrEventHappens(WintergraspQuests.VictoryHorde);
-					// Send Wintergrasp victory achievement
+					// Send Wintergrasp victory Achievement
 					DoCompleteOrIncrementAchievement(WGAchievements.WinWg, player);
 
-					// Award achievement for succeeding in Wintergrasp in 10 minutes or less
+					// Award Achievement for succeeding in Wintergrasp in 10 minutes or less
 					if (!endByTimer &&
 					    GetTimer() <= 10000)
 						DoCompleteOrIncrementAchievement(WGAchievements.WinWgTimer10, player);
@@ -838,7 +838,7 @@ namespace Game.BattleFields
 						player.RemoveAuraFromStack(WGSpells.TowerControl);
 				}
 
-				// Add buff stack to defenders and give achievement/quest credit
+				// Add buff stack to defenders and give Achievement/quest credit
 				foreach (var guid in _PlayersInWar[GetDefenderTeam()])
 				{
 					Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -1270,7 +1270,7 @@ namespace Game.BattleFields
 
 			if (_state == WGGameObjectState.None)
 			{
-				// set to default state based on type
+				// set to default State based on Type
 				switch (_teamControl)
 				{
 					case TeamId.Alliance:

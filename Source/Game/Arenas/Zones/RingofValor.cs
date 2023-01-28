@@ -157,7 +157,7 @@ namespace Game.Arenas
 
 		private void TogglePillarCollision(bool enable)
 		{
-			// Toggle visual pillars, pulley, gear, and collision based on previous state
+			// Toggle visual pillars, pulley, gear, and collision based on previous State
 			for (int i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.Gear2; ++i)
 				if (enable)
 					DoorOpen(i);

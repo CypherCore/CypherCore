@@ -1375,13 +1375,13 @@ namespace Scripts.Spells.Druid
 			triggeredSpellId = GetFormSpellId(GetTarget().ToPlayer(), GetCastDifficulty(), true);
 
 			// If chosen form is current aura, just don't remove it.
-			if (triggeredSpellId == _scriptSpellId)
+			if (triggeredSpellId == ScriptSpellId)
 				PreventDefaultAction();
 		}
 
 		private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
 		{
-			if (triggeredSpellId == _scriptSpellId)
+			if (triggeredSpellId == ScriptSpellId)
 				return;
 
 			Player player = GetTarget().ToPlayer();

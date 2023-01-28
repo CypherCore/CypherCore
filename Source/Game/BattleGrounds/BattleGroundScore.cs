@@ -15,7 +15,7 @@ namespace Game.BattleGrounds
 		public uint HealingDone;
 		public uint HonorableKills;
 
-		// Default score, present in every type
+		// Default score, present in every Type
 		public uint KillingBlows;
 
 		public ObjectGuid PlayerGuid;
@@ -56,7 +56,7 @@ namespace Game.BattleGrounds
 
 					break;
 				default:
-					Cypher.Assert(false, "Not implemented Battleground score type!");
+					Cypher.Assert(false, "Not implemented Battleground score Type!");
 
 					break;
 			}

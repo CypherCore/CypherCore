@@ -214,7 +214,7 @@ namespace Game.Entities
 					}
 			}
 
-			// or use empty slot in other case
+			// or use empty Slot in other case
 			for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
 			{
 				byte j = (byte)((preferredSlot + i) % SharedConst.ActionBarIndexMax);

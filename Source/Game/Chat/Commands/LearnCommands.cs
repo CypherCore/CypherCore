@@ -298,11 +298,11 @@ namespace Game.Chat.Commands
 					if (skillLine.SupercedesSpell != 0)
 						continue;
 
-					// skip racial skills
+					// skip racial Skills
 					if (skillLine.RaceMask != 0)
 						continue;
 
-					// skip wrong class skills
+					// skip wrong class Skills
 					if (skillLine.ClassMask != 0 &&
 					    (skillLine.ClassMask & classmask) == 0)
 						continue;
@@ -355,7 +355,7 @@ namespace Game.Chat.Commands
 					if (spellInfo.SpellLevel == 0)
 						continue;
 
-					// skip wrong class/race skills
+					// skip wrong class/race Skills
 					if (!handler.GetSession().GetPlayer().IsSpellFitByClassAndRace(spellInfo.Id))
 						continue;
 

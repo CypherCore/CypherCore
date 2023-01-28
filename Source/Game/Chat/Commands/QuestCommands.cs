@@ -33,7 +33,7 @@ namespace Game.Chat
 				return false;
 			}
 
-			// check item starting quest (it can work incorrectly if added without item in inventory)
+			// check Item starting quest (it can work incorrectly if added without Item in inventory)
 			var itc    = Global.ObjectMgr.GetItemTemplates();
 			var result = itc.Values.FirstOrDefault(p => p.GetStartQuest() == quest.Id);
 
@@ -113,7 +113,7 @@ namespace Game.Chat
 
 						if (quest.HasFlag(QuestFlags.Pvp))
 						{
-							player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
+							player.PvpInfo.IsHostile = player.PvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
 							player.UpdatePvPState();
 						}
 					}

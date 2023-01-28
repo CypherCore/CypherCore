@@ -432,7 +432,7 @@ namespace Game
 			if (!Global.ObjectMgr.LoadCypherStrings())
 				Environment.Exit(1);
 
-			// not send custom type REALM_FFA_PVP to realm list
+			// not send custom Type REALM_FFA_PVP to realm list
 			RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
 			uint      realm_zone  = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
@@ -605,7 +605,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
 			Global.SpellMgr.LoadSpellEnchantProcData();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading Random item bonus list definitions...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading Random Item bonus list definitions...");
 			ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading Disables"); // must be before loading quests and items
@@ -748,7 +748,7 @@ namespace Game
 			Global.ObjectMgr.LoadAreaTriggerTeleports();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading Access Requirements...");
-			Global.ObjectMgr.LoadAccessRequirements(); // must be after item template load
+			Global.ObjectMgr.LoadAccessRequirements(); // must be after Item template load
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading Quest Area Triggers...");
 			Global.ObjectMgr.LoadQuestAreaTriggers(); // must be after LoadQuests
@@ -815,7 +815,7 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading the max pet number...");
 			Global.ObjectMgr.LoadPetNumber();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading pet level stats...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading pet level Stats...");
 			Global.ObjectMgr.LoadPetLevelInfo();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading Player level dependent mail rewards...");
@@ -939,13 +939,13 @@ namespace Game
 			Log.outInfo(LogFilter.ServerLoading, "Loading Conditions...");
 			Global.ConditionMgr.LoadConditions();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading faction change achievement pairs...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading faction change Achievement pairs...");
 			Global.ObjectMgr.LoadFactionChangeAchievements();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading faction change spell pairs...");
 			Global.ObjectMgr.LoadFactionChangeSpells();
 
-			Log.outInfo(LogFilter.ServerLoading, "Loading faction change item pairs...");
+			Log.outInfo(LogFilter.ServerLoading, "Loading faction change Item pairs...");
 			Global.ObjectMgr.LoadFactionChangeItems();
 
 			Log.outInfo(LogFilter.ServerLoading, "Loading faction change quest pairs...");
@@ -1382,7 +1382,7 @@ namespace Game
 			{
 				_timers[WorldTimers.Auctions].Reset();
 
-				// Update mails (return old mails with item, or delete them)
+				// Update mails (return old mails with Item, or delete them)
 				if (++mail_timer > mail_timer_expires)
 				{
 					mail_timer = 0;
@@ -1597,7 +1597,7 @@ namespace Game
 
 			foreach (var session in _sessions.Values)
 			{
-				// Session should have permissions to receive global gm messages
+				// _session should have permissions to receive global gm messages
 				if (session == null ||
 				    !session.HasPermission(RBACPermissions.ReceiveGlobalGmTextmessage))
 					continue;
@@ -1879,7 +1879,7 @@ namespace Game
 					    GetActiveAndQueuedSessionCount() == 0)
 						IsStopped = true; // exist code already set
 					else
-						_ShutdownTimer = 1; // minimum timer value to wait idle state
+						_ShutdownTimer = 1; // minimum timer value to wait idle State
 				}
 				//- ... else decrease it and if necessary display a shutdown countdown to the users
 				else

@@ -106,7 +106,7 @@ namespace Game
 
 				if (traderCanTrade && playerCanTrade)
 				{
-					// Ok, if trade item exists and can be stored
+					// Ok, if trade Item exists and can be stored
 					// If we trade in both directions we had to check, if the trade will work before we actually do it
 					// A roll back is not possible after we stored it
 					if (myItems[i])
@@ -165,24 +165,24 @@ namespace Game
 					if (myItems[i])
 					{
 						if (!traderCanTrade)
-							Log.outError(LogFilter.Network, "trader can't store item: {0}", myItems[i].GetGUID().ToString());
+							Log.outError(LogFilter.Network, "trader can't store Item: {0}", myItems[i].GetGUID().ToString());
 
 						if (GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, playerDst, myItems[i], false) == InventoryResult.Ok)
 							GetPlayer().MoveItemToInventory(playerDst, myItems[i], true, true);
 						else
-							Log.outError(LogFilter.Network, "player can't take item back: {0}", myItems[i].GetGUID().ToString());
+							Log.outError(LogFilter.Network, "player can't take Item back: {0}", myItems[i].GetGUID().ToString());
 					}
 
 					// return the already removed items to the original owner
 					if (hisItems[i])
 					{
 						if (!playerCanTrade)
-							Log.outError(LogFilter.Network, "player can't store item: {0}", hisItems[i].GetGUID().ToString());
+							Log.outError(LogFilter.Network, "player can't store Item: {0}", hisItems[i].GetGUID().ToString());
 
 						if (trader.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, traderDst, hisItems[i], false) == InventoryResult.Ok)
 							trader.MoveItemToInventory(traderDst, hisItems[i], true, true);
 						else
-							Log.outError(LogFilter.Network, "trader can't take item back: {0}", hisItems[i].GetGUID().ToString());
+							Log.outError(LogFilter.Network, "trader can't take Item back: {0}", hisItems[i].GetGUID().ToString());
 					}
 				}
 			}
@@ -200,7 +200,7 @@ namespace Game
 
 				if (item)
 				{
-					Log.outDebug(LogFilter.Network, "player trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
+					Log.outDebug(LogFilter.Network, "player trade Item {0} bag: {1} Slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
 					//Can return null
 					myItems[i] = item;
 					myItems[i].SetInTrade();
@@ -210,7 +210,7 @@ namespace Game
 
 				if (item)
 				{
-					Log.outDebug(LogFilter.Network, "partner trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
+					Log.outDebug(LogFilter.Network, "partner trade Item {0} bag: {1} Slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
 					hisItems[i] = item;
 					hisItems[i].SetInTrade();
 				}
@@ -454,7 +454,7 @@ namespace Game
 				info.Status = TradeStatus.Accepted;
 				trader.GetSession().SendTradeStatus(info);
 
-				// test if item will fit in each inventory
+				// test if Item will fit in each inventory
 				TradeStatusPkt myCanCompleteInfo  = new();
 				TradeStatusPkt hisCanCompleteInfo = new();
 				hisCanCompleteInfo.BagResult = trader.CanStoreItems(myItems, (int)TradeSlots.TradedCount, ref hisCanCompleteInfo.ItemID);
@@ -778,7 +778,7 @@ namespace Game
 
 			TradeStatusPkt info = new();
 
-			// invalid slot number
+			// invalid Slot number
 			if (setTradeItem.TradeSlot >= (byte)TradeSlots.Count)
 			{
 				info.Status = TradeStatus.Cancelled;
@@ -801,7 +801,7 @@ namespace Game
 
 			ObjectGuid iGUID = item.GetGUID();
 
-			// prevent place single item into many trade slots using cheating and client bugs
+			// prevent place single Item into many trade slots using cheating and client bugs
 			if (my_trade.HasItem(iGUID))
 			{
 				// cheating attempt
@@ -836,7 +836,7 @@ namespace Game
 
 			my_trade.UpdateClientStateIndex();
 
-			// invalid slot number
+			// invalid Slot number
 			if (clearTradeItem.TradeSlot >= (byte)TradeSlots.Count)
 				return;
 

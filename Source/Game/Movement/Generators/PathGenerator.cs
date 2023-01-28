@@ -422,7 +422,7 @@ namespace Game.Movement
 
 					if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPoly(suffixStartPoly, endPoint, suffixEndPoint, ref posOverPoly)))
 					{
-						// suffixStartPoly is still invalid, error state
+						// suffixStartPoly is still invalid, error State
 						BuildShortcut();
 						pathType = PathType.NoPath;
 
@@ -458,7 +458,7 @@ namespace Game.Movement
 
 				if (suffixPolyLength == 0 ||
 				    Detour.dtStatusFailed(dtResult))
-					// this is probably an error state, but we'll leave it
+					// this is probably an error State, but we'll leave it
 					// and hopefully recover on the next Update
 					// we still need to copy our preffix
 					Log.outError(LogFilter.Maps, $"Path Build failed\n{_source.GetDebugInfo()}");
@@ -582,7 +582,7 @@ namespace Game.Movement
 				}
 			}
 
-			// by now we know what type of path we can get
+			// by now we know what Type of path we can get
 			if (_pathPolyRefs[_polyLength - 1] == endPoly &&
 			    !pathType.HasAnyFlag(PathType.Incomplete))
 				pathType = PathType.Normal;
@@ -691,7 +691,7 @@ namespace Game.Movement
 				pathType = (PathType.Normal | PathType.NotUsingPath);
 			}
 
-			Log.outDebug(LogFilter.Maps, "PathGenerator.BuildPointPath path type {0} size {1} poly-size {2}\n", pathType, pointCount, _polyLength);
+			Log.outDebug(LogFilter.Maps, "PathGenerator.BuildPointPath path Type {0} size {1} poly-size {2}\n", pathType, pointCount, _polyLength);
 		}
 
 		private uint FixupCorridor(ulong[] path, uint npath, uint maxPath, ulong[] visited, int nvisited)

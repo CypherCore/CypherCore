@@ -78,7 +78,7 @@ namespace Game.Entities
 
 			Update();
 
-			// need remove possible trader spell applied to changed item
+			// need remove possible trader spell applied to changed Item
 			if (slot == TradeSlots.NonTraded)
 				GetTraderData().SetSpell(0);
 
@@ -107,7 +107,7 @@ namespace Game.Entities
 
 			UpdateServerStateIndex();
 
-			Update(true);  // send spell info to item owner
+			Update(true);  // send spell info to Item owner
 			Update(false); // send spell info to caster self
 		}
 
@@ -139,9 +139,9 @@ namespace Game.Entities
 		private void Update(bool forTarget = true)
 		{
 			if (forTarget)
-				_trader.GetSession().SendUpdateTrade(true); // player state for trader
+				_trader.GetSession().SendUpdateTrade(true); // player State for trader
 			else
-				_player.GetSession().SendUpdateTrade(false); // player state for player
+				_player.GetSession().SendUpdateTrade(false); // player State for player
 		}
 
 		public void SetAccepted(bool state, bool crosssend = false)

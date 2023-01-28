@@ -280,7 +280,7 @@ namespace Game.Entities
 
 				owner.UpdateCriteria(CriteriaType.EarnArtifactXPForAzeriteItem, xp);
 
-				// changing azerite level changes item level, need to update stats
+				// changing azerite level changes Item level, need to update Stats
 				if (_azeriteItemData.Level != level)
 				{
 					if (IsEquipped())
@@ -422,7 +422,7 @@ namespace Game.Entities
 
 		public void SetSelectedAzeriteEssence(int slot, uint azeriteEssenceId)
 		{
-			//ASSERT(slot < MAX_AZERITE_ESSENCE_SLOT);
+			//ASSERT(Slot < MAX_AZERITE_ESSENCE_SLOT);
 			int index = _azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled; });
 			//ASSERT(index >= 0);
 			SelectedAzeriteEssences selectedEssences = _values.ModifyValue(_azeriteItemData).ModifyValue(_azeriteItemData.SelectedEssences, index);

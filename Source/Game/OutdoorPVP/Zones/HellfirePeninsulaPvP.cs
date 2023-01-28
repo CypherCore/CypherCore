@@ -241,7 +241,7 @@ namespace Game.PvP
 					break;
 			}
 
-			// send world state update
+			// send world State update
 			if (field != 0)
 			{
 				PvP.SetWorldState((int)field, 0);
@@ -318,7 +318,7 @@ namespace Game.PvP
 			foreach (var go in bounds)
 				go.SetGoArtKit(artkit2);
 
-			// send world state update
+			// send world State update
 			if (field != 0)
 				PvP.SetWorldState((int)field, 1);
 

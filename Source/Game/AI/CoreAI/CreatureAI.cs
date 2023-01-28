@@ -151,7 +151,7 @@ namespace Game.AI
 			// Send alert sound (if any) for this creature
 			me.SendAIReaction(AiReaction.Alert);
 
-			// Face the unit (stealthed player) and set distracted state for 5 seconds
+			// Face the unit (stealthed player) and set distracted State for 5 seconds
 			me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
 		}
 
@@ -649,7 +649,7 @@ namespace Game.AI
 			return false;
 		}
 
-		// Called when a player selects a gossip item in the creature's gossip menu.
+		// Called when a player selects a gossip Item in the creature's gossip menu.
 		public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
 		{
 			return false;
@@ -666,7 +666,7 @@ namespace Game.AI
 		{
 		}
 
-		// Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
+		// Called when a player completes a quest and is rewarded, opt is the selected Item's index or 0
 		public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
 		{
 		}

@@ -155,7 +155,7 @@ namespace Game
 
 				if (!item)
 				{
-					Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} wants to deposit an invalid item ({2}).", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Deposits[i].ToString());
+					Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} wants to deposit an invalid Item ({2}).", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Deposits[i].ToString());
 
 					continue;
 				}
@@ -192,7 +192,7 @@ namespace Game
 
 				if (itemVS == null)
 				{
-					Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} tried to withdraw an invalid item ({2})", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Withdrawals[i].ToString());
+					Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} {1} tried to withdraw an invalid Item ({2})", player.GetGUID().ToString(), player.GetName(), voidStorageTransfer.Withdrawals[i].ToString());
 
 					continue;
 				}
@@ -247,7 +247,7 @@ namespace Game
 
 			if (player.GetVoidStorageItem(swapVoidItem.VoidItemGuid.GetCounter(), out oldSlot) == null)
 			{
-				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - Player (GUID: {0}, name: {1}) requested swapping an invalid item (slot: {2}, itemid: {3}).", player.GetGUID().ToString(), player.GetName(), swapVoidItem.DstSlot, swapVoidItem.VoidItemGuid.ToString());
+				Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - Player (GUID: {0}, name: {1}) requested swapping an invalid Item (Slot: {2}, itemid: {3}).", player.GetGUID().ToString(), player.GetName(), swapVoidItem.DstSlot, swapVoidItem.VoidItemGuid.ToString());
 
 				return;
 			}

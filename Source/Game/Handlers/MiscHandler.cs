@@ -88,7 +88,7 @@ namespace Game
 			}
 
 			// Pretend we've never seen this object
-			GetPlayer()._clientGUIDs.Remove(objectUpdateFailed.ObjectGUID);
+			GetPlayer().ClientGUIDs.Remove(objectUpdateFailed.ObjectGUID);
 		}
 
 		[WorldPacketHandler(ClientOpcodes.ObjectUpdateRescued, Processing = PacketProcessing.Inplace)]
@@ -98,7 +98,7 @@ namespace Game
 
 			// Client received values update after destroying object
 			// re-register object in _clientGUIDs to send DestroyObject on next visibility update
-			GetPlayer()._clientGUIDs.Add(objectUpdateRescued.ObjectGUID);
+			GetPlayer().ClientGUIDs.Add(objectUpdateRescued.ObjectGUID);
 		}
 
 		[WorldPacketHandler(ClientOpcodes.SetActionButton)]
@@ -119,7 +119,7 @@ namespace Game
 			if (!GetPlayer()) // ignore until not logged (check needed because STATUS_AUTHED)
 			{
 				if (packet.Mask != 0)
-					Log.outError(LogFilter.Network, "WorldSession.HandleSetActionBarToggles in not logged state with value: {0}, ignored", packet.Mask);
+					Log.outError(LogFilter.Network, "WorldSession.HandleSetActionBarToggles in not logged State with value: {0}, ignored", packet.Mask);
 
 				return;
 			}
@@ -568,7 +568,7 @@ namespace Game
 				GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
 
 				if (!GetPlayer().IsPvP() ||
-				    GetPlayer().pvpInfo.EndTimer != 0)
+				    GetPlayer().PvpInfo.EndTimer != 0)
 					GetPlayer().UpdatePvP(true, true);
 			}
 			else if (!GetPlayer().IsWarModeLocalActive())
@@ -576,9 +576,9 @@ namespace Game
 				GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
 				GetPlayer().SetPlayerFlag(PlayerFlags.PVPTimer);
 
-				if (!GetPlayer().pvpInfo.IsHostile &&
+				if (!GetPlayer().PvpInfo.IsHostile &&
 				    GetPlayer().IsPvP())
-					GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+					GetPlayer().PvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
 			}
 		}
 
@@ -591,7 +591,7 @@ namespace Game
 				GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
 
 				if (!GetPlayer().IsPvP() ||
-				    GetPlayer().pvpInfo.EndTimer != 0)
+				    GetPlayer().PvpInfo.EndTimer != 0)
 					GetPlayer().UpdatePvP(true, true);
 			}
 			else if (!GetPlayer().IsWarModeLocalActive())
@@ -599,9 +599,9 @@ namespace Game
 				GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
 				GetPlayer().SetPlayerFlag(PlayerFlags.PVPTimer);
 
-				if (!GetPlayer().pvpInfo.IsHostile &&
+				if (!GetPlayer().PvpInfo.IsHostile &&
 				    GetPlayer().IsPvP())
-					GetPlayer().pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+					GetPlayer().PvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
 			}
 		}
 
@@ -616,13 +616,13 @@ namespace Game
 		{
 			if (farSight.Enable)
 			{
-				Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer()._activePlayerData.FarsightObject.ToString(), GetPlayer().GetGUID().ToString());
+				Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().ActivePlayerData.FarsightObject.ToString(), GetPlayer().GetGUID().ToString());
 				WorldObject target = GetPlayer().GetViewpoint();
 
 				if (target)
 					GetPlayer().SetSeer(target);
 				else
-					Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer()._activePlayerData.FarsightObject.ToString());
+					Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().ActivePlayerData.FarsightObject.ToString());
 			}
 			else
 			{

@@ -31,12 +31,12 @@ namespace Game.Entities
 				// update yesterday's contribution
 				if (_lastHonorUpdateTime >= yesterday)
 					// this is the first update today, reset today's contribution
-					SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.YesterdayHonorableKills), _activePlayerData.TodayHonorableKills);
+					SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), ActivePlayerData.TodayHonorableKills);
 				else
 					// no honor/kills yesterday or today, reset
-					SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.YesterdayHonorableKills), (ushort)0);
+					SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), (ushort)0);
 
-				SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.TodayHonorableKills), (ushort)0);
+				SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)0);
 			}
 
 			_lastHonorUpdateTime = now;
@@ -107,7 +107,7 @@ namespace Game.Entities
 					//  [29..38] Other title and player name
 					//  [39+]    Nothing
 					// this is all wrong, should be going off PvpTitle, not PlayerTitle
-					uint victim_title = plrVictim._playerData.PlayerTitle;
+					uint victim_title = plrVictim.PlayerData.PlayerTitle;
 
 					// Get Killer titles, CharTitlesEntry.bit_index
 					// Ranks:
@@ -126,9 +126,9 @@ namespace Game.Entities
 					honor_f = (float)Math.Ceiling(Formulas.HKHonorAtLevelF(k_level) * (v_level - k_grey) / (k_level - k_grey));
 
 					// count the number of playerkills in one day
-					ApplyModUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.TodayHonorableKills), (ushort)1, true);
+					ApplyModUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)1, true);
 					// and those in a lifetime
-					ApplyModUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.LifetimeHonorableKills), 1u, true);
+					ApplyModUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 1u, true);
 					UpdateCriteria(CriteriaType.HonorableKills);
 					UpdateCriteria(CriteriaType.DeliverKillingBlowToClass, (uint)victim.GetClass());
 					UpdateCriteria(CriteriaType.DeliverKillingBlowToRace, (uint)victim.GetRace());
@@ -213,14 +213,14 @@ namespace Game.Entities
 
 		public void ResetHonorStats()
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.TodayHonorableKills), (ushort)0);
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.YesterdayHonorableKills), (ushort)0);
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.LifetimeHonorableKills), 0u);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), (ushort)0);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), (ushort)0);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 0u);
 		}
 
 		private void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.HonorLevel), honorLevel);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), honorLevel);
 			UpdateHonorNextLevel();
 
 			AddHonorXP(honor);
@@ -256,8 +256,8 @@ namespace Game.Entities
 
 		public void AddHonorXP(uint xp)
 		{
-			uint currentHonorXP   = _activePlayerData.Honor;
-			uint nextHonorLevelXP = _activePlayerData.HonorNextLevel;
+			uint currentHonorXP   = ActivePlayerData.Honor;
+			uint nextHonorLevelXP = ActivePlayerData.HonorNextLevel;
 			uint newHonorXP       = currentHonorXP + xp;
 			uint honorLevel       = GetHonorLevel();
 
@@ -274,10 +274,10 @@ namespace Game.Entities
 					SetHonorLevel((byte)(honorLevel + 1));
 
 				honorLevel       = GetHonorLevel();
-				nextHonorLevelXP = _activePlayerData.HonorNextLevel;
+				nextHonorLevelXP = ActivePlayerData.HonorNextLevel;
 			}
 
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
 		}
 
 		private void SetHonorLevel(byte level)
@@ -287,7 +287,7 @@ namespace Game.Entities
 			if (level == oldHonorLevel)
 				return;
 
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.HonorLevel), level);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), level);
 			UpdateHonorNextLevel();
 
 			UpdateCriteria(CriteriaType.HonorLevelIncrease);
@@ -298,12 +298,12 @@ namespace Game.Entities
 			// 5500 at honor level 1
 			// no idea what between here
 			// 8800 at honor level ~14 (never goes above 8800)
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.HonorNextLevel), 8800u);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.HonorNextLevel), 8800u);
 		}
 
 		public uint GetHonorLevel()
 		{
-			return _playerData.HonorLevel;
+			return PlayerData.HonorLevel;
 		}
 
 		public bool IsMaxHonorLevel()
@@ -411,14 +411,14 @@ namespace Game.Entities
 			if (GetBattlegroundId() == 0)
 				return null;
 
-			return Global.BattlegroundMgr.GetBattleground(GetBattlegroundId(), _bgData.bgTypeID);
+			return Global.BattlegroundMgr.GetBattleground(GetBattlegroundId(), _bgData.TypeID);
 		}
 
 		public bool InBattlegroundQueue(bool ignoreArena = false)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId != default &&
-				    (!ignoreArena || _bgBattlegroundQueueID[i].bgQueueTypeId.BattlemasterListId != (ushort)BattlegroundTypeId.AA))
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId != default &&
+				    (!ignoreArena || _bgBattlegroundQueueID[i].BGQueueTypeId.BattlemasterListId != (ushort)BattlegroundTypeId.AA))
 					return true;
 
 			return false;
@@ -427,7 +427,7 @@ namespace Game.Entities
 		public BattlegroundQueueTypeId GetBattlegroundQueueTypeId(uint index)
 		{
 			if (index < SharedConst.MaxPlayerBGQueues)
-				return _bgBattlegroundQueueID[index].bgQueueTypeId;
+				return _bgBattlegroundQueueID[index].BGQueueTypeId;
 
 			return default;
 		}
@@ -435,7 +435,7 @@ namespace Game.Entities
 		public uint GetBattlegroundQueueIndex(BattlegroundQueueTypeId bgQueueTypeId)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
 					return i;
 
 			return SharedConst.MaxPlayerBGQueues;
@@ -444,8 +444,8 @@ namespace Game.Entities
 		public bool IsInvitedForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-					return _bgBattlegroundQueueID[i].invitedToInstance != 0;
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
+					return _bgBattlegroundQueueID[i].InvitedToInstance != 0;
 
 			return false;
 		}
@@ -457,20 +457,20 @@ namespace Game.Entities
 
 		public void SetBattlegroundId(uint val, BattlegroundTypeId bgTypeId)
 		{
-			_bgData.bgInstanceID = val;
-			_bgData.bgTypeID     = bgTypeId;
+			_bgData.InstanceID = val;
+			_bgData.TypeID     = bgTypeId;
 		}
 
 		public uint AddBattlegroundQueueId(BattlegroundQueueTypeId val)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == default ||
-				    _bgBattlegroundQueueID[i].bgQueueTypeId == val)
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == default ||
+				    _bgBattlegroundQueueID[i].BGQueueTypeId == val)
 				{
-					_bgBattlegroundQueueID[i].bgQueueTypeId     = val;
-					_bgBattlegroundQueueID[i].invitedToInstance = 0;
-					_bgBattlegroundQueueID[i].joinTime          = (uint)GameTime.GetGameTime();
-					_bgBattlegroundQueueID[i].mercenary         = HasAura(BattlegroundConst.SpellMercenaryContractHorde) || HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
+					_bgBattlegroundQueueID[i].BGQueueTypeId     = val;
+					_bgBattlegroundQueueID[i].InvitedToInstance = 0;
+					_bgBattlegroundQueueID[i].JoinTime          = (uint)GameTime.GetGameTime();
+					_bgBattlegroundQueueID[i].Mercenary         = HasAura(BattlegroundConst.SpellMercenaryContractHorde) || HasAura(BattlegroundConst.SpellMercenaryContractAlliance);
 
 					return i;
 				}
@@ -481,7 +481,7 @@ namespace Game.Entities
 		public bool HasFreeBattlegroundQueueId()
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == default)
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == default)
 					return true;
 
 			return false;
@@ -490,12 +490,12 @@ namespace Game.Entities
 		public void RemoveBattlegroundQueueId(BattlegroundQueueTypeId val)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == val)
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == val)
 				{
-					_bgBattlegroundQueueID[i].bgQueueTypeId     = default;
-					_bgBattlegroundQueueID[i].invitedToInstance = 0;
-					_bgBattlegroundQueueID[i].joinTime          = 0;
-					_bgBattlegroundQueueID[i].mercenary         = false;
+					_bgBattlegroundQueueID[i].BGQueueTypeId     = default;
+					_bgBattlegroundQueueID[i].InvitedToInstance = 0;
+					_bgBattlegroundQueueID[i].JoinTime          = 0;
+					_bgBattlegroundQueueID[i].Mercenary         = false;
 
 					return;
 				}
@@ -504,14 +504,14 @@ namespace Game.Entities
 		public void SetInviteForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, uint instanceId)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-					_bgBattlegroundQueueID[i].invitedToInstance = instanceId;
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
+					_bgBattlegroundQueueID[i].InvitedToInstance = instanceId;
 		}
 
 		public bool IsInvitedForBattlegroundInstance(uint instanceId)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].invitedToInstance == instanceId)
+				if (_bgBattlegroundQueueID[i].InvitedToInstance == instanceId)
 					return true;
 
 			return false;
@@ -520,44 +520,44 @@ namespace Game.Entities
 		private void SetMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, bool mercenary)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-					_bgBattlegroundQueueID[i].mercenary = mercenary;
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
+					_bgBattlegroundQueueID[i].Mercenary = mercenary;
 		}
 
 		public bool IsMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-					return _bgBattlegroundQueueID[i].mercenary;
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
+					return _bgBattlegroundQueueID[i].Mercenary;
 
 			return false;
 		}
 
 		public WorldLocation GetBattlegroundEntryPoint()
 		{
-			return _bgData.joinPos;
+			return _bgData.JoinPos;
 		}
 
 		public bool InBattleground()
 		{
-			return _bgData.bgInstanceID != 0;
+			return _bgData.InstanceID != 0;
 		}
 
 		public uint GetBattlegroundId()
 		{
-			return _bgData.bgInstanceID;
+			return _bgData.InstanceID;
 		}
 
 		public BattlegroundTypeId GetBattlegroundTypeId()
 		{
-			return _bgData.bgTypeID;
+			return _bgData.TypeID;
 		}
 
 		public uint GetBattlegroundQueueJoinTime(BattlegroundQueueTypeId bgQueueTypeId)
 		{
 			for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-				if (_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-					return _bgBattlegroundQueueID[i].joinTime;
+				if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
+					return _bgBattlegroundQueueID[i].JoinTime;
 
 			return 0;
 		}
@@ -593,14 +593,14 @@ namespace Game.Entities
 		public void SetBattlegroundEntryPoint()
 		{
 			// Taxi path store
-			if (!_taxi.Empty())
+			if (!Taxi.Empty())
 			{
-				_bgData.mountSpell  = 0;
-				_bgData.taxiPath[0] = _taxi.GetTaxiSource();
-				_bgData.taxiPath[1] = _taxi.GetTaxiDestination();
+				_bgData.MountSpell  = 0;
+				_bgData.TaxiPath[0] = Taxi.GetTaxiSource();
+				_bgData.TaxiPath[1] = Taxi.GetTaxiDestination();
 
 				// On taxi we don't need check for dungeon
-				_bgData.joinPos = new WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+				_bgData.JoinPos = new WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 			}
 			else
 			{
@@ -612,11 +612,11 @@ namespace Game.Entities
 					var auras = GetAuraEffectsByType(AuraType.Mounted);
 
 					if (!auras.Empty())
-						_bgData.mountSpell = auras[0].GetId();
+						_bgData.MountSpell = auras[0].GetId();
 				}
 				else
 				{
-					_bgData.mountSpell = 0;
+					_bgData.MountSpell = 0;
 				}
 
 				// If map is dungeon find linked graveyard
@@ -625,30 +625,30 @@ namespace Game.Entities
 					WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
 
 					if (entry != null)
-						_bgData.joinPos = entry.Loc;
+						_bgData.JoinPos = entry.Loc;
 					else
 						Log.outError(LogFilter.Player, "SetBattlegroundEntryPoint: Dungeon map {0} has no linked graveyard, setting home location as entry point.", GetMapId());
 				}
 				// If new entry point is not BG or arena set it
 				else if (!GetMap().IsBattlegroundOrArena())
 				{
-					_bgData.joinPos = new WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+					_bgData.JoinPos = new WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 				}
 			}
 
-			if (_bgData.joinPos.GetMapId() == 0xFFFFFFFF) // In error cases use homebind position
-				_bgData.joinPos = new WorldLocation(GetHomebind());
+			if (_bgData.JoinPos.GetMapId() == 0xFFFFFFFF) // In error cases use _homebind position
+				_bgData.JoinPos = new WorldLocation(GetHomebind());
 		}
 
 		public void SetBGTeam(Team team)
 		{
-			_bgData.bgTeam = (uint)team;
+			_bgData.Team = (uint)team;
 			SetArenaFaction((byte)(team == Team.Alliance ? 1 : 0));
 		}
 
 		public Team GetBGTeam()
 		{
-			return _bgData.bgTeam != 0 ? (Team)_bgData.bgTeam : GetTeam();
+			return _bgData.Team != 0 ? (Team)_bgData.Team : GetTeam();
 		}
 
 		public void LeaveBattleground(bool teleportToEntryPoint = true)
@@ -698,13 +698,13 @@ namespace Game.Entities
 
 		public void ClearAfkReports()
 		{
-			_bgData.bgAfkReporter.Clear();
+			_bgData.AfkReporter.Clear();
 		}
 
 		private bool CanReportAfkDueToLimit()
 		{
 			// a player can complain about 15 people per 5 minutes
-			if (_bgData.bgAfkReportedCount++ >= 15)
+			if (_bgData.AfkReportedCount++ >= 15)
 				return false;
 
 			return true;
@@ -732,21 +732,21 @@ namespace Game.Entities
 			}
 
 			// check if player has 'Idle' or 'Inactive' debuff
-			if (!_bgData.bgAfkReporter.Contains(reporter.GetGUID()) &&
+			if (!_bgData.AfkReporter.Contains(reporter.GetGUID()) &&
 			    !HasAura(43680) &&
 			    !HasAura(43681) &&
 			    reporter.CanReportAfkDueToLimit())
 			{
-				_bgData.bgAfkReporter.Add(reporter.GetGUID());
+				_bgData.AfkReporter.Add(reporter.GetGUID());
 
 				// by default 3 players have to complain to apply debuff
-				if (_bgData.bgAfkReporter.Count >= WorldConfig.GetIntValue(WorldCfg.BattlegroundReportAfk))
+				if (_bgData.AfkReporter.Count >= WorldConfig.GetIntValue(WorldCfg.BattlegroundReportAfk))
 				{
 					// cast 'Idle' spell
 					CastSpell(this, 43680, true);
-					_bgData.bgAfkReporter.Clear();
-					reportAfkResult.NumBlackMarksOnOffender = (byte)_bgData.bgAfkReporter.Count;
-					reportAfkResult.NumPlayersIHaveReported = reporter._bgData.bgAfkReportedCount;
+					_bgData.AfkReporter.Clear();
+					reportAfkResult.NumBlackMarksOnOffender = (byte)_bgData.AfkReporter.Count;
+					reportAfkResult.NumPlayersIHaveReported = reporter._bgData.AfkReportedCount;
 					reportAfkResult.Result                  = ReportPvPPlayerAFKResult.ResultCode.Success;
 				}
 			}
@@ -756,14 +756,14 @@ namespace Game.Entities
 
 		public bool GetRandomWinner()
 		{
-			return _IsBGRandomWinner;
+			return _isBGRandomWinner;
 		}
 
 		public void SetRandomWinner(bool isWinner)
 		{
-			_IsBGRandomWinner = isWinner;
+			_isBGRandomWinner = isWinner;
 
-			if (_IsBGRandomWinner)
+			if (_isBGRandomWinner)
 			{
 				PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BATTLEGROUND_RANDOM);
 				stmt.AddValue(0, GetGUID().GetCounter());
@@ -837,12 +837,12 @@ namespace Game.Entities
 
 		public void SetArenaTeamIdInvited(uint ArenaTeamId)
 		{
-			_ArenaTeamIdInvited = ArenaTeamId;
+			_arenaTeamIdInvited = ArenaTeamId;
 		}
 
 		public uint GetArenaTeamIdInvited()
 		{
-			return _ArenaTeamIdInvited;
+			return _arenaTeamIdInvited;
 		}
 
 		public uint GetRBGPersonalRating()
@@ -862,10 +862,10 @@ namespace Game.Entities
 
 		public PVPInfo GetPvpInfoForBracket(byte bracket)
 		{
-			int index = _activePlayerData.PvpInfo.FindIndexIf(pvpInfo => { return pvpInfo.Bracket == bracket && !pvpInfo.Disqualified; });
+			int index = ActivePlayerData.PvpInfo.FindIndexIf(pvpInfo => { return pvpInfo.Bracket == bracket && !pvpInfo.Disqualified; });
 
 			if (index >= 0)
-				return _activePlayerData.PvpInfo[index];
+				return ActivePlayerData.PvpInfo[index];
 
 			return null;
 		}

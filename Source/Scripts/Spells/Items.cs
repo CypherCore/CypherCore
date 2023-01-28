@@ -1276,7 +1276,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=6522 Deviate Fish
+	// http://www.wowhead.com/Item=6522 Deviate Fish
 	[Script] // 8063 Deviate Fish
 	internal class spell_item_deviate_fish : SpellScript, IHasSpellEffects
 	{
@@ -1516,7 +1516,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=47499 Flask of the North
+	// http://www.wowhead.com/Item=47499 Flask of the North
 	[Script] // 67019 Flask of the North
 	internal class spell_item_flask_of_the_north : SpellScript, IHasSpellEffects
 	{
@@ -1611,7 +1611,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=10645 Gnomish Death Ray
+	// http://www.wowhead.com/Item=10645 Gnomish Death Ray
 	[Script] // 13280 Gnomish Death Ray
 	internal class spell_item_gnomish_death_ray : SpellScript, IHasSpellEffects
 	{
@@ -1757,7 +1757,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=27388 Mr. Pinchy
+	// http://www.wowhead.com/Item=27388 Mr. Pinchy
 	[Script] // 33060 Make a Wish
 	internal class spell_item_make_a_wish : SpellScript, IHasSpellEffects
 	{
@@ -1857,7 +1857,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=32686 Mingo's Fortune Giblets
+	// http://www.wowhead.com/Item=32686 Mingo's Fortune Giblets
 	[Script] // 40802 Mingo's Fortune Generator
 	internal class spell_item_mingos_fortune_generator : SpellScript, IHasSpellEffects
 	{
@@ -1919,7 +1919,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=10720 Gnomish Net-o-Matic Projector
+	// http://www.wowhead.com/Item=10720 Gnomish Net-o-Matic Projector
 	[Script] // 13120 Net-o-Matic
 	internal class spell_item_net_o_matic : SpellScript, IHasSpellEffects
 	{
@@ -1954,7 +1954,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=8529 Noggenfogger Elixir
+	// http://www.wowhead.com/Item=8529 Noggenfogger Elixir
 	[Script] // 16589 Noggenfogger Elixir
 	internal class spell_item_noggenfogger_elixir : SpellScript, IHasSpellEffects
 	{
@@ -2143,7 +2143,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=6657 Savory Deviate Delight
+	// http://www.wowhead.com/Item=6657 Savory Deviate Delight
 	[Script] // 8213 Savory Deviate Delight
 	internal class spell_item_savory_deviate_delight : SpellScript, IHasSpellEffects
 	{
@@ -2540,7 +2540,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=7734 Six Demon Bag
+	// http://www.wowhead.com/Item=7734 Six Demon Bag
 	[Script] // 14537 Six Demon Bag
 	internal class spell_item_six_demon_bag : SpellScript, IHasSpellEffects
 	{
@@ -2645,7 +2645,7 @@ namespace Scripts.Spells.Items
 		}
 	}
 
-	// http://www.wowhead.com/item=44012 Underbelly Elixir
+	// http://www.wowhead.com/Item=44012 Underbelly Elixir
 	[Script] // 59640 Underbelly Elixir
 	internal class spell_item_underbelly_elixir : SpellScript, IHasSpellEffects
 	{
@@ -4046,7 +4046,7 @@ namespace Scripts.Spells.Items
 			SpellInfo spellInfo = eventInfo.GetSpellInfo();
 
 			if (spellInfo != null)
-				if (spellInfo.Id != _scriptSpellId)
+				if (spellInfo.Id != ScriptSpellId)
 					return true;
 
 			return false;

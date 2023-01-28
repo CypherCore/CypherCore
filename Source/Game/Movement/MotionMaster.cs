@@ -338,13 +338,13 @@ namespace Game.Movement
 			if (top.HasFlag(MovementGeneratorFlags.Deactivated))
 				top.Reset(_owner);
 
-			Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (type: {top.GetMovementGeneratorType()}, flags: {top.Flags})");
+			Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (Type: {top.GetMovementGeneratorType()}, flags: {top.Flags})");
 
 			if (!top.Update(_owner, diff))
 			{
 				Cypher.Assert(top == GetCurrentMovementGenerator(), $"MotionMaster::Update: top was modified while updating! ({_owner.GetGUID()})");
 
-				// Since all the actions that modify any slot are delayed, this movement is guaranteed to be top
+				// Since all the actions that modify any Slot are delayed, this movement is guaranteed to be top
 				Pop(true, true); // Natural, and only, call to MovementInform
 			}
 
@@ -1213,26 +1213,26 @@ namespace Game.Movement
 		private void DirectAdd(MovementGenerator movement, MovementSlot slot = MovementSlot.Active)
 		{
 			/*
-			IMovementGenerator curr = _slot[(int)slot];
+			IMovementGenerator curr = _slot[(int)Slot];
 			if (curr != null)
 			{
-			    _slot[(int)slot] = null; // in case a new one is generated in this slot during directdelete
-			    if (_top == (int)slot && Convert.ToBoolean(_cleanFlag & MotionMasterCleanFlag.Update))
+			    _slot[(int)Slot] = null; // in case a new one is generated in this Slot during directdelete
+			    if (_top == (int)Slot && Convert.ToBoolean(_cleanFlag & MotionMasterCleanFlag.Update))
 			        DelayedDelete(curr);
 			    else
 			        DirectDelete(curr);
 			}
-			else if (_top < (int)slot)
+			else if (_top < (int)Slot)
 			{
-			    _top = (int)slot;
+			    _top = (int)Slot;
 			}
 
-			_slot[(int)slot] = m;
-			if (_top > (int)slot)
-			    _initialize[(int)slot] = true;
+			_slot[(int)Slot] = m;
+			if (_top > (int)Slot)
+			    _initialize[(int)Slot] = true;
 			else
 			{
-			    _initialize[(int)slot] = false;
+			    _initialize[(int)Slot] = false;
 			    m.Initialize(_owner);
 			}
 			*/

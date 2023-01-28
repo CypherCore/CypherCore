@@ -273,7 +273,7 @@ namespace Game.Entities
 				_me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
 				_me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
 
-				// ... Resistance, Split damage, Change stats ...
+				// ... Resistance, Split damage, Change Stats ...
 				_me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);
 				_me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SplitDamagePct, true);
 				_me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModResistance, true);

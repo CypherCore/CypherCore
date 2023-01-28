@@ -27,7 +27,7 @@ namespace Game.Entities
 					if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
 						restBonus = 0;
 
-					next_level_xp = _player._activePlayerData.NextLevelXP;
+					next_level_xp = _player.ActivePlayerData.NextLevelXP;
 					affectedByRaF = true;
 
 					break;
@@ -36,7 +36,7 @@ namespace Game.Entities
 					if (_player.IsMaxHonorLevel())
 						restBonus = 0;
 
-					next_level_xp = _player._activePlayerData.HonorNextLevel;
+					next_level_xp = _player.ActivePlayerData.HonorNextLevel;
 
 					break;
 				default:
@@ -54,7 +54,7 @@ namespace Game.Entities
 			uint oldBonus = (uint)(_restBonus[(int)restType]);
 			_restBonus[(int)restType] = restBonus;
 
-			PlayerRestState oldRestState = (PlayerRestState)(int)_player._activePlayerData.RestInfo[(int)restType].StateID;
+			PlayerRestState oldRestState = (PlayerRestState)(int)_player.ActivePlayerData.RestInfo[(int)restType].StateID;
 			PlayerRestState newRestState = PlayerRestState.Normal;
 
 			if (affectedByRaF &&
@@ -89,7 +89,7 @@ namespace Game.Entities
 			_restFlagMask |= restFlag;
 
 			if (oldRestMask == 0 &&
-			    _restFlagMask != 0) // only set flag/time on the first rest state
+			    _restFlagMask != 0) // only set flag/time on the first rest State
 			{
 				_restTime = GameTime.GetGameTime();
 				_player.SetPlayerFlag(PlayerFlags.Resting);
@@ -105,7 +105,7 @@ namespace Game.Entities
 			_restFlagMask &= ~restFlag;
 
 			if (oldRestMask != 0 &&
-			    _restFlagMask == 0) // only remove flag/time on the last rest state remove
+			    _restFlagMask == 0) // only remove flag/time on the last rest State remove
 			{
 				_restTime = 0;
 				_player.RemovePlayerFlag(PlayerFlags.Resting);
@@ -166,9 +166,9 @@ namespace Game.Entities
 			switch (restType)
 			{
 				case RestTypes.Honor:
-					return _player._activePlayerData.HonorNextLevel / 72000.0f * bubble;
+					return _player.ActivePlayerData.HonorNextLevel / 72000.0f * bubble;
 				case RestTypes.XP:
-					return _player._activePlayerData.NextLevelXP / 72000.0f * bubble;
+					return _player.ActivePlayerData.NextLevelXP / 72000.0f * bubble;
 				default:
 					return 0.0f;
 			}

@@ -147,7 +147,7 @@ namespace Game.Maps
 		{
 			i_player     = pl;
 			i_data       = new UpdateData(pl.GetMapId());
-			vis_guids    = new List<ObjectGuid>(pl._clientGUIDs);
+			vis_guids    = new List<ObjectGuid>(pl.ClientGUIDs);
 			i_visibleNow = new List<Unit>();
 		}
 
@@ -206,7 +206,7 @@ namespace Game.Maps
 
 			foreach (var guid in vis_guids)
 			{
-				i_player._clientGUIDs.Remove(guid);
+				i_player.ClientGUIDs.Remove(guid);
 				i_data.AddOutOfRangeGUID(guid);
 
 				if (guid.IsPlayer())
@@ -250,7 +250,7 @@ namespace Game.Maps
 				player.UpdateVisibilityOf(i_objects);
 
 				foreach (var visionPlayer in player.GetSharedVisionList())
-					if (visionPlayer.seerView == player)
+					if (visionPlayer.SeerView == player)
 						visionPlayer.UpdateVisibilityOf(i_objects);
 			}
 		}
@@ -262,7 +262,7 @@ namespace Game.Maps
 				Creature creature = objs[i];
 
 				foreach (var visionPlayer in creature.GetSharedVisionList())
-					if (visionPlayer.seerView == creature)
+					if (visionPlayer.SeerView == creature)
 						visionPlayer.UpdateVisibilityOf(i_objects);
 			}
 		}
@@ -278,7 +278,7 @@ namespace Game.Maps
 				{
 					Player pl = caster.ToPlayer();
 
-					if (pl && pl.seerView == dynamicObject)
+					if (pl && pl.SeerView == dynamicObject)
 						pl.UpdateVisibilityOf(i_objects);
 				}
 			}
@@ -302,7 +302,7 @@ namespace Game.Maps
 
 				i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
 
-				if (player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
+				if (player.SeerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
 					continue;
 
 				player.UpdateVisibilityOf(i_player);
@@ -313,7 +313,7 @@ namespace Game.Maps
 		{
 			base.Visit(objs);
 
-			bool relocated_for_ai = (i_player == i_player.seerView);
+			bool relocated_for_ai = (i_player == i_player.SeerView);
 
 			for (var i = 0; i < objs.Count; ++i)
 			{
@@ -343,7 +343,7 @@ namespace Game.Maps
 			{
 				Player player = objs[i];
 
-				if (!player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
+				if (!player.SeerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
 					player.UpdateVisibilityOf(i_creature);
 
 				CreatureUnitRelocationWorker(i_creature, player);
@@ -387,7 +387,7 @@ namespace Game.Maps
 			for (var i = 0; i < objs.Count; ++i)
 			{
 				Player      player    = objs[i];
-				WorldObject viewPoint = player.seerView;
+				WorldObject viewPoint = player.SeerView;
 
 				if (!viewPoint.IsNeedNotify(NotifyFlags.VisibilityChanged))
 					continue;
@@ -511,10 +511,10 @@ namespace Game.Maps
 				// Send packet to all who are sharing the player's vision
 				if (player.HasSharedVision())
 					foreach (var visionPlayer in player.GetSharedVisionList())
-						if (visionPlayer.seerView == player)
+						if (visionPlayer.SeerView == player)
 							SendPacket(visionPlayer);
 
-				if (player.seerView == player ||
+				if (player.SeerView == player ||
 				    player.GetVehicle() != null)
 					SendPacket(player);
 			}
@@ -535,7 +535,7 @@ namespace Game.Maps
 				// Send packet to all who are sharing the creature's vision
 				if (creature.HasSharedVision())
 					foreach (var visionPlayer in creature.GetSharedVisionList())
-						if (visionPlayer.seerView == creature)
+						if (visionPlayer.SeerView == creature)
 							SendPacket(visionPlayer);
 			}
 		}
@@ -559,7 +559,7 @@ namespace Game.Maps
 				{
 					Player player = caster.ToPlayer();
 
-					if (player && player.seerView == dynamicObject)
+					if (player && player.SeerView == dynamicObject)
 						SendPacket(player);
 				}
 			}
@@ -610,10 +610,10 @@ namespace Game.Maps
 				// Send packet to all who are sharing the player's vision
 				if (player.HasSharedVision())
 					foreach (var visionPlayer in player.GetSharedVisionList())
-						if (visionPlayer.seerView == player)
+						if (visionPlayer.SeerView == player)
 							SendPacket(visionPlayer);
 
-				if (player.seerView == player ||
+				if (player.SeerView == player ||
 				    player.GetVehicle())
 					SendPacket(player);
 			}
@@ -634,7 +634,7 @@ namespace Game.Maps
 				// Send packet to all who are sharing the creature's vision
 				if (creature.HasSharedVision())
 					foreach (var player in creature.GetSharedVisionList())
-						if (player.seerView == creature)
+						if (player.SeerView == creature)
 							SendPacket(player);
 			}
 		}
@@ -658,7 +658,7 @@ namespace Game.Maps
 					// Send packet back to the caster if the caster has vision of dynamic object
 					Player player = caster.ToPlayer();
 
-					if (player && player.seerView == dynamicObject)
+					if (player && player.SeerView == dynamicObject)
 						SendPacket(player);
 				}
 			}
@@ -969,7 +969,7 @@ namespace Game.Maps
 					Player caster = Global.ObjAccessor.FindPlayer(guid);
 
 					if (caster != null)
-						if (caster._activePlayerData.FarsightObject == dynamicObject.GetGUID())
+						if (caster.ActivePlayerData.FarsightObject == dynamicObject.GetGUID())
 							BuildPacket(caster);
 				}
 			}
@@ -3230,7 +3230,7 @@ namespace Game.Maps
 		}
 	}
 
-	// Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
+	// Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain Type)
 	internal class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
 	{
 		private WorldObject i_obj;

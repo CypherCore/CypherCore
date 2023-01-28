@@ -194,7 +194,7 @@ namespace Game.BattleGrounds.Zones
 						}
 					}
 
-					// 1-minute to occupy a node from contested state
+					// 1-minute to occupy a node from contested State
 					if (_NodeTimers[node] != 0)
 					{
 						if (_NodeTimers[node] > diff)
@@ -292,7 +292,7 @@ namespace Game.BattleGrounds.Zones
 						else
 							UpdateWorldState(ABWorldStates.ResourcesHorde, (int)_TeamScores[team]);
 
-						// update achievement flags
+						// update Achievement flags
 						// we increased _TeamScores[team] so we just need to check if it is 500 more than other teams resources
 						int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
 
@@ -434,7 +434,7 @@ namespace Game.BattleGrounds.Zones
 
 		private void _SendNodeUpdate(byte node)
 		{
-			// Send node owner state update to refresh map icons on client
+			// Send node owner State update to refresh map icons on client
 			int[] idPlusArray =
 			{
 				0, 2, 3, 0, 1
@@ -606,7 +606,7 @@ namespace Game.BattleGrounds.Zones
 			else if ((_Nodes[node] == ABNodeStatus.AllyContested) ||
 			         (_Nodes[node] == ABNodeStatus.HordeContested))
 			{
-				// If last state is NOT occupied, change node to enemy-contested
+				// If last State is NOT occupied, change node to enemy-contested
 				if (_prevNodes[node] < ABNodeStatus.Occupied)
 				{
 					UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);

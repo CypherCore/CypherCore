@@ -44,7 +44,7 @@ namespace Game.PvP
 			foreach (var pair in _capturePoints)
 				pair.Value.HandlePlayerLeave(player);
 
-			// remove the world state information from the player (we can't keep everyone up to date, so leave out those who are not in the concerning zones)
+			// remove the world State information from the player (we can't keep everyone up to date, so leave out those who are not in the concerning zones)
 			if (!player.GetSession().PlayerLogout())
 				SendRemoveWorldStates(player);
 

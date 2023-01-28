@@ -89,7 +89,7 @@ namespace Game
 
 			SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
 
-			// essence is already in that slot, nothing to do
+			// essence is already in that Slot, nothing to do
 			if (selectedEssences != null &&
 			    selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
 				return;
@@ -135,7 +135,7 @@ namespace Game
 
 			if (selectedEssences != null)
 			{
-				// need to remove selected essence from another slot if selected
+				// need to remove selected essence from another Slot if selected
 				int removeEssenceFromSlot = -1;
 
 				for (int slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
@@ -143,7 +143,7 @@ namespace Game
 					    selectedEssences.AzeriteEssenceID[slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
 						removeEssenceFromSlot = slot;
 
-				// check cooldown of major essence slot
+				// check cooldown of major essence Slot
 				if (selectedEssences.AzeriteEssenceID[0] != 0 &&
 				    (azeriteEssenceActivateEssence.Slot == 0 || removeEssenceFromSlot == 0))
 					for (uint essenceRank = 1; essenceRank <= rank; ++essenceRank)
@@ -263,7 +263,7 @@ namespace Game
 
 			if (activateAzeritePower)
 			{
-				// apply all item mods when azerite power grants a bonus, item level changes and that affects stats and auras that scale with item level
+				// apply all Item mods when azerite power grants a bonus, Item level changes and that affects Stats and auras that scale with Item level
 				if (azeritePower.ItemBonusListID != 0)
 					_player._ApplyItemMods(azeriteEmpoweredItem, azeriteEmpoweredItem.GetSlot(), true);
 				else

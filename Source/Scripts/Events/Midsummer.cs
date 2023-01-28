@@ -386,7 +386,7 @@ namespace Scripts.Events.Midsummer
 			         player.GetQuestStatus(QuestIds.MoreTorchCatchingH) == QuestStatus.Incomplete)
 				requiredCatches = 9;
 
-			// Used quest item without being on quest - do nothing
+			// Used quest Item without being on quest - do nothing
 			if (requiredCatches == 0)
 				return;
 

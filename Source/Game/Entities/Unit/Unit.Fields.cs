@@ -24,7 +24,7 @@ namespace Game.Entities
 		protected uint[] _attackTimer = new uint[(int)WeaponAttackType.Max];
 		protected float[][] _auraFlatModifiersGroup = new float[(int)UnitMods.End][];
 		protected float[][] _auraPctModifiersGroup = new float[(int)UnitMods.End][];
-		private MultiMap<AuraStateType, AuraApplication> _auraStateAuras = new(); // Used for improve performance of aura state checks on aura apply/remove
+		private MultiMap<AuraStateType, AuraApplication> _auraStateAuras = new(); // Used for improve performance of aura State checks on aura apply/remove
 
 		private uint[] _baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
 		public bool _canDualWield;

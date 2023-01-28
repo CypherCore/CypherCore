@@ -43,7 +43,7 @@ namespace Game
 
 					break;
 				default:
-					Log.outError(LogFilter.Network, "QuestGiver called for unexpected type {0}", questgiver.GetTypeId());
+					Log.outError(LogFilter.Network, "QuestGiver called for unexpected Type {0}", questgiver.GetTypeId());
 
 					break;
 			}
@@ -273,7 +273,7 @@ namespace Game
 
 						if (rewardProto == null)
 						{
-							Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", _player.GetName(), _player.GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
+							Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward Item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", _player.GetName(), _player.GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
 
 							return;
 						}
@@ -328,7 +328,7 @@ namespace Game
 
 						if (!itemValid)
 						{
-							Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", _player.GetName(), _player.GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
+							Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward Item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", _player.GetName(), _player.GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
 
 							return;
 						}
@@ -393,7 +393,7 @@ namespace Game
 
 			if (_player.CanRewardQuest(quest, true)) // First, check if player is allowed to turn the quest in (all objectives completed). If not, we send players to the offer reward screen
 			{
-				if (_player.CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
+				if (_player.CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward Item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
 				{
 					Battleground bg = _player.GetBattleground();
 
@@ -510,13 +510,13 @@ namespace Game
 
 						if (quest.HasFlag(QuestFlags.Pvp))
 						{
-							_player.pvpInfo.IsHostile = _player.pvpInfo.IsInHostileArea || _player.HasPvPForcingQuest();
+							_player.PvpInfo.IsHostile = _player.PvpInfo.IsInHostileArea || _player.HasPvPForcingQuest();
 							_player.UpdatePvPState();
 						}
 					}
 
 					_player.SetQuestSlot(packet.Entry, 0);
-					_player.TakeQuestSourceItem(questId, true); // remove quest src item from player
+					_player.TakeQuestSourceItem(questId, true); // remove quest src Item from player
 					_player.AbandonQuest(questId);              // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements. 
 					_player.RemoveActiveQuest(questId);
 					_player.RemoveCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);

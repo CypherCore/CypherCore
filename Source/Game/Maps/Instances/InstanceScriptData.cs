@@ -138,7 +138,7 @@ namespace Game.Maps
 
 				if (bossState.ValueKind != JsonValueKind.Number)
 				{
-					Log.outError(LogFilter.Scripts, $"Boss state for boss ({bossId}) is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+					Log.outError(LogFilter.Scripts, $"Boss State for boss ({bossId}) is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
 					return Result.BossStateIsNotAnObject;
 				}

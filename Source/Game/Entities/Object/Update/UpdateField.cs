@@ -475,7 +475,7 @@ namespace Game.Entities
 		{
 			if (index >= updateField._values.Count)
 			{
-				// fill with zeros until reaching desired slot
+				// fill with zeros until reaching desired Slot
 				updateField._values.Resize((uint)index + 1);
 				updateField._updateMask.Resize((uint)(updateField._values.Count + 31) / 32);
 			}

@@ -20,7 +20,7 @@ namespace Game
 			var oldMSTime = Time.GetMSTime();
 
 			//                                          0    1         2           3          4            5           6        7      8           9
-			SQLResult result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
+			SQLResult result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, Action, action_chance FROM waypoint_data ORDER BY id, point");
 
 			if (result.IsEmpty())
 			{

@@ -362,7 +362,7 @@ namespace Game.Maps
 				if (bossInfo.state == EncounterState.ToBeDecided) // loading
 				{
 					bossInfo.state = state;
-					Log.outDebug(LogFilter.Scripts, $"InstanceScript: Initialize boss {id} state as {state} (map {instance.GetId()}, {instance.GetInstanceId()}).");
+					Log.outDebug(LogFilter.Scripts, $"InstanceScript: Initialize boss {id} State as {state} (map {instance.GetId()}, {instance.GetInstanceId()}).");
 
 					return false;
 				}
@@ -373,7 +373,7 @@ namespace Game.Maps
 
 					if (bossInfo.state == EncounterState.Done)
 					{
-						Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance boss {id} state from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
+						Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance boss {id} State from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
 
 						return false;
 					}
@@ -585,7 +585,7 @@ namespace Game.Maps
 				}
 				else
 				{
-					Log.outError(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton can't use gameobject entry {0}, because type is {1}.", go.GetEntry(), go.GetGoType());
+					Log.outError(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
 				}
 			}
 			else
@@ -611,7 +611,7 @@ namespace Game.Maps
 				}
 				else
 				{
-					Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because type is {1}.", go.GetEntry(), go.GetGoType());
+					Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
 				}
 			}
 			else
@@ -633,7 +633,7 @@ namespace Game.Maps
 					case GameObjectTypes.Trap:
 					case GameObjectTypes.FishingNode:
 						// not expect any of these should ever be handled
-						Log.outError(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject can't respawn gameobject entry {0}, because type is {1}.", go.GetEntry(), go.GetGoType());
+						Log.outError(LogFilter.Scripts, "InstanceScript: DoRespawnGameObject can't respawn gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
 
 						return;
 					default:
@@ -772,7 +772,7 @@ namespace Game.Maps
 		public virtual bool CheckAchievementCriteriaMeet(uint criteria_id, Player source, Unit target = null, uint miscvalue1 = 0)
 		{
 			Log.outError(LogFilter.Server,
-			             "Achievement system call CheckAchievementCriteriaMeet but instance script for map {0} not have implementation for achievement criteria {1}",
+			             "Achievement system call CheckAchievementCriteriaMeet but instance script for map {0} not have implementation for Achievement criteria {1}",
 			             instance.GetId(),
 			             criteria_id);
 

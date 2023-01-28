@@ -319,7 +319,7 @@ namespace Game.AI
 
 		public override void MovementInform(MovementGeneratorType moveType, uint Id)
 		{
-			// no action allowed if there is no escort
+			// no Action allowed if there is no escort
 			if (!HasEscortState(EscortState.Escorting))
 				return;
 
@@ -565,7 +565,7 @@ namespace Game.AI
 		None = 0x00,      //nothing in progress
 		Escorting = 0x01, //escort are in progress
 		Returning = 0x02, //escort is returning after being in combat
-		Paused = 0x04     //will not proceed with waypoints before state is removed
+		Paused = 0x04     //will not proceed with waypoints before State is removed
 	}
 
 	internal struct EscortPointIds

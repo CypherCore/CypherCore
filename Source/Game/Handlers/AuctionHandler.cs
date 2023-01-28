@@ -657,7 +657,7 @@ namespace Game
 			if (sellCommodity.UnitPrice == 0 ||
 			    sellCommodity.UnitPrice > PlayerConst.MaxMoneyAmount)
 			{
-				Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell item with invalid price.");
+				Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell Item with invalid price.");
 				SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.DatabaseError, throttle.DelayUntilNext);
 
 				return;
@@ -756,7 +756,7 @@ namespace Game
 
 				if (item.GetCount() < soldItem.UseCount)
 				{
-					// check that we have enough of this item to sell
+					// check that we have enough of this Item to sell
 					SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.ItemNotFound, throttle.DelayUntilNext);
 
 					return;
@@ -807,7 +807,7 @@ namespace Game
 
 					if (itemForSale == null)
 					{
-						Log.outError(LogFilter.Network, $"CMSG_AUCTION_SELL_COMMODITY: Could not create clone of item {pair.Value.Item1.GetEntry()}");
+						Log.outError(LogFilter.Network, $"CMSG_AUCTION_SELL_COMMODITY: Could not create clone of Item {pair.Value.Item1.GetEntry()}");
 						SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.DatabaseError, throttle.DelayUntilNext);
 
 						return;
@@ -824,7 +824,7 @@ namespace Game
 				return;
 			}
 
-			/*TC_LOG_INFO("network", "CMSG_AUCTION_SELL_COMMODITY: %s %s is selling item %s %s to auctioneer %s with count " UI64FMTD " with with unit price " UI64FMTD " and with time %u (in sec) in auctionhouse %u",
+			/*TC_LOG_INFO("network", "CMSG_AUCTION_SELL_COMMODITY: %s %s is selling Item %s %s to auctioneer %s with count " UI64FMTD " with with unit price " UI64FMTD " and with time %u (in sec) in auctionhouse %u",
 			    _player.GetGUID().ToString(), _player.GetName(), items2.begin().second.first.GetNameForLocaleIdx(sWorld.GetDefaultDbcLocale()),
 			    ([&items2]()
 		{
@@ -921,7 +921,7 @@ namespace Game
 			if (sellItem.MinBid > PlayerConst.MaxMoneyAmount ||
 			    sellItem.BuyoutPrice > PlayerConst.MaxMoneyAmount)
 			{
-				Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell item with higher price than max gold amount.");
+				Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell Item with higher price than max gold amount.");
 				SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.Inventory, throttle.DelayUntilNext, InventoryResult.TooMuchGold);
 
 				return;
@@ -1030,7 +1030,7 @@ namespace Game
 			auction.Items.Add(item);
 
 			Log.outInfo(LogFilter.Network,
-			            $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
+			            $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} is selling Item {item.GetGUID()} {item.GetTemplate().GetName()} " +
 			            $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with time {auctionTime.TotalSeconds} " +
 			            $"(in sec) in auctionhouse {auctionHouse.GetAuctionHouseId()}");
 

@@ -47,7 +47,7 @@ namespace Game
 					// Get the event information
 					return mGameEvent[entry].start < currenttime && currenttime < mGameEvent[entry].end && (currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * Time.Minute) < mGameEvent[entry].length * Time.Minute;
 				}
-				// if the state is conditions or nextphase, then the event should be active
+				// if the State is conditions or nextphase, then the event should be active
 				case GameEventState.WorldConditions:
 				case GameEventState.WorldNextPhase:
 					return true;
@@ -61,8 +61,8 @@ namespace Game
 					long currenttime = GameTime.GetGameTime();
 
 					foreach (var gameEventId in mGameEvent[entry].prerequisite_events)
-						if ((mGameEvent[gameEventId].state != GameEventState.WorldNextPhase && mGameEvent[gameEventId].state != GameEventState.WorldFinished) || // if prereq not in nextphase or finished state, then can't start this one
-						    mGameEvent[gameEventId].nextstart > currenttime)                                                                                     // if not in nextphase state for long enough, can't start this one
+						if ((mGameEvent[gameEventId].state != GameEventState.WorldNextPhase && mGameEvent[gameEventId].state != GameEventState.WorldFinished) || // if prereq not in nextphase or finished State, then can't start this one
+						    mGameEvent[gameEventId].nextstart > currenttime)                                                                                     // if not in nextphase State for long enough, can't start this one
 							return false;
 
 					// all prerequisite events are met
@@ -76,12 +76,12 @@ namespace Game
 		{
 			long currenttime = GameTime.GetGameTime();
 
-			// for NEXTPHASE state world events, return the delay to start the next event, so the followup event will be checked correctly
+			// for NEXTPHASE State world events, return the delay to start the next event, so the followup event will be checked correctly
 			if ((mGameEvent[entry].state == GameEventState.WorldNextPhase || mGameEvent[entry].state == GameEventState.WorldFinished) &&
 			    mGameEvent[entry].nextstart >= currenttime)
 				return (uint)(mGameEvent[entry].nextstart - currenttime);
 
-			// for CONDITIONS state world events, return the length of the wait period, so if the conditions are met, this check will be called again to set the timer as NEXTPHASE event
+			// for CONDITIONS State world events, return the length of the wait period, so if the conditions are met, this check will be called again to set the timer as NEXTPHASE event
 			if (mGameEvent[entry].state == GameEventState.WorldConditions)
 			{
 				if (mGameEvent[entry].length != 0)
@@ -160,7 +160,7 @@ namespace Game
 				// add spawns
 				ApplyNewEvent(event_id);
 
-				// check if can go to next state
+				// check if can go to next State
 				bool conditions_met = CheckOneGameEventConditions(event_id);
 				// save to db
 				SaveWorldEventStateToDB(event_id);
@@ -302,7 +302,7 @@ namespace Game
 				uint oldMSTime = Time.GetMSTime();
 
 				//                                                       0       1        2
-				SQLResult result = DB.Characters.Query("SELECT eventEntry, state, next_start FROM game_event_save");
+				SQLResult result = DB.Characters.Query("SELECT eventEntry, State, next_start FROM game_event_save");
 
 				if (result.IsEmpty())
 				{
@@ -858,7 +858,7 @@ namespace Game
 				uint oldMSTime = Time.GetMSTime();
 
 				//                                               0           1     2     3         4         5             6     7             8                  9
-				SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
+				SQLResult result = DB.World.Query("SELECT eventEntry, guid, Item, maxcount, incrtime, ExtendedCost, Type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, Slot ASC");
 
 				if (result.IsEmpty())
 				{
@@ -1117,14 +1117,14 @@ namespace Game
 				// so first queue it
 				if (CheckOneGameEvent(id))
 				{
-					// if the world event is in NEXTPHASE state, and the time has passed to finish this event, then do so
+					// if the world event is in NEXTPHASE State, and the time has passed to finish this event, then do so
 					if (mGameEvent[id].state == GameEventState.WorldNextPhase &&
 					    mGameEvent[id].nextstart <= currenttime)
 					{
 						// set this event to finished, null the nextstart time
 						mGameEvent[id].state     = GameEventState.WorldFinished;
 						mGameEvent[id].nextstart = 0;
-						// save the state of this gameevent
+						// save the State of this gameevent
 						SaveWorldEventStateToDB(id);
 
 						// queue for deactivation
@@ -1136,7 +1136,7 @@ namespace Game
 					}
 					else if (mGameEvent[id].state == GameEventState.WorldConditions &&
 					         CheckOneGameEventConditions(id))
-						// changed, save to DB the gameevent state, will be updated in next update cycle
+						// changed, save to DB the gameevent State, will be updated in next update cycle
 					{
 						SaveWorldEventStateToDB(id);
 					}
@@ -1714,10 +1714,10 @@ namespace Game
 						trans.Append(stmt);
 						DB.Characters.CommitTransaction(trans);
 
-						// check if all conditions are met, if so, update the event state
+						// check if all conditions are met, if so, update the event State
 						if (CheckOneGameEventConditions(event_id))
 						{
-							// changed, save to DB the gameevent state
+							// changed, save to DB the gameevent State
 							SaveWorldEventStateToDB(event_id);
 							// force update events to set timer
 							Global.WorldMgr.ForceGameEventUpdate();
@@ -1776,7 +1776,7 @@ namespace Game
 
 		private void RunSmartAIScripts(ushort event_id, bool activate)
 		{
-			//! Iterate over every supported source type (creature and gameobject)
+			//! Iterate over every supported source Type (creature and gameobject)
 			//! Not entirely sure how this will affect units in non-loaded grids.
 			Global.MapMgr.DoForAllMaps(map =>
 			                           {
@@ -1940,8 +1940,8 @@ namespace Game
 	public class GameEventFinishCondition
 	{
 		public float done;            // done number
-		public uint done_world_state; // done resource count world state update id
-		public uint max_world_state;  // max resource count world state update id
+		public uint done_world_state; // done resource count world State update id
+		public uint max_world_state;  // max resource count world State update id
 		public float reqNum;          // required number // use float, since some events use percent
 	}
 
@@ -1966,7 +1966,7 @@ namespace Game
 		public List<ushort> prerequisite_events = new(); // events that must be completed before starting this event
 
 		public long start;           // occurs after this time
-		public GameEventState state; // state of the game event, these are saved into the game_event table on change!
+		public GameEventState state; // State of the game event, these are saved into the game_event table on change!
 
 		public GameEventData()
 		{

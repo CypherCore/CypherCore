@@ -39,7 +39,7 @@ namespace Game.Entities
 				SQLTransaction               trans            = new();
 
 				// Prevent items from being added to the queue while loading
-				_itemUpdateQueueBlocked = true;
+				ItemUpdateQueueBlocked = true;
 
 				do
 				{
@@ -93,7 +93,7 @@ namespace Game.Entities
 							}
 							else
 							{
-								Log.outError(LogFilter.Player, $"Player._LoadInventory: Player '{GetName()}' ({GetGUID()}) has child item ({item.GetGUID()}, entry: {item.GetEntry()}) which can't be loaded into inventory because parent item was not found (Bag {bagGuid}, slot: {slot}). Item will be sent by mail.");
+								Log.outError(LogFilter.Player, $"Player._LoadInventory: Player '{GetName()}' ({GetGUID()}) has child Item ({item.GetGUID()}, entry: {item.GetEntry()}) which can't be loaded into inventory because parent Item was not found (Bag {bagGuid}, Slot: {slot}). Item will be sent by mail.");
 								item.DeleteFromInventoryDB(trans);
 								problematicItems.Enqueue(item);
 
@@ -174,7 +174,7 @@ namespace Game.Entities
 							else
 							{
 								Log.outError(LogFilter.Player,
-								             "LoadInventory: player (GUID: {0}, name: '{1}') has item (GUID: {2}, entry: {3}) which doesnt have a valid bag (Bag GUID: {4}, slot: {5}). Possible cheat?",
+								             "LoadInventory: player (GUID: {0}, name: '{1}') has Item (GUID: {2}, entry: {3}) which doesnt have a valid bag (Bag GUID: {4}, Slot: {5}). Possible cheat?",
 								             GetGUID().ToString(),
 								             GetName(),
 								             item.GetGUID().ToString(),
@@ -188,7 +188,7 @@ namespace Game.Entities
 							}
 						}
 
-						// Item's state may have changed after storing
+						// Item's State may have changed after storing
 						if (err == InventoryResult.Ok)
 						{
 							item.SetState(ItemUpdateState.Unchanged, this);
@@ -196,7 +196,7 @@ namespace Game.Entities
 						else
 						{
 							Log.outError(LogFilter.Player,
-							             "LoadInventory: player (GUID: {0}, name: '{1}') has item (GUID: {2}, entry: {3}) which can't be loaded into inventory (Bag GUID: {4}, slot: {5}) by reason {6}. " +
+							             "LoadInventory: player (GUID: {0}, name: '{1}') has Item (GUID: {2}, entry: {3}) which can't be loaded into inventory (Bag GUID: {4}, Slot: {5}) by reason {6}. " +
 							             "Item will be sent by mail.",
 							             GetGUID().ToString(),
 							             GetName(),
@@ -212,13 +212,13 @@ namespace Game.Entities
 					}
 				} while (result.NextRow());
 
-				_itemUpdateQueueBlocked = false;
+				ItemUpdateQueueBlocked = false;
 
 				// Send problematic items by mail
 				while (problematicItems.Count != 0)
 				{
 					string    subject = Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
-					MailDraft draft   = new(subject, "There were problems with equipping item(s).");
+					MailDraft draft   = new(subject, "There were problems with equipping Item(s).");
 
 					for (int i = 0; problematicItems.Count != 0 && i < SharedConst.MaxMailItems; ++i)
 						draft.AddItem(problematicItems.Dequeue());
@@ -230,7 +230,7 @@ namespace Game.Entities
 			}
 
 			_ApplyAllItemMods();
-			// Apply all azerite item mods, azerite empowered item mods will get applied through its spell script
+			// Apply all azerite Item mods, azerite empowered Item mods will get applied through its spell script
 			ApplyAllAzeriteItemMods(true);
 		}
 
@@ -250,12 +250,12 @@ namespace Game.Entities
 				{
 					PreparedStatement stmt;
 
-					// Do not allow to have item limited to another map/zone in alive state
+					// Do not allow to have Item limited to another map/zone in alive State
 					if (IsAlive() &&
 					    item.IsLimitedToAnotherMapOrZone(GetMapId(), zoneId))
 					{
 						Log.outDebug(LogFilter.Player,
-						             "LoadInventory: player (GUID: {0}, name: '{1}', map: {2}) has item (GUID: {3}, entry: {4}) limited to another map ({5}). Deleting item.",
+						             "LoadInventory: player (GUID: {0}, name: '{1}', map: {2}) has Item (GUID: {3}, entry: {4}) limited to another map ({5}). Deleting Item.",
 						             GetGUID().ToString(),
 						             GetName(),
 						             GetMapId(),
@@ -270,7 +270,7 @@ namespace Game.Entities
 					         proto.HasFlag(ItemFlags.Conjured))
 					{
 						Log.outDebug(LogFilter.Player,
-						             "LoadInventory: player (GUID: {0}, name: {1}, diff: {2}) has conjured item (GUID: {3}, entry: {4}) with expired lifetime (15 minutes). Deleting item.",
+						             "LoadInventory: player (GUID: {0}, name: {1}, diff: {2}) has conjured Item (GUID: {3}, entry: {4}) with expired lifetime (15 minutes). Deleting Item.",
 						             GetGUID().ToString(),
 						             GetName(),
 						             timeDiff,
@@ -285,7 +285,7 @@ namespace Game.Entities
 						if (item.GetPlayedTime() > (2 * Time.Hour))
 						{
 							Log.outDebug(LogFilter.Player,
-							             "LoadInventory: player (GUID: {0}, name: {1}) has item (GUID: {2}, entry: {3}) with expired refund time ({4}). Deleting refund data and removing " +
+							             "LoadInventory: player (GUID: {0}, name: {1}) has Item (GUID: {2}, entry: {3}) with expired refund time ({4}). Deleting refund data and removing " +
 							             "efundable flag.",
 							             GetGUID().ToString(),
 							             GetName(),
@@ -316,7 +316,7 @@ namespace Game.Entities
 							else
 							{
 								Log.outDebug(LogFilter.Player,
-								             "LoadInventory: player (GUID: {0}, name: {1}) has item (GUID: {2}, entry: {3}) with refundable flags, but without data in item_refund_instance. Removing flag.",
+								             "LoadInventory: player (GUID: {0}, name: {1}) has Item (GUID: {2}, entry: {3}) with refundable flags, but without data in item_refund_instance. Removing flag.",
 								             GetGUID().ToString(),
 								             GetName(),
 								             item.GetGUID().ToString(),
@@ -357,7 +357,7 @@ namespace Game.Entities
 						else
 						{
 							Log.outDebug(LogFilter.ServerLoading,
-							             "LoadInventory: player ({0}, name: {1}) has item ({2}, entry: {3}) with ITEM_FLAG_BOP_TRADEABLE flag, " +
+							             "LoadInventory: player ({0}, name: {1}) has Item ({2}, entry: {3}) with ITEM_FLAG_BOP_TRADEABLE flag, " +
 							             "but without data in item_soulbound_trade_data. Removing flag.",
 							             GetGUID().ToString(),
 							             GetName(),
@@ -385,7 +385,7 @@ namespace Game.Entities
 				else
 				{
 					Log.outError(LogFilter.Player,
-					             "LoadInventory: player (GUID: {0}, name: {1}) has broken item (GUID: {2}, entry: {3}) in inventory. Deleting item.",
+					             "LoadInventory: player (GUID: {0}, name: {1}) has broken Item (GUID: {2}, entry: {3}) in inventory. Deleting Item.",
 					             GetGUID().ToString(),
 					             GetName(),
 					             itemGuid,
@@ -394,19 +394,19 @@ namespace Game.Entities
 					remove = true;
 				}
 
-				// Remove item from inventory if necessary
+				// Remove Item from inventory if necessary
 				if (remove)
 				{
 					Item.DeleteFromInventoryDB(trans, itemGuid);
 					item.FSetState(ItemUpdateState.Removed);
-					item.SaveToDB(trans); // it also deletes item object!
+					item.SaveToDB(trans); // it also deletes Item object!
 					item = null;
 				}
 			}
 			else
 			{
 				Log.outError(LogFilter.Player,
-				             "LoadInventory: player (GUID: {0}, name: {1}) has unknown item (entry: {2}) in inventory. Deleting item.",
+				             "LoadInventory: player (GUID: {0}, name: {1}) has unknown Item (entry: {2}) in inventory. Deleting Item.",
 				             GetGUID().ToString(),
 				             GetName(),
 				             itemEntry);
@@ -429,9 +429,9 @@ namespace Game.Entities
 			if (!result.IsEmpty())
 				do
 				{
-					if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills) // client limit
+					if (_mSkillStatus.Count >= SkillConst.MaxPlayerSkills) // client limit
 					{
-						Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}) has more than {SkillConst.MaxPlayerSkills} skills.");
+						Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}) has more than {SkillConst.MaxPlayerSkills} Skills.");
 
 						break;
 					}
@@ -445,7 +445,7 @@ namespace Game.Entities
 					if (rcEntry == null)
 					{
 						Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}, Race: {race}, Class: {GetClass()}) has forbidden skill {skill} for his race/class combination");
-						mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Deleted));
+						_mSkillStatus.Add(skill, new SkillStatusData((uint)_mSkillStatus.Count, SkillState.Deleted));
 
 						continue;
 					}
@@ -469,10 +469,10 @@ namespace Game.Entities
 							break;
 					}
 
-					if (!mSkillStatus.ContainsKey(skill))
-						mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Unchanged));
+					if (!_mSkillStatus.ContainsKey(skill))
+						_mSkillStatus.Add(skill, new SkillStatusData((uint)_mSkillStatus.Count, SkillState.Unchanged));
 
-					var    skillStatusData = mSkillStatus[skill];
+					var    skillStatusData = _mSkillStatus[skill];
 					ushort step            = 0;
 
 					SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
@@ -492,7 +492,7 @@ namespace Game.Entities
 								int professionSlot = FindProfessionSlotFor(skill);
 
 								if (professionSlot != -1)
-									SetUpdateFieldValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
+									SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
 							}
 						}
 					}
@@ -509,7 +509,7 @@ namespace Game.Entities
 					loadedSkillValues[skill] = value;
 				} while (result.NextRow());
 
-			// Learn skill rewarded spells after all skills have been loaded to prevent learning a skill from them before its loaded with proper value from DB
+			// Learn skill rewarded spells after all Skills have been loaded to prevent learning a skill from them before its loaded with proper value from DB
 			foreach (var skill in loadedSkillValues)
 			{
 				LearnSkillRewardedSpells(skill.Key, skill.Value, race);
@@ -518,14 +518,14 @@ namespace Game.Entities
 				if (childSkillLines != null)
 					foreach (var childItr in childSkillLines)
 					{
-						if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)
+						if (_mSkillStatus.Count >= SkillConst.MaxPlayerSkills)
 							break;
 
-						if (!mSkillStatus.ContainsKey(childItr.Id))
+						if (!_mSkillStatus.ContainsKey(childItr.Id))
 						{
 							SetSkillLineId(count, (ushort)childItr.Id);
 							SetSkillStartingRank(count, 1);
-							mSkillStatus.Add(childItr.Id, new SkillStatusData(count, SkillState.Unchanged));
+							_mSkillStatus.Add(childItr.Id, new SkillStatusData(count, SkillState.Unchanged));
 						}
 					}
 			}
@@ -677,13 +677,13 @@ namespace Game.Entities
 
 			if (!result.IsEmpty())
 			{
-				homebind.WorldRelocate(result.Read<uint>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
-				homebindAreaId = result.Read<uint>(1);
+				_homebind.WorldRelocate(result.Read<uint>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+				_homebindAreaId = result.Read<uint>(1);
 
-				var map = CliDB.MapStorage.LookupByKey(homebind.GetMapId());
+				var map = CliDB.MapStorage.LookupByKey(_homebind.GetMapId());
 
 				// accept saved data only for valid position (and non instanceable), and accessable
-				if (GridDefines.IsValidMapCoord(homebind) &&
+				if (GridDefines.IsValidMapCoord(_homebind) &&
 				    !map.Instanceable() &&
 				    GetSession().GetExpansion() >= map.Expansion())
 				{
@@ -701,12 +701,12 @@ namespace Game.Entities
 			{
 				PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PLAYER_HOMEBIND);
 				stmt.AddValue(0, GetGUID().GetCounter());
-				stmt.AddValue(1, homebind.GetMapId());
-				stmt.AddValue(2, homebindAreaId);
-				stmt.AddValue(3, homebind.GetPositionX());
-				stmt.AddValue(4, homebind.GetPositionY());
-				stmt.AddValue(5, homebind.GetPositionZ());
-				stmt.AddValue(6, homebind.GetOrientation());
+				stmt.AddValue(1, _homebind.GetMapId());
+				stmt.AddValue(2, _homebindAreaId);
+				stmt.AddValue(3, _homebind.GetPositionX());
+				stmt.AddValue(4, _homebind.GetPositionY());
+				stmt.AddValue(5, _homebind.GetPositionZ());
+				stmt.AddValue(6, _homebind.GetOrientation());
 				DB.Characters.Execute(stmt);
 			}
 
@@ -715,12 +715,12 @@ namespace Game.Entities
 			if (!ok &&
 			    HasAtLoginFlag(AtLoginFlags.FirstLogin))
 			{
-				var createPosition = _createMode == PlayerCreateMode.NPE && info.createPositionNPE.HasValue ? info.createPositionNPE.Value : info.createPosition;
+				var createPosition = _createMode == PlayerCreateMode.NPE && info.CreatePositionNPE.HasValue ? info.CreatePositionNPE.Value : info.CreatePositionInfo;
 
 				if (!createPosition.TransportGuid.HasValue)
 				{
-					homebind.WorldRelocate(createPosition.Loc);
-					homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
+					_homebind.WorldRelocate(createPosition.Loc);
+					_homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, _homebind);
 
 					saveHomebindToDb();
 					ok = true;
@@ -737,13 +737,13 @@ namespace Game.Entities
 
 				Cypher.Assert(loc != null, "Missing fallback graveyard location for faction {GetTeamId()}");
 
-				homebind.WorldRelocate(loc.Loc);
-				homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
+				_homebind.WorldRelocate(loc.Loc);
+				_homebindAreaId = Global.TerrainMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
 
 				saveHomebindToDb();
 			}
 
-			Log.outDebug(LogFilter.Player, $"Setting player home position - mapid: {homebind.GetMapId()}, areaid: {homebindAreaId}, {homebind}");
+			Log.outDebug(LogFilter.Player, $"Setting player home position - mapid: {_homebind.GetMapId()}, areaid: {_homebindAreaId}, {_homebind}");
 
 			return true;
 		}
@@ -763,7 +763,7 @@ namespace Game.Entities
 					continue;
 
 				PlayerCurrency cur = new();
-				cur.state           = PlayerCurrencyState.Unchanged;
+				cur.State           = PlayerCurrencyState.Unchanged;
 				cur.Quantity        = result.Read<uint>(1);
 				cur.WeeklyQuantity  = result.Read<uint>(2);
 				cur.TrackedQuantity = result.Read<uint>(3);
@@ -795,15 +795,15 @@ namespace Game.Entities
 
 					if (ab != null)
 					{
-						ab.uState = ActionButtonUpdateState.UnChanged;
+						ab.UState = ActionButtonUpdateState.UnChanged;
 					}
 					else
 					{
-						Log.outError(LogFilter.Player, $"Player::_LoadActions: Player '{GetName()}' ({GetGUID()}) has an invalid action button (Button: {button}, Action: {action}, Type: {type}). It will be deleted at next save. This can be due to a player changing their talents.");
+						Log.outError(LogFilter.Player, $"Player::_LoadActions: Player '{GetName()}' ({GetGUID()}) has an invalid Action Button (Button: {button}, Action: {action}, Type: {type}). It will be deleted at next save. This can be due to a player changing their talents.");
 
 						// Will deleted in DB at next save (it can create data until save but marked as deleted)
 						_actionButtons[button]        = new ActionButton();
-						_actionButtons[button].uState = ActionButtonUpdateState.Deleted;
+						_actionButtons[button].UState = ActionButtonUpdateState.Deleted;
 					}
 				} while (result.NextRow());
 		}
@@ -888,7 +888,7 @@ namespace Game.Entities
 							++slot;
 						}
 
-						_QuestStatus[questId] = questStatusData;
+						_questStatus[questId] = questStatusData;
 						Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, questId, GetGUID().ToString());
 					}
 				} while (result.NextRow());
@@ -907,7 +907,7 @@ namespace Game.Entities
 
 					Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
 
-					var questStatusData = _QuestStatus.LookupByKey(questID);
+					var questStatusData = _questStatus.LookupByKey(questID);
 
 					if (questStatusData != null &&
 					    questStatusData.Slot < SharedConst.MaxQuestLogSize &&
@@ -992,14 +992,14 @@ namespace Game.Entities
 							}
 
 						if (quest.CanIncreaseRewardedQuestCounters())
-							_RewardedQuests.Add(quest_id);
+							_rewardedQuests.Add(quest_id);
 					}
 				} while (result.NextRow());
 		}
 
 		private void _LoadDailyQuestStatus(SQLResult result)
 		{
-			_DFQuests.Clear();
+			_dfQuests.Clear();
 
 			//QueryResult* result = CharacterDatabase.PQuery("SELECT quest, time FROM character_queststatus_daily WHERE guid = '{0}'");
 			if (!result.IsEmpty())
@@ -1011,7 +1011,7 @@ namespace Game.Entities
 					if (qQuest != null)
 						if (qQuest.IsDFQuest())
 						{
-							_DFQuests.Add(qQuest.Id);
+							_dfQuests.Add(qQuest.Id);
 							_lastDailyQuestTime = result.Read<uint>(1);
 
 							continue;
@@ -1025,7 +1025,7 @@ namespace Game.Entities
 					if (quest == null)
 						continue;
 
-					AddDynamicUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.DailyQuestsCompleted), quest_id);
+					AddDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted), quest_id);
 					uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
 
 					if (questBit != 0)
@@ -1034,7 +1034,7 @@ namespace Game.Entities
 					Log.outDebug(LogFilter.Player, "Daily quest ({0}) cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
 				} while (result.NextRow());
 
-			_DailyQuestChanged = false;
+			_dailyQuestChanged = false;
 		}
 
 		private void _LoadWeeklyQuestStatus(SQLResult result)
@@ -1059,7 +1059,7 @@ namespace Game.Entities
 					Log.outDebug(LogFilter.Player, "Weekly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
 				} while (result.NextRow());
 
-			_WeeklyQuestChanged = false;
+			_weeklyQuestChanged = false;
 		}
 
 		private void _LoadSeasonalQuestStatus(SQLResult result)
@@ -1090,7 +1090,7 @@ namespace Game.Entities
 					Log.outDebug(LogFilter.Player, "Seasonal quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
 				} while (result.NextRow());
 
-			_SeasonalQuestChanged = false;
+			_seasonalQuestChanged = false;
 		}
 
 		private void _LoadMonthlyQuestStatus()
@@ -1119,7 +1119,7 @@ namespace Game.Entities
 					Log.outDebug(LogFilter.Player, "Monthly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
 				} while (result.NextRow());
 
-			_MonthlyQuestChanged = false;
+			_monthlyQuestChanged = false;
 		}
 
 		private void _LoadTalents(SQLResult result)
@@ -1173,7 +1173,7 @@ namespace Game.Entities
 
 			if (!configsResult.IsEmpty())
 				//                    0     1                    2                  3                4            5              6      7
-				// SELECT traitConfigId, type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, `name` FROM character_trait_config WHERE guid = ?
+				// SELECT traitConfigId, Type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, `name` FROM character_trait_config WHERE guid = ?
 				do
 				{
 					TraitConfigPacket traitConfig = new();
@@ -1218,14 +1218,14 @@ namespace Game.Entities
 
 			bool hasConfigForSpec(int specId)
 			{
-				return _activePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.Type == (int)TraitConfigType.Combat && traitConfig.ChrSpecializationID == specId && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0; }) >= 0;
+				return ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.Type == (int)TraitConfigType.Combat && traitConfig.ChrSpecializationID == specId && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0; }) >= 0;
 			}
 
 			int findFreeLocalIdentifier(int specId)
 			{
 				int index = 1;
 
-				while (_activePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.Type == (int)TraitConfigType.Combat && traitConfig.ChrSpecializationID == specId && traitConfig.LocalIdentifier == index; }) >= 0)
+				while (ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.Type == (int)TraitConfigType.Combat && traitConfig.ChrSpecializationID == specId && traitConfig.LocalIdentifier == index; }) >= 0)
 					++index;
 
 				return index;
@@ -1251,17 +1251,17 @@ namespace Game.Entities
 				}
 			}
 
-			int activeConfig = _activePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.Type == (int)TraitConfigType.Combat && traitConfig.ChrSpecializationID == GetPrimarySpecialization() && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0; });
+			int activeConfig = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.Type == (int)TraitConfigType.Combat && traitConfig.ChrSpecializationID == GetPrimarySpecialization() && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0; });
 
 			if (activeConfig >= 0)
-				SetActiveCombatTraitConfigID(_activePlayerData.TraitConfigs[activeConfig].ID);
+				SetActiveCombatTraitConfigID(ActivePlayerData.TraitConfigs[activeConfig].ID);
 
-			foreach (TraitConfig traitConfig in _activePlayerData.TraitConfigs)
+			foreach (TraitConfig traitConfig in ActivePlayerData.TraitConfigs)
 			{
 				switch ((TraitConfigType)(int)traitConfig.Type)
 				{
 					case TraitConfigType.Combat:
-						if (traitConfig.ID != _activePlayerData.ActiveCombatTraitConfigID)
+						if (traitConfig.ID != ActivePlayerData.ActiveCombatTraitConfigID)
 							continue;
 
 						break;
@@ -1340,7 +1340,7 @@ namespace Game.Entities
 
 			do
 			{
-				// SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
+				// SELECT itemId, itemEntry, Slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
 				ulong       itemId                 = result.Read<ulong>(0);
 				uint        itemEntry              = result.Read<uint>(1);
 				byte        slot                   = result.Read<byte>(2);
@@ -1358,21 +1358,21 @@ namespace Game.Entities
 
 				if (itemId == 0)
 				{
-					Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an item with an invalid id (item id: item id: {2}, entry: {3}).", GetGUID().ToString(), GetName(), itemId, itemEntry);
+					Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an Item with an invalid id (Item id: Item id: {2}, entry: {3}).", GetGUID().ToString(), GetName(), itemId, itemEntry);
 
 					continue;
 				}
 
 				if (Global.ObjectMgr.GetItemTemplate(itemEntry) == null)
 				{
-					Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an item with an invalid entry (item id: item id: {2}, entry: {3}).", GetGUID().ToString(), GetName(), itemId, itemEntry);
+					Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an Item with an invalid entry (Item id: Item id: {2}, entry: {3}).", GetGUID().ToString(), GetName(), itemId, itemEntry);
 
 					continue;
 				}
 
 				if (slot >= SharedConst.VoidStorageMaxSlot)
 				{
-					Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an item with an invalid slot (item id: item id: {2}, entry: {3}, slot: {4}).", GetGUID().ToString(), GetName(), itemId, itemEntry, slot);
+					Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an Item with an invalid Slot (Item id: Item id: {2}, entry: {3}, Slot: {4}).", GetGUID().ToString(), GetName(), itemId, itemEntry, slot);
 
 					continue;
 				}
@@ -1446,7 +1446,7 @@ namespace Game.Entities
 
 			if (proto == null)
 			{
-				Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid}) has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
+				Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid}) has unknown Item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
 
 				SQLTransaction trans = new();
 
@@ -1476,7 +1476,7 @@ namespace Game.Entities
 
 				item.FSetState(ItemUpdateState.Removed);
 
-				item.SaveToDB(null); // it also deletes item object !
+				item.SaveToDB(null); // it also deletes Item object !
 
 				return null;
 			}
@@ -1656,7 +1656,7 @@ namespace Game.Entities
 				eqSet.Data.SetIcon           = result.Read<string>(3);
 				eqSet.Data.IgnoreMask        = result.Read<uint>(4);
 				eqSet.Data.AssignedSpecIndex = result.Read<int>(5);
-				eqSet.state                  = EquipmentSetUpdateState.Unchanged;
+				eqSet.State                  = EquipmentSetUpdateState.Unchanged;
 
 				for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
 				{
@@ -1694,7 +1694,7 @@ namespace Game.Entities
 				eqSet.Data.SetName    = result.Read<string>(2);
 				eqSet.Data.SetIcon    = result.Read<string>(3);
 				eqSet.Data.IgnoreMask = result.Read<uint>(4);
-				eqSet.state           = EquipmentSetUpdateState.Unchanged;
+				eqSet.State           = EquipmentSetUpdateState.Unchanged;
 
 				for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
 					eqSet.Data.Appearances[i] = result.Read<int>(5 + i);
@@ -1737,14 +1737,14 @@ namespace Game.Entities
 					continue;
 				}
 
-				_CUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, topPoint, bottomPoint, leftPoint, topOffset, bottomOffset, leftOffset);
+				_cUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, topPoint, bottomPoint, leftPoint, topOffset, bottomOffset, leftOffset);
 			} while (result.NextRow());
 		}
 
 		private void _LoadRandomBGStatus(SQLResult result)
 		{
 			if (!result.IsEmpty())
-				_IsBGRandomWinner = true;
+				_isBGRandomWinner = true;
 		}
 
 		private void _LoadBGData(SQLResult result)
@@ -1754,13 +1754,13 @@ namespace Game.Entities
 
 			// Expecting only one row
 			//        0           1     2      3      4      5      6          7          8        9
-			// SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell FROM character_Battleground_data WHERE guid = ?
-			_bgData.bgInstanceID = result.Read<uint>(0);
-			_bgData.bgTeam       = result.Read<ushort>(1);
-			_bgData.joinPos      = new WorldLocation(result.Read<ushort>(6), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
-			_bgData.taxiPath[0]  = result.Read<uint>(7);
-			_bgData.taxiPath[1]  = result.Read<uint>(8);
-			_bgData.mountSpell   = result.Read<uint>(9);
+			// SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, MountSpell FROM character_Battleground_data WHERE guid = ?
+			_bgData.InstanceID = result.Read<uint>(0);
+			_bgData.Team       = result.Read<ushort>(1);
+			_bgData.JoinPos      = new WorldLocation(result.Read<ushort>(6), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+			_bgData.TaxiPath[0]  = result.Read<uint>(7);
+			_bgData.TaxiPath[1]  = result.Read<uint>(8);
+			_bgData.MountSpell   = result.Read<uint>(9);
 		}
 
 		private void _LoadPetStable(uint summonedPetNumber, SQLResult result)
@@ -1771,7 +1771,7 @@ namespace Game.Entities
 			_petStable = new PetStable();
 
 			//         0      1        2      3    4           5     6     7        8          9       10      11        12              13       14              15
-			// SELECT id, entry, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ?
+			// SELECT id, entry, modelid, level, exp, Reactstate, Slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, specialization FROM character_pet WHERE owner = ?
 			if (!result.IsEmpty())
 				do
 				{
@@ -1812,7 +1812,7 @@ namespace Game.Entities
 		{
 			PreparedStatement stmt;
 
-			// force items in buyback slots to new state
+			// force items in buyback slots to new State
 			// and remove those that aren't already
 			for (var i = InventorySlots.BuyBackStart; i < InventorySlots.BuyBackEnd; ++i)
 			{
@@ -1844,7 +1844,7 @@ namespace Game.Entities
 			// Updated played time for refundable items. We don't do this in Player.Update because there's simply no need for it,
 			// the client auto counts down in real time after having received the initial played time on the first
 			// SMSG_ITEM_REFUND_INFO_RESPONSE packet.
-			// Item.UpdatePlayedTime is only called when needed, which is in DB saves, and item refund info requests.
+			// Item.UpdatePlayedTime is only called when needed, which is in DB saves, and Item refund info requests.
 			foreach (var guid in _refundableItems)
 			{
 				Item item = GetItemByGuid(guid);
@@ -1857,14 +1857,14 @@ namespace Game.Entities
 				}
 				else
 				{
-					Log.outError(LogFilter.Player, "Can't find item guid {0} but is in refundable storage for player {1} ! Removing.", guid, GetGUID().ToString());
+					Log.outError(LogFilter.Player, "Can't find Item guid {0} but is in refundable storage for player {1} ! Removing.", guid, GetGUID().ToString());
 					_refundableItems.Remove(guid);
 				}
 			}
 
 			// update enchantment durations
 			foreach (var enchant in _enchantDuration)
-				enchant.item.SetEnchantmentDuration(enchant.slot, enchant.leftduration, this);
+				enchant.Item.SetEnchantmentDuration(enchant.Slot, enchant.Leftduration, this);
 
 			// if no changes
 			if (ItemUpdateQueue.Count == 0)
@@ -1892,8 +1892,8 @@ namespace Game.Entities
 							bagTestGUID = test2.GetGUID().GetCounter();
 
 						Log.outError(LogFilter.Player,
-						             "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} (state {5}) are incorrect, " +
-						             "the player doesn't have an item at that position!",
+						             "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and Slot({3}) values for the Item with guid {4} (State {5}) are incorrect, " +
+						             "the player doesn't have an Item at that position!",
 						             GetGUID().ToString(),
 						             GetName(),
 						             item.GetBagSlot(),
@@ -1901,7 +1901,7 @@ namespace Game.Entities
 						             item.GetGUID().ToString(),
 						             item.GetState());
 
-						// according to the test that was just performed nothing should be in this slot, delete
+						// according to the test that was just performed nothing should be in this Slot, delete
 						stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_BAG_SLOT);
 						stmt.AddValue(0, bagTestGUID);
 						stmt.AddValue(1, item.GetSlot());
@@ -1912,15 +1912,15 @@ namespace Game.Entities
 						RemoveEnchantmentDurationsReferences(item);
 						RemoveItemDurations(item);
 
-						// also THIS item should be somewhere else, cheat attempt
+						// also THIS Item should be somewhere else, cheat attempt
 						item.FSetState(ItemUpdateState.Removed); // we are IN updateQueue right now, can't use SetState which modifies the queue
 						DeleteRefundReference(item.GetGUID());
 					}
 					else if (test != item)
 					{
 						Log.outError(LogFilter.Player,
-						             "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and slot({3}) values for the item with guid {4} are incorrect, " +
-						             "the item with guid {5} is there instead!",
+						             "Player(GUID: {0} Name: {1}).SaveInventory - the bag({2}) and Slot({3}) values for the Item with guid {4} are incorrect, " +
+						             "the Item with guid {5} is there instead!",
 						             GetGUID().ToString(),
 						             GetName(),
 						             item.GetBagSlot(),
@@ -1928,7 +1928,7 @@ namespace Game.Entities
 						             item.GetGUID().ToString(),
 						             test.GetGUID().ToString());
 
-						// save all changes to the item...
+						// save all changes to the Item...
 						if (item.GetState() != ItemUpdateState.New) // only for existing items, no dupes
 							item.SaveToDB(trans);
 
@@ -1959,7 +1959,7 @@ namespace Game.Entities
 						break;
 				}
 
-				item.SaveToDB(trans); // item have unchanged inventory record and can be save standalone
+				item.SaveToDB(trans); // Item have unchanged inventory record and can be save standalone
 			}
 
 			ItemUpdateQueue.Clear();
@@ -1969,9 +1969,9 @@ namespace Game.Entities
 		{
 			PreparedStatement stmt; // = null;
 
-			SkillInfo skillInfoField = _activePlayerData.Skill;
+			SkillInfo skillInfoField = ActivePlayerData.Skill;
 
-			foreach (var pair in mSkillStatus.ToList())
+			foreach (var pair in _mSkillStatus.ToList())
 			{
 				if (pair.Value.State == SkillState.Unchanged)
 					continue;
@@ -2157,7 +2157,7 @@ namespace Game.Entities
 				if (entry == null) // should never happen
 					continue;
 
-				switch (pair.Value.state)
+				switch (pair.Value.State)
 				{
 					case PlayerCurrencyState.New:
 						stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_CURRENCY);
@@ -2185,7 +2185,7 @@ namespace Game.Entities
 						break;
 				}
 
-				pair.Value.state = PlayerCurrencyState.Unchanged;
+				pair.Value.State = PlayerCurrencyState.Unchanged;
 			}
 		}
 
@@ -2217,27 +2217,27 @@ namespace Game.Entities
 
 			_customizationsChanged = false;
 
-			SavePlayerCustomizations(trans, GetGUID().GetCounter(), _playerData.Customizations);
+			SavePlayerCustomizations(trans, GetGUID().GetCounter(), PlayerData.Customizations);
 		}
 
 		private void _SaveActions(SQLTransaction trans)
 		{
 			int traitConfigId = 0;
 
-			TraitConfig traitConfig = GetTraitConfig((int)(uint)_activePlayerData.ActiveCombatTraitConfigID);
+			TraitConfig traitConfig = GetTraitConfig((int)(uint)ActivePlayerData.ActiveCombatTraitConfigID);
 
 			if (traitConfig != null)
 			{
-				int usedSavedTraitConfigIndex = _activePlayerData.TraitConfigs.FindIndexIf(savedConfig => { return (TraitConfigType)(int)savedConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.SharedActionBars) == TraitCombatConfigFlags.None && savedConfig.LocalIdentifier == traitConfig.LocalIdentifier; });
+				int usedSavedTraitConfigIndex = ActivePlayerData.TraitConfigs.FindIndexIf(savedConfig => { return (TraitConfigType)(int)savedConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.SharedActionBars) == TraitCombatConfigFlags.None && savedConfig.LocalIdentifier == traitConfig.LocalIdentifier; });
 
 				if (usedSavedTraitConfigIndex >= 0)
-					traitConfigId = _activePlayerData.TraitConfigs[usedSavedTraitConfigIndex].ID;
+					traitConfigId = ActivePlayerData.TraitConfigs[usedSavedTraitConfigIndex].ID;
 			}
 
 			PreparedStatement stmt;
 
 			foreach (var pair in _actionButtons.ToList())
-				switch (pair.Value.uState)
+				switch (pair.Value.UState)
 				{
 					case ActionButtonUpdateState.New:
 						stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_ACTION);
@@ -2249,7 +2249,7 @@ namespace Game.Entities
 						stmt.AddValue(5, (byte)pair.Value.GetButtonType());
 						trans.Append(stmt);
 
-						pair.Value.uState = ActionButtonUpdateState.UnChanged;
+						pair.Value.UState = ActionButtonUpdateState.UnChanged;
 
 						break;
 					case ActionButtonUpdateState.Changed:
@@ -2262,7 +2262,7 @@ namespace Game.Entities
 						stmt.AddValue(5, traitConfigId);
 						trans.Append(stmt);
 
-						pair.Value.uState = ActionButtonUpdateState.UnChanged;
+						pair.Value.UState = ActionButtonUpdateState.UnChanged;
 
 						break;
 					case ActionButtonUpdateState.Deleted:
@@ -2291,10 +2291,10 @@ namespace Game.Entities
 			PreparedStatement stmt;
 			bool              keepAbandoned = !Global.WorldMgr.GetCleaningFlags().HasAnyFlag(CleaningFlags.Queststatus);
 
-			foreach (var save in _QuestStatusSave)
+			foreach (var save in _questStatusSave)
 				if (save.Value == QuestSaveType.Default)
 				{
-					var data = _QuestStatus.LookupByKey(save.Key);
+					var data = _questStatus.LookupByKey(save.Key);
 
 					if (data != null &&
 					    (keepAbandoned || data.Status != QuestStatus.None))
@@ -2341,9 +2341,9 @@ namespace Game.Entities
 					trans.Append(stmt);
 				}
 
-			_QuestStatusSave.Clear();
+			_questStatusSave.Clear();
 
-			foreach (var save in _RewardedQuestsSave)
+			foreach (var save in _rewardedQuestsSave)
 				if (save.Value == QuestSaveType.Default)
 				{
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_REWARDED);
@@ -2360,7 +2360,7 @@ namespace Game.Entities
 					trans.Append(stmt);
 				}
 
-			_RewardedQuestsSave.Clear();
+			_rewardedQuestsSave.Clear();
 
 			if (!isTransaction)
 				DB.Characters.CommitTransaction(trans);
@@ -2368,10 +2368,10 @@ namespace Game.Entities
 
 		private void _SaveDailyQuestStatus(SQLTransaction trans)
 		{
-			if (!_DailyQuestChanged)
+			if (!_dailyQuestChanged)
 				return;
 
-			_DailyQuestChanged = false;
+			_dailyQuestChanged = false;
 
 			// save last daily quest time for all quests: we need only mostly reset time for reset check anyway
 
@@ -2379,7 +2379,7 @@ namespace Game.Entities
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_DAILY);
 			stmt.AddValue(0, GetGUID().GetCounter());
 
-			foreach (int questId in _activePlayerData.DailyQuestsCompleted)
+			foreach (int questId in ActivePlayerData.DailyQuestsCompleted)
 			{
 				stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_DAILY);
 				stmt.AddValue(0, GetGUID().GetCounter());
@@ -2388,8 +2388,8 @@ namespace Game.Entities
 				trans.Append(stmt);
 			}
 
-			if (!_DFQuests.Empty())
-				foreach (var id in _DFQuests)
+			if (!_dfQuests.Empty())
+				foreach (var id in _dfQuests)
 				{
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_DAILY);
 					stmt.AddValue(0, GetGUID().GetCounter());
@@ -2401,7 +2401,7 @@ namespace Game.Entities
 
 		private void _SaveWeeklyQuestStatus(SQLTransaction trans)
 		{
-			if (!_WeeklyQuestChanged ||
+			if (!_weeklyQuestChanged ||
 			    _weeklyquests.Empty())
 				return;
 
@@ -2418,12 +2418,12 @@ namespace Game.Entities
 				trans.Append(stmt);
 			}
 
-			_WeeklyQuestChanged = false;
+			_weeklyQuestChanged = false;
 		}
 
 		private void _SaveSeasonalQuestStatus(SQLTransaction trans)
 		{
-			if (!_SeasonalQuestChanged)
+			if (!_seasonalQuestChanged)
 				return;
 
 			// we don't need transactions here.
@@ -2431,7 +2431,7 @@ namespace Game.Entities
 			stmt.AddValue(0, GetGUID().GetCounter());
 			trans.Append(stmt);
 
-			_SeasonalQuestChanged = false;
+			_seasonalQuestChanged = false;
 
 			if (_seasonalquests.Empty())
 				return;
@@ -2452,7 +2452,7 @@ namespace Game.Entities
 
 		private void _SaveMonthlyQuestStatus(SQLTransaction trans)
 		{
-			if (!_MonthlyQuestChanged ||
+			if (!_monthlyQuestChanged ||
 			    _monthlyquests.Empty())
 				return;
 
@@ -2469,7 +2469,7 @@ namespace Game.Entities
 				trans.Append(stmt);
 			}
 
-			_MonthlyQuestChanged = false;
+			_monthlyQuestChanged = false;
 		}
 
 		private void _SaveTalents(SQLTransaction trans)
@@ -2671,7 +2671,7 @@ namespace Game.Entities
 				if (m.state == MailState.Deleted)
 					_mail.Remove(m);
 
-			_mailsUpdated = false;
+			MailUpdated = false;
 		}
 
 		private void _SaveStoredAuraTeleportLocations(SQLTransaction trans)
@@ -2734,16 +2734,16 @@ namespace Game.Entities
 			for (int i = 0; i < (int)SpellSchools.Max; ++i)
 				stmt.AddValue(index++, GetResistance((SpellSchools)i));
 
-			stmt.AddValue(index++, _activePlayerData.BlockPercentage);
-			stmt.AddValue(index++, _activePlayerData.DodgePercentage);
-			stmt.AddValue(index++, _activePlayerData.ParryPercentage);
-			stmt.AddValue(index++, _activePlayerData.CritPercentage);
-			stmt.AddValue(index++, _activePlayerData.RangedCritPercentage);
-			stmt.AddValue(index++, _activePlayerData.SpellCritPercentage);
+			stmt.AddValue(index++, ActivePlayerData.BlockPercentage);
+			stmt.AddValue(index++, ActivePlayerData.DodgePercentage);
+			stmt.AddValue(index++, ActivePlayerData.ParryPercentage);
+			stmt.AddValue(index++, ActivePlayerData.CritPercentage);
+			stmt.AddValue(index++, ActivePlayerData.RangedCritPercentage);
+			stmt.AddValue(index++, ActivePlayerData.SpellCritPercentage);
 			stmt.AddValue(index++, _unitData.AttackPower);
 			stmt.AddValue(index++, _unitData.RangedAttackPower);
 			stmt.AddValue(index++, GetBaseSpellPowerBonus());
-			stmt.AddValue(index, _activePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
+			stmt.AddValue(index, ActivePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
 
 			trans.Append(stmt);
 		}
@@ -2771,7 +2771,7 @@ namespace Game.Entities
 				PreparedStatement stmt;
 				byte              j = 0;
 
-				switch (eqSet.state)
+				switch (eqSet.State)
 				{
 					case EquipmentSetUpdateState.Unchanged:
 						break; // do nothing
@@ -2810,7 +2810,7 @@ namespace Game.Entities
 						}
 
 						trans.Append(stmt);
-						eqSet.state = EquipmentSetUpdateState.Unchanged;
+						eqSet.State = EquipmentSetUpdateState.Unchanged;
 
 						break;
 					case EquipmentSetUpdateState.New:
@@ -2846,7 +2846,7 @@ namespace Game.Entities
 						}
 
 						trans.Append(stmt);
-						eqSet.state = EquipmentSetUpdateState.Unchanged;
+						eqSet.State = EquipmentSetUpdateState.Unchanged;
 
 						break;
 					case EquipmentSetUpdateState.Deleted:
@@ -2870,9 +2870,9 @@ namespace Game.Entities
 
 			for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
 			{
-				if (_voidStorageItems[i] == null) // unused item
+				if (_voidStorageItems[i] == null) // unused Item
 				{
-					// DELETE FROM void_storage WHERE slot = ? AND playerGuid = ?
+					// DELETE FROM void_storage WHERE Slot = ? AND playerGuid = ?
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT);
 					stmt.AddValue(0, i);
 					stmt.AddValue(1, GetGUID().GetCounter());
@@ -2880,7 +2880,7 @@ namespace Game.Entities
 
 				else
 				{
-					// REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomPropertyType, randomProperty, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+					// REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, Slot, creatorGuid, randomPropertyType, randomProperty, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_VOID_STORAGE_ITEM);
 					stmt.AddValue(0, _voidStorageItems[i].ItemId);
 					stmt.AddValue(1, GetGUID().GetCounter());
@@ -2911,7 +2911,7 @@ namespace Game.Entities
 
 			for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
 			{
-				if (_CUFProfiles[i] == null) // unused profile
+				if (_cUFProfiles[i] == null) // unused profile
 				{
 					// DELETE FROM character_cuf_profiles WHERE guid = ? and id = ?
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_CUF_PROFILES_BY_ID);
@@ -2924,18 +2924,18 @@ namespace Game.Entities
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_CUF_PROFILES);
 					stmt.AddValue(0, lowGuid);
 					stmt.AddValue(1, i);
-					stmt.AddValue(2, _CUFProfiles[i].ProfileName);
-					stmt.AddValue(3, _CUFProfiles[i].FrameHeight);
-					stmt.AddValue(4, _CUFProfiles[i].FrameWidth);
-					stmt.AddValue(5, _CUFProfiles[i].SortBy);
-					stmt.AddValue(6, _CUFProfiles[i].HealthText);
-					stmt.AddValue(7, (uint)_CUFProfiles[i].GetUlongOptionValue()); // 25 of 32 fields used, fits in an int
-					stmt.AddValue(8, _CUFProfiles[i].TopPoint);
-					stmt.AddValue(9, _CUFProfiles[i].BottomPoint);
-					stmt.AddValue(10, _CUFProfiles[i].LeftPoint);
-					stmt.AddValue(11, _CUFProfiles[i].TopOffset);
-					stmt.AddValue(12, _CUFProfiles[i].BottomOffset);
-					stmt.AddValue(13, _CUFProfiles[i].LeftOffset);
+					stmt.AddValue(2, _cUFProfiles[i].ProfileName);
+					stmt.AddValue(3, _cUFProfiles[i].FrameHeight);
+					stmt.AddValue(4, _cUFProfiles[i].FrameWidth);
+					stmt.AddValue(5, _cUFProfiles[i].SortBy);
+					stmt.AddValue(6, _cUFProfiles[i].HealthText);
+					stmt.AddValue(7, (uint)_cUFProfiles[i].GetUlongOptionValue()); // 25 of 32 fields used, fits in an int
+					stmt.AddValue(8, _cUFProfiles[i].TopPoint);
+					stmt.AddValue(9, _cUFProfiles[i].BottomPoint);
+					stmt.AddValue(10, _cUFProfiles[i].LeftPoint);
+					stmt.AddValue(11, _cUFProfiles[i].TopOffset);
+					stmt.AddValue(12, _cUFProfiles[i].BottomOffset);
+					stmt.AddValue(13, _cUFProfiles[i].LeftOffset);
 				}
 
 				trans.Append(stmt);
@@ -2969,16 +2969,16 @@ namespace Game.Entities
 
 			stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PLAYER_BGDATA);
 			stmt.AddValue(0, GetGUID().GetCounter());
-			stmt.AddValue(1, _bgData.bgInstanceID);
-			stmt.AddValue(2, _bgData.bgTeam);
-			stmt.AddValue(3, _bgData.joinPos.GetPositionX());
-			stmt.AddValue(4, _bgData.joinPos.GetPositionY());
-			stmt.AddValue(5, _bgData.joinPos.GetPositionZ());
-			stmt.AddValue(6, _bgData.joinPos.GetOrientation());
-			stmt.AddValue(7, (ushort)_bgData.joinPos.GetMapId());
-			stmt.AddValue(8, _bgData.taxiPath[0]);
-			stmt.AddValue(9, _bgData.taxiPath[1]);
-			stmt.AddValue(10, _bgData.mountSpell);
+			stmt.AddValue(1, _bgData.InstanceID);
+			stmt.AddValue(2, _bgData.Team);
+			stmt.AddValue(3, _bgData.JoinPos.GetPositionX());
+			stmt.AddValue(4, _bgData.JoinPos.GetPositionY());
+			stmt.AddValue(5, _bgData.JoinPos.GetPositionZ());
+			stmt.AddValue(6, _bgData.JoinPos.GetOrientation());
+			stmt.AddValue(7, (ushort)_bgData.JoinPos.GetMapId());
+			stmt.AddValue(8, _bgData.TaxiPath[0]);
+			stmt.AddValue(9, _bgData.TaxiPath[1]);
+			stmt.AddValue(10, _bgData.MountSpell);
 			trans.Append(stmt);
 		}
 
@@ -3102,8 +3102,8 @@ namespace Game.Entities
 			}
 
 
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.WowAccount), GetSession().GetAccountGUID());
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.WowAccount), GetSession().GetAccountGUID());
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
 
 			if (gender >= Gender.None)
 			{
@@ -3132,18 +3132,18 @@ namespace Game.Entities
 			StringArray exploredZonesStrings = new(exploredZones, ' ');
 
 			for (int i = 0; i < exploredZonesStrings.Length && i / 2 < ActivePlayerData.ExploredZonesSize; ++i)
-				SetUpdateFieldFlagValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
+				SetUpdateFieldFlagValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
 
 			StringArray knownTitlesStrings = new(knownTitles, ' ');
 
 			if ((knownTitlesStrings.Length % 2) == 0)
 				for (int i = 0; i < knownTitlesStrings.Length; ++i)
-					SetUpdateFieldFlagValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.KnownTitles, i / 2), (ulong)((long.Parse(knownTitlesStrings[i])) << (32 * (i % 2))));
+					SetUpdateFieldFlagValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.KnownTitles, i / 2), (ulong)((long.Parse(knownTitlesStrings[i])) << (32 * (i % 2))));
 
 			SetObjectScale(1.0f);
 			SetHoverHeight(1.0f);
 
-			// load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
+			// load achievements before anything else to prevent multiple gains for the same Achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
 			_achievementSys.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Achievements), holder.GetResult(PlayerLoginQueryLoad.CriteriaProgress));
 			_questObjectiveCriteriaMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectivesCriteria), holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectivesCriteriaProgress));
 
@@ -3165,12 +3165,12 @@ namespace Game.Entities
 			SetInventorySlotCount(inventorySlots);
 			SetBankBagSlotCount(bankSlots);
 			SetNativeGender(gender);
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.Inebriation), drunk);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.Inebriation), drunk);
 			ReplaceAllPlayerFlags(playerFlags);
 			ReplaceAllPlayerFlagsEx(playerFlagsEx);
 			SetWatchedFactionIndex(watchedFaction);
 
-			atLoginFlags = (AtLoginFlags)at_login;
+			AtLoginFlags = (AtLoginFlags)at_login;
 
 			if (!GetSession().ValidateAppearance(GetRace(), GetClass(), gender, customizations))
 			{
@@ -3206,17 +3206,17 @@ namespace Game.Entities
 
 			var RelocateToHomebind = new Action(() =>
 			                                    {
-				                                    mapId       = homebind.GetMapId();
+				                                    mapId       = _homebind.GetMapId();
 				                                    instance_id = 0;
-				                                    Relocate(homebind);
+				                                    Relocate(_homebind);
 			                                    });
 
 			_LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 
 			_LoadCurrency(holder.GetResult(PlayerLoginQueryLoad.Currency));
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.LifetimeHonorableKills), totalKills);
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.TodayHonorableKills), todayKills);
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.YesterdayHonorableKills), yesterdayKills);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), totalKills);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TodayHonorableKills), todayKills);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.YesterdayHonorableKills), yesterdayKills);
 
 			_LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
 			_LoadBGData(holder.GetResult(PlayerLoginQueryLoad.BgData));
@@ -3237,8 +3237,8 @@ namespace Game.Entities
 			{
 				Battleground currentBg = null;
 
-				if (_bgData.bgInstanceID != 0) //saved in Battleground
-					currentBg = Global.BattlegroundMgr.GetBattleground(_bgData.bgInstanceID, BattlegroundTypeId.None);
+				if (_bgData.InstanceID != 0) //saved in Battleground
+					currentBg = Global.BattlegroundMgr.GetBattleground(_bgData.InstanceID, BattlegroundTypeId.None);
 
 				player_at_bg = currentBg != null && currentBg.IsPlayerInBattleground(GetGUID());
 
@@ -3249,7 +3249,7 @@ namespace Game.Entities
 					BattlegroundQueueTypeId bgQueueTypeId = currentBg.GetQueueId();
 					AddBattlegroundQueueId(bgQueueTypeId);
 
-					_bgData.bgTypeID = currentBg.GetTypeID();
+					_bgData.TypeID = currentBg.GetTypeID();
 
 					//join player to Battlegroundgroup
 					currentBg.EventPlayerLoggedIn(this);
@@ -3283,7 +3283,7 @@ namespace Game.Entities
 					}
 
 					// We are not in BG anymore
-					_bgData.bgInstanceID = 0;
+					_bgData.InstanceID = 0;
 				}
 			}
 			// currently we do not support transport in bg
@@ -3360,20 +3360,20 @@ namespace Game.Entities
 				// Not finish taxi flight path
 				if (_bgData.HasTaxiPath())
 					for (int i = 0; i < 2; ++i)
-						_taxi.AddTaxiDestination(_bgData.taxiPath[i]);
+						Taxi.AddTaxiDestination(_bgData.TaxiPath[i]);
 
-				if (!_taxi.LoadTaxiDestinationsFromString(taxi_path, GetTeam()))
+				if (!Taxi.LoadTaxiDestinationsFromString(taxi_path, GetTeam()))
 				{
 					// problems with taxi path loading
 					TaxiNodesRecord nodeEntry = null;
-					uint            node_id   = _taxi.GetTaxiSource();
+					uint            node_id   = Taxi.GetTaxiSource();
 
 					if (node_id != 0)
 						nodeEntry = CliDB.TaxiNodesStorage.LookupByKey(node_id);
 
-					if (nodeEntry == null) // don't know taxi start node, to homebind
+					if (nodeEntry == null) // don't know taxi start node, to _homebind
 					{
-						Log.outError(LogFilter.Player, "Character {0} have wrong data in taxi destination list, teleport to homebind.", GetGUID().ToString());
+						Log.outError(LogFilter.Player, "Character {0} have wrong data in taxi destination list, teleport to _homebind.", GetGUID().ToString());
 						RelocateToHomebind();
 					}
 					else // have start node, to it
@@ -3383,10 +3383,10 @@ namespace Game.Entities
 						Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
 					}
 
-					_taxi.ClearTaxiDestinations();
+					Taxi.ClearTaxiDestinations();
 				}
 
-				uint nodeid = _taxi.GetTaxiSource();
+				uint nodeid = Taxi.GetTaxiSource();
 
 				if (nodeid != 0)
 				{
@@ -3396,7 +3396,7 @@ namespace Game.Entities
 					if (nodeEntry != null &&
 					    nodeEntry.ContinentID == GetMapId())
 					{
-						Cypher.Assert(nodeEntry != null); // checked in _taxi.LoadTaxiDestinationsFromString
+						Cypher.Assert(nodeEntry != null); // checked in Taxi.LoadTaxiDestinationsFromString
 						mapId = nodeEntry.ContinentID;
 						Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
 					}
@@ -3484,7 +3484,7 @@ namespace Game.Entities
 			// now that map position is determined, check instance validity
 			if (!CheckInstanceValidity(true) &&
 			    !IsInstanceLoginGameMasterException())
-				_InstanceValid = false;
+				InstanceValid = false;
 
 			if (player_at_bg)
 				map.ToBattlegroundMap().GetBG().AddPlayer(this);
@@ -3498,7 +3498,7 @@ namespace Game.Entities
 			long now        = GameTime.GetGameTime();
 			long logoutTime = logout_time;
 
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.LogoutTime), logoutTime);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.LogoutTime), logoutTime);
 
 			// since last logout (in seconds)
 			uint time_diff = (uint)(now - logoutTime);
@@ -3513,13 +3513,13 @@ namespace Game.Entities
 			_createTime      = createTime;
 			_createMode      = createMode;
 			_cinematic       = cinematic;
-			_PlayedTimeTotal = totaltime;
-			_PlayedTimeLevel = leveltime;
+			_playedTimeTotal = totaltime;
+			_playedTimeLevel = leveltime;
 
 			SetTalentResetCost(resettalents_cost);
 			SetTalentResetTime(resettalents_time);
 
-			_taxi.LoadTaxiMask(taximask); // must be before InitTaxiNodesForLevel
+			Taxi.LoadTaxiMask(taximask); // must be before InitTaxiNodesForLevel
 
 			_LoadPetStable(summonedPetNumber, holder.GetResult(PlayerLoginQueryLoad.PetSlots));
 
@@ -3538,7 +3538,7 @@ namespace Game.Entities
 			// make sure the unit is considered out of combat for proper loading
 			ClearInCombat();
 
-			// reset stats before loading any modifiers
+			// reset Stats before loading any modifiers
 			InitStatsForLevel();
 			InitTaxiNodesForLevel();
 			InitRunes();
@@ -3546,7 +3546,7 @@ namespace Game.Entities
 			// rest bonus can only be calculated after InitStatsForLevel()
 			_restMgr.LoadRestBonus(RestTypes.XP, restState, rest_bonus);
 
-			// load skills after InitStatsForLevel because it triggering aura apply also
+			// load Skills after InitStatsForLevel because it triggering aura apply also
 			_LoadSkills(holder.GetResult(PlayerLoginQueryLoad.Skills));
 			UpdateSkillsForLevel();
 
@@ -3606,7 +3606,7 @@ namespace Game.Entities
 			_LoadTraits(holder.GetResult(PlayerLoginQueryLoad.TraitConfigs), holder.GetResult(PlayerLoginQueryLoad.TraitEntries)); // must be after loading spells
 
 			// must be before inventory (some items required reputation check)
-			reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
+			_reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
 			_LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory),
 			               holder.GetResult(PlayerLoginQueryLoad.Artifacts),
@@ -3653,8 +3653,8 @@ namespace Game.Entities
 			if (savedHealth == 0)
 				_deathState = DeathState.Corpse;
 
-			// Spell code allow apply any auras to dead character in load time in aura/spell/item loading
-			// Do now before stats re-calculation cleanup for ghost state unexpected auras
+			// Spell code allow apply any auras to dead character in load time in aura/spell/Item loading
+			// Do now before Stats re-calculation cleanup for ghost State unexpected auras
 			if (!IsAlive())
 				RemoveAllAurasOnDeath();
 			else
@@ -3698,9 +3698,9 @@ namespace Game.Entities
 				}
 			}
 
-			Log.outDebug(LogFilter.Player, "The value of player {0} after load item and aura is: ", GetName());
+			Log.outDebug(LogFilter.Player, "The value of player {0} after load Item and aura is: ", GetName());
 
-			// GM state
+			// GM State
 			if (GetSession().HasPermission(RBACPermissions.RestoreSavedGmState))
 			{
 				switch (WorldConfig.GetIntValue(WorldCfg.GmLoginState))
@@ -3712,7 +3712,7 @@ namespace Game.Entities
 						SetGameMaster(true);
 
 						break; // enable
-					case 2:    // save state
+					case 2:    // save State
 						if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMOn))
 							SetGameMaster(true);
 
@@ -3728,7 +3728,7 @@ namespace Game.Entities
 						break; // invisible
 					case 1:
 						break; // visible
-					case 2:    // save state
+					case 2:    // save State
 						if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMInvisible))
 							SetGMVisible(false);
 
@@ -3744,7 +3744,7 @@ namespace Game.Entities
 						SetGMChat(true);
 
 						break; // enable
-					case 2:    // save state
+					case 2:    // save State
 						if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMChat))
 							SetGMChat(true);
 
@@ -3760,7 +3760,7 @@ namespace Game.Entities
 						SetAcceptWhispers(true);
 
 						break; // enable
-					case 2:    // save state
+					case 2:    // save State
 						if (extra_flags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers))
 							SetAcceptWhispers(true);
 
@@ -3900,9 +3900,9 @@ namespace Game.Entities
 				stmt.AddValue(index++, GetMoney());
 				stmt.AddValue(index++, GetInventorySlotCount());
 				stmt.AddValue(index++, GetBankBagSlotCount());
-				stmt.AddValue(index++, _activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
-				stmt.AddValue(index++, _playerData.PlayerFlags);
-				stmt.AddValue(index++, _playerData.PlayerFlagsEx);
+				stmt.AddValue(index++, ActivePlayerData.RestInfo[(int)RestTypes.XP].StateID);
+				stmt.AddValue(index++, PlayerData.PlayerFlags);
+				stmt.AddValue(index++, PlayerData.PlayerFlagsEx);
 				stmt.AddValue(index++, (ushort)GetMapId());
 				stmt.AddValue(index++, GetInstanceId());
 				stmt.AddValue(index++, (byte)GetDungeonDifficultyID());
@@ -3926,15 +3926,15 @@ namespace Game.Entities
 
 				StringBuilder ss = new();
 
-				for (int i = 0; i < _taxi._taximask.Length; ++i)
-					ss.Append(_taxi._taximask[i] + " ");
+				for (int i = 0; i < Taxi._taximask.Length; ++i)
+					ss.Append(Taxi._taximask[i] + " ");
 
 				stmt.AddValue(index++, ss.ToString());
 				stmt.AddValue(index++, _createTime);
 				stmt.AddValue(index++, (byte)_createMode);
 				stmt.AddValue(index++, _cinematic);
-				stmt.AddValue(index++, _PlayedTimeTotal);
-				stmt.AddValue(index++, _PlayedTimeLevel);
+				stmt.AddValue(index++, _playedTimeTotal);
+				stmt.AddValue(index++, _playedTimeLevel);
 				stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
 				stmt.AddValue(index++, GameTime.GetGameTime());
 				stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
@@ -3943,20 +3943,20 @@ namespace Game.Entities
 				stmt.AddValue(index++, GetTalentResetCost());
 				stmt.AddValue(index++, GetTalentResetTime());
 				stmt.AddValue(index++, GetPrimarySpecialization());
-				stmt.AddValue(index++, (ushort)_ExtraFlags);
+				stmt.AddValue(index++, (ushort)_extraFlags);
 				stmt.AddValue(index++, 0); // summonedPetNumber
-				stmt.AddValue(index++, (ushort)atLoginFlags);
+				stmt.AddValue(index++, (ushort)AtLoginFlags);
 				stmt.AddValue(index++, _deathExpireTime);
 
 				ss.Clear();
-				ss.Append(_taxi.SaveTaxiDestinationsToString());
+				ss.Append(Taxi.SaveTaxiDestinationsToString());
 
 				stmt.AddValue(index++, ss.ToString());
-				stmt.AddValue(index++, _activePlayerData.LifetimeHonorableKills);
-				stmt.AddValue(index++, _activePlayerData.TodayHonorableKills);
-				stmt.AddValue(index++, _activePlayerData.YesterdayHonorableKills);
-				stmt.AddValue(index++, _playerData.PlayerTitle);
-				stmt.AddValue(index++, _activePlayerData.WatchedFactionIndex);
+				stmt.AddValue(index++, ActivePlayerData.LifetimeHonorableKills);
+				stmt.AddValue(index++, ActivePlayerData.TodayHonorableKills);
+				stmt.AddValue(index++, ActivePlayerData.YesterdayHonorableKills);
+				stmt.AddValue(index++, PlayerData.PlayerTitle);
+				stmt.AddValue(index++, ActivePlayerData.WatchedFactionIndex);
 				stmt.AddValue(index++, GetDrunkValue());
 				stmt.AddValue(index++, GetHealth());
 
@@ -3981,7 +3981,7 @@ namespace Game.Entities
 				ss.Clear();
 
 				for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
-					ss.Append($"{(uint)(_activePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((_activePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
+					ss.Append($"{(uint)(ActivePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((ActivePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
 
 				stmt.AddValue(index++, ss.ToString());
 
@@ -4014,12 +4014,12 @@ namespace Game.Entities
 
 				ss.Clear();
 
-				for (int i = 0; i < _activePlayerData.KnownTitles.Size(); ++i)
-					ss.Append($"{(uint)(_activePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((_activePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
+				for (int i = 0; i < ActivePlayerData.KnownTitles.Size(); ++i)
+					ss.Append($"{(uint)(ActivePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((ActivePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
 
 				stmt.AddValue(index++, ss.ToString());
 
-				stmt.AddValue(index++, _activePlayerData.MultiActionBars);
+				stmt.AddValue(index++, ActivePlayerData.MultiActionBars);
 				stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
 			}
 			else
@@ -4035,9 +4035,9 @@ namespace Game.Entities
 				stmt.AddValue(index++, GetMoney());
 				stmt.AddValue(index++, GetInventorySlotCount());
 				stmt.AddValue(index++, GetBankBagSlotCount());
-				stmt.AddValue(index++, _activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
-				stmt.AddValue(index++, _playerData.PlayerFlags);
-				stmt.AddValue(index++, _playerData.PlayerFlagsEx);
+				stmt.AddValue(index++, ActivePlayerData.RestInfo[(int)RestTypes.XP].StateID);
+				stmt.AddValue(index++, PlayerData.PlayerFlags);
+				stmt.AddValue(index++, PlayerData.PlayerFlagsEx);
 
 				if (!IsBeingTeleported())
 				{
@@ -4078,13 +4078,13 @@ namespace Game.Entities
 
 				StringBuilder ss = new();
 
-				for (int i = 0; i < _taxi._taximask.Length; ++i)
-					ss.Append(_taxi._taximask[i] + " ");
+				for (int i = 0; i < Taxi._taximask.Length; ++i)
+					ss.Append(Taxi._taximask[i] + " ");
 
 				stmt.AddValue(index++, ss.ToString());
 				stmt.AddValue(index++, _cinematic);
-				stmt.AddValue(index++, _PlayedTimeTotal);
-				stmt.AddValue(index++, _PlayedTimeLevel);
+				stmt.AddValue(index++, _playedTimeTotal);
+				stmt.AddValue(index++, _playedTimeLevel);
 				stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
 				stmt.AddValue(index++, GameTime.GetGameTime());
 				stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
@@ -4094,7 +4094,7 @@ namespace Game.Entities
 				stmt.AddValue(index++, GetTalentResetTime());
 				stmt.AddValue(index++, GetNumRespecs());
 				stmt.AddValue(index++, GetPrimarySpecialization());
-				stmt.AddValue(index++, (ushort)_ExtraFlags);
+				stmt.AddValue(index++, (ushort)_extraFlags);
 				PetStable petStable = GetPetStable();
 
 				if (petStable != null)
@@ -4102,19 +4102,19 @@ namespace Game.Entities
 				else
 					stmt.AddValue(index++, 0); // summonedPetNumber
 
-				stmt.AddValue(index++, (ushort)atLoginFlags);
+				stmt.AddValue(index++, (ushort)AtLoginFlags);
 				stmt.AddValue(index++, GetZoneId());
 				stmt.AddValue(index++, _deathExpireTime);
 
 				ss.Clear();
-				ss.Append(_taxi.SaveTaxiDestinationsToString());
+				ss.Append(Taxi.SaveTaxiDestinationsToString());
 
 				stmt.AddValue(index++, ss.ToString());
-				stmt.AddValue(index++, _activePlayerData.LifetimeHonorableKills);
-				stmt.AddValue(index++, _activePlayerData.TodayHonorableKills);
-				stmt.AddValue(index++, _activePlayerData.YesterdayHonorableKills);
-				stmt.AddValue(index++, _playerData.PlayerTitle);
-				stmt.AddValue(index++, _activePlayerData.WatchedFactionIndex);
+				stmt.AddValue(index++, ActivePlayerData.LifetimeHonorableKills);
+				stmt.AddValue(index++, ActivePlayerData.TodayHonorableKills);
+				stmt.AddValue(index++, ActivePlayerData.YesterdayHonorableKills);
+				stmt.AddValue(index++, PlayerData.PlayerTitle);
+				stmt.AddValue(index++, ActivePlayerData.WatchedFactionIndex);
 				stmt.AddValue(index++, GetDrunkValue());
 				stmt.AddValue(index++, GetHealth());
 
@@ -4139,7 +4139,7 @@ namespace Game.Entities
 				ss.Clear();
 
 				for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
-					ss.Append($"{(uint)(_activePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((_activePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
+					ss.Append($"{(uint)(ActivePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((ActivePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
 
 				stmt.AddValue(index++, ss.ToString());
 
@@ -4172,16 +4172,16 @@ namespace Game.Entities
 
 				ss.Clear();
 
-				for (int i = 0; i < _activePlayerData.KnownTitles.Size(); ++i)
-					ss.Append($"{(uint)(_activePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((_activePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
+				for (int i = 0; i < ActivePlayerData.KnownTitles.Size(); ++i)
+					ss.Append($"{(uint)(ActivePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((ActivePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
 
 				stmt.AddValue(index++, ss.ToString());
-				stmt.AddValue(index++, _activePlayerData.MultiActionBars);
+				stmt.AddValue(index++, ActivePlayerData.MultiActionBars);
 
 				stmt.AddValue(index++, IsInWorld && !GetSession().PlayerLogout() ? 1 : 0);
-				stmt.AddValue(index++, _activePlayerData.Honor);
+				stmt.AddValue(index++, ActivePlayerData.Honor);
 				stmt.AddValue(index++, GetHonorLevel());
-				stmt.AddValue(index++, _activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
+				stmt.AddValue(index++, ActivePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
 				stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
 				stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
 
@@ -4200,7 +4200,7 @@ namespace Game.Entities
 				characterTransaction.Append(stmt);
 			}
 
-			if (_mailsUpdated) //save mails only when needed
+			if (MailUpdated) //save mails only when needed
 				_SaveMail(characterTransaction);
 
 			_SaveCustomizations(characterTransaction);
@@ -4222,7 +4222,7 @@ namespace Game.Entities
 			_SaveSkills(characterTransaction);
 			_SaveStoredAuraTeleportLocations(characterTransaction);
 			_achievementSys.SaveToDB(characterTransaction);
-			reputationMgr.SaveToDB(characterTransaction);
+			_reputationMgr.SaveToDB(characterTransaction);
 			_questObjectiveCriteriaMgr.SaveToDB(characterTransaction);
 			_SaveEquipmentSets(characterTransaction);
 			GetSession().SaveTutorialsData(characterTransaction); // changed only while character in game
@@ -4233,8 +4233,8 @@ namespace Game.Entities
 			if (_garrison != null)
 				_garrison.SaveToDB(characterTransaction);
 
-			// check if stats should only be saved on logout
-			// save stats can be out of transaction
+			// check if Stats should only be saved on logout
+			// save Stats can be out of transaction
 			if (GetSession().IsLogingOut() ||
 			    !WorldConfig.GetBoolValue(WorldCfg.StatsSaveOnlyOnLogout))
 				_SaveStats(characterTransaction);
@@ -4263,7 +4263,7 @@ namespace Game.Entities
 			stmt.AddValue(6, GameTime.GetGameTime());
 			loginTransaction.Append(stmt);
 
-			// save pet (hunter pet level and experience and all type pets health/mana).
+			// save pet (hunter pet level and experience and all Type pets health/mana).
 			Pet pet = GetPet();
 
 			if (pet)

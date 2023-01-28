@@ -65,11 +65,11 @@ namespace Game
 			}
 
 			inspectResult.ItemLevel       = (int)player.GetAverageItemLevel();
-			inspectResult.LifetimeMaxRank = player._activePlayerData.LifetimeMaxRank;
-			inspectResult.TodayHK         = player._activePlayerData.TodayHonorableKills;
-			inspectResult.YesterdayHK     = player._activePlayerData.YesterdayHonorableKills;
-			inspectResult.LifetimeHK      = player._activePlayerData.LifetimeHonorableKills;
-			inspectResult.HonorLevel      = player._playerData.HonorLevel;
+			inspectResult.LifetimeMaxRank = player.ActivePlayerData.LifetimeMaxRank;
+			inspectResult.TodayHK         = player.ActivePlayerData.TodayHonorableKills;
+			inspectResult.YesterdayHK     = player.ActivePlayerData.YesterdayHonorableKills;
+			inspectResult.LifetimeHK      = player.ActivePlayerData.LifetimeHonorableKills;
+			inspectResult.HonorLevel      = player.PlayerData.HonorLevel;
 
 			SendPacket(inspectResult);
 		}

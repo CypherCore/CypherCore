@@ -66,7 +66,7 @@ namespace Game.AI
 		}
 
         /// <summary>
-        ///  Called when a player selects a gossip item in the gameobject's gossip menu.
+        ///  Called when a player selects a gossip Item in the gameobject's gossip menu.
         /// </summary>
         public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
 		{
@@ -89,14 +89,14 @@ namespace Game.AI
 		}
 
         /// <summary>
-        ///  Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
+        ///  Called when a player completes a quest and is rewarded, opt is the selected Item's index or 0
         /// </summary>
         public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
 		{
 		}
 
 		// Called when a Player clicks a GameObject, before GossipHello
-		// prevents achievement tracking if returning true
+		// prevents Achievement tracking if returning true
 		public virtual bool OnReportUse(Player player)
 		{
 			return false;
@@ -173,7 +173,7 @@ namespace Game.AI
 			return false;
 		}
 
-		// Called when the capture point state gets updated. Return true to disable default behaviour.
+		// Called when the capture point State gets updated. Return true to disable default behaviour.
 		public virtual bool OnCapturePointUpdated(BattlegroundCapturePointState state)
 		{
 			return false;

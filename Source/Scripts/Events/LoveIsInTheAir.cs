@@ -85,7 +85,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
 			bool foundSomeone = false;
 			// For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
-			// required by achievement and "hearts" visual
+			// required by Achievement and "hearts" visual
 			List<Unit>                  playerList = new();
 			AnyPlayerInObjectRangeCheck checker    = new(target, SharedConst.InteractionDistance * 2);
 			var                         searcher   = new PlayerListSearcher(target, playerList, checker);

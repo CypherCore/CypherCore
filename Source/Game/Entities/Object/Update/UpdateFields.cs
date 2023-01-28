@@ -2178,7 +2178,7 @@ namespace Game.Entities
 		{
 			uint flags = unitData.Flags;
 
-			// Update fields of triggers, transformed units or uninteractible units (values dependent on GM state)
+			// Update fields of triggers, transformed units or uninteractible units (values dependent on GM State)
 			if (receiver.IsGameMaster())
 				flags &= ~(uint)UnitFlags.Uninteractible;
 

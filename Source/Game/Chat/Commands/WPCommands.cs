@@ -432,7 +432,7 @@ namespace Game.Chat.Commands
 			// Check
 			// Remember: "show" must also be the name of a column!
 			if ((subCommand != "delay") &&
-			    (subCommand != "action") &&
+			    (subCommand != "Action") &&
 			    (subCommand != "action_chance") &&
 			    (subCommand != "move_flag") &&
 			    (subCommand != "del") &&

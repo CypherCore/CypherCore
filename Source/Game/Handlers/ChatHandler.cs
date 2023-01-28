@@ -415,7 +415,7 @@ namespace Game
 					break;
 				}
 				default:
-					Log.outError(LogFilter.ChatSystem, "CHAT: unknown message type {0}, lang: {1}", type, lang);
+					Log.outError(LogFilter.ChatSystem, "CHAT: unknown message Type {0}, lang: {1}", type, lang);
 
 					break;
 			}
@@ -514,7 +514,7 @@ namespace Game
 					break;
 
 				default:
-					Log.outError(LogFilter.Server, "HandleAddonMessagechat: unknown addon message type {0}", type);
+					Log.outError(LogFilter.Server, "HandleAddonMessagechat: unknown addon message Type {0}", type);
 
 					break;
 			}
@@ -540,11 +540,11 @@ namespace Game
 				if (string.IsNullOrEmpty(packet.Text))
 					sender.ToggleAFK(); // Remove AFK
 				else
-					sender.autoReplyMsg = packet.Text; // Update message
+					sender.AutoReplyMsg = packet.Text; // Update message
 			}
 			else // New AFK mode
 			{
-				sender.autoReplyMsg = string.IsNullOrEmpty(packet.Text) ? Global.ObjectMgr.GetCypherString(CypherStrings.PlayerAfkDefault) : packet.Text;
+				sender.AutoReplyMsg = string.IsNullOrEmpty(packet.Text) ? Global.ObjectMgr.GetCypherString(CypherStrings.PlayerAfkDefault) : packet.Text;
 
 				if (sender.IsDND())
 					sender.ToggleDND();
@@ -580,11 +580,11 @@ namespace Game
 				if (string.IsNullOrEmpty(packet.Text))
 					sender.ToggleDND(); // Remove DND
 				else
-					sender.autoReplyMsg = packet.Text; // Update message
+					sender.AutoReplyMsg = packet.Text; // Update message
 			}
 			else // New DND mode
 			{
-				sender.autoReplyMsg = string.IsNullOrEmpty(packet.Text) ? Global.ObjectMgr.GetCypherString(CypherStrings.PlayerDndDefault) : packet.Text;
+				sender.AutoReplyMsg = string.IsNullOrEmpty(packet.Text) ? Global.ObjectMgr.GetCypherString(CypherStrings.PlayerDndDefault) : packet.Text;
 
 				if (sender.IsAFK())
 					sender.ToggleAFK();

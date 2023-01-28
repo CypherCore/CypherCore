@@ -53,7 +53,7 @@ namespace Game
 			if (nearest == 0)
 				data.Status = TaxiNodeStatus.None;
 			else if (unit.GetReactionTo(player) >= ReputationRank.Neutral)
-				data.Status = player._taxi.IsTaximaskNodeKnown(nearest) ? TaxiNodeStatus.Learned : TaxiNodeStatus.Unlearned;
+				data.Status = player.Taxi.IsTaximaskNodeKnown(nearest) ? TaxiNodeStatus.Learned : TaxiNodeStatus.Unlearned;
 			else
 				data.Status = TaxiNodeStatus.NotEligible;
 
@@ -105,7 +105,7 @@ namespace Game
 
 			data.WindowInfo = windowInfo;
 
-			GetPlayer()._taxi.AppendTaximaskTo(data, lastTaxiCheaterState);
+			GetPlayer().Taxi.AppendTaximaskTo(data, lastTaxiCheaterState);
 
 			byte[] reachableNodes = new byte[CliDB.TaxiNodesMask.Length];
 			TaxiPathGraph.GetReachableNodesMask(CliDB.TaxiNodesStorage.LookupByKey(curloc), reachableNodes);
@@ -142,7 +142,7 @@ namespace Game
 			if (curloc == 0)
 				return true;
 
-			if (GetPlayer()._taxi.SetTaximaskNode(curloc))
+			if (GetPlayer().Taxi.SetTaximaskNode(curloc))
 			{
 				SendPacket(new NewTaxiPath());
 
@@ -161,7 +161,7 @@ namespace Game
 
 		public void SendDiscoverNewTaxiNode(uint nodeid)
 		{
-			if (GetPlayer()._taxi.SetTaximaskNode(nodeid))
+			if (GetPlayer().Taxi.SetTaximaskNode(nodeid))
 				SendPacket(new NewTaxiPath());
 		}
 
@@ -190,8 +190,8 @@ namespace Game
 				return;
 
 			if (!GetPlayer().IsTaxiCheater())
-				if (!GetPlayer()._taxi.IsTaximaskNodeKnown(curloc) ||
-				    !GetPlayer()._taxi.IsTaximaskNodeKnown(activateTaxi.Node))
+				if (!GetPlayer().Taxi.IsTaximaskNodeKnown(curloc) ||
+				    !GetPlayer().Taxi.IsTaximaskNodeKnown(activateTaxi.Node))
 				{
 					SendActivateTaxiReply(ActivateTaxiReply.NotVisited);
 
@@ -242,7 +242,7 @@ namespace Game
 			FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
 
 			if (flight != null)
-				if (GetPlayer()._taxi.RequestEarlyLanding())
+				if (GetPlayer().Taxi.RequestEarlyLanding())
 				{
 					flight.LoadPath(GetPlayer(), (uint)flight.GetPath()[(int)flight.GetCurrentNode()].NodeIndex);
 					flight.Reset(GetPlayer());

@@ -516,7 +516,7 @@ namespace Game.Networking.Packets
 		///< the amount of money that the player bid in copper
 		public uint DesiredDelay;
 
-        /// < the type of action that triggered this notification. Possible values are @ ref AuctionAction
+        /// < the Type of Action that triggered this notification. Possible values are @ ref AuctionAction
         public int ErrorCode;
 
         /// < the bid error. Possible values are @ ref AuctionError

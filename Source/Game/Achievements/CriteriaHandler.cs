@@ -35,7 +35,7 @@ namespace Game.Achievements
 		}
 
         /// <summary>
-        ///  this function will be called whenever the user might have done a criteria relevant action
+        ///  this function will be called whenever the user might have done a criteria relevant Action
         /// </summary>
         /// <param name="type"></param>
         /// <param name="miscValue1"></param>
@@ -47,7 +47,7 @@ namespace Game.Achievements
 		{
 			if (type >= CriteriaType.Count)
 			{
-				Log.outDebug(LogFilter.Achievement, "UpdateCriteria: Wrong criteria type {0}", type);
+				Log.outDebug(LogFilter.Achievement, "UpdateCriteria: Wrong criteria Type {0}", type);
 
 				return;
 			}
@@ -341,7 +341,7 @@ namespace Game.Achievements
 
 						break;
 					case CriteriaType.HonorableKills:
-						SetCriteriaProgress(criteria, referencePlayer._activePlayerData.LifetimeHonorableKills, referencePlayer);
+						SetCriteriaProgress(criteria, referencePlayer.ActivePlayerData.LifetimeHonorableKills, referencePlayer);
 
 						break;
 					case CriteriaType.MostMoneyOwned:
@@ -1182,7 +1182,7 @@ namespace Game.Achievements
 
 					break;
 				case CriteriaType.GetLootByType:
-					// miscValue1 = itemId - miscValue2 = count of item loot
+					// miscValue1 = itemId - miscValue2 = count of Item loot
 					// miscValue3 = loot_type (note: 0 = LOOT_CORPSE and then it ignored)
 					if (miscValue1 == 0 ||
 					    miscValue2 == 0 ||
@@ -1231,7 +1231,7 @@ namespace Game.Achievements
 
 						ulong mask = 1ul << (int)((uint)area.AreaBit % ActivePlayerData.ExploredZonesBits);
 
-						if (Convert.ToBoolean(referencePlayer._activePlayerData.ExploredZones[playerIndexOffset] & mask))
+						if (Convert.ToBoolean(referencePlayer.ActivePlayerData.ExploredZones[playerIndexOffset] & mask))
 						{
 							matchFound = true;
 
@@ -1429,7 +1429,7 @@ namespace Game.Achievements
 			{
 				case ModifierTreeType.PlayerInebriationLevelEqualOrGreaterThan: // 1
 				{
-					uint inebriation = (uint)Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer._playerData.FakeInebriation), 100);
+					uint inebriation = (uint)Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer.PlayerData.FakeInebriation), 100);
 
 					if (inebriation < reqValue)
 						return false;
@@ -2181,7 +2181,7 @@ namespace Game.Achievements
 					uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
 
 					if (questBit != 0)
-						if ((referencePlayer._activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
+						if ((referencePlayer.ActivePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
 							return false;
 
 					break;
@@ -2226,7 +2226,7 @@ namespace Game.Achievements
 					if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
 						break;
 
-					if ((referencePlayer._activePlayerData.ExploredZones[playerIndexOffset] & (1ul << (areaTable.AreaBit % ActivePlayerData.ExploredZonesBits))) == 0)
+					if ((referencePlayer.ActivePlayerData.ExploredZones[playerIndexOffset] & (1ul << (areaTable.AreaBit % ActivePlayerData.ExploredZonesBits))) == 0)
 						return false;
 
 					break;
@@ -3166,7 +3166,7 @@ namespace Game.Achievements
 					return false;
 				case ModifierTreeType.PlayerHasRestriction: // 203
 				{
-					int restrictionIndex = referencePlayer._activePlayerData.CharacterRestrictions.FindIndexIf(restriction => restriction.Type == reqValue);
+					int restrictionIndex = referencePlayer.ActivePlayerData.CharacterRestrictions.FindIndexIf(restriction => restriction.Type == reqValue);
 
 					if (restrictionIndex < 0)
 						return false;
@@ -3248,7 +3248,7 @@ namespace Game.Achievements
 					if (group != null)
 						for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
 							if (itr.GetSource() != referencePlayer &&
-							    referencePlayer._playerData.VirtualPlayerRealm == itr.GetSource()._playerData.VirtualPlayerRealm)
+							    referencePlayer.PlayerData.VirtualPlayerRealm == itr.GetSource().PlayerData.VirtualPlayerRealm)
 								++memberCount;
 
 					if (memberCount < reqValue)
@@ -3389,7 +3389,7 @@ namespace Game.Achievements
 				}
 				case ModifierTreeType.PlayerMainhandWeaponType: // 232
 				{
-					var          visibleItem  = referencePlayer._playerData.VisibleItems[EquipmentSlot.MainHand];
+					var          visibleItem  = referencePlayer.PlayerData.VisibleItems[EquipmentSlot.MainHand];
 					uint         itemSubclass = (uint)ItemSubClassWeapon.Fist;
 					ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(visibleItem.ItemID);
 
@@ -3417,7 +3417,7 @@ namespace Game.Achievements
 				}
 				case ModifierTreeType.PlayerOffhandWeaponType: // 233
 				{
-					var          visibleItem  = referencePlayer._playerData.VisibleItems[EquipmentSlot.OffHand];
+					var          visibleItem  = referencePlayer.PlayerData.VisibleItems[EquipmentSlot.OffHand];
 					uint         itemSubclass = (uint)ItemSubClassWeapon.Fist;
 					ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(visibleItem.ItemID);
 
@@ -3894,7 +3894,7 @@ namespace Game.Achievements
 				case ModifierTreeType.TargetLevelWithinOrAboveLevelRange: // 275 NYI
 					return false;
 				case ModifierTreeType.MaxJailersTowerLevelEqualOrGreaterThan: // 276
-					if (referencePlayer._activePlayerData.JailersTowerLevelMax < reqValue)
+					if (referencePlayer.ActivePlayerData.JailersTowerLevelMax < reqValue)
 						return false;
 
 					break;
@@ -3952,7 +3952,7 @@ namespace Game.Achievements
 				case ModifierTreeType.JailersTowerActiveFloorDifficultyEqualOrGreaterThan: // 287 NYI
 					return false;
 				case ModifierTreeType.PlayerCovenant: // 288
-					if (referencePlayer._playerData.CovenantID != reqValue)
+					if (referencePlayer.PlayerData.CovenantID != reqValue)
 						return false;
 
 					break;
@@ -3994,7 +3994,7 @@ namespace Game.Achievements
 				case ModifierTreeType.GarrisonHasPermanentTalent: // 290 NYI
 					return false;
 				case ModifierTreeType.HasActiveSoulbind: // 291
-					if (referencePlayer._playerData.SoulbindID != reqValue)
+					if (referencePlayer.PlayerData.SoulbindID != reqValue)
 						return false;
 
 					break;
@@ -4036,12 +4036,12 @@ namespace Game.Achievements
 					return false;
 				}
 				case ModifierTreeType.PlayerIsInChromieTime: // 300
-					if (referencePlayer._activePlayerData.UiChromieTimeExpansionID != reqValue)
+					if (referencePlayer.ActivePlayerData.UiChromieTimeExpansionID != reqValue)
 						return false;
 
 					break;
 				case ModifierTreeType.PlayerIsInAnyChromieTime: // 301
-					if (referencePlayer._activePlayerData.UiChromieTimeExpansionID == 0)
+					if (referencePlayer.ActivePlayerData.UiChromieTimeExpansionID == 0)
 						return false;
 
 					break;
@@ -4054,15 +4054,15 @@ namespace Game.Achievements
 				{
 					int block = (int)reqValue / 32;
 
-					if (block >= referencePlayer._activePlayerData.RuneforgePowers.Size())
+					if (block >= referencePlayer.ActivePlayerData.RuneforgePowers.Size())
 						return false;
 
 					uint bit = reqValue % 32;
 
-					return (referencePlayer._activePlayerData.RuneforgePowers[block] & (1u << (int)bit)) != 0;
+					return (referencePlayer.ActivePlayerData.RuneforgePowers[block] & (1u << (int)bit)) != 0;
 				}
 				case ModifierTreeType.PlayerInChromieTimeForScaling: // 304
-					if ((referencePlayer._playerData.CtrOptions._value.ContentTuningConditionMask & 1) == 0)
+					if ((referencePlayer.PlayerData.CtrOptions._value.ContentTuningConditionMask & 1) == 0)
 						return false;
 
 					break;
@@ -4130,7 +4130,7 @@ namespace Game.Achievements
 					break;
 				}
 				case ModifierTreeType.PlayerHasWeeklyRewardsAvailable: // 313
-					if (referencePlayer._activePlayerData.WeeklyRewardsPeriodSinceOrigin == 0)
+					if (referencePlayer.ActivePlayerData.WeeklyRewardsPeriodSinceOrigin == 0)
 						return false;
 
 					break;
@@ -4139,7 +4139,7 @@ namespace Game.Achievements
 					    !refe.IsPlayer())
 						return false;
 
-					if (refe.ToPlayer()._playerData.CovenantID != reqValue)
+					if (refe.ToPlayer().PlayerData.CovenantID != reqValue)
 						return false;
 
 					break;
@@ -4155,7 +4155,7 @@ namespace Game.Achievements
 					return false;
 				case ModifierTreeType.PlayerHasCustomizationChoice: // 323
 				{
-					int customizationChoiceIndex = referencePlayer._playerData.Customizations.FindIndexIf(choice => { return choice.ChrCustomizationChoiceID == reqValue; });
+					int customizationChoiceIndex = referencePlayer.PlayerData.Customizations.FindIndexIf(choice => { return choice.ChrCustomizationChoiceID == reqValue; });
 
 					if (customizationChoiceIndex < 0)
 						return false;
@@ -4281,10 +4281,10 @@ namespace Game.Achievements
 				{
 					bool hasTraitNodeEntry()
 					{
-						foreach (var traitConfig in referencePlayer._activePlayerData.TraitConfigs)
+						foreach (var traitConfig in referencePlayer.ActivePlayerData.TraitConfigs)
 						{
 							if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
-								if (referencePlayer._activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
+								if (referencePlayer.ActivePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
 								    !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
 									continue;
 
@@ -4305,10 +4305,10 @@ namespace Game.Achievements
 				{
 					var traitNodeEntryRank = new Func<short?>(() =>
 					                                          {
-						                                          foreach (var traitConfig in referencePlayer._activePlayerData.TraitConfigs)
+						                                          foreach (var traitConfig in referencePlayer.ActivePlayerData.TraitConfigs)
 						                                          {
 							                                          if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
-								                                          if (referencePlayer._activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
+								                                          if (referencePlayer.ActivePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
 								                                              !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
 									                                          continue;
 
@@ -4327,7 +4327,7 @@ namespace Game.Achievements
 					break;
 				}
 				case ModifierTreeType.PlayerDaysSinceLogout: // 344
-					if (GameTime.GetGameTime() - referencePlayer._playerData.LogoutTime < reqValue * Time.Day)
+					if (GameTime.GetGameTime() - referencePlayer.PlayerData.LogoutTime < reqValue * Time.Day)
 						return false;
 
 					break;
@@ -4398,7 +4398,7 @@ namespace Game.Achievements
 
 		private MultiMap<CriteriaStartEvent, Criteria> _criteriasByTimedType = new();
 
-		// store criterias by type to speed up lookup
+		// store criterias by Type to speed up lookup
 		private MultiMap<CriteriaType, Criteria> _criteriasByType = new();
 
 		private MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
@@ -4505,7 +4505,7 @@ namespace Game.Achievements
 			// Load criteria tree nodes
 			foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
 			{
-				// Find linked achievement
+				// Find linked Achievement
 				AchievementRecord  achievement    = GetEntry(achievementCriteriaTreeIds, tree);
 				ScenarioStepRecord scenarioStep   = GetEntry(scenarioCriteriaTreeIds, tree);
 				QuestObjective     questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
@@ -4664,7 +4664,7 @@ namespace Game.Achievements
 
 			_criteriaDataMap.Clear(); // need for reload case
 
-			SQLResult result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
+			SQLResult result = DB.World.Query("SELECT criteria_id, Type, value1, value2, ScriptName FROM criteria_data");
 
 			if (result.IsEmpty())
 			{
@@ -4695,7 +4695,7 @@ namespace Game.Achievements
 				if (!scriptName.IsEmpty())
 				{
 					if (dataType != CriteriaDataType.Script)
-						Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data type (Entry: {0}, type {1}), useless data.", criteria_id, dataType);
+						Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data Type (Entry: {0}, Type {1}), useless data.", criteria_id, dataType);
 					else
 						scriptId = Global.ObjectMgr.GetScriptId(scriptName);
 				}
@@ -4951,7 +4951,7 @@ namespace Game.Achievements
 		{
 			if (DataType >= CriteriaDataType.Max)
 			{
-				Log.outError(LogFilter.Sql, "Table `criteria_data` for criteria (Entry: {0}) has wrong data type ({1}), ignored.", criteria.Id, DataType);
+				Log.outError(LogFilter.Sql, "Table `criteria_data` for criteria (Entry: {0}) has wrong data Type ({1}), ignored.", criteria.Id, DataType);
 
 				return false;
 			}
@@ -4988,7 +4988,7 @@ namespace Game.Achievements
 				default:
 					if (DataType != CriteriaDataType.Script)
 					{
-						Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaType)criteria.Entry.Type);
+						Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria Type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaType)criteria.Entry.Type);
 
 						return false;
 					}
@@ -5006,7 +5006,7 @@ namespace Game.Achievements
 					    Global.ObjectMgr.GetCreatureTemplate(Creature.Id) == null)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_CREATURE ({2}) has non-existing creature id in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_CREATURE ({2}) has non-existing creature id in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5021,7 +5021,7 @@ namespace Game.Achievements
 					    ClassRace.RaceId == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType);
@@ -5033,7 +5033,7 @@ namespace Game.Achievements
 					    ((1 << (int)(ClassRace.ClassId - 1)) & (int)Class.ClassMaskAllPlayable) == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5046,7 +5046,7 @@ namespace Game.Achievements
 					    (SharedConst.GetMaskForRace((Race)ClassRace.RaceId) & (long)SharedConst.RaceMaskAllPlayable) == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5061,7 +5061,7 @@ namespace Game.Achievements
 					    Health.Percent > 100)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_PLAYER_LESS_HEALTH ({2}) has wrong percent value in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_PLAYER_LESS_HEALTH ({2}) has wrong percent value in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5079,7 +5079,7 @@ namespace Game.Achievements
 					if (spellEntry == null)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell id in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type {2} has wrong spell id in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5091,7 +5091,7 @@ namespace Game.Achievements
 					if (spellEntry.GetEffects().Count <= Aura.EffectIndex)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell effect index in value2 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type {2} has wrong spell effect index in value2 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5103,7 +5103,7 @@ namespace Game.Achievements
 					if (spellEntry.GetEffect(Aura.EffectIndex).ApplyAuraName == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has non-aura spell effect (ID: {3} Effect: {4}), ignores.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type {2} has non-aura spell effect (ID: {3} Effect: {4}), ignores.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5119,7 +5119,7 @@ namespace Game.Achievements
 					if (Value.ComparisonType >= (int)ComparisionType.Max)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_VALUE ({2}) has wrong ComparisionType in value2 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_VALUE ({2}) has wrong ComparisionType in value2 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5133,7 +5133,7 @@ namespace Game.Achievements
 					if (Level.Min > SharedConst.GTMaxLevel)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_LEVEL ({2}) has wrong minlevel in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_LEVEL ({2}) has wrong minlevel in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5147,7 +5147,7 @@ namespace Game.Achievements
 					if (Gender.Gender > (int)Framework.Constants.Gender.None)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_GENDER ({2}) has wrong gender in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_GENDER ({2}) has wrong gender in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5161,7 +5161,7 @@ namespace Game.Achievements
 					if (ScriptId == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_SCRIPT ({2}) does not have ScriptName set, ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_SCRIPT ({2}) does not have ScriptName set, ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType);
@@ -5174,7 +5174,7 @@ namespace Game.Achievements
 					if (MapPlayers.MaxCount <= 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT ({2}) has wrong max players count in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT ({2}) has wrong max players count in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5189,7 +5189,7 @@ namespace Game.Achievements
 					    TeamId.Team != (int)Team.Horde)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_TEAM ({2}) has unknown team in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_T_TEAM ({2}) has unknown team in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5203,7 +5203,7 @@ namespace Game.Achievements
 					if (Drunk.State >= 4)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_DRUNK ({2}) has unknown drunken state in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_DRUNK ({2}) has unknown drunken State in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5217,7 +5217,7 @@ namespace Game.Achievements
 					if (!CliDB.HolidaysStorage.ContainsKey(Holiday.Id))
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data`(Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_HOLIDAY ({2}) has unknown holiday in value1 ({3}), ignored.",
+						             "Table `criteria_data`(Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_HOLIDAY ({2}) has unknown holiday in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5235,7 +5235,7 @@ namespace Game.Achievements
 					    GameEvent.Id >= events.Length)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_GAME_EVENT ({2}) has unknown game_event in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_GAME_EVENT ({2}) has unknown game_event in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5252,7 +5252,7 @@ namespace Game.Achievements
 					if (EquippedItem.ItemQuality >= (uint)ItemQuality.Max)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `achievement_criteria_requirement` (Entry: {0} Type: {1}) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPED_ITEM ({2}) has unknown quality state in value1 ({3}), ignored.",
+						             "Table `achievement_criteria_requirement` (Entry: {0} Type: {1}) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPED_ITEM ({2}) has unknown quality State in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5266,7 +5266,7 @@ namespace Game.Achievements
 					if (!CliDB.MapStorage.ContainsKey(MapId.Id))
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_ID ({2}) contains an unknown map entry in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_MAP_ID ({2}) contains an unknown map entry in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5281,7 +5281,7 @@ namespace Game.Achievements
 					    ClassRace.RaceId == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType);
@@ -5293,7 +5293,7 @@ namespace Game.Achievements
 					    ((1 << (int)(ClassRace.ClassId - 1)) & (int)Class.ClassMaskAllPlayable) == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5306,7 +5306,7 @@ namespace Game.Achievements
 					    ((ulong)SharedConst.GetMaskForRace((Race)ClassRace.RaceId) & SharedConst.RaceMaskAllPlayable) == 0)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5320,7 +5320,7 @@ namespace Game.Achievements
 					if (!CliDB.CharTitlesStorage.ContainsKey(KnownTitle.Id))
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_KNOWN_TITLE ({2}) contains an unknown title_id in value1 ({3}), ignore.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_KNOWN_TITLE ({2}) contains an unknown title_id in value1 ({3}), ignore.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5334,7 +5334,7 @@ namespace Game.Achievements
 					if (itemQuality.Quality >= (uint)ItemQuality.Max)
 					{
 						Log.outError(LogFilter.Sql,
-						             "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_ITEM_QUALITY ({2}) contains an unknown quality state value in value1 ({3}), ignored.",
+						             "Table `criteria_data` (Entry: {0} Type: {1}) for data Type CRITERIA_DATA_TYPE_S_ITEM_QUALITY ({2}) contains an unknown quality State value in value1 ({3}), ignored.",
 						             criteria.Id,
 						             criteria.Entry.Type,
 						             DataType,
@@ -5345,7 +5345,7 @@ namespace Game.Achievements
 
 					return true;
 				default:
-					Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) contains data of a non-supported data type ({2}), ignored.", criteria.Id, criteria.Entry.Type, DataType);
+					Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) contains data of a non-supported data Type ({2}), ignored.", criteria.Id, criteria.Entry.Type, DataType);
 
 					return false;
 			}
@@ -5474,7 +5474,7 @@ namespace Game.Achievements
 					if (!map.IsDungeon())
 					{
 						Log.outError(LogFilter.Achievement,
-						             "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for achievement criteria {1} for non-dungeon/non-raid map {2}",
+						             "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for Achievement criteria {1} for non-dungeon/non-raid map {2}",
 						             CriteriaDataType.InstanceScript,
 						             criteriaId,
 						             map.GetId());
@@ -5487,7 +5487,7 @@ namespace Game.Achievements
 					if (instance == null)
 					{
 						Log.outError(LogFilter.Achievement,
-						             "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for achievement criteria {1} for map {2} but map does not have a instance script",
+						             "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for Achievement criteria {1} for map {2} but map does not have a instance script",
 						             CriteriaDataType.InstanceScript,
 						             criteriaId,
 						             map.GetId());

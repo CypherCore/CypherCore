@@ -64,7 +64,7 @@ namespace Game.Spells
 				amount = GetSpellEffectInfo().CalcValue(caster, _baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
 			else if (caster != null &&
 			         caster.IsTypeId(TypeId.Player))
-				amount = (int)(caster.ToPlayer()._activePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
+				amount = (int)(caster.ToPlayer().ActivePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
 
 			// custom amount calculations go here
 			switch (GetAuraType())
@@ -1158,7 +1158,7 @@ namespace Game.Spells
 				target._invisibilityDetect.AddValue(type, -GetAmount());
 			}
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (target.IsInWorld)
 				target.UpdateObjectVisibility();
 		}
@@ -1211,7 +1211,7 @@ namespace Game.Spells
 
 					if (!found)
 					{
-						// if not have invisibility auras of type INVISIBILITY_GENERAL
+						// if not have invisibility auras of Type INVISIBILITY_GENERAL
 						// remove glow vision
 						if (playerTarget != null &&
 						    type == InvisibilityType.General)
@@ -1226,7 +1226,7 @@ namespace Game.Spells
 				target._invisibility.AddValue(type, -GetAmount());
 			}
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
 				// drop flag at invisibiliy in bg
 				target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
@@ -1257,7 +1257,7 @@ namespace Game.Spells
 				target._stealthDetect.AddValue(type, -GetAmount());
 			}
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (target.IsInWorld)
 				target.UpdateObjectVisibility();
 		}
@@ -1297,7 +1297,7 @@ namespace Game.Spells
 				}
 			}
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
 				// drop flag at stealth in bg
 				target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
@@ -1320,7 +1320,7 @@ namespace Game.Spells
 			else
 				target._stealth.AddValue(type, -GetAmount());
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (target.IsInWorld)
 				target.UpdateObjectVisibility();
 		}
@@ -1372,17 +1372,17 @@ namespace Game.Spells
 			if (!target.IsTypeId(TypeId.Player))
 				return;
 
-			// prepare spirit state
+			// prepare spirit State
 			if (apply)
 			{
 				if (target.IsTypeId(TypeId.Player))
-					// set stand state (expected in this form)
+					// set stand State (expected in this form)
 					if (!target.IsStandState())
 						target.SetStandState(UnitStandStateType.Stand);
 			}
 			// die at aura end
 			else if (target.IsAlive())
-				// call functions which may have additional effects after changing state of unit
+				// call functions which may have additional effects after changing State of unit
 			{
 				target.SetDeathState(DeathState.JustDied);
 			}
@@ -1615,7 +1615,7 @@ namespace Game.Spells
 				return;
 
 			if (target.IsTypeId(TypeId.Player))
-				// Learn spells for shapeshift form - no need to send action bars or add spells to spellbook
+				// Learn spells for shapeshift form - no need to send Action bars or add spells to spellbook
 				for (byte i = 0; i < SpellConst.MaxShapeshift; ++i)
 				{
 					if (shapeInfo.PresetSpellID[i] == 0)
@@ -2020,7 +2020,7 @@ namespace Game.Spells
 			else
 				target.RemoveUnitFlag(UnitFlags.NonAttackable2);
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
 			{
 				if (target.GetMap().IsDungeon())
@@ -2113,7 +2113,7 @@ namespace Game.Spells
 					{
 						player._ApplyWeaponDamage(slot, item, !apply);
 
-						if (!apply) // apply case already handled on item dependent aura removal (if any)
+						if (!apply) // apply case already handled on Item dependent aura removal (if any)
 							player.UpdateWeaponDependentAuras(attackType);
 					}
 				}
@@ -2136,7 +2136,7 @@ namespace Game.Spells
 			{
 				target.SetUnitFlag(UnitFlags.Silenced);
 
-				// call functions which may have additional effects after changing state of unit
+				// call functions which may have additional effects after changing State of unit
 				// Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
 				for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
 				{
@@ -2144,7 +2144,7 @@ namespace Game.Spells
 
 					if (spell != null)
 						if (spell._spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
-							// Stop spells on prepare or casting state
+							// Stop spells on prepare or casting State
 							target.InterruptSpell(i, false);
 				}
 			}
@@ -2221,7 +2221,7 @@ namespace Game.Spells
 			{
 				target.SetUnitFlag2(UnitFlags2.NoActions);
 
-				// call functions which may have additional effects after changing state of unit
+				// call functions which may have additional effects after changing State of unit
 				// Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
 				for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
 				{
@@ -2229,7 +2229,7 @@ namespace Game.Spells
 
 					if (spell)
 						if (spell._spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
-							// Stop spells on prepare or casting state
+							// Stop spells on prepare or casting State
 							target.InterruptSpell(i, false);
 				}
 			}
@@ -2305,7 +2305,7 @@ namespace Game.Spells
 					target.RemoveDynamicFlag(UnitDynFlags.TrackUnit);
 			}
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (target.IsInWorld)
 				target.UpdateObjectVisibility();
 		}
@@ -3311,7 +3311,7 @@ namespace Game.Spells
 
 			Unit target = aurApp.GetTarget();
 
-			// only players have base stats
+			// only players have base Stats
 			if (!target.IsTypeId(TypeId.Player))
 			{
 				//pets only have base armor
@@ -3375,10 +3375,10 @@ namespace Game.Spells
 
 			Unit target = aurApp.GetTarget();
 
-			// only players have base stats
+			// only players have base Stats
 			if (!target.IsTypeId(TypeId.Player))
 			{
-				//only pets have base stats
+				//only pets have base Stats
 				if (target.IsPet() &&
 				    Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
 					target.HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, GetAmount(), apply);
@@ -3439,7 +3439,7 @@ namespace Game.Spells
 				return;
 
 			for (var i = Stats.Strength; i < Stats.Max; i++)
-				// -1 or -2 is all stats (misc < -2 checked in function beginning)
+				// -1 or -2 is all Stats (misc < -2 checked in function beginning)
 				if (GetMiscValue() < 0 ||
 				    GetMiscValue() == (int)i)
 				{
@@ -3476,7 +3476,7 @@ namespace Game.Spells
 				return;
 			}
 
-			// only players have base stats
+			// only players have base Stats
 			if (!target.IsTypeId(TypeId.Player))
 				return;
 
@@ -3573,11 +3573,11 @@ namespace Game.Spells
 
 			Unit target = aurApp.GetTarget();
 
-			// save current health state
+			// save current health State
 			float healthPct  = target.GetHealthPct();
 			bool  zeroHealth = !target.IsAlive();
 
-			// players in corpse state may mean two different states:
+			// players in corpse State may mean two different states:
 			/// 1. player just died but did not release (in this case health == 0)
 			/// 2. player is corpse running (ie ghost) (in this case health == 1)
 			if (target.GetDeathState() == DeathState.Corpse)
@@ -3585,7 +3585,7 @@ namespace Game.Spells
 
 			for (int i = (int)Stats.Strength; i < (int)Stats.Max; i++)
 				if (Convert.ToBoolean(GetMiscValueB() & (1 << i)) ||
-				    GetMiscValueB() == 0) // 0 is also used for all stats
+				    GetMiscValueB() == 0) // 0 is also used for all Stats
 				{
 					float amount = target.GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage,
 					                                             aurEff =>
@@ -3636,7 +3636,7 @@ namespace Game.Spells
 			if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
 				return;
 
-			// only players have primary stats
+			// only players have primary Stats
 			Player player = aurApp.GetTarget().ToPlayer();
 
 			if (!player)
@@ -3679,7 +3679,7 @@ namespace Game.Spells
 				return;
 			}
 
-			// only players have base stats
+			// only players have base Stats
 			if (!target.IsTypeId(TypeId.Player))
 				return;
 
@@ -4523,7 +4523,7 @@ namespace Game.Spells
 				for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
 					if (Convert.ToBoolean(GetMiscValue() & (1 << (int)i)))
 					{
-						// only aura type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
+						// only aura Type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
 						float amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, 1u << (int)i);
 						thisPlayer.SetModDamageDonePercent(i, amount);
 					}
@@ -5345,7 +5345,7 @@ namespace Game.Spells
 					target._invisibilityDetect.DelFlag(InvisibilityType.Drunk);
 			}
 
-			// call functions which may have additional effects after changing state of unit
+			// call functions which may have additional effects after changing State of unit
 			if (target.IsInWorld)
 				target.UpdateObjectVisibility();
 		}
@@ -5875,7 +5875,7 @@ namespace Game.Spells
 			ProcFlagsInit procVictim   = new ProcFlagsInit(ProcFlags.TakeHelpfulPeriodic);
 			ProcFlagsHit  hitMask      = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
 
-			// ignore item heals
+			// ignore Item heals
 			if (GetBase().GetCastItemGUID().IsEmpty())
 				Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, null, null, healInfo);
 		}

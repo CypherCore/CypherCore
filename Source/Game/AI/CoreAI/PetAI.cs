@@ -90,7 +90,7 @@ namespace Game.AI
 				}
 			}
 
-			// Autocast (casted only in combat or persistent spells in any state)
+			// Autocast (casted only in combat or persistent spells in any State)
 			if (!me.HasUnitState(UnitState.Casting))
 			{
 				List<Tuple<Unit, Spell>> targetSpellStore = new();

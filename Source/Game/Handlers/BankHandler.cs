@@ -129,7 +129,7 @@ namespace Game
 			}
 
 			uint slot = GetPlayer().GetBankBagSlotCount();
-			// next slot
+			// next Slot
 			++slot;
 
 			BankBagSlotPricesRecord slotEntry = CliDB.BankBagSlotPricesStorage.LookupByKey(slot);

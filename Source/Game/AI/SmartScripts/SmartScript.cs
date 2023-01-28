@@ -968,7 +968,7 @@ namespace Game.AI
 							}
 						}
 					}
-					else // Specific target type
+					else // Specific target Type
 					{
 						foreach (var target in targets)
 							if (IsPlayer(target))
@@ -2838,7 +2838,7 @@ namespace Game.AI
 							doCreatePersonalClone(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), invoker);
 					}
 
-					// action list will continue on personal clones
+					// Action list will continue on personal clones
 					_timedActionList.RemoveAll(script => { return script.EventId > e.EventId; });
 
 					break;
@@ -2877,7 +2877,7 @@ namespace Game.AI
 					break;
 				}
 				default:
-					Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+					Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action Type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
 
 					break;
 			}
@@ -2896,7 +2896,7 @@ namespace Game.AI
 
 		private void ProcessTimedAction(SmartScriptHolder e, uint min, uint max, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
 		{
-			// We may want to execute action rarely and because of this if condition is not fulfilled the action will be rechecked in a long time
+			// We may want to execute Action rarely and because of this if condition is not fulfilled the Action will be rechecked in a long time
 			if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(e.EntryOrGuid, e.EventId, e.SourceType, unit, GetBaseObject()))
 			{
 				RecalcTimer(e, min, max);
@@ -3637,7 +3637,7 @@ namespace Game.AI
 
 					if (creatures.Empty())
 					{
-						// if there are at least two same npcs, they will perform the same action immediately even if this is useless...
+						// if there are at least two same npcs, they will perform the same Action immediately even if this is useless...
 						RecalcTimer(e, 1000, 3000);
 
 						return;
@@ -3733,16 +3733,16 @@ namespace Game.AI
 					switch (e.Event.gossipHello.filter)
 					{
 						case 0:
-							// no filter set, always execute action
+							// no filter set, always execute Action
 							break;
 						case 1:
-							// OnGossipHello only filter set, skip action if OnReportUse
+							// OnGossipHello only filter set, skip Action if OnReportUse
 							if (var0 != 0)
 								return;
 
 							break;
 						case 2:
-							// OnReportUse only filter set, skip action if OnGossipHello
+							// OnReportUse only filter set, skip Action if OnGossipHello
 							if (var0 == 0)
 								return;
 
@@ -4050,7 +4050,7 @@ namespace Game.AI
 				}
 				case SmartEvents.GossipSelect:
 				{
-					Log.outDebug(LogFilter.ScriptsAi, "SmartScript: Gossip Select:  menu {0} action {1}", var0, var1); //little help for scripters
+					Log.outDebug(LogFilter.ScriptsAi, "SmartScript: Gossip Select:  menu {0} Action {1}", var0, var1); //little help for scripters
 
 					if (e.Event.gossip.sender != var0 ||
 					    e.Event.gossip.action != var1)
@@ -4237,7 +4237,7 @@ namespace Game.AI
 					break;
 				}
 				default:
-					Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event type {0}", e.GetEventType());
+					Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event Type {0}", e.GetEventType());
 
 					break;
 			}
@@ -4410,7 +4410,7 @@ namespace Game.AI
 			if (_me != null &&
 			    _me.IsInEvadeMode())
 			{
-				// Check if the timed action list finished and clear it if so.
+				// Check if the timed Action list finished and clear it if so.
 				// This is required by SMART_ACTION_CALL_TIMED_ACTIONLIST failing if mTimedActionList is not empty.
 				if (!_timedActionList.Empty())
 				{
@@ -4507,7 +4507,7 @@ namespace Game.AI
 		{
 			RaisePriority(e);
 
-			// This allows to retry the action later without rolling again the chance roll (which might fail and end up not executing the action)
+			// This allows to retry the Action later without rolling again the chance roll (which might fail and end up not executing the Action)
 			if (ignoreChanceRoll)
 				e.Event.event_flags |= SmartEventFlags.TempIgnoreChanceRoll;
 
@@ -4787,7 +4787,7 @@ namespace Game.AI
 			for (var i = 0; i < _timedActionList.Count; ++i)
 			{
 				var scriptHolder = _timedActionList[i];
-				scriptHolder.EnableTimed = i == 0; //enable processing only for the first action
+				scriptHolder.EnableTimed = i == 0; //enable processing only for the first Action
 
 				if (e.Action.timedActionList.timerType == 0)
 					scriptHolder.Event.type = SmartEvents.UpdateOoc;
@@ -4903,7 +4903,7 @@ namespace Game.AI
 
 			if (!smart &&
 			    !silent)
-				Log.outError(LogFilter.Sql, "SmartScript: Action target Creature (GUID: {0} Entry: {1}) is not using SmartAI, action skipped to prevent crash.", creature != null ? creature.GetSpawnId() : (_me != null ? _me.GetSpawnId() : 0), creature != null ? creature.GetEntry() : (_me != null ? _me.GetEntry() : 0));
+				Log.outError(LogFilter.Sql, "SmartScript: Action target Creature (GUID: {0} Entry: {1}) is not using SmartAI, Action skipped to prevent crash.", creature != null ? creature.GetSpawnId() : (_me != null ? _me.GetSpawnId() : 0), creature != null ? creature.GetEntry() : (_me != null ? _me.GetEntry() : 0));
 
 			return smart;
 		}
@@ -4920,7 +4920,7 @@ namespace Game.AI
 
 			if (!smart &&
 			    !silent)
-				Log.outError(LogFilter.Sql, "SmartScript: Action target GameObject (GUID: {0} Entry: {1}) is not using SmartGameObjectAI, action skipped to prevent crash.", gameObject != null ? gameObject.GetSpawnId() : (_go != null ? _go.GetSpawnId() : 0), gameObject != null ? gameObject.GetEntry() : (_go != null ? _go.GetEntry() : 0));
+				Log.outError(LogFilter.Sql, "SmartScript: Action target GameObject (GUID: {0} Entry: {1}) is not using SmartGameObjectAI, Action skipped to prevent crash.", gameObject != null ? gameObject.GetSpawnId() : (_go != null ? _go.GetSpawnId() : 0), gameObject != null ? gameObject.GetEntry() : (_go != null ? _go.GetEntry() : 0));
 
 			return smart;
 		}

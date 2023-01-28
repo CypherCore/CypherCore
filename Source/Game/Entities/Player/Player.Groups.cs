@@ -23,7 +23,7 @@ namespace Game.Entities
 			{
 				Player Target = refe.GetSource();
 
-				// IsHostileTo check duel and controlled by enemy
+				// IsHostileTo check Duel and controlled by enemy
 				if (Target &&
 				    Target != this &&
 				    IsWithinDistInMap(Target, radius) &&
@@ -188,10 +188,10 @@ namespace Game.Entities
 		public void SetPartyType(GroupCategory category, GroupType type)
 		{
 			Cypher.Assert(category < GroupCategory.Max);
-			byte value = _playerData.PartyType;
+			byte value = PlayerData.PartyType;
 			value &= (byte)~((byte)0xFF << ((byte)category * 4));
 			value |= (byte)((byte)type << ((byte)category * 4));
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.PartyType), value);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.PartyType), value);
 		}
 
 		public void ResetGroupUpdateSequenceIfNeeded(Group group)

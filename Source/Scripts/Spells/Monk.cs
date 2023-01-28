@@ -247,7 +247,7 @@ namespace Scripts.Spells.Monk
 
 		private void Absorb(DamageInfo dmgInfo, float multiplier)
 		{
-			// Prevent default action (which would remove the aura)
+			// Prevent default Action (which would remove the aura)
 			PreventDefaultAction();
 
 			// make sure damage doesn't come from stagger damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
@@ -310,7 +310,7 @@ namespace Scripts.Spells.Monk
 				}
 				else
 				{
-					// amount changed the stagger type so we need to change the stagger amount (e.g. from medium to light)
+					// amount changed the stagger Type so we need to change the stagger amount (e.g. from medium to light)
 					GetTarget().RemoveAura(auraStagger);
 					AddNewStagger(target, spellId, newAmount);
 				}

@@ -291,8 +291,8 @@ namespace Game.Networking.Packets
 			MemberStats.PositionZ = (short)(player.GetPositionZ());
 
 			MemberStats.SpecID               = (ushort)player.GetPrimarySpecialization();
-			MemberStats.PartyType[0]         = (sbyte)(player._playerData.PartyType & 0xF);
-			MemberStats.PartyType[1]         = (sbyte)(player._playerData.PartyType >> 4);
+			MemberStats.PartyType[0]         = (sbyte)(player.PlayerData.PartyType & 0xF);
+			MemberStats.PartyType[1]         = (sbyte)(player.PlayerData.PartyType >> 4);
 			MemberStats.WmoGroupID           = 0;
 			MemberStats.WmoDoodadPlacementID = 0;
 

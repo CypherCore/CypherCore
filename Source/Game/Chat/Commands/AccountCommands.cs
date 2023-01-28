@@ -381,7 +381,7 @@ namespace Game.Chat
 		[Command("password", CypherStrings.CommandAccPasswordHelp, RBACPermissions.CommandAccountPassword)]
 		private static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, [OptionalArg] string confirmEmail)
 		{
-			// First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
+			// First, we check config. What security Type (sec Type) is it ? Depending on it, the command branches out
 			uint pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
 			// We compare the old, saved password to the entered old password - no chance for the unauthorized.
@@ -709,7 +709,7 @@ namespace Game.Chat
 					Global.AccountMgr.GetName(accountId, out accountName);
 				}
 
-				// Let set addon state only for lesser (strong) security level
+				// Let set addon State only for lesser (strong) security level
 				// or to self account
 				if (handler.GetSession() != null &&
 				    handler.GetSession().GetAccountId() != accountId &&

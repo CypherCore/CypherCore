@@ -99,7 +99,7 @@ namespace Game.Movement
 					while (!_pointsForPathSwitch.Empty() && _pointsForPathSwitch[0].PathIndex <= _currentNode)
 					{
 						_pointsForPathSwitch.RemoveAt(0);
-						owner._taxi.NextTaxiDestination();
+						owner.Taxi.NextTaxiDestination();
 
 						if (!_pointsForPathSwitch.Empty())
 						{
@@ -141,12 +141,12 @@ namespace Game.Movement
 			if (!active)
 				return;
 
-			uint taxiNodeId = owner._taxi.GetTaxiDestination();
-			owner._taxi.ClearTaxiDestinations();
+			uint taxiNodeId = owner.Taxi.GetTaxiDestination();
+			owner.Taxi.ClearTaxiDestinations();
 			owner.Dismount();
 			owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.OnTaxi);
 
-			if (owner._taxi.Empty())
+			if (owner.Taxi.Empty())
 			{
 				// update z position to ground and orientation for landing point
 				// this prevent cheating with landing  point at lags
@@ -189,8 +189,8 @@ namespace Game.Movement
 			_path.Clear();
 			_currentNode = (int)startNode;
 			_pointsForPathSwitch.Clear();
-			var   taxi     = player._taxi.GetPath();
-			float discount = player.GetReputationPriceDiscount(player._taxi.GetFlightMasterFactionTemplate());
+			var   taxi     = player.Taxi.GetPath();
+			float discount = player.GetReputationPriceDiscount(player.Taxi.GetFlightMasterFactionTemplate());
 
 			for (int src = 0, dst = 1; dst < taxi.Count; src = dst++)
 			{

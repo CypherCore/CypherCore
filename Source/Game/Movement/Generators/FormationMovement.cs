@@ -67,7 +67,7 @@ namespace Game.Movement
 			    target == null)
 				return false;
 
-			// Owner cannot move. Reset all fields and wait for next action
+			// _owner cannot move. Reset all fields and wait for next Action
 			if (owner.HasUnitState(UnitState.NotMove) ||
 			    owner.IsMovementPreventedByCasting())
 			{
@@ -97,7 +97,7 @@ namespace Game.Movement
 				owner.SetHomePosition(owner.GetPosition());
 
 			// Formation leader has launched a new spline, launch a new one for our member as well
-			// This action does not reset the regular movement launch cycle interval
+			// This Action does not reset the regular movement launch cycle interval
 			if (!target.MoveSpline.Finalized() &&
 			    target.MoveSpline.GetId() != _lastLeaderSplineID)
 			{

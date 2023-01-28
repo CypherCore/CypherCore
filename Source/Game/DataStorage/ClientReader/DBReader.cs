@@ -337,7 +337,7 @@ namespace Game.DataStorage
 					return _palletData[fieldIndex][palletIndex].As<T>();
 			}
 
-			throw new Exception(string.Format("Unexpected compression type {0}", _columnMeta[fieldIndex].CompressionType));
+			throw new Exception(string.Format("Unexpected compression Type {0}", _columnMeta[fieldIndex].CompressionType));
 		}
 
 		private T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
@@ -388,7 +388,7 @@ namespace Game.DataStorage
 					return arr4;
 			}
 
-			throw new Exception(string.Format("Unexpected compression type {0}", columnMeta.CompressionType));
+			throw new Exception(string.Format("Unexpected compression Type {0}", columnMeta.CompressionType));
 		}
 
 		public T As<T>() where T : new()
@@ -502,7 +502,7 @@ namespace Game.DataStorage
 
 							break;
 						default:
-							throw new Exception("Unhandled array type: " + arrayElementType.Name);
+							throw new Exception("Unhandled array Type: " + arrayElementType.Name);
 					}
 				}
 				else

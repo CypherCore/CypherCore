@@ -7,9 +7,9 @@ namespace Game.Scripting.Interfaces
 {
 	public interface IBaseSpellScript
 	{
-		byte _currentScriptState { get; set; }
-		string _scriptName { get; set; }
-		uint _scriptSpellId { get; set; }
+		byte CurrentScriptState { get; set; }
+		string ScriptName { get; set; }
+		uint ScriptSpellId { get; set; }
 
 		bool Load();
 		void Register();

@@ -270,7 +270,7 @@ namespace Game.Chat.Commands
 			[Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
 			private static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
 			{
-				/*if (state)
+				/*if (State)
 				{
 				    if (IpLocationRecord const* location = sIPLocation->GetLocationRecord(handler->GetSession()->GetRemoteAddress()))
 			{

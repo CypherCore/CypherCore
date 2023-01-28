@@ -356,7 +356,7 @@ namespace Game.Chat
 						return true;
 					}
 
-					// send item set in "id - [namedlink locale]" format
+					// send Item set in "id - [namedlink locale]" format
 					if (handler.GetSession() != null)
 						handler.SendSysMessage(CypherStrings.ItemsetListChat, set.Id, set.Id, name, "");
 					else
@@ -676,7 +676,7 @@ namespace Game.Chat
 
 						string knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
 
-						string activeStr = target && target._playerData.PlayerTitle == titleInfo.MaskID
+						string activeStr = target && target.PlayerData.PlayerTitle == titleInfo.MaskID
 							                   ? handler.GetCypherString(CypherStrings.Active)
 							                   : "";
 
@@ -698,7 +698,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[CommandGroup("item")]
+		[CommandGroup("Item")]
 		private class LookupItemCommands
 		{
 			[Command("", RBACPermissions.CommandLookupItem, true)]
@@ -820,7 +820,7 @@ namespace Game.Chat
 							return true;
 						}
 
-						// send item set in "id - [namedlink locale]" format
+						// send Item set in "id - [namedlink locale]" format
 						if (handler.GetSession())
 							handler.SendSysMessage(CypherStrings.ItemsetListChat, id, id, name, "");
 						else
@@ -1143,7 +1143,7 @@ namespace Game.Chat
 								if (handler.GetSession() != null)
 								{
 									int maxLevel    = 0;
-									var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer()._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+									var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 									if (questLevels.HasValue)
 										maxLevel = questLevels.Value.MaxLevel;
@@ -1219,7 +1219,7 @@ namespace Game.Chat
 						if (handler.GetSession() != null)
 						{
 							int maxLevel    = 0;
-							var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer()._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+							var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 							if (questLevels.HasValue)
 								maxLevel = questLevels.Value.MaxLevel;
@@ -1299,7 +1299,7 @@ namespace Game.Chat
 					if (handler.GetSession())
 					{
 						int maxLevel    = 0;
-						var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, handler.GetSession().GetPlayer()._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+						var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, handler.GetSession().GetPlayer().PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 						if (questLevels.HasValue)
 							maxLevel = questLevels.Value.MaxLevel;

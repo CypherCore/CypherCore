@@ -56,7 +56,7 @@ namespace Game.Spells
 		private AuraFlags _flags;     // Aura info flag
 		private bool _needClientUpdate;
 		private AuraRemoveMode _removeMode; // Store info for know remove aura reason
-		private byte _slot;                 // Aura slot on unit
+		private byte _slot;                 // Aura Slot on unit
 		private Unit _target;
 
 		public AuraApplication(Unit target, Unit caster, Aura aura, uint effMask)
@@ -71,7 +71,7 @@ namespace Game.Spells
 
 			Cypher.Assert(GetTarget() != null && GetBase() != null);
 
-			// Try find slot for aura
+			// Try find Slot for aura
 			byte slot = 0;
 
 			// Lookup for auras already applied from spell
@@ -89,11 +89,11 @@ namespace Game.Spells
 				_slot = slot;
 				GetTarget().SetVisibleAura(this);
 				_needClientUpdate = true;
-				Log.outDebug(LogFilter.Spells, "Aura: {0} Effect: {1} put to unit visible auras slot: {2}", GetBase().GetId(), GetEffectMask(), slot);
+				Log.outDebug(LogFilter.Spells, "Aura: {0} Effect: {1} put to unit visible auras Slot: {2}", GetBase().GetId(), GetEffectMask(), slot);
 			}
 			else
 			{
-				Log.outError(LogFilter.Spells, "Aura: {0} Effect: {1} could not find empty unit visible slot", GetBase().GetId(), GetEffectMask());
+				Log.outError(LogFilter.Spells, "Aura: {0} Effect: {1} could not find empty unit visible Slot", GetBase().GetId(), GetEffectMask());
 			}
 
 
@@ -435,7 +435,7 @@ namespace Game.Spells
 			_duration       = _maxDuration;
 			_procCharges    = CalcMaxCharges(createInfo.Caster);
 			_isUsingCharges = _procCharges != 0;
-			// _casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
+			// _casterLevel = cast Item level/caster level, caster level should be saved to db, confirmed with sniffs
 		}
 
 		public T GetScript<T>() where T : AuraScript
@@ -502,7 +502,7 @@ namespace Game.Spells
 
 			_applications[target.GetGUID()] = auraApp;
 
-			// set infinity cooldown state for spells
+			// set infinity cooldown State for spells
 			if (caster != null &&
 			    caster.IsTypeId(TypeId.Player))
 				if (_spellInfo.IsCooldownStartedOnEvent())
@@ -538,10 +538,10 @@ namespace Game.Spells
 
 			_removedApplications.Add(auraApp);
 
-			// reset cooldown state for spells
+			// reset cooldown State for spells
 			if (caster != null &&
 			    GetSpellInfo().IsCooldownStartedOnEvent())
-				// note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
+				// note: Item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
 				caster.GetSpellHistory().SendCooldownEvent(GetSpellInfo());
 		}
 
@@ -591,7 +591,7 @@ namespace Game.Spells
 				else
 				{
 					// needs readding - remove now, will be applied in next update cycle
-					// (dbcs do not have auras which apply on same type of targets but have different radius, so this is not really needed)
+					// (dbcs do not have auras which apply on same Type of targets but have different radius, so this is not really needed)
 					if (app.Value.GetTarget().IsImmunedToSpell(GetSpellInfo(), caster, true) ||
 					    !CanBeAppliedOn(app.Value.GetTarget()))
 					{
@@ -672,7 +672,7 @@ namespace Game.Spells
 					if (!_owner.IsSelfOrInSameMap(unit))
 						// @todo There is a crash caused by shadowfiend load addon
 						Log.outFatal(LogFilter.Spells,
-						             "Aura {0}: Owner {1} (map {2}) is not in the same map as target {3} (map {4}).",
+						             "Aura {0}: _owner {1} (map {2}) is not in the same map as target {3} (map {4}).",
 						             GetSpellInfo().Id,
 						             _owner.GetName(),
 						             _owner.IsInWorld ? (int)_owner.GetMap().GetId() : -1,
@@ -1728,7 +1728,7 @@ namespace Game.Spells
 
 			if (!sameCaster)
 			{
-				// Channeled auras can stack if not forbidden by db or aura type
+				// Channeled auras can stack if not forbidden by db or aura Type
 				if (existingAura.GetSpellInfo().IsChanneled())
 					return true;
 
@@ -2550,7 +2550,7 @@ namespace Game.Spells
 			if (foundAura != null)
 			{
 				// we've here aura, which script triggered removal after modding stack amount
-				// check the state here, so we won't create new Aura object
+				// check the State here, so we won't create new Aura object
 				if (foundAura.IsRemoved())
 					return null;
 
@@ -3330,7 +3330,7 @@ namespace Game.Spells
 				if (!HasEffect(spellEffectInfo.EffectIndex))
 					continue;
 
-				// we can't use effect type like area auras to determine check type, check targets
+				// we can't use effect Type like area auras to determine check Type, check targets
 				SpellTargetCheckTypes selectionType = spellEffectInfo.TargetA.GetCheckType();
 
 				if (spellEffectInfo.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)

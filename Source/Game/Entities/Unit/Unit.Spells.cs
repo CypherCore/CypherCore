@@ -38,7 +38,7 @@ namespace Game.Entities
 
 			if (thisPlayer)
 			{
-				float overrideSP = thisPlayer._activePlayerData.OverrideSpellPowerByAPPercent;
+				float overrideSP = thisPlayer.ActivePlayerData.OverrideSpellPowerByAPPercent;
 
 				if (overrideSP > 0.0f)
 					return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
@@ -55,7 +55,7 @@ namespace Game.Entities
 				if (GetPowerIndex(PowerType.Mana) != (uint)PowerType.Max)
 					DoneAdvertisedBenefit += Math.Max(0, (int)GetStat(Stats.Intellect)); // spellpower from intellect
 
-				// Damage bonus from stats
+				// Damage bonus from Stats
 				var mDamageDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellDamageOfStatPercent);
 
 				foreach (var eff in mDamageDoneOfStatPercent)
@@ -210,7 +210,7 @@ namespace Game.Entities
 			{
 				for (int i = 0; i < (int)SpellSchools.Max; ++i)
 					if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << i)))
-						maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer._activePlayerData.ModDamageDonePercent[i]);
+						maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.ActivePlayerData.ModDamageDonePercent[i]);
 			}
 			else
 			{
@@ -358,7 +358,7 @@ namespace Game.Entities
 
 			if (thisPlayer != null)
 			{
-				float overrideSP = thisPlayer._activePlayerData.OverrideSpellPowerByAPPercent;
+				float overrideSP = thisPlayer.ActivePlayerData.OverrideSpellPowerByAPPercent;
 
 				if (overrideSP > 0.0f)
 					return (uint)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
@@ -384,7 +384,7 @@ namespace Game.Entities
 				if (GetPowerIndex(PowerType.Mana) != (uint)PowerType.Max)
 					advertisedBenefit += Math.Max(0, (uint)GetStat(Stats.Intellect)); // spellpower from intellect
 
-				// Healing bonus from stats
+				// Healing bonus from Stats
 				var mHealingDoneOfStatPercent = GetAuraEffectsByType(AuraType.ModSpellHealingOfStatPercent);
 
 				foreach (var i in mHealingDoneOfStatPercent)
@@ -561,7 +561,7 @@ namespace Game.Entities
 
 				for (int i = 0; i < (int)SpellSchools.Max; ++i)
 					if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
-						maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer._activePlayerData.ModHealingDonePercent[i]);
+						maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.ActivePlayerData.ModHealingDonePercent[i]);
 
 				return maxModDamagePercentSchool;
 			}
@@ -665,7 +665,7 @@ namespace Game.Entities
 						crit_chance = 0.0f;
 					// For other schools
 					else if (IsTypeId(TypeId.Player))
-						crit_chance = ToPlayer()._activePlayerData.SpellCritPercentage;
+						crit_chance = ToPlayer().ActivePlayerData.SpellCritPercentage;
 					else
 						crit_chance = BaseSpellCritChance;
 
@@ -808,7 +808,7 @@ namespace Game.Entities
 
 			WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
-			// Check damage class instead of attack type to correctly handle judgements
+			// Check damage class instead of attack Type to correctly handle judgements
 			// - they are meele, but can't be dodged/parried/deflected because of ranged dmg class
 			if (spellInfo.DmgClass == SpellDmgClass.Ranged)
 				attType = WeaponAttackType.RangedAttack;
@@ -907,7 +907,7 @@ namespace Game.Entities
 
 						break;
 					default:
-						Log.outDebug(LogFilter.Unit, "Spell {0} SPELL_AURA_IGNORE_COMBAT_RESULT has unhandled state {1}", aurEff.GetId(), aurEff.GetMiscValue());
+						Log.outDebug(LogFilter.Unit, "Spell {0} SPELL_AURA_IGNORE_COMBAT_RESULT has unhandled State {1}", aurEff.GetId(), aurEff.GetMiscValue());
 
 						break;
 				}
@@ -1030,7 +1030,7 @@ namespace Game.Entities
 		{
 			ProcFlagsHit hitMask = ProcFlagsHit.None;
 
-			// Check victim state
+			// Check victim State
 			if (missCondition != SpellMissInfo.None)
 			{
 				switch (missCondition)
@@ -1238,7 +1238,7 @@ namespace Game.Entities
 				{
 					var eff = _modAuras[aType][i];
 
-					// Get auras with disease dispel type by caster
+					// Get auras with disease dispel Type by caster
 					if (eff.GetSpellInfo().Dispel == DispelType.Disease &&
 					    eff.GetCasterGUID() == casterGUID)
 					{
@@ -1516,7 +1516,7 @@ namespace Game.Entities
 				                 });
 			}
 
-			// If _immuneToEffect type contain this effect type, IMMUNE effect.
+			// If _immuneToEffect Type contain this effect Type, IMMUNE effect.
 			var effectList = _spellImmune[(int)SpellImmunity.Effect];
 
 			if (hasImmunity(effectList, (uint)spellEffectInfo.Effect))
@@ -1564,13 +1564,13 @@ namespace Game.Entities
 			if (schoolMask == SpellSchoolMask.None)
 				return false;
 
-			// If _immuneToSchool type contain this school type, IMMUNE damage.
+			// If _immuneToSchool Type contain this school Type, IMMUNE damage.
 			uint schoolImmunityMask = GetSchoolImmunityMask();
 
 			if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
 				return true;
 
-			// If _immuneToDamage type contain magic, IMMUNE damage.
+			// If _immuneToDamage Type contain magic, IMMUNE damage.
 			uint damageImmunityMask = GetDamageImmunityMask();
 
 			if (((SpellSchoolMask)damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
@@ -1597,7 +1597,7 @@ namespace Game.Entities
 
 			if (schoolMask != 0)
 			{
-				// If _immuneToSchool type contain this school type, IMMUNE damage.
+				// If _immuneToSchool Type contain this school Type, IMMUNE damage.
 				uint schoolImmunityMask = 0;
 				var  schoolList         = _spellImmune[(int)SpellImmunity.School];
 
@@ -1610,7 +1610,7 @@ namespace Game.Entities
 				if ((schoolImmunityMask & schoolMask) == schoolMask)
 					return true;
 
-				// If _immuneToDamage type contain magic, IMMUNE damage.
+				// If _immuneToDamage Type contain magic, IMMUNE damage.
 				uint damageImmunityMask = GetDamageImmunityMask();
 
 				if ((damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
@@ -1656,9 +1656,9 @@ namespace Game.Entities
 			    ToPlayer().GetSession().PlayerLoading())
 				return;
 
-			// For melee/ranged based attack need update skills and set some Aura states if victim present
+			// For melee/ranged based attack need update Skills and set some Aura states if victim present
 			if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
-				// If exist crit/parry/dodge/block need update aura state (for victim and attacker)
+				// If exist crit/parry/dodge/block need update aura State (for victim and attacker)
 				if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
 					// for victim
 					if (isVictim)
@@ -2153,7 +2153,7 @@ namespace Game.Entities
 					else
 						aura.SetDuration(aura.GetDuration() - delaytime);
 
-					// update for out of range group members (on 1 slot use)
+					// update for out of range group members (on 1 Slot use)
 					aura.SetNeedClientUpdateForTargets();
 				}
 		}
@@ -3336,7 +3336,7 @@ namespace Game.Entities
 						}
 						else
 						{
-							// single target state must be removed before aura creation to preserve existing single target aura
+							// single target State must be removed before aura creation to preserve existing single target aura
 							if (aura.IsSingleTarget())
 								aura.UnregisterSingleTarget();
 
@@ -3967,7 +3967,7 @@ namespace Game.Entities
 					if (caster.HasAuraTypeWithAffectMask(AuraType.AbilityIgnoreAurastate, spellProto))
 						return true;
 
-				// Check per caster aura state
+				// Check per caster aura State
 				// If aura with aurastate by caster not found return false
 				if (Convert.ToBoolean((1 << (int)flag) & (int)AuraStateType.PerCasterAuraStateMask))
 				{
@@ -4114,7 +4114,7 @@ namespace Game.Entities
 				}
 				else
 				{
-					// update for casters, some shouldn't 'see' the aura state
+					// update for casters, some shouldn't 'see' the aura State
 					uint aStateMask = (1u << ((int)auraState - 1));
 
 					if ((aStateMask & (uint)AuraStateType.PerCasterAuraStateMask) != 0)
@@ -4321,7 +4321,7 @@ namespace Game.Entities
 			if (aurApp.HasRemoveMode())
 				return;
 
-			// Update target aura state flag
+			// Update target aura State flag
 			AuraStateType aState = aura.GetSpellInfo().GetAuraState();
 
 			if (aState != 0)
@@ -4418,10 +4418,10 @@ namespace Game.Entities
 			    !createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters())
 				createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
-			// passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
+			// passive and Incanter's Absorption and auras with different Type can stack with themselves any number of times
 			if (!createInfo.GetSpellInfo().IsMultiSlotAura())
 			{
-				// check if cast item changed
+				// check if cast Item changed
 				ObjectGuid castItemGUID = createInfo.CastItemGUID;
 
 				// find current aura from spell and change it's stackamount, or refresh it's duration
@@ -4453,7 +4453,7 @@ namespace Game.Entities
 						auraEff._baseAmount = bp;
 					}
 
-					// correct cast item guid if needed
+					// correct cast Item guid if needed
 					if (castItemGUID != foundAura.GetCastItemGUID())
 					{
 						foundAura.SetCastItemGUID(castItemGUID);

@@ -43,7 +43,7 @@ namespace Game
 
 				if (type >= DisableType.Max)
 				{
-					Log.outError(LogFilter.Sql, "Invalid type {0} specified in `disables` table, skipped.", type);
+					Log.outError(LogFilter.Sql, "Invalid Type {0} specified in `disables` table, skipped.", type);
 
 					continue;
 				}

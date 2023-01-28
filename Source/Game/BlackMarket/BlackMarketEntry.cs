@@ -55,7 +55,7 @@ namespace Game.BlackMarket
 
 			if (Global.ObjectMgr.GetItemTemplate(Item.ItemID) == null)
 			{
-				Log.outError(LogFilter.Misc, "Black market template {0} does not have a valid item. (Entry: {1})", MarketID, Item.ItemID);
+				Log.outError(LogFilter.Misc, "Black market template {0} does not have a valid Item. (Entry: {1})", MarketID, Item.ItemID);
 
 				return false;
 			}

@@ -20,7 +20,7 @@ namespace Game.BattleGrounds.Zones
 		private ObjectGuid[] _FlagKeepers = new ObjectGuid[2]; // 0 - alliance, 1 - horde
 		private int[] _flagsDropTimer = new int[2];
 		private int _flagSpellForceTimer;
-		private WSGFlagState[] _flagState = new WSGFlagState[2]; // for checking flag state
+		private WSGFlagState[] _flagState = new WSGFlagState[2]; // for checking flag State
 		private int[] _flagsTimer = new int[2];
 		private uint _HonorEndKills;
 		private uint _HonorWinKills;
@@ -361,7 +361,7 @@ namespace Game.BattleGrounds.Zones
 			else
 				SendBroadcastText(WSGBroadcastTexts.CapturedAllianceFlag, ChatMsg.BgSystemHorde, player);
 
-			UpdateFlagState(team, WSGFlagState.WaitRespawn); // flag state none
+			UpdateFlagState(team, WSGFlagState.WaitRespawn); // flag State none
 			UpdateTeamScore(GetTeamIndexByTeamId(team));
 			// only flag capture should be updated
 			UpdatePlayerScore(player, ScoreType.FlagCaptures, 1); // +1 flag captures
@@ -508,7 +508,7 @@ namespace Game.BattleGrounds.Zones
 				SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnOneDay);
 				SetAllianceFlagPicker(player.GetGUID());
 				_flagState[TeamId.Alliance] = WSGFlagState.OnPlayer;
-				//update world state to show correct flag carrier
+				//update world State to show correct flag carrier
 				UpdateFlagState(Team.Horde, WSGFlagState.OnPlayer);
 				player.CastSpell(player, WSGSpellId.SilverwingFlag, true);
 				player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.SilverwingFlagPicked);
@@ -532,7 +532,7 @@ namespace Game.BattleGrounds.Zones
 				SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnOneDay);
 				SetHordeFlagPicker(player.GetGUID());
 				_flagState[TeamId.Horde] = WSGFlagState.OnPlayer;
-				//update world state to show correct flag carrier
+				//update world State to show correct flag carrier
 				UpdateFlagState(Team.Alliance, WSGFlagState.OnPlayer);
 				player.CastSpell(player, WSGSpellId.WarsongFlag, true);
 				player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.WarsongFlagPicked);

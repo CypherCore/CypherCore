@@ -306,21 +306,21 @@ namespace Game
 						{
 							if (log)
 								Log.outCommand(GetAccountId(),
-								               $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail item: {item.GetTemplate().GetName()} " +
+								               $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail Item: {item.GetTemplate().GetName()} " +
 								               $"(Entry: {item.GetEntry()} Count: {item.GetCount()}) to: {sendMail.Info.Target} ({receiverGuid}) (Account: {receiverAccountId})");
 
-							item.SetNotRefundable(GetPlayer()); // makes the item no longer refundable
+							item.SetNotRefundable(GetPlayer()); // makes the Item no longer refundable
 							player.MoveItemFromInventory(item.GetBagSlot(), item.GetSlot(), true);
 
-							item.DeleteFromInventoryDB(trans); // deletes item from character's inventory
+							item.DeleteFromInventoryDB(trans); // deletes Item from character's inventory
 							item.SetOwnerGUID(receiverGuid);
 							item.SetState(ItemUpdateState.Changed);
-							item.SaveToDB(trans); // recursive and not have transaction guard into self, item not in inventory and can be save standalone
+							item.SaveToDB(trans); // recursive and not have transaction guard into self, Item not in inventory and can be save standalone
 
 							draft.AddItem(item);
 						}
 
-						// if item send to character at another account, then apply item delivery delay
+						// if Item send to character at another account, then apply Item delivery delay
 						needItemDelay = player.GetSession().GetAccountId() != receiverAccountId;
 					}
 
@@ -328,7 +328,7 @@ namespace Game
 						Log.outCommand(GetAccountId(), "GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail money: {mailInfo.SendMoney} to: {mailInfo.Target} ({receiverGuid}) (Account: {receiverAccountId})");
 				}
 
-				// If theres is an item, there is a one hour delivery delay if sent to another account's character.
+				// If theres is an Item, there is a one hour delivery delay if sent to another account's character.
 				uint deliver_delay = needItemDelay ? WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay) : 0;
 
 				// Mail sent between guild members arrives instantly
@@ -342,7 +342,7 @@ namespace Game
 				if (sendMail.Info.Attachments.Empty())
 					sendMail.Info.Cod = 0;
 
-				// will delete item or place to receiver mail list
+				// will delete Item or place to receiver mail list
 				draft.AddMoney((ulong)sendMail.Info.SendMoney)
 				     .AddCOD((uint)sendMail.Info.Cod)
 				     .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckMask.Copied : MailCheckMask.HasBody, deliver_delay);
@@ -395,11 +395,11 @@ namespace Game
 			if (m != null &&
 			    m.state != MailState.Deleted)
 			{
-				if (player.unReadMails != 0)
-					--player.unReadMails;
+				if (player.UnReadMails != 0)
+					--player.UnReadMails;
 
 				m.checkMask          = m.checkMask | MailCheckMask.Read;
-				player._mailsUpdated = true;
+				player.MailUpdated = true;
 				m.state              = MailState.Changed;
 			}
 		}
@@ -410,7 +410,7 @@ namespace Game
 		{
 			Mail   m      = GetPlayer().GetMail(mailDelete.MailID);
 			Player player = GetPlayer();
-			player._mailsUpdated = true;
+			player.MailUpdated = true;
 
 			if (m != null)
 			{
@@ -488,7 +488,7 @@ namespace Game
 			player.SendMailResult(returnToSender.MailID, MailResponseType.ReturnedToSender, MailResponseResult.Ok);
 		}
 
-		//called when player takes item attached in mail
+		//called when player takes Item attached in mail
 		[WorldPacketHandler(ClientOpcodes.MailTakeItem)]
 		private void HandleMailTakeItem(MailTakeItem takeItem)
 		{
@@ -510,7 +510,7 @@ namespace Game
 				return;
 			}
 
-			// verify that the mail has the item to avoid cheaters taking COD items without paying
+			// verify that the mail has the Item to avoid cheaters taking COD items without paying
 			if (!m.items.Any(p => p.item_guid == AttachID))
 			{
 				player.SendMailResult(takeItem.MailID, MailResponseType.ItemTaken, MailResponseResult.InternalError);
@@ -563,7 +563,7 @@ namespace Game
 						}
 
 						Log.outCommand(GetAccountId(),
-						               "GM {0} (Account: {1}) receiver mail item: {2} (Entry: {3} Count: {4}) and send COD money: {5} to player: {6} (Account: {7})",
+						               "GM {0} (Account: {1}) receiver mail Item: {2} (Entry: {3} Count: {4}) and send COD money: {5} to player: {6} (Account: {7})",
 						               GetPlayerName(),
 						               GetAccountId(),
 						               it.GetTemplate().GetName(),
@@ -589,11 +589,11 @@ namespace Game
 
 				m.COD                = 0;
 				m.state              = MailState.Changed;
-				player._mailsUpdated = true;
+				player.MailUpdated = true;
 				player.RemoveMItem(it.GetGUID().GetCounter());
 
 				uint count = it.GetCount();             // save counts before store and possible merge with deleting
-				it.SetState(ItemUpdateState.Unchanged); // need to set this state, otherwise item cannot be removed later, if neccessary
+				it.SetState(ItemUpdateState.Unchanged); // need to set this State, otherwise Item cannot be removed later, if neccessary
 				player.MoveItemToInventory(dest, it, true);
 
 				player.SaveInventoryAndGoldToDB(trans);
@@ -635,7 +635,7 @@ namespace Game
 
 			m.money              = 0;
 			m.state              = MailState.Changed;
-			player._mailsUpdated = true;
+			player.MailUpdated = true;
 
 			player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.Ok);
 
@@ -676,7 +676,7 @@ namespace Game
 			player.PlayerTalkClass.GetInteractionData().SourceGuid = getList.Mailbox;
 			SendPacket(response);
 
-			// recalculate _nextMailDelivereTime and unReadMails
+			// recalculate _nextMailDelivereTime and UnReadMails
 			GetPlayer().UpdateNextMailTimeAndUnreads();
 		}
 
@@ -706,7 +706,7 @@ namespace Game
 			if (!bodyItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), 8383, ItemContext.None, player))
 				return;
 
-			// in mail template case we need create new item text
+			// in mail template case we need create new Item text
 			if (m.mailTemplateId != 0)
 			{
 				MailTemplateRecord mailTemplateEntry = CliDB.MailTemplateStorage.LookupByKey(m.mailTemplateId);
@@ -739,7 +739,7 @@ namespace Game
 			{
 				m.checkMask          = m.checkMask | MailCheckMask.Copied;
 				m.state              = MailState.Changed;
-				player._mailsUpdated = true;
+				player.MailUpdated = true;
 
 				player.StoreItem(dest, bodyItem, true);
 				player.SendMailResult(createTextItem.MailID, MailResponseType.MadePermanent, MailResponseResult.Ok);
@@ -755,7 +755,7 @@ namespace Game
 		{
 			MailQueryNextTimeResult result = new();
 
-			if (GetPlayer().unReadMails > 0)
+			if (GetPlayer().UnReadMails > 0)
 			{
 				result.NextMailTime = 0.0f;
 

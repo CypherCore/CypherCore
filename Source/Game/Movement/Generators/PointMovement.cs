@@ -126,7 +126,7 @@ namespace Game.Movement
 				MoveSplineInit init = new(owner);
 				init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ(), _generatePath);
 
-				if (_speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
+				if (_speed > 0.0f) // Default value for point motion Type is 0.0, if 0.0 spline will use GetSpeed on unit
 					init.SetVelocity(_speed);
 
 				init.Launch();

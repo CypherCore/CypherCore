@@ -428,8 +428,8 @@ namespace Game.Entities
 
 		public virtual bool LoadFromDB(ulong guid, ObjectGuid ownerGuid, SQLFields fields, uint entry)
 		{
-			// create item before any checks for store correct guid
-			// and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting item from DB
+			// create Item before any checks for store correct guid
+			// and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting Item from DB
 			_Create(ObjectGuid.Create(HighGuid.Item, guid));
 
 			SetEntry(entry);
@@ -442,7 +442,7 @@ namespace Game.Entities
 
 			_bonusData = new BonusData(proto);
 
-			// set owner (not if item is only loaded for gbank/auction/mail
+			// set owner (not if Item is only loaded for gbank/auction/mail
 			if (!ownerGuid.IsEmpty())
 				SetOwnerGUID(ownerGuid);
 
@@ -509,7 +509,7 @@ namespace Game.Entities
 
 			SetBonuses(bonusListIDs);
 
-			// load charges after bonuses, they can add more item effects
+			// load charges after bonuses, they can add more Item effects
 			var tokens = new StringArray(fields.Read<string>(6), ' ');
 
 			for (byte i = 0; i < _itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount && i < tokens.Length; ++i)
@@ -587,7 +587,7 @@ namespace Game.Entities
 				need_save = true;
 			}
 
-			if (need_save) // normal item changed state set not work at loading
+			if (need_save) // normal Item changed State set not work at loading
 			{
 				byte              index = 0;
 				PreparedStatement stmt  = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_ON_LOAD);
@@ -779,7 +779,7 @@ namespace Game.Entities
 			if (uState == ItemUpdateState.New &&
 			    state == ItemUpdateState.Removed)
 			{
-				// pretend the item never existed
+				// pretend the Item never existed
 				if (forplayer)
 				{
 					RemoveItemFromUpdateQueueOf(this, forplayer);
@@ -791,7 +791,7 @@ namespace Game.Entities
 
 			if (state != ItemUpdateState.Unchanged)
 			{
-				// new items must stay in new state until saved
+				// new items must stay in new State until saved
 				if (uState != ItemUpdateState.New)
 					uState = state;
 
@@ -801,7 +801,7 @@ namespace Game.Entities
 			else
 			{
 				// unset in queue
-				// the item must be removed from the queue manually
+				// the Item must be removed from the queue manually
 				uQueuePos = -1;
 				uState    = ItemUpdateState.Unchanged;
 			}
@@ -816,12 +816,12 @@ namespace Game.Entities
 
 			if (player.GetGUID() != item.GetOwnerGUID())
 			{
-				Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - Owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
+				Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - _owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
 
 				return;
 			}
 
-			if (player._itemUpdateQueueBlocked)
+			if (player.ItemUpdateQueueBlocked)
 				return;
 
 			player.ItemUpdateQueue.Add(item);
@@ -837,12 +837,12 @@ namespace Game.Entities
 
 			if (player.GetGUID() != item.GetOwnerGUID())
 			{
-				Log.outError(LogFilter.Player, "Item.RemoveFromUpdateQueueOf - Owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
+				Log.outError(LogFilter.Player, "Item.RemoveFromUpdateQueueOf - _owner's guid ({0}) and player's guid ({1}) don't match!", item.GetOwnerGUID().ToString(), player.GetGUID().ToString());
 
 				return;
 			}
 
-			if (player._itemUpdateQueueBlocked)
+			if (player.ItemUpdateQueueBlocked)
 				return;
 
 			player.ItemUpdateQueue[item.uQueuePos] = null;
@@ -1022,7 +1022,7 @@ namespace Game.Entities
 			if (_lootGenerated)
 				return InventoryResult.LootGone;
 
-			// check item type
+			// check Item Type
 			if (GetEntry() != proto.GetId())
 				return InventoryResult.CantStack;
 
@@ -1039,28 +1039,28 @@ namespace Game.Entities
 
 			bool isEnchantSpell = spellInfo.HasEffect(SpellEffectName.EnchantItem) || spellInfo.HasEffect(SpellEffectName.EnchantItemTemporary) || spellInfo.HasEffect(SpellEffectName.EnchantItemPrismatic);
 
-			if ((int)spellInfo.EquippedItemClass != -1) // -1 == any item class
+			if ((int)spellInfo.EquippedItemClass != -1) // -1 == any Item class
 			{
 				if (isEnchantSpell && proto.HasFlag(ItemFlags3.CanStoreEnchants))
 					return true;
 
 				if (spellInfo.EquippedItemClass != proto.GetClass())
-					return false; //  wrong item class
+					return false; //  wrong Item class
 
 				if (spellInfo.EquippedItemSubClassMask != 0) // 0 == any subclass
 					if ((spellInfo.EquippedItemSubClassMask & (1 << (int)proto.GetSubClass())) == 0)
 						return false; // subclass not present in mask
 			}
 
-			if (isEnchantSpell && spellInfo.EquippedItemInventoryTypeMask != 0) // 0 == any inventory type
+			if (isEnchantSpell && spellInfo.EquippedItemInventoryTypeMask != 0) // 0 == any inventory Type
 			{
-				// Special case - accept weapon type for main and offhand requirements
+				// Special case - accept weapon Type for main and offhand requirements
 				if ((proto.GetInventoryType() == InventoryType.Weapon &&
 				     Convert.ToBoolean(spellInfo.EquippedItemInventoryTypeMask & (1 << (int)InventoryType.WeaponMainhand))) ||
 				    Convert.ToBoolean(spellInfo.EquippedItemInventoryTypeMask & (1 << (int)InventoryType.WeaponOffhand)))
 					return true;
 				else if ((spellInfo.EquippedItemInventoryTypeMask & (1 << (int)proto.GetInventoryType())) == 0)
-					return false; // inventory type not present in mask
+					return false; // inventory Type not present in mask
 			}
 
 			return true;
@@ -1068,7 +1068,7 @@ namespace Game.Entities
 
 		public void SetEnchantment(EnchantmentSlot slot, uint id, uint duration, uint charges, ObjectGuid caster = default)
 		{
-			// Better lost small time at check in comparison lost time at item save to DB.
+			// Better lost small time at check in comparison lost time at Item save to DB.
 			if ((GetEnchantmentId(slot) == id) &&
 			    (GetEnchantmentDuration(slot) == duration) &&
 			    (GetEnchantmentCharges(slot) == charges))
@@ -1137,13 +1137,13 @@ namespace Game.Entities
 
 		public SocketedGem GetGem(ushort slot)
 		{
-			//ASSERT(slot < MAX_GEM_SOCKETS);
+			//ASSERT(Slot < MAX_GEM_SOCKETS);
 			return slot < _itemData.Gems.Size() ? _itemData.Gems[slot] : null;
 		}
 
 		public void SetGem(ushort slot, ItemDynamicFieldGems gem, uint gemScalingLevel)
 		{
-			//ASSERT(slot < MAX_GEM_SOCKETS);
+			//ASSERT(Slot < MAX_GEM_SOCKETS);
 			_gemScalingLevels[slot]            = gemScalingLevel;
 			_bonusData.GemItemLevelBonus[slot] = 0;
 			ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
@@ -1229,7 +1229,7 @@ namespace Game.Entities
 			{
 				SocketColor SocketColor = GetTemplate().GetSocketColor(gemSlot);
 
-				if (SocketColor == 0) // no socket slot
+				if (SocketColor == 0) // no socket Slot
 					continue;
 
 				SocketColor GemColor = 0;
@@ -1306,7 +1306,7 @@ namespace Game.Entities
 		public static Item CreateItem(uint item, uint count, ItemContext context, Player player = null)
 		{
 			if (count < 1)
-				return null; //don't create item at zero count
+				return null; //don't create Item at zero count
 
 			var pProto = Global.ObjectMgr.GetItemTemplate(item);
 
@@ -1340,7 +1340,7 @@ namespace Game.Entities
 			newItem.ReplaceAllItemFlags((ItemFieldFlags)(_itemData.DynamicFlags & ~(uint)(ItemFieldFlags.Refundable | ItemFieldFlags.BopTradeable)));
 			newItem.SetExpiration(_itemData.Expiration);
 
-			// player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
+			// player CAN be NULL in which case we must not update random properties because that accesses player's Item update queue
 			if (player != null)
 				newItem.SetItemRandomBonusList(_randomBonusListId);
 
@@ -1349,11 +1349,11 @@ namespace Game.Entities
 
 		public bool IsBindedNotWith(Player player)
 		{
-			// not binded item
+			// not binded Item
 			if (!IsSoulBound())
 				return false;
 
-			// own item
+			// own Item
 			if (GetOwnerGUID() == player.GetGUID())
 				return false;
 
@@ -1361,7 +1361,7 @@ namespace Game.Entities
 				if (allowedGUIDs.Contains(player.GetGUID()))
 					return false;
 
-			// BOA item case
+			// BOA Item case
 			if (IsBoundAccountWide())
 				return false;
 
@@ -2613,7 +2613,7 @@ namespace Game.Entities
 
 			if (set == null)
 			{
-				Log.outError(LogFilter.Sql, "Item set {0} for item (id {1}) not found, mods not applied.", setid, proto.GetId());
+				Log.outError(LogFilter.Sql, "Item set {0} for Item (id {1}) not found, mods not applied.", setid, proto.GetId());
 
 				return;
 			}
@@ -2631,7 +2631,7 @@ namespace Game.Entities
 				{
 					uint maxLevel = (uint)Global.DB2Mgr.GetCurveXAxisRange(item.GetBonus().PlayerLevelToItemLevelCurveId).Item2;
 
-					var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player._playerData.CtrOptions._value.ContentTuningConditionMask, true);
+					var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.PlayerData.CtrOptions._value.ContentTuningConditionMask, true);
 
 					if (contentTuning.HasValue)
 						maxLevel = Math.Min(maxLevel, (uint)contentTuning.Value.MaxLevel);
@@ -2706,7 +2706,7 @@ namespace Game.Entities
 
 			if (set == null)
 			{
-				Log.outError(LogFilter.Sql, $"Item set {setid} for item {item.GetEntry()} not found, mods not removed.");
+				Log.outError(LogFilter.Sql, $"Item set {setid} for Item {item.GetEntry()} not found, mods not removed.");
 
 				return;
 			}

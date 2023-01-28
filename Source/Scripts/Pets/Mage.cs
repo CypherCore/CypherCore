@@ -44,7 +44,7 @@ namespace Scripts.Pets
 					return;
 
 				// here mirror image casts on summoner spell (not present in client dbc) 49866
-				// here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcast by mirror images (stats related?)
+				// here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcast by mirror images (Stats related?)
 				// Clone Me!
 				owner.CastSpell(me, SpellIds.CloneMe, true);
 			}

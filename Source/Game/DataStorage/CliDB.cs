@@ -424,8 +424,8 @@ namespace Game.DataStorage
 			if (!AreaTableStorage.ContainsKey(14618) ||       // last area added in 10.0.2 (46741)
 			    !CharTitlesStorage.ContainsKey(749) ||        // last char title added in 10.0.2 (46741)
 			    !GemPropertiesStorage.ContainsKey(4028) ||    // last gem property added in 10.0.2 (46741)
-			    !ItemStorage.ContainsKey(202712) ||           // last item added in 10.0.2 (46741)
-			    !ItemExtendedCostStorage.ContainsKey(7862) || // last item extended cost added in 10.0.2 (46741)
+			    !ItemStorage.ContainsKey(202712) ||           // last Item added in 10.0.2 (46741)
+			    !ItemExtendedCostStorage.ContainsKey(7862) || // last Item extended cost added in 10.0.2 (46741)
 			    !MapStorage.ContainsKey(2582) ||              // last map added in 10.0.2 (46741)
 			    !SpellNameStorage.ContainsKey(399311))        // last spell added in 10.0.2 (46741)
 			{

@@ -85,7 +85,7 @@ namespace Game.Arenas
 			string playerName;
 			Class  playerClass;
 
-			// Check if arena team is full (Can't have more than type * 2 players)
+			// Check if arena team is full (Can't have more than Type * 2 players)
 			if (GetMembersSize() >= GetArenaType() * 2)
 				return false;
 
@@ -112,7 +112,7 @@ namespace Game.Arenas
 			if ((player && player.GetArenaTeamId(GetSlot()) != 0) ||
 			    Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(playerGuid, GetArenaType()) != 0)
 			{
-				Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of type {2}", playerGuid.ToString(), playerName, GetArenaType());
+				Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of Type {2}", playerGuid.ToString(), playerName, GetArenaType());
 
 				return false;
 			}
@@ -175,7 +175,7 @@ namespace Game.Arenas
 					player.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 1);
 			}
 
-			Log.outDebug(LogFilter.Arena, "Player: {0} [{1}] joined arena team type: {2} [Id: {3}, Name: {4}].", playerName, playerGuid.ToString(), GetArenaType(), GetId(), GetName());
+			Log.outDebug(LogFilter.Arena, "Player: {0} [{1}] joined arena team Type: {2} [Id: {3}, Name: {4}].", playerName, playerGuid.ToString(), GetArenaType(), GetId(), GetName());
 
 			return true;
 		}
@@ -336,7 +336,7 @@ namespace Game.Arenas
 				for (uint i = 0; i < (int)ArenaTeamInfoType.End; ++i)
 					player.SetArenaTeamInfoField(GetSlot(), (ArenaTeamInfoType)i, 0);
 
-				Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] left arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
+				Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] left arena team Type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
 			}
 
 			// Only used for single member deletion, for arena team disband we use a single query for more efficiency
@@ -357,7 +357,7 @@ namespace Game.Arenas
 				Player player = session.GetPlayer();
 
 				if (player)
-					Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
+					Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team Type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
 			}
 
 			// Remove all members from arena team
@@ -408,19 +408,19 @@ namespace Game.Arenas
 		{
 			/*WorldPacket data = new WorldPacket(ServerOpcodes.ArenaTeamStats);
 			data.WriteUInt32(GetId());                                // team id
-			data.WriteUInt32(stats.Rating);                           // rating
-			data.WriteUInt32(stats.WeekGames);                        // games this week
-			data.WriteUInt32(stats.WeekWins);                         // wins this week
-			data.WriteUInt32(stats.SeasonGames);                      // played this season
-			data.WriteUInt32(stats.SeasonWins);                       // wins this season
-			data.WriteUInt32(stats.Rank);                             // rank
+			data.WriteUInt32(Stats.Rating);                           // rating
+			data.WriteUInt32(Stats.WeekGames);                        // games this week
+			data.WriteUInt32(Stats.WeekWins);                         // wins this week
+			data.WriteUInt32(Stats.SeasonGames);                      // played this season
+			data.WriteUInt32(Stats.SeasonWins);                       // wins this season
+			data.WriteUInt32(Stats.Rank);                             // rank
 			session.SendPacket(data);*/
 		}
 
 		public void NotifyStatsChanged()
 		{
 			// This is called after a rated match ended
-			// Updates arena team stats for every member of the team (not only the ones who participated!)
+			// Updates arena team Stats for every member of the team (not only the ones who participated!)
 			foreach (var member in Members)
 			{
 				Player player = Global.ObjAccessor.FindPlayer(member.Guid);
@@ -452,7 +452,7 @@ namespace Game.Arenas
 					break;
 			}
 
-			Log.outError(LogFilter.Arena, "FATAL: Unknown arena team type {0} for some arena team", type);
+			Log.outError(LogFilter.Arena, "FATAL: Unknown arena team Type {0} for some arena team", type);
 
 			return 0xFF;
 		}
@@ -468,7 +468,7 @@ namespace Game.Arenas
 					break;
 			}
 
-			Log.outError(LogFilter.Arena, "FATAL: Unknown arena team slot {0} for some arena team", slot);
+			Log.outError(LogFilter.Arena, "FATAL: Unknown arena team Slot {0} for some arena team", slot);
 
 			return 0xFF;
 		}
@@ -623,7 +623,7 @@ namespace Game.Arenas
 			// Change in Team Rating
 			ratingChange = GetRatingMod(stats.Rating, opponentMMRating, true);
 
-			// Modify the team stats accordingly
+			// Modify the team Stats accordingly
 			FinishGame(ratingChange);
 
 			// Update number of wins per season and week
@@ -643,7 +643,7 @@ namespace Game.Arenas
 			// Change in Team Rating
 			ratingChange = GetRatingMod(stats.Rating, opponentMMRating, false);
 
-			// Modify the team stats accordingly
+			// Modify the team Stats accordingly
 			FinishGame(ratingChange);
 
 			// return the rating change, used to display it on the results screen
@@ -663,7 +663,7 @@ namespace Game.Arenas
 					// Update matchmaker rating
 					member.ModifyMatchmakerRating(matchmakerRatingChange, GetSlot());
 
-					// Update personal played stats
+					// Update personal played Stats
 					member.WeekGames   += 1;
 					member.SeasonGames += 1;
 
@@ -688,7 +688,7 @@ namespace Game.Arenas
 					// update matchmaker rating
 					member.ModifyMatchmakerRating(matchmakerRatingChange, GetSlot());
 
-					// update personal played stats
+					// update personal played Stats
 					member.WeekGames   += 1;
 					member.SeasonGames += 1;
 
@@ -709,7 +709,7 @@ namespace Game.Arenas
 					// update matchmaker rating
 					member.ModifyMatchmakerRating(matchmakerRatingChange, GetSlot());
 
-					// update personal stats
+					// update personal Stats
 					member.WeekGames   += 1;
 					member.SeasonGames += 1;
 					member.SeasonWins  += 1;
@@ -724,7 +724,7 @@ namespace Game.Arenas
 
 		public void SaveToDB()
 		{
-			// Save team and member stats to db
+			// Save team and member Stats to db
 			// Called after a match has ended or when calculating arena_points
 
 			SQLTransaction trans = new();
@@ -771,11 +771,11 @@ namespace Game.Arenas
 			if (stats.WeekGames == 0)
 				return false;
 
-			// Reset team stats
+			// Reset team Stats
 			stats.WeekGames = 0;
 			stats.WeekWins  = 0;
 
-			// Reset member stats
+			// Reset member Stats
 			foreach (var member in Members)
 			{
 				member.WeekGames = 0;

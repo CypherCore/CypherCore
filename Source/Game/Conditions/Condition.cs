@@ -690,7 +690,7 @@ namespace Game.Conditions
 
 		public uint GetMaxAvailableConditionTargets()
 		{
-			// returns number of targets which are available for given source type
+			// returns number of targets which are available for given source Type
 			switch (SourceType)
 			{
 				case ConditionSourceType.Spell:

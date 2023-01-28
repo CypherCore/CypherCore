@@ -258,7 +258,7 @@ namespace Game.AI
 				if (!IsTargetValid(temp))
 					continue;
 
-				// check all event and action params
+				// check all event and Action params
 				if (!IsEventValid(temp))
 					continue;
 
@@ -1028,7 +1028,7 @@ namespace Game.AI
 		{
 			if (e.Event.type >= SmartEvents.End)
 			{
-				Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid event type ({2}), skipped.", e.EntryOrGuid, e.EventId, e.GetEventType());
+				Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid event Type ({2}), skipped.", e.EntryOrGuid, e.EventId, e.GetEventType());
 
 				return false;
 			}
@@ -1037,7 +1037,7 @@ namespace Game.AI
 			if (e.GetScriptType() != SmartScriptType.TimedActionlist &&
 			    !Convert.ToBoolean(GetEventMask(e.Event.type) & GetTypeMask(e.GetScriptType())))
 			{
-				Log.outError(LogFilter.Scripts, "SmartAIMgr: EntryOrGuid {0}, event type {1} can not be used for Script type {2}", e.EntryOrGuid, e.GetEventType(), e.GetScriptType());
+				Log.outError(LogFilter.Scripts, "SmartAIMgr: EntryOrGuid {0}, event Type {1} can not be used for Script Type {2}", e.EntryOrGuid, e.GetEventType(), e.GetScriptType());
 
 				return false;
 			}
@@ -1045,7 +1045,7 @@ namespace Game.AI
 			if (e.Action.type <= 0 ||
 			    e.Action.type >= SmartActions.End)
 			{
-				Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid action type ({2}), skipped.", e.EntryOrGuid, e.EventId, e.GetActionType());
+				Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid Action Type ({2}), skipped.", e.EntryOrGuid, e.EventId, e.GetActionType());
 
 				return false;
 			}
@@ -1276,7 +1276,7 @@ namespace Game.AI
 					{
 						if (MotionMaster.IsInvalidMovementGeneratorType((MovementGeneratorType)e.Event.movementInform.type))
 						{
-							Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid Motion type {e.Event.movementInform.type}, skipped.");
+							Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid Motion Type {e.Event.movementInform.type}, skipped.");
 
 							return false;
 						}
@@ -1449,7 +1449,7 @@ namespace Game.AI
 						if (e.Action.type == SmartActions.CallScriptReset)
 						{
 							// There might be SMART_TARGET_* cases where this should be allowed, they will be handled if needed
-							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses event SMART_EVENT_RESET and action SMART_ACTION_CALL_SCRIPT_RESET, skipped.");
+							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses event SMART_EVENT_RESET and Action SMART_ACTION_CALL_SCRIPT_RESET, skipped.");
 
 							return false;
 						}
@@ -1606,7 +1606,7 @@ namespace Game.AI
 
 					if (e.Action.animKit.type > 3)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid AnimKit type {e.Action.animKit.type}, skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid AnimKit Type {e.Action.animKit.type}, skipped.");
 
 						return false;
 					}
@@ -1748,7 +1748,7 @@ namespace Game.AI
 					    e.GetEventType() != SmartEvents.Link &&
 					    !EventHasInvoker(e.Event.type))
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has invoker cast action, but event does not provide any invoker!");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has invoker cast Action, but event does not provide any invoker!");
 
 						return false;
 					}
@@ -1887,7 +1887,7 @@ namespace Game.AI
 					if (e.Action.setSheath.sheath != 0 &&
 					    e.Action.setSheath.sheath >= (uint)SheathState.Max)
 					{
-						Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses incorrect Sheath state {e.Action.setSheath.sheath}, skipped.");
+						Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses incorrect Sheath State {e.Action.setSheath.sheath}, skipped.");
 
 						return false;
 					}
@@ -2062,7 +2062,7 @@ namespace Game.AI
 				{
 					if (e.Action.setInstanceData.type > 1)
 					{
-						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid data type {e.Action.setInstanceData.type} (value range 0-1), skipped.");
+						Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid data Type {e.Action.setInstanceData.type} (value range 0-1), skipped.");
 
 						return false;
 					}
@@ -2070,7 +2070,7 @@ namespace Game.AI
 					{
 						if (e.Action.setInstanceData.data > (int)EncounterState.ToBeDecided)
 						{
-							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid boss state {e.Action.setInstanceData.data} (value range 0-5), skipped.");
+							Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid boss State {e.Action.setInstanceData.data} (value range 0-5), skipped.");
 
 							return false;
 						}
@@ -2894,7 +2894,7 @@ namespace Game.AI
 		public static void TC_SAI_IS_BOOLEAN_VALID(SmartScriptHolder e, uint value, [CallerArgumentExpression("value")] string valueName = null)
 		{
 			if (value > 1)
-				Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses param {valueName} of type Boolean with value {value}, valid values are 0 or 1, skipped.");
+				Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses param {valueName} of Type Boolean with value {value}, valid values are 0 or 1, skipped.");
 		}
 	}
 

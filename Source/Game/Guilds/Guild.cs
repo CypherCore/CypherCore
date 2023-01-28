@@ -1018,7 +1018,7 @@ namespace Game.Guilds
 			if (!_HasRankRight(player, repair ? GuildRankRights.WithdrawRepair : GuildRankRights.WithdrawGold))
 				return false;
 
-			if (_GetMemberRemainingMoney(member) < (long)amount) // Check if we have enough slot/money today
+			if (_GetMemberRemainingMoney(member) < (long)amount) // Check if we have enough Slot/money today
 				return false;
 
 			// Call script after validation and before money transfer.
@@ -1431,7 +1431,7 @@ namespace Game.Guilds
 				_eventLog.LoadEvent(new EventLogEntry(_id,                                     // guild id
 				                                      field.Read<uint>(1),                     // guid
 				                                      field.Read<long>(6),                     // timestamp
-				                                      (GuildEventLogTypes)field.Read<byte>(2), // event type
+				                                      (GuildEventLogTypes)field.Read<byte>(2), // event Type
 				                                      field.Read<ulong>(3),                    // player guid 1
 				                                      field.Read<ulong>(4),                    // player guid 2
 				                                      field.Read<byte>(5)));                   // rank
@@ -1477,9 +1477,9 @@ namespace Game.Guilds
 					                                     guid,                  // guid
 					                                     field.Read<long>(8),   // timestamp
 					                                     dbTabId,               // tab id
-					                                     eventType,             // event type
+					                                     eventType,             // event Type
 					                                     field.Read<ulong>(4),  // player guid
-					                                     field.Read<ulong>(5),  // item or money
+					                                     field.Read<ulong>(5),  // Item or money
 					                                     field.Read<ushort>(6), // itam stack count
 					                                     field.Read<byte>(7))); // dest tab id
 				}
@@ -1496,7 +1496,7 @@ namespace Game.Guilds
 			var news = new NewsLogEntry(_id,                                                      // guild id
 			                            field.Read<uint>(1),                                      // guid
 			                            field.Read<long>(6),                                      // timestamp //64 bits?
-			                            (GuildNews)field.Read<byte>(2),                           // type
+			                            (GuildNews)field.Read<byte>(2),                           // Type
 			                            ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(3)), // player guid
 			                            field.Read<uint>(4),                                      // Flags
 			                            field.Read<uint>(5));                                     // value)
@@ -1521,7 +1521,7 @@ namespace Game.Guilds
 			if (tabId >= _GetPurchasedTabsSize())
 			{
 				Log.outError(LogFilter.Guild,
-				             "Invalid tab for item (GUID: {0}, id: {1}) in guild bank, skipped.",
+				             "Invalid tab for Item (GUID: {0}, id: {1}) in guild bank, skipped.",
 				             field.Read<uint>(0),
 				             field.Read<uint>(1));
 
@@ -2309,17 +2309,17 @@ namespace Game.Guilds
 
 		private void _MoveItems(MoveItemData pSrc, MoveItemData pDest, uint splitedAmount)
 		{
-			// 1. Initialize source item
+			// 1. Initialize source Item
 			if (!pSrc.InitItem())
-				return; // No source item
+				return; // No source Item
 
-			// 2. Check source item
+			// 2. Check source Item
 			if (!pSrc.CheckItem(ref splitedAmount))
-				return; // Source item or splited amount is invalid
+				return; // Source Item or splited amount is invalid
 
 			// 3. Check destination rights
 			if (!pDest.HasStoreRights(pSrc))
-				return; // Player has no rights to store item in destination
+				return; // Player has no rights to store Item in destination
 
 			// 4. Check source withdraw rights
 			if (!pSrc.HasWithdrawRights(pDest))
@@ -2328,11 +2328,11 @@ namespace Game.Guilds
 			// 5. Check split
 			if (splitedAmount != 0)
 			{
-				// 5.1. Clone source item
+				// 5.1. Clone source Item
 				if (!pSrc.CloneItem(splitedAmount))
 					return; // Item could not be cloned
 
-				// 5.2. Move splited item to destination
+				// 5.2. Move splited Item to destination
 				_DoItemsMove(pSrc, pDest, true, splitedAmount);
 			}
 			else // 6. No split
@@ -2343,7 +2343,7 @@ namespace Game.Guilds
 				if (mergeAttemptResult != InventoryResult.Ok) // Item could not be merged
 				{
 					// 6.2. Try to swap items
-					// 6.2.1. Initialize destination item
+					// 6.2.1. Initialize destination Item
 					if (!pDest.InitItem())
 					{
 						pSrc.SendEquipError(mergeAttemptResult, pSrc.GetItem(false));
@@ -2351,12 +2351,12 @@ namespace Game.Guilds
 						return;
 					}
 
-					// 6.2.2. Check rights to store item in source (opposite direction)
+					// 6.2.2. Check rights to store Item in source (opposite direction)
 					if (!pSrc.HasStoreRights(pDest))
-						return; // Player has no rights to store item in source (opposite direction)
+						return; // Player has no rights to store Item in source (opposite direction)
 
 					if (!pDest.HasWithdrawRights(pSrc))
-						return; // Player has no rights to withdraw item from destination (opposite direction)
+						return; // Player has no rights to withdraw Item from destination (opposite direction)
 
 					// 6.2.3. Swap items (pDest.GetItem() != NULL)
 					_DoItemsMove(pSrc, pDest, true);
@@ -2373,13 +2373,13 @@ namespace Game.Guilds
 			bool swap      = (pDestItem != null);
 
 			Item pSrcItem = pSrc.GetItem(splitedAmount != 0);
-			// 1. Can store source item in destination
+			// 1. Can store source Item in destination
 			InventoryResult destResult = pDest.CanStore(pSrcItem, swap, sendError);
 
 			if (destResult != InventoryResult.Ok)
 				return destResult;
 
-			// 2. Can store destination item in source
+			// 2. Can store destination Item in source
 			if (swap)
 			{
 				InventoryResult srcResult = pSrc.CanStore(pDestItem, true, true);
@@ -2401,17 +2401,17 @@ namespace Game.Guilds
 			if (swap)
 				pSrc.LogBankEvent(trans, pDest, pDestItem.GetCount());
 
-			// 4. Remove item from source
+			// 4. Remove Item from source
 			pSrc.RemoveItem(trans, pDest, splitedAmount);
 
-			// 5. Remove item from destination
+			// 5. Remove Item from destination
 			if (swap)
 				pDest.RemoveItem(trans, pSrc);
 
-			// 6. Store item in destination
+			// 6. Store Item in destination
 			pDest.StoreItem(trans, pSrcItem);
 
-			// 7. Store item in source
+			// 7. Store Item in source
 			if (swap)
 				pSrc.StoreItem(trans, pDestItem);
 
@@ -3850,7 +3850,7 @@ namespace Game.Guilds
 
 				if (slotId >= GuildConst.MaxBankSlots)
 				{
-					Log.outError(LogFilter.Guild, "Invalid slot for item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
+					Log.outError(LogFilter.Guild, "Invalid Slot for Item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
 
 					return false;
 				}
@@ -3859,7 +3859,7 @@ namespace Game.Guilds
 
 				if (proto == null)
 				{
-					Log.outError(LogFilter.Guild, "Unknown item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
+					Log.outError(LogFilter.Guild, "Unknown Item (GUID: {0}, id: {1}) in guild bank, skipped.", itemGuid, itemEntry);
 
 					return false;
 				}
@@ -4224,26 +4224,26 @@ namespace Game.Guilds
 
 			public abstract bool IsBank();
 
-			// Initializes item. Returns true, if item exists, false otherwise.
+			// Initializes Item. Returns true, if Item exists, false otherwise.
 			public abstract bool InitItem();
 
-			// Checks splited amount against item. Splited amount cannot be more that number of items in stack.
-			// Defines if player has rights to save item in container
+			// Checks splited amount against Item. Splited amount cannot be more that number of items in stack.
+			// Defines if player has rights to save Item in container
 			public virtual bool HasStoreRights(MoveItemData pOther)
 			{
 				return true;
 			}
 
-			// Defines if player has rights to withdraw item from container
+			// Defines if player has rights to withdraw Item from container
 			public virtual bool HasWithdrawRights(MoveItemData pOther)
 			{
 				return true;
 			}
 
-			// Remove item from container (if splited update items fields)
+			// Remove Item from container (if splited update items fields)
 			public abstract void RemoveItem(SQLTransaction trans, MoveItemData pOther, uint splitedAmount = 0);
 
-			// Saves item to container
+			// Saves Item to container
 			public abstract Item StoreItem(SQLTransaction trans, Item pItem);
 
 			// Log bank event
@@ -4369,7 +4369,7 @@ namespace Game.Guilds
 			{
 				Cypher.Assert(pOther != null);
 
-				// Do not check rights if item is being swapped within the same bank tab
+				// Do not check rights if Item is being swapped within the same bank tab
 				if (pOther.IsBank() &&
 				    pOther.GetContainer() == _container)
 					return true;
@@ -4381,7 +4381,7 @@ namespace Game.Guilds
 			{
 				Cypher.Assert(pOther != null);
 
-				// Do not check rights if item is being swapped within the same bank tab
+				// Do not check rights if Item is being swapped within the same bank tab
 				if (pOther.IsBank() &&
 				    pOther.GetContainer() == _container)
 					return true;
@@ -4411,7 +4411,7 @@ namespace Game.Guilds
 					_pItem = null;
 				}
 
-				// Decrease amount of player's remaining items (if item is moved to different tab or to player)
+				// Decrease amount of player's remaining items (if Item is moved to different tab or to player)
 				if (!pOther.IsBank() ||
 				    pOther.GetContainer() != _container)
 					_pGuild._UpdateMemberWithdrawSlots(trans, _pPlayer.GetGUID(), _container);
@@ -4432,7 +4432,7 @@ namespace Game.Guilds
 				foreach (var pos in _vec)
 				{
 					Log.outDebug(LogFilter.Guild,
-					             "GUILD STORAGE: StoreItem tab = {0}, slot = {1}, item = {2}, count = {3}",
+					             "GUILD STORAGE: StoreItem tab = {0}, Slot = {1}, Item = {2}, count = {3}",
 					             _container,
 					             _slotId,
 					             pItem.GetEntry(),
@@ -4474,7 +4474,7 @@ namespace Game.Guilds
 				if (!pFrom.IsBank() &&
 				    _pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
 					Log.outCommand(_pPlayer.GetSession().GetAccountId(),
-					               "GM {0} ({1}) (Account: {2}) deposit item: {3} (Entry: {4} Count: {5}) to guild bank named: {6} (Guild ID: {7})",
+					               "GM {0} ({1}) (Account: {2}) deposit Item: {3} (Entry: {4} Count: {5}) to guild bank named: {6} (Guild ID: {7})",
 					               _pPlayer.GetName(),
 					               _pPlayer.GetGUID().ToString(),
 					               _pPlayer.GetSession().GetAccountId(),
@@ -4524,7 +4524,7 @@ namespace Game.Guilds
 
 				if (pItemDest != null)
 				{
-					// Make sure source and destination items match and destination item has space for more stacks.
+					// Make sure source and destination items match and destination Item has space for more stacks.
 					if (pItemDest.GetEntry() != pItem.GetEntry() ||
 					    pItemDest.GetCount() >= pItem.GetMaxStackCount())
 						return false;
@@ -4551,7 +4551,7 @@ namespace Game.Guilds
 			{
 				for (byte slotId = 0; (slotId < GuildConst.MaxBankSlots) && (count > 0); ++slotId)
 				{
-					// Skip slot already processed in CanStore (when destination slot was specified)
+					// Skip Slot already processed in CanStore (when destination Slot was specified)
 					if (slotId == skipSlotId)
 						continue;
 
@@ -4571,7 +4571,7 @@ namespace Game.Guilds
 			public override InventoryResult CanStore(Item pItem, bool swap)
 			{
 				Log.outDebug(LogFilter.Guild,
-				             "GUILD STORAGE: CanStore() tab = {0}, slot = {1}, item = {2}, count = {3}",
+				             "GUILD STORAGE: CanStore() tab = {0}, Slot = {1}, Item = {2}, count = {3}",
 				             _container,
 				             _slotId,
 				             pItem.GetEntry(),
@@ -4592,7 +4592,7 @@ namespace Game.Guilds
 				{
 					Item pItemDest = _pGuild._GetItem(_container, _slotId);
 
-					// Ignore swapped item (this slot will be empty after move)
+					// Ignore swapped Item (this Slot will be empty after move)
 					if ((pItemDest == pItem) || swap)
 						pItemDest = null;
 
@@ -4613,7 +4613,7 @@ namespace Game.Guilds
 						return InventoryResult.Ok;
 				}
 
-				// Search free slot for item
+				// Search free Slot for Item
 				CanStoreItemInTab(pItem, _slotId, false, ref count);
 
 				if (count == 0)

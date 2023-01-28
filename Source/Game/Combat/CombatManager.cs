@@ -172,7 +172,7 @@ namespace Game.Combat
 			PutReference(who.GetGUID(), refe);
 			who.GetCombatManager().PutReference(_owner.GetGUID(), refe);
 
-			// now, sequencing is important - first we update the combat state, which will set both units in combat and do non-AI combat start stuff
+			// now, sequencing is important - first we update the combat State, which will set both units in combat and do non-AI combat start stuff
 			bool needSelfAI  = UpdateOwnerCombatState();
 			bool needOtherAI = who.GetCombatManager().UpdateOwnerCombatState();
 
@@ -311,12 +311,12 @@ namespace Game.Combat
 		{
 			if (refe._isPvP)
 			{
-				Cypher.Assert(!_pvpRefs.ContainsKey(guid), "Duplicate combat state detected!");
+				Cypher.Assert(!_pvpRefs.ContainsKey(guid), "Duplicate combat State detected!");
 				_pvpRefs[guid] = (PvPCombatReference)refe;
 			}
 			else
 			{
-				Cypher.Assert(!_pveRefs.ContainsKey(guid), "Duplicate combat state detected!");
+				Cypher.Assert(!_pveRefs.ContainsKey(guid), "Duplicate combat State detected!");
 				_pveRefs[guid] = refe;
 			}
 		}
@@ -406,7 +406,7 @@ namespace Game.Combat
 
 		public void EndCombat()
 		{
-			// sequencing matters here - AI might do nasty stuff, so make sure refs are in a consistent state before you hand off!
+			// sequencing matters here - AI might do nasty stuff, so make sure refs are in a consistent State before you hand off!
 
 			// first, get rid of any threat that still exists...
 			first.GetThreatManager().ClearThreat(second);
@@ -416,7 +416,7 @@ namespace Game.Combat
 			first.GetCombatManager().PurgeReference(second.GetGUID(), _isPvP);
 			second.GetCombatManager().PurgeReference(first.GetGUID(), _isPvP);
 
-			// ...update the combat state, which will potentially remove IN_COMBAT...
+			// ...update the combat State, which will potentially remove IN_COMBAT...
 			bool needFirstAI  = first.GetCombatManager().UpdateOwnerCombatState();
 			bool needSecondAI = second.GetCombatManager().UpdateOwnerCombatState();
 
@@ -474,7 +474,7 @@ namespace Game.Combat
 			}
 		}
 
-		// suppressed combat refs do not generate a combat state for one side of the relation
+		// suppressed combat refs do not generate a combat State for one side of the relation
 		// (used by: vanish, feign death)
 		public bool IsSuppressedFor(Unit who)
 		{

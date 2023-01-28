@@ -37,7 +37,7 @@ namespace Game.Achievements
 		                                                                                                       };
 
         /// <summary>
-        ///  called at player login. The player might have fulfilled some achievements when the achievement system wasn't working yet
+        ///  called at player login. The player might have fulfilled some achievements when the Achievement system wasn't working yet
         /// </summary>
         /// <param name="referencePlayer"></param>
         public void CheckAllAchievementCriteria(Player referencePlayer)
@@ -110,7 +110,7 @@ namespace Game.Achievements
 					return false;
 
 			if (achievement.CovenantID != 0 &&
-			    referencePlayer._playerData.CovenantID != achievement.CovenantID)
+			    referencePlayer.PlayerData.CovenantID != achievement.CovenantID)
 			{
 				Log.outTrace(LogFilter.Achievement, $"CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Achievement {achievement.Id}) Wrong covenant");
 
@@ -132,7 +132,7 @@ namespace Game.Achievements
 				return false;
 
 			if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
-				// someone on this realm has already completed that achievement
+				// someone on this realm has already completed that Achievement
 				if (Global.AchievementMgr.IsRealmCompleted(achievement))
 					return false;
 
@@ -189,8 +189,8 @@ namespace Game.Achievements
 			if (tree == null)
 				return false;
 
-			// For SUMM achievements, we have to count the progress of each criteria of the achievement.
-			// Oddly, the target count is NOT contained in the achievement, but in each individual criteria
+			// For SUMM achievements, we have to count the progress of each criteria of the Achievement.
+			// Oddly, the target count is NOT contained in the Achievement, but in each individual criteria
 			if (entry.Flags.HasAnyFlag(AchievementFlags.Summ))
 			{
 				long progress = 0;
@@ -285,7 +285,7 @@ namespace Game.Achievements
 
 					_achievementPoints += achievement.Points;
 
-					// title achievement rewards are retroactive
+					// title Achievement rewards are retroactive
 					var reward = Global.AchievementMgr.GetAchievementReward(achievement);
 
 					if (reward != null)
@@ -319,7 +319,7 @@ namespace Game.Achievements
 					if (criteria == null)
 					{
 						// Removing non-existing criteria data for all characters
-						Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `character_achievement_progress`.", id);
+						Log.outError(LogFilter.Achievement, "Non-existing Achievement criteria {0} data removed from table `character_achievement_progress`.", id);
 
 						PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA);
 						stmt.AddValue(0, id);
@@ -408,7 +408,7 @@ namespace Game.Achievements
 					bool allComplete = true;
 
 					foreach (CriteriaTree tree in trees)
-						// don't update already completed criteria if not forced or achievement already complete
+						// don't update already completed criteria if not forced or Achievement already complete
 						if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete) ||
 						    !HasAchieved(tree.Achievement.Id))
 						{
@@ -575,7 +575,7 @@ namespace Game.Achievements
 				return;
 
 			// titles
-			//! Currently there's only one achievement that deals with gender-specific titles.
+			//! Currently there's only one Achievement that deals with gender-specific titles.
 			//! Since no common attributes were found, (not even in titleRewardFlags field)
 			//! we explicitly check by ID. Maybe in the future we could move the achievement_reward
 			//! condition fields to the condition system.
@@ -622,10 +622,10 @@ namespace Game.Achievements
 
 				if (item)
 				{
-					// save new item before send
-					item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+					// save new Item before send
+					item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then Item will deleted
 
-					// item
+					// Item
 					draft.AddItem(item);
 				}
 
@@ -717,7 +717,7 @@ namespace Game.Achievements
 					serverFirstAchievement.AchievementID = achievement.Id;
 					Global.WorldMgr.SendGlobalMessage(serverFirstAchievement);
 				}
-				// if player is in world he can tell his friends about new achievement
+				// if player is in world he can tell his friends about new Achievement
 				else if (_owner.IsInWorld)
 				{
 					BroadcastTextBuilder _builder   = new(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetNativeGender(), _owner, achievement.Id);
@@ -843,7 +843,7 @@ namespace Game.Achievements
 					if (criteria == null)
 					{
 						// we will remove not existed criteria for all guilds
-						Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `guild_achievement_progress`.", id);
+						Log.outError(LogFilter.Achievement, "Non-existing Achievement criteria {0} data removed from table `guild_achievement_progress`.", id);
 
 						PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD);
 						stmt.AddValue(0, id);
@@ -1133,7 +1133,7 @@ namespace Game.Achievements
 
 	public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
 	{
-		// store achievements by referenced achievement id to speed up lookup
+		// store achievements by referenced Achievement id to speed up lookup
 		private MultiMap<uint, AchievementRecord> _achievementListByReferencedId = new();
 		private Dictionary<uint, AchievementRewardLocale> _achievementRewardLocales = new();
 
@@ -1199,7 +1199,7 @@ namespace Game.Achievements
 
 			if (CliDB.AchievementStorage.Empty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement references.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Achievement references.");
 
 				return;
 			}
@@ -1221,7 +1221,7 @@ namespace Game.Achievements
 			if (achievement1 != null)
 				achievement1.InstanceID = 631; // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
 
-			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement references in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Achievement references in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public void LoadAchievementScripts()
@@ -1234,7 +1234,7 @@ namespace Game.Achievements
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement scripts. DB table `achievement_scripts` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Achievement scripts. DB table `achievement_scripts` is empty.");
 
 				return;
 			}
@@ -1256,21 +1256,21 @@ namespace Game.Achievements
 				_achievementScripts[achievementId] = Global.ObjectMgr.GetScriptId(scriptName);
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementScripts.Count} achievement scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+			Log.outInfo(LogFilter.ServerLoading, $"Loaded {_achievementScripts.Count} Achievement scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 		}
 
 		public void LoadCompletedAchievements()
 		{
 			uint oldMSTime = Time.GetMSTime();
 
-			// Populate _allCompletedAchievements with all realm first achievement ids to make multithreaded access safer
+			// Populate _allCompletedAchievements with all realm first Achievement ids to make multithreaded access safer
 			// while it will not prevent races, it will prevent crashes that happen because std::unordered_map key was added
 			// instead the only potential race will happen on value associated with the key
 			foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
 				if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
 					_allCompletedAchievements[achievement.Id] = DateTime.MinValue;
 
-			SQLResult result = DB.Characters.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
+			SQLResult result = DB.Characters.Query("SELECT Achievement FROM character_achievement GROUP BY Achievement");
 
 			if (result.IsEmpty())
 			{
@@ -1287,7 +1287,7 @@ namespace Game.Achievements
 				if (achievement == null)
 				{
 					// Remove non-existing achievements from all characters
-					Log.outError(LogFilter.Achievement, "Non-existing achievement {0} data has been removed from the table `character_achievement`.", achievementId);
+					Log.outError(LogFilter.Achievement, "Non-existing Achievement {0} data has been removed from the table `character_achievement`.", achievementId);
 
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEVMENT);
 					stmt.AddValue(0, achievementId);
@@ -1315,7 +1315,7 @@ namespace Game.Achievements
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 achievement rewards. DB table `achievement_reward` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 Achievement rewards. DB table `achievement_reward` is empty.");
 
 				return;
 			}
@@ -1327,7 +1327,7 @@ namespace Game.Achievements
 
 				if (achievement == null)
 				{
-					Log.outError(LogFilter.Sql, $"Table `achievement_reward` contains a wrong achievement ID ({id}), ignored.");
+					Log.outError(LogFilter.Sql, $"Table `achievement_reward` contains a wrong Achievement ID ({id}), ignored.");
 
 					continue;
 				}
@@ -1346,7 +1346,7 @@ namespace Game.Achievements
 				    reward.TitleId[1] == 0 &&
 				    reward.SenderCreatureId == 0)
 				{
-					Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not contain title or item reward data. Ignored.");
+					Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not contain title or Item reward data. Ignored.");
 
 					continue;
 				}
@@ -1377,7 +1377,7 @@ namespace Game.Achievements
 					}
 				}
 
-				//check mail data before item for report including wrong item case
+				//check mail data before Item for report including wrong Item case
 				if (reward.SenderCreatureId != 0)
 				{
 					if (Global.ObjectMgr.GetCreatureTemplate(reward.SenderCreatureId) == null)
@@ -1389,7 +1389,7 @@ namespace Game.Achievements
 				else
 				{
 					if (reward.ItemId != 0)
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains an item reward. Item will not be rewarded.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains an Item reward. Item will not be rewarded.");
 
 					if (!reward.Subject.IsEmpty())
 						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains a mail subject.");
@@ -1418,14 +1418,14 @@ namespace Game.Achievements
 				if (reward.ItemId != 0)
 					if (Global.ObjectMgr.GetItemTemplate(reward.ItemId) == null)
 					{
-						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid item id {reward.ItemId}, reward mail will not contain the rewarded item.");
+						Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid Item id {reward.ItemId}, reward mail will not contain the rewarded Item.");
 						reward.ItemId = 0;
 					}
 
 				_achievementRewards[id] = reward;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement rewards in {1} ms.", _achievementRewards.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Achievement rewards in {1} ms.", _achievementRewards.Count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public void LoadRewardLocales()
@@ -1439,7 +1439,7 @@ namespace Game.Achievements
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");
 
 				return;
 			}
@@ -1451,7 +1451,7 @@ namespace Game.Achievements
 
 				if (!_achievementRewards.ContainsKey(id))
 				{
-					Log.outError(LogFilter.Sql, $"Table `achievement_reward_locale` (ID: {id}) contains locale strings for a non-existing achievement reward.");
+					Log.outError(LogFilter.Sql, $"Table `achievement_reward_locale` (ID: {id}) contains locale strings for a non-existing Achievement reward.");
 
 					continue;
 				}
@@ -1469,7 +1469,7 @@ namespace Game.Achievements
 				_achievementRewardLocales[id] = data;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement reward locale strings in {1} ms.", _achievementRewardLocales.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+			Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Achievement reward locale strings in {1} ms.", _achievementRewardLocales.Count, Time.GetMSTimeDiffToNow(oldMSTime));
 		}
 
 		public uint GetAchievementScriptId(uint achievementId)

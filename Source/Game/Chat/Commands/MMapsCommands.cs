@@ -197,12 +197,12 @@ namespace Game.Chat
 			return true;
 		}
 
-		[Command("stats", RBACPermissions.CommandMmapStats)]
+		[Command("Stats", RBACPermissions.CommandMmapStats)]
 		private static bool HandleMmapStatsCommand(CommandHandler handler)
 		{
 			Player player       = handler.GetSession().GetPlayer();
 			uint   terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
-			handler.SendSysMessage("mmap stats:");
+			handler.SendSysMessage("mmap Stats:");
 			handler.SendSysMessage("  global mmap pathfinding is {0}abled", Global.DisableMgr.IsPathfindingEnabled(player.GetMapId()) ? "En" : "Dis");
 			handler.SendSysMessage(" {0} maps loaded with {1} tiles overall", Global.MMapMgr.GetLoadedMapsCount(), Global.MMapMgr.GetLoadedTilesCount());
 
@@ -237,7 +237,7 @@ namespace Game.Chat
 				triVertCount += tile.header.detailVertCount;
 			}
 
-			handler.SendSysMessage("Navmesh stats:");
+			handler.SendSysMessage("Navmesh Stats:");
 			handler.SendSysMessage(" {0} tiles loaded", tileCount);
 			handler.SendSysMessage(" {0} BVTree nodes", nodeCount);
 			handler.SendSysMessage(" {0} polygons ({1} vertices)", polyCount, vertCount);

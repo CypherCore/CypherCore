@@ -35,7 +35,7 @@ namespace Game
 			}
 
 			//                                         0   1     2     3       4        5       6    7
-			SQLResult result = DB.World.Query("SELECT id, type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
+			SQLResult result = DB.World.Query("SELECT id, Type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
 
 			if (result.IsEmpty())
 			{
@@ -55,7 +55,7 @@ namespace Game
 
 				if (category == WardenCheckCategory.Max)
 				{
-					Log.outError(LogFilter.Sql, $"Warden check with id {id} lists check type {checkType} in `warden_checks`, which is not supported. Skipped.");
+					Log.outError(LogFilter.Sql, $"Warden check with id {id} lists check Type {checkType} in `warden_checks`, which is not supported. Skipped.");
 
 					continue;
 				}
@@ -119,7 +119,7 @@ namespace Game
 					wardenCheck.IdStr = str.ToCharArray();
 				}
 
-				// initialize action with default action from config, this may be overridden later
+				// initialize Action with default Action from config, this may be overridden later
 				wardenCheck.Action = (WardenActions)WorldConfig.GetIntValue(WorldCfg.WardenClientFailAction);
 
 				_pools[(int)category].Add(id);
@@ -142,11 +142,11 @@ namespace Game
 			}
 
 			//                                              0         1
-			SQLResult result = DB.Characters.Query("SELECT wardenId, action FROM warden_action");
+			SQLResult result = DB.Characters.Query("SELECT wardenId, Action FROM warden_action");
 
 			if (result.IsEmpty())
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden Action overrides. DB table `warden_action` is empty!");
 
 				return;
 			}
@@ -158,15 +158,15 @@ namespace Game
 				ushort        checkId = result.Read<ushort>(0);
 				WardenActions action  = (WardenActions)result.Read<byte>(1);
 
-				// Check if action value is in range (0-2, see WardenActions enum)
+				// Check if Action value is in range (0-2, see WardenActions enum)
 				if (action > WardenActions.Ban)
 				{
-					Log.outError(LogFilter.Warden, $"Warden check override action out of range (ID: {checkId}, action: {action})");
+					Log.outError(LogFilter.Warden, $"Warden check override Action out of range (ID: {checkId}, Action: {action})");
 				}
 				// Check if check actually exists before accessing the CheckStore vector
 				else if (checkId >= _checks.Count)
 				{
-					Log.outError(LogFilter.Warden, $"Warden check action override for non-existing check (ID: {checkId}, action: {action}), skipped");
+					Log.outError(LogFilter.Warden, $"Warden check Action override for non-existing check (ID: {checkId}, Action: {action}), skipped");
 				}
 				else
 				{
@@ -175,7 +175,7 @@ namespace Game
 				}
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden action overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+			Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden Action overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 		}
 
 		public WardenCheck GetCheckData(ushort Id)

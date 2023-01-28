@@ -266,7 +266,7 @@ namespace Game.Entities
 					break;
 				default:
 					if (!IsPetGhoul())
-						Log.outError(LogFilter.Pet, "Pet have incorrect type ({0}) for pet loading.", GetPetType());
+						Log.outError(LogFilter.Pet, "Pet have incorrect Type ({0}) for pet loading.", GetPetType());
 
 					break;
 			}
@@ -317,7 +317,7 @@ namespace Game.Entities
 
 			// set current pet as current
 			// 0-4=current
-			// PET_SAVE_NOT_IN_SLOT(-1) = not stable slot (summoning))
+			// PET_SAVE_NOT_IN_SLOT(-1) = not stable Slot (summoning))
 			if (slot == PetSaveMode.NotInSlot)
 			{
 				uint petInfoNumber = petInfo.PetNumber;
@@ -394,7 +394,7 @@ namespace Game.Entities
 				                    uint timediff = (uint)(GameTime.GetGameTime() - lastSaveTime);
 				                    _LoadAuras(holder.GetResult(PetLoginQueryLoad.Auras), holder.GetResult(PetLoginQueryLoad.AuraEffects), timediff);
 
-				                    // load action bar, if data broken will fill later by default spells.
+				                    // load Action bar, if data broken will fill later by default spells.
 				                    if (!isTemporarySummon)
 				                    {
 					                    _LoadSpells(holder.GetResult(PetLoginQueryLoad.Spells));
@@ -421,7 +421,7 @@ namespace Game.Entities
 				                    // The SetSpecialization function will run these functions if the pet's spec is not 0
 				                    if (GetSpecialization() == 0)
 				                    {
-					                    CleanupActionBar(); // remove unknown spells from action bar after load
+					                    CleanupActionBar(); // remove unknown spells from Action bar after load
 
 					                    owner.PetSpellInitialize();
 				                    }
@@ -496,7 +496,7 @@ namespace Game.Entities
 					mode = (PetSaveMode)activeSlot;
 			}
 
-			// stable and not in slot saves
+			// stable and not in Slot saves
 			if (mode < PetSaveMode.FirstActiveSlot ||
 			    mode >= PetSaveMode.LastActiveSlot)
 				RemoveAllAuras();
@@ -1168,7 +1168,7 @@ namespace Game.Entities
 			newspell.state = state;
 			newspell.type  = type;
 
-			if (active == ActiveStates.Decide) // active was not used before, so we save it's autocast/passive state here
+			if (active == ActiveStates.Decide) // active was not used before, so we save it's autocast/passive State here
 			{
 				if (spellInfo.IsAutocastable())
 					newspell.active = ActiveStates.Disabled;
@@ -1356,13 +1356,13 @@ namespace Game.Entities
 					learnPrev = false;
 			}
 
-			// if remove last rank or non-ranked then update action bar at server and client if need
+			// if remove last rank or non-ranked then update Action bar at server and client if need
 			if (clearActionBar &&
 			    !learnPrev &&
 			    GetCharmInfo().RemoveSpellFromActionBar(spellId))
 				if (!_loading)
 				{
-					// need update action bar for last removed rank
+					// need update Action bar for last removed rank
 					Unit owner = GetOwner();
 
 					if (owner)
@@ -1536,7 +1536,7 @@ namespace Game.Entities
 			if (!IsPermanentPetFor(owner))
 				return;
 
-			foreach (var pa in owner._petAuras)
+			foreach (var pa in owner.PetAuras)
 				if (!current &&
 				    pa.IsRemovedOnChangePet())
 					owner.RemovePetAura(pa);
@@ -1564,7 +1564,7 @@ namespace Game.Entities
 			Player owner = GetOwner();
 
 			// if the owner has that pet aura, return true
-			foreach (var petAura in owner._petAuras)
+			foreach (var petAura in owner.PetAuras)
 				if (petAura.GetAura(GetEntry()) == aura.GetId())
 					return true;
 
@@ -1796,7 +1796,7 @@ namespace Game.Entities
 			_petSpecialization = (ushort)spec;
 			LearnSpecializationSpells();
 
-			// resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet action bar
+			// resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet Action bar
 			CleanupActionBar();
 			GetOwner().PetSpellInitialize();
 

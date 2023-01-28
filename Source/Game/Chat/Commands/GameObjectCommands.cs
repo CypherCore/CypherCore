@@ -635,7 +635,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("state", RBACPermissions.CommandGobjectSetState)]
+			[Command("State", RBACPermissions.CommandGobjectSetState)]
 			private static bool HandleGameObjectSetStateCommand(CommandHandler handler, ulong guidLow, int objectType, uint? objectState)
 			{
 				if (guidLow == 0)
@@ -697,7 +697,7 @@ namespace Game.Chat
 						break;
 				}
 
-				handler.SendSysMessage("Set gobject type {0} state {1}", objectType, objectState);
+				handler.SendSysMessage("Set gobject Type {0} State {1}", objectType, objectState);
 
 				return true;
 			}

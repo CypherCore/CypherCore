@@ -237,7 +237,7 @@ namespace Game.Networking.Packets
 			Race             = (byte)player.GetRace();
 			ClassID          = (byte)player.GetClass();
 
-			foreach (var customization in player._playerData.Customizations)
+			foreach (var customization in player.PlayerData.Customizations)
 				Customizations.Add(customization);
 
 			for (byte i = 0; i < EquipmentSlot.End; ++i)

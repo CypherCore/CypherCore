@@ -32,7 +32,7 @@ namespace Game.Loots
 		public uint LootListId;
 		public bool needs_quest; // quest drop
 		public uint randomBonusListId;
-		public ObjectGuid rollWinnerGUID; // Stores the guid of person who won loot, if his bags are full only he can see the item in loot list!
+		public ObjectGuid rollWinnerGUID; // Stores the guid of person who won loot, if his bags are full only he can see the Item in loot list!
 
 		public LootItem()
 		{
@@ -53,7 +53,7 @@ namespace Game.Loots
 		}
 
         /// <summary>
-        ///  Basic checks for player/item compatibility - if false no chance to see the item in the loot - used only for loot generation
+        ///  Basic checks for player/Item compatibility - if false no chance to see the Item in the loot - used only for loot generation
         /// </summary>
         /// <param name="player"></param>
         /// <param name="loot"></param>
@@ -297,7 +297,7 @@ namespace Game.Loots
 				startLootRoll.Method     = _loot.GetLootMethod();
 				startLootRoll.ValidRolls = _voteMask;
 
-				// In NEED_BEFORE_GREED need disabled for non-usable item for player
+				// In NEED_BEFORE_GREED need disabled for non-usable Item for player
 				if (_loot.GetLootMethod() == LootMethod.NeedBeforeGreed &&
 				    player.CanRollNeedForItem(itemTemplate, _map, true) != InventoryResult.Ok)
 					startLootRoll.ValidRolls &= ~RollMask.Need;
@@ -447,7 +447,7 @@ namespace Game.Loots
 			lootItem.Loot              = new ItemInstance(_lootItem);
 		}
 
-		// Try to start the group roll for the specified item (it may fail for quest item or any condition
+		// Try to start the group roll for the specified Item (it may fail for quest Item or any condition
 		// If this method return false the roll have to be removed from the container to avoid any problem
 		public bool TryToStart(Map map, Loot loot, uint lootListId, ushort enchantingSkill)
 		{
@@ -462,7 +462,7 @@ namespace Game.Loots
 				_lootItem = loot.items[(int)lootListId];
 
 				_loot                = loot;
-				_lootItem.is_blocked = true; // block the item while rolling
+				_lootItem.is_blocked = true; // block the Item while rolling
 
 				uint playerCount = 0;
 
@@ -471,7 +471,7 @@ namespace Game.Loots
 					Player plr = Global.ObjAccessor.GetPlayer(_map, allowedLooter);
 
 					if (!plr ||
-					    !_lootItem.HasAllowedLooter(plr.GetGUID())) // check if player meet the condition to be able to roll this item
+					    !_lootItem.HasAllowedLooter(plr.GetGUID())) // check if player meet the condition to be able to roll this Item
 					{
 						_rollVoteMap[allowedLooter].Vote = RollVote.NotValid;
 
@@ -487,7 +487,7 @@ namespace Game.Loots
 					++playerCount;
 				}
 
-				// initialize item prototype and check enchant possibilities for this group
+				// initialize Item prototype and check enchant possibilities for this group
 				ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(_lootItem.itemid);
 				_voteMask = RollMask.AllMask;
 
@@ -500,7 +500,7 @@ namespace Game.Loots
 				    disenchant.SkillRequired > enchantingSkill)
 					_voteMask = _voteMask & ~RollMask.Disenchant;
 
-				if (playerCount > 1) // check if more than one player can loot this item
+				if (playerCount > 1) // check if more than one player can loot this Item
 				{
 					// start the roll
 					SendStartRoll();
@@ -510,7 +510,7 @@ namespace Game.Loots
 					return true;
 				}
 
-				// no need to start roll if one or less player can loot this item so place it under threshold
+				// no need to start roll if one or less player can loot this Item so place it under threshold
 				_lootItem.is_underthreshold = true;
 				_lootItem.is_blocked        = false;
 			}
@@ -622,7 +622,7 @@ namespace Game.Loots
 								winnerPair = pair;
 
 						break;
-					// Explicitly passing excludes a player from winning loot, so no action required.
+					// Explicitly passing excludes a player from winning loot, so no Action required.
 					case RollVote.Pass:
 						break;
 					case RollVote.NotEmitedYet:
@@ -716,12 +716,12 @@ namespace Game.Loots
 		private ObjectGuid _lootMaster;
 		private LootMethod _lootMethod;
 		private ObjectGuid _owner;                         // The WorldObject that holds this loot
-		private Dictionary<uint, LootRoll> _rolls = new(); // used if an item is under rolling
+		private Dictionary<uint, LootRoll> _rolls = new(); // used if an Item is under rolling
 		private bool _wasOpened;                           // true if at least one player received the loot content
 		public uint gold;
 
 		public List<LootItem> items = new();
-		public LootType loot_type; // required for achievement system
+		public LootType loot_type; // required for Achievement system
 		private MultiMap<ObjectGuid, NotNormalLootItem> PlayerFFAItems = new();
 
 		private List<ObjectGuid> PlayersLooting = new();
@@ -738,7 +738,7 @@ namespace Game.Loots
 			_lootMaster  = group != null ? group.GetMasterLooterGuid() : ObjectGuid.Empty;
 		}
 
-		// Inserts the item into the loot (called by LootTemplate processors)
+		// Inserts the Item into the loot (called by LootTemplate processors)
 		public void AddItem(LootStoreItem item)
 		{
 			ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
@@ -785,7 +785,7 @@ namespace Game.Loots
 				if (lootItem.is_blocked)
 					continue;
 
-				// dont allow protected item to be looted by someone else
+				// dont allow protected Item to be looted by someone else
 				if (!lootItem.rollWinnerGUID.IsEmpty() &&
 				    lootItem.rollWinnerGUID != GetGUID())
 					continue;
@@ -950,8 +950,8 @@ namespace Game.Loots
 
 		public void NotifyItemRemoved(byte lootListId, Map map)
 		{
-			// notify all players that are looting this that the item was removed
-			// convert the index to the slot the player sees
+			// notify all players that are looting this that the Item was removed
+			// convert the index to the Slot the player sees
 			for (int i = 0; i < PlayersLooting.Count; ++i)
 			{
 				LootItem item = items[lootListId];
@@ -1089,7 +1089,7 @@ namespace Game.Loots
 			return item;
 		}
 
-		// return true if there is any item that is lootable for any player (not quest item, FFA or conditional)
+		// return true if there is any Item that is lootable for any player (not quest Item, FFA or conditional)
 		public bool HasItemForAll()
 		{
 			// Gold is always lootable
@@ -1106,7 +1106,7 @@ namespace Game.Loots
 			return false;
 		}
 
-		// return true if there is any FFA, quest or conditional item for the player.
+		// return true if there is any FFA, quest or conditional Item for the player.
 		public bool HasItemFor(Player player)
 		{
 			// quest items
@@ -1129,7 +1129,7 @@ namespace Game.Loots
 			return false;
 		}
 
-		// return true if there is any item over the group threshold (i.e. not underthreshold).
+		// return true if there is any Item over the group threshold (i.e. not underthreshold).
 		public bool HasOverThresholdItem()
 		{
 			for (byte i = 0; i < items.Count; ++i)

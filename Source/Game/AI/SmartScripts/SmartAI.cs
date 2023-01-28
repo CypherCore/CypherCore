@@ -774,7 +774,7 @@ namespace Game.AI
 		{
 			bool charmed = me.IsCharmed();
 
-			if (charmed) // do this before we change charmed state, as charmed state might prevent these things from processing
+			if (charmed) // do this before we change charmed State, as charmed State might prevent these things from processing
 				if (HasEscortState(SmartEscortState.Escorting | SmartEscortState.Paused | SmartEscortState.Returning))
 					EndPath(true);
 
@@ -1048,7 +1048,7 @@ namespace Game.AI
 				{
 					StopPath(0, EscortQuestID, true);
 
-					// allow to properly hook out of range despawn action, which in most cases should perform the same operation as dying
+					// allow to properly hook out of range despawn Action, which in most cases should perform the same operation as dying
 					GetScript().ProcessEventsFor(SmartEvents.Death, me);
 					me.DespawnOrUnsummon();
 
@@ -1381,6 +1381,6 @@ namespace Game.AI
 		None = 0x00,      //nothing in progress
 		Escorting = 0x01, //escort is in progress
 		Returning = 0x02, //escort is returning after being in combat
-		Paused = 0x04     //will not proceed with waypoints before state is removed
+		Paused = 0x04     //will not proceed with waypoints before State is removed
 	}
 }

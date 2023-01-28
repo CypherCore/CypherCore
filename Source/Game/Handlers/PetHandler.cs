@@ -553,7 +553,7 @@ namespace Game
 			uint         spell_id  = UnitActionBarEntry.UNIT_ACTION_BUTTON_ACTION(actionData);
 			ActiveStates act_state = (ActiveStates)UnitActionBarEntry.UNIT_ACTION_BUTTON_TYPE(actionData);
 
-			Log.outDebug(LogFilter.Network, "Player {0} has changed pet spell action. Position: {1}, Spell: {2}, State: {3}", GetPlayer().GetName(), position, spell_id, act_state);
+			Log.outDebug(LogFilter.Network, "Player {0} has changed pet spell Action. Position: {1}, Spell: {2}, State: {3}", GetPlayer().GetName(), position, spell_id, act_state);
 
 			foreach (Unit petControlled in pets)
 				//if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add

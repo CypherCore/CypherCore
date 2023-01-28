@@ -1052,15 +1052,15 @@ namespace Game.Spells
 
 			// the chance of getting a perfect result
 			float perfectCreateChance = 0.0f;
-			// the resulting perfect item if successful
+			// the resulting perfect Item if successful
 			uint perfectItemType = itemId;
 
 			// get perfection capability and chance
 			if (SkillPerfectItems.CanCreatePerfectItem(player, _spellInfo.Id, ref perfectCreateChance, ref perfectItemType))
 				if (RandomHelper.randChance(perfectCreateChance)) // if the roll succeeds...
-					newitemid = perfectItemType;                  // the perfect item replaces the regular one
+					newitemid = perfectItemType;                  // the perfect Item replaces the regular one
 
-			// init items_count to 1, since 1 item will be created regardless of specialization
+			// init items_count to 1, since 1 Item will be created regardless of specialization
 			int items_count = 1;
 			// the chance to create additional items
 			float additionalCreateChance = 0.0f;
@@ -1076,7 +1076,7 @@ namespace Game.Spells
 			// really will be created more items
 			num_to_add *= (uint)items_count;
 
-			// can the player store the new item?
+			// can the player store the new Item?
 			List<ItemPosCount> dest = new();
 			uint               no_space;
 			InventoryResult    msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, newitemid, num_to_add, out no_space);
@@ -1100,7 +1100,7 @@ namespace Game.Spells
 
 			if (num_to_add != 0)
 			{
-				// create the new item and store it
+				// create the new Item and store it
 				Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(newitemid), null, context, bonusListIds);
 
 				// was it successful? return error if not
@@ -1111,7 +1111,7 @@ namespace Game.Spells
 					return;
 				}
 
-				// set the "Crafted by ..." property of the item
+				// set the "Crafted by ..." property of the Item
 				if (pItem.GetTemplate().HasSignature())
 					pItem.SetCreator(player.GetGUID());
 
@@ -1127,7 +1127,7 @@ namespace Game.Spells
 						guild.AddGuildNews(GuildNews.ItemCrafted, player.GetGUID(), 0, pProto.GetId());
 				}
 
-				// we succeeded in creating at least one item, so a levelup is possible
+				// we succeeded in creating at least one Item, so a levelup is possible
 				player.UpdateCraftSkill(_spellInfo);
 			}
 		}
@@ -1156,13 +1156,13 @@ namespace Game.Spells
 
 			ItemContext context = _spellInfo.HasAttribute(SpellAttr0.IsTradeskill) ? ItemContext.TradeSkill : ItemContext.None;
 
-			// Pick a random item from spell_loot_template
+			// Pick a random Item from spell_loot_template
 			if (_spellInfo.IsLootCrafting())
 			{
 				player.AutoStoreLoot(_spellInfo.Id, LootStorage.Spell, context, false, true);
 				player.UpdateCraftSkill(_spellInfo);
 			}
-			else // If there's no random loot entries for this spell, pick the item associated with this spell
+			else // If there's no random loot entries for this spell, pick the Item associated with this spell
 			{
 				uint itemId = effectInfo.ItemType;
 
@@ -1450,7 +1450,7 @@ namespace Game.Spells
 				itemTarget.SetState(ItemUpdateState.Changed, itemTarget.GetOwner());
 			}
 
-			// not allow use skill grow at item base open
+			// not allow use skill grow at Item base open
 			if (_CastItem == null &&
 			    skillId != SkillType.None)
 			{
@@ -1488,11 +1488,11 @@ namespace Game.Spells
 
 			Player player = _caster.ToPlayer();
 
-			// applied only to using item
+			// applied only to using Item
 			if (_CastItem == null)
 				return;
 
-			// ... only to item in own inventory/bank/equip_slot
+			// ... only to Item in own inventory/bank/equip_slot
 			if (_CastItem.GetOwnerGUID() != player.GetGUID())
 				return;
 
@@ -1527,7 +1527,7 @@ namespace Game.Spells
 				{
 					player.DestroyItem(_CastItem.GetBagSlot(), _CastItem.GetSlot(), true);
 
-					// prevent crash at access and unexpected charges counting with item update queue corrupt
+					// prevent crash at access and unexpected charges counting with Item update queue corrupt
 					if (_CastItem == _targets.GetItemTarget())
 						_targets.SetItemTarget(null);
 
@@ -1552,7 +1552,7 @@ namespace Game.Spells
 				{
 					player.DestroyItem(_CastItem.GetBagSlot(), _CastItem.GetSlot(), true);
 
-					// prevent crash at access and unexpected charges counting with item update queue corrupt
+					// prevent crash at access and unexpected charges counting with Item update queue corrupt
 					if (_CastItem == _targets.GetItemTarget())
 						_targets.SetItemTarget(null);
 
@@ -1580,7 +1580,7 @@ namespace Game.Spells
 					if (msg == InventoryResult.ClientLockedOut)
 						dest = EquipmentSlot.MainHand;
 
-					// prevent crash at access and unexpected charges counting with item update queue corrupt
+					// prevent crash at access and unexpected charges counting with Item update queue corrupt
 					if (_CastItem == _targets.GetItemTarget())
 						_targets.SetItemTarget(null);
 
@@ -1642,7 +1642,7 @@ namespace Game.Spells
 
 			if (properties == null)
 			{
-				Log.outError(LogFilter.Spells, "EffectSummonType: Unhandled summon type {0}", effectInfo.MiscValueB);
+				Log.outError(LogFilter.Spells, "EffectSummonType: Unhandled summon Type {0}", effectInfo.MiscValueB);
 
 				return;
 			}
@@ -1922,7 +1922,7 @@ namespace Game.Spells
 			if (unitTarget == null)
 				return;
 
-			// Create dispel mask by dispel type
+			// Create dispel mask by dispel Type
 			uint dispel_type = (uint)effectInfo.MiscValue;
 			uint dispelMask  = SpellInfo.GetDispelMask((DispelType)dispel_type);
 
@@ -2244,7 +2244,7 @@ namespace Game.Spells
 				if (pEnchant == null)
 					return;
 
-				// item can be in trade slot and have owner diff. from caster
+				// Item can be in trade Slot and have owner diff. from caster
 				Player item_owner = itemTarget.GetOwner();
 
 				if (item_owner == null)
@@ -2298,7 +2298,7 @@ namespace Game.Spells
 			if (enchant == null)
 				return;
 
-			// support only enchantings with add socket in this slot
+			// support only enchantings with add socket in this Slot
 			{
 				bool add_socket = false;
 
@@ -2322,7 +2322,7 @@ namespace Game.Spells
 				}
 			}
 
-			// item can be in trade slot and have owner diff. from caster
+			// Item can be in trade Slot and have owner diff. from caster
 			Player item_owner = itemTarget.GetOwner();
 
 			if (item_owner == null)
@@ -2386,7 +2386,7 @@ namespace Game.Spells
 			// select enchantment duration
 			uint duration = (uint)pEnchant.Duration;
 
-			// item can be in trade slot and have owner diff. from caster
+			// Item can be in trade Slot and have owner diff. from caster
 			Player item_owner = itemTarget.GetOwner();
 
 			if (item_owner == null)
@@ -2443,7 +2443,7 @@ namespace Game.Spells
 
 			Pet pet = unitCaster.CreateTamedPetFrom(creatureTarget, _spellInfo.Id);
 
-			if (pet == null) // in very specific state like near world end/etc.
+			if (pet == null) // in very specific State like near world end/etc.
 				return;
 
 			// "kill" original creature
@@ -2503,13 +2503,13 @@ namespace Game.Spells
 
 			Pet OldSummon = owner.GetPet();
 
-			// if pet requested type already exist
+			// if pet requested Type already exist
 			if (OldSummon != null)
 			{
 				if (petentry == 0 ||
 				    OldSummon.GetEntry() == petentry)
 				{
-					// pet in corpse state can't be summoned
+					// pet in corpse State can't be summoned
 					if (OldSummon.IsDead())
 						return;
 
@@ -2686,7 +2686,7 @@ namespace Game.Spells
 			{
 				case SpellFamilyNames.Shaman:
 				{
-					// Skyshatter Harness item set bonus
+					// Skyshatter Harness Item set bonus
 					// Stormstrike
 					AuraEffect aurEff = unitCaster.IsScriptOverriden(_spellInfo, 5634);
 
@@ -2998,7 +2998,7 @@ namespace Game.Spells
 							byte slot = 0;
 							Item item;
 
-							while (bag != 0) // 256 = 0 due to var type
+							while (bag != 0) // 256 = 0 due to var Type
 							{
 								item = _caster.ToPlayer().GetItemByPos(bag, slot);
 
@@ -3090,7 +3090,7 @@ namespace Game.Spells
 							if (!_caster.IsTypeId(TypeId.Player))
 								return;
 
-							// Delete item from inventory at death
+							// Delete Item from inventory at death
 							_caster.ToPlayer().DestroyItemCount((uint)damage, 5, true);
 
 							return;
@@ -3190,14 +3190,14 @@ namespace Game.Spells
 			Player caster = _caster.ToPlayer();
 			Player target = unitTarget.ToPlayer();
 
-			// caster or target already have requested duel
-			if (caster.duel != null ||
-			    target.duel != null ||
+			// caster or target already have requested Duel
+			if (caster.Duel != null ||
+			    target.Duel != null ||
 			    target.GetSocial() == null ||
 			    target.GetSocial().HasIgnore(caster.GetGUID(), caster.GetSession().GetAccountGUID()))
 				return;
 
-			// Players can only fight a duel in zones with this flag
+			// Players can only fight a Duel in zones with this flag
 			AreaTableRecord casterAreaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
 
 			if (casterAreaEntry != null &&
@@ -3259,10 +3259,10 @@ namespace Game.Spells
 			caster.SendPacket(packet);
 			target.SendPacket(packet);
 
-			// create duel-info
+			// create Duel-info
 			bool isMounted = (GetSpellInfo().Id == 62875);
-			caster.duel = new DuelInfo(target, caster, isMounted);
-			target.duel = new DuelInfo(caster, caster, isMounted);
+			caster.Duel = new DuelInfo(target, caster, isMounted);
+			target.Duel = new DuelInfo(caster, caster, isMounted);
 
 			caster.SetDuelArbiter(go.GetGUID());
 			target.SetDuelArbiter(go.GetGUID());
@@ -3410,7 +3410,7 @@ namespace Game.Spells
 			if (effectHandleMode != SpellEffectHandleMode.HitTarget)
 				return;
 
-			// this is only item spell effect applied to main-hand weapon of target player (players in area)
+			// this is only Item spell effect applied to main-hand weapon of target player (players in area)
 			if (unitTarget == null ||
 			    !unitTarget.IsTypeId(TypeId.Player))
 				return;
@@ -3444,7 +3444,7 @@ namespace Game.Spells
 				if (pEnchant == null)
 					return;
 
-				// Always go to temp enchantment slot
+				// Always go to temp enchantment Slot
 				EnchantmentSlot slot = EnchantmentSlot.Temp;
 
 				// Enchantment will not be applied if a different one already exists
@@ -3474,7 +3474,7 @@ namespace Game.Spells
 				caster.SendLoot(itemTarget.loot);
 			}
 
-			// item will be removed at disenchanting end
+			// Item will be removed at disenchanting end
 		}
 
 		[SpellEffectHandler(SpellEffectName.Inebriate)]
@@ -3546,7 +3546,7 @@ namespace Game.Spells
 
 			uint count = 1;
 			player.DestroyItemCount(foodItem, ref count, true);
-			// @todo fix crash when a spell has two effects, both pointed at the same item target
+			// @todo fix crash when a spell has two effects, both pointed at the same Item target
 
 			CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 			args.SetTriggeringSpell(this);
@@ -4141,7 +4141,7 @@ namespace Game.Spells
 
 					if (quest.HasFlag(QuestFlags.Pvp))
 					{
-						player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
+						player.PvpInfo.IsHostile = player.PvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
 						player.UpdatePvPState();
 					}
 				}
@@ -4437,7 +4437,7 @@ namespace Game.Spells
 				return;
 			}
 
-			// invalid slot value
+			// invalid Slot value
 			if (slot >= InventorySlots.BagEnd)
 				return;
 
@@ -4471,7 +4471,7 @@ namespace Game.Spells
 				return;
 			}
 
-			// invalid slot value
+			// invalid Slot value
 			if (slot >= InventorySlots.BagEnd)
 				return;
 
@@ -4580,7 +4580,7 @@ namespace Game.Spells
 				{
 					go.SetFaction(unitCaster.GetFaction());
 					ObjectGuid bobberGuid = go.GetGUID();
-					// client requires fishing bobber guid in channel object slot 0 to be usable
+					// client requires fishing bobber guid in channel object Slot 0 to be usable
 					unitCaster.SetChannelObject(0, bobberGuid);
 					unitCaster.AddGameObject(go); // will removed at spell cancel
 
@@ -4769,7 +4769,7 @@ namespace Game.Spells
 
 			List<DispelableAura> stealList = new();
 
-			// Create dispel mask by dispel type
+			// Create dispel mask by dispel Type
 			uint dispelMask = SpellInfo.GetDispelMask((DispelType)effectInfo.MiscValue);
 			var  auras      = unitTarget.GetOwnedAuras();
 
@@ -5111,7 +5111,7 @@ namespace Game.Spells
 					    !properties.GetFlags().HasFlag(SummonPropertiesFlags.UseCreatureLevel))
 						level = unitCaster.GetLevel();
 
-					// level of pet summoned using engineering item based at engineering skill level
+					// level of pet summoned using engineering Item based at engineering skill level
 					if (_CastItem && unitCaster.IsPlayer())
 					{
 						ItemTemplate proto = _CastItem.GetTemplate();
@@ -5135,7 +5135,7 @@ namespace Game.Spells
 
 				if (summon.GetEntry() == 27893)
 				{
-					VisibleItem weapon = _caster.ToPlayer()._playerData.VisibleItems[EquipmentSlot.MainHand];
+					VisibleItem weapon = _caster.ToPlayer().PlayerData.VisibleItems[EquipmentSlot.MainHand];
 
 					if (weapon.ItemID != 0)
 					{
@@ -5310,7 +5310,7 @@ namespace Game.Spells
 				    ab.GetButtonType() != ActionButtonType.Spell)
 					continue;
 
-				//! Action button data is unverified when it's set so it can be "hacked"
+				//! Action Button data is unverified when it's set so it can be "hacked"
 				//! to contain invalid spells, so filter here.
 				uint spell_id = (uint)ab.GetAction();
 
@@ -5393,7 +5393,7 @@ namespace Game.Spells
 			player.SetHomebind(homeLoc, areaId);
 			player.SendBindPointUpdate();
 
-			Log.outDebug(LogFilter.Spells, $"EffectBind: New homebind: {homeLoc}, AreaId: {areaId}");
+			Log.outDebug(LogFilter.Spells, $"EffectBind: New _homebind: {homeLoc}, AreaId: {areaId}");
 
 			// zone update
 			player.SendPlayerBound(_caster.GetGUID(), areaId);

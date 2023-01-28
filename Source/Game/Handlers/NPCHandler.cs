@@ -338,7 +338,7 @@ namespace Game
 
 		private void SendBindPoint(Creature npc)
 		{
-			// prevent set homebind to instances in any case
+			// prevent set _homebind to instances in any case
 			if (GetPlayer().GetMap().Instanceable())
 				return;
 
@@ -718,7 +718,7 @@ namespace Game
 
 					if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(vendor.GetEntry(), vendorItem.item, _player, vendor))
 					{
-						Log.outDebug(LogFilter.Condition, "SendListInventory: conditions not met for creature entry {0} item {1}", vendor.GetEntry(), vendorItem.item);
+						Log.outDebug(LogFilter.Condition, "SendListInventory: conditions not met for creature entry {0} Item {1}", vendor.GetEntry(), vendorItem.item);
 
 						continue;
 					}

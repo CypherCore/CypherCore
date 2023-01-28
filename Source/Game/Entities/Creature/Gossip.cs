@@ -79,12 +79,12 @@ namespace Game.Misc
 		}
 
         /// <summary>
-        ///  Adds a localized gossip menu item from db by menu id and menu item id.
+        ///  Adds a localized gossip menu Item from db by menu id and menu Item id.
         /// </summary>
         /// <param name="menuId">menuId Gossip menu id.</param>
-        /// <param name="menuItemId">menuItemId Gossip menu item id.</param>
+        /// <param name="menuItemId">menuItemId Gossip menu Item id.</param>
         /// <param name="sender">sender Identifier of the current menu.</param>
-        /// <param name="action">action Custom action given to OnGossipHello.</param>
+        /// <param name="action">Action Custom Action given to OnGossipHello.</param>
         public void AddMenuItem(uint menuId, uint menuItemId, uint sender, uint action)
 		{
 			// Find items for given menu id.
@@ -94,7 +94,7 @@ namespace Game.Misc
 			if (bounds.Empty())
 				return;
 
-			/// Find the one with the given menu item id.
+			/// Find the one with the given menu Item id.
 			var gossipMenuItems = bounds.Find(menuItem => menuItem.OrderIndex == menuItemId);
 
 			if (gossipMenuItems == null)
@@ -311,7 +311,7 @@ namespace Game.Misc
 				opt.OptionLanguage = item.Language;
 				opt.Flags          = item.Flags;
 				opt.OrderIndex     = (int)item.OrderIndex;
-				opt.Text           = item.OptionText; // text for gossip item
+				opt.Text           = item.OptionText; // text for gossip Item
 				opt.Confirm        = item.BoxText;    // accept text (related to money) pop up box, 2.0.3
 				opt.Status         = GossipOptionStatus.Available;
 				opt.SpellID        = item.SpellID;
@@ -711,7 +711,7 @@ namespace Game.Misc
 			packet.SuggestPartyMembers = quest.SuggestedPlayers;
 
 			// incomplete: FD
-			// incomplete quest with item objective but item objective is complete DD
+			// incomplete quest with Item objective but Item objective is complete DD
 			packet.StatusFlags = canComplete ? 0xFF : 0xFD;
 
 			packet.MoneyToGet = 0;
@@ -833,7 +833,7 @@ namespace Game.Misc
 	{
 		public uint Action;
 
-		// action data
+		// Action data
 		public uint ActionMenuID;
 		public uint ActionPoiID;
 		public bool BoxCoded;

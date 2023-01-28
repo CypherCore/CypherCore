@@ -1106,7 +1106,7 @@ namespace Scripts.Spells.Quest
 				return;
 
 			// TO DO: Being triggered is hack, but in checkcast it doesn't pass aurastate requirements.
-			// Beside that the decoy won't keep it's freeze animation state when enter.
+			// Beside that the decoy won't keep it's freeze animation State when enter.
 			GetHitCreature().CastSpell(GetCaster(), SpellIds.Ride, true);
 		}
 

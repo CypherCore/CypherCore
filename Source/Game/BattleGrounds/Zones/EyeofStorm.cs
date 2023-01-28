@@ -26,10 +26,10 @@ namespace Game.BattleGrounds.Zones
 	{
 		private byte[] _CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
 		private ObjectGuid _DroppedFlagGUID;
-		private uint _FlagCapturedBgObjectType; // type that should be despawned when flag is captured
+		private uint _FlagCapturedBgObjectType; // Type that should be despawned when flag is captured
 
 		private ObjectGuid _FlagKeeper;   // keepers guid
-		private EotSFlagState _FlagState; // for checking flag state
+		private EotSFlagState _FlagState; // for checking flag State
 		private int _FlagsTimer;
 
 		private uint[] _HonorScoreTics = new uint[2];

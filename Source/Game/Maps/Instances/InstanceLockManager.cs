@@ -634,7 +634,7 @@ namespace Game.Maps
 	{
         /// <summary>
         ///  Instance id based locks have two states
-        ///  One shared by everyone, which is the real state used by instance
+        ///  One shared by everyone, which is the real State used by instance
         ///  and one for each player that shows in UI that might have less encounters completed
         /// </summary>
         private SharedInstanceLockData _sharedData;

@@ -92,7 +92,7 @@ namespace Game.DataStorage
 		public byte ParticleMovement;
 		public float ParticleScale;
 		public byte ParticleTexSlots;
-		public byte SoundBank; // used to be "type", maybe needs fixing (works well for now)
+		public byte SoundBank; // used to be "Type", maybe needs fixing (works well for now)
 		public uint SoundID;
 		public uint SpellID;
 		public string[] Texture = new string[6];

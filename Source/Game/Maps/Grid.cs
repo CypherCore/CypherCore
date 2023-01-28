@@ -213,7 +213,7 @@ namespace Game.Maps
 							SetGridState(GridState.Idle);
 
 							Log.outDebug(LogFilter.Maps,
-							             "Grid[{0}, {1}] on map {2} moved to IDLE state",
+							             "Grid[{0}, {1}] on map {2} moved to IDLE State",
 							             GetX(),
 							             GetY(),
 							             map.GetId());
@@ -230,7 +230,7 @@ namespace Game.Maps
 					SetGridState(GridState.Removal);
 
 					Log.outDebug(LogFilter.Maps,
-					             "Grid[{0}, {1}] on map {2} moved to REMOVAL state",
+					             "Grid[{0}, {1}] on map {2} moved to REMOVAL State",
 					             GetX(),
 					             GetY(),
 					             map.GetId());

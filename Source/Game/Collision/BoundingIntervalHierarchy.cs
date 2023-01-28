@@ -234,7 +234,7 @@ namespace Game.Collision
 							tempTree[nodeIndex + 2] = FloatToRawIntBits(prevClip);
 						}
 
-						// count stats for the unused leaf
+						// count Stats for the unused leaf
 						depth++;
 						stats.UpdateLeaf(depth, 0);
 						// now we keep going as we are, with a new nodeIndex:

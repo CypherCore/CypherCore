@@ -31,7 +31,7 @@ namespace Game
 				reason = 1;
 			else if (pl.IsFalling())
 				reason = 3; // is jumping or falling
-			else if (pl.duel != null ||
+			else if (pl.Duel != null ||
 			         pl.HasAura(9454)) // is dueling or frozen by GM via freeze command
 				reason = 2;            // FIXME - Need the correct value
 
@@ -55,7 +55,7 @@ namespace Game
 				return;
 			}
 
-			// not set flags if player can't free move to prevent lost state at logout cancel
+			// not set flags if player can't free move to prevent lost State at logout cancel
 			if (pl.CanFreeMove())
 			{
 				if (pl.GetStandState() == UnitStandStateType.Stand)

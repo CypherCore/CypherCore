@@ -61,7 +61,7 @@ namespace Game.Entities
 				Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in world!!", GetGUID().ToString());
 
 				if (IsTypeMask(TypeMask.Item))
-					Log.outFatal(LogFilter.Misc, "Item slot {0}", ((Item)this).GetSlot());
+					Log.outFatal(LogFilter.Misc, "Item Slot {0}", ((Item)this).GetSlot());
 
 				Cypher.Assert(false);
 			}
@@ -1194,7 +1194,7 @@ namespace Game.Entities
 			if (!IsPrivateObject())
 				return true;
 
-			// Owner of this private object
+			// _owner of this private object
 			if (_privateObjectOwner == seer.GetGUID())
 				return true;
 
@@ -1260,7 +1260,7 @@ namespace Game.Entities
 				if (thisPlayer != null)
 				{
 					if (thisPlayer.IsDead() &&
-					    thisPlayer.GetHealth() > 0 && // Cheap way to check for ghost state
+					    thisPlayer.GetHealth() > 0 && // Cheap way to check for ghost State
 					    !Convert.ToBoolean(obj._serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & _serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & (uint)GhostVisibilityType.Ghost))
 					{
 						Corpse corpse = thisPlayer.GetCorpse();
@@ -1496,7 +1496,7 @@ namespace Game.Entities
 				    visibilityRange > SharedConst.MaxPlayerStealthDetectRange)
 					visibilityRange = SharedConst.MaxPlayerStealthDetectRange;
 
-				// When checking for alert state, look 8% further, and then 1.5 yards more than that.
+				// When checking for alert State, look 8% further, and then 1.5 yards more than that.
 				if (checkAlert)
 					visibilityRange += (visibilityRange * 0.08f) + 1.5f;
 
@@ -2403,7 +2403,7 @@ namespace Game.Entities
 
 						break;
 					default:
-						Log.outError(LogFilter.Unit, $"Object (name={GetName()}, type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
+						Log.outError(LogFilter.Unit, $"Object (name={GetName()}, Type={GetTypeId()}) has invalid faction (faction template Id) #{factionId}");
 
 						break;
 				}
@@ -2485,10 +2485,10 @@ namespace Game.Entities
 						if (selfPlayerOwner == targetPlayerOwner)
 							return ReputationRank.Friendly;
 
-						// duel - always hostile to opponent
-						if (selfPlayerOwner.duel != null &&
-						    selfPlayerOwner.duel.Opponent == targetPlayerOwner &&
-						    selfPlayerOwner.duel.State == DuelState.InProgress)
+						// Duel - always hostile to opponent
+						if (selfPlayerOwner.Duel != null &&
+						    selfPlayerOwner.Duel.Opponent == targetPlayerOwner &&
+						    selfPlayerOwner.Duel.State == DuelState.InProgress)
 							return ReputationRank.Hostile;
 
 						// same group - checks dependant only on our faction - skip FFA_PVP for example
@@ -2526,7 +2526,7 @@ namespace Game.Entities
 										    selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
 											return ReputationRank.Hostile;
 
-										// if faction has reputation, hostile state depends only from AtWar state
+										// if faction has reputation, hostile State depends only from AtWar State
 										if (selfPlayerOwner.GetReputationMgr().IsAtWar(targetFactionEntry))
 											return ReputationRank.Hostile;
 
@@ -2574,7 +2574,7 @@ namespace Game.Entities
 					if (factionEntry != null)
 						if (factionEntry.CanHaveReputation())
 						{
-							// CvP case - check reputation, don't allow state higher than neutral when at war
+							// CvP case - check reputation, don't allow State higher than neutral when at war
 							ReputationRank repRank1 = targetPlayerOwner.GetReputationMgr().GetRank(factionEntry);
 
 							if (targetPlayerOwner.GetReputationMgr().IsAtWar(factionEntry))
@@ -3001,9 +3001,9 @@ namespace Game.Entities
 				return false;
 
 			if (playerAffectingAttacker && playerAffectingTarget)
-				if (playerAffectingAttacker.duel != null &&
-				    playerAffectingAttacker.duel.Opponent == playerAffectingTarget &&
-				    playerAffectingAttacker.duel.State == DuelState.InProgress)
+				if (playerAffectingAttacker.Duel != null &&
+				    playerAffectingAttacker.Duel.Opponent == playerAffectingTarget &&
+				    playerAffectingAttacker.Duel.State == DuelState.InProgress)
 					return true;
 
 			// PvP case - can't attack when attacker or target are in sanctuary
@@ -3138,7 +3138,7 @@ namespace Game.Entities
 					    targetPlayerOwner != null)
 						// can't assist player which is dueling someone
 						if (selfPlayerOwner != targetPlayerOwner &&
-						    targetPlayerOwner.duel != null)
+						    targetPlayerOwner.Duel != null)
 							return false;
 
 					// can't assist player in ffa_pvp zone from outside
@@ -3153,7 +3153,7 @@ namespace Game.Entities
 							return false;
 				}
 			}
-			// PvC case - player can assist creature only if has specific type flags
+			// PvC case - player can assist creature only if has specific Type flags
 			// !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
 			else if (unit != null &&
 			         unit.HasUnitFlag(UnitFlags.PlayerControlled))
@@ -3375,7 +3375,7 @@ namespace Game.Entities
 					continue;
 
 				DestroyForPlayer(player);
-				player._clientGUIDs.Remove(GetGUID());
+				player.ClientGUIDs.Remove(GetGUID());
 			}
 		}
 

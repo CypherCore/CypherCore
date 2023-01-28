@@ -172,7 +172,7 @@ namespace Game
 
 				if (proto == null)
 				{
-					Log.outError(LogFilter.Misc, $"AuctionHouseMgr.LoadAuctionItems: Unknown item (GUID: {itemGuid} item entry: #{itemEntry}) in auction, skipped.");
+					Log.outError(LogFilter.Misc, $"AuctionHouseMgr.LoadAuctionItems: Unknown Item (GUID: {itemGuid} Item entry: #{itemEntry}) in auction, skipped.");
 
 					continue;
 				}
@@ -589,7 +589,7 @@ namespace Game
 
 			if (bucket == null)
 			{
-				// we don't have any item for this key yet, create new bucket
+				// we don't have any Item for this key yet, create new bucket
 				bucket     = new AuctionsBucketData();
 				bucket.Key = key;
 
@@ -873,8 +873,8 @@ namespace Game
 				///- Or perform the transaction
 				else
 				{
-					//we should send an "item sold" message if the seller is online
-					//we send the item to the winner
+					//we should send an "Item sold" message if the seller is online
+					//we send the Item to the winner
 					//we send the money to the seller
 					SendAuctionWon(auction, null, trans);
 					SendAuctionSold(auction, null, trans);
@@ -1028,7 +1028,7 @@ namespace Game
 						continue;
 				}
 
-				// TODO: this one needs to access loot history to know highest item level for every inventory type
+				// TODO: this one needs to access loot history to know highest Item level for every inventory Type
 				//if (filters.HasFlag(AuctionHouseFilterMask.UpgradesOnly))
 				//{
 				//}
@@ -1555,7 +1555,7 @@ namespace Game
 				uint ownerAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner);
 
 				Log.outCommand(bidderAccId,
-				               $"GM {bidderName} (Account: {bidderAccId}) won item in auction: {auction.Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {auction.Items[0].GetEntry()}" +
+				               $"GM {bidderName} (Account: {bidderAccId}) won Item in auction: {auction.Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {auction.Items[0].GetEntry()}" +
 				               $" Count: {auction.GetTotalItemCount()}) and pay money: {auction.BidAmount}. Original owner {ownerName} (Account: {ownerAccId})");
 			}
 
@@ -1565,8 +1565,8 @@ namespace Game
 				MailDraft mail = new(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Won, auction),
 				                     Global.AuctionHouseMgr.BuildAuctionWonMailBody(auction.Owner, auction.BidAmount, auction.BuyoutOrUnitPrice));
 
-				// set owner to bidder (to prevent delete item with sender char deleting)
-				// owner in `data` will set at mail receive and item extracting
+				// set owner to bidder (to prevent delete Item with sender char deleting)
+				// owner in `data` will set at mail receive and Item extracting
 				foreach (Item item in auction.Items)
 				{
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
@@ -1591,7 +1591,7 @@ namespace Game
 			}
 			else
 			{
-				// bidder doesn't exist, delete the item
+				// bidder doesn't exist, delete the Item
 				foreach (Item item in auction.Items)
 					Global.AuctionHouseMgr.RemoveAItem(item.GetGUID(), true, trans);
 			}
@@ -1604,7 +1604,7 @@ namespace Game
 				owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
 
 			// owner exist
-			if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner))) // && !sAuctionBotConfig.IsBotChar(auction.Owner))
+			if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner))) // && !sAuctionBotConfig.IsBotChar(auction._owner))
 			{
 				ulong auctionHouseCut = CalculateAuctionHouseCut(auction.BidAmount);
 				ulong profit          = auction.BidAmount + auction.Deposit - auctionHouseCut;
@@ -1630,7 +1630,7 @@ namespace Game
 			Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
 
 			// owner exist
-			if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner))) // && !sAuctionBotConfig.IsBotChar(auction.Owner))
+			if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner))) // && !sAuctionBotConfig.IsBotChar(auction._owner))
 			{
 				if (owner)
 					owner.GetSession().SendAuctionClosedNotification(auction, 0.0f, false);
@@ -1649,7 +1649,7 @@ namespace Game
 			}
 			else
 			{
-				// owner doesn't exist, delete the item
+				// owner doesn't exist, delete the Item
 				foreach (Item item in auction.Items)
 					Global.AuctionHouseMgr.RemoveAItem(item.GetGUID(), true, trans);
 			}
@@ -1688,7 +1688,7 @@ namespace Game
 				owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
 
 			// owner exist (online or offline)
-			if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner))) // && !sAuctionBotConfig.IsBotChar(auction.Owner))
+			if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner))) // && !sAuctionBotConfig.IsBotChar(auction._owner))
 			{
 				ByteBuffer tempBuffer = new();
 				tempBuffer.WritePackedTime(GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));

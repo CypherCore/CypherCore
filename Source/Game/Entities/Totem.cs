@@ -108,7 +108,7 @@ namespace Game.Entities
 			CombatStop();
 			RemoveAurasDueToSpell(GetSpell(), GetGUID());
 
-			// clear owner's totem slot
+			// clear owner's totem Slot
 			for (byte i = (int)SummonSlot.Totem; i < SharedConst.MaxTotemSlot; ++i)
 				if (GetOwner()._SummonSlot[i] == GetGUID())
 				{

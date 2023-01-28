@@ -111,35 +111,35 @@ namespace Game.Entities
 					case 0:
 						continue;
 
-					// craft spell for crafting non-existed item (break client recipes list show)
+					// craft spell for crafting non-existed Item (break client recipes list show)
 					case SpellEffectName.CreateItem:
 					case SpellEffectName.CreateLoot:
 					{
 						if (spellEffectInfo.ItemType == 0)
 						{
-							// skip auto-loot crafting spells, its not need explicit item info (but have special fake items sometime)
+							// skip auto-loot crafting spells, its not need explicit Item info (but have special fake items sometime)
 							if (!spellInfo.IsLootCrafting())
 							{
 								if (msg)
 								{
 									if (player)
-										player.SendSysMessage("Craft spell {0} not have create item entry.", spellInfo.Id);
+										player.SendSysMessage("Craft spell {0} not have create Item entry.", spellInfo.Id);
 									else
-										Log.outError(LogFilter.Spells, "Craft spell {0} not have create item entry.", spellInfo.Id);
+										Log.outError(LogFilter.Spells, "Craft spell {0} not have create Item entry.", spellInfo.Id);
 								}
 
 								return false;
 							}
 						}
-						// also possible IsLootCrafting case but fake item must exist anyway
+						// also possible IsLootCrafting case but fake Item must exist anyway
 						else if (Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType) == null)
 						{
 							if (msg)
 							{
 								if (player)
-									player.SendSysMessage("Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+									player.SendSysMessage("Craft spell {0} create not-exist in DB Item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
 								else
-									Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+									Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB Item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
 							}
 
 							return false;
@@ -178,9 +178,9 @@ namespace Game.Entities
 						if (msg)
 						{
 							if (player != null)
-								player.SendSysMessage("Craft spell {0} have not-exist reagent in DB item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
+								player.SendSysMessage("Craft spell {0} have not-exist reagent in DB Item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
 							else
-								Log.outError(LogFilter.Spells, "Craft spell {0} have not-exist reagent in DB item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
+								Log.outError(LogFilter.Spells, "Craft spell {0} have not-exist reagent in DB Item (Entry: {1}) and then...", spellInfo.Id, spellInfo.Reagent[j]);
 						}
 
 						return false;
@@ -486,7 +486,7 @@ namespace Game.Entities
 
 		public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
 		{
-			// proc type doesn't match
+			// proc Type doesn't match
 			if (!(eventInfo.GetTypeMask() & procEntry.ProcFlags))
 				return false;
 
@@ -532,7 +532,7 @@ namespace Game.Entities
 					if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
 						return false;
 
-				// check spell type mask (if set)
+				// check spell Type mask (if set)
 				if (procEntry.SpellTypeMask != 0 &&
 				    !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
 					return false;
@@ -1077,7 +1077,7 @@ namespace Game.Entities
 		{
 			mSpellLearnSkills.Clear();
 
-			// search auto-learned skills and add its to map also for use in unlearn spells/talents
+			// search auto-learned Skills and add its to map also for use in unlearn spells/talents
 			uint dbc_count = 0;
 
 			foreach (var entry in mSpellInfoMap.Values)
@@ -1843,7 +1843,7 @@ namespace Game.Entities
 					foreach (var spellEffectInfo in spellInfo.GetEffects())
 						if (spellEffectInfo.IsAura())
 						{
-							Log.outDebug(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura type, it probably needs an entry in `spell_proc` table to be handled correctly.");
+							Log.outDebug(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags 0x{spellInfo.ProcFlags[0]:X} 0x{spellInfo.ProcFlags[1]:X}, but it's of non-proc aura Type, it probably needs an entry in `spell_proc` table to be handled correctly.");
 
 							break;
 						}
@@ -2106,7 +2106,7 @@ namespace Game.Entities
 			mSpellLinkedMap.Clear(); // need for reload case
 
 			//                                                0              1             2
-			SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, type FROM spell_linked_spell");
+			SQLResult result = DB.World.Query("SELECT spell_trigger, spell_effect, Type FROM spell_linked_spell");
 
 			if (result.IsEmpty())
 			{
@@ -2147,7 +2147,7 @@ namespace Game.Entities
 				if (type < SpellLinkedType.Cast ||
 				    type > SpellLinkedType.Remove)
 				{
-					Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link type {type}, skipped.");
+					Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link Type {type}, skipped.");
 
 					continue;
 				}
@@ -2155,7 +2155,7 @@ namespace Game.Entities
 				if (trigger < 0)
 				{
 					if (type != SpellLinkedType.Cast)
-						Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link type {type}, changed to 0.");
+						Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link Type {type}, changed to 0.");
 
 					trigger = -trigger;
 					type    = SpellLinkedType.Remove;
@@ -2862,28 +2862,28 @@ namespace Game.Entities
 
 					if (effect.Effect >= (uint)SpellEffectName.TotalSpellEffects)
 					{
-						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect type {effect.Effect} at index {effect.EffectIndex}, skipped");
+						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect Type {effect.Effect} at index {effect.EffectIndex}, skipped");
 
 						continue;
 					}
 
 					if (effect.EffectAura >= (uint)AuraType.Total)
 					{
-						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
+						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid aura Type {effect.EffectAura} at index {effect.EffectIndex}, skipped");
 
 						continue;
 					}
 
 					if (effect.ImplicitTarget[0] >= (uint)Targets.TotalSpellTargets)
 					{
-						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
+						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetA Type {effect.ImplicitTarget[0]} at index {effect.EffectIndex}, skipped");
 
 						continue;
 					}
 
 					if (effect.ImplicitTarget[1] >= (uint)Targets.TotalSpellTargets)
 					{
-						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
+						Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid targetB Type {effect.ImplicitTarget[1]} at index {effect.EffectIndex}, skipped");
 
 						continue;
 					}
@@ -3490,7 +3490,7 @@ namespace Game.Entities
 					                                  });
 				              });
 
-				// Karazhan - Chess NPC AI, action timer
+				// Karazhan - Chess NPC AI, Action timer
 				ApplySpellFix(new[]
 				              {
 					              37504
@@ -4723,7 +4723,7 @@ namespace Game.Entities
 			              spellInfo =>
 			              {
 				              // All spells work even without these changes. The LOS attribute is due to problem
-				              // from collision between maps & gos with active destroyed state.
+				              // from collision between maps & gos with active destroyed State.
 				              spellInfo.AttributesEx2 |= SpellAttr2.IgnoreLineOfSight;
 			              });
 
@@ -4954,7 +4954,7 @@ namespace Game.Entities
 			              },
 			              spellInfo => { spellInfo.Attributes |= SpellAttr0.NoImmunities; });
 
-			// Horde / Alliance switch (BG mercenary system)
+			// Horde / Alliance switch (BG Mercenary system)
 			ApplySpellFix(new[]
 			              {
 				              195838, 195843
@@ -5352,12 +5352,12 @@ namespace Game.Entities
 				    newArea != areaId)
 					return false;
 
-			if (questStart != 0) // not in expected required quest state
+			if (questStart != 0) // not in expected required quest State
 				if (player == null ||
 				    (((1 << (int)player.GetQuestStatus(questStart)) & questStartStatus) == 0))
 					return false;
 
-			if (questEnd != 0) // not in expected forbidden quest state
+			if (questEnd != 0) // not in expected forbidden quest State
 				if (player == null ||
 				    (((1 << (int)player.GetQuestStatus(questEnd)) & questEndStatus) == 0))
 					return false;

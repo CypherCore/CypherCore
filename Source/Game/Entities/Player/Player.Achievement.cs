@@ -58,7 +58,7 @@ namespace Game.Entities
 			_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
 			_questObjectiveCriteriaMgr.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
 
-			// Update only individual achievement criteria here, otherwise we may get multiple updates
+			// Update only individual Achievement criteria here, otherwise we may get multiple updates
 			// from a single boss kill
 			if (CriteriaManager.IsGroupCriteriaType(type))
 				return;

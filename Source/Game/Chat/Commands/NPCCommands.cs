@@ -574,7 +574,7 @@ namespace Game.Chat
 
 		private static void _ShowLootEntry(CommandHandler handler, uint itemId, byte itemCount, bool alternateString = false)
 		{
-			string name = "Unknown item";
+			string name = "Unknown Item";
 
 			ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
 
@@ -680,7 +680,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("item", RBACPermissions.CommandNpcAddItem)]
+			[Command("Item", RBACPermissions.CommandNpcAddItem)]
 			private static bool HandleNpcAddVendorItemCommand(CommandHandler handler, uint itemId, uint? mc, uint? it, uint? ec, [OptionalArg] string bonusListIds)
 			{
 				if (itemId == 0)
@@ -746,7 +746,7 @@ namespace Game.Chat
 					return false;
 				}
 
-				// Update movement type
+				// Update movement Type
 				PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
 				stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
 				stmt.AddValue(1, lowGuid);
@@ -878,7 +878,7 @@ namespace Game.Chat
 				return false;
 			}
 
-			[Command("item", RBACPermissions.CommandNpcDeleteItem)]
+			[Command("Item", RBACPermissions.CommandNpcDeleteItem)]
 			private static bool HandleNpcDeleteVendorItemCommand(CommandHandler handler, uint itemId)
 			{
 				Creature vendor = handler.GetSelectedCreature();
@@ -1006,7 +1006,7 @@ namespace Game.Chat
 				}
 
 				creature.GetAI().SetData(data_1, data_2);
-				string AIorScript = creature.GetAIName() != "" ? "AI type: " + creature.GetAIName() : (creature.GetScriptName() != "" ? "Script Name: " + creature.GetScriptName() : "No AI or Script Name Set");
+				string AIorScript = creature.GetAIName() != "" ? "AI Type: " + creature.GetAIName() : (creature.GetScriptName() != "" ? "Script Name: " + creature.GetScriptName() : "No AI or Script Name Set");
 				handler.SendSysMessage(CypherStrings.NpcSetdata, creature.GetGUID(), creature.GetEntry(), creature.GetName(), data_1, data_2, AIorScript);
 
 				return true;
@@ -1267,7 +1267,7 @@ namespace Game.Chat
 
 				if (creature)
 				{
-					// update movement type
+					// update movement Type
 					if (!doNotDelete)
 						creature.LoadPath(0);
 

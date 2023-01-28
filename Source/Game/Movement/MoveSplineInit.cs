@@ -22,7 +22,7 @@ namespace Game.Movement
 
 			// Elevators also use MOVEMENTFLAG_ONTRANSPORT but we do not keep track of their position changes
 			args.TransformForTransport = !unit.GetTransGUID().IsEmpty();
-			// mix existing state into new
+			// mix existing State into new
 			args.flags.SetUnsetFlag(SplineFlag.CanSwim, unit.CanSwim());
 			args.walk = unit.HasUnitMovementFlag(MovementFlag.Walking);
 			args.flags.SetUnsetFlag(SplineFlag.Flying, unit.HasUnitMovementFlag(MovementFlag.CanFly | MovementFlag.DisableGravity));
@@ -67,7 +67,7 @@ namespace Game.Movement
 			bool    transport     = !unit.GetTransGUID().IsEmpty();
 			Vector4 real_position = new();
 
-			// there is a big chance that current position is unknown if current state is not finalized, need compute it
+			// there is a big chance that current position is unknown if current State is not finalized, need compute it
 			// this also allows calculate spline position and update map position in much greater intervals
 			// Don't compute for transport movement if the unit is in a motion between two transports
 			if (!move_spline.Finalized() &&

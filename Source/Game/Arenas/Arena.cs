@@ -269,7 +269,7 @@ namespace Game.Arenas
 						// per player calculation
 						if (team == winner)
 						{
-							// update achievement BEFORE personal rating update
+							// update Achievement BEFORE personal rating update
 							uint rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
 							player.UpdateCriteria(CriteriaType.WinAnyRankedArena, rating != 0 ? rating : 1);
 							player.UpdateCriteria(CriteriaType.WinArena, GetMapId());
@@ -311,7 +311,7 @@ namespace Game.Arenas
 					// save the stat changes
 					winnerArenaTeam.SaveToDB();
 					loserArenaTeam.SaveToDB();
-					// send updated arena team stats to players
+					// send updated arena team Stats to players
 					// this way all arena team members will get notified, not only the ones who participated in this match
 					winnerArenaTeam.NotifyStatsChanged();
 					loserArenaTeam.NotifyStatsChanged();

@@ -302,7 +302,7 @@ namespace Game.Entities
 			    !victim.IsAlive())
 				return false;
 
-			// player cannot attack in mount state
+			// player cannot attack in mount State
 			if (IsTypeId(TypeId.Player) &&
 			    IsMounted())
 				return false;
@@ -383,7 +383,7 @@ namespace Game.Entities
 				creature.SendAIReaction(AiReaction.Hostile);
 				creature.CallAssistance();
 
-				// Remove emote state - will be restored on creature reset
+				// Remove emote State - will be restored on creature reset
 				SetEmoteState(Emote.OneshotNone);
 			}
 
@@ -786,7 +786,7 @@ namespace Game.Entities
 
 			if (myPlayerOwner &&
 			    targetPlayerOwner &&
-			    !(myPlayerOwner.duel != null && myPlayerOwner.duel.Opponent == targetPlayerOwner))
+			    !(myPlayerOwner.Duel != null && myPlayerOwner.Duel.Opponent == targetPlayerOwner))
 			{
 				myPlayerOwner.UpdatePvP(true);
 				myPlayerOwner.SetContestedPvP(targetPlayerOwner);
@@ -989,7 +989,7 @@ namespace Game.Entities
 
 			// Inform pets (if any) when player kills target)
 			// MUST come after victim.setDeathState(JUST_DIED); or pet next target
-			// selection will get stuck on same target and break pet react state
+			// selection will get stuck on same target and break pet react State
 			foreach (Player tapper in tappers)
 			{
 				Pet pet = tapper.GetPet();
@@ -1010,7 +1010,7 @@ namespace Game.Entities
 
 			if (plrVictim != null)
 			{
-				// remember victim PvP death for corpse type and corpse reclaim delay
+				// remember victim PvP death for corpse Type and corpse reclaim delay
 				// at original death (not at SpiritOfRedemtionTalent timeout)
 				plrVictim.SetPvPDeath(player != null);
 
@@ -1021,7 +1021,7 @@ namespace Game.Entities
 					double baseLoss = WorldConfig.GetFloatValue(WorldCfg.RateDurabilityLossOnDeath);
 					uint   loss     = (uint)(baseLoss - (baseLoss * plrVictim.GetTotalAuraMultiplier(AuraType.ModDurabilityLoss)));
 					Log.outDebug(LogFilter.Unit, "We are dead, losing {0} percent durability", loss);
-					// Durability loss is calculated more accurately again for each item in Player.DurabilityLoss
+					// Durability loss is calculated more accurately again for each Item in Player.DurabilityLoss
 					plrVictim.DurabilityLossAll(baseLoss, false);
 					// durability lost message
 					plrVictim.SendDurabilityLoss(plrVictim, loss);
@@ -1033,10 +1033,10 @@ namespace Game.Entities
 				    attacker.IsAIEnabled())
 					attacker.ToCreature().GetAI().KilledUnit(victim);
 
-				// last damage from non duel opponent or opponent controlled creature
-				if (plrVictim.duel != null)
+				// last damage from non Duel opponent or opponent controlled creature
+				if (plrVictim.Duel != null)
 				{
-					plrVictim.duel.Opponent.CombatStopWithPets(true);
+					plrVictim.Duel.Opponent.CombatStopWithPets(true);
 					plrVictim.CombatStopWithPets(true);
 					plrVictim.DuelComplete(DuelCompleteType.Interrupted);
 				}
@@ -1088,7 +1088,7 @@ namespace Game.Entities
 				}
 			}
 
-			// outdoor pvp things, do these after setting the death state, else the player activity notify won't work... doh...
+			// outdoor pvp things, do these after setting the death State, else the player activity notify won't work... doh...
 			// handle player kill only if not suicide (spirit of redemption for example)
 			if (player != null &&
 			    attacker != victim)
@@ -1104,7 +1104,7 @@ namespace Game.Entities
 					bf.HandleKill(player, victim);
 			}
 
-			// Battlegroundthings (do this at the end, so the death state flag will be properly set to handle in the bg.handlekill)
+			// Battlegroundthings (do this at the end, so the death State flag will be properly set to handle in the bg.handlekill)
 			if (player != null &&
 			    player.InBattleground())
 			{
@@ -1121,7 +1121,7 @@ namespace Game.Entities
 				}
 			}
 
-			// achievement stuff
+			// Achievement stuff
 			if (attacker != null &&
 			    victim.IsPlayer())
 			{
@@ -1219,7 +1219,7 @@ namespace Game.Entities
 			    !victim.IsAlive())
 				return;
 
-			// Select HitInfo/procAttacker/procVictim flag based on attack type
+			// Select HitInfo/procAttacker/procVictim flag based on attack Type
 			switch (attackType)
 			{
 				case WeaponAttackType.BaseAttack:

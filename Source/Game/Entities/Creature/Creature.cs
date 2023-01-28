@@ -387,13 +387,13 @@ namespace Game.Entities
 			else if (!IsGuardian())
 			{
 				ulong previousHealth = GetHealth();
-				UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
+				UpdateLevelDependantStats(); // We still re-initialize level dependant Stats on entry update
 
 				if (previousHealth > 0)
 					SetHealth(previousHealth);
 			}
 
-			// Do not update guardian stats here - they are handled in Guardian::InitStatsForLevel()
+			// Do not update guardian Stats here - they are handled in Guardian::InitStatsForLevel()
 			if (!IsGuardian())
 			{
 				SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
@@ -475,14 +475,14 @@ namespace Game.Entities
 			{
 				case DeathState.JustRespawned:
 				case DeathState.JustDied:
-					Log.outError(LogFilter.Unit, $"Creature ({GetGUID()}) in wrong state: {_deathState}");
+					Log.outError(LogFilter.Unit, $"Creature ({GetGUID()}) in wrong State: {_deathState}");
 
 					break;
 				case DeathState.Dead:
 				{
 					if (!_respawnCompatibilityMode)
 					{
-						Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
+						Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong State: DEAD (3)");
 
 						break;
 					}
@@ -2970,8 +2970,8 @@ namespace Game.Entities
 						    CliDB.FactionTemplateStorage.LookupByKey(CliDB.ChrRacesStorage.LookupByKey(playerTarget.GetRace()).FactionID).FactionGroup != scalingFactionGroup)
 							scalingLevelMin = scalingLevelMax;
 
-						int maxCreatureScalingLevel = playerTarget._activePlayerData.MaxCreatureScalingLevel;
-						targetLevelDelta = Math.Min(maxCreatureScalingLevel > 0 ? maxCreatureScalingLevel - targetLevel : 0, playerTarget._activePlayerData.ScalingPlayerLevelDelta);
+						int maxCreatureScalingLevel = playerTarget.ActivePlayerData.MaxCreatureScalingLevel;
+						targetLevelDelta = Math.Min(maxCreatureScalingLevel > 0 ? maxCreatureScalingLevel - targetLevel : 0, playerTarget.ActivePlayerData.ScalingPlayerLevelDelta);
 					}
 
 					int levelWithDelta = targetLevel + targetLevelDelta;
@@ -4007,7 +4007,7 @@ namespace Game.Entities
 
 		public override bool Execute(ulong e_time, uint p_time)
 		{
-			_owner.DespawnOrUnsummon(TimeSpan.Zero, _respawnTimer); // since we are here, we are not TempSummon as object type cannot change during runtime
+			_owner.DespawnOrUnsummon(TimeSpan.Zero, _respawnTimer); // since we are here, we are not TempSummon as object Type cannot change during runtime
 
 			return true;
 		}

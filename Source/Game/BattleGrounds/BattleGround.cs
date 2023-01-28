@@ -64,7 +64,7 @@ namespace Game.BattleGrounds
 				_Map = null;
 			}
 
-			// remove from bg free slot queue
+			// remove from bg free Slot queue
 			RemoveFromBGFreeSlotQueue();
 		}
 
@@ -141,7 +141,7 @@ namespace Game.BattleGrounds
 					break;
 			}
 
-			// Update start time and reset stats timer
+			// Update start time and reset Stats timer
 			SetElapsedTime(GetElapsedTime() + diff);
 
 			if (GetStatus() == BattlegroundStatus.WaitJoin)
@@ -1028,7 +1028,7 @@ namespace Game.BattleGrounds
 		{
 			SetElapsedTime(0);
 			SetLastResurrectTime(0);
-			// add BG to free slot queue
+			// add BG to free Slot queue
 			AddToBGFreeSlotQueue();
 
 			// add bg to update list
@@ -1037,7 +1037,7 @@ namespace Game.BattleGrounds
 			Global.BattlegroundMgr.AddBattleground(this);
 
 			if (_IsRated)
-				Log.outDebug(LogFilter.Arena, "Arena match type: {0} for Team1Id: {1} - Team2Id: {2} started.", _ArenaType, _ArenaTeamIds[TeamId.Alliance], _ArenaTeamIds[TeamId.Horde]);
+				Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} started.", _ArenaType, _ArenaTeamIds[TeamId.Alliance], _ArenaTeamIds[TeamId.Horde]);
 		}
 
 		public void TeleportPlayerToExploitLocation(Player player)
@@ -1473,7 +1473,7 @@ namespace Game.BattleGrounds
 			    rotation3 == 0)
 			{
 				Log.outDebug(LogFilter.Battleground,
-				             $"Battleground.AddObject: gameoobject [entry: {entry}, object type: {type}] for BG (map: {GetMapId()}) has zeroed rotation fields, " +
+				             $"Battleground.AddObject: gameoobject [entry: {entry}, object Type: {type}] for BG (map: {GetMapId()}) has zeroed rotation fields, " +
 				             "orientation used temporally, but please fix the spawn");
 
 				rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
@@ -1506,7 +1506,7 @@ namespace Game.BattleGrounds
 		}
 
 		// Some doors aren't despawned so we cannot handle their closing in gameobject.update()
-		// It would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
+		// It would be nice to correctly implement GO_ACTIVATED State and open/close doors in gameobject code
 		public void DoorClose(int type)
 		{
 			GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
@@ -1523,7 +1523,7 @@ namespace Game.BattleGrounds
 			}
 			else
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.DoorClose: door gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.DoorClose: door gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 			}
 		}
 
@@ -1538,7 +1538,7 @@ namespace Game.BattleGrounds
 			}
 			else
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.DoorOpen: door gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.DoorOpen: door gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 			}
 		}
 
@@ -1550,7 +1550,7 @@ namespace Game.BattleGrounds
 			GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
 
 			if (!obj)
-				Log.outError(LogFilter.Battleground, $"Battleground.GetBGObject: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.GetBGObject: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 
 			return obj;
 		}
@@ -1563,7 +1563,7 @@ namespace Game.BattleGrounds
 			Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
 
 			if (!creature)
-				Log.outError(LogFilter.Battleground, $"Battleground.GetBGCreature: creature (type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.GetBGCreature: creature (Type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 
 			return creature;
 		}
@@ -1599,7 +1599,7 @@ namespace Game.BattleGrounds
 					}
 					else if (obj.GetLootState() == LootState.JustDeactivated)
 					{
-						// Change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
+						// Change State from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
 						obj.SetLootState(LootState.Ready);
 					}
 
@@ -1682,7 +1682,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outError(LogFilter.Battleground, $"Battleground.DelCreature: creature (type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outError(LogFilter.Battleground, $"Battleground.DelCreature: creature (Type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 			BgCreatures[type].Clear();
 
 			return false;
@@ -1704,7 +1704,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outError(LogFilter.Battleground, $"Battleground.DelObject: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outError(LogFilter.Battleground, $"Battleground.DelObject: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 			BgObjects[type].Clear();
 
 			return false;
@@ -1725,7 +1725,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outInfo(LogFilter.Battleground, $"Battleground::RemoveObjectFromWorld: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outInfo(LogFilter.Battleground, $"Battleground::RemoveObjectFromWorld: gameobject (Type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 
 			return false;
 		}
@@ -1751,7 +1751,7 @@ namespace Game.BattleGrounds
 				return true;
 			}
 
-			Log.outError(LogFilter.Battleground, $"Battleground.AddSpiritGuide: cannot create spirit guide (type: {type}, entry: {entry}) for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+			Log.outError(LogFilter.Battleground, $"Battleground.AddSpiritGuide: cannot create spirit guide (Type: {type}, entry: {entry}) for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 			EndNow();
 
 			return false;
@@ -1818,7 +1818,7 @@ namespace Game.BattleGrounds
 			    !obj.IsSpawned())
 				return;
 
-			// Change buff type, when buff is used:
+			// Change buff Type, when buff is used:
 			int index = BgObjects.Length - 1;
 
 			while (index >= 0 && BgObjects[index] != goGuid)
@@ -1826,7 +1826,7 @@ namespace Game.BattleGrounds
 
 			if (index < 0)
 			{
-				Log.outError(LogFilter.Battleground, $"Battleground.HandleTriggerBuff: cannot find buff gameobject ({goGuid}, entry: {obj.GetEntry()}, type: {obj.GetGoType()}) in internal data for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
+				Log.outError(LogFilter.Battleground, $"Battleground.HandleTriggerBuff: cannot find buff gameobject ({goGuid}, entry: {obj.GetEntry()}, Type: {obj.GetGoType()}) in internal data for BG (map: {GetMapId()}, instance id: {_InstanceID})!");
 
 				return;
 			}

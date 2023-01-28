@@ -83,7 +83,7 @@ namespace Game.Movement
 
 				if (_nextFirstWP >= thisLink.Points.Count)
 				{
-					Log.outError(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: attempted to resume spline chain from invalid resume state, _nextFirstWP >= path size (_nextIndex: {_nextIndex}, _nextFirstWP: {_nextFirstWP}). ({owner.GetGUID()})");
+					Log.outError(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: attempted to resume spline chain from invalid resume State, _nextFirstWP >= path size (_nextIndex: {_nextIndex}, _nextFirstWP: {_nextFirstWP}). ({owner.GetGUID()})");
 					_nextFirstWP = (byte)(thisLink.Points.Count - 1);
 				}
 
@@ -91,7 +91,7 @@ namespace Game.Movement
 				Span<Vector3> partial = thisLink.Points.ToArray();
 				SendPathSpline(owner, thisLink.Velocity, partial[(_nextFirstWP - 1)..]);
 
-				Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: resumed spline chain generator from resume state. ({owner.GetGUID()})");
+				Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: resumed spline chain generator from resume State. ({owner.GetGUID()})");
 
 				++_nextIndex;
 

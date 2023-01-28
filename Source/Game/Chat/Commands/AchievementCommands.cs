@@ -7,7 +7,7 @@ using Game.Entities;
 
 namespace Game.Chat.Commands
 {
-	[CommandGroup("achievement")]
+	[CommandGroup("Achievement")]
 	internal class AchievementCommand
 	{
 		[Command("add", CypherStrings.CommandAchievementAddHelp, RBACPermissions.CommandAchievementAdd)]

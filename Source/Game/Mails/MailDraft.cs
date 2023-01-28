@@ -74,7 +74,7 @@ namespace Game.Mails
 
 					if (item != null)
 					{
-						item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+						item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then Item will deleted
 						AddItem(item);
 					}
 				}
@@ -113,14 +113,14 @@ namespace Game.Mails
 
 			if (!_items.Empty())
 			{
-				// if item send to character at another account, then apply item delivery delay
+				// if Item send to character at another account, then apply Item delivery delay
 				needItemDelay = senderAcc != rc_account;
 
-				// set owner to new receiver (to prevent delete item with sender char deleting)
+				// set owner to new receiver (to prevent delete Item with sender char deleting)
 				foreach (var item in _items.Values)
 				{
-					item.SaveToDB(trans); // item not in inventory and can be save standalone
-					// owner in data will set at mail receive and item extracting
+					item.SaveToDB(trans); // Item not in inventory and can be save standalone
+					// owner in data will set at mail receive and Item extracting
 					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
 					stmt.AddValue(0, receiver_guid);
 					stmt.AddValue(1, item.GetGUID().GetCounter());
@@ -128,10 +128,10 @@ namespace Game.Mails
 				}
 			}
 
-			// If theres is an item, there is a one hour delivery delay.
+			// If theres is an Item, there is a one hour delivery delay.
 			uint deliver_delay = needItemDelay ? WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay) : 0;
 
-			// will delete item or place to receiver mail list
+			// will delete Item or place to receiver mail list
 			SendMailTo(trans, new MailReceiver(receiver, receiver_guid), new MailSender(MailMessageType.Normal, senderGuid), MailCheckMask.Returned, deliver_delay);
 		}
 

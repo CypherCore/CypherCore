@@ -101,7 +101,7 @@ namespace Game
 
 				loot.NotifyMoneyRemoved(player.GetMap());
 
-				if (shareMoney && player.GetGroup() != null) //item, pickpocket and players can be looted only single player
+				if (shareMoney && player.GetGroup() != null) //Item, pickpocket and players can be looted only single player
 				{
 					Group group = player.GetGroup();
 
@@ -317,13 +317,13 @@ namespace Game
 				}
 				else
 				{
-					// Only delete item if no loot or money (unlooted loot is saved to db) or if it isn't an openable item
+					// Only delete Item if no loot or money (unlooted loot is saved to db) or if it isn't an openable Item
 					if (loot.IsLooted() ||
 					    !proto.HasFlag(ItemFlags.HasLoot))
 						player.DestroyItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
 				}
 
-				return; // item can be looted only single player
+				return; // Item can be looted only single player
 			}
 			else
 			{
@@ -402,7 +402,7 @@ namespace Game
 				    !_player.IsInMap(target))
 				{
 					_player.SendLootError(req.Object, loot.GetOwnerGUID(), LootError.MasterOther);
-					Log.outInfo(LogFilter.Cheat, $"MasterLootItem: Player {GetPlayer().GetName()} tried to give an item to ineligible player {target.GetName()} !");
+					Log.outInfo(LogFilter.Cheat, $"MasterLootItem: Player {GetPlayer().GetName()} tried to give an Item to ineligible player {target.GetName()} !");
 
 					return;
 				}
@@ -416,7 +416,7 @@ namespace Game
 
 				if (req.LootListID >= loot.items.Count)
 				{
-					Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (slot {req.LootListID}, size {loot.items.Count})");
+					Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (Slot {req.LootListID}, size {loot.items.Count})");
 
 					return;
 				}
@@ -441,7 +441,7 @@ namespace Game
 					return;
 				}
 
-				// now move item from loot to target inventory
+				// now move Item from loot to target inventory
 				Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
 				aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());
 

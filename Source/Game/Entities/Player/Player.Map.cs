@@ -131,12 +131,12 @@ namespace Game.Entities
 			_areaUpdateId = newArea;
 
 			AreaTableRecord area          = CliDB.AreaTableStorage.LookupByKey(newArea);
-			bool            oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-			pvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.Arena);
+			bool            oldFFAPvPArea = PvpInfo.IsInFFAPvPArea;
+			PvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.Arena);
 			UpdatePvPState(true);
 
 			// check if we were in ffa arena and we left
-			if (oldFFAPvPArea && !pvpInfo.IsInFFAPvPArea)
+			if (oldFFAPvPArea && !PvpInfo.IsInFFAPvPArea)
 				ValidateAttackersAndOwnTarget();
 
 			PhasingHandler.OnAreaChange(this);
@@ -148,15 +148,15 @@ namespace Game.Entities
 				DisablePvpRules();
 
 			// previously this was in UpdateZone (but after UpdateArea) so nothing will break
-			pvpInfo.IsInNoPvPArea = false;
+			PvpInfo.IsInNoPvPArea = false;
 
 			if (area != null &&
 			    area.IsSanctuary()) // in sanctuary
 			{
 				SetPvpFlag(UnitPVPStateFlags.Sanctuary);
-				pvpInfo.IsInNoPvPArea = true;
+				PvpInfo.IsInNoPvPArea = true;
 
-				if (duel == null &&
+				if (Duel == null &&
 				    GetCombatManager().HasPvPCombat())
 					CombatStopWithPets();
 			}
@@ -228,11 +228,11 @@ namespace Game.Entities
 
 			if (zone.HasFlag(AreaFlags.Capital)) // Is in a capital city
 			{
-				if (!pvpInfo.IsInHostileArea ||
+				if (!PvpInfo.IsInHostileArea ||
 				    zone.IsSanctuary())
 					_restMgr.SetRestFlag(RestFlag.City);
 
-				pvpInfo.IsInNoPvPArea = true;
+				PvpInfo.IsInNoPvPArea = true;
 			}
 			else
 			{
@@ -246,7 +246,7 @@ namespace Game.Entities
 			if (IsAlive())
 				DestroyZoneLimitedItem(true, newZone);
 
-			// check some item equip limitations (in result lost CanTitanGrip at talent reset, for example)
+			// check some Item equip limitations (in result lost CanTitanGrip at talent reset, for example)
 			AutoUnequipOffhandIfNeed();
 
 			// recent client version not send leave/join channel packets for built-in local channels
@@ -273,15 +273,15 @@ namespace Game.Entities
 		{
 			ZonePVPTypeOverride overrideZonePvpType = GetOverrideZonePVPType();
 
-			pvpInfo.IsInHostileArea = false;
+			PvpInfo.IsInHostileArea = false;
 
 			if (area.IsSanctuary()) // sanctuary and arena cannot be overriden
 			{
-				pvpInfo.IsInHostileArea = false;
+				PvpInfo.IsInHostileArea = false;
 			}
 			else if (area.HasFlag(AreaFlags.Arena))
 			{
-				pvpInfo.IsInHostileArea = true;
+				PvpInfo.IsInHostileArea = true;
 			}
 			else if (overrideZonePvpType == ZonePVPTypeOverride.None)
 			{
@@ -291,14 +291,14 @@ namespace Game.Entities
 					    area.HasFlag(AreaFlags.Combat) ||
 					    (area.PvpCombatWorldStateID != -1 && Global.WorldStateMgr.GetValue(area.PvpCombatWorldStateID, GetMap()) != 0))
 					{
-						pvpInfo.IsInHostileArea = true;
+						PvpInfo.IsInHostileArea = true;
 					}
 					else if (IsWarModeLocalActive() ||
 					         area.HasFlag(AreaFlags.Unk3))
 					{
 						if (area.HasFlag(AreaFlags.ContestedArea))
 						{
-							pvpInfo.IsInHostileArea = IsWarModeLocalActive();
+							PvpInfo.IsInHostileArea = IsWarModeLocalActive();
 						}
 						else
 						{
@@ -306,11 +306,11 @@ namespace Game.Entities
 
 							if (factionTemplate == null ||
 							    factionTemplate.FriendGroup.HasAnyFlag(area.FactionGroupMask))
-								pvpInfo.IsInHostileArea = false; // friend area are considered hostile if war mode is active
+								PvpInfo.IsInHostileArea = false; // friend area are considered hostile if war mode is active
 							else if (factionTemplate.EnemyGroup.HasAnyFlag(area.FactionGroupMask))
-								pvpInfo.IsInHostileArea = true;
+								PvpInfo.IsInHostileArea = true;
 							else
-								pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm();
+								PvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm();
 						}
 					}
 				}
@@ -320,13 +320,13 @@ namespace Game.Entities
 				switch (overrideZonePvpType)
 				{
 					case ZonePVPTypeOverride.Friendly:
-						pvpInfo.IsInHostileArea = false;
+						PvpInfo.IsInHostileArea = false;
 
 						break;
 					case ZonePVPTypeOverride.Hostile:
 					case ZonePVPTypeOverride.Contested:
 					case ZonePVPTypeOverride.Combat:
-						pvpInfo.IsInHostileArea = true;
+						PvpInfo.IsInHostileArea = true;
 
 						break;
 					default:
@@ -335,17 +335,17 @@ namespace Game.Entities
 			}
 
 			// Treat players having a quest flagging for PvP as always in hostile area
-			pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest() || IsWarModeLocalActive();
+			PvpInfo.IsHostile = PvpInfo.IsInHostileArea || HasPvPForcingQuest() || IsWarModeLocalActive();
 		}
 
 		public ZonePVPTypeOverride GetOverrideZonePVPType()
 		{
-			return (ZonePVPTypeOverride)(uint)_activePlayerData.OverrideZonePVPType;
+			return (ZonePVPTypeOverride)(uint)ActivePlayerData.OverrideZonePVPType;
 		}
 
 		public void SetOverrideZonePVPType(ZonePVPTypeOverride type)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.OverrideZonePVPType), (uint)type);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.OverrideZonePVPType), (uint)type);
 		}
 
 		public void ConfirmPendingBind()
@@ -428,35 +428,35 @@ namespace Game.Entities
 				{
 					if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
 					{
-						if (ar.levelMin != 0 &&
-						    GetLevel() < ar.levelMin)
-							LevelMin = ar.levelMin;
+						if (ar.LevelMin != 0 &&
+						    GetLevel() < ar.LevelMin)
+							LevelMin = ar.LevelMin;
 
-						if (ar.levelMax != 0 &&
-						    GetLevel() > ar.levelMax)
-							LevelMax = ar.levelMax;
+						if (ar.LevelMax != 0 &&
+						    GetLevel() > ar.LevelMax)
+							LevelMax = ar.LevelMax;
 					}
 
-					if (ar.item != 0)
+					if (ar.Item != 0)
 					{
-						if (!HasItemCount(ar.item) &&
-						    (ar.item2 == 0 || !HasItemCount(ar.item2)))
-							missingItem = ar.item;
+						if (!HasItemCount(ar.Item) &&
+						    (ar.Item2 == 0 || !HasItemCount(ar.Item2)))
+							missingItem = ar.Item;
 					}
-					else if (ar.item2 != 0 &&
-					         !HasItemCount(ar.item2))
+					else if (ar.Item2 != 0 &&
+					         !HasItemCount(ar.Item2))
 					{
-						missingItem = ar.item2;
+						missingItem = ar.Item2;
 					}
 
 					if (GetTeam() == Team.Alliance &&
-					    ar.quest_A != 0 &&
-					    !GetQuestRewardStatus(ar.quest_A))
-						missingQuest = ar.quest_A;
+					    ar.Quest_A != 0 &&
+					    !GetQuestRewardStatus(ar.Quest_A))
+						missingQuest = ar.Quest_A;
 					else if (GetTeam() == Team.Horde &&
-					         ar.quest_H != 0 &&
-					         !GetQuestRewardStatus(ar.quest_H))
-						missingQuest = ar.quest_H;
+					         ar.Quest_H != 0 &&
+					         !GetQuestRewardStatus(ar.Quest_H))
+						missingQuest = ar.Quest_H;
 
 					Player     leader     = this;
 					ObjectGuid leaderGuid = GetGroup() != null ? GetGroup().GetLeaderGUID() : GetGUID();
@@ -464,10 +464,10 @@ namespace Game.Entities
 					if (leaderGuid != GetGUID())
 						leader = Global.ObjAccessor.FindPlayer(leaderGuid);
 
-					if (ar.achievement != 0)
+					if (ar.Achievement != 0)
 						if (leader == null ||
-						    !leader.HasAchieved(ar.achievement))
-							missingAchievement = ar.achievement;
+						    !leader.HasAchieved(ar.Achievement))
+							missingAchievement = ar.Achievement;
 				}
 
 				if (LevelMin != 0 ||
@@ -483,9 +483,9 @@ namespace Game.Entities
 					if (report)
 					{
 						if (missingQuest != 0 &&
-						    !string.IsNullOrEmpty(ar.questFailedText))
+						    !string.IsNullOrEmpty(ar.QuestFailedText))
 						{
-							SendSysMessage("{0}", ar.questFailedText);
+							SendSysMessage("{0}", ar.QuestFailedText);
 						}
 						else if (mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' ||
 						         failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
@@ -681,36 +681,36 @@ namespace Game.Entities
 			// process liquid auras using generic unit code
 			base.ProcessTerrainStatusUpdate(oldLiquidStatus, newLiquidData);
 
-			_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
+			_mirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
 
 			// player specific logic for mirror timers
 			if (GetLiquidStatus() != 0 &&
 			    newLiquidData != null)
 			{
-				// Breath bar state (under water in any liquid type)
+				// Breath bar State (under water in any liquid Type)
 				if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.AllLiquids))
 					if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.UnderWater))
-						_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
+						_mirrorTimerFlags |= PlayerUnderwaterState.InWater;
 
-				// Fatigue bar state (if not on flight path or transport)
+				// Fatigue bar State (if not on flight path or transport)
 				if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) &&
 				    !IsInFlight() &&
 				    GetTransport() == null)
-					_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
+					_mirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
 
-				// Lava state (any contact)
+				// Lava State (any contact)
 				if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Magma))
 					if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.InContact))
-						_MirrorTimerFlags |= PlayerUnderwaterState.InLava;
+						_mirrorTimerFlags |= PlayerUnderwaterState.InLava;
 
-				// Slime state (any contact)
+				// Slime State (any contact)
 				if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Slime))
 					if (GetLiquidStatus().HasAnyFlag(ZLiquidStatus.InContact))
-						_MirrorTimerFlags |= PlayerUnderwaterState.InSlime;
+						_mirrorTimerFlags |= PlayerUnderwaterState.InSlime;
 			}
 
 			if (HasAuraType(AuraType.ForceBeathBar))
-				_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
+				_mirrorTimerFlags |= PlayerUnderwaterState.InWater;
 		}
 
 		public uint GetRecentInstanceId(uint mapId)

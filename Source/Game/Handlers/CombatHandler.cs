@@ -18,7 +18,7 @@ namespace Game
 
 			if (!enemy)
 			{
-				// stop attack state at client
+				// stop attack State at client
 				SendAttackStop(null);
 
 				return;
@@ -26,7 +26,7 @@ namespace Game
 
 			if (!GetPlayer().IsValidAttackTarget(enemy))
 			{
-				// stop attack state at client
+				// stop attack State at client
 				SendAttackStop(enemy);
 
 				return;
@@ -64,7 +64,7 @@ namespace Game
 		{
 			if (packet.CurrentSheathState >= (int)SheathState.Max)
 			{
-				Log.outError(LogFilter.Network, "Unknown sheath state {0} ??", packet.CurrentSheathState);
+				Log.outError(LogFilter.Network, "Unknown sheath State {0} ??", packet.CurrentSheathState);
 
 				return;
 			}

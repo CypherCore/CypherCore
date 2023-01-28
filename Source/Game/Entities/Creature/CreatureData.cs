@@ -465,7 +465,7 @@ namespace Game.Entities
 		public uint incrtime; // time for restore items amount if maxcount != 0
 
 		public uint item;
-		public uint maxcount; // 0 for infinity item amount
+		public uint maxcount; // 0 for infinity Item amount
 		public uint PlayerConditionId;
 		public ItemVendorType Type;
 

@@ -250,7 +250,7 @@ namespace Game.Combat
 				}
 			}
 
-			// if we cannot actually have a threat list, we instead just set combat state and avoid creating threat refs altogether
+			// if we cannot actually have a threat list, we instead just set combat State and avoid creating threat refs altogether
 			if (!CanHaveThreatList())
 			{
 				CombatManager combatMgr = _owner.GetCombatManager();
@@ -567,10 +567,10 @@ namespace Game.Combat
 		// returns true if a is LOWER on the threat list than b
 		public static bool CompareReferencesLT(ThreatReference a, ThreatReference b, float aWeight)
 		{
-			if (a.GetOnlineState() != b.GetOnlineState()) // online state precedence (ONLINE > SUPPRESSED > OFFLINE)
+			if (a.GetOnlineState() != b.GetOnlineState()) // online State precedence (ONLINE > SUPPRESSED > OFFLINE)
 				return a.GetOnlineState() < b.GetOnlineState();
 
-			if (a.GetTauntState() != b.GetTauntState()) // taunt state precedence (TAUNT > NONE > DETAUNT)
+			if (a.GetTauntState() != b.GetTauntState()) // taunt State precedence (TAUNT > NONE > DETAUNT)
 				return a.GetTauntState() < b.GetTauntState();
 
 			return (a.GetThreat() * aWeight < b.GetThreat());

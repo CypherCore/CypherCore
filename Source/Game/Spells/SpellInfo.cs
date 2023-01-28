@@ -625,11 +625,11 @@ namespace Game.Spells
 
 		public bool IsItemFitToSpellRequirements(Item item)
 		{
-			// item neutral spell
+			// Item neutral spell
 			if (EquippedItemClass == ItemClass.None)
 				return true;
 
-			// item dependent spell
+			// Item dependent spell
 			if (item && item.IsFitToSpellRequirements(this))
 				return true;
 
@@ -1175,11 +1175,11 @@ namespace Game.Spells
 				return SpellCastResult.BadTargets;
 
 			/* TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
-			not allow passengers to be implicitly hit by spells, however this target type should be an exception,
+			not allow passengers to be implicitly hit by spells, however this target Type should be an exception,
 			if this is left it kills spells that award kill credit from vehicle to master (few spells),
 			the use of these 2 covers passenger target check, logically, if vehicle cast this to master it should always hit
 			him, because it would be it's passenger, there's no such case where this gets to fail legitimacy, this problem
-			cannot be solved from within the check in other way since target type cannot be called for the spell currently
+			cannot be solved from within the check in other way since target Type cannot be called for the spell currently
 			Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
 			Unit unitCaster = caster.ToUnit();
 
@@ -1451,21 +1451,21 @@ namespace Game.Spells
 			if (GetCategory() == 1133)
 				_auraState = AuraStateType.FaerieFire;
 
-			// Swiftmend state on Regrowth, Rejuvenation, Wild Growth
+			// Swiftmend State on Regrowth, Rejuvenation, Wild Growth
 			if (SpellFamilyName == SpellFamilyNames.Druid &&
 			    (SpellFamilyFlags[0].HasAnyFlag(0x50u) || SpellFamilyFlags[1].HasAnyFlag(0x4000000u)))
 				_auraState = AuraStateType.DruidPeriodicHeal;
 
-			// Deadly poison aura state
+			// Deadly poison aura State
 			if (SpellFamilyName == SpellFamilyNames.Rogue &&
 			    SpellFamilyFlags[0].HasAnyFlag(0x10000u))
 				_auraState = AuraStateType.RoguePoisoned;
 
-			// Enrage aura state
+			// Enrage aura State
 			if (Dispel == DispelType.Enrage)
 				_auraState = AuraStateType.Enraged;
 
-			// Bleeding aura state
+			// Bleeding aura State
 			if (Convert.ToBoolean(GetAllEffectsMechanicMask() & (1 << (int)Mechanics.Bleed)))
 				_auraState = AuraStateType.Bleed;
 
@@ -3025,7 +3025,7 @@ namespace Game.Spells
 			// Spell drain all exist power on cast (Only paladin lay of Hands)
 			if (HasAttribute(SpellAttr1.UseAllMana))
 			{
-				// If power type - health drain all
+				// If power Type - health drain all
 				if (power.PowerType == PowerType.Health)
 				{
 					cost.Power  = PowerType.Health;
@@ -3043,7 +3043,7 @@ namespace Game.Spells
 					return cost;
 				}
 
-				Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+				Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
 
 				return default;
 			}
@@ -3072,7 +3072,7 @@ namespace Game.Spells
 
 							break;
 						case PowerType.AlternatePower:
-							Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+							Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
 
 							return null;
 						default:
@@ -3086,7 +3086,7 @@ namespace Game.Spells
 								break;
 							}
 
-							Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+							Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id}");
 
 							return null;
 						}
@@ -3109,7 +3109,7 @@ namespace Game.Spells
 
 							break;
 						case PowerType.AlternatePower:
-							Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unsupported power type POWER_ALTERNATE_POWER in spell {Id} for optional cost percent");
+							Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unsupported power Type POWER_ALTERNATE_POWER in spell {Id} for optional cost percent");
 
 							return null;
 						default:
@@ -3123,7 +3123,7 @@ namespace Game.Spells
 								break;
 							}
 
-							Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id} for optional cost percent");
+							Log.outError(LogFilter.Spells, $"SpellInfo::CalcPowerCost: Unknown power Type '{power.PowerType}' in spell {Id} for optional cost percent");
 
 							return null;
 						}
@@ -3161,7 +3161,7 @@ namespace Game.Spells
 			if (power.PowerType != PowerType.Health)
 			{
 				if (!optionalCost)
-					// Flat mod from caster auras by spell school and power type
+					// Flat mod from caster auras by spell school and power Type
 					foreach (AuraEffect aura in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchool))
 					{
 						if ((aura.GetMiscValue() & (int)schoolMask) == 0)
@@ -3173,7 +3173,7 @@ namespace Game.Spells
 						powerCost += aura.GetAmount();
 					}
 
-				// PCT mod from user auras by spell school and power type
+				// PCT mod from user auras by spell school and power Type
 				foreach (var schoolCostPct in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct))
 				{
 					if ((schoolCostPct.GetMiscValue() & (int)schoolMask) == 0)
@@ -3335,9 +3335,9 @@ namespace Game.Spells
 			if (player == null)
 				return 0.0f;
 
-			float crit       = player._activePlayerData.CritPercentage;
-			float rangedCrit = player._activePlayerData.RangedCritPercentage;
-			float spellCrit  = player._activePlayerData.SpellCritPercentage;
+			float crit       = player.ActivePlayerData.CritPercentage;
+			float rangedCrit = player.ActivePlayerData.RangedCritPercentage;
+			float spellCrit  = player.ActivePlayerData.SpellCritPercentage;
 
 			switch (mod.Param)
 			{
@@ -3669,7 +3669,7 @@ namespace Game.Spells
 						case 61734: // Noblegarden Bunny
 						case 62344: // Fists of Stone
 						case 50344: // Dream Funnel
-						case 61819: // Manabonked! (item)
+						case 61819: // Manabonked! (Item)
 						case 61834: // Manabonked! (minigob)
 						case 73523: // Rigor Mortis
 							return true;
@@ -4461,7 +4461,7 @@ namespace Game.Spells
 	{
 		private static StaticData[] _data = new StaticData[(int)SpellEffectName.TotalSpellEffects]
 		                                    {
-			                                    // implicit target type           used target object type
+			                                    // implicit target Type           used target object Type
 			                                    new(SpellEffectImplicitTargetTypes.None, SpellTargetObjectTypes.None),            // 0
 			                                    new(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit),        // 1 SPELL_EFFECT_INSTAKILL
 			                                    new(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit),        // 2 SPELL_EFFECT_SCHOOL_DAMAGE
@@ -5262,8 +5262,8 @@ namespace Game.Spells
 
 		public class StaticData
 		{
-			public SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target type provided for effect
-			public SpellTargetObjectTypes UsedTargetObjectType;       // defines valid target object type for spell effect
+			public SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target Type provided for effect
+			public SpellTargetObjectTypes UsedTargetObjectType;       // defines valid target object Type for spell effect
 
 			public StaticData(SpellEffectImplicitTargetTypes implicittarget, SpellTargetObjectTypes usedtarget)
 			{
@@ -5660,7 +5660,7 @@ namespace Game.Spells
 				DirectionType      = direction;
 			}
 
-			public SpellTargetObjectTypes ObjectType;       // type of object returned by target type
+			public SpellTargetObjectTypes ObjectType;       // Type of object returned by target Type
 			public SpellTargetReferenceTypes ReferenceType; // defines which object is used as a reference when selecting target
 			public SpellTargetSelectionCategories SelectionCategory;
 			public SpellTargetCheckTypes SelectionCheckType; // defines selection criteria

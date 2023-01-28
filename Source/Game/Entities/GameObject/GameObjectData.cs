@@ -818,7 +818,7 @@ namespace Game.Entities
 			public uint questID;                                                       // 5 questID, References: QuestV2, NoValue = 0
 			public uint conditionID1;                                                  // 6 conditionID1, References: PlayerCondition, NoValue = 0
 			public uint LargeAOI;                                                      // 7 Large AOI, enum { false, true, }; Default: false
-			public uint UseGarrisonOwnerGuildColors;                                   // 8 Use Garrison Owner Guild Colors, enum { false, true, }; Default: false
+			public uint UseGarrisonOwnerGuildColors;                                   // 8 Use Garrison _owner Guild Colors, enum { false, true, }; Default: false
 			public uint InteractRadiusOverride;                                        // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
 			public uint Allowunfriendlycrossfactionpartymemberstocollaborateonaritual; // 10 Allow unfriendly cross faction party members to collaborate on a ritual, enum { false, true, }; Default: false
 		}

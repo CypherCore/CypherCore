@@ -325,7 +325,7 @@ namespace Scripts.Pets
 				{
 					spawnPos = me.GetPosition();
 
-					// if we leave default state (ASSIST) it will passively be controlled by warlock
+					// if we leave default State (ASSIST) it will passively be controlled by warlock
 					me.SetReactState(ReactStates.Passive);
 
 					// melee damage

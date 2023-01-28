@@ -73,7 +73,7 @@ namespace Game.Arenas
 			DB.Characters.DirectExecute("DELETE FROM arena_team_member WHERE arenaTeamId NOT IN (SELECT arenaTeamId FROM arena_team)"); // One-time query
 
 			//                                                        0        1         2         3          4              5            6            7           8
-			SQLResult result = DB.Characters.Query("SELECT arenaTeamId, name, captainGuid, type, backgroundColor, emblemStyle, emblemColor, borderStyle, borderColor, " +
+			SQLResult result = DB.Characters.Query("SELECT arenaTeamId, name, captainGuid, Type, backgroundColor, emblemStyle, emblemColor, borderStyle, borderColor, " +
 			                                       //      9        10        11         12           13       14
 			                                       "rating, weekGames, weekWins, seasonGames, seasonWins, `rank` FROM arena_team ORDER BY arenaTeamId ASC");
 
@@ -88,7 +88,7 @@ namespace Game.Arenas
 			                                        //              0              1           2             3              4                 5          6     7          8                  9
 			                                        "SELECT arenaTeamId, atm.guid, atm.weekGames, atm.weekWins, atm.seasonGames, atm.seasonWins, c.name, class, personalRating, matchMakerRating FROM arena_team_member atm" +
 			                                        " INNER JOIN arena_team ate USING (arenaTeamId) LEFT JOIN characters AS c ON atm.guid = c.guid" +
-			                                        " LEFT JOIN character_arena_stats AS cas ON c.guid = cas.guid AND (cas.slot = 0 AND ate.type = 2 OR cas.slot = 1 AND ate.type = 3 OR cas.slot = 2 AND ate.type = 5)" +
+			                                        " LEFT JOIN character_arena_stats AS cas ON c.guid = cas.guid AND (cas.Slot = 0 AND ate.Type = 2 OR cas.Slot = 1 AND ate.Type = 3 OR cas.Slot = 2 AND ate.Type = 5)" +
 			                                        " ORDER BY atm.arenateamid ASC");
 
 			uint count = 0;

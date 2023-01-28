@@ -48,7 +48,7 @@ namespace Game.Chat.Commands
 		[Command("items", RBACPermissions.CommandSendItems, true)]
 		private static bool HandleSendItemsCommand(CommandHandler handler, PlayerIdentifier playerIdentifier, QuotedString subject, QuotedString text, string itemsStr)
 		{
-			// format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
+			// format: name "subject text" "mail text" item1[:count1] Item2[:count2] ... item12[:count12]
 			if (playerIdentifier == null)
 				playerIdentifier = PlayerIdentifier.FromTarget(handler);
 
@@ -66,7 +66,7 @@ namespace Game.Chat.Commands
 
 			for (var i = 0; i < tokens.Length; ++i)
 			{
-				// parse item str
+				// parse Item str
 				string[] itemIdAndCountStr = tokens[i].Split(':');
 
 				if (!uint.TryParse(itemIdAndCountStr[0], out uint itemId) ||
@@ -124,7 +124,7 @@ namespace Game.Chat.Commands
 
 				if (item)
 				{
-					item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+					item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then Item will deleted
 					draft.AddItem(item);
 				}
 			}

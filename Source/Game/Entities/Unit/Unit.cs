@@ -732,7 +732,7 @@ namespace Game.Entities
 				// Need disable spell use for owner
 				if (createBySpell != null &&
 				    createBySpell.IsCooldownStartedOnEvent())
-					// note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
+					// note: Item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
 					GetSpellHistory().StartCooldown(createBySpell, 0, null, true);
 			}
 
@@ -769,7 +769,7 @@ namespace Game.Entities
 				// Need activate spell use for owner
 				if (createBySpell != null &&
 				    createBySpell.IsCooldownStartedOnEvent())
-					// note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
+					// note: Item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
 					GetSpellHistory().SendCooldownEvent(createBySpell);
 			}
 
@@ -1296,10 +1296,10 @@ namespace Game.Entities
 
 			Player player = ToPlayer();
 
-			// If the player is on mounted duel and exits the mount, he should immediatly lose the duel
+			// If the player is on mounted Duel and exits the mount, he should immediatly lose the Duel
 			if (player &&
-			    player.duel != null &&
-			    player.duel.IsMounted)
+			    player.Duel != null &&
+			    player.Duel.IsMounted)
 				player.DuelComplete(DuelCompleteType.Fled);
 
 			SetControlled(false, UnitState.Root); // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
@@ -1336,7 +1336,7 @@ namespace Game.Entities
 			                  {
 				                  float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();
 
-				                  // Creatures without inhabit type air should begin falling after exiting the vehicle
+				                  // Creatures without inhabit Type air should begin falling after exiting the vehicle
 				                  if (IsTypeId(TypeId.Unit) &&
 				                      !CanFly() &&
 				                      height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight(), ref height))
@@ -1635,7 +1635,7 @@ namespace Game.Entities
 								ChrCustomizationReqRecord choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
 
 								if (choiceReq == null ||
-								    thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer._playerData.Customizations))
+								    thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.PlayerData.Customizations))
 									displayIds.Add(displayInfo.DisplayID);
 							}
 						}
@@ -1720,7 +1720,7 @@ namespace Game.Entities
 
 		public virtual void SetDeathState(DeathState s)
 		{
-			// Death state needs to be updated before RemoveAllAurasOnDeath() is called, to prevent entering combat
+			// Death State needs to be updated before RemoveAllAurasOnDeath() is called, to prevent entering combat
 			_deathState = s;
 
 			bool isOnVehicle = GetVehicle() != null;
@@ -1734,7 +1734,7 @@ namespace Game.Entities
 					InterruptNonMeleeSpells(false);
 
 				ExitVehicle(); // Exit vehicle before calling RemoveAllControlled
-				// vehicles use special type of charm that is not removed by the next function
+				// vehicles use special Type of charm that is not removed by the next function
 				// triggering an assert
 				UnsummonAllTotems();
 				RemoveAllControlled();
@@ -3266,7 +3266,7 @@ namespace Game.Entities
 
 			if (damagetype != DamageEffectType.NoDamage)
 			{
-				// interrupting auras with SpellAuraInterruptFlags.Damage before checking !damage (absorbed damage breaks that type of auras)
+				// interrupting auras with SpellAuraInterruptFlags.Damage before checking !damage (absorbed damage breaks that Type of auras)
 				if (spellProto != null)
 				{
 					if (!spellProto.HasAttribute(SpellAttr4.ReactiveDamageProc))
@@ -3343,19 +3343,19 @@ namespace Game.Entities
 
 			uint health = (uint)victim.GetHealth();
 
-			// duel ends when player has 1 or less hp
+			// Duel ends when player has 1 or less hp
 			bool duel_hasEnded   = false;
 			bool duel_wasMounted = false;
 
 			if (victim.IsPlayer() &&
-			    victim.ToPlayer().duel != null &&
+			    victim.ToPlayer().Duel != null &&
 			    damage >= (health - 1))
 			{
 				if (!attacker)
 					return 0;
 
-				// prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-				if (victim.ToPlayer().duel.Opponent == attacker.GetControllingPlayer())
+				// prevent kill only if killed in Duel and killed by opponent or opponent controlled creature
+				if (victim.ToPlayer().Duel.Opponent == attacker.GetControllingPlayer())
 					damage = health - 1;
 
 				duel_hasEnded = true;
@@ -3368,14 +3368,14 @@ namespace Game.Entities
 				Player victimRider = victim.GetCharmer().ToPlayer();
 
 				if (victimRider != null &&
-				    victimRider.duel != null &&
-				    victimRider.duel.IsMounted)
+				    victimRider.Duel != null &&
+				    victimRider.Duel.IsMounted)
 				{
 					if (!attacker)
 						return 0;
 
-					// prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-					if (victimRider.duel.Opponent == attacker.GetControllingPlayer())
+					// prevent kill only if killed in Duel and killed by opponent or opponent controlled creature
+					if (victimRider.Duel.Opponent == attacker.GetControllingPlayer())
 						damage = health - 1;
 
 					duel_wasMounted = true;
@@ -3462,7 +3462,7 @@ namespace Game.Entities
 
 						uint tempAbsorb = (uint)currentAbsorb;
 
-						// This aura type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
+						// This aura Type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
 						// repurpose PreventDefaultAction for this
 						bool deathFullyPrevented = false;
 
@@ -3610,19 +3610,19 @@ namespace Game.Entities
 					}
 				}
 
-				// last damage from duel opponent
+				// last damage from Duel opponent
 				if (duel_hasEnded)
 				{
 					Player he = duel_wasMounted ? victim.GetCharmer().ToPlayer() : victim.ToPlayer();
 
-					Cypher.Assert(he && he.duel != null);
+					Cypher.Assert(he && he.Duel != null);
 
 					if (duel_wasMounted) // In this case victim==mount
 						victim.SetHealth(1);
 					else
 						he.SetHealth(1);
 
-					he.duel.Opponent.CombatStopWithPets(true);
+					he.Duel.Opponent.CombatStopWithPets(true);
 					he.CombatStopWithPets(true);
 
 					he.CastSpell(he, 7267, true); // beg
@@ -4102,7 +4102,7 @@ namespace Game.Entities
 
 				if (target)
 				{
-					// IsHostileTo check duel and controlled by enemy
+					// IsHostileTo check Duel and controlled by enemy
 					if (target != this &&
 					    IsWithinDistInMap(target, radius) &&
 					    target.IsAlive() &&
@@ -4755,21 +4755,21 @@ namespace Game.Entities
 			// ..done
 			// SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
 
-			// ..done (base at attack power for marked target and base at attack power for creature type)
+			// ..done (base at attack power for marked target and base at attack power for creature Type)
 			int APbonus = 0;
 
 			if (attType == WeaponAttackType.RangedAttack)
 			{
 				APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
-				// ..done (base at attack power and creature type)
+				// ..done (base at attack power and creature Type)
 				APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
 			}
 			else
 			{
 				APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
-				// ..done (base at attack power and creature type)
+				// ..done (base at attack power and creature Type)
 				APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
 			}
 
@@ -4797,7 +4797,7 @@ namespace Game.Entities
 					{
 						for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
 							if (Convert.ToBoolean((int)schoolMask & (1 << (int)i)))
-								maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer._activePlayerData.ModDamageDonePercent[(int)i]);
+								maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.ActivePlayerData.ModDamageDonePercent[(int)i]);
 					}
 					else
 					{

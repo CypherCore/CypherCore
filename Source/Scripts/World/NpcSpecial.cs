@@ -952,7 +952,7 @@ namespace Scripts.World.NpcSpecial
 
 					if (Patient)
 					{
-						//303, this flag appear to be required for client side item.spell to work (TARGET_SINGLE_FRIEND)
+						//303, this flag appear to be required for client side Item.spell to work (TARGET_SINGLE_FRIEND)
 						Patient.SetUnitFlag(UnitFlags.PlayerControlled);
 
 						Patients.Add(Patient.GetGUID());
@@ -1322,7 +1322,7 @@ namespace Scripts.World.NpcSpecial
 		{
 			if (apply)
 			{
-				// Initialize the action bar without the melee attack command
+				// Initialize the Action bar without the melee attack command
 				me.InitCharmInfo();
 				me.GetCharmInfo().InitEmptyActionBar(false);
 
@@ -1399,7 +1399,7 @@ namespace Scripts.World.NpcSpecial
 					                                                              {
 						                                                              var nextTask = (TaskContext task) =>
 						                                                                             {
-							                                                                             // If dancing stop before next random state
+							                                                                             // If dancing stop before next random State
 							                                                                             if (me.GetEmoteState() == Emote.StateDance)
 								                                                                             me.SetEmoteState(Emote.OneshotNone);
 

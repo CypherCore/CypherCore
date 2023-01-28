@@ -241,7 +241,7 @@ namespace Game.BattleGrounds
 
 			// we create here an instanceid, which is just for
 			// displaying this to the client and without any other use..
-			// the client-instanceIds are unique for each Battleground-type
+			// the client-instanceIds are unique for each Battleground-Type
 			// the instance-id just needs to be as low as possible, beginning with 1
 			// the following works, because std.set is default ordered with "<"
 			// the optimalization would be to use as bitmask std.vector<uint32> - but that would only make code unreadable
@@ -698,7 +698,7 @@ namespace Game.BattleGrounds
 
 				if (!CliDB.BattlemasterListStorage.ContainsKey(bgTypeId))
 				{
-					Log.outError(LogFilter.Sql, "Table `battlemaster_entry` contain entry {0} for not existed Battleground type {1}, ignored.", entry, bgTypeId);
+					Log.outError(LogFilter.Sql, "Table `battlemaster_entry` contain entry {0} for not existed Battleground Type {1}, ignored.", entry, bgTypeId);
 
 					continue;
 				}

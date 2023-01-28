@@ -139,7 +139,7 @@ namespace Game
 		{
 			// Get Random dungeons that can be done at a certain level and expansion
 			uint level                                 = GetPlayer().GetLevel();
-			uint contentTuningReplacementConditionMask = GetPlayer()._playerData.CtrOptions.GetValue().ContentTuningConditionMask;
+			uint contentTuningReplacementConditionMask = GetPlayer().PlayerData.CtrOptions.GetValue().ContentTuningConditionMask;
 			var  randomDungeons                        = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion(), contentTuningReplacementConditionMask);
 
 			LfgPlayerInfo lfgPlayerInfo = new();
@@ -393,7 +393,7 @@ namespace Game
 		public void SendLfgQueueStatus(LfgQueueStatusData queueData)
 		{
 			Log.outDebug(LogFilter.Lfg,
-			             "SMSG_LFG_QUEUE_STATUS {0} state: {1} dungeon: {2}, waitTime: {3}, " +
+			             "SMSG_LFG_QUEUE_STATUS {0} State: {1} dungeon: {2}, waitTime: {3}, " +
 			             "avgWaitTime: {4}, waitTimeTanks: {5}, waitTimeHealer: {6}, waitTimeDps: {7}, queuedTime: {8}, tanks: {9}, healers: {10}, dps: {11}",
 			             GetPlayerInfo(),
 			             Global.LFGMgr.GetState(GetPlayer().GetGUID()),
@@ -518,7 +518,7 @@ namespace Game
 			bool       silent       = !proposal.isNew && guildGuid == proposal.group;
 			uint       dungeonEntry = proposal.dungeonId;
 
-			Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} state: {1}", GetPlayerInfo(), proposal.state);
+			Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} State: {1}", GetPlayerInfo(), proposal.state);
 
 			// show random dungeon if player selected random dungeon and it's not lfg group
 			if (!silent)

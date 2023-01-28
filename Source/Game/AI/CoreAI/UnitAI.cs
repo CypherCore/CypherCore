@@ -37,7 +37,7 @@ namespace Game.AI
 			if (victim != null &&
 			    me.Attack(victim, true))
 			{
-				// Clear distracted state on attacking
+				// Clear distracted State on attacking
 				if (me.HasUnitState(UnitState.Distracted))
 				{
 					me.ClearUnitState(UnitState.Distracted);
@@ -578,7 +578,7 @@ namespace Game.AI
 		}
 
 		/// <summary>
-		// Called when unit's charm state changes with isNew = false
+		// Called when unit's charm State changes with isNew = false
 		// Implementation should call me->ScheduleAIChange() if AI replacement is desired
 		// If this call is made, AI will be replaced on the next tick
 		// When replacement is made, OnCharmed is called with isNew = true

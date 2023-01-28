@@ -148,7 +148,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[Command("stats", RBACPermissions.CommandInstanceStats, true)]
+		[Command("Stats", RBACPermissions.CommandInstanceStats, true)]
 		private static bool HandleInstanceStatsCommand(CommandHandler handler)
 		{
 			handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());

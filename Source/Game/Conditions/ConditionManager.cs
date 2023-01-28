@@ -32,7 +32,7 @@ namespace Game
 
 		public ConditionTypeInfo[] StaticConditionTypeData =
 		{
-			new("None", false, false, false), new("Aura", true, true, true), new("Item Stored", true, true, true), new("Item Equipped", true, false, false), new("Zone", true, false, false), new("Reputation", true, true, false), new("Team", true, false, false), new("Skill", true, true, false), new("Quest Rewarded", true, false, false), new("Quest Taken", true, false, false), new("Drunken", true, false, false), new("WorldState", true, true, false), new("Active Event", true, false, false), new("Instance Info", true, true, true), new("Quest None", true, false, false), new("Class", true, false, false), new("Race", true, false, false), new("Achievement", true, false, false), new("Title", true, false, false), new("SpawnMask", true, false, false), new("Gender", true, false, false), new("Unit State", true, false, false), new("Map", true, false, false), new("Area", true, false, false), new("CreatureType", true, false, false), new("Spell Known", true, false, false), new("Phase", true, false, false), new("Level", true, true, false), new("Quest Completed", true, false, false), new("Near Creature", true, true, true), new("Near GameObject", true, true, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("Relation", true, true, false), new("Reaction", true, true, false), new("Distance", true, true, true), new("Alive", false, false, false), new("Health Value", true, true, false), new("Health Pct", true, true, false), new("Realm Achievement", true, false, false), new("In Water", false, false, false), new("Terrain Swap", true, false, false), new("Sit/stand state", true, true, false), new("Daily Quest Completed", true, false, false), new("Charmed", false, false, false), new("Pet type", true, false, false), new("On Taxi", false, false, false), new("Quest state mask", true, true, false), new("Quest objective progress", true, false, true), new("Map Difficulty", true, false, false), new("Is Gamemaster", true, false, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("BattlePet Species Learned", true, true, true), new("On Scenario Step", true, false, false), new("Scene In Progress", true, false, false), new("Player Condition", true, false, false)
+			new("None", false, false, false), new("Aura", true, true, true), new("Item Stored", true, true, true), new("Item Equipped", true, false, false), new("Zone", true, false, false), new("Reputation", true, true, false), new("Team", true, false, false), new("Skill", true, true, false), new("Quest Rewarded", true, false, false), new("Quest Taken", true, false, false), new("Drunken", true, false, false), new("WorldState", true, true, false), new("Active Event", true, false, false), new("Instance Info", true, true, true), new("Quest None", true, false, false), new("Class", true, false, false), new("Race", true, false, false), new("Achievement", true, false, false), new("Title", true, false, false), new("SpawnMask", true, false, false), new("Gender", true, false, false), new("Unit State", true, false, false), new("Map", true, false, false), new("Area", true, false, false), new("CreatureType", true, false, false), new("Spell Known", true, false, false), new("Phase", true, false, false), new("Level", true, true, false), new("Quest Completed", true, false, false), new("Near Creature", true, true, true), new("Near GameObject", true, true, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("Relation", true, true, false), new("Reaction", true, true, false), new("Distance", true, true, true), new("Alive", false, false, false), new("Health Value", true, true, false), new("Health Pct", true, true, false), new("Realm Achievement", true, false, false), new("In Water", false, false, false), new("Terrain Swap", true, false, false), new("Sit/stand State", true, true, false), new("Daily Quest Completed", true, false, false), new("Charmed", false, false, false), new("Pet Type", true, false, false), new("On Taxi", false, false, false), new("Quest State mask", true, true, false), new("Quest objective progress", true, false, true), new("Map Difficulty", true, false, false), new("Is Gamemaster", true, false, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("BattlePet Species Learned", true, true, true), new("On Scenario Step", true, false, false), new("Scene In Progress", true, false, false), new("Player Condition", true, false, false)
 		};
 
 		public string[] StaticSourceTypeData =
@@ -231,7 +231,7 @@ namespace Game
 
 				if (!conditions.Empty())
 				{
-					Log.outDebug(LogFilter.Condition, "GetConditionsForNotGroupedEntry: found conditions for type {0} and entry {1}", sourceType, entry);
+					Log.outDebug(LogFilter.Condition, "GetConditionsForNotGroupedEntry: found conditions for Type {0} and entry {1}", sourceType, entry);
 
 					return IsObjectMeetToConditions(sourceInfo, conditions);
 				}
@@ -353,7 +353,7 @@ namespace Game
 
 				if (!conditions.Empty())
 				{
-					Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendor: found conditions for creature entry {0} item {1}", creatureId, itemId);
+					Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendor: found conditions for creature entry {0} Item {1}", creatureId, itemId);
 					ConditionSourceInfo sourceInfo = new(player, vendor);
 
 					return IsObjectMeetToConditions(sourceInfo, conditions);
@@ -792,7 +792,7 @@ namespace Game
 
 				                                           foreach (var spellEffectInfo in spellInfo.GetEffects())
 				                                           {
-					                                           // additional checks by condition type
+					                                           // additional checks by condition Type
 					                                           if ((conditionEffMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
 						                                           switch (cond.ConditionType)
 						                                           {
@@ -994,7 +994,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1016,7 +1016,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1038,7 +1038,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1060,7 +1060,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1082,7 +1082,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1104,7 +1104,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1126,7 +1126,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1148,7 +1148,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1170,7 +1170,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1192,7 +1192,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1214,7 +1214,7 @@ namespace Game
 					if (pItemProto == null &&
 					    !loot.IsReference((uint)cond.SourceEntry))
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1380,7 +1380,7 @@ namespace Game
 
 					if (itemTemplate == null)
 					{
-						Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table item does not exist, ignoring.", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table Item does not exist, ignoring.", cond.ToString());
 
 						return false;
 					}
@@ -1477,7 +1477,7 @@ namespace Game
 					if (cond.SourceGroup <= 0 ||
 					    cond.SourceGroup >= (uint)TypeId.Max)
 					{
-						Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, is no valid object type, ignoring.");
+						Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, is no valid object Type, ignoring.");
 
 						return false;
 					}
@@ -1502,7 +1502,7 @@ namespace Game
 					}
 					else
 					{
-						Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked type id, ignoring.");
+						Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceGroup in `condition` table, uses unchecked Type id, ignoring.");
 
 						return false;
 					}
@@ -1573,7 +1573,7 @@ namespace Game
 
 					if (cond.ConditionValue2 == 0)
 					{
-						Log.outError(LogFilter.Sql, "{0} Zero item count in ConditionValue2, skipped", cond.ToString());
+						Log.outError(LogFilter.Sql, "{0} Zero Item count in ConditionValue2, skipped", cond.ToString());
 
 						return false;
 					}
@@ -1660,7 +1660,7 @@ namespace Game
 				case ConditionTypes.Queststate:
 					if (cond.ConditionValue2 >= (1 << (int)QuestStatus.Max))
 					{
-						Log.outError(LogFilter.Sql, "{0} has invalid state mask ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+						Log.outError(LogFilter.Sql, "{0} has invalid State mask ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
 
 						return false;
 					}
@@ -1787,7 +1787,7 @@ namespace Game
 				{
 					if (cond.ConditionValue1 > (uint)DrunkenState.Smashed)
 					{
-						Log.outError(LogFilter.Sql, "{0} has invalid state ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has invalid State ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
 
 						return false;
 					}
@@ -2021,7 +2021,7 @@ namespace Game
 				{
 					if (Global.WorldStateMgr.GetWorldStateTemplate((int)cond.ConditionValue1) == null)
 					{
-						Log.outError(LogFilter.Sql, "{0} has non existing world state in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has non existing world State in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
 
 						return false;
 					}
@@ -2054,7 +2054,7 @@ namespace Game
 				}
 				case ConditionTypes.SpawnmaskDeprecated:
 				{
-					Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition type CONDITION_SPAWNMASK.");
+					Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition Type CONDITION_SPAWNMASK.");
 
 					return false;
 				}
@@ -2116,7 +2116,7 @@ namespace Game
 
 					if (!valid)
 					{
-						Log.outError(LogFilter.Sql, "{0} has non-existing stand state ({1},{2}), skipped.", cond.ToString(true), cond.ConditionValue1, cond.ConditionValue2);
+						Log.outError(LogFilter.Sql, "{0} has non-existing stand State ({1},{2}), skipped.", cond.ToString(true), cond.ConditionValue1, cond.ConditionValue2);
 
 						return false;
 					}
@@ -2148,7 +2148,7 @@ namespace Game
 				case ConditionTypes.PetType:
 					if (cond.ConditionValue1 >= (1 << (int)PetType.Max))
 					{
-						Log.outError(LogFilter.Sql, "{0} has non-existing pet type {1}, skipped.", cond.ToString(true), cond.ConditionValue1);
+						Log.outError(LogFilter.Sql, "{0} has non-existing pet Type {1}, skipped.", cond.ToString(true), cond.ConditionValue1);
 
 						return false;
 					}
@@ -2393,7 +2393,7 @@ namespace Game
 
 		public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
 		{
-			ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, player._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+			ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, player.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 			if (levels.HasValue)
 			{
@@ -2568,7 +2568,7 @@ namespace Game
 				byte team;
 
 				if (player.GetMap().IsBattlegroundOrArena())
-					team = player._playerData.ArenaFaction;
+					team = player.PlayerData.ArenaFaction;
 				else
 					team = (byte)player.GetTeamId();
 
@@ -2577,11 +2577,11 @@ namespace Game
 			}
 
 			if (condition.PvpMedal != 0 &&
-			    !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player._activePlayerData.PvpMedals))
+			    !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.ActivePlayerData.PvpMedals))
 				return false;
 
 			if (condition.LifetimeMaxPVPRank != 0 &&
-			    player._activePlayerData.LifetimeMaxRank != condition.LifetimeMaxPVPRank)
+			    player.ActivePlayerData.LifetimeMaxRank != condition.LifetimeMaxPVPRank)
 				return false;
 
 			if (condition.MovementFlags[0] != 0 &&
@@ -2651,7 +2651,7 @@ namespace Game
 					uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
 
 					if (questBit != 0)
-						results[i] = (player._activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) != 0;
+						results[i] = (player.ActivePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) != 0;
 				}
 
 				if (!PlayerConditionLogic(condition.PrevQuestLogic, results))
@@ -2742,7 +2742,7 @@ namespace Game
 
 					if (area != null)
 						if (area.AreaBit != -1 &&
-						    !Convert.ToBoolean(player._activePlayerData.ExploredZones[area.AreaBit / ActivePlayerData.ExploredZonesBits] & (1ul << ((int)area.AreaBit % ActivePlayerData.ExploredZonesBits))))
+						    !Convert.ToBoolean(player.ActivePlayerData.ExploredZones[area.AreaBit / ActivePlayerData.ExploredZonesBits] & (1ul << ((int)area.AreaBit % ActivePlayerData.ExploredZonesBits))))
 							return false;
 				}
 
@@ -2887,19 +2887,19 @@ namespace Game
 			}
 
 			if (condition.MinAvgItemLevel != 0 &&
-			    Math.Floor(player._playerData.AvgItemLevel[0]) < condition.MinAvgItemLevel)
+			    Math.Floor(player.PlayerData.AvgItemLevel[0]) < condition.MinAvgItemLevel)
 				return false;
 
 			if (condition.MaxAvgItemLevel != 0 &&
-			    Math.Floor(player._playerData.AvgItemLevel[0]) > condition.MaxAvgItemLevel)
+			    Math.Floor(player.PlayerData.AvgItemLevel[0]) > condition.MaxAvgItemLevel)
 				return false;
 
 			if (condition.MinAvgEquippedItemLevel != 0 &&
-			    Math.Floor(player._playerData.AvgItemLevel[1]) < condition.MinAvgEquippedItemLevel)
+			    Math.Floor(player.PlayerData.AvgItemLevel[1]) < condition.MinAvgEquippedItemLevel)
 				return false;
 
 			if (condition.MaxAvgEquippedItemLevel != 0 &&
-			    Math.Floor(player._playerData.AvgItemLevel[1]) > condition.MaxAvgEquippedItemLevel)
+			    Math.Floor(player.PlayerData.AvgItemLevel[1]) > condition.MaxAvgEquippedItemLevel)
 				return false;
 
 			if (condition.ModifierTreeID != 0 &&
@@ -2907,17 +2907,17 @@ namespace Game
 				return false;
 
 			if (condition.CovenantID != 0 &&
-			    player._playerData.CovenantID != condition.CovenantID)
+			    player.PlayerData.CovenantID != condition.CovenantID)
 				return false;
 
 			if (condition.TraitNodeEntryID.Any(traitNodeEntryId => traitNodeEntryId != 0))
 			{
 				var getTraitNodeEntryRank = ushort?(int traitNodeEntryId) =>
 				                            {
-					                            foreach (var traitConfig in player._activePlayerData.TraitConfigs)
+					                            foreach (var traitConfig in player.ActivePlayerData.TraitConfigs)
 					                            {
 						                            if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
-							                            if (player._activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
+							                            if (player.ActivePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
 							                                !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
 								                            continue;
 

@@ -106,7 +106,7 @@ namespace Game.DataStorage
 					if (targetcam.Count > 0)
 					{
 						// Find the target camera before and after this camera
-						// Pre-load first item
+						// Pre-load first Item
 						FlyByCamera lastTarget = targetcam[0];
 						FlyByCamera nextTarget = targetcam[0];
 

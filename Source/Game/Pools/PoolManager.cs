@@ -83,7 +83,7 @@ namespace Game
 				uint oldMSTime = Time.GetMSTime();
 
 				//                                         1        2            3
-				SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 0");
+				SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE Type = 0");
 
 				if (result.IsEmpty())
 				{
@@ -160,7 +160,7 @@ namespace Game
 				uint oldMSTime = Time.GetMSTime();
 
 				//                                         1        2            3
-				SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 1");
+				SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE Type = 1");
 
 				if (result.IsEmpty())
 				{
@@ -192,7 +192,7 @@ namespace Game
 						    goinfo.type != GameObjectTypes.GatheringNode &&
 						    goinfo.type != GameObjectTypes.Goober)
 						{
-							Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
+							Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, Type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
 
 							continue;
 						}
@@ -249,7 +249,7 @@ namespace Game
 				uint oldMSTime = Time.GetMSTime();
 
 				//                                         1        2            3
-				SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 2");
+				SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE Type = 2");
 
 				if (result.IsEmpty())
 				{
@@ -379,7 +379,7 @@ namespace Game
 
 				SQLResult result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_members.spawnId, pool_members.poolSpawnId FROM pool_template" +
 				                                  " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
-				                                  " LEFT JOIN pool_members ON pool_members.type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
+				                                  " LEFT JOIN pool_members ON pool_members.Type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
 
 				if (result.IsEmpty())
 				{
@@ -560,7 +560,7 @@ namespace Game
 			return 0;
 		}
 
-		// Selects proper template overload to call based on passed type
+		// Selects proper template overload to call based on passed Type
 		public uint IsPartOfAPool(SpawnObjectType type, ulong spawnId)
 		{
 			switch (type)
@@ -572,7 +572,7 @@ namespace Game
 				case SpawnObjectType.AreaTrigger:
 					return 0;
 				default:
-					Cypher.Assert(false, $"Invalid spawn type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
+					Cypher.Assert(false, $"Invalid spawn Type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
 
 					return 0;
 			}
@@ -940,7 +940,7 @@ namespace Game
 				case SpawnObjectType.GameObject:
 					return mSpawnedGameobjects.Contains(db_guid_or_pool_id);
 				default:
-					Log.outFatal(LogFilter.Misc, $"Invalid spawn type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
+					Log.outFatal(LogFilter.Misc, $"Invalid spawn Type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
 
 					return false;
 			}

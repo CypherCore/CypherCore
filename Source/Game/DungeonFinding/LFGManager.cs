@@ -549,7 +549,7 @@ namespace Game.DungeonFinding
 
 							break;
 						default:
-							Log.outError(LogFilter.Lfg, "Wrong dungeon type {0} for dungeon {1}", type, it);
+							Log.outError(LogFilter.Lfg, "Wrong dungeon Type {0} for dungeon {1}", type, it);
 							joinData.result = LfgJoinResult.InvalidSlot;
 
 							break;
@@ -695,7 +695,7 @@ namespace Game.DungeonFinding
 						LfgState newState = LfgState.None;
 						LfgState oldState = GetOldState(gguid);
 
-						// Set the new state to LFG_STATE_DUNGEON/LFG_STATE_FINISHED_DUNGEON if the group is already in a dungeon
+						// Set the new State to LFG_STATE_DUNGEON/LFG_STATE_FINISHED_DUNGEON if the group is already in a dungeon
 						// This is required in case a LFG group vote-kicks a player in a dungeon, queues, then leaves the queue (maybe to queue later again)
 						Group group = Global.GroupMgr.GetGroupByGUID(gguid);
 
@@ -1255,7 +1255,7 @@ namespace Game.DungeonFinding
 						break;
 				}
 
-				// Store the number of players that were present in group when joining RFD, used for achievement purposes
+				// Store the number of players that were present in group when joining RFD, used for Achievement purposes
 				Player _player = Global.ObjAccessor.FindConnectedPlayer(pguid);
 
 				if (_player != null)
@@ -1282,7 +1282,7 @@ namespace Game.DungeonFinding
 			LfgProposal proposal = itProposal.Value;
 			proposal.state = LfgProposalState.Failed;
 
-			Log.outDebug(LogFilter.Lfg, "RemoveProposal: Proposal {0}, state FAILED, UpdateType {1}", itProposal.Key, type);
+			Log.outDebug(LogFilter.Lfg, "RemoveProposal: Proposal {0}, State FAILED, UpdateType {1}", itProposal.Key, type);
 
 			// Mark all people that didn't answered as no accept
 			if (type == LfgUpdateType.ProposalFailed)
@@ -1906,38 +1906,38 @@ namespace Game.DungeonFinding
 				}
 				else if ((ar = Global.ObjectMgr.GetAccessRequirement(dungeon.map, dungeon.difficulty)) != null)
 				{
-					if (ar.achievement != 0 &&
-					    !player.HasAchieved(ar.achievement))
+					if (ar.Achievement != 0 &&
+					    !player.HasAchieved(ar.Achievement))
 					{
 						lockStatus = LfgLockStatusType.MissingAchievement;
 					}
 					else if (player.GetTeam() == Team.Alliance &&
-					         ar.quest_A != 0 &&
-					         !player.GetQuestRewardStatus(ar.quest_A))
+					         ar.Quest_A != 0 &&
+					         !player.GetQuestRewardStatus(ar.Quest_A))
 					{
 						lockStatus = LfgLockStatusType.QuestNotCompleted;
 					}
 					else if (player.GetTeam() == Team.Horde &&
-					         ar.quest_H != 0 &&
-					         !player.GetQuestRewardStatus(ar.quest_H))
+					         ar.Quest_H != 0 &&
+					         !player.GetQuestRewardStatus(ar.Quest_H))
 					{
 						lockStatus = LfgLockStatusType.QuestNotCompleted;
 					}
-					else if (ar.item != 0)
+					else if (ar.Item != 0)
 					{
-						if (!player.HasItemCount(ar.item) &&
-						    (ar.item2 == 0 || !player.HasItemCount(ar.item2)))
+						if (!player.HasItemCount(ar.Item) &&
+						    (ar.Item2 == 0 || !player.HasItemCount(ar.Item2)))
 							lockStatus = LfgLockStatusType.MissingItem;
 					}
-					else if (ar.item2 != 0 &&
-					         !player.HasItemCount(ar.item2))
+					else if (ar.Item2 != 0 &&
+					         !player.HasItemCount(ar.Item2))
 					{
 						lockStatus = LfgLockStatusType.MissingItem;
 					}
 				}
 				else
 				{
-					var levels = Global.DB2Mgr.GetContentTuningData(dungeon.contentTuningId, player._playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+					var levels = Global.DB2Mgr.GetContentTuningData(dungeon.contentTuningId, player.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 					if (levels.HasValue)
 					{
@@ -2005,7 +2005,7 @@ namespace Game.DungeonFinding
 			Cypher.Assert(gguid.IsParty());
 
 			var data = GroupsStore[gguid];
-			Log.outInfo(LogFilter.Lfg, "Group: {0}, New state: {1}, Previous: {2}", gguid.ToString(), active, data.IsVoteKickActive());
+			Log.outInfo(LogFilter.Lfg, "Group: {0}, New State: {1}, Previous: {2}", gguid.ToString(), active, data.IsVoteKickActive());
 
 			data.SetVoteKick(active);
 		}
@@ -2264,7 +2264,7 @@ namespace Game.DungeonFinding
 				if (state != LfgState.Queued)
 				{
 					if (state != LfgState.Proposal)
-						Log.outDebug(LogFilter.Lfg, "Unexpected state found while trying to form new group. Guid: {0}, State: {1}", guid.ToString(), state);
+						Log.outDebug(LogFilter.Lfg, "Unexpected State found while trying to form new group. Guid: {0}, State: {1}", guid.ToString(), state);
 
 					return false;
 				}

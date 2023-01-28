@@ -19,9 +19,9 @@ namespace Game.Entities
 		{
 			Race      race           = GetRace();
 			ushort    maxSkill       = GetMaxSkillValueForLevel();
-			SkillInfo skillInfoField = _activePlayerData.Skill;
+			SkillInfo skillInfoField = ActivePlayerData.Skill;
 
-			foreach (var pair in mSkillStatus)
+			foreach (var pair in _mSkillStatus)
 			{
 				if (pair.Value.State == SkillState.Deleted ||
 				    skillInfoField.SkillRank[pair.Value.Pos] == 0)
@@ -54,9 +54,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -75,9 +75,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -96,9 +96,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey((uint)skill);
+			var skillStatusData = _mSkillStatus.LookupByKey((uint)skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -113,9 +113,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -130,9 +130,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -147,9 +147,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -167,9 +167,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -184,9 +184,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return 0;
 
-			SkillInfo skillInfo = _activePlayerData.Skill;
+			SkillInfo skillInfo = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -243,7 +243,7 @@ namespace Game.Entities
 			petSpellsPacket.ReactState     = pet.GetReactState();
 			petSpellsPacket.CommandState   = charmInfo.GetCommandState();
 
-			// action bar loop
+			// Action bar loop
 			for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
 				petSpellsPacket.ActionButtons[i] = charmInfo.GetActionBarEntry(i).packedData;
 
@@ -303,7 +303,7 @@ namespace Game.Entities
 
 		public void SetOverrideSpellsId(uint overrideSpellsId)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.OverrideSpellsID), overrideSpellsId);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.OverrideSpellsID), overrideSpellsId);
 		}
 
 		public void AddOverrideSpell(uint overridenSpellId, uint newSpellId)
@@ -400,7 +400,7 @@ namespace Game.Entities
 				{
 					SetSkillLineId(i, (ushort)skillLine.Id);
 					SetSkillStartingRank(i, 1);
-					mSkillStatus.Add(skillLine.Id, new SkillStatusData(i, SkillState.Unchanged));
+					_mSkillStatus.Add(skillLine.Id, new SkillStatusData(i, SkillState.Unchanged));
 
 					if (++i >= SkillConst.MaxPlayerSkills)
 						break;
@@ -435,13 +435,13 @@ namespace Game.Entities
 				return false;
 			}
 
-			var skillStatusData = mSkillStatus.LookupByKey(skillId);
+			var skillStatusData = _mSkillStatus.LookupByKey(skillId);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted)
 				return false;
 
-			SkillInfo skillInfoField = _activePlayerData.Skill;
+			SkillInfo skillInfoField = ActivePlayerData.Skill;
 
 			ushort value = skillInfoField.SkillRank[skillStatusData.Pos];
 			ushort max   = skillInfoField.SkillMaxRank[skillStatusData.Pos];
@@ -538,19 +538,19 @@ namespace Game.Entities
 			{
 				var enchantDuration = _enchantDuration[i];
 
-				if (enchantDuration.item.GetEnchantmentId(enchantDuration.slot) == 0)
+				if (enchantDuration.Item.GetEnchantmentId(enchantDuration.Slot) == 0)
 				{
 					_enchantDuration.Remove(enchantDuration);
 				}
-				else if (enchantDuration.leftduration <= time)
+				else if (enchantDuration.Leftduration <= time)
 				{
-					ApplyEnchantment(enchantDuration.item, enchantDuration.slot, false, false);
-					enchantDuration.item.ClearEnchantment(enchantDuration.slot);
+					ApplyEnchantment(enchantDuration.Item, enchantDuration.Slot, false, false);
+					enchantDuration.Item.ClearEnchantment(enchantDuration.Slot);
 					_enchantDuration.Remove(enchantDuration);
 				}
-				else if (enchantDuration.leftduration > time)
+				else if (enchantDuration.Leftduration > time)
 				{
-					enchantDuration.leftduration -= time;
+					enchantDuration.Leftduration -= time;
 				}
 			}
 		}
@@ -598,7 +598,7 @@ namespace Game.Entities
 			{
 				if (item.GetSocketColor((uint)(slot - EnchantmentSlot.Sock1)) == 0)
 				{
-					// Check if the requirements for the prismatic socket are met before applying the gem stats
+					// Check if the requirements for the prismatic socket are met before applying the gem Stats
 					SpellItemEnchantmentRecord pPrismaticEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(EnchantmentSlot.Prismatic));
 
 					if (pPrismaticEnchant == null ||
@@ -916,7 +916,7 @@ namespace Game.Entities
 							// nothing do..
 							break;
 						default:
-							Log.outError(LogFilter.Player, "Unknown item enchantment (id = {0}) display type: {1}", enchant_id, enchant_display_type);
+							Log.outError(LogFilter.Player, "Unknown Item enchantment (id = {0}) display Type: {1}", enchant_id, enchant_display_type);
 
 							break;
 					}
@@ -925,7 +925,7 @@ namespace Game.Entities
 			// visualize enchantment at player and equipped items
 			if (slot == EnchantmentSlot.Perm)
 			{
-				VisibleItem visibleItem = _values.ModifyValue(_playerData).ModifyValue(_playerData.VisibleItems, item.GetSlot());
+				VisibleItem visibleItem = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.VisibleItems, item.GetSlot());
 				SetUpdateFieldValue(visibleItem.ModifyValue(visibleItem.ItemVisual), item.GetVisibleItemVisual(this));
 			}
 
@@ -949,9 +949,9 @@ namespace Game.Entities
 
 		public void ModifySkillBonus(SkillType skillid, int val, bool talent)
 		{
-			SkillInfo skillInfoField = _activePlayerData.Skill;
+			SkillInfo skillInfoField = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skillid);
+			var skillStatusData = _mSkillStatus.LookupByKey(skillid);
 
 			if (skillStatusData == null ||
 			    skillStatusData.State == SkillState.Deleted ||
@@ -1003,10 +1003,10 @@ namespace Game.Entities
 			{
 				var enchantDuration = _enchantDuration[i];
 
-				if (enchantDuration.item == item &&
-				    enchantDuration.slot == slot)
+				if (enchantDuration.Item == item &&
+				    enchantDuration.Slot == slot)
 				{
-					enchantDuration.item.SetEnchantmentDuration(enchantDuration.slot, enchantDuration.leftduration, this);
+					enchantDuration.Item.SetEnchantmentDuration(enchantDuration.Slot, enchantDuration.Leftduration, this);
 					_enchantDuration.Remove(enchantDuration);
 
 					break;
@@ -1026,10 +1026,10 @@ namespace Game.Entities
 			{
 				var enchantDuration = _enchantDuration[i];
 
-				if (enchantDuration.item == item)
+				if (enchantDuration.Item == item)
 				{
-					// save duration in item
-					item.SetEnchantmentDuration(enchantDuration.slot, enchantDuration.leftduration, this);
+					// save duration in Item
+					item.SetEnchantmentDuration(enchantDuration.Slot, enchantDuration.Leftduration, this);
 					_enchantDuration.Remove(enchantDuration);
 				}
 			}
@@ -1041,7 +1041,7 @@ namespace Game.Entities
 			{
 				var enchantDuration = _enchantDuration[i];
 
-				if (enchantDuration.item == item)
+				if (enchantDuration.Item == item)
 					_enchantDuration.Remove(enchantDuration);
 			}
 		}
@@ -1053,19 +1053,19 @@ namespace Game.Entities
 			{
 				var enchantDuration = _enchantDuration[i];
 
-				if (enchantDuration.slot == slot)
+				if (enchantDuration.Slot == slot)
 				{
-					if (enchantDuration.item &&
-					    enchantDuration.item.GetEnchantmentId(slot) != 0)
+					if (enchantDuration.Item &&
+					    enchantDuration.Item.GetEnchantmentId(slot) != 0)
 					{
 						// Poisons and DK runes are enchants which are allowed on arenas
-						if (Global.SpellMgr.IsArenaAllowedEnchancment(enchantDuration.item.GetEnchantmentId(slot)))
+						if (Global.SpellMgr.IsArenaAllowedEnchancment(enchantDuration.Item.GetEnchantmentId(slot)))
 							continue;
 
-						// remove from stats
-						ApplyEnchantment(enchantDuration.item, slot, false, false);
+						// remove from Stats
+						ApplyEnchantment(enchantDuration.Item, slot, false, false);
 						// remove visual
-						enchantDuration.item.ClearEnchantment(slot);
+						enchantDuration.Item.ClearEnchantment(slot);
 					}
 
 					// remove from update list
@@ -1074,7 +1074,7 @@ namespace Game.Entities
 			}
 
 			// remove enchants from inventory items
-			// NOTE: no need to remove these from stats, since these aren't equipped
+			// NOTE: no need to remove these from Stats, since these aren't equipped
 			// in inventory
 			int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
 
@@ -1109,10 +1109,10 @@ namespace Game.Entities
 			    IsInCombat())
 				return;
 
-			// Call not from spell cast, send cooldown event for item spells if no in combat
+			// Call not from spell cast, send cooldown event for Item spells if no in combat
 			if (!spell)
 			{
-				// spell/item pair let set proper cooldown (except not existed charged spell cooldown spellmods for potions)
+				// spell/Item pair let set proper cooldown (except not existed charged spell cooldown spellmods for potions)
 				ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(_lastPotionId);
 
 				if (proto != null)
@@ -1158,9 +1158,9 @@ namespace Game.Entities
 			if (skill == 0)
 				return false;
 
-			SkillInfo skillInfoField = _activePlayerData.Skill;
+			SkillInfo skillInfoField = ActivePlayerData.Skill;
 
-			var skillStatusData = mSkillStatus.LookupByKey(skill);
+			var skillStatusData = _mSkillStatus.LookupByKey(skill);
 
 			return skillStatusData != null && skillStatusData.State != SkillState.Deleted && skillInfoField.SkillRank[skillStatusData.Pos] != 0;
 		}
@@ -1176,10 +1176,10 @@ namespace Game.Entities
 				return;
 
 			ushort    currVal;
-			var       skillStatusData = mSkillStatus.LookupByKey(id);
-			SkillInfo skillInfoField  = _activePlayerData.Skill;
+			var       skillStatusData = _mSkillStatus.LookupByKey(id);
+			SkillInfo skillInfoField  = ActivePlayerData.Skill;
 
-			// Handle already stored skills
+			// Handle already stored Skills
 			if (skillStatusData != null)
 			{
 				currVal = skillInfoField.SkillRank[skillStatusData.Pos];
@@ -1211,7 +1211,7 @@ namespace Game.Entities
 					UpdateCriteria(CriteriaType.SkillRaised, id);
 					UpdateCriteria(CriteriaType.AchieveSkillStep, id);
 
-					// update skill state
+					// update skill State
 					if (skillStatusData.State == SkillState.Unchanged)
 					{
 						if (currVal == 0) // activated skill, mark as new to save into database
@@ -1253,10 +1253,10 @@ namespace Game.Entities
 								SetSkill(childSkillLine.Id, 0, 0, 0);
 
 					// Clear profession lines
-					if (_activePlayerData.ProfessionSkillLine[0] == id)
-						SetUpdateFieldValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.ProfessionSkillLine, 0), 0u);
-					else if (_activePlayerData.ProfessionSkillLine[1] == id)
-						SetUpdateFieldValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.ProfessionSkillLine, 1), 0u);
+					if (ActivePlayerData.ProfessionSkillLine[0] == id)
+						SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ProfessionSkillLine, 0), 0u);
+					else if (ActivePlayerData.ProfessionSkillLine[1] == id)
+						SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ProfessionSkillLine, 1), 0u);
 				}
 			}
 			else
@@ -1264,9 +1264,9 @@ namespace Game.Entities
 				// We are about to learn a skill that has been added outside of normal circumstances (Game Master command, scripts etc.)
 				byte skillSlot = 0;
 
-				// Find a free skill slot
+				// Find a free skill Slot
 				for (int i = 0; i < SkillConst.MaxPlayerSkills; ++i)
-					if (((SkillInfo)_activePlayerData.Skill).SkillLineID[i] == 0)
+					if (((SkillInfo)ActivePlayerData.Skill).SkillLineID[i] == 0)
 					{
 						skillSlot = (byte)i;
 
@@ -1275,7 +1275,7 @@ namespace Game.Entities
 
 				if (skillSlot == 0)
 				{
-					Log.outError(LogFilter.Misc, $"Tried to add skill {id} but player {GetName()} ({GetGUID()}) cannot have additional skills");
+					Log.outError(LogFilter.Misc, $"Tried to add skill {id} but player {GetName()} ({GetGUID()}) cannot have additional Skills");
 
 					return;
 				}
@@ -1309,7 +1309,7 @@ namespace Game.Entities
 				}
 				else
 				{
-					// also learn missing child skills at 0 value
+					// also learn missing child Skills at 0 value
 					List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(id);
 
 					if (childSkillLines != null)
@@ -1322,7 +1322,7 @@ namespace Game.Entities
 						int freeProfessionSlot = FindProfessionSlotFor(id);
 
 						if (freeProfessionSlot != -1)
-							SetUpdateFieldValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
+							SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
 					}
 				}
 
@@ -1340,7 +1340,7 @@ namespace Game.Entities
 
 				UpdateSkillEnchantments(id, 0, (ushort)newVal);
 
-				mSkillStatus.Add(id, new SkillStatusData(skillSlot, SkillState.New));
+				_mSkillStatus.Add(id, new SkillStatusData(skillSlot, SkillState.New));
 
 				if (newVal != 0)
 				{
@@ -1610,7 +1610,7 @@ namespace Game.Entities
 			//cycle all equipped items
 			for (byte slot = EquipmentSlot.Start; slot < EquipmentSlot.End; ++slot)
 			{
-				//enchants for the slot being socketed are handled by Player.ApplyItemMods
+				//enchants for the Slot being socketed are handled by Player.ApplyItemMods
 				if (slot == exceptslot)
 					continue;
 
@@ -1636,13 +1636,13 @@ namespace Game.Entities
 
 					if (condition != 0)
 					{
-						//was enchant active with/without item?
+						//was enchant active with/without Item?
 						bool wasactive = EnchantmentFitsRequirements(condition, (sbyte)(apply ? exceptslot : -1));
 
 						//should it now be?
 						if (wasactive ^ EnchantmentFitsRequirements(condition, (sbyte)(apply ? -1 : exceptslot)))
-							// ignore item gem conditions
-							//if state changed, (dis)apply enchant
+							// ignore Item gem conditions
+							//if State changed, (dis)apply enchant
 							ApplyEnchantment(pItem, enchant_slot, !wasactive, true, true);
 					}
 				}
@@ -1652,10 +1652,10 @@ namespace Game.Entities
 		public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
 		{
 			if (!item.GetTemplate().HasFlag(ItemFlags.Legacy))
-				// item spells casted at use
+				// Item spells casted at use
 				foreach (ItemEffectRecord effectData in item.GetEffects())
 				{
-					// wrong triggering type
+					// wrong triggering Type
 					if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
 						continue;
 
@@ -1807,8 +1807,8 @@ namespace Game.Entities
 
 			int index = 0;
 
-			// if there is no same profession, find any free slot
-			foreach (var b in _activePlayerData.ProfessionSkillLine)
+			// if there is no same profession, find any free Slot
+			foreach (var b in ActivePlayerData.ProfessionSkillLine)
 			{
 				if (b == 0)
 					return index;
@@ -1831,15 +1831,15 @@ namespace Game.Entities
 				if (aura.GetCasterGUID() != GetGUID())
 					continue;
 
-				// skip if not item dependent or have alternative item
+				// skip if not Item dependent or have alternative Item
 				if (HasItemFitToSpellRequirements(spellInfo, pItem))
 					continue;
 
-				// no alt item, remove aura, restart check
+				// no alt Item, remove aura, restart check
 				RemoveOwnedAura(pair);
 			}
 
-			// currently casted spells can be dependent from item
+			// currently casted spells can be dependent from Item
 			for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
 			{
 				Spell spell = GetCurrentSpell(i);
@@ -1892,7 +1892,7 @@ namespace Game.Entities
 								    item.IsFitToSpellRequirements(spellInfo))
 									return true;
 
-							// special check to filter things like Shield Wall, the aura is not permanent and must stay even without required item
+							// special check to filter things like Shield Wall, the aura is not permanent and must stay even without required Item
 							if (!spellInfo.IsPassive())
 								foreach (var spellEffectInfo in spellInfo.GetEffects())
 									if (spellEffectInfo.IsAura())
@@ -1912,7 +1912,7 @@ namespace Game.Entities
 					}
 					else
 					{
-						// requires item equipped in all armor slots
+						// requires Item equipped in all armor slots
 						foreach (byte i in new[]
 						                   {
 							                   EquipmentSlot.Head, EquipmentSlot.Shoulders, EquipmentSlot.Chest, EquipmentSlot.Waist, EquipmentSlot.Legs, EquipmentSlot.Feet, EquipmentSlot.Wrist, EquipmentSlot.Hands
@@ -1932,7 +1932,7 @@ namespace Game.Entities
 					break;
 				}
 				default:
-					Log.outError(LogFilter.Player, "HasItemFitToSpellRequirements: Not handled spell requirement for item class {0}", spellInfo.EquippedItemClass);
+					Log.outError(LogFilter.Player, "HasItemFitToSpellRequirements: Not handled spell requirement for Item class {0}", spellInfo.EquippedItemClass);
 
 					break;
 			}
@@ -2038,7 +2038,7 @@ namespace Game.Entities
 			float amount = 0.0f;
 			amount += GetTotalAuraModifier(AuraType.ModWeaponCritPercent, auraEffect => CheckAttackFitToAuraRequirement(attackType, auraEffect));
 
-			// these auras don't have item requirement (only Combat Expertise in 3.3.5a)
+			// these auras don't have Item requirement (only Combat Expertise in 3.3.5a)
 			amount += GetTotalAuraModifier(AuraType.ModCritPct);
 
 			SetBaseModFlatValue(modGroup, amount);
@@ -2128,7 +2128,7 @@ namespace Game.Entities
 			if (spell == null)
 				return;
 
-			// spell has other state than temporary - do not change it
+			// spell has other State than temporary - do not change it
 			if (spell.State != PlayerSpellState.Temporary)
 				return;
 
@@ -2187,7 +2187,7 @@ namespace Game.Entities
 			// learn default race/class spells
 			PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
 
-			foreach (var tspell in info.customSpells)
+			foreach (var tspell in info.CustomSpells)
 			{
 				Log.outDebug(LogFilter.Player, "PLAYER (Class: {0} Race: {1}): Adding initial spell, id = {2}", GetClass(), GetRace(), tspell);
 
@@ -2200,10 +2200,10 @@ namespace Game.Entities
 
 		public void LearnDefaultSkills()
 		{
-			// learn default race/class skills
+			// learn default race/class Skills
 			PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
 
-			foreach (var rcInfo in info.skills)
+			foreach (var rcInfo in info.Skills)
 			{
 				if (HasSkill((SkillType)rcInfo.SkillID))
 					continue;
@@ -2477,17 +2477,17 @@ namespace Game.Entities
 					RemoveOverrideSpell(spellNode.OverridesSpell, spellNode.Spell);
 			}
 
-			// activate lesser rank in spellbook/action bar, and cast it if need
+			// activate lesser rank in spellbook/Action bar, and cast it if need
 			bool prev_activate = false;
 
 			uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
 
 			if (prev_id != 0)
-				// if ranked non-stackable spell: need activate lesser rank and update dendence state
+				// if ranked non-stackable spell: need activate lesser rank and update dendence State
 				// No need to check for spellInfo != NULL here because if cur_active is true, then that means that the spell was already in _spells, and only valid spells can be pushed there.
 				if (cur_active && spellInfo.IsRanked())
 				{
-					// need manually update dependence state (learn spell ignore like attempts)
+					// need manually update dependence State (learn spell ignore like attempts)
 					var prevSpell = _spells.LookupByKey(prev_id);
 
 					if (prevSpell != null)
@@ -2504,7 +2504,7 @@ namespace Game.Entities
 						if (!prevSpell.Active && learnLowRank)
 							if (AddSpell(prev_id, true, false, prevSpell.Dependent, prevSpell.Disabled))
 							{
-								// downgrade spell ranks in spellbook and action bar
+								// downgrade spell ranks in spellbook and Action bar
 								SendSupercededSpell(spellId, prev_id);
 								prev_activate = true;
 							}
@@ -2565,7 +2565,7 @@ namespace Game.Entities
 			                  (form == 0 && spellInfo.HasAttribute(SpellAttr2.AllowWhileNotShapeshiftedCasterForm)));
 
 			// Check EquippedItemClass
-			// passive spells which apply aura and have an item requirement are to be added manually, instead of casted
+			// passive spells which apply aura and have an Item requirement are to be added manually, instead of casted
 			if (spellInfo.EquippedItemClass >= 0)
 				foreach (var spellEffectInfo in spellInfo.GetEffects())
 					if (spellEffectInfo.IsAura())
@@ -2664,7 +2664,7 @@ namespace Game.Entities
 			{
 				uint next_active_spell_id = 0;
 
-				// fix activate state for non-stackable low rank (and find next spell for !active case)
+				// fix activate State for non-stackable low rank (and find next spell for !active case)
 				if (spellInfo.IsRanked())
 				{
 					uint next = Global.SpellMgr.GetNextSpellInChain(spellId);
@@ -2678,7 +2678,7 @@ namespace Game.Entities
 						}
 				}
 
-				// not do anything if already known in expected state
+				// not do anything if already known in expected State
 				if (spell.State != PlayerSpellState.Removed &&
 				    spell.Active == active &&
 				    spell.Dependent == dependent &&
@@ -2691,7 +2691,7 @@ namespace Game.Entities
 					return false;
 				}
 
-				// dependent spell known as not dependent, overwrite state
+				// dependent spell known as not dependent, overwrite State
 				if (spell.State != PlayerSpellState.Removed &&
 				    !spell.Dependent &&
 				    dependent)
@@ -2719,7 +2719,7 @@ namespace Game.Entities
 
 				spell.Favorite = favorite;
 
-				// update active state for known spell
+				// update active State for known spell
 				if (spell.Active != active &&
 				    spell.State != PlayerSpellState.Removed &&
 				    !spell.Disabled)
@@ -2819,7 +2819,7 @@ namespace Game.Entities
 				if (traitDefinitionId.HasValue)
 					newspell.TraitDefinitionId = traitDefinitionId.Value;
 
-				// replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
+				// replace spells in Action bars and spellbook to bigger rank if only one spell rank must be accessible
 				if (newspell.Active &&
 				    !newspell.Disabled &&
 				    spellInfo.IsRanked())
@@ -2847,7 +2847,7 @@ namespace Game.Entities
 									if (_spell.Value.State != PlayerSpellState.New)
 										_spell.Value.State = PlayerSpellState.Changed;
 
-									superceded_old = true; // new spell replace old in action bars and spell book.
+									superceded_old = true; // new spell replace old in Action bars and spell book.
 								}
 								else
 								{
@@ -2893,7 +2893,7 @@ namespace Game.Entities
 
 				if (traitDefinitionId.HasValue)
 				{
-					TraitConfig traitConfig = GetTraitConfig((int)(uint)_activePlayerData.ActiveCombatTraitConfigID);
+					TraitConfig traitConfig = GetTraitConfig((int)(uint)ActivePlayerData.ActiveCombatTraitConfigID);
 
 					if (traitConfig != null)
 					{
@@ -2952,7 +2952,7 @@ namespace Game.Entities
 
 			if (spellLearnSkill != null)
 			{
-				// add dependent skills if this spell is not learned from adding skill already
+				// add dependent Skills if this spell is not learned from adding skill already
 				if ((uint)spellLearnSkill.skill != fromSkill)
 				{
 					ushort skill_value     = GetPureSkillValue(spellLearnSkill.skill);
@@ -2971,7 +2971,7 @@ namespace Game.Entities
 			}
 			else
 			{
-				// not ranked skills
+				// not ranked Skills
 				foreach (var _spell_idx in skill_bounds)
 				{
 					SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(_spell_idx.SkillLine);
@@ -3016,7 +3016,7 @@ namespace Game.Entities
 
 			if (!GetSession().PlayerLoading())
 			{
-				// not ranked skills
+				// not ranked Skills
 				foreach (var _spell_idx in skill_bounds)
 				{
 					UpdateCriteria(CriteriaType.LearnTradeskillSkillLine, _spell_idx.SkillLine);
@@ -3120,28 +3120,28 @@ namespace Game.Entities
 				case SpellModType.LabelFlat:
 					if (apply)
 					{
-						AddDynamicUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.SpellFlatModByLabel), (mod as SpellFlatModifierByLabel).value);
+						AddDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellFlatModByLabel), (mod as SpellFlatModifierByLabel).value);
 					}
 					else
 					{
-						int firstIndex = _activePlayerData.SpellFlatModByLabel.FindIndex((mod as SpellFlatModifierByLabel).value);
+						int firstIndex = ActivePlayerData.SpellFlatModByLabel.FindIndex((mod as SpellFlatModifierByLabel).value);
 
 						if (firstIndex >= 0)
-							RemoveDynamicUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.SpellFlatModByLabel), firstIndex);
+							RemoveDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellFlatModByLabel), firstIndex);
 					}
 
 					break;
 				case SpellModType.LabelPct:
 					if (apply)
 					{
-						AddDynamicUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.SpellPctModByLabel), (mod as SpellPctModifierByLabel).value);
+						AddDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellPctModByLabel), (mod as SpellPctModifierByLabel).value);
 					}
 					else
 					{
-						int firstIndex = _activePlayerData.SpellPctModByLabel.FindIndex((mod as SpellPctModifierByLabel).value);
+						int firstIndex = ActivePlayerData.SpellPctModByLabel.FindIndex((mod as SpellPctModifierByLabel).value);
 
 						if (firstIndex >= 0)
-							RemoveDynamicUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.SpellPctModByLabel), firstIndex);
+							RemoveDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellPctModByLabel), firstIndex);
 					}
 
 					break;
@@ -3194,8 +3194,8 @@ namespace Game.Entities
 			pct  = 1.0f;
 
 			// Drop charges for triggering spells instead of triggered ones
-			if (_spellModTakingSpell)
-				spell = _spellModTakingSpell;
+			if (SpellModTakingSpell)
+				spell = SpellModTakingSpell;
 
 			switch (op)
 			{
@@ -3426,14 +3426,14 @@ namespace Game.Entities
 
 		public void SetSpellModTakingSpell(Spell spell, bool apply)
 		{
-			if (apply && _spellModTakingSpell != null)
+			if (apply && SpellModTakingSpell != null)
 				return;
 
 			if (!apply &&
-			    (_spellModTakingSpell == null || _spellModTakingSpell != spell))
+			    (SpellModTakingSpell == null || SpellModTakingSpell != spell))
 				return;
 
-			_spellModTakingSpell = apply ? spell : null;
+			SpellModTakingSpell = apply ? spell : null;
 		}
 
 		private void SendSpellModifiers()
@@ -3513,7 +3513,7 @@ namespace Game.Entities
 
 		private void UpdateItemSetAuras(bool formChange = false)
 		{
-			// item set bonuses not dependent from item broken state
+			// Item set bonuses not dependent from Item broken State
 			for (int setindex = 0; setindex < ItemSetEff.Count; ++setindex)
 			{
 				ItemSetEffect eff = ItemSetEff[setindex];
@@ -3528,7 +3528,7 @@ namespace Game.Entities
 					if (itemSetSpell.ChrSpecID != 0 &&
 					    itemSetSpell.ChrSpecID != GetPrimarySpecialization())
 					{
-						ApplyEquipSpell(spellInfo, null, false, false); // item set aura is not for current spec
+						ApplyEquipSpell(spellInfo, null, false, false); // Item set aura is not for current spec
 					}
 					else
 					{
@@ -3675,10 +3675,10 @@ namespace Game.Entities
 
 			// Check no reagent use mask
 			FlagArray128 noReagentMask = new();
-			noReagentMask[0] = _activePlayerData.NoReagentCostMask[0];
-			noReagentMask[1] = _activePlayerData.NoReagentCostMask[1];
-			noReagentMask[2] = _activePlayerData.NoReagentCostMask[2];
-			noReagentMask[3] = _activePlayerData.NoReagentCostMask[3];
+			noReagentMask[0] = ActivePlayerData.NoReagentCostMask[0];
+			noReagentMask[1] = ActivePlayerData.NoReagentCostMask[1];
+			noReagentMask[2] = ActivePlayerData.NoReagentCostMask[2];
+			noReagentMask[3] = ActivePlayerData.NoReagentCostMask[3];
 
 			if (spellInfo.SpellFamilyFlags & noReagentMask)
 				return true;
@@ -3689,7 +3689,7 @@ namespace Game.Entities
 		public void SetNoRegentCostMask(FlagArray128 mask)
 		{
 			for (byte i = 0; i < 4; ++i)
-				SetUpdateFieldValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.NoReagentCostMask, i), mask[i]);
+				SetUpdateFieldValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.NoReagentCostMask, i), mask[i]);
 		}
 
 		public void CastItemCombatSpell(DamageInfo damageInfo)
@@ -3703,7 +3703,7 @@ namespace Game.Entities
 
 			for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
 			{
-				// If usable, try to cast item spell
+				// If usable, try to cast Item spell
 				Item item = GetItemByPos(InventorySlots.Bag0, i);
 
 				if (item != null)
@@ -3717,7 +3717,7 @@ namespace Game.Entities
 							// Additional check for weapons
 							if (proto.GetClass() == ItemClass.Weapon)
 							{
-								// offhand item cannot proc from main hand hit etc
+								// offhand Item cannot proc from main hand hit etc
 								byte slot;
 
 								switch (damageInfo.GetAttackType())
@@ -3740,7 +3740,7 @@ namespace Game.Entities
 								if (slot != i)
 									continue;
 
-								// Check if item is useable (forms or disarm)
+								// Check if Item is useable (forms or disarm)
 								if (damageInfo.GetAttackType() == WeaponAttackType.BaseAttack)
 									if (!IsUseEquipedWeapon(true) &&
 									    !IsInFeralForm())
@@ -3763,7 +3763,7 @@ namespace Game.Entities
 				if (!item.GetTemplate().HasFlag(ItemFlags.Legacy))
 					foreach (ItemEffectRecord effectData in item.GetEffects())
 					{
-						// wrong triggering type
+						// wrong triggering Type
 						if (effectData.TriggerType != ItemSpelltriggerType.OnProc)
 							continue;
 
@@ -3793,7 +3793,7 @@ namespace Game.Entities
 							CastSpell(damageInfo.GetVictim(), spellInfo.Id, item);
 					}
 
-			// item combat enchantments
+			// Item combat enchantments
 			for (byte e_slot = 0; e_slot < (byte)EnchantmentSlot.Max; ++e_slot)
 			{
 				uint                       enchant_id = item.GetEnchantmentId((EnchantmentSlot)e_slot);
@@ -3941,7 +3941,7 @@ namespace Game.Entities
 					if (spellInfo.SpellLevel == 0)
 						continue;
 
-					// skip wrong class/race skills
+					// skip wrong class/race Skills
 					if (!IsSpellFitByClassAndRace(spellInfo.Id))
 						continue;
 
@@ -3967,48 +3967,48 @@ namespace Game.Entities
 
 		public void SetPetSpellPower(uint spellPower)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.PetSpellPower), spellPower);
+			SetUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.PetSpellPower), spellPower);
 		}
 
 		public void SetSkillLineId(uint pos, ushort skillLineId)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillLineID, (int)pos), skillLineId);
 		}
 
 		public void SetSkillStep(uint pos, ushort step)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillStep, (int)pos), step);
 		}
 
 		public void SetSkillRank(uint pos, ushort rank)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillRank, (int)pos), rank);
 		}
 
 		public void SetSkillStartingRank(uint pos, ushort starting)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillStartingRank, (int)pos), starting);
 		}
 
 		public void SetSkillMaxRank(uint pos, ushort max)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillMaxRank, (int)pos), max);
 		}
 
 		public void SetSkillTempBonus(uint pos, ushort bonus)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillTempBonus, (int)pos), bonus);
 		}
 
 		public void SetSkillPermBonus(uint pos, ushort bonus)
 		{
-			SkillInfo skillInfo = _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.Skill);
+			SkillInfo skillInfo = _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Skill);
 			SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillPermBonus, (int)pos), bonus);
 		}
 	}

@@ -11,7 +11,7 @@ namespace Game.AI
 	internal enum FollowState
 	{
 		None = 0x00,
-		Inprogress = 0x01, //must always have this state for any follow
+		Inprogress = 0x01, //must always have this State for any follow
 		Paused = 0x02,     //disables following
 		Complete = 0x04,   //follow is completed and may end
 		PreEvent = 0x08,   //not implemented (allow pre event to run, before follow is initiated)

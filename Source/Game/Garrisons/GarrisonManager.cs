@@ -424,7 +424,7 @@ namespace Game.Garrisons
 				if (goTemplate.type != GameObjectTypes.Goober)
 				{
 					Log.outError(LogFilter.Sql,
-					             "Invalid gameobject type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId {2}.",
+					             "Invalid gameobject Type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId {2}.",
 					             goTemplate.type,
 					             hordeGameObjectId,
 					             garrPlotInstanceId);
@@ -447,7 +447,7 @@ namespace Game.Garrisons
 				if (goTemplate.type != GameObjectTypes.Goober)
 				{
 					Log.outError(LogFilter.Sql,
-					             "Invalid gameobject type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId {2}.",
+					             "Invalid gameobject Type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId {2}.",
 					             goTemplate.type,
 					             allianceGameObjectId,
 					             garrPlotInstanceId);

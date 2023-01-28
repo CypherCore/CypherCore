@@ -288,7 +288,7 @@ namespace Game.Entities
 				item.AddBonuses(bonusId);
 
 			// Get heirloom offset to update only one part of dynamic field
-			List<uint> heirlooms = player._activePlayerData.Heirlooms;
+			List<uint> heirlooms = player.ActivePlayerData.Heirlooms;
 			int        offset    = heirlooms.IndexOf(itemId);
 
 			player.SetHeirloomFlags(offset, (uint)flags);
@@ -337,7 +337,7 @@ namespace Game.Entities
 
 				if (newItemId != 0)
 				{
-					List<uint> heirlooms = player._activePlayerData.Heirlooms;
+					List<uint> heirlooms = player.ActivePlayerData.Heirlooms;
 					int        offset    = heirlooms.IndexOf(item.GetEntry());
 
 					player.SetHeirloom(offset, newItemId);
@@ -503,7 +503,7 @@ namespace Game.Entities
 					_favoriteAppearances[favoriteAppearances.Read<uint>(0)] = FavoriteAppearanceState.Unchanged;
 				} while (favoriteAppearances.NextRow());
 
-			// Static item appearances known by every player
+			// Static Item appearances known by every player
 			uint[] hiddenAppearanceItems =
 			{
 				134110, // Hidden Helm

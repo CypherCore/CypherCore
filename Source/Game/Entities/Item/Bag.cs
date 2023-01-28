@@ -34,7 +34,7 @@ namespace Game.Entities
 					if (item.IsInWorld)
 					{
 						Log.outFatal(LogFilter.PlayerItems,
-						             "Item {0} (slot {1}, bag slot {2}) in bag {3} (slot {4}, bag slot {5}, _bagslot {6}) is to be deleted but is still in world.",
+						             "Item {0} (Slot {1}, bag Slot {2}) in bag {3} (Slot {4}, bag Slot {5}, _bagslot {6}) is to be deleted but is still in world.",
 						             item.GetEntry(),
 						             item.GetSlot(),
 						             item.GetBagSlot(),
@@ -117,7 +117,7 @@ namespace Game.Entities
 			ItemTemplate itemProto = GetTemplate(); // checked in Item.LoadFromDB
 			SetBagSize(itemProto.GetContainerSlots());
 
-			// cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
+			// cleanup bag content related Item value fields (its will be filled correctly from `character_inventory`)
 			for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
 			{
 				SetSlot(i, ObjectGuid.Empty);

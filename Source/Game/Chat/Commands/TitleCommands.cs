@@ -115,7 +115,7 @@ namespace Game.Chat.Commands
 
 			handler.SendSysMessage(CypherStrings.TitleRemoveRes, titleId, titleNameStr, tNameLink);
 
-			if (!target.HasTitle(target._playerData.PlayerTitle))
+			if (!target.HasTitle(target.PlayerData.PlayerTitle))
 			{
 				target.SetChosenTitle(0);
 				handler.SendSysMessage(CypherStrings.CurrentTitleReset, tNameLink);
@@ -154,7 +154,7 @@ namespace Game.Chat.Commands
 				target.SetKnownTitles(0, mask);
 				handler.SendSysMessage(CypherStrings.Done);
 
-				if (!target.HasTitle(target._playerData.PlayerTitle))
+				if (!target.HasTitle(target.PlayerData.PlayerTitle))
 				{
 					target.SetChosenTitle(0);
 					handler.SendSysMessage(CypherStrings.CurrentTitleReset, handler.GetNameLink(target));

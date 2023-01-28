@@ -410,7 +410,7 @@ namespace Scripts.World.Areatriggers
 			{
 				stormforgedMonitorGUID = stormforgedMonitor.GetGUID();
 				stormforgedMonitor.SetWalk(false);
-				/// The npc would search an alternative way to get to the last waypoint without this unit state.
+				/// The npc would search an alternative way to get to the last waypoint without this unit State.
 				stormforgedMonitor.AddUnitState(UnitState.IgnorePathfinding);
 				stormforgedMonitor.GetMotionMaster().MovePath(CreatureIds.StormforgedMonitor * 100, false);
 			}

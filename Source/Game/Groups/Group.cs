@@ -441,7 +441,7 @@ namespace Game.Groups
 						break;
 					}
 
-				// We are raid group and no one slot is free
+				// We are raid group and no one Slot is free
 				if (!groupFound)
 					return false;
 			}
@@ -477,8 +477,8 @@ namespace Game.Groups
 			player.SetPartyType(_groupCategory, GroupType.Normal);
 			player.ResetGroupUpdateSequenceIfNeeded(this);
 
-			// if the same group invites the player back, cancel the homebind timer
-			player._InstanceValid = player.CheckInstanceValidity(false);
+			// if the same group invites the player back, cancel the _homebind timer
+			player.InstanceValid = player.CheckInstanceValidity(false);
 
 			if (!IsRaidGroup()) // reset targetIcons for non-raid-groups
 				for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
@@ -533,7 +533,7 @@ namespace Game.Groups
 
 			UpdatePlayerOutOfRange(player);
 
-			// quest related GO state dependent from raid membership
+			// quest related GO State dependent from raid membership
 			if (IsRaidGroup())
 				player.UpdateVisibleGameobjectsOrSpellClicks();
 
@@ -627,7 +627,7 @@ namespace Game.Groups
 						else
 							player.SetGroup(null);
 
-						// quest related GO state dependent from raid membership
+						// quest related GO State dependent from raid membership
 						player.UpdateVisibleGameobjectsOrSpellClicks();
 					}
 
@@ -784,7 +784,7 @@ namespace Game.Groups
 
 				player.SetPartyType(_groupCategory, GroupType.None);
 
-				// quest related GO state dependent from raid membership
+				// quest related GO State dependent from raid membership
 				if (IsRaidGroup())
 					player.UpdateVisibleGameobjectsOrSpellClicks();
 
@@ -1105,7 +1105,7 @@ namespace Game.Groups
 			if (prevSubGroup == group)
 				return;
 
-			// Update the player slot with the new sub group setting
+			// Update the player Slot with the new sub group setting
 			slot.group = group;
 
 			// Increase the counter of the new sub group..
@@ -1287,7 +1287,7 @@ namespace Game.Groups
 			if (memberscount > bgEntry.MaxGroupSize)     // no MinPlayerCount for Battlegrounds
 				return GroupJoinBattlegroundResult.None; // ERR_GROUP_JOIN_Battleground_TOO_MANY handled on client side
 
-			// get a player as reference, to compare other players' stats to (arena team id, queue id based on level, etc.)
+			// get a player as reference, to compare other players' Stats to (arena team id, queue id based on level, etc.)
 			Player reference = GetFirstMember().GetSource();
 
 			// no reference found, can't join this way
@@ -1536,7 +1536,7 @@ namespace Game.Groups
 			if (player &&
 			    !player.IsGameMaster() &&
 			    CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon())
-				player._InstanceValid = false;
+				player.InstanceValid = false;
 		}
 
 		public void BroadcastGroupUpdate()

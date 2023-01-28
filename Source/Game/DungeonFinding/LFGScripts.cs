@@ -66,7 +66,7 @@ namespace Game.DungeonFinding
 
 				// This function is also called when players log in
 				// if for some reason the LFG system recognises the player as being in a LFG dungeon,
-				// but the player was loaded without a valid group, we'll teleport to homebind to prevent
+				// but the player was loaded without a valid group, we'll teleport to _homebind to prevent
 				// crashes or other undefined behaviour
 				if (!group)
 				{
@@ -75,7 +75,7 @@ namespace Game.DungeonFinding
 					player.TeleportTo(player.GetHomebind());
 
 					Log.outError(LogFilter.Lfg,
-					             "LFGPlayerScript.OnMapChanged, Player {0} ({1}) is in LFG dungeon map but does not have a valid group! Teleporting to homebind.",
+					             "LFGPlayerScript.OnMapChanged, Player {0} ({1}) is in LFG dungeon map but does not have a valid group! Teleporting to _homebind.",
 					             player.GetName(),
 					             player.GetGUID().ToString());
 
@@ -139,7 +139,7 @@ namespace Game.DungeonFinding
 			{
 				LfgState gstate = Global.LFGMgr.GetState(gguid);
 				LfgState state  = Global.LFGMgr.GetState(guid);
-				Log.outDebug(LogFilter.Lfg, "LFGScripts.OnAddMember [{0}]: added [{1} leader {2}] gstate: {3}, state: {4}", gguid, guid, leader, gstate, state);
+				Log.outDebug(LogFilter.Lfg, "LFGScripts.OnAddMember [{0}]: added [{1} leader {2}] gstate: {3}, State: {4}", gguid, guid, leader, gstate, state);
 
 				if (state == LfgState.Queued)
 					Global.LFGMgr.LeaveLfg(guid);
@@ -241,7 +241,7 @@ namespace Game.DungeonFinding
 					player.CastSpell(player, SharedConst.LFGSpellDungeonDeserter, true);
 				else if (method == RemoveMethod.KickLFG)
 					player.RemoveAurasDueToSpell(SharedConst.LFGSpellDungeonCooldown);
-				//else if (state == LFG_STATE_BOOT)
+				//else if (State == LFG_STATE_BOOT)
 				// Update internal kick cooldown of kicked
 
 				player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.LeaderUnk1), true);

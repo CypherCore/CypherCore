@@ -244,7 +244,7 @@ namespace Game.BlackMarket
 					bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
 			}
 
-			// Create item
+			// Create Item
 			BlackMarketTemplate templ = entry.GetTemplate();
 			Item                item  = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
 
@@ -262,7 +262,7 @@ namespace Game.BlackMarket
 			// Log trade
 			if (logGmTrade)
 				Log.outCommand(bidderAccId,
-				               "GM {0} (Account: {1}) won item in blackmarket auction: {2} (Entry: {3} Count: {4}) and payed gold : {5}.",
+				               "GM {0} (Account: {1}) won Item in blackmarket auction: {2} (Entry: {3} Count: {4}) and payed gold : {5}.",
 				               bidderName,
 				               bidderAccId,
 				               item.GetTemplate().GetName(),

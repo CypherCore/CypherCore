@@ -578,7 +578,7 @@ namespace Game.BattlePets
 			PetBattleSlotUpdates updates = new();
 			updates.Slots.Add(_slots[slotIndex]);
 			updates.AutoSlotted = false; // what's this?
-			updates.NewSlot     = true;  // causes the "new slot unlocked" bubble to appear
+			updates.NewSlot     = true;  // causes the "new Slot unlocked" bubble to appear
 			_owner.SendPacket(updates);
 		}
 
@@ -983,7 +983,7 @@ namespace Game.BattlePets
 
 		public void CalculateStats()
 		{
-			// get base breed stats
+			// get base breed Stats
 			var breedState = BattlePetMgr.BattlePetBreedStates.LookupByKey(PacketInfo.Breed);
 
 			if (breedState == null) // non existing breed id
@@ -993,7 +993,7 @@ namespace Game.BattlePets
 			float power  = breedState[BattlePetState.StatPower];
 			float speed  = breedState[BattlePetState.StatSpeed];
 
-			// modify stats depending on species - not all pets have this
+			// modify Stats depending on species - not all pets have this
 			var speciesState = BattlePetMgr.BattlePetSpeciesStates.LookupByKey(PacketInfo.Species);
 
 			if (speciesState != null)
@@ -1003,7 +1003,7 @@ namespace Game.BattlePets
 				speed  += speciesState[BattlePetState.StatSpeed];
 			}
 
-			// modify stats by quality
+			// modify Stats by quality
 			foreach (var battlePetBreedQuality in CliDB.BattlePetBreedQualityStorage.Values)
 				if (battlePetBreedQuality.QualityEnum == PacketInfo.Quality)
 				{
@@ -1015,12 +1015,12 @@ namespace Game.BattlePets
 				}
 
 			// TOOD: add check if pet has existing quality
-			// scale stats depending on level
+			// scale Stats depending on level
 			health *= PacketInfo.Level;
 			power  *= PacketInfo.Level;
 			speed  *= PacketInfo.Level;
 
-			// set stats
+			// set Stats
 			// round, ceil or floor? verify this
 			PacketInfo.MaxHealth = (uint)((Math.Round(health / 20) + 100));
 			PacketInfo.Power     = (uint)(Math.Round(power / 100));

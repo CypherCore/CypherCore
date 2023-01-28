@@ -89,7 +89,7 @@ namespace Game
 			charter.SetState(ItemUpdateState.Changed, GetPlayer());
 			GetPlayer().SendNewItem(charter, 1, true, false);
 
-			// a petition is invalid, if both the owner and the type matches
+			// a petition is invalid, if both the owner and the Type matches
 			// we checked above, if this player is in an arenateam, so this must be
 			// datacorruption
 			Petition petition = Global.PetitionMgr.GetPetitionByOwner(_player.GetGUID());
@@ -428,7 +428,7 @@ namespace Game
 			}
 			// Proceed with guild/arena team creation
 
-			// Delete charter item
+			// Delete charter Item
 			GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
 
 			// Create guild

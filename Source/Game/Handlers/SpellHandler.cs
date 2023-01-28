@@ -23,7 +23,7 @@ namespace Game
 		{
 			Player user = GetPlayer();
 
-			// ignore for remote control state
+			// ignore for remote control State
 			if (user.GetUnitBeingMoved() != user)
 				return;
 
@@ -52,7 +52,7 @@ namespace Game
 				return;
 			}
 
-			// some item classes can be used only in equipped state
+			// some Item classes can be used only in equipped State
 			if (proto.GetInventoryType() != InventoryType.NonEquip &&
 			    !item.IsEquipped())
 			{
@@ -70,7 +70,7 @@ namespace Game
 				return;
 			}
 
-			// only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
+			// only allow conjured consumable, bandage, poisons (all should have the 2^21 Item flag set in DB)
 			if (proto.GetClass() == ItemClass.Consumable &&
 			    !proto.HasFlag(ItemFlags.IgnoreDefaultArenaRestrictions) &&
 			    user.InArena())
@@ -118,7 +118,7 @@ namespace Game
 
 			SpellCastTargets targets = new(user, packet.Cast);
 
-			// Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
+			// Note: If script stop casting it must send appropriate data to client to prevent stuck Item in gray State.
 			if (!Global.ScriptMgr.RunScriptRet<IItemOnUse>(p => p.OnUse(user, item, targets, packet.Cast.CastID), item.GetScriptId()))
 				// no script or script not process request by self
 				user.CastItemUseSpell(item, targets, packet.Cast.CastID, packet.Cast.Misc);
@@ -129,7 +129,7 @@ namespace Game
 		{
 			Player player = GetPlayer();
 
-			// ignore for remote control state
+			// ignore for remote control State
 			if (player.GetUnitBeingMoved() != player)
 				return;
 
@@ -159,14 +159,14 @@ namespace Game
 				return;
 			}
 
-			// Verify that the bag is an actual bag or wrapped item that can be used "normally"
+			// Verify that the bag is an actual bag or wrapped Item that can be used "normally"
 			if (!proto.HasFlag(ItemFlags.HasLoot) &&
 			    !item.IsWrapped())
 			{
 				player.SendEquipError(InventoryResult.ClientLockedOut, item);
 
 				Log.outError(LogFilter.Network,
-				             "Possible hacking attempt: Player {0} [guid: {1}] tried to open item [guid: {2}, entry: {3}] which is not openable!",
+				             "Possible hacking attempt: Player {0} [guid: {1}] tried to open Item [guid: {2}, entry: {3}] which is not openable!",
 				             player.GetName(),
 				             player.GetGUID().ToString(),
 				             item.GetGUID().ToString(),
@@ -175,7 +175,7 @@ namespace Game
 				return;
 			}
 
-			// locked item
+			// locked Item
 			uint lockId = proto.GetLockID();
 
 			if (lockId != 0)
@@ -185,7 +185,7 @@ namespace Game
 				if (lockInfo == null)
 				{
 					player.SendEquipError(InventoryResult.ItemLocked, item);
-					Log.outError(LogFilter.Network, "WORLD:OpenItem: item [guid = {0}] has an unknown lockId: {1}!", item.GetGUID().ToString(), lockId);
+					Log.outError(LogFilter.Network, "WORLD:OpenItem: Item [guid = {0}] has an unknown lockId: {1}!", item.GetGUID().ToString(), lockId);
 
 					return;
 				}
@@ -212,7 +212,7 @@ namespace Game
 			}
 			else
 			{
-				// If item doesn't already have loot, attempt to load it. If that
+				// If Item doesn't already have loot, attempt to load it. If that
 				// fails then this is first time opening, generate loot
 				if (!item._lootGenerated &&
 				    !Global.LootItemStorage.LoadStoredLoot(item, player))
@@ -223,7 +223,7 @@ namespace Game
 					loot.FillLoot(item.GetEntry(), LootStorage.Items, player, true, loot.gold != 0);
 
 					// Force save the loot and money items that were just rolled
-					//  Also saves the container item ID in Loot struct (not to DB)
+					//  Also saves the container Item ID in Loot struct (not to DB)
 					if (loot.gold > 0 ||
 					    loot.unlootedCount > 0)
 						Global.LootItemStorage.AddNewStoredLoot(item.GetGUID().GetCounter(), loot, player);
@@ -247,12 +247,12 @@ namespace Game
 				return;
 
 			if (item.GetGUID() != itemGuid ||
-			    !item.IsWrapped()) // during getting result, gift was swapped with another item
+			    !item.IsWrapped()) // during getting result, gift was swapped with another Item
 				return;
 
 			if (result.IsEmpty())
 			{
-				Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID()} don't have record in character_gifts table and will deleted");
+				Log.outError(LogFilter.Network, $"Wrapped Item {item.GetGUID()} don't have record in character_gifts table and will deleted");
 				GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
 
 				return;
@@ -285,7 +285,7 @@ namespace Game
 
 			if (obj)
 			{
-				// ignore for remote control state
+				// ignore for remote control State
 				if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
 					if (!(GetPlayer().IsOnVehicle(GetPlayer().GetUnitBeingMoved()) || GetPlayer().IsMounted()) &&
 					    !obj.GetGoInfo().IsUsableMounted())
@@ -298,7 +298,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.GameObjReportUse, Processing = PacketProcessing.Inplace)]
 		private void HandleGameobjectReportUse(GameObjReportUse packet)
 		{
-			// ignore for remote control state
+			// ignore for remote control State
 			if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
 				return;
 
@@ -316,7 +316,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.CastSpell, Processing = PacketProcessing.ThreadSafe)]
 		private void HandleCastSpell(CastSpell cast)
 		{
-			// ignore for remote control state (for player case)
+			// ignore for remote control State (for player case)
 			Unit mover = GetPlayer().GetUnitBeingMoved();
 
 			if (mover != GetPlayer() &&
@@ -560,7 +560,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.CancelChannelling, Processing = PacketProcessing.Inplace)]
 		private void HandleCancelChanneling(CancelChannelling cancelChanneling)
 		{
-			// ignore for remote control state (for player case)
+			// ignore for remote control State (for player case)
 			Unit mover = _player.GetUnitBeingMoved();
 
 			if (mover != _player &&
@@ -588,7 +588,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.TotemDestroyed, Processing = PacketProcessing.Inplace)]
 		private void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
 		{
-			// ignore for remote control state
+			// ignore for remote control State
 			if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
 				return;
 
@@ -611,7 +611,7 @@ namespace Game
 		[WorldPacketHandler(ClientOpcodes.SelfRes)]
 		private void HandleSelfRes(SelfRes selfRes)
 		{
-			List<uint> selfResSpells = _player._activePlayerData.SelfResSpells;
+			List<uint> selfResSpells = _player.ActivePlayerData.SelfResSpells;
 
 			if (!selfResSpells.Contains(selfRes.SpellId))
 				return;
@@ -676,7 +676,7 @@ namespace Game
 				mirrorImageComponentedData.Gender    = (byte)creator.GetGender();
 				mirrorImageComponentedData.ClassID   = (byte)creator.GetClass();
 
-				foreach (var customization in player._playerData.Customizations)
+				foreach (var customization in player.PlayerData.Customizations)
 				{
 					var chrCustomizationChoice = new ChrCustomizationChoice();
 					chrCustomizationChoice.ChrCustomizationOptionID = customization.ChrCustomizationOptionID;

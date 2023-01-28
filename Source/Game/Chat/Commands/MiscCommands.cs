@@ -858,7 +858,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		// move item to other slot
+		// move Item to other Slot
 		[CommandNonGroup("itemmove", RBACPermissions.CommandItemmove)]
 		private static bool HandleItemMoveCommand(CommandHandler handler, byte srcSlot, byte dstSlot)
 		{
@@ -985,7 +985,7 @@ namespace Game.Chat
 				string player     = result.Read<string>(0);
 				int    remaintime = result.Read<int>(1);
 				// Save the frozen player to update remaining time in case of future .listfreeze uses
-				// before the frozen state expires
+				// before the frozen State expires
 				Player frozen = Global.ObjAccessor.FindPlayerByName(player);
 
 				if (frozen)
@@ -2366,7 +2366,7 @@ namespace Game.Chat
 					return false;
 				}
 			}
-			else // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
+			else // ItemId or [name] Shift-click form |color|Hitem:ItemId:0:0:0|h[name]|h|r
 			{
 				string idStr = handler.ExtractKeyFromLink(args, "Hitem");
 
@@ -2546,7 +2546,7 @@ namespace Game.Chat
 
 				if (msg == InventoryResult.Ok)
 				{
-					List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
+					List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each Item
 
 					if (itemContext != ItemContext.None &&
 					    itemContext < ItemContext.Max)
@@ -2633,7 +2633,7 @@ namespace Game.Chat
 					return false;
 				}
 			}
-			else // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
+			else // ItemId or [name] Shift-click form |color|Hitem:ItemId:0:0:0|h[name]|h|r
 			{
 				string id = handler.ExtractKeyFromLink(tailArgs, "Hitem");
 

@@ -614,7 +614,7 @@ namespace Game.Networking
 			stmt.AddValue(1, account.game.Id);
 			DB.Login.Execute(stmt);
 
-			// First reject the connection if packet contains invalid data or realm state doesn't allow logging in
+			// First reject the connection if packet contains invalid data or realm State doesn't allow logging in
 			if (Global.WorldMgr.IsClosed())
 			{
 				SendAuthResponseError(BattlenetRpcErrorCode.Denied);
@@ -702,7 +702,7 @@ namespace Game.Networking
 				return;
 			}
 
-			// Check locked state for server
+			// Check locked State for server
 			AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
 
 			if (allowedAccountType > AccountTypes.Player &&

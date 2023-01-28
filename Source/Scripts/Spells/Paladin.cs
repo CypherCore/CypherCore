@@ -822,9 +822,9 @@ namespace Scripts.Spells.Paladin
 
 		public override void Register()
 		{
-			if (_scriptSpellId == SpellIds.HolyPrismTargetEnemy)
+			if (ScriptSpellId == SpellIds.HolyPrismTargetEnemy)
 				SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaAlly));
-			else if (_scriptSpellId == SpellIds.HolyPrismTargetAlly)
+			else if (ScriptSpellId == SpellIds.HolyPrismTargetAlly)
 				SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
 
 			SpellEffects.Add(new ObjectAreaTargetSelectHandler(ShareTargets, 2, Targets.UnitDestAreaEntry));

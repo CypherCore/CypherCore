@@ -395,7 +395,7 @@ namespace Game.DataStorage
 				_itemBonusTrees.Add(bonusTreeNode.ParentItemBonusTreeID, bonusTreeNode);
 
 			foreach (ItemChildEquipmentRecord itemChildEquipment in ItemChildEquipmentStorage.Values)
-				//ASSERT(_itemChildEquipment.find(itemChildEquipment.ParentItemID) == _itemChildEquipment.end(), "Item must have max 1 child item.");
+				//ASSERT(_itemChildEquipment.find(itemChildEquipment.ParentItemID) == _itemChildEquipment.end(), "Item must have max 1 child Item.");
 				_itemChildEquipment[itemChildEquipment.ParentItemID] = itemChildEquipment;
 
 			foreach (ItemClassRecord itemClass in ItemClassStorage.Values)
@@ -1038,7 +1038,7 @@ namespace Game.DataStorage
 
 		public AzeriteItemMilestonePowerRecord GetAzeriteItemMilestonePower(int slot)
 		{
-			//ASSERT(slot < MAX_AZERITE_ESSENCE_SLOT, "Slot %u must be lower than MAX_AZERITE_ESSENCE_SLOT (%u)", uint32(slot), MAX_AZERITE_ESSENCE_SLOT);
+			//ASSERT(Slot < MAX_AZERITE_ESSENCE_SLOT, "Slot %u must be lower than MAX_AZERITE_ESSENCE_SLOT (%u)", uint32(Slot), MAX_AZERITE_ESSENCE_SLOT);
 			return _azeriteItemMilestonePowerByEssenceSlot[slot];
 		}
 

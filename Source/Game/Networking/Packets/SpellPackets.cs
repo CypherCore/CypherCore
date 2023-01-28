@@ -164,7 +164,7 @@ namespace Game.Networking.Packets
 
 	public class SetActionButton : ClientPacket
 	{
-		public ulong Action; // two packed values (action and type)
+		public ulong Action; // two packed values (Action and Type)
 		public byte Index;
 
 		public SetActionButton(WorldPacket packet) : base(packet)
@@ -1444,7 +1444,7 @@ namespace Game.Networking.Packets
 			CreatureLevelScaling creatureScaling  = creatureTemplate.GetLevelScaling(attacker.GetMap().GetDifficultyID());
 
 			TuningType                    = ContentTuningType.CreatureToPlayerDamage;
-			PlayerLevelDelta              = (short)target._activePlayerData.ScalingPlayerLevelDelta;
+			PlayerLevelDelta              = (short)target.ActivePlayerData.ScalingPlayerLevelDelta;
 			PlayerItemLevel               = (ushort)target.GetAverageItemLevel();
 			ScalingHealthItemLevelCurveID = (ushort)target._unitData.ScalingHealthItemLevelCurveID;
 			TargetLevel                   = (byte)target.GetLevel();
@@ -1461,7 +1461,7 @@ namespace Game.Networking.Packets
 			CreatureLevelScaling creatureScaling  = creatureTemplate.GetLevelScaling(target.GetMap().GetDifficultyID());
 
 			TuningType                    = ContentTuningType.PlayerToCreatureDamage;
-			PlayerLevelDelta              = (short)attacker._activePlayerData.ScalingPlayerLevelDelta;
+			PlayerLevelDelta              = (short)attacker.ActivePlayerData.ScalingPlayerLevelDelta;
 			PlayerItemLevel               = (ushort)attacker.GetAverageItemLevel();
 			ScalingHealthItemLevelCurveID = (ushort)target._unitData.ScalingHealthItemLevelCurveID;
 			TargetLevel                   = (byte)target.GetLevel();

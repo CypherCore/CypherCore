@@ -68,22 +68,22 @@ namespace Game.Entities
 
 		public void AddWeaponProficiency(uint newflag)
 		{
-			_WeaponProficiency |= newflag;
+			_weaponProficiency |= newflag;
 		}
 
 		public void AddArmorProficiency(uint newflag)
 		{
-			_ArmorProficiency |= newflag;
+			_armorProficiency |= newflag;
 		}
 
 		public uint GetWeaponProficiency()
 		{
-			return _WeaponProficiency;
+			return _weaponProficiency;
 		}
 
 		public uint GetArmorProficiency()
 		{
-			return _ArmorProficiency;
+			return _armorProficiency;
 		}
 
 		public void SendProficiency(ItemClass itemClass, uint itemSubclassMask)
@@ -116,7 +116,7 @@ namespace Game.Entities
 
 		public float GetRatingBonusValue(CombatRating cr)
 		{
-			float baseResult = ApplyRatingDiminishing(cr, _activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
+			float baseResult = ApplyRatingDiminishing(cr, ActivePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
 
 			if (cr != CombatRating.ResiliencePlayerDamage)
 				return baseResult;
@@ -250,9 +250,9 @@ namespace Game.Entities
 			switch (attType)
 			{
 				case WeaponAttackType.BaseAttack:
-					return baseExpertise + _activePlayerData.MainhandExpertise / 4.0f;
+					return baseExpertise + ActivePlayerData.MainhandExpertise / 4.0f;
 				case WeaponAttackType.OffAttack:
-					return baseExpertise + _activePlayerData.OffhandExpertise / 4.0f;
+					return baseExpertise + ActivePlayerData.OffhandExpertise / 4.0f;
 				default:
 					break;
 			}
@@ -401,7 +401,7 @@ namespace Game.Entities
 
 		public override float GetBlockPercent(uint attackerLevel)
 		{
-			float blockArmor    = (float)_activePlayerData.ShieldBlock;
+			float blockArmor    = (float)ActivePlayerData.ShieldBlock;
 			float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None);
 
 			if ((blockArmor + armorConstant) == 0)
@@ -428,59 +428,59 @@ namespace Game.Entities
 			UpdateBlockPercentage();
 		}
 
-		// duel health and mana reset methods
+		// Duel health and mana reset methods
 		public void SaveHealthBeforeDuel()
 		{
-			healthBeforeDuel = (uint)GetHealth();
+			_healthBeforeDuel = (uint)GetHealth();
 		}
 
 		public void SaveManaBeforeDuel()
 		{
-			manaBeforeDuel = (uint)GetPower(PowerType.Mana);
+			_manaBeforeDuel = (uint)GetPower(PowerType.Mana);
 		}
 
 		public void RestoreHealthAfterDuel()
 		{
-			SetHealth(healthBeforeDuel);
+			SetHealth(_healthBeforeDuel);
 		}
 
 		public void RestoreManaAfterDuel()
 		{
-			SetPower(PowerType.Mana, (int)manaBeforeDuel);
+			SetPower(PowerType.Mana, (int)_manaBeforeDuel);
 		}
 
 		private void UpdateDuelFlag(long currTime)
 		{
-			if (duel != null &&
-			    duel.State == DuelState.Countdown &&
-			    duel.StartTime <= currTime)
+			if (Duel != null &&
+			    Duel.State == DuelState.Countdown &&
+			    Duel.StartTime <= currTime)
 			{
-				Global.ScriptMgr.ForEach<IPlayerOnDuelStart>(p => p.OnDuelStart(this, duel.Opponent));
+				Global.ScriptMgr.ForEach<IPlayerOnDuelStart>(p => p.OnDuelStart(this, Duel.Opponent));
 
 				SetDuelTeam(1);
-				duel.Opponent.SetDuelTeam(2);
+				Duel.Opponent.SetDuelTeam(2);
 
-				duel.State               = DuelState.InProgress;
-				duel.Opponent.duel.State = DuelState.InProgress;
+				Duel.State               = DuelState.InProgress;
+				Duel.Opponent.Duel.State = DuelState.InProgress;
 			}
 		}
 
 		private void CheckDuelDistance(long currTime)
 		{
-			if (duel == null)
+			if (Duel == null)
 				return;
 
-			ObjectGuid duelFlagGUID = _playerData.DuelArbiter;
+			ObjectGuid duelFlagGUID = PlayerData.DuelArbiter;
 			GameObject obj          = GetMap().GetGameObject(duelFlagGUID);
 
 			if (!obj)
 				return;
 
-			if (duel.OutOfBoundsTime == 0)
+			if (Duel.OutOfBoundsTime == 0)
 			{
 				if (!IsWithinDistInMap(obj, 50))
 				{
-					duel.OutOfBoundsTime = currTime + 10;
+					Duel.OutOfBoundsTime = currTime + 10;
 					SendPacket(new DuelOutOfBounds());
 				}
 			}
@@ -488,10 +488,10 @@ namespace Game.Entities
 			{
 				if (IsWithinDistInMap(obj, 40))
 				{
-					duel.OutOfBoundsTime = 0;
+					Duel.OutOfBoundsTime = 0;
 					SendPacket(new DuelInBounds());
 				}
-				else if (currTime >= duel.OutOfBoundsTime)
+				else if (currTime >= Duel.OutOfBoundsTime)
 				{
 					DuelComplete(DuelCompleteType.Fled);
 				}
@@ -500,17 +500,17 @@ namespace Game.Entities
 
 		public void DuelComplete(DuelCompleteType type)
 		{
-			// duel not requested
-			if (duel == null)
+			// Duel not requested
+			if (Duel == null)
 				return;
 
 			// Check if DuelComplete() has been called already up in the stack and in that case don't do anything else here
-			if (duel.State == DuelState.Completed)
+			if (Duel.State == DuelState.Completed)
 				return;
 
-			Player opponent = duel.Opponent;
-			duel.State          = DuelState.Completed;
-			opponent.duel.State = DuelState.Completed;
+			Player opponent = Duel.Opponent;
+			Duel.State          = DuelState.Completed;
+			opponent.Duel.State = DuelState.Completed;
 
 			Log.outDebug(LogFilter.Player, $"Duel Complete {GetName()} {opponent.GetName()}");
 
@@ -567,9 +567,9 @@ namespace Game.Entities
 					// Credit for quest Death's Challenge
 					if (GetClass() == Class.Deathknight &&
 					    opponent.GetQuestStatus(12733) == QuestStatus.Incomplete)
-						opponent.CastSpell(duel.Opponent, 52994, true);
+						opponent.CastSpell(Duel.Opponent, 52994, true);
 
-					// Honor points after duel (the winner) - ImpConfig
+					// Honor points after Duel (the winner) - ImpConfig
 					int amount = WorldConfig.GetIntValue(WorldCfg.HonorAfterDuel);
 
 					if (amount != 0)
@@ -582,13 +582,13 @@ namespace Game.Entities
 
 			// Victory emote spell
 			if (type != DuelCompleteType.Interrupted)
-				opponent.CastSpell(duel.Opponent, 52852, true);
+				opponent.CastSpell(Duel.Opponent, 52852, true);
 
 			//Remove Duel Flag object
-			GameObject obj = GetMap().GetGameObject(_playerData.DuelArbiter);
+			GameObject obj = GetMap().GetGameObject(PlayerData.DuelArbiter);
 
 			if (obj)
-				duel.Initiator.RemoveGameObject(obj, true);
+				Duel.Initiator.RemoveGameObject(obj, true);
 
 			//remove auras
 			var itsAuras = opponent.GetAppliedAuras();
@@ -599,7 +599,7 @@ namespace Game.Entities
 
 				if (!pair.Value.IsPositive() &&
 				    aura.GetCasterGUID() == GetGUID() &&
-				    aura.GetApplyTime() >= duel.StartTime)
+				    aura.GetApplyTime() >= Duel.StartTime)
 					opponent.RemoveAura(pair);
 			}
 
@@ -611,7 +611,7 @@ namespace Game.Entities
 
 				if (!pair.Value.IsPositive() &&
 				    aura.GetCasterGUID() == opponent.GetGUID() &&
-				    aura.GetApplyTime() >= duel.StartTime)
+				    aura.GetApplyTime() >= Duel.StartTime)
 					RemoveAura(pair);
 			}
 
@@ -625,27 +625,27 @@ namespace Game.Entities
 			opponent.SetDuelArbiter(ObjectGuid.Empty);
 			opponent.SetDuelTeam(0);
 
-			opponent.duel = null;
-			duel          = null;
+			opponent.Duel = null;
+			Duel          = null;
 		}
 
 		public void SetDuelArbiter(ObjectGuid guid)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.DuelArbiter), guid);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.DuelArbiter), guid);
 		}
 
 		private void SetDuelTeam(uint duelTeam)
 		{
-			SetUpdateFieldValue(_values.ModifyValue(_playerData).ModifyValue(_playerData.DuelTeam), duelTeam);
+			SetUpdateFieldValue(_values.ModifyValue(PlayerData).ModifyValue(PlayerData.DuelTeam), duelTeam);
 		}
 
 		//PVP
 		public void SetPvPDeath(bool on)
 		{
 			if (on)
-				_ExtraFlags |= PlayerExtraFlags.PVPDeath;
+				_extraFlags |= PlayerExtraFlags.PVPDeath;
 			else
-				_ExtraFlags &= ~PlayerExtraFlags.PVPDeath;
+				_extraFlags &= ~PlayerExtraFlags.PVPDeath;
 		}
 
 		public void SetContestedPvPTimer(uint newTime)
@@ -662,17 +662,17 @@ namespace Game.Entities
 
 		private void UpdateAfkReport(long currTime)
 		{
-			if (_bgData.bgAfkReportedTimer <= currTime)
+			if (_bgData.AfkReportedTimer <= currTime)
 			{
-				_bgData.bgAfkReportedCount = 0;
-				_bgData.bgAfkReportedTimer = currTime + 5 * Time.Minute;
+				_bgData.AfkReportedCount = 0;
+				_bgData.AfkReportedTimer = currTime + 5 * Time.Minute;
 			}
 		}
 
 		public void SetContestedPvP(Player attackedPlayer = null)
 		{
 			if (attackedPlayer != null &&
-			    (attackedPlayer == this || (duel != null && duel.Opponent == attackedPlayer)))
+			    (attackedPlayer == this || (Duel != null && Duel.Opponent == attackedPlayer)))
 				return;
 
 			SetContestedPvPTimer(30000);
@@ -712,14 +712,14 @@ namespace Game.Entities
 			if (!IsPvP())
 				return;
 
-			if (pvpInfo.EndTimer == 0 ||
-			    (currTime < pvpInfo.EndTimer + 300) ||
-			    pvpInfo.IsHostile)
+			if (PvpInfo.EndTimer == 0 ||
+			    (currTime < PvpInfo.EndTimer + 300) ||
+			    PvpInfo.IsHostile)
 				return;
 
-			if (pvpInfo.EndTimer <= currTime)
+			if (PvpInfo.EndTimer <= currTime)
 			{
-				pvpInfo.EndTimer = 0;
+				PvpInfo.EndTimer = 0;
 				RemovePlayerFlag(PlayerFlags.PVPTimer);
 			}
 
@@ -731,11 +731,11 @@ namespace Game.Entities
 			if (!state || Override)
 			{
 				SetPvP(state);
-				pvpInfo.EndTimer = 0;
+				PvpInfo.EndTimer = 0;
 			}
 			else
 			{
-				pvpInfo.EndTimer = GameTime.GetGameTime();
+				PvpInfo.EndTimer = GameTime.GetGameTime();
 				SetPvP(state);
 			}
 		}
@@ -751,9 +751,9 @@ namespace Game.Entities
 		{
 			// @todo should we always synchronize UNIT_FIELD_BYTES_2, 1 of controller and controlled?
 			// no, we shouldn't, those are checked for affecting player by client
-			if (!pvpInfo.IsInNoPvPArea &&
+			if (!PvpInfo.IsInNoPvPArea &&
 			    !IsGameMaster() &&
-			    (pvpInfo.IsInFFAPvPArea || Global.WorldMgr.IsFFAPvPRealm() || HasAuraType(AuraType.SetFFAPvp)))
+			    (PvpInfo.IsInFFAPvPArea || Global.WorldMgr.IsFFAPvPRealm() || HasAuraType(AuraType.SetFFAPvp)))
 			{
 				if (!IsFFAPvP())
 				{
@@ -774,18 +774,18 @@ namespace Game.Entities
 			if (onlyFFA)
 				return;
 
-			if (pvpInfo.IsHostile) // in hostile area
+			if (PvpInfo.IsHostile) // in hostile area
 			{
 				if (!IsPvP() ||
-				    pvpInfo.EndTimer != 0)
+				    PvpInfo.EndTimer != 0)
 					UpdatePvP(true, true);
 			}
 			else // in friendly area
 			{
 				if (IsPvP() &&
 				    !HasPlayerFlag(PlayerFlags.InPVP) &&
-				    pvpInfo.EndTimer == 0)
-					pvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
+				    PvpInfo.EndTimer == 0)
+					PvpInfo.EndTimer = GameTime.GetGameTime(); // start toggle-off
 			}
 		}
 

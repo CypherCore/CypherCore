@@ -262,7 +262,7 @@ namespace Game.Chat
 				Player target = player.GetConnectedPlayer();
 
 				if (where is string &&
-				    where.Equals("$home")) // References target's homebind
+				    where.Equals("$home")) // References target's _homebind
 				{
 					if (target)
 					{

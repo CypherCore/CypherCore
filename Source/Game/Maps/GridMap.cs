@@ -597,10 +597,10 @@ namespace Game.Maps
 			return _liquidMap[cx_int * _liquidWidth + cy_int];
 		}
 
-		// Get water state on map
+		// Get water State on map
 		public ZLiquidStatus GetLiquidStatus(float x, float y, float z, LiquidHeaderTypeFlags? reqLiquidType, LiquidData data, float collisionHeight)
 		{
-			// Check water type (if no water return)
+			// Check water Type (if no water return)
 			if (_liquidGlobalFlags == LiquidHeaderTypeFlags.NoWater &&
 			    _liquidFlags == null)
 				return ZLiquidStatus.NoWater;
@@ -612,7 +612,7 @@ namespace Game.Maps
 			int x_int = (int)cx & (MapConst.MapResolution - 1);
 			int y_int = (int)cy & (MapConst.MapResolution - 1);
 
-			// Check water type in cell
+			// Check water Type in cell
 			int                   idx         = (x_int >> 3) * 16 + (y_int >> 3);
 			LiquidHeaderTypeFlags type        = _liquidFlags != null ? (LiquidHeaderTypeFlags)_liquidFlags[idx] : _liquidGlobalFlags;
 			uint                  entry       = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
@@ -656,7 +656,7 @@ namespace Game.Maps
 			if (type == LiquidHeaderTypeFlags.NoWater)
 				return ZLiquidStatus.NoWater;
 
-			// Check req liquid type mask
+			// Check req liquid Type mask
 			if (reqLiquidType.HasValue &&
 			    (reqLiquidType & type) == LiquidHeaderTypeFlags.NoWater)
 				return ZLiquidStatus.NoWater;

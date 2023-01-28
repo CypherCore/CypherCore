@@ -67,12 +67,12 @@ namespace Game.Entities
 
 		public List<uint> GetRewardedQuests()
 		{
-			return _RewardedQuests;
+			return _rewardedQuests;
 		}
 
 		private Dictionary<uint, QuestStatusData> GetQuestStatusMap()
 		{
-			return _QuestStatus;
+			return _questStatus;
 		}
 
 		public int GetQuestMinLevel(Quest quest)
@@ -82,7 +82,7 @@ namespace Game.Entities
 
 		private int GetQuestMinLevel(uint contentTuningId)
 		{
-			var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, _playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+			var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 			if (questLevels.HasValue)
 			{
@@ -110,7 +110,7 @@ namespace Game.Entities
 
 		public int GetQuestLevel(uint contentTuningId)
 		{
-			var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, _playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+			var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
 
 			if (questLevels.HasValue)
 			{
@@ -129,7 +129,7 @@ namespace Game.Entities
 
 		public int GetRewardedQuestCount()
 		{
-			return _RewardedQuests.Count;
+			return _rewardedQuests.Count;
 		}
 
 		public void LearnQuestRewardedSpells(Quest quest)
@@ -156,7 +156,7 @@ namespace Game.Entities
 			if (spellInfo == null)
 				return;
 
-			// check learned spells state
+			// check learned spells State
 			bool found = false;
 
 			foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -199,7 +199,7 @@ namespace Game.Entities
 		public void LearnQuestRewardedSpells()
 		{
 			// learn spells received from quest completing
-			foreach (var questId in _RewardedQuests)
+			foreach (var questId in _rewardedQuests)
 			{
 				Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
 
@@ -212,7 +212,7 @@ namespace Game.Entities
 
 		public void DailyReset()
 		{
-			foreach (uint questId in _activePlayerData.DailyQuestsCompleted)
+			foreach (uint questId in ActivePlayerData.DailyQuestsCompleted)
 			{
 				uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
 
@@ -221,15 +221,15 @@ namespace Game.Entities
 			}
 
 			DailyQuestsReset dailyQuestsReset = new();
-			dailyQuestsReset.Count = _activePlayerData.DailyQuestsCompleted.Size();
+			dailyQuestsReset.Count = ActivePlayerData.DailyQuestsCompleted.Size();
 			SendPacket(dailyQuestsReset);
 
-			ClearDynamicUpdateFieldValues(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.DailyQuestsCompleted));
+			ClearDynamicUpdateFieldValues(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted));
 
-			_DFQuests.Clear(); // Dungeon Finder Quests.
+			_dfQuests.Clear(); // Dungeon Finder Quests.
 
 			// DB data deleted in caller
-			_DailyQuestChanged  = false;
+			_dailyQuestChanged  = false;
 			_lastDailyQuestTime = 0;
 
 			if (_garrison != null)
@@ -251,13 +251,13 @@ namespace Game.Entities
 
 			_weeklyquests.Clear();
 			// DB data deleted in caller
-			_WeeklyQuestChanged = false;
+			_weeklyQuestChanged = false;
 		}
 
 		public void ResetSeasonalQuestStatus(ushort event_id, long eventStartTime)
 		{
 			// DB data deleted in caller
-			_SeasonalQuestChanged = false;
+			_seasonalQuestChanged = false;
 
 			var eventList = _seasonalquests.LookupByKey(event_id);
 
@@ -294,7 +294,7 @@ namespace Game.Entities
 
 			_monthlyquests.Clear();
 			// DB data deleted in caller
-			_MonthlyQuestChanged = false;
+			_monthlyQuestChanged = false;
 		}
 
 		public bool CanInteractWithQuestGiver(WorldObject questGiver)
@@ -318,7 +318,7 @@ namespace Game.Entities
 
 		public bool IsQuestRewarded(uint quest_id)
 		{
-			return _RewardedQuests.Contains(quest_id);
+			return _rewardedQuests.Contains(quest_id);
 		}
 
 		public void PrepareQuestMenu(ObjectGuid guid)
@@ -445,7 +445,7 @@ namespace Game.Entities
 
 		public bool IsActiveQuest(uint quest_id)
 		{
-			return _QuestStatus.ContainsKey(quest_id);
+			return _questStatus.ContainsKey(quest_id);
 		}
 
 		public Quest GetNextQuest(ObjectGuid guid, Quest quest)
@@ -534,7 +534,7 @@ namespace Game.Entities
 				List<ItemPosCount> dest  = new();
 				InventoryResult    msg2  = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, srcitem, count);
 
-				// player already have max number (in most case 1) source item, no additional item needed and quest can be added.
+				// player already have max number (in most case 1) source Item, no additional Item needed and quest can be added.
 				if (msg2 == InventoryResult.ItemMaxCount)
 					return true;
 
@@ -567,7 +567,7 @@ namespace Game.Entities
 				    CanTakeQuest(qInfo, false))
 					return true;
 
-				var q_status = _QuestStatus.LookupByKey(questId);
+				var q_status = _questStatus.LookupByKey(questId);
 
 				if (q_status == null)
 					return false;
@@ -809,9 +809,9 @@ namespace Game.Entities
 					Item item = (Item)questGiver;
 					Global.ScriptMgr.RunScriptRet<IItemOnQuestAccept>(p => p.OnQuestAccept(this, item, quest), item.GetScriptId());
 
-					// There are two cases where the source item is not destroyed when the quest is accepted:
-					// - It is required to finish the quest, and is an unique item
-					// - It is the same item present in the source item field (item that would be given on quest accept)
+					// There are two cases where the source Item is not destroyed when the quest is accepted:
+					// - It is required to finish the quest, and is an unique Item
+					// - It is the same Item present in the source Item field (Item that would be given on quest accept)
 					bool destroyItem = true;
 
 					foreach (QuestObjective obj in quest.Objectives)
@@ -846,16 +846,16 @@ namespace Game.Entities
 		{
 			ushort logSlot = FindQuestSlot(0);
 
-			if (logSlot >= SharedConst.MaxQuestLogSize) // Player does not have any free slot in the quest log
+			if (logSlot >= SharedConst.MaxQuestLogSize) // Player does not have any free Slot in the quest log
 				return;
 
 			uint questId = quest.Id;
 
-			// if not exist then created with set uState == NEW and rewarded=false
-			if (!_QuestStatus.ContainsKey(questId))
-				_QuestStatus[questId] = new QuestStatusData();
+			// if not exist then created with set UState == NEW and rewarded=false
+			if (!_questStatus.ContainsKey(questId))
+				_questStatus[questId] = new QuestStatusData();
 
-			QuestStatusData questStatusData = _QuestStatus.LookupByKey(questId);
+			QuestStatusData questStatusData = _questStatus.LookupByKey(questId);
 			QuestStatus     oldStatus       = questStatusData.Status;
 
 			// check for repeatable quests status reset
@@ -903,7 +903,7 @@ namespace Game.Entities
 				// shared timed quest
 				if (questGiver != null &&
 				    questGiver.IsTypeId(TypeId.Player))
-					limittime = questGiver.ToPlayer()._QuestStatus[questId].Timer / Time.InMilliseconds;
+					limittime = questGiver.ToPlayer()._questStatus[questId].Timer / Time.InMilliseconds;
 
 				AddTimedQuest(questId);
 				questStatusData.Timer = limittime * Time.InMilliseconds;
@@ -916,7 +916,7 @@ namespace Game.Entities
 
 			if (quest.HasFlag(QuestFlags.Pvp))
 			{
-				pvpInfo.IsHostile = true;
+				PvpInfo.IsHostile = true;
 				UpdatePvPState();
 			}
 
@@ -943,7 +943,7 @@ namespace Game.Entities
 			SetQuestSlotEndTime(logSlot, endTime);
 			SetQuestSlotAcceptTime(logSlot, GameTime.GetGameTime());
 
-			_QuestStatusSave[questId] = QuestSaveType.Default;
+			_questStatusSave[questId] = QuestSaveType.Default;
 
 			StartCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);
 
@@ -959,7 +959,7 @@ namespace Game.Entities
 			{
 				SetQuestStatus(quest_id, QuestStatus.Complete);
 
-				QuestStatusData questStatus = _QuestStatus.LookupByKey(quest_id);
+				QuestStatusData questStatus = _questStatus.LookupByKey(quest_id);
 
 				if (questStatus != null)
 					SetQuestSlotState(questStatus.Slot, QuestSlotStateMask.Complete);
@@ -1275,7 +1275,7 @@ namespace Game.Entities
 
 			RewardReputation(quest);
 
-			// cast spells after mark quest complete (some spells have quest completed state requirements in spell_area data)
+			// cast spells after mark quest complete (some spells have quest completed State requirements in spell_area data)
 			if (quest.RewardSpell > 0)
 			{
 				SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, GetMap().GetDifficultyID());
@@ -1339,7 +1339,7 @@ namespace Game.Entities
 
 			if (quest.HasFlag(QuestFlags.Pvp))
 			{
-				pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
+				PvpInfo.IsHostile = PvpInfo.IsInHostileArea || HasPvPForcingQuest();
 				UpdatePvPState();
 			}
 
@@ -1355,8 +1355,8 @@ namespace Game.Entities
 
 		public void SetRewardedQuest(uint quest_id)
 		{
-			_RewardedQuests.Add(quest_id);
-			_RewardedQuestsSave[quest_id] = QuestSaveType.Default;
+			_rewardedQuests.Add(quest_id);
+			_rewardedQuestsSave[quest_id] = QuestSaveType.Default;
 		}
 
 		public void FailQuest(uint questId)
@@ -1384,7 +1384,7 @@ namespace Game.Entities
 
 				if (quest.LimitTime != 0)
 				{
-					QuestStatusData q_status = _QuestStatus[questId];
+					QuestStatusData q_status = _questStatus[questId];
 
 					RemoveTimedQuest(questId);
 					q_status.Timer = 0;
@@ -1513,7 +1513,7 @@ namespace Game.Entities
 
 		public bool SatisfyQuestLog(bool msg)
 		{
-			// exist free slot
+			// exist free Slot
 			if (FindQuestSlot(0) < SharedConst.MaxQuestLogSize)
 				return true;
 
@@ -1541,7 +1541,7 @@ namespace Game.Entities
 
 			// If positive previous quest rewarded, return true
 			if (qInfo.PrevQuestId > 0 &&
-			    _RewardedQuests.Contains(prevId))
+			    _rewardedQuests.Contains(prevId))
 				return true;
 
 			// If negative previous quest active, return true
@@ -1549,8 +1549,8 @@ namespace Game.Entities
 			    GetQuestStatus(prevId) == QuestStatus.Incomplete)
 				return true;
 
-			// Has positive prev. quest in non-rewarded state
-			// and negative prev. quest in non-active state
+			// Has positive prev. quest in non-rewarded State
+			// and negative prev. quest in non-active State
 			if (msg)
 			{
 				SendCanTakeQuestResponse(QuestFailedReasons.None);
@@ -1584,7 +1584,7 @@ namespace Game.Entities
 
 					foreach (var exclusiveQuestId in bounds)
 					{
-						// skip checked quest id, only state of other quests in group is interesting
+						// skip checked quest id, only State of other quests in group is interesting
 						if (exclusiveQuestId == prevId)
 							continue;
 
@@ -1605,7 +1605,7 @@ namespace Game.Entities
 				}
 			}
 
-			// Has only prev. quests in non-rewarded state
+			// Has only prev. quests in non-rewarded State
 			if (msg)
 			{
 				SendCanTakeQuestResponse(QuestFailedReasons.None);
@@ -1815,7 +1815,7 @@ namespace Game.Entities
 
 			foreach (var exclude_Id in range)
 			{
-				// skip checked quest id, only state of other quests in group is interesting
+				// skip checked quest id, only State of other quests in group is interesting
 				if (exclude_Id == qInfo.Id)
 					continue;
 
@@ -1860,13 +1860,13 @@ namespace Game.Entities
 
 			if (qInfo.IsDFQuest())
 			{
-				if (_DFQuests.Contains(qInfo.Id))
+				if (_dfQuests.Contains(qInfo.Id))
 					return false;
 
 				return true;
 			}
 
-			return _activePlayerData.DailyQuestsCompleted.FindIndex(qInfo.Id) == -1;
+			return ActivePlayerData.DailyQuestsCompleted.FindIndex(qInfo.Id) == -1;
 		}
 
 		public bool SatisfyQuestWeek(Quest qInfo, bool msg)
@@ -1926,7 +1926,7 @@ namespace Game.Entities
 
 			if (srcitem > 0)
 			{
-				// Don't give source item if it is the same item used to start the quest
+				// Don't give source Item if it is the same Item used to start the quest
 				ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(srcitem);
 
 				if (quest.Id == itemTemplate.GetStartQuest())
@@ -1948,7 +1948,7 @@ namespace Game.Entities
 					return true;
 				}
 
-				// player already have max amount required item, just report success
+				// player already have max amount required Item, just report success
 				if (msg == InventoryResult.ItemMaxCount)
 					return true;
 
@@ -1976,9 +1976,9 @@ namespace Game.Entities
 					if (count <= 0)
 						count = 1;
 
-					// There are two cases where the source item is not destroyed:
+					// There are two cases where the source Item is not destroyed:
 					// - Item cannot be unequipped (example: non-empty bags)
-					// - The source item is the item that started the quest, so the player is supposed to keep it (otherwise it was already destroyed in AddQuestAndCheckCompletion())
+					// - The source Item is the Item that started the quest, so the player is supposed to keep it (otherwise it was already destroyed in AddQuestAndCheckCompletion())
 					InventoryResult res = CanUnequipItems(srcItemId, count);
 
 					if (res != InventoryResult.Ok)
@@ -2021,7 +2021,7 @@ namespace Game.Entities
 		{
 			if (questId != 0)
 			{
-				var questStatusData = _QuestStatus.LookupByKey(questId);
+				var questStatusData = _questStatus.LookupByKey(questId);
 
 				if (questStatusData != null)
 					return questStatusData.Status;
@@ -2040,7 +2040,7 @@ namespace Game.Entities
 			if (qInfo != null &&
 			    qInfo.HasFlag(QuestFlags.Sharable))
 			{
-				var questStatusData = _QuestStatus.LookupByKey(quest_id);
+				var questStatusData = _questStatus.LookupByKey(quest_id);
 
 				return questStatusData != null;
 			}
@@ -2054,14 +2054,14 @@ namespace Game.Entities
 
 			if (quest != null)
 			{
-				if (!_QuestStatus.ContainsKey(questId))
-					_QuestStatus[questId] = new QuestStatusData();
+				if (!_questStatus.ContainsKey(questId))
+					_questStatus[questId] = new QuestStatusData();
 
-				QuestStatus oldStatus = _QuestStatus[questId].Status;
-				_QuestStatus[questId].Status = status;
+				QuestStatus oldStatus = _questStatus[questId].Status;
+				_questStatus[questId].Status = status;
 
 				if (!quest.IsAutoComplete())
-					_QuestStatusSave[questId] = QuestSaveType.Default;
+					_questStatusSave[questId] = QuestSaveType.Default;
 
 				Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
 				Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, status), quest.ScriptId);
@@ -2073,7 +2073,7 @@ namespace Game.Entities
 
 		public void RemoveActiveQuest(uint questId, bool update = true)
 		{
-			var questStatus = _QuestStatus.LookupByKey(questId);
+			var questStatus = _questStatus.LookupByKey(questId);
 
 			if (questStatus != null)
 			{
@@ -2081,8 +2081,8 @@ namespace Game.Entities
 					if (objective.Value.QuestStatusPair.Status == questStatus)
 						_questObjectiveStatus.Remove(objective);
 
-				_QuestStatus.Remove(questId);
-				_QuestStatusSave[questId] = QuestSaveType.Delete;
+				_questStatus.Remove(questId);
+				_questStatusSave[questId] = QuestSaveType.Delete;
 			}
 
 			if (update)
@@ -2091,10 +2091,10 @@ namespace Game.Entities
 
 		public void RemoveRewardedQuest(uint questId, bool update = true)
 		{
-			if (_RewardedQuests.Contains(questId))
+			if (_rewardedQuests.Contains(questId))
 			{
-				_RewardedQuests.Remove(questId);
-				_RewardedQuestsSave[questId] = QuestSaveType.ForceDelete;
+				_rewardedQuests.Remove(questId);
+				_rewardedQuestsSave[questId] = QuestSaveType.ForceDelete;
 			}
 
 			uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
@@ -2112,7 +2112,7 @@ namespace Game.Entities
 				if (_seasonalquests.ContainsKey(eventId))
 				{
 					_seasonalquests[eventId].Remove(questId);
-					_SeasonalQuestChanged = true;
+					_seasonalQuestChanged = true;
 				}
 			}
 
@@ -2214,7 +2214,7 @@ namespace Game.Entities
 				}
 				default:
 					// it's impossible, but check
-					Log.outError(LogFilter.Player, "GetQuestDialogStatus called for unexpected type {0}", questgiver.GetTypeId());
+					Log.outError(LogFilter.Player, "GetQuestDialogStatus called for unexpected Type {0}", questgiver.GetTypeId());
 
 					return QuestGiverStatus.None;
 			}
@@ -2357,36 +2357,36 @@ namespace Game.Entities
 
 		public uint GetQuestSlotQuestId(ushort slot)
 		{
-			return _playerData.QuestLog[slot].QuestID;
+			return PlayerData.QuestLog[slot].QuestID;
 		}
 
 		public uint GetQuestSlotState(ushort slot, byte counter)
 		{
-			return _playerData.QuestLog[slot].StateFlags;
+			return PlayerData.QuestLog[slot].StateFlags;
 		}
 
 		public ushort GetQuestSlotCounter(ushort slot, byte counter)
 		{
 			if (counter < SharedConst.MaxQuestCounts)
-				return _playerData.QuestLog[slot].ObjectiveProgress[counter];
+				return PlayerData.QuestLog[slot].ObjectiveProgress[counter];
 
 			return 0;
 		}
 
 		public uint GetQuestSlotEndTime(ushort slot)
 		{
-			return _playerData.QuestLog[slot].EndTime;
+			return PlayerData.QuestLog[slot].EndTime;
 		}
 
 		public uint GetQuestSlotAcceptTime(ushort slot)
 		{
-			return _playerData.QuestLog[slot].AcceptTime;
+			return PlayerData.QuestLog[slot].AcceptTime;
 		}
 
 		private bool GetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
 		{
 			if (objectiveIndex < SharedConst.MaxQuestCounts)
-				return ((_playerData.QuestLog[slot].ObjectiveFlags) & (1 << objectiveIndex)) != 0;
+				return ((PlayerData.QuestLog[slot].ObjectiveFlags) & (1 << objectiveIndex)) != 0;
 
 			return false;
 		}
@@ -2415,7 +2415,7 @@ namespace Game.Entities
 
 		public void SetQuestSlot(ushort slot, uint quest_id)
 		{
-			var questLogField = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			var questLogField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
 			SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), 0u);
 			SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
@@ -2431,43 +2431,43 @@ namespace Game.Entities
 			if (counter >= SharedConst.MaxQuestCounts)
 				return;
 
-			QuestLog questLog = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(ref questLog.ModifyValue(questLog.ObjectiveProgress, counter), count);
 		}
 
 		public void SetQuestSlotState(ushort slot, QuestSlotStateMask state)
 		{
-			QuestLog questLogField = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLogField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
 		}
 
 		public void RemoveQuestSlotState(ushort slot, QuestSlotStateMask state)
 		{
-			QuestLog questLogField = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLogField = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			RemoveUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
 		}
 
 		public void SetQuestSlotEndTime(ushort slot, long endTime)
 		{
-			QuestLog questLog = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), (uint)endTime);
 		}
 
 		public void SetQuestSlotAcceptTime(ushort slot, long acceptTime)
 		{
-			QuestLog questLog = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldValue(questLog.ModifyValue(questLog.AcceptTime), (uint)acceptTime);
 		}
 
 		private void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
 		{
-			QuestLog questLog = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			SetUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
 		}
 
 		private void RemoveQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
 		{
-			QuestLog questLog = _values.ModifyValue(_playerData).ModifyValue(_playerData.QuestLog, slot);
+			QuestLog questLog = _values.ModifyValue(PlayerData).ModifyValue(PlayerData.QuestLog, slot);
 			RemoveUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
 		}
 
@@ -2484,16 +2484,16 @@ namespace Game.Entities
 			ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
 
 			if (completed)
-				SetUpdateFieldFlagValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.QuestCompleted, (int)fieldOffset), flag);
+				SetUpdateFieldFlagValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.QuestCompleted, (int)fieldOffset), flag);
 			else
-				RemoveUpdateFieldFlagValue(ref _values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.QuestCompleted, (int)fieldOffset), flag);
+				RemoveUpdateFieldFlagValue(ref _values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.QuestCompleted, (int)fieldOffset), flag);
 		}
 
 		public void AreaExploredOrEventHappens(uint questId)
 		{
 			if (questId != 0)
 			{
-				QuestStatusData status = _QuestStatus.LookupByKey(questId);
+				QuestStatusData status = _questStatus.LookupByKey(questId);
 
 				if (status != null)
 					// Dont complete failed quest
@@ -2501,7 +2501,7 @@ namespace Game.Entities
 					    status.Status != QuestStatus.Failed)
 					{
 						status.Explored           = true;
-						_QuestStatusSave[questId] = QuestSaveType.Default;
+						_questStatusSave[questId] = QuestSaveType.Default;
 
 						SendQuestComplete(questId);
 					}
@@ -2735,7 +2735,7 @@ namespace Game.Entities
 
 								break;
 							default:
-								Cypher.Assert(false, "Unhandled quest objective type {objectiveType}");
+								Cypher.Assert(false, "Unhandled quest objective Type {objectiveType}");
 
 								break;
 						}
@@ -2791,7 +2791,7 @@ namespace Game.Entities
 			}
 
 			// This part - for ItemDrop
-			foreach (var questStatus in _QuestStatus)
+			foreach (var questStatus in _questStatus)
 			{
 				if (questStatus.Value.Status != QuestStatus.Incomplete)
 					continue;
@@ -2807,7 +2807,7 @@ namespace Game.Entities
 
 				for (byte j = 0; j < SharedConst.QuestItemDropCount; ++j)
 				{
-					// examined item is a source item
+					// examined Item is a source Item
 					if (qInfo.ItemDrop[j] != itemid)
 						continue;
 
@@ -2816,7 +2816,7 @@ namespace Game.Entities
 					// allows custom amount drop when not 0
 					uint maxAllowedCount = qInfo.ItemDropQuantity[j] != 0 ? qInfo.ItemDropQuantity[j] : pProto.GetMaxStackSize();
 
-					// 'unique' item
+					// 'unique' Item
 					if (pProto.GetMaxCount() != 0 &&
 					    pProto.GetMaxCount() < maxAllowedCount)
 						maxAllowedCount = pProto.GetMaxCount();
@@ -2848,7 +2848,7 @@ namespace Game.Entities
 				return;
 			}
 
-			var status = _QuestStatus.LookupByKey(objective.QuestID);
+			var status = _questStatus.LookupByKey(objective.QuestID);
 
 			if (status == null)
 			{
@@ -2879,7 +2879,7 @@ namespace Game.Entities
 				Global.ScriptMgr.RunScript<IQuestOnQuestObjectiveChange>(script => script.OnQuestObjectiveChange(this, quest, objective, oldData, data), quest.ScriptId);
 
 			// Add to save
-			_QuestStatusSave[objective.QuestID] = QuestSaveType.Default;
+			_questStatusSave[objective.QuestID] = QuestSaveType.Default;
 
 			// Update quest fields
 			if (!objective.IsStoringFlag())
@@ -3012,7 +3012,7 @@ namespace Game.Entities
 					break;
 				default:
 					Log.outError(LogFilter.Player,
-					             "Player.CanCompleteQuest: Player '{0}' ({1}) tried to complete a quest (ID: {2}) with an unknown objective type {3}",
+					             "Player.CanCompleteQuest: Player '{0}' ({1}) tried to complete a quest (ID: {2}) with an unknown objective Type {3}",
 					             GetName(),
 					             GetGUID().ToString(),
 					             objective.QuestID,
@@ -3216,7 +3216,7 @@ namespace Game.Entities
 		{
 			QuestGiverStatusMultiple response = new();
 
-			foreach (var itr in _clientGUIDs)
+			foreach (var itr in ClientGUIDs)
 				if (itr.IsAnyTypeCreature())
 				{
 					// need also pet quests case support
@@ -3292,13 +3292,13 @@ namespace Game.Entities
 
 		public void UpdateVisibleGameobjectsOrSpellClicks()
 		{
-			if (_clientGUIDs.Empty())
+			if (ClientGUIDs.Empty())
 				return;
 
 			UpdateData   udata = new(GetMapId());
 			UpdateObject packet;
 
-			foreach (var guid in _clientGUIDs)
+			foreach (var guid in ClientGUIDs)
 				if (guid.IsGameObject())
 				{
 					GameObject obj = ObjectAccessor.GetGameObject(this, guid);
@@ -3372,28 +3372,28 @@ namespace Game.Entities
 			{
 				if (!qQuest.IsDFQuest())
 				{
-					AddDynamicUpdateFieldValue(_values.ModifyValue(_activePlayerData).ModifyValue(_activePlayerData.DailyQuestsCompleted), quest_id);
+					AddDynamicUpdateFieldValue(_values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DailyQuestsCompleted), quest_id);
 					_lastDailyQuestTime = GameTime.GetGameTime(); // last daily quest time
-					_DailyQuestChanged  = true;
+					_dailyQuestChanged  = true;
 				}
 				else
 				{
-					_DFQuests.Add(quest_id);
+					_dfQuests.Add(quest_id);
 					_lastDailyQuestTime = GameTime.GetGameTime();
-					_DailyQuestChanged  = true;
+					_dailyQuestChanged  = true;
 				}
 			}
 		}
 
 		public bool IsDailyQuestDone(uint quest_id)
 		{
-			return _activePlayerData.DailyQuestsCompleted.FindIndex(quest_id) >= 0;
+			return ActivePlayerData.DailyQuestsCompleted.FindIndex(quest_id) >= 0;
 		}
 
 		private void SetWeeklyQuestStatus(uint quest_id)
 		{
 			_weeklyquests.Add(quest_id);
-			_WeeklyQuestChanged = true;
+			_weeklyQuestChanged = true;
 		}
 
 		private void SetSeasonalQuestStatus(uint quest_id)
@@ -3407,13 +3407,13 @@ namespace Game.Entities
 				_seasonalquests[quest.GetEventIdForQuest()] = new Dictionary<uint, long>();
 
 			_seasonalquests[quest.GetEventIdForQuest()][quest_id] = GameTime.GetGameTime();
-			_SeasonalQuestChanged                                 = true;
+			_seasonalQuestChanged                                 = true;
 		}
 
 		private void SetMonthlyQuestStatus(uint quest_id)
 		{
 			_monthlyquests.Add(quest_id);
-			_MonthlyQuestChanged = true;
+			_monthlyQuestChanged = true;
 		}
 
 		private void PushQuests()

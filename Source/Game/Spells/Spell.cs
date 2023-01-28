@@ -51,7 +51,7 @@ namespace Game.Spells
 			_fromClient      = false;
 			_needComboPoints = _spellInfo.NeedsComboPoints();
 
-			// Get data for type of attack
+			// Get data for Type of attack
 			_attackType = info.GetAttackType();
 
 			_spellSchoolMask = _spellInfo.GetSchoolMask(); // Can be override for some spell (wand shoot for example)
@@ -137,7 +137,7 @@ namespace Game.Spells
 			}
 
 			if (_caster && _caster.GetTypeId() == TypeId.Player)
-				Cypher.Assert(_caster.ToPlayer()._spellModTakingSpell != this);
+				Cypher.Assert(_caster.ToPlayer().SpellModTakingSpell != this);
 		}
 
 		private void InitExplicitTargets(SpellCastTargets targets)
@@ -274,7 +274,7 @@ namespace Game.Spells
 				if (!spellEffectInfo.IsEffect())
 					continue;
 
-				// set expected type of implicit targets to be sent to client
+				// set expected Type of implicit targets to be sent to client
 				SpellCastTargetFlags implicitTargetMask = SpellInfo.GetTargetFlagMask(spellEffectInfo.TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(spellEffectInfo.TargetB.GetObjectType());
 
 				if (Convert.ToBoolean(implicitTargetMask & SpellCastTargetFlags.Unit))
@@ -286,10 +286,10 @@ namespace Game.Spells
 				SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetA, ref processedAreaEffectsMask);
 				SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetB, ref processedAreaEffectsMask);
 
-				// Select targets of effect based on effect type
-				// those are used when no valid target could be added for spell effect based on spell target type
+				// Select targets of effect based on effect Type
+				// those are used when no valid target could be added for spell effect based on spell target Type
 				// some spell effects use explicit target as a default target added to target map (like SPELL_EFFECT_LEARN_SPELL)
-				// some spell effects add target to target map only when target type specified (like SPELL_EFFECT_WEAPON)
+				// some spell effects add target to target map only when target Type specified (like SPELL_EFFECT_WEAPON)
 				// some spell effects don't add anything to target map (confirmed with sniffs) (like SPELL_EFFECT_DESTROY_ALL_TOTEMS)
 				SelectEffectTypeImplicitTargets(spellEffectInfo);
 
@@ -476,7 +476,7 @@ namespace Game.Spells
 
 									break;
 								default:
-									Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_SRC");
+									Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference Type for TARGET_TYPE_OBJECT_SRC");
 
 									break;
 							}
@@ -498,7 +498,7 @@ namespace Game.Spells
 
 									break;
 								default:
-									Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
+									Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference Type for TARGET_TYPE_OBJECT_DEST");
 
 									break;
 							}
@@ -516,7 +516,7 @@ namespace Game.Spells
 
 									break;
 								default:
-									Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT");
+									Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference Type for TARGET_TYPE_OBJECT");
 
 									break;
 							}
@@ -526,7 +526,7 @@ namespace Game.Spells
 
 					break;
 				case SpellTargetSelectionCategories.Nyi:
-					Log.outDebug(LogFilter.Spells, "SPELL: target type {0}, found in spellID {1}, effect {2} is not implemented yet!", _spellInfo.Id, spellEffectInfo.EffectIndex, targetType.GetTarget());
+					Log.outDebug(LogFilter.Spells, "SPELL: target Type {0}, found in spellID {1}, effect {2} is not implemented yet!", _spellInfo.Id, spellEffectInfo.EffectIndex, targetType.GetTarget());
 
 					break;
 				default:
@@ -540,7 +540,7 @@ namespace Game.Spells
 		{
 			if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
 			{
-				Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target reference type");
+				Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target reference Type");
 
 				return;
 			}
@@ -620,7 +620,7 @@ namespace Game.Spells
 					break;
 				}
 				default:
-					Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target type");
+					Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target Type");
 
 					break;
 			}
@@ -630,7 +630,7 @@ namespace Game.Spells
 		{
 			if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
 			{
-				Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target reference type");
+				Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target reference Type");
 
 				return;
 			}
@@ -656,7 +656,7 @@ namespace Game.Spells
 
 					break;
 				default:
-					Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check type");
+					Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check Type");
 
 					break;
 			}
@@ -749,7 +749,7 @@ namespace Game.Spells
 					}
 					else
 					{
-						Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {_spellInfo.Id} set object of wrong type, expected unit, got {target.GetGUID().GetHigh()}, effect {effMask}");
+						Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {_spellInfo.Id} set object of wrong Type, expected unit, got {target.GetGUID().GetHigh()}, effect {effMask}");
 						SendCastResult(SpellCastResult.BadImplicitTargets);
 						Finish(false);
 
@@ -766,7 +766,7 @@ namespace Game.Spells
 					}
 					else
 					{
-						Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {_spellInfo.Id} set object of wrong type, expected gameobject, got {target.GetGUID().GetHigh()}, effect {effMask}");
+						Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {_spellInfo.Id} set object of wrong Type, expected gameobject, got {target.GetGUID().GetHigh()}, effect {effMask}");
 						SendCastResult(SpellCastResult.BadImplicitTargets);
 						Finish(false);
 
@@ -783,7 +783,7 @@ namespace Game.Spells
 					}
 					else
 					{
-						Log.outDebug(LogFilter.Spells, $"Spell::SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {_spellInfo.Id} set object of wrong type, expected corpse, got {target.GetGUID().GetTypeId()}, effect {effMask}");
+						Log.outDebug(LogFilter.Spells, $"Spell::SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {_spellInfo.Id} set object of wrong Type, expected corpse, got {target.GetGUID().GetTypeId()}, effect {effMask}");
 						SendCastResult(SpellCastResult.BadImplicitTargets);
 						Finish(false);
 
@@ -802,7 +802,7 @@ namespace Game.Spells
 
 					break;
 				default:
-					Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target object type");
+					Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target object Type");
 
 					break;
 			}
@@ -908,7 +908,7 @@ namespace Game.Spells
 					break;
 				}
 				default:
-					Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
+					Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference Type");
 
 					return;
 			}
@@ -935,7 +935,7 @@ namespace Game.Spells
 
 					break;
 				default:
-					Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
+					Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference Type");
 
 					return;
 			}
@@ -1625,7 +1625,7 @@ namespace Game.Spells
 
 					break;
 				default:
-					Cypher.Assert(false, "Spell.SelectImplicitLineTargets: received not implemented target reference type");
+					Cypher.Assert(false, "Spell.SelectImplicitLineTargets: received not implemented target reference Type");
 
 					return;
 			}
@@ -1717,7 +1717,7 @@ namespace Game.Spells
 					break;
 			}
 
-			// select spell implicit targets based on effect type
+			// select spell implicit targets based on effect Type
 			if (spellEffectInfo.GetImplicitTargetType() == 0)
 				return;
 
@@ -1796,7 +1796,7 @@ namespace Game.Spells
 			// this function selects which containers need to be searched for spell target
 			GridMapTypeMask retMask = GridMapTypeMask.All;
 
-			// filter searchers based on searched object type
+			// filter searchers based on searched object Type
 			switch (objType)
 			{
 				case SpellTargetObjectTypes.Unit:
@@ -2018,7 +2018,7 @@ namespace Game.Spells
 
 			_procVictim = _procAttacker = new ProcFlagsInit();
 
-			// Get data for type of attack and fill base info for trigger
+			// Get data for Type of attack and fill base info for trigger
 			switch (_spellInfo.DmgClass)
 			{
 				case SpellDmgClass.Melee:
@@ -2411,7 +2411,7 @@ namespace Game.Spells
 				}
 				else if (_caster.IsFriendlyTo(unit))
 				{
-					// for delayed spells ignore negative spells (after duel end) for friendly targets
+					// for delayed spells ignore negative spells (after Duel end) for friendly targets
 					if (_spellInfo.HasHitDelay() &&
 					    unit.IsPlayer() &&
 					    !IsPositive() &&
@@ -2805,7 +2805,7 @@ namespace Game.Spells
 
 			LoadScripts();
 
-			// Fill cost data (not use power for item casts
+			// Fill cost data (not use power for Item casts
 			if (_CastItem == null)
 				_powerCost = _spellInfo.CalcPowerCost(_caster, _spellSchoolMask, this);
 
@@ -2828,7 +2828,7 @@ namespace Game.Spells
 				// Periodic auras should be interrupted when aura triggers a spell which can't be cast
 				// for example bladestorm aura should be removed on disarm as of patch 3.3.5
 				// channeled periodic spells should be affected by this (arcane missiles, penance, etc)
-				// a possible alternative sollution for those would be validating aura target on unit state change
+				// a possible alternative sollution for those would be validating aura target on unit State change
 				if (triggeredByAura != null &&
 				    triggeredByAura.IsPeriodic() &&
 				    !triggeredByAura.GetBase().IsPassive())
@@ -2921,7 +2921,7 @@ namespace Game.Spells
 				if (unitCaster != null)
 				{
 					// stealth must be removed at cast starting (at show channel bar)
-					// skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
+					// skip triggered spell (Item equip spell casting and other not explicit character casts/Item uses)
 					if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) &&
 					    !_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
 						unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action, _spellInfo);
@@ -3010,7 +3010,7 @@ namespace Game.Spells
 					_originalCaster.RemoveGameObject(_spellInfo.Id, true);
 			}
 
-			//set state back so finish will be processed
+			//set State back so finish will be processed
 			_spellState = oldState;
 
 			Finish(false);
@@ -3023,7 +3023,7 @@ namespace Game.Spells
 
 			if (modOwner)
 			{
-				lastSpellMod = modOwner._spellModTakingSpell;
+				lastSpellMod = modOwner.SpellModTakingSpell;
 
 				if (lastSpellMod)
 					modOwner.SetSpellModTakingSpell(lastSpellMod, false);
@@ -3217,7 +3217,7 @@ namespace Game.Spells
 
 			CallScriptOnCastHandlers();
 
-			// traded items have trade slot instead of guid in _itemTargetGUID
+			// traded items have trade Slot instead of guid in _itemTargetGUID
 			// set to real guid to be sent later to the client
 			_targets.UpdateTradeSlotItem();
 
@@ -3241,11 +3241,11 @@ namespace Game.Spells
 			{
 				// Powers have to be taken before SendSpellGo
 				TakePower();
-				TakeReagents(); // we must remove reagents before HandleEffects to allow place crafted item in same slot
+				TakeReagents(); // we must remove reagents before HandleEffects to allow place crafted Item in same Slot
 			}
 			else if (targetItem != null)
 			{
-				// Not own traded item (in trader trade slot) req. reagents including triggered spell case
+				// Not own traded Item (in trader trade Slot) req. reagents including triggered spell case
 				if (targetItem.GetOwnerGUID() != _caster.GetGUID())
 					TakeReagents();
 			}
@@ -3271,8 +3271,8 @@ namespace Game.Spells
 			if ((_spellInfo.HasHitDelay() && !_spellInfo.IsChanneled()) ||
 			    _spellInfo.HasAttribute(SpellAttr4.NoHarmfulThreat))
 			{
-				// Remove used for cast item if need (it can be already NULL after TakeReagents call
-				// in case delayed spell remove item at cast delay start
+				// Remove used for cast Item if need (it can be already NULL after TakeReagents call
+				// in case delayed spell remove Item at cast delay start
 				TakeCastItem();
 
 				// Okay, maps created, now prepare flags
@@ -3460,7 +3460,7 @@ namespace Game.Spells
 			// spell is finished, perform some last features of the spell here
 			_handle_finish_phase();
 
-			// Remove used for cast item if need (it can be already NULL after TakeReagents call
+			// Remove used for cast Item if need (it can be already NULL after TakeReagents call
 			TakeCastItem();
 
 			if (_spellState != SpellState.Casting)
@@ -3707,7 +3707,7 @@ namespace Game.Spells
 			    CheckMovement() != SpellCastResult.SpellCastOk)
 				// if charmed by creature, trust the AI not to cheat and allow the cast to proceed
 				// @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
-				// however, checking what type of movement the spline is for every single spline would be really expensive
+				// however, checking what Type of movement the spline is for every single spline would be really expensive
 				if (!_caster.ToUnit().GetCharmerGUID().IsCreature())
 					Cancel();
 
@@ -3794,7 +3794,7 @@ namespace Game.Spells
 			if (unitCaster == null)
 				return;
 
-			// successful cast of the initial autorepeat spell is moved to idle state so that it is not deleted as long as autorepeat is active
+			// successful cast of the initial autorepeat spell is moved to idle State so that it is not deleted as long as autorepeat is active
 			if (IsAutoRepeat() &&
 			    unitCaster.GetCurrentSpell(CurrentSpellTypes.AutoRepeat) == this)
 				_spellState = SpellState.Idle;
@@ -4080,7 +4080,7 @@ namespace Game.Spells
 
 							if (!caster.HasItemCount(itemid, itemcount))
 							{
-								packet.FailedArg1 = (int)itemid; // first missing item
+								packet.FailedArg1 = (int)itemid; // first missing Item
 
 								break;
 							}
@@ -4257,8 +4257,8 @@ namespace Game.Spells
 
 				if (player)
 				{
-					runeData.Start = _runesState;            // runes state before
-					runeData.Count = player.GetRunesState(); // runes state after
+					runeData.Start = _runesState;            // runes State before
+					runeData.Count = player.GetRunesState(); // runes State after
 
 					for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
 					{
@@ -4376,8 +4376,8 @@ namespace Game.Spells
 				RuneData runeData = castData.RemainingRunes;
 
 				Player player = _caster.ToPlayer();
-				runeData.Start = _runesState;            // runes state before
-				runeData.Count = player.GetRunesState(); // runes state after
+				runeData.Start = _runesState;            // runes State before
+				runeData.Count = player.GetRunesState(); // runes State after
 
 				for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
 				{
@@ -4405,7 +4405,7 @@ namespace Game.Spells
 			// _needAliveTargetMask req for stop channelig if one target die
 			foreach (var targetInfo in _UniqueTargetInfo)
 			{
-				if (targetInfo.EffectMask == 0) // No effect apply - all immuned add state
+				if (targetInfo.EffectMask == 0) // No effect apply - all immuned add State
 					// possibly SPELL_MISS_IMMUNE2 for this??
 					targetInfo.MissCondition = SpellMissInfo.Immune2;
 
@@ -4806,7 +4806,7 @@ namespace Game.Spells
 			    !_caster.IsTypeId(TypeId.Player))
 				return;
 
-			// not remove cast item at triggered spell (equipping, weapon damage, etc)
+			// not remove cast Item at triggered spell (equipping, weapon damage, etc)
 			if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCastItem))
 				return;
 
@@ -4815,8 +4815,8 @@ namespace Game.Spells
 			if (proto == null)
 			{
 				// This code is to avoid a crash
-				// I'm not sure, if this is really an error, but I guess every item needs a prototype
-				Log.outError(LogFilter.Spells, "Cast item has no item prototype {0}", _CastItem.GetGUID().ToString());
+				// I'm not sure, if this is really an error, but I guess every Item needs a prototype
+				Log.outError(LogFilter.Spells, "Cast Item has no Item prototype {0}", _CastItem.GetGUID().ToString());
 
 				return;
 			}
@@ -4829,7 +4829,7 @@ namespace Game.Spells
 				if (itemEffect.LegacySlotIndex >= _CastItem._itemData.SpellCharges.GetSize())
 					continue;
 
-				// item has limited charges
+				// Item has limited charges
 				if (itemEffect.Charges != 0)
 				{
 					if (itemEffect.Charges < 0)
@@ -4837,7 +4837,7 @@ namespace Game.Spells
 
 					int charges = _CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
 
-					// item has charges left
+					// Item has charges left
 					if (charges != 0)
 					{
 						if (charges > 0)
@@ -4933,7 +4933,7 @@ namespace Game.Spells
 
 				if (cost.Power >= PowerType.Max)
 				{
-					Log.outError(LogFilter.Spells, "Spell.TakePower: Unknown power type '{0}'", cost.Power);
+					Log.outError(LogFilter.Spells, "Spell.TakePower: Unknown power Type '{0}'", cost.Power);
 
 					continue;
 				}
@@ -4976,7 +4976,7 @@ namespace Game.Spells
 				return;
 
 			Player player = _caster.ToPlayer();
-			_runesState = player.GetRunesState(); // store previous state
+			_runesState = player.GetRunesState(); // store previous State
 
 			int runeCost = _powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
 
@@ -4994,7 +4994,7 @@ namespace Game.Spells
 			if (!_caster.IsTypeId(TypeId.Player))
 				return;
 
-			// do not take reagents for these item casts
+			// do not take reagents for these Item casts
 			if (_CastItem != null &&
 			    _CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost))
 				return;
@@ -5154,7 +5154,7 @@ namespace Game.Spells
 		{
 			SpellCastResult castResult;
 
-			// check death state
+			// check death State
 			if (_caster.ToUnit() &&
 			    !_caster.ToUnit().IsAlive() &&
 			    !_spellInfo.IsPassive() &&
@@ -5319,7 +5319,7 @@ namespace Game.Spells
 						}
 					}
 
-				// caster state requirements
+				// caster State requirements
 				// not for triggered spells (needed by execute)
 				if (!_triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreCasterAurastate))
 				{
@@ -5559,7 +5559,7 @@ namespace Game.Spells
 						return SpellCastResult.RequiresSpellFocus;
 				}
 
-			// always (except passive spells) check items (focus object can be required for any type casts)
+			// always (except passive spells) check items (focus object can be required for any Type casts)
 			if (!_spellInfo.IsPassive())
 			{
 				castResult = CheckItems(ref param1, ref param2);
@@ -5881,7 +5881,7 @@ namespace Game.Spells
 							pTempItem = _caster.ToPlayer().GetItemByGuid(_targets.GetItemTargetGUID());
 						}
 
-						// we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM_TARGET
+						// we need a go target, or an openable Item target in case of TARGET_GAMEOBJECT_ITEM_TARGET
 						if (spellEffectInfo.TargetA.GetTarget() == Targets.GameobjectItemTarget &&
 						    _targets.GetGOTarget() == null &&
 						    (pTempItem == null || pTempItem.GetTemplate().GetLockID() == 0 || !pTempItem.IsLocked()))
@@ -6456,7 +6456,7 @@ namespace Game.Spells
 					case AuraType.Fly:
 					case AuraType.ModIncreaseFlightSpeed:
 					{
-						// not allow cast fly spells if not have req. skills  (all spells is self target)
+						// not allow cast fly spells if not have req. Skills  (all spells is self target)
 						// allow always ghost flight spells
 						if (_originalCaster != null &&
 						    _originalCaster.IsTypeId(TypeId.Player) &&
@@ -6494,7 +6494,7 @@ namespace Game.Spells
 						break;
 				}
 
-				// check if target already has the same type, but more powerful aura
+				// check if target already has the same Type, but more powerful aura
 				if (!_spellInfo.HasAttribute(SpellAttr4.AuraNeverBounces) &&
 				    (nonAuraEffectMask == 0 || _spellInfo.HasAttribute(SpellAttr4.AuraBounceFailsSpell)) &&
 				    (approximateAuraEffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 &&
@@ -6508,7 +6508,7 @@ namespace Game.Spells
 				}
 			}
 
-			// check trade slot case (last, for allow catch any another cast problems)
+			// check trade Slot case (last, for allow catch any another cast problems)
 			if (Convert.ToBoolean(_targets.GetTargetMask() & SpellCastTargetFlags.TradeItem))
 			{
 				if (_CastItem != null)
@@ -6612,9 +6612,9 @@ namespace Game.Spells
 			// SPELL_ATTR5_USABLE_WHILE_CONFUSED by default only disorient (ie no polymorph)
 			bool usableWhileConfused = _spellInfo.HasAttribute(SpellAttr5.AllowWhileConfused);
 
-			// Check whether the cast should be prevented by any state you might have.
+			// Check whether the cast should be prevented by any State you might have.
 			SpellCastResult result = SpellCastResult.SpellCastOk;
-			// Get unit state
+			// Get unit State
 			UnitFlags unitflag = (UnitFlags)(uint)unitCaster._unitData.Flags;
 
 			// this check should only be done when player does cast directly
@@ -6627,7 +6627,7 @@ namespace Game.Spells
 			            result = SpellCastResult.Charmed;
 			}*/
 
-			// spell has attribute usable while having a cc state, check if caster has allowed mechanic auras, another mechanic types must prevent cast spell
+			// spell has attribute usable while having a cc State, check if caster has allowed mechanic auras, another mechanic types must prevent cast spell
 			SpellCastResult mechanicCheck(AuraType auraType, ref int _param1)
 			{
 				bool foundNotMechanic = false;
@@ -6760,7 +6760,7 @@ namespace Game.Spells
 			if (unitCaster == null)
 				return false;
 
-			// Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
+			// Checking auras is needed now, because you are prevented by some State but the spell grants immunity.
 			var auraEffects = unitCaster.GetAuraEffectsByType(auraType);
 
 			if (auraEffects.Empty())
@@ -7052,7 +7052,7 @@ namespace Game.Spells
 			if (unitCaster == null)
 				return SpellCastResult.SpellCastOk;
 
-			// item cast not used power
+			// Item cast not used power
 			if (_CastItem != null)
 				return SpellCastResult.SpellCastOk;
 
@@ -7067,10 +7067,10 @@ namespace Game.Spells
 					continue;
 				}
 
-				// Check valid power type
+				// Check valid power Type
 				if (cost.Power >= PowerType.Max)
 				{
-					Log.outError(LogFilter.Spells, "Spell.CheckPower: Unknown power type '{0}'", cost.Power);
+					Log.outError(LogFilter.Spells, "Spell.CheckPower: Unknown power Type '{0}'", cost.Power);
 
 					return SpellCastResult.Unknown;
 				}
@@ -7122,7 +7122,7 @@ namespace Game.Spells
 						if (_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex) == 0)
 							return SpellCastResult.NoChargesRemain;
 
-				// consumable cast item checks
+				// consumable cast Item checks
 				if (proto.GetClass() == ItemClass.Consumable &&
 				    _targets.GetUnitTarget() != null)
 				{
@@ -7184,7 +7184,7 @@ namespace Game.Spells
 				}
 			}
 
-			// check target item
+			// check target Item
 			if (!_targets.GetItemTargetGUID().IsEmpty())
 			{
 				Item item = _targets.GetItemTarget();
@@ -7195,7 +7195,7 @@ namespace Game.Spells
 				if (!item.IsFitToSpellRequirements(_spellInfo))
 					return SpellCastResult.EquippedItemClass;
 			}
-			// if not item target then required item must be equipped
+			// if not Item target then required Item must be equipped
 			else
 			{
 				if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreEquippedItemRequirement))
@@ -7204,12 +7204,12 @@ namespace Game.Spells
 						return SpellCastResult.EquippedItemClass;
 			}
 
-			// do not take reagents for these item casts
+			// do not take reagents for these Item casts
 			if (!(_CastItem != null && _CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)))
 			{
 				bool checkReagents = !Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost) && !player.CanNoReagentCast(_spellInfo);
 
-				// Not own traded item (in trader trade slot) requires reagents even if triggered spell
+				// Not own traded Item (in trader trade Slot) requires reagents even if triggered spell
 				if (!checkReagents)
 				{
 					Item targetItem = _targets.GetItemTarget();
@@ -7275,7 +7275,7 @@ namespace Game.Spells
 						}
 				}
 
-				// check totem-item requirements (items presence in inventory)
+				// check totem-Item requirements (items presence in inventory)
 				uint totems = 2;
 
 				for (int i = 0; i < 2; ++i)
@@ -7331,7 +7331,7 @@ namespace Game.Spells
 						if (target.IsPlayer() &&
 						    !IsTriggered())
 						{
-							// SPELL_EFFECT_CREATE_ITEM_2 differs from SPELL_EFFECT_CREATE_ITEM in that it picks the random item to create from a pool of potential items,
+							// SPELL_EFFECT_CREATE_ITEM_2 differs from SPELL_EFFECT_CREATE_ITEM in that it picks the random Item to create from a pool of potential items,
 							// so we need to make sure there is at least one free space in the player's inventory
 							if (spellEffectInfo.Effect == SpellEffectName.CreateLoot)
 								if (target.ToPlayer().GetFreeInventorySpace() == 0)
@@ -7469,7 +7469,7 @@ namespace Game.Spells
 									}
 								}
 
-						// Not allow enchant in trade slot for some enchant type
+						// Not allow enchant in trade Slot for some enchant Type
 						if (targetItem.GetOwner() != player)
 						{
 							if (enchantEntry == null)
@@ -7488,7 +7488,7 @@ namespace Game.Spells
 						if (item == null)
 							return SpellCastResult.ItemNotFound;
 
-						// Not allow enchant in trade slot for some enchant type
+						// Not allow enchant in trade Slot for some enchant Type
 						if (item.GetOwner() != player)
 						{
 							int enchant_id   = spellEffectInfo.MiscValue;
@@ -7501,7 +7501,7 @@ namespace Game.Spells
 								return SpellCastResult.NotTradeable;
 						}
 
-						// Apply item level restriction if the enchanting spell has max level restrition set
+						// Apply Item level restriction if the enchanting spell has max level restrition set
 						if (_CastItem != null &&
 						    _spellInfo.MaxLevel > 0)
 						{
@@ -7515,7 +7515,7 @@ namespace Game.Spells
 						break;
 					}
 					case SpellEffectName.EnchantHeldItem:
-						// check item existence in effect code (not output errors at offhand hold item effect to main hand for example
+						// check Item existence in effect code (not output errors at offhand hold Item effect to main hand for example
 						break;
 					case SpellEffectName.Disenchant:
 					{
@@ -7524,7 +7524,7 @@ namespace Game.Spells
 						if (!item)
 							return SpellCastResult.CantBeSalvaged;
 
-						// prevent disenchanting in trade slot
+						// prevent disenchanting in trade Slot
 						if (item.GetOwnerGUID() != player.GetGUID())
 							return SpellCastResult.CantBeSalvaged;
 
@@ -7550,11 +7550,11 @@ namespace Game.Spells
 						if (!item)
 							return SpellCastResult.CantBeProspected;
 
-						//ensure item is a prospectable ore
+						//ensure Item is a prospectable ore
 						if (!item.GetTemplate().HasFlag(ItemFlags.IsProspectable))
 							return SpellCastResult.CantBeProspected;
 
-						//prevent prospecting in trade slot
+						//prevent prospecting in trade Slot
 						if (item.GetOwnerGUID() != player.GetGUID())
 							return SpellCastResult.CantBeProspected;
 
@@ -7585,11 +7585,11 @@ namespace Game.Spells
 						if (!item)
 							return SpellCastResult.CantBeMilled;
 
-						//ensure item is a millable herb
+						//ensure Item is a millable herb
 						if (!item.GetTemplate().HasFlag(ItemFlags.IsMillable))
 							return SpellCastResult.CantBeMilled;
 
-						//prevent milling in trade slot
+						//prevent milling in trade Slot
 						if (item.GetOwnerGUID() != player.GetGUID())
 							return SpellCastResult.CantBeMilled;
 
@@ -7712,7 +7712,7 @@ namespace Game.Spells
 				                                                              {
 					                                                              Item item = player.ToPlayer().GetWeaponForAttack(attackType);
 
-					                                                              // skip spell if no weapon in slot or broken
+					                                                              // skip spell if no weapon in Slot or broken
 					                                                              if (!item ||
 					                                                                  item.IsBroken())
 						                                                              return SpellCastResult.EquippedItemClass;
@@ -7885,11 +7885,11 @@ namespace Game.Spells
 				_CastItem      = _caster.ToPlayer().GetItemByGuid(_castItemGUID);
 				_castItemLevel = -1;
 
-				// cast item not found, somehow the item is no longer where we expected
+				// cast Item not found, somehow the Item is no longer where we expected
 				if (!_CastItem)
 					return false;
 
-				// check if the item is really the same, in case it has been wrapped for example
+				// check if the Item is really the same, in case it has been wrapped for example
 				if (_castItemEntry != _CastItem.GetEntry())
 					return false;
 
@@ -8283,7 +8283,7 @@ namespace Game.Spells
 			for (int j = 0; j < SharedConst.MaxLockCase; ++j)
 				switch ((LockKeyType)lockInfo.LockType[j])
 				{
-					// check key item (many fit cases can be)
+					// check key Item (many fit cases can be)
 					case LockKeyType.Item:
 						if (lockInfo.Index[j] != 0 &&
 						    _CastItem &&
@@ -8318,7 +8318,7 @@ namespace Game.Spells
 							else if (lockInfo.Index[j] == (uint)LockType.Lockpicking)
 								skillValue = (int)unitCaster.GetLevel() * 5;
 
-							// skill bonus provided by casting spell (mostly item spells)
+							// skill bonus provided by casting spell (mostly Item spells)
 							// add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
 							if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget ||
 							    effect.TargetB.GetTarget() == Targets.GameobjectItemTarget)
@@ -9546,7 +9546,7 @@ namespace Game.Spells
 
 			// if target is flagged for pvp also flag caster if a player
 			// but respect current pvp rules (buffing/healing npcs flagged for pvp only flags you if they are in combat)
-			_enablePVP = (MissCondition == SpellMissInfo.None || spell._spellInfo.HasAttribute(SpellAttr3.PvpEnabling)) && unit.IsPvP() && (unit.IsInCombat() || unit.IsCharmedOwnedByPlayerOrPlayer()) && spell.GetCaster().IsPlayer(); // need to check PvP state before spell effects, but act on it afterwards
+			_enablePVP = (MissCondition == SpellMissInfo.None || spell._spellInfo.HasAttribute(SpellAttr3.PvpEnabling)) && unit.IsPvP() && (unit.IsInCombat() || unit.IsCharmedOwnedByPlayerOrPlayer()) && spell.GetCaster().IsPlayer(); // need to check PvP State before spell effects, but act on it afterwards
 
 			if (_spellHitTarget)
 			{
@@ -9817,7 +9817,7 @@ namespace Game.Spells
 
 					Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
 
-					// item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
+					// Item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
 					if (caster.IsPlayer() &&
 					    procSpellType.HasAnyFlag(ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal))
 						if (spell._spellInfo.DmgClass == SpellDmgClass.Melee ||
@@ -10390,12 +10390,12 @@ namespace Game.Spells
 			if (_Spell.GetState() != SpellState.Finished)
 				_Spell.Update(p_time);
 
-			// check spell state to process
+			// check spell State to process
 			switch (_Spell.GetState())
 			{
 				case SpellState.Finished:
 				{
-					// spell was finished, check deletable state
+					// spell was finished, check deletable State
 					if (_Spell.IsDeletable())
 						// check, if we do have unfinished triggered spells
 						return true; // spell is deletable, finish event

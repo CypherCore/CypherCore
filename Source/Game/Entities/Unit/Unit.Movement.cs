@@ -156,7 +156,7 @@ namespace Game.Entities
 			{
 				// register forced speed changes for WorldSession.HandleForceSpeedChangeAck
 				// and do it only for real sent packets and use run for run/mounted as client expected
-				++ToPlayer()._forced_speed_changes[(int)mtype];
+				++ToPlayer().ForcedSpeedChanges[(int)mtype];
 
 				if (!IsInCombat())
 				{
@@ -591,7 +591,7 @@ namespace Game.Entities
 					break;
 				}
 				default:
-					Log.outError(LogFilter.Unit, "Unit.UpdateSpeed: Unsupported move type ({0})", mtype);
+					Log.outError(LogFilter.Unit, "Unit.UpdateSpeed: Unsupported move Type ({0})", mtype);
 
 					return;
 			}
@@ -730,7 +730,7 @@ namespace Game.Entities
 
 			if (relocated)
 			{
-				// move and update visible state if need
+				// move and update visible State if need
 				if (IsTypeId(TypeId.Player))
 					GetMap().PlayerRelocation(ToPlayer(), x, y, z, orientation);
 				else
@@ -1033,7 +1033,7 @@ namespace Game.Entities
 					CastSpell(this, curLiquid.SpellID, true);
 			}
 
-			// mount capability depends on liquid state change
+			// mount capability depends on liquid State change
 			if (oldLiquidStatus != GetLiquidStatus())
 				UpdateMountCapability();
 		}
@@ -1879,7 +1879,7 @@ namespace Game.Entities
 				setModMovementForceMagnitude.SequenceIndex = _movementCounter++;
 				setModMovementForceMagnitude.Speed         = modMagnitude;
 				movingPlayer.SendPacket(setModMovementForceMagnitude);
-				++movingPlayer._movementForceModMagnitudeChanges;
+				++movingPlayer.MovementForceModMagnitudeChanges;
 			}
 			else
 			{

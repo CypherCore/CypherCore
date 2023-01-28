@@ -765,7 +765,7 @@ namespace Game.Entities
 					{
 						UpdateData data = new(GetMap().GetId());
 						BuildCreateUpdateBlockForPlayer(data, player);
-						player._visibleTransports.Add(GetGUID());
+						player.VisibleTransports.Add(GetGUID());
 						data.BuildPacket(out UpdateObject packet);
 						player.SendPacket(packet);
 					}
@@ -779,10 +779,10 @@ namespace Game.Entities
 
 				foreach (var player in GetMap().GetPlayers())
 					if (player.GetTransport() != this &&
-					    player._visibleTransports.Contains(GetGUID()))
+					    player.VisibleTransports.Contains(GetGUID()))
 					{
 						player.SendPacket(packet);
-						player._visibleTransports.Remove(GetGUID());
+						player.VisibleTransports.Remove(GetGUID());
 					}
 
 				RemoveFromWorld();

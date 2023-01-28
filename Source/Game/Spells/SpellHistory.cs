@@ -1082,7 +1082,7 @@ namespace Game.Spells
 
 			if (player)
 			{
-				// add all profession CDs created while in duel (if any)
+				// add all profession CDs created while in Duel (if any)
 				foreach (var c in _spellCooldowns)
 				{
 					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(c.Key, Difficulty.None);
@@ -1092,7 +1092,7 @@ namespace Game.Spells
 						_spellCooldownsBeforeDuel[c.Key] = _spellCooldowns[c.Key];
 				}
 
-				// check for spell with onHold active before and during the duel
+				// check for spell with onHold active before and during the Duel
 				foreach (var pair in _spellCooldownsBeforeDuel)
 					if (!pair.Value.OnHold &&
 					    _spellCooldowns.ContainsKey(pair.Key) &&

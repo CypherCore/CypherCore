@@ -97,7 +97,7 @@ namespace Game.Chat.Commands
 			return true;
 		}
 
-		[Command("item", RBACPermissions.CommandListItem, true)]
+		[Command("Item", RBACPermissions.CommandListItem, true)]
 		private static bool HandleListItemCommand(CommandHandler handler, uint itemId, uint? countArg)
 		{
 			uint count = countArg.GetValueOrDefault(10);

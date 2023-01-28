@@ -39,7 +39,7 @@ namespace Game.AI
 
 			Unit victim = !_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, _victimGuid) : null;
 
-			// Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
+			// Search victim if no, not attackable, or out of range, or friendly (possible in case Duel end)
 			if (victim == null ||
 			    !victim.IsTargetableForAttack() ||
 			    !me.IsWithinDistInMap(victim, max_range) ||

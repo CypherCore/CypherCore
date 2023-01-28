@@ -135,7 +135,7 @@ namespace Game
 
 			// Weather statistics:
 			// 30% - no change
-			// 30% - weather gets better (if not fine) or change weather type
+			// 30% - weather gets better (if not fine) or change weather Type
 			// 30% - weather worsens (if not fine)
 			// 10% - radical change (if not fine)
 			uint u = RandomHelper.URand(0, 99);
@@ -185,8 +185,8 @@ namespace Game
 			{
 				// Radical change:
 				// if light . heavy
-				// if medium . change weather type
-				// if heavy . 50% light, 50% change weather type
+				// if medium . change weather Type
+				// if heavy . 50% light, 50% change weather Type
 
 				if (_intensity < 0.33333334f)
 				{

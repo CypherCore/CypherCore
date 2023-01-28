@@ -477,7 +477,7 @@ namespace Game
 
 				if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
 				{
-					Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing item entry {0}", reward.ItemID);
+					Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing Item entry {0}", reward.ItemID);
 
 					continue;
 				}
@@ -500,7 +500,7 @@ namespace Game
 
 						if (!CliDB.AchievementStorage.ContainsKey(requiredAchievementId))
 						{
-							Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing achievement entry {0}", requiredAchievementId);
+							Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing Achievement entry {0}", requiredAchievementId);
 
 							continue;
 						}

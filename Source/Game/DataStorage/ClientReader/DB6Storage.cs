@@ -142,7 +142,7 @@ namespace Game.DataStorage
 
 								break;
 							default:
-								throw new Exception($"Unhandled Custom type: {type.Name}");
+								throw new Exception($"Unhandled Custom Type: {type.Name}");
 						}
 
 						break;

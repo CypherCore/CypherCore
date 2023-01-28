@@ -198,13 +198,13 @@ namespace Game.DataStorage
 
 	public sealed class ItemExtendedCostRecord
 	{
-		public byte ArenaBracket;                                                    // arena slot restrictions (min slot value)
+		public byte ArenaBracket;                                                    // arena Slot restrictions (min Slot value)
 		public uint[] CurrencyCount = new uint[ItemConst.MaxItemExtCostCurrencies];  // required curency count
 		public ushort[] CurrencyID = new ushort[ItemConst.MaxItemExtCostCurrencies]; // required curency id
 		public byte Flags;
 		public uint Id;
-		public ushort[] ItemCount = new ushort[ItemConst.MaxItemExtCostItems]; // required count of 1st item
-		public uint[] ItemID = new uint[ItemConst.MaxItemExtCostItems];        // required item id
+		public ushort[] ItemCount = new ushort[ItemConst.MaxItemExtCostItems]; // required count of 1st Item
+		public uint[] ItemID = new uint[ItemConst.MaxItemExtCostItems];        // required Item id
 		public byte MinFactionID;
 		public int MinReputation;
 		public byte RequiredAchievement; // required personal arena rating

@@ -23,7 +23,7 @@ namespace Scripts.World.DuelReset
 			_resetHealthMana = WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana);
 		}
 
-		// Called when a duel ends
+		// Called when a Duel ends
 		public void OnDuelEnd(Player winner, Player loser, DuelCompleteType type)
 		{
 			// do not reset anything if DuelInterrupted or DuelFled
@@ -58,7 +58,7 @@ namespace Scripts.World.DuelReset
 			}
 		}
 
-		// Called when a duel starts (after 3s countdown)
+		// Called when a Duel starts (after 3s countdown)
 		public void OnDuelStart(Player player1, Player player2)
 		{
 			// Cooldowns reset

@@ -712,7 +712,7 @@ namespace Game
 			if (factionState == null)
 				return;
 
-			// always invisible or hidden faction can't change war state
+			// always invisible or hidden faction can't change war State
 			if (factionState.Flags.HasAnyFlag(ReputationFlags.Hidden | ReputationFlags.Header))
 				return;
 
@@ -998,7 +998,7 @@ namespace Game
 
 	public class RepRewardRate
 	{
-		public float creatureRate; // no reputation are given at all for this faction/rate type.
+		public float creatureRate; // no reputation are given at all for this faction/rate Type.
 		public float questDailyRate;
 		public float questMonthlyRate;
 		public float questRate; // We allow rate = 0.0 in database. For this case, it means that

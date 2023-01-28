@@ -61,7 +61,7 @@ namespace Game.Entities
 				++count;
 			} while (result.NextRow());
 
-			Log.outInfo(LogFilter.Player, $"Loaded {count} Random item bonus list definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+			Log.outInfo(LogFilter.Player, $"Loaded {count} Random Item bonus list definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 		}
 
 		public static uint GenerateItemRandomBonusListId(uint item_id)
@@ -71,7 +71,7 @@ namespace Game.Entities
 			if (itemProto == null)
 				return 0;
 
-			// item must have one from this field values not null if it can have random enchantments
+			// Item must have one from this field values not null if it can have random enchantments
 			if (itemProto.RandomBonusListTemplateId == 0)
 				return 0;
 

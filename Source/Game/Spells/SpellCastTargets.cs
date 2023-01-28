@@ -330,7 +330,7 @@ namespace Game.Spells
 				if (_targetMask.HasAnyFlag(SpellCastTargetFlags.Item))
 					_itemTarget = player.GetItemByGuid(_itemTargetGUID);
 				else if (_targetMask.HasAnyFlag(SpellCastTargetFlags.TradeItem))
-					if (_itemTargetGUID == ObjectGuid.TradeItem) // here it is not guid but slot. Also prevents hacking slots
+					if (_itemTargetGUID == ObjectGuid.TradeItem) // here it is not guid but Slot. Also prevents hacking slots
 					{
 						TradeData pTrade = player.GetTradeData();
 

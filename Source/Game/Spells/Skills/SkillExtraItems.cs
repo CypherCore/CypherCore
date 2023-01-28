@@ -12,7 +12,7 @@ namespace Game.Spells
 	{
 		private static Dictionary<uint, SkillExtraItemEntry> SkillExtraItemStorage = new();
 
-		// loads the extra item creation info from DB
+		// loads the extra Item creation info from DB
 		public static void LoadSkillExtraItemTable()
 		{
 			uint oldMSTime = Time.GetMSTime();
@@ -97,14 +97,14 @@ namespace Game.Spells
 			additionalChance = specEntry.additionalCreateChance;
 			additionalMax    = specEntry.additionalMaxNum;
 
-			// enable extra item creation
+			// enable extra Item creation
 			return true;
 		}
 	}
 
 	internal class SkillExtraItemEntry
 	{
-		// the chance to create one additional item
+		// the chance to create one additional Item
 		public float additionalCreateChance;
 
 		// maximum number of extra items created per crafting
@@ -177,7 +177,7 @@ namespace Game.Spells
 
 				if (Global.ObjectMgr.GetItemTemplate(perfectItemType) == null)
 				{
-					Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} references non-existent perfect item id {1} in `skill_perfect_item_template`!", spellId, perfectItemType);
+					Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} references non-existent perfect Item id {1} in `skill_perfect_item_template`!", spellId, perfectItemType);
 
 					continue;
 				}
@@ -218,7 +218,7 @@ namespace Game.Spells
 		// perfection proc chance
 		public float perfectCreateChance;
 
-		// itemid of the resulting perfect item
+		// itemid of the resulting perfect Item
 		public uint perfectItemType;
 
 		// the spell id of the spell required - it's named "specialization" to conform with SkillExtraItemEntry

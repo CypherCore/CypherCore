@@ -1546,7 +1546,7 @@ namespace Scripts.Spells.Generic
 
 		public override void Register()
 		{
-			if (_scriptSpellId == SpellIds.NightmareFigmentMirrorImage)
+			if (ScriptSpellId == SpellIds.NightmareFigmentMirrorImage)
 			{
 				SpellEffects.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
 				SpellEffects.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
@@ -2824,7 +2824,7 @@ namespace Scripts.Spells.Generic
 
 		public override void Register()
 		{
-			SpellInfo spell = Global.SpellMgr.GetSpellInfo(_scriptSpellId, Difficulty.None);
+			SpellInfo spell = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
 
 			if (spell.HasEffect(SpellEffectName.ScriptEffect))
 				SpellEffects.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
@@ -3047,7 +3047,7 @@ namespace Scripts.Spells.Generic
 			if (player.GetReputationMgr().GetBaseReputation(factionEntry) < repChange)
 				player.GetReputationMgr().SetReputation(factionEntry, repChange);
 
-			// EFFECT_INDEX_2 most likely update at war state, we already handle this in SetReputation
+			// EFFECT_INDEX_2 most likely update at war State, we already handle this in SetReputation
 		}
 
 		public override void Register()
@@ -4018,7 +4018,7 @@ namespace Scripts.Spells.Generic
 			_applyTimes.Add(GameTime.GetGameTimeMS());
 			Unit target = GetTarget();
 
-			// on stack 15 cast the achievement crediting spell
+			// on stack 15 cast the Achievement crediting spell
 			if (GetStackAmount() >= 15)
 				target.CastSpell(target, SpellIds.TurkeyVengeance, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
 		}
@@ -4381,7 +4381,7 @@ namespace Scripts.Spells.Generic
 
 			if (player)
 			{
-				// stop combat + make player unattackable + duel stop + stop some spells
+				// stop combat + make player unattackable + Duel stop + stop some spells
 				player.SetFaction(35);
 				player.CombatStop();
 
@@ -5239,7 +5239,7 @@ namespace Scripts.Spells.Generic
 
 		public override void Register()
 		{
-			SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(_scriptSpellId, Difficulty.None);
+			SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
 
 			if (spellInfo.HasAura(AuraType.ModXpPct))
 				Effects.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.ModXpPct));

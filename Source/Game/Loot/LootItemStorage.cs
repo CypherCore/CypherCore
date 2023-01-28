@@ -63,11 +63,11 @@ namespace Game.Loots
 					++count;
 				} while (result.NextRow());
 
-				Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+				Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored Item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 			}
 			else
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored Item loots");
 			}
 
 			stmt   = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
@@ -90,11 +90,11 @@ namespace Game.Loots
 					++count;
 				} while (result.NextRow());
 
-				Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+				Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored Item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 			}
 			else
 			{
-				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item money");
+				Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored Item money");
 			}
 		}
 
@@ -127,10 +127,10 @@ namespace Game.Loots
 					li.context           = storedItem.Context;
 					li.BonusListIDs      = storedItem.BonusListIDs;
 
-					// Copy the extra loot conditions from the item in the loot template
+					// Copy the extra loot conditions from the Item in the loot template
 					lt.CopyConditions(li);
 
-					// If container item is in a bag, add that player as an allowed looter
+					// If container Item is in a bag, add that player as an allowed looter
 					if (item.GetBagSlot() != 0)
 						li.AddAllowedLooter(player);
 
@@ -141,7 +141,7 @@ namespace Game.Loots
 					++loot.unlootedCount;
 				}
 
-			// Mark the item if it has loot so it won't be generated again on open
+			// Mark the Item if it has loot so it won't be generated again on open
 			item.loot           = loot;
 			item._lootGenerated = true;
 
@@ -182,13 +182,13 @@ namespace Game.Loots
 
 		public void AddNewStoredLoot(ulong containerId, Loot loot, Player player)
 		{
-			// Saves the money and item loot associated with an openable item to the DB
+			// Saves the money and Item loot associated with an openable Item to the DB
 			if (loot.IsLooted()) // no money and no loot
 				return;
 
 			if (_lootItemStorage.ContainsKey(containerId))
 			{
-				Log.outError(LogFilter.Misc, $"Trying to store item loot by player: {player.GetGUID()} for container id: {containerId} that is already in storage!");
+				Log.outError(LogFilter.Misc, $"Trying to store Item loot by player: {player.GetGUID()} for container id: {containerId} that is already in storage!");
 
 				return;
 			}
@@ -251,7 +251,7 @@ namespace Game.Loots
 
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
 
-			// container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
+			// container_id, ItemId, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
 			stmt.AddValue(0, _containerId);
 			stmt.AddValue(1, lootItem.itemid);
 			stmt.AddValue(2, lootItem.count);
@@ -312,7 +312,7 @@ namespace Game.Loots
 					break;
 				}
 
-			// Deletes a single item associated with an openable item from the DB
+			// Deletes a single Item associated with an openable Item from the DB
 			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
 			stmt.AddValue(0, _containerId);
 			stmt.AddValue(1, itemId);

@@ -205,7 +205,7 @@ namespace Game
 							plrMover.EnvironmentalDamage(EnviromentalDamage.FallToVoid, (uint)GetPlayer().GetMaxHealth());
 
 							// player can be alive if GM/etc
-							// change the death state to CORPSE to prevent the death timer from
+							// change the death State to CORPSE to prevent the death timer from
 							// starting in the next player update
 							if (plrMover.IsAlive())
 								plrMover.KillPlayer();
@@ -252,13 +252,13 @@ namespace Game
 				return;
 			}
 
-			// get the destination map entry, not the current one, this will fix homebind and reset greeting
+			// get the destination map entry, not the current one, this will fix _homebind and reset greeting
 			MapRecord mapEntry = CliDB.MapStorage.LookupByKey(loc.GetMapId());
 
 			// reset instance validity, except if going to an instance inside an instance
-			if (!player._InstanceValid &&
+			if (!player.InstanceValid &&
 			    !mapEntry.IsDungeon())
-				player._InstanceValid = true;
+				player.InstanceValid = true;
 
 			Map oldMap = player.GetMap();
 			Map newMap = GetPlayer().GetTeleportDestInstanceId().HasValue ? Global.MapMgr.FindMap(loc.GetMapId(), GetPlayer().GetTeleportDestInstanceId().Value) : Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
@@ -281,7 +281,7 @@ namespace Game
 			if (newMap == null ||
 			    newMap.CannotEnter(player) != null)
 			{
-				Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
+				Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to _homebind");
 				player.TeleportTo(player.GetHomebind());
 
 				return;
@@ -321,7 +321,7 @@ namespace Game
 				return;
 			}
 
-			// Battleground state prepare (in case join to BG), at relogin/tele player not invited
+			// Battleground State prepare (in case join to BG), at relogin/tele player not invited
 			// only add to bg group and object, if the player was invited (else he entered through command)
 			if (player.InBattleground())
 			{
@@ -419,7 +419,7 @@ namespace Game
 
 				// check if instance is valid
 				if (!player.CheckInstanceValidity(false))
-					player._InstanceValid = false;
+					player.InstanceValid = false;
 			}
 
 			// update zone immediately, otherwise leave channel will cause crash in mtmap
@@ -427,7 +427,7 @@ namespace Game
 			player.UpdateZone(newzone, newarea);
 
 			// honorless target
-			if (player.pvpInfo.IsHostile)
+			if (player.PvpInfo.IsHostile)
 				player.CastSpell(player, 2479, true);
 
 			// in friendly area
@@ -496,7 +496,7 @@ namespace Game
 			if (old_zone != newzone)
 			{
 				// honorless target
-				if (plMover.pvpInfo.IsHostile)
+				if (plMover.PvpInfo.IsHostile)
 					plMover.CastSpell(plMover, 2479, true);
 
 				// in friendly area
@@ -575,18 +575,18 @@ namespace Game
 
 					break;
 				default:
-					Log.outError(LogFilter.Network, "WorldSession.HandleForceSpeedChangeAck: Unknown move type opcode: {0}", opcode);
+					Log.outError(LogFilter.Network, "WorldSession.HandleForceSpeedChangeAck: Unknown move Type opcode: {0}", opcode);
 
 					return;
 			}
 
 			// skip all forced speed changes except last and unexpected
 			// in run/mounted case used one ACK and it must be skipped. _forced_speed_changes[MOVE_RUN] store both.
-			if (GetPlayer()._forced_speed_changes[(int)move_type] > 0)
+			if (GetPlayer().ForcedSpeedChanges[(int)move_type] > 0)
 			{
-				--GetPlayer()._forced_speed_changes[(int)move_type];
+				--GetPlayer().ForcedSpeedChanges[(int)move_type];
 
-				if (GetPlayer()._forced_speed_changes[(int)move_type] > 0)
+				if (GetPlayer().ForcedSpeedChanges[(int)move_type] > 0)
 					return;
 			}
 
@@ -737,11 +737,11 @@ namespace Game
 			}
 
 			// skip all except last
-			if (_player._movementForceModMagnitudeChanges > 0)
+			if (_player.MovementForceModMagnitudeChanges > 0)
 			{
-				--_player._movementForceModMagnitudeChanges;
+				--_player.MovementForceModMagnitudeChanges;
 
-				if (_player._movementForceModMagnitudeChanges == 0)
+				if (_player.MovementForceModMagnitudeChanges == 0)
 				{
 					float          expectedModMagnitude = 1.0f;
 					MovementForces movementForces       = mover.GetMovementForces();
@@ -774,7 +774,7 @@ namespace Game
 
 			if (mover == null)
 			{
-				Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong mover state from the unit moved by {GetPlayer().GetGUID()}");
+				Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong mover State from the unit moved by {GetPlayer().GetGUID()}");
 
 				return;
 			}
@@ -806,7 +806,7 @@ namespace Game
 			// 2) switch from one map to other in case multim-map taxi path
 			// we need process only (1)
 
-			uint curDest = GetPlayer()._taxi.GetTaxiDestination();
+			uint curDest = GetPlayer().Taxi.GetTaxiDestination();
 
 			if (curDest != 0)
 			{
@@ -834,13 +834,13 @@ namespace Game
 			}
 
 			// at this point only 1 node is expected (final destination)
-			if (GetPlayer()._taxi.GetPath().Count != 1)
+			if (GetPlayer().Taxi.GetPath().Count != 1)
 				return;
 
 			GetPlayer().CleanupAfterTaxiFlight();
 			GetPlayer().SetFallInformation(0, GetPlayer().GetPositionZ());
 
-			if (GetPlayer().pvpInfo.IsHostile)
+			if (GetPlayer().PvpInfo.IsHostile)
 				GetPlayer().CastSpell(GetPlayer(), 2479, true);
 		}
 

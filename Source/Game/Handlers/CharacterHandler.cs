@@ -347,7 +347,7 @@ namespace Game
 
 			//if (raceExpansionRequirement.AchievementId && !)
 			//{
-			//    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
+			//    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without Achievement %u race (%u)",
 			//        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement.AchievementId, charCreate.CreateInfo.Race);
 			//    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
 			//    return;
@@ -655,7 +655,7 @@ namespace Game
 					                                                        skipCinematics == 2)
 						                                                    newChar.SetCinematic(1); // not show intro
 
-					                                                    newChar.atLoginFlags = AtLoginFlags.FirstLogin; // First login
+					                                                    newChar.AtLoginFlags = AtLoginFlags.FirstLogin; // First login
 
 					                                                    SQLTransaction characterTransaction = new();
 					                                                    SQLTransaction loginTransaction     = new();
@@ -847,7 +847,7 @@ namespace Game
 			if (!PlayerLoading() ||
 			    GetPlayer())
 			{
-				KickPlayer("WorldSession::HandleContinuePlayerLogin incorrect player state when logging in");
+				KickPlayer("WorldSession::HandleContinuePlayerLogin incorrect player State when logging in");
 
 				return;
 			}
@@ -948,10 +948,10 @@ namespace Game
 					switch (pCurrChar.GetCreateMode())
 					{
 						case PlayerCreateMode.Normal:
-							if (playerInfo.introMovieId.HasValue)
-								pCurrChar.SendMovieStart(playerInfo.introMovieId.Value);
-							else if (playerInfo.introSceneId.HasValue)
-								pCurrChar.GetSceneMgr().PlayScene(playerInfo.introSceneId.Value);
+							if (playerInfo.IntroMovieId.HasValue)
+								pCurrChar.SendMovieStart(playerInfo.IntroMovieId.Value);
+							else if (playerInfo.IntroSceneId.HasValue)
+								pCurrChar.GetSceneMgr().PlayScene(playerInfo.IntroSceneId.Value);
 							else if (CliDB.ChrClassesStorage.TryGetValue((uint)pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) &&
 							         chrClassesRecord.CinematicSequenceID != 0)
 								pCurrChar.SendCinematicStart(chrClassesRecord.CinematicSequenceID);
@@ -961,8 +961,8 @@ namespace Game
 
 							break;
 						case PlayerCreateMode.NPE:
-							if (playerInfo.introSceneIdNPE.HasValue)
-								pCurrChar.GetSceneMgr().PlayScene(playerInfo.introSceneIdNPE.Value);
+							if (playerInfo.IntroSceneIdNPE.HasValue)
+								pCurrChar.GetSceneMgr().PlayScene(playerInfo.IntroSceneIdNPE.Value);
 
 							break;
 						default:
@@ -1087,7 +1087,7 @@ namespace Game
 			{
 				pCurrChar.ResetTalents(true);
 				pCurrChar.ResetTalentSpecialization();
-				pCurrChar.SendTalentsInfoData(); // original talents send already in to SendInitialPacketsBeforeAddToMap, resend reset state
+				pCurrChar.SendTalentsInfoData(); // original talents send already in to SendInitialPacketsBeforeAddToMap, resend reset State
 				SendNotification(CypherStrings.ResetTalents);
 			}
 
@@ -1097,7 +1097,7 @@ namespace Game
 
 				PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(pCurrChar.GetRace(), pCurrChar.GetClass());
 
-				foreach (var spellId in info.castSpells[(int)pCurrChar.GetCreateMode()])
+				foreach (var spellId in info.CastSpells[(int)pCurrChar.GetCreateMode()])
 					pCurrChar.CastSpell(pCurrChar, spellId, new CastSpellExtraArgs(true));
 
 				// start with every map explored
@@ -1206,7 +1206,7 @@ namespace Game
 			if (!PlayerLoading() ||
 			    GetPlayer())
 			{
-				KickPlayer("WorldSession::AbortLogin incorrect player state when logging in");
+				KickPlayer("WorldSession::AbortLogin incorrect player State when logging in");
 
 				return;
 			}
@@ -1740,11 +1740,11 @@ namespace Game
 						{
 							Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
 
-							// cheating check 1 (item equipped but sent empty guid)
+							// cheating check 1 (Item equipped but sent empty guid)
 							if (!item)
 								return;
 
-							// cheating check 2 (sent guid does not match equipped item)
+							// cheating check 2 (sent guid does not match equipped Item)
 							if (item.GetGUID() != itemGuid)
 								return;
 						}
@@ -1839,7 +1839,7 @@ namespace Game
 			{
 				Log.outDebug(LogFilter.Player, "{0}: ContainerSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
 
-				// check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
+				// check if Item Slot is set to "ignored" (raw value == 1), must not be unequipped then
 				if (useEquipmentSet.Items[i].Item == ignoredItemGuid)
 					continue;
 
@@ -2219,7 +2219,7 @@ namespace Game
 						trans.Append(stmt);
 					}
 
-					// Reset homebind and position
+					// Reset _homebind and position
 					stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_HOMEBIND);
 					stmt.AddValue(0, lowGuid);
 					trans.Append(stmt);
@@ -2479,7 +2479,7 @@ namespace Game
 		private void HandleOpeningCinematic(OpeningCinematic packet)
 		{
 			// Only players that has not yet gained any experience can use this
-			if (GetPlayer()._activePlayerData.XP != 0)
+			if (GetPlayer().ActivePlayerData.XP != 0)
 				return;
 
 			ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(GetPlayer().GetClass());

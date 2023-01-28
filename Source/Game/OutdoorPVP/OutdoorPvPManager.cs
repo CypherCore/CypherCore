@@ -82,7 +82,7 @@ namespace Game.PvP
 
 				if (!_OutdoorPvPDatas.ContainsKey(outdoorPvpType))
 				{
-					Log.outError(LogFilter.Sql, "Could not initialize OutdoorPvP object for type ID {0}; no entry in database.", outdoorPvpType);
+					Log.outError(LogFilter.Sql, "Could not initialize OutdoorPvP object for Type ID {0}; no entry in database.", outdoorPvpType);
 
 					continue;
 				}
@@ -91,14 +91,14 @@ namespace Game.PvP
 
 				if (pvp == null)
 				{
-					Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for type ID {0}; got NULL pointer from script.", outdoorPvpType);
+					Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for Type ID {0}; got NULL pointer from script.", outdoorPvpType);
 
 					continue;
 				}
 
 				if (!pvp.SetupOutdoorPvP())
 				{
-					Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for type ID {0}; SetupOutdoorPvP failed.", outdoorPvpType);
+					Log.outError(LogFilter.Outdoorpvp, "Could not initialize OutdoorPvP object for Type ID {0}; SetupOutdoorPvP failed.", outdoorPvpType);
 
 					continue;
 				}

@@ -428,7 +428,7 @@ namespace Game.Chat
 		[Command("item_random_bonus_list_template", RBACPermissions.CommandReloadItemRandomBonusListTemplate, true)]
 		private static bool HandleReloadItemRandomBonusListTemplatesCommand(CommandHandler handler)
 		{
-			Log.outInfo(LogFilter.Server, "Re-Loading Random item bonus list definitions...");
+			Log.outInfo(LogFilter.Server, "Re-Loading Random Item bonus list definitions...");
 			ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
 			handler.SendGlobalGMSysMessage("DB table `item_random_bonus_list_template` reloaded.");
 
@@ -757,7 +757,7 @@ namespace Game.Chat
 			// latched onto HandleReloadSkillExtraItemTemplateCommand as it's part of that table group (and i don't want to chance all the command IDs)
 			Log.outInfo(LogFilter.Misc, "Re-Loading Skill Perfection Data Table...");
 			SkillPerfectItems.LoadSkillPerfectItemTable();
-			handler.SendGlobalGMSysMessage("DB table `skill_perfect_item_template` (perfect item procs when crafting) reloaded.");
+			handler.SendGlobalGMSysMessage("DB table `skill_perfect_item_template` (perfect Item procs when crafting) reloaded.");
 
 			return true;
 		}
@@ -767,7 +767,7 @@ namespace Game.Chat
 		{
 			Log.outInfo(LogFilter.Server, "Re-Loading Skill Extra Item Table...");
 			SkillExtraItems.LoadSkillExtraItemTable();
-			handler.SendGlobalGMSysMessage("DB table `skill_extra_item_template` (extra item creation when crafting) reloaded.");
+			handler.SendGlobalGMSysMessage("DB table `skill_extra_item_template` (extra Item creation when crafting) reloaded.");
 
 			return HandleReloadSkillPerfectItemTemplateCommand(handler);
 		}
@@ -809,7 +809,7 @@ namespace Game.Chat
 		{
 			Log.outInfo(LogFilter.Server, "Re-Loading SpellArea Data...");
 			Global.SpellMgr.LoadSpellAreas();
-			handler.SendGlobalGMSysMessage("DB table `spell_area` (spell dependences from area/quest/auras state) reloaded.");
+			handler.SendGlobalGMSysMessage("DB table `spell_area` (spell dependences from area/quest/auras State) reloaded.");
 
 			return true;
 		}
@@ -1077,7 +1077,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("achievement", RBACPermissions.CommandReloadAllAchievement, true)]
+			[Command("Achievement", RBACPermissions.CommandReloadAllAchievement, true)]
 			private static bool HandleReloadAllAchievementCommand(CommandHandler handler)
 			{
 				HandleReloadCriteriaDataCommand(handler);
@@ -1106,7 +1106,7 @@ namespace Game.Chat
 				return true;
 			}
 
-			[Command("item", RBACPermissions.CommandReloadAllItem, true)]
+			[Command("Item", RBACPermissions.CommandReloadAllItem, true)]
 			private static bool HandleReloadAllItemCommand(CommandHandler handler)
 			{
 				HandleReloadPageTextsCommand(handler);

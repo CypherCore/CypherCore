@@ -155,7 +155,7 @@ namespace Game.Chat
 			return true;
 		}
 
-		[Command("stats", RBACPermissions.CommandResetStats, true)]
+		[Command("Stats", RBACPermissions.CommandResetStats, true)]
 		private static bool HandleResetStatsCommand(CommandHandler handler, PlayerIdentifier player)
 		{
 			if (player == null)

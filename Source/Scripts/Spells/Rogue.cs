@@ -111,7 +111,7 @@ namespace Scripts.Spells.Rogue
 
 		public override void Register()
 		{
-			if (_scriptSpellId == SpellIds.BladeFlurry)
+			if (ScriptSpellId == SpellIds.BladeFlurry)
 				Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModPowerRegenPercent, AuraScriptHookType.EffectProc));
 			else
 				Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ModMeleeHaste, AuraScriptHookType.EffectProc));
@@ -157,7 +157,7 @@ namespace Scripts.Spells.Rogue
 				if (!item)
 					return;
 
-				// item combat enchantments
+				// Item combat enchantments
 				for (byte slot = 0; slot < (int)EnchantmentSlot.Max; ++slot)
 				{
 					var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId((EnchantmentSlot)slot));

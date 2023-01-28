@@ -286,7 +286,7 @@ namespace Game.AI
 				    !Convert.ToBoolean(aiSpell.Targets & (1 << ((int)targets - 1))))
 					continue;
 
-				//Check the type of spell if we are looking for a specific spell type
+				//Check the Type of spell if we are looking for a specific spell Type
 				if (effect != 0 &&
 				    !Convert.ToBoolean(aiSpell.Effects & (1 << ((int)effect - 1))))
 					continue;

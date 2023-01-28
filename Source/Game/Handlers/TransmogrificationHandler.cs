@@ -46,7 +46,7 @@ namespace Game
 
 				if (isSecondary && itemTransmogrified.GetTemplate().GetInventoryType() != InventoryType.Shoulders)
 				{
-					Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} tried to transmogrify secondary appearance to non-shoulder item.");
+					Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} tried to transmogrify secondary appearance to non-shoulder Item.");
 
 					return false;
 				}
@@ -96,20 +96,20 @@ namespace Game
 
 			foreach (TransmogrifyItem transmogItem in transmogrifyItems.Items)
 			{
-				// slot of the transmogrified item
+				// Slot of the transmogrified Item
 				if (transmogItem.Slot >= EquipmentSlot.End)
 				{
-					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player ({0}, name: {1}) tried to transmogrify wrong slot {2} when transmogrifying items.", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
+					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player ({0}, name: {1}) tried to transmogrify wrong Slot {2} when transmogrifying items.", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
 
 					return;
 				}
 
-				// transmogrified item
+				// transmogrified Item
 				Item itemTransmogrified = player.GetItemByPos(InventorySlots.Bag0, (byte)transmogItem.Slot);
 
 				if (!itemTransmogrified)
 				{
-					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player (GUID: {0}, name: {1}) tried to transmogrify an invalid item in a valid slot (slot: {2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
+					Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Player (GUID: {0}, name: {1}) tried to transmogrify an invalid Item in a valid Slot (Slot: {2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
 
 					return;
 				}
@@ -138,7 +138,7 @@ namespace Game
 					if (transmogItem.Slot != EquipmentSlot.MainHand &&
 					    transmogItem.Slot != EquipmentSlot.OffHand)
 					{
-						Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion into non-weapon slot ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
+						Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion into non-weapon Slot ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.Slot);
 
 						return;
 					}

@@ -33,8 +33,8 @@ namespace Game.Scripting
 
 		public void _PrepareScriptCall(AuraScriptHookType hookType, AuraApplication aurApp = null)
 		{
-			_scriptStates.Push(new ScriptStateStore(_currentScriptState, _auraApplication, _defaultActionPrevented));
-			_currentScriptState     = (byte)hookType;
+			_scriptStates.Push(new ScriptStateStore(CurrentScriptState, _auraApplication, _defaultActionPrevented));
+            CurrentScriptState = (byte)hookType;
 			_defaultActionPrevented = false;
 			_auraApplication        = aurApp;
 		}
@@ -42,7 +42,7 @@ namespace Game.Scripting
 		public void _FinishScriptCall()
 		{
 			ScriptStateStore stateStore = _scriptStates.Peek();
-			_currentScriptState     = stateStore._currentScriptState;
+            CurrentScriptState = stateStore._currentScriptState;
 			_auraApplication        = stateStore._auraApplication;
 			_defaultActionPrevented = stateStore._defaultActionPrevented;
 			_scriptStates.Pop();
@@ -50,7 +50,7 @@ namespace Game.Scripting
 
 		public bool _IsDefaultActionPrevented()
 		{
-			switch ((AuraScriptHookType)_currentScriptState)
+			switch ((AuraScriptHookType)CurrentScriptState)
 			{
 				case AuraScriptHookType.EffectApply:
 				case AuraScriptHookType.EffectRemove:
@@ -67,10 +67,10 @@ namespace Game.Scripting
 		}
 
 
-		// prevents default action of a hook from being executed (works only while called in a hook which default action can be prevented)
+		// prevents default Action of a hook from being executed (works only while called in a hook which default Action can be prevented)
 		public void PreventDefaultAction()
 		{
-			switch ((AuraScriptHookType)_currentScriptState)
+			switch ((AuraScriptHookType)CurrentScriptState)
 			{
 				case AuraScriptHookType.EffectApply:
 				case AuraScriptHookType.EffectRemove:
@@ -83,7 +83,7 @@ namespace Game.Scripting
 
 					break;
 				default:
-					Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.PreventDefaultAction called in a hook in which the call won't have effect!", _scriptName, _scriptSpellId);
+					Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.PreventDefaultAction called in a hook in which the call won't have effect!", ScriptName, ScriptSpellId);
 
 					break;
 			}
@@ -218,7 +218,7 @@ namespace Game.Scripting
 		// return null is when the call happens in an unsupported hook, in other cases, it is always valid
 		public Unit GetTarget()
 		{
-			switch ((AuraScriptHookType)_currentScriptState)
+			switch ((AuraScriptHookType)CurrentScriptState)
 			{
 				case AuraScriptHookType.EffectApply:
 				case AuraScriptHookType.EffectRemove:
@@ -240,7 +240,7 @@ namespace Game.Scripting
 				case AuraScriptHookType.EnterLeaveCombat:
 					return _auraApplication.GetTarget();
 				default:
-					Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.GetTarget called in a hook in which the call won't have effect!", _scriptName, _scriptSpellId);
+					Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.GetTarget called in a hook in which the call won't have effect!", ScriptName, ScriptSpellId);
 
 					break;
 			}
@@ -265,7 +265,7 @@ namespace Game.Scripting
 			return _aura.GetDynobjOwner();
 		}
 
-		// returns type of the aura, may be dynobj owned aura or unit owned aura
+		// returns Type of the aura, may be dynobj owned aura or unit owned aura
 		private AuraObjectType GetAuraType()
 		{
 			return _aura.GetAuraType();
@@ -337,7 +337,7 @@ namespace Game.Scripting
 			return _aura.IsDeathPersistent();
 		}
 
-		// check if aura has effect of given aura type
+		// check if aura has effect of given aura Type
 		private bool HasEffectType(AuraType type)
 		{
 			return _aura.HasEffectType(type);

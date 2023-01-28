@@ -109,7 +109,7 @@ namespace Game.Entities
 
 				if (!IsInWorld)
 				{
-					Log.outFatal(LogFilter.Unit, $"SetMinion: Minion being added to owner not in world. Minion: {minion.GetGUID()}, Owner: {GetDebugInfo()}");
+					Log.outFatal(LogFilter.Unit, $"SetMinion: Minion being added to owner not in world. Minion: {minion.GetGUID()}, _owner: {GetDebugInfo()}");
 
 					return;
 				}
@@ -304,7 +304,7 @@ namespace Game.Entities
 			Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
 			Cypher.Assert((type == CharmType.Vehicle) == (GetVehicleKit() && GetVehicleKit().IsControllableVehicle()));
 
-			Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
+			Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), Type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
 
 			if (this == charmer)
 			{
@@ -395,7 +395,7 @@ namespace Game.Entities
 			if (aurApp != null &&
 			    aurApp.GetRemoveMode() != 0)
 			{
-				// properly clean up charm changes up to this point to avoid leaving the unit in partially charmed state
+				// properly clean up charm changes up to this point to avoid leaving the unit in partially charmed State
 				SetFaction(_oldFactionId);
 				GetMotionMaster().InitializeDefault();
 				charmer.SetCharm(this, false);

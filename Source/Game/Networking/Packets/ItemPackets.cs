@@ -273,7 +273,7 @@ namespace Game.Networking.Packets
 			_worldPacket.WriteInt8((sbyte)BagResult);
 			_worldPacket.WritePackedGuid(Item[0]);
 			_worldPacket.WritePackedGuid(Item[1]);
-			_worldPacket.WriteUInt8(ContainerBSlot); // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
+			_worldPacket.WriteUInt8(ContainerBSlot); // bag Type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
 
 			switch (BagResult)
 			{

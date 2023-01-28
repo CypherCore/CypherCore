@@ -194,7 +194,7 @@ namespace Game.Entities
 				}
 				default:
 					UnSummon();
-					Log.outError(LogFilter.Unit, "Temporary summoned creature (entry: {0}) have unknown type {1} of ", GetEntry(), _type);
+					Log.outError(LogFilter.Unit, "Temporary summoned creature (entry: {0}) have unknown Type {1} of ", GetEntry(), _type);
 
 					break;
 			}
@@ -666,7 +666,7 @@ namespace Game.Entities
 
 			SetLevel(petlevel);
 
-			//Determine pet type
+			//Determine pet Type
 			PetType petType = PetType.Max;
 
 			if (IsPet() &&
@@ -686,7 +686,7 @@ namespace Game.Entities
 				}
 				else
 				{
-					Log.outError(LogFilter.Unit, "Unknown type pet {0} is summoned by player class {1}", GetEntry(), GetOwner().GetClass());
+					Log.outError(LogFilter.Unit, "Unknown Type pet {0} is summoned by player class {1}", GetEntry(), GetOwner().GetClass());
 				}
 			}
 
@@ -771,8 +771,8 @@ namespace Game.Entities
 				case PetType.Summon:
 				{
 					// the damage bonus used for pets is either fire or shadow damage, whatever is higher
-					int fire   = GetOwner().ToPlayer()._activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire];
-					int shadow = GetOwner().ToPlayer()._activePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow];
+					int fire   = GetOwner().ToPlayer().ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Fire];
+					int shadow = GetOwner().ToPlayer().ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow];
 					int val    = (fire > shadow) ? fire : shadow;
 
 					if (val < 0)
@@ -973,11 +973,11 @@ namespace Game.Entities
 					case Stats.Stamina:
 						mod = 0.3f;
 
-						break; // Default Owner's Stamina scale
+						break; // Default _owner's Stamina scale
 					case Stats.Strength:
 						mod = 0.7f;
 
-						break; // Default Owner's Strength scale
+						break; // Default _owner's Strength scale
 					default: break;
 				}
 
@@ -1187,8 +1187,8 @@ namespace Game.Entities
 				//demons benefit from warlocks shadow or fire damage
 				else if (IsPet())
 				{
-					int fire    = owner._activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - owner._activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
-					int shadow  = owner._activePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow] - owner._activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Shadow];
+					int fire    = owner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - owner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
+					int shadow  = owner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow] - owner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Shadow];
 					int maximum = (fire > shadow) ? fire : shadow;
 
 					if (maximum < 0)
@@ -1200,7 +1200,7 @@ namespace Game.Entities
 				//water elementals benefit from mage's frost damage
 				else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
 				{
-					int frost = owner._activePlayerData.ModDamageDonePos[(int)SpellSchools.Frost] - owner._activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Frost];
+					int frost = owner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Frost] - owner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Frost];
 
 					if (frost < 0)
 						frost = 0;
@@ -1235,7 +1235,7 @@ namespace Game.Entities
 				//force of nature
 				if (GetEntry() == ENTRY_TREANT)
 				{
-					int spellDmg = playerOwner._activePlayerData.ModDamageDonePos[(int)SpellSchools.Nature] - playerOwner._activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Nature];
+					int spellDmg = playerOwner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Nature] - playerOwner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Nature];
 
 					if (spellDmg > 0)
 						bonusDamage = spellDmg * 0.09f;
@@ -1243,7 +1243,7 @@ namespace Game.Entities
 				//greater fire elemental
 				else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
 				{
-					int spellDmg = playerOwner._activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - playerOwner._activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
+					int spellDmg = playerOwner.ActivePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - playerOwner.ActivePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
 
 					if (spellDmg > 0)
 						bonusDamage = spellDmg * 0.4f;
@@ -1347,7 +1347,7 @@ namespace Game.Entities
 		public uint entry;          // Entry of summoned creature
 		public Position pos;        // Position, where should be creature spawned
 		public uint time;           // Despawn time, usable only with certain temp summon types
-		public TempSummonType type; // Summon type, see TempSummonType for available types
+		public TempSummonType type; // Summon Type, see TempSummonType for available types
 	}
 
 	internal enum PetEntry

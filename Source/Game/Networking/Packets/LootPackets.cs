@@ -319,7 +319,7 @@ namespace Game.Networking.Packets
 
 	internal class LootRollBroadcast : ServerPacket
 	{
-		public bool Autopassed; // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
+		public bool Autopassed; // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that Item.
 		public LootItemData Item = new();
 
 		public ObjectGuid LootObj;
