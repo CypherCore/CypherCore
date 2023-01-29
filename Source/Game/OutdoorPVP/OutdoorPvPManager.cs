@@ -14,22 +14,22 @@ namespace Game.PvP
     public class OutdoorPvPManager : Singleton<OutdoorPvPManager>
     {
         // Holds the outdoor PvP templates
-        private readonly uint[] _OutdoorMapIds =
+        private readonly uint[] _outdoorMapIds =
         {
             0, 530, 530, 530, 530, 1
         };
 
         // contains all initiated outdoor pvp events
         // used when initing / cleaning up
-        private readonly MultiMap<Map, OutdoorPvP> _OutdoorPvPByMap = new();
-        private readonly Dictionary<OutdoorPvPTypes, uint> _OutdoorPvPDatas = new();
+        private readonly MultiMap<Map, OutdoorPvP> _outdoorPvPByMap = new();
+        private readonly Dictionary<OutdoorPvPTypes, uint> _outdoorPvPDatas = new();
 
         // maps the zone ids to an outdoor pvp event
         // used in player event handling
-        private readonly Dictionary<(Map map, uint zoneId), OutdoorPvP> _OutdoorPvPMap = new();
+        private readonly Dictionary<(Map map, uint zoneId), OutdoorPvP> _outdoorPvPMap = new();
 
         // update interval
-        private uint _UpdateTimer;
+        private uint _updateTimer;
 
         private OutdoorPvPManager()
         {
@@ -65,7 +65,7 @@ namespace Game.PvP
                     continue;
                 }
 
-                _OutdoorPvPDatas[typeId] = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
+                _outdoorPvPDatas[typeId] = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
 
                 ++count;
             } while (result.NextRow());
@@ -77,17 +77,17 @@ namespace Game.PvP
         {
             for (OutdoorPvPTypes outdoorPvpType = OutdoorPvPTypes.HellfirePeninsula; outdoorPvpType < OutdoorPvPTypes.Max; ++outdoorPvpType)
             {
-                if (map.GetId() != _OutdoorMapIds[(int)outdoorPvpType])
+                if (map.GetId() != _outdoorMapIds[(int)outdoorPvpType])
                     continue;
 
-                if (!_OutdoorPvPDatas.ContainsKey(outdoorPvpType))
+                if (!_outdoorPvPDatas.ContainsKey(outdoorPvpType))
                 {
                     Log.outError(LogFilter.Sql, "Could not initialize OutdoorPvP object for Type ID {0}; no entry in database.", outdoorPvpType);
 
                     continue;
                 }
 
-                OutdoorPvP pvp = Global.ScriptMgr.RunScriptRet<IOutdoorPvPGetOutdoorPvP, OutdoorPvP>(p => p.GetOutdoorPvP(map), _OutdoorPvPDatas[outdoorPvpType], null);
+                OutdoorPvP pvp = Global.ScriptMgr.RunScriptRet<IOutdoorPvPGetOutdoorPvP, OutdoorPvP>(p => p.GetOutdoorPvP(map), _outdoorPvPDatas[outdoorPvpType], null);
 
                 if (pvp == null)
                 {
@@ -103,18 +103,18 @@ namespace Game.PvP
                     continue;
                 }
 
-                _OutdoorPvPByMap.Add(map, pvp);
+                _outdoorPvPByMap.Add(map, pvp);
             }
         }
 
         public void DestroyOutdoorPvPForMap(Map map)
         {
-            _OutdoorPvPByMap.Remove(map);
+            _outdoorPvPByMap.Remove(map);
         }
 
         public void AddZone(uint zoneid, OutdoorPvP handle)
         {
-            _OutdoorPvPMap[(handle.GetMap(), zoneid)] = handle;
+            _outdoorPvPMap[(handle.GetMap(), zoneid)] = handle;
         }
 
         public void HandlePlayerEnterZone(Player player, uint zoneid)
@@ -148,19 +148,19 @@ namespace Game.PvP
 
         public OutdoorPvP GetOutdoorPvPToZoneId(Map map, uint zoneid)
         {
-            return _OutdoorPvPMap.LookupByKey((map, zoneid));
+            return _outdoorPvPMap.LookupByKey((map, zoneid));
         }
 
         public void Update(uint diff)
         {
-            _UpdateTimer += diff;
+            _updateTimer += diff;
 
-            if (_UpdateTimer > 1000)
+            if (_updateTimer > 1000)
             {
-                foreach (var (_, outdoor) in _OutdoorPvPByMap)
-                    outdoor.Update(_UpdateTimer);
+                foreach (var (_, outdoor) in _outdoorPvPByMap)
+                    outdoor.Update(_updateTimer);
 
-                _UpdateTimer = 0;
+                _updateTimer = 0;
             }
         }
 
