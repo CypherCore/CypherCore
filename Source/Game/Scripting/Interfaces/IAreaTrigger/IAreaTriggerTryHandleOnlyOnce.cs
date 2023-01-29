@@ -6,8 +6,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IAreaTrigger
 {
-	public interface IAreaTriggerTryHandleOnlyOnce : IScriptObject
-	{
-		bool TryHandleOnce(Player player, AreaTriggerRecord trigger);
-	}
+    public interface IAreaTriggerTryHandleOnlyOnce : IScriptObject
+    {
+        bool TryHandleOnce(Player player, AreaTriggerRecord trigger);
+    }
 }

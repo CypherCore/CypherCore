@@ -5,8 +5,8 @@ using Game.BattleGrounds;
 
 namespace Game.Scripting.Interfaces.IBattleground
 {
-	public interface IBattlegroundGetBattleground : IScriptObject
-	{
-		Battleground GetBattleground();
-	}
+    public interface IBattlegroundGetBattleground : IScriptObject
+    {
+        Battleground GetBattleground();
+    }
 }

@@ -10,202 +10,202 @@ using Game.Spells;
 
 namespace Scripts.EasternKingdoms.Deadmines
 {
-	internal struct SpellIds
-	{
-		public const uint Trash = 3391;
-		public const uint SmiteStomp = 6432;
-		public const uint SmiteSlam = 6435;
-	}
+    internal struct SpellIds
+    {
+        public const uint Trash = 3391;
+        public const uint SmiteStomp = 6432;
+        public const uint SmiteSlam = 6435;
+    }
 
-	internal struct EquipIds
-	{
-		public const int Sword = 5191;
-		public const int Axe = 5196;
-		public const int Mace = 7230;
-	}
+    internal struct EquipIds
+    {
+        public const int Sword = 5191;
+        public const int Axe = 5196;
+        public const int Mace = 7230;
+    }
 
-	internal struct TextIds
-	{
-		public const uint SayPhase1 = 2;
-		public const uint SayPhase2 = 3;
-	}
+    internal struct TextIds
+    {
+        public const uint SayPhase1 = 2;
+        public const uint SayPhase2 = 3;
+    }
 
-	[Script]
-	internal class boss_mr_smite : ScriptedAI
-	{
-		private InstanceScript instance;
+    [Script]
+    internal class boss_mr_smite : ScriptedAI
+    {
+        private readonly InstanceScript instance;
 
-		private byte uiHealth;
+        private byte uiHealth;
 
-		private bool uiIsMoving;
+        private bool uiIsMoving;
 
-		private uint uiPhase;
-		private uint uiSlamTimer;
-		private uint uiTimer;
-		private uint uiTrashTimer;
+        private uint uiPhase;
+        private uint uiSlamTimer;
+        private uint uiTimer;
+        private uint uiTrashTimer;
 
-		public boss_mr_smite(Creature creature) : base(creature)
-		{
-			Initialize();
-			instance = creature.GetInstanceScript();
-		}
+        public boss_mr_smite(Creature creature) : base(creature)
+        {
+            Initialize();
+            instance = creature.GetInstanceScript();
+        }
 
-		private void Initialize()
-		{
-			uiTrashTimer = RandomHelper.URand(5000, 9000);
-			uiSlamTimer  = 9000;
+        public override void Reset()
+        {
+            Initialize();
 
-			uiHealth = 0;
+            SetEquipmentSlots(false, EquipIds.Sword, 0);
+            me.SetStandState(UnitStandStateType.Stand);
+            me.SetReactState(ReactStates.Aggressive);
+            me.SetNoCallAssistance(true);
+        }
 
-			uiPhase = 0;
-			uiTimer = 0;
+        public override void JustEngagedWith(Unit who)
+        {
+        }
 
-			uiIsMoving = false;
-		}
+        public override void UpdateAI(uint uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
 
-		public override void Reset()
-		{
-			Initialize();
+            if (!uiIsMoving) // halt abilities in between phases
+            {
+                if (uiTrashTimer <= uiDiff)
+                {
+                    if (bCheckChances())
+                        DoCast(me, SpellIds.Trash);
 
-			SetEquipmentSlots(false, EquipIds.Sword, 0);
-			me.SetStandState(UnitStandStateType.Stand);
-			me.SetReactState(ReactStates.Aggressive);
-			me.SetNoCallAssistance(true);
-		}
+                    uiTrashTimer = RandomHelper.URand(6000, 15500);
+                }
+                else
+                {
+                    uiTrashTimer -= uiDiff;
+                }
 
-		public override void JustEngagedWith(Unit who)
-		{
-		}
+                if (uiSlamTimer <= uiDiff)
+                {
+                    if (bCheckChances())
+                        DoCastVictim(SpellIds.SmiteSlam);
 
-		private bool bCheckChances()
-		{
-			uint uiChances = RandomHelper.URand(0, 99);
+                    uiSlamTimer = 11000;
+                }
+                else
+                {
+                    uiSlamTimer -= uiDiff;
+                }
+            }
 
-			if (uiChances <= 15)
-				return false;
-			else
-				return true;
-		}
+            if ((uiHealth == 0 && !HealthAbovePct(66)) ||
+                (uiHealth == 1 && !HealthAbovePct(33)))
+            {
+                ++uiHealth;
+                DoCastAOE(SpellIds.SmiteStomp, new CastSpellExtraArgs(false));
+                SetCombatMovement(false);
+                me.AttackStop();
+                me.InterruptNonMeleeSpells(false);
+                me.SetReactState(ReactStates.Passive);
+                uiTimer = 2500;
+                uiPhase = 1;
 
-		public override void UpdateAI(uint uiDiff)
-		{
-			if (!UpdateVictim())
-				return;
+                switch (uiHealth)
+                {
+                    case 1:
+                        Talk(TextIds.SayPhase1);
 
-			if (!uiIsMoving) // halt abilities in between phases
-			{
-				if (uiTrashTimer <= uiDiff)
-				{
-					if (bCheckChances())
-						DoCast(me, SpellIds.Trash);
+                        break;
+                    case 2:
+                        Talk(TextIds.SayPhase2);
 
-					uiTrashTimer = RandomHelper.URand(6000, 15500);
-				}
-				else
-				{
-					uiTrashTimer -= uiDiff;
-				}
+                        break;
+                }
+            }
 
-				if (uiSlamTimer <= uiDiff)
-				{
-					if (bCheckChances())
-						DoCastVictim(SpellIds.SmiteSlam);
+            if (uiPhase != 0)
+            {
+                if (uiTimer <= uiDiff)
+                    switch (uiPhase)
+                    {
+                        case 1:
+                            {
+                                if (uiIsMoving)
+                                    break;
 
-					uiSlamTimer = 11000;
-				}
-				else
-				{
-					uiSlamTimer -= uiDiff;
-				}
-			}
+                                GameObject go = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.SmiteChest));
 
-			if ((uiHealth == 0 && !HealthAbovePct(66)) ||
-			    (uiHealth == 1 && !HealthAbovePct(33)))
-			{
-				++uiHealth;
-				DoCastAOE(SpellIds.SmiteStomp, new CastSpellExtraArgs(false));
-				SetCombatMovement(false);
-				me.AttackStop();
-				me.InterruptNonMeleeSpells(false);
-				me.SetReactState(ReactStates.Passive);
-				uiTimer = 2500;
-				uiPhase = 1;
+                                if (go)
+                                {
+                                    me.GetMotionMaster().Clear();
+                                    me.GetMotionMaster().MovePoint(1, go.GetPositionX() - 1.5f, go.GetPositionY() + 1.4f, go.GetPositionZ());
+                                    uiIsMoving = true;
+                                }
 
-				switch (uiHealth)
-				{
-					case 1:
-						Talk(TextIds.SayPhase1);
+                                break;
+                            }
+                        case 2:
+                            if (uiHealth == 1)
+                                SetEquipmentSlots(false, EquipIds.Axe, EquipIds.Axe);
+                            else
+                                SetEquipmentSlots(false, EquipIds.Mace, 0);
 
-						break;
-					case 2:
-						Talk(TextIds.SayPhase2);
+                            uiTimer = 500;
+                            uiPhase = 3;
 
-						break;
-				}
-			}
+                            break;
+                        case 3:
+                            me.SetStandState(UnitStandStateType.Stand);
+                            uiTimer = 750;
+                            uiPhase = 4;
 
-			if (uiPhase != 0)
-			{
-				if (uiTimer <= uiDiff)
-					switch (uiPhase)
-					{
-						case 1:
-						{
-							if (uiIsMoving)
-								break;
+                            break;
+                        case 4:
+                            me.SetReactState(ReactStates.Aggressive);
+                            SetCombatMovement(true);
+                            me.GetMotionMaster().MoveChase(me.GetVictim(), me.CombatDistance);
+                            uiIsMoving = false;
+                            uiPhase = 0;
 
-							GameObject go = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.SmiteChest));
+                            break;
+                    }
+                else uiTimer -= uiDiff;
+            }
 
-							if (go)
-							{
-								me.GetMotionMaster().Clear();
-								me.GetMotionMaster().MovePoint(1, go.GetPositionX() - 1.5f, go.GetPositionY() + 1.4f, go.GetPositionZ());
-								uiIsMoving = true;
-							}
+            DoMeleeAttackIfReady();
+        }
 
-							break;
-						}
-						case 2:
-							if (uiHealth == 1)
-								SetEquipmentSlots(false, EquipIds.Axe, EquipIds.Axe);
-							else
-								SetEquipmentSlots(false, EquipIds.Mace, 0);
+        public override void MovementInform(MovementGeneratorType uiType, uint uiId)
+        {
+            if (uiType != MovementGeneratorType.Point)
+                return;
 
-							uiTimer = 500;
-							uiPhase = 3;
+            me.SetFacingTo(5.47f);
+            me.SetStandState(UnitStandStateType.Kneel);
 
-							break;
-						case 3:
-							me.SetStandState(UnitStandStateType.Stand);
-							uiTimer = 750;
-							uiPhase = 4;
+            uiTimer = 2000;
+            uiPhase = 2;
+        }
 
-							break;
-						case 4:
-							me.SetReactState(ReactStates.Aggressive);
-							SetCombatMovement(true);
-							me.GetMotionMaster().MoveChase(me.GetVictim(), me.CombatDistance);
-							uiIsMoving = false;
-							uiPhase    = 0;
+        private void Initialize()
+        {
+            uiTrashTimer = RandomHelper.URand(5000, 9000);
+            uiSlamTimer = 9000;
 
-							break;
-					}
-				else uiTimer -= uiDiff;
-			}
+            uiHealth = 0;
 
-			DoMeleeAttackIfReady();
-		}
+            uiPhase = 0;
+            uiTimer = 0;
 
-		public override void MovementInform(MovementGeneratorType uiType, uint uiId)
-		{
-			if (uiType != MovementGeneratorType.Point)
-				return;
+            uiIsMoving = false;
+        }
 
-			me.SetFacingTo(5.47f);
-			me.SetStandState(UnitStandStateType.Kneel);
+        private bool bCheckChances()
+        {
+            uint uiChances = RandomHelper.URand(0, 99);
 
-			uiTimer = 2000;
-			uiPhase = 2;
-		}
-	}
+            if (uiChances <= 15)
+                return false;
+            else
+                return true;
+        }
+    }
 }

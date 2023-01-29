@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IUnit
 {
-	public interface IUnitOnDamage : IScriptObject
-	{
-		void OnDamage(Unit attacker, Unit victim, ref uint damage);
-	}
+    public interface IUnitOnDamage : IScriptObject
+    {
+        void OnDamage(Unit attacker, Unit victim, ref uint damage);
+    }
 }

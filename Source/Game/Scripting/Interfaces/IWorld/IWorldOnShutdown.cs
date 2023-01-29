@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnShutdown : IScriptObject
-	{
-		void OnShutdown();
-	}
+    public interface IWorldOnShutdown : IScriptObject
+    {
+        void OnShutdown();
+    }
 }

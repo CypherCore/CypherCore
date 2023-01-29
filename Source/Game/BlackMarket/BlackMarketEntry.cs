@@ -1,263 +1,207 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
-using Game.Networking.Packets;
 
 namespace Game.BlackMarket
 {
-	public class BlackMarketTemplate
-	{
-		public float Chance;
-		public long Duration;
-		public ItemInstance Item;
 
-		public uint MarketID;
-		public ulong MinBid;
-		public uint Quantity;
-		public uint SellerNPC;
+    public class BlackMarketEntry
+    {
+        private ulong _bidder;
+        private ulong _currentBid;
+        private bool _mailSent;
 
-		public bool LoadFromDB(SQLFields fields)
-		{
-			MarketID    = fields.Read<uint>(0);
-			SellerNPC   = fields.Read<uint>(1);
-			Item        = new ItemInstance();
-			Item.ItemID = fields.Read<uint>(2);
-			Quantity    = fields.Read<uint>(3);
-			MinBid      = fields.Read<ulong>(4);
-			Duration    = fields.Read<uint>(5);
-			Chance      = fields.Read<float>(6);
+        private uint _marketId;
+        private uint _numBids;
+        private uint _secondsRemaining;
 
-			var        bonusListIDsTok = new StringArray(fields.Read<string>(7), ' ');
-			List<uint> bonusListIDs    = new();
+        public void Initialize(uint marketId, uint duration)
+        {
+            _marketId = marketId;
+            _secondsRemaining = duration;
+        }
 
-			if (!bonusListIDsTok.IsEmpty())
-				foreach (string token in bonusListIDsTok)
-					if (uint.TryParse(token, out uint id))
-						bonusListIDs.Add(id);
+        public void Update(long newTimeOfUpdate)
+        {
+            _secondsRemaining = (uint)(_secondsRemaining - (newTimeOfUpdate - Global.BlackMarketMgr.GetLastUpdate()));
+        }
 
-			if (!bonusListIDs.Empty())
-			{
-				Item.ItemBonus              = new ItemBonuses();
-				Item.ItemBonus.BonusListIDs = bonusListIDs;
-			}
+        public BlackMarketTemplate GetTemplate()
+        {
+            return Global.BlackMarketMgr.GetTemplateByID(_marketId);
+        }
 
-			if (Global.ObjectMgr.GetCreatureTemplate(SellerNPC) == null)
-			{
-				Log.outError(LogFilter.Misc, "Black market template {0} does not have a valid seller. (Entry: {1})", MarketID, SellerNPC);
+        public uint GetSecondsRemaining()
+        {
+            return (uint)(_secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate()));
+        }
 
-				return false;
-			}
+        public bool IsCompleted()
+        {
+            return GetSecondsRemaining() <= 0;
+        }
 
-			if (Global.ObjectMgr.GetItemTemplate(Item.ItemID) == null)
-			{
-				Log.outError(LogFilter.Misc, "Black market template {0} does not have a valid Item. (Entry: {1})", MarketID, Item.ItemID);
+        public bool LoadFromDB(SQLFields fields)
+        {
+            _marketId = fields.Read<uint>(0);
 
-				return false;
-			}
+            // Invalid MarketID
+            BlackMarketTemplate templ = Global.BlackMarketMgr.GetTemplateByID(_marketId);
 
-			return true;
-		}
-	}
+            if (templ == null)
+            {
+                Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid Id.", _marketId);
 
-	public class BlackMarketEntry
-	{
-		private ulong _bidder;
-		private ulong _currentBid;
-		private bool _mailSent;
+                return false;
+            }
 
-		private uint _marketId;
-		private uint _numBids;
-		private uint _secondsRemaining;
+            _currentBid = fields.Read<ulong>(1);
+            _secondsRemaining = (uint)(fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate());
+            _numBids = fields.Read<uint>(3);
+            _bidder = fields.Read<ulong>(4);
 
-		public void Initialize(uint marketId, uint duration)
-		{
-			_marketId         = marketId;
-			_secondsRemaining = duration;
-		}
+            // Either no bidder or existing player
+            if (_bidder != 0 &&
+                Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, _bidder)) == 0) // Probably a better way to check if player exists
+            {
+                Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid bidder (GUID: {1}).", _marketId, _bidder);
 
-		public void Update(long newTimeOfUpdate)
-		{
-			_secondsRemaining = (uint)(_secondsRemaining - (newTimeOfUpdate - Global.BlackMarketMgr.GetLastUpdate()));
-		}
+                return false;
+            }
 
-		public BlackMarketTemplate GetTemplate()
-		{
-			return Global.BlackMarketMgr.GetTemplateByID(_marketId);
-		}
+            return true;
+        }
 
-		public uint GetSecondsRemaining()
-		{
-			return (uint)(_secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate()));
-		}
+        public void SaveToDB(SQLTransaction trans)
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BLACKMARKET_AUCTIONS);
 
-		private long GetExpirationTime()
-		{
-			return GameTime.GetGameTime() + GetSecondsRemaining();
-		}
+            stmt.AddValue(0, _marketId);
+            stmt.AddValue(1, _currentBid);
+            stmt.AddValue(2, GetExpirationTime());
+            stmt.AddValue(3, _numBids);
+            stmt.AddValue(4, _bidder);
 
-		public bool IsCompleted()
-		{
-			return GetSecondsRemaining() <= 0;
-		}
+            trans.Append(stmt);
+        }
 
-		public bool LoadFromDB(SQLFields fields)
-		{
-			_marketId = fields.Read<uint>(0);
+        public void DeleteFromDB(SQLTransaction trans)
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BLACKMARKET_AUCTIONS);
+            stmt.AddValue(0, _marketId);
+            trans.Append(stmt);
+        }
 
-			// Invalid MarketID
-			BlackMarketTemplate templ = Global.BlackMarketMgr.GetTemplateByID(_marketId);
+        public bool ValidateBid(ulong bid)
+        {
+            if (bid <= _currentBid)
+                return false;
 
-			if (templ == null)
-			{
-				Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid Id.", _marketId);
+            if (bid < _currentBid + GetMinIncrement())
+                return false;
 
-				return false;
-			}
+            if (bid >= BlackMarketConst.MaxBid)
+                return false;
 
-			_currentBid       = fields.Read<ulong>(1);
-			_secondsRemaining = (uint)(fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate());
-			_numBids          = fields.Read<uint>(3);
-			_bidder           = fields.Read<ulong>(4);
+            return true;
+        }
 
-			// Either no bidder or existing player
-			if (_bidder != 0 &&
-			    Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, _bidder)) == 0) // Probably a better way to check if player exists
-			{
-				Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid bidder (GUID: {1}).", _marketId, _bidder);
+        public void PlaceBid(ulong bid, Player player, SQLTransaction trans) //Updated
+        {
+            if (bid < _currentBid)
+                return;
 
-				return false;
-			}
+            _currentBid = bid;
+            ++_numBids;
 
-			return true;
-		}
+            if (GetSecondsRemaining() < 30 * Time.Minute)
+                _secondsRemaining += 30 * Time.Minute;
 
-		public void SaveToDB(SQLTransaction trans)
-		{
-			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BLACKMARKET_AUCTIONS);
+            _bidder = player.GetGUID().GetCounter();
 
-			stmt.AddValue(0, _marketId);
-			stmt.AddValue(1, _currentBid);
-			stmt.AddValue(2, GetExpirationTime());
-			stmt.AddValue(3, _numBids);
-			stmt.AddValue(4, _bidder);
-
-			trans.Append(stmt);
-		}
-
-		public void DeleteFromDB(SQLTransaction trans)
-		{
-			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BLACKMARKET_AUCTIONS);
-			stmt.AddValue(0, _marketId);
-			trans.Append(stmt);
-		}
-
-		public bool ValidateBid(ulong bid)
-		{
-			if (bid <= _currentBid)
-				return false;
-
-			if (bid < _currentBid + GetMinIncrement())
-				return false;
-
-			if (bid >= BlackMarketConst.MaxBid)
-				return false;
-
-			return true;
-		}
-
-		public void PlaceBid(ulong bid, Player player, SQLTransaction trans) //Updated
-		{
-			if (bid < _currentBid)
-				return;
-
-			_currentBid = bid;
-			++_numBids;
-
-			if (GetSecondsRemaining() < 30 * Time.Minute)
-				_secondsRemaining += 30 * Time.Minute;
-
-			_bidder = player.GetGUID().GetCounter();
-
-			player.ModifyMoney(-(long)bid);
+            player.ModifyMoney(-(long)bid);
 
 
-			PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);
 
-			stmt.AddValue(0, _currentBid);
-			stmt.AddValue(1, GetExpirationTime());
-			stmt.AddValue(2, _numBids);
-			stmt.AddValue(3, _bidder);
-			stmt.AddValue(4, _marketId);
+            stmt.AddValue(0, _currentBid);
+            stmt.AddValue(1, GetExpirationTime());
+            stmt.AddValue(2, _numBids);
+            stmt.AddValue(3, _bidder);
+            stmt.AddValue(4, _marketId);
 
-			trans.Append(stmt);
+            trans.Append(stmt);
 
-			Global.BlackMarketMgr.Update(true);
-		}
+            Global.BlackMarketMgr.Update(true);
+        }
 
-		public string BuildAuctionMailSubject(BMAHMailAuctionAnswers response)
-		{
-			return GetTemplate().Item.ItemID + ":0:" + response + ':' + GetMarketId() + ':' + GetTemplate().Quantity;
-		}
+        public string BuildAuctionMailSubject(BMAHMailAuctionAnswers response)
+        {
+            return GetTemplate().Item.ItemID + ":0:" + response + ':' + GetMarketId() + ':' + GetTemplate().Quantity;
+        }
 
-		public string BuildAuctionMailBody()
-		{
-			return GetTemplate().SellerNPC + ":" + _currentBid;
-		}
+        public string BuildAuctionMailBody()
+        {
+            return GetTemplate().SellerNPC + ":" + _currentBid;
+        }
 
 
-		public uint GetMarketId()
-		{
-			return _marketId;
-		}
+        public uint GetMarketId()
+        {
+            return _marketId;
+        }
 
-		public ulong GetCurrentBid()
-		{
-			return _currentBid;
-		}
+        public ulong GetCurrentBid()
+        {
+            return _currentBid;
+        }
 
-		private void SetCurrentBid(ulong bid)
-		{
-			_currentBid = bid;
-		}
+        public uint GetNumBids()
+        {
+            return _numBids;
+        }
 
-		public uint GetNumBids()
-		{
-			return _numBids;
-		}
+        public ulong GetBidder()
+        {
+            return _bidder;
+        }
 
-		private void SetNumBids(uint numBids)
-		{
-			_numBids = numBids;
-		}
+        public ulong GetMinIncrement()
+        {
+            return (_currentBid / 20) - ((_currentBid / 20) % MoneyConstants.Gold);
+        } //5% increase every bid (has to be round gold value)
 
-		public ulong GetBidder()
-		{
-			return _bidder;
-		}
+        public void MailSent()
+        {
+            _mailSent = true;
+        } // Set when mail has been sent
 
-		private void SetBidder(ulong bidder)
-		{
-			_bidder = bidder;
-		}
+        public bool GetMailSent()
+        {
+            return _mailSent;
+        }
 
-		public ulong GetMinIncrement()
-		{
-			return (_currentBid / 20) - ((_currentBid / 20) % MoneyConstants.Gold);
-		} //5% increase every bid (has to be round gold value)
+        private long GetExpirationTime()
+        {
+            return GameTime.GetGameTime() + GetSecondsRemaining();
+        }
 
-		public void MailSent()
-		{
-			_mailSent = true;
-		} // Set when mail has been sent
+        private void SetCurrentBid(ulong bid)
+        {
+            _currentBid = bid;
+        }
 
-		public bool GetMailSent()
-		{
-			return _mailSent;
-		}
-	}
+        private void SetNumBids(uint numBids)
+        {
+            _numBids = numBids;
+        }
+
+        private void SetBidder(ulong bidder)
+        {
+            _bidder = bidder;
+        }
+    }
 }

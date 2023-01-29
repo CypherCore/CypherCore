@@ -1,484 +1,483 @@
 using System;
 using System.Collections.Generic;
-using dtPolyRef = System.UInt64;
 
 public static partial class Detour
 {
-	/// Flags representing the type of a navigation mesh polygon.
-	public enum dtPolyTypes
-	{
-		/// The polygon is a standard convex polygon that is part of the surface of the mesh.
-		DT_POLYTYPE_GROUND = 0,
+    /// Flags representing the type of a navigation mesh polygon.
+    public enum dtPolyTypes
+    {
+        /// The polygon is a standard convex polygon that is part of the surface of the mesh.
+        DT_POLYTYPE_GROUND = 0,
 
-		/// The polygon is an off-mesh connection consisting of two vertices.
-		DT_POLYTYPE_OFFMESH_CONNECTION = 1
-	};
+        /// The polygon is an off-mesh connection consisting of two vertices.
+        DT_POLYTYPE_OFFMESH_CONNECTION = 1
+    };
 
-	/// Vertex flags returned by dtNavMeshQuery::findStraightPath.
-	public enum dtStraightPathFlags
-	{
-		DT_STRAIGHTPATH_START = 0x01,             //< The vertex is the start position in the path.
-		DT_STRAIGHTPATH_END = 0x02,               //< The vertex is the end position in the path.
-		DT_STRAIGHTPATH_OFFMESH_CONNECTION = 0x04 //< The vertex is the start of an off-mesh connection.
-	};
+    /// Vertex flags returned by dtNavMeshQuery::findStraightPath.
+    public enum dtStraightPathFlags
+    {
+        DT_STRAIGHTPATH_START = 0x01,             //< The vertex is the start position in the path.
+        DT_STRAIGHTPATH_END = 0x02,               //< The vertex is the end position in the path.
+        DT_STRAIGHTPATH_OFFMESH_CONNECTION = 0x04 //< The vertex is the start of an off-mesh connection.
+    };
 
-	/// Options for dtNavMeshQuery::findStraightPath.
-	public enum dtStraightPathOptions
-	{
-		DT_STRAIGHTPATH_AREA_CROSSINGS = 0x01, //< Add a vertex at every polygon edge crossing where area changes.
-		DT_STRAIGHTPATH_ALL_CROSSINGS = 0x02   //< Add a vertex at every polygon edge crossing.
-	};
+    /// Options for dtNavMeshQuery::findStraightPath.
+    public enum dtStraightPathOptions
+    {
+        DT_STRAIGHTPATH_AREA_CROSSINGS = 0x01, //< Add a vertex at every polygon edge crossing where area changes.
+        DT_STRAIGHTPATH_ALL_CROSSINGS = 0x02   //< Add a vertex at every polygon edge crossing.
+    };
 
     /// Tile flags used for various functions and fields.
     /// For an example, see dtNavMesh::addTile().
     public enum dtTileFlags
-	{
-		/// The navigation mesh owns the tile memory and is responsible for freeing it.
-		DT_TILE_FREE_DATA = 0x01
-	};
+    {
+        /// The navigation mesh owns the tile memory and is responsible for freeing it.
+        DT_TILE_FREE_DATA = 0x01
+    };
 
-	/// The maximum number of vertices per navigation polygon.
-	// @ingroup detour
-	public const int DT_VERTS_PER_POLYGON = 6;
+    /// The maximum number of vertices per navigation polygon.
+    // @ingroup detour
+    public const int DT_VERTS_PER_POLYGON = 6;
 
-	// @{
-	// @name Tile Serialization Constants
+    // @{
+    // @name Tile Serialization Constants
     /// These constants are used to detect whether a navigation tile's data
     /// and state format is compatible with the current build.
     /// 
     /// A magic number used to detect compatibility of navigation tile data.
     public const int DT_NAVMESH_MAGIC = ('D' << 24) | ('N' << 16) | ('A' << 8) | 'V';
 
-	/// A version number used to detect compatibility of navigation tile data.
-	public const int DT_NAVMESH_VERSION = 7;
+    /// A version number used to detect compatibility of navigation tile data.
+    public const int DT_NAVMESH_VERSION = 7;
 
-	/// A magic number used to detect the compatibility of navigation tile states.
-	public const int DT_NAVMESH_STATE_MAGIC = ('D' << 24) | ('N' << 16) | ('M' << 8) | 'S';
+    /// A magic number used to detect the compatibility of navigation tile states.
+    public const int DT_NAVMESH_STATE_MAGIC = ('D' << 24) | ('N' << 16) | ('M' << 8) | 'S';
 
-	/// A version number used to detect compatibility of navigation tile states.
-	public const int DT_NAVMESH_STATE_VERSION = 1;
+    /// A version number used to detect compatibility of navigation tile states.
+    public const int DT_NAVMESH_STATE_VERSION = 1;
 
-	// @}
+    // @}
 
     /// A flag that indicates that an entity links to an external entity.
     /// (E.g. A polygon edge is a portal that links to another polygon.)
     public const ushort DT_EXT_LINK = 0x8000;
 
-	/// A value that indicates the entity does not link to anything.
-	public const uint DT_NULL_LINK = 0xffffffff;
+    /// A value that indicates the entity does not link to anything.
+    public const uint DT_NULL_LINK = 0xffffffff;
 
-	/// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
-	public const uint DT_OFFMESH_CON_BIDIR = 1;
+    /// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
+    public const uint DT_OFFMESH_CON_BIDIR = 1;
 
-	/// The maximum number of user defined area ids.
-	// @ingroup detour
-	public const int DT_MAX_AREAS = 64;
+    /// The maximum number of user defined area ids.
+    // @ingroup detour
+    public const int DT_MAX_AREAS = 64;
 
-	private const ushort MESH_NULL_IDX = 0xffff;
+    private const ushort MESH_NULL_IDX = 0xffff;
 
     /// Get flags for edge in detail triangle.
     /// @param	triFlags[in]		The flags for the triangle (last component of detail vertices above).
     /// @param	edgeIndex[in]		The index of the first vertex of the edge. For instance, if 0,
     /// returns flags for edge AB.
     public static int dtGetDetailTriEdgeFlags(byte triFlags, int edgeIndex)
-	{
-		return (triFlags >> (edgeIndex * 2)) & 0x3;
-	}
+    {
+        return (triFlags >> (edgeIndex * 2)) & 0x3;
+    }
 
-	private static void calcExtends(BVItem[] items, int nitems, int imin, int imax, ushort[] bmin, ushort[] bmax)
-	{
-		bmin[0] = items[imin].bmin[0];
-		bmin[1] = items[imin].bmin[1];
-		bmin[2] = items[imin].bmin[2];
+    private static void calcExtends(BVItem[] items, int nitems, int imin, int imax, ushort[] bmin, ushort[] bmax)
+    {
+        bmin[0] = items[imin].bmin[0];
+        bmin[1] = items[imin].bmin[1];
+        bmin[2] = items[imin].bmin[2];
 
-		bmax[0] = items[imin].bmax[0];
-		bmax[1] = items[imin].bmax[1];
-		bmax[2] = items[imin].bmax[2];
+        bmax[0] = items[imin].bmax[0];
+        bmax[1] = items[imin].bmax[1];
+        bmax[2] = items[imin].bmax[2];
 
-		for (int i = imin + 1; i < imax; ++i)
-		{
-			//const BVItem& it = items[i];
-			BVItem it                         = items[i];
-			if (it.bmin[0] < bmin[0]) bmin[0] = it.bmin[0];
-			if (it.bmin[1] < bmin[1]) bmin[1] = it.bmin[1];
-			if (it.bmin[2] < bmin[2]) bmin[2] = it.bmin[2];
+        for (int i = imin + 1; i < imax; ++i)
+        {
+            //const BVItem& it = items[i];
+            BVItem it = items[i];
+            if (it.bmin[0] < bmin[0]) bmin[0] = it.bmin[0];
+            if (it.bmin[1] < bmin[1]) bmin[1] = it.bmin[1];
+            if (it.bmin[2] < bmin[2]) bmin[2] = it.bmin[2];
 
-			if (it.bmax[0] > bmax[0]) bmax[0] = it.bmax[0];
-			if (it.bmax[1] > bmax[1]) bmax[1] = it.bmax[1];
-			if (it.bmax[2] > bmax[2]) bmax[2] = it.bmax[2];
-		}
-	}
+            if (it.bmax[0] > bmax[0]) bmax[0] = it.bmax[0];
+            if (it.bmax[1] > bmax[1]) bmax[1] = it.bmax[1];
+            if (it.bmax[2] > bmax[2]) bmax[2] = it.bmax[2];
+        }
+    }
 
-	public static int longestAxis(ushort x, ushort y, ushort z)
-	{
-		int    axis   = 0;
-		ushort maxVal = x;
+    public static int longestAxis(ushort x, ushort y, ushort z)
+    {
+        int axis = 0;
+        ushort maxVal = x;
 
-		if (y > maxVal)
-		{
-			axis   = 1;
-			maxVal = y;
-		}
+        if (y > maxVal)
+        {
+            axis = 1;
+            maxVal = y;
+        }
 
-		if (z > maxVal)
-		{
-			axis   = 2;
-			maxVal = z;
-		}
+        if (z > maxVal)
+        {
+            axis = 2;
+            maxVal = z;
+        }
 
-		return axis;
-	}
+        return axis;
+    }
 
-	public static void subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, dtBVNode[] nodes)
-	{
-		int inum = imax - imin;
-		int icur = curNode;
+    public static void subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, dtBVNode[] nodes)
+    {
+        int inum = imax - imin;
+        int icur = curNode;
 
-		dtBVNode node = nodes[curNode++];
+        dtBVNode node = nodes[curNode++];
 
-		if (inum == 1)
-		{
-			// Leaf
-			node.bmin[0] = items[imin].bmin[0];
-			node.bmin[1] = items[imin].bmin[1];
-			node.bmin[2] = items[imin].bmin[2];
+        if (inum == 1)
+        {
+            // Leaf
+            node.bmin[0] = items[imin].bmin[0];
+            node.bmin[1] = items[imin].bmin[1];
+            node.bmin[2] = items[imin].bmin[2];
 
-			node.bmax[0] = items[imin].bmax[0];
-			node.bmax[1] = items[imin].bmax[1];
-			node.bmax[2] = items[imin].bmax[2];
+            node.bmax[0] = items[imin].bmax[0];
+            node.bmax[1] = items[imin].bmax[1];
+            node.bmax[2] = items[imin].bmax[2];
 
-			node.i = items[imin].i;
-		}
-		else
-		{
-			// Split
-			calcExtends(items, nitems, imin, imax, node.bmin, node.bmax);
+            node.i = items[imin].i;
+        }
+        else
+        {
+            // Split
+            calcExtends(items, nitems, imin, imax, node.bmin, node.bmax);
 
-			int axis = longestAxis((ushort)(node.bmax[0] - node.bmin[0]),
-			                       (ushort)(node.bmax[1] - node.bmin[1]),
-			                       (ushort)(node.bmax[2] - node.bmin[2]));
+            int axis = longestAxis((ushort)(node.bmax[0] - node.bmin[0]),
+                                   (ushort)(node.bmax[1] - node.bmin[1]),
+                                   (ushort)(node.bmax[2] - node.bmin[2]));
 
-			if (axis == 0)
-				// Sort along x-axis
-				//qsort(items+imin, inum, sizeof(BVItem), compareItemX);
-				Array.Sort(items, imin, inum, new BVItemCompareX());
-			else if (axis == 1)
-				// Sort along y-axis
-				//qsort(items+imin, inum, sizeof(BVItem), compareItemY);
-				Array.Sort(items, imin, inum, new BVItemCompareY());
-			else
-				// Sort along z-axis
-				//qsort(items+imin, inum, sizeof(BVItem), compareItemZ);
-				Array.Sort(items, imin, inum, new BVItemCompareZ());
+            if (axis == 0)
+                // Sort along x-axis
+                //qsort(items+imin, inum, sizeof(BVItem), compareItemX);
+                Array.Sort(items, imin, inum, new BVItemCompareX());
+            else if (axis == 1)
+                // Sort along y-axis
+                //qsort(items+imin, inum, sizeof(BVItem), compareItemY);
+                Array.Sort(items, imin, inum, new BVItemCompareY());
+            else
+                // Sort along z-axis
+                //qsort(items+imin, inum, sizeof(BVItem), compareItemZ);
+                Array.Sort(items, imin, inum, new BVItemCompareZ());
 
-			int isplit = imin + inum / 2;
+            int isplit = imin + inum / 2;
 
-			// Left
-			subdivide(items, nitems, imin, isplit, ref curNode, nodes);
-			// Right
-			subdivide(items, nitems, isplit, imax, ref curNode, nodes);
+            // Left
+            subdivide(items, nitems, imin, isplit, ref curNode, nodes);
+            // Right
+            subdivide(items, nitems, isplit, imax, ref curNode, nodes);
 
-			int iescape = curNode - icur;
-			// Negative index means escape.
-			node.i = -iescape;
-		}
-	}
+            int iescape = curNode - icur;
+            // Negative index means escape.
+            node.i = -iescape;
+        }
+    }
 
-	public static int createBVTree(dtNavMeshCreateParams createParams, dtBVNode[] nodes, int nnodes)
-	{
-		// Build tree
-		float    quantFactor = 1 / createParams.cs;
-		BVItem[] items       = new BVItem[createParams.polyCount]; //(BVItem*)dtAlloc(sizeof(BVItem)*npolys, DT_ALLOC_TEMP);
-		dtcsArrayItemsCreate(items);
+    public static int createBVTree(dtNavMeshCreateParams createParams, dtBVNode[] nodes, int nnodes)
+    {
+        // Build tree
+        float quantFactor = 1 / createParams.cs;
+        BVItem[] items = new BVItem[createParams.polyCount]; //(BVItem*)dtAlloc(sizeof(BVItem)*npolys, DT_ALLOC_TEMP);
+        dtcsArrayItemsCreate(items);
 
-		for (int i = 0; i < createParams.polyCount; i++)
-		{
-			BVItem it = items[i];
-			it.i = i;
+        for (int i = 0; i < createParams.polyCount; i++)
+        {
+            BVItem it = items[i];
+            it.i = i;
 
-			// Calc polygon bounds. Use detail meshes if available.
-			if (createParams.detailMeshes != null)
-			{
-				int     vb   = (int)createParams.detailMeshes[i * 4 + 0];
-				int     ndv  = (int)createParams.detailMeshes[i * 4 + 1];
-				float[] bmin = new float[3];
-				float[] bmax = new float[3];
+            // Calc polygon bounds. Use detail meshes if available.
+            if (createParams.detailMeshes != null)
+            {
+                int vb = (int)createParams.detailMeshes[i * 4 + 0];
+                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                float[] bmin = new float[3];
+                float[] bmax = new float[3];
 
-				float[] dv = createParams.detailVerts[(vb * 3)..];
-				dtVcopy(bmin, dv);
-				dtVcopy(bmax, dv);
+                float[] dv = createParams.detailVerts[(vb * 3)..];
+                dtVcopy(bmin, dv);
+                dtVcopy(bmax, dv);
 
-				for (int j = 1; j < ndv; j++)
-				{
-					dtVmin(bmin, dv[(j * 3)..]);
-					dtVmax(bmax, dv[(j * 3)..]);
-				}
+                for (int j = 1; j < ndv; j++)
+                {
+                    dtVmin(bmin, dv[(j * 3)..]);
+                    dtVmax(bmax, dv[(j * 3)..]);
+                }
 
-				// BV-tree uses cs for all dimensions
-				it.bmin[0] = (ushort)dtClamp((int)((bmin[0] - createParams.bmin[0]) * quantFactor), 0, 0xffff);
-				it.bmin[1] = (ushort)dtClamp((int)((bmin[1] - createParams.bmin[1]) * quantFactor), 0, 0xffff);
-				it.bmin[2] = (ushort)dtClamp((int)((bmin[2] - createParams.bmin[2]) * quantFactor), 0, 0xffff);
+                // BV-tree uses cs for all dimensions
+                it.bmin[0] = (ushort)dtClamp((int)((bmin[0] - createParams.bmin[0]) * quantFactor), 0, 0xffff);
+                it.bmin[1] = (ushort)dtClamp((int)((bmin[1] - createParams.bmin[1]) * quantFactor), 0, 0xffff);
+                it.bmin[2] = (ushort)dtClamp((int)((bmin[2] - createParams.bmin[2]) * quantFactor), 0, 0xffff);
 
-				it.bmax[0] = (ushort)dtClamp((int)((bmax[0] - createParams.bmin[0]) * quantFactor), 0, 0xffff);
-				it.bmax[1] = (ushort)dtClamp((int)((bmax[1] - createParams.bmin[1]) * quantFactor), 0, 0xffff);
-				it.bmax[2] = (ushort)dtClamp((int)((bmax[2] - createParams.bmin[2]) * quantFactor), 0, 0xffff);
-			}
-			else
-			{
-				ushort[] p              = createParams.polys[(i * createParams.nvp * 2)..];
-				it.bmin[0] = it.bmax[0] = createParams.verts[p[0] * 3 + 0];
-				it.bmin[1] = it.bmax[1] = createParams.verts[p[0] * 3 + 1];
-				it.bmin[2] = it.bmax[2] = createParams.verts[p[0] * 3 + 2];
+                it.bmax[0] = (ushort)dtClamp((int)((bmax[0] - createParams.bmin[0]) * quantFactor), 0, 0xffff);
+                it.bmax[1] = (ushort)dtClamp((int)((bmax[1] - createParams.bmin[1]) * quantFactor), 0, 0xffff);
+                it.bmax[2] = (ushort)dtClamp((int)((bmax[2] - createParams.bmin[2]) * quantFactor), 0, 0xffff);
+            }
+            else
+            {
+                ushort[] p = createParams.polys[(i * createParams.nvp * 2)..];
+                it.bmin[0] = it.bmax[0] = createParams.verts[p[0] * 3 + 0];
+                it.bmin[1] = it.bmax[1] = createParams.verts[p[0] * 3 + 1];
+                it.bmin[2] = it.bmax[2] = createParams.verts[p[0] * 3 + 2];
 
-				for (int j = 1; j < createParams.nvp; ++j)
-				{
-					if (p[j] == MESH_NULL_IDX) break;
+                for (int j = 1; j < createParams.nvp; ++j)
+                {
+                    if (p[j] == MESH_NULL_IDX) break;
 
-					ushort x = createParams.verts[p[j] * 3 + 0];
-					ushort y = createParams.verts[p[j] * 3 + 1];
-					ushort z = createParams.verts[p[j] * 3 + 2];
+                    ushort x = createParams.verts[p[j] * 3 + 0];
+                    ushort y = createParams.verts[p[j] * 3 + 1];
+                    ushort z = createParams.verts[p[j] * 3 + 2];
 
-					if (x < it.bmin[0]) it.bmin[0] = x;
-					if (y < it.bmin[1]) it.bmin[1] = y;
-					if (z < it.bmin[2]) it.bmin[2] = z;
+                    if (x < it.bmin[0]) it.bmin[0] = x;
+                    if (y < it.bmin[1]) it.bmin[1] = y;
+                    if (z < it.bmin[2]) it.bmin[2] = z;
 
-					if (x > it.bmax[0]) it.bmax[0] = x;
-					if (y > it.bmax[1]) it.bmax[1] = y;
-					if (z > it.bmax[2]) it.bmax[2] = z;
-				}
+                    if (x > it.bmax[0]) it.bmax[0] = x;
+                    if (y > it.bmax[1]) it.bmax[1] = y;
+                    if (z > it.bmax[2]) it.bmax[2] = z;
+                }
 
-				// Remap y
-				it.bmin[1] = (ushort)MathF.Floor((float)it.bmin[1] * createParams.ch / createParams.cs);
-				it.bmax[1] = (ushort)MathF.Ceiling((float)it.bmax[1] * createParams.ch / createParams.cs);
-			}
-		}
+                // Remap y
+                it.bmin[1] = (ushort)MathF.Floor((float)it.bmin[1] * createParams.ch / createParams.cs);
+                it.bmax[1] = (ushort)MathF.Ceiling((float)it.bmax[1] * createParams.ch / createParams.cs);
+            }
+        }
 
-		int curNode = 0;
-		subdivide(items, createParams.polyCount, 0, createParams.polyCount, ref curNode, nodes);
+        int curNode = 0;
+        subdivide(items, createParams.polyCount, 0, createParams.polyCount, ref curNode, nodes);
 
-		//dtFree(items);
+        //dtFree(items);
 
-		return curNode;
-	}
+        return curNode;
+    }
 
-	public static byte classifyOffMeshPoint(float[] pt, int ptStart, float[] bmin, float[] bmax)
-	{
-		const byte XP = 1 << 0;
-		const byte ZP = 1 << 1;
-		const byte XM = 1 << 2;
-		const byte ZM = 1 << 3;
+    public static byte classifyOffMeshPoint(float[] pt, int ptStart, float[] bmin, float[] bmax)
+    {
+        const byte XP = 1 << 0;
+        const byte ZP = 1 << 1;
+        const byte XM = 1 << 2;
+        const byte ZM = 1 << 3;
 
-		byte outcode = 0;
-		outcode |= (pt[ptStart + 0] >= bmax[0]) ? XP : (byte)0;
-		outcode |= (pt[ptStart + 2] >= bmax[2]) ? ZP : (byte)0;
-		outcode |= (pt[ptStart + 0] < bmin[0]) ? XM : (byte)0;
-		outcode |= (pt[ptStart + 2] < bmin[2]) ? ZM : (byte)0;
+        byte outcode = 0;
+        outcode |= (pt[ptStart + 0] >= bmax[0]) ? XP : (byte)0;
+        outcode |= (pt[ptStart + 2] >= bmax[2]) ? ZP : (byte)0;
+        outcode |= (pt[ptStart + 0] < bmin[0]) ? XM : (byte)0;
+        outcode |= (pt[ptStart + 2] < bmin[2]) ? ZM : (byte)0;
 
-		switch (outcode)
-		{
-			case XP:      return 0;
-			case XP | ZP: return 1;
-			case ZP:      return 2;
-			case XM | ZP: return 3;
-			case XM:      return 4;
-			case XM | ZM: return 5;
-			case ZM:      return 6;
-			case XP | ZM: return 7;
-		}
+        switch (outcode)
+        {
+            case XP: return 0;
+            case XP | ZP: return 1;
+            case ZP: return 2;
+            case XM | ZP: return 3;
+            case XM: return 4;
+            case XM | ZM: return 5;
+            case ZM: return 6;
+            case XP | ZM: return 7;
+        }
 
-		return 0xff;
-	}
+        return 0xff;
+    }
 
-	// TODO: Better error handling.
+    // TODO: Better error handling.
 
-	// @par
-	/// 
-	/// The output data array is allocated using the detour allocator (dtAlloc()).  The method
-	/// used to free the memory will be determined by how the tile is added to the navigation
-	/// mesh.
-	///
-	// @see dtNavMesh, dtNavMesh::addTile()
-	/// Builds navigation mesh tile data from the provided tile creation data.
-	// @ingroup detour
+    // @par
+    /// 
+    /// The output data array is allocated using the detour allocator (dtAlloc()).  The method
+    /// used to free the memory will be determined by how the tile is added to the navigation
+    /// mesh.
+    ///
+    // @see dtNavMesh, dtNavMesh::addTile()
+    /// Builds navigation mesh tile data from the provided tile creation data.
+    // @ingroup detour
     /// @param[in]		params		Tile creation data.
     /// @param[out]	outData		The resulting tile data.
     /// @param[out]	outDataSize	The size of the tile data array.
     // @return True if the tile data was successfully created.
-	public static bool dtCreateNavMeshData(dtNavMeshCreateParams createParams, out dtRawTileData outTile) //ref byte[] outData, ref int outDataSize)
-	{
-		outTile = null;
+    public static bool dtCreateNavMeshData(dtNavMeshCreateParams createParams, out dtRawTileData outTile) //ref byte[] outData, ref int outDataSize)
+    {
+        outTile = null;
 
-		if (createParams.nvp > DT_VERTS_PER_POLYGON)
-			return false;
+        if (createParams.nvp > DT_VERTS_PER_POLYGON)
+            return false;
 
-		if (createParams.vertCount >= 0xffff)
-			return false;
+        if (createParams.vertCount >= 0xffff)
+            return false;
 
-		if (createParams.vertCount == 0 ||
-		    createParams.verts == null)
-			return false;
+        if (createParams.vertCount == 0 ||
+            createParams.verts == null)
+            return false;
 
-		if (createParams.polyCount == 0 ||
-		    createParams.polys == null)
-			return false;
+        if (createParams.polyCount == 0 ||
+            createParams.polys == null)
+            return false;
 
-		int nvp = createParams.nvp;
+        int nvp = createParams.nvp;
 
-		// Classify off-mesh connection points. We store only the connections
-		// whose start point is inside the tile.
-		byte[] offMeshConClass       = null;
-		int    storedOffMeshConCount = 0;
-		int    offMeshConLinkCount   = 0;
+        // Classify off-mesh connection points. We store only the connections
+        // whose start point is inside the tile.
+        byte[] offMeshConClass = null;
+        int storedOffMeshConCount = 0;
+        int offMeshConLinkCount = 0;
 
-		if (createParams.offMeshConCount > 0)
-		{
-			//offMeshConClass = (byte*)dtAlloc(sizeof(byte)*createParams.offMeshConCount*2, DT_ALLOC_TEMP);
-			offMeshConClass = new byte[createParams.offMeshConCount * 2];
+        if (createParams.offMeshConCount > 0)
+        {
+            //offMeshConClass = (byte*)dtAlloc(sizeof(byte)*createParams.offMeshConCount*2, DT_ALLOC_TEMP);
+            offMeshConClass = new byte[createParams.offMeshConCount * 2];
 
-			if (offMeshConClass == null)
-				return false;
+            if (offMeshConClass == null)
+                return false;
 
-			// Find tight heigh bounds, used for culling out off-mesh start locations.
-			float hmin = float.MaxValue;
-			float hmax = -float.MaxValue;
+            // Find tight heigh bounds, used for culling out off-mesh start locations.
+            float hmin = float.MaxValue;
+            float hmax = -float.MaxValue;
 
-			if (createParams.detailVerts != null &&
-			    createParams.detailVertsCount != 0)
-				for (int i = 0; i < createParams.detailVertsCount; ++i)
-				{
-					float h = createParams.detailVerts[i * 3 + 1];
-					hmin = Math.Min(hmin, h);
-					hmax = Math.Max(hmax, h);
-				}
-			else
-				for (int i = 0; i < createParams.vertCount; ++i)
-				{
-					//ushort* iv = &createParams.verts[i*3];
-					float h = createParams.bmin[1] + createParams.verts[i * 3 + 1] * createParams.ch;
-					hmin = Math.Min(hmin, h);
-					hmax = Math.Max(hmax, h);
-				}
+            if (createParams.detailVerts != null &&
+                createParams.detailVertsCount != 0)
+                for (int i = 0; i < createParams.detailVertsCount; ++i)
+                {
+                    float h = createParams.detailVerts[i * 3 + 1];
+                    hmin = Math.Min(hmin, h);
+                    hmax = Math.Max(hmax, h);
+                }
+            else
+                for (int i = 0; i < createParams.vertCount; ++i)
+                {
+                    //ushort* iv = &createParams.verts[i*3];
+                    float h = createParams.bmin[1] + createParams.verts[i * 3 + 1] * createParams.ch;
+                    hmin = Math.Min(hmin, h);
+                    hmax = Math.Max(hmax, h);
+                }
 
-			hmin -= createParams.walkableClimb;
-			hmax += createParams.walkableClimb;
-			float[] bmin = new float[3]; //, bmax[3];
-			float[] bmax = new float[3];
-			dtVcopy(bmin, createParams.bmin);
-			dtVcopy(bmax, createParams.bmax);
-			bmin[1] = hmin;
-			bmax[1] = hmax;
+            hmin -= createParams.walkableClimb;
+            hmax += createParams.walkableClimb;
+            float[] bmin = new float[3]; //, bmax[3];
+            float[] bmax = new float[3];
+            dtVcopy(bmin, createParams.bmin);
+            dtVcopy(bmax, createParams.bmax);
+            bmin[1] = hmin;
+            bmax[1] = hmax;
 
-			for (int i = 0; i < createParams.offMeshConCount; ++i)
-			{
-				//const float* p0 = &createParams.offMeshConVerts[(i*2+0)*3];
-				//const float* p1 = &createParams.offMeshConVerts[(i*2+1)*3];
-				int p0Start = (i * 2 + 0) * 3;
-				int p1Start = (i * 2 + 1) * 3;
-				offMeshConClass[i * 2 + 0] = classifyOffMeshPoint(createParams.offMeshConVerts, p0Start, bmin, bmax);
-				offMeshConClass[i * 2 + 1] = classifyOffMeshPoint(createParams.offMeshConVerts, p1Start, bmin, bmax);
+            for (int i = 0; i < createParams.offMeshConCount; ++i)
+            {
+                //const float* p0 = &createParams.offMeshConVerts[(i*2+0)*3];
+                //const float* p1 = &createParams.offMeshConVerts[(i*2+1)*3];
+                int p0Start = (i * 2 + 0) * 3;
+                int p1Start = (i * 2 + 1) * 3;
+                offMeshConClass[i * 2 + 0] = classifyOffMeshPoint(createParams.offMeshConVerts, p0Start, bmin, bmax);
+                offMeshConClass[i * 2 + 1] = classifyOffMeshPoint(createParams.offMeshConVerts, p1Start, bmin, bmax);
 
-				// Zero out off-mesh start positions which are not even potentially touching the mesh.
-				if (offMeshConClass[i * 2 + 0] == 0xff)
-					if (createParams.offMeshConVerts[p0Start + 1] < bmin[1] ||
-					    createParams.offMeshConVerts[p0Start + 1] > bmax[1])
-						offMeshConClass[i * 2 + 0] = 0;
+                // Zero out off-mesh start positions which are not even potentially touching the mesh.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                    if (createParams.offMeshConVerts[p0Start + 1] < bmin[1] ||
+                        createParams.offMeshConVerts[p0Start + 1] > bmax[1])
+                        offMeshConClass[i * 2 + 0] = 0;
 
-				// Cound how many links should be allocated for off-mesh connections.
-				if (offMeshConClass[i * 2 + 0] == 0xff)
-					offMeshConLinkCount++;
+                // Cound how many links should be allocated for off-mesh connections.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                    offMeshConLinkCount++;
 
-				if (offMeshConClass[i * 2 + 1] == 0xff)
-					offMeshConLinkCount++;
+                if (offMeshConClass[i * 2 + 1] == 0xff)
+                    offMeshConLinkCount++;
 
-				if (offMeshConClass[i * 2 + 0] == 0xff)
-					storedOffMeshConCount++;
-			}
-		}
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                    storedOffMeshConCount++;
+            }
+        }
 
-		// Off-mesh connectionss are stored as polygons, adjust values.
-		int totPolyCount = createParams.polyCount + storedOffMeshConCount;
-		int totVertCount = createParams.vertCount + storedOffMeshConCount * 2;
+        // Off-mesh connectionss are stored as polygons, adjust values.
+        int totPolyCount = createParams.polyCount + storedOffMeshConCount;
+        int totVertCount = createParams.vertCount + storedOffMeshConCount * 2;
 
-		// Find portal edges which are at tile borders.
-		int edgeCount   = 0;
-		int portalCount = 0;
+        // Find portal edges which are at tile borders.
+        int edgeCount = 0;
+        int portalCount = 0;
 
-		for (int i = 0; i < createParams.polyCount; ++i)
-		{
-			//const ushort* p = &createParams.polys[i*2*nvp];
-			int pStart = i * 2 * nvp;
+        for (int i = 0; i < createParams.polyCount; ++i)
+        {
+            //const ushort* p = &createParams.polys[i*2*nvp];
+            int pStart = i * 2 * nvp;
 
-			for (int j = 0; j < nvp; ++j)
-			{
-				if (createParams.polys[pStart + j] == MESH_NULL_IDX) break;
+            for (int j = 0; j < nvp; ++j)
+            {
+                if (createParams.polys[pStart + j] == MESH_NULL_IDX) break;
 
-				edgeCount++;
+                edgeCount++;
 
-				if ((createParams.polys[pStart + nvp + j] & 0x8000) != 0)
-				{
-					ushort dir = (ushort)(createParams.polys[pStart + nvp + j] & 0xf);
+                if ((createParams.polys[pStart + nvp + j] & 0x8000) != 0)
+                {
+                    ushort dir = (ushort)(createParams.polys[pStart + nvp + j] & 0xf);
 
-					if (dir != 0xf)
-						portalCount++;
-				}
-			}
-		}
+                    if (dir != 0xf)
+                        portalCount++;
+                }
+            }
+        }
 
-		int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
+        int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
 
-		// Find unique detail vertices.
-		int uniqueDetailVertCount = 0;
-		int detailTriCount        = 0;
+        // Find unique detail vertices.
+        int uniqueDetailVertCount = 0;
+        int detailTriCount = 0;
 
-		if (createParams.detailMeshes != null)
-		{
-			// Has detail mesh, count unique detail vertex count and use input detail tri count.
-			detailTriCount = createParams.detailTriCount;
+        if (createParams.detailMeshes != null)
+        {
+            // Has detail mesh, count unique detail vertex count and use input detail tri count.
+            detailTriCount = createParams.detailTriCount;
 
-			for (int i = 0; i < createParams.polyCount; ++i)
-			{
-				//const ushort* p = &createParams.polys[i*nvp*2];
-				int pStart = i * nvp * 2;
-				int ndv    = (int)createParams.detailMeshes[i * 4 + 1];
-				int nv     = 0;
+            for (int i = 0; i < createParams.polyCount; ++i)
+            {
+                //const ushort* p = &createParams.polys[i*nvp*2];
+                int pStart = i * nvp * 2;
+                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                int nv = 0;
 
-				for (int j = 0; j < nvp; ++j)
-				{
-					if (createParams.polys[pStart + j] == MESH_NULL_IDX)
-						break;
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (createParams.polys[pStart + j] == MESH_NULL_IDX)
+                        break;
 
-					nv++;
-				}
+                    nv++;
+                }
 
-				ndv                   -= nv;
-				uniqueDetailVertCount += ndv;
-			}
-		}
-		else
-		{
-			// No input detail mesh, build detail mesh from nav polys.
-			uniqueDetailVertCount = 0; // No extra detail verts.
-			detailTriCount        = 0;
+                ndv -= nv;
+                uniqueDetailVertCount += ndv;
+            }
+        }
+        else
+        {
+            // No input detail mesh, build detail mesh from nav polys.
+            uniqueDetailVertCount = 0; // No extra detail verts.
+            detailTriCount = 0;
 
-			for (int i = 0; i < createParams.polyCount; ++i)
-			{
-				//const ushort* p = &createParams.polys[i*nvp*2];
-				int pStart = i * nvp * 2;
-				int nv     = 0;
+            for (int i = 0; i < createParams.polyCount; ++i)
+            {
+                //const ushort* p = &createParams.polys[i*nvp*2];
+                int pStart = i * nvp * 2;
+                int nv = 0;
 
-				for (int j = 0; j < nvp; ++j)
-				{
-					if (createParams.polys[pStart + j] == MESH_NULL_IDX) break;
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (createParams.polys[pStart + j] == MESH_NULL_IDX) break;
 
-					nv++;
-				}
+                    nv++;
+                }
 
-				detailTriCount += nv - 2;
-			}
-		}
+                detailTriCount += nv - 2;
+            }
+        }
 
-		outTile = new dtRawTileData();
-		/*
+        outTile = new dtRawTileData();
+        /*
 			    // Calculate data size
 		const int headerSize = dtAlign4(sizeof(dtMeshHeader));
 		const int vertsSize = dtAlign4(sizeof(float)*3*totVertCount);
@@ -516,847 +515,847 @@ public static partial class Detour
 		dtOffMeshConnection* offMeshCons = (dtOffMeshConnection*)d; d += offMeshConsSize;
 		*/
 
-		outTile.header = new dtMeshHeader();
-		dtMeshHeader header = outTile.header;
-		// Store header
-		header.magic        = DT_NAVMESH_MAGIC;
-		header.version      = DT_NAVMESH_VERSION;
-		header.x            = createParams.tileX;
-		header.y            = createParams.tileY;
-		header.layer        = createParams.tileLayer;
-		header.userId       = createParams.userId;
-		header.polyCount    = totPolyCount;
-		header.vertCount    = totVertCount;
-		header.maxLinkCount = maxLinkCount;
-		dtVcopy(header.bmin, createParams.bmin);
-		dtVcopy(header.bmax, createParams.bmax);
-		header.detailMeshCount = createParams.polyCount;
-		header.detailVertCount = uniqueDetailVertCount;
-		header.detailTriCount  = detailTriCount;
-		header.bvQuantFactor   = 1.0f / createParams.cs;
-		header.offMeshBase     = createParams.polyCount;
-		header.walkableHeight  = createParams.walkableHeight;
-		header.walkableRadius  = createParams.walkableRadius;
-		header.walkableClimb   = createParams.walkableClimb;
-		header.offMeshConCount = storedOffMeshConCount;
-		header.bvNodeCount     = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
+        outTile.header = new dtMeshHeader();
+        dtMeshHeader header = outTile.header;
+        // Store header
+        header.magic = DT_NAVMESH_MAGIC;
+        header.version = DT_NAVMESH_VERSION;
+        header.x = createParams.tileX;
+        header.y = createParams.tileY;
+        header.layer = createParams.tileLayer;
+        header.userId = createParams.userId;
+        header.polyCount = totPolyCount;
+        header.vertCount = totVertCount;
+        header.maxLinkCount = maxLinkCount;
+        dtVcopy(header.bmin, createParams.bmin);
+        dtVcopy(header.bmax, createParams.bmax);
+        header.detailMeshCount = createParams.polyCount;
+        header.detailVertCount = uniqueDetailVertCount;
+        header.detailTriCount = detailTriCount;
+        header.bvQuantFactor = 1.0f / createParams.cs;
+        header.offMeshBase = createParams.polyCount;
+        header.walkableHeight = createParams.walkableHeight;
+        header.walkableRadius = createParams.walkableRadius;
+        header.walkableClimb = createParams.walkableClimb;
+        header.offMeshConCount = storedOffMeshConCount;
+        header.bvNodeCount = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
 
-		int offMeshVertsBase = createParams.vertCount;
-		int offMeshPolyBase  = createParams.polyCount;
+        int offMeshVertsBase = createParams.vertCount;
+        int offMeshPolyBase = createParams.polyCount;
 
-		outTile.links = new dtLink[header.maxLinkCount];
-		dtcsArrayItemsCreate(outTile.links);
+        outTile.links = new dtLink[header.maxLinkCount];
+        dtcsArrayItemsCreate(outTile.links);
 
-		// Store vertices
-		// Mesh vertices
-		//const int vertsSize = dtAlign4(sizeof(float)*3*totVertCount);
-		//float* navVerts = (float*)d; d += vertsSize;
-		outTile.verts = new float[totVertCount * 3];
-		float[] navVerts = outTile.verts;
+        // Store vertices
+        // Mesh vertices
+        //const int vertsSize = dtAlign4(sizeof(float)*3*totVertCount);
+        //float* navVerts = (float*)d; d += vertsSize;
+        outTile.verts = new float[totVertCount * 3];
+        float[] navVerts = outTile.verts;
 
-		for (int i = 0; i < createParams.vertCount; ++i)
-		{
-			//const ushort* iv = &createParams.verts[i*3];
-			//float* v = &navVerts[i*3];
-			int ivIndex = i * 3;
-			int vIndex  = i * 3;
-			navVerts[vIndex + 0] = createParams.bmin[0] + createParams.verts[ivIndex + 0] * createParams.cs;
-			navVerts[vIndex + 1] = createParams.bmin[1] + createParams.verts[ivIndex + 1] * createParams.ch;
-			navVerts[vIndex + 2] = createParams.bmin[2] + createParams.verts[ivIndex + 2] * createParams.cs;
-		}
+        for (int i = 0; i < createParams.vertCount; ++i)
+        {
+            //const ushort* iv = &createParams.verts[i*3];
+            //float* v = &navVerts[i*3];
+            int ivIndex = i * 3;
+            int vIndex = i * 3;
+            navVerts[vIndex + 0] = createParams.bmin[0] + createParams.verts[ivIndex + 0] * createParams.cs;
+            navVerts[vIndex + 1] = createParams.bmin[1] + createParams.verts[ivIndex + 1] * createParams.ch;
+            navVerts[vIndex + 2] = createParams.bmin[2] + createParams.verts[ivIndex + 2] * createParams.cs;
+        }
 
-		// Off-mesh link vertices.
-		int n = 0;
+        // Off-mesh link vertices.
+        int n = 0;
 
-		for (int i = 0; i < createParams.offMeshConCount; ++i)
-			// Only store connections which start from this tile.
-			if (offMeshConClass[i * 2 + 0] == 0xff)
-			{
-				//const float* linkv = &createParams.offMeshConVerts[i*2*3];
-				//float* v = &navVerts[(offMeshVertsBase + n*2)*3];
-				int linkVStart = i * 2 * 3;
-				int vStart     = (offMeshVertsBase + n * 2) * 3;
-				dtVcopy(navVerts, vStart + 0, createParams.offMeshConVerts, linkVStart + 0);
-				dtVcopy(navVerts, vStart + 3, createParams.offMeshConVerts, linkVStart + 3);
-				n++;
-			}
+        for (int i = 0; i < createParams.offMeshConCount; ++i)
+            // Only store connections which start from this tile.
+            if (offMeshConClass[i * 2 + 0] == 0xff)
+            {
+                //const float* linkv = &createParams.offMeshConVerts[i*2*3];
+                //float* v = &navVerts[(offMeshVertsBase + n*2)*3];
+                int linkVStart = i * 2 * 3;
+                int vStart = (offMeshVertsBase + n * 2) * 3;
+                dtVcopy(navVerts, vStart + 0, createParams.offMeshConVerts, linkVStart + 0);
+                dtVcopy(navVerts, vStart + 3, createParams.offMeshConVerts, linkVStart + 3);
+                n++;
+            }
 
-		// Store polygons
-		// Mesh polys
-		//const ushort* src = createParams.polys;
-		//ushort[] src = createParams.polys;
-		int srcIndex = 0;
-		//const int polysSize = dtAlign4(sizeof(dtPoly)*totPolyCount);
-		//dtPoly* navPolys = (dtPoly*)d; d += polysSize;
-		outTile.polys = new dtPoly[totPolyCount];
-		dtcsArrayItemsCreate(outTile.polys);
-		//outTile.offMeshCons ??
-		dtPoly[] navPolys = outTile.polys;
+        // Store polygons
+        // Mesh polys
+        //const ushort* src = createParams.polys;
+        //ushort[] src = createParams.polys;
+        int srcIndex = 0;
+        //const int polysSize = dtAlign4(sizeof(dtPoly)*totPolyCount);
+        //dtPoly* navPolys = (dtPoly*)d; d += polysSize;
+        outTile.polys = new dtPoly[totPolyCount];
+        dtcsArrayItemsCreate(outTile.polys);
+        //outTile.offMeshCons ??
+        dtPoly[] navPolys = outTile.polys;
 
-		//outTile.
-		for (int i = 0; i < createParams.polyCount; ++i)
-		{
-			//dtPoly* p = &navPolys[i];
-			dtPoly p = navPolys[i];
-			p.vertCount = 0;
-			p.flags     = createParams.polyFlags[i];
-			p.setArea(createParams.polyAreas[i]);
-			p.setType((byte)dtPolyTypes.DT_POLYTYPE_GROUND);
+        //outTile.
+        for (int i = 0; i < createParams.polyCount; ++i)
+        {
+            //dtPoly* p = &navPolys[i];
+            dtPoly p = navPolys[i];
+            p.vertCount = 0;
+            p.flags = createParams.polyFlags[i];
+            p.setArea(createParams.polyAreas[i]);
+            p.setType((byte)dtPolyTypes.DT_POLYTYPE_GROUND);
 
-			for (int j = 0; j < nvp; ++j)
-			{
-				if (createParams.polys[srcIndex + j] == MESH_NULL_IDX)
-					break;
+            for (int j = 0; j < nvp; ++j)
+            {
+                if (createParams.polys[srcIndex + j] == MESH_NULL_IDX)
+                    break;
 
-				p.verts[j] = createParams.polys[srcIndex + j];
+                p.verts[j] = createParams.polys[srcIndex + j];
 
-				if ((createParams.polys[srcIndex + nvp + j] & 0x8000) != 0)
-				{
-					// Border or portal edge.
-					ushort dir = (ushort)(createParams.polys[srcIndex + nvp + j] & 0xf);
+                if ((createParams.polys[srcIndex + nvp + j] & 0x8000) != 0)
+                {
+                    // Border or portal edge.
+                    ushort dir = (ushort)(createParams.polys[srcIndex + nvp + j] & 0xf);
 
-					if (dir == 0xf) // Border
-						p.neis[j] = 0;
-					else if (dir == 0) // Portal x-
-						p.neis[j] = DT_EXT_LINK | 4;
-					else if (dir == 1) // Portal z+
-						p.neis[j] = DT_EXT_LINK | 2;
-					else if (dir == 2) // Portal x+
-						p.neis[j] = DT_EXT_LINK | 0;
-					else if (dir == 3) // Portal z-
-						p.neis[j] = DT_EXT_LINK | 6;
-				}
-				else
-				{
-					// Normal connection
-					p.neis[j] = (ushort)(createParams.polys[srcIndex + nvp + j] + 1);
-				}
+                    if (dir == 0xf) // Border
+                        p.neis[j] = 0;
+                    else if (dir == 0) // Portal x-
+                        p.neis[j] = DT_EXT_LINK | 4;
+                    else if (dir == 1) // Portal z+
+                        p.neis[j] = DT_EXT_LINK | 2;
+                    else if (dir == 2) // Portal x+
+                        p.neis[j] = DT_EXT_LINK | 0;
+                    else if (dir == 3) // Portal z-
+                        p.neis[j] = DT_EXT_LINK | 6;
+                }
+                else
+                {
+                    // Normal connection
+                    p.neis[j] = (ushort)(createParams.polys[srcIndex + nvp + j] + 1);
+                }
 
-				p.vertCount++;
-			}
+                p.vertCount++;
+            }
 
-			srcIndex += nvp * 2;
-		}
+            srcIndex += nvp * 2;
+        }
 
-		// Off-mesh connection vertices.
-		n = 0;
+        // Off-mesh connection vertices.
+        n = 0;
 
-		for (int i = 0; i < createParams.offMeshConCount; ++i)
-			// Only store connections which start from this tile.
-			if (offMeshConClass[i * 2 + 0] == 0xff)
-			{
-				dtPoly p = navPolys[offMeshPolyBase + n];
-				p.vertCount = 2;
-				p.verts[0]  = (ushort)(offMeshVertsBase + n * 2 + 0);
-				p.verts[1]  = (ushort)(offMeshVertsBase + n * 2 + 1);
-				p.flags     = createParams.offMeshConFlags[i];
-				p.setArea(createParams.offMeshConAreas[i]);
-				p.setType((byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION);
-				n++;
-			}
+        for (int i = 0; i < createParams.offMeshConCount; ++i)
+            // Only store connections which start from this tile.
+            if (offMeshConClass[i * 2 + 0] == 0xff)
+            {
+                dtPoly p = navPolys[offMeshPolyBase + n];
+                p.vertCount = 2;
+                p.verts[0] = (ushort)(offMeshVertsBase + n * 2 + 0);
+                p.verts[1] = (ushort)(offMeshVertsBase + n * 2 + 1);
+                p.flags = createParams.offMeshConFlags[i];
+                p.setArea(createParams.offMeshConAreas[i]);
+                p.setType((byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION);
+                n++;
+            }
 
-		// Store detail meshes and vertices.
-		// The nav polygon vertices are stored as the first vertices on each mesh.
-		// We compress the mesh data by skipping them and using the navmesh coordinates.
-		//const int detailMeshesSize = dtAlign4(sizeof(dtPolyDetail)*createParams.polyCount);
-		//dtPolyDetail* navDMeshes = (dtPolyDetail*)d; d += detailMeshesSize;
-		outTile.detailMeshes = new dtPolyDetail[createParams.polyCount];
-		dtPolyDetail[] navDMeshes = outTile.detailMeshes;
-		dtcsArrayItemsCreate(navDMeshes);
+        // Store detail meshes and vertices.
+        // The nav polygon vertices are stored as the first vertices on each mesh.
+        // We compress the mesh data by skipping them and using the navmesh coordinates.
+        //const int detailMeshesSize = dtAlign4(sizeof(dtPolyDetail)*createParams.polyCount);
+        //dtPolyDetail* navDMeshes = (dtPolyDetail*)d; d += detailMeshesSize;
+        outTile.detailMeshes = new dtPolyDetail[createParams.polyCount];
+        dtPolyDetail[] navDMeshes = outTile.detailMeshes;
+        dtcsArrayItemsCreate(navDMeshes);
 
-		outTile.detailVerts = new float[3 * uniqueDetailVertCount];
-		float[] navDVerts = outTile.detailVerts;
+        outTile.detailVerts = new float[3 * uniqueDetailVertCount];
+        float[] navDVerts = outTile.detailVerts;
 
-		outTile.detailTris = new byte[4 * detailTriCount];
-		byte[] navDTris = outTile.detailTris;
+        outTile.detailTris = new byte[4 * detailTriCount];
+        byte[] navDTris = outTile.detailTris;
 
-		if (createParams.detailMeshes != null)
-		{
-			ushort vbase = 0;
+        if (createParams.detailMeshes != null)
+        {
+            ushort vbase = 0;
 
-			for (int i = 0; i < createParams.polyCount; ++i)
-			{
-				dtPolyDetail dtl = navDMeshes[i];
-				int          vb  = (int)createParams.detailMeshes[i * 4 + 0];
-				int          ndv = (int)createParams.detailMeshes[i * 4 + 1];
-				int          nv  = navPolys[i].vertCount;
-				dtl.vertBase  = (uint)vbase;
-				dtl.vertCount = (byte)(ndv - nv);
-				dtl.triBase   = (uint)createParams.detailMeshes[i * 4 + 2];
-				dtl.triCount  = (byte)createParams.detailMeshes[i * 4 + 3];
+            for (int i = 0; i < createParams.polyCount; ++i)
+            {
+                dtPolyDetail dtl = navDMeshes[i];
+                int vb = (int)createParams.detailMeshes[i * 4 + 0];
+                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                int nv = navPolys[i].vertCount;
+                dtl.vertBase = (uint)vbase;
+                dtl.vertCount = (byte)(ndv - nv);
+                dtl.triBase = (uint)createParams.detailMeshes[i * 4 + 2];
+                dtl.triCount = (byte)createParams.detailMeshes[i * 4 + 3];
 
-				// Copy vertices except the first 'nv' verts which are equal to nav poly verts.
-				if (ndv - nv != 0)
-				{
-					//memcpy(&navDVerts[vbase*3], &createParams.detailVerts[(vb+nv)*3], sizeof(float)*3*(ndv-nv));
-					for (int j = 0; j < 3 * (ndv - nv); ++j)
-						navDVerts[j + vbase * 3] = createParams.detailVerts[j + (vb + nv) * 3];
+                // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
+                if (ndv - nv != 0)
+                {
+                    //memcpy(&navDVerts[vbase*3], &createParams.detailVerts[(vb+nv)*3], sizeof(float)*3*(ndv-nv));
+                    for (int j = 0; j < 3 * (ndv - nv); ++j)
+                        navDVerts[j + vbase * 3] = createParams.detailVerts[j + (vb + nv) * 3];
 
-					vbase += (ushort)(ndv - nv);
-				}
-			}
+                    vbase += (ushort)(ndv - nv);
+                }
+            }
 
-			// Store triangles.
-			//memcpy(navDTris, createParams.detailTris, sizeof(byte)*4*createParams.detailTriCount);
-			for (int j = 0; j < 4 * createParams.detailTriCount; ++j)
-				navDTris[j] = createParams.detailTris[j];
-		}
-		else
-		{
-			// Create dummy detail mesh by triangulating polys.
-			int tbase = 0;
+            // Store triangles.
+            //memcpy(navDTris, createParams.detailTris, sizeof(byte)*4*createParams.detailTriCount);
+            for (int j = 0; j < 4 * createParams.detailTriCount; ++j)
+                navDTris[j] = createParams.detailTris[j];
+        }
+        else
+        {
+            // Create dummy detail mesh by triangulating polys.
+            int tbase = 0;
 
-			for (int i = 0; i < createParams.polyCount; ++i)
-			{
-				dtPolyDetail dtl = navDMeshes[i];
-				int          nv  = navPolys[i].vertCount;
-				dtl.vertBase  = 0;
-				dtl.vertCount = 0;
-				dtl.triBase   = (uint)tbase;
-				dtl.triCount  = (byte)(nv - 2);
+            for (int i = 0; i < createParams.polyCount; ++i)
+            {
+                dtPolyDetail dtl = navDMeshes[i];
+                int nv = navPolys[i].vertCount;
+                dtl.vertBase = 0;
+                dtl.vertCount = 0;
+                dtl.triBase = (uint)tbase;
+                dtl.triCount = (byte)(nv - 2);
 
-				// Triangulate polygon (local indices).
-				for (int j = 2; j < nv; ++j)
-				{
-					//byte* t = &navDTris[tbase*4];
-					int tIndex = tbase * 4;
-					navDTris[tIndex + 0] = 0;
-					navDTris[tIndex + 1] = (byte)(j - 1);
-					navDTris[tIndex + 2] = (byte)j;
-					// Bit for each edge that belongs to poly boundary.
-					navDTris[tIndex + 3] = (1 << 2);
+                // Triangulate polygon (local indices).
+                for (int j = 2; j < nv; ++j)
+                {
+                    //byte* t = &navDTris[tbase*4];
+                    int tIndex = tbase * 4;
+                    navDTris[tIndex + 0] = 0;
+                    navDTris[tIndex + 1] = (byte)(j - 1);
+                    navDTris[tIndex + 2] = (byte)j;
+                    // Bit for each edge that belongs to poly boundary.
+                    navDTris[tIndex + 3] = (1 << 2);
 
-					if (j == 2)
-						navDTris[tIndex + 3] |= (1 << 0);
+                    if (j == 2)
+                        navDTris[tIndex + 3] |= (1 << 0);
 
-					if (j == nv - 1)
-						navDTris[tIndex + 3] |= (1 << 4);
+                    if (j == nv - 1)
+                        navDTris[tIndex + 3] |= (1 << 4);
 
-					tbase++;
-				}
-			}
-		}
+                    tbase++;
+                }
+            }
+        }
 
-		//createParams.buildBvTree ? dtAlign4(sizeof(dtBVNode)*createParams.polyCount*2) : 0;
-		int bvTreeNodeCout = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
-		outTile.bvTree = new dtBVNode[bvTreeNodeCout];
-		dtcsArrayItemsCreate(outTile.bvTree);
-		dtBVNode[] navBvtree = outTile.bvTree;
+        //createParams.buildBvTree ? dtAlign4(sizeof(dtBVNode)*createParams.polyCount*2) : 0;
+        int bvTreeNodeCout = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
+        outTile.bvTree = new dtBVNode[bvTreeNodeCout];
+        dtcsArrayItemsCreate(outTile.bvTree);
+        dtBVNode[] navBvtree = outTile.bvTree;
 
-		//const int offMeshConsSize = dtAlign4(sizeof(dtOffMeshConnection)*storedOffMeshConCount);
-		outTile.offMeshCons = new dtOffMeshConnection[storedOffMeshConCount];
-		dtOffMeshConnection[] offMeshCons = outTile.offMeshCons;
+        //const int offMeshConsSize = dtAlign4(sizeof(dtOffMeshConnection)*storedOffMeshConCount);
+        outTile.offMeshCons = new dtOffMeshConnection[storedOffMeshConCount];
+        dtOffMeshConnection[] offMeshCons = outTile.offMeshCons;
 
-		// Store and create BVtree.
-		// TODO: take detail mesh into account! use byte per bbox extent?
-		if (createParams.buildBvTree)
-			createBVTree(createParams, navBvtree, createParams.polyCount * 2);
+        // Store and create BVtree.
+        // TODO: take detail mesh into account! use byte per bbox extent?
+        if (createParams.buildBvTree)
+            createBVTree(createParams, navBvtree, createParams.polyCount * 2);
 
-		// Store Off-Mesh connections.
-		n = 0;
+        // Store Off-Mesh connections.
+        n = 0;
 
-		for (int i = 0; i < createParams.offMeshConCount; ++i)
-			// Only store connections which start from this tile.
-			if (offMeshConClass[i * 2 + 0] == 0xff)
-			{
-				dtOffMeshConnection con = offMeshCons[n];
-				con.poly = (ushort)(offMeshPolyBase + n);
-				// Copy connection end-points.
-				//float[] endPts = createParams.offMeshConVerts[i*2*3];
-				int endPtsStart = i * 2 * 3;
-				dtVcopy(con.pos, 0, createParams.offMeshConVerts, endPtsStart + 0);
-				dtVcopy(con.pos, 3, createParams.offMeshConVerts, endPtsStart + 3);
-				con.rad   = createParams.offMeshConRad[i];
-				con.flags = createParams.offMeshConDir[i] != 0 ? (byte)DT_OFFMESH_CON_BIDIR : (byte)0;
-				con.side  = offMeshConClass[i * 2 + 1];
+        for (int i = 0; i < createParams.offMeshConCount; ++i)
+            // Only store connections which start from this tile.
+            if (offMeshConClass[i * 2 + 0] == 0xff)
+            {
+                dtOffMeshConnection con = offMeshCons[n];
+                con.poly = (ushort)(offMeshPolyBase + n);
+                // Copy connection end-points.
+                //float[] endPts = createParams.offMeshConVerts[i*2*3];
+                int endPtsStart = i * 2 * 3;
+                dtVcopy(con.pos, 0, createParams.offMeshConVerts, endPtsStart + 0);
+                dtVcopy(con.pos, 3, createParams.offMeshConVerts, endPtsStart + 3);
+                con.rad = createParams.offMeshConRad[i];
+                con.flags = createParams.offMeshConDir[i] != 0 ? (byte)DT_OFFMESH_CON_BIDIR : (byte)0;
+                con.side = offMeshConClass[i * 2 + 1];
 
-				if (createParams.offMeshConUserID != null)
-					con.userId = createParams.offMeshConUserID[i];
+                if (createParams.offMeshConUserID != null)
+                    con.userId = createParams.offMeshConUserID[i];
 
-				n++;
-			}
+                n++;
+            }
 
-		//dtFree(offMeshConClass);
+        //dtFree(offMeshConClass);
 
-		//*outData = data;
-		//*outDataSize = dataSize;
+        //*outData = data;
+        //*outDataSize = dataSize;
 
-		return true;
-	}
+        return true;
+    }
 
-	/// Options for dtNavMeshQuery::initSlicedFindPath and updateSlicedFindPath
-	private enum dtFindPathOptions
-	{
-		DT_FINDPATH_ANY_ANGLE = 0x02 ///< use raycasts during pathfind to "shortcut" (raycast still consider costs)
+    /// Options for dtNavMeshQuery::initSlicedFindPath and updateSlicedFindPath
+    private enum dtFindPathOptions
+    {
+        DT_FINDPATH_ANY_ANGLE = 0x02 ///< use raycasts during pathfind to "shortcut" (raycast still consider costs)
 	};
 
-	/// Options for dtNavMeshQuery::raycast
-	private enum dtRaycastOptions
-	{
-		DT_RAYCAST_USE_COSTS = 0x01 ///< Raycast should calculate movement cost along the ray and fill RaycastHit::cost
+    /// Options for dtNavMeshQuery::raycast
+    private enum dtRaycastOptions
+    {
+        DT_RAYCAST_USE_COSTS = 0x01 ///< Raycast should calculate movement cost along the ray and fill RaycastHit::cost
 	};
 
-	private enum dtDetailTriEdgeFlags
-	{
-		DT_DETAIL_EDGE_BOUNDARY = 0x01 ///< Detail triangle edge is part of the poly boundary
+    private enum dtDetailTriEdgeFlags
+    {
+        DT_DETAIL_EDGE_BOUNDARY = 0x01 ///< Detail triangle edge is part of the poly boundary
 	};
 
 
-	/// Defines a polyogn within a dtMeshTile object.
-	// @ingroup detour
-	public class dtPoly
-	{
-		/// The bit packed area id and polygon type.
-		// @note Use the structure's set and get methods to acess this value.
-		public byte areaAndtype;
+    /// Defines a polyogn within a dtMeshTile object.
+    // @ingroup detour
+    public class dtPoly
+    {
+        /// The bit packed area id and polygon type.
+        // @note Use the structure's set and get methods to acess this value.
+        public byte areaAndtype;
 
-		/// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
-		public uint firstLink;
+        /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
+        public uint firstLink;
 
-		/// The user defined polygon flags.
-		public ushort flags;
+        /// The user defined polygon flags.
+        public ushort flags;
 
-		// Packed data representing neighbor polygons references and flags for each edge.
-		public ushort[] neis = new ushort[DT_VERTS_PER_POLYGON];
+        // Packed data representing neighbor polygons references and flags for each edge.
+        public ushort[] neis = new ushort[DT_VERTS_PER_POLYGON];
 
-		/// The number of vertices in the polygon.
-		public byte vertCount;
+        /// The number of vertices in the polygon.
+        public byte vertCount;
 
-		// The indices of the polygon's vertices.
-		// The actual vertices are located in dtMeshTile::verts.
-		public ushort[] verts = new ushort[DT_VERTS_PER_POLYGON];
+        // The indices of the polygon's vertices.
+        // The actual vertices are located in dtMeshTile::verts.
+        public ushort[] verts = new ushort[DT_VERTS_PER_POLYGON];
 
-		public int FromBytes(byte[] array, int start)
-		{
-			firstLink =  BitConverter.ToUInt32(array, start);
-			start     += sizeof(uint);
+        public int FromBytes(byte[] array, int start)
+        {
+            firstLink = BitConverter.ToUInt32(array, start);
+            start += sizeof(uint);
 
-			for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
-			{
-				verts[i] =  BitConverter.ToUInt16(array, start);
-				start    += sizeof(ushort);
-			}
+            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            {
+                verts[i] = BitConverter.ToUInt16(array, start);
+                start += sizeof(ushort);
+            }
 
-			for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
-			{
-				neis[i] =  BitConverter.ToUInt16(array, start);
-				start   += sizeof(ushort);
-			}
+            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            {
+                neis[i] = BitConverter.ToUInt16(array, start);
+                start += sizeof(ushort);
+            }
 
-			flags       =  BitConverter.ToUInt16(array, start);
-			start       += sizeof(ushort);
-			vertCount   =  array[start];
-			start       += sizeof(byte);
-			areaAndtype =  array[start];
-			start       += sizeof(byte);
+            flags = BitConverter.ToUInt16(array, start);
+            start += sizeof(ushort);
+            vertCount = array[start];
+            start += sizeof(byte);
+            areaAndtype = array[start];
+            start += sizeof(byte);
 
-			return start;
-		}
+            return start;
+        }
 
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
 
-			bytes.AddRange(BitConverter.GetBytes(firstLink));
+            bytes.AddRange(BitConverter.GetBytes(firstLink));
 
-			for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
-				bytes.AddRange(BitConverter.GetBytes(verts[i]));
+            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+                bytes.AddRange(BitConverter.GetBytes(verts[i]));
 
-			for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
-				bytes.AddRange(BitConverter.GetBytes(neis[i]));
+            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+                bytes.AddRange(BitConverter.GetBytes(neis[i]));
 
-			bytes.AddRange(BitConverter.GetBytes(flags));
-			bytes.Add(vertCount);
-			bytes.Add(areaAndtype);
+            bytes.AddRange(BitConverter.GetBytes(flags));
+            bytes.Add(vertCount);
+            bytes.Add(areaAndtype);
 
-			return bytes.ToArray();
-		}
+            return bytes.ToArray();
+        }
 
-		/// Sets the user defined area id. [Limit: &lt; #DT_MAX_AREAS]
-		public void setArea(byte a)
-		{
-			//Bitwise operators are done on ints in C#
-			areaAndtype = (byte)(((int)areaAndtype & 0xc0) | ((int)a & 0x3f));
-		}
+        /// Sets the user defined area id. [Limit: &lt; #DT_MAX_AREAS]
+        public void setArea(byte a)
+        {
+            //Bitwise operators are done on ints in C#
+            areaAndtype = (byte)(((int)areaAndtype & 0xc0) | ((int)a & 0x3f));
+        }
 
-		/// Sets the polygon type. (See: #dtPolyTypes.)
-		public void setType(byte t)
-		{
-			areaAndtype = (byte)(((int)areaAndtype & 0x3f) | (t << 6));
-		}
+        /// Sets the polygon type. (See: #dtPolyTypes.)
+        public void setType(byte t)
+        {
+            areaAndtype = (byte)(((int)areaAndtype & 0x3f) | (t << 6));
+        }
 
-		/// Gets the user defined area id.
-		public byte getArea()
-		{
-			return (byte)((int)areaAndtype & 0x3f);
-		}
+        /// Gets the user defined area id.
+        public byte getArea()
+        {
+            return (byte)((int)areaAndtype & 0x3f);
+        }
 
-		/// Gets the polygon type. (See: #dtPolyTypes)
-		public byte getType()
-		{
-			return (byte)((int)areaAndtype >> 6);
-		}
-	};
+        /// Gets the polygon type. (See: #dtPolyTypes)
+        public byte getType()
+        {
+            return (byte)((int)areaAndtype >> 6);
+        }
+    };
 
-	/// Defines the location of detail sub-mesh data within a dtMeshTile.
-	public class dtPolyDetail
-	{
-		public uint triBase;   //< The offset of the triangles in the dtMeshTile::detailTris array.
-		public byte triCount;  //< The number of triangles in the sub-mesh.
-		public uint vertBase;  //< The offset of the vertices in the dtMeshTile::detailVerts array.
-		public byte vertCount; //< The number of vertices in the sub-mesh.
+    /// Defines the location of detail sub-mesh data within a dtMeshTile.
+    public class dtPolyDetail
+    {
+        public uint triBase;   //< The offset of the triangles in the dtMeshTile::detailTris array.
+        public byte triCount;  //< The number of triangles in the sub-mesh.
+        public uint vertBase;  //< The offset of the vertices in the dtMeshTile::detailVerts array.
+        public byte vertCount; //< The number of vertices in the sub-mesh.
 
-		public int FromBytes(byte[] array, int start)
-		{
-			vertBase  =  BitConverter.ToUInt32(array, start);
-			start     += sizeof(uint);
-			triBase   =  BitConverter.ToUInt32(array, start);
-			start     += sizeof(uint);
-			vertCount =  array[start];
-			start     += sizeof(byte);
-			triCount  =  array[start];
-			start     += sizeof(byte);
-			start     += sizeof(ushort); //two byte padding
+        public int FromBytes(byte[] array, int start)
+        {
+            vertBase = BitConverter.ToUInt32(array, start);
+            start += sizeof(uint);
+            triBase = BitConverter.ToUInt32(array, start);
+            start += sizeof(uint);
+            vertCount = array[start];
+            start += sizeof(byte);
+            triCount = array[start];
+            start += sizeof(byte);
+            start += sizeof(ushort); //two byte padding
 
-			return start;
-		}
+            return start;
+        }
 
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
 
-			bytes.AddRange(BitConverter.GetBytes(vertBase));
-			bytes.AddRange(BitConverter.GetBytes(triBase));
-			bytes.Add(vertCount);
-			bytes.Add(triCount);
+            bytes.AddRange(BitConverter.GetBytes(vertBase));
+            bytes.AddRange(BitConverter.GetBytes(triBase));
+            bytes.Add(vertCount);
+            bytes.Add(triCount);
 
-			return bytes.ToArray();
-		}
-	};
+            return bytes.ToArray();
+        }
+    };
 
-	/// Defines a link between polygons.
-	// @note This structure is rarely if ever used by the end user.
-	// @see dtMeshTile
-	public class dtLink
-	{
-		public byte bmax;     //< If a boundary link, defines the maximum sub-edge area.
-		public byte bmin;     //< If a boundary link, defines the minimum sub-edge area.
-		public byte edge;     //< Index of the polygon edge that owns this link.
-		public uint next;     //< Index of the next link.
-		public ulong polyRef; //< Neighbour reference. (The neighbor that is linked to.)
-		public byte side;     //< If a boundary link, defines on which side the link is.
+    /// Defines a link between polygons.
+    // @note This structure is rarely if ever used by the end user.
+    // @see dtMeshTile
+    public class dtLink
+    {
+        public byte bmax;     //< If a boundary link, defines the maximum sub-edge area.
+        public byte bmin;     //< If a boundary link, defines the minimum sub-edge area.
+        public byte edge;     //< Index of the polygon edge that owns this link.
+        public uint next;     //< Index of the next link.
+        public ulong polyRef; //< Neighbour reference. (The neighbor that is linked to.)
+        public byte side;     //< If a boundary link, defines on which side the link is.
 
-		public int FromBytes(byte[] array, int start)
-		{
-			polyRef =  BitConverter.ToUInt64(array, start);
-			start   += sizeof(ulong);
-			next    =  BitConverter.ToUInt32(array, start);
-			start   += sizeof(uint);
-			edge    =  array[start];
-			start   += sizeof(byte);
-			side    =  array[start];
-			start   += sizeof(byte);
-			bmin    =  array[start];
-			start   += sizeof(byte);
-			bmax    =  array[start];
-			start   += sizeof(byte);
+        public int FromBytes(byte[] array, int start)
+        {
+            polyRef = BitConverter.ToUInt64(array, start);
+            start += sizeof(ulong);
+            next = BitConverter.ToUInt32(array, start);
+            start += sizeof(uint);
+            edge = array[start];
+            start += sizeof(byte);
+            side = array[start];
+            start += sizeof(byte);
+            bmin = array[start];
+            start += sizeof(byte);
+            bmax = array[start];
+            start += sizeof(byte);
 
-			return start;
-		}
+            return start;
+        }
 
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
 
-			bytes.AddRange(BitConverter.GetBytes(polyRef));
-			bytes.AddRange(BitConverter.GetBytes(next));
-			bytes.Add(edge);
-			bytes.Add(side);
-			bytes.Add(bmin);
-			bytes.Add(bmax);
+            bytes.AddRange(BitConverter.GetBytes(polyRef));
+            bytes.AddRange(BitConverter.GetBytes(next));
+            bytes.Add(edge);
+            bytes.Add(side);
+            bytes.Add(bmin);
+            bytes.Add(bmax);
 
-			return bytes.ToArray();
-		}
-	};
+            return bytes.ToArray();
+        }
+    };
 
-	/// Bounding volume node.
-	// @note This structure is rarely if ever used by the end user.
-	// @see dtMeshTile
-	public class dtBVNode
-	{
-		public ushort[] bmax = new ushort[3]; //< Maximum bounds of the node's AABB. [(x, y, z)]
-		public ushort[] bmin = new ushort[3]; //< Minimum bounds of the node's AABB. [(x, y, z)]
-		public int i;                         //< The node's index. (Negative for escape sequence.)
+    /// Bounding volume node.
+    // @note This structure is rarely if ever used by the end user.
+    // @see dtMeshTile
+    public class dtBVNode
+    {
+        public ushort[] bmax = new ushort[3]; //< Maximum bounds of the node's AABB. [(x, y, z)]
+        public ushort[] bmin = new ushort[3]; //< Minimum bounds of the node's AABB. [(x, y, z)]
+        public int i;                         //< The node's index. (Negative for escape sequence.)
 
-		public int FromBytes(byte[] array, int start)
-		{
-			for (int j = 0; j < bmin.Length; ++j)
-			{
-				bmin[j] =  BitConverter.ToUInt16(array, start);
-				start   += sizeof(ushort);
-			}
+        public int FromBytes(byte[] array, int start)
+        {
+            for (int j = 0; j < bmin.Length; ++j)
+            {
+                bmin[j] = BitConverter.ToUInt16(array, start);
+                start += sizeof(ushort);
+            }
 
-			for (int j = 0; j < bmax.Length; ++j)
-			{
-				bmax[j] =  BitConverter.ToUInt16(array, start);
-				start   += sizeof(ushort);
-			}
+            for (int j = 0; j < bmax.Length; ++j)
+            {
+                bmax[j] = BitConverter.ToUInt16(array, start);
+                start += sizeof(ushort);
+            }
 
-			i     =  BitConverter.ToInt32(array, start);
-			start += sizeof(int);
+            i = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
 
-			return start;
-		}
+            return start;
+        }
 
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
 
-			for (int j = 0; j < bmin.Length; ++j)
-				bytes.AddRange(BitConverter.GetBytes(bmin[j]));
+            for (int j = 0; j < bmin.Length; ++j)
+                bytes.AddRange(BitConverter.GetBytes(bmin[j]));
 
-			for (int j = 0; j < bmax.Length; ++j)
-				bytes.AddRange(BitConverter.GetBytes(bmax[j]));
+            for (int j = 0; j < bmax.Length; ++j)
+                bytes.AddRange(BitConverter.GetBytes(bmax[j]));
 
-			bytes.AddRange(BitConverter.GetBytes(i));
+            bytes.AddRange(BitConverter.GetBytes(i));
 
-			return bytes.ToArray();
-		}
-	};
+            return bytes.ToArray();
+        }
+    };
 
     /// Defines an navigation mesh off-mesh connection within a dtMeshTile object.
     /// An off-mesh connection is a user defined traversable connection made up to two vertices.
     public class dtOffMeshConnection
-	{
-		/// Link flags. 
-		// @note These are not the connection's user defined flags. Those are assigned via the 
-		/// connection's dtPoly definition. These are link flags used for internal purposes.
-		public byte flags;
+    {
+        /// Link flags. 
+        // @note These are not the connection's user defined flags. Those are assigned via the 
+        /// connection's dtPoly definition. These are link flags used for internal purposes.
+        public byte flags;
 
-		/// The polygon reference of the connection within the tile.
-		public ushort poly;
+        /// The polygon reference of the connection within the tile.
+        public ushort poly;
 
-		/// The endpoints of the connection. [(ax, ay, az, bx, by, bz)]
-		public float[] pos = new float[6];
+        /// The endpoints of the connection. [(ax, ay, az, bx, by, bz)]
+        public float[] pos = new float[6];
 
-		/// The radius of the endpoints. [Limit: >= 0]
-		public float rad;
+        /// The radius of the endpoints. [Limit: >= 0]
+        public float rad;
 
-		/// End point side.
-		public byte side;
+        /// End point side.
+        public byte side;
 
-		/// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
-		public uint userId;
-
-
-		public int FromBytes(byte[] array, int start)
-		{
-			for (int i = 0; i < 6; ++i)
-			{
-				pos[i] =  BitConverter.ToSingle(array, start);
-				start  += sizeof(float);
-			}
-
-			rad   =  BitConverter.ToSingle(array, start);
-			start += sizeof(float);
-			poly  =  BitConverter.ToUInt16(array, start);
-			start += sizeof(ushort);
-			flags =  array[start];
-			++start;
-			side = array[start];
-			++start;
-			userId =  BitConverter.ToUInt32(array, start);
-			start  += sizeof(uint);
-
-			return start;
-		}
-
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
-
-			for (int i = 0; i < 6; ++i)
-				bytes.AddRange(BitConverter.GetBytes(pos[i]));
-
-			bytes.AddRange(BitConverter.GetBytes(rad));
-			bytes.AddRange(BitConverter.GetBytes(poly));
-			bytes.Add(flags);
-			bytes.Add(side);
-			bytes.AddRange(BitConverter.GetBytes(userId));
-
-			return bytes.ToArray();
-		}
-	};
+        /// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
+        public uint userId;
 
 
-	/// Provides high level information related to a dtMeshTile object.
-	// @ingroup detour
-	public class dtMeshHeader
-	{
-		public float[] bmax = new float[3]; //< The maximum bounds of the tile's AABB. [(x, y, z)]
-		public float[] bmin = new float[3]; //< The minimum bounds of the tile's AABB. [(x, y, z)]
-		public int bvNodeCount;             //< The number of bounding volume nodes. (Zero if bounding volumes are disabled.)
+        public int FromBytes(byte[] array, int start)
+        {
+            for (int i = 0; i < 6; ++i)
+            {
+                pos[i] = BitConverter.ToSingle(array, start);
+                start += sizeof(float);
+            }
+
+            rad = BitConverter.ToSingle(array, start);
+            start += sizeof(float);
+            poly = BitConverter.ToUInt16(array, start);
+            start += sizeof(ushort);
+            flags = array[start];
+            ++start;
+            side = array[start];
+            ++start;
+            userId = BitConverter.ToUInt32(array, start);
+            start += sizeof(uint);
+
+            return start;
+        }
+
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
+
+            for (int i = 0; i < 6; ++i)
+                bytes.AddRange(BitConverter.GetBytes(pos[i]));
+
+            bytes.AddRange(BitConverter.GetBytes(rad));
+            bytes.AddRange(BitConverter.GetBytes(poly));
+            bytes.Add(flags);
+            bytes.Add(side);
+            bytes.AddRange(BitConverter.GetBytes(userId));
+
+            return bytes.ToArray();
+        }
+    };
+
+
+    /// Provides high level information related to a dtMeshTile object.
+    // @ingroup detour
+    public class dtMeshHeader
+    {
+        public float[] bmax = new float[3]; //< The maximum bounds of the tile's AABB. [(x, y, z)]
+        public float[] bmin = new float[3]; //< The minimum bounds of the tile's AABB. [(x, y, z)]
+        public int bvNodeCount;             //< The number of bounding volume nodes. (Zero if bounding volumes are disabled.)
 
         /// The bounding volume quantization factor.
         public float bvQuantFactor;
 
-		public int detailMeshCount; //< The number of sub-meshes in the detail mesh.
+        public int detailMeshCount; //< The number of sub-meshes in the detail mesh.
 
-		public int detailTriCount; //< The number of triangles in the detail mesh.
+        public int detailTriCount; //< The number of triangles in the detail mesh.
 
-		/// The number of unique vertices in the detail mesh. (In addition to the polygon vertices.)
-		public int detailVertCount;
+        /// The number of unique vertices in the detail mesh. (In addition to the polygon vertices.)
+        public int detailVertCount;
 
-		public int layer;            //< The layer of the tile within the dtNavMesh tile grid. (x, y, layer)
-		public int magic;            //< Tile magic number. (Used to identify the data format.)
-		public int maxLinkCount;     //< The number of allocated links.
-		public int offMeshBase;      //< The index of the first polygon which is an off-mesh connection.
-		public int offMeshConCount;  //< The number of off-mesh connections.
-		public int polyCount;        //< The number of polygons in the tile.
-		public uint userId;          //< The user defined id of the tile.
-		public int version;          //< Tile data format version number.
-		public int vertCount;        //< The number of vertices in the tile.
-		public float walkableClimb;  //< The maximum climb height of the agents using the tile.
-		public float walkableHeight; //< The height of the agents using the tile.
-		public float walkableRadius; //< The radius of the agents using the tile.
-		public int x;                //< The x-position of the tile within the dtNavMesh tile grid. (x, y, layer)
-		public int y;                //< The y-position of the tile within the dtNavMesh tile grid. (x, y, layer)
+        public int layer;            //< The layer of the tile within the dtNavMesh tile grid. (x, y, layer)
+        public int magic;            //< Tile magic number. (Used to identify the data format.)
+        public int maxLinkCount;     //< The number of allocated links.
+        public int offMeshBase;      //< The index of the first polygon which is an off-mesh connection.
+        public int offMeshConCount;  //< The number of off-mesh connections.
+        public int polyCount;        //< The number of polygons in the tile.
+        public uint userId;          //< The user defined id of the tile.
+        public int version;          //< Tile data format version number.
+        public int vertCount;        //< The number of vertices in the tile.
+        public float walkableClimb;  //< The maximum climb height of the agents using the tile.
+        public float walkableHeight; //< The height of the agents using the tile.
+        public float walkableRadius; //< The radius of the agents using the tile.
+        public int x;                //< The x-position of the tile within the dtNavMesh tile grid. (x, y, layer)
+        public int y;                //< The y-position of the tile within the dtNavMesh tile grid. (x, y, layer)
 
-		public int FromBytes(byte[] array, int start)
-		{
-			magic           =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			version         =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			x               =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			y               =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			layer           =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			userId          =  BitConverter.ToUInt32(array, start);
-			start           += sizeof(uint);
-			polyCount       =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			vertCount       =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			maxLinkCount    =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			detailMeshCount =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
+        public int FromBytes(byte[] array, int start)
+        {
+            magic = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            version = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            x = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            y = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            layer = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            userId = BitConverter.ToUInt32(array, start);
+            start += sizeof(uint);
+            polyCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            vertCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            maxLinkCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            detailMeshCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
 
-			detailVertCount =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
+            detailVertCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
 
-			detailTriCount  =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			bvNodeCount     =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			offMeshConCount =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			offMeshBase     =  BitConverter.ToInt32(array, start);
-			start           += sizeof(int);
-			walkableHeight  =  BitConverter.ToSingle(array, start);
-			start           += sizeof(float);
-			walkableRadius  =  BitConverter.ToSingle(array, start);
-			start           += sizeof(float);
-			walkableClimb   =  BitConverter.ToSingle(array, start);
-			start           += sizeof(float);
+            detailTriCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            bvNodeCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            offMeshConCount = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            offMeshBase = BitConverter.ToInt32(array, start);
+            start += sizeof(int);
+            walkableHeight = BitConverter.ToSingle(array, start);
+            start += sizeof(float);
+            walkableRadius = BitConverter.ToSingle(array, start);
+            start += sizeof(float);
+            walkableClimb = BitConverter.ToSingle(array, start);
+            start += sizeof(float);
 
-			for (int i = 0; i < 3; ++i)
-			{
-				bmin[i] =  BitConverter.ToSingle(array, start);
-				start   += sizeof(float);
-			}
+            for (int i = 0; i < 3; ++i)
+            {
+                bmin[i] = BitConverter.ToSingle(array, start);
+                start += sizeof(float);
+            }
 
-			for (int i = 0; i < 3; ++i)
-			{
-				bmax[i] =  BitConverter.ToSingle(array, start);
-				start   += sizeof(float);
-			}
+            for (int i = 0; i < 3; ++i)
+            {
+                bmax[i] = BitConverter.ToSingle(array, start);
+                start += sizeof(float);
+            }
 
-			bvQuantFactor =  BitConverter.ToSingle(array, start);
-			start         += sizeof(float);
+            bvQuantFactor = BitConverter.ToSingle(array, start);
+            start += sizeof(float);
 
-			return start;
-		}
+            return start;
+        }
 
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
 
-			bytes.AddRange(BitConverter.GetBytes(magic));
-			bytes.AddRange(BitConverter.GetBytes(version));
-			bytes.AddRange(BitConverter.GetBytes(x));
-			bytes.AddRange(BitConverter.GetBytes(y));
-			bytes.AddRange(BitConverter.GetBytes(layer));
-			bytes.AddRange(BitConverter.GetBytes(userId));
-			bytes.AddRange(BitConverter.GetBytes(polyCount));
-			bytes.AddRange(BitConverter.GetBytes(vertCount));
-			bytes.AddRange(BitConverter.GetBytes(maxLinkCount));
-			bytes.AddRange(BitConverter.GetBytes(detailMeshCount));
+            bytes.AddRange(BitConverter.GetBytes(magic));
+            bytes.AddRange(BitConverter.GetBytes(version));
+            bytes.AddRange(BitConverter.GetBytes(x));
+            bytes.AddRange(BitConverter.GetBytes(y));
+            bytes.AddRange(BitConverter.GetBytes(layer));
+            bytes.AddRange(BitConverter.GetBytes(userId));
+            bytes.AddRange(BitConverter.GetBytes(polyCount));
+            bytes.AddRange(BitConverter.GetBytes(vertCount));
+            bytes.AddRange(BitConverter.GetBytes(maxLinkCount));
+            bytes.AddRange(BitConverter.GetBytes(detailMeshCount));
 
-			bytes.AddRange(BitConverter.GetBytes(detailVertCount));
+            bytes.AddRange(BitConverter.GetBytes(detailVertCount));
 
-			bytes.AddRange(BitConverter.GetBytes(detailTriCount));
-			bytes.AddRange(BitConverter.GetBytes(bvNodeCount));
-			bytes.AddRange(BitConverter.GetBytes(offMeshConCount));
-			bytes.AddRange(BitConverter.GetBytes(offMeshBase));
-			bytes.AddRange(BitConverter.GetBytes(walkableHeight));
-			bytes.AddRange(BitConverter.GetBytes(walkableRadius));
-			bytes.AddRange(BitConverter.GetBytes(walkableClimb));
+            bytes.AddRange(BitConverter.GetBytes(detailTriCount));
+            bytes.AddRange(BitConverter.GetBytes(bvNodeCount));
+            bytes.AddRange(BitConverter.GetBytes(offMeshConCount));
+            bytes.AddRange(BitConverter.GetBytes(offMeshBase));
+            bytes.AddRange(BitConverter.GetBytes(walkableHeight));
+            bytes.AddRange(BitConverter.GetBytes(walkableRadius));
+            bytes.AddRange(BitConverter.GetBytes(walkableClimb));
 
-			for (int i = 0; i < 3; ++i)
-				bytes.AddRange(BitConverter.GetBytes(bmin[i]));
+            for (int i = 0; i < 3; ++i)
+                bytes.AddRange(BitConverter.GetBytes(bmin[i]));
 
-			for (int i = 0; i < 3; ++i)
-				bytes.AddRange(BitConverter.GetBytes(bmax[i]));
+            for (int i = 0; i < 3; ++i)
+                bytes.AddRange(BitConverter.GetBytes(bmax[i]));
 
-			bytes.AddRange(BitConverter.GetBytes(bvQuantFactor));
+            bytes.AddRange(BitConverter.GetBytes(bvQuantFactor));
 
-			return bytes.ToArray();
-		}
-	};
+            return bytes.ToArray();
+        }
+    };
 
 
-	public class dtRawTileData
-	{
+    public class dtRawTileData
+    {
         /// The tile bounding volume nodes. [Size: dtMeshHeader::bvNodeCount]
         /// (Will be null if bounding volumes are disabled.)
         public dtBVNode[] bvTree;
 
-		public dtPolyDetail[] detailMeshes; //< The tile's detail sub-meshes. [Size: dtMeshHeader::detailMeshCount]
+        public dtPolyDetail[] detailMeshes; //< The tile's detail sub-meshes. [Size: dtMeshHeader::detailMeshCount]
 
-		/// The detail mesh's triangles. [(vertA, vertB, vertC) * dtMeshHeader::detailTriCount]
-		public byte[] detailTris;
+        /// The detail mesh's triangles. [(vertA, vertB, vertC) * dtMeshHeader::detailTriCount]
+        public byte[] detailTris;
 
-		/// The detail mesh's unique vertices. [(x, y, z) * dtMeshHeader::detailVertCount]
-		public float[] detailVerts;
+        /// The detail mesh's unique vertices. [(x, y, z) * dtMeshHeader::detailVertCount]
+        public float[] detailVerts;
 
-		public int flags;           //< Tile flags. (See: #dtTileFlags)
-		public dtMeshHeader header; //< The tile header.
-		public dtLink[] links;      //< The tile links. [Size: dtMeshHeader::maxLinkCount]
+        public int flags;           //< Tile flags. (See: #dtTileFlags)
+        public dtMeshHeader header; //< The tile header.
+        public dtLink[] links;      //< The tile links. [Size: dtMeshHeader::maxLinkCount]
 
-		public dtOffMeshConnection[] offMeshCons; //< The tile off-mesh connections. [Size: dtMeshHeader::offMeshConCount]
-		public dtPoly[] polys;                    //< The tile polygons. [Size: dtMeshHeader::polyCount]
-		public float[] verts;                     //< The tile vertices. [Size: dtMeshHeader::vertCount]
+        public dtOffMeshConnection[] offMeshCons; //< The tile off-mesh connections. [Size: dtMeshHeader::offMeshConCount]
+        public dtPoly[] polys;                    //< The tile polygons. [Size: dtMeshHeader::polyCount]
+        public float[] verts;                     //< The tile vertices. [Size: dtMeshHeader::vertCount]
 
-		public int FromBytes(byte[] array, int start)
-		{
-			header = new dtMeshHeader();
-			start  = header.FromBytes(array, start);
+        public int FromBytes(byte[] array, int start)
+        {
+            header = new dtMeshHeader();
+            start = header.FromBytes(array, start);
 
-			int count = header.vertCount * 3;
-			verts = new float[count];
-			int c = 0;
+            int count = header.vertCount * 3;
+            verts = new float[count];
+            int c = 0;
 
-			for (; c < count; ++c)
-			{
-				verts[c] =  BitConverter.ToSingle(array, start);
-				start    += sizeof(float);
-			}
+            for (; c < count; ++c)
+            {
+                verts[c] = BitConverter.ToSingle(array, start);
+                start += sizeof(float);
+            }
 
-			count = header.polyCount;
-			polys = new dtPoly[count];
+            count = header.polyCount;
+            polys = new dtPoly[count];
 
-			for (int i = 0; i < count; ++i)
-			{
-				polys[i] = new dtPoly();
-				start    = polys[i].FromBytes(array, start);
-			}
+            for (int i = 0; i < count; ++i)
+            {
+                polys[i] = new dtPoly();
+                start = polys[i].FromBytes(array, start);
+            }
 
-			count = header.maxLinkCount;
-			links = new dtLink[count];
+            count = header.maxLinkCount;
+            links = new dtLink[count];
 
-			for (int i = 0; i < count; ++i)
-			{
-				links[i] = new dtLink();
-				start    = links[i].FromBytes(array, start);
-			}
+            for (int i = 0; i < count; ++i)
+            {
+                links[i] = new dtLink();
+                start = links[i].FromBytes(array, start);
+            }
 
-			count        = header.detailMeshCount;
-			detailMeshes = new dtPolyDetail[count];
+            count = header.detailMeshCount;
+            detailMeshes = new dtPolyDetail[count];
 
-			for (int i = 0; i < count; ++i)
-			{
-				detailMeshes[i] = new dtPolyDetail();
-				start           = detailMeshes[i].FromBytes(array, start);
-			}
+            for (int i = 0; i < count; ++i)
+            {
+                detailMeshes[i] = new dtPolyDetail();
+                start = detailMeshes[i].FromBytes(array, start);
+            }
 
-			count       = header.detailVertCount * 3;
-			detailVerts = new float[count];
+            count = header.detailVertCount * 3;
+            detailVerts = new float[count];
 
-			for (int i = 0; i < count; ++i)
-			{
-				detailVerts[i] =  BitConverter.ToSingle(array, start);
-				start          += sizeof(float);
-			}
+            for (int i = 0; i < count; ++i)
+            {
+                detailVerts[i] = BitConverter.ToSingle(array, start);
+                start += sizeof(float);
+            }
 
-			count      = header.detailTriCount * 4;
-			detailTris = new byte[count];
+            count = header.detailTriCount * 4;
+            detailTris = new byte[count];
 
-			for (int i = 0; i < count; ++i)
-				detailTris[i] = array[start + i];
+            for (int i = 0; i < count; ++i)
+                detailTris[i] = array[start + i];
 
-			start  += count;
-			count  =  header.bvNodeCount;
-			bvTree =  new dtBVNode[count];
+            start += count;
+            count = header.bvNodeCount;
+            bvTree = new dtBVNode[count];
 
-			for (int i = 0; i < count; ++i)
-			{
-				bvTree[i] = new dtBVNode();
-				start     = bvTree[i].FromBytes(array, start);
-			}
+            for (int i = 0; i < count; ++i)
+            {
+                bvTree[i] = new dtBVNode();
+                start = bvTree[i].FromBytes(array, start);
+            }
 
-			count       = header.offMeshConCount;
-			offMeshCons = new dtOffMeshConnection[count];
+            count = header.offMeshConCount;
+            offMeshCons = new dtOffMeshConnection[count];
 
-			for (int i = 0; i < count; ++i)
-			{
-				offMeshCons[i] = new dtOffMeshConnection();
-				start          = offMeshCons[i].FromBytes(array, start);
-			}
+            for (int i = 0; i < count; ++i)
+            {
+                offMeshCons[i] = new dtOffMeshConnection();
+                start = offMeshCons[i].FromBytes(array, start);
+            }
 
-			return start;
-		}
+            return start;
+        }
 
-		public byte[] ToBytes()
-		{
-			List<byte> bytes = new();
+        public byte[] ToBytes()
+        {
+            List<byte> bytes = new();
 
-			bytes.AddRange(header.ToBytes());
+            bytes.AddRange(header.ToBytes());
 
-			for (int i = 0; i < polys.Length; ++i)
-				bytes.AddRange(polys[i].ToBytes());
+            for (int i = 0; i < polys.Length; ++i)
+                bytes.AddRange(polys[i].ToBytes());
 
-			for (int i = 0; i < verts.Length; ++i)
-				bytes.AddRange(BitConverter.GetBytes(verts[i]));
+            for (int i = 0; i < verts.Length; ++i)
+                bytes.AddRange(BitConverter.GetBytes(verts[i]));
 
-			for (int i = 0; i < links.Length; ++i)
-				bytes.AddRange(links[i].ToBytes());
+            for (int i = 0; i < links.Length; ++i)
+                bytes.AddRange(links[i].ToBytes());
 
-			for (int i = 0; i < detailMeshes.Length; ++i)
-				bytes.AddRange(detailMeshes[i].ToBytes());
+            for (int i = 0; i < detailMeshes.Length; ++i)
+                bytes.AddRange(detailMeshes[i].ToBytes());
 
-			for (int i = 0; i < detailVerts.Length; ++i)
-				bytes.AddRange(BitConverter.GetBytes(detailVerts[i]));
+            for (int i = 0; i < detailVerts.Length; ++i)
+                bytes.AddRange(BitConverter.GetBytes(detailVerts[i]));
 
-			for (int i = 0; i < detailTris.Length; ++i)
-				bytes.Add(detailTris[i]);
+            for (int i = 0; i < detailTris.Length; ++i)
+                bytes.Add(detailTris[i]);
 
-			for (int i = 0; i < bvTree.Length; ++i)
-				bytes.AddRange(bvTree[i].ToBytes());
+            for (int i = 0; i < bvTree.Length; ++i)
+                bytes.AddRange(bvTree[i].ToBytes());
 
-			for (int i = 0; i < offMeshCons.Length; ++i)
-				bytes.AddRange(offMeshCons[i].ToBytes());
+            for (int i = 0; i < offMeshCons.Length; ++i)
+                bytes.AddRange(offMeshCons[i].ToBytes());
 
-			return bytes.ToArray();
-		}
-	}
+            return bytes.ToArray();
+        }
+    }
 
-	/// Defines a navigation mesh tile.
-	// @ingroup detour
-	/* 
+    /// Defines a navigation mesh tile.
+    // @ingroup detour
+    /* 
 	@struct dtMeshTile
 	@par
 
@@ -1380,67 +1379,67 @@ public static partial class Detour
 	Vertex B is not required to be within the bounds of the mesh.
 
 	*/
-	public class dtMeshTile
-	{
+    public class dtMeshTile
+    {
         /// The tile bounding volume nodes. [Size: dtMeshHeader::bvNodeCount]
         /// (Will be null if bounding volumes are disabled.)
         public dtBVNode[] bvTree;
 
-		public dtRawTileData data;          //< The tile data. (Not directly accessed under normal situations.)
-		public int dataSize;                //< Size of the tile data.
-		public dtPolyDetail[] detailMeshes; //< The tile's detail sub-meshes. [Size: dtMeshHeader::detailMeshCount]
+        public dtRawTileData data;          //< The tile data. (Not directly accessed under normal situations.)
+        public int dataSize;                //< Size of the tile data.
+        public dtPolyDetail[] detailMeshes; //< The tile's detail sub-meshes. [Size: dtMeshHeader::detailMeshCount]
 
         /// The detail mesh's triangles. [(vertA, vertB, vertC, triFlags) * dtMeshHeader::detailTriCount].
         /// See dtDetailTriEdgeFlags and dtGetDetailTriEdgeFlags.
         public byte[] detailTris;
 
-		/// The detail mesh's unique vertices. [(x, y, z) * dtMeshHeader::detailVertCount]
-		public float[] detailVerts;
+        /// The detail mesh's unique vertices. [(x, y, z) * dtMeshHeader::detailVertCount]
+        public float[] detailVerts;
 
-		public int flags;           //< Tile flags. (See: #dtTileFlags)
-		public dtMeshHeader header; //< The tile header.
-		public dtLink[] links;      //< The tile links. [Size: dtMeshHeader::maxLinkCount]
+        public int flags;           //< Tile flags. (See: #dtTileFlags)
+        public dtMeshHeader header; //< The tile header.
+        public dtLink[] links;      //< The tile links. [Size: dtMeshHeader::maxLinkCount]
 
-		public uint linksFreeList; //< Index to the next free link.
-		public dtMeshTile next;    //< The next free tile, or the next tile in the spatial grid.
+        public uint linksFreeList; //< Index to the next free link.
+        public dtMeshTile next;    //< The next free tile, or the next tile in the spatial grid.
 
-		public dtOffMeshConnection[] offMeshCons; //< The tile off-mesh connections. [Size: dtMeshHeader::offMeshConCount]
-		public dtPoly[] polys;                    //< The tile polygons. [Size: dtMeshHeader::polyCount]
-		public uint salt;                         //< Counter describing modifications to the tile.
-		public float[] verts;                     //< The tile vertices. [Size: dtMeshHeader::vertCount]
-	};
+        public dtOffMeshConnection[] offMeshCons; //< The tile off-mesh connections. [Size: dtMeshHeader::offMeshConCount]
+        public dtPoly[] polys;                    //< The tile polygons. [Size: dtMeshHeader::polyCount]
+        public uint salt;                         //< Counter describing modifications to the tile.
+        public float[] verts;                     //< The tile vertices. [Size: dtMeshHeader::vertCount]
+    };
 
     /// Configuration parameters used to define multi-tile navigation meshes.
     /// The values are used to allocate space during the initialization of a navigation mesh.
     // @see dtNavMesh::init()
-	// @ingroup detour
-	public class dtNavMeshParams
-	{
-		public int maxPolys;                //< The maximum number of polygons each tile can contain.
-		public int maxTiles;                //< The maximum number of tiles the navigation mesh can contain.
-		public float[] orig = new float[3]; //< The world space origin of the navigation mesh's tile space. [(x, y, z)]
-		public float tileHeight;            //< The height of each tile. (Along the z-axis.)
-		public float tileWidth;             //< The width of each tile. (Along the x-axis.)
+    // @ingroup detour
+    public class dtNavMeshParams
+    {
+        public int maxPolys;                //< The maximum number of polygons each tile can contain.
+        public int maxTiles;                //< The maximum number of tiles the navigation mesh can contain.
+        public float[] orig = new float[3]; //< The world space origin of the navigation mesh's tile space. [(x, y, z)]
+        public float tileHeight;            //< The height of each tile. (Along the z-axis.)
+        public float tileWidth;             //< The width of each tile. (Along the x-axis.)
 
-		///
-		public dtNavMeshParams Clone()
-		{
-			dtNavMeshParams copy = new();
+        ///
+        public dtNavMeshParams Clone()
+        {
+            dtNavMeshParams copy = new();
 
-			for (int i = 0; i < orig.Length; ++i)
-				copy.orig[i] = orig[i];
+            for (int i = 0; i < orig.Length; ++i)
+                copy.orig[i] = orig[i];
 
-			copy.tileWidth  = tileWidth;
-			copy.tileHeight = tileHeight;
-			copy.maxTiles   = maxTiles;
-			copy.maxPolys   = maxPolys;
+            copy.tileWidth = tileWidth;
+            copy.tileHeight = tileHeight;
+            copy.maxTiles = maxTiles;
+            copy.maxPolys = maxPolys;
 
-			return copy;
-		}
-	};
+            return copy;
+        }
+    };
 
-	/// Represents the source data used to build an navigation mesh tile.
-	// @ingroup detour
+    /// Represents the source data used to build an navigation mesh tile.
+    // @ingroup detour
     /**
 	 * @struct dtNavMeshCreateParams
 	 * @par
@@ -1461,146 +1460,146 @@ public static partial class Detour
 	 * @see dtCreateNavMeshData
 	 */
     public class dtNavMeshCreateParams
-	{
-		public float[] bmax = new float[3]; //< The maximum bounds of the tile. [(x, y, z)] [Unit: wu]
-		public float[] bmin = new float[3]; //< The minimum bounds of the tile. [(x, y, z)] [Unit: wu]
+    {
+        public float[] bmax = new float[3]; //< The maximum bounds of the tile. [(x, y, z)] [Unit: wu]
+        public float[] bmin = new float[3]; //< The minimum bounds of the tile. [(x, y, z)] [Unit: wu]
 
-		/// True if a bounding volume tree should be built for the tile.
-		// @note The BVTree is not normally needed for layered navigation meshes.
-		public bool buildBvTree;
+        /// True if a bounding volume tree should be built for the tile.
+        // @note The BVTree is not normally needed for layered navigation meshes.
+        public bool buildBvTree;
 
-		public float ch; //< The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
-		public float cs; //< The xz-plane cell size of the polygon mesh. [Limit: > 0] [Unit: wu]
+        public float ch; //< The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
+        public float cs; //< The xz-plane cell size of the polygon mesh. [Limit: > 0] [Unit: wu]
 
-		// @}
-		// @name Height Detail Attributes (Optional)
-		// See #rcPolyMeshDetail for details related to these attributes.
-		// @{
+        // @}
+        // @name Height Detail Attributes (Optional)
+        // See #rcPolyMeshDetail for details related to these attributes.
+        // @{
 
-		public uint[] detailMeshes;  //< The height detail sub-mesh data. [Size: 4 * #polyCount]
-		public int detailTriCount;   //< The number of triangles in the detail mesh.
-		public byte[] detailTris;    //< The detail mesh triangles. [Size: 4 * #detailTriCount]
-		public float[] detailVerts;  //< The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
-		public int detailVertsCount; //< The number of vertices in the detail mesh.
+        public uint[] detailMeshes;  //< The height detail sub-mesh data. [Size: 4 * #polyCount]
+        public int detailTriCount;   //< The number of triangles in the detail mesh.
+        public byte[] detailTris;    //< The detail mesh triangles. [Size: 4 * #detailTriCount]
+        public float[] detailVerts;  //< The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
+        public int detailVertsCount; //< The number of vertices in the detail mesh.
 
-		public int nvp; //< Number maximum number of vertices per polygon. [Limit: >= 3]
+        public int nvp; //< Number maximum number of vertices per polygon. [Limit: >= 3]
 
-		// User defined area ids assigned to the off-mesh connections. [Size: #offMeshConCount]
-		public byte[] offMeshConAreas;
+        // User defined area ids assigned to the off-mesh connections. [Size: #offMeshConCount]
+        public byte[] offMeshConAreas;
 
-		// The number of off-mesh connections. [Limit: >= 0]
-		public int offMeshConCount;
+        // The number of off-mesh connections. [Limit: >= 0]
+        public int offMeshConCount;
 
-		// The permitted travel direction of the off-mesh connections. [Size: #offMeshConCount]
-		//
-		// 0 = Travel only from endpoint A to endpoint B.<br/>
-		// #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
-		public byte[] offMeshConDir;
+        // The permitted travel direction of the off-mesh connections. [Size: #offMeshConCount]
+        //
+        // 0 = Travel only from endpoint A to endpoint B.<br/>
+        // #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
+        public byte[] offMeshConDir;
 
-		// User defined flags assigned to the off-mesh connections. [Size: #offMeshConCount]
-		public ushort[] offMeshConFlags;
+        // User defined flags assigned to the off-mesh connections. [Size: #offMeshConCount]
+        public ushort[] offMeshConFlags;
 
-		// Off-mesh connection radii. [Size: #offMeshConCount] [Unit: wu]
-		public float[] offMeshConRad;
+        // Off-mesh connection radii. [Size: #offMeshConCount] [Unit: wu]
+        public float[] offMeshConRad;
 
-		// The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
-		public uint[] offMeshConUserID;
+        // The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
+        public uint[] offMeshConUserID;
 
-		// @}
-		// @name Off-Mesh Connections Attributes (Optional)
-		// Used to define a custom point-to-point edge within the navigation graph, an 
-		// off-mesh connection is a user defined traversable connection made up to two vertices, 
-		// at least one of which resides within a navigation mesh polygon.
-		// @{
+        // @}
+        // @name Off-Mesh Connections Attributes (Optional)
+        // Used to define a custom point-to-point edge within the navigation graph, an 
+        // off-mesh connection is a user defined traversable connection made up to two vertices, 
+        // at least one of which resides within a navigation mesh polygon.
+        // @{
 
-		// Off-mesh connection vertices. [(ax, ay, az, bx, by, bz) * #offMeshConCount] [Unit: wu]
-		public float[] offMeshConVerts;
-		public byte[] polyAreas;   //< The user defined area ids assigned to each polygon. [Size: #polyCount]
-		public int polyCount;      //< Number of polygons in the mesh. [Limit: >= 1]
-		public ushort[] polyFlags; //< The user defined flags assigned to each polygon. [Size: #polyCount]
-		public ushort[] polys;     //< The polygon data. [Size: #polyCount * 2 * #nvp]
-		public int tileLayer;      //< The tile's layer within the layered destination mesh. [Limit: >= 0] (Along the y-axis.)
-		public int tileX;          //< The tile's x-grid location within the multi-tile destination mesh. (Along the x-axis.)
-		public int tileY;          //< The tile's y-grid location within the multi-tile desitation mesh. (Along the z-axis.)
+        // Off-mesh connection vertices. [(ax, ay, az, bx, by, bz) * #offMeshConCount] [Unit: wu]
+        public float[] offMeshConVerts;
+        public byte[] polyAreas;   //< The user defined area ids assigned to each polygon. [Size: #polyCount]
+        public int polyCount;      //< Number of polygons in the mesh. [Limit: >= 1]
+        public ushort[] polyFlags; //< The user defined flags assigned to each polygon. [Size: #polyCount]
+        public ushort[] polys;     //< The polygon data. [Size: #polyCount * 2 * #nvp]
+        public int tileLayer;      //< The tile's layer within the layered destination mesh. [Limit: >= 0] (Along the y-axis.)
+        public int tileX;          //< The tile's x-grid location within the multi-tile destination mesh. (Along the x-axis.)
+        public int tileY;          //< The tile's y-grid location within the multi-tile desitation mesh. (Along the z-axis.)
 
-		// @}
-		// @name Tile Attributes
-		// @note The tile grid/layer data can be left at zero if the destination is a single tile mesh.
-		// @{
+        // @}
+        // @name Tile Attributes
+        // @note The tile grid/layer data can be left at zero if the destination is a single tile mesh.
+        // @{
 
-		public uint userId;   //< The user defined id of the tile.
-		public int vertCount; //< The number vertices in the polygon mesh. [Limit: >= 3]
+        public uint userId;   //< The user defined id of the tile.
+        public int vertCount; //< The number vertices in the polygon mesh. [Limit: >= 3]
 
-		// @name Polygon Mesh Attributes
-		// Used to create the base navigation graph.
-		// See #rcPolyMesh for details related to these attributes.
-		// @{
+        // @name Polygon Mesh Attributes
+        // Used to create the base navigation graph.
+        // See #rcPolyMesh for details related to these attributes.
+        // @{
 
-		public ushort[] verts;      //< The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
-		public float walkableClimb; //< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
+        public ushort[] verts;      //< The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
+        public float walkableClimb; //< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
 
-		// @}
-		// @name General Configuration Attributes
-		// @{
+        // @}
+        // @name General Configuration Attributes
+        // @{
 
-		public float walkableHeight; //< The agent height. [Unit: wu]
-		public float walkableRadius; //< The agent radius. [Unit: wu]
+        public float walkableHeight; //< The agent height. [Unit: wu]
+        public float walkableRadius; //< The agent radius. [Unit: wu]
 
-		// @}
-	}
+        // @}
+    }
 
-	public class BVItem
-	{
-		public ushort[] bmax = new ushort[3];
-		public ushort[] bmin = new ushort[3];
-		public int i;
-	};
+    public class BVItem
+    {
+        public ushort[] bmax = new ushort[3];
+        public ushort[] bmin = new ushort[3];
+        public int i;
+    };
 
-	//public static int compareItemX(const void* va, const void* vb)
-	public class BVItemCompareX : IComparer<BVItem>
-	{
-		// Compares by Height, Length, and Width. 
-		public int Compare(BVItem a, BVItem b)
-		{
-			if (a.bmin[0] < b.bmin[0])
-				return -1;
+    //public static int compareItemX(const void* va, const void* vb)
+    public class BVItemCompareX : IComparer<BVItem>
+    {
+        // Compares by Height, Length, and Width. 
+        public int Compare(BVItem a, BVItem b)
+        {
+            if (a.bmin[0] < b.bmin[0])
+                return -1;
 
-			if (a.bmin[0] > b.bmin[0])
-				return 1;
+            if (a.bmin[0] > b.bmin[0])
+                return 1;
 
-			return 0;
-		}
-	}
+            return 0;
+        }
+    }
 
-	//static int compareItemY(const void* va, const void* vb)
-	public class BVItemCompareY : IComparer<BVItem>
-	{
-		public int Compare(BVItem a, BVItem b)
-		{
-			if (a.bmin[1] < b.bmin[1])
-				return -1;
+    //static int compareItemY(const void* va, const void* vb)
+    public class BVItemCompareY : IComparer<BVItem>
+    {
+        public int Compare(BVItem a, BVItem b)
+        {
+            if (a.bmin[1] < b.bmin[1])
+                return -1;
 
-			if (a.bmin[1] > b.bmin[1])
-				return 1;
+            if (a.bmin[1] > b.bmin[1])
+                return 1;
 
-			return 0;
-		}
-	}
+            return 0;
+        }
+    }
 
-	public class BVItemCompareZ : IComparer<BVItem>
-	{
-		public int Compare(BVItem a, BVItem b)
-		{
-			if (a.bmin[2] < b.bmin[2])
-				return -1;
+    public class BVItemCompareZ : IComparer<BVItem>
+    {
+        public int Compare(BVItem a, BVItem b)
+        {
+            if (a.bmin[2] < b.bmin[2])
+                return -1;
 
-			if (a.bmin[2] > b.bmin[2])
-				return 1;
+            if (a.bmin[2] > b.bmin[2])
+                return 1;
 
-			return 0;
-		}
-	}
-	/*
+            return 0;
+        }
+    }
+    /*
 	/// Swaps the endianess of the tile data's header (#dtMeshHeader).
 	///  @param[in,out]	data		The tile data array.
 	///  @param[in]		dataSize	The size of the data array.
@@ -1650,16 +1649,16 @@ public static partial class Detour
 		return true;
 	}
 	*/
-	// @par
-	//
-	// @warning This function assumes that the header is in the correct endianess already. 
-	// Call #dtNavMeshHeaderSwapEndian() first on the data if the data is expected to be in wrong endianess 
-	// to start with. Call #dtNavMeshHeaderSwapEndian() after the data has been swapped if converting from 
-	// native to foreign endianess.
-	// Swaps endianess of the tile data.
-	//  @param[in,out]	data		The tile data array.
-	//  @param[in]		dataSize	The size of the data array.
-	/*
+    // @par
+    //
+    // @warning This function assumes that the header is in the correct endianess already. 
+    // Call #dtNavMeshHeaderSwapEndian() first on the data if the data is expected to be in wrong endianess 
+    // to start with. Call #dtNavMeshHeaderSwapEndian() after the data has been swapped if converting from 
+    // native to foreign endianess.
+    // Swaps endianess of the tile data.
+    //  @param[in,out]	data		The tile data array.
+    //  @param[in]		dataSize	The size of the data array.
+    /*
 	bool dtNavMeshDataSwapEndian(byte* data, const int dataSize)
 	{
 		// Make sure the data is in right format.

@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.ITransport
 {
-	public interface ITransportOnRelocate : IScriptObject
-	{
-		void OnRelocate(Transport transport, uint mapId, float x, float y, float z);
-	}
+    public interface ITransportOnRelocate : IScriptObject
+    {
+        void OnRelocate(Transport transport, uint mapId, float x, float y, float z);
+    }
 }

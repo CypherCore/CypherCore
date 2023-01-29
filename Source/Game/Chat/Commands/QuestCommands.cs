@@ -11,265 +11,265 @@ using Game.Scripting.Interfaces.IQuest;
 
 namespace Game.Chat
 {
-	[CommandGroup("quest")]
-	internal class QuestCommands
-	{
-		[Command("add", RBACPermissions.CommandQuestAdd)]
-		private static bool HandleQuestAdd(CommandHandler handler, Quest quest)
-		{
-			Player player = handler.GetSelectedPlayer();
+    [CommandGroup("quest")]
+    internal class QuestCommands
+    {
+        [CommandGroup("objective")]
+        private class ObjectiveCommands
+        {
+            [Command("complete", RBACPermissions.CommandQuestObjectiveComplete)]
+            private static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
+            {
+                Player player = handler.GetSelectedPlayerOrSelf();
 
-			if (!player)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+                if (!player)
+                {
+                    handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-				return false;
-			}
+                    return false;
+                }
 
-			if (Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
-			{
-				handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
+                QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
 
-				return false;
-			}
+                if (obj == null)
+                {
+                    handler.SendSysMessage(CypherStrings.QuestObjectiveNotfound);
 
-			// check Item starting quest (it can work incorrectly if added without Item in inventory)
-			var itc    = Global.ObjectMgr.GetItemTemplates();
-			var result = itc.Values.FirstOrDefault(p => p.GetStartQuest() == quest.Id);
+                    return false;
+                }
 
-			if (result != null)
-			{
-				handler.SendSysMessage(CypherStrings.CommandQuestStartfromitem, quest.Id, result.GetId());
+                CompleteObjective(player, obj);
 
-				return false;
-			}
+                return true;
+            }
+        }
 
-			if (player.IsActiveQuest(quest.Id))
-				return false;
+        [Command("add", RBACPermissions.CommandQuestAdd)]
+        private static bool HandleQuestAdd(CommandHandler handler, Quest quest)
+        {
+            Player player = handler.GetSelectedPlayer();
 
-			// ok, normal (creature/GO starting) quest
-			if (player.CanAddQuest(quest, true))
-				player.AddQuestAndCheckCompletion(quest, null);
+            if (!player)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			return true;
-		}
+                return false;
+            }
 
-		[Command("complete", RBACPermissions.CommandQuestComplete)]
-		private static bool HandleQuestComplete(CommandHandler handler, Quest quest)
-		{
-			Player player = handler.GetSelectedPlayer();
+            if (Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
+            {
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
 
-			if (!player)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
 
-				return false;
-			}
+            // check Item starting quest (it can work incorrectly if added without Item in inventory)
+            var itc = Global.ObjectMgr.GetItemTemplates();
+            var result = itc.Values.FirstOrDefault(p => p.GetStartQuest() == quest.Id);
 
-			// If player doesn't have the quest
-			if (player.GetQuestStatus(quest.Id) == QuestStatus.None ||
-			    Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
-			{
-				handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
+            if (result != null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandQuestStartfromitem, quest.Id, result.GetId());
 
-				return false;
-			}
+                return false;
+            }
 
-			foreach (var obj in quest.Objectives)
-				CompleteObjective(player, obj);
+            if (player.IsActiveQuest(quest.Id))
+                return false;
 
-			player.CompleteQuest(quest.Id);
+            // ok, normal (creature/GO starting) quest
+            if (player.CanAddQuest(quest, true))
+                player.AddQuestAndCheckCompletion(quest, null);
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("remove", RBACPermissions.CommandQuestRemove)]
-		private static bool HandleQuestRemove(CommandHandler handler, Quest quest)
-		{
-			Player player = handler.GetSelectedPlayer();
+        [Command("complete", RBACPermissions.CommandQuestComplete)]
+        private static bool HandleQuestComplete(CommandHandler handler, Quest quest)
+        {
+            Player player = handler.GetSelectedPlayer();
 
-			if (!player)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            if (!player)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-				return false;
-			}
+                return false;
+            }
 
-			QuestStatus oldStatus = player.GetQuestStatus(quest.Id);
+            // If player doesn't have the quest
+            if (player.GetQuestStatus(quest.Id) == QuestStatus.None ||
+                Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
+            {
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
 
-			if (oldStatus != QuestStatus.None)
-			{
-				// remove all quest entries for 'entry' from quest log
-				for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
-				{
-					uint logQuest = player.GetQuestSlotQuestId(slot);
+                return false;
+            }
 
-					if (logQuest == quest.Id)
-					{
-						player.SetQuestSlot(slot, 0);
+            foreach (var obj in quest.Objectives)
+                CompleteObjective(player, obj);
 
-						// we ignore unequippable quest items in this case, its' still be equipped
-						player.TakeQuestSourceItem(logQuest, false);
+            player.CompleteQuest(quest.Id);
 
-						if (quest.HasFlag(QuestFlags.Pvp))
-						{
-							player.PvpInfo.IsHostile = player.PvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
-							player.UpdatePvPState();
-						}
-					}
-				}
+            return true;
+        }
 
-				player.RemoveActiveQuest(quest.Id, false);
-				player.RemoveRewardedQuest(quest.Id);
+        [Command("remove", RBACPermissions.CommandQuestRemove)]
+        private static bool HandleQuestRemove(CommandHandler handler, Quest quest)
+        {
+            Player player = handler.GetSelectedPlayer();
 
-				Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(player, quest.Id));
-				Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
+            if (!player)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-				handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
+                return false;
+            }
 
-				return true;
-			}
-			else
-			{
-				handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
+            QuestStatus oldStatus = player.GetQuestStatus(quest.Id);
 
-				return false;
-			}
-		}
+            if (oldStatus != QuestStatus.None)
+            {
+                // remove all quest entries for 'entry' from quest log
+                for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+                {
+                    uint logQuest = player.GetQuestSlotQuestId(slot);
 
-		[Command("reward", RBACPermissions.CommandQuestReward)]
-		private static bool HandleQuestReward(CommandHandler handler, Quest quest)
-		{
-			Player player = handler.GetSelectedPlayer();
+                    if (logQuest == quest.Id)
+                    {
+                        player.SetQuestSlot(slot, 0);
 
-			if (!player)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+                        // we ignore unequippable quest items in this case, its' still be equipped
+                        player.TakeQuestSourceItem(logQuest, false);
 
-				return false;
-			}
+                        if (quest.HasFlag(QuestFlags.Pvp))
+                        {
+                            player.PvpInfo.IsHostile = player.PvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
+                            player.UpdatePvPState();
+                        }
+                    }
+                }
 
-			// If player doesn't have the quest
-			if (player.GetQuestStatus(quest.Id) != QuestStatus.Complete ||
-			    Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
-			{
-				handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
+                player.RemoveActiveQuest(quest.Id, false);
+                player.RemoveRewardedQuest(quest.Id);
 
-				return false;
-			}
+                Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(player, quest.Id));
+                Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
 
-			player.RewardQuest(quest, LootItemType.Item, 0, player);
+                handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
 
-			return true;
-		}
+                return true;
+            }
+            else
+            {
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
 
-		private static void CompleteObjective(Player player, QuestObjective obj)
-		{
-			switch (obj.Type)
-			{
-				case QuestObjectiveType.Item:
-				{
-					uint               curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
-					List<ItemPosCount> dest         = new();
-					var                msg          = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
+                return false;
+            }
+        }
 
-					if (msg == InventoryResult.Ok)
-					{
-						Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
-						player.SendNewItem(item, (uint)(obj.Amount - curItemCount), true, false);
-					}
+        [Command("reward", RBACPermissions.CommandQuestReward)]
+        private static bool HandleQuestReward(CommandHandler handler, Quest quest)
+        {
+            Player player = handler.GetSelectedPlayer();
 
-					break;
-				}
-				case QuestObjectiveType.Monster:
-				{
-					CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
+            if (!player)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-					if (creatureInfo != null)
-						for (var z = 0; z < obj.Amount; ++z)
-							player.KilledMonster(creatureInfo, ObjectGuid.Empty);
+                return false;
+            }
 
-					break;
-				}
-				case QuestObjectiveType.GameObject:
-				{
-					for (var z = 0; z < obj.Amount; ++z)
-						player.KillCreditGO((uint)obj.ObjectID);
+            // If player doesn't have the quest
+            if (player.GetQuestStatus(quest.Id) != QuestStatus.Complete ||
+                Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, null))
+            {
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, quest.Id);
 
-					break;
-				}
-				case QuestObjectiveType.MinReputation:
-				{
-					int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
+                return false;
+            }
 
-					if (curRep < obj.Amount)
-					{
-						var factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+            player.RewardQuest(quest, LootItemType.Item, 0, player);
 
-						if (factionEntry != null)
-							player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
-					}
+            return true;
+        }
 
-					break;
-				}
-				case QuestObjectiveType.MaxReputation:
-				{
-					int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
+        private static void CompleteObjective(Player player, QuestObjective obj)
+        {
+            switch (obj.Type)
+            {
+                case QuestObjectiveType.Item:
+                    {
+                        uint curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
+                        List<ItemPosCount> dest = new();
+                        var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
 
-					if (curRep > obj.Amount)
-					{
-						var factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+                        if (msg == InventoryResult.Ok)
+                        {
+                            Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
+                            player.SendNewItem(item, (uint)(obj.Amount - curItemCount), true, false);
+                        }
 
-						if (factionEntry != null)
-							player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
-					}
+                        break;
+                    }
+                case QuestObjectiveType.Monster:
+                    {
+                        CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
 
-					break;
-				}
-				case QuestObjectiveType.Money:
-				{
-					player.ModifyMoney(obj.Amount);
+                        if (creatureInfo != null)
+                            for (var z = 0; z < obj.Amount; ++z)
+                                player.KilledMonster(creatureInfo, ObjectGuid.Empty);
 
-					break;
-				}
-				case QuestObjectiveType.PlayerKills:
-				{
-					for (var z = 0; z < obj.Amount; ++z)
-						player.KilledPlayerCredit(ObjectGuid.Empty);
+                        break;
+                    }
+                case QuestObjectiveType.GameObject:
+                    {
+                        for (var z = 0; z < obj.Amount; ++z)
+                            player.KillCreditGO((uint)obj.ObjectID);
 
-					break;
-				}
-			}
-		}
+                        break;
+                    }
+                case QuestObjectiveType.MinReputation:
+                    {
+                        int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
 
-		[CommandGroup("objective")]
-		private class ObjectiveCommands
-		{
-			[Command("complete", RBACPermissions.CommandQuestObjectiveComplete)]
-			private static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
-			{
-				Player player = handler.GetSelectedPlayerOrSelf();
+                        if (curRep < obj.Amount)
+                        {
+                            var factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
 
-				if (!player)
-				{
-					handler.SendSysMessage(CypherStrings.NoCharSelected);
+                            if (factionEntry != null)
+                                player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
+                        }
 
-					return false;
-				}
+                        break;
+                    }
+                case QuestObjectiveType.MaxReputation:
+                    {
+                        int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
 
-				QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
+                        if (curRep > obj.Amount)
+                        {
+                            var factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
 
-				if (obj == null)
-				{
-					handler.SendSysMessage(CypherStrings.QuestObjectiveNotfound);
+                            if (factionEntry != null)
+                                player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
+                        }
 
-					return false;
-				}
+                        break;
+                    }
+                case QuestObjectiveType.Money:
+                    {
+                        player.ModifyMoney(obj.Amount);
 
-				CompleteObjective(player, obj);
+                        break;
+                    }
+                case QuestObjectiveType.PlayerKills:
+                    {
+                        for (var z = 0; z < obj.Amount; ++z)
+                            player.KilledPlayerCredit(ObjectGuid.Empty);
 
-				return true;
-			}
-		}
-	}
+                        break;
+                    }
+            }
+        }
+    }
 }

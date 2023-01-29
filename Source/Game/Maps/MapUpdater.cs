@@ -6,107 +6,106 @@ using Framework.Threading;
 
 namespace Game.Maps
 {
-	public class MapUpdater
-	{
-		private volatile bool _cancelationToken;
+    public class MapUpdater
+    {
+        private readonly object _lock = new();
+        private readonly ProducerConsumerQueue<MapUpdateRequest> _queue = new();
 
-		private object _lock = new();
-		private int _pendingRequests;
-		private ProducerConsumerQueue<MapUpdateRequest> _queue = new();
+        private readonly Thread[] _workerThreads;
+        private volatile bool _cancelationToken;
+        private int _pendingRequests;
 
-		private Thread[] _workerThreads;
+        public MapUpdater(int numThreads)
+        {
+            _workerThreads = new Thread[numThreads];
 
-		public MapUpdater(int numThreads)
-		{
-			_workerThreads = new Thread[numThreads];
+            for (var i = 0; i < numThreads; ++i)
+            {
+                _workerThreads[i] = new Thread(WorkerThread);
+                _workerThreads[i].Start();
+            }
+        }
 
-			for (var i = 0; i < numThreads; ++i)
-			{
-				_workerThreads[i] = new Thread(WorkerThread);
-				_workerThreads[i].Start();
-			}
-		}
+        public void Deactivate()
+        {
+            _cancelationToken = true;
 
-		public void Deactivate()
-		{
-			_cancelationToken = true;
+            Wait();
 
-			Wait();
+            _queue.Cancel();
 
-			_queue.Cancel();
+            foreach (var thread in _workerThreads)
+                thread.Join();
+        }
 
-			foreach (var thread in _workerThreads)
-				thread.Join();
-		}
+        public void Wait()
+        {
+            lock (_lock)
+            {
+                while (_pendingRequests > 0)
+                    Monitor.Wait(_lock);
+            }
+        }
 
-		public void Wait()
-		{
-			lock (_lock)
-			{
-				while (_pendingRequests > 0)
-					Monitor.Wait(_lock);
-			}
-		}
+        public void ScheduleUpdate(Map map, uint diff)
+        {
+            lock (_lock)
+            {
+                ++_pendingRequests;
 
-		public void ScheduleUpdate(Map map, uint diff)
-		{
-			lock (_lock)
-			{
-				++_pendingRequests;
+                _queue.Push(new MapUpdateRequest(map, this, diff));
+            }
+        }
 
-				_queue.Push(new MapUpdateRequest(map, this, diff));
-			}
-		}
+        public void UpdateFinished()
+        {
+            lock (_lock)
+            {
+                --_pendingRequests;
 
-		public void UpdateFinished()
-		{
-			lock (_lock)
-			{
-				--_pendingRequests;
+                Monitor.PulseAll(_lock);
+            }
+        }
 
-				Monitor.PulseAll(_lock);
-			}
-		}
+        private void WorkerThread()
+        {
+            while (true)
+            {
+                MapUpdateRequest request;
 
-		private void WorkerThread()
-		{
-			while (true)
-			{
-				MapUpdateRequest request;
+                _queue.WaitAndPop(out request);
 
-				_queue.WaitAndPop(out request);
+                if (_cancelationToken)
+                    return;
 
-				if (_cancelationToken)
-					return;
+                request.Call();
+            }
+        }
+    }
 
-				request.Call();
-			}
-		}
-	}
+    public class MapUpdateRequest
+    {
+        private readonly uint _diff;
+        private readonly Map _map;
+        private readonly MapUpdater _updater;
 
-	public class MapUpdateRequest
-	{
-		private uint _diff;
-		private Map _map;
-		private MapUpdater _updater;
+        public MapUpdateRequest(Map m, uint d)
+        {
+            _map = m;
+            _diff = d;
+        }
 
-		public MapUpdateRequest(Map m, uint d)
-		{
-			_map  = m;
-			_diff = d;
-		}
+        public MapUpdateRequest(Map m, MapUpdater u, uint d)
+        {
+            _map = m;
+            _updater = u;
+            _diff = d;
+        }
 
-		public MapUpdateRequest(Map m, MapUpdater u, uint d)
-		{
-			_map     = m;
-			_updater = u;
-			_diff    = d;
-		}
-
-		public void Call()
-		{
-			_map.Update(_diff);
-			_updater.UpdateFinished();
-		}
-	}
+        public void Call()
+        {
+            _map.Update(_diff);
+            _updater.UpdateFinished();
+        }
+    }
 }

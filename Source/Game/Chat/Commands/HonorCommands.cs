@@ -6,77 +6,77 @@ using Game.Entities;
 
 namespace Game.Chat.Commands
 {
-	[CommandGroup("honor")]
-	internal class HonorCommands
-	{
-		[Command("update", RBACPermissions.CommandHonorUpdate)]
-		private static bool HandleHonorUpdateCommand(CommandHandler handler)
-		{
-			Player target = handler.GetSelectedPlayer();
+    [CommandGroup("honor")]
+    internal class HonorCommands
+    {
+        [CommandGroup("add")]
+        private class HonorAddCommands
+        {
+            [Command("", RBACPermissions.CommandHonorAdd)]
+            private static bool HandleHonorAddCommand(CommandHandler handler, int amount)
+            {
+                Player target = handler.GetSelectedPlayer();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-				return false;
-			}
+                    return false;
+                }
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+                // check online security
+                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                    return false;
 
-			target.UpdateHonorFields();
+                target.RewardHonor(null, 1, amount);
 
-			return true;
-		}
+                return true;
+            }
 
-		[CommandGroup("add")]
-		private class HonorAddCommands
-		{
-			[Command("", RBACPermissions.CommandHonorAdd)]
-			private static bool HandleHonorAddCommand(CommandHandler handler, int amount)
-			{
-				Player target = handler.GetSelectedPlayer();
+            [Command("kill", RBACPermissions.CommandHonorAddKill)]
+            private static bool HandleHonorAddKillCommand(CommandHandler handler)
+            {
+                Unit target = handler.GetSelectedUnit();
 
-				if (!target)
-				{
-					handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-					return false;
-				}
+                    return false;
+                }
 
-				// check online security
-				if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-					return false;
+                // check online security
+                Player player = target.ToPlayer();
 
-				target.RewardHonor(null, 1, amount);
+                if (player)
+                    if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
+                        return false;
 
-				return true;
-			}
+                handler.GetPlayer().RewardHonor(target, 1);
 
-			[Command("kill", RBACPermissions.CommandHonorAddKill)]
-			private static bool HandleHonorAddKillCommand(CommandHandler handler)
-			{
-				Unit target = handler.GetSelectedUnit();
+                return true;
+            }
+        }
 
-				if (!target)
-				{
-					handler.SendSysMessage(CypherStrings.PlayerNotFound);
+        [Command("update", RBACPermissions.CommandHonorUpdate)]
+        private static bool HandleHonorUpdateCommand(CommandHandler handler)
+        {
+            Player target = handler.GetSelectedPlayer();
 
-					return false;
-				}
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-				// check online security
-				Player player = target.ToPlayer();
+                return false;
+            }
 
-				if (player)
-					if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
-						return false;
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-				handler.GetPlayer().RewardHonor(target, 1);
+            target.UpdateHonorFields();
 
-				return true;
-			}
-		}
-	}
+            return true;
+        }
+    }
 }

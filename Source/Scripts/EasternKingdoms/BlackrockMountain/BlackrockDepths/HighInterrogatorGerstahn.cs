@@ -9,71 +9,71 @@ using Game.Scripting;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.HighInterrogatorGerstahn
 {
-	internal struct SpellIds
-	{
-		public const uint Shadowwordpain = 10894;
-		public const uint Manaburn = 10876;
-		public const uint Psychicscream = 8122;
-		public const uint Shadowshield = 22417;
-	}
+    internal struct SpellIds
+    {
+        public const uint Shadowwordpain = 10894;
+        public const uint Manaburn = 10876;
+        public const uint Psychicscream = 8122;
+        public const uint Shadowshield = 22417;
+    }
 
-	[Script]
-	internal class boss_high_interrogator_gerstahn : ScriptedAI
-	{
-		public boss_high_interrogator_gerstahn(Creature creature) : base(creature)
-		{
-		}
+    [Script]
+    internal class boss_high_interrogator_gerstahn : ScriptedAI
+    {
+        public boss_high_interrogator_gerstahn(Creature creature) : base(creature)
+        {
+        }
 
-		public override void Reset()
-		{
-			_scheduler.CancelAll();
-		}
+        public override void Reset()
+        {
+            _scheduler.CancelAll();
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			_scheduler.Schedule(TimeSpan.FromSeconds(4),
-			                    task =>
-			                    {
-				                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
+        public override void JustEngagedWith(Unit who)
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(4),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
 
-				                    if (target)
-					                    DoCast(target, SpellIds.Shadowwordpain);
+                                    if (target)
+                                        DoCast(target, SpellIds.Shadowwordpain);
 
-				                    task.Repeat(TimeSpan.FromSeconds(7));
-			                    });
+                                    task.Repeat(TimeSpan.FromSeconds(7));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(14),
-			                    task =>
-			                    {
-				                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
+            _scheduler.Schedule(TimeSpan.FromSeconds(14),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
 
-				                    if (target)
-					                    DoCast(target, SpellIds.Manaburn);
+                                    if (target)
+                                        DoCast(target, SpellIds.Manaburn);
 
-				                    task.Repeat(TimeSpan.FromSeconds(10));
-			                    });
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(32),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Psychicscream);
-				                    task.Repeat(TimeSpan.FromSeconds(30));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(32),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Psychicscream);
+                                    task.Repeat(TimeSpan.FromSeconds(30));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(8),
-			                    task =>
-			                    {
-				                    DoCast(me, SpellIds.Shadowshield);
-				                    task.Repeat(TimeSpan.FromSeconds(25));
-			                    });
-		}
+            _scheduler.Schedule(TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.Shadowshield);
+                                    task.Repeat(TimeSpan.FromSeconds(25));
+                                });
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 }

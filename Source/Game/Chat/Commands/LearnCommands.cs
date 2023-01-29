@@ -10,370 +10,370 @@ using Game.Spells;
 
 namespace Game.Chat.Commands
 {
-	[CommandGroup("learn")]
-	internal class LearnCommands
-	{
-		[Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
-		private static bool HandleLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
-		{
-			Player targetPlayer = handler.GetSelectedPlayerOrSelf();
-
-			if (!targetPlayer)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
-
-				return false;
-			}
-
-			if (!Global.SpellMgr.IsSpellValid(spellId, handler.GetSession().GetPlayer()))
-			{
-				handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
-
-				return false;
-			}
-
-			bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
-
-			if (!allRanks &&
-			    targetPlayer.HasSpell(spellId))
-			{
-				if (targetPlayer == handler.GetPlayer())
-					handler.SendSysMessage(CypherStrings.YouKnownSpell);
-				else
-					handler.SendSysMessage(CypherStrings.TargetKnownSpell, handler.GetNameLink(targetPlayer));
-
-				return false;
-			}
-
-			targetPlayer.LearnSpell(spellId, false);
-
-			if (allRanks)
-				while ((spellId = Global.SpellMgr.GetNextSpellInChain(spellId)) != 0)
-					targetPlayer.LearnSpell(spellId, false);
-
-			return true;
-		}
-
-		[CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
-		private static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
-		{
-			Player target = handler.GetSelectedPlayer();
-
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
-
-				return false;
-			}
-
-			bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
-
-			if (allRanks)
-				spellId = Global.SpellMgr.GetFirstSpellInChain(spellId);
-
-			if (target.HasSpell(spellId))
-				target.RemoveSpell(spellId, false, !allRanks);
-			else
-				handler.SendSysMessage(CypherStrings.ForgetSpell);
-
-			return true;
-		}
-
-		[CommandGroup("all")]
-		private class LearnAllCommands
-		{
-			[Command("blizzard", CypherStrings.CommandLearnAllBlizzardHelp, RBACPermissions.CommandLearnAllGm)]
-			private static bool HandleLearnAllGMCommand(CommandHandler handler)
-			{
-				foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((uint)SkillType.Internal))
-				{
-					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillSpell.Spell, Difficulty.None);
-
-					if (spellInfo == null ||
-					    !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
-						continue;
-
-					handler.GetSession().GetPlayer().LearnSpell(skillSpell.Spell, false);
-				}
-
-				handler.SendSysMessage(CypherStrings.LearningGmSkills);
-
-				return true;
-			}
-
-			[Command("debug", CypherStrings.CommandLearnAllDebugHelp, RBACPermissions.CommandLearn)]
-			private static bool HandleLearnDebugSpellsCommand(CommandHandler handler)
-			{
-				Player player = handler.GetPlayer();
-				player.LearnSpell(63364, false); /* 63364 - Saronite Barrier (reduces Damage taken by 99%) */
-				player.LearnSpell(1908, false);  /*  1908 - Uber Heal Over Time (heals Target to full constantly) */
-				player.LearnSpell(27680, false); /* 27680 - Berserk (+500% Damage, +150% speed, 10m duration) */
-				player.LearnSpell(62555, false); /* 62555 - Berserk (+500% Damage, +150% melee haste, 10m duration) */
-				player.LearnSpell(64238, false); /* 64238 - Berserk (+900% Damage, +150% melee haste, 30m duration) */
-				player.LearnSpell(72525, false); /* 72525 - Berserk (+240% Damage, +160% haste, infinite duration) */
-				player.LearnSpell(66776, false); /* 66776 - Rage (+300% Damage, -95% Damage taken, +100% speed, infinite duration) */
+    [CommandGroup("learn")]
+    internal class LearnCommands
+    {
+        [CommandGroup("all")]
+        private class LearnAllCommands
+        {
+            [Command("blizzard", CypherStrings.CommandLearnAllBlizzardHelp, RBACPermissions.CommandLearnAllGm)]
+            private static bool HandleLearnAllGMCommand(CommandHandler handler)
+            {
+                foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((uint)SkillType.Internal))
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillSpell.Spell, Difficulty.None);
+
+                    if (spellInfo == null ||
+                        !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
+                        continue;
+
+                    handler.GetSession().GetPlayer().LearnSpell(skillSpell.Spell, false);
+                }
+
+                handler.SendSysMessage(CypherStrings.LearningGmSkills);
+
+                return true;
+            }
+
+            [Command("debug", CypherStrings.CommandLearnAllDebugHelp, RBACPermissions.CommandLearn)]
+            private static bool HandleLearnDebugSpellsCommand(CommandHandler handler)
+            {
+                Player player = handler.GetPlayer();
+                player.LearnSpell(63364, false); /* 63364 - Saronite Barrier (reduces Damage taken by 99%) */
+                player.LearnSpell(1908, false);  /*  1908 - Uber Heal Over Time (heals Target to full constantly) */
+                player.LearnSpell(27680, false); /* 27680 - Berserk (+500% Damage, +150% speed, 10m duration) */
+                player.LearnSpell(62555, false); /* 62555 - Berserk (+500% Damage, +150% melee haste, 10m duration) */
+                player.LearnSpell(64238, false); /* 64238 - Berserk (+900% Damage, +150% melee haste, 30m duration) */
+                player.LearnSpell(72525, false); /* 72525 - Berserk (+240% Damage, +160% haste, infinite duration) */
+                player.LearnSpell(66776, false); /* 66776 - Rage (+300% Damage, -95% Damage taken, +100% speed, infinite duration) */
+
+                return true;
+            }
+
+            [Command("crafts", CypherStrings.CommandLearnAllCraftsHelp, RBACPermissions.CommandLearnAllCrafts)]
+            private static bool HandleLearnAllCraftsCommand(CommandHandler handler, PlayerIdentifier player)
+            {
+                if (player == null)
+                    player = PlayerIdentifier.FromTargetOrSelf(handler);
+
+                if (player == null ||
+                    !player.IsConnected())
+                    return false;
+
+                Player target = player.GetConnectedPlayer();
+
+                foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
+                    if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) &&
+                        skillInfo.CanLink != 0) // only prof. with recipes have
+                        HandleLearnSkillRecipesHelper(target, skillInfo.Id);
+
+                handler.SendSysMessage(CypherStrings.CommandLearnAllCraft);
+
+                return true;
+            }
+
+            [Command("default", CypherStrings.CommandLearnAllDefaultHelp, RBACPermissions.CommandLearnAllDefault)]
+            private static bool HandleLearnAllDefaultCommand(CommandHandler handler, PlayerIdentifier player)
+            {
+                if (player == null)
+                    player = PlayerIdentifier.FromTargetOrSelf(handler);
+
+                if (player == null ||
+                    !player.IsConnected())
+                    return false;
+
+                Player target = player.GetConnectedPlayer();
+                target.LearnDefaultSkills();
+                target.LearnCustomSpells();
+                target.LearnQuestRewardedSpells();
+
+                handler.SendSysMessage(CypherStrings.CommandLearnAllDefaultAndQuest, handler.GetNameLink(target));
+
+                return true;
+            }
+
+            [Command("languages", CypherStrings.CommandLearnAllLanguagesHelp, RBACPermissions.CommandLearnAllLang)]
+            private static bool HandleLearnAllLangCommand(CommandHandler handler)
+            {
+                Global.LanguageMgr.ForEachLanguage((_, languageDesc) =>
+                                                   {
+                                                       if (languageDesc.SpellId != 0)
+                                                           handler.GetSession().GetPlayer().LearnSpell(languageDesc.SpellId, false);
+
+                                                       return true;
+                                                   });
+
+                handler.SendSysMessage(CypherStrings.CommandLearnAllLang);
+
+                return true;
+            }
+
+            [Command("recipes", CypherStrings.CommandLearnAllRecipesHelp, RBACPermissions.CommandLearnAllRecipes)]
+            private static bool HandleLearnAllRecipesCommand(CommandHandler handler, Tail namePart)
+            {
+                //  Learns all recipes of specified profession and sets skill to max
+                //  Example: .learn all_recipes enchanting
 
-				return true;
-			}
+                Player target = handler.GetSelectedPlayer();
 
-			[Command("crafts", CypherStrings.CommandLearnAllCraftsHelp, RBACPermissions.CommandLearnAllCrafts)]
-			private static bool HandleLearnAllCraftsCommand(CommandHandler handler, PlayerIdentifier player)
-			{
-				if (player == null)
-					player = PlayerIdentifier.FromTargetOrSelf(handler);
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-				if (player == null ||
-				    !player.IsConnected())
-					return false;
+                    return false;
+                }
 
-				Player target = player.GetConnectedPlayer();
+                if (namePart.IsEmpty())
+                    return false;
 
-				foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
-					if ((skillInfo.CategoryID == SkillCategory.Profession || skillInfo.CategoryID == SkillCategory.Secondary) &&
-					    skillInfo.CanLink != 0) // only prof. with recipes have
-						HandleLearnSkillRecipesHelper(target, skillInfo.Id);
+                string name = "";
+                uint skillId = 0;
 
-				handler.SendSysMessage(CypherStrings.CommandLearnAllCraft);
+                foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
+                {
+                    if ((skillInfo.CategoryID != SkillCategory.Profession &&
+                         skillInfo.CategoryID != SkillCategory.Secondary) ||
+                        skillInfo.CanLink == 0) // only prof with recipes have set
+                        continue;
 
-				return true;
-			}
+                    Locale locale = handler.GetSessionDbcLocale();
+                    name = skillInfo.DisplayName[locale];
 
-			[Command("default", CypherStrings.CommandLearnAllDefaultHelp, RBACPermissions.CommandLearnAllDefault)]
-			private static bool HandleLearnAllDefaultCommand(CommandHandler handler, PlayerIdentifier player)
-			{
-				if (player == null)
-					player = PlayerIdentifier.FromTargetOrSelf(handler);
+                    if (string.IsNullOrEmpty(name))
+                        continue;
 
-				if (player == null ||
-				    !player.IsConnected())
-					return false;
+                    if (!name.Like(namePart))
+                    {
+                        locale = 0;
 
-				Player target = player.GetConnectedPlayer();
-				target.LearnDefaultSkills();
-				target.LearnCustomSpells();
-				target.LearnQuestRewardedSpells();
+                        for (; locale < Locale.Total; ++locale)
+                        {
+                            name = skillInfo.DisplayName[locale];
 
-				handler.SendSysMessage(CypherStrings.CommandLearnAllDefaultAndQuest, handler.GetNameLink(target));
+                            if (name.IsEmpty())
+                                continue;
 
-				return true;
-			}
+                            if (name.Like(namePart))
+                                break;
+                        }
+                    }
 
-			[Command("languages", CypherStrings.CommandLearnAllLanguagesHelp, RBACPermissions.CommandLearnAllLang)]
-			private static bool HandleLearnAllLangCommand(CommandHandler handler)
-			{
-				Global.LanguageMgr.ForEachLanguage((_, languageDesc) =>
-				                                   {
-					                                   if (languageDesc.SpellId != 0)
-						                                   handler.GetSession().GetPlayer().LearnSpell(languageDesc.SpellId, false);
+                    if (locale < Locale.Total)
+                    {
+                        skillId = skillInfo.Id;
 
-					                                   return true;
-				                                   });
+                        break;
+                    }
+                }
 
-				handler.SendSysMessage(CypherStrings.CommandLearnAllLang);
+                if (!(name.IsEmpty() && skillId != 0))
+                    return false;
 
-				return true;
-			}
+                HandleLearnSkillRecipesHelper(target, skillId);
 
-			[Command("recipes", CypherStrings.CommandLearnAllRecipesHelp, RBACPermissions.CommandLearnAllRecipes)]
-			private static bool HandleLearnAllRecipesCommand(CommandHandler handler, Tail namePart)
-			{
-				//  Learns all recipes of specified profession and sets skill to max
-				//  Example: .learn all_recipes enchanting
+                ushort maxLevel = target.GetPureMaxSkillValue((SkillType)skillId);
+                target.SetSkill(skillId, target.GetSkillStep((SkillType)skillId), maxLevel, maxLevel);
+                handler.SendSysMessage(CypherStrings.CommandLearnAllRecipes, name);
 
-				Player target = handler.GetSelectedPlayer();
+                return true;
+            }
 
-				if (!target)
-				{
-					handler.SendSysMessage(CypherStrings.PlayerNotFound);
+            [Command("talents", CypherStrings.CommandLearnAllTalentsHelp, RBACPermissions.CommandLearnAllTalents)]
+            private static bool HandleLearnAllTalentsCommand(CommandHandler handler)
+            {
+                Player player = handler.GetSession().GetPlayer();
+                uint playerClass = (uint)player.GetClass();
 
-					return false;
-				}
+                foreach (var (_, talentInfo) in CliDB.TalentStorage)
+                {
+                    if (playerClass != talentInfo.ClassID)
+                        continue;
 
-				if (namePart.IsEmpty())
-					return false;
+                    if (talentInfo.SpecID != 0 &&
+                        player.GetPrimarySpecialization() != talentInfo.SpecID)
+                        continue;
 
-				string name    = "";
-				uint   skillId = 0;
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
 
-				foreach (var (_, skillInfo) in CliDB.SkillLineStorage)
-				{
-					if ((skillInfo.CategoryID != SkillCategory.Profession &&
-					     skillInfo.CategoryID != SkillCategory.Secondary) ||
-					    skillInfo.CanLink == 0) // only prof with recipes have set
-						continue;
+                    if (spellInfo == null ||
+                        !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
+                        continue;
 
-					Locale locale = handler.GetSessionDbcLocale();
-					name = skillInfo.DisplayName[locale];
+                    // learn highest rank of talent and learn all non-talent spell ranks (recursive by tree)
+                    player.AddTalent(talentInfo, player.GetActiveTalentGroup(), true);
+                    player.LearnSpell(talentInfo.SpellID, false);
+                }
 
-					if (string.IsNullOrEmpty(name))
-						continue;
+                player.SendTalentsInfoData();
 
-					if (!name.Like(namePart))
-					{
-						locale = 0;
+                handler.SendSysMessage(CypherStrings.CommandLearnClassTalents);
 
-						for (; locale < Locale.Total; ++locale)
-						{
-							name = skillInfo.DisplayName[locale];
+                return true;
+            }
 
-							if (name.IsEmpty())
-								continue;
+            [Command("pettalents", CypherStrings.CommandLearnAllPettalentHelp, RBACPermissions.CommandLearnMyPetTalents)]
+            private static bool HandleLearnAllPetTalentsCommand(CommandHandler handler)
+            {
+                return true;
+            }
 
-							if (name.Like(namePart))
-								break;
-						}
-					}
+            private static void HandleLearnSkillRecipesHelper(Player player, uint skillId)
+            {
+                uint classmask = player.GetClassMask();
 
-					if (locale < Locale.Total)
-					{
-						skillId = skillInfo.Id;
+                var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
 
-						break;
-					}
-				}
+                if (skillLineAbilities == null)
+                    return;
 
-				if (!(name.IsEmpty() && skillId != 0))
-					return false;
+                foreach (var skillLine in skillLineAbilities)
+                {
+                    // not high rank
+                    if (skillLine.SupercedesSpell != 0)
+                        continue;
 
-				HandleLearnSkillRecipesHelper(target, skillId);
+                    // skip racial Skills
+                    if (skillLine.RaceMask != 0)
+                        continue;
 
-				ushort maxLevel = target.GetPureMaxSkillValue((SkillType)skillId);
-				target.SetSkill(skillId, target.GetSkillStep((SkillType)skillId), maxLevel, maxLevel);
-				handler.SendSysMessage(CypherStrings.CommandLearnAllRecipes, name);
+                    // skip wrong class Skills
+                    if (skillLine.ClassMask != 0 &&
+                        (skillLine.ClassMask & classmask) == 0)
+                        continue;
 
-				return true;
-			}
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell, Difficulty.None);
 
-			[Command("talents", CypherStrings.CommandLearnAllTalentsHelp, RBACPermissions.CommandLearnAllTalents)]
-			private static bool HandleLearnAllTalentsCommand(CommandHandler handler)
-			{
-				Player player      = handler.GetSession().GetPlayer();
-				uint   playerClass = (uint)player.GetClass();
+                    if (spellInfo == null ||
+                        !Global.SpellMgr.IsSpellValid(spellInfo, player, false))
+                        continue;
 
-				foreach (var (_, talentInfo) in CliDB.TalentStorage)
-				{
-					if (playerClass != talentInfo.ClassID)
-						continue;
+                    player.LearnSpell(skillLine.Spell, false);
+                }
+            }
+        }
 
-					if (talentInfo.SpecID != 0 &&
-					    player.GetPrimarySpecialization() != talentInfo.SpecID)
-						continue;
+        [CommandGroup("my")]
+        private class LearnAllMyCommands
+        {
+            [Command("quests", CypherStrings.CommandLearnMyQuestsHelp, RBACPermissions.CommandLearnAllMySpells)]
+            private static bool HandleLearnMyQuestsCommand(CommandHandler handler)
+            {
+                Player player = handler.GetPlayer();
 
-					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                foreach (var (_, quest) in Global.ObjectMgr.GetQuestTemplates())
+                    if (quest.AllowableClasses != 0 &&
+                        player.SatisfyQuestClass(quest, false))
+                        player.LearnQuestRewardedSpells(quest);
 
-					if (spellInfo == null ||
-					    !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
-						continue;
+                return true;
+            }
 
-					// learn highest rank of talent and learn all non-talent spell ranks (recursive by tree)
-					player.AddTalent(talentInfo, player.GetActiveTalentGroup(), true);
-					player.LearnSpell(talentInfo.SpellID, false);
-				}
+            [Command("trainer", CypherStrings.CommandLearnMyTrainerHelp, RBACPermissions.CommandLearnAllMySpells)]
+            private static bool HandleLearnMySpellsCommand(CommandHandler handler)
+            {
+                ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetPlayer().GetClass());
 
-				player.SendTalentsInfoData();
+                if (classEntry == null)
+                    return true;
 
-				handler.SendSysMessage(CypherStrings.CommandLearnClassTalents);
+                uint family = classEntry.SpellClassSet;
 
-				return true;
-			}
+                foreach (var (_, entry) in CliDB.SkillLineAbilityStorage)
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell, Difficulty.None);
 
-			[Command("pettalents", CypherStrings.CommandLearnAllPettalentHelp, RBACPermissions.CommandLearnMyPetTalents)]
-			private static bool HandleLearnAllPetTalentsCommand(CommandHandler handler)
-			{
-				return true;
-			}
+                    if (spellInfo == null)
+                        continue;
 
-			private static void HandleLearnSkillRecipesHelper(Player player, uint skillId)
-			{
-				uint classmask = player.GetClassMask();
+                    // skip server-side/triggered spells
+                    if (spellInfo.SpellLevel == 0)
+                        continue;
 
-				var skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
+                    // skip wrong class/race Skills
+                    if (!handler.GetSession().GetPlayer().IsSpellFitByClassAndRace(spellInfo.Id))
+                        continue;
 
-				if (skillLineAbilities == null)
-					return;
+                    // skip other spell families
+                    if ((uint)spellInfo.SpellFamilyName != family)
+                        continue;
 
-				foreach (var skillLine in skillLineAbilities)
-				{
-					// not high rank
-					if (skillLine.SupercedesSpell != 0)
-						continue;
+                    // skip broken spells
+                    if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
+                        continue;
 
-					// skip racial Skills
-					if (skillLine.RaceMask != 0)
-						continue;
+                    handler.GetSession().GetPlayer().LearnSpell(spellInfo.Id, false);
+                }
 
-					// skip wrong class Skills
-					if (skillLine.ClassMask != 0 &&
-					    (skillLine.ClassMask & classmask) == 0)
-						continue;
+                handler.SendSysMessage(CypherStrings.CommandLearnClassSpells);
 
-					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell, Difficulty.None);
+                return true;
+            }
+        }
 
-					if (spellInfo == null ||
-					    !Global.SpellMgr.IsSpellValid(spellInfo, player, false))
-						continue;
+        [Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
+        private static bool HandleLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
+        {
+            Player targetPlayer = handler.GetSelectedPlayerOrSelf();
 
-					player.LearnSpell(skillLine.Spell, false);
-				}
-			}
-		}
+            if (!targetPlayer)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-		[CommandGroup("my")]
-		private class LearnAllMyCommands
-		{
-			[Command("quests", CypherStrings.CommandLearnMyQuestsHelp, RBACPermissions.CommandLearnAllMySpells)]
-			private static bool HandleLearnMyQuestsCommand(CommandHandler handler)
-			{
-				Player player = handler.GetPlayer();
+                return false;
+            }
 
-				foreach (var (_, quest) in Global.ObjectMgr.GetQuestTemplates())
-					if (quest.AllowableClasses != 0 &&
-					    player.SatisfyQuestClass(quest, false))
-						player.LearnQuestRewardedSpells(quest);
+            if (!Global.SpellMgr.IsSpellValid(spellId, handler.GetSession().GetPlayer()))
+            {
+                handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
 
-				return true;
-			}
+                return false;
+            }
 
-			[Command("trainer", CypherStrings.CommandLearnMyTrainerHelp, RBACPermissions.CommandLearnAllMySpells)]
-			private static bool HandleLearnMySpellsCommand(CommandHandler handler)
-			{
-				ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetPlayer().GetClass());
+            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
 
-				if (classEntry == null)
-					return true;
+            if (!allRanks &&
+                targetPlayer.HasSpell(spellId))
+            {
+                if (targetPlayer == handler.GetPlayer())
+                    handler.SendSysMessage(CypherStrings.YouKnownSpell);
+                else
+                    handler.SendSysMessage(CypherStrings.TargetKnownSpell, handler.GetNameLink(targetPlayer));
 
-				uint family = classEntry.SpellClassSet;
+                return false;
+            }
 
-				foreach (var (_, entry) in CliDB.SkillLineAbilityStorage)
-				{
-					SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell, Difficulty.None);
+            targetPlayer.LearnSpell(spellId, false);
 
-					if (spellInfo == null)
-						continue;
+            if (allRanks)
+                while ((spellId = Global.SpellMgr.GetNextSpellInChain(spellId)) != 0)
+                    targetPlayer.LearnSpell(spellId, false);
 
-					// skip server-side/triggered spells
-					if (spellInfo.SpellLevel == 0)
-						continue;
+            return true;
+        }
 
-					// skip wrong class/race Skills
-					if (!handler.GetSession().GetPlayer().IsSpellFitByClassAndRace(spellInfo.Id))
-						continue;
+        [CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
+        private static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
+        {
+            Player target = handler.GetSelectedPlayer();
 
-					// skip other spell families
-					if ((uint)spellInfo.SpellFamilyName != family)
-						continue;
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-					// skip broken spells
-					if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
-						continue;
+                return false;
+            }
 
-					handler.GetSession().GetPlayer().LearnSpell(spellInfo.Id, false);
-				}
+            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
 
-				handler.SendSysMessage(CypherStrings.CommandLearnClassSpells);
+            if (allRanks)
+                spellId = Global.SpellMgr.GetFirstSpellInChain(spellId);
 
-				return true;
-			}
-		}
-	}
+            if (target.HasSpell(spellId))
+                target.RemoveSpell(spellId, false, !allRanks);
+            else
+                handler.SendSysMessage(CypherStrings.ForgetSpell);
+
+            return true;
+        }
+    }
 }

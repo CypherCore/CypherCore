@@ -8,67 +8,67 @@ using Game.Scripting;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.GizrulTheSlavener
 {
-	internal struct SpellIds
-	{
-		public const uint FatalBite = 16495;
-		public const uint InfectedBite = 16128;
-		public const uint Frenzy = 8269;
-	}
+    internal struct SpellIds
+    {
+        public const uint FatalBite = 16495;
+        public const uint InfectedBite = 16128;
+        public const uint Frenzy = 8269;
+    }
 
-	internal struct PathIds
-	{
-		public const uint Gizrul = 402450;
-	}
+    internal struct PathIds
+    {
+        public const uint Gizrul = 402450;
+    }
 
-	[Script]
-	internal class boss_gizrul_the_slavener : BossAI
-	{
-		public boss_gizrul_the_slavener(Creature creature) : base(creature, DataTypes.GizrulTheSlavener)
-		{
-		}
+    [Script]
+    internal class boss_gizrul_the_slavener : BossAI
+    {
+        public boss_gizrul_the_slavener(Creature creature) : base(creature, DataTypes.GizrulTheSlavener)
+        {
+        }
 
-		public override void Reset()
-		{
-			_Reset();
-		}
+        public override void Reset()
+        {
+            _Reset();
+        }
 
-		public override void IsSummonedBy(WorldObject summoner)
-		{
-			me.GetMotionMaster().MovePath(PathIds.Gizrul, false);
-		}
+        public override void IsSummonedBy(WorldObject summoner)
+        {
+            me.GetMotionMaster().MovePath(PathIds.Gizrul, false);
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			base.JustEngagedWith(who);
+        public override void JustEngagedWith(Unit who)
+        {
+            base.JustEngagedWith(who);
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(17),
-			                    TimeSpan.FromSeconds(20),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.FatalBite);
-				                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(17),
+                                TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.FatalBite);
+                                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(10),
-			                    TimeSpan.FromSeconds(12),
-			                    task =>
-			                    {
-				                    DoCast(me, SpellIds.InfectedBite);
-				                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
-			                    });
-		}
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                TimeSpan.FromSeconds(12),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.InfectedBite);
+                                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                                });
+        }
 
-		public override void JustDied(Unit killer)
-		{
-			_JustDied();
-		}
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 }

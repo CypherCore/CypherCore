@@ -7,7 +7,7 @@ public struct AreaTriggerId
 
     public AreaTriggerId(uint id, bool isServerSide)
     {
-        Id           = id;
+        Id = id;
         IsServerSide = isServerSide;
     }
 

@@ -8,252 +8,251 @@ using Game.Entities;
 
 namespace Game.Networking
 {
-	public abstract class ClientPacket : IDisposable
-	{
-		protected WorldPacket _worldPacket;
+    public abstract class ClientPacket : IDisposable
+    {
+        protected WorldPacket _worldPacket;
 
-		protected ClientPacket(WorldPacket worldPacket)
-		{
-			_worldPacket = worldPacket;
-		}
+        protected ClientPacket(WorldPacket worldPacket)
+        {
+            _worldPacket = worldPacket;
+        }
 
-		public void Dispose()
-		{
-			_worldPacket.Dispose();
-		}
+        public void Dispose()
+        {
+            _worldPacket.Dispose();
+        }
 
-		public abstract void Read();
+        public abstract void Read();
 
-		public ClientOpcodes GetOpcode()
-		{
-			return (ClientOpcodes)_worldPacket.GetOpcode();
-		}
+        public ClientOpcodes GetOpcode()
+        {
+            return (ClientOpcodes)_worldPacket.GetOpcode();
+        }
 
-		public void LogPacket(WorldSession session)
-		{
-			Log.outDebug(LogFilter.Network, "Received ClientOpcode: {0} From: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "Unknown IP");
-		}
-	}
+        public void LogPacket(WorldSession session)
+        {
+            Log.outDebug(LogFilter.Network, "Received ClientOpcode: {0} From: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "Unknown IP");
+        }
+    }
 
-	public abstract class ServerPacket
-	{
-		protected WorldPacket _worldPacket;
+    public abstract class ServerPacket
+    {
+        protected WorldPacket _worldPacket;
+        private readonly ConnectionType connectionType;
 
-		private byte[] buffer;
-		private ConnectionType connectionType;
+        private byte[] buffer;
 
-		protected ServerPacket(ServerOpcodes opcode)
-		{
-			connectionType = ConnectionType.Realm;
-			_worldPacket   = new WorldPacket(opcode);
-		}
+        protected ServerPacket(ServerOpcodes opcode)
+        {
+            connectionType = ConnectionType.Realm;
+            _worldPacket = new WorldPacket(opcode);
+        }
 
-		protected ServerPacket(ServerOpcodes opcode, ConnectionType type = ConnectionType.Realm)
-		{
-			connectionType = type;
-			_worldPacket   = new WorldPacket(opcode);
-		}
+        protected ServerPacket(ServerOpcodes opcode, ConnectionType type = ConnectionType.Realm)
+        {
+            connectionType = type;
+            _worldPacket = new WorldPacket(opcode);
+        }
 
-		public void Clear()
-		{
-			_worldPacket.Clear();
-			buffer = null;
-		}
+        public void Clear()
+        {
+            _worldPacket.Clear();
+            buffer = null;
+        }
 
-		public ServerOpcodes GetOpcode()
-		{
-			return (ServerOpcodes)_worldPacket.GetOpcode();
-		}
+        public ServerOpcodes GetOpcode()
+        {
+            return (ServerOpcodes)_worldPacket.GetOpcode();
+        }
 
-		public byte[] GetData()
-		{
-			return buffer;
-		}
+        public byte[] GetData()
+        {
+            return buffer;
+        }
 
-		public void LogPacket(WorldSession session)
-		{
-			Log.outDebug(LogFilter.Network, "Sent ServerOpcode: {0} To: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "");
-		}
+        public void LogPacket(WorldSession session)
+        {
+            Log.outDebug(LogFilter.Network, "Sent ServerOpcode: {0} To: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "");
+        }
 
-		public abstract void Write();
+        public abstract void Write();
 
-		public void WritePacketData()
-		{
-			if (buffer != null)
-				return;
+        public void WritePacketData()
+        {
+            if (buffer != null)
+                return;
 
-			Write();
+            Write();
 
-			buffer = _worldPacket.GetData();
-			_worldPacket.Dispose();
-		}
+            buffer = _worldPacket.GetData();
+            _worldPacket.Dispose();
+        }
 
-		public ConnectionType GetConnection()
-		{
-			return connectionType;
-		}
-	}
+        public ConnectionType GetConnection()
+        {
+            return connectionType;
+        }
+    }
 
-	public class WorldPacket : ByteBuffer
-	{
-		private DateTime _receivedTime; // only set for a specific set of opcodes, for performance reasons.
+    public class WorldPacket : ByteBuffer
+    {
+        private readonly uint opcode;
+        private DateTime _receivedTime; // only set for a specific set of opcodes, for performance reasons.
 
-		private uint opcode;
+        public WorldPacket(ServerOpcodes opcode = ServerOpcodes.None)
+        {
+            this.opcode = (uint)opcode;
+        }
 
-		public WorldPacket(ServerOpcodes opcode = ServerOpcodes.None)
-		{
-			this.opcode = (uint)opcode;
-		}
+        public WorldPacket(byte[] data) : base(data)
+        {
+            opcode = ReadUInt16();
+        }
 
-		public WorldPacket(byte[] data) : base(data)
-		{
-			opcode = ReadUInt16();
-		}
+        public ObjectGuid ReadPackedGuid()
+        {
+            var loLength = ReadUInt8();
+            var hiLength = ReadUInt8();
+            var low = ReadPackedUInt64(loLength);
 
-		public ObjectGuid ReadPackedGuid()
-		{
-			var loLength = ReadUInt8();
-			var hiLength = ReadUInt8();
-			var low      = ReadPackedUInt64(loLength);
+            return new ObjectGuid(ReadPackedUInt64(hiLength), low);
+        }
 
-			return new ObjectGuid(ReadPackedUInt64(hiLength), low);
-		}
+        public Position ReadPosition()
+        {
+            return new Position(ReadFloat(), ReadFloat(), ReadFloat());
+        }
 
-		private ulong ReadPackedUInt64(byte length)
-		{
-			if (length == 0)
-				return 0;
+        public void WritePackedGuid(ObjectGuid guid)
+        {
+            if (guid.IsEmpty())
+            {
+                WriteUInt8(0);
+                WriteUInt8(0);
 
-			var guid = 0ul;
+                return;
+            }
 
-			for (var i = 0; i < 8; i++)
-				if (((1 << i) & length) != 0)
-					guid |= (ulong)ReadUInt8() << (i * 8);
+            byte lowMask, highMask;
+            byte[] lowPacked, highPacked;
 
-			return guid;
-		}
+            var loSize = PackUInt64(guid.GetLowValue(), out lowMask, out lowPacked);
+            var hiSize = PackUInt64(guid.GetHighValue(), out highMask, out highPacked);
 
-		public Position ReadPosition()
-		{
-			return new Position(ReadFloat(), ReadFloat(), ReadFloat());
-		}
+            WriteUInt8(lowMask);
+            WriteUInt8(highMask);
+            WriteBytes(lowPacked, loSize);
+            WriteBytes(highPacked, hiSize);
+        }
 
-		public void WritePackedGuid(ObjectGuid guid)
-		{
-			if (guid.IsEmpty())
-			{
-				WriteUInt8(0);
-				WriteUInt8(0);
+        public void WritePackedUInt64(ulong guid)
+        {
+            byte mask;
+            byte[] packed;
+            var packedSize = PackUInt64(guid, out mask, out packed);
 
-				return;
-			}
+            WriteUInt8(mask);
+            WriteBytes(packed, packedSize);
+        }
 
-			byte   lowMask,   highMask;
-			byte[] lowPacked, highPacked;
+        public void WriteBytes(WorldPacket data)
+        {
+            FlushBits();
+            WriteBytes(data.GetData());
+        }
 
-			var loSize = PackUInt64(guid.GetLowValue(), out lowMask, out lowPacked);
-			var hiSize = PackUInt64(guid.GetHighValue(), out highMask, out highPacked);
+        public void WriteXYZ(Position pos)
+        {
+            if (pos == null)
+                return;
 
-			WriteUInt8(lowMask);
-			WriteUInt8(highMask);
-			WriteBytes(lowPacked, loSize);
-			WriteBytes(highPacked, hiSize);
-		}
+            float x, y, z;
+            pos.GetPosition(out x, out y, out z);
+            WriteFloat(x);
+            WriteFloat(y);
+            WriteFloat(z);
+        }
 
-		public void WritePackedUInt64(ulong guid)
-		{
-			byte   mask;
-			byte[] packed;
-			var    packedSize = PackUInt64(guid, out mask, out packed);
+        public void WriteXYZO(Position pos)
+        {
+            float x, y, z, o;
+            pos.GetPosition(out x, out y, out z, out o);
+            WriteFloat(x);
+            WriteFloat(y);
+            WriteFloat(z);
+            WriteFloat(o);
+        }
 
-			WriteUInt8(mask);
-			WriteBytes(packed, packedSize);
-		}
+        public uint GetOpcode()
+        {
+            return opcode;
+        }
 
-		private uint PackUInt64(ulong value, out byte mask, out byte[] result)
-		{
-			uint resultSize = 0;
-			mask   = 0;
-			result = new byte[8];
+        public DateTime GetReceivedTime()
+        {
+            return _receivedTime;
+        }
 
-			for (byte i = 0; value != 0; ++i)
-			{
-				if ((value & 0xFF) != 0)
-				{
-					mask                 |= (byte)(1 << i);
-					result[resultSize++] =  (byte)(value & 0xFF);
-				}
+        public void SetReceiveTime(DateTime receivedTime)
+        {
+            _receivedTime = receivedTime;
+        }
 
-				value >>= 8;
-			}
+        private ulong ReadPackedUInt64(byte length)
+        {
+            if (length == 0)
+                return 0;
 
-			return resultSize;
-		}
+            var guid = 0ul;
 
-		public void WriteBytes(WorldPacket data)
-		{
-			FlushBits();
-			WriteBytes(data.GetData());
-		}
+            for (var i = 0; i < 8; i++)
+                if (((1 << i) & length) != 0)
+                    guid |= (ulong)ReadUInt8() << (i * 8);
 
-		public void WriteXYZ(Position pos)
-		{
-			if (pos == null)
-				return;
+            return guid;
+        }
 
-			float x, y, z;
-			pos.GetPosition(out x, out y, out z);
-			WriteFloat(x);
-			WriteFloat(y);
-			WriteFloat(z);
-		}
+        private uint PackUInt64(ulong value, out byte mask, out byte[] result)
+        {
+            uint resultSize = 0;
+            mask = 0;
+            result = new byte[8];
 
-		public void WriteXYZO(Position pos)
-		{
-			float x, y, z, o;
-			pos.GetPosition(out x, out y, out z, out o);
-			WriteFloat(x);
-			WriteFloat(y);
-			WriteFloat(z);
-			WriteFloat(o);
-		}
+            for (byte i = 0; value != 0; ++i)
+            {
+                if ((value & 0xFF) != 0)
+                {
+                    mask |= (byte)(1 << i);
+                    result[resultSize++] = (byte)(value & 0xFF);
+                }
 
-		public uint GetOpcode()
-		{
-			return opcode;
-		}
+                value >>= 8;
+            }
 
-		public DateTime GetReceivedTime()
-		{
-			return _receivedTime;
-		}
+            return resultSize;
+        }
+    }
 
-		public void SetReceiveTime(DateTime receivedTime)
-		{
-			_receivedTime = receivedTime;
-		}
-	}
+    public class PacketHeader
+    {
+        public int Size;
+        public byte[] Tag = new byte[12];
 
-	public class PacketHeader
-	{
-		public int Size;
-		public byte[] Tag = new byte[12];
+        public void Read(byte[] buffer)
+        {
+            Size = BitConverter.ToInt32(buffer, 0);
+            Buffer.BlockCopy(buffer, 4, Tag, 0, 12);
+        }
 
-		public void Read(byte[] buffer)
-		{
-			Size = BitConverter.ToInt32(buffer, 0);
-			Buffer.BlockCopy(buffer, 4, Tag, 0, 12);
-		}
+        public void Write(ByteBuffer byteBuffer)
+        {
+            byteBuffer.WriteInt32(Size);
+            byteBuffer.WriteBytes(Tag, 12);
+        }
 
-		public void Write(ByteBuffer byteBuffer)
-		{
-			byteBuffer.WriteInt32(Size);
-			byteBuffer.WriteBytes(Tag, 12);
-		}
-
-		public bool IsValidSize()
-		{
-			return Size < 0x40000;
-		}
-	}
+        public bool IsValidSize()
+        {
+            return Size < 0x40000;
+        }
+    }
 }

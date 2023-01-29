@@ -8,58 +8,58 @@ using Game.Networking.Packets;
 
 namespace Game.Arenas
 {
-	internal class ArenaScore : BattlegroundScore
-	{
-		private uint PostMatchMMR;
-		private uint PostMatchRating;
-		private uint PreMatchMMR;
+    internal class ArenaScore : BattlegroundScore
+    {
+        private readonly uint PostMatchMMR;
+        private readonly uint PostMatchRating;
+        private readonly uint PreMatchMMR;
 
-		private uint PreMatchRating;
+        private readonly uint PreMatchRating;
 
-		public ArenaScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team)
-		{
-			TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
-		}
+        public ArenaScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team)
+        {
+            TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
+        }
 
-		public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
-		{
-			base.BuildPvPLogPlayerDataPacket(out playerData);
+        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
+        {
+            base.BuildPvPLogPlayerDataPacket(out playerData);
 
-			if (PreMatchRating != 0)
-				playerData.PreMatchRating = PreMatchRating;
+            if (PreMatchRating != 0)
+                playerData.PreMatchRating = PreMatchRating;
 
-			if (PostMatchRating != PreMatchRating)
-				playerData.RatingChange = (int)(PostMatchRating - PreMatchRating);
+            if (PostMatchRating != PreMatchRating)
+                playerData.RatingChange = (int)(PostMatchRating - PreMatchRating);
 
-			if (PreMatchMMR != 0)
-				playerData.PreMatchMMR = PreMatchMMR;
+            if (PreMatchMMR != 0)
+                playerData.PreMatchMMR = PreMatchMMR;
 
-			if (PostMatchMMR != PreMatchMMR)
-				playerData.MmrChange = (int)(PostMatchMMR - PreMatchMMR);
-		}
+            if (PostMatchMMR != PreMatchMMR)
+                playerData.MmrChange = (int)(PostMatchMMR - PreMatchMMR);
+        }
 
-		// For Logging purpose
-		public override string ToString()
-		{
-			return $"Damage done: {DamageDone} Healing done: {HealingDone} Killing blows: {KillingBlows} PreMatchRating: {PreMatchRating} " +
-			       $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
-		}
-	}
+        // For Logging purpose
+        public override string ToString()
+        {
+            return $"Damage done: {DamageDone} Healing done: {HealingDone} Killing blows: {KillingBlows} PreMatchRating: {PreMatchRating} " +
+                   $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
+        }
+    }
 
-	public class ArenaTeamScore
-	{
-		public uint PostMatchMMR;
-		public uint PostMatchRating;
-		public uint PreMatchMMR;
+    public class ArenaTeamScore
+    {
+        public uint PostMatchMMR;
+        public uint PostMatchRating;
+        public uint PreMatchMMR;
 
-		public uint PreMatchRating;
+        public uint PreMatchRating;
 
-		public void Assign(uint preMatchRating, uint postMatchRating, uint preMatchMMR, uint postMatchMMR)
-		{
-			PreMatchRating  = preMatchRating;
-			PostMatchRating = postMatchRating;
-			PreMatchMMR     = preMatchMMR;
-			PostMatchMMR    = postMatchMMR;
-		}
-	}
+        public void Assign(uint preMatchRating, uint postMatchRating, uint preMatchMMR, uint postMatchMMR)
+        {
+            PreMatchRating = preMatchRating;
+            PostMatchRating = postMatchRating;
+            PreMatchMMR = preMatchMMR;
+            PostMatchMMR = postMatchMMR;
+        }
+    }
 }

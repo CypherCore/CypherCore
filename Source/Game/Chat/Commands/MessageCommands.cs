@@ -10,121 +10,121 @@ using Game.Networking.Packets;
 
 namespace Game.Chat
 {
-	internal class MessageCommands
-	{
-		[CommandNonGroup("nameannounce", RBACPermissions.CommandNameannounce, true)]
-		private static bool HandleNameAnnounceCommand(CommandHandler handler, Tail message)
-		{
-			if (message.IsEmpty())
-				return false;
+    internal class MessageCommands
+    {
+        [CommandNonGroup("nameannounce", RBACPermissions.CommandNameannounce, true)]
+        private static bool HandleNameAnnounceCommand(CommandHandler handler, Tail message)
+        {
+            if (message.IsEmpty())
+                return false;
 
-			string       name    = "Console";
-			WorldSession session = handler.GetSession();
+            string name = "Console";
+            WorldSession session = handler.GetSession();
 
-			if (session)
-				name = session.GetPlayer().GetName();
+            if (session)
+                name = session.GetPlayer().GetName();
 
-			Global.WorldMgr.SendWorldText(CypherStrings.AnnounceColor, name, message);
+            Global.WorldMgr.SendWorldText(CypherStrings.AnnounceColor, name, message);
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandNonGroup("gmnameannounce", RBACPermissions.CommandGmnameannounce, true)]
-		private static bool HandleGMNameAnnounceCommand(CommandHandler handler, Tail message)
-		{
-			if (message.IsEmpty())
-				return false;
+        [CommandNonGroup("gmnameannounce", RBACPermissions.CommandGmnameannounce, true)]
+        private static bool HandleGMNameAnnounceCommand(CommandHandler handler, Tail message)
+        {
+            if (message.IsEmpty())
+                return false;
 
-			string       name    = "Console";
-			WorldSession session = handler.GetSession();
+            string name = "Console";
+            WorldSession session = handler.GetSession();
 
-			if (session)
-				name = session.GetPlayer().GetName();
+            if (session)
+                name = session.GetPlayer().GetName();
 
-			Global.WorldMgr.SendGMText(CypherStrings.AnnounceColor, name, message);
+            Global.WorldMgr.SendGMText(CypherStrings.AnnounceColor, name, message);
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandNonGroup("announce", RBACPermissions.CommandAnnounce, true)]
-		private static bool HandleAnnounceCommand(CommandHandler handler, Tail message)
-		{
-			if (message.IsEmpty())
-				return false;
+        [CommandNonGroup("announce", RBACPermissions.CommandAnnounce, true)]
+        private static bool HandleAnnounceCommand(CommandHandler handler, Tail message)
+        {
+            if (message.IsEmpty())
+                return false;
 
-			Global.WorldMgr.SendServerMessage(ServerMessageType.String, handler.GetParsedString(CypherStrings.Systemmessage, message));
+            Global.WorldMgr.SendServerMessage(ServerMessageType.String, handler.GetParsedString(CypherStrings.Systemmessage, message));
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandNonGroup("gmannounce", RBACPermissions.CommandGmannounce, true)]
-		private static bool HandleGMAnnounceCommand(CommandHandler handler, Tail message)
-		{
-			if (message.IsEmpty())
-				return false;
+        [CommandNonGroup("gmannounce", RBACPermissions.CommandGmannounce, true)]
+        private static bool HandleGMAnnounceCommand(CommandHandler handler, Tail message)
+        {
+            if (message.IsEmpty())
+                return false;
 
-			Global.WorldMgr.SendGMText(CypherStrings.GmBroadcast, message);
+            Global.WorldMgr.SendGMText(CypherStrings.GmBroadcast, message);
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandNonGroup("notify", RBACPermissions.CommandNotify, true)]
-		private static bool HandleNotifyCommand(CommandHandler handler, Tail message)
-		{
-			if (message.IsEmpty())
-				return false;
+        [CommandNonGroup("notify", RBACPermissions.CommandNotify, true)]
+        private static bool HandleNotifyCommand(CommandHandler handler, Tail message)
+        {
+            if (message.IsEmpty())
+                return false;
 
-			string str = handler.GetCypherString(CypherStrings.GlobalNotify);
-			str += message;
+            string str = handler.GetCypherString(CypherStrings.GlobalNotify);
+            str += message;
 
-			Global.WorldMgr.SendGlobalMessage(new PrintNotification(str));
+            Global.WorldMgr.SendGlobalMessage(new PrintNotification(str));
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandNonGroup("gmnotify", RBACPermissions.CommandGmnotify, true)]
-		private static bool HandleGMNotifyCommand(CommandHandler handler, Tail message)
-		{
-			if (message.IsEmpty())
-				return false;
+        [CommandNonGroup("gmnotify", RBACPermissions.CommandGmnotify, true)]
+        private static bool HandleGMNotifyCommand(CommandHandler handler, Tail message)
+        {
+            if (message.IsEmpty())
+                return false;
 
-			string str = handler.GetCypherString(CypherStrings.GmNotify);
-			str += message;
+            string str = handler.GetCypherString(CypherStrings.GmNotify);
+            str += message;
 
-			Global.WorldMgr.SendGlobalGMMessage(new PrintNotification(str));
+            Global.WorldMgr.SendGlobalGMMessage(new PrintNotification(str));
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandNonGroup("whispers", RBACPermissions.CommandWhispers)]
-		private static bool HandleWhispersCommand(CommandHandler handler, bool? operationArg, [OptionalArg] string playerNameArg)
-		{
-			if (!operationArg.HasValue)
-			{
-				handler.SendSysMessage(CypherStrings.CommandWhisperaccepting, handler.GetSession().GetPlayer().IsAcceptWhispers() ? handler.GetCypherString(CypherStrings.On) : handler.GetCypherString(CypherStrings.Off));
+        [CommandNonGroup("whispers", RBACPermissions.CommandWhispers)]
+        private static bool HandleWhispersCommand(CommandHandler handler, bool? operationArg, [OptionalArg] string playerNameArg)
+        {
+            if (!operationArg.HasValue)
+            {
+                handler.SendSysMessage(CypherStrings.CommandWhisperaccepting, handler.GetSession().GetPlayer().IsAcceptWhispers() ? handler.GetCypherString(CypherStrings.On) : handler.GetCypherString(CypherStrings.Off));
 
-				return true;
-			}
+                return true;
+            }
 
-			if (operationArg.HasValue)
-			{
-				handler.GetSession().GetPlayer().SetAcceptWhispers(true);
-				handler.SendSysMessage(CypherStrings.CommandWhisperon);
+            if (operationArg.HasValue)
+            {
+                handler.GetSession().GetPlayer().SetAcceptWhispers(true);
+                handler.SendSysMessage(CypherStrings.CommandWhisperon);
 
-				return true;
-			}
-			else
-			{
-				// Remove all players from the Gamemaster's whisper whitelist
-				handler.GetSession().GetPlayer().ClearWhisperWhiteList();
-				handler.GetSession().GetPlayer().SetAcceptWhispers(false);
-				handler.SendSysMessage(CypherStrings.CommandWhisperoff);
+                return true;
+            }
+            else
+            {
+                // Remove all players from the Gamemaster's whisper whitelist
+                handler.GetSession().GetPlayer().ClearWhisperWhiteList();
+                handler.GetSession().GetPlayer().SetAcceptWhispers(false);
+                handler.SendSysMessage(CypherStrings.CommandWhisperoff);
 
-				return true;
-			}
+                return true;
+            }
 
-			//todo fix me
-			/*if (operationArg->holds_alternative < EXACT_SEQUENCE("remove") > ())
+            //todo fix me
+            /*if (operationArg->holds_alternative < EXACT_SEQUENCE("remove") > ())
 			{
 			    if (!playerNameArg)
 			        return false;
@@ -147,71 +147,69 @@ namespace Game.Chat
 			}
 			handler.SendSysMessage(CypherStrings.UseBol);
 			return false;*/
-		}
-	}
+        }
+    }
 
-	[CommandGroup("channel")]
-	internal class ChannelCommands
-	{
-		[CommandGroup("set")]
-		private class ChannelSetCommands
-		{
-			[Command("ownership", RBACPermissions.CommandChannelSetOwnership)]
-			private static bool HandleChannelSetOwnership(CommandHandler handler, string channelName, bool grantOwnership)
-			{
-				uint channelId = 0;
+    [CommandGroup("channel")]
+    internal class ChannelCommands
+    {
+        [CommandGroup("set")]
+        private class ChannelSetCommands
+        {
+            [Command("ownership", RBACPermissions.CommandChannelSetOwnership)]
+            private static bool HandleChannelSetOwnership(CommandHandler handler, string channelName, bool grantOwnership)
+            {
+                uint channelId = 0;
 
-				foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
-					if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))
-					{
-						channelId = channelEntry.Id;
+                foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
+                    if (channelEntry.Name[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        channelId = channelEntry.Id;
 
-						break;
-					}
+                        break;
+                    }
 
-				AreaTableRecord zoneEntry = null;
+                AreaTableRecord zoneEntry = null;
 
-				foreach (var entry in CliDB.AreaTableStorage.Values)
-					if (entry.AreaName[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))
-					{
-						zoneEntry = entry;
+                foreach (var entry in CliDB.AreaTableStorage.Values)
+                    if (entry.AreaName[handler.GetSessionDbcLocale()].Equals(channelName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        zoneEntry = entry;
 
-						break;
-					}
+                        break;
+                    }
 
-				Player  player  = handler.GetSession().GetPlayer();
-				Channel channel = null;
+                Player player = handler.GetSession().GetPlayer();
+                Channel channel = null;
 
-				ChannelManager cMgr = ChannelManager.ForTeam(player.GetTeam());
+                ChannelManager cMgr = ChannelManager.ForTeam(player.GetTeam());
 
-				if (cMgr != null)
-					channel = cMgr.GetChannel(channelId, channelName, player, false, zoneEntry);
+                if (cMgr != null)
+                    channel = cMgr.GetChannel(channelId, channelName, player, false, zoneEntry);
 
-				if (grantOwnership)
-				{
-					if (channel != null)
-						channel.SetOwnership(true);
+                if (grantOwnership)
+                {
+                    channel?.SetOwnership(true);
 
-					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
-					stmt.AddValue(0, 1);
-					stmt.AddValue(1, channelName);
-					DB.Characters.Execute(stmt);
-					handler.SendSysMessage(CypherStrings.ChannelEnableOwnership, channelName);
-				}
-				else
-				{
-					if (channel != null)
-						channel.SetOwnership(false);
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
+                    stmt.AddValue(0, 1);
+                    stmt.AddValue(1, channelName);
+                    DB.Characters.Execute(stmt);
+                    handler.SendSysMessage(CypherStrings.ChannelEnableOwnership, channelName);
+                }
+                else
+                {
+                    channel?.SetOwnership(false);
 
-					PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
-					stmt.AddValue(0, 0);
-					stmt.AddValue(1, channelName);
-					DB.Characters.Execute(stmt);
-					handler.SendSysMessage(CypherStrings.ChannelDisableOwnership, channelName);
-				}
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
+                    stmt.AddValue(0, 0);
+                    stmt.AddValue(1, channelName);
+                    DB.Characters.Execute(stmt);
+                    handler.SendSysMessage(CypherStrings.ChannelDisableOwnership, channelName);
+                }
 
-				return true;
-			}
-		}
-	}
+                return true;
+            }
+        }
+    }
 }

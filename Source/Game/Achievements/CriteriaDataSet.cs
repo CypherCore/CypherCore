@@ -5,8 +5,8 @@ namespace Game.Achievements;
 
 public class CriteriaDataSet
 {
-    private uint _criteriaId;
     private readonly List<CriteriaData> _storage = new();
+    private uint _criteriaId;
 
     public void Add(CriteriaData data)
     {

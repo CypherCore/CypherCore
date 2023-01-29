@@ -7,24 +7,24 @@ using Game.Entities;
 
 namespace Game.Chat.Commands
 {
-	[CommandGroup("Achievement")]
-	internal class AchievementCommand
-	{
-		[Command("add", CypherStrings.CommandAchievementAddHelp, RBACPermissions.CommandAchievementAdd)]
-		private static bool HandleAchievementAddCommand(CommandHandler handler, AchievementRecord achievementEntry)
-		{
-			Player target = handler.GetSelectedPlayer();
+    [CommandGroup("Achievement")]
+    internal class AchievementCommand
+    {
+        [Command("add", CypherStrings.CommandAchievementAddHelp, RBACPermissions.CommandAchievementAdd)]
+        private static bool HandleAchievementAddCommand(CommandHandler handler, AchievementRecord achievementEntry)
+        {
+            Player target = handler.GetSelectedPlayer();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-				return false;
-			}
+                return false;
+            }
 
-			target.CompletedAchievement(achievementEntry);
+            target.CompletedAchievement(achievementEntry);
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }

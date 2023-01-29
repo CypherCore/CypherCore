@@ -6,8 +6,8 @@ using Game.Groups;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
-	public interface IGroupOnChangeLeader : IScriptObject
-	{
-		void OnChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid);
-	}
+    public interface IGroupOnChangeLeader : IScriptObject
+    {
+        void OnChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid);
+    }
 }

@@ -6,9 +6,9 @@ using Game.BattleGrounds;
 namespace Game.Entities
 {
     public class BgBattlegroundQueueID_Rec
-	{
-		public BattlegroundQueueTypeId BGQueueTypeId;
-		public uint InvitedToInstance { get; set; }
+    {
+        public BattlegroundQueueTypeId BGQueueTypeId;
+        public uint InvitedToInstance { get; set; }
         public uint JoinTime { get; set; }
         public bool Mercenary { get; set; }
     }

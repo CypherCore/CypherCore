@@ -11,37 +11,37 @@ using Game.DataStorage;
 
 namespace Game.Maps
 {
-	internal class InstanceScriptDataReader
-	{
-		public enum Result
-		{
-			Ok,
-			MalformedJson,
-			RootIsNotAnObject,
-			MissingHeader,
-			UnexpectedHeader,
-			MissingBossStates,
-			BossStatesIsNotAnObject,
-			UnknownBoss,
-			BossStateIsNotAnObject,
-			MissingBossState,
-			BossStateValueIsNotANumber,
-			AdditionalDataIsNotAnObject,
-			AdditionalDataUnexpectedValueType
-		}
+    internal class InstanceScriptDataReader
+    {
+        public enum Result
+        {
+            Ok,
+            MalformedJson,
+            RootIsNotAnObject,
+            MissingHeader,
+            UnexpectedHeader,
+            MissingBossStates,
+            BossStatesIsNotAnObject,
+            UnknownBoss,
+            BossStateIsNotAnObject,
+            MissingBossState,
+            BossStateValueIsNotANumber,
+            AdditionalDataIsNotAnObject,
+            AdditionalDataUnexpectedValueType
+        }
 
-		private JsonDocument _doc;
+        private readonly InstanceScript _instance;
 
-		private InstanceScript _instance;
+        private JsonDocument _doc;
 
-		public InstanceScriptDataReader(InstanceScript instance)
-		{
-			_instance = instance;
-		}
+        public InstanceScriptDataReader(InstanceScript instance)
+        {
+            _instance = instance;
+        }
 
-		public Result Load(string data)
-		{
-			/*
+        public Result Load(string data)
+        {
+            /*
 			   Expected JSON
 
 			    {
@@ -54,249 +54,249 @@ namespace Game.Maps
 			    }
 			*/
 
-			try
-			{
-				_doc = JsonDocument.Parse(data);
-			}
-			catch (JsonException ex)
-			{
-				Log.outError(LogFilter.Scripts, $"JSON parser error {ex.Message} at {ex.LineNumber} while loading _data for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+            try
+            {
+                _doc = JsonDocument.Parse(data);
+            }
+            catch (JsonException ex)
+            {
+                Log.outError(LogFilter.Scripts, $"JSON parser error {ex.Message} at {ex.LineNumber} while loading _data for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-				return Result.MalformedJson;
-			}
+                return Result.MalformedJson;
+            }
 
-			if (_doc.RootElement.ValueKind != JsonValueKind.Object)
-			{
-				Log.outError(LogFilter.Scripts, $"Root JSON value is not an object for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+            if (_doc.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                Log.outError(LogFilter.Scripts, $"Root JSON value is not an object for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-				return Result.RootIsNotAnObject;
-			}
+                return Result.RootIsNotAnObject;
+            }
 
-			Result result = ParseHeader();
+            Result result = ParseHeader();
 
-			if (result != Result.Ok)
-				return result;
+            if (result != Result.Ok)
+                return result;
 
-			result = ParseBossStates();
+            result = ParseBossStates();
 
-			if (result != Result.Ok)
-				return result;
+            if (result != Result.Ok)
+                return result;
 
-			result = ParseAdditionalData();
+            result = ParseAdditionalData();
 
-			if (result != Result.Ok)
-				return result;
+            if (result != Result.Ok)
+                return result;
 
-			return Result.Ok;
-		}
+            return Result.Ok;
+        }
 
-		private Result ParseHeader()
-		{
-			if (!_doc.RootElement.TryGetProperty("Header", out JsonElement header))
-			{
-				Log.outError(LogFilter.Scripts, $"Missing _data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+        private Result ParseHeader()
+        {
+            if (!_doc.RootElement.TryGetProperty("Header", out JsonElement header))
+            {
+                Log.outError(LogFilter.Scripts, $"Missing _data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-				return Result.MissingHeader;
-			}
+                return Result.MissingHeader;
+            }
 
-			if (header.GetString() != _instance.GetHeader())
-			{
-				Log.outError(LogFilter.Scripts, $"Incorrect _data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}], expected \"{_instance.GetHeader()}\" got \"{header.GetString()}\"");
+            if (header.GetString() != _instance.GetHeader())
+            {
+                Log.outError(LogFilter.Scripts, $"Incorrect _data header for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}], expected \"{_instance.GetHeader()}\" got \"{header.GetString()}\"");
 
-				return Result.UnexpectedHeader;
-			}
+                return Result.UnexpectedHeader;
+            }
 
-			return Result.Ok;
-		}
+            return Result.Ok;
+        }
 
-		private Result ParseBossStates()
-		{
-			if (!_doc.RootElement.TryGetProperty("BossStates", out JsonElement bossStates))
-			{
-				Log.outError(LogFilter.Scripts, $"Missing boss states for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+        private Result ParseBossStates()
+        {
+            if (!_doc.RootElement.TryGetProperty("BossStates", out JsonElement bossStates))
+            {
+                Log.outError(LogFilter.Scripts, $"Missing boss states for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-				return Result.MissingBossStates;
-			}
+                return Result.MissingBossStates;
+            }
 
-			if (bossStates.ValueKind != JsonValueKind.Array)
-			{
-				Log.outError(LogFilter.Scripts, $"Boss states is not an array for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+            if (bossStates.ValueKind != JsonValueKind.Array)
+            {
+                Log.outError(LogFilter.Scripts, $"Boss states is not an array for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-				return Result.BossStatesIsNotAnObject;
-			}
+                return Result.BossStatesIsNotAnObject;
+            }
 
-			for (int bossId = 0; bossId < bossStates.GetArrayLength(); ++bossId)
-			{
-				if (bossId >= _instance.GetEncounterCount())
-				{
-					Log.outError(LogFilter.Scripts, $"Boss states has entry for boss with higher Id ({bossId}) than number of bosses ({_instance.GetEncounterCount()}) for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+            for (int bossId = 0; bossId < bossStates.GetArrayLength(); ++bossId)
+            {
+                if (bossId >= _instance.GetEncounterCount())
+                {
+                    Log.outError(LogFilter.Scripts, $"Boss states has entry for boss with higher Id ({bossId}) than number of bosses ({_instance.GetEncounterCount()}) for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-					return Result.UnknownBoss;
-				}
+                    return Result.UnknownBoss;
+                }
 
-				var bossState = bossStates[bossId];
+                var bossState = bossStates[bossId];
 
-				if (bossState.ValueKind != JsonValueKind.Number)
-				{
-					Log.outError(LogFilter.Scripts, $"Boss State for boss ({bossId}) is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+                if (bossState.ValueKind != JsonValueKind.Number)
+                {
+                    Log.outError(LogFilter.Scripts, $"Boss State for boss ({bossId}) is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-					return Result.BossStateIsNotAnObject;
-				}
+                    return Result.BossStateIsNotAnObject;
+                }
 
-				EncounterState state = (EncounterState)bossState.GetInt32();
+                EncounterState state = (EncounterState)bossState.GetInt32();
 
-				if (state == EncounterState.InProgress ||
-				    state == EncounterState.Fail ||
-				    state == EncounterState.Special)
-					state = EncounterState.NotStarted;
+                if (state == EncounterState.InProgress ||
+                    state == EncounterState.Fail ||
+                    state == EncounterState.Special)
+                    state = EncounterState.NotStarted;
 
-				if (state < EncounterState.ToBeDecided)
-					_instance.SetBossState((uint)bossId, state);
-			}
+                if (state < EncounterState.ToBeDecided)
+                    _instance.SetBossState((uint)bossId, state);
+            }
 
-			return Result.Ok;
-		}
+            return Result.Ok;
+        }
 
-		private Result ParseAdditionalData()
-		{
-			if (!_doc.RootElement.TryGetProperty("AdditionalData", out JsonElement moreData))
-				return Result.Ok;
+        private Result ParseAdditionalData()
+        {
+            if (!_doc.RootElement.TryGetProperty("AdditionalData", out JsonElement moreData))
+                return Result.Ok;
 
-			if (moreData.ValueKind != JsonValueKind.Object)
-			{
-				Log.outError(LogFilter.Scripts, $"Additional _data is not an object for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+            if (moreData.ValueKind != JsonValueKind.Object)
+            {
+                Log.outError(LogFilter.Scripts, $"Additional _data is not an object for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-				return Result.AdditionalDataIsNotAnObject;
-			}
+                return Result.AdditionalDataIsNotAnObject;
+            }
 
-			foreach (PersistentInstanceScriptValueBase valueBase in _instance.GetPersistentScriptValues())
-				if (moreData.TryGetProperty(valueBase.GetName(), out JsonElement value) &&
-				    value.ValueKind != JsonValueKind.Null)
-				{
-					if (value.ValueKind != JsonValueKind.Number)
-					{
-						Log.outError(LogFilter.Scripts, $"Additional _data value for key {valueBase.GetName()} is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
+            foreach (PersistentInstanceScriptValueBase valueBase in _instance.GetPersistentScriptValues())
+                if (moreData.TryGetProperty(valueBase.GetName(), out JsonElement value) &&
+                    value.ValueKind != JsonValueKind.Null)
+                {
+                    if (value.ValueKind != JsonValueKind.Number)
+                    {
+                        Log.outError(LogFilter.Scripts, $"Additional _data value for key {valueBase.GetName()} is not a number for instance {GetInstanceId()} [{GetMapId()}-{GetMapName()} | {GetDifficultyId()}-{GetDifficultyName()}]");
 
-						return Result.AdditionalDataUnexpectedValueType;
-					}
+                        return Result.AdditionalDataUnexpectedValueType;
+                    }
 
-					if (value.TryGetDouble(out double doubleValue))
-						valueBase.LoadValue(doubleValue);
-					else
-						valueBase.LoadValue(value.GetInt64());
-				}
+                    if (value.TryGetDouble(out double doubleValue))
+                        valueBase.LoadValue(doubleValue);
+                    else
+                        valueBase.LoadValue(value.GetInt64());
+                }
 
-			return Result.Ok;
-		}
+            return Result.Ok;
+        }
 
-		private uint GetInstanceId()
-		{
-			return _instance.instance.GetInstanceId();
-		}
+        private uint GetInstanceId()
+        {
+            return _instance.Instance.GetInstanceId();
+        }
 
-		private uint GetMapId()
-		{
-			return _instance.instance.GetId();
-		}
+        private uint GetMapId()
+        {
+            return _instance.Instance.GetId();
+        }
 
-		private string GetMapName()
-		{
-			return _instance.instance.GetMapName();
-		}
+        private string GetMapName()
+        {
+            return _instance.Instance.GetMapName();
+        }
 
-		private uint GetDifficultyId()
-		{
-			return (uint)_instance.instance.GetDifficultyID();
-		}
+        private uint GetDifficultyId()
+        {
+            return (uint)_instance.Instance.GetDifficultyID();
+        }
 
-		private string GetDifficultyName()
-		{
-			return CliDB.DifficultyStorage.LookupByKey(_instance.instance.GetDifficultyID()).Name;
-		}
-	}
+        private string GetDifficultyName()
+        {
+            return CliDB.DifficultyStorage.LookupByKey(_instance.Instance.GetDifficultyID()).Name;
+        }
+    }
 
-	internal class InstanceScriptDataWriter
-	{
-		private JsonObject _doc = new();
-		private InstanceScript _instance;
+    internal class InstanceScriptDataWriter
+    {
+        private readonly InstanceScript _instance;
+        private JsonObject _doc = new();
 
-		public InstanceScriptDataWriter(InstanceScript instance)
-		{
-			_instance = instance;
-		}
+        public InstanceScriptDataWriter(InstanceScript instance)
+        {
+            _instance = instance;
+        }
 
-		public string GetString()
-		{
-			using var stream = new MemoryStream();
+        public string GetString()
+        {
+            using var stream = new MemoryStream();
 
-			using (var writer = new Utf8JsonWriter(stream))
-			{
-				_doc.WriteTo(writer);
-			}
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                _doc.WriteTo(writer);
+            }
 
-			return Encoding.UTF8.GetString(stream.ToArray());
-		}
+            return Encoding.UTF8.GetString(stream.ToArray());
+        }
 
-		public void FillData(bool withValues = true)
-		{
-			_doc.Add("Header", _instance.GetHeader());
+        public void FillData(bool withValues = true)
+        {
+            _doc.Add("Header", _instance.GetHeader());
 
-			JsonArray bossStates = new();
+            JsonArray bossStates = new();
 
-			for (uint bossId = 0; bossId < _instance.GetEncounterCount(); ++bossId)
-				bossStates.Add(JsonValue.Create((int)(withValues ? _instance.GetBossState(bossId) : EncounterState.NotStarted)));
+            for (uint bossId = 0; bossId < _instance.GetEncounterCount(); ++bossId)
+                bossStates.Add(JsonValue.Create((int)(withValues ? _instance.GetBossState(bossId) : EncounterState.NotStarted)));
 
-			_doc.Add("BossStates", bossStates);
+            _doc.Add("BossStates", bossStates);
 
-			if (!_instance.GetPersistentScriptValues().Empty())
-			{
-				JsonObject moreData = new();
+            if (!_instance.GetPersistentScriptValues().Empty())
+            {
+                JsonObject moreData = new();
 
-				foreach (PersistentInstanceScriptValueBase additionalValue in _instance.GetPersistentScriptValues())
-					if (withValues)
-					{
-						UpdateAdditionalSaveDataEvent data = additionalValue.CreateEvent();
+                foreach (PersistentInstanceScriptValueBase additionalValue in _instance.GetPersistentScriptValues())
+                    if (withValues)
+                    {
+                        UpdateAdditionalSaveDataEvent data = additionalValue.CreateEvent();
 
-						if (data.Value is double)
-							moreData.Add(data.Key, (double)data.Value);
-						else
-							moreData.Add(data.Key, (long)data.Value);
-					}
-					else
-					{
-						moreData.Add(additionalValue.GetName(), null);
-					}
+                        if (data.Value is double)
+                            moreData.Add(data.Key, (double)data.Value);
+                        else
+                            moreData.Add(data.Key, (long)data.Value);
+                    }
+                    else
+                    {
+                        moreData.Add(additionalValue.GetName(), null);
+                    }
 
-				_doc.Add("AdditionalData", moreData);
-			}
-		}
+                _doc.Add("AdditionalData", moreData);
+            }
+        }
 
-		public void FillDataFrom(string data)
-		{
-			try
-			{
-				_doc = JsonNode.Parse(data).AsObject();
-			}
-			catch (JsonException)
-			{
-				FillData(false);
-			}
-		}
+        public void FillDataFrom(string data)
+        {
+            try
+            {
+                _doc = JsonNode.Parse(data).AsObject();
+            }
+            catch (JsonException)
+            {
+                FillData(false);
+            }
+        }
 
-		public void SetBossState(UpdateBossStateSaveDataEvent data)
-		{
-			var array = _doc["BossStates"].AsArray();
-			array[(int)data.BossId] = (int)data.NewState;
-		}
+        public void SetBossState(UpdateBossStateSaveDataEvent data)
+        {
+            var array = _doc["BossStates"].AsArray();
+            array[(int)data.BossId] = (int)data.NewState;
+        }
 
-		public void SetAdditionalData(UpdateAdditionalSaveDataEvent data)
-		{
-			var jObject = _doc["AdditionalData"].AsObject();
+        public void SetAdditionalData(UpdateAdditionalSaveDataEvent data)
+        {
+            var jObject = _doc["AdditionalData"].AsObject();
 
-			if (data.Value is double)
-				jObject[data.Key] = (double)data.Value;
-			else
-				jObject[data.Key] = (long)data.Value;
-		}
-	}
+            if (data.Value is double)
+                jObject[data.Key] = (double)data.Value;
+            else
+                jObject[data.Key] = (long)data.Value;
+        }
+    }
 }

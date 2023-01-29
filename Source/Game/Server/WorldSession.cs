@@ -1,13 +1,20 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Numerics;
+using System.Text;
 using Framework.Collections;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
 using Game.Accounts;
-using Game.AI;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.Chat;
@@ -17,12 +24,7 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
-using System.Text;
+using Google.Protobuf;
 
 namespace Game
 {
@@ -201,8 +203,7 @@ namespace Game
                 Log.outInfo(LogFilter.Player, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
                 Map map = GetPlayer().GetMap();
-                if (map != null)
-                    map.RemovePlayerFromMap(GetPlayer(), true);
+                map?.RemovePlayerFromMap(GetPlayer(), true);
 
                 SetPlayer(null);
 
@@ -373,11 +374,6 @@ namespace Game
             _recvQueue.Enqueue(packet);
         }
 
-        void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
-        {
-            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
-        }
-
         public void SendPacket(ServerPacket packet)
         {
             if (packet == null)
@@ -477,7 +473,7 @@ namespace Game
 
         public void SendConnectToInstance(ConnectToSerial serial)
         {
-            var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(System.Net.IPAddress.Parse(GetRemoteAddress()));
+            var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(IPAddress.Parse(GetRemoteAddress()));
 
             _instanceConnectKey.AccountId = GetAccountId();
             _instanceConnectKey.connectionType = ConnectionType.Instance;
@@ -489,7 +485,7 @@ namespace Game
             connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
             connectTo.Con = (byte)ConnectionType.Instance;
 
-            if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            if (instanceAddress.AddressFamily == AddressFamily.InterNetwork)
             {
                 connectTo.Payload.Where.IPv4 = instanceAddress.Address.GetAddressBytes();
                 connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv4;
@@ -503,69 +499,6 @@ namespace Game
             SendPacket(connectTo);
         }
 
-        void LoadAccountData(SQLResult result, AccountDataTypes mask)
-        {
-            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
-                if (Convert.ToBoolean((int)mask & (1 << i)))
-                    _accountData[i] = new AccountData();
-
-            if (result.IsEmpty())
-                return;
-
-            do
-            {
-                int type = result.Read<byte>(0);
-                if (type >= (int)AccountDataTypes.Max)
-                {
-                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account _data Type ({1}), ignore.",
-                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
-                    continue;
-                }
-
-                if (((int)mask & (1 << type)) == 0)
-                {
-                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account _data Type ({1}), ignore.",
-                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
-                    continue;
-                }
-
-                _accountData[type].Time = result.Read<long>(1);
-                var bytes = result.Read<byte[]>(2);
-                var line = Encoding.Default.GetString(bytes);
-                _accountData[type].Data = line;
-            }
-            while (result.NextRow());
-        }
-
-        void SetAccountData(AccountDataTypes type, long time, string data)
-        {
-            if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
-                stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (byte)type);
-                stmt.AddValue(2, time);
-                stmt.AddValue(3, data);
-                DB.Characters.Execute(stmt);
-            }
-            else
-            {
-                // _player can be NULL and packet received after logout but _GUID still store correct Guid
-                if (_GUIDLow == 0)
-                    return;
-
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
-                stmt.AddValue(0, _GUIDLow);
-                stmt.AddValue(1, (byte)type);
-                stmt.AddValue(2, time);
-                stmt.AddValue(3, data);
-                DB.Characters.Execute(stmt);
-            }
-
-            _accountData[(int)type].Time = time;
-            _accountData[(int)type].Data = data;
-        }
-
         public void SendTutorialsData()
         {
             TutorialFlags packet = new();
@@ -576,19 +509,6 @@ namespace Game
         public bool CanSpeak()
         {
             return _muteTime <= GameTime.GetGameTime();
-        }
-
-        bool ValidateHyperlinksAndMaybeKick(string str)
-        {
-            if (Hyperlink.CheckAllLinks(str))
-                return true;
-
-            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} sent a message with an invalid link:\n{str}");
-
-            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
-                KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
-
-            return false;
         }
 
         public bool DisallowHyperlinksAndMaybeKick(string str)
@@ -644,18 +564,11 @@ namespace Game
             return ss.ToString();
         }
 
-        void HandleWardenData(WardenData packet)
-        {
-            if (_warden == null || packet.Data.GetSize() == 0)
-                return;
-
-            _warden.HandleData(packet.Data);
-        }
-
         public bool PlayerLoading() { return !_playerLoading.IsEmpty(); }
         public bool PlayerLogout() { return _playerLogout; }
         public bool PlayerLogoutWithSave() { return _playerLogout && _playerSave; }
         public bool PlayerRecentlyLoggedOut() { return _playerRecentlyLogout; }
+
         public bool PlayerDisconnected()
         {
             return !(_Socket[(int)ConnectionType.Realm] != null && _Socket[(int)ConnectionType.Realm].IsOpen() &&
@@ -671,8 +584,6 @@ namespace Game
 
         public Player GetPlayer() { return _player; }
 
-        void SetSecurity(AccountTypes security) { _security = security; }
-
         public string GetRemoteAddress() { return _Address; }
 
         public Expansion GetAccountExpansion() { return _accountExpansion; }
@@ -686,28 +597,6 @@ namespace Game
 
         public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
 
-        void SetLogoutStartTime(long requestTime)
-        {
-            _logoutTime = requestTime;
-        }
-
-        bool ShouldLogOut(long currTime)
-        {
-            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
-        }
-
-        void ProcessQueryCallbacks()
-        {
-            _queryProcessor.ProcessReadyCallbacks();
-            _transactionCallbacks.ProcessReadyCallbacks();
-            _queryHolderProcessor.ProcessReadyCallbacks();
-        }
-
-        TransactionCallback AddTransactionCallback(TransactionCallback callback)
-        {
-            return _transactionCallbacks.AddCallback(callback);
-        }
-
         public SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
         {
             return (SQLQueryHolderCallback<R>)_queryHolderProcessor.AddCallback(callback);
@@ -716,26 +605,9 @@ namespace Game
         public bool CanAccessAlliedRaces()
         {
             if (ConfigMgr.GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false))
-                return true; 
+                return true;
             else
                 return GetAccountExpansion() >= Expansion.BattleForAzeroth;
-        }
-
-        void InitWarden(BigInteger k)
-        {
-            if (_os == "Win")
-            {
-                _warden = new WardenWin();
-                _warden.Init(this, k);
-            }
-            else if (_os == "Wn64")
-            {
-                // Not implemented
-            }
-            else if (_os == "Mc64")
-            {
-                // Not implemented
-            }
         }
 
         public void LoadPermissions()
@@ -788,7 +660,214 @@ namespace Game
             });
         }
 
-        void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
+        public RBACData GetRBACData()
+        {
+            return _RBACData;
+        }
+
+        public bool HasPermission(RBACPermissions permission)
+        {
+            if (_RBACData == null)
+                LoadPermissions();
+
+            bool hasPermission = _RBACData.HasPermission(permission);
+            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+
+            return hasPermission;
+        }
+
+        public void InvalidateRBACData()
+        {
+            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+            _RBACData = null;
+        }
+
+        public void ResetTimeSync()
+        {
+            _timeSyncNextCounter = 0;
+            _pendingTimeSyncRequests.Clear();
+        }
+
+        public void SendTimeSync()
+        {
+            TimeSyncRequest timeSyncRequest = new();
+            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
+            SendPacket(timeSyncRequest);
+
+            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
+
+            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
+            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
+            _timeSyncNextCounter++;
+        }
+
+        public Locale GetSessionDbcLocale() { return _sessionDbcLocale; }
+        public Locale GetSessionDbLocaleIndex() { return _sessionDbLocaleIndex; }
+
+        public uint GetLatency() { return _latency; }
+        public void SetLatency(uint latency) { _latency = latency; }
+
+        public void ResetTimeOutTime(bool onlyActive)
+        {
+            if (GetPlayer())
+                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
+            else if (!onlyActive)
+                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
+        }
+
+        public uint GetRecruiterId() { return recruiterId; }
+        public bool IsARecruiter() { return isRecruiter; }
+
+        // Packets cooldown
+        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
+        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
+
+        // Battle Pets
+        public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
+        public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
+
+        // Battlenet
+        public Array<byte> GetRealmListSecret() { return _realmListSecret; }
+        public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
+
+        public static implicit operator bool(WorldSession session)
+        {
+            return session != null;
+        }
+
+        private void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
+        {
+            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
+        }
+
+        private void LoadAccountData(SQLResult result, AccountDataTypes mask)
+        {
+            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
+                if (Convert.ToBoolean((int)mask & (1 << i)))
+                    _accountData[i] = new AccountData();
+
+            if (result.IsEmpty())
+                return;
+
+            do
+            {
+                int type = result.Read<byte>(0);
+                if (type >= (int)AccountDataTypes.Max)
+                {
+                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account _data Type ({1}), ignore.",
+                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                    continue;
+                }
+
+                if (((int)mask & (1 << type)) == 0)
+                {
+                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account _data Type ({1}), ignore.",
+                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                    continue;
+                }
+
+                _accountData[type].Time = result.Read<long>(1);
+                var bytes = result.Read<byte[]>(2);
+                var line = Encoding.Default.GetString(bytes);
+                _accountData[type].Data = line;
+            }
+            while (result.NextRow());
+        }
+
+        private void SetAccountData(AccountDataTypes type, long time, string data)
+        {
+            if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
+            {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
+                stmt.AddValue(0, GetAccountId());
+                stmt.AddValue(1, (byte)type);
+                stmt.AddValue(2, time);
+                stmt.AddValue(3, data);
+                DB.Characters.Execute(stmt);
+            }
+            else
+            {
+                // _player can be NULL and packet received after logout but _GUID still store correct Guid
+                if (_GUIDLow == 0)
+                    return;
+
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
+                stmt.AddValue(0, _GUIDLow);
+                stmt.AddValue(1, (byte)type);
+                stmt.AddValue(2, time);
+                stmt.AddValue(3, data);
+                DB.Characters.Execute(stmt);
+            }
+
+            _accountData[(int)type].Time = time;
+            _accountData[(int)type].Data = data;
+        }
+
+        private bool ValidateHyperlinksAndMaybeKick(string str)
+        {
+            if (Hyperlink.CheckAllLinks(str))
+                return true;
+
+            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} sent a message with an invalid link:\n{str}");
+
+            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+                KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
+
+            return false;
+        }
+
+        private void HandleWardenData(WardenData packet)
+        {
+            if (_warden == null || packet.Data.GetSize() == 0)
+                return;
+
+            _warden.HandleData(packet.Data);
+        }
+
+        private void SetSecurity(AccountTypes security) { _security = security; }
+
+        private void SetLogoutStartTime(long requestTime)
+        {
+            _logoutTime = requestTime;
+        }
+
+        private bool ShouldLogOut(long currTime)
+        {
+            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
+        }
+
+        private void ProcessQueryCallbacks()
+        {
+            _queryProcessor.ProcessReadyCallbacks();
+            _transactionCallbacks.ProcessReadyCallbacks();
+            _queryHolderProcessor.ProcessReadyCallbacks();
+        }
+
+        private TransactionCallback AddTransactionCallback(TransactionCallback callback)
+        {
+            return _transactionCallbacks.AddCallback(callback);
+        }
+
+        private void InitWarden(BigInteger k)
+        {
+            if (_os == "Win")
+            {
+                _warden = new WardenWin();
+                _warden.Init(this, k);
+            }
+            else if (_os == "Wn64")
+            {
+                // Not implemented
+            }
+            else if (_os == "Mc64")
+            {
+                // Not implemented
+            }
+        }
+
+        private void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
         {
             LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypes.GlobalCacheMask);
             LoadTutorialsData(realmHolder.GetResult(AccountInfoQueryLoad.TutorialsIndexPerRealm));
@@ -830,35 +909,11 @@ namespace Game
             _battlePetMgr.LoadFromDB(holder.GetResult(AccountInfoQueryLoad.BattlePets), holder.GetResult(AccountInfoQueryLoad.BattlePetSlot));
         }
 
-        public RBACData GetRBACData()
-        {
-            return _RBACData;
-        }
+        private AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
 
-        public bool HasPermission(RBACPermissions permission)
-        {
-            if (_RBACData == null)
-                LoadPermissions();
+        private uint GetTutorialInt(byte index) { return tutorials[index]; }
 
-            bool hasPermission = _RBACData.HasPermission(permission);
-            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
-
-            return hasPermission;
-        }
-
-        public void InvalidateRBACData()
-        {
-            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
-            _RBACData = null;
-        }
-
-        AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
-
-        uint GetTutorialInt(byte index) { return tutorials[index]; }
-
-        void SetTutorialInt(byte index, uint value)
+        private void SetTutorialInt(byte index, uint value)
         {
             if (tutorials[index] != value)
             {
@@ -867,26 +922,7 @@ namespace Game
             }
         }
 
-        public void ResetTimeSync()
-        {
-            _timeSyncNextCounter = 0;
-            _pendingTimeSyncRequests.Clear();
-        }
-
-        public void SendTimeSync()
-        {
-            TimeSyncRequest timeSyncRequest = new();
-            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
-            SendPacket(timeSyncRequest);
-
-            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
-
-            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
-            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
-            _timeSyncNextCounter++;
-        }
-
-        uint AdjustClientMovementTime(uint time)
+        private uint AdjustClientMovementTime(uint time)
         {
             long movementTime = (long)time + _timeSyncClockDelta;
             if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
@@ -898,113 +934,72 @@ namespace Game
                 return (uint)movementTime;
         }
 
-        public Locale GetSessionDbcLocale() { return _sessionDbcLocale; }
-        public Locale GetSessionDbLocaleIndex() { return _sessionDbLocaleIndex; }
-
-        public uint GetLatency() { return _latency; }
-        public void SetLatency(uint latency) { _latency = latency; }
-        public void ResetTimeOutTime(bool onlyActive)
-        {
-            if (GetPlayer())
-                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
-            else if (!onlyActive)
-                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
-        }
-        bool IsConnectionIdle()
+        private bool IsConnectionIdle()
         {
             return _timeOutTime < GameTime.GetGameTime() && !_inQueue;
         }
 
-        public uint GetRecruiterId() { return recruiterId; }
-        public bool IsARecruiter() { return isRecruiter; }
-
-        // Packets cooldown
-        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
-        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
-
-        // Battle Pets
-        public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
-        public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
-
-        // Battlenet
-        public Array<byte> GetRealmListSecret() { return _realmListSecret; }
-        void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
-        public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
-
-        public static implicit operator bool(WorldSession session)
-        {
-            return session != null;
-        }
+        private void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
 
         #region Fields
-        List<ObjectGuid> _legitCharacters = new();
-        ulong _GUIDLow;
-        Player _player;
-        WorldSocket[] _Socket = new WorldSocket[(int)ConnectionType.Max];
-        string _Address;
 
-        AccountTypes _security;
-        uint _accountId;
-        string _accountName;
-        uint _battlenetAccountId;
-        Expansion _accountExpansion;
-        Expansion _expansion;
-        string _os;
+        private readonly List<ObjectGuid> _legitCharacters = new();
+        private ulong _GUIDLow;
+        private Player _player;
+        private readonly WorldSocket[] _Socket = new WorldSocket[(int)ConnectionType.Max];
+        private readonly string _Address;
+        private AccountTypes _security;
+        private readonly uint _accountId;
+        private readonly string _accountName;
+        private readonly uint _battlenetAccountId;
+        private readonly Expansion _accountExpansion;
+        private readonly Expansion _expansion;
+        private readonly string _os;
+        private uint expireTime;
+        private bool forceExit;
+        private readonly DosProtection AntiDOS;
+        private Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
 
-        uint expireTime;
-        bool forceExit;
-
-        DosProtection AntiDOS;
-        Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
-
-        long _logoutTime;
-        bool _inQueue;
-        ObjectGuid _playerLoading;                               // code processed in LoginPlayer
-        bool _playerLogout;                                // code processed in LogoutPlayer
-        bool _playerRecentlyLogout;
-        bool _playerSave;
-        Locale _sessionDbcLocale;
-        Locale _sessionDbLocaleIndex;
-        uint _latency;
-        AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
-        uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
-        TutorialsFlag tutorialsChanged;
-
-        Array<byte> _realmListSecret = new(32);
-        Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
-        Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new();
-        uint _battlenetRequestToken;
-
-        List<string> _registeredAddonPrefixes = new();
-        bool _filterAddonMessages;
-        uint recruiterId;
-        bool isRecruiter;
+        private long _logoutTime;
+        private bool _inQueue;
+        private ObjectGuid _playerLoading; // code processed in LoginPlayer
+        private bool _playerLogout;        // code processed in LogoutPlayer
+        private bool _playerRecentlyLogout;
+        private bool _playerSave;
+        private readonly Locale _sessionDbcLocale;
+        private readonly Locale _sessionDbLocaleIndex;
+        private uint _latency;
+        private readonly AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
+        private readonly uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
+        private TutorialsFlag tutorialsChanged;
+        private Array<byte> _realmListSecret = new(32);
+        private readonly Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
+        private readonly Dictionary<uint, Action<CodedInputStream>> _battlenetResponseCallbacks = new();
+        private uint _battlenetRequestToken;
+        private readonly List<string> _registeredAddonPrefixes = new();
+        private bool _filterAddonMessages;
+        private readonly uint recruiterId;
+        private readonly bool isRecruiter;
 
         public long _muteTime;
-        long _timeOutTime;
-
-        ConcurrentQueue<WorldPacket> _recvQueue = new();
-        RBACData _RBACData;
-
-        CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
-        long _timeSyncClockDelta;
-
-        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server Time when packet with that counter was sent.
-        uint _timeSyncNextCounter;
-        uint _timeSyncTimer;
-
-        CollectionMgr _collectionMgr;
-
-        ConnectToKey _instanceConnectKey;
+        private long _timeOutTime;
+        private readonly ConcurrentQueue<WorldPacket> _recvQueue = new();
+        private RBACData _RBACData;
+        private readonly CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
+        private long _timeSyncClockDelta;
+        private readonly Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server Time when packet with that counter was sent.
+        private uint _timeSyncNextCounter;
+        private uint _timeSyncTimer;
+        private readonly CollectionMgr _collectionMgr;
+        private ConnectToKey _instanceConnectKey;
 
         // Packets cooldown
-        long _calendarEventCreationCooldown;
+        private long _calendarEventCreationCooldown;
+        private readonly BattlePetMgr _battlePetMgr;
+        private readonly AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
+        private readonly AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
+        private readonly AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
 
-        BattlePetMgr _battlePetMgr;
-
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
-        AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
-        AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
         #endregion
     }
 
@@ -1028,11 +1023,23 @@ namespace Game
 
     public class DosProtection
     {
+        private enum Policy
+        {
+            Log,
+            Kick,
+            Ban,
+        }
+
+        private readonly Policy _policy;
+        private readonly WorldSession Session;
+        private readonly Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
+
         public DosProtection(WorldSession s)
         {
             Session = s;
             _policy = (Policy)WorldConfig.GetIntValue(WorldCfg.PacketSpoofPolicy);
         }
+
         //todo fix me
         public bool EvaluateOpcode(WorldPacket packet, long time)
         {
@@ -1086,20 +1093,9 @@ namespace Game
             }
             return true;
         }
-
-        Policy _policy;
-        WorldSession Session;
-        Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
-
-        enum Policy
-        {
-            Log,
-            Kick,
-            Ban,
-        }
     }
 
-    struct PacketCounter
+    internal struct PacketCounter
     {
         public long lastReceiveTime;
         public uint amountCounter;
@@ -1111,7 +1107,7 @@ namespace Game
         public string Data;
     }
 
-    class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
+    internal class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
@@ -1125,7 +1121,7 @@ namespace Game
         }
     }
 
-    class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
+    internal class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
@@ -1168,7 +1164,7 @@ namespace Game
         }
     }
 
-    enum AccountInfoQueryLoad
+    internal enum AccountInfoQueryLoad
     {
         GlobalAccountToys,
         BattlePets,

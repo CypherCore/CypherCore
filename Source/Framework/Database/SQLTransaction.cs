@@ -8,141 +8,140 @@ using MySqlConnector;
 
 namespace Framework.Database
 {
-	public class SQLTransaction
-	{
-		public SQLTransaction()
-		{
-			commands = new List<MySqlCommand>();
-		}
+    public class SQLTransaction
+    {
+        public SQLTransaction()
+        {
+            commands = new List<MySqlCommand>();
+        }
 
-		public List<MySqlCommand> commands { get; }
+        public List<MySqlCommand> commands { get; }
 
-		public void Append(PreparedStatement stmt)
-		{
-			MySqlCommand cmd = new(stmt.CommandText);
+        public void Append(PreparedStatement stmt)
+        {
+            MySqlCommand cmd = new(stmt.CommandText);
 
-			foreach (var parameter in stmt.Parameters)
-				cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
+            foreach (var parameter in stmt.Parameters)
+                cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
-			commands.Add(cmd);
-		}
+            commands.Add(cmd);
+        }
 
-		public void Append(string sql, params object[] args)
-		{
-			commands.Add(new MySqlCommand(string.Format(sql, args)));
-		}
-	}
+        public void Append(string sql, params object[] args)
+        {
+            commands.Add(new MySqlCommand(string.Format(sql, args)));
+        }
+    }
 
-	internal class TransactionTask : ISqlOperation
-	{
-		public static object _deadlockLock = new();
+    internal class TransactionTask : ISqlOperation
+    {
+        public static object _deadlockLock = new();
 
-		private SQLTransaction _trans;
+        private readonly SQLTransaction _trans;
 
-		public TransactionTask(SQLTransaction trans)
-		{
-			_trans = trans;
-		}
+        public TransactionTask(SQLTransaction trans)
+        {
+            _trans = trans;
+        }
 
-		public virtual bool Execute<T>(MySqlBase<T> mySqlBase)
-		{
-			MySqlErrorCode errorCode = TryExecute(mySqlBase);
+        public virtual bool Execute<T>(MySqlBase<T> mySqlBase)
+        {
+            MySqlErrorCode errorCode = TryExecute(mySqlBase);
 
-			if (errorCode == MySqlErrorCode.None)
-				return true;
+            if (errorCode == MySqlErrorCode.None)
+                return true;
 
-			if (errorCode == MySqlErrorCode.LockDeadlock)
-				// Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
-				lock (_deadlockLock)
-				{
-					byte loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
+            if (errorCode == MySqlErrorCode.LockDeadlock)
+                // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
+                lock (_deadlockLock)
+                {
+                    byte loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
 
-					for (byte i = 0; i < loopBreaker; ++i)
-						if (TryExecute(mySqlBase) == MySqlErrorCode.None)
-							return true;
-				}
+                    for (byte i = 0; i < loopBreaker; ++i)
+                        if (TryExecute(mySqlBase) == MySqlErrorCode.None)
+                            return true;
+                }
 
-			return false;
-		}
+            return false;
+        }
 
-		public MySqlErrorCode TryExecute<T>(MySqlBase<T> mySqlBase)
-		{
-			return mySqlBase.DirectCommitTransaction(_trans);
-		}
-	}
+        public MySqlErrorCode TryExecute<T>(MySqlBase<T> mySqlBase)
+        {
+            return mySqlBase.DirectCommitTransaction(_trans);
+        }
+    }
 
-	internal class TransactionWithResultTask : TransactionTask
-	{
-		private TaskCompletionSource<bool> _result = new();
+    internal class TransactionWithResultTask : TransactionTask
+    {
+        private readonly TaskCompletionSource<bool> _result = new();
 
-		public TransactionWithResultTask(SQLTransaction trans) : base(trans)
-		{
-		}
+        public TransactionWithResultTask(SQLTransaction trans) : base(trans)
+        {
+        }
 
-		public override bool Execute<T>(MySqlBase<T> mySqlBase)
-		{
-			MySqlErrorCode errorCode = TryExecute(mySqlBase);
+        public override bool Execute<T>(MySqlBase<T> mySqlBase)
+        {
+            MySqlErrorCode errorCode = TryExecute(mySqlBase);
 
-			if (errorCode == MySqlErrorCode.None)
-			{
-				_result.SetResult(true);
+            if (errorCode == MySqlErrorCode.None)
+            {
+                _result.SetResult(true);
 
-				return true;
-			}
+                return true;
+            }
 
-			if (errorCode == MySqlErrorCode.LockDeadlock)
-				// Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
-				lock (_deadlockLock)
-				{
-					byte loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
+            if (errorCode == MySqlErrorCode.LockDeadlock)
+                // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
+                lock (_deadlockLock)
+                {
+                    byte loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
 
-					for (byte i = 0; i < loopBreaker; ++i)
-						if (TryExecute(mySqlBase) == MySqlErrorCode.None)
-						{
-							_result.SetResult(true);
+                    for (byte i = 0; i < loopBreaker; ++i)
+                        if (TryExecute(mySqlBase) == MySqlErrorCode.None)
+                        {
+                            _result.SetResult(true);
 
-							return true;
-						}
-				}
+                            return true;
+                        }
+                }
 
-			_result.SetResult(false);
+            _result.SetResult(false);
 
-			return false;
-		}
+            return false;
+        }
 
-		public Task<bool> GetFuture()
-		{
-			return _result.Task;
-		}
-	}
+        public Task<bool> GetFuture()
+        {
+            return _result.Task;
+        }
+    }
 
-	public class TransactionCallback : ISqlCallback
-	{
-		private Action<bool> _callback;
+    public class TransactionCallback : ISqlCallback
+    {
+        private readonly Task<bool> _future;
+        private Action<bool> _callback;
 
-		private Task<bool> _future;
+        public TransactionCallback(Task<bool> future)
+        {
+            _future = future;
+        }
 
-		public TransactionCallback(Task<bool> future)
-		{
-			_future = future;
-		}
+        public bool InvokeIfReady()
+        {
+            if (_future != null &&
+                _future.Wait(0))
+            {
+                _callback(_future.Result);
 
-		public bool InvokeIfReady()
-		{
-			if (_future != null &&
-			    _future.Wait(0))
-			{
-				_callback(_future.Result);
+                return true;
+            }
 
-				return true;
-			}
+            return false;
+        }
 
-			return false;
-		}
-
-		public void AfterComplete(Action<bool> callback)
-		{
-			_callback = callback;
-		}
-	}
+        public void AfterComplete(Action<bool> callback)
+        {
+            _callback = callback;
+        }
+    }
 }

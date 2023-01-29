@@ -6,16 +6,17 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class EnchantDuration
-	{
-		public Item Item { get; set; }
-        public uint Leftduration { get; set; }
+    {
         public EnchantmentSlot Slot;
 
-		public EnchantDuration(Item _item = null, EnchantmentSlot _slot = EnchantmentSlot.Max, uint _leftduration = 0)
-		{
-			Item         = _item;
-			Slot         = _slot;
-			Leftduration = _leftduration;
-		}
-	}
+        public EnchantDuration(Item _item = null, EnchantmentSlot _slot = EnchantmentSlot.Max, uint _leftduration = 0)
+        {
+            Item = _item;
+            Slot = _slot;
+            Leftduration = _leftduration;
+        }
+
+        public Item Item { get; set; }
+        public uint Leftduration { get; set; }
+    }
 }

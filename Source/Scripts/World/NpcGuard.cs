@@ -11,246 +11,246 @@ using Game.Spells;
 
 namespace Scripts.World.NpcGuard
 {
-	internal struct SpellIds
-	{
-		public const uint BanishedShattrathA = 36642;
-		public const uint BanishedShattrathS = 36671;
-		public const uint BanishTeleport = 36643;
-		public const uint Exile = 39533;
-	}
+    internal struct SpellIds
+    {
+        public const uint BanishedShattrathA = 36642;
+        public const uint BanishedShattrathS = 36671;
+        public const uint BanishTeleport = 36643;
+        public const uint Exile = 39533;
+    }
 
-	internal struct TextIds
-	{
-		public const uint SayGuardSilAggro = 0;
-	}
+    internal struct TextIds
+    {
+        public const uint SayGuardSilAggro = 0;
+    }
 
 
-	internal struct CreatureIds
-	{
-		public const uint CenarionHoldInfantry = 15184;
-		public const uint StormwindCityGuard = 68;
-		public const uint StormwindCityPatroller = 1976;
-		public const uint OrgrimmarGrunt = 3296;
-		public const uint AldorVindicator = 18549;
-	}
+    internal struct CreatureIds
+    {
+        public const uint CenarionHoldInfantry = 15184;
+        public const uint StormwindCityGuard = 68;
+        public const uint StormwindCityPatroller = 1976;
+        public const uint OrgrimmarGrunt = 3296;
+        public const uint AldorVindicator = 18549;
+    }
 
-	[Script]
-	internal class npc_guard_generic : GuardAI
-	{
-		private TaskScheduler _combatScheduler;
+    [Script]
+    internal class npc_guard_generic : GuardAI
+    {
+        private readonly TaskScheduler _combatScheduler;
 
-		public npc_guard_generic(Creature creature) : base(creature)
-		{
-			_scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting) && !me.IsInEvadeMode() && me.IsAlive());
-			_combatScheduler = new TaskScheduler();
-			_combatScheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-		}
+        public npc_guard_generic(Creature creature) : base(creature)
+        {
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting) && !me.IsInEvadeMode() && me.IsAlive());
+            _combatScheduler = new TaskScheduler();
+            _combatScheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+        }
 
-		public override void Reset()
-		{
-			_scheduler.CancelAll();
-			_combatScheduler.CancelAll();
+        public override void Reset()
+        {
+            _scheduler.CancelAll();
+            _combatScheduler.CancelAll();
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(1),
-			                    task =>
-			                    {
-				                    // Find a spell that targets friendly and applies an aura (these are generally buffs)
-				                    SpellInfo spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Aura);
+            _scheduler.Schedule(TimeSpan.FromSeconds(1),
+                                task =>
+                                {
+                                    // Find a spell that targets friendly and applies an aura (these are generally buffs)
+                                    SpellInfo spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Aura);
 
-				                    if (spellInfo != null)
-					                    DoCast(me, spellInfo.Id);
+                                    if (spellInfo != null)
+                                        DoCast(me, spellInfo.Id);
 
-				                    task.Repeat(TimeSpan.FromMinutes(10));
-			                    });
-		}
+                                    task.Repeat(TimeSpan.FromMinutes(10));
+                                });
+        }
 
-		private void DoReplyToTextEmote(TextEmotes emote)
-		{
-			switch (emote)
-			{
-				case TextEmotes.Kiss:
-					me.HandleEmoteCommand(Emote.OneshotBow);
+        public override void ReceiveEmote(Player player, TextEmotes textEmote)
+        {
+            switch (me.GetEntry())
+            {
+                case CreatureIds.StormwindCityGuard:
+                case CreatureIds.StormwindCityPatroller:
+                case CreatureIds.OrgrimmarGrunt:
+                    break;
+                default:
+                    return;
+            }
 
-					break;
-				case TextEmotes.Wave:
-					me.HandleEmoteCommand(Emote.OneshotWave);
+            if (!me.IsFriendlyTo(player))
+                return;
 
-					break;
-				case TextEmotes.Salute:
-					me.HandleEmoteCommand(Emote.OneshotSalute);
+            DoReplyToTextEmote(textEmote);
+        }
 
-					break;
-				case TextEmotes.Shy:
-					me.HandleEmoteCommand(Emote.OneshotFlex);
+        public override void JustEngagedWith(Unit who)
+        {
+            if (me.GetEntry() == CreatureIds.CenarionHoldInfantry)
+                Talk(TextIds.SayGuardSilAggro, who);
 
-					break;
-				case TextEmotes.Rude:
-				case TextEmotes.Chicken:
-					me.HandleEmoteCommand(Emote.OneshotPoint);
+            _combatScheduler.Schedule(TimeSpan.FromSeconds(1),
+                                      task =>
+                                      {
+                                          Unit victim = me.GetVictim();
 
-					break;
-				default:
-					break;
-			}
-		}
+                                          if (!me.IsAttackReady() ||
+                                              !me.IsWithinMeleeRange(victim))
+                                          {
+                                              task.Repeat();
 
-		public override void ReceiveEmote(Player player, TextEmotes textEmote)
-		{
-			switch (me.GetEntry())
-			{
-				case CreatureIds.StormwindCityGuard:
-				case CreatureIds.StormwindCityPatroller:
-				case CreatureIds.OrgrimmarGrunt:
-					break;
-				default:
-					return;
-			}
+                                              return;
+                                          }
 
-			if (!me.IsFriendlyTo(player))
-				return;
+                                          if (RandomHelper.randChance(20))
+                                          {
+                                              SpellInfo spellInfo = SelectSpell(me.GetVictim(), 0, 0, SelectTargetType.AnyEnemy, 0, SharedConst.NominalMeleeRange, SelectEffect.DontCare);
 
-			DoReplyToTextEmote(textEmote);
-		}
+                                              if (spellInfo != null)
+                                              {
+                                                  me.ResetAttackTimer();
+                                                  DoCastVictim(spellInfo.Id);
+                                                  task.Repeat();
 
-		public override void JustEngagedWith(Unit who)
-		{
-			if (me.GetEntry() == CreatureIds.CenarionHoldInfantry)
-				Talk(TextIds.SayGuardSilAggro, who);
+                                                  return;
+                                              }
+                                          }
 
-			_combatScheduler.Schedule(TimeSpan.FromSeconds(1),
-			                          task =>
-			                          {
-				                          Unit victim = me.GetVictim();
+                                          me.AttackerStateUpdate(victim);
+                                          me.ResetAttackTimer();
+                                          task.Repeat();
+                                      });
 
-				                          if (!me.IsAttackReady() ||
-				                              !me.IsWithinMeleeRange(victim))
-				                          {
-					                          task.Repeat();
+            _combatScheduler.Schedule(TimeSpan.FromSeconds(5),
+                                      task =>
+                                      {
+                                          bool healing = false;
+                                          SpellInfo spellInfo = null;
 
-					                          return;
-				                          }
+                                          // Select a healing spell if less than 30% hp and Only 33% of the Time
+                                          if (me.HealthBelowPct(30) &&
+                                              RandomHelper.randChance(33))
+                                              spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Healing);
 
-				                          if (RandomHelper.randChance(20))
-				                          {
-					                          SpellInfo spellInfo = SelectSpell(me.GetVictim(), 0, 0, SelectTargetType.AnyEnemy, 0, SharedConst.NominalMeleeRange, SelectEffect.DontCare);
+                                          // No healing spell available, check if we can cast a ranged spell
+                                          if (spellInfo != null)
+                                              healing = true;
+                                          else
+                                              spellInfo = SelectSpell(me.GetVictim(), 0, 0, SelectTargetType.AnyEnemy, SharedConst.NominalMeleeRange, 0, SelectEffect.DontCare);
 
-					                          if (spellInfo != null)
-					                          {
-						                          me.ResetAttackTimer();
-						                          DoCastVictim(spellInfo.Id);
-						                          task.Repeat();
+                                          // Found a spell
+                                          if (spellInfo != null)
+                                          {
+                                              if (healing)
+                                                  DoCast(me, spellInfo.Id);
+                                              else
+                                                  DoCastVictim(spellInfo.Id);
 
-						                          return;
-					                          }
-				                          }
+                                              task.Repeat(TimeSpan.FromSeconds(5));
+                                          }
+                                          else
+                                          {
+                                              task.Repeat(TimeSpan.FromSeconds(1));
+                                          }
+                                      });
+        }
 
-				                          me.AttackerStateUpdate(victim);
-				                          me.ResetAttackTimer();
-				                          task.Repeat();
-			                          });
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
 
-			_combatScheduler.Schedule(TimeSpan.FromSeconds(5),
-			                          task =>
-			                          {
-				                          bool      healing   = false;
-				                          SpellInfo spellInfo = null;
+            if (!UpdateVictim())
+                return;
 
-				                          // Select a healing spell if less than 30% hp and Only 33% of the Time
-				                          if (me.HealthBelowPct(30) &&
-				                              RandomHelper.randChance(33))
-					                          spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Healing);
+            _combatScheduler.Update(diff);
+        }
 
-				                          // No healing spell available, check if we can cast a ranged spell
-				                          if (spellInfo != null)
-					                          healing = true;
-				                          else
-					                          spellInfo = SelectSpell(me.GetVictim(), 0, 0, SelectTargetType.AnyEnemy, SharedConst.NominalMeleeRange, 0, SelectEffect.DontCare);
+        private void DoReplyToTextEmote(TextEmotes emote)
+        {
+            switch (emote)
+            {
+                case TextEmotes.Kiss:
+                    me.HandleEmoteCommand(Emote.OneshotBow);
 
-				                          // Found a spell
-				                          if (spellInfo != null)
-				                          {
-					                          if (healing)
-						                          DoCast(me, spellInfo.Id);
-					                          else
-						                          DoCastVictim(spellInfo.Id);
+                    break;
+                case TextEmotes.Wave:
+                    me.HandleEmoteCommand(Emote.OneshotWave);
 
-					                          task.Repeat(TimeSpan.FromSeconds(5));
-				                          }
-				                          else
-				                          {
-					                          task.Repeat(TimeSpan.FromSeconds(1));
-				                          }
-			                          });
-		}
+                    break;
+                case TextEmotes.Salute:
+                    me.HandleEmoteCommand(Emote.OneshotSalute);
 
-		public override void UpdateAI(uint diff)
-		{
-			_scheduler.Update(diff);
+                    break;
+                case TextEmotes.Shy:
+                    me.HandleEmoteCommand(Emote.OneshotFlex);
 
-			if (!UpdateVictim())
-				return;
+                    break;
+                case TextEmotes.Rude:
+                case TextEmotes.Chicken:
+                    me.HandleEmoteCommand(Emote.OneshotPoint);
 
-			_combatScheduler.Update(diff);
-		}
-	}
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
-	[Script]
-	internal class npc_guard_shattrath_faction : GuardAI
-	{
-		public npc_guard_shattrath_faction(Creature creature) : base(creature)
-		{
-			_scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-		}
+    [Script]
+    internal class npc_guard_shattrath_faction : GuardAI
+    {
+        public npc_guard_shattrath_faction(Creature creature) : base(creature)
+        {
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+        }
 
-		public override void Reset()
-		{
-			_scheduler.CancelAll();
-		}
+        public override void Reset()
+        {
+            _scheduler.CancelAll();
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			ScheduleVanish();
-		}
+        public override void JustEngagedWith(Unit who)
+        {
+            ScheduleVanish();
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, DoMeleeAttackIfReady);
-		}
+            _scheduler.Update(diff, DoMeleeAttackIfReady);
+        }
 
-		private void ScheduleVanish()
-		{
-			_scheduler.Schedule(TimeSpan.FromSeconds(5),
-			                    task =>
-			                    {
-				                    Unit temp = me.GetVictim();
+        private void ScheduleVanish()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(5),
+                                task =>
+                                {
+                                    Unit temp = me.GetVictim();
 
-				                    if (temp && temp.IsTypeId(TypeId.Player))
-				                    {
-					                    DoCast(temp, me.GetEntry() == CreatureIds.AldorVindicator ? SpellIds.BanishedShattrathS : SpellIds.BanishedShattrathA);
-					                    ObjectGuid playerGUID = temp.GetGUID();
+                                    if (temp && temp.IsTypeId(TypeId.Player))
+                                    {
+                                        DoCast(temp, me.GetEntry() == CreatureIds.AldorVindicator ? SpellIds.BanishedShattrathS : SpellIds.BanishedShattrathA);
+                                        ObjectGuid playerGUID = temp.GetGUID();
 
-					                    task.Schedule(TimeSpan.FromSeconds(9),
-					                                  task =>
-					                                  {
-						                                  Unit temp = Global.ObjAccessor.GetUnit(me, playerGUID);
+                                        task.Schedule(TimeSpan.FromSeconds(9),
+                                                      task =>
+                                                      {
+                                                          Unit temp = Global.ObjAccessor.GetUnit(me, playerGUID);
 
-						                                  if (temp)
-						                                  {
-							                                  temp.CastSpell(temp, SpellIds.Exile, true);
-							                                  temp.CastSpell(temp, SpellIds.BanishTeleport, true);
-						                                  }
+                                                          if (temp)
+                                                          {
+                                                              temp.CastSpell(temp, SpellIds.Exile, true);
+                                                              temp.CastSpell(temp, SpellIds.BanishTeleport, true);
+                                                          }
 
-						                                  ScheduleVanish();
-					                                  });
-				                    }
-				                    else
-				                    {
-					                    task.Repeat();
-				                    }
-			                    });
-		}
-	}
+                                                          ScheduleVanish();
+                                                      });
+                                    }
+                                    else
+                                    {
+                                        task.Repeat();
+                                    }
+                                });
+        }
+    }
 }

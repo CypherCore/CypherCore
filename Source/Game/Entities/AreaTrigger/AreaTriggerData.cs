@@ -6,20 +6,6 @@ namespace Game.Entities;
 [StructLayout(LayoutKind.Explicit)]
 public unsafe class AreaTriggerData
 {
-    [FieldOffset(0)] public boundedPlaneDatas BoundedPlaneDatas;
-
-    [FieldOffset(0)] public boxdatas BoxDatas;
-
-    [FieldOffset(0)] public cylinderdatas CylinderDatas;
-
-    [FieldOffset(0)] public defaultdatas DefaultDatas;
-
-    [FieldOffset(0)] public diskDatas DiskDatas;
-
-    [FieldOffset(0)] public polygondatas PolygonDatas;
-
-    [FieldOffset(0)] public spheredatas SphereDatas;
-
     public struct defaultdatas
     {
         public fixed float Data[SharedConst.MaxAreatriggerEntityData];
@@ -76,4 +62,18 @@ public unsafe class AreaTriggerData
         public fixed float Extents[2];
         public fixed float ExtentsTarget[2];
     }
+
+    [FieldOffset(0)] public boundedPlaneDatas BoundedPlaneDatas;
+
+    [FieldOffset(0)] public boxdatas BoxDatas;
+
+    [FieldOffset(0)] public cylinderdatas CylinderDatas;
+
+    [FieldOffset(0)] public defaultdatas DefaultDatas;
+
+    [FieldOffset(0)] public diskDatas DiskDatas;
+
+    [FieldOffset(0)] public polygondatas PolygonDatas;
+
+    [FieldOffset(0)] public spheredatas SphereDatas;
 }

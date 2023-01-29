@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IScene
 {
-	public interface ISceneOnSceneTrigger : IScriptObject
-	{
-		void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName);
-	}
+    public interface ISceneOnSceneTrigger : IScriptObject
+    {
+        void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName);
+    }
 }

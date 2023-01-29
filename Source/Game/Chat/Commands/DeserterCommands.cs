@@ -7,86 +7,86 @@ using Game.Spells;
 
 namespace Game.Chat.Commands
 {
-	internal struct Spells
-	{
-		public const uint LFGDundeonDeserter = 71041;
-		public const uint BGDeserter = 26013;
-	}
+    internal struct Spells
+    {
+        public const uint LFGDundeonDeserter = 71041;
+        public const uint BGDeserter = 26013;
+    }
 
-	[CommandGroup("deserter")]
-	internal class DeserterCommands
-	{
-		private static bool HandleDeserterAdd(CommandHandler handler, uint time, bool isInstance)
-		{
-			Player player = handler.GetSelectedPlayer();
+    [CommandGroup("deserter")]
+    internal class DeserterCommands
+    {
+        [CommandGroup("instance")]
+        private class DeserterInstanceCommands
+        {
+            [Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
+            private static bool HandleDeserterInstanceAdd(CommandHandler handler, uint time)
+            {
+                return HandleDeserterAdd(handler, time, true);
+            }
 
-			if (!player)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            [Command("remove", RBACPermissions.CommandDeserterInstanceRemove)]
+            private static bool HandleDeserterInstanceRemove(CommandHandler handler)
+            {
+                return HandleDeserterRemove(handler, true);
+            }
+        }
 
-				return false;
-			}
+        [CommandGroup("bg")]
+        private class DeserterBGCommands
+        {
+            [Command("add", RBACPermissions.CommandDeserterBgAdd)]
+            private static bool HandleDeserterBGAdd(CommandHandler handler, uint time)
+            {
+                return HandleDeserterAdd(handler, time, false);
+            }
 
-			Aura aura = player.AddAura(isInstance ? Spells.LFGDundeonDeserter : Spells.BGDeserter, player);
+            [Command("remove", RBACPermissions.CommandDeserterBgRemove)]
+            private static bool HandleDeserterBGRemove(CommandHandler handler)
+            {
+                return HandleDeserterRemove(handler, false);
+            }
+        }
 
-			if (aura == null)
-			{
-				handler.SendSysMessage(CypherStrings.BadValue);
+        private static bool HandleDeserterAdd(CommandHandler handler, uint time, bool isInstance)
+        {
+            Player player = handler.GetSelectedPlayer();
 
-				return false;
-			}
+            if (!player)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			aura.SetDuration((int)(time * Time.InMilliseconds));
+                return false;
+            }
 
-			return true;
-		}
+            Aura aura = player.AddAura(isInstance ? Spells.LFGDundeonDeserter : Spells.BGDeserter, player);
 
-		private static bool HandleDeserterRemove(CommandHandler handler, bool isInstance)
-		{
-			Player player = handler.GetSelectedPlayer();
+            if (aura == null)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
 
-			if (!player)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
 
-				return false;
-			}
+            aura.SetDuration((int)(time * Time.InMilliseconds));
 
-			player.RemoveAura(isInstance ? Spells.LFGDundeonDeserter : Spells.BGDeserter);
+            return true;
+        }
 
-			return true;
-		}
+        private static bool HandleDeserterRemove(CommandHandler handler, bool isInstance)
+        {
+            Player player = handler.GetSelectedPlayer();
 
-		[CommandGroup("instance")]
-		private class DeserterInstanceCommands
-		{
-			[Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
-			private static bool HandleDeserterInstanceAdd(CommandHandler handler, uint time)
-			{
-				return HandleDeserterAdd(handler, time, true);
-			}
+            if (!player)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			[Command("remove", RBACPermissions.CommandDeserterInstanceRemove)]
-			private static bool HandleDeserterInstanceRemove(CommandHandler handler)
-			{
-				return HandleDeserterRemove(handler, true);
-			}
-		}
+                return false;
+            }
 
-		[CommandGroup("bg")]
-		private class DeserterBGCommands
-		{
-			[Command("add", RBACPermissions.CommandDeserterBgAdd)]
-			private static bool HandleDeserterBGAdd(CommandHandler handler, uint time)
-			{
-				return HandleDeserterAdd(handler, time, false);
-			}
+            player.RemoveAura(isInstance ? Spells.LFGDundeonDeserter : Spells.BGDeserter);
 
-			[Command("remove", RBACPermissions.CommandDeserterBgRemove)]
-			private static bool HandleDeserterBGRemove(CommandHandler handler)
-			{
-				return HandleDeserterRemove(handler, false);
-			}
-		}
-	}
+            return true;
+        }
+    }
 }

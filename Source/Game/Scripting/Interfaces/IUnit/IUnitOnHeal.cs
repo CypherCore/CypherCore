@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IUnit
 {
-	public interface IUnitOnHeal : IScriptObject
-	{
-		void OnHeal(Unit healer, Unit reciever, ref uint gain);
-	}
+    public interface IUnitOnHeal : IScriptObject
+    {
+        void OnHeal(Unit healer, Unit reciever, ref uint gain);
+    }
 }

@@ -10,76 +10,76 @@ using Game.Spells;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Beauty
 {
-	internal struct SpellIds
-	{
-		public const uint TerrifyingRoar = 76028; // Not yet Implemented
-		public const uint BerserkerCharge = 76030;
-		public const uint MagmaSpit = 76031;
-		public const uint Flamebreak = 76032;
-		public const uint Berserk = 82395; // Not yet Implemented
-	}
+    internal struct SpellIds
+    {
+        public const uint TerrifyingRoar = 76028; // Not yet Implemented
+        public const uint BerserkerCharge = 76030;
+        public const uint MagmaSpit = 76031;
+        public const uint Flamebreak = 76032;
+        public const uint Berserk = 82395; // Not yet Implemented
+    }
 
-	internal struct SoundIds
-	{
-		public const uint Aggro = 18559;
-		public const uint Death = 18563;
-	}
+    internal struct SoundIds
+    {
+        public const uint Aggro = 18559;
+        public const uint Death = 18563;
+    }
 
-	[Script]
-	internal class boss_beauty : BossAI
-	{
-		public boss_beauty(Creature creature) : base(creature, DataTypes.Beauty)
-		{
-		}
+    [Script]
+    internal class boss_beauty : BossAI
+    {
+        public boss_beauty(Creature creature) : base(creature, DataTypes.Beauty)
+        {
+        }
 
-		public override void Reset()
-		{
-			_Reset();
-		}
+        public override void Reset()
+        {
+            _Reset();
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			base.JustEngagedWith(who);
+        public override void JustEngagedWith(Unit who)
+        {
+            base.JustEngagedWith(who);
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(7),
-			                    TimeSpan.FromSeconds(10),
-			                    task =>
-			                    {
-				                    DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.MagmaSpit, new CastSpellExtraArgs(true));
-				                    task.Repeat();
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(7),
+                                TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.MagmaSpit, new CastSpellExtraArgs(true));
+                                    task.Repeat();
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(16),
-			                    TimeSpan.FromSeconds(19),
-			                    task =>
-			                    {
-				                    DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.BerserkerCharge, new CastSpellExtraArgs(true));
-				                    task.Repeat();
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(16),
+                                TimeSpan.FromSeconds(19),
+                                task =>
+                                {
+                                    DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.BerserkerCharge, new CastSpellExtraArgs(true));
+                                    task.Repeat();
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(18),
-			                    TimeSpan.FromSeconds(22),
-			                    task =>
-			                    {
-				                    DoCast(me, SpellIds.Flamebreak);
-				                    task.Repeat();
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(18),
+                                TimeSpan.FromSeconds(22),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.Flamebreak);
+                                    task.Repeat();
+                                });
 
-			DoPlaySoundToSet(me, SoundIds.Aggro);
-		}
+            DoPlaySoundToSet(me, SoundIds.Aggro);
+        }
 
-		public override void JustDied(Unit killer)
-		{
-			_JustDied();
-			DoPlaySoundToSet(me, SoundIds.Death);
-		}
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            DoPlaySoundToSet(me, SoundIds.Death);
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 }

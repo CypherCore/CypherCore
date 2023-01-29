@@ -6,6 +6,14 @@ namespace Game.Entities;
 
 public unsafe class AreaTriggerCreateProperties
 {
+    public AreaTriggerCreateProperties()
+    {
+        // legacy code from before it was known what each curve field does
+        ExtraScale.Raw.Data[5] = 1065353217;
+        // also OverrideActive does nothing on ExtraScale
+        ExtraScale.Structured.OverrideActive = 1;
+    }
+
     public int AnimId { get; set; }
     public uint AnimKitId { get; set; }
 
@@ -33,14 +41,6 @@ public unsafe class AreaTriggerCreateProperties
     public uint TimeToTarget { get; set; }
     public uint TimeToTargetScale { get; set; }
 
-    public AreaTriggerCreateProperties()
-    {
-        // legacy code from before it was known what each curve field does
-        ExtraScale.Raw.Data[5] = 1065353217;
-        // also OverrideActive does nothing on ExtraScale
-        ExtraScale.Structured.OverrideActive = 1;
-    }
-
     public bool HasSplines()
     {
         return SplinePoints.Count >= 2;
@@ -50,8 +50,8 @@ public unsafe class AreaTriggerCreateProperties
     {
         if (Shape.TriggerType == AreaTriggerTypes.Polygon)
         {
-            Position center          = new(0.0f, 0.0f);
-            float    maxSearchRadius = 0.0f;
+            Position center = new(0.0f, 0.0f);
+            float maxSearchRadius = 0.0f;
 
             foreach (var vertice in PolygonVertices)
             {

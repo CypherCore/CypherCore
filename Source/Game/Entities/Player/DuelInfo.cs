@@ -6,19 +6,19 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class DuelInfo
-	{
-		public Player Initiator { get; set; }
+    {
+        public DuelInfo(Player opponent, Player initiator, bool isMounted)
+        {
+            Opponent = opponent;
+            Initiator = initiator;
+            IsMounted = isMounted;
+        }
+
+        public Player Initiator { get; set; }
         public bool IsMounted { get; set; }
         public Player Opponent { get; set; }
         public long OutOfBoundsTime { get; set; }
         public long StartTime { get; set; }
         public DuelState State { get; set; }
-
-        public DuelInfo(Player opponent, Player initiator, bool isMounted)
-		{
-			Opponent  = opponent;
-			Initiator = initiator;
-			IsMounted = isMounted;
-		}
-	}
+    }
 }

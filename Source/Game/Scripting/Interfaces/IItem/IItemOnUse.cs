@@ -6,8 +6,8 @@ using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IItem
 {
-	public interface IItemOnUse : IScriptObject
-	{
-		bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId);
-	}
+    public interface IItemOnUse : IScriptObject
+    {
+        bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId);
+    }
 }

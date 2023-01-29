@@ -1,16 +1,17 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
+using System;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting.Interfaces;
-using System;
 
 namespace Game.Scripting
 {
     public abstract class ScriptObject : IScriptObject
     {
+        private readonly string _name;
+
         public ScriptObject(string name)
         {
             _name = name;
@@ -30,8 +31,6 @@ namespace Game.Scripting
 
             return null;
         }
-
-        string _name;
     }
 
     public abstract class ScriptObjectAutoAdd : ScriptObject

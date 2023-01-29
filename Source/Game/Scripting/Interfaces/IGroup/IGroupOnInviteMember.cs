@@ -6,8 +6,8 @@ using Game.Groups;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
-	public interface IGroupOnInviteMember : IScriptObject
-	{
-		void OnInviteMember(Group group, ObjectGuid guid);
-	}
+    public interface IGroupOnInviteMember : IScriptObject
+    {
+        void OnInviteMember(Group group, ObjectGuid guid);
+    }
 }

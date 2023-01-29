@@ -7,52 +7,41 @@ using System.Linq;
 
 namespace Framework.Dynamic
 {
-	public class TaskScheduler
-	{
-		// Predicate type
-		public delegate bool predicate_t();
+    public class TaskScheduler
+    {
+        // Predicate type
+        public delegate bool predicate_t();
 
-		// Success handle type
-		public delegate void success_t();
+        // Success handle type
+        public delegate void success_t();
 
-		// Contains all asynchronous tasks which will be invoked at
-		// the next update tick.
-		private List<Action> _asyncHolder;
+        // Contains all asynchronous tasks which will be invoked at
+        // the next update tick.
+        private readonly List<Action> _asyncHolder;
 
-		// The current time point (now)
-		private DateTime _now;
+        // The Task Queue which contains all task objects.
+        private readonly TaskQueue _task_holder;
 
-		private predicate_t _predicate;
+        // The current time point (now)
+        private DateTime _now;
 
-		// The Task Queue which contains all task objects.
-		private TaskQueue _task_holder;
+        private predicate_t _predicate;
 
-		public TaskScheduler()
-		{
-			_now         = DateTime.Now;
-			_task_holder = new TaskQueue();
-			_asyncHolder = new List<Action>();
-			_predicate   = EmptyValidator;
-		}
+        public TaskScheduler()
+        {
+            _now = DateTime.Now;
+            _task_holder = new TaskQueue();
+            _asyncHolder = new List<Action>();
+            _predicate = EmptyValidator;
+        }
 
-		public TaskScheduler(predicate_t predicate)
-		{
-			_now         = DateTime.Now;
-			_task_holder = new TaskQueue();
-			_asyncHolder = new List<Action>();
-			_predicate   = predicate;
-		}
-
-        /// <summary>
-        ///  Clears the validator which is asked if tasks are allowed to be executed.
-        /// </summary>
-        /// <returns></returns>
-        private TaskScheduler ClearValidator()
-		{
-			_predicate = EmptyValidator;
-
-			return this;
-		}
+        public TaskScheduler(predicate_t predicate)
+        {
+            _now = DateTime.Now;
+            _task_holder = new TaskQueue();
+            _asyncHolder = new List<Action>();
+            _predicate = predicate;
+        }
 
         /// <summary>
         ///  Sets a validator which is asked if tasks are allowed to be executed.
@@ -60,11 +49,11 @@ namespace Framework.Dynamic
         /// <param name="predicate"></param>
         /// <returns></returns>
         public TaskScheduler SetValidator(predicate_t predicate)
-		{
-			_predicate = predicate;
+        {
+            _predicate = predicate;
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Update the scheduler to the current time.
@@ -72,12 +61,12 @@ namespace Framework.Dynamic
         /// </summary>
         /// <returns></returns>
         public TaskScheduler Update(success_t callback = null)
-		{
-			_now = DateTime.Now;
-			Dispatch(callback);
+        {
+            _now = DateTime.Now;
+            Dispatch(callback);
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Update the scheduler with a difftime in ms.
@@ -87,31 +76,16 @@ namespace Framework.Dynamic
         /// <param name="callback"></param>
         /// <returns></returns>
         public TaskScheduler Update(uint milliseconds, success_t callback = null)
-		{
-			return Update(TimeSpan.FromMilliseconds(milliseconds), callback);
-		}
+        {
+            return Update(TimeSpan.FromMilliseconds(milliseconds), callback);
+        }
 
-        /// <summary>
-        ///  Update the scheduler with a difftime.
-        ///  Calls the optional callback on successfully finish.
-        /// </summary>
-        /// <param name="difftime"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        private TaskScheduler Update(TimeSpan difftime, success_t callback = null)
-		{
-			_now += difftime;
-			Dispatch(callback);
+        public TaskScheduler Async(Action callable)
+        {
+            _asyncHolder.Add(callable);
 
-			return this;
-		}
-
-		public TaskScheduler Async(Action callable)
-		{
-			_asyncHolder.Add(callable);
-
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Schedule an event with a fixed rate.
@@ -121,9 +95,9 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskScheduler Schedule(TimeSpan time, Action<TaskContext> task)
-		{
-			return ScheduleAt(_now, time, task);
-		}
+        {
+            return ScheduleAt(_now, time, task);
+        }
 
         /// <summary>
         ///  Schedule an event with a fixed rate.
@@ -134,9 +108,9 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskScheduler Schedule(TimeSpan time, uint group, Action<TaskContext> task)
-		{
-			return ScheduleAt(_now, time, group, task);
-		}
+        {
+            return ScheduleAt(_now, time, group, task);
+        }
 
         /// <summary>
         ///  Schedule an event with a randomized rate between min and max rate.
@@ -147,9 +121,9 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskScheduler Schedule(TimeSpan min, TimeSpan max, Action<TaskContext> task)
-		{
-			return Schedule(RandomHelper.RandTime(min, max), task);
-		}
+        {
+            return Schedule(RandomHelper.RandTime(min, max), task);
+        }
 
         /// <summary>
         ///  Schedule an event with a fixed rate.
@@ -161,32 +135,32 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskScheduler Schedule(TimeSpan min, TimeSpan max, uint group, Action<TaskContext> task)
-		{
-			return Schedule(RandomHelper.RandTime(min, max), group, task);
-		}
+        {
+            return Schedule(RandomHelper.RandTime(min, max), group, task);
+        }
 
-		public TaskScheduler CancelAll()
-		{
-			// Clear the task holder
-			_task_holder.Clear();
-			_asyncHolder.Clear();
+        public TaskScheduler CancelAll()
+        {
+            // Clear the task holder
+            _task_holder.Clear();
+            _asyncHolder.Clear();
 
-			return this;
-		}
+            return this;
+        }
 
-		public TaskScheduler CancelGroup(uint group)
-		{
-			_task_holder.RemoveIf(task => task.IsInGroup(@group));
+        public TaskScheduler CancelGroup(uint group)
+        {
+            _task_holder.RemoveIf(task => task.IsInGroup(@group));
 
-			return this;
-		}
+            return this;
+        }
 
-		public TaskScheduler CancelGroupsOf(List<uint> groups)
-		{
-			groups.ForEach(group => CancelGroup(group));
+        public TaskScheduler CancelGroupsOf(List<uint> groups)
+        {
+            groups.ForEach(group => CancelGroup(group));
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Delays all tasks with the given duration.
@@ -194,16 +168,16 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskScheduler DelayAll(TimeSpan duration)
-		{
-			_task_holder.ModifyIf(task =>
-			                      {
-				                      task._end += duration;
+        {
+            _task_holder.ModifyIf(task =>
+                                  {
+                                      task._end += duration;
 
-				                      return true;
-			                      });
+                                      return true;
+                                  });
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Delays all tasks with a random duration between min and max.
@@ -212,9 +186,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskScheduler DelayAll(TimeSpan min, TimeSpan max)
-		{
-			return DelayAll(RandomHelper.RandTime(min, max));
-		}
+        {
+            return DelayAll(RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Delays all tasks of a group with the given duration.
@@ -223,23 +197,23 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskScheduler DelayGroup(uint group, TimeSpan duration)
-		{
-			_task_holder.ModifyIf(task =>
-			                      {
-				                      if (task.IsInGroup(group))
-				                      {
-					                      task._end += duration;
+        {
+            _task_holder.ModifyIf(task =>
+                                  {
+                                      if (task.IsInGroup(group))
+                                      {
+                                          task._end += duration;
 
-					                      return true;
-				                      }
-				                      else
-				                      {
-					                      return false;
-				                      }
-			                      });
+                                          return true;
+                                      }
+                                      else
+                                      {
+                                          return false;
+                                      }
+                                  });
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Delays all tasks of a group with a random duration between min and max.
@@ -249,9 +223,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskScheduler DelayGroup(uint group, TimeSpan min, TimeSpan max)
-		{
-			return DelayGroup(group, RandomHelper.RandTime(min, max));
-		}
+        {
+            return DelayGroup(group, RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Reschedule all tasks with a given duration.
@@ -259,18 +233,18 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskScheduler RescheduleAll(TimeSpan duration)
-		{
-			var end = _now + duration;
+        {
+            var end = _now + duration;
 
-			_task_holder.ModifyIf(task =>
-			                      {
-				                      task._end = end;
+            _task_holder.ModifyIf(task =>
+                                  {
+                                      task._end = end;
 
-				                      return true;
-			                      });
+                                      return true;
+                                  });
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Reschedule all tasks with a random duration between min and max.
@@ -279,9 +253,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskScheduler RescheduleAll(TimeSpan min, TimeSpan max)
-		{
-			return RescheduleAll(RandomHelper.RandTime(min, max));
-		}
+        {
+            return RescheduleAll(RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Reschedule all tasks of a group with the given duration.
@@ -290,25 +264,25 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskScheduler RescheduleGroup(uint group, TimeSpan duration)
-		{
-			var end = _now + duration;
+        {
+            var end = _now + duration;
 
-			_task_holder.ModifyIf(task =>
-			                      {
-				                      if (task.IsInGroup(group))
-				                      {
-					                      task._end = end;
+            _task_holder.ModifyIf(task =>
+                                  {
+                                      if (task.IsInGroup(group))
+                                      {
+                                          task._end = end;
 
-					                      return true;
-				                      }
-				                      else
-				                      {
-					                      return false;
-				                      }
-			                      });
+                                          return true;
+                                      }
+                                      else
+                                      {
+                                          return false;
+                                      }
+                                  });
 
-			return this;
-		}
+            return this;
+        }
 
         /// <summary>
         ///  Reschedule all tasks of a group with a random duration between min and max.
@@ -318,21 +292,21 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskScheduler RescheduleGroup(uint group, TimeSpan min, TimeSpan max)
-		{
-			return RescheduleGroup(group, RandomHelper.RandTime(min, max));
-		}
+        {
+            return RescheduleGroup(group, RandomHelper.RandTime(min, max));
+        }
 
-		internal TaskScheduler InsertTask(Task task)
-		{
-			_task_holder.Push(task);
+        internal TaskScheduler InsertTask(Task task)
+        {
+            _task_holder.Push(task);
 
-			return this;
-		}
+            return this;
+        }
 
-		internal TaskScheduler ScheduleAt(DateTime end, TimeSpan time, Action<TaskContext> task)
-		{
-			return InsertTask(new Task(end + time, time, task));
-		}
+        internal TaskScheduler ScheduleAt(DateTime end, TimeSpan time, Action<TaskContext> task)
+        {
+            return InsertTask(new Task(end + time, time, task));
+        }
 
         /// <summary>
         ///  Schedule an event with a fixed rate.
@@ -344,82 +318,108 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         internal TaskScheduler ScheduleAt(DateTime end, TimeSpan time, uint group, Action<TaskContext> task)
-		{
-			return InsertTask(new Task(end + time, time, group, 0, task));
-		}
+        {
+            return InsertTask(new Task(end + time, time, group, 0, task));
+        }
 
-		private void Dispatch(success_t callback = null)
-		{
-			// If the validation failed abort the dispatching here.
-			if (!_predicate())
-				return;
+        /// <summary>
+        ///  Clears the validator which is asked if tasks are allowed to be executed.
+        /// </summary>
+        /// <returns></returns>
+        private TaskScheduler ClearValidator()
+        {
+            _predicate = EmptyValidator;
 
-			// Process all asyncs
-			while (!_asyncHolder.Empty())
-			{
-				_asyncHolder.First().Invoke();
-				_asyncHolder.RemoveAt(0);
+            return this;
+        }
 
-				// If the validation failed abort the dispatching here.
-				if (!_predicate())
-					return;
-			}
+        /// <summary>
+        ///  Update the scheduler with a difftime.
+        ///  Calls the optional callback on successfully finish.
+        /// </summary>
+        /// <param name="difftime"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        private TaskScheduler Update(TimeSpan difftime, success_t callback = null)
+        {
+            _now += difftime;
+            Dispatch(callback);
 
-			while (!_task_holder.IsEmpty())
-			{
-				if (_task_holder.First()._end > _now)
-					break;
+            return this;
+        }
 
-				// Perfect forward the context to the handler
-				// Use weak references to catch destruction before callbacks.
-				TaskContext context = new(_task_holder.Pop(), this);
+        private void Dispatch(success_t callback = null)
+        {
+            // If the validation failed abort the dispatching here.
+            if (!_predicate())
+                return;
 
-				// Invoke the context
-				context.Invoke();
+            // Process all asyncs
+            while (!_asyncHolder.Empty())
+            {
+                _asyncHolder.First().Invoke();
+                _asyncHolder.RemoveAt(0);
 
-				// If the validation failed abort the dispatching here.
-				if (!_predicate())
-					return;
-			}
+                // If the validation failed abort the dispatching here.
+                if (!_predicate())
+                    return;
+            }
 
-			callback?.Invoke();
-		}
+            while (!_task_holder.IsEmpty())
+            {
+                if (_task_holder.First()._end > _now)
+                    break;
 
-		private static bool EmptyValidator()
-		{
-			return true;
-		}
-	}
+                // Perfect forward the context to the handler
+                // Use weak references to catch destruction before callbacks.
+                TaskContext context = new(_task_holder.Pop(), this);
 
-	public class Task : IComparable<Task>
-	{
-		internal TimeSpan _duration;
+                // Invoke the context
+                context.Invoke();
 
-		internal DateTime _end;
-		internal uint? _group;
-		internal uint _repeated;
-		internal Action<TaskContext> _task;
+                // If the validation failed abort the dispatching here.
+                if (!_predicate())
+                    return;
+            }
 
-		public Task(DateTime end, TimeSpan duration, uint group, uint repeated, Action<TaskContext> task)
-		{
-			_end      = end;
-			_duration = duration;
-			_group    = group;
-			_repeated = repeated;
-			_task     = task;
-		}
+            callback?.Invoke();
+        }
 
-		public Task(DateTime end, TimeSpan duration, Action<TaskContext> task)
-		{
-			_end      = end;
-			_duration = duration;
-			_task     = task;
-		}
+        private static bool EmptyValidator()
+        {
+            return true;
+        }
+    }
 
-		public int CompareTo(Task other)
-		{
-			return _end.CompareTo(other._end);
-		}
+    public class Task : IComparable<Task>
+    {
+        internal TimeSpan _duration;
+
+        internal DateTime _end;
+        internal uint? _group;
+        internal uint _repeated;
+        internal Action<TaskContext> _task;
+
+        public Task(DateTime end, TimeSpan duration, uint group, uint repeated, Action<TaskContext> task)
+        {
+            _end = end;
+            _duration = duration;
+            _group = group;
+            _repeated = repeated;
+            _task = task;
+        }
+
+        public Task(DateTime end, TimeSpan duration, Action<TaskContext> task)
+        {
+            _end = end;
+            _duration = duration;
+            _task = task;
+        }
+
+        public int CompareTo(Task other)
+        {
+            return _end.CompareTo(other._end);
+        }
 
         /// <summary>
         ///  Returns true if the task is in the given group
@@ -427,177 +427,109 @@ namespace Framework.Dynamic
         /// <param name="group"></param>
         /// <returns></returns>
         public bool IsInGroup(uint group)
-		{
-			return _group.HasValue && _group == group;
-		}
-	}
+        {
+            return _group.HasValue && _group == group;
+        }
+    }
 
-	internal class TaskQueue
-	{
-		private SortedSet<Task> container = new();
+    internal class TaskQueue
+    {
+        private readonly SortedSet<Task> container = new();
 
         /// <summary>
         ///  Pushes the task in the container
         /// </summary>
         /// <param name="task"></param>
         public void Push(Task task)
-		{
-			if (!container.Add(task))
-			{
-			}
-		}
+        {
+            if (!container.Add(task))
+            {
+            }
+        }
 
         /// <summary>
         ///  Pops the task out of the container
         /// </summary>
         /// <returns></returns>
         public Task Pop()
-		{
-			Task result = container.First();
-			container.Remove(result);
+        {
+            Task result = container.First();
+            container.Remove(result);
 
-			return result;
-		}
+            return result;
+        }
 
-		public Task First()
-		{
-			return container.First();
-		}
+        public Task First()
+        {
+            return container.First();
+        }
 
-		public void Clear()
-		{
-			container.Clear();
-		}
+        public void Clear()
+        {
+            container.Clear();
+        }
 
-		public void RemoveIf(Predicate<Task> filter)
-		{
-			container.RemoveWhere(filter);
-		}
+        public void RemoveIf(Predicate<Task> filter)
+        {
+            container.RemoveWhere(filter);
+        }
 
-		public void ModifyIf(Func<Task, bool> filter)
-		{
-			List<Task> cache = new();
+        public void ModifyIf(Func<Task, bool> filter)
+        {
+            List<Task> cache = new();
 
-			foreach (var task in container.Where(filter))
-				if (filter(task))
-				{
-					cache.Add(task);
-					container.Remove(task);
-				}
+            foreach (var task in container.Where(filter))
+                if (filter(task))
+                {
+                    cache.Add(task);
+                    container.Remove(task);
+                }
 
-			foreach (var task in cache)
-				container.Add(task);
-		}
+            foreach (var task in cache)
+                container.Add(task);
+        }
 
-		public bool IsEmpty()
-		{
-			return container.Empty();
-		}
-	}
+        public bool IsEmpty()
+        {
+            return container.Empty();
+        }
+    }
 
-	public class TaskContext
-	{
-		// Marks the task as consumed
-		private bool _consumed = true;
+    public class TaskContext
+    {
+        // Owner
+        private readonly TaskScheduler _owner;
 
-		// Owner
-		private TaskScheduler _owner;
+        // Associated task
+        private readonly Task _task;
 
-		// Associated task
-		private Task _task;
+        // Marks the task as consumed
+        private bool _consumed = true;
 
-		public TaskContext(Task task, TaskScheduler owner)
-		{
-			_task     = task;
-			_owner    = owner;
-			_consumed = false;
-		}
-
-        /// <summary>
-        ///  Dispatches an action safe on the TaskScheduler
-        /// </summary>
-        /// <param name="apply"></param>
-        /// <returns></returns>
-        private TaskContext Dispatch(Action apply)
-		{
-			apply();
-
-			return this;
-		}
-
-		private TaskContext Dispatch(Func<TaskScheduler, TaskScheduler> apply)
-		{
-			apply(_owner);
-
-			return this;
-		}
-
-		private bool IsExpired()
-		{
-			return _owner == null;
-		}
-
-        /// <summary>
-        ///  Returns true if the event is in the given group
-        /// </summary>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        private bool IsInGroup(uint group)
-		{
-			return _task.IsInGroup(group);
-		}
-
-        /// <summary>
-        ///  Sets the event in the given group
-        /// </summary>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        private TaskContext SetGroup(uint group)
-		{
-			_task._group = group;
-
-			return this;
-		}
-
-        /// <summary>
-        ///  Removes the group from the event
-        /// </summary>
-        /// <returns></returns>
-        private TaskContext ClearGroup()
-		{
-			_task._group = null;
-
-			return this;
-		}
+        public TaskContext(Task task, TaskScheduler owner)
+        {
+            _task = task;
+            _owner = owner;
+            _consumed = false;
+        }
 
         /// <summary>
         ///  Returns the repeat counter which increases every time the task is repeated.
         /// </summary>
         /// <returns></returns>
         public uint GetRepeatCounter()
-		{
-			return _task._repeated;
-		}
-
-        /// <summary>
-        ///  Schedule a callable function that is executed at the next update tick from within the context.
-        ///  Its safe to modify the TaskScheduler from within the callable.
-        /// </summary>
-        /// <param name="callable"></param>
-        /// <returns></returns>
-        private TaskContext Async(Action callable)
-		{
-			return Dispatch(() => _owner.Async(callable));
-		}
+        {
+            return _task._repeated;
+        }
 
         /// <summary>
         ///  Cancels all tasks from within the context.
         /// </summary>
         /// <returns></returns>
         public TaskContext CancelAll()
-		{
-			return Dispatch(() => _owner.CancelAll());
-		}
+        {
+            return Dispatch(() => _owner.CancelAll());
+        }
 
         /// <summary>
         ///  Cancel all tasks of a single group from within the context.
@@ -605,9 +537,9 @@ namespace Framework.Dynamic
         /// <param name="group"></param>
         /// <returns></returns>
         public TaskContext CancelGroup(uint group)
-		{
-			return Dispatch(() => _owner.CancelGroup(group));
-		}
+        {
+            return Dispatch(() => _owner.CancelGroup(group));
+        }
 
         /// <summary>
         ///  Cancels all groups in the given std.vector from within the context.
@@ -615,27 +547,17 @@ namespace Framework.Dynamic
         /// <param name="groups"></param>
         /// <returns></returns>
         public TaskContext CancelGroupsOf(List<uint> groups)
-		{
-			return Dispatch(() => _owner.CancelGroupsOf(groups));
-		}
-
-        /// <summary>
-        ///  Asserts if the task was consumed already.
-        /// </summary>
-        private void AssertOnConsumed()
-		{
-			// This was adapted to TC to prevent static analysis tools from complaining.
-			// If you encounter this assertion check if you repeat a TaskContext more then 1 time!
-			Cypher.Assert(!_consumed, "Bad task logic, task context was consumed already!");
-		}
+        {
+            return Dispatch(() => _owner.CancelGroupsOf(groups));
+        }
 
         /// <summary>
         ///  Invokes the associated hook of the task.
         /// </summary>
         public void Invoke()
-		{
-			_task._task(this);
-		}
+        {
+            _task._task(this);
+        }
 
         /// <summary>
         ///  Repeats the event and sets a new duration.
@@ -645,17 +567,17 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskContext Repeat(TimeSpan duration)
-		{
-			AssertOnConsumed();
+        {
+            AssertOnConsumed();
 
-			// Set new duration, in-context timing and increment repeat counter
-			_task._duration =  duration;
-			_task._end      += duration;
-			_task._repeated += 1;
-			_consumed       =  true;
+            // Set new duration, in-context timing and increment repeat counter
+            _task._duration = duration;
+            _task._end += duration;
+            _task._repeated += 1;
+            _consumed = true;
 
-			return Dispatch(() => _owner.InsertTask(_task));
-		}
+            return Dispatch(() => _owner.InsertTask(_task));
+        }
 
         /// <summary>
         ///  Repeats the event with the same duration.
@@ -664,9 +586,9 @@ namespace Framework.Dynamic
         /// </summary>
         /// <returns></returns>
         public TaskContext Repeat()
-		{
-			return Repeat(_task._duration);
-		}
+        {
+            return Repeat(_task._duration);
+        }
 
         /// <summary>
         ///  Repeats the event and set a new duration that is randomized between min and max.
@@ -677,9 +599,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskContext Repeat(TimeSpan min, TimeSpan max)
-		{
-			return Repeat(RandomHelper.RandTime(min, max));
-		}
+        {
+            return Repeat(RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Schedule an event with a fixed rate from within the context.
@@ -691,16 +613,16 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskContext Schedule(TimeSpan time, Action<TaskContext> task)
-		{
-			var end = _task._end;
+        {
+            var end = _task._end;
 
-			return Dispatch(scheduler => scheduler.ScheduleAt(end, time, task));
-		}
+            return Dispatch(scheduler => scheduler.ScheduleAt(end, time, task));
+        }
 
-		public TaskContext Schedule(TimeSpan time, Action task)
-		{
-			return Schedule(time, delegate(TaskContext task1) { task(); });
-		}
+        public TaskContext Schedule(TimeSpan time, Action task)
+        {
+            return Schedule(time, delegate (TaskContext task1) { task(); });
+        }
 
         /// <summary>
         ///  Schedule an event with a fixed rate from within the context.
@@ -713,16 +635,16 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskContext Schedule(TimeSpan time, uint group, Action<TaskContext> task)
-		{
-			var end = _task._end;
+        {
+            var end = _task._end;
 
-			return Dispatch(scheduler => scheduler.ScheduleAt(end, time, @group, task));
-		}
+            return Dispatch(scheduler => scheduler.ScheduleAt(end, time, @group, task));
+        }
 
-		public TaskContext Schedule(TimeSpan time, uint group, Action task)
-		{
-			return Schedule(time, group, delegate(TaskContext task1) { task(); });
-		}
+        public TaskContext Schedule(TimeSpan time, uint group, Action task)
+        {
+            return Schedule(time, group, delegate (TaskContext task1) { task(); });
+        }
 
         /// <summary>
         ///  Schedule an event with a randomized rate between min and max rate from within the context.
@@ -735,14 +657,14 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskContext Schedule(TimeSpan min, TimeSpan max, Action<TaskContext> task)
-		{
-			return Schedule(RandomHelper.RandTime(min, max), task);
-		}
+        {
+            return Schedule(RandomHelper.RandTime(min, max), task);
+        }
 
-		public TaskContext Schedule(TimeSpan min, TimeSpan max, Action task)
-		{
-			return Schedule(min, max, delegate(TaskContext task1) { task(); });
-		}
+        public TaskContext Schedule(TimeSpan min, TimeSpan max, Action task)
+        {
+            return Schedule(min, max, delegate (TaskContext task1) { task(); });
+        }
 
         /// <summary>
         ///  Schedule an event with a randomized rate between min and max rate from within the context.
@@ -756,14 +678,14 @@ namespace Framework.Dynamic
         /// <param name="task"></param>
         /// <returns></returns>
         public TaskContext Schedule(TimeSpan min, TimeSpan max, uint group, Action<TaskContext> task)
-		{
-			return Schedule(RandomHelper.RandTime(min, max), group, task);
-		}
+        {
+            return Schedule(RandomHelper.RandTime(min, max), group, task);
+        }
 
-		public TaskContext Schedule(TimeSpan min, TimeSpan max, uint group, Action task)
-		{
-			return Schedule(min, max, group, delegate(TaskContext task1) { task(); });
-		}
+        public TaskContext Schedule(TimeSpan min, TimeSpan max, uint group, Action task)
+        {
+            return Schedule(min, max, group, delegate (TaskContext task1) { task(); });
+        }
 
         /// <summary>
         ///  Delays all tasks with the given duration from within the context.
@@ -771,9 +693,9 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskContext DelayAll(TimeSpan duration)
-		{
-			return Dispatch(() => _owner.DelayAll(duration));
-		}
+        {
+            return Dispatch(() => _owner.DelayAll(duration));
+        }
 
         /// <summary>
         ///  Delays all tasks with a random duration between min and max from within the context.
@@ -782,9 +704,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskContext DelayAll(TimeSpan min, TimeSpan max)
-		{
-			return DelayAll(RandomHelper.RandTime(min, max));
-		}
+        {
+            return DelayAll(RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Delays all tasks of a group with the given duration from within the context.
@@ -793,9 +715,9 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskContext DelayGroup(uint group, TimeSpan duration)
-		{
-			return Dispatch(() => _owner.DelayGroup(group, duration));
-		}
+        {
+            return Dispatch(() => _owner.DelayGroup(group, duration));
+        }
 
         /// <summary>
         ///  Delays all tasks of a group with a random duration between min and max from within the context.
@@ -805,9 +727,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskContext DelayGroup(uint group, TimeSpan min, TimeSpan max)
-		{
-			return DelayGroup(group, RandomHelper.RandTime(min, max));
-		}
+        {
+            return DelayGroup(group, RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Reschedule all tasks with the given duration.
@@ -815,9 +737,9 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskContext RescheduleAll(TimeSpan duration)
-		{
-			return Dispatch(() => _owner.RescheduleAll(duration));
-		}
+        {
+            return Dispatch(() => _owner.RescheduleAll(duration));
+        }
 
         /// <summary>
         ///  Reschedule all tasks with a random duration between min and max.
@@ -826,9 +748,9 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskContext RescheduleAll(TimeSpan min, TimeSpan max)
-		{
-			return RescheduleAll(RandomHelper.RandTime(min, max));
-		}
+        {
+            return RescheduleAll(RandomHelper.RandTime(min, max));
+        }
 
         /// <summary>
         ///  Reschedule all tasks of a group with the given duration.
@@ -837,9 +759,9 @@ namespace Framework.Dynamic
         /// <param name="duration"></param>
         /// <returns></returns>
         public TaskContext RescheduleGroup(uint group, TimeSpan duration)
-		{
-			return Dispatch(() => _owner.RescheduleGroup(group, duration));
-		}
+        {
+            return Dispatch(() => _owner.RescheduleGroup(group, duration));
+        }
 
         /// <summary>
         ///  Reschedule all tasks of a group with a random duration between min and max.
@@ -849,8 +771,86 @@ namespace Framework.Dynamic
         /// <param name="max"></param>
         /// <returns></returns>
         public TaskContext RescheduleGroup(uint group, TimeSpan min, TimeSpan max)
-		{
-			return RescheduleGroup(group, RandomHelper.RandTime(min, max));
-		}
-	}
+        {
+            return RescheduleGroup(group, RandomHelper.RandTime(min, max));
+        }
+
+        /// <summary>
+        ///  Dispatches an action safe on the TaskScheduler
+        /// </summary>
+        /// <param name="apply"></param>
+        /// <returns></returns>
+        private TaskContext Dispatch(Action apply)
+        {
+            apply();
+
+            return this;
+        }
+
+        private TaskContext Dispatch(Func<TaskScheduler, TaskScheduler> apply)
+        {
+            apply(_owner);
+
+            return this;
+        }
+
+        private bool IsExpired()
+        {
+            return _owner == null;
+        }
+
+        /// <summary>
+        ///  Returns true if the event is in the given group
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        private bool IsInGroup(uint group)
+        {
+            return _task.IsInGroup(group);
+        }
+
+        /// <summary>
+        ///  Sets the event in the given group
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        private TaskContext SetGroup(uint group)
+        {
+            _task._group = group;
+
+            return this;
+        }
+
+        /// <summary>
+        ///  Removes the group from the event
+        /// </summary>
+        /// <returns></returns>
+        private TaskContext ClearGroup()
+        {
+            _task._group = null;
+
+            return this;
+        }
+
+        /// <summary>
+        ///  Schedule a callable function that is executed at the next update tick from within the context.
+        ///  Its safe to modify the TaskScheduler from within the callable.
+        /// </summary>
+        /// <param name="callable"></param>
+        /// <returns></returns>
+        private TaskContext Async(Action callable)
+        {
+            return Dispatch(() => _owner.Async(callable));
+        }
+
+        /// <summary>
+        ///  Asserts if the task was consumed already.
+        /// </summary>
+        private void AssertOnConsumed()
+        {
+            // This was adapted to TC to prevent static analysis tools from complaining.
+            // If you encounter this assertion check if you repeat a TaskContext more then 1 time!
+            Cypher.Assert(!_consumed, "Bad task logic, task context was consumed already!");
+        }
+    }
 }

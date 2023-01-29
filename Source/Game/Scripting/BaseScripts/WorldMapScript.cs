@@ -5,15 +5,15 @@ using Game.Maps;
 
 namespace Game.Scripting.BaseScripts
 {
-	public class WorldMapScript : MapScript<Map>
-	{
-		public WorldMapScript(string name, uint mapId) : base(name, mapId)
-		{
-			if (GetEntry() != null &&
-			    !GetEntry().IsWorldMap())
-				Log.outError(LogFilter.Scripts, "WorldMapScript for map {0} is invalid.", mapId);
+    public class WorldMapScript : MapScript<Map>
+    {
+        public WorldMapScript(string name, uint mapId) : base(name, mapId)
+        {
+            if (GetEntry() != null &&
+                !GetEntry().IsWorldMap())
+                Log.outError(LogFilter.Scripts, "WorldMapScript for map {0} is invalid.", mapId);
 
-			Global.ScriptMgr.AddScript(this);
-		}
-	}
+            Global.ScriptMgr.AddScript(this);
+        }
+    }
 }

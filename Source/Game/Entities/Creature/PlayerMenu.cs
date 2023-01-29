@@ -35,7 +35,7 @@ public class PlayerMenu
 
         GossipMessagePkt packet = new();
         packet.GossipGUID = objectGUID;
-        packet.GossipID   = _gossipMenu.GetMenuId();
+        packet.GossipID = _gossipMenu.GetMenuId();
 
         GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(packet.GossipID);
 
@@ -51,35 +51,35 @@ public class PlayerMenu
         {
             ClientGossipOptions opt = new();
             opt.GossipOptionID = item.GossipOptionID;
-            opt.OptionNPC      = item.OptionNpc;
-            opt.OptionFlags    = (byte)(item.BoxCoded ? 1 : 0); // makes pop up box password
-            opt.OptionCost     = (int)item.BoxMoney;            // money required to open menu, 2.0.3
+            opt.OptionNPC = item.OptionNpc;
+            opt.OptionFlags = (byte)(item.BoxCoded ? 1 : 0); // makes pop up box password
+            opt.OptionCost = (int)item.BoxMoney;            // money required to open menu, 2.0.3
             opt.OptionLanguage = item.Language;
-            opt.Flags          = item.Flags;
-            opt.OrderIndex     = (int)item.OrderIndex;
-            opt.Text           = item.OptionText; // text for gossip Item
-            opt.Confirm        = item.BoxText;    // accept text (related to money) pop up box, 2.0.3
-            opt.Status         = GossipOptionStatus.Available;
-            opt.SpellID        = item.SpellID;
+            opt.Flags = item.Flags;
+            opt.OrderIndex = (int)item.OrderIndex;
+            opt.Text = item.OptionText; // text for gossip Item
+            opt.Confirm = item.BoxText;    // accept text (related to money) pop up box, 2.0.3
+            opt.Status = GossipOptionStatus.Available;
+            opt.SpellID = item.SpellID;
             opt.OverrideIconID = item.OverrideIconID;
             packet.GossipOptions.Add(opt);
         }
 
         for (byte i = 0; i < _questMenu.GetMenuItemCount(); ++i)
         {
-            QuestMenuItem item    = _questMenu.GetItem(i);
-            uint          questID = item.QuestId;
-            Quest         quest   = Global.ObjectMgr.GetQuestTemplate(questID);
+            QuestMenuItem item = _questMenu.GetItem(i);
+            uint questID = item.QuestId;
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
 
             if (quest != null)
             {
                 ClientGossipText gossipText = new();
-                gossipText.QuestID         = questID;
+                gossipText.QuestID = questID;
                 gossipText.ContentTuningID = quest.ContentTuningId;
-                gossipText.QuestType       = item.QuestIcon;
-                gossipText.QuestFlags      = (uint)quest.Flags;
-                gossipText.QuestFlagsEx    = (uint)quest.FlagsEx;
-                gossipText.Repeatable      = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                gossipText.QuestType = item.QuestIcon;
+                gossipText.QuestFlags = (uint)quest.Flags;
+                gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
+                gossipText.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
 
                 gossipText.QuestTitle = quest.LogTitle;
                 Locale locale = _session.GetSessionDbLocaleIndex();
@@ -118,7 +118,7 @@ public class PlayerMenu
         }
 
         GossipPOI packet = new();
-        packet.Id   = pointOfInterest.Id;
+        packet.Id = pointOfInterest.Id;
         packet.Name = pointOfInterest.Name;
 
         Locale locale = _session.GetSessionDbLocaleIndex();
@@ -131,9 +131,9 @@ public class PlayerMenu
                 ObjectManager.GetLocaleString(localeData.Name, locale, ref packet.Name);
         }
 
-        packet.Flags      = pointOfInterest.Flags;
-        packet.Pos        = pointOfInterest.Pos;
-        packet.Icon       = pointOfInterest.Icon;
+        packet.Flags = pointOfInterest.Flags;
+        packet.Pos = pointOfInterest.Pos;
+        packet.Icon = pointOfInterest.Icon;
         packet.Importance = pointOfInterest.Importance;
         packet.WMOGroupID = pointOfInterest.WMOGroupID;
 
@@ -142,8 +142,8 @@ public class PlayerMenu
 
     public void SendQuestGiverQuestListMessage(WorldObject questgiver)
     {
-        ObjectGuid guid           = questgiver.GetGUID();
-        Locale     localeConstant = _session.GetSessionDbLocaleIndex();
+        ObjectGuid guid = questgiver.GetGUID();
+        Locale localeConstant = _session.GetSessionDbLocaleIndex();
 
         QuestGiverQuestListMessage questList = new();
         questList.QuestGiverGUID = guid;
@@ -153,8 +153,8 @@ public class PlayerMenu
         if (questGreeting != null)
         {
             questList.GreetEmoteDelay = questGreeting.EmoteDelay;
-            questList.GreetEmoteType  = questGreeting.EmoteType;
-            questList.Greeting        = questGreeting.Text;
+            questList.GreetEmoteType = questGreeting.EmoteType;
+            questList.Greeting = questGreeting.Text;
 
             if (localeConstant != Locale.enUS)
             {
@@ -169,19 +169,19 @@ public class PlayerMenu
         {
             QuestMenuItem questMenuItem = _questMenu.GetItem(i);
 
-            uint  questID = questMenuItem.QuestId;
-            Quest quest   = Global.ObjectMgr.GetQuestTemplate(questID);
+            uint questID = questMenuItem.QuestId;
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
 
             if (quest != null)
             {
                 ClientGossipText text = new();
-                text.QuestID         = questID;
+                text.QuestID = questID;
                 text.ContentTuningID = quest.ContentTuningId;
-                text.QuestType       = questMenuItem.QuestIcon;
-                text.QuestFlags      = (uint)quest.Flags;
-                text.QuestFlagsEx    = (uint)quest.FlagsEx;
-                text.Repeatable      = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
-                text.QuestTitle      = quest.LogTitle;
+                text.QuestType = questMenuItem.QuestIcon;
+                text.QuestFlags = (uint)quest.Flags;
+                text.QuestFlagsEx = (uint)quest.FlagsEx;
+                text.Repeatable = quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                text.QuestTitle = quest.LogTitle;
 
                 if (localeConstant != Locale.enUS)
                 {
@@ -201,7 +201,7 @@ public class PlayerMenu
     public void SendQuestGiverStatus(QuestGiverStatus questStatus, ObjectGuid npcGUID)
     {
         var packet = new QuestGiverStatusPkt();
-        packet.QuestGiver.Guid   = npcGUID;
+        packet.QuestGiver.Guid = npcGUID;
         packet.QuestGiver.Status = questStatus;
 
         _session.SendPacket(packet);
@@ -211,11 +211,11 @@ public class PlayerMenu
     {
         QuestGiverQuestDetails packet = new();
 
-        packet.QuestTitle         = quest.LogTitle;
-        packet.LogDescription     = quest.LogDescription;
-        packet.DescriptionText    = quest.QuestDescription;
-        packet.PortraitGiverText  = quest.PortraitGiverText;
-        packet.PortraitGiverName  = quest.PortraitGiverName;
+        packet.QuestTitle = quest.LogTitle;
+        packet.LogDescription = quest.LogDescription;
+        packet.DescriptionText = quest.QuestDescription;
+        packet.PortraitGiverText = quest.PortraitGiverText;
+        packet.PortraitGiverName = quest.PortraitGiverName;
         packet.PortraitTurnInText = quest.PortraitTurnInText;
         packet.PortraitTurnInName = quest.PortraitTurnInName;
 
@@ -246,21 +246,21 @@ public class PlayerMenu
             }
         }
 
-        packet.QuestGiverGUID            = npcGUID;
-        packet.InformUnit                = _session.GetPlayer().GetPlayerSharingQuest();
-        packet.QuestID                   = quest.Id;
-        packet.QuestPackageID            = (int)quest.PackageID;
-        packet.PortraitGiver             = quest.QuestGiverPortrait;
-        packet.PortraitGiverMount        = quest.QuestGiverPortraitMount;
+        packet.QuestGiverGUID = npcGUID;
+        packet.InformUnit = _session.GetPlayer().GetPlayerSharingQuest();
+        packet.QuestID = quest.Id;
+        packet.QuestPackageID = (int)quest.PackageID;
+        packet.PortraitGiver = quest.QuestGiverPortrait;
+        packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
         packet.PortraitGiverModelSceneID = quest.QuestGiverPortraitModelSceneId;
-        packet.PortraitTurnIn            = quest.QuestTurnInPortrait;
-        packet.QuestSessionBonus         = 0; //quest.GetQuestSessionBonus(); // this is only sent while quest session is active
-        packet.AutoLaunched              = autoLaunched;
-        packet.DisplayPopup              = displayPopup;
-        packet.QuestFlags[0]             = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));
-        packet.QuestFlags[1]             = (uint)quest.FlagsEx;
-        packet.QuestFlags[2]             = (uint)quest.FlagsEx2;
-        packet.SuggestedPartyMembers     = quest.SuggestedPlayers;
+        packet.PortraitTurnIn = quest.QuestTurnInPortrait;
+        packet.QuestSessionBonus = 0; //quest.GetQuestSessionBonus(); // this is only sent while quest session is active
+        packet.AutoLaunched = autoLaunched;
+        packet.DisplayPopup = displayPopup;
+        packet.QuestFlags[0] = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));
+        packet.QuestFlags[1] = (uint)quest.FlagsEx;
+        packet.QuestFlags[2] = (uint)quest.FlagsEx2;
+        packet.SuggestedPartyMembers = quest.SuggestedPlayers;
 
         // Is there a better way? what about game objects?
         Creature creature = ObjectAccessor.GetCreature(_session.GetPlayer(), npcGUID);
@@ -289,10 +289,10 @@ public class PlayerMenu
         for (int i = 0; i < objs.Count; ++i)
         {
             var obj = new QuestObjectiveSimple();
-            obj.Id       = objs[i].Id;
+            obj.Id = objs[i].Id;
             obj.ObjectID = objs[i].ObjectID;
-            obj.Amount   = objs[i].Amount;
-            obj.Type     = (byte)objs[i].Type;
+            obj.Amount = objs[i].Amount;
+            obj.Type = (byte)objs[i].Type;
             packet.Objectives.Add(obj);
         }
 
@@ -316,10 +316,10 @@ public class PlayerMenu
     {
         QuestGiverOfferRewardMessage packet = new();
 
-        packet.QuestTitle         = quest.LogTitle;
-        packet.RewardText         = quest.OfferRewardText;
-        packet.PortraitGiverText  = quest.PortraitGiverText;
-        packet.PortraitGiverName  = quest.PortraitGiverName;
+        packet.QuestTitle = quest.LogTitle;
+        packet.RewardText = quest.OfferRewardText;
+        packet.PortraitGiverText = quest.PortraitGiverText;
+        packet.PortraitGiverName = quest.PortraitGiverName;
         packet.PortraitTurnInText = quest.PortraitTurnInText;
         packet.PortraitTurnInName = quest.PortraitTurnInName;
 
@@ -364,11 +364,11 @@ public class PlayerMenu
         if (creature)
         {
             packet.QuestGiverCreatureID = creature.GetEntry();
-            offer.QuestGiverCreatureID  = creature.GetCreatureTemplate().Entry;
+            offer.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
         }
 
-        offer.QuestID               = quest.Id;
-        offer.AutoLaunched          = autoLaunched;
+        offer.QuestID = quest.Id;
+        offer.AutoLaunched = autoLaunched;
         offer.SuggestedPartyMembers = quest.SuggestedPlayers;
 
         for (uint i = 0; i < SharedConst.QuestEmoteCount && quest.OfferRewardEmote[i] != 0; ++i)
@@ -378,11 +378,11 @@ public class PlayerMenu
         offer.QuestFlags[1] = (uint)quest.FlagsEx;
         offer.QuestFlags[2] = (uint)quest.FlagsEx2;
 
-        packet.PortraitTurnIn            = quest.QuestTurnInPortrait;
-        packet.PortraitGiver             = quest.QuestGiverPortrait;
-        packet.PortraitGiverMount        = quest.QuestGiverPortraitMount;
+        packet.PortraitTurnIn = quest.QuestTurnInPortrait;
+        packet.PortraitGiver = quest.QuestGiverPortrait;
+        packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
         packet.PortraitGiverModelSceneID = quest.QuestGiverPortraitModelSceneId;
-        packet.QuestPackageID            = quest.PackageID;
+        packet.QuestPackageID = quest.PackageID;
 
         packet.QuestData = offer;
 
@@ -403,7 +403,7 @@ public class PlayerMenu
 
         QuestGiverRequestItems packet = new();
 
-        packet.QuestTitle     = quest.LogTitle;
+        packet.QuestTitle = quest.LogTitle;
         packet.CompletionText = quest.RequestItemsText;
 
         Locale locale = _session.GetSessionDbLocaleIndex();
@@ -443,17 +443,17 @@ public class PlayerMenu
         if (canComplete)
         {
             packet.CompEmoteDelay = quest.EmoteOnCompleteDelay;
-            packet.CompEmoteType  = quest.EmoteOnComplete;
+            packet.CompEmoteType = quest.EmoteOnComplete;
         }
         else
         {
             packet.CompEmoteDelay = quest.EmoteOnIncompleteDelay;
-            packet.CompEmoteType  = quest.EmoteOnIncomplete;
+            packet.CompEmoteType = quest.EmoteOnIncomplete;
         }
 
-        packet.QuestFlags[0]       = (uint)quest.Flags;
-        packet.QuestFlags[1]       = (uint)quest.FlagsEx;
-        packet.QuestFlags[2]       = (uint)quest.FlagsEx2;
+        packet.QuestFlags[0] = (uint)quest.Flags;
+        packet.QuestFlags[1] = (uint)quest.FlagsEx;
+        packet.QuestFlags[2] = (uint)quest.FlagsEx2;
         packet.SuggestPartyMembers = quest.SuggestedPlayers;
 
         // incomplete: FD
@@ -501,11 +501,6 @@ public class PlayerMenu
         return _interactionData;
     }
 
-    private bool IsEmpty()
-    {
-        return _gossipMenu.IsEmpty() && _questMenu.IsEmpty();
-    }
-
     public uint GetGossipOptionSender(uint selection)
     {
         return _gossipMenu.GetMenuItemSender(selection);
@@ -519,5 +514,10 @@ public class PlayerMenu
     public bool IsGossipOptionCoded(uint selection)
     {
         return _gossipMenu.IsMenuItemCoded(selection);
+    }
+
+    private bool IsEmpty()
+    {
+        return _gossipMenu.IsEmpty() && _questMenu.IsEmpty();
     }
 }

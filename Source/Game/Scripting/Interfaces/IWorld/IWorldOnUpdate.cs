@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnUpdate : IScriptObject
-	{
-		void OnUpdate(uint diff);
-	}
+    public interface IWorldOnUpdate : IScriptObject
+    {
+        void OnUpdate(uint diff);
+    }
 }

@@ -6,13 +6,12 @@ namespace Game.Entities;
 
 public class CreatureGroup
 {
+    private readonly ulong _leaderSpawnId;
+    private readonly List<ulong> _memberIds = new();
+    private readonly Dictionary<Creature, FormationInfo> _members = new();
     private bool _engaging;
     private bool _formed;
     private Creature _leader;
-
-    private readonly ulong _leaderSpawnId;
-    private readonly Dictionary<Creature, FormationInfo> _members = new();
-    private readonly List<ulong> _memberIds = new();
 
     public CreatureGroup(ulong leaderSpawnId)
     {
@@ -126,7 +125,7 @@ public class CreatureGroup
                 continue;
 
             float angle = pair.Value.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
-            float dist  = pair.Value.FollowDist;
+            float dist = pair.Value.FollowDist;
 
             if (!member.HasUnitState(UnitState.FollowFormation))
                 member.GetMotionMaster().MoveFormation(_leader, dist, angle, pair.Value.LeaderWaypointIDs[0], pair.Value.LeaderWaypointIDs[1]);

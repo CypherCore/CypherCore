@@ -5,11 +5,11 @@ using Framework.Constants;
 
 namespace Game.DataStorage
 {
-	public sealed class OverrideSpellDataRecord
-	{
-		public byte Flags;
-		public uint Id;
-		public uint PlayerActionBarFileDataID;
-		public uint[] Spells = new uint[SharedConst.MaxOverrideSpell];
-	}
+    public sealed class OverrideSpellDataRecord
+    {
+        public byte Flags;
+        public uint Id;
+        public uint PlayerActionBarFileDataID;
+        public uint[] Spells = new uint[SharedConst.MaxOverrideSpell];
+    }
 }

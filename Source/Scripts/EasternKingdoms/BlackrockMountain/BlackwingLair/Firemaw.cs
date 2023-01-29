@@ -8,57 +8,57 @@ using Game.Scripting;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Firemaw
 {
-	internal struct SpellIds
-	{
-		public const uint Shadowflame = 22539;
-		public const uint Wingbuffet = 23339;
-		public const uint Flamebuffet = 23341;
-	}
+    internal struct SpellIds
+    {
+        public const uint Shadowflame = 22539;
+        public const uint Wingbuffet = 23339;
+        public const uint Flamebuffet = 23341;
+    }
 
-	[Script]
-	internal class boss_firemaw : BossAI
-	{
-		public boss_firemaw(Creature creature) : base(creature, DataTypes.Firemaw)
-		{
-		}
+    [Script]
+    internal class boss_firemaw : BossAI
+    {
+        public boss_firemaw(Creature creature) : base(creature, DataTypes.Firemaw)
+        {
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			base.JustEngagedWith(who);
+        public override void JustEngagedWith(Unit who)
+        {
+            base.JustEngagedWith(who);
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(10),
-			                    TimeSpan.FromSeconds(20),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Shadowflame);
-				                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Shadowflame);
+                                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(30),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Wingbuffet);
+            _scheduler.Schedule(TimeSpan.FromSeconds(30),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Wingbuffet);
 
-				                    if (GetThreat(me.GetVictim()) != 0)
-					                    ModifyThreatByPercent(me.GetVictim(), -75);
+                                    if (GetThreat(me.GetVictim()) != 0)
+                                        ModifyThreatByPercent(me.GetVictim(), -75);
 
-				                    task.Repeat(TimeSpan.FromSeconds(30));
-			                    });
+                                    task.Repeat(TimeSpan.FromSeconds(30));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(5),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Flamebuffet);
-				                    task.Repeat(TimeSpan.FromSeconds(5));
-			                    });
-		}
+            _scheduler.Schedule(TimeSpan.FromSeconds(5),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Flamebuffet);
+                                    task.Repeat(TimeSpan.FromSeconds(5));
+                                });
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 }

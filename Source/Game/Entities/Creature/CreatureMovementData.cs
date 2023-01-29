@@ -4,6 +4,17 @@ namespace Game.Entities;
 
 public class CreatureMovementData
 {
+    public CreatureMovementData()
+    {
+        Ground = CreatureGroundMovementType.Run;
+        Flight = CreatureFlightMovementType.None;
+        Swim = true;
+        Rooted = false;
+        Chase = CreatureChaseMovementType.Run;
+        Random = CreatureRandomMovementType.Walk;
+        InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
+    }
+
     public CreatureChaseMovementType Chase { get; set; }
     public CreatureFlightMovementType Flight { get; set; }
     public CreatureGroundMovementType Ground { get; set; }
@@ -11,17 +22,6 @@ public class CreatureMovementData
     public CreatureRandomMovementType Random { get; set; }
     public bool Rooted { get; set; }
     public bool Swim { get; set; }
-
-    public CreatureMovementData()
-    {
-        Ground                = CreatureGroundMovementType.Run;
-        Flight                = CreatureFlightMovementType.None;
-        Swim                  = true;
-        Rooted                = false;
-        Chase                 = CreatureChaseMovementType.Run;
-        Random                = CreatureRandomMovementType.Walk;
-        InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
-    }
 
     public bool IsGroundAllowed()
     {

@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-	public interface ISpellScriptLoaderGetSpellScript : IScriptObject
-	{
-		SpellScript GetSpellScript();
-	}
+    public interface ISpellScriptLoaderGetSpellScript : IScriptObject
+    {
+        SpellScript GetSpellScript();
+    }
 }

@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IVehicle
 {
-	public interface IVehicleOnAddPassenger : IScriptObject
-	{
-		void OnAddPassenger(Vehicle veh, Unit passenger, sbyte seatId);
-	}
+    public interface IVehicleOnAddPassenger : IScriptObject
+    {
+        void OnAddPassenger(Vehicle veh, Unit passenger, sbyte seatId);
+    }
 }

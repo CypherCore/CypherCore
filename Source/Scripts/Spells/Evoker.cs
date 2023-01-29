@@ -10,42 +10,42 @@ using Game.Spells;
 
 namespace Scripts.Spells.Evoker
 {
-	internal struct SpellIds
-	{
-		public const uint GlideKnockback = 358736;
-		public const uint Hover = 358267;
-		public const uint SoarRacial = 369536;
-	}
+    internal struct SpellIds
+    {
+        public const uint GlideKnockback = 358736;
+        public const uint Hover = 358267;
+        public const uint SoarRacial = 369536;
+    }
 
-	[Script] // 358733 - Glide (Racial)
-	internal class spell_evo_glide : SpellScript, ICheckCastHander, IOnCast
-	{
-		public override bool Validate(SpellInfo spellInfo)
-		{
-			return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.Hover, SpellIds.SoarRacial);
-		}
+    [Script] // 358733 - Glide (Racial)
+    internal class spell_evo_glide : SpellScript, ICheckCastHander, IOnCast
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.Hover, SpellIds.SoarRacial);
+        }
 
-		public SpellCastResult CheckCast()
-		{
-			Unit caster = GetCaster();
+        public SpellCastResult CheckCast()
+        {
+            Unit caster = GetCaster();
 
-			if (!caster.IsFalling())
-				return SpellCastResult.NotOnGround;
+            if (!caster.IsFalling())
+                return SpellCastResult.NotOnGround;
 
-			return SpellCastResult.SpellCastOk;
-		}
+            return SpellCastResult.SpellCastOk;
+        }
 
-		public void OnCast()
-		{
-			Player caster = GetCaster().ToPlayer();
+        public void OnCast()
+        {
+            Player caster = GetCaster().ToPlayer();
 
-			if (caster == null)
-				return;
+            if (caster == null)
+                return;
 
-			caster.CastSpell(caster, SpellIds.GlideKnockback, true);
+            caster.CastSpell(caster, SpellIds.GlideKnockback, true);
 
-			caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-			caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
-		}
-	}
+            caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.Hover, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+            caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.SoarRacial, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
+        }
+    }
 }

@@ -5,8 +5,8 @@ using Game.Conditions;
 
 namespace Game.Scripting.Interfaces.ICondition
 {
-	public interface IConditionCheck : IScriptObject
-	{
-		bool OnConditionCheck(Condition condition, ConditionSourceInfo sourceInfo);
-	}
+    public interface IConditionCheck : IScriptObject
+    {
+        bool OnConditionCheck(Condition condition, ConditionSourceInfo sourceInfo);
+    }
 }

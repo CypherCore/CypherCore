@@ -4,16 +4,16 @@
 namespace Game.Entities
 {
     public class VendorItemCount
-	{
-		public uint Count { get; set; }
+    {
+        public VendorItemCount(uint _item, uint _count)
+        {
+            ItemId = _item;
+            Count = _count;
+            LastIncrementTime = GameTime.GetGameTime();
+        }
+
+        public uint Count { get; set; }
         public uint ItemId { get; set; }
         public long LastIncrementTime { get; set; }
-
-        public VendorItemCount(uint _item, uint _count)
-		{
-			ItemId            = _item;
-			Count             = _count;
-			LastIncrementTime = GameTime.GetGameTime();
-		}
-	}
+    }
 }

@@ -11,455 +11,455 @@ using Framework.Configuration;
 
 public class Log
 {
-	private static Dictionary<byte, Appender> appenders = new();
-	private static Dictionary<LogFilter, Logger> loggers = new();
-	private static string _logsDir;
-	private static byte AppenderId;
-
-	private static LogLevel lowestLogLevel;
-
-	static Log()
-	{
-		_logsDir       = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
-		lowestLogLevel = LogLevel.Fatal;
-
-		foreach (var appenderName in ConfigMgr.GetKeysByString("Appender."))
-			CreateAppenderFromConfig(appenderName);
-
-		foreach (var loggerName in ConfigMgr.GetKeysByString("Logger."))
-			CreateLoggerFromConfig(loggerName);
-
-		// Bad config configuration, creating default config
-		if (!loggers.ContainsKey(LogFilter.Server))
-		{
-			Console.WriteLine("Wrong Loggers configuration. Review your Logger config section.\nCreating default loggers [Server (Info)] to console\n");
-
-			loggers.Clear();
-			appenders.Clear();
-
-			byte id = NextAppenderId();
-
-			var appender = new ConsoleAppender(id, "Console", LogLevel.Debug, AppenderFlags.None);
-			appenders[id] = appender;
-
-			var serverLogger = new Logger("Server", LogLevel.Error);
-			serverLogger.addAppender(id, appender);
-			loggers[LogFilter.Server] = serverLogger;
-		}
-
-		outInfo(LogFilter.Server, @" ____                    __                      ");
-		outInfo(LogFilter.Server, @"/\  _`\                 /\ \                     ");
-		outInfo(LogFilter.Server, @"\ \ \/\_\  __  __  _____\ \ \___      __   _ __  ");
-		outInfo(LogFilter.Server, @" \ \ \/_/_/\ \/\ \/\ '__`\ \  _ `\  /'__`\/\`'__\");
-		outInfo(LogFilter.Server, @"  \ \ \L\ \ \ \_\ \ \ \L\ \ \ \ \ \/\  __/\ \ \/ ");
-		outInfo(LogFilter.Server, @"   \ \____/\/`____ \ \ ,__/\ \_\ \_\ \____\\ \_\ ");
-		outInfo(LogFilter.Server, @"    \/___/  `/___/> \ \ \/  \/_/\/_/\/____/ \/_/ ");
-		outInfo(LogFilter.Server, @"               /\___/\ \_\                       ");
-		outInfo(LogFilter.Server, @"               \/__/  \/_/                   Core");
-		outInfo(LogFilter.Server, "https://github.com/CypherCore/CypherCore \r\n");
-	}
-
-	private static bool ShouldLog(LogFilter type, LogLevel level)
-	{
-		// Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
-		if (level < lowestLogLevel)
-			return false;
-
-		Logger logger = GetLoggerByType(type);
-
-		if (logger == null)
-			return false;
-
-		LogLevel logLevel = logger.getLogLevel();
-
-		return logLevel != LogLevel.Disabled && logLevel <= level;
-	}
-
-	public static void outLog(LogFilter type, LogLevel level, string text, params object[] args)
-	{
-		if (!ShouldLog(type, level))
-			return;
-
-		outMessage(type, level, text, args);
-	}
-
-	public static void outInfo(LogFilter type, string text, params object[] args)
-	{
-		if (!ShouldLog(type, LogLevel.Info))
-			return;
-
-		outMessage(type, LogLevel.Info, text, args);
-	}
-
-	public static void outWarn(LogFilter type, string text, params object[] args)
-	{
-		if (!ShouldLog(type, LogLevel.Warn))
-			return;
+    private static readonly Dictionary<byte, Appender> appenders = new();
+    private static readonly Dictionary<LogFilter, Logger> loggers = new();
+    private static readonly string _logsDir;
+    private static byte AppenderId;
+
+    private static LogLevel lowestLogLevel;
+
+    static Log()
+    {
+        _logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
+        lowestLogLevel = LogLevel.Fatal;
+
+        foreach (var appenderName in ConfigMgr.GetKeysByString("Appender."))
+            CreateAppenderFromConfig(appenderName);
+
+        foreach (var loggerName in ConfigMgr.GetKeysByString("Logger."))
+            CreateLoggerFromConfig(loggerName);
+
+        // Bad config configuration, creating default config
+        if (!loggers.ContainsKey(LogFilter.Server))
+        {
+            Console.WriteLine("Wrong Loggers configuration. Review your Logger config section.\nCreating default loggers [Server (Info)] to console\n");
+
+            loggers.Clear();
+            appenders.Clear();
+
+            byte id = NextAppenderId();
+
+            var appender = new ConsoleAppender(id, "Console", LogLevel.Debug, AppenderFlags.None);
+            appenders[id] = appender;
+
+            var serverLogger = new Logger("Server", LogLevel.Error);
+            serverLogger.addAppender(id, appender);
+            loggers[LogFilter.Server] = serverLogger;
+        }
+
+        outInfo(LogFilter.Server, @" ____                    __                      ");
+        outInfo(LogFilter.Server, @"/\  _`\                 /\ \                     ");
+        outInfo(LogFilter.Server, @"\ \ \/\_\  __  __  _____\ \ \___      __   _ __  ");
+        outInfo(LogFilter.Server, @" \ \ \/_/_/\ \/\ \/\ '__`\ \  _ `\  /'__`\/\`'__\");
+        outInfo(LogFilter.Server, @"  \ \ \L\ \ \ \_\ \ \ \L\ \ \ \ \ \/\  __/\ \ \/ ");
+        outInfo(LogFilter.Server, @"   \ \____/\/`____ \ \ ,__/\ \_\ \_\ \____\\ \_\ ");
+        outInfo(LogFilter.Server, @"    \/___/  `/___/> \ \ \/  \/_/\/_/\/____/ \/_/ ");
+        outInfo(LogFilter.Server, @"               /\___/\ \_\                       ");
+        outInfo(LogFilter.Server, @"               \/__/  \/_/                   Core");
+        outInfo(LogFilter.Server, "https://github.com/CypherCore/CypherCore \r\n");
+    }
+
+    public static void outLog(LogFilter type, LogLevel level, string text, params object[] args)
+    {
+        if (!ShouldLog(type, level))
+            return;
+
+        outMessage(type, level, text, args);
+    }
+
+    public static void outInfo(LogFilter type, string text, params object[] args)
+    {
+        if (!ShouldLog(type, LogLevel.Info))
+            return;
+
+        outMessage(type, LogLevel.Info, text, args);
+    }
+
+    public static void outWarn(LogFilter type, string text, params object[] args)
+    {
+        if (!ShouldLog(type, LogLevel.Warn))
+            return;
+
+        outMessage(type, LogLevel.Warn, text, args);
+    }
+
+    [Conditional("DEBUG")]
+    public static void outDebug(LogFilter type, string text, params object[] args)
+    {
+        if (!ShouldLog(type, LogLevel.Debug))
+            return;
+
+        outMessage(type, LogLevel.Debug, text, args);
+    }
+
+    public static void outError(LogFilter type, string text, params object[] args)
+    {
+        if (!ShouldLog(type, LogLevel.Error))
+            return;
+
+        outMessage(type, LogLevel.Error, text, args);
+    }
+
+    public static void outException(Exception ex, [CallerMemberName] string memberName = "")
+    {
+        if (!ShouldLog(LogFilter.Server, LogLevel.Fatal))
+            return;
+
+        outMessage(LogFilter.Server, LogLevel.Fatal, "CallingMember: {0} ExceptionMessage: {1}", memberName, ex.Message);
+    }
+
+    public static void outFatal(LogFilter type, string text, params object[] args)
+    {
+        if (!ShouldLog(type, LogLevel.Fatal))
+            return;
+
+        outMessage(type, LogLevel.Fatal, text, args);
+    }
 
-		outMessage(type, LogLevel.Warn, text, args);
-	}
-
-	[Conditional("DEBUG")]
-	public static void outDebug(LogFilter type, string text, params object[] args)
-	{
-		if (!ShouldLog(type, LogLevel.Debug))
-			return;
-
-		outMessage(type, LogLevel.Debug, text, args);
-	}
-
-	public static void outError(LogFilter type, string text, params object[] args)
-	{
-		if (!ShouldLog(type, LogLevel.Error))
-			return;
-
-		outMessage(type, LogLevel.Error, text, args);
-	}
-
-	public static void outException(Exception ex, [CallerMemberName] string memberName = "")
-	{
-		if (!ShouldLog(LogFilter.Server, LogLevel.Fatal))
-			return;
-
-		outMessage(LogFilter.Server, LogLevel.Fatal, "CallingMember: {0} ExceptionMessage: {1}", memberName, ex.Message);
-	}
-
-	public static void outFatal(LogFilter type, string text, params object[] args)
-	{
-		if (!ShouldLog(type, LogLevel.Fatal))
-			return;
-
-		outMessage(type, LogLevel.Fatal, text, args);
-	}
-
-	public static void outTrace(LogFilter type, string text, params object[] args)
-	{
-		if (!ShouldLog(type, LogLevel.Trace))
-			return;
-
-		outMessage(type, LogLevel.Trace, text, args);
-	}
-
-	public static void outCommand(uint accountId, string text, params object[] args)
-	{
-		if (!ShouldLog(LogFilter.Commands, LogLevel.Info))
-			return;
-
-		var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, string.Format(text, args));
-		msg.dynamicName = accountId.ToString();
-
-		Logger logger = GetLoggerByType(LogFilter.Commands);
-		logger.write(msg);
-	}
-
-	private static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
-	{
-		Logger logger = GetLoggerByType(type);
-		logger.write(new LogMessage(level, type, string.Format(text, args)));
-	}
-
-	private static byte NextAppenderId()
-	{
-		return AppenderId++;
-	}
+    public static void outTrace(LogFilter type, string text, params object[] args)
+    {
+        if (!ShouldLog(type, LogLevel.Trace))
+            return;
+
+        outMessage(type, LogLevel.Trace, text, args);
+    }
 
-	private static void CreateAppenderFromConfig(string appenderName)
-	{
-		if (string.IsNullOrEmpty(appenderName))
-			return;
+    public static void outCommand(uint accountId, string text, params object[] args)
+    {
+        if (!ShouldLog(LogFilter.Commands, LogLevel.Info))
+            return;
+
+        var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, string.Format(text, args));
+        msg.dynamicName = accountId.ToString();
 
-		string options = ConfigMgr.GetDefaultValue(appenderName, "");
-		var    tokens  = new StringArray(options, ',');
-		string name    = appenderName.Substring(9);
+        Logger logger = GetLoggerByType(LogFilter.Commands);
+        logger.write(msg);
+    }
 
-		if (tokens.Length < 2)
-		{
-			Console.WriteLine("Log.CreateAppenderFromConfig: Wrong configuration for appender {0}. Config line: {1}", name, options);
+    public static bool SetLogLevel(string name, int newLeveli, bool isLogger = true)
+    {
+        if (newLeveli < 0)
+            return false;
 
-			return;
-		}
+        LogLevel newLevel = (LogLevel)newLeveli;
 
-		AppenderFlags flags = AppenderFlags.None;
-		AppenderType  type  = (AppenderType)uint.Parse(tokens[0]);
-		LogLevel      level = (LogLevel)uint.Parse(tokens[1]);
+        if (isLogger)
+        {
+            foreach (var logger in loggers.Values)
+                if (logger.getName() == name)
+                {
+                    logger.setLogLevel(newLevel);
+
+                    if (newLevel != LogLevel.Disabled &&
+                        newLevel < lowestLogLevel)
+                        lowestLogLevel = newLevel;
+
+                    return true;
+                }
+
+            return false;
+        }
+        else
+        {
+            Appender appender = GetAppenderByName(name);
+
+            if (appender == null)
+                return false;
+
+            appender.setLogLevel(newLevel);
+        }
+
+        return true;
+    }
+
+    public static void SetRealmId(uint id)
+    {
+        foreach (var appender in appenders.Values)
+            appender.setRealmId(id);
+    }
+
+    private static bool ShouldLog(LogFilter type, LogLevel level)
+    {
+        // Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
+        if (level < lowestLogLevel)
+            return false;
+
+        Logger logger = GetLoggerByType(type);
+
+        if (logger == null)
+            return false;
+
+        LogLevel logLevel = logger.getLogLevel();
+
+        return logLevel != LogLevel.Disabled && logLevel <= level;
+    }
+
+    private static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
+    {
+        Logger logger = GetLoggerByType(type);
+        logger.write(new LogMessage(level, type, string.Format(text, args)));
+    }
 
-		if (level > LogLevel.Fatal)
-		{
-			Console.WriteLine("Log.CreateAppenderFromConfig: Wrong Log Level {0} for appender {1}\n", level, name);
+    private static byte NextAppenderId()
+    {
+        return AppenderId++;
+    }
 
-			return;
-		}
+    private static void CreateAppenderFromConfig(string appenderName)
+    {
+        if (string.IsNullOrEmpty(appenderName))
+            return;
 
-		if (tokens.Length > 2)
-			flags = (AppenderFlags)uint.Parse(tokens[2]);
+        string options = ConfigMgr.GetDefaultValue(appenderName, "");
+        var tokens = new StringArray(options, ',');
+        string name = appenderName[9..];
 
-		byte id = NextAppenderId();
+        if (tokens.Length < 2)
+        {
+            Console.WriteLine("Log.CreateAppenderFromConfig: Wrong configuration for appender {0}. Config line: {1}", name, options);
 
-		switch (type)
-		{
-			case AppenderType.Console:
-			{
-				var appender = new ConsoleAppender(id, name, level, flags);
-				appenders[id] = appender;
+            return;
+        }
 
-				break;
-			}
-			case AppenderType.File:
-			{
-				string filename;
+        AppenderFlags flags = AppenderFlags.None;
+        AppenderType type = (AppenderType)uint.Parse(tokens[0]);
+        LogLevel level = (LogLevel)uint.Parse(tokens[1]);
 
-				if (tokens.Length < 4)
-				{
-					if (name != "Server")
-					{
-						Console.WriteLine("Log.CreateAppenderFromConfig: Missing file name for appender {0}", name);
+        if (level > LogLevel.Fatal)
+        {
+            Console.WriteLine("Log.CreateAppenderFromConfig: Wrong Log Level {0} for appender {1}\n", level, name);
 
-						return;
-					}
+            return;
+        }
 
-					filename = Process.GetCurrentProcess().ProcessName + ".log";
-				}
-				else
-				{
-					filename = tokens[3];
-				}
+        if (tokens.Length > 2)
+            flags = (AppenderFlags)uint.Parse(tokens[2]);
 
-				appenders[id] = new FileAppender(id, name, level, filename, _logsDir, flags);
+        byte id = NextAppenderId();
 
-				break;
-			}
-			case AppenderType.DB:
-			{
-				appenders[id] = new DBAppender(id, name, level);
+        switch (type)
+        {
+            case AppenderType.Console:
+                {
+                    var appender = new ConsoleAppender(id, name, level, flags);
+                    appenders[id] = appender;
 
-				break;
-			}
-			default:
-				Console.WriteLine("Log.CreateAppenderFromConfig: Unknown type {0} for appender {1}", type, name);
+                    break;
+                }
+            case AppenderType.File:
+                {
+                    string filename;
 
-				break;
-		}
-	}
+                    if (tokens.Length < 4)
+                    {
+                        if (name != "Server")
+                        {
+                            Console.WriteLine("Log.CreateAppenderFromConfig: Missing file name for appender {0}", name);
 
-	private static void CreateLoggerFromConfig(string appenderName)
-	{
-		if (string.IsNullOrEmpty(appenderName))
-			return;
+                            return;
+                        }
 
-		string name = appenderName.Substring(7);
+                        filename = Process.GetCurrentProcess().ProcessName + ".log";
+                    }
+                    else
+                    {
+                        filename = tokens[3];
+                    }
 
-		string options = ConfigMgr.GetDefaultValue(appenderName, "");
+                    appenders[id] = new FileAppender(id, name, level, filename, _logsDir, flags);
 
-		if (string.IsNullOrEmpty(options))
-		{
-			Console.WriteLine("Log.CreateLoggerFromConfig: Missing config option Logger.{0}", name);
+                    break;
+                }
+            case AppenderType.DB:
+                {
+                    appenders[id] = new DBAppender(id, name, level);
 
-			return;
-		}
+                    break;
+                }
+            default:
+                Console.WriteLine("Log.CreateAppenderFromConfig: Unknown type {0} for appender {1}", type, name);
 
-		var tokens = new StringArray(options, ',');
+                break;
+        }
+    }
 
-		LogFilter type = name.ToEnum<LogFilter>();
+    private static void CreateLoggerFromConfig(string appenderName)
+    {
+        if (string.IsNullOrEmpty(appenderName))
+            return;
 
-		if (loggers.ContainsKey(type))
-		{
-			Console.WriteLine("Error while configuring Logger {0}. Already defined", name);
+        string name = appenderName[7..];
 
-			return;
-		}
+        string options = ConfigMgr.GetDefaultValue(appenderName, "");
 
-		LogLevel level = (LogLevel)uint.Parse(tokens[0]);
+        if (string.IsNullOrEmpty(options))
+        {
+            Console.WriteLine("Log.CreateLoggerFromConfig: Missing config option Logger.{0}", name);
 
-		if (level > LogLevel.Fatal)
-		{
-			Console.WriteLine("Log.CreateLoggerFromConfig: Wrong Log Level {0} for logger {1}", type, name);
+            return;
+        }
 
-			return;
-		}
+        var tokens = new StringArray(options, ',');
 
-		if (level < lowestLogLevel)
-			lowestLogLevel = level;
+        LogFilter type = name.ToEnum<LogFilter>();
 
-		Logger logger = new(name, level);
+        if (loggers.ContainsKey(type))
+        {
+            Console.WriteLine("Error while configuring Logger {0}. Already defined", name);
 
-		int i  = 0;
-		var ss = new StringArray(tokens[1], ' ');
+            return;
+        }
 
-		while (i < ss.Length)
-		{
-			var      str      = ss[i++];
-			Appender appender = GetAppenderByName(str);
+        LogLevel level = (LogLevel)uint.Parse(tokens[0]);
 
-			if (appender == null)
-				Console.WriteLine("Error while configuring Appender {0} in Logger {1}. Appender does not exist", str, name);
-			else
-				logger.addAppender(appender.getId(), appender);
-		}
+        if (level > LogLevel.Fatal)
+        {
+            Console.WriteLine("Log.CreateLoggerFromConfig: Wrong Log Level {0} for logger {1}", type, name);
 
-		loggers[type] = logger;
-	}
+            return;
+        }
 
-	private static Appender GetAppenderByName(string name)
-	{
-		return appenders.First(p => p.Value.getName() == name).Value;
-	}
+        if (level < lowestLogLevel)
+            lowestLogLevel = level;
 
-	private static Logger GetLoggerByType(LogFilter type)
-	{
-		if (loggers.ContainsKey(type))
-			return loggers[type];
+        Logger logger = new(name, level);
 
-		string typeString = type.ToString();
+        int i = 0;
+        var ss = new StringArray(tokens[1], ' ');
 
-		int index = 1;
+        while (i < ss.Length)
+        {
+            var str = ss[i++];
+            Appender appender = GetAppenderByName(str);
 
-		for (; index < typeString.Length - 1; ++index)
-			if (char.IsUpper(typeString[index]))
-				break;
+            if (appender == null)
+                Console.WriteLine("Error while configuring Appender {0} in Logger {1}. Appender does not exist", str, name);
+            else
+                logger.addAppender(appender.getId(), appender);
+        }
 
-		typeString = typeString.Substring(0, index);
+        loggers[type] = logger;
+    }
 
-		if (typeString.IsEmpty())
-			return null;
+    private static Appender GetAppenderByName(string name)
+    {
+        return appenders.First(p => p.Value.getName() == name).Value;
+    }
 
-		LogFilter parentLogger;
+    private static Logger GetLoggerByType(LogFilter type)
+    {
+        if (loggers.ContainsKey(type))
+            return loggers[type];
 
-		if (!Enum.TryParse(typeString, out parentLogger))
-			return null;
+        string typeString = type.ToString();
 
-		return GetLoggerByType(parentLogger);
-	}
+        int index = 1;
 
-	public static bool SetLogLevel(string name, int newLeveli, bool isLogger = true)
-	{
-		if (newLeveli < 0)
-			return false;
+        for (; index < typeString.Length - 1; ++index)
+            if (char.IsUpper(typeString[index]))
+                break;
 
-		LogLevel newLevel = (LogLevel)newLeveli;
+        typeString = typeString[..index];
 
-		if (isLogger)
-		{
-			foreach (var logger in loggers.Values)
-				if (logger.getName() == name)
-				{
-					logger.setLogLevel(newLevel);
+        if (typeString.IsEmpty())
+            return null;
 
-					if (newLevel != LogLevel.Disabled &&
-					    newLevel < lowestLogLevel)
-						lowestLogLevel = newLevel;
+        LogFilter parentLogger;
 
-					return true;
-				}
+        if (!Enum.TryParse(typeString, out parentLogger))
+            return null;
 
-			return false;
-		}
-		else
-		{
-			Appender appender = GetAppenderByName(name);
-
-			if (appender == null)
-				return false;
-
-			appender.setLogLevel(newLevel);
-		}
-
-		return true;
-	}
-
-	public static void SetRealmId(uint id)
-	{
-		foreach (var appender in appenders.Values)
-			appender.setRealmId(id);
-	}
+        return GetLoggerByType(parentLogger);
+    }
 }
 
 internal enum AppenderType
 {
-	None,
-	Console,
-	File,
-	DB
+    None,
+    Console,
+    File,
+    DB
 }
 
 [Flags]
 internal enum AppenderFlags
 {
-	None = 0x00,
-	PrefixTimestamp = 0x01,
-	PrefixLogLevel = 0x02,
-	PrefixLogFilterType = 0x04
+    None = 0x00,
+    PrefixTimestamp = 0x01,
+    PrefixLogLevel = 0x02,
+    PrefixLogFilterType = 0x04
 }
 
 public enum LogLevel
 {
-	Disabled = 0,
-	Trace = 1,
-	Debug = 2,
-	Info = 3,
-	Warn = 4,
-	Error = 5,
-	Fatal = 6,
-	Max = 6
+    Disabled = 0,
+    Trace = 1,
+    Debug = 2,
+    Info = 3,
+    Warn = 4,
+    Error = 5,
+    Fatal = 6,
+    Max = 6
 }
 
 public enum LogFilter
 {
-	Misc,
-	Achievement,
-	Addon,
-	Ahbot,
-	AreaTrigger,
-	Arena,
-	Auctionhouse,
-	Battlefield,
-	Battleground,
-	BattlegroundReportPvpAfk,
-	Calendar,
-	ChatLog,
-	ChatSystem,
-	Cheat,
-	Commands,
-	CommandsRA,
-	Condition,
-	Conversation,
-	Garrison,
-	Gameevent,
-	Guild,
-	Instance,
-	Lfg,
-	Loot,
-	MapsScript,
-	Maps,
-	Movement,
-	Network,
-	Outdoorpvp,
-	Pet,
-	Player,
-	PlayerCharacter,
-	PlayerDump,
-	PlayerItems,
-	PlayerLoading,
-	PlayerSkills,
-	Pool,
-	Rbac,
-	Realmlist,
-	Scenario,
-	Scenes,
-	Scripts,
-	ScriptsAi,
-	Server,
-	ServerLoading,
-	ServiceProtobuf,
-	Session,
-	SessionRpc,
-	Spells,
-	SpellsPeriodic,
-	Sql,
-	SqlDev,
-	SqlDriver,
-	SqlUpdates,
-	Transport,
-	Unit,
-	Vehicle,
-	Warden
+    Misc,
+    Achievement,
+    Addon,
+    Ahbot,
+    AreaTrigger,
+    Arena,
+    Auctionhouse,
+    Battlefield,
+    Battleground,
+    BattlegroundReportPvpAfk,
+    Calendar,
+    ChatLog,
+    ChatSystem,
+    Cheat,
+    Commands,
+    CommandsRA,
+    Condition,
+    Conversation,
+    Garrison,
+    Gameevent,
+    Guild,
+    Instance,
+    Lfg,
+    Loot,
+    MapsScript,
+    Maps,
+    Movement,
+    Network,
+    Outdoorpvp,
+    Pet,
+    Player,
+    PlayerCharacter,
+    PlayerDump,
+    PlayerItems,
+    PlayerLoading,
+    PlayerSkills,
+    Pool,
+    Rbac,
+    Realmlist,
+    Scenario,
+    Scenes,
+    Scripts,
+    ScriptsAi,
+    Server,
+    ServerLoading,
+    ServiceProtobuf,
+    Session,
+    SessionRpc,
+    Spells,
+    SpellsPeriodic,
+    Sql,
+    SqlDev,
+    SqlDriver,
+    SqlUpdates,
+    Transport,
+    Unit,
+    Vehicle,
+    Warden
 }

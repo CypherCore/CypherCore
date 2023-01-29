@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWeather
 {
-	public interface IWeatherOnUpdate : IScriptObject
-	{
-		void OnUpdate(Weather obj, uint diff);
-	}
+    public interface IWeatherOnUpdate : IScriptObject
+    {
+        void OnUpdate(Weather obj, uint diff);
+    }
 }

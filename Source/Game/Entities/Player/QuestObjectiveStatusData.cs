@@ -4,8 +4,8 @@
 namespace Game.Entities
 {
     internal struct QuestObjectiveStatusData
-	{
-		public (uint QuestID, QuestStatusData Status) QuestStatusPair { get; set; }
+    {
+        public (uint QuestID, QuestStatusData Status) QuestStatusPair { get; set; }
         public QuestObjective Objective { get; set; }
     }
 }

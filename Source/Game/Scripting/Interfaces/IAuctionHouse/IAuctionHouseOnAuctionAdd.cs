@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IAuctionHouse
 {
-	public interface IAuctionHouseOnAuctionAdd : IScriptObject
-	{
-		void OnAuctionAdd(AuctionHouseObject ah, AuctionPosting auction);
-	}
+    public interface IAuctionHouseOnAuctionAdd : IScriptObject
+    {
+        void OnAuctionAdd(AuctionHouseObject ah, AuctionPosting auction);
+    }
 }

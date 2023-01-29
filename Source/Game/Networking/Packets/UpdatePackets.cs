@@ -5,22 +5,22 @@ using Framework.Constants;
 
 namespace Game.Networking.Packets
 {
-	public class UpdateObject : ServerPacket
-	{
-		public byte[] Data;
-		public ushort MapID;
+    public class UpdateObject : ServerPacket
+    {
+        public byte[] Data;
+        public ushort MapID;
 
-		public uint NumObjUpdates;
+        public uint NumObjUpdates;
 
-		public UpdateObject() : base(ServerOpcodes.UpdateObject, ConnectionType.Instance)
-		{
-		}
+        public UpdateObject() : base(ServerOpcodes.UpdateObject, ConnectionType.Instance)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteUInt32(NumObjUpdates);
-			_worldPacket.WriteUInt16(MapID);
-			_worldPacket.WriteBytes(Data);
-		}
-	}
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(NumObjUpdates);
+            _worldPacket.WriteUInt16(MapID);
+            _worldPacket.WriteBytes(Data);
+        }
+    }
 }

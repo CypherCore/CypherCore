@@ -10,115 +10,115 @@ using Game.Networking;
 
 namespace Game.Scenarios
 {
-	public class InstanceScenario : Scenario
-	{
-		private InstanceMap _map;
+    public class InstanceScenario : Scenario
+    {
+        private readonly InstanceMap _map;
 
-		public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(scenarioData)
-		{
-			_map = map;
+        public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(scenarioData)
+        {
+            _map = map;
 
-			//ASSERT(_map);
-			LoadInstanceData();
+            //ASSERT(_map);
+            LoadInstanceData();
 
-			var players = map.GetPlayers();
+            var players = map.GetPlayers();
 
-			foreach (var player in players)
-				SendScenarioState(player);
-		}
+            foreach (var player in players)
+                SendScenarioState(player);
+        }
 
-		private void LoadInstanceData()
-		{
-			InstanceScript instanceScript = _map.GetInstanceScript();
+        public override string GetOwnerInfo()
+        {
+            return $"Instance ID {_map.GetInstanceId()}";
+        }
 
-			if (instanceScript == null)
-				return;
+        public override void SendPacket(ServerPacket data)
+        {
+            //Hack  todo fix me
+            if (_map == null)
+                return;
 
-			List<CriteriaTree> criteriaTrees = new();
+            _map.SendToPlayers(data);
+        }
 
-			var killCreatureCriteria = Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(CriteriaType.KillCreature, _data.Entry.Id);
+        private void LoadInstanceData()
+        {
+            InstanceScript instanceScript = _map.GetInstanceScript();
 
-			if (!killCreatureCriteria.Empty())
-			{
-				var spawnGroups = Global.ObjectMgr.GetInstanceSpawnGroupsForMap(_map.GetId());
+            if (instanceScript == null)
+                return;
 
-				if (spawnGroups != null)
-				{
-					Dictionary<uint, ulong> despawnedCreatureCountsById = new();
+            List<CriteriaTree> criteriaTrees = new();
 
-					foreach (InstanceSpawnGroupInfo spawnGroup in spawnGroups)
-					{
-						if (instanceScript.GetBossState(spawnGroup.BossStateId) != EncounterState.Done)
-							continue;
+            var killCreatureCriteria = Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(CriteriaType.KillCreature, _data.Entry.Id);
 
-						bool isDespawned = ((1 << (int)EncounterState.Done) & spawnGroup.BossStates) == 0 || spawnGroup.Flags.HasFlag(InstanceSpawnGroupFlags.BlockSpawn);
+            if (!killCreatureCriteria.Empty())
+            {
+                var spawnGroups = Global.ObjectMgr.GetInstanceSpawnGroupsForMap(_map.GetId());
 
-						if (isDespawned)
-							foreach (var spawn in Global.ObjectMgr.GetSpawnMetadataForGroup(spawnGroup.SpawnGroupId))
-							{
-								SpawnData spawnData = spawn.ToSpawnData();
+                if (spawnGroups != null)
+                {
+                    Dictionary<uint, ulong> despawnedCreatureCountsById = new();
 
-								if (spawnData != null)
-									++despawnedCreatureCountsById[spawnData.Id];
-							}
-					}
+                    foreach (InstanceSpawnGroupInfo spawnGroup in spawnGroups)
+                    {
+                        if (instanceScript.GetBossState(spawnGroup.BossStateId) != EncounterState.Done)
+                            continue;
 
-					foreach (Criteria criteria in killCreatureCriteria)
-					{
-						// Count creatures in despawned spawn groups
-						ulong progress = despawnedCreatureCountsById.LookupByKey(criteria.Entry.Asset);
+                        bool isDespawned = ((1 << (int)EncounterState.Done) & spawnGroup.BossStates) == 0 || spawnGroup.Flags.HasFlag(InstanceSpawnGroupFlags.BlockSpawn);
 
-						if (progress != 0)
-						{
-							SetCriteriaProgress(criteria, progress, null, ProgressType.Set);
-							var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                        if (isDespawned)
+                            foreach (var spawn in Global.ObjectMgr.GetSpawnMetadataForGroup(spawnGroup.SpawnGroupId))
+                            {
+                                SpawnData spawnData = spawn.ToSpawnData();
 
-							if (trees != null)
-								foreach (CriteriaTree tree in trees)
-									criteriaTrees.Add(tree);
-						}
-					}
-				}
-			}
+                                if (spawnData != null)
+                                    ++despawnedCreatureCountsById[spawnData.Id];
+                            }
+                    }
 
-			foreach (Criteria criteria in Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(CriteriaType.DefeatDungeonEncounter, _data.Entry.Id))
-			{
-				if (!instanceScript.IsEncounterCompleted(criteria.Entry.Asset))
-					continue;
+                    foreach (Criteria criteria in killCreatureCriteria)
+                    {
+                        // Count creatures in despawned spawn groups
+                        ulong progress = despawnedCreatureCountsById.LookupByKey(criteria.Entry.Asset);
 
-				SetCriteriaProgress(criteria, 1, null, ProgressType.Set);
-				var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                        if (progress != 0)
+                        {
+                            SetCriteriaProgress(criteria, progress, null, ProgressType.Set);
+                            var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
 
-				if (trees != null)
-					foreach (CriteriaTree tree in trees)
-						criteriaTrees.Add(tree);
-			}
+                            if (trees != null)
+                                foreach (CriteriaTree tree in trees)
+                                    criteriaTrees.Add(tree);
+                        }
+                    }
+                }
+            }
 
-			foreach (CriteriaTree tree in criteriaTrees)
-			{
-				ScenarioStepRecord step = tree.ScenarioStep;
+            foreach (Criteria criteria in Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(CriteriaType.DefeatDungeonEncounter, _data.Entry.Id))
+            {
+                if (!instanceScript.IsEncounterCompleted(criteria.Entry.Asset))
+                    continue;
 
-				if (step == null)
-					continue;
+                SetCriteriaProgress(criteria, 1, null, ProgressType.Set);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+
+                if (trees != null)
+                    foreach (CriteriaTree tree in trees)
+                        criteriaTrees.Add(tree);
+            }
+
+            foreach (CriteriaTree tree in criteriaTrees)
+            {
+                ScenarioStepRecord step = tree.ScenarioStep;
+
+                if (step == null)
+                    continue;
 
 
-				if (IsCompletedCriteriaTree(tree))
-					SetStepState(step, ScenarioStepState.Done);
-			}
-		}
-
-		public override string GetOwnerInfo()
-		{
-			return $"Instance ID {_map.GetInstanceId()}";
-		}
-
-		public override void SendPacket(ServerPacket data)
-		{
-			//Hack  todo fix me
-			if (_map == null)
-				return;
-
-			_map.SendToPlayers(data);
-		}
-	}
+                if (IsCompletedCriteriaTree(tree))
+                    SetStepState(step, ScenarioStepState.Done);
+            }
+        }
+    }
 }

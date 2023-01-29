@@ -11,1009 +11,1009 @@ using Game.Networking.Packets;
 
 namespace Game.Chat
 {
-	[CommandGroup("modify")]
-	internal class ModifyCommand
-	{
-		[Command("hp", RBACPermissions.CommandModifyHp)]
-		private static bool HandleModifyHPCommand(CommandHandler handler, int hp, int? maxHp)
-		{
-			Player target = handler.GetSelectedPlayerOrSelf();
-
-			if (CheckModifyResources(handler, target, ref hp, ref maxHp))
-			{
-				NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, maxHp);
-				target.SetMaxHealth((uint)maxHp.Value);
-				target.SetHealth((uint)hp);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		[Command("mana", RBACPermissions.CommandModifyMana)]
-		private static bool HandleModifyManaCommand(CommandHandler handler, int mana, int? maxMana)
-		{
-			Player target = handler.GetSelectedPlayerOrSelf();
-
-			if (CheckModifyResources(handler, target, ref mana, ref maxMana))
-			{
-				NotifyModification(handler, target, CypherStrings.YouChangeMana, CypherStrings.YoursManaChanged, mana, maxMana.Value);
-				target.SetMaxPower(PowerType.Mana, maxMana.Value);
-				target.SetPower(PowerType.Mana, mana);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		[Command("energy", RBACPermissions.CommandModifyEnergy)]
-		private static bool HandleModifyEnergyCommand(CommandHandler handler, int energy, int? maxEnergy)
-		{
-			Player target           = handler.GetSelectedPlayerOrSelf();
-			byte   energyMultiplier = 10;
-
-			if (CheckModifyResources(handler, target, ref energy, ref maxEnergy, energyMultiplier))
-			{
-				NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, maxEnergy.Value / energyMultiplier);
-				target.SetMaxPower(PowerType.Energy, maxEnergy.Value);
-				target.SetPower(PowerType.Energy, energy);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		[Command("rage", RBACPermissions.CommandModifyRage)]
-		private static bool HandleModifyRageCommand(CommandHandler handler, int rage, int? maxRage)
-		{
-			Player target         = handler.GetSelectedPlayerOrSelf();
-			byte   rageMultiplier = 10;
-
-			if (CheckModifyResources(handler, target, ref rage, ref maxRage, rageMultiplier))
-			{
-				NotifyModification(handler, target, CypherStrings.YouChangeRage, CypherStrings.YoursRageChanged, rage / rageMultiplier, maxRage.Value / rageMultiplier);
-				target.SetMaxPower(PowerType.Rage, maxRage.Value);
-				target.SetPower(PowerType.Rage, rage);
-
-				return true;
-			}
+    [CommandGroup("modify")]
+    internal class ModifyCommand
+    {
+        [CommandGroup("speed")]
+        private class ModifySpeed
+        {
+            [Command("", RBACPermissions.CommandModifySpeed)]
+            private static bool HandleModifySpeedCommand(CommandHandler handler, StringArguments args)
+            {
+                return HandleModifyASpeedCommand(handler, args);
+            }
+
+            [Command("all", RBACPermissions.CommandModifySpeedAll)]
+            private static bool HandleModifyASpeedCommand(CommandHandler handler, StringArguments args)
+            {
+                float allSpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out allSpeed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeAspeed, CypherStrings.YoursAspeedChanged, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Walk, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Run, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Swim, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Flight, allSpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("swim", RBACPermissions.CommandModifySpeedSwim)]
+            private static bool HandleModifySwimCommand(CommandHandler handler, StringArguments args)
+            {
+                float swimSpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out swimSpeed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeSwimSpeed, CypherStrings.YoursSwimSpeedChanged, swimSpeed);
+                    target.SetSpeedRate(UnitMoveType.Swim, swimSpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("backwalk", RBACPermissions.CommandModifySpeedBackwalk)]
+            private static bool HandleModifyBWalkCommand(CommandHandler handler, StringArguments args)
+            {
+                float backSpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out backSpeed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeBackSpeed, CypherStrings.YoursBackSpeedChanged, backSpeed);
+                    target.SetSpeedRate(UnitMoveType.RunBack, backSpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("fly", RBACPermissions.CommandModifySpeedFly)]
+            private static bool HandleModifyFlyCommand(CommandHandler handler, StringArguments args)
+            {
+                float flySpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out flySpeed, 0.1f, 50.0f, false))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeFlySpeed, CypherStrings.YoursFlySpeedChanged, flySpeed);
+                    target.SetSpeedRate(UnitMoveType.Flight, flySpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("walk", RBACPermissions.CommandModifySpeedWalk)]
+            private static bool HandleModifyWalkSpeedCommand(CommandHandler handler, StringArguments args)
+            {
+                float Speed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out Speed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeSpeed, CypherStrings.YoursSpeedChanged, Speed);
+                    target.SetSpeedRate(UnitMoveType.Run, Speed);
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        [Command("hp", RBACPermissions.CommandModifyHp)]
+        private static bool HandleModifyHPCommand(CommandHandler handler, int hp, int? maxHp)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+
+            if (CheckModifyResources(handler, target, ref hp, ref maxHp))
+            {
+                NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, maxHp);
+                target.SetMaxHealth((uint)maxHp.Value);
+                target.SetHealth((uint)hp);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        [Command("mana", RBACPermissions.CommandModifyMana)]
+        private static bool HandleModifyManaCommand(CommandHandler handler, int mana, int? maxMana)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+
+            if (CheckModifyResources(handler, target, ref mana, ref maxMana))
+            {
+                NotifyModification(handler, target, CypherStrings.YouChangeMana, CypherStrings.YoursManaChanged, mana, maxMana.Value);
+                target.SetMaxPower(PowerType.Mana, maxMana.Value);
+                target.SetPower(PowerType.Mana, mana);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        [Command("energy", RBACPermissions.CommandModifyEnergy)]
+        private static bool HandleModifyEnergyCommand(CommandHandler handler, int energy, int? maxEnergy)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+            byte energyMultiplier = 10;
+
+            if (CheckModifyResources(handler, target, ref energy, ref maxEnergy, energyMultiplier))
+            {
+                NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, maxEnergy.Value / energyMultiplier);
+                target.SetMaxPower(PowerType.Energy, maxEnergy.Value);
+                target.SetPower(PowerType.Energy, energy);
+
+                return true;
+            }
+
+            return false;
+        }
 
-			return false;
-		}
+        [Command("rage", RBACPermissions.CommandModifyRage)]
+        private static bool HandleModifyRageCommand(CommandHandler handler, int rage, int? maxRage)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+            byte rageMultiplier = 10;
 
-		[Command("runicpower", RBACPermissions.CommandModifyRunicpower)]
-		private static bool HandleModifyRunicPowerCommand(CommandHandler handler, int rune, int? maxRune)
-		{
-			Player target         = handler.GetSelectedPlayerOrSelf();
-			byte   runeMultiplier = 10;
+            if (CheckModifyResources(handler, target, ref rage, ref maxRage, rageMultiplier))
+            {
+                NotifyModification(handler, target, CypherStrings.YouChangeRage, CypherStrings.YoursRageChanged, rage / rageMultiplier, maxRage.Value / rageMultiplier);
+                target.SetMaxPower(PowerType.Rage, maxRage.Value);
+                target.SetPower(PowerType.Rage, rage);
 
-			if (CheckModifyResources(handler, target, ref rune, ref maxRune, runeMultiplier))
-			{
-				NotifyModification(handler, target, CypherStrings.YouChangeRunicPower, CypherStrings.YoursRunicPowerChanged, rune / runeMultiplier, maxRune.Value / runeMultiplier);
-				target.SetMaxPower(PowerType.RunicPower, maxRune.Value);
-				target.SetPower(PowerType.RunicPower, rune);
+                return true;
+            }
 
-				return true;
-			}
+            return false;
+        }
 
-			return false;
-		}
+        [Command("runicpower", RBACPermissions.CommandModifyRunicpower)]
+        private static bool HandleModifyRunicPowerCommand(CommandHandler handler, int rune, int? maxRune)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+            byte runeMultiplier = 10;
 
-		[Command("faction", RBACPermissions.CommandModifyFaction)]
-		private static bool HandleModifyFactionCommand(CommandHandler handler, StringArguments args)
-		{
-			string pfactionid = handler.ExtractKeyFromLink(args, "Hfaction");
+            if (CheckModifyResources(handler, target, ref rune, ref maxRune, runeMultiplier))
+            {
+                NotifyModification(handler, target, CypherStrings.YouChangeRunicPower, CypherStrings.YoursRunicPowerChanged, rune / runeMultiplier, maxRune.Value / runeMultiplier);
+                target.SetMaxPower(PowerType.RunicPower, maxRune.Value);
+                target.SetPower(PowerType.RunicPower, rune);
 
-			Creature target = handler.GetSelectedCreature();
-
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.SelectCreature);
+                return true;
+            }
 
-				return false;
-			}
+            return false;
+        }
 
-			if (!uint.TryParse(pfactionid, out uint factionid))
-			{
-				uint  _factionid = target.GetFaction();
-				uint  _flag      = target.UnitData.Flags;
-				ulong _npcflag   = ((ulong)target.UnitData.NpcFlags[0] << 32) | target.UnitData.NpcFlags[1];
-				uint  _dyflag    = target.ObjectData.DynamicFlags;
-				handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), _factionid, _flag, _npcflag, _dyflag);
+        [Command("faction", RBACPermissions.CommandModifyFaction)]
+        private static bool HandleModifyFactionCommand(CommandHandler handler, StringArguments args)
+        {
+            string pfactionid = handler.ExtractKeyFromLink(args, "Hfaction");
 
-				return true;
-			}
+            Creature target = handler.GetSelectedCreature();
 
-			if (!uint.TryParse(args.NextString(), out uint flag))
-				flag = target.UnitData.Flags;
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCreature);
 
-			if (!ulong.TryParse(args.NextString(), out ulong npcflag))
-				npcflag = ((ulong)target.UnitData.NpcFlags[0] << 32) | target.UnitData.NpcFlags[1];
+                return false;
+            }
 
-			if (!uint.TryParse(args.NextString(), out uint dyflag))
-				dyflag = target.ObjectData.DynamicFlags;
+            if (!uint.TryParse(pfactionid, out uint factionid))
+            {
+                uint _factionid = target.GetFaction();
+                uint _flag = target.UnitData.Flags;
+                ulong _npcflag = ((ulong)target.UnitData.NpcFlags[0] << 32) | target.UnitData.NpcFlags[1];
+                uint _dyflag = target.ObjectData.DynamicFlags;
+                handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), _factionid, _flag, _npcflag, _dyflag);
 
-			if (!CliDB.FactionTemplateStorage.ContainsKey(factionid))
-			{
-				handler.SendSysMessage(CypherStrings.WrongFaction, factionid);
+                return true;
+            }
 
-				return false;
-			}
+            if (!uint.TryParse(args.NextString(), out uint flag))
+                flag = target.UnitData.Flags;
 
-			handler.SendSysMessage(CypherStrings.YouChangeFaction, target.GetGUID().ToString(), factionid, flag, npcflag, dyflag);
+            if (!ulong.TryParse(args.NextString(), out ulong npcflag))
+                npcflag = ((ulong)target.UnitData.NpcFlags[0] << 32) | target.UnitData.NpcFlags[1];
 
-			target.SetFaction(factionid);
-			target.ReplaceAllUnitFlags((UnitFlags)flag);
-			target.ReplaceAllNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
-			target.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
-			target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag);
+            if (!uint.TryParse(args.NextString(), out uint dyflag))
+                dyflag = target.ObjectData.DynamicFlags;
 
-			return true;
-		}
+            if (!CliDB.FactionTemplateStorage.ContainsKey(factionid))
+            {
+                handler.SendSysMessage(CypherStrings.WrongFaction, factionid);
 
-		[Command("spell", RBACPermissions.CommandModifySpell)]
-		private static bool HandleModifySpellCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+                return false;
+            }
+
+            handler.SendSysMessage(CypherStrings.YouChangeFaction, target.GetGUID().ToString(), factionid, flag, npcflag, dyflag);
 
-			byte spellflatid = args.NextByte();
+            target.SetFaction(factionid);
+            target.ReplaceAllUnitFlags((UnitFlags)flag);
+            target.ReplaceAllNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
+            target.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
+            target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag);
 
-			if (spellflatid == 0)
-				return false;
+            return true;
+        }
 
-			byte op = args.NextByte();
+        [Command("spell", RBACPermissions.CommandModifySpell)]
+        private static bool HandleModifySpellCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			if (op == 0)
-				return false;
+            byte spellflatid = args.NextByte();
 
-			ushort val = args.NextUInt16();
+            if (spellflatid == 0)
+                return false;
 
-			if (val == 0)
-				return false;
+            byte op = args.NextByte();
 
-			if (!ushort.TryParse(args.NextString(), out ushort mark))
-				mark = 65535;
+            if (op == 0)
+                return false;
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            ushort val = args.NextUInt16();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            if (val == 0)
+                return false;
 
-				return false;
-			}
+            if (!ushort.TryParse(args.NextString(), out ushort mark))
+                mark = 65535;
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			handler.SendSysMessage(CypherStrings.YouChangeSpellflatid, spellflatid, val, mark, handler.GetNameLink(target));
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			if (handler.NeedReportToTarget(target))
-				target.SendSysMessage(CypherStrings.YoursSpellflatidChanged, handler.GetNameLink(), spellflatid, val, mark);
+                return false;
+            }
 
-			SetSpellModifier  packet   = new(ServerOpcodes.SetFlatSpellModifier);
-			SpellModifierInfo spellMod = new();
-			spellMod.ModIndex = op;
-			SpellModifierData modData;
-			modData.ClassIndex    = spellflatid;
-			modData.ModifierValue = val;
-			spellMod.ModifierData.Add(modData);
-			packet.Modifiers.Add(spellMod);
-			target.SendPacket(packet);
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			return true;
-		}
+            handler.SendSysMessage(CypherStrings.YouChangeSpellflatid, spellflatid, val, mark, handler.GetNameLink(target));
 
-		[Command("talentpoints", RBACPermissions.CommandModifyTalentpoints)]
-		private static bool HandleModifyTalentCommand(CommandHandler handler)
-		{
-			return false;
-		}
+            if (handler.NeedReportToTarget(target))
+                target.SendSysMessage(CypherStrings.YoursSpellflatidChanged, handler.GetNameLink(), spellflatid, val, mark);
 
-		[Command("scale", RBACPermissions.CommandModifyScale)]
-		private static bool HandleModifyScaleCommand(CommandHandler handler, StringArguments args)
-		{
-			float Scale;
-			Unit  target = handler.GetSelectedUnit();
+            SetSpellModifier packet = new(ServerOpcodes.SetFlatSpellModifier);
+            SpellModifierInfo spellMod = new();
+            spellMod.ModIndex = op;
+            SpellModifierData modData;
+            modData.ClassIndex = spellflatid;
+            modData.ModifierValue = val;
+            spellMod.ModifierData.Add(modData);
+            packet.Modifiers.Add(spellMod);
+            target.SendPacket(packet);
 
-			if (CheckModifySpeed(args, handler, target, out Scale, 0.1f, 10.0f, false))
-			{
-				NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, Scale);
-				Creature creatureTarget = target.ToCreature();
+            return true;
+        }
 
-				if (creatureTarget)
-					creatureTarget.SetDisplayId(creatureTarget.GetDisplayId(), Scale);
-				else
-					target.SetObjectScale(Scale);
+        [Command("talentpoints", RBACPermissions.CommandModifyTalentpoints)]
+        private static bool HandleModifyTalentCommand(CommandHandler handler)
+        {
+            return false;
+        }
 
-				return true;
-			}
+        [Command("scale", RBACPermissions.CommandModifyScale)]
+        private static bool HandleModifyScaleCommand(CommandHandler handler, StringArguments args)
+        {
+            float Scale;
+            Unit target = handler.GetSelectedUnit();
 
-			return false;
-		}
+            if (CheckModifySpeed(args, handler, target, out Scale, 0.1f, 10.0f, false))
+            {
+                NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, Scale);
+                Creature creatureTarget = target.ToCreature();
 
-		[Command("Mount", RBACPermissions.CommandModifyMount)]
-		private static bool HandleModifyMountCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+                if (creatureTarget)
+                    creatureTarget.SetDisplayId(creatureTarget.GetDisplayId(), Scale);
+                else
+                    target.SetObjectScale(Scale);
 
-			if (!uint.TryParse(args.NextString(), out uint mount))
-				return false;
+                return true;
+            }
 
-			if (!CliDB.CreatureDisplayInfoStorage.HasRecord(mount))
-			{
-				handler.SendSysMessage(CypherStrings.NoMount);
+            return false;
+        }
 
-				return false;
-			}
+        [Command("Mount", RBACPermissions.CommandModifyMount)]
+        private static bool HandleModifyMountCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            if (!uint.TryParse(args.NextString(), out uint mount))
+                return false;
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            if (!CliDB.CreatureDisplayInfoStorage.HasRecord(mount))
+            {
+                handler.SendSysMessage(CypherStrings.NoMount);
 
-				return false;
-			}
+                return false;
+            }
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			float speed;
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			if (!CheckModifySpeed(args, handler, target, out speed, 0.1f, 50.0f))
-				return false;
+                return false;
+            }
 
-			NotifyModification(handler, target, CypherStrings.YouGiveMount, CypherStrings.MountGived);
-			target.Mount(mount);
-			target.SetSpeedRate(UnitMoveType.Run, speed);
-			target.SetSpeedRate(UnitMoveType.Flight, speed);
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			return true;
-		}
+            float speed;
 
-		[Command("money", RBACPermissions.CommandModifyMoney)]
-		private static bool HandleModifyMoneyCommand(CommandHandler handler, StringArguments args)
-		{
-			Player target = handler.GetSelectedPlayerOrSelf();
+            if (!CheckModifySpeed(args, handler, target, out speed, 0.1f, 50.0f))
+                return false;
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            NotifyModification(handler, target, CypherStrings.YouGiveMount, CypherStrings.MountGived);
+            target.Mount(mount);
+            target.SetSpeedRate(UnitMoveType.Run, speed);
+            target.SetSpeedRate(UnitMoveType.Flight, speed);
 
-				return false;
-			}
+            return true;
+        }
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+        [Command("money", RBACPermissions.CommandModifyMoney)]
+        private static bool HandleModifyMoneyCommand(CommandHandler handler, StringArguments args)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			long  moneyToAdd  = args.NextInt64();
-			ulong targetMoney = target.GetMoney();
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			if (moneyToAdd < 0)
-			{
-				long newmoney = (long)targetMoney + moneyToAdd;
+                return false;
+            }
 
-				Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), targetMoney, moneyToAdd, newmoney);
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-				if (newmoney <= 0)
-				{
-					handler.SendSysMessage(CypherStrings.YouTakeAllMoney, handler.GetNameLink(target));
+            long moneyToAdd = args.NextInt64();
+            ulong targetMoney = target.GetMoney();
 
-					if (handler.NeedReportToTarget(target))
-						target.SendSysMessage(CypherStrings.YoursAllMoneyGone, handler.GetNameLink());
+            if (moneyToAdd < 0)
+            {
+                long newmoney = (long)targetMoney + moneyToAdd;
 
-					target.SetMoney(0);
-				}
-				else
-				{
-					ulong moneyToAddMsg = (ulong)(moneyToAdd * -1);
+                Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), targetMoney, moneyToAdd, newmoney);
 
-					if (newmoney > (long)PlayerConst.MaxMoneyAmount)
-						newmoney = (long)PlayerConst.MaxMoneyAmount;
+                if (newmoney <= 0)
+                {
+                    handler.SendSysMessage(CypherStrings.YouTakeAllMoney, handler.GetNameLink(target));
 
-					handler.SendSysMessage(CypherStrings.YouTakeMoney, moneyToAddMsg, handler.GetNameLink(target));
+                    if (handler.NeedReportToTarget(target))
+                        target.SendSysMessage(CypherStrings.YoursAllMoneyGone, handler.GetNameLink());
 
-					if (handler.NeedReportToTarget(target))
-						target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), moneyToAddMsg);
+                    target.SetMoney(0);
+                }
+                else
+                {
+                    ulong moneyToAddMsg = (ulong)(moneyToAdd * -1);
 
-					target.SetMoney((ulong)newmoney);
-				}
-			}
-			else
-			{
-				handler.SendSysMessage(CypherStrings.YouGiveMoney, moneyToAdd, handler.GetNameLink(target));
+                    if (newmoney > (long)PlayerConst.MaxMoneyAmount)
+                        newmoney = (long)PlayerConst.MaxMoneyAmount;
 
-				if (handler.NeedReportToTarget(target))
-					target.SendSysMessage(CypherStrings.YoursMoneyGiven, handler.GetNameLink(), moneyToAdd);
+                    handler.SendSysMessage(CypherStrings.YouTakeMoney, moneyToAddMsg, handler.GetNameLink(target));
 
-				if ((ulong)moneyToAdd >= PlayerConst.MaxMoneyAmount)
-					moneyToAdd = Convert.ToInt64(PlayerConst.MaxMoneyAmount);
+                    if (handler.NeedReportToTarget(target))
+                        target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), moneyToAddMsg);
 
-				moneyToAdd = (long)Math.Min((ulong)moneyToAdd, (PlayerConst.MaxMoneyAmount - targetMoney));
+                    target.SetMoney((ulong)newmoney);
+                }
+            }
+            else
+            {
+                handler.SendSysMessage(CypherStrings.YouGiveMoney, moneyToAdd, handler.GetNameLink(target));
 
-				target.ModifyMoney(moneyToAdd);
-			}
+                if (handler.NeedReportToTarget(target))
+                    target.SendSysMessage(CypherStrings.YoursMoneyGiven, handler.GetNameLink(), moneyToAdd);
 
-			Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.NewMoney), targetMoney, moneyToAdd, target.GetMoney());
+                if ((ulong)moneyToAdd >= PlayerConst.MaxMoneyAmount)
+                    moneyToAdd = Convert.ToInt64(PlayerConst.MaxMoneyAmount);
 
-			return true;
-		}
+                moneyToAdd = (long)Math.Min((ulong)moneyToAdd, (PlayerConst.MaxMoneyAmount - targetMoney));
 
-		[Command("honor", RBACPermissions.CommandModifyHonor)]
-		private static bool HandleModifyHonorCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+                target.ModifyMoney(moneyToAdd);
+            }
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.NewMoney), targetMoney, moneyToAdd, target.GetMoney());
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("honor", RBACPermissions.CommandModifyHonor)]
+        private static bool HandleModifyHonorCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			int amount = args.NextInt32();
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-			//Target.ModifyCurrency(CurrencyTypes.HonorPoints, amount, true, true);
-			handler.SendSysMessage("NOT IMPLEMENTED: {0} honor NOT added.", amount);
+                return false;
+            }
 
-			//handler.SendSysMessage(CypherStrings.CommandModifyHonor, handler.GetNameLink(Target), Target.GetCurrency((uint)CurrencyTypes.HonorPoints));
-			return true;
-		}
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-		[Command("drunk", RBACPermissions.CommandModifyDrunk)]
-		private static bool HandleModifyDrunkCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+            int amount = args.NextInt32();
 
-			byte drunklevel = args.NextByte();
+            //Target.ModifyCurrency(CurrencyTypes.HonorPoints, amount, true, true);
+            handler.SendSysMessage("NOT IMPLEMENTED: {0} honor NOT added.", amount);
 
-			if (drunklevel > 100)
-				drunklevel = 100;
+            //handler.SendSysMessage(CypherStrings.CommandModifyHonor, handler.GetNameLink(Target), Target.GetCurrency((uint)CurrencyTypes.HonorPoints));
+            return true;
+        }
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+        [Command("drunk", RBACPermissions.CommandModifyDrunk)]
+        private static bool HandleModifyDrunkCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			if (target)
-				target.SetDrunkValue(drunklevel);
+            byte drunklevel = args.NextByte();
 
-			return true;
-		}
+            if (drunklevel > 100)
+                drunklevel = 100;
 
-		[Command("reputation", RBACPermissions.CommandModifyReputation)]
-		private static bool HandleModifyRepCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            if (target)
+                target.SetDrunkValue(drunklevel);
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("reputation", RBACPermissions.CommandModifyReputation)]
+        private static bool HandleModifyRepCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			string factionTxt = handler.ExtractKeyFromLink(args, "Hfaction");
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-			if (string.IsNullOrEmpty(factionTxt))
-				return false;
+                return false;
+            }
 
-			if (!uint.TryParse(factionTxt, out uint factionId))
-				return false;
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			string rankTxt = args.NextString();
+            string factionTxt = handler.ExtractKeyFromLink(args, "Hfaction");
 
-			if (factionId == 0 ||
-			    !int.TryParse(rankTxt, out int amount))
-				return false;
+            if (string.IsNullOrEmpty(factionTxt))
+                return false;
 
-			var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
+            if (!uint.TryParse(factionTxt, out uint factionId))
+                return false;
 
-			if (factionEntry == null)
-			{
-				handler.SendSysMessage(CypherStrings.CommandFactionUnknown, factionId);
+            string rankTxt = args.NextString();
 
-				return false;
-			}
+            if (factionId == 0 ||
+                !int.TryParse(rankTxt, out int amount))
+                return false;
 
-			if (factionEntry.ReputationIndex < 0)
-			{
-				handler.SendSysMessage(CypherStrings.CommandFactionNorepError, factionEntry.Name[handler.GetSessionDbcLocale()], factionId);
+            var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 
-				return false;
-			}
+            if (factionEntry == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandFactionUnknown, factionId);
 
-			// try to find rank by Name
-			if ((amount == 0) &&
-			    !(amount < 0) &&
-			    !rankTxt.IsNumber())
-			{
-				string rankStr = rankTxt.ToLower();
+                return false;
+            }
 
-				int i = 0;
-				int r = 0;
+            if (factionEntry.ReputationIndex < 0)
+            {
+                handler.SendSysMessage(CypherStrings.CommandFactionNorepError, factionEntry.Name[handler.GetSessionDbcLocale()], factionId);
 
-				for (; i != ReputationMgr.ReputationRankThresholds.Length - 1; ++i, ++r)
-				{
-					string rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
+                return false;
+            }
 
-					if (string.IsNullOrEmpty(rank))
-						continue;
+            // try to find rank by Name
+            if ((amount == 0) &&
+                !(amount < 0) &&
+                !rankTxt.IsNumber())
+            {
+                string rankStr = rankTxt.ToLower();
 
-					if (rank.Equals(rankStr, StringComparison.OrdinalIgnoreCase))
-						break;
+                int i = 0;
+                int r = 0;
 
-					if (i == ReputationMgr.ReputationRankThresholds.Length - 1)
-					{
-						handler.SendSysMessage(CypherStrings.CommandInvalidParam, rankTxt);
+                for (; i != ReputationMgr.ReputationRankThresholds.Length - 1; ++i, ++r)
+                {
+                    string rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
 
-						return false;
-					}
+                    if (string.IsNullOrEmpty(rank))
+                        continue;
 
-					amount = ReputationMgr.ReputationRankThresholds[i];
+                    if (rank.Equals(rankStr, StringComparison.OrdinalIgnoreCase))
+                        break;
 
-					string deltaTxt = args.NextString();
+                    if (i == ReputationMgr.ReputationRankThresholds.Length - 1)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandInvalidParam, rankTxt);
 
-					if (!string.IsNullOrEmpty(deltaTxt))
-					{
-						int toNextRank         = 0;
-						var nextThresholdIndex = i;
-						++nextThresholdIndex;
+                        return false;
+                    }
 
-						if (nextThresholdIndex != ReputationMgr.ReputationRankThresholds.Length - 1)
-							toNextRank = nextThresholdIndex - i;
+                    amount = ReputationMgr.ReputationRankThresholds[i];
 
-						if (!int.TryParse(deltaTxt, out int delta) ||
-						    delta < 0 ||
-						    delta >= toNextRank)
-						{
-							handler.SendSysMessage(CypherStrings.CommandFactionDelta, Math.Max(0, toNextRank - 1));
+                    string deltaTxt = args.NextString();
 
-							return false;
-						}
+                    if (!string.IsNullOrEmpty(deltaTxt))
+                    {
+                        int toNextRank = 0;
+                        var nextThresholdIndex = i;
+                        ++nextThresholdIndex;
 
-						amount += delta;
-					}
-				}
-			}
+                        if (nextThresholdIndex != ReputationMgr.ReputationRankThresholds.Length - 1)
+                            toNextRank = nextThresholdIndex - i;
 
-			target.GetReputationMgr().SetOneFactionReputation(factionEntry, amount, false);
-			target.GetReputationMgr().SendState(target.GetReputationMgr().GetState(factionEntry));
-			handler.SendSysMessage(CypherStrings.CommandModifyRep, factionEntry.Name[handler.GetSessionDbcLocale()], factionId, handler.GetNameLink(target), target.GetReputationMgr().GetReputation(factionEntry));
+                        if (!int.TryParse(deltaTxt, out int delta) ||
+                            delta < 0 ||
+                            delta >= toNextRank)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandFactionDelta, Math.Max(0, toNextRank - 1));
 
-			return true;
-		}
+                            return false;
+                        }
 
-		[Command("phase", RBACPermissions.CommandModifyPhase)]
-		private static bool HandleModifyPhaseCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+                        amount += delta;
+                    }
+                }
+            }
 
-			uint phaseId      = args.NextUInt32();
-			uint visibleMapId = args.NextUInt32();
+            target.GetReputationMgr().SetOneFactionReputation(factionEntry, amount, false);
+            target.GetReputationMgr().SendState(target.GetReputationMgr().GetState(factionEntry));
+            handler.SendSysMessage(CypherStrings.CommandModifyRep, factionEntry.Name[handler.GetSessionDbcLocale()], factionId, handler.GetNameLink(target), target.GetReputationMgr().GetReputation(factionEntry));
 
-			if (phaseId != 0 &&
-			    !CliDB.PhaseStorage.ContainsKey(phaseId))
-			{
-				handler.SendSysMessage(CypherStrings.PhaseNotfound);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("phase", RBACPermissions.CommandModifyPhase)]
+        private static bool HandleModifyPhaseCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			Unit target = handler.GetSelectedUnit();
+            uint phaseId = args.NextUInt32();
+            uint visibleMapId = args.NextUInt32();
 
-			if (visibleMapId != 0)
-			{
-				MapRecord visibleMap = CliDB.MapStorage.LookupByKey(visibleMapId);
+            if (phaseId != 0 &&
+                !CliDB.PhaseStorage.ContainsKey(phaseId))
+            {
+                handler.SendSysMessage(CypherStrings.PhaseNotfound);
 
-				if (visibleMap == null ||
-				    visibleMap.ParentMapID != target.GetMapId())
-				{
-					handler.SendSysMessage(CypherStrings.PhaseNotfound);
+                return false;
+            }
 
-					return false;
-				}
+            Unit target = handler.GetSelectedUnit();
 
-				if (!target.GetPhaseShift().HasVisibleMapId(visibleMapId))
-					PhasingHandler.AddVisibleMapId(target, visibleMapId);
-				else
-					PhasingHandler.RemoveVisibleMapId(target, visibleMapId);
-			}
+            if (visibleMapId != 0)
+            {
+                MapRecord visibleMap = CliDB.MapStorage.LookupByKey(visibleMapId);
 
-			if (phaseId != 0)
-			{
-				if (!target.GetPhaseShift().HasPhase(phaseId))
-					PhasingHandler.AddPhase(target, phaseId, true);
-				else
-					PhasingHandler.RemovePhase(target, phaseId, true);
-			}
+                if (visibleMap == null ||
+                    visibleMap.ParentMapID != target.GetMapId())
+                {
+                    handler.SendSysMessage(CypherStrings.PhaseNotfound);
 
-			return true;
-		}
+                    return false;
+                }
 
-		[Command("power", RBACPermissions.CommandModifyPower)]
-		private static bool HandleModifyPowerCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+                if (!target.GetPhaseShift().HasVisibleMapId(visibleMapId))
+                    PhasingHandler.AddVisibleMapId(target, visibleMapId);
+                else
+                    PhasingHandler.RemoveVisibleMapId(target, visibleMapId);
+            }
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            if (phaseId != 0)
+            {
+                if (!target.GetPhaseShift().HasPhase(phaseId))
+                    PhasingHandler.AddPhase(target, phaseId, true);
+                else
+                    PhasingHandler.RemovePhase(target, phaseId, true);
+            }
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("power", RBACPermissions.CommandModifyPower)]
+        private static bool HandleModifyPowerCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			string powerTypeToken = args.NextString();
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			if (powerTypeToken.IsEmpty())
-				return false;
+                return false;
+            }
 
-			PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeByName(powerTypeToken);
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			if (powerType == null)
-			{
-				handler.SendSysMessage(CypherStrings.InvalidPowerName);
+            string powerTypeToken = args.NextString();
 
-				return false;
-			}
+            if (powerTypeToken.IsEmpty())
+                return false;
 
-			if (target.GetPowerIndex(powerType.PowerTypeEnum) == (int)PowerType.Max)
-			{
-				handler.SendSysMessage(CypherStrings.InvalidPowerName);
+            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeByName(powerTypeToken);
 
-				return false;
-			}
+            if (powerType == null)
+            {
+                handler.SendSysMessage(CypherStrings.InvalidPowerName);
 
-			int powerAmount = args.NextInt32();
+                return false;
+            }
 
-			if (powerAmount < 1)
-			{
-				handler.SendSysMessage(CypherStrings.BadValue);
+            if (target.GetPowerIndex(powerType.PowerTypeEnum) == (int)PowerType.Max)
+            {
+                handler.SendSysMessage(CypherStrings.InvalidPowerName);
 
-				return false;
-			}
+                return false;
+            }
 
-			NotifyModification(handler, target, CypherStrings.YouChangePower, CypherStrings.YourPowerChanged, powerType.NameGlobalStringTag, powerAmount, powerAmount);
-			powerAmount *= powerType.DisplayModifier;
-			target.SetMaxPower(powerType.PowerTypeEnum, powerAmount);
-			target.SetPower(powerType.PowerTypeEnum, powerAmount);
+            int powerAmount = args.NextInt32();
 
-			return true;
-		}
+            if (powerAmount < 1)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
 
-		[Command("standstate", RBACPermissions.CommandModifyStandstate)]
-		private static bool HandleModifyStandStateCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+                return false;
+            }
 
-			uint anim_id = args.NextUInt32();
-			handler.GetSession().GetPlayer().SetEmoteState((Emote)anim_id);
+            NotifyModification(handler, target, CypherStrings.YouChangePower, CypherStrings.YourPowerChanged, powerType.NameGlobalStringTag, powerAmount, powerAmount);
+            powerAmount *= powerType.DisplayModifier;
+            target.SetMaxPower(powerType.PowerTypeEnum, powerAmount);
+            target.SetPower(powerType.PowerTypeEnum, powerAmount);
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("Gender", RBACPermissions.CommandModifyGender)]
-		private static bool HandleModifyGenderCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+        [Command("standstate", RBACPermissions.CommandModifyStandstate)]
+        private static bool HandleModifyStandStateCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            uint anim_id = args.NextUInt32();
+            handler.GetSession().GetPlayer().SetEmoteState((Emote)anim_id);
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("Gender", RBACPermissions.CommandModifyGender)]
+        private static bool HandleModifyGenderCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(target.GetRace(), target.GetClass());
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			if (info == null)
-				return false;
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-			string gender_str = args.NextString();
-			Gender gender;
+                return false;
+            }
 
-			if (gender_str == "male") // MALE
-			{
-				if (target.GetGender() == Gender.Male)
-					return true;
+            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(target.GetRace(), target.GetClass());
 
-				gender = Gender.Male;
-			}
-			else if (gender_str == "female") // FEMALE
-			{
-				if (target.GetGender() == Gender.Female)
-					return true;
+            if (info == null)
+                return false;
 
-				gender = Gender.Female;
-			}
-			else
-			{
-				handler.SendSysMessage(CypherStrings.MustMaleOrFemale);
+            string gender_str = args.NextString();
+            Gender gender;
 
-				return false;
-			}
+            if (gender_str == "male") // MALE
+            {
+                if (target.GetGender() == Gender.Male)
+                    return true;
 
-			// Set Gender
-			target.SetGender(gender);
-			target.SetNativeGender(gender);
+                gender = Gender.Male;
+            }
+            else if (gender_str == "female") // FEMALE
+            {
+                if (target.GetGender() == Gender.Female)
+                    return true;
 
-			// Change display ID
-			target.InitDisplayIds();
+                gender = Gender.Female;
+            }
+            else
+            {
+                handler.SendSysMessage(CypherStrings.MustMaleOrFemale);
 
-			target.RestoreDisplayId(false);
-			Global.CharacterCacheStorage.UpdateCharacterGender(target.GetGUID(), (byte)gender);
+                return false;
+            }
 
-			// Generate random customizations
-			List<ChrCustomizationChoice> customizations = new();
+            // Set Gender
+            target.SetGender(gender);
+            target.SetNativeGender(gender);
 
-			var          options      = Global.DB2Mgr.GetCustomiztionOptions(target.GetRace(), gender);
-			WorldSession worldSession = target.GetSession();
+            // Change display ID
+            target.InitDisplayIds();
 
-			foreach (ChrCustomizationOptionRecord option in options)
-			{
-				ChrCustomizationReqRecord optionReq = CliDB.ChrCustomizationReqStorage.LookupByKey(option.ChrCustomizationReqID);
+            target.RestoreDisplayId(false);
+            Global.CharacterCacheStorage.UpdateCharacterGender(target.GetGUID(), (byte)gender);
 
-				if (optionReq != null &&
-				    !worldSession.MeetsChrCustomizationReq(optionReq, target.GetClass(), false, customizations))
-					continue;
+            // Generate random customizations
+            List<ChrCustomizationChoice> customizations = new();
 
-				// Loop over the options until the first one fits
-				var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(option.Id);
+            var options = Global.DB2Mgr.GetCustomiztionOptions(target.GetRace(), gender);
+            WorldSession worldSession = target.GetSession();
 
-				foreach (ChrCustomizationChoiceRecord choiceForOption in choicesForOption)
-				{
-					var choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(choiceForOption.ChrCustomizationReqID);
+            foreach (ChrCustomizationOptionRecord option in options)
+            {
+                ChrCustomizationReqRecord optionReq = CliDB.ChrCustomizationReqStorage.LookupByKey(option.ChrCustomizationReqID);
 
-					if (choiceReq != null &&
-					    !worldSession.MeetsChrCustomizationReq(choiceReq, target.GetClass(), false, customizations))
-						continue;
+                if (optionReq != null &&
+                    !worldSession.MeetsChrCustomizationReq(optionReq, target.GetClass(), false, customizations))
+                    continue;
 
-					ChrCustomizationChoiceRecord choiceEntry = choicesForOption[0];
-					ChrCustomizationChoice       choice      = new();
-					choice.ChrCustomizationOptionID = option.Id;
-					choice.ChrCustomizationChoiceID = choiceEntry.Id;
-					customizations.Add(choice);
+                // Loop over the options until the first one fits
+                var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(option.Id);
 
-					break;
-				}
-			}
+                foreach (ChrCustomizationChoiceRecord choiceForOption in choicesForOption)
+                {
+                    var choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(choiceForOption.ChrCustomizationReqID);
 
-			target.SetCustomizations(customizations);
+                    if (choiceReq != null &&
+                        !worldSession.MeetsChrCustomizationReq(choiceReq, target.GetClass(), false, customizations))
+                        continue;
 
-			handler.SendSysMessage(CypherStrings.YouChangeGender, handler.GetNameLink(target), gender);
+                    ChrCustomizationChoiceRecord choiceEntry = choicesForOption[0];
+                    ChrCustomizationChoice choice = new();
+                    choice.ChrCustomizationOptionID = option.Id;
+                    choice.ChrCustomizationChoiceID = choiceEntry.Id;
+                    customizations.Add(choice);
 
-			if (handler.NeedReportToTarget(target))
-				target.SendSysMessage(CypherStrings.YourGenderChanged, gender, handler.GetNameLink());
+                    break;
+                }
+            }
 
-			return true;
-		}
+            target.SetCustomizations(customizations);
 
-		[Command("currency", RBACPermissions.CommandModifyCurrency)]
-		private static bool HandleModifyCurrencyCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+            handler.SendSysMessage(CypherStrings.YouChangeGender, handler.GetNameLink(target), gender);
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            if (handler.NeedReportToTarget(target))
+                target.SendSysMessage(CypherStrings.YourGenderChanged, gender, handler.GetNameLink());
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("currency", RBACPermissions.CommandModifyCurrency)]
+        private static bool HandleModifyCurrencyCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			uint currencyId = args.NextUInt32();
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
-				return false;
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-			uint amount = args.NextUInt32();
+                return false;
+            }
 
-			if (amount == 0)
-				return false;
+            uint currencyId = args.NextUInt32();
 
-			target.ModifyCurrency(currencyId, (int)amount, true, true);
+            if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
+                return false;
 
-			return true;
-		}
+            uint amount = args.NextUInt32();
 
-		[Command("xp", RBACPermissions.CommandModifyXp)]
-		private static bool HandleModifyXPCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+            if (amount == 0)
+                return false;
 
-			int xp = args.NextInt32();
+            target.ModifyCurrency(currencyId, (int)amount, true, true);
 
-			if (xp < 1)
-			{
-				handler.SendSysMessage(CypherStrings.BadValue);
+            return true;
+        }
 
-				return false;
-			}
+        [Command("xp", RBACPermissions.CommandModifyXp)]
+        private static bool HandleModifyXPCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			Player target = handler.GetSelectedPlayerOrSelf();
+            int xp = args.NextInt32();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            if (xp < 1)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            Player target = handler.GetSelectedPlayerOrSelf();
 
-			// we can run the command
-			target.GiveXP((uint)xp, null);
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-			return true;
-		}
+                return false;
+            }
 
-		[CommandNonGroup("morph", RBACPermissions.CommandMorph)]
-		private static bool HandleModifyMorphCommand(CommandHandler handler, StringArguments args)
-		{
-			if (args.Empty())
-				return false;
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			uint display_id = args.NextUInt32();
+            // we can run the command
+            target.GiveXP((uint)xp, null);
 
-			Unit target = handler.GetSelectedUnit();
+            return true;
+        }
 
-			if (!target)
-				target = handler.GetSession().GetPlayer();
+        [CommandNonGroup("morph", RBACPermissions.CommandMorph)]
+        private static bool HandleModifyMorphCommand(CommandHandler handler, StringArguments args)
+        {
+            if (args.Empty())
+                return false;
 
-			// check online security
-			else if (target.IsTypeId(TypeId.Player) &&
-			         handler.HasLowerSecurity(target.ToPlayer(), ObjectGuid.Empty))
-				return false;
+            uint display_id = args.NextUInt32();
 
-			target.SetDisplayId(display_id);
+            Unit target = handler.GetSelectedUnit();
 
-			return true;
-		}
+            if (!target)
+                target = handler.GetSession().GetPlayer();
 
-		[CommandNonGroup("demorph", RBACPermissions.CommandDemorph)]
-		private static bool HandleDeMorphCommand(CommandHandler handler)
-		{
-			Unit target = handler.GetSelectedUnit();
+            // check online security
+            else if (target.IsTypeId(TypeId.Player) &&
+                     handler.HasLowerSecurity(target.ToPlayer(), ObjectGuid.Empty))
+                return false;
 
-			if (!target)
-				target = handler.GetSession().GetPlayer();
+            target.SetDisplayId(display_id);
 
-			// check online security
-			else if (target.IsTypeId(TypeId.Player) &&
-			         handler.HasLowerSecurity(target.ToPlayer(), ObjectGuid.Empty))
-				return false;
+            return true;
+        }
 
-			target.DeMorph();
+        [CommandNonGroup("demorph", RBACPermissions.CommandDemorph)]
+        private static bool HandleDeMorphCommand(CommandHandler handler)
+        {
+            Unit target = handler.GetSelectedUnit();
 
-			return true;
-		}
+            if (!target)
+                target = handler.GetSession().GetPlayer();
 
-		private static void NotifyModification(CommandHandler handler, Unit target, CypherStrings resourceMessage, CypherStrings resourceReportMessage, params object[] args)
-		{
-			Player player = target.ToPlayer();
+            // check online security
+            else if (target.IsTypeId(TypeId.Player) &&
+                     handler.HasLowerSecurity(target.ToPlayer(), ObjectGuid.Empty))
+                return false;
 
-			if (player)
-			{
-				handler.SendSysMessage(resourceMessage,
-				                       new object[]
-				                       {
-					                       handler.GetNameLink(player)
-				                       }.Combine(args));
+            target.DeMorph();
 
-				if (handler.NeedReportToTarget(player))
-					player.SendSysMessage(resourceReportMessage,
-					                      new object[]
-					                      {
-						                      handler.GetNameLink()
-					                      }.Combine(args));
-			}
-		}
+            return true;
+        }
 
-		private static bool CheckModifyResources(CommandHandler handler, Player target, ref int res, ref int? resmax, byte multiplier = 1)
-		{
-			res    *= multiplier;
-			resmax *= multiplier;
+        private static void NotifyModification(CommandHandler handler, Unit target, CypherStrings resourceMessage, CypherStrings resourceReportMessage, params object[] args)
+        {
+            Player player = target.ToPlayer();
 
-			if (resmax == 0)
-				resmax = res;
+            if (player)
+            {
+                handler.SendSysMessage(resourceMessage,
+                                       new object[]
+                                       {
+                                           handler.GetNameLink(player)
+                                       }.Combine(args));
 
-			if (res < 1 ||
-			    resmax < 1 ||
-			    resmax < res)
-			{
-				handler.SendSysMessage(CypherStrings.BadValue);
+                if (handler.NeedReportToTarget(player))
+                    player.SendSysMessage(resourceReportMessage,
+                                          new object[]
+                                          {
+                                              handler.GetNameLink()
+                                          }.Combine(args));
+            }
+        }
 
-				return false;
-			}
+        private static bool CheckModifyResources(CommandHandler handler, Player target, ref int res, ref int? resmax, byte multiplier = 1)
+        {
+            res *= multiplier;
+            resmax *= multiplier;
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            if (resmax == 0)
+                resmax = res;
 
-				return false;
-			}
+            if (res < 1 ||
+                resmax < 1 ||
+                resmax < res)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
 
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+                return false;
+            }
 
-			return true;
-		}
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-		private static bool CheckModifySpeed(StringArguments args, CommandHandler handler, Unit target, out float speed, float minimumBound, float maximumBound, bool checkInFlight = true)
-		{
-			speed = 0f;
+                return false;
+            }
 
-			if (args.Empty())
-				return false;
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			speed = args.NextSingle();
+            return true;
+        }
 
-			if (speed > maximumBound ||
-			    speed < minimumBound)
-			{
-				handler.SendSysMessage(CypherStrings.BadValue);
+        private static bool CheckModifySpeed(StringArguments args, CommandHandler handler, Unit target, out float speed, float minimumBound, float maximumBound, bool checkInFlight = true)
+        {
+            speed = 0f;
 
-				return false;
-			}
+            if (args.Empty())
+                return false;
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.NoCharSelected);
+            speed = args.NextSingle();
 
-				return false;
-			}
+            if (speed > maximumBound ||
+                speed < minimumBound)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
 
-			Player player = target.ToPlayer();
+                return false;
+            }
 
-			if (player)
-			{
-				// check online security
-				if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
-					return false;
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
 
-				if (player.IsInFlight() && checkInFlight)
-				{
-					handler.SendSysMessage(CypherStrings.CharInFlight, handler.GetNameLink(player));
+                return false;
+            }
 
-					return false;
-				}
-			}
+            Player player = target.ToPlayer();
 
-			return true;
-		}
+            if (player)
+            {
+                // check online security
+                if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
+                    return false;
 
-		[CommandGroup("speed")]
-		private class ModifySpeed
-		{
-			[Command("", RBACPermissions.CommandModifySpeed)]
-			private static bool HandleModifySpeedCommand(CommandHandler handler, StringArguments args)
-			{
-				return HandleModifyASpeedCommand(handler, args);
-			}
+                if (player.IsInFlight() && checkInFlight)
+                {
+                    handler.SendSysMessage(CypherStrings.CharInFlight, handler.GetNameLink(player));
 
-			[Command("all", RBACPermissions.CommandModifySpeedAll)]
-			private static bool HandleModifyASpeedCommand(CommandHandler handler, StringArguments args)
-			{
-				float  allSpeed;
-				Player target = handler.GetSelectedPlayerOrSelf();
+                    return false;
+                }
+            }
 
-				if (CheckModifySpeed(args, handler, target, out allSpeed, 0.1f, 50.0f))
-				{
-					NotifyModification(handler, target, CypherStrings.YouChangeAspeed, CypherStrings.YoursAspeedChanged, allSpeed);
-					target.SetSpeedRate(UnitMoveType.Walk, allSpeed);
-					target.SetSpeedRate(UnitMoveType.Run, allSpeed);
-					target.SetSpeedRate(UnitMoveType.Swim, allSpeed);
-					target.SetSpeedRate(UnitMoveType.Flight, allSpeed);
-
-					return true;
-				}
-
-				return false;
-			}
-
-			[Command("swim", RBACPermissions.CommandModifySpeedSwim)]
-			private static bool HandleModifySwimCommand(CommandHandler handler, StringArguments args)
-			{
-				float  swimSpeed;
-				Player target = handler.GetSelectedPlayerOrSelf();
-
-				if (CheckModifySpeed(args, handler, target, out swimSpeed, 0.1f, 50.0f))
-				{
-					NotifyModification(handler, target, CypherStrings.YouChangeSwimSpeed, CypherStrings.YoursSwimSpeedChanged, swimSpeed);
-					target.SetSpeedRate(UnitMoveType.Swim, swimSpeed);
-
-					return true;
-				}
-
-				return false;
-			}
-
-			[Command("backwalk", RBACPermissions.CommandModifySpeedBackwalk)]
-			private static bool HandleModifyBWalkCommand(CommandHandler handler, StringArguments args)
-			{
-				float  backSpeed;
-				Player target = handler.GetSelectedPlayerOrSelf();
-
-				if (CheckModifySpeed(args, handler, target, out backSpeed, 0.1f, 50.0f))
-				{
-					NotifyModification(handler, target, CypherStrings.YouChangeBackSpeed, CypherStrings.YoursBackSpeedChanged, backSpeed);
-					target.SetSpeedRate(UnitMoveType.RunBack, backSpeed);
-
-					return true;
-				}
-
-				return false;
-			}
-
-			[Command("fly", RBACPermissions.CommandModifySpeedFly)]
-			private static bool HandleModifyFlyCommand(CommandHandler handler, StringArguments args)
-			{
-				float  flySpeed;
-				Player target = handler.GetSelectedPlayerOrSelf();
-
-				if (CheckModifySpeed(args, handler, target, out flySpeed, 0.1f, 50.0f, false))
-				{
-					NotifyModification(handler, target, CypherStrings.YouChangeFlySpeed, CypherStrings.YoursFlySpeedChanged, flySpeed);
-					target.SetSpeedRate(UnitMoveType.Flight, flySpeed);
-
-					return true;
-				}
-
-				return false;
-			}
-
-			[Command("walk", RBACPermissions.CommandModifySpeedWalk)]
-			private static bool HandleModifyWalkSpeedCommand(CommandHandler handler, StringArguments args)
-			{
-				float  Speed;
-				Player target = handler.GetSelectedPlayerOrSelf();
-
-				if (CheckModifySpeed(args, handler, target, out Speed, 0.1f, 50.0f))
-				{
-					NotifyModification(handler, target, CypherStrings.YouChangeSpeed, CypherStrings.YoursSpeedChanged, Speed);
-					target.SetSpeedRate(UnitMoveType.Run, Speed);
-
-					return true;
-				}
-
-				return false;
-			}
-		}
-	}
+            return true;
+        }
+    }
 }

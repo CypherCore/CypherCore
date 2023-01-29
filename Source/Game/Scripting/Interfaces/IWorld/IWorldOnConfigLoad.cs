@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnConfigLoad : IScriptObject
-	{
-		void OnConfigLoad(bool reload);
-	}
+    public interface IWorldOnConfigLoad : IScriptObject
+    {
+        void OnConfigLoad(bool reload);
+    }
 }

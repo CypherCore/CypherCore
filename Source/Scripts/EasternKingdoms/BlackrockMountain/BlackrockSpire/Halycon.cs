@@ -9,69 +9,69 @@ using Game.Scripting;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Halycon
 {
-	internal struct SpellIds
-	{
-		public const uint Rend = 13738;
-		public const uint Thrash = 3391;
-	}
+    internal struct SpellIds
+    {
+        public const uint Rend = 13738;
+        public const uint Thrash = 3391;
+    }
 
-	internal struct TextIds
-	{
-		public const uint EmoteDeath = 0;
-	}
+    internal struct TextIds
+    {
+        public const uint EmoteDeath = 0;
+    }
 
-	[Script]
-	internal class boss_halycon : BossAI
-	{
-		private static Position SummonLocation = new(-167.9561f, -411.7844f, 76.23057f, 1.53589f);
+    [Script]
+    internal class boss_halycon : BossAI
+    {
+        private static readonly Position SummonLocation = new(-167.9561f, -411.7844f, 76.23057f, 1.53589f);
 
-		private bool Summoned;
+        private bool Summoned;
 
-		public boss_halycon(Creature creature) : base(creature, DataTypes.Halycon)
-		{
-			Initialize();
-		}
+        public boss_halycon(Creature creature) : base(creature, DataTypes.Halycon)
+        {
+            Initialize();
+        }
 
-		private void Initialize()
-		{
-			Summoned = false;
-		}
+        public override void Reset()
+        {
+            _Reset();
+            Initialize();
+        }
 
-		public override void Reset()
-		{
-			_Reset();
-			Initialize();
-		}
+        public override void JustEngagedWith(Unit who)
+        {
+            base.JustEngagedWith(who);
 
-		public override void JustEngagedWith(Unit who)
-		{
-			base.JustEngagedWith(who);
+            _scheduler.Schedule(TimeSpan.FromSeconds(17),
+                                TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Rend);
+                                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(17),
-			                    TimeSpan.FromSeconds(20),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Rend);
-				                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(12), task => { DoCast(me, SpellIds.Thrash); });
+        }
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(12), task => { DoCast(me, SpellIds.Thrash); });
-		}
+        public override void JustDied(Unit killer)
+        {
+            me.SummonCreature(CreaturesIds.GizrulTheSlavener, SummonLocation, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+            Talk(TextIds.EmoteDeath);
 
-		public override void JustDied(Unit killer)
-		{
-			me.SummonCreature(CreaturesIds.GizrulTheSlavener, SummonLocation, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
-			Talk(TextIds.EmoteDeath);
+            Summoned = true;
+        }
 
-			Summoned = true;
-		}
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+        private void Initialize()
+        {
+            Summoned = false;
+        }
+    }
 }

@@ -6,8 +6,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.ICreature
 {
-	public interface ICreatureGetAI : IScriptObject
-	{
-		CreatureAI GetAI(Creature creature);
-	}
+    public interface ICreatureGetAI : IScriptObject
+    {
+        CreatureAI GetAI(Creature creature);
+    }
 }

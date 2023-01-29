@@ -8,192 +8,192 @@ using Game.Spells;
 
 namespace Game.Chat
 {
-	[CommandGroup("cast")]
-	internal class CastCommands
-	{
-		[Command("", RBACPermissions.CommandCast)]
-		private static bool HandleCastCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
-		{
-			Unit target = handler.GetSelectedUnit();
+    [CommandGroup("cast")]
+    internal class CastCommands
+    {
+        [Command("", RBACPermissions.CommandCast)]
+        private static bool HandleCastCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        {
+            Unit target = handler.GetSelectedUnit();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (!CheckSpellExistsAndIsValid(handler, spellId))
-				return false;
+            if (!CheckSpellExistsAndIsValid(handler, spellId))
+                return false;
 
-			TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
 
-			if (!triggerFlags.HasValue)
-				return false;
+            if (!triggerFlags.HasValue)
+                return false;
 
-			handler.GetSession().GetPlayer().CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
+            handler.GetSession().GetPlayer().CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("back", RBACPermissions.CommandCastBack)]
-		private static bool HandleCastBackCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
-		{
-			Creature caster = handler.GetSelectedCreature();
+        [Command("back", RBACPermissions.CommandCastBack)]
+        private static bool HandleCastBackCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        {
+            Creature caster = handler.GetSelectedCreature();
 
-			if (!caster)
-			{
-				handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+            if (!caster)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (CheckSpellExistsAndIsValid(handler, spellId))
-				return false;
+            if (CheckSpellExistsAndIsValid(handler, spellId))
+                return false;
 
-			TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
 
-			if (!triggerFlags.HasValue)
-				return false;
+            if (!triggerFlags.HasValue)
+                return false;
 
-			caster.CastSpell(handler.GetSession().GetPlayer(), spellId, new CastSpellExtraArgs(triggerFlags.Value));
+            caster.CastSpell(handler.GetSession().GetPlayer(), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("dist", RBACPermissions.CommandCastDist)]
-		private static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, [OptionalArg] string triggeredStr)
-		{
-			if (CheckSpellExistsAndIsValid(handler, spellId))
-				return false;
+        [Command("dist", RBACPermissions.CommandCastDist)]
+        private static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, [OptionalArg] string triggeredStr)
+        {
+            if (CheckSpellExistsAndIsValid(handler, spellId))
+                return false;
 
-			TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
 
-			if (!triggerFlags.HasValue)
-				return false;
+            if (!triggerFlags.HasValue)
+                return false;
 
-			float x, y, z;
-			handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, dist);
+            float x, y, z;
+            handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, dist);
 
-			handler.GetSession().GetPlayer().CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggerFlags.Value));
+            handler.GetSession().GetPlayer().CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("self", RBACPermissions.CommandCastSelf)]
-		private static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
-		{
-			Unit target = handler.GetSelectedUnit();
+        [Command("self", RBACPermissions.CommandCastSelf)]
+        private static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        {
+            Unit target = handler.GetSelectedUnit();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (!CheckSpellExistsAndIsValid(handler, spellId))
-				return false;
+            if (!CheckSpellExistsAndIsValid(handler, spellId))
+                return false;
 
-			TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
 
-			if (!triggerFlags.HasValue)
-				return false;
+            if (!triggerFlags.HasValue)
+                return false;
 
-			target.CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
+            target.CastSpell(target, spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("Target", RBACPermissions.CommandCastTarget)]
-		private static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
-		{
-			Creature caster = handler.GetSelectedCreature();
+        [Command("Target", RBACPermissions.CommandCastTarget)]
+        private static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        {
+            Creature caster = handler.GetSelectedCreature();
 
-			if (!caster)
-			{
-				handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+            if (!caster)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (!caster.GetVictim())
-			{
-				handler.SendSysMessage(CypherStrings.SelectedTargetNotHaveVictim);
+            if (!caster.GetVictim())
+            {
+                handler.SendSysMessage(CypherStrings.SelectedTargetNotHaveVictim);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (CheckSpellExistsAndIsValid(handler, spellId))
-				return false;
+            if (CheckSpellExistsAndIsValid(handler, spellId))
+                return false;
 
-			TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
 
-			if (!triggerFlags.HasValue)
-				return false;
+            if (!triggerFlags.HasValue)
+                return false;
 
-			caster.CastSpell(caster.GetVictim(), spellId, new CastSpellExtraArgs(triggerFlags.Value));
+            caster.CastSpell(caster.GetVictim(), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("dest", RBACPermissions.CommandCastDest)]
-		private static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, [OptionalArg] string triggeredStr)
-		{
-			Unit caster = handler.GetSelectedUnit();
+        [Command("dest", RBACPermissions.CommandCastDest)]
+        private static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, [OptionalArg] string triggeredStr)
+        {
+            Unit caster = handler.GetSelectedUnit();
 
-			if (!caster)
-			{
-				handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+            if (!caster)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (CheckSpellExistsAndIsValid(handler, spellId))
-				return false;
+            if (CheckSpellExistsAndIsValid(handler, spellId))
+                return false;
 
-			TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
+            TriggerCastFlags? triggerFlags = GetTriggerFlags(triggeredStr);
 
-			if (!triggerFlags.HasValue)
-				return false;
+            if (!triggerFlags.HasValue)
+                return false;
 
-			caster.CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggerFlags.Value));
+            caster.CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggerFlags.Value));
 
-			return true;
-		}
+            return true;
+        }
 
-		private static TriggerCastFlags? GetTriggerFlags(string triggeredStr)
-		{
-			if (!triggeredStr.IsEmpty())
-			{
-				if (triggeredStr.StartsWith("triggered")) // check if "triggered" starts with *triggeredStr (e.g. "trig", "trigger", etc.)
-					return TriggerCastFlags.FullDebugMask;
-				else
-					return null;
-			}
+        private static TriggerCastFlags? GetTriggerFlags(string triggeredStr)
+        {
+            if (!triggeredStr.IsEmpty())
+            {
+                if (triggeredStr.StartsWith("triggered")) // check if "triggered" starts with *triggeredStr (e.g. "trig", "trigger", etc.)
+                    return TriggerCastFlags.FullDebugMask;
+                else
+                    return null;
+            }
 
-			return TriggerCastFlags.None;
-		}
+            return TriggerCastFlags.None;
+        }
 
-		private static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
-		{
-			var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+        private static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
+        {
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
 
-			if (spellInfo == null)
-			{
-				handler.SendSysMessage(CypherStrings.CommandNospellfound);
+            if (spellInfo == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandNospellfound);
 
-				return false;
-			}
+                return false;
+            }
 
-			if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetPlayer()))
-			{
-				handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellInfo.Id);
+            if (!Global.SpellMgr.IsSpellValid(spellInfo, handler.GetPlayer()))
+            {
+                handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellInfo.Id);
 
-				return false;
-			}
+                return false;
+            }
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }

@@ -7,30 +7,30 @@ using Game.Networking.Packets;
 
 namespace Game
 {
-	public partial class WorldSession
-	{
-		[WorldPacketHandler(ClientOpcodes.SceneTriggerEvent)]
-		private void HandleSceneTriggerEvent(SceneTriggerEvent sceneTriggerEvent)
-		{
-			Log.outDebug(LogFilter.Scenes, "HandleSceneTriggerEvent: SceneInstanceID: {0} Event: {1}", sceneTriggerEvent.SceneInstanceID, sceneTriggerEvent._Event);
+    public partial class WorldSession
+    {
+        [WorldPacketHandler(ClientOpcodes.SceneTriggerEvent)]
+        private void HandleSceneTriggerEvent(SceneTriggerEvent sceneTriggerEvent)
+        {
+            Log.outDebug(LogFilter.Scenes, "HandleSceneTriggerEvent: SceneInstanceID: {0} Event: {1}", sceneTriggerEvent.SceneInstanceID, sceneTriggerEvent._Event);
 
-			GetPlayer().GetSceneMgr().OnSceneTrigger(sceneTriggerEvent.SceneInstanceID, sceneTriggerEvent._Event);
-		}
+            GetPlayer().GetSceneMgr().OnSceneTrigger(sceneTriggerEvent.SceneInstanceID, sceneTriggerEvent._Event);
+        }
 
-		[WorldPacketHandler(ClientOpcodes.ScenePlaybackComplete)]
-		private void HandleScenePlaybackComplete(ScenePlaybackComplete scenePlaybackComplete)
-		{
-			Log.outDebug(LogFilter.Scenes, "HandleScenePlaybackComplete: SceneInstanceID: {0}", scenePlaybackComplete.SceneInstanceID);
+        [WorldPacketHandler(ClientOpcodes.ScenePlaybackComplete)]
+        private void HandleScenePlaybackComplete(ScenePlaybackComplete scenePlaybackComplete)
+        {
+            Log.outDebug(LogFilter.Scenes, "HandleScenePlaybackComplete: SceneInstanceID: {0}", scenePlaybackComplete.SceneInstanceID);
 
-			GetPlayer().GetSceneMgr().OnSceneComplete(scenePlaybackComplete.SceneInstanceID);
-		}
+            GetPlayer().GetSceneMgr().OnSceneComplete(scenePlaybackComplete.SceneInstanceID);
+        }
 
-		[WorldPacketHandler(ClientOpcodes.ScenePlaybackCanceled)]
-		private void HandleScenePlaybackCanceled(ScenePlaybackCanceled scenePlaybackCanceled)
-		{
-			Log.outDebug(LogFilter.Scenes, "HandleScenePlaybackCanceled: SceneInstanceID: {0}", scenePlaybackCanceled.SceneInstanceID);
+        [WorldPacketHandler(ClientOpcodes.ScenePlaybackCanceled)]
+        private void HandleScenePlaybackCanceled(ScenePlaybackCanceled scenePlaybackCanceled)
+        {
+            Log.outDebug(LogFilter.Scenes, "HandleScenePlaybackCanceled: SceneInstanceID: {0}", scenePlaybackCanceled.SceneInstanceID);
 
-			GetPlayer().GetSceneMgr().OnSceneCancel(scenePlaybackCanceled.SceneInstanceID);
-		}
-	}
+            GetPlayer().GetSceneMgr().OnSceneCancel(scenePlaybackCanceled.SceneInstanceID);
+        }
+    }
 }

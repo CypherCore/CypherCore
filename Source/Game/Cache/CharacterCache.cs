@@ -8,267 +8,253 @@ using Game.Networking.Packets;
 
 namespace Game.Cache
 {
-	public class CharacterCache : Singleton<CharacterCache>
-	{
-		private Dictionary<string, CharacterCacheEntry> _characterCacheByNameStore = new();
-		private Dictionary<ObjectGuid, CharacterCacheEntry> _characterCacheStore = new();
-
-		private CharacterCache()
-		{
-		}
-
-		public void LoadCharacterCacheStorage()
-		{
-			_characterCacheStore.Clear();
-			uint oldMSTime = Time.GetMSTime();
-
-			SQLResult result = DB.Characters.Query("SELECT Guid, Name, account, race, Gender, class, level, deleteDate FROM characters");
-
-			if (result.IsEmpty())
-			{
-				Log.outInfo(LogFilter.ServerLoading, "No character Name _data loaded, empty query");
-
-				return;
-			}
-
-			do
-			{
-				AddCharacterCacheEntry(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)), result.Read<uint>(2), result.Read<string>(1), result.Read<byte>(4), result.Read<byte>(3), result.Read<byte>(5), result.Read<byte>(6), result.Read<uint>(7) != 0);
-			} while (result.NextRow());
-
-			Log.outInfo(LogFilter.ServerLoading, $"Loaded character infos for {_characterCacheStore.Count} characters in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-		}
-
-		public void AddCharacterCacheEntry(ObjectGuid guid, uint accountId, string name, byte gender, byte race, byte playerClass, byte level, bool isDeleted)
-		{
-			var data = new CharacterCacheEntry();
-			data.Guid      = guid;
-			data.Name      = name;
-			data.AccountId = accountId;
-			data.RaceId    = (Race)race;
-			data.Sex       = (Gender)gender;
-			data.ClassId   = (Class)playerClass;
-			data.Level     = level;
-			data.GuildId   = 0; // Will be set in guild loading or guild setting
-
-			for (byte i = 0; i < SharedConst.MaxArenaSlot; ++i)
-				data.ArenaTeamId[i] = 0; // Will be set in arena teams loading
-
-			data.IsDeleted = isDeleted;
-
-			// Fill Name to Guid Store
-			_characterCacheByNameStore[name] = data;
-			_characterCacheStore[guid]       = data;
-		}
-
-		public void DeleteCharacterCacheEntry(ObjectGuid guid, string name)
-		{
-			_characterCacheStore.Remove(guid);
-			_characterCacheByNameStore.Remove(name);
-		}
-
-		public void UpdateCharacterData(ObjectGuid guid, string name, byte? gender = null, byte? race = null)
-		{
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
-
-			if (characterCacheEntry == null)
-				return;
-
-			string oldName = characterCacheEntry.Name;
-			characterCacheEntry.Name = name;
-
-			if (gender.HasValue)
-				characterCacheEntry.Sex = (Gender)gender.Value;
-
-			if (race.HasValue)
-				characterCacheEntry.RaceId = (Race)race.Value;
-
-			InvalidatePlayer invalidatePlayer = new();
-			invalidatePlayer.Guid = guid;
-			Global.WorldMgr.SendGlobalMessage(invalidatePlayer);
-
-			// Correct Name -> pointer storage
-			_characterCacheByNameStore.Remove(oldName);
-			_characterCacheByNameStore[name] = characterCacheEntry;
-		}
+    public class CharacterCache : Singleton<CharacterCache>
+    {
+        private readonly Dictionary<string, CharacterCacheEntry> _characterCacheByNameStore = new();
+        private readonly Dictionary<ObjectGuid, CharacterCacheEntry> _characterCacheStore = new();
+
+        private CharacterCache()
+        {
+        }
+
+        public void LoadCharacterCacheStorage()
+        {
+            _characterCacheStore.Clear();
+            uint oldMSTime = Time.GetMSTime();
+
+            SQLResult result = DB.Characters.Query("SELECT Guid, Name, account, race, Gender, class, level, deleteDate FROM characters");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "No character Name _data loaded, empty query");
+
+                return;
+            }
+
+            do
+            {
+                AddCharacterCacheEntry(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)), result.Read<uint>(2), result.Read<string>(1), result.Read<byte>(4), result.Read<byte>(3), result.Read<byte>(5), result.Read<byte>(6), result.Read<uint>(7) != 0);
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded character infos for {_characterCacheStore.Count} characters in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public void AddCharacterCacheEntry(ObjectGuid guid, uint accountId, string name, byte gender, byte race, byte playerClass, byte level, bool isDeleted)
+        {
+            var data = new CharacterCacheEntry();
+            data.Guid = guid;
+            data.Name = name;
+            data.AccountId = accountId;
+            data.RaceId = (Race)race;
+            data.Sex = (Gender)gender;
+            data.ClassId = (Class)playerClass;
+            data.Level = level;
+            data.GuildId = 0; // Will be set in guild loading or guild setting
+
+            for (byte i = 0; i < SharedConst.MaxArenaSlot; ++i)
+                data.ArenaTeamId[i] = 0; // Will be set in arena teams loading
+
+            data.IsDeleted = isDeleted;
+
+            // Fill Name to Guid Store
+            _characterCacheByNameStore[name] = data;
+            _characterCacheStore[guid] = data;
+        }
+
+        public void DeleteCharacterCacheEntry(ObjectGuid guid, string name)
+        {
+            _characterCacheStore.Remove(guid);
+            _characterCacheByNameStore.Remove(name);
+        }
+
+        public void UpdateCharacterData(ObjectGuid guid, string name, byte? gender = null, byte? race = null)
+        {
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+
+            if (characterCacheEntry == null)
+                return;
+
+            string oldName = characterCacheEntry.Name;
+            characterCacheEntry.Name = name;
+
+            if (gender.HasValue)
+                characterCacheEntry.Sex = (Gender)gender.Value;
+
+            if (race.HasValue)
+                characterCacheEntry.RaceId = (Race)race.Value;
+
+            InvalidatePlayer invalidatePlayer = new();
+            invalidatePlayer.Guid = guid;
+            Global.WorldMgr.SendGlobalMessage(invalidatePlayer);
+
+            // Correct Name -> pointer storage
+            _characterCacheByNameStore.Remove(oldName);
+            _characterCacheByNameStore[name] = characterCacheEntry;
+        }
 
-		public void UpdateCharacterGender(ObjectGuid guid, byte gender)
-		{
-			if (!_characterCacheStore.ContainsKey(guid))
-				return;
+        public void UpdateCharacterGender(ObjectGuid guid, byte gender)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
 
-			_characterCacheStore[guid].Sex = (Gender)gender;
-		}
+            _characterCacheStore[guid].Sex = (Gender)gender;
+        }
 
-		public void UpdateCharacterLevel(ObjectGuid guid, byte level)
-		{
-			if (!_characterCacheStore.ContainsKey(guid))
-				return;
+        public void UpdateCharacterLevel(ObjectGuid guid, byte level)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
 
-			_characterCacheStore[guid].Level = level;
-		}
+            _characterCacheStore[guid].Level = level;
+        }
 
-		public void UpdateCharacterAccountId(ObjectGuid guid, uint accountId)
-		{
-			if (!_characterCacheStore.ContainsKey(guid))
-				return;
+        public void UpdateCharacterAccountId(ObjectGuid guid, uint accountId)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
 
-			_characterCacheStore[guid].AccountId = accountId;
-		}
+            _characterCacheStore[guid].AccountId = accountId;
+        }
 
-		public void UpdateCharacterGuildId(ObjectGuid guid, ulong guildId)
-		{
-			if (!_characterCacheStore.ContainsKey(guid))
-				return;
+        public void UpdateCharacterGuildId(ObjectGuid guid, ulong guildId)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
 
-			_characterCacheStore[guid].GuildId = guildId;
-		}
+            _characterCacheStore[guid].GuildId = guildId;
+        }
 
-		public void UpdateCharacterArenaTeamId(ObjectGuid guid, byte slot, uint arenaTeamId)
-		{
-			if (!_characterCacheStore.ContainsKey(guid))
-				return;
+        public void UpdateCharacterArenaTeamId(ObjectGuid guid, byte slot, uint arenaTeamId)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
 
-			_characterCacheStore[guid].ArenaTeamId[slot] = arenaTeamId;
-		}
+            _characterCacheStore[guid].ArenaTeamId[slot] = arenaTeamId;
+        }
 
-		public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name = null)
-		{
-			if (!_characterCacheStore.ContainsKey(guid))
-				return;
+        public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name = null)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
 
-			_characterCacheStore[guid].IsDeleted = deleted;
+            _characterCacheStore[guid].IsDeleted = deleted;
 
-			if (!name.IsEmpty())
-				_characterCacheStore[guid].Name = name;
-		}
+            if (!name.IsEmpty())
+                _characterCacheStore[guid].Name = name;
+        }
 
-		public bool HasCharacterCacheEntry(ObjectGuid guid)
-		{
-			return _characterCacheStore.ContainsKey(guid);
-		}
+        public bool HasCharacterCacheEntry(ObjectGuid guid)
+        {
+            return _characterCacheStore.ContainsKey(guid);
+        }
 
-		public CharacterCacheEntry GetCharacterCacheByGuid(ObjectGuid guid)
-		{
-			return _characterCacheStore.LookupByKey(guid);
-		}
+        public CharacterCacheEntry GetCharacterCacheByGuid(ObjectGuid guid)
+        {
+            return _characterCacheStore.LookupByKey(guid);
+        }
 
-		public CharacterCacheEntry GetCharacterCacheByName(string name)
-		{
-			return _characterCacheByNameStore.LookupByKey(name);
-		}
+        public CharacterCacheEntry GetCharacterCacheByName(string name)
+        {
+            return _characterCacheByNameStore.LookupByKey(name);
+        }
 
-		public ObjectGuid GetCharacterGuidByName(string name)
-		{
-			var characterCacheEntry = _characterCacheByNameStore.LookupByKey(name);
+        public ObjectGuid GetCharacterGuidByName(string name)
+        {
+            var characterCacheEntry = _characterCacheByNameStore.LookupByKey(name);
 
-			if (characterCacheEntry != null)
-				return characterCacheEntry.Guid;
+            if (characterCacheEntry != null)
+                return characterCacheEntry.Guid;
 
-			return ObjectGuid.Empty;
-		}
+            return ObjectGuid.Empty;
+        }
 
-		public bool GetCharacterNameByGuid(ObjectGuid guid, out string name)
-		{
-			name = "Unknown";
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+        public bool GetCharacterNameByGuid(ObjectGuid guid, out string name)
+        {
+            name = "Unknown";
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return false;
+            if (characterCacheEntry == null)
+                return false;
 
-			name = characterCacheEntry.Name;
+            name = characterCacheEntry.Name;
 
-			return true;
-		}
+            return true;
+        }
 
-		public Team GetCharacterTeamByGuid(ObjectGuid guid)
-		{
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+        public Team GetCharacterTeamByGuid(ObjectGuid guid)
+        {
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return 0;
+            if (characterCacheEntry == null)
+                return 0;
 
-			return Player.TeamForRace(characterCacheEntry.RaceId);
-		}
+            return Player.TeamForRace(characterCacheEntry.RaceId);
+        }
 
-		public uint GetCharacterAccountIdByGuid(ObjectGuid guid)
-		{
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+        public uint GetCharacterAccountIdByGuid(ObjectGuid guid)
+        {
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return 0;
+            if (characterCacheEntry == null)
+                return 0;
 
-			return characterCacheEntry.AccountId;
-		}
+            return characterCacheEntry.AccountId;
+        }
 
-		public uint GetCharacterAccountIdByName(string name)
-		{
-			var characterCacheEntry = _characterCacheByNameStore.LookupByKey(name);
+        public uint GetCharacterAccountIdByName(string name)
+        {
+            var characterCacheEntry = _characterCacheByNameStore.LookupByKey(name);
 
-			if (characterCacheEntry != null)
-				return characterCacheEntry.AccountId;
+            if (characterCacheEntry != null)
+                return characterCacheEntry.AccountId;
 
-			return 0;
-		}
+            return 0;
+        }
 
-		public byte GetCharacterLevelByGuid(ObjectGuid guid)
-		{
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+        public byte GetCharacterLevelByGuid(ObjectGuid guid)
+        {
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return 0;
+            if (characterCacheEntry == null)
+                return 0;
 
-			return characterCacheEntry.Level;
-		}
+            return characterCacheEntry.Level;
+        }
 
-		public ulong GetCharacterGuildIdByGuid(ObjectGuid guid)
-		{
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+        public ulong GetCharacterGuildIdByGuid(ObjectGuid guid)
+        {
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return 0;
+            if (characterCacheEntry == null)
+                return 0;
 
-			return characterCacheEntry.GuildId;
-		}
+            return characterCacheEntry.GuildId;
+        }
 
-		public uint GetCharacterArenaTeamIdByGuid(ObjectGuid guid, byte type)
-		{
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+        public uint GetCharacterArenaTeamIdByGuid(ObjectGuid guid, byte type)
+        {
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return 0;
+            if (characterCacheEntry == null)
+                return 0;
 
-			return characterCacheEntry.ArenaTeamId[ArenaTeam.GetSlotByType(type)];
-		}
+            return characterCacheEntry.ArenaTeamId[ArenaTeam.GetSlotByType(type)];
+        }
 
-		public bool GetCharacterNameAndClassByGUID(ObjectGuid guid, out string name, out byte _class)
-		{
-			name   = "Unknown";
-			_class = 0;
+        public bool GetCharacterNameAndClassByGUID(ObjectGuid guid, out string name, out byte _class)
+        {
+            name = "Unknown";
+            _class = 0;
 
-			var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
+            var characterCacheEntry = _characterCacheStore.LookupByKey(guid);
 
-			if (characterCacheEntry == null)
-				return false;
+            if (characterCacheEntry == null)
+                return false;
 
-			name   = characterCacheEntry.Name;
-			_class = (byte)characterCacheEntry.ClassId;
+            name = characterCacheEntry.Name;
+            _class = (byte)characterCacheEntry.ClassId;
 
-			return true;
-		}
-	}
-
-	public class CharacterCacheEntry
-	{
-		public uint AccountId;
-		public uint[] ArenaTeamId = new uint[SharedConst.MaxArenaSlot];
-		public Class ClassId;
-		public ObjectGuid Guid;
-		public ulong GuildId;
-		public bool IsDeleted;
-		public byte Level;
-		public string Name;
-		public Race RaceId;
-		public Gender Sex;
-	}
+            return true;
+        }
+    }
 }

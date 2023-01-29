@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-	public interface ICalcCritChance : ISpellScript
-	{
-		void CalcCritChance(Unit victim, ref float chance);
-	}
+    public interface ICalcCritChance : ISpellScript
+    {
+        void CalcCritChance(Unit victim, ref float chance);
+    }
 }

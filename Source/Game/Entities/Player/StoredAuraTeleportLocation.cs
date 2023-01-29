@@ -4,15 +4,15 @@
 namespace Game.Entities
 {
     internal class StoredAuraTeleportLocation
-	{
-		public enum State
-		{
-			Unchanged,
-			Changed,
-			Deleted
-		}
+    {
+        public enum State
+        {
+            Unchanged,
+            Changed,
+            Deleted
+        }
 
-		public State CurrentState { get; set; }
+        public State CurrentState { get; set; }
         public WorldLocation Loc { get; set; }
     }
 }

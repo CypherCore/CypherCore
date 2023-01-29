@@ -5,7 +5,7 @@ namespace Game.Entities;
 
 public class VendorItemData
 {
-    private List<VendorItem> _items = new();
+    private readonly List<VendorItem> _items = new();
 
     public VendorItem GetItem(uint slot)
     {

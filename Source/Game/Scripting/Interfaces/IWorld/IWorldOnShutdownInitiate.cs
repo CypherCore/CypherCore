@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnShutdownInitiate : IScriptObject
-	{
-		void OnShutdownInitiate(ShutdownExitCode code, ShutdownMask mask);
-	}
+    public interface IWorldOnShutdownInitiate : IScriptObject
+    {
+        void OnShutdownInitiate(ShutdownExitCode code, ShutdownMask mask);
+    }
 }

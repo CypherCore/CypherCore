@@ -9,177 +9,177 @@ using Game.Networking;
 namespace Game.Entities
 {
     public class DynamicUpdateField<T> where T : new()
-	{
-		public List<uint> UpdateMask { get; set; }
+    {
+        public DynamicUpdateField()
+        {
+            Values = new List<T>();
+            UpdateMask = new List<uint>();
+
+            BlockBit = -1;
+            Bit = -1;
+        }
+
+        public DynamicUpdateField(int blockBit, int bit)
+        {
+            Values = new List<T>();
+            UpdateMask = new List<uint>();
+
+            BlockBit = blockBit;
+            Bit = bit;
+        }
+
+        public List<uint> UpdateMask { get; set; }
         public List<T> Values { get; set; }
         public int Bit { get; set; }
         public int BlockBit { get; set; }
 
-        public DynamicUpdateField()
-		{
-			Values     = new List<T>();
-			UpdateMask = new List<uint>();
+        public T this[int index]
+        {
+            get
+            {
+                if (Values.Count <= index)
+                    Values.Add(new T());
 
-			BlockBit = -1;
-			Bit      = -1;
-		}
+                return Values[index];
+            }
+            set => Values[index] = value;
+        }
 
-		public DynamicUpdateField(int blockBit, int bit)
-		{
-			Values     = new List<T>();
-			UpdateMask = new List<uint>();
+        public int FindIndex(T value)
+        {
+            return Values.IndexOf(value);
+        }
 
-			BlockBit = blockBit;
-			Bit      = bit;
-		}
+        public int FindIndexIf(Predicate<T> predicate)
+        {
+            return Values.FindIndex(predicate);
+        }
 
-		public T this[int index]
-		{
-			get
-			{
-				if (Values.Count <= index)
-					Values.Add(new T());
+        public bool HasChanged(int index)
+        {
+            return (UpdateMask[index / 32] & (1 << (index % 32))) != 0;
+        }
 
-				return Values[index];
-			}
-			set => Values[index] = value;
-		}
+        public void WriteUpdateMask(WorldPacket data, int bitsForSize = 32)
+        {
+            data.WriteBits(Values.Count, bitsForSize);
 
-		public int FindIndex(T value)
-		{
-			return Values.IndexOf(value);
-		}
+            if (Values.Count > 32)
+            {
+                if (data.HasUnfinishedBitPack())
+                    for (int block = 0; block < Values.Count / 32; ++block)
+                        data.WriteBits(UpdateMask[block], 32);
+                else
+                    for (int block = 0; block < Values.Count / 32; ++block)
+                        data.WriteUInt32(UpdateMask[block]);
+            }
 
-		public int FindIndexIf(Predicate<T> predicate)
-		{
-			return Values.FindIndex(predicate);
-		}
+            else if (Values.Count == 32)
+            {
+                data.WriteBits(UpdateMask.Last(), 32);
 
-		public bool HasChanged(int index)
-		{
-			return (UpdateMask[index / 32] & (1 << (index % 32))) != 0;
-		}
+                return;
+            }
 
-		public void WriteUpdateMask(WorldPacket data, int bitsForSize = 32)
-		{
-			data.WriteBits(Values.Count, bitsForSize);
+            if ((Values.Count % 32) != 0)
+                data.WriteBits(UpdateMask.Last(), Values.Count % 32);
+        }
 
-			if (Values.Count > 32)
-			{
-				if (data.HasUnfinishedBitPack())
-					for (int block = 0; block < Values.Count / 32; ++block)
-						data.WriteBits(UpdateMask[block], 32);
-				else
-					for (int block = 0; block < Values.Count / 32; ++block)
-						data.WriteUInt32(UpdateMask[block]);
-			}
+        public void ClearChangesMask()
+        {
+            for (var i = 0; i < UpdateMask.Count; ++i)
+                UpdateMask[i] = 0;
+        }
 
-			else if (Values.Count == 32)
-			{
-				data.WriteBits(UpdateMask.Last(), 32);
+        public void AddValue(T value)
+        {
+            MarkChanged(Values.Count);
+            MarkAllUpdateMaskFields(value);
 
-				return;
-			}
+            Values.Add(value);
+        }
 
-			if ((Values.Count % 32) != 0)
-				data.WriteBits(UpdateMask.Last(), Values.Count % 32);
-		}
+        public void InsertValue(int index, T value)
+        {
+            Values.Insert(index, value);
 
-		public void ClearChangesMask()
-		{
-			for (var i = 0; i < UpdateMask.Count; ++i)
-				UpdateMask[i] = 0;
-		}
+            for (int i = index; i < Values.Count; ++i)
+            {
+                MarkChanged(i);
+                // also mark all fields of value as changed
+                MarkAllUpdateMaskFields(Values[i]);
+            }
+        }
 
-		public void AddValue(T value)
-		{
-			MarkChanged(Values.Count);
-			MarkAllUpdateMaskFields(value);
+        public void RemoveValue(int index)
+        {
+            // remove by shifting entire container - client might rely on values being sorted for certain fields
+            Values.RemoveAt(index);
 
-			Values.Add(value);
-		}
+            for (int i = index; i < Values.Count; ++i)
+            {
+                MarkChanged(i);
+                // also mark all fields of value as changed
+                MarkAllUpdateMaskFields(Values[i]);
+            }
 
-		public void InsertValue(int index, T value)
-		{
-			Values.Insert(index, value);
-
-			for (int i = index; i < Values.Count; ++i)
-			{
-				MarkChanged(i);
-				// also mark all fields of value as changed
-				MarkAllUpdateMaskFields(Values[i]);
-			}
-		}
-
-		public void RemoveValue(int index)
-		{
-			// remove by shifting entire container - client might rely on values being sorted for certain fields
-			Values.RemoveAt(index);
-
-			for (int i = index; i < Values.Count; ++i)
-			{
-				MarkChanged(i);
-				// also mark all fields of value as changed
-				MarkAllUpdateMaskFields(Values[i]);
-			}
-
-			if ((Values.Count % 32) != 0)
+            if ((Values.Count % 32) != 0)
                 UpdateMask[Entities.UpdateMask.GetBlockIndex(Values.Count)] &= (uint)~Entities.UpdateMask.GetBlockFlag(Values.Count);
-			else
-				UpdateMask.RemoveAt(UpdateMask.Count - 1);
-		}
+            else
+                UpdateMask.RemoveAt(UpdateMask.Count - 1);
+        }
 
-		private void MarkAllUpdateMaskFields(T value)
-		{
-			if (value is IHasChangesMask)
-				((IHasChangesMask)value).GetUpdateMask().SetAll();
-		}
+        public void Clear()
+        {
+            Values.Clear();
+            UpdateMask.Clear();
+        }
 
-		public void Clear()
-		{
-			Values.Clear();
-			UpdateMask.Clear();
-		}
+        public void MarkChanged(int index)
+        {
+            int block = Entities.UpdateMask.GetBlockIndex(index);
 
-		public void MarkChanged(int index)
-		{
-			int block = Entities.UpdateMask.GetBlockIndex(index);
-
-			if (block >= UpdateMask.Count)
-				UpdateMask.Add(0);
+            if (block >= UpdateMask.Count)
+                UpdateMask.Add(0);
 
             UpdateMask[block] |= (uint)Entities.UpdateMask.GetBlockFlag(index);
-		}
+        }
 
-		public void ClearChanged(int index)
-		{
-			int block = Entities.UpdateMask.GetBlockIndex(index);
+        public void ClearChanged(int index)
+        {
+            int block = Entities.UpdateMask.GetBlockIndex(index);
 
-			if (block >= UpdateMask.Count)
-				UpdateMask.Add(0);
+            if (block >= UpdateMask.Count)
+                UpdateMask.Add(0);
 
             UpdateMask[block] &= ~(uint)Entities.UpdateMask.GetBlockFlag(index);
-		}
+        }
 
-		public bool Empty()
-		{
-			return Values.Empty();
-		}
+        public bool Empty()
+        {
+            return Values.Empty();
+        }
 
-		public int Size()
-		{
-			return Values.Count;
-		}
+        public int Size()
+        {
+            return Values.Count;
+        }
 
-		public static implicit operator List<T>(DynamicUpdateField<T> updateField)
-		{
-			return updateField.Values;
-		}
+        public static implicit operator List<T>(DynamicUpdateField<T> updateField)
+        {
+            return updateField.Values;
+        }
 
-		public IEnumerator<T> GetEnumerator()
-		{
-			foreach (var obj in Values)
-				yield return obj;
-		}
-	}
+        public IEnumerator<T> GetEnumerator()
+        {
+            foreach (var obj in Values)
+                yield return obj;
+        }
+
+        private void MarkAllUpdateMaskFields(T value)
+        {
+            if (value is IHasChangesMask)
+                ((IHasChangesMask)value).GetUpdateMask().SetAll();
+        }
+    }
 }

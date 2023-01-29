@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.IPlayer
 {
-	public interface IPlayerOnTextEmote : IScriptObject
-	{
-		void OnTextEmote(Player player, uint textEmote, uint emoteNum, ObjectGuid guid);
-	}
+    public interface IPlayerOnTextEmote : IScriptObject
+    {
+        void OnTextEmote(Player player, uint textEmote, uint emoteNum, ObjectGuid guid);
+    }
 }

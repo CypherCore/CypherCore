@@ -4,8 +4,8 @@
 namespace Game.Entities
 {
     public struct PvPInfo
-	{
-		public bool IsHostile { get; set; }
+    {
+        public bool IsHostile { get; set; }
         public bool IsInHostileArea { get; set; } //> Marks if player is in an area which forces PvP flag
         public bool IsInNoPvPArea { get; set; }   //> Marks if player is in a sanctuary or friendly capital city
         public bool IsInFFAPvPArea { get; set; }  //> Marks if player is in an FFAPvP area (such as Gurubashi Arena)

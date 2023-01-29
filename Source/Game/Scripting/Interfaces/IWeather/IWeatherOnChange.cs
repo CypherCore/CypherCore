@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWeather
 {
-	public interface IWeatherOnChange : IScriptObject
-	{
-		void OnChange(Weather weather, WeatherState state, float grade);
-	}
+    public interface IWeatherOnChange : IScriptObject
+    {
+        void OnChange(Weather weather, WeatherState state, float grade);
+    }
 }

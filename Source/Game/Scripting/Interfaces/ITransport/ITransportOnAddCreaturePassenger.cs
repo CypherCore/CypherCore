@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.ITransport
 {
-	public interface ITransportOnAddCreaturePassenger : IScriptObject
-	{
-		void OnAddCreaturePassenger(Transport transport, Creature creature);
-	}
+    public interface ITransportOnAddCreaturePassenger : IScriptObject
+    {
+        void OnAddCreaturePassenger(Transport transport, Creature creature);
+    }
 }

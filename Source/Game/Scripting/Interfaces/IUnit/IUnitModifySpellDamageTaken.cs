@@ -6,8 +6,8 @@ using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IUnit
 {
-	public interface IUnitModifySpellDamageTaken : IScriptObject
-	{
-		void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo);
-	}
+    public interface IUnitModifySpellDamageTaken : IScriptObject
+    {
+        void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo);
+    }
 }

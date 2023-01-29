@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IConversation
 {
-	public interface IConversationOnConversationCreate : IScriptObject
-	{
-		void OnConversationCreate(Conversation conversation, Unit creator);
-	}
+    public interface IConversationOnConversationCreate : IScriptObject
+    {
+        void OnConversationCreate(Conversation conversation, Unit creator);
+    }
 }

@@ -6,8 +6,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-	public interface IMapOnPlayerEnter<T> : IScriptObject where T : Map
-	{
-		void OnPlayerEnter(T map, Player player);
-	}
+    public interface IMapOnPlayerEnter<T> : IScriptObject where T : Map
+    {
+        void OnPlayerEnter(T map, Player player);
+    }
 }

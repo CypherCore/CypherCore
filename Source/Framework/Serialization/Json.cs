@@ -9,77 +9,77 @@ using Framework.IO;
 
 namespace Framework.Serialization
 {
-	public class Json
-	{
-		public static string CreateString<T>(T dataObject)
-		{
-			return Encoding.UTF8.GetString(CreateArray(dataObject));
-		}
+    public class Json
+    {
+        public static string CreateString<T>(T dataObject)
+        {
+            return Encoding.UTF8.GetString(CreateArray(dataObject));
+        }
 
-		public static byte[] CreateArray<T>(T dataObject)
-		{
-			var serializer = new DataContractJsonSerializer(typeof(T));
-			var stream     = new MemoryStream();
+        public static byte[] CreateArray<T>(T dataObject)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(T));
+            var stream = new MemoryStream();
 
-			serializer.WriteObject(stream, dataObject);
+            serializer.WriteObject(stream, dataObject);
 
-			return stream.ToArray();
-		}
+            return stream.ToArray();
+        }
 
-		public static T CreateObject<T>(Stream jsonData)
-		{
-			var serializer = new DataContractJsonSerializer(typeof(T));
+        public static T CreateObject<T>(Stream jsonData)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(T));
 
-			return (T)serializer.ReadObject(jsonData);
-		}
+            return (T)serializer.ReadObject(jsonData);
+        }
 
-		public static T CreateObject<T>(string jsonData, bool split = false)
-		{
-			return CreateObject<T>(Encoding.UTF8.GetBytes(split
-				                                              ? jsonData.Split(new[]
-				                                                               {
-					                                                               ':'
-				                                                               },
-				                                                               2)[1]
-				                                              : jsonData));
-		}
+        public static T CreateObject<T>(string jsonData, bool split = false)
+        {
+            return CreateObject<T>(Encoding.UTF8.GetBytes(split
+                                                              ? jsonData.Split(new[]
+                                                                               {
+                                                                                   ':'
+                                                                               },
+                                                                               2)[1]
+                                                              : jsonData));
+        }
 
-		public static T CreateObject<T>(byte[] jsonData)
-		{
-			return CreateObject<T>(new MemoryStream(jsonData));
-		}
+        public static T CreateObject<T>(byte[] jsonData)
+        {
+            return CreateObject<T>(new MemoryStream(jsonData));
+        }
 
-		public static object CreateObject(Stream jsonData, Type type)
-		{
-			var serializer = new DataContractJsonSerializer(type);
+        public static object CreateObject(Stream jsonData, Type type)
+        {
+            var serializer = new DataContractJsonSerializer(type);
 
-			return serializer.ReadObject(jsonData);
-		}
+            return serializer.ReadObject(jsonData);
+        }
 
-		public static object CreateObject(string jsonData, Type type, bool split = false)
-		{
-			return CreateObject(Encoding.UTF8.GetBytes(split
-				                                           ? jsonData.Split(new[]
-				                                                            {
-					                                                            ':'
-				                                                            },
-				                                                            2)[1]
-				                                           : jsonData),
-			                    type);
-		}
+        public static object CreateObject(string jsonData, Type type, bool split = false)
+        {
+            return CreateObject(Encoding.UTF8.GetBytes(split
+                                                           ? jsonData.Split(new[]
+                                                                            {
+                                                                                ':'
+                                                                            },
+                                                                            2)[1]
+                                                           : jsonData),
+                                type);
+        }
 
-		public static object CreateObject(byte[] jsonData, Type type)
-		{
-			return CreateObject(new MemoryStream(jsonData), type);
-		}
+        public static object CreateObject(byte[] jsonData, Type type)
+        {
+            return CreateObject(new MemoryStream(jsonData), type);
+        }
 
-		// Used for protobuf json strings.
-		public static byte[] Deflate<T>(string name, T data)
-		{
-			var jsonData       = Encoding.UTF8.GetBytes(name + ":" + CreateString(data) + "\0");
-			var compressedData = ZLib.Compress(jsonData);
+        // Used for protobuf json strings.
+        public static byte[] Deflate<T>(string name, T data)
+        {
+            var jsonData = Encoding.UTF8.GetBytes(name + ":" + CreateString(data) + "\0");
+            var compressedData = ZLib.Compress(jsonData);
 
-			return BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
-		}
-	}
+            return BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
+        }
+    }
 }

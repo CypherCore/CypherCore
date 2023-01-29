@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnMotdChange : IScriptObject
-	{
-		void OnMotdChange(string newMotd);
-	}
+    public interface IWorldOnMotdChange : IScriptObject
+    {
+        void OnMotdChange(string newMotd);
+    }
 }

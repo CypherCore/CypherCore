@@ -6,90 +6,90 @@ using System.Net.Sockets;
 
 namespace Framework.Networking
 {
-	public class SocketManager<TSocketType> where TSocketType : ISocket
-	{
-		private int _threadCount;
-		private NetworkThread<TSocketType>[] _threads;
-		public AsyncAcceptor Acceptor;
+    public class SocketManager<TSocketType> where TSocketType : ISocket
+    {
+        public AsyncAcceptor Acceptor;
+        private int _threadCount;
+        private NetworkThread<TSocketType>[] _threads;
 
-		public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
-		{
-			Cypher.Assert(threadCount > 0);
+        public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
+        {
+            Cypher.Assert(threadCount > 0);
 
-			Acceptor = new AsyncAcceptor();
+            Acceptor = new AsyncAcceptor();
 
-			if (!Acceptor.Start(bindIp, port))
-			{
-				Log.outError(LogFilter.Network, "StartNetwork failed to Start AsyncAcceptor");
+            if (!Acceptor.Start(bindIp, port))
+            {
+                Log.outError(LogFilter.Network, "StartNetwork failed to Start AsyncAcceptor");
 
-				return false;
-			}
+                return false;
+            }
 
-			_threadCount = threadCount;
-			_threads     = new NetworkThread<TSocketType>[GetNetworkThreadCount()];
+            _threadCount = threadCount;
+            _threads = new NetworkThread<TSocketType>[GetNetworkThreadCount()];
 
-			for (int i = 0; i < _threadCount; ++i)
-			{
-				_threads[i] = new NetworkThread<TSocketType>();
-				_threads[i].Start();
-			}
+            for (int i = 0; i < _threadCount; ++i)
+            {
+                _threads[i] = new NetworkThread<TSocketType>();
+                _threads[i].Start();
+            }
 
-			Acceptor.AsyncAcceptSocket(OnSocketOpen);
+            Acceptor.AsyncAcceptSocket(OnSocketOpen);
 
-			return true;
-		}
+            return true;
+        }
 
-		public virtual void StopNetwork()
-		{
-			Acceptor.Close();
+        public virtual void StopNetwork()
+        {
+            Acceptor.Close();
 
-			if (_threadCount != 0)
-				for (int i = 0; i < _threadCount; ++i)
-					_threads[i].Stop();
+            if (_threadCount != 0)
+                for (int i = 0; i < _threadCount; ++i)
+                    _threads[i].Stop();
 
-			Wait();
+            Wait();
 
-			Acceptor     = null;
-			_threads     = null;
-			_threadCount = 0;
-		}
+            Acceptor = null;
+            _threads = null;
+            _threadCount = 0;
+        }
 
-		private void Wait()
-		{
-			if (_threadCount != 0)
-				for (int i = 0; i < _threadCount; ++i)
-					_threads[i].Wait();
-		}
+        public virtual void OnSocketOpen(Socket sock)
+        {
+            try
+            {
+                TSocketType newSocket = (TSocketType)Activator.CreateInstance(typeof(TSocketType), sock);
+                newSocket.Accept();
 
-		public virtual void OnSocketOpen(Socket sock)
-		{
-			try
-			{
-				TSocketType newSocket = (TSocketType)Activator.CreateInstance(typeof(TSocketType), sock);
-				newSocket.Accept();
+                _threads[SelectThreadWithMinConnections()].AddSocket(newSocket);
+            }
+            catch (Exception err)
+            {
+                Log.outException(err);
+            }
+        }
 
-				_threads[SelectThreadWithMinConnections()].AddSocket(newSocket);
-			}
-			catch (Exception err)
-			{
-				Log.outException(err);
-			}
-		}
+        public int GetNetworkThreadCount()
+        {
+            return _threadCount;
+        }
 
-		public int GetNetworkThreadCount()
-		{
-			return _threadCount;
-		}
+        private void Wait()
+        {
+            if (_threadCount != 0)
+                for (int i = 0; i < _threadCount; ++i)
+                    _threads[i].Wait();
+        }
 
-		private uint SelectThreadWithMinConnections()
-		{
-			uint min = 0;
+        private uint SelectThreadWithMinConnections()
+        {
+            uint min = 0;
 
-			for (uint i = 1; i < _threadCount; ++i)
-				if (_threads[i].GetConnectionCount() < _threads[min].GetConnectionCount())
-					min = i;
+            for (uint i = 1; i < _threadCount; ++i)
+                if (_threads[i].GetConnectionCount() < _threads[min].GetConnectionCount())
+                    min = i;
 
-			return min;
-		}
-	}
+            return min;
+        }
+    }
 }

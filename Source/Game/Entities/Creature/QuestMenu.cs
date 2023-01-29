@@ -13,19 +13,10 @@ public class QuestMenu
 
         QuestMenuItem questMenuItem = new();
 
-        questMenuItem.QuestId   = QuestId;
+        questMenuItem.QuestId = QuestId;
         questMenuItem.QuestIcon = Icon;
 
         _questMenuItems.Add(questMenuItem);
-    }
-
-    private bool HasItem(uint questId)
-    {
-        foreach (var item in _questMenuItems)
-            if (item.QuestId == questId)
-                return true;
-
-        return false;
     }
 
     public void ClearMenu()
@@ -46,5 +37,14 @@ public class QuestMenu
     public QuestMenuItem GetItem(int index)
     {
         return _questMenuItems.LookupByIndex(index);
+    }
+
+    private bool HasItem(uint questId)
+    {
+        foreach (var item in _questMenuItems)
+            if (item.QuestId == questId)
+                return true;
+
+        return false;
     }
 }

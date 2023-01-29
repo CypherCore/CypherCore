@@ -8,14 +8,14 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class AreaTriggerTemplate
-	{
-		public List<AreaTriggerAction> Actions { get; set; } = new();
-		public AreaTriggerFlags Flags { get; set; }
+    {
         public AreaTriggerId Id;
+        public List<AreaTriggerAction> Actions { get; set; } = new();
+        public AreaTriggerFlags Flags { get; set; }
 
-		public bool HasFlag(AreaTriggerFlags flag)
-		{
-			return Flags.HasAnyFlag(flag);
-		}
-	}
+        public bool HasFlag(AreaTriggerFlags flag)
+        {
+            return Flags.HasAnyFlag(flag);
+        }
+    }
 }

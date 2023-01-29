@@ -6,64 +6,64 @@ using System.Security.Cryptography;
 
 namespace Framework.Cryptography
 {
-	public sealed class WorldCrypt : IDisposable
-	{
-		private ulong _clientCounter;
-		private AesGcm _clientDecrypt;
-		private ulong _serverCounter;
+    public sealed class WorldCrypt : IDisposable
+    {
+        private ulong _clientCounter;
+        private AesGcm _clientDecrypt;
+        private ulong _serverCounter;
 
-		private AesGcm _serverEncrypt;
+        private AesGcm _serverEncrypt;
 
-		public bool IsInitialized { get; set; }
+        public bool IsInitialized { get; set; }
 
-		public void Dispose()
-		{
-			IsInitialized = false;
-		}
+        public void Dispose()
+        {
+            IsInitialized = false;
+        }
 
-		public void Initialize(byte[] key)
-		{
-			if (IsInitialized)
-				throw new InvalidOperationException("PacketCrypt already initialized!");
+        public void Initialize(byte[] key)
+        {
+            if (IsInitialized)
+                throw new InvalidOperationException("PacketCrypt already initialized!");
 
-			_serverEncrypt = new AesGcm(key);
-			_clientDecrypt = new AesGcm(key);
+            _serverEncrypt = new AesGcm(key);
+            _clientDecrypt = new AesGcm(key);
 
-			IsInitialized = true;
-		}
+            IsInitialized = true;
+        }
 
-		public bool Encrypt(ref byte[] data, ref byte[] tag)
-		{
-			try
-			{
-				if (IsInitialized)
-					_serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
+        public bool Encrypt(ref byte[] data, ref byte[] tag)
+        {
+            try
+            {
+                if (IsInitialized)
+                    _serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
 
-				++_serverCounter;
+                ++_serverCounter;
 
-				return true;
-			}
-			catch (CryptographicException)
-			{
-				return false;
-			}
-		}
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
+        }
 
-		public bool Decrypt(byte[] data, byte[] tag)
-		{
-			try
-			{
-				if (IsInitialized)
-					_clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
+        public bool Decrypt(byte[] data, byte[] tag)
+        {
+            try
+            {
+                if (IsInitialized)
+                    _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
 
-				++_clientCounter;
+                ++_clientCounter;
 
-				return true;
-			}
-			catch (CryptographicException)
-			{
-				return false;
-			}
-		}
-	}
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
+        }
+    }
 }

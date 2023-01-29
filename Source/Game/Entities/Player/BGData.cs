@@ -8,13 +8,20 @@ namespace Game.Entities
 {
     // Holder for Battlegrounddata
     public class BGData
-	{
-		public byte AfkReportedCount { get; set; }
+    {
+        public BGData()
+        {
+            TypeID = BattlegroundTypeId.None;
+            ClearTaxiPath();
+            JoinPos = new WorldLocation();
+        }
+
+        public byte AfkReportedCount { get; set; }
         public long AfkReportedTimer { get; set; }
 
         public List<ObjectGuid> AfkReporter { get; set; } = new();
 
-		public uint InstanceID { get; set; } //< This variable is set to bg._InstanceID,
+        public uint InstanceID { get; set; } //< This variable is set to bg._InstanceID,
 
         public uint Team { get; set; } //< What side the player will be added to
 
@@ -26,21 +33,14 @@ namespace Game.Entities
         public uint MountSpell { get; set; }
         public uint[] TaxiPath { get; set; } = new uint[2];
 
-		public BGData()
-		{
-			TypeID = BattlegroundTypeId.None;
-			ClearTaxiPath();
-			JoinPos = new WorldLocation();
-		}
+        public void ClearTaxiPath()
+        {
+            TaxiPath[0] = TaxiPath[1] = 0;
+        }
 
-		public void ClearTaxiPath()
-		{
-			TaxiPath[0] = TaxiPath[1] = 0;
-		}
-
-		public bool HasTaxiPath()
-		{
-			return TaxiPath[0] != 0 && TaxiPath[1] != 0;
-		}
-	}
+        public bool HasTaxiPath()
+        {
+            return TaxiPath[0] != 0 && TaxiPath[1] != 0;
+        }
+    }
 }

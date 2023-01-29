@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.IAura
 {
-	public interface IAuraCheckAreaTarget : IAuraScript
-	{
-		bool CheckAreaTarget(Unit target);
-	}
+    public interface IAuraCheckAreaTarget : IAuraScript
+    {
+        bool CheckAreaTarget(Unit target);
+    }
 }

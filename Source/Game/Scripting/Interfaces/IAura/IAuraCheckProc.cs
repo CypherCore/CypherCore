@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.IAura
 {
-	public interface IAuraCheckProc : IAuraScript
-	{
-		bool CheckProc(ProcEventInfo info);
-	}
+    public interface IAuraCheckProc : IAuraScript
+    {
+        bool CheckProc(ProcEventInfo info);
+    }
 }

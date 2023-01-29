@@ -10,131 +10,131 @@ using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BaradinHold
 {
-	internal struct DataTypes
-	{
-		public const uint Argaloth = 0;
-		public const uint Occuthar = 1;
-		public const uint Alizabal = 2;
-	}
+    internal struct DataTypes
+    {
+        public const uint Argaloth = 0;
+        public const uint Occuthar = 1;
+        public const uint Alizabal = 2;
+    }
 
-	internal struct CreatureIds
-	{
-		public const uint EyeOfOccuthar = 52389;
-		public const uint FocusFireDummy = 52369;
-		public const uint OccutharEye = 52368;
-	}
+    internal struct CreatureIds
+    {
+        public const uint EyeOfOccuthar = 52389;
+        public const uint FocusFireDummy = 52369;
+        public const uint OccutharEye = 52368;
+    }
 
-	internal struct BossIds
-	{
-		public const uint Argaloth = 47120;
-		public const uint Occuthar = 52363;
-		public const uint Alizabal = 55869;
-	}
+    internal struct BossIds
+    {
+        public const uint Argaloth = 47120;
+        public const uint Occuthar = 52363;
+        public const uint Alizabal = 55869;
+    }
 
-	internal struct GameObjectIds
-	{
-		public const uint ArgalothDoor = 207619;
-		public const uint OccutharDoor = 208953;
-		public const uint AlizabalDoor = 209849;
-	}
+    internal struct GameObjectIds
+    {
+        public const uint ArgalothDoor = 207619;
+        public const uint OccutharDoor = 208953;
+        public const uint AlizabalDoor = 209849;
+    }
 
-	[Script]
-	internal class instance_baradin_hold : InstanceMapScript, IInstanceMapGetInstanceScript
-	{
-		private static DoorData[] doorData =
-		{
-			new(GameObjectIds.ArgalothDoor, DataTypes.Argaloth, DoorType.Room), new(GameObjectIds.OccutharDoor, DataTypes.Occuthar, DoorType.Room), new(GameObjectIds.AlizabalDoor, DataTypes.Alizabal, DoorType.Room)
-		};
+    [Script]
+    internal class instance_baradin_hold : InstanceMapScript, IInstanceMapGetInstanceScript
+    {
+        private class instance_baradin_hold_InstanceMapScript : InstanceScript
+        {
+            private ObjectGuid AlizabalGUID;
+            private ObjectGuid ArgalothGUID;
+            private ObjectGuid OccutharGUID;
 
-		private static DungeonEncounterData[] encounters =
-		{
-			new(DataTypes.Argaloth, 1033), new(DataTypes.Occuthar, 1250), new(DataTypes.Alizabal, 1332)
-		};
+            public instance_baradin_hold_InstanceMapScript(InstanceMap map) : base(map)
+            {
+                SetHeaders("BH");
+                SetBossNumber(3);
+                LoadDoorData(doorData);
+                LoadDungeonEncounterData(encounters);
+            }
 
-		public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757)
-		{
-		}
+            public override void OnCreatureCreate(Creature creature)
+            {
+                switch (creature.GetEntry())
+                {
+                    case BossIds.Argaloth:
+                        ArgalothGUID = creature.GetGUID();
 
-		public InstanceScript GetInstanceScript(InstanceMap map)
-		{
-			return new instance_baradin_hold_InstanceMapScript(map);
-		}
+                        break;
+                    case BossIds.Occuthar:
+                        OccutharGUID = creature.GetGUID();
 
-		private class instance_baradin_hold_InstanceMapScript : InstanceScript
-		{
-			private ObjectGuid AlizabalGUID;
-			private ObjectGuid ArgalothGUID;
-			private ObjectGuid OccutharGUID;
+                        break;
+                    case BossIds.Alizabal:
+                        AlizabalGUID = creature.GetGUID();
 
-			public instance_baradin_hold_InstanceMapScript(InstanceMap map) : base(map)
-			{
-				SetHeaders("BH");
-				SetBossNumber(3);
-				LoadDoorData(doorData);
-				LoadDungeonEncounterData(encounters);
-			}
+                        break;
+                }
+            }
 
-			public override void OnCreatureCreate(Creature creature)
-			{
-				switch (creature.GetEntry())
-				{
-					case BossIds.Argaloth:
-						ArgalothGUID = creature.GetGUID();
+            public override void OnGameObjectCreate(GameObject go)
+            {
+                switch (go.GetEntry())
+                {
+                    case GameObjectIds.ArgalothDoor:
+                    case GameObjectIds.OccutharDoor:
+                    case GameObjectIds.AlizabalDoor:
+                        AddDoor(go, true);
 
-						break;
-					case BossIds.Occuthar:
-						OccutharGUID = creature.GetGUID();
+                        break;
+                }
+            }
 
-						break;
-					case BossIds.Alizabal:
-						AlizabalGUID = creature.GetGUID();
+            public override ObjectGuid GetGuidData(uint data)
+            {
+                switch (data)
+                {
+                    case DataTypes.Argaloth:
+                        return ArgalothGUID;
+                    case DataTypes.Occuthar:
+                        return OccutharGUID;
+                    case DataTypes.Alizabal:
+                        return AlizabalGUID;
+                    default:
+                        break;
+                }
 
-						break;
-				}
-			}
+                return ObjectGuid.Empty;
+            }
 
-			public override void OnGameObjectCreate(GameObject go)
-			{
-				switch (go.GetEntry())
-				{
-					case GameObjectIds.ArgalothDoor:
-					case GameObjectIds.OccutharDoor:
-					case GameObjectIds.AlizabalDoor:
-						AddDoor(go, true);
+            public override void OnGameObjectRemove(GameObject go)
+            {
+                switch (go.GetEntry())
+                {
+                    case GameObjectIds.ArgalothDoor:
+                    case GameObjectIds.OccutharDoor:
+                    case GameObjectIds.AlizabalDoor:
+                        AddDoor(go, false);
 
-						break;
-				}
-			}
+                        break;
+                }
+            }
+        }
 
-			public override ObjectGuid GetGuidData(uint data)
-			{
-				switch (data)
-				{
-					case DataTypes.Argaloth:
-						return ArgalothGUID;
-					case DataTypes.Occuthar:
-						return OccutharGUID;
-					case DataTypes.Alizabal:
-						return AlizabalGUID;
-					default:
-						break;
-				}
+        private static readonly DoorData[] doorData =
+        {
+            new(GameObjectIds.ArgalothDoor, DataTypes.Argaloth, DoorType.Room), new(GameObjectIds.OccutharDoor, DataTypes.Occuthar, DoorType.Room), new(GameObjectIds.AlizabalDoor, DataTypes.Alizabal, DoorType.Room)
+        };
 
-				return ObjectGuid.Empty;
-			}
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.Argaloth, 1033), new(DataTypes.Occuthar, 1250), new(DataTypes.Alizabal, 1332)
+        };
 
-			public override void OnGameObjectRemove(GameObject go)
-			{
-				switch (go.GetEntry())
-				{
-					case GameObjectIds.ArgalothDoor:
-					case GameObjectIds.OccutharDoor:
-					case GameObjectIds.AlizabalDoor:
-						AddDoor(go, false);
+        public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757)
+        {
+        }
 
-						break;
-				}
-			}
-		}
-	}
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_baradin_hold_InstanceMapScript(map);
+        }
+    }
 }

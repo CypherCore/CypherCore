@@ -4,498 +4,490 @@
 using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using Game.Maps.Notifiers;
 
 namespace Game.Maps
 {
-	public class GridInfo
-	{
-		private TimeTracker i_timer;
+    public class GridInfo
+    {
+        private readonly PeriodicTimer vis_Update;
+        private TimeTracker i_timer;
 
-		private ushort i_unloadActiveLockCount; // lock from active object spawn points (prevent clone loading)
-		private bool i_unloadExplicitLock;      // explicit manual lock or config setting
-		private PeriodicTimer vis_Update;
+        private ushort i_unloadActiveLockCount; // lock from active object spawn points (prevent clone loading)
+        private bool i_unloadExplicitLock;      // explicit manual lock or config setting
 
-		public GridInfo()
-		{
-			i_timer                 = new TimeTracker(0);
-			vis_Update              = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
-			i_unloadActiveLockCount = 0;
-			i_unloadExplicitLock    = false;
-		}
+        public GridInfo()
+        {
+            i_timer = new TimeTracker(0);
+            vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
+            i_unloadActiveLockCount = 0;
+            i_unloadExplicitLock = false;
+        }
 
-		public GridInfo(long expiry, bool unload = true)
-		{
-			i_timer                 = new TimeTracker((uint)expiry);
-			vis_Update              = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
-			i_unloadActiveLockCount = 0;
-			i_unloadExplicitLock    = !unload;
-		}
+        public GridInfo(long expiry, bool unload = true)
+        {
+            i_timer = new TimeTracker((uint)expiry);
+            vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
+            i_unloadActiveLockCount = 0;
+            i_unloadExplicitLock = !unload;
+        }
 
-		public TimeTracker GetTimeTracker()
-		{
-			return i_timer;
-		}
+        public TimeTracker GetTimeTracker()
+        {
+            return i_timer;
+        }
 
-		public bool GetUnloadLock()
-		{
-			return i_unloadActiveLockCount != 0 || i_unloadExplicitLock;
-		}
+        public bool GetUnloadLock()
+        {
+            return i_unloadActiveLockCount != 0 || i_unloadExplicitLock;
+        }
 
-		public void SetUnloadExplicitLock(bool on)
-		{
-			i_unloadExplicitLock = on;
-		}
+        public void SetUnloadExplicitLock(bool on)
+        {
+            i_unloadExplicitLock = on;
+        }
 
-		public void IncUnloadActiveLock()
-		{
-			++i_unloadActiveLockCount;
-		}
+        public void IncUnloadActiveLock()
+        {
+            ++i_unloadActiveLockCount;
+        }
 
-		public void DecUnloadActiveLock()
-		{
-			if (i_unloadActiveLockCount != 0) --i_unloadActiveLockCount;
-		}
+        public void DecUnloadActiveLock()
+        {
+            if (i_unloadActiveLockCount != 0) --i_unloadActiveLockCount;
+        }
 
-		private void SetTimer(TimeTracker pTimer)
-		{
-			i_timer = pTimer;
-		}
+        public void ResetTimeTracker(long interval)
+        {
+            i_timer.Reset((uint)interval);
+        }
 
-		public void ResetTimeTracker(long interval)
-		{
-			i_timer.Reset((uint)interval);
-		}
+        public void UpdateTimeTracker(long diff)
+        {
+            i_timer.Update((uint)diff);
+        }
 
-		public void UpdateTimeTracker(long diff)
-		{
-			i_timer.Update((uint)diff);
-		}
+        public PeriodicTimer GetRelocationTimer()
+        {
+            return vis_Update;
+        }
 
-		public PeriodicTimer GetRelocationTimer()
-		{
-			return vis_Update;
-		}
-	}
+        private void SetTimer(TimeTracker pTimer)
+        {
+            i_timer = pTimer;
+        }
+    }
 
-	public class Grid
-	{
-		private uint gridId;
-		private GridInfo gridInfo;
-		private bool gridObjectDataLoaded;
-		private GridState gridState;
-		private uint gridX;
-		private uint gridY;
-		private GridCell[][] i_cells = new GridCell[MapConst.MaxCells][];
+    public class Grid
+    {
+        private readonly GridInfo gridInfo;
+        private readonly uint gridX;
+        private readonly uint gridY;
+        private readonly GridCell[][] i_cells = new GridCell[MapConst.MaxCells][];
+        private uint gridId;
+        private bool gridObjectDataLoaded;
+        private GridState gridState;
 
-		public Grid(uint id, uint x, uint y, long expiry, bool unload = true)
-		{
-			gridId               = id;
-			gridX                = x;
-			gridY                = y;
-			gridInfo             = new GridInfo(expiry, unload);
-			gridState            = GridState.Invalid;
-			gridObjectDataLoaded = false;
+        public Grid(uint id, uint x, uint y, long expiry, bool unload = true)
+        {
+            gridId = id;
+            gridX = x;
+            gridY = y;
+            gridInfo = new GridInfo(expiry, unload);
+            gridState = GridState.Invalid;
+            gridObjectDataLoaded = false;
 
-			for (uint xx = 0; xx < MapConst.MaxCells; ++xx)
-			{
-				i_cells[xx] = new GridCell[MapConst.MaxCells];
+            for (uint xx = 0; xx < MapConst.MaxCells; ++xx)
+            {
+                i_cells[xx] = new GridCell[MapConst.MaxCells];
 
-				for (uint yy = 0; yy < MapConst.MaxCells; ++yy)
-					i_cells[xx][yy] = new GridCell();
-			}
-		}
+                for (uint yy = 0; yy < MapConst.MaxCells; ++yy)
+                    i_cells[xx][yy] = new GridCell();
+            }
+        }
 
-		public Grid(Cell cell, uint expiry, bool unload = true) : this(cell.GetId(), cell.GetGridX(), cell.GetGridY(), expiry, unload)
-		{
-		}
+        public Grid(Cell cell, uint expiry, bool unload = true) : this(cell.GetId(), cell.GetGridX(), cell.GetGridY(), expiry, unload)
+        {
+        }
 
-		public GridCell GetGridCell(uint x, uint y)
-		{
-			return i_cells[x][y];
-		}
+        public GridCell GetGridCell(uint x, uint y)
+        {
+            return i_cells[x][y];
+        }
 
-		public uint GetGridId()
-		{
-			return gridId;
-		}
+        public uint GetGridId()
+        {
+            return gridId;
+        }
 
-		private void SetGridId(uint id)
-		{
-			gridId = id;
-		}
+        public GridState GetGridState()
+        {
+            return gridState;
+        }
 
-		public GridState GetGridState()
-		{
-			return gridState;
-		}
+        public void SetGridState(GridState s)
+        {
+            gridState = s;
+        }
 
-		public void SetGridState(GridState s)
-		{
-			gridState = s;
-		}
+        public uint GetX()
+        {
+            return gridX;
+        }
 
-		public uint GetX()
-		{
-			return gridX;
-		}
+        public uint GetY()
+        {
+            return gridY;
+        }
 
-		public uint GetY()
-		{
-			return gridY;
-		}
+        public bool IsGridObjectDataLoaded()
+        {
+            return gridObjectDataLoaded;
+        }
 
-		public bool IsGridObjectDataLoaded()
-		{
-			return gridObjectDataLoaded;
-		}
+        public void SetGridObjectDataLoaded(bool pLoaded)
+        {
+            gridObjectDataLoaded = pLoaded;
+        }
 
-		public void SetGridObjectDataLoaded(bool pLoaded)
-		{
-			gridObjectDataLoaded = pLoaded;
-		}
+        public GridInfo GetGridInfoRef()
+        {
+            return gridInfo;
+        }
 
-		public GridInfo GetGridInfoRef()
-		{
-			return gridInfo;
-		}
+        public bool GetUnloadLock()
+        {
+            return gridInfo.GetUnloadLock();
+        }
 
-		private TimeTracker GetTimeTracker()
-		{
-			return gridInfo.GetTimeTracker();
-		}
+        public void SetUnloadExplicitLock(bool on)
+        {
+            gridInfo.SetUnloadExplicitLock(on);
+        }
 
-		public bool GetUnloadLock()
-		{
-			return gridInfo.GetUnloadLock();
-		}
+        public void IncUnloadActiveLock()
+        {
+            gridInfo.IncUnloadActiveLock();
+        }
 
-		public void SetUnloadExplicitLock(bool on)
-		{
-			gridInfo.SetUnloadExplicitLock(on);
-		}
+        public void DecUnloadActiveLock()
+        {
+            gridInfo.DecUnloadActiveLock();
+        }
 
-		public void IncUnloadActiveLock()
-		{
-			gridInfo.IncUnloadActiveLock();
-		}
+        public void ResetTimeTracker(long interval)
+        {
+            gridInfo.ResetTimeTracker(interval);
+        }
 
-		public void DecUnloadActiveLock()
-		{
-			gridInfo.DecUnloadActiveLock();
-		}
+        public void UpdateTimeTracker(long diff)
+        {
+            gridInfo.UpdateTimeTracker(diff);
+        }
 
-		public void ResetTimeTracker(long interval)
-		{
-			gridInfo.ResetTimeTracker(interval);
-		}
+        public void Update(Map map, uint diff)
+        {
+            switch (GetGridState())
+            {
+                case GridState.Active:
+                    // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
+                    GetGridInfoRef().UpdateTimeTracker(diff);
 
-		public void UpdateTimeTracker(long diff)
-		{
-			gridInfo.UpdateTimeTracker(diff);
-		}
+                    if (GetGridInfoRef().GetTimeTracker().Passed())
+                    {
+                        if (GetWorldObjectCountInNGrid<Player>() == 0 &&
+                            !map.ActiveObjectsNearGrid(this))
+                        {
+                            ObjectGridStoper worker = new();
+                            var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
+                            VisitAllGrids(visitor);
+                            SetGridState(GridState.Idle);
 
-		public void Update(Map map, uint diff)
-		{
-			switch (GetGridState())
-			{
-				case GridState.Active:
-					// Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
-					GetGridInfoRef().UpdateTimeTracker(diff);
+                            Log.outDebug(LogFilter.Maps,
+                                         "Grid[{0}, {1}] on map {2} moved to IDLE State",
+                                         GetX(),
+                                         GetY(),
+                                         map.GetId());
+                        }
+                        else
+                        {
+                            map.ResetGridExpiry(this, 0.1f);
+                        }
+                    }
 
-					if (GetGridInfoRef().GetTimeTracker().Passed())
-					{
-						if (GetWorldObjectCountInNGrid<Player>() == 0 &&
-						    !map.ActiveObjectsNearGrid(this))
-						{
-							ObjectGridStoper worker  = new();
-							var              visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-							VisitAllGrids(visitor);
-							SetGridState(GridState.Idle);
+                    break;
+                case GridState.Idle:
+                    map.ResetGridExpiry(this);
+                    SetGridState(GridState.Removal);
 
-							Log.outDebug(LogFilter.Maps,
-							             "Grid[{0}, {1}] on map {2} moved to IDLE State",
-							             GetX(),
-							             GetY(),
-							             map.GetId());
-						}
-						else
-						{
-							map.ResetGridExpiry(this, 0.1f);
-						}
-					}
+                    Log.outDebug(LogFilter.Maps,
+                                 "Grid[{0}, {1}] on map {2} moved to REMOVAL State",
+                                 GetX(),
+                                 GetY(),
+                                 map.GetId());
 
-					break;
-				case GridState.Idle:
-					map.ResetGridExpiry(this);
-					SetGridState(GridState.Removal);
+                    break;
+                case GridState.Removal:
+                    if (!GetGridInfoRef().GetUnloadLock())
+                    {
+                        GetGridInfoRef().UpdateTimeTracker(diff);
 
-					Log.outDebug(LogFilter.Maps,
-					             "Grid[{0}, {1}] on map {2} moved to REMOVAL State",
-					             GetX(),
-					             GetY(),
-					             map.GetId());
+                        if (GetGridInfoRef().GetTimeTracker().Passed())
+                            if (!map.UnloadGrid(this, false))
+                            {
+                                Log.outDebug(LogFilter.Maps,
+                                             "Grid[{0}, {1}] for map {2} differed unloading due to players or active objects nearby",
+                                             GetX(),
+                                             GetY(),
+                                             map.GetId());
 
-					break;
-				case GridState.Removal:
-					if (!GetGridInfoRef().GetUnloadLock())
-					{
-						GetGridInfoRef().UpdateTimeTracker(diff);
+                                map.ResetGridExpiry(this);
+                            }
+                    }
 
-						if (GetGridInfoRef().GetTimeTracker().Passed())
-							if (!map.UnloadGrid(this, false))
-							{
-								Log.outDebug(LogFilter.Maps,
-								             "Grid[{0}, {1}] for map {2} differed unloading due to players or active objects nearby",
-								             GetX(),
-								             GetY(),
-								             map.GetId());
+                    break;
+            }
+        }
 
-								map.ResetGridExpiry(this);
-							}
-					}
+        public void VisitAllGrids(Visitor visitor)
+        {
+            for (uint x = 0; x < MapConst.MaxCells; ++x)
+                for (uint y = 0; y < MapConst.MaxCells; ++y)
+                    GetGridCell(x, y).Visit(visitor);
+        }
 
-					break;
-			}
-		}
+        public void VisitGrid(uint x, uint y, Visitor visitor)
+        {
+            GetGridCell(x, y).Visit(visitor);
+        }
 
-		public void VisitAllGrids(Visitor visitor)
-		{
-			for (uint x = 0; x < MapConst.MaxCells; ++x)
-				for (uint y = 0; y < MapConst.MaxCells; ++y)
-					GetGridCell(x, y).Visit(visitor);
-		}
+        public uint GetWorldObjectCountInNGrid<T>() where T : WorldObject
+        {
+            uint count = 0;
 
-		public void VisitGrid(uint x, uint y, Visitor visitor)
-		{
-			GetGridCell(x, y).Visit(visitor);
-		}
+            for (uint x = 0; x < MapConst.MaxCells; ++x)
+                for (uint y = 0; y < MapConst.MaxCells; ++y)
+                    count += i_cells[x][y].GetWorldObjectCountInGrid<T>();
 
-		public uint GetWorldObjectCountInNGrid<T>() where T : WorldObject
-		{
-			uint count = 0;
+            return count;
+        }
 
-			for (uint x = 0; x < MapConst.MaxCells; ++x)
-				for (uint y = 0; y < MapConst.MaxCells; ++y)
-					count += i_cells[x][y].GetWorldObjectCountInGrid<T>();
+        private void SetGridId(uint id)
+        {
+            gridId = id;
+        }
 
-			return count;
-		}
-	}
+        private TimeTracker GetTimeTracker()
+        {
+            return gridInfo.GetTimeTracker();
+        }
+    }
 
-	public class GridCell
-	{
+    public class GridCell
+    {
         /// <summary>
         ///  Holds all Grid objects - GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger, Conversation, SceneObject
         /// </summary>
-        private MultiTypeContainer _container;
+        private readonly MultiTypeContainer _container;
 
         /// <summary>
         ///  Holds all World objects - Player, Pets, Corpse(resurrectable), DynamicObject(farsight)
         /// </summary>
-        private MultiTypeContainer _objects;
+        private readonly MultiTypeContainer _objects;
 
-		public GridCell()
-		{
-			_objects   = new MultiTypeContainer();
-			_container = new MultiTypeContainer();
-		}
+        public GridCell()
+        {
+            _objects = new MultiTypeContainer();
+            _container = new MultiTypeContainer();
+        }
 
-		public void Visit(Visitor visitor)
-		{
-			switch (visitor._mask)
-			{
-				case GridMapTypeMask.AllGrid:
-					visitor.Visit(_container.gameObjects);
-					visitor.Visit(_container.creatures);
-					visitor.Visit(_container.dynamicObjects);
-					visitor.Visit(_container.corpses);
-					visitor.Visit(_container.areaTriggers);
-					visitor.Visit(_container.sceneObjects);
-					visitor.Visit(_container.conversations);
-					visitor.Visit(_container.worldObjects);
+        public void Visit(Visitor visitor)
+        {
+            switch (visitor._mask)
+            {
+                case GridMapTypeMask.AllGrid:
+                    visitor.Visit(_container.gameObjects);
+                    visitor.Visit(_container.creatures);
+                    visitor.Visit(_container.dynamicObjects);
+                    visitor.Visit(_container.corpses);
+                    visitor.Visit(_container.areaTriggers);
+                    visitor.Visit(_container.sceneObjects);
+                    visitor.Visit(_container.conversations);
+                    visitor.Visit(_container.worldObjects);
 
-					break;
-				case GridMapTypeMask.AllWorld:
-					visitor.Visit(_objects.players);
-					visitor.Visit(_objects.creatures);
-					visitor.Visit(_objects.corpses);
-					visitor.Visit(_objects.dynamicObjects);
-					visitor.Visit(_objects.worldObjects);
+                    break;
+                case GridMapTypeMask.AllWorld:
+                    visitor.Visit(_objects.players);
+                    visitor.Visit(_objects.creatures);
+                    visitor.Visit(_objects.corpses);
+                    visitor.Visit(_objects.dynamicObjects);
+                    visitor.Visit(_objects.worldObjects);
 
-					break;
-				default:
-					Log.outError(LogFilter.Server, "{0} called Visit with Unknown Mask {1}.", visitor.ToString(), visitor._mask);
+                    break;
+                default:
+                    Log.outError(LogFilter.Server, "{0} called Visit with Unknown Mask {1}.", visitor.ToString(), visitor._mask);
 
-					break;
-			}
-		}
+                    break;
+            }
+        }
 
-		public uint GetWorldObjectCountInGrid<T>() where T : WorldObject
-		{
-			return (uint)_objects.GetCount<T>();
-		}
+        public uint GetWorldObjectCountInGrid<T>() where T : WorldObject
+        {
+            return (uint)_objects.GetCount<T>();
+        }
 
-		public void AddWorldObject(WorldObject obj)
-		{
-			_objects.Insert(obj);
-		}
+        public void AddWorldObject(WorldObject obj)
+        {
+            _objects.Insert(obj);
+        }
 
-		public void AddGridObject(WorldObject obj)
-		{
-			_container.Insert(obj);
-		}
+        public void AddGridObject(WorldObject obj)
+        {
+            _container.Insert(obj);
+        }
 
-		public void RemoveWorldObject(WorldObject obj)
-		{
-			_objects.Remove(obj);
-		}
+        public void RemoveWorldObject(WorldObject obj)
+        {
+            _objects.Remove(obj);
+        }
 
-		public void RemoveGridObject(WorldObject obj)
-		{
-			_container.Remove(obj);
-		}
+        public void RemoveGridObject(WorldObject obj)
+        {
+            _container.Remove(obj);
+        }
 
-		public bool HasWorldObject(WorldObject obj)
-		{
-			return _objects.Contains(obj);
-		}
+        public bool HasWorldObject(WorldObject obj)
+        {
+            return _objects.Contains(obj);
+        }
 
-		public bool HasGridObject(WorldObject obj)
-		{
-			return _container.Contains(obj);
-		}
-	}
+        public bool HasGridObject(WorldObject obj)
+        {
+            return _container.Contains(obj);
+        }
+    }
 
-	public class MultiTypeContainer
-	{
-		public List<AreaTrigger> areaTriggers = new();
-		public List<Conversation> conversations = new();
-		public List<Corpse> corpses = new();
-		public List<Creature> creatures = new();
-		public List<DynamicObject> dynamicObjects = new();
-		public List<GameObject> gameObjects = new();
+    public class MultiTypeContainer
+    {
+        public List<AreaTrigger> areaTriggers = new();
+        public List<Conversation> conversations = new();
+        public List<Corpse> corpses = new();
+        public List<Creature> creatures = new();
+        public List<DynamicObject> dynamicObjects = new();
+        public List<GameObject> gameObjects = new();
 
-		public List<Player> players = new();
-		public List<SceneObject> sceneObjects = new();
-		public List<WorldObject> worldObjects = new();
+        public List<Player> players = new();
+        public List<SceneObject> sceneObjects = new();
+        public List<WorldObject> worldObjects = new();
 
-		public void Insert(WorldObject obj)
-		{
-			worldObjects.Add(obj);
+        public void Insert(WorldObject obj)
+        {
+            worldObjects.Add(obj);
 
-			switch (obj.GetTypeId())
-			{
-				case TypeId.Unit:
-					creatures.Add((Creature)obj);
+            switch (obj.GetTypeId())
+            {
+                case TypeId.Unit:
+                    creatures.Add((Creature)obj);
 
-					break;
-				case TypeId.Player:
-					players.Add((Player)obj);
+                    break;
+                case TypeId.Player:
+                    players.Add((Player)obj);
 
-					break;
-				case TypeId.GameObject:
-					gameObjects.Add((GameObject)obj);
+                    break;
+                case TypeId.GameObject:
+                    gameObjects.Add((GameObject)obj);
 
-					break;
-				case TypeId.DynamicObject:
-					dynamicObjects.Add((DynamicObject)obj);
+                    break;
+                case TypeId.DynamicObject:
+                    dynamicObjects.Add((DynamicObject)obj);
 
-					break;
-				case TypeId.Corpse:
-					corpses.Add((Corpse)obj);
+                    break;
+                case TypeId.Corpse:
+                    corpses.Add((Corpse)obj);
 
-					break;
-				case TypeId.AreaTrigger:
-					areaTriggers.Add((AreaTrigger)obj);
+                    break;
+                case TypeId.AreaTrigger:
+                    areaTriggers.Add((AreaTrigger)obj);
 
-					break;
-				case TypeId.SceneObject:
-					sceneObjects.Add((SceneObject)obj);
+                    break;
+                case TypeId.SceneObject:
+                    sceneObjects.Add((SceneObject)obj);
 
-					break;
-				case TypeId.Conversation:
-					conversations.Add((Conversation)obj);
+                    break;
+                case TypeId.Conversation:
+                    conversations.Add((Conversation)obj);
 
-					break;
-			}
-		}
+                    break;
+            }
+        }
 
-		public void Remove(WorldObject obj)
-		{
-			worldObjects.Remove(obj);
+        public void Remove(WorldObject obj)
+        {
+            worldObjects.Remove(obj);
 
-			switch (obj.GetTypeId())
-			{
-				case TypeId.Unit:
-					creatures.Remove((Creature)obj);
+            switch (obj.GetTypeId())
+            {
+                case TypeId.Unit:
+                    creatures.Remove((Creature)obj);
 
-					break;
-				case TypeId.Player:
-					players.Remove((Player)obj);
+                    break;
+                case TypeId.Player:
+                    players.Remove((Player)obj);
 
-					break;
-				case TypeId.GameObject:
-					gameObjects.Remove((GameObject)obj);
+                    break;
+                case TypeId.GameObject:
+                    gameObjects.Remove((GameObject)obj);
 
-					break;
-				case TypeId.DynamicObject:
-					dynamicObjects.Remove((DynamicObject)obj);
+                    break;
+                case TypeId.DynamicObject:
+                    dynamicObjects.Remove((DynamicObject)obj);
 
-					break;
-				case TypeId.Corpse:
-					corpses.Remove((Corpse)obj);
+                    break;
+                case TypeId.Corpse:
+                    corpses.Remove((Corpse)obj);
 
-					break;
-				case TypeId.AreaTrigger:
-					areaTriggers.Remove((AreaTrigger)obj);
+                    break;
+                case TypeId.AreaTrigger:
+                    areaTriggers.Remove((AreaTrigger)obj);
 
-					break;
-				case TypeId.SceneObject:
-					sceneObjects.Remove((SceneObject)obj);
+                    break;
+                case TypeId.SceneObject:
+                    sceneObjects.Remove((SceneObject)obj);
 
-					break;
-				case TypeId.Conversation:
-					conversations.Remove((Conversation)obj);
+                    break;
+                case TypeId.Conversation:
+                    conversations.Remove((Conversation)obj);
 
-					break;
-			}
-		}
+                    break;
+            }
+        }
 
-		public bool Contains(WorldObject obj)
-		{
-			return worldObjects.Contains(obj);
-		}
+        public bool Contains(WorldObject obj)
+        {
+            return worldObjects.Contains(obj);
+        }
 
-		public int GetCount<T>()
-		{
-			switch (typeof(T).Name)
-			{
-				case "Creature":
-					return creatures.Count;
-				case "Player":
-					return players.Count;
-				case "GameObject":
-					return gameObjects.Count;
-				case "DynamicObject":
-					return dynamicObjects.Count;
-				case "Corpse":
-					return corpses.Count;
-				case "AreaTrigger":
-					return areaTriggers.Count;
-				case "Conversation":
-					return conversations.Count;
-			}
+        public int GetCount<T>()
+        {
+            switch (typeof(T).Name)
+            {
+                case "Creature":
+                    return creatures.Count;
+                case "Player":
+                    return players.Count;
+                case "GameObject":
+                    return gameObjects.Count;
+                case "DynamicObject":
+                    return dynamicObjects.Count;
+                case "Corpse":
+                    return corpses.Count;
+                case "AreaTrigger":
+                    return areaTriggers.Count;
+                case "Conversation":
+                    return conversations.Count;
+            }
 
-			return 0;
-		}
-	}
-
-	public enum GridState
-	{
-		Invalid = 0,
-		Active = 1,
-		Idle = 2,
-		Removal = 3,
-		Max = 4
-	}
+            return 0;
+        }
+    }
 }

@@ -6,38 +6,39 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class ActionButton
-	{
-		public ulong PackedData { get; set; }
+    {
         public ActionButtonUpdateState UState;
 
-		public ActionButton()
-		{
-			PackedData = 0;
-			UState     = ActionButtonUpdateState.New;
-		}
+        public ActionButton()
+        {
+            PackedData = 0;
+            UState = ActionButtonUpdateState.New;
+        }
 
-		public ActionButtonType GetButtonType()
-		{
-			return (ActionButtonType)((PackedData & 0xFF00000000000000) >> 56);
-		}
+        public ulong PackedData { get; set; }
 
-		public ulong GetAction()
-		{
-			return (PackedData & 0x00FFFFFFFFFFFFFF);
-		}
+        public ActionButtonType GetButtonType()
+        {
+            return (ActionButtonType)((PackedData & 0xFF00000000000000) >> 56);
+        }
 
-		public void SetActionAndType(ulong action, ActionButtonType type)
-		{
-			ulong newData = action | ((ulong)type << 56);
+        public ulong GetAction()
+        {
+            return (PackedData & 0x00FFFFFFFFFFFFFF);
+        }
 
-			if (newData != PackedData ||
-			    UState == ActionButtonUpdateState.Deleted)
-			{
-				PackedData = newData;
+        public void SetActionAndType(ulong action, ActionButtonType type)
+        {
+            ulong newData = action | ((ulong)type << 56);
 
-				if (UState != ActionButtonUpdateState.New)
-					UState = ActionButtonUpdateState.Changed;
-			}
-		}
-	}
+            if (newData != PackedData ||
+                UState == ActionButtonUpdateState.Deleted)
+            {
+                PackedData = newData;
+
+                if (UState != ActionButtonUpdateState.New)
+                    UState = ActionButtonUpdateState.Changed;
+            }
+        }
+    }
 }

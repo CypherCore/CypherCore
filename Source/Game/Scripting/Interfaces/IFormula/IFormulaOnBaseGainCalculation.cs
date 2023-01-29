@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IFormula
 {
-	public interface IFormulaOnBaseGainCalculation : IScriptObject
-	{
-		void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel);
-	}
+    public interface IFormulaOnBaseGainCalculation : IScriptObject
+    {
+        void OnBaseGainCalculation(uint gain, uint playerLevel, uint mobLevel);
+    }
 }
