@@ -171,9 +171,9 @@ namespace Game
                 setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, standing));
 
             foreach (var state in _factions.Values)
-                if (state.needSend)
+                if (state.NeedSend)
                 {
-                    state.needSend = false;
+                    state.NeedSend = false;
 
                     if (faction == null ||
                         state.ReputationListID != faction.ReputationListID)
@@ -198,7 +198,7 @@ namespace Game
                 initFactions.FactionFlags[pair.Key] = pair.Value.Flags;
                 initFactions.FactionStandings[pair.Key] = pair.Value.Standing;
                 // @todo faction bonus
-                pair.Value.needSend = false;
+                pair.Value.NeedSend = false;
             }
 
             _player.SendPacket(initFactions);
@@ -238,12 +238,12 @@ namespace Game
                 if (repTemplate != null)
                 {
                     for (uint i = 0; i < 5; ++i)
-                        if (repTemplate.faction[i] != 0)
-                            if (_player.GetReputationRank(repTemplate.faction[i]) <= (ReputationRank)repTemplate.faction_rank[i])
+                        if (repTemplate.Faction[i] != 0)
+                            if (_player.GetReputationRank(repTemplate.Faction[i]) <= (ReputationRank)repTemplate.FactionRank[i])
                             {
                                 // bonuses are already given, so just modify standing by rate
-                                int spilloverRep = (int)(standing * repTemplate.faction_rate[i]);
-                                SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(repTemplate.faction[i]), spilloverRep, incremental);
+                                int spilloverRep = (int)(standing * repTemplate.FactionRate[i]);
+                                SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(repTemplate.Faction[i]), spilloverRep, incremental);
                             }
                 }
                 else
@@ -333,8 +333,8 @@ namespace Game
                 // Ignore renown reputation already raised to the maximum level
                 if (HasMaximumRenownReputation(factionEntry))
                 {
-                    factionState.needSend = false;
-                    factionState.needSave = false;
+                    factionState.NeedSend = false;
+                    factionState.NeedSave = false;
 
                     return false;
                 }
@@ -412,8 +412,8 @@ namespace Game
                 _player.ReputationChanged(factionEntry, reputationChange);
 
                 factionState.Standing = newStanding;
-                factionState.needSend = true;
-                factionState.needSave = true;
+                factionState.NeedSend = true;
+                factionState.NeedSave = true;
 
                 SetVisible(factionState);
 
@@ -552,8 +552,8 @@ namespace Game
                         // reset changed flag if values similar to saved in DB
                         if (faction.Flags == dbFactionFlags)
                         {
-                            faction.needSend = false;
-                            faction.needSave = false;
+                            faction.NeedSend = false;
+                            faction.NeedSave = false;
                         }
                     }
                 } while (result.NextRow());
@@ -562,7 +562,7 @@ namespace Game
         public void SaveToDB(SQLTransaction trans)
         {
             foreach (var factionState in _factions.Values)
-                if (factionState.needSave)
+                if (factionState.NeedSave)
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION_BY_FACTION);
                     stmt.AddValue(0, _player.GetGUID().GetCounter());
@@ -576,7 +576,7 @@ namespace Game
                     stmt.AddValue(3, (ushort)factionState.Flags);
                     trans.Append(stmt);
 
-                    factionState.needSave = false;
+                    factionState.NeedSave = false;
                 }
         }
 
@@ -833,8 +833,8 @@ namespace Game
                     newFaction.Standing = 0;
                     newFaction.VisualStandingIncrease = 0;
                     newFaction.Flags = GetDefaultStateFlags(factionEntry);
-                    newFaction.needSend = true;
-                    newFaction.needSave = true;
+                    newFaction.NeedSend = true;
+                    newFaction.NeedSave = true;
 
                     if (newFaction.Flags.HasFlag(ReputationFlags.Visible))
                         ++_visibleFactionCount;
@@ -864,8 +864,8 @@ namespace Game
                 return;
 
             faction.Flags |= ReputationFlags.Visible;
-            faction.needSend = true;
-            faction.needSave = true;
+            faction.NeedSend = true;
+            faction.NeedSave = true;
 
             _visibleFactionCount++;
 
@@ -889,8 +889,8 @@ namespace Game
             else
                 faction.Flags &= ~ReputationFlags.AtWar;
 
-            faction.needSend = true;
-            faction.needSave = true;
+            faction.NeedSend = true;
+            faction.NeedSave = true;
         }
 
         private void SetInactive(FactionState faction, bool inactive)
@@ -909,8 +909,8 @@ namespace Game
             else
                 faction.Flags &= ~ReputationFlags.Inactive;
 
-            faction.needSend = true;
-            faction.needSave = true;
+            faction.NeedSend = true;
+            faction.NeedSave = true;
         }
 
         private void UpdateRankCounters(ReputationRank old_rank, ReputationRank new_rank)
@@ -983,47 +983,5 @@ namespace Game
         private bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
 
         #endregion
-    }
-
-    public class FactionState
-    {
-        public ReputationFlags Flags;
-        public uint Id;
-        public bool needSave;
-        public bool needSend;
-        public uint ReputationListID;
-        public int Standing;
-        public int VisualStandingIncrease;
-    }
-
-    public class RepRewardRate
-    {
-        public float creatureRate; // no reputation are given at all for this faction/rate Type.
-        public float questDailyRate;
-        public float questMonthlyRate;
-        public float questRate; // We allow rate = 0.0 in database. For this case, it means that
-        public float questRepeatableRate;
-        public float questWeeklyRate;
-        public float spellRate;
-    }
-
-    public class ReputationOnKillEntry
-    {
-        public bool IsTeamAward1;
-        public bool IsTeamAward2;
-        public uint RepFaction1;
-        public uint RepFaction2;
-        public uint ReputationMaxCap1;
-        public uint ReputationMaxCap2;
-        public int RepValue1;
-        public int RepValue2;
-        public bool TeamDependent;
-    }
-
-    public class RepSpilloverTemplate
-    {
-        public uint[] faction = new uint[5];
-        public uint[] faction_rank = new uint[5];
-        public float[] faction_rate = new float[5];
     }
 }

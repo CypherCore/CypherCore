@@ -1541,31 +1541,31 @@ namespace Game.Entities
                 switch (source)
                 {
                     case ReputationSource.Kill:
-                        repRate = repData.creatureRate;
+                        repRate = repData.CreatureRate;
 
                         break;
                     case ReputationSource.Quest:
-                        repRate = repData.questRate;
+                        repRate = repData.QuestRate;
 
                         break;
                     case ReputationSource.DailyQuest:
-                        repRate = repData.questDailyRate;
+                        repRate = repData.QuestDailyRate;
 
                         break;
                     case ReputationSource.WeeklyQuest:
-                        repRate = repData.questWeeklyRate;
+                        repRate = repData.QuestWeeklyRate;
 
                         break;
                     case ReputationSource.MonthlyQuest:
-                        repRate = repData.questMonthlyRate;
+                        repRate = repData.QuestMonthlyRate;
 
                         break;
                     case ReputationSource.RepeatableQuest:
-                        repRate = repData.questRepeatableRate;
+                        repRate = repData.QuestRepeatableRate;
 
                         break;
                     case ReputationSource.Spell:
-                        repRate = repData.spellRate;
+                        repRate = repData.SpellRate;
 
                         break;
                 }
