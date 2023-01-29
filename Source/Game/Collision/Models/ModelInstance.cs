@@ -153,10 +153,10 @@ namespace Game.Collision
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
                 float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;
 
-                if (info.ground_Z < world_Z)
+                if (info.Ground_Z < world_Z)
                 {
-                    info.ground_Z = world_Z;
-                    info.adtId = adtId;
+                    info.Ground_Z = world_Z;
+                    info.AdtId = adtId;
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace Game.Collision
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
 
-            if (info.hitModel.GetLiquidLevel(pModel, out zDist))
+            if (info.HitModel.GetLiquidLevel(pModel, out zDist))
             {
                 // calculate world height (zDist in model coords):
                 // assume WMO not tilted (wouldn't make much sense anyway)
@@ -207,12 +207,12 @@ namespace Game.Collision
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
                 float world_Z = (iInvRot.Multiply(modelGround * iScale) + iPos).Z;
 
-                if (info.ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
+                if (info.Ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
                 {
-                    info.rootId = groupInfo.rootId;
-                    info.hitModel = groupInfo.hitModel;
-                    info.ground_Z = world_Z;
-                    info.hitInstance = this;
+                    info.RootId = groupInfo.RootId;
+                    info.HitModel = groupInfo.HitModel;
+                    info.Ground_Z = world_Z;
+                    info.HitInstance = this;
 
                     return true;
                 }

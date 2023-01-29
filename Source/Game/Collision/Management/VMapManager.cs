@@ -8,33 +8,18 @@ using Framework.Constants;
 
 namespace Game.Collision
 {
-    public enum VMAPLoadResult
-    {
-        Error,
-        OK,
-        Ignored
-    }
-
-    public enum LoadResult
-    {
-        Success,
-        FileNotFound,
-        VersionMismatch,
-        ReadFromFileFailed,
-        DisabledInConfig
-    }
 
     public class VMapManager : Singleton<VMapManager>
     {
         public static string VMapPath = Global.WorldMgr.GetDataPath() + "/vmaps/";
         private bool _enableHeightCalc;
         private bool _enableLineOfSightCalc;
-        private readonly Dictionary<uint, StaticMapTree> iInstanceMapTrees = new();
+        private readonly Dictionary<uint, StaticMapTree> _iInstanceMapTrees = new();
 
-        private readonly Dictionary<string, ManagedModel> iLoadedModelFiles = new();
-        private readonly Dictionary<uint, uint> iParentMapData = new();
+        private readonly Dictionary<string, ManagedModel> _iLoadedModelFiles = new();
+        private readonly Dictionary<uint, uint> _iParentMapData = new();
 
-        private readonly object LoadedModelFilesLock = new();
+        private readonly object _loadedModelFilesLock = new();
 
         private VMapManager()
         {
@@ -43,7 +28,7 @@ namespace Game.Collision
         public void Initialize(MultiMap<uint, uint> mapData)
         {
             foreach (var pair in mapData)
-                iParentMapData[pair.Value] = pair.Key;
+                _iParentMapData[pair.Value] = pair.Key;
         }
 
         public LoadResult LoadMap(uint mapId, int x, int y)
@@ -51,7 +36,7 @@ namespace Game.Collision
             if (!IsMapLoadingEnabled())
                 return LoadResult.DisabledInConfig;
 
-            var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+            var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
             if (instanceTree == null)
             {
@@ -62,7 +47,7 @@ namespace Game.Collision
                 if (treeInitResult != LoadResult.Success)
                     return treeInitResult;
 
-                iInstanceMapTrees.Add(mapId, newTree);
+                _iInstanceMapTrees.Add(mapId, newTree);
 
                 instanceTree = newTree;
             }
@@ -72,27 +57,27 @@ namespace Game.Collision
 
         public void UnloadMap(uint mapId, int x, int y)
         {
-            var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+            var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
             if (instanceTree != null)
             {
                 instanceTree.UnloadMapTile(x, y, this);
 
                 if (instanceTree.NumLoadedTiles() == 0)
-                    iInstanceMapTrees.Remove(mapId);
+                    _iInstanceMapTrees.Remove(mapId);
             }
         }
 
         public void UnloadMap(uint mapId)
         {
-            var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+            var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
             if (instanceTree != null)
             {
                 instanceTree.UnloadMap(this);
 
                 if (instanceTree.NumLoadedTiles() == 0)
-                    iInstanceMapTrees.Remove(mapId);
+                    _iInstanceMapTrees.Remove(mapId);
             }
         }
 
@@ -102,7 +87,7 @@ namespace Game.Collision
                 Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLOS))
                 return true;
 
-            var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+            var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
             if (instanceTree != null)
             {
@@ -121,7 +106,7 @@ namespace Game.Collision
             if (IsLineOfSightCalcEnabled() &&
                 !Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLOS))
             {
-                var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+                var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
                 if (instanceTree != null)
                 {
@@ -150,7 +135,7 @@ namespace Game.Collision
             if (IsHeightCalcEnabled() &&
                 !Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapHeight))
             {
-                var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+                var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
                 if (instanceTree != null)
                 {
@@ -176,7 +161,7 @@ namespace Game.Collision
 
             if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapAreaFlag))
             {
-                var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+                var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
                 if (instanceTree != null)
                 {
@@ -196,7 +181,7 @@ namespace Game.Collision
         {
             if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLiquidStatus))
             {
-                var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+                var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
                 if (instanceTree != null)
                 {
@@ -205,16 +190,16 @@ namespace Game.Collision
 
                     if (instanceTree.GetLocationInfo(pos, info))
                     {
-                        floor = info.ground_Z;
+                        floor = info.Ground_Z;
                         Cypher.Assert(floor < float.MaxValue);
-                        type = info.hitModel.GetLiquidType(); // entry from LiquidType.dbc
-                        mogpFlags = info.hitModel.GetMogpFlags();
+                        type = info.HitModel.GetLiquidType(); // entry from LiquidType.dbc
+                        mogpFlags = info.HitModel.GetMogpFlags();
 
                         if (reqLiquidType != 0 &&
                             !Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(type) & reqLiquidType))
                             return false;
 
-                        if (info.hitInstance.GetLiquidLevel(pos, info, ref level))
+                        if (info.HitInstance.GetLiquidLevel(pos, info, ref level))
                             return true;
                     }
                 }
@@ -229,17 +214,17 @@ namespace Game.Collision
 
             if (Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLiquidStatus))
             {
-                data.floorZ = z;
+                data.FloorZ = z;
                 int adtId, rootId, groupId;
                 uint flags;
 
-                if (GetAreaInfo(mapId, x, y, ref data.floorZ, out flags, out adtId, out rootId, out groupId))
-                    data.areaInfo = new AreaAndLiquidData.AreaInfo(adtId, rootId, groupId, flags);
+                if (GetAreaInfo(mapId, x, y, ref data.FloorZ, out flags, out adtId, out rootId, out groupId))
+                    data.AreaInfoData = new AreaAndLiquidData.AreaInfo(adtId, rootId, groupId, flags);
 
                 return data;
             }
 
-            var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+            var instanceTree = _iInstanceMapTrees.LookupByKey(mapId);
 
             if (instanceTree != null)
             {
@@ -248,17 +233,17 @@ namespace Game.Collision
 
                 if (instanceTree.GetLocationInfo(pos, info))
                 {
-                    data.floorZ = info.ground_Z;
-                    uint liquidType = info.hitModel.GetLiquidType();
+                    data.FloorZ = info.Ground_Z;
+                    uint liquidType = info.HitModel.GetLiquidType();
                     float liquidLevel = 0;
 
                     if (reqLiquidType == 0 ||
                         Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType))
-                        if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
-                            data.liquidInfo = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
+                        if (info.HitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
+                            data.LiquidInfoData = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
 
                     if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, (byte)DisableFlags.VmapLiquidStatus))
-                        data.areaInfo = new AreaAndLiquidData.AreaInfo(info.hitInstance.adtId, info.rootId, (int)info.hitModel.GetWmoID(), info.hitModel.GetMogpFlags());
+                        data.AreaInfoData = new AreaAndLiquidData.AreaInfo(info.HitInstance.adtId, info.RootId, (int)info.HitModel.GetWmoID(), info.HitModel.GetMogpFlags());
                 }
             }
 
@@ -267,10 +252,10 @@ namespace Game.Collision
 
         public WorldModel AcquireModelInstance(string filename, uint flags = 0)
         {
-            lock (LoadedModelFilesLock)
+            lock (_loadedModelFilesLock)
             {
                 filename = filename.TrimEnd('\0');
-                var model = iLoadedModelFiles.LookupByKey(filename);
+                var model = _iLoadedModelFiles.LookupByKey(filename);
 
                 if (model == null)
                 {
@@ -286,7 +271,7 @@ namespace Game.Collision
                     Log.outDebug(LogFilter.Maps, "VMapManager: loading file '{0}'", filename);
                     model.GetModel().Flags = flags;
 
-                    iLoadedModelFiles.Add(filename, model);
+                    _iLoadedModelFiles.Add(filename, model);
                 }
 
                 model.IncRefCount();
@@ -297,10 +282,10 @@ namespace Game.Collision
 
         public void ReleaseModelInstance(string filename)
         {
-            lock (LoadedModelFilesLock)
+            lock (_loadedModelFilesLock)
             {
                 filename = filename.TrimEnd('\0');
-                var model = iLoadedModelFiles.LookupByKey(filename);
+                var model = _iLoadedModelFiles.LookupByKey(filename);
 
                 if (model == null)
                 {
@@ -312,7 +297,7 @@ namespace Game.Collision
                 if (model.DecRefCount() == 0)
                 {
                     Log.outDebug(LogFilter.Maps, "VMapManager: unloading file '{0}'", filename);
-                    iLoadedModelFiles.Remove(filename);
+                    _iLoadedModelFiles.Remove(filename);
                 }
             }
         }
@@ -324,8 +309,8 @@ namespace Game.Collision
 
         public int GetParentMapId(uint mapId)
         {
-            if (iParentMapData.ContainsKey(mapId))
-                return (int)iParentMapData[mapId];
+            if (_iParentMapData.ContainsKey(mapId))
+                return (int)_iParentMapData[mapId];
 
             return -1;
         }
@@ -369,74 +354,6 @@ namespace Game.Collision
         public bool IsMapLoadingEnabled()
         {
             return _enableLineOfSightCalc || _enableHeightCalc;
-        }
-    }
-
-    public class ManagedModel
-    {
-        private WorldModel iModel;
-        private int iRefCount;
-
-        public ManagedModel()
-        {
-            iModel = new WorldModel();
-            iRefCount = 0;
-        }
-
-        public void SetModel(WorldModel model)
-        {
-            iModel = model;
-        }
-
-        public WorldModel GetModel()
-        {
-            return iModel;
-        }
-
-        public void IncRefCount()
-        {
-            ++iRefCount;
-        }
-
-        public int DecRefCount()
-        {
-            return --iRefCount;
-        }
-    }
-
-    public class AreaAndLiquidData
-    {
-        public AreaInfo? areaInfo;
-
-        public float floorZ = MapConst.VMAPInvalidHeightValue;
-        public LiquidInfo? liquidInfo;
-
-        public struct AreaInfo
-        {
-            public int AdtId;
-            public int RootId;
-            public int GroupId;
-            public uint MogpFlags;
-
-            public AreaInfo(int adtId, int rootId, int groupId, uint flags)
-            {
-                AdtId = adtId;
-                RootId = rootId;
-                GroupId = groupId;
-                MogpFlags = flags;
-            }
-        }
-
-        public struct LiquidInfo
-        {
-            public uint LiquidType;
-            public float Level;
-
-            public LiquidInfo(uint type, float level)
-            {
-                LiquidType = type;
-                Level = level;
-            }
         }
     }
 }

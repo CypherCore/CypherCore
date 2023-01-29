@@ -10,57 +10,21 @@ using Framework.GameMath;
 
 namespace Game.Collision
 {
-    public class GroupLocationInfo
-    {
-        public GroupModel hitModel;
-        public int rootId = -1;
-    }
-
-    public class LocationInfo
-    {
-        public float ground_Z;
-        public ModelInstance hitInstance;
-        public GroupModel hitModel;
-
-        public int rootId;
-
-        public LocationInfo()
-        {
-            ground_Z = float.NegativeInfinity;
-        }
-    }
-
-    public class AreaInfo
-    {
-        public int adtId;
-        public uint flags;
-        public float ground_Z;
-        public int groupId;
-
-        public bool result;
-        public int rootId;
-
-        public AreaInfo()
-        {
-            ground_Z = float.NegativeInfinity;
-        }
-    }
-
     public class StaticMapTree
     {
-        private readonly Dictionary<uint, uint> iLoadedSpawns = new();
+        private readonly Dictionary<uint, uint> _iLoadedSpawns = new();
 
-        private readonly Dictionary<uint, bool> iLoadedTiles = new();
+        private readonly Dictionary<uint, bool> _iLoadedTiles = new();
 
-        private readonly uint iMapID;
-        private uint iNTreeValues;
-        private readonly Dictionary<uint, uint> iSpawnIndices = new();
-        private readonly BIH iTree = new();
-        private ModelInstance[] iTreeValues;
+        private readonly uint _iMapID;
+        private uint _iNTreeValues;
+        private readonly Dictionary<uint, uint> _iSpawnIndices = new();
+        private readonly BoundingIntervalHierarchy _iTree = new();
+        private ModelInstance[] _iTreeValues;
 
         public StaticMapTree(uint mapId)
         {
-            iMapID = mapId;
+            _iMapID = mapId;
         }
 
         public LoadResult InitMap(string fname)
@@ -82,11 +46,11 @@ namespace Game.Collision
                 if (node != "NODE")
                     return LoadResult.ReadFromFileFailed;
 
-                if (!iTree.ReadFromFile(reader))
+                if (!_iTree.ReadFromFile(reader))
                     return LoadResult.ReadFromFileFailed;
 
-                iNTreeValues = iTree.PrimCount();
-                iTreeValues = new ModelInstance[iNTreeValues];
+                _iNTreeValues = _iTree.PrimCount();
+                _iTreeValues = new ModelInstance[_iNTreeValues];
 
                 if (reader.ReadStringFromChars(4) != "SIDX")
                     return LoadResult.ReadFromFileFailed;
@@ -96,7 +60,7 @@ namespace Game.Collision
                 for (uint i = 0; i < spawnIndicesSize; ++i)
                 {
                     uint spawnId = reader.ReadUInt32();
-                    iSpawnIndices[spawnId] = i;
+                    _iSpawnIndices[spawnId] = i;
                 }
             }
 
@@ -105,21 +69,21 @@ namespace Game.Collision
 
         public void UnloadMap(VMapManager vm)
         {
-            foreach (var id in iLoadedSpawns)
+            foreach (var id in _iLoadedSpawns)
             {
                 for (uint refCount = 0; refCount < id.Key; ++refCount)
-                    vm.ReleaseModelInstance(iTreeValues[id.Key].name);
+                    vm.ReleaseModelInstance(_iTreeValues[id.Key].name);
 
-                iTreeValues[id.Key].SetUnloaded();
+                _iTreeValues[id.Key].SetUnloaded();
             }
 
-            iLoadedSpawns.Clear();
-            iLoadedTiles.Clear();
+            _iLoadedSpawns.Clear();
+            _iLoadedTiles.Clear();
         }
 
         public LoadResult LoadMapTile(int tileX, int tileY, VMapManager vm)
         {
-            if (iTreeValues == null)
+            if (_iTreeValues == null)
             {
                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : tree has not been initialized [{0}, {1}]", tileX, tileY);
 
@@ -128,7 +92,7 @@ namespace Game.Collision
 
             LoadResult result = LoadResult.FileNotFound;
 
-            TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
+            TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, _iMapID, tileX, tileY, vm);
 
             if (fileResult.File != null)
             {
@@ -153,48 +117,48 @@ namespace Game.Collision
                                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
 
                             // update tree
-                            if (iSpawnIndices.ContainsKey(spawn.Id))
+                            if (_iSpawnIndices.ContainsKey(spawn.Id))
                             {
-                                uint referencedVal = iSpawnIndices[spawn.Id];
+                                uint referencedVal = _iSpawnIndices[spawn.Id];
 
-                                if (!iLoadedSpawns.ContainsKey(referencedVal))
+                                if (!_iLoadedSpawns.ContainsKey(referencedVal))
                                 {
-                                    if (referencedVal >= iNTreeValues)
+                                    if (referencedVal >= _iNTreeValues)
                                     {
-                                        Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, iNTreeValues, fileResult.Name);
+                                        Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, _iNTreeValues, fileResult.Name);
 
                                         continue;
                                     }
 
-                                    iTreeValues[referencedVal] = new ModelInstance(spawn, model);
-                                    iLoadedSpawns[referencedVal] = 1;
+                                    _iTreeValues[referencedVal] = new ModelInstance(spawn, model);
+                                    _iLoadedSpawns[referencedVal] = 1;
                                 }
                                 else
                                 {
-                                    ++iLoadedSpawns[referencedVal];
+                                    ++_iLoadedSpawns[referencedVal];
                                 }
                             }
-                            else if (iMapID == fileResult.UsedMapId)
+                            else if (_iMapID == fileResult.UsedMapId)
                             {
                                 // unknown parent spawn might appear in because it overlaps multiple tiles
                                 // in case the original tile is swapped but its neighbour is now (adding this spawn)
                                 // we want to not mark it as loading error and just skip that model
-                                Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : invalid tree element (spawn {spawn.Id}) referenced in tile fileResult.Name{fileResult.Name} by map {iMapID}");
+                                Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : invalid tree element (spawn {spawn.Id}) referenced in tile fileResult.Name{fileResult.Name} by map {_iMapID}");
                                 result = LoadResult.ReadFromFileFailed;
                             }
                         }
                         else
                         {
-                            Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : cannot read model from file (spawn index {i}) referenced in tile {fileResult.Name} by map {iMapID}");
+                            Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : cannot read model from file (spawn index {i}) referenced in tile {fileResult.Name} by map {_iMapID}");
                             result = LoadResult.ReadFromFileFailed;
                         }
                 }
 
-                iLoadedTiles[PackTileID(tileX, tileY)] = true;
+                _iLoadedTiles[PackTileID(tileX, tileY)] = true;
             }
             else
             {
-                iLoadedTiles[PackTileID(tileX, tileY)] = false;
+                _iLoadedTiles[PackTileID(tileX, tileY)] = false;
             }
 
             return result;
@@ -204,16 +168,16 @@ namespace Game.Collision
         {
             uint tileID = PackTileID(tileX, tileY);
 
-            if (!iLoadedTiles.ContainsKey(tileID))
+            if (!_iLoadedTiles.ContainsKey(tileID))
             {
-                Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-loaded tile - Map:{0} X:{1} Y:{2}", iMapID, tileX, tileY);
+                Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-loaded tile - Map:{0} X:{1} Y:{2}", _iMapID, tileX, tileY);
 
                 return;
             }
 
-            if (iLoadedTiles[tileID]) // file associated with tile
+            if (_iLoadedTiles[tileID]) // file associated with tile
             {
-                TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
+                TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, _iMapID, tileX, tileY, vm);
 
                 if (fileResult.File != null)
                 {
@@ -237,21 +201,21 @@ namespace Game.Collision
                             vm.ReleaseModelInstance(spawn.name);
 
                             // update tree
-                            if (iSpawnIndices.ContainsKey(spawn.Id))
+                            if (_iSpawnIndices.ContainsKey(spawn.Id))
                             {
-                                uint referencedNode = iSpawnIndices[spawn.Id];
+                                uint referencedNode = _iSpawnIndices[spawn.Id];
 
-                                if (!iLoadedSpawns.ContainsKey(referencedNode))
+                                if (!_iLoadedSpawns.ContainsKey(referencedNode))
                                 {
                                     Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-referenced model '{0}' (ID:{1})", spawn.name, spawn.Id);
                                 }
-                                else if (--iLoadedSpawns[referencedNode] == 0)
+                                else if (--_iLoadedSpawns[referencedNode] == 0)
                                 {
-                                    iTreeValues[referencedNode].SetUnloaded();
-                                    iLoadedSpawns.Remove(referencedNode);
+                                    _iTreeValues[referencedNode].SetUnloaded();
+                                    _iLoadedSpawns.Remove(referencedNode);
                                 }
                             }
-                            else if (iMapID == fileResult.UsedMapId) // logic documented in StaticMapTree::LoadMapTile
+                            else if (_iMapID == fileResult.UsedMapId) // logic documented in StaticMapTree::LoadMapTile
                             {
                                 result = false;
                             }
@@ -260,7 +224,7 @@ namespace Game.Collision
                 }
             }
 
-            iLoadedTiles.Remove(tileID);
+            _iLoadedTiles.Remove(tileID);
         }
 
         private static uint PackTileID(int tileX, int tileY)
@@ -346,16 +310,16 @@ namespace Game.Collision
             rootId = 0;
             groupId = 0;
 
-            AreaInfoCallback intersectionCallBack = new(iTreeValues);
-            iTree.IntersectPoint(pos, intersectionCallBack);
+            AreaInfoCallback intersectionCallBack = new(_iTreeValues);
+            _iTree.IntersectPoint(pos, intersectionCallBack);
 
-            if (intersectionCallBack.aInfo.result)
+            if (intersectionCallBack.AInfo.Result)
             {
-                flags = intersectionCallBack.aInfo.flags;
-                adtId = intersectionCallBack.aInfo.adtId;
-                rootId = intersectionCallBack.aInfo.rootId;
-                groupId = intersectionCallBack.aInfo.groupId;
-                pos.Z = intersectionCallBack.aInfo.ground_Z;
+                flags = intersectionCallBack.AInfo.Flags;
+                adtId = intersectionCallBack.AInfo.AdtId;
+                rootId = intersectionCallBack.AInfo.RootId;
+                groupId = intersectionCallBack.AInfo.GroupId;
+                pos.Z = intersectionCallBack.AInfo.Ground_Z;
 
                 return true;
             }
@@ -365,10 +329,10 @@ namespace Game.Collision
 
         public bool GetLocationInfo(Vector3 pos, LocationInfo info)
         {
-            LocationInfoCallback intersectionCallBack = new(iTreeValues, info);
-            iTree.IntersectPoint(pos, intersectionCallBack);
+            LocationInfoCallback intersectionCallBack = new(_iTreeValues, info);
+            _iTree.IntersectPoint(pos, intersectionCallBack);
 
-            return intersectionCallBack.result;
+            return intersectionCallBack.Result;
         }
 
         public float GetHeight(Vector3 pPos, float maxSearchDist)
@@ -387,8 +351,8 @@ namespace Game.Collision
         private bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
             float distance = pMaxDist;
-            MapRayCallback intersectionCallBack = new(iTreeValues, ignoreFlags);
-            iTree.IntersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
+            MapRayCallback intersectionCallBack = new(_iTreeValues, ignoreFlags);
+            _iTree.IntersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
 
             if (intersectionCallBack.DidHit())
                 pMaxDist = distance;
@@ -469,14 +433,7 @@ namespace Game.Collision
 
         public int NumLoadedTiles()
         {
-            return iLoadedTiles.Count;
+            return _iLoadedTiles.Count;
         }
-    }
-
-    internal class TileFileOpenResult
-    {
-        public FileStream File;
-        public string Name;
-        public uint UsedMapId;
     }
 }

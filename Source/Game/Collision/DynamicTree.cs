@@ -136,13 +136,13 @@ namespace Game.Collision
             DynamicTreeAreaInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
 
-            if (intersectionCallBack.GetAreaInfo().result)
+            if (intersectionCallBack.GetAreaInfo().Result)
             {
-                flags = intersectionCallBack.GetAreaInfo().flags;
-                adtId = intersectionCallBack.GetAreaInfo().adtId;
-                rootId = intersectionCallBack.GetAreaInfo().rootId;
-                groupId = intersectionCallBack.GetAreaInfo().groupId;
-                z = intersectionCallBack.GetAreaInfo().ground_Z;
+                flags = intersectionCallBack.GetAreaInfo().Flags;
+                adtId = intersectionCallBack.GetAreaInfo().AdtId;
+                rootId = intersectionCallBack.GetAreaInfo().RootId;
+                groupId = intersectionCallBack.GetAreaInfo().GroupId;
+                z = intersectionCallBack.GetAreaInfo().Ground_Z;
 
                 return true;
             }
@@ -158,28 +158,28 @@ namespace Game.Collision
             DynamicTreeLocationInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
 
-            if (intersectionCallBack.GetLocationInfo().hitModel != null)
+            if (intersectionCallBack.GetLocationInfo().HitModel != null)
             {
-                data.floorZ = intersectionCallBack.GetLocationInfo().ground_Z;
-                uint liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
+                data.FloorZ = intersectionCallBack.GetLocationInfo().Ground_Z;
+                uint liquidType = intersectionCallBack.GetLocationInfo().HitModel.GetLiquidType();
                 float liquidLevel = 0;
 
                 if (reqLiquidType == 0 ||
                     (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType) != 0)
                     if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, intersectionCallBack.GetLocationInfo(), ref liquidLevel))
-                        data.liquidInfo = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
+                        data.LiquidInfoData = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
 
-                data.areaInfo = new AreaAndLiquidData.AreaInfo(intersectionCallBack.GetHitModel().GetNameSetId(),
-                                                               intersectionCallBack.GetLocationInfo().rootId,
-                                                               (int)intersectionCallBack.GetLocationInfo().hitModel.GetWmoID(),
-                                                               intersectionCallBack.GetLocationInfo().hitModel.GetMogpFlags());
+                data.AreaInfoData = new AreaAndLiquidData.AreaInfo(intersectionCallBack.GetHitModel().GetNameSetId(),
+                                                               intersectionCallBack.GetLocationInfo().RootId,
+                                                               (int)intersectionCallBack.GetLocationInfo().HitModel.GetWmoID(),
+                                                               intersectionCallBack.GetLocationInfo().HitModel.GetMogpFlags());
             }
 
             return data;
         }
     }
 
-    public class DynTreeImpl : RegularGrid2D<GameObjectModel, BIHWrap<GameObjectModel>>
+    public class DynTreeImpl : RegularGrid2D<GameObjectModel, BoundingIntervalHierarchyWrap<GameObjectModel>>
     {
         private readonly TimeTracker rebalance_timer;
         private int unbalanced_times;

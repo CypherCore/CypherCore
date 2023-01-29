@@ -484,38 +484,38 @@ namespace Game.Maps
                 MathFunctions.fuzzyGe(z, gridMapHeight - MapConst.GroundHeightTolerance))
                 data.FloorZ = gridMapHeight;
 
-            if (vmapData.floorZ > MapConst.InvalidHeight &&
-                MathFunctions.fuzzyGe(z, vmapData.floorZ - MapConst.GroundHeightTolerance) &&
-                (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || vmapData.floorZ > gridMapHeight))
+            if (vmapData.FloorZ > MapConst.InvalidHeight &&
+                MathFunctions.fuzzyGe(z, vmapData.FloorZ - MapConst.GroundHeightTolerance) &&
+                (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || vmapData.FloorZ > gridMapHeight))
             {
-                data.FloorZ = vmapData.floorZ;
+                data.FloorZ = vmapData.FloorZ;
                 wmoData = vmapData;
             }
 
             // NOTE: Objects will not detect a case when a wmo providing area/liquid despawns from under them
             // but this is fine as these kind of objects are not meant to be spawned and despawned a lot
             // example: Lich King platform
-            if (dynData.floorZ > MapConst.InvalidHeight &&
-                MathFunctions.fuzzyGe(z, dynData.floorZ - MapConst.GroundHeightTolerance) &&
-                (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || dynData.floorZ > gridMapHeight) &&
-                (MathFunctions.fuzzyLt(z, vmapData.floorZ - MapConst.GroundHeightTolerance) || dynData.floorZ > vmapData.floorZ))
+            if (dynData.FloorZ > MapConst.InvalidHeight &&
+                MathFunctions.fuzzyGe(z, dynData.FloorZ - MapConst.GroundHeightTolerance) &&
+                (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || dynData.FloorZ > gridMapHeight) &&
+                (MathFunctions.fuzzyLt(z, vmapData.FloorZ - MapConst.GroundHeightTolerance) || dynData.FloorZ > vmapData.FloorZ))
             {
-                data.FloorZ = dynData.floorZ;
+                data.FloorZ = dynData.FloorZ;
                 wmoData = dynData;
             }
 
             if (wmoData != null)
             {
-                if (wmoData.areaInfo.HasValue)
+                if (wmoData.AreaInfoData.HasValue)
                 {
-                    data.areaInfo = new PositionFullTerrainStatus.AreaInfo(wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.GroupId, wmoData.areaInfo.Value.MogpFlags);
+                    data.areaInfo = new PositionFullTerrainStatus.AreaInfo(wmoData.AreaInfoData.Value.AdtId, wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.GroupId, wmoData.AreaInfoData.Value.MogpFlags);
                     // wmo found
-                    var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.GroupId);
+                    var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.AdtId, wmoData.AreaInfoData.Value.GroupId);
 
                     if (wmoEntry == null)
-                        wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, -1);
+                        wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.AdtId, -1);
 
-                    data.outdoors = (wmoData.areaInfo.Value.MogpFlags & 0x8) != 0;
+                    data.outdoors = (wmoData.AreaInfoData.Value.MogpFlags & 0x8) != 0;
 
                     if (wmoEntry != null)
                     {
@@ -530,7 +530,7 @@ namespace Game.Maps
                     if (data.AreaId == 0)
                         data.AreaId = gridAreaId;
 
-                    useGridLiquid = !IsInWMOInterior(wmoData.areaInfo.Value.MogpFlags);
+                    useGridLiquid = !IsInWMOInterior(wmoData.AreaInfoData.Value.MogpFlags);
                 }
             }
             else
@@ -552,10 +552,10 @@ namespace Game.Maps
             data.LiquidStatus = ZLiquidStatus.NoWater;
 
             if (wmoData != null &&
-                wmoData.liquidInfo.HasValue &&
-                wmoData.liquidInfo.Value.Level > wmoData.floorZ)
+                wmoData.LiquidInfoData.HasValue &&
+                wmoData.LiquidInfoData.Value.Level > wmoData.FloorZ)
             {
-                uint liquidType = wmoData.liquidInfo.Value.LiquidType;
+                uint liquidType = wmoData.LiquidInfoData.Value.LiquidType;
 
                 if (GetId() == 530 &&
                     liquidType == 2) // gotta love hacks
@@ -592,12 +592,12 @@ namespace Game.Maps
                 }
 
                 data.LiquidInfo = new LiquidData();
-                data.LiquidInfo.level = wmoData.liquidInfo.Value.Level;
-                data.LiquidInfo.depth_level = wmoData.floorZ;
+                data.LiquidInfo.level = wmoData.LiquidInfoData.Value.Level;
+                data.LiquidInfo.depth_level = wmoData.FloorZ;
                 data.LiquidInfo.entry = liquidType;
                 data.LiquidInfo.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
-                float delta = wmoData.liquidInfo.Value.Level - z;
+                float delta = wmoData.LiquidInfoData.Value.Level - z;
 
                 if (delta > collisionHeight)
                     data.LiquidStatus = ZLiquidStatus.UnderWater;
@@ -616,7 +616,7 @@ namespace Game.Maps
                 ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid, collisionHeight);
 
                 if (gridMapStatus != ZLiquidStatus.NoWater &&
-                    (wmoData == null || gridMapLiquid.level > wmoData.floorZ))
+                    (wmoData == null || gridMapLiquid.level > wmoData.FloorZ))
                 {
                     if (GetId() == 530 &&
                         gridMapLiquid.entry == 2)

@@ -7,24 +7,24 @@ using Framework.GameMath;
 
 namespace Game.Collision
 {
-    public class BIHWrap<T> where T : IModel
+    public class BoundingIntervalHierarchyWrap<T> where T : IModel
     {
         private readonly Dictionary<T, uint> _obj2Idx = new();
         private readonly List<T> _objects = new();
         private readonly HashSet<T> _objects_to_push = new();
 
-        private readonly BIH _tree = new();
-        private int unbalanced_times;
+        private readonly BoundingIntervalHierarchy _tree = new();
+        private int _unbalanced_times;
 
         public void Insert(T obj)
         {
-            ++unbalanced_times;
+            ++_unbalanced_times;
             _objects_to_push.Add(obj);
         }
 
         public void Remove(T obj)
         {
-            ++unbalanced_times;
+            ++_unbalanced_times;
             uint Idx;
 
             if (_obj2Idx.TryGetValue(obj, out Idx))
@@ -35,10 +35,10 @@ namespace Game.Collision
 
         public void Balance()
         {
-            if (unbalanced_times == 0)
+            if (_unbalanced_times == 0)
                 return;
 
-            unbalanced_times = 0;
+            _unbalanced_times = 0;
             _objects.Clear();
             _objects.AddRange(_obj2Idx.Keys);
             _objects.AddRange(_objects_to_push);

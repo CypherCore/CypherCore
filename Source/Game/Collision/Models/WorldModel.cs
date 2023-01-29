@@ -179,7 +179,7 @@ namespace Game.Collision
         private uint iGroupWMOID;
         private WmoLiquid iLiquid;
         private uint iMogpFlags;
-        private readonly BIH meshTree = new();
+        private readonly BoundingIntervalHierarchy meshTree = new();
         private readonly List<MeshTriangle> triangles = new();
         private readonly List<Vector3> vertices = new();
 
@@ -271,7 +271,7 @@ namespace Game.Collision
             GModelRayCallback callback = new(triangles, vertices);
             meshTree.IntersectRay(ray, callback, ref distance, stopAtFirstHit);
 
-            return callback.hit;
+            return callback.Hit;
         }
 
         public bool IsInsideObject(Vector3 pos, Vector3 down, out float z_dist)
@@ -331,7 +331,7 @@ namespace Game.Collision
     {
         public uint Flags;
         private readonly List<GroupModel> groupModels = new();
-        private readonly BIH groupTree = new();
+        private readonly BoundingIntervalHierarchy groupTree = new();
 
         private uint RootWMOID;
 
@@ -351,7 +351,7 @@ namespace Game.Collision
             WModelRayCallBack isc = new(groupModels);
             groupTree.IntersectRay(ray, isc, ref distance, stopAtFirstHit);
 
-            return isc.hit;
+            return isc.Hit;
         }
 
         public bool IntersectPoint(Vector3 p, Vector3 down, out float dist, AreaInfo info)
@@ -364,13 +364,13 @@ namespace Game.Collision
             WModelAreaCallback callback = new(groupModels, down);
             groupTree.IntersectPoint(p, callback);
 
-            if (callback.hit != null)
+            if (callback.Hit != null)
             {
-                info.rootId = (int)RootWMOID;
-                info.groupId = (int)callback.hit.GetWmoID();
-                info.flags = callback.hit.GetMogpFlags();
-                info.result = true;
-                dist = callback.zDist;
+                info.RootId = (int)RootWMOID;
+                info.GroupId = (int)callback.Hit.GetWmoID();
+                info.Flags = callback.Hit.GetMogpFlags();
+                info.Result = true;
+                dist = callback.ZDist;
 
                 return true;
             }
@@ -388,11 +388,11 @@ namespace Game.Collision
             WModelAreaCallback callback = new(groupModels, down);
             groupTree.IntersectPoint(p, callback);
 
-            if (callback.hit != null)
+            if (callback.Hit != null)
             {
-                info.rootId = (int)RootWMOID;
-                info.hitModel = callback.hit;
-                dist = callback.zDist;
+                info.RootId = (int)RootWMOID;
+                info.HitModel = callback.Hit;
+                dist = callback.ZDist;
 
                 return true;
             }
