@@ -946,7 +946,7 @@ namespace Game.Entities
 
             if (IsInWater() &&
                 newLiquidData != null)
-                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(newLiquidData.entry);
+                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(newLiquidData.Entry);
 
             if (curLiquid != _lastLiquid)
             {

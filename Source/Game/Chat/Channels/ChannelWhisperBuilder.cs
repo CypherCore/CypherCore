@@ -3,7 +3,7 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Game.Maps;
+using Game.Maps.Dos;
 using Game.Networking.Packets;
 
 namespace Game.Chat

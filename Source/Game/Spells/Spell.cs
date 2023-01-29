@@ -15,6 +15,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
@@ -4154,7 +4156,7 @@ namespace Game.Spells
                         LiquidData liquidData = new();
 
                         if (_caster.GetMap().GetLiquidStatus(_caster.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, liquidData, _caster.GetCollisionHeight()) != 0)
-                            liquidLevel = liquidData.level;
+                            liquidLevel = liquidData.Level;
 
                         if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level
                         {

@@ -12,6 +12,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.Maps.Dos;
+using Game.Maps.Notifiers;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -778,7 +780,7 @@ namespace Game.Chat
             ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, liquidStatus);
 
             if (liquidStatus != null)
-                handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
+                handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.Level, liquidStatus.Depth_level, liquidStatus.Entry, liquidStatus.Type_flags, status);
 
             PhasingHandler.PrintToChat(handler, obj);
 
@@ -1822,8 +1824,8 @@ namespace Game.Chat
                 uint gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
 
                 foreach (RespawnInfo info in data)
-                    if (info.gridId == gridId)
-                        player.GetMap().RemoveRespawnTime(info.type, info.spawnId);
+                    if (info.GridId == gridId)
+                        player.GetMap().RemoveRespawnTime(info.Type, info.SpawnId);
             }
 
             return true;

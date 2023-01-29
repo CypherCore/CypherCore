@@ -229,7 +229,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                         if (state == EncounterState.Done)
                             foreach (var guid in EggList)
                             {
-                                GameObject egg = instance.GetGameObject(guid);
+                                GameObject egg = Instance.GetGameObject(guid);
 
                                 if (egg)
                                     egg.SetLootState(LootState.JustDeactivated);
@@ -325,7 +325,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                               case EventIds.RazorSpawn:
                                                   for (uint i = RandomHelper.URand(2, 5); i > 0; --i)
                                                   {
-                                                      Creature summon = instance.SummonCreature(BWLMisc.Entry[RandomHelper.URand(0, 4)], BWLMisc.SummonPosition[RandomHelper.URand(0, 7)]);
+                                                      Creature summon = Instance.SummonCreature(BWLMisc.Entry[RandomHelper.URand(0, 4)], BWLMisc.SummonPosition[RandomHelper.URand(0, 7)]);
 
                                                       if (summon)
                                                           summon.GetAI().DoZoneInCombat();

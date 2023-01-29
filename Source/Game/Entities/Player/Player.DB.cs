@@ -62,31 +62,31 @@ namespace Game.Entities
                 {
                     Mail m = new();
 
-                    m.messageID = mailsResult.Read<uint>(0);
-                    m.messageType = (MailMessageType)mailsResult.Read<byte>(1);
-                    m.sender = mailsResult.Read<uint>(2);
-                    m.receiver = mailsResult.Read<uint>(3);
-                    m.subject = mailsResult.Read<string>(4);
-                    m.body = mailsResult.Read<string>(5);
-                    m.expire_time = mailsResult.Read<long>(6);
-                    m.deliver_time = mailsResult.Read<long>(7);
-                    m.money = mailsResult.Read<ulong>(8);
+                    m.MessageID = mailsResult.Read<uint>(0);
+                    m.MessageType = (MailMessageType)mailsResult.Read<byte>(1);
+                    m.Sender = mailsResult.Read<uint>(2);
+                    m.Receiver = mailsResult.Read<uint>(3);
+                    m.Subject = mailsResult.Read<string>(4);
+                    m.Body = mailsResult.Read<string>(5);
+                    m.Expire_time = mailsResult.Read<long>(6);
+                    m.Deliver_time = mailsResult.Read<long>(7);
+                    m.Money = mailsResult.Read<ulong>(8);
                     m.COD = mailsResult.Read<ulong>(9);
-                    m.checkMask = (MailCheckMask)mailsResult.Read<byte>(10);
-                    m.stationery = (MailStationery)mailsResult.Read<byte>(11);
-                    m.mailTemplateId = mailsResult.Read<ushort>(12);
+                    m.CheckMask = (MailCheckMask)mailsResult.Read<byte>(10);
+                    m.Stationery = (MailStationery)mailsResult.Read<byte>(11);
+                    m.MailTemplateId = mailsResult.Read<ushort>(12);
 
-                    if (m.mailTemplateId != 0 &&
-                        !CliDB.MailTemplateStorage.ContainsKey(m.mailTemplateId))
+                    if (m.MailTemplateId != 0 &&
+                        !CliDB.MailTemplateStorage.ContainsKey(m.MailTemplateId))
                     {
-                        Log.outError(LogFilter.Player, $"Player:_LoadMail - Mail ({m.messageID}) have not existed MailTemplateId ({m.mailTemplateId}), remove at load");
-                        m.mailTemplateId = 0;
+                        Log.outError(LogFilter.Player, $"Player:_LoadMail - Mail ({m.MessageID}) have not existed MailTemplateId ({m.MailTemplateId}), remove at load");
+                        m.MailTemplateId = 0;
                     }
 
-                    m.state = MailState.Unchanged;
+                    m.State = MailState.Unchanged;
 
                     _mail.Add(m);
-                    mailById[m.messageID] = m;
+                    mailById[m.MessageID] = m;
                 } while (mailsResult.NextRow());
 
             if (!mailItemsResult.IsEmpty())
@@ -130,55 +130,55 @@ namespace Game.Entities
             PreparedStatement stmt;
 
             foreach (var m in _mail)
-                if (m.state == MailState.Changed)
+                if (m.State == MailState.Changed)
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_MAIL);
                     stmt.AddValue(0, m.HasItems() ? 1 : 0);
-                    stmt.AddValue(1, m.expire_time);
-                    stmt.AddValue(2, m.deliver_time);
-                    stmt.AddValue(3, m.money);
+                    stmt.AddValue(1, m.Expire_time);
+                    stmt.AddValue(2, m.Deliver_time);
+                    stmt.AddValue(3, m.Money);
                     stmt.AddValue(4, m.COD);
-                    stmt.AddValue(5, (byte)m.checkMask);
-                    stmt.AddValue(6, m.messageID);
+                    stmt.AddValue(5, (byte)m.CheckMask);
+                    stmt.AddValue(6, m.MessageID);
 
                     trans.Append(stmt);
 
-                    if (!m.removedItems.Empty())
+                    if (!m.RemovedItems.Empty())
                     {
-                        foreach (var id in m.removedItems)
+                        foreach (var id in m.RemovedItems)
                         {
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM);
                             stmt.AddValue(0, id);
                             trans.Append(stmt);
                         }
 
-                        m.removedItems.Clear();
+                        m.RemovedItems.Clear();
                     }
 
-                    m.state = MailState.Unchanged;
+                    m.State = MailState.Unchanged;
                 }
-                else if (m.state == MailState.Deleted)
+                else if (m.State == MailState.Deleted)
                 {
                     if (m.HasItems())
-                        foreach (var mailItemInfo in m.items)
+                        foreach (var mailItemInfo in m.Items)
                         {
-                            Item.DeleteFromDB(trans, mailItemInfo.item_guid);
-                            AzeriteItem.DeleteFromDB(trans, mailItemInfo.item_guid);
-                            AzeriteEmpoweredItem.DeleteFromDB(trans, mailItemInfo.item_guid);
+                            Item.DeleteFromDB(trans, mailItemInfo.ItemGuid);
+                            AzeriteItem.DeleteFromDB(trans, mailItemInfo.ItemGuid);
+                            AzeriteEmpoweredItem.DeleteFromDB(trans, mailItemInfo.ItemGuid);
                         }
 
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
-                    stmt.AddValue(0, m.messageID);
+                    stmt.AddValue(0, m.MessageID);
                     trans.Append(stmt);
 
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                    stmt.AddValue(0, m.messageID);
+                    stmt.AddValue(0, m.MessageID);
                     trans.Append(stmt);
                 }
 
             //deallocate deleted mails...
             foreach (var m in GetMails().ToList())
-                if (m.state == MailState.Deleted)
+                if (m.State == MailState.Deleted)
                     _mail.Remove(m);
 
             MailUpdated = false;

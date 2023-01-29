@@ -179,15 +179,15 @@ namespace Scripts.EasternKingdoms.Karazhan
                                 switch (RandomHelper.URand(CreatureIds.HyakissTheLurker, CreatureIds.RokadTheRavager))
                                 {
                                     case CreatureIds.HyakissTheLurker:
-                                        instance.SummonCreature(CreatureIds.HyakissTheLurker, OptionalSpawn[0]);
+                                        Instance.SummonCreature(CreatureIds.HyakissTheLurker, OptionalSpawn[0]);
 
                                         break;
                                     case CreatureIds.ShadikithTheGlider:
-                                        instance.SummonCreature(CreatureIds.ShadikithTheGlider, OptionalSpawn[1]);
+                                        Instance.SummonCreature(CreatureIds.ShadikithTheGlider, OptionalSpawn[1]);
 
                                         break;
                                     case CreatureIds.RokadTheRavager:
-                                        instance.SummonCreature(CreatureIds.RokadTheRavager, OptionalSpawn[2]);
+                                        Instance.SummonCreature(CreatureIds.RokadTheRavager, OptionalSpawn[2]);
 
                                         break;
                                 }
@@ -225,7 +225,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                         {
                             HandleGameObject(StageDoorLeftGUID, true);
                             HandleGameObject(StageDoorRightGUID, true);
-                            GameObject sideEntrance = instance.GetGameObject(SideEntranceDoor);
+                            GameObject sideEntrance = Instance.GetGameObject(SideEntranceDoor);
 
                             if (sideEntrance)
                                 sideEntrance.RemoveFlag(GameObjectFlags.Locked);

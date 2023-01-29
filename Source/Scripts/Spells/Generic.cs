@@ -9,6 +9,8 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
@@ -618,7 +620,7 @@ namespace Scripts.Spells.Generic
             LiquidData liquidStatus = new();
 
             if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, liquidStatus, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
-                summonPos.Z = liquidStatus.level;
+                summonPos.Z = liquidStatus.Level;
 
             dest.Relocate(summonPos);
         }

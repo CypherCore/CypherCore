@@ -9,77 +9,77 @@ namespace Game.Maps
 {
     public class Cell
     {
-        public struct Data
+        public struct CellData
         {
-            public uint grid_x;
-            public uint grid_y;
-            public uint cell_x;
-            public uint cell_y;
-            public bool nocreate;
+            public uint Grid_x;
+            public uint Grid_y;
+            public uint Cell_x;
+            public uint Cell_y;
+            public bool Nocreate;
         }
 
-        public Data data;
+        public CellData Data;
 
         public Cell(ICoord p)
         {
-            data.grid_x = p.X_coord / MapConst.MaxCells;
-            data.grid_y = p.Y_coord / MapConst.MaxCells;
-            data.cell_x = p.X_coord % MapConst.MaxCells;
-            data.cell_y = p.Y_coord % MapConst.MaxCells;
+            Data.Grid_x = p.X_coord / MapConst.MaxCells;
+            Data.Grid_y = p.Y_coord / MapConst.MaxCells;
+            Data.Cell_x = p.X_coord % MapConst.MaxCells;
+            Data.Cell_y = p.Y_coord % MapConst.MaxCells;
         }
 
         public Cell(float x, float y)
         {
             ICoord p = GridDefines.ComputeCellCoord(x, y);
-            data.grid_x = p.X_coord / MapConst.MaxCells;
-            data.grid_y = p.Y_coord / MapConst.MaxCells;
-            data.cell_x = p.X_coord % MapConst.MaxCells;
-            data.cell_y = p.Y_coord % MapConst.MaxCells;
+            Data.Grid_x = p.X_coord / MapConst.MaxCells;
+            Data.Grid_y = p.Y_coord / MapConst.MaxCells;
+            Data.Cell_x = p.X_coord % MapConst.MaxCells;
+            Data.Cell_y = p.Y_coord % MapConst.MaxCells;
         }
 
         public Cell(Cell cell)
         {
-            data = cell.data;
+            Data = cell.Data;
         }
 
         public bool IsCellValid()
         {
-            return data.cell_x < MapConst.MaxCells && data.cell_y < MapConst.MaxCells;
+            return Data.Cell_x < MapConst.MaxCells && Data.Cell_y < MapConst.MaxCells;
         }
 
         public uint GetId()
         {
-            return data.grid_x * MapConst.MaxGrids + data.grid_y;
+            return Data.Grid_x * MapConst.MaxGrids + Data.Grid_y;
         }
 
         public uint GetCellX()
         {
-            return data.cell_x;
+            return Data.Cell_x;
         }
 
         public uint GetCellY()
         {
-            return data.cell_y;
+            return Data.Cell_y;
         }
 
         public uint GetGridX()
         {
-            return data.grid_x;
+            return Data.Grid_x;
         }
 
         public uint GetGridY()
         {
-            return data.grid_y;
+            return Data.Grid_y;
         }
 
         public bool NoCreate()
         {
-            return data.nocreate;
+            return Data.Nocreate;
         }
 
         public void SetNoCreate()
         {
-            data.nocreate = true;
+            Data.Nocreate = true;
         }
 
         public static bool operator ==(Cell left, Cell right)
@@ -91,7 +91,7 @@ namespace Game.Maps
                 right is null)
                 return false;
 
-            return left.data.cell_x == right.data.cell_x && left.data.cell_y == right.data.cell_y && left.data.grid_x == right.data.grid_x && left.data.grid_y == right.data.grid_y;
+            return left.Data.Cell_x == right.Data.Cell_x && left.Data.Cell_y == right.Data.Cell_y && left.Data.Grid_x == right.Data.Grid_x && left.Data.Grid_y == right.Data.Grid_y;
         }
 
         public static bool operator !=(Cell left, Cell right)
@@ -106,7 +106,7 @@ namespace Game.Maps
 
         public override int GetHashCode()
         {
-            return (int)(data.cell_x ^ data.cell_y ^ data.grid_x ^ data.grid_y);
+            return (int)(Data.Cell_x ^ Data.Cell_y ^ Data.Grid_x ^ Data.Grid_y);
         }
 
         public override string ToString()
@@ -116,20 +116,20 @@ namespace Game.Maps
 
         public CellCoord GetCellCoord()
         {
-            return new CellCoord(data.grid_x * MapConst.MaxCells + data.cell_x,
-                                 data.grid_y * MapConst.MaxCells + data.cell_y);
+            return new CellCoord(Data.Grid_x * MapConst.MaxCells + Data.Cell_x,
+                                 Data.Grid_y * MapConst.MaxCells + Data.Cell_y);
         }
 
         public bool DiffCell(Cell cell)
         {
-            return (data.cell_x != cell.data.cell_x ||
-                    data.cell_y != cell.data.cell_y);
+            return (Data.Cell_x != cell.Data.Cell_x ||
+                    Data.Cell_y != cell.Data.Cell_y);
         }
 
         public bool DiffGrid(Cell cell)
         {
-            return (data.grid_x != cell.data.grid_x ||
-                    data.grid_y != cell.data.grid_y);
+            return (Data.Grid_x != cell.Data.Grid_x ||
+                    Data.Grid_y != cell.Data.Grid_y);
         }
 
         public void Visit(CellCoord standing_cell, Visitor visitor, Map map, WorldObject obj, float radius)
@@ -173,10 +173,10 @@ namespace Game.Maps
             //if radius is known to reach cell area more than 4x4 then we should call optimized VisitCircle
             //currently this technique works with MAX_NUMBER_OF_CELLS 16 and higher, with lower values
             //there are nothing to optimize because SIZE_OF_GRID_CELL is too big...
-            if ((area.high_bound.X_coord > (area.low_bound.X_coord + 4)) &&
-                (area.high_bound.Y_coord > (area.low_bound.Y_coord + 4)))
+            if ((area.High_bound.X_coord > (area.Low_bound.X_coord + 4)) &&
+                (area.High_bound.Y_coord > (area.Low_bound.Y_coord + 4)))
             {
-                VisitCircle(visitor, map, area.low_bound, area.high_bound);
+                VisitCircle(visitor, map, area.Low_bound, area.High_bound);
 
                 return;
             }
@@ -186,9 +186,9 @@ namespace Game.Maps
             map.Visit(this, visitor);
 
             // loop the cell range
-            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
+            for (uint x = area.Low_bound.X_coord; x <= area.High_bound.X_coord; ++x)
             {
-                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
+                for (uint y = area.Low_bound.Y_coord; y <= area.High_bound.Y_coord; ++y)
                 {
                     CellCoord cellCoord = new(x, y);
 
@@ -196,7 +196,7 @@ namespace Game.Maps
                     if (cellCoord != standing_cell)
                     {
                         Cell r_zone = new(cellCoord);
-                        r_zone.data.nocreate = data.nocreate;
+                        r_zone.Data.Nocreate = Data.Nocreate;
                         map.Visit(r_zone, visitor);
                     }
                 }
@@ -309,7 +309,7 @@ namespace Game.Maps
                 {
                     CellCoord cellCoord = new(x, y);
                     Cell r_zone = new(cellCoord);
-                    r_zone.data.nocreate = data.nocreate;
+                    r_zone.Data.Nocreate = Data.Nocreate;
                     map.Visit(r_zone, visitor);
                 }
             }
@@ -335,44 +335,16 @@ namespace Game.Maps
                     //e.g. filling 2 trapezoids after filling central cell strip...
                     CellCoord cellCoord_left = new(x_start - step, y);
                     Cell r_zone_left = new(cellCoord_left);
-                    r_zone_left.data.nocreate = data.nocreate;
+                    r_zone_left.Data.Nocreate = Data.Nocreate;
                     map.Visit(r_zone_left, visitor);
 
                     //right trapezoid cell visit
                     CellCoord cellCoord_right = new(x_end + step, y);
                     Cell r_zone_right = new(cellCoord_right);
-                    r_zone_right.data.nocreate = data.nocreate;
+                    r_zone_right.Data.Nocreate = Data.Nocreate;
                     map.Visit(r_zone_right, visitor);
                 }
             }
-        }
-    }
-
-    public class CellArea
-    {
-        public ICoord high_bound;
-
-        public ICoord low_bound;
-
-        public CellArea()
-        {
-        }
-
-        public CellArea(CellCoord low, CellCoord high)
-        {
-            low_bound = low;
-            high_bound = high;
-        }
-
-        public bool Check()
-        {
-            return low_bound == high_bound;
-        }
-
-        private void ResizeBorders(ref ICoord begin_cell, ref ICoord end_cell)
-        {
-            begin_cell = low_bound;
-            end_cell = high_bound;
         }
     }
 }

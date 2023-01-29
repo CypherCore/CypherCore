@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 
-namespace Game.Maps
+namespace Game.Maps.Notifiers
 {
     internal class ObjectGridLoaderBase : Notifier
     {
@@ -96,15 +96,15 @@ namespace Game.Maps
             i_creatures = 0;
             i_gameObjects = 0;
             i_corpses = 0;
-            i_cell.data.cell_y = 0;
+            i_cell.Data.Cell_y = 0;
 
             for (uint x = 0; x < MapConst.MaxCells; ++x)
             {
-                i_cell.data.cell_x = x;
+                i_cell.Data.Cell_x = x;
 
                 for (uint y = 0; y < MapConst.MaxCells; ++y)
                 {
-                    i_cell.data.cell_y = y;
+                    i_cell.Data.Cell_y = y;
 
                     var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
                     i_grid.VisitGrid(x, y, visitor);
@@ -184,15 +184,15 @@ namespace Game.Maps
         public void Load(uint phaseId)
         {
             _phaseId = phaseId;
-            i_cell.data.cell_y = 0;
+            i_cell.Data.Cell_y = 0;
 
             for (uint x = 0; x < MapConst.MaxCells; ++x)
             {
-                i_cell.data.cell_x = x;
+                i_cell.Data.Cell_x = x;
 
                 for (uint y = 0; y < MapConst.MaxCells; ++y)
                 {
-                    i_cell.data.cell_y = y;
+                    i_cell.Data.Cell_y = y;
 
                     //Load creatures and game objects
                     var visitor = new Visitor(this, GridMapTypeMask.AllGrid);

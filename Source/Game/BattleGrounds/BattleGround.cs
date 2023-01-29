@@ -13,6 +13,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
+using Game.Maps.Dos;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;

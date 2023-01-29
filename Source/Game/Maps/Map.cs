@@ -8,14 +8,13 @@ using System.Linq;
 using System.Numerics;
 using Framework.Constants;
 using Framework.Database;
-using Game.BattleGrounds;
 using Game.Collision;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
+using Game.Maps.Notifiers;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.Scenarios;
 using Game.Scripting.Interfaces.IMap;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.IWorldState;
@@ -1293,10 +1292,10 @@ namespace Game.Maps
 
         public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
         {
-            if (info.respawnTime <= GameTime.GetGameTime())
+            if (info.RespawnTime <= GameTime.GetGameTime())
                 return;
 
-            info.respawnTime = GameTime.GetGameTime();
+            info.RespawnTime = GameTime.GetGameTime();
             SaveRespawnInfoDB(info, dbTrans);
         }
 
@@ -1828,11 +1827,11 @@ namespace Game.Maps
             }
 
             RespawnInfo ri = new();
-            ri.type = data.type;
-            ri.spawnId = data.SpawnId;
-            ri.entry = entry;
-            ri.respawnTime = respawnTime;
-            ri.gridId = gridId;
+            ri.Type = data.type;
+            ri.SpawnId = data.SpawnId;
+            ri.Entry = entry;
+            ri.RespawnTime = respawnTime;
+            ri.GridId = gridId;
             bool success = AddRespawnInfo(ri);
 
             if (startup)
@@ -1852,9 +1851,9 @@ namespace Game.Maps
                 return;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_RESPAWN);
-            stmt.AddValue(0, (ushort)info.type);
-            stmt.AddValue(1, info.spawnId);
-            stmt.AddValue(2, info.respawnTime);
+            stmt.AddValue(0, (ushort)info.Type);
+            stmt.AddValue(1, info.SpawnId);
+            stmt.AddValue(2, info.RespawnTime);
             stmt.AddValue(3, GetId());
             stmt.AddValue(4, GetInstanceId());
             DB.Characters.ExecuteOrAppend(dbTrans, stmt);
@@ -2544,7 +2543,7 @@ namespace Game.Maps
             {
                 var respawnInfo = map.LookupByKey(spawnId);
 
-                return (respawnInfo == null) ? 0 : respawnInfo.respawnTime;
+                return (respawnInfo == null) ? 0 : respawnInfo.RespawnTime;
             }
 
             return 0;
@@ -3057,9 +3056,9 @@ namespace Game.Maps
             // Update mobs/objects in ALL visible cells around object!
             CellArea area = Cell.CalculateCellArea(obj.GetPositionX(), obj.GetPositionY(), obj.GetGridActivationRange());
 
-            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
+            for (uint x = area.Low_bound.X_coord; x <= area.High_bound.X_coord; ++x)
             {
-                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
+                for (uint y = area.Low_bound.Y_coord; y <= area.High_bound.Y_coord; ++y)
                 {
                     // marked cells are those that have been visited
                     // don't visit the same cell twice
@@ -3618,13 +3617,13 @@ namespace Game.Maps
 
         private bool CheckRespawn(RespawnInfo info)
         {
-            SpawnData data = Global.ObjectMgr.GetSpawnData(info.type, info.spawnId);
-            Cypher.Assert(data != null, $"Invalid respawn info with Type {info.type}, spawnID {info.spawnId} in respawn queue.");
+            SpawnData data = Global.ObjectMgr.GetSpawnData(info.Type, info.SpawnId);
+            Cypher.Assert(data != null, $"Invalid respawn info with Type {info.Type}, spawnID {info.SpawnId} in respawn queue.");
 
             // First, check if this creature's spawn group is inactive
             if (!IsSpawnGroupActive(data.spawnGroupData.groupId))
             {
-                info.respawnTime = 0;
+                info.RespawnTime = 0;
 
                 return false;
             }
@@ -3633,14 +3632,14 @@ namespace Game.Maps
             // Only do this for unpooled spawns
             bool alreadyExists = false;
 
-            switch (info.type)
+            switch (info.Type)
             {
                 case SpawnObjectType.Creature:
                     {
                         // escort check for creatures only (if the world config boolean is set)
                         bool isEscort = WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
 
-                        var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
+                        var range = _creatureBySpawnIdStore.LookupByKey(info.SpawnId);
 
                         foreach (var creature in range)
                         {
@@ -3660,25 +3659,25 @@ namespace Game.Maps
                     }
                 case SpawnObjectType.GameObject:
                     // gameobject check is simpler - they cannot be dead or escorting
-                    if (_gameobjectBySpawnIdStore.ContainsKey(info.spawnId))
+                    if (_gameobjectBySpawnIdStore.ContainsKey(info.SpawnId))
                         alreadyExists = true;
 
                     break;
                 default:
-                    Cypher.Assert(false, $"Invalid spawn Type {info.type} with spawnId {info.spawnId} on map {GetId()}");
+                    Cypher.Assert(false, $"Invalid spawn Type {info.Type} with spawnId {info.SpawnId} on map {GetId()}");
 
                     return true;
             }
 
             if (alreadyExists)
             {
-                info.respawnTime = 0;
+                info.RespawnTime = 0;
 
                 return false;
             }
 
             // next, check linked respawn Time
-            ObjectGuid thisGUID = info.type == SpawnObjectType.GameObject ? ObjectGuid.Create(HighGuid.GameObject, GetId(), info.entry, info.spawnId) : ObjectGuid.Create(HighGuid.Creature, GetId(), info.entry, info.spawnId);
+            ObjectGuid thisGUID = info.Type == SpawnObjectType.GameObject ? ObjectGuid.Create(HighGuid.GameObject, GetId(), info.Entry, info.SpawnId) : ObjectGuid.Create(HighGuid.Creature, GetId(), info.Entry, info.SpawnId);
             long linkedTime = GetLinkedRespawnTime(thisGUID);
 
             if (linkedTime != 0)
@@ -3693,7 +3692,7 @@ namespace Game.Maps
                 else // set us to check again shortly after linked unit
                     respawnTime = Math.Max(now, linkedTime) + RandomHelper.URand(5, 15);
 
-                info.respawnTime = respawnTime;
+                info.RespawnTime = respawnTime;
 
                 return false;
             }
@@ -3730,41 +3729,41 @@ namespace Game.Maps
 
         private bool AddRespawnInfo(RespawnInfo info)
         {
-            if (info.spawnId == 0)
+            if (info.SpawnId == 0)
             {
-                Log.outError(LogFilter.Maps, $"Attempt to insert respawn info for zero spawn Id (Type {info.type})");
+                Log.outError(LogFilter.Maps, $"Attempt to insert respawn info for zero spawn Id (Type {info.Type})");
 
                 return false;
             }
 
-            var bySpawnIdMap = GetRespawnMapForType(info.type);
+            var bySpawnIdMap = GetRespawnMapForType(info.Type);
 
             if (bySpawnIdMap == null)
                 return false;
 
             // check if we already have the maximum possible number of respawns scheduled
-            if (SpawnMetadata.TypeHasData(info.type))
+            if (SpawnMetadata.TypeHasData(info.Type))
             {
-                var existing = bySpawnIdMap.LookupByKey(info.spawnId);
+                var existing = bySpawnIdMap.LookupByKey(info.SpawnId);
 
                 if (existing != null) // spawnid already has a respawn scheduled
                 {
-                    if (info.respawnTime <= existing.respawnTime) // delete existing in this case
+                    if (info.RespawnTime <= existing.RespawnTime) // delete existing in this case
                         DeleteRespawnInfo(existing);
                     else
                         return false;
                 }
 
-                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.spawnId), $"Insertion of respawn info with Id ({info.type},{info.spawnId}) into spawn Id map failed - State desync.");
+                Cypher.Assert(!bySpawnIdMap.ContainsKey(info.SpawnId), $"Insertion of respawn info with Id ({info.Type},{info.SpawnId}) into spawn Id map failed - State desync.");
             }
             else
             {
-                Cypher.Assert(false, $"Invalid respawn info for spawn Id ({info.type},{info.spawnId}) being inserted");
+                Cypher.Assert(false, $"Invalid respawn info for spawn Id ({info.Type},{info.SpawnId}) being inserted");
             }
 
             RespawnInfo ri = new(info);
             _respawnTimes.Add(ri);
-            bySpawnIdMap.Add(ri.spawnId, ri);
+            bySpawnIdMap.Add(ri.SpawnId, ri);
 
             return true;
         }
@@ -3805,20 +3804,20 @@ namespace Game.Maps
             Cypher.Assert(info != null);
 
             // spawnid store
-            var spawnMap = GetRespawnMapForType(info.type);
+            var spawnMap = GetRespawnMapForType(info.Type);
 
             if (spawnMap == null)
                 return;
 
-            var respawnInfo = spawnMap.LookupByKey(info.spawnId);
-            Cypher.Assert(respawnInfo != null, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (Type {info.type})");
-            spawnMap.Remove(info.spawnId);
+            var respawnInfo = spawnMap.LookupByKey(info.SpawnId);
+            Cypher.Assert(respawnInfo != null, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.SpawnId} (Type {info.Type})");
+            spawnMap.Remove(info.SpawnId);
 
             // respawn heap
             _respawnTimes.Remove(info);
 
             // database
-            DeleteRespawnInfoFromDB(info.type, info.spawnId, dbTrans);
+            DeleteRespawnInfoFromDB(info.Type, info.SpawnId, dbTrans);
         }
 
         private void DeleteRespawnInfoFromDB(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
@@ -3874,50 +3873,50 @@ namespace Game.Maps
             {
                 RespawnInfo next = _respawnTimes.First();
 
-                if (now < next.respawnTime) // done for this tick
+                if (now < next.RespawnTime) // done for this tick
                     break;
 
-                uint poolId = Global.PoolMgr.IsPartOfAPool(next.type, next.spawnId);
+                uint poolId = Global.PoolMgr.IsPartOfAPool(next.Type, next.SpawnId);
 
                 if (poolId != 0) // is this part of a pool?
                 {
                     // if yes, respawn will be handled by (external) pooling logic, just delete the respawn Time
                     // step 1: remove entry from maps to avoid it being reachable by outside logic
                     _respawnTimes.Remove(next);
-                    GetRespawnMapForType(next.type).Remove(next.spawnId);
+                    GetRespawnMapForType(next.Type).Remove(next.SpawnId);
 
                     // step 2: tell pooling logic to do its thing
-                    Global.PoolMgr.UpdatePool(GetPoolData(), poolId, next.type, next.spawnId);
+                    Global.PoolMgr.UpdatePool(GetPoolData(), poolId, next.Type, next.SpawnId);
 
                     // step 3: get rid of the actual entry
-                    RemoveRespawnTime(next.type, next.spawnId, null, true);
-                    GetRespawnMapForType(next.type).Remove(next.spawnId);
+                    RemoveRespawnTime(next.Type, next.SpawnId, null, true);
+                    GetRespawnMapForType(next.Type).Remove(next.SpawnId);
                 }
                 else if (CheckRespawn(next)) // see if we're allowed to respawn
                 {
                     // ok, respawn
                     // step 1: remove entry from maps to avoid it being reachable by outside logic
                     _respawnTimes.Remove(next);
-                    GetRespawnMapForType(next.type).Remove(next.spawnId);
+                    GetRespawnMapForType(next.Type).Remove(next.SpawnId);
 
                     // step 2: do the respawn, which involves external logic
-                    DoRespawn(next.type, next.spawnId, next.gridId);
+                    DoRespawn(next.Type, next.SpawnId, next.GridId);
 
                     // step 3: get rid of the actual entry
-                    RemoveRespawnTime(next.type, next.spawnId, null, true);
-                    GetRespawnMapForType(next.type).Remove(next.spawnId);
+                    RemoveRespawnTime(next.Type, next.SpawnId, null, true);
+                    GetRespawnMapForType(next.Type).Remove(next.SpawnId);
                 }
-                else if (next.respawnTime == 0)
+                else if (next.RespawnTime == 0)
                 {
                     // just remove this respawn entry without rescheduling
                     _respawnTimes.Remove(next);
-                    GetRespawnMapForType(next.type).Remove(next.spawnId);
-                    RemoveRespawnTime(next.type, next.spawnId, null, true);
+                    GetRespawnMapForType(next.Type).Remove(next.SpawnId);
+                    RemoveRespawnTime(next.Type, next.SpawnId, null, true);
                 }
                 else
                 {
                     // new respawn Time, update heap position
-                    Cypher.Assert(now < next.respawnTime); // infinite loop guard
+                    Cypher.Assert(now < next.RespawnTime); // infinite loop guard
                     SaveRespawnInfoDB(next);
                 }
             }
@@ -4279,11 +4278,11 @@ namespace Game.Maps
             foreach (var script in list)
             {
                 ScriptAction sa;
-                sa.sourceGUID = sourceGUID;
-                sa.targetGUID = targetGUID;
-                sa.ownerGUID = ownerGUID;
+                sa.SourceGUID = sourceGUID;
+                sa.TargetGUID = targetGUID;
+                sa.OwnerGUID = ownerGUID;
 
-                sa.script = script.Value;
+                sa.Script = script.Value;
                 _scriptSchedule.Add(GameTime.GetGameTime() + script.Key, sa);
 
                 if (script.Key == 0)
@@ -4311,11 +4310,11 @@ namespace Game.Maps
             ObjectGuid ownerGUID = (source != null && source.IsTypeMask(TypeMask.Item)) ? ((Item)source).GetOwnerGUID() : ObjectGuid.Empty;
 
             var sa = new ScriptAction();
-            sa.sourceGUID = sourceGUID;
-            sa.targetGUID = targetGUID;
-            sa.ownerGUID = ownerGUID;
+            sa.SourceGUID = sourceGUID;
+            sa.TargetGUID = targetGUID;
+            sa.OwnerGUID = ownerGUID;
 
-            sa.script = script;
+            sa.Script = script;
             _scriptSchedule.Add(GameTime.GetGameTime() + delay, sa);
 
             Global.MapMgr.IncreaseScheduledScriptsCount();
@@ -4667,100 +4666,100 @@ namespace Game.Maps
 
                 WorldObject source = null;
 
-                if (!step.sourceGUID.IsEmpty())
-                    switch (step.sourceGUID.GetHigh())
+                if (!step.SourceGUID.IsEmpty())
+                    switch (step.SourceGUID.GetHigh())
                     {
                         case HighGuid.Item: // as well as HIGHGUID_CONTAINER
-                            Player player = GetPlayer(step.ownerGUID);
+                            Player player = GetPlayer(step.OwnerGUID);
 
                             if (player != null)
-                                source = player.GetItemByGuid(step.sourceGUID);
+                                source = player.GetItemByGuid(step.SourceGUID);
 
                             break;
                         case HighGuid.Creature:
                         case HighGuid.Vehicle:
-                            source = GetCreature(step.sourceGUID);
+                            source = GetCreature(step.SourceGUID);
 
                             break;
                         case HighGuid.Pet:
-                            source = GetPet(step.sourceGUID);
+                            source = GetPet(step.SourceGUID);
 
                             break;
                         case HighGuid.Player:
-                            source = GetPlayer(step.sourceGUID);
+                            source = GetPlayer(step.SourceGUID);
 
                             break;
                         case HighGuid.GameObject:
                         case HighGuid.Transport:
-                            source = GetGameObject(step.sourceGUID);
+                            source = GetGameObject(step.SourceGUID);
 
                             break;
                         case HighGuid.Corpse:
-                            source = GetCorpse(step.sourceGUID);
+                            source = GetCorpse(step.SourceGUID);
 
                             break;
                         default:
                             Log.outError(LogFilter.Scripts,
                                          "{0} source with unsupported high Guid (GUID: {1}, high Guid: {2}).",
-                                         step.script.GetDebugInfo(),
-                                         step.sourceGUID,
-                                         step.sourceGUID.ToString());
+                                         step.Script.GetDebugInfo(),
+                                         step.SourceGUID,
+                                         step.SourceGUID.ToString());
 
                             break;
                     }
 
                 WorldObject target = null;
 
-                if (!step.targetGUID.IsEmpty())
-                    switch (step.targetGUID.GetHigh())
+                if (!step.TargetGUID.IsEmpty())
+                    switch (step.TargetGUID.GetHigh())
                     {
                         case HighGuid.Creature:
                         case HighGuid.Vehicle:
-                            target = GetCreature(step.targetGUID);
+                            target = GetCreature(step.TargetGUID);
 
                             break;
                         case HighGuid.Pet:
-                            target = GetPet(step.targetGUID);
+                            target = GetPet(step.TargetGUID);
 
                             break;
                         case HighGuid.Player:
-                            target = GetPlayer(step.targetGUID);
+                            target = GetPlayer(step.TargetGUID);
 
                             break;
                         case HighGuid.GameObject:
                         case HighGuid.Transport:
-                            target = GetGameObject(step.targetGUID);
+                            target = GetGameObject(step.TargetGUID);
 
                             break;
                         case HighGuid.Corpse:
-                            target = GetCorpse(step.targetGUID);
+                            target = GetCorpse(step.TargetGUID);
 
                             break;
                         default:
-                            Log.outError(LogFilter.Scripts, "{0} Target with unsupported high Guid {1}.", step.script.GetDebugInfo(), step.targetGUID.ToString());
+                            Log.outError(LogFilter.Scripts, "{0} Target with unsupported high Guid {1}.", step.Script.GetDebugInfo(), step.TargetGUID.ToString());
 
                             break;
                     }
 
-                switch (step.script.command)
+                switch (step.Script.command)
                 {
                     case ScriptCommands.Talk:
                         {
-                            if (step.script.Talk.ChatType > ChatMsg.Whisper &&
-                                step.script.Talk.ChatType != ChatMsg.RaidBossWhisper)
+                            if (step.Script.Talk.ChatType > ChatMsg.Whisper &&
+                                step.Script.Talk.ChatType != ChatMsg.RaidBossWhisper)
                             {
                                 Log.outError(LogFilter.Scripts,
                                              "{0} invalid chat Type ({1}) specified, skipping.",
-                                             step.script.GetDebugInfo(),
-                                             step.script.Talk.ChatType);
+                                             step.Script.GetDebugInfo(),
+                                             step.Script.Talk.ChatType);
 
                                 break;
                             }
 
-                            if (step.script.Talk.Flags.HasAnyFlag(eScriptFlags.TalkUsePlayer))
-                                source = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                            if (step.Script.Talk.Flags.HasAnyFlag(eScriptFlags.TalkUsePlayer))
+                                source = _GetScriptPlayerSourceOrTarget(source, target, step.Script);
                             else
-                                source = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                                source = _GetScriptCreatureSourceOrTarget(source, target, step.Script);
 
                             if (source)
                             {
@@ -4768,24 +4767,24 @@ namespace Game.Maps
 
                                 if (!sourceUnit)
                                 {
-                                    Log.outError(LogFilter.Scripts, "{0} source object ({1}) is not an unit, skipping.", step.script.GetDebugInfo(), source.GetGUID().ToString());
+                                    Log.outError(LogFilter.Scripts, "{0} source object ({1}) is not an unit, skipping.", step.Script.GetDebugInfo(), source.GetGUID().ToString());
 
                                     break;
                                 }
 
-                                switch (step.script.Talk.ChatType)
+                                switch (step.Script.Talk.ChatType)
                                 {
                                     case ChatMsg.Say:
-                                        sourceUnit.Say((uint)step.script.Talk.TextID, target);
+                                        sourceUnit.Say((uint)step.Script.Talk.TextID, target);
 
                                         break;
                                     case ChatMsg.Yell:
-                                        sourceUnit.Yell((uint)step.script.Talk.TextID, target);
+                                        sourceUnit.Yell((uint)step.Script.Talk.TextID, target);
 
                                         break;
                                     case ChatMsg.Emote:
                                     case ChatMsg.RaidBossEmote:
-                                        sourceUnit.TextEmote((uint)step.script.Talk.TextID, target, step.script.Talk.ChatType == ChatMsg.RaidBossEmote);
+                                        sourceUnit.TextEmote((uint)step.Script.Talk.TextID, target, step.Script.Talk.ChatType == ChatMsg.RaidBossEmote);
 
                                         break;
                                     case ChatMsg.Whisper:
@@ -4794,9 +4793,9 @@ namespace Game.Maps
                                             Player receiver = target ? target.ToPlayer() : null;
 
                                             if (!receiver)
-                                                Log.outError(LogFilter.Scripts, "{0} attempt to whisper to non-player unit, skipping.", step.script.GetDebugInfo());
+                                                Log.outError(LogFilter.Scripts, "{0} attempt to whisper to non-player unit, skipping.", step.Script.GetDebugInfo());
                                             else
-                                                sourceUnit.Whisper((uint)step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
+                                                sourceUnit.Whisper((uint)step.Script.Talk.TextID, receiver, step.Script.Talk.ChatType == ChatMsg.RaidBossWhisper);
 
                                             break;
                                         }
@@ -4810,14 +4809,14 @@ namespace Game.Maps
                     case ScriptCommands.Emote:
                         {
                             // Source or Target must be Creature.
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.Script);
 
                             if (cSource)
                             {
-                                if (step.script.Emote.Flags.HasAnyFlag(eScriptFlags.EmoteUseState))
-                                    cSource.SetEmoteState((Emote)step.script.Emote.EmoteID);
+                                if (step.Script.Emote.Flags.HasAnyFlag(eScriptFlags.EmoteUseState))
+                                    cSource.SetEmoteState((Emote)step.Script.Emote.EmoteID);
                                 else
-                                    cSource.HandleEmoteCommand((Emote)step.script.Emote.EmoteID);
+                                    cSource.HandleEmoteCommand((Emote)step.Script.Emote.EmoteID);
                             }
 
                             break;
@@ -4825,30 +4824,30 @@ namespace Game.Maps
                     case ScriptCommands.MoveTo:
                         {
                             // Source or Target must be Creature.
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.Script);
 
                             if (cSource)
                             {
                                 Unit unit = cSource.ToUnit();
 
-                                if (step.script.MoveTo.TravelTime != 0)
+                                if (step.Script.MoveTo.TravelTime != 0)
                                 {
                                     float speed =
-                                        unit.GetDistance(step.script.MoveTo.DestX,
-                                                         step.script.MoveTo.DestY,
-                                                         step.script.MoveTo.DestZ) /
-                                        (step.script.MoveTo.TravelTime * 0.001f);
+                                        unit.GetDistance(step.Script.MoveTo.DestX,
+                                                         step.Script.MoveTo.DestY,
+                                                         step.Script.MoveTo.DestZ) /
+                                        (step.Script.MoveTo.TravelTime * 0.001f);
 
-                                    unit.MonsterMoveWithSpeed(step.script.MoveTo.DestX,
-                                                              step.script.MoveTo.DestY,
-                                                              step.script.MoveTo.DestZ,
+                                    unit.MonsterMoveWithSpeed(step.Script.MoveTo.DestX,
+                                                              step.Script.MoveTo.DestY,
+                                                              step.Script.MoveTo.DestZ,
                                                               speed);
                                 }
                                 else
                                 {
-                                    unit.NearTeleportTo(step.script.MoveTo.DestX,
-                                                        step.script.MoveTo.DestY,
-                                                        step.script.MoveTo.DestZ,
+                                    unit.NearTeleportTo(step.Script.MoveTo.DestX,
+                                                        step.Script.MoveTo.DestY,
+                                                        step.Script.MoveTo.DestZ,
                                                         unit.GetOrientation());
                                 }
                             }
@@ -4857,28 +4856,28 @@ namespace Game.Maps
                         }
                     case ScriptCommands.TeleportTo:
                         {
-                            if (step.script.TeleportTo.Flags.HasAnyFlag(eScriptFlags.TeleportUseCreature))
+                            if (step.Script.TeleportTo.Flags.HasAnyFlag(eScriptFlags.TeleportUseCreature))
                             {
                                 // Source or Target must be Creature.
-                                Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                                Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.Script);
 
                                 if (cSource)
-                                    cSource.NearTeleportTo(step.script.TeleportTo.DestX,
-                                                           step.script.TeleportTo.DestY,
-                                                           step.script.TeleportTo.DestZ,
-                                                           step.script.TeleportTo.Orientation);
+                                    cSource.NearTeleportTo(step.Script.TeleportTo.DestX,
+                                                           step.Script.TeleportTo.DestY,
+                                                           step.Script.TeleportTo.DestZ,
+                                                           step.Script.TeleportTo.Orientation);
                             }
                             else
                             {
                                 // Source or Target must be Player.
-                                Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                                Player player = _GetScriptPlayerSourceOrTarget(source, target, step.Script);
 
                                 if (player)
-                                    player.TeleportTo(step.script.TeleportTo.MapID,
-                                                      step.script.TeleportTo.DestX,
-                                                      step.script.TeleportTo.DestY,
-                                                      step.script.TeleportTo.DestZ,
-                                                      step.script.TeleportTo.Orientation);
+                                    player.TeleportTo(step.Script.TeleportTo.MapID,
+                                                      step.Script.TeleportTo.DestX,
+                                                      step.Script.TeleportTo.DestY,
+                                                      step.Script.TeleportTo.DestZ,
+                                                      step.Script.TeleportTo.Orientation);
                             }
 
                             break;
@@ -4887,14 +4886,14 @@ namespace Game.Maps
                         {
                             if (!source)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} source object is NULL.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, "{0} source object is NULL.", step.Script.GetDebugInfo());
 
                                 break;
                             }
 
                             if (!target)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} Target object is NULL.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, "{0} Target object is NULL.", step.Script.GetDebugInfo());
 
                                 break;
                             }
@@ -4911,7 +4910,7 @@ namespace Game.Maps
                                 {
                                     Log.outError(LogFilter.Scripts,
                                                  "{0} source is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.",
-                                                 step.script.GetDebugInfo(),
+                                                 step.Script.GetDebugInfo(),
                                                  source.GetTypeId(),
                                                  source.GetEntry(),
                                                  source.GetGUID().ToString());
@@ -4933,7 +4932,7 @@ namespace Game.Maps
                                     {
                                         Log.outError(LogFilter.Scripts,
                                                      "{0} Target is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.",
-                                                     step.script.GetDebugInfo(),
+                                                     step.Script.GetDebugInfo(),
                                                      target.GetTypeId(),
                                                      target.GetEntry(),
                                                      target.GetGUID().ToString());
@@ -4947,7 +4946,7 @@ namespace Game.Maps
                                 {
                                     Log.outError(LogFilter.Scripts,
                                                  "{0} neither source nor Target is player (Entry: {0}, GUID: {1}; Target: Entry: {2}, GUID: {3}), skipping.",
-                                                 step.script.GetDebugInfo(),
+                                                 step.Script.GetDebugInfo(),
                                                  source.GetEntry(),
                                                  source.GetGUID().ToString(),
                                                  target.GetEntry(),
@@ -4959,11 +4958,11 @@ namespace Game.Maps
 
                             // quest Id and Flags checked at script loading
                             if ((!worldObject.IsTypeId(TypeId.Unit) || worldObject.ToUnit().IsAlive()) &&
-                                (step.script.QuestExplored.Distance == 0 ||
-                                 worldObject.IsWithinDistInMap(player, step.script.QuestExplored.Distance)))
-                                player.AreaExploredOrEventHappens(step.script.QuestExplored.QuestID);
+                                (step.Script.QuestExplored.Distance == 0 ||
+                                 worldObject.IsWithinDistInMap(player, step.Script.QuestExplored.Distance)))
+                                player.AreaExploredOrEventHappens(step.Script.QuestExplored.QuestID);
                             else
-                                player.FailQuest(step.script.QuestExplored.QuestID);
+                                player.FailQuest(step.Script.QuestExplored.QuestID);
 
                             break;
                         }
@@ -4971,37 +4970,37 @@ namespace Game.Maps
                     case ScriptCommands.KillCredit:
                         {
                             // Source or Target must be Player.
-                            Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                            Player player = _GetScriptPlayerSourceOrTarget(source, target, step.Script);
 
                             if (player)
                             {
-                                if (step.script.KillCredit.Flags.HasAnyFlag(eScriptFlags.KillcreditRewardGroup))
-                                    player.RewardPlayerAndGroupAtEvent(step.script.KillCredit.CreatureEntry, player);
+                                if (step.Script.KillCredit.Flags.HasAnyFlag(eScriptFlags.KillcreditRewardGroup))
+                                    player.RewardPlayerAndGroupAtEvent(step.Script.KillCredit.CreatureEntry, player);
                                 else
-                                    player.KilledMonsterCredit(step.script.KillCredit.CreatureEntry, ObjectGuid.Empty);
+                                    player.KilledMonsterCredit(step.Script.KillCredit.CreatureEntry, ObjectGuid.Empty);
                             }
 
                             break;
                         }
                     case ScriptCommands.RespawnGameobject:
                         {
-                            if (step.script.RespawnGameObject.GOGuid == 0)
+                            if (step.Script.RespawnGameObject.GOGuid == 0)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} gameobject Guid (datalong) is not specified.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, "{0} gameobject Guid (datalong) is not specified.", step.Script.GetDebugInfo());
 
                                 break;
                             }
 
                             // Source or Target must be WorldObject.
-                            WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
+                            WorldObject pSummoner = _GetScriptWorldObject(source, true, step.Script);
 
                             if (pSummoner)
                             {
-                                GameObject pGO = _FindGameObject(pSummoner, step.script.RespawnGameObject.GOGuid);
+                                GameObject pGO = _FindGameObject(pSummoner, step.Script.RespawnGameObject.GOGuid);
 
                                 if (pGO == null)
                                 {
-                                    Log.outError(LogFilter.Scripts, "{0} gameobject was not found (Guid: {1}).", step.script.GetDebugInfo(), step.script.RespawnGameObject.GOGuid);
+                                    Log.outError(LogFilter.Scripts, "{0} gameobject was not found (Guid: {1}).", step.Script.GetDebugInfo(), step.Script.RespawnGameObject.GOGuid);
 
                                     break;
                                 }
@@ -5013,9 +5012,9 @@ namespace Game.Maps
                                 {
                                     Log.outError(LogFilter.Scripts,
                                                  "{0} can not be used with gameobject of Type {1} (Guid: {2}).",
-                                                 step.script.GetDebugInfo(),
+                                                 step.Script.GetDebugInfo(),
                                                  pGO.GetGoType(),
-                                                 step.script.RespawnGameObject.GOGuid);
+                                                 step.Script.RespawnGameObject.GOGuid);
 
                                     break;
                                 }
@@ -5023,7 +5022,7 @@ namespace Game.Maps
                                 // Check that GO is not spawned
                                 if (!pGO.IsSpawned())
                                 {
-                                    int nTimeToDespawn = Math.Max(5, (int)step.script.RespawnGameObject.DespawnDelay);
+                                    int nTimeToDespawn = Math.Max(5, (int)step.Script.RespawnGameObject.DespawnDelay);
                                     pGO.SetLootState(LootState.Ready);
                                     pGO.SetRespawnTime(nTimeToDespawn);
 
@@ -5036,23 +5035,23 @@ namespace Game.Maps
                     case ScriptCommands.TempSummonCreature:
                         {
                             // Source must be WorldObject.
-                            WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
+                            WorldObject pSummoner = _GetScriptWorldObject(source, true, step.Script);
 
                             if (pSummoner)
                             {
-                                if (step.script.TempSummonCreature.CreatureEntry == 0)
+                                if (step.Script.TempSummonCreature.CreatureEntry == 0)
                                 {
-                                    Log.outError(LogFilter.Scripts, "{0} creature entry (datalong) is not specified.", step.script.GetDebugInfo());
+                                    Log.outError(LogFilter.Scripts, "{0} creature entry (datalong) is not specified.", step.Script.GetDebugInfo());
                                 }
                                 else
                                 {
-                                    float x = step.script.TempSummonCreature.PosX;
-                                    float y = step.script.TempSummonCreature.PosY;
-                                    float z = step.script.TempSummonCreature.PosZ;
-                                    float o = step.script.TempSummonCreature.Orientation;
+                                    float x = step.Script.TempSummonCreature.PosX;
+                                    float y = step.Script.TempSummonCreature.PosY;
+                                    float z = step.Script.TempSummonCreature.PosZ;
+                                    float o = step.Script.TempSummonCreature.Orientation;
 
-                                    if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
-                                        Log.outError(LogFilter.Scripts, "{0} creature was not spawned (entry: {1}).", step.script.GetDebugInfo(), step.script.TempSummonCreature.CreatureEntry);
+                                    if (pSummoner.SummonCreature(step.Script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.Script.TempSummonCreature.DespawnDelay)) == null)
+                                        Log.outError(LogFilter.Scripts, "{0} creature was not spawned (entry: {1}).", step.Script.GetDebugInfo(), step.Script.TempSummonCreature.CreatureEntry);
                                 }
                             }
 
@@ -5061,20 +5060,20 @@ namespace Game.Maps
 
                     case ScriptCommands.OpenDoor:
                     case ScriptCommands.CloseDoor:
-                        _ScriptProcessDoor(source, target, step.script);
+                        _ScriptProcessDoor(source, target, step.Script);
 
                         break;
                     case ScriptCommands.ActivateObject:
                         {
                             // Source must be Unit.
-                            Unit unit = _GetScriptUnit(source, true, step.script);
+                            Unit unit = _GetScriptUnit(source, true, step.Script);
 
                             if (unit)
                             {
                                 // Target must be GameObject.
                                 if (target == null)
                                 {
-                                    Log.outError(LogFilter.Scripts, "{0} Target object is NULL.", step.script.GetDebugInfo());
+                                    Log.outError(LogFilter.Scripts, "{0} Target object is NULL.", step.Script.GetDebugInfo());
 
                                     break;
                                 }
@@ -5083,7 +5082,7 @@ namespace Game.Maps
                                 {
                                     Log.outError(LogFilter.Scripts,
                                                  "{0} Target object is not gameobject (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.",
-                                                 step.script.GetDebugInfo(),
+                                                 step.Script.GetDebugInfo(),
                                                  target.GetTypeId(),
                                                  target.GetEntry(),
                                                  target.GetGUID().ToString());
@@ -5102,11 +5101,11 @@ namespace Game.Maps
                     case ScriptCommands.RemoveAura:
                         {
                             // Source (datalong2 != 0) or Target (datalong2 == 0) must be Unit.
-                            bool bReverse = step.script.RemoveAura.Flags.HasAnyFlag(eScriptFlags.RemoveauraReverse);
-                            Unit unit = _GetScriptUnit(bReverse ? source : target, bReverse, step.script);
+                            bool bReverse = step.Script.RemoveAura.Flags.HasAnyFlag(eScriptFlags.RemoveauraReverse);
+                            Unit unit = _GetScriptUnit(bReverse ? source : target, bReverse, step.Script);
 
                             if (unit)
-                                unit.RemoveAurasDueToSpell(step.script.RemoveAura.SpellID);
+                                unit.RemoveAurasDueToSpell(step.Script.RemoveAura.SpellID);
 
                             break;
                         }
@@ -5115,7 +5114,7 @@ namespace Game.Maps
                             if (source == null &&
                                 target == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} source and Target objects are NULL.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, "{0} source and Target objects are NULL.", step.Script.GetDebugInfo());
 
                                 break;
                             }
@@ -5124,7 +5123,7 @@ namespace Game.Maps
                             WorldObject uTarget = null;
 
                             // source/Target cast spell at Target/source (script.datalong2: 0: s.t 1: s.s 2: t.t 3: t.s
-                            switch (step.script.CastSpell.Flags)
+                            switch (step.Script.CastSpell.Flags)
                             {
                                 case eScriptFlags.CastspellSourceToTarget: // source . Target
                                     uSource = source;
@@ -5148,80 +5147,80 @@ namespace Game.Maps
                                     break;
                                 case eScriptFlags.CastspellSearchCreature: // source . creature with entry
                                     uSource = source;
-                                    uTarget = uSource?.FindNearestCreature((uint)Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
+                                    uTarget = uSource?.FindNearestCreature((uint)Math.Abs(step.Script.CastSpell.CreatureEntry), step.Script.CastSpell.SearchRadius);
 
                                     break;
                             }
 
                             if (uSource == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} no source worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                                Log.outError(LogFilter.Scripts, "{0} no source worldobject found for spell {1}", step.Script.GetDebugInfo(), step.Script.CastSpell.SpellID);
 
                                 break;
                             }
 
                             if (uTarget == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} no Target worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                                Log.outError(LogFilter.Scripts, "{0} no Target worldobject found for spell {1}", step.Script.GetDebugInfo(), step.Script.CastSpell.SpellID);
 
                                 break;
                             }
 
-                            bool triggered = ((int)step.script.CastSpell.Flags != 4)
-                                                 ? step.script.CastSpell.CreatureEntry.HasAnyFlag((int)eScriptFlags.CastspellTriggered)
-                                                 : step.script.CastSpell.CreatureEntry < 0;
+                            bool triggered = ((int)step.Script.CastSpell.Flags != 4)
+                                                 ? step.Script.CastSpell.CreatureEntry.HasAnyFlag((int)eScriptFlags.CastspellTriggered)
+                                                 : step.Script.CastSpell.CreatureEntry < 0;
 
-                            uSource.CastSpell(uTarget, step.script.CastSpell.SpellID, triggered);
+                            uSource.CastSpell(uTarget, step.Script.CastSpell.SpellID, triggered);
 
                             break;
                         }
 
                     case ScriptCommands.PlaySound:
                         // Source must be WorldObject.
-                        WorldObject obj = _GetScriptWorldObject(source, true, step.script);
+                        WorldObject obj = _GetScriptWorldObject(source, true, step.Script);
 
                         if (obj)
                         {
                             // PlaySound.Flags bitmask: 0/1=anyone/Target
                             Player player2 = null;
 
-                            if (step.script.PlaySound.Flags.HasAnyFlag(eScriptFlags.PlaysoundTargetPlayer))
+                            if (step.Script.PlaySound.Flags.HasAnyFlag(eScriptFlags.PlaysoundTargetPlayer))
                             {
                                 // Target must be Player.
-                                player2 = _GetScriptPlayer(target, false, step.script);
+                                player2 = _GetScriptPlayer(target, false, step.Script);
 
                                 if (target == null)
                                     break;
                             }
 
                             // PlaySound.Flags bitmask: 0/2=without/with distance dependent
-                            if (step.script.PlaySound.Flags.HasAnyFlag(eScriptFlags.PlaysoundDistanceSound))
-                                obj.PlayDistanceSound(step.script.PlaySound.SoundID, player2);
+                            if (step.Script.PlaySound.Flags.HasAnyFlag(eScriptFlags.PlaysoundDistanceSound))
+                                obj.PlayDistanceSound(step.Script.PlaySound.SoundID, player2);
                             else
-                                obj.PlayDirectSound(step.script.PlaySound.SoundID, player2);
+                                obj.PlayDirectSound(step.Script.PlaySound.SoundID, player2);
                         }
 
                         break;
 
                     case ScriptCommands.CreateItem:
                         // Target or source must be Player.
-                        Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                        Player pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.Script);
 
                         if (pReceiver)
                         {
                             var dest = new List<ItemPosCount>();
-                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, step.script.CreateItem.ItemEntry, step.script.CreateItem.Amount);
+                            InventoryResult msg = pReceiver.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, step.Script.CreateItem.ItemEntry, step.Script.CreateItem.Amount);
 
                             if (msg == InventoryResult.Ok)
                             {
-                                Item item = pReceiver.StoreNewItem(dest, step.script.CreateItem.ItemEntry, true);
+                                Item item = pReceiver.StoreNewItem(dest, step.Script.CreateItem.ItemEntry, true);
 
                                 if (item != null)
-                                    pReceiver.SendNewItem(item, step.script.CreateItem.Amount, false, true);
+                                    pReceiver.SendNewItem(item, step.Script.CreateItem.Amount, false, true);
                             }
                             else
                             {
-                                pReceiver.SendEquipError(msg, null, null, step.script.CreateItem.ItemEntry);
+                                pReceiver.SendEquipError(msg, null, null, step.Script.CreateItem.ItemEntry);
                             }
                         }
 
@@ -5230,17 +5229,17 @@ namespace Game.Maps
                     case ScriptCommands.DespawnSelf:
                         {
                             // First try with Target or source creature, then with Target or source gameobject
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true);
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.Script, true);
 
                             if (cSource != null)
                             {
-                                cSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
+                                cSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.Script.DespawnSelf.DespawnDelay));
                             }
                             else
                             {
-                                GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.script, true);
+                                GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.Script, true);
 
-                                goSource?.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
+                                goSource?.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.Script.DespawnSelf.DespawnDelay));
                             }
 
                             break;
@@ -5248,36 +5247,36 @@ namespace Game.Maps
                     case ScriptCommands.LoadPath:
                         {
                             // Source must be Unit.
-                            Unit unit = _GetScriptUnit(source, true, step.script);
+                            Unit unit = _GetScriptUnit(source, true, step.Script);
 
                             if (unit)
                             {
-                                if (Global.WaypointMgr.GetPath(step.script.LoadPath.PathID) == null)
-                                    Log.outError(LogFilter.Scripts, "{0} source object has an invalid path ({1}), skipping.", step.script.GetDebugInfo(), step.script.LoadPath.PathID);
+                                if (Global.WaypointMgr.GetPath(step.Script.LoadPath.PathID) == null)
+                                    Log.outError(LogFilter.Scripts, "{0} source object has an invalid path ({1}), skipping.", step.Script.GetDebugInfo(), step.Script.LoadPath.PathID);
                                 else
-                                    unit.GetMotionMaster().MovePath(step.script.LoadPath.PathID, step.script.LoadPath.IsRepeatable != 0);
+                                    unit.GetMotionMaster().MovePath(step.Script.LoadPath.PathID, step.Script.LoadPath.IsRepeatable != 0);
                             }
 
                             break;
                         }
                     case ScriptCommands.CallscriptToUnit:
                         {
-                            if (step.script.CallScript.CreatureEntry == 0)
+                            if (step.Script.CallScript.CreatureEntry == 0)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} creature entry is not specified, skipping.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, "{0} creature entry is not specified, skipping.", step.Script.GetDebugInfo());
 
                                 break;
                             }
 
-                            if (step.script.CallScript.ScriptID == 0)
+                            if (step.Script.CallScript.ScriptID == 0)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} script Id is not specified, skipping.", step.script.GetDebugInfo());
+                                Log.outError(LogFilter.Scripts, "{0} script Id is not specified, skipping.", step.Script.GetDebugInfo());
 
                                 break;
                             }
 
                             Creature cTarget = null;
-                            var creatureBounds = _creatureBySpawnIdStore.LookupByKey(step.script.CallScript.CreatureEntry);
+                            var creatureBounds = _creatureBySpawnIdStore.LookupByKey(step.Script.CallScript.CreatureEntry);
 
                             if (!creatureBounds.Empty())
                             {
@@ -5289,13 +5288,13 @@ namespace Game.Maps
 
                             if (cTarget == null)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} Target was not found (entry: {1})", step.script.GetDebugInfo(), step.script.CallScript.CreatureEntry);
+                                Log.outError(LogFilter.Scripts, "{0} Target was not found (entry: {1})", step.Script.GetDebugInfo(), step.Script.CallScript.CreatureEntry);
 
                                 break;
                             }
 
                             // Insert script into schedule but do not start it
-                            ScriptsStart((ScriptsType)step.script.CallScript.ScriptType, step.script.CallScript.ScriptID, cTarget, null);
+                            ScriptsStart((ScriptsType)step.Script.CallScript.ScriptType, step.Script.CallScript.ScriptID, cTarget, null);
 
                             break;
                         }
@@ -5303,19 +5302,19 @@ namespace Game.Maps
                     case ScriptCommands.Kill:
                         {
                             // Source or Target must be Creature.
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.Script);
 
                             if (cSource)
                             {
                                 if (cSource.IsDead())
                                 {
-                                    Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
+                                    Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.Script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
                                 }
                                 else
                                 {
                                     cSource.SetDeathState(DeathState.JustDied);
 
-                                    if (step.script.Kill.RemoveCorpse == 1)
+                                    if (step.Script.Kill.RemoveCorpse == 1)
                                         cSource.RemoveCorpse();
                                 }
                             }
@@ -5325,14 +5324,14 @@ namespace Game.Maps
                     case ScriptCommands.Orientation:
                         {
                             // Source must be Unit.
-                            Unit sourceUnit = _GetScriptUnit(source, true, step.script);
+                            Unit sourceUnit = _GetScriptUnit(source, true, step.Script);
 
                             if (sourceUnit)
                             {
-                                if (step.script.Orientation.Flags.HasAnyFlag(eScriptFlags.OrientationFaceTarget))
+                                if (step.Script.Orientation.Flags.HasAnyFlag(eScriptFlags.OrientationFaceTarget))
                                 {
                                     // Target must be Unit.
-                                    Unit targetUnit = _GetScriptUnit(target, false, step.script);
+                                    Unit targetUnit = _GetScriptUnit(target, false, step.Script);
 
                                     if (targetUnit == null)
                                         break;
@@ -5341,7 +5340,7 @@ namespace Game.Maps
                                 }
                                 else
                                 {
-                                    sourceUnit.SetFacingTo(step.script.Orientation._Orientation);
+                                    sourceUnit.SetFacingTo(step.Script.Orientation._Orientation);
                                 }
                             }
 
@@ -5350,27 +5349,27 @@ namespace Game.Maps
                     case ScriptCommands.Equip:
                         {
                             // Source must be Creature.
-                            Creature cSource = _GetScriptCreature(source, target, step.script);
+                            Creature cSource = _GetScriptCreature(source, target, step.Script);
 
                             if (cSource)
-                                cSource.LoadEquipment((int)step.script.Equip.EquipmentID);
+                                cSource.LoadEquipment((int)step.Script.Equip.EquipmentID);
 
                             break;
                         }
                     case ScriptCommands.Model:
                         {
                             // Source must be Creature.
-                            Creature cSource = _GetScriptCreature(source, target, step.script);
+                            Creature cSource = _GetScriptCreature(source, target, step.Script);
 
                             if (cSource)
-                                cSource.SetDisplayId(step.script.Model.ModelID);
+                                cSource.SetDisplayId(step.Script.Model.ModelID);
 
                             break;
                         }
                     case ScriptCommands.CloseGossip:
                         {
                             // Source must be Player.
-                            Player player = _GetScriptPlayer(source, true, step.script);
+                            Player player = _GetScriptPlayer(source, true, step.Script);
 
                             player?.PlayerTalkClass.SendCloseGossip();
 
@@ -5379,17 +5378,17 @@ namespace Game.Maps
                     case ScriptCommands.Playmovie:
                         {
                             // Source must be Player.
-                            Player player = _GetScriptPlayer(source, true, step.script);
+                            Player player = _GetScriptPlayer(source, true, step.Script);
 
                             if (player)
-                                player.SendMovieStart(step.script.PlayMovie.MovieID);
+                                player.SendMovieStart(step.Script.PlayMovie.MovieID);
 
                             break;
                         }
                     case ScriptCommands.Movement:
                         {
                             // Source must be Creature.
-                            Creature cSource = _GetScriptCreature(source, true, step.script);
+                            Creature cSource = _GetScriptCreature(source, true, step.Script);
 
                             if (cSource)
                             {
@@ -5398,14 +5397,14 @@ namespace Game.Maps
 
                                 cSource.GetMotionMaster().MoveIdle();
 
-                                switch ((MovementGeneratorType)step.script.Movement.MovementType)
+                                switch ((MovementGeneratorType)step.Script.Movement.MovementType)
                                 {
                                     case MovementGeneratorType.Random:
-                                        cSource.GetMotionMaster().MoveRandom(step.script.Movement.MovementDistance);
+                                        cSource.GetMotionMaster().MoveRandom(step.Script.Movement.MovementDistance);
 
                                         break;
                                     case MovementGeneratorType.Waypoint:
-                                        cSource.GetMotionMaster().MovePath((uint)step.script.Movement.Path, false);
+                                        cSource.GetMotionMaster().MovePath((uint)step.Script.Movement.Path, false);
 
                                         break;
                                 }
@@ -5416,15 +5415,15 @@ namespace Game.Maps
                     case ScriptCommands.PlayAnimkit:
                         {
                             // Source must be Creature.
-                            Creature cSource = _GetScriptCreature(source, true, step.script);
+                            Creature cSource = _GetScriptCreature(source, true, step.Script);
 
                             if (cSource)
-                                cSource.PlayOneShotAnimKitId((ushort)step.script.PlayAnimKit.AnimKitID);
+                                cSource.PlayOneShotAnimKitId((ushort)step.Script.PlayAnimKit.AnimKitID);
 
                             break;
                         }
                     default:
-                        Log.outError(LogFilter.Scripts, "Unknown script command {0}.", step.script.GetDebugInfo());
+                        Log.outError(LogFilter.Scripts, "Unknown script command {0}.", step.Script.GetDebugInfo());
 
                         break;
                 }
@@ -5508,676 +5507,5 @@ namespace Game.Maps
         private readonly Dictionary<int, int> _worldStateValues = new();
 
         #endregion
-    }
-
-    public class InstanceMap : Map
-    {
-        private readonly InstanceLock i_instanceLock;
-        private readonly GroupInstanceReference i_owningGroupRef = new();
-        private InstanceScript i_data;
-        private DateTime? i_instanceExpireEvent;
-        private InstanceScenario i_scenario;
-        private uint i_script_id;
-
-        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
-        {
-            i_instanceLock = instanceLock;
-
-            //lets initialize visibility distance for dungeons
-            InitVisibilityDistance();
-
-            // the timer is started by default, and stopped when the first player joins
-            // this make sure it gets unloaded if for some reason no player joins
-            _unloadTimer = (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
-
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, instanceTeam == TeamId.Alliance ? 1 : 0, false, this);
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, instanceTeam == TeamId.Horde ? 1 : 0, false, this);
-
-            if (i_instanceLock != null)
-            {
-                i_instanceLock.SetInUse(true);
-                i_instanceExpireEvent = i_instanceLock.GetExpiryTime(); // ignore extension State for reset event (will ask players to accept extended save on expiration)
-            }
-        }
-
-        public override void InitVisibilityDistance()
-        {
-            //init visibility distance for instances
-            _VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
-            _VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
-        }
-
-        public override TransferAbortParams CannotEnter(Player player)
-        {
-            if (player.GetMap() == this)
-            {
-                Log.outError(LogFilter.Maps, "InstanceMap:CannotEnter - player {0} ({1}) already in map {2}, {3}, {4}!", player.GetName(), player.GetGUID().ToString(), GetId(), GetInstanceId(), GetDifficultyID());
-                Cypher.Assert(false);
-
-                return new TransferAbortParams(TransferAbortReason.Error);
-            }
-
-            // allow GM's to enter
-            if (player.IsGameMaster())
-                return base.CannotEnter(player);
-
-            // cannot enter if the instance is full (player cap), GMs don't Count
-            uint maxPlayers = GetMaxPlayers();
-
-            if (GetPlayersCountExceptGMs() >= maxPlayers)
-            {
-                Log.outInfo(LogFilter.Maps, "MAP: Instance '{0}' of map '{1}' cannot have more than '{2}' players. Player '{3}' rejected", GetInstanceId(), GetMapName(), maxPlayers, player.GetName());
-
-                return new TransferAbortParams(TransferAbortReason.MaxPlayers);
-            }
-
-            // cannot enter while an encounter is in progress (unless this is a relog, in which case it is permitted)
-            if (!player.IsLoading() &&
-                IsRaid() &&
-                GetInstanceScript() != null &&
-                GetInstanceScript().IsEncounterInProgress())
-                return new TransferAbortParams(TransferAbortReason.ZoneInCombat);
-
-            if (i_instanceLock != null)
-            {
-                // cannot enter if player is permanent saved to a different instance Id
-                TransferAbortReason lockError = Global.InstanceLockMgr.CanJoinInstanceLock(player.GetGUID(), new MapDb2Entries(GetEntry(), GetMapDifficulty()), i_instanceLock);
-
-                if (lockError != TransferAbortReason.None)
-                    return new TransferAbortParams(lockError);
-            }
-
-            return base.CannotEnter(player);
-        }
-
-        public override bool AddPlayerToMap(Player player, bool initPlayer = true)
-        {
-            // increase current instances (hourly limit)
-            player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
-
-            MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-
-            if (entries.MapDifficulty.HasResetSchedule() &&
-                i_instanceLock != null &&
-                i_instanceLock.GetData().CompletedEncountersMask != 0)
-                if (!entries.MapDifficulty.IsUsingEncounterLocks())
-                {
-                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
-
-                    if (playerLock == null ||
-                        (playerLock.IsExpired() && playerLock.IsExtended()) ||
-                        playerLock.GetData().CompletedEncountersMask != i_instanceLock.GetData().CompletedEncountersMask)
-                    {
-                        PendingRaidLock pendingRaidLock = new();
-                        pendingRaidLock.TimeUntilLock = 60000;
-                        pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
-                        pendingRaidLock.Extending = playerLock != null && playerLock.IsExtended();
-                        pendingRaidLock.WarningOnly = entries.Map.IsFlexLocking(); // events it triggers:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
-                        player.GetSession().SendPacket(pendingRaidLock);
-
-                        if (!entries.Map.IsFlexLocking())
-                            player.SetPendingBind(GetInstanceId(), 60000);
-                    }
-                }
-
-            Log.outInfo(LogFilter.Maps,
-                        "MAP: Player '{0}' entered instance '{1}' of map '{2}'",
-                        player.GetName(),
-                        GetInstanceId(),
-                        GetMapName());
-
-            // initialize unload State
-            _unloadTimer = 0;
-
-            // this will acquire the same mutex so it cannot be in the previous block
-            base.AddPlayerToMap(player, initPlayer);
-
-            i_data?.OnPlayerEnter(player);
-
-            i_scenario?.OnPlayerEnter(player);
-
-            return true;
-        }
-
-        public override void Update(uint diff)
-        {
-            base.Update(diff);
-
-            if (i_data != null)
-            {
-                i_data.Update(diff);
-                i_data.UpdateCombatResurrection(diff);
-            }
-
-            i_scenario?.Update(diff);
-
-            if (i_instanceExpireEvent.HasValue &&
-                i_instanceExpireEvent.Value < GameTime.GetSystemTime())
-            {
-                Reset(InstanceResetMethod.Expire);
-                i_instanceExpireEvent = Global.InstanceLockMgr.GetNextResetTime(new MapDb2Entries(GetEntry(), GetMapDifficulty()));
-            }
-        }
-
-        public override void RemovePlayerFromMap(Player player, bool remove)
-        {
-            Log.outInfo(LogFilter.Maps, "MAP: Removing player '{0}' from instance '{1}' of map '{2}' before relocating to another map", player.GetName(), GetInstanceId(), GetMapName());
-
-            i_data?.OnPlayerLeave(player);
-
-            // if last player set unload timer
-            if (_unloadTimer == 0 &&
-                GetPlayers().Count == 1)
-                _unloadTimer = (i_instanceLock != null && i_instanceLock.IsExpired()) ? 1 : (uint)Math.Max(WorldConfig.GetIntValue(WorldCfg.InstanceUnloadDelay), 1);
-
-            i_scenario?.OnPlayerExit(player);
-
-            base.RemovePlayerFromMap(player, remove);
-        }
-
-        public void CreateInstanceData()
-        {
-            if (i_data != null)
-                return;
-
-            InstanceTemplate mInstance = Global.ObjectMgr.GetInstanceTemplate(GetId());
-
-            if (mInstance != null)
-            {
-                i_script_id = mInstance.ScriptId;
-                i_data = Global.ScriptMgr.RunScriptRet<IInstanceMapGetInstanceScript, InstanceScript>(p => p.GetInstanceScript(this), GetScriptId(), null);
-            }
-
-            if (i_data == null)
-                return;
-
-            if (i_instanceLock == null ||
-                i_instanceLock.GetInstanceId() == 0)
-            {
-                i_data.Create();
-
-                return;
-            }
-
-            MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-
-            if (!entries.IsInstanceIdBound() ||
-                !IsRaid() ||
-                !entries.MapDifficulty.IsRestoringDungeonState() ||
-                i_owningGroupRef.IsValid())
-            {
-                i_data.Create();
-
-                return;
-            }
-
-            InstanceLockData lockData = i_instanceLock.GetInstanceInitializationData();
-            i_data.SetCompletedEncountersMask(lockData.CompletedEncountersMask);
-            i_data.SetEntranceLocation(lockData.EntranceWorldSafeLocId);
-
-            if (!lockData.Data.IsEmpty())
-            {
-                Log.outDebug(LogFilter.Maps, $"Loading instance _data for `{Global.ObjectMgr.GetScriptName(i_script_id)}` with Id {i_InstanceId}");
-                i_data.Load(lockData.Data);
-            }
-            else
-            {
-                i_data.Create();
-            }
-        }
-
-        public Group GetOwningGroup()
-        {
-            return i_owningGroupRef.GetTarget();
-        }
-
-        public void TrySetOwningGroup(Group group)
-        {
-            if (!i_owningGroupRef.IsValid())
-                i_owningGroupRef.Link(group, this);
-        }
-
-        public InstanceResetResult Reset(InstanceResetMethod method)
-        {
-            // raids can be reset if no boss was killed
-            if (method != InstanceResetMethod.Expire &&
-                i_instanceLock != null &&
-                i_instanceLock.GetData().CompletedEncountersMask != 0)
-                return InstanceResetResult.CannotReset;
-
-            if (HavePlayers())
-            {
-                switch (method)
-                {
-                    case InstanceResetMethod.Manual:
-                        // notify the players to leave the instance so it can be reset
-                        foreach (var player in GetPlayers())
-                            player.SendResetFailedNotify(GetId());
-
-                        break;
-                    case InstanceResetMethod.OnChangeDifficulty:
-                        // no client notification
-                        break;
-                    case InstanceResetMethod.Expire:
-                        {
-                            RaidInstanceMessage raidInstanceMessage = new();
-                            raidInstanceMessage.Type = InstanceResetWarningType.Expired;
-                            raidInstanceMessage.MapID = GetId();
-                            raidInstanceMessage.DifficultyID = GetDifficultyID();
-                            raidInstanceMessage.Write();
-
-                            PendingRaidLock pendingRaidLock = new();
-                            pendingRaidLock.TimeUntilLock = 60000;
-                            pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
-                            pendingRaidLock.Extending = true;
-                            pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
-                            pendingRaidLock.Write();
-
-                            foreach (Player player in GetPlayers())
-                            {
-                                player.SendPacket(raidInstanceMessage);
-                                player.SendPacket(pendingRaidLock);
-
-                                if (!pendingRaidLock.WarningOnly)
-                                    player.SetPendingBind(GetInstanceId(), 60000);
-                            }
-
-                            break;
-                        }
-                    default:
-                        break;
-                }
-
-                return InstanceResetResult.NotEmpty;
-            }
-            else
-            {
-                // unloaded at next update
-                _unloadTimer = 1;
-            }
-
-            return InstanceResetResult.Success;
-        }
-
-        public string GetScriptName()
-        {
-            return Global.ObjectMgr.GetScriptName(i_script_id);
-        }
-
-        public void UpdateInstanceLock(UpdateBossStateSaveDataEvent updateSaveDataEvent)
-        {
-            if (i_instanceLock != null)
-            {
-                uint instanceCompletedEncounters = i_instanceLock.GetData().CompletedEncountersMask | (1u << updateSaveDataEvent.DungeonEncounter.Bit);
-
-                MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-
-                SQLTransaction trans = new();
-
-                if (entries.IsInstanceIdBound())
-                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans,
-                                                                    new InstanceLockUpdateEvent(GetInstanceId(),
-                                                                                                i_data.GetSaveData(),
-                                                                                                instanceCompletedEncounters,
-                                                                                                updateSaveDataEvent.DungeonEncounter,
-                                                                                                i_data.GetEntranceLocationForCompletedEncounters(instanceCompletedEncounters)));
-
-                foreach (var player in GetPlayers())
-                {
-                    // never instance bind GMs with GM mode enabled
-                    if (player.IsGameMaster())
-                        continue;
-
-                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
-                    string oldData = "";
-                    uint playerCompletedEncounters = 0;
-
-                    if (playerLock != null)
-                    {
-                        oldData = playerLock.GetData().Data;
-                        playerCompletedEncounters = playerLock.GetData().CompletedEncountersMask | (1u << updateSaveDataEvent.DungeonEncounter.Bit);
-                    }
-
-                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
-
-                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans,
-                                                                                              player.GetGUID(),
-                                                                                              entries,
-                                                                                              new InstanceLockUpdateEvent(GetInstanceId(),
-                                                                                                                          i_data.UpdateBossStateSaveData(oldData, updateSaveDataEvent),
-                                                                                                                          instanceCompletedEncounters,
-                                                                                                                          updateSaveDataEvent.DungeonEncounter,
-                                                                                                                          i_data.GetEntranceLocationForCompletedEncounters(playerCompletedEncounters)));
-
-                    if (isNewLock)
-                    {
-                        InstanceSaveCreated data = new();
-                        data.Gm = player.IsGameMaster();
-                        player.SendPacket(data);
-
-                        player.GetSession().SendCalendarRaidLockoutAdded(newLock);
-                    }
-                }
-
-                DB.Characters.CommitTransaction(trans);
-            }
-        }
-
-        public void UpdateInstanceLock(UpdateAdditionalSaveDataEvent updateSaveDataEvent)
-        {
-            if (i_instanceLock != null)
-            {
-                uint instanceCompletedEncounters = i_instanceLock.GetData().CompletedEncountersMask;
-
-                MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-
-                SQLTransaction trans = new();
-
-                if (entries.IsInstanceIdBound())
-                    Global.InstanceLockMgr.UpdateSharedInstanceLock(trans, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), instanceCompletedEncounters, null, null));
-
-                foreach (var player in GetPlayers())
-                {
-                    // never instance bind GMs with GM mode enabled
-                    if (player.IsGameMaster())
-                        continue;
-
-                    InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
-                    string oldData = "";
-
-                    if (playerLock != null)
-                        oldData = playerLock.GetData().Data;
-
-                    bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
-
-                    InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans,
-                                                                                              player.GetGUID(),
-                                                                                              entries,
-                                                                                              new InstanceLockUpdateEvent(GetInstanceId(),
-                                                                                                                          i_data.UpdateAdditionalSaveData(oldData, updateSaveDataEvent),
-                                                                                                                          instanceCompletedEncounters,
-                                                                                                                          null,
-                                                                                                                          null));
-
-                    if (isNewLock)
-                    {
-                        InstanceSaveCreated data = new();
-                        data.Gm = player.IsGameMaster();
-                        player.SendPacket(data);
-
-                        player.GetSession().SendCalendarRaidLockoutAdded(newLock);
-                    }
-                }
-
-                DB.Characters.CommitTransaction(trans);
-            }
-        }
-
-        public void CreateInstanceLockForPlayer(Player player)
-        {
-            MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
-            InstanceLock playerLock = Global.InstanceLockMgr.FindActiveInstanceLock(player.GetGUID(), entries);
-
-            bool isNewLock = playerLock == null || playerLock.GetData().CompletedEncountersMask == 0 || playerLock.IsExpired();
-
-            SQLTransaction trans = new();
-
-            InstanceLock newLock = Global.InstanceLockMgr.UpdateInstanceLockForPlayer(trans, player.GetGUID(), entries, new InstanceLockUpdateEvent(GetInstanceId(), i_data.GetSaveData(), i_instanceLock.GetData().CompletedEncountersMask, null, null));
-
-            DB.Characters.CommitTransaction(trans);
-
-            if (isNewLock)
-            {
-                InstanceSaveCreated data = new();
-                data.Gm = player.IsGameMaster();
-                player.SendPacket(data);
-
-                player.GetSession().SendCalendarRaidLockoutAdded(newLock);
-            }
-        }
-
-        public uint GetMaxPlayers()
-        {
-            MapDifficultyRecord mapDiff = GetMapDifficulty();
-
-            if (mapDiff != null &&
-                mapDiff.MaxPlayers != 0)
-                return mapDiff.MaxPlayers;
-
-            return GetEntry().MaxPlayers;
-        }
-
-        public int GetTeamIdInInstance()
-        {
-            if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceAlliance, this) != 0)
-                return TeamId.Alliance;
-
-            if (Global.WorldStateMgr.GetValue(WorldStates.TeamInInstanceHorde, this) != 0)
-                return TeamId.Horde;
-
-            return TeamId.Neutral;
-        }
-
-        public Team GetTeamInInstance()
-        {
-            return GetTeamIdInInstance() == TeamId.Alliance ? Team.Alliance : Team.Horde;
-        }
-
-        public uint GetScriptId()
-        {
-            return i_script_id;
-        }
-
-        public override string GetDebugInfo()
-        {
-            return $"{base.GetDebugInfo()}\nScriptId: {GetScriptId()} ScriptName: {GetScriptName()}";
-        }
-
-        public InstanceScript GetInstanceScript()
-        {
-            return i_data;
-        }
-
-        public InstanceScenario GetInstanceScenario()
-        {
-            return i_scenario;
-        }
-
-        public void SetInstanceScenario(InstanceScenario scenario)
-        {
-            i_scenario = scenario;
-        }
-
-        public InstanceLock GetInstanceLock()
-        {
-            return i_instanceLock;
-        }
-
-        ~InstanceMap()
-        {
-            i_instanceLock?.SetInUse(false);
-        }
-    }
-
-    public class BattlegroundMap : Map
-    {
-        private Battleground _bg;
-
-        public BattlegroundMap(uint id, uint expiry, uint InstanceId, Difficulty spawnMode)
-            : base(id, expiry, InstanceId, spawnMode)
-        {
-            InitVisibilityDistance();
-        }
-
-        public override void InitVisibilityDistance()
-        {
-            _VisibleDistance = IsBattleArena() ? Global.WorldMgr.GetMaxVisibleDistanceInArenas() : Global.WorldMgr.GetMaxVisibleDistanceInBG();
-            _VisibilityNotifyPeriod = IsBattleArena() ? Global.WorldMgr.GetVisibilityNotifyPeriodInArenas() : Global.WorldMgr.GetVisibilityNotifyPeriodInBG();
-        }
-
-        public override TransferAbortParams CannotEnter(Player player)
-        {
-            if (player.GetMap() == this)
-            {
-                Log.outError(LogFilter.Maps, "BGMap:CannotEnter - player {0} is already in map!", player.GetGUID().ToString());
-                Cypher.Assert(false);
-
-                return new TransferAbortParams(TransferAbortReason.Error);
-            }
-
-            if (player.GetBattlegroundId() != GetInstanceId())
-                return new TransferAbortParams(TransferAbortReason.LockedToDifferentInstance);
-
-            return base.CannotEnter(player);
-        }
-
-        public override bool AddPlayerToMap(Player player, bool initPlayer = true)
-        {
-            player.InstanceValid = true;
-
-            return base.AddPlayerToMap(player, initPlayer);
-        }
-
-        public override void RemovePlayerFromMap(Player player, bool remove)
-        {
-            Log.outInfo(LogFilter.Maps,
-                        "MAP: Removing player '{0}' from bg '{1}' of map '{2}' before relocating to another map",
-                        player.GetName(),
-                        GetInstanceId(),
-                        GetMapName());
-
-            base.RemovePlayerFromMap(player, remove);
-        }
-
-        public void SetUnload()
-        {
-            _unloadTimer = 1;
-        }
-
-        public override void RemoveAllPlayers()
-        {
-            if (HavePlayers())
-                foreach (Player player in _activePlayers)
-                    if (!player.IsBeingTeleportedFar())
-                        player.TeleportTo(player.GetBattlegroundEntryPoint());
-        }
-
-        public Battleground GetBG()
-        {
-            return _bg;
-        }
-
-        public void SetBG(Battleground bg)
-        {
-            _bg = bg;
-        }
-    }
-
-    public class TransferAbortParams
-    {
-        public byte Arg;
-        public uint MapDifficultyXConditionId;
-        public TransferAbortReason Reason;
-
-        public TransferAbortParams(TransferAbortReason reason = TransferAbortReason.None, byte arg = 0, uint mapDifficultyXConditionId = 0)
-        {
-            Reason = reason;
-            Arg = arg;
-            MapDifficultyXConditionId = mapDifficultyXConditionId;
-        }
-    }
-
-    public struct ScriptAction
-    {
-        public ObjectGuid ownerGUID;
-
-        // owner of source if source is Item
-        public ScriptInfo script;
-
-        public ObjectGuid sourceGUID;
-        public ObjectGuid targetGUID;
-    }
-
-    public class ZoneDynamicInfo
-    {
-        public struct LightOverride
-        {
-            public uint AreaLightId;
-            public uint OverrideLightId;
-            public uint TransitionMilliseconds;
-        }
-
-        public Weather DefaultWeather;
-        public float Intensity;
-        public List<LightOverride> LightOverrides = new();
-        public uint MusicId;
-        public WeatherState WeatherId;
-    }
-
-    public class PositionFullTerrainStatus
-    {
-        public struct AreaInfo
-        {
-            public int AdtId;
-            public int RootId;
-            public int GroupId;
-            public uint MogpFlags;
-
-            public AreaInfo(int adtId, int rootId, int groupId, uint flags)
-            {
-                AdtId = adtId;
-                RootId = rootId;
-                GroupId = groupId;
-                MogpFlags = flags;
-            }
-        }
-
-        public uint AreaId;
-        public AreaInfo? areaInfo;
-        public float FloorZ;
-        public LiquidData LiquidInfo;
-        public ZLiquidStatus LiquidStatus;
-        public bool outdoors = true;
-    }
-
-    public class RespawnInfo
-    {
-        public uint entry;
-        public uint gridId;
-        public long respawnTime;
-        public ulong spawnId;
-        public SpawnObjectType type;
-
-        public RespawnInfo()
-        {
-        }
-
-        public RespawnInfo(RespawnInfo info)
-        {
-            type = info.type;
-            spawnId = info.spawnId;
-            entry = info.entry;
-            respawnTime = info.respawnTime;
-            gridId = info.gridId;
-        }
-    }
-
-    internal struct CompareRespawnInfo : IComparer<RespawnInfo>
-    {
-        public int Compare(RespawnInfo a, RespawnInfo b)
-        {
-            if (a == b)
-                return 0;
-
-            if (a.respawnTime != b.respawnTime)
-                return a.respawnTime.CompareTo(b.respawnTime);
-
-            if (a.spawnId != b.spawnId)
-                return a.spawnId.CompareTo(b.spawnId);
-
-            Cypher.Assert(a.type != b.type, $"Duplicate respawn entry for spawnId ({a.type},{a.spawnId}) found!");
-
-            return a.type.CompareTo(b.type);
-        }
     }
 }

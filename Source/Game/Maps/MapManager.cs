@@ -12,8 +12,6 @@ using Game.DataStorage;
 using Game.Garrisons;
 using Game.Groups;
 using Game.Maps;
-using Game.Scripting.BaseScripts;
-using Game.Scripting.Interfaces.IMap;
 
 namespace Game.Entities
 {
@@ -554,20 +552,6 @@ namespace Game.Entities
             map.Dispose();
 
             return true;
-        }
-    }
-
-    // hack to allow conditions to access what faction owns the map (these worldstates should not be set on these maps)
-    internal class SplitByFactionMapScript : WorldMapScript, IMapOnCreate<Map>
-    {
-        public SplitByFactionMapScript(string name, uint mapId) : base(name, mapId)
-        {
-        }
-
-        public void OnCreate(Map map)
-        {
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceAlliance, map.GetInstanceId() == TeamId.Alliance ? 1 : 0, false, map);
-            Global.WorldStateMgr.SetValue(WorldStates.TeamInInstanceHorde, map.GetInstanceId() == TeamId.Horde ? 1 : 0, false, map);
         }
     }
 }

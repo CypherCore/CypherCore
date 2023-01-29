@@ -441,7 +441,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                         // Check Killed bosses
                         for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
                         {
-                            Creature boss = instance.GetCreature(TombBossGUIDs[i]);
+                            Creature boss = Instance.GetCreature(TombBossGUIDs[i]);
 
                             if (boss)
                                 if (!boss.IsAlive())
@@ -464,7 +464,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 if (GhostKillCount < MiscConst.TombOfSevenBossNum &&
                     !TombBossGUIDs[TombEventCounter].IsEmpty())
                 {
-                    Creature boss = instance.GetCreature(TombBossGUIDs[TombEventCounter]);
+                    Creature boss = Instance.GetCreature(TombBossGUIDs[TombEventCounter]);
 
                     if (boss)
                     {
@@ -485,7 +485,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 
                 for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
                 {
-                    Creature boss = instance.GetCreature(TombBossGUIDs[i]);
+                    Creature boss = Instance.GetCreature(TombBossGUIDs[i]);
 
                     if (boss)
                     {

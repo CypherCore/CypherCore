@@ -11,6 +11,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.Maps.Dos;
+using Game.Maps.Notifiers;
 using Game.Networking;
 using Game.Networking.Packets;
 

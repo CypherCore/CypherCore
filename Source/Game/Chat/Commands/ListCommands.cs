@@ -580,7 +580,7 @@ namespace Game.Chat.Commands
 
                 foreach (RespawnInfo ri in respawns)
                 {
-                    SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(ri.type, ri.spawnId);
+                    SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(ri.Type, ri.SpawnId);
 
                     if (data == null)
                         continue;
@@ -604,11 +604,11 @@ namespace Game.Chat.Commands
                         }
                     }
 
-                    uint gridY = ri.gridId / MapConst.MaxGrids;
-                    uint gridX = ri.gridId % MapConst.MaxGrids;
+                    uint gridY = ri.GridId / MapConst.MaxGrids;
+                    uint gridX = ri.GridId % MapConst.MaxGrids;
 
-                    string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.respawnTime - GameTime.GetGameTime()), TimeFormat.ShortText) : stringOverdue;
-                    handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
+                    string respawnTime = ri.RespawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.RespawnTime - GameTime.GetGameTime()), TimeFormat.ShortText) : stringOverdue;
+                    handler.SendSysMessage($"{ri.SpawnId} | {ri.Entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
                 }
             }
 

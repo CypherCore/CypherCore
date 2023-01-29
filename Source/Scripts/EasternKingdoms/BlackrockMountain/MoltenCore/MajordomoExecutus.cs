@@ -131,7 +131,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
                 me.RemoveNpcFlag(NPCFlags.Gossip);
                 Talk(TextIds.SaySummonMaj);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), task => { Instance.instance.SummonCreature(MCCreatureIds.Ragnaros, MCMiscConst.RagnarosSummonPos); });
+                _scheduler.Schedule(TimeSpan.FromSeconds(8), task => { Instance.Instance.SummonCreature(MCCreatureIds.Ragnaros, MCMiscConst.RagnarosSummonPos); });
                 _scheduler.Schedule(TimeSpan.FromSeconds(24), task => { Talk(TextIds.SayArrival2Maj); });
             }
             else if (action == ActionIds.StartRagnarosAlt)

@@ -15,6 +15,8 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -1162,9 +1164,9 @@ namespace Game.Entities
                 if (_respawnCompatibilityMode)
                 {
                     RespawnInfo ri = new();
-                    ri.type = SpawnObjectType.GameObject;
-                    ri.spawnId = _spawnId;
-                    ri.respawnTime = _respawnTime;
+                    ri.Type = SpawnObjectType.GameObject;
+                    ri.SpawnId = _spawnId;
+                    ri.RespawnTime = _respawnTime;
                     GetMap().SaveRespawnInfoDB(ri);
 
                     return;

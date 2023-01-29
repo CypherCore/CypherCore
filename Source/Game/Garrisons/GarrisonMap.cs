@@ -83,15 +83,15 @@ namespace Game.Garrisons
         {
             if (i_garrison != null)
             {
-                i_cell.data.cell_y = 0;
+                i_cell.Data.Cell_y = 0;
 
                 for (uint x = 0; x < MapConst.MaxCells; ++x)
                 {
-                    i_cell.data.cell_x = x;
+                    i_cell.Data.Cell_x = x;
 
                     for (uint y = 0; y < MapConst.MaxCells; ++y)
                     {
-                        i_cell.data.cell_y = y;
+                        i_cell.Data.Cell_y = y;
 
                         //Load creatures and game objects
                         var visitor = new Visitor(this, GridMapTypeMask.AllGrid);

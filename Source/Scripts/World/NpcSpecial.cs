@@ -10,6 +10,8 @@ using Game;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;

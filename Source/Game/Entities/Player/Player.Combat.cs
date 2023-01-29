@@ -7,6 +7,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Maps;
+using Game.Maps.Notifiers;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;

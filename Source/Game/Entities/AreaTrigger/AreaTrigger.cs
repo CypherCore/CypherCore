@@ -8,6 +8,8 @@ using System.Numerics;
 using Framework.Constants;
 using Game.AI;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;

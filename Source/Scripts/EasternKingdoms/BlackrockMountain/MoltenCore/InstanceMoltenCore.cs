@@ -190,19 +190,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 
                 if (GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
                 {
-                    instance.SummonCreature(MCCreatureIds.MajordomoExecutus, MCMiscConst.SummonPositions[0]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[1]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[2]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[3]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[4]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[5]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[6]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[7]);
-                    instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[8]);
+                    Instance.SummonCreature(MCCreatureIds.MajordomoExecutus, MCMiscConst.SummonPositions[0]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[1]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[2]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[3]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerHealer, MCMiscConst.SummonPositions[4]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[5]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[6]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[7]);
+                    Instance.SummonCreature(MCCreatureIds.FlamewakerElite, MCMiscConst.SummonPositions[8]);
                 }
                 else
                 {
-                    TempSummon summon = instance.SummonCreature(MCCreatureIds.MajordomoExecutus, MCMiscConst.RagnarosTelePos);
+                    TempSummon summon = Instance.SummonCreature(MCCreatureIds.MajordomoExecutus, MCMiscConst.RagnarosTelePos);
 
                     if (summon)
                         summon.GetAI().DoAction(ActionIds.StartRagnarosAlt);

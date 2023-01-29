@@ -160,24 +160,24 @@ namespace Game.Mails
 
 
                 Mail m = new();
-                m.messageID = mailId;
-                m.mailTemplateId = GetMailTemplateId();
-                m.subject = GetSubject();
-                m.body = GetBody();
-                m.money = GetMoney();
+                m.MessageID = mailId;
+                m.MailTemplateId = GetMailTemplateId();
+                m.Subject = GetSubject();
+                m.Body = GetBody();
+                m.Money = GetMoney();
                 m.COD = GetCOD();
 
                 foreach (var item in _items.Values)
                     m.AddItem(item.GetGUID().GetCounter(), item.GetEntry());
 
-                m.messageType = sender.GetMailMessageType();
-                m.stationery = sender.GetStationery();
-                m.sender = sender.GetSenderId();
-                m.receiver = receiver.GetPlayerGUIDLow();
-                m.expire_time = expire_time;
-                m.deliver_time = deliver_time;
-                m.checkMask = checkMask;
-                m.state = MailState.Unchanged;
+                m.MessageType = sender.GetMailMessageType();
+                m.Stationery = sender.GetStationery();
+                m.Sender = sender.GetSenderId();
+                m.Receiver = receiver.GetPlayerGUIDLow();
+                m.Expire_time = expire_time;
+                m.Deliver_time = deliver_time;
+                m.CheckMask = checkMask;
+                m.State = MailState.Unchanged;
 
                 pReceiver.AddMail(m); // to insert new mail to beginning of maillist
 

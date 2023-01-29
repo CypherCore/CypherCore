@@ -24,6 +24,8 @@ using Game.Guilds;
 using Game.Loots;
 using Game.Mails;
 using Game.Maps;
+using Game.Maps.Dos;
+using Game.Maps.Notifiers;
 using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
@@ -2873,7 +2875,7 @@ namespace Game.Entities
         public void RemoveMail(uint id)
         {
             foreach (var mail in _mail)
-                if (mail.messageID == id)
+                if (mail.MessageID == id)
                 {
                     //do not delete Item, because Player.removeMail() is called when returning mail to sender.
                     _mail.Remove(mail);
@@ -2911,13 +2913,13 @@ namespace Game.Entities
             UnReadMails = 0;
 
             foreach (var mail in _mail)
-                if (mail.deliver_time > cTime)
+                if (mail.Deliver_time > cTime)
                 {
                     if (_nextMailDelivereTime == 0 ||
-                        _nextMailDelivereTime > mail.deliver_time)
-                        _nextMailDelivereTime = mail.deliver_time;
+                        _nextMailDelivereTime > mail.Deliver_time)
+                        _nextMailDelivereTime = mail.Deliver_time;
                 }
-                else if ((mail.checkMask & MailCheckMask.Read) == 0)
+                else if ((mail.CheckMask & MailCheckMask.Read) == 0)
                 {
                     ++UnReadMails;
                 }
@@ -2955,7 +2957,7 @@ namespace Game.Entities
 
         public Mail GetMail(uint id)
         {
-            return _mail.Find(p => p.messageID == id);
+            return _mail.Find(p => p.MessageID == id);
         }
 
         public List<Mail> GetMails()

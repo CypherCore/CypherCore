@@ -1129,9 +1129,9 @@ namespace Game.Movement
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrainFlag.Ground;
 
-            data.type_flags &= ~LiquidHeaderTypeFlags.DarkWater;
+            data.Type_flags &= ~LiquidHeaderTypeFlags.DarkWater;
 
-            switch (data.type_flags)
+            switch (data.Type_flags)
             {
                 case LiquidHeaderTypeFlags.Water:
                 case LiquidHeaderTypeFlags.Ocean:

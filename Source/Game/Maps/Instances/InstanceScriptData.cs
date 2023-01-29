@@ -191,27 +191,27 @@ namespace Game.Maps
 
         private uint GetInstanceId()
         {
-            return _instance.instance.GetInstanceId();
+            return _instance.Instance.GetInstanceId();
         }
 
         private uint GetMapId()
         {
-            return _instance.instance.GetId();
+            return _instance.Instance.GetId();
         }
 
         private string GetMapName()
         {
-            return _instance.instance.GetMapName();
+            return _instance.Instance.GetMapName();
         }
 
         private uint GetDifficultyId()
         {
-            return (uint)_instance.instance.GetDifficultyID();
+            return (uint)_instance.Instance.GetDifficultyID();
         }
 
         private string GetDifficultyName()
         {
-            return CliDB.DifficultyStorage.LookupByKey(_instance.instance.GetDifficultyID()).Name;
+            return CliDB.DifficultyStorage.LookupByKey(_instance.Instance.GetDifficultyID()).Name;
         }
     }
 

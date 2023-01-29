@@ -402,14 +402,14 @@ namespace Game
             Mail m = player.GetMail(markAsRead.MailID);
 
             if (m != null &&
-                m.state != MailState.Deleted)
+                m.State != MailState.Deleted)
             {
                 if (player.UnReadMails != 0)
                     --player.UnReadMails;
 
-                m.checkMask = m.checkMask | MailCheckMask.Read;
+                m.CheckMask = m.CheckMask | MailCheckMask.Read;
                 player.MailUpdated = true;
-                m.state = MailState.Changed;
+                m.State = MailState.Changed;
             }
         }
 
@@ -431,7 +431,7 @@ namespace Game
                     return;
                 }
 
-                m.state = MailState.Deleted;
+                m.State = MailState.Deleted;
             }
 
             player.SendMailResult(mailDelete.MailID, MailResponseType.Deleted, MailResponseResult.Ok);
@@ -447,9 +447,9 @@ namespace Game
             Mail m = player.GetMail(returnToSender.MailID);
 
             if (m == null ||
-                m.state == MailState.Deleted ||
-                m.deliver_time > GameTime.GetGameTime() ||
-                m.sender != returnToSender.SenderGUID.GetCounter())
+                m.State == MailState.Deleted ||
+                m.Deliver_time > GameTime.GetGameTime() ||
+                m.Sender != returnToSender.SenderGUID.GetCounter())
             {
                 player.SendMailResult(returnToSender.MailID, MailResponseType.ReturnedToSender, MailResponseResult.InternalError);
 
@@ -470,26 +470,26 @@ namespace Game
             player.RemoveMail(returnToSender.MailID);
 
             // only return mail if the player exists (and delete if not existing)
-            if (m.messageType == MailMessageType.Normal &&
-                m.sender != 0)
+            if (m.MessageType == MailMessageType.Normal &&
+                m.Sender != 0)
             {
-                MailDraft draft = new(m.subject, m.body);
+                MailDraft draft = new(m.Subject, m.Body);
 
-                if (m.mailTemplateId != 0)
-                    draft = new MailDraft(m.mailTemplateId, false); // items already included
+                if (m.MailTemplateId != 0)
+                    draft = new MailDraft(m.MailTemplateId, false); // items already included
 
                 if (m.HasItems())
-                    foreach (var itemInfo in m.items)
+                    foreach (var itemInfo in m.Items)
                     {
-                        Item item = player.GetMItem(itemInfo.item_guid);
+                        Item item = player.GetMItem(itemInfo.ItemGuid);
 
                         if (item)
                             draft.AddItem(item);
 
-                        player.RemoveMItem(itemInfo.item_guid);
+                        player.RemoveMItem(itemInfo.ItemGuid);
                     }
 
-                draft.AddMoney(m.money).SendReturnToSender(GetAccountId(), m.receiver, m.sender, trans);
+                draft.AddMoney(m.Money).SendReturnToSender(GetAccountId(), m.Receiver, m.Sender, trans);
             }
 
             DB.Characters.CommitTransaction(trans);
@@ -511,8 +511,8 @@ namespace Game
             Mail m = player.GetMail(takeItem.MailID);
 
             if (m == null ||
-                m.state == MailState.Deleted ||
-                m.deliver_time > GameTime.GetGameTime())
+                m.State == MailState.Deleted ||
+                m.Deliver_time > GameTime.GetGameTime())
             {
                 player.SendMailResult(takeItem.MailID, MailResponseType.ItemTaken, MailResponseResult.InternalError);
 
@@ -520,7 +520,7 @@ namespace Game
             }
 
             // verify that the mail has the Item to avoid cheaters taking COD items without paying
-            if (!m.items.Any(p => p.item_guid == AttachID))
+            if (!m.Items.Any(p => p.ItemGuid == AttachID))
             {
                 player.SendMailResult(takeItem.MailID, MailResponseType.ItemTaken, MailResponseResult.InternalError);
 
@@ -544,11 +544,11 @@ namespace Game
             {
                 SQLTransaction trans = new();
                 m.RemoveItem(takeItem.AttachID);
-                m.removedItems.Add(takeItem.AttachID);
+                m.RemovedItems.Add(takeItem.AttachID);
 
                 if (m.COD > 0) //if there is COD, take COD money from player and send them to sender by mail
                 {
-                    ObjectGuid sender_guid = ObjectGuid.Create(HighGuid.Player, m.sender);
+                    ObjectGuid sender_guid = ObjectGuid.Create(HighGuid.Player, m.Sender);
                     Player receiver = Global.ObjAccessor.FindPlayer(sender_guid);
 
                     uint sender_accId = 0;
@@ -589,15 +589,15 @@ namespace Game
 
                     // check player existence
                     if (receiver || sender_accId != 0)
-                        new MailDraft(m.subject, "")
+                        new MailDraft(m.Subject, "")
                             .AddMoney(m.COD)
-                            .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender(MailMessageType.Normal, m.receiver), MailCheckMask.CodPayment);
+                            .SendMailTo(trans, new MailReceiver(receiver, m.Sender), new MailSender(MailMessageType.Normal, m.Receiver), MailCheckMask.CodPayment);
 
                     player.ModifyMoney(-(long)m.COD);
                 }
 
                 m.COD = 0;
-                m.state = MailState.Changed;
+                m.State = MailState.Changed;
                 player.MailUpdated = true;
                 player.RemoveMItem(it.GetGUID().GetCounter());
 
@@ -627,23 +627,23 @@ namespace Game
 
             Mail m = player.GetMail(takeMoney.MailID);
 
-            if ((m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime()) ||
-                (takeMoney.Money > 0 && m.money != (ulong)takeMoney.Money))
+            if ((m == null || m.State == MailState.Deleted || m.Deliver_time > GameTime.GetGameTime()) ||
+                (takeMoney.Money > 0 && m.Money != (ulong)takeMoney.Money))
             {
                 player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.InternalError);
 
                 return;
             }
 
-            if (!player.ModifyMoney((long)m.money, false))
+            if (!player.ModifyMoney((long)m.Money, false))
             {
                 player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.EquipError, InventoryResult.TooMuchGold);
 
                 return;
             }
 
-            m.money = 0;
-            m.state = MailState.Changed;
+            m.Money = 0;
+            m.State = MailState.Changed;
             player.MailUpdated = true;
 
             player.SendMailResult(takeMoney.MailID, MailResponseType.MoneyTaken, MailResponseResult.Ok);
@@ -672,8 +672,8 @@ namespace Game
             foreach (Mail m in mails)
             {
                 // skip deleted or not delivered (deliver delay not expired) mails
-                if (m.state == MailState.Deleted ||
-                    curTime < m.deliver_time)
+                if (m.State == MailState.Deleted ||
+                    curTime < m.Deliver_time)
                     continue;
 
                 // max. 100 mails can be sent
@@ -701,9 +701,9 @@ namespace Game
             Mail m = player.GetMail(createTextItem.MailID);
 
             if (m == null ||
-                (string.IsNullOrEmpty(m.body) && m.mailTemplateId == 0) ||
-                m.state == MailState.Deleted ||
-                m.deliver_time > GameTime.GetGameTime())
+                (string.IsNullOrEmpty(m.Body) && m.MailTemplateId == 0) ||
+                m.State == MailState.Deleted ||
+                m.Deliver_time > GameTime.GetGameTime())
             {
                 player.SendMailResult(createTextItem.MailID, MailResponseType.MadePermanent, MailResponseResult.InternalError);
 
@@ -716,9 +716,9 @@ namespace Game
                 return;
 
             // in mail template case we need create new Item text
-            if (m.mailTemplateId != 0)
+            if (m.MailTemplateId != 0)
             {
-                MailTemplateRecord mailTemplateEntry = CliDB.MailTemplateStorage.LookupByKey(m.mailTemplateId);
+                MailTemplateRecord mailTemplateEntry = CliDB.MailTemplateStorage.LookupByKey(m.MailTemplateId);
 
                 if (mailTemplateEntry == null)
                 {
@@ -731,11 +731,11 @@ namespace Game
             }
             else
             {
-                bodyItem.SetText(m.body);
+                bodyItem.SetText(m.Body);
             }
 
-            if (m.messageType == MailMessageType.Normal)
-                bodyItem.SetCreator(ObjectGuid.Create(HighGuid.Player, m.sender));
+            if (m.MessageType == MailMessageType.Normal)
+                bodyItem.SetCreator(ObjectGuid.Create(HighGuid.Player, m.Sender));
 
             bodyItem.SetItemFlag(ItemFieldFlags.Readable);
 
@@ -746,8 +746,8 @@ namespace Game
 
             if (msg == InventoryResult.Ok)
             {
-                m.checkMask = m.checkMask | MailCheckMask.Copied;
-                m.state = MailState.Changed;
+                m.CheckMask = m.CheckMask | MailCheckMask.Copied;
+                m.State = MailState.Changed;
                 player.MailUpdated = true;
 
                 player.StoreItem(dest, bodyItem, true);
@@ -773,20 +773,20 @@ namespace Game
 
                 foreach (Mail mail in GetPlayer().GetMails())
                 {
-                    if (mail.checkMask.HasAnyFlag(MailCheckMask.Read))
+                    if (mail.CheckMask.HasAnyFlag(MailCheckMask.Read))
                         continue;
 
                     // and already delivered
-                    if (now < mail.deliver_time)
+                    if (now < mail.Deliver_time)
                         continue;
 
                     // only send each mail sender once
-                    if (sentSenders.Any(p => p == mail.sender))
+                    if (sentSenders.Any(p => p == mail.Sender))
                         continue;
 
                     result.Next.Add(new MailQueryNextTimeResult.MailNextTimeEntry(mail));
 
-                    sentSenders.Add(mail.sender);
+                    sentSenders.Add(mail.Sender);
 
                     // do not send more than 2 mails
                     if (sentSenders.Count > 2)

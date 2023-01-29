@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
+using Game.Maps.Notifiers;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;

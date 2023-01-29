@@ -9633,8 +9633,8 @@ namespace Game
 
                 do
                 {
-                    item.item_guid = result.Read<uint>(0);
-                    item.item_template = result.Read<uint>(1);
+                    item.ItemGuid = result.Read<uint>(0);
+                    item.Item_Template = result.Read<uint>(1);
                     uint mailId = result.Read<uint>(2);
                     itemsCache.Add(mailId, item);
                 } while (items.NextRow());
@@ -9651,63 +9651,63 @@ namespace Game
                     continue;
 
                 Mail m = new();
-                m.messageID = result.Read<uint>(0);
-                m.messageType = (MailMessageType)result.Read<byte>(1);
-                m.sender = result.Read<uint>(2);
-                m.receiver = receiver;
+                m.MessageID = result.Read<uint>(0);
+                m.MessageType = (MailMessageType)result.Read<byte>(1);
+                m.Sender = result.Read<uint>(2);
+                m.Receiver = receiver;
                 bool has_items = result.Read<bool>(4);
-                m.expire_time = result.Read<long>(5);
-                m.deliver_time = 0;
+                m.Expire_time = result.Read<long>(5);
+                m.Deliver_time = 0;
                 m.COD = result.Read<ulong>(6);
-                m.checkMask = (MailCheckMask)result.Read<byte>(7);
-                m.mailTemplateId = result.Read<ushort>(8);
+                m.CheckMask = (MailCheckMask)result.Read<byte>(7);
+                m.MailTemplateId = result.Read<ushort>(8);
 
                 // Delete or return mail
                 if (has_items)
                 {
                     // read items from cache
-                    List<MailItemInfo> temp = itemsCache[m.messageID];
-                    Extensions.Swap(ref m.items, ref temp);
+                    List<MailItemInfo> temp = itemsCache[m.MessageID];
+                    Extensions.Swap(ref m.Items, ref temp);
 
                     // if it is mail from non-player, or if it's already return mail, it shouldn't be returned, but deleted
-                    if (m.messageType != MailMessageType.Normal ||
-                        (m.checkMask.HasAnyFlag(MailCheckMask.CodPayment | MailCheckMask.Returned)))
+                    if (m.MessageType != MailMessageType.Normal ||
+                        (m.CheckMask.HasAnyFlag(MailCheckMask.CodPayment | MailCheckMask.Returned)))
                     {
                         // mail open and then not returned
-                        foreach (var itemInfo in m.items)
+                        foreach (var itemInfo in m.Items)
                         {
-                            Item.DeleteFromDB(null, itemInfo.item_guid);
-                            AzeriteItem.DeleteFromDB(null, itemInfo.item_guid);
-                            AzeriteEmpoweredItem.DeleteFromDB(null, itemInfo.item_guid);
+                            Item.DeleteFromDB(null, itemInfo.ItemGuid);
+                            AzeriteItem.DeleteFromDB(null, itemInfo.ItemGuid);
+                            AzeriteEmpoweredItem.DeleteFromDB(null, itemInfo.ItemGuid);
                         }
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                        stmt.AddValue(0, m.messageID);
+                        stmt.AddValue(0, m.MessageID);
                         DB.Characters.Execute(stmt);
                     }
                     else
                     {
                         // Mail will be returned
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_MAIL_RETURNED);
-                        stmt.AddValue(0, m.receiver);
-                        stmt.AddValue(1, m.sender);
+                        stmt.AddValue(0, m.Receiver);
+                        stmt.AddValue(1, m.Sender);
                         stmt.AddValue(2, curTime + 30 * Time.Day);
                         stmt.AddValue(3, curTime);
                         stmt.AddValue(4, (byte)MailCheckMask.Returned);
-                        stmt.AddValue(5, m.messageID);
+                        stmt.AddValue(5, m.MessageID);
                         DB.Characters.Execute(stmt);
 
-                        foreach (var itemInfo in m.items)
+                        foreach (var itemInfo in m.Items)
                         {
                             // Update receiver in mail items for its proper delivery, and in instance_item for avoid lost Item at sender delete
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_MAIL_ITEM_RECEIVER);
-                            stmt.AddValue(0, m.sender);
-                            stmt.AddValue(1, itemInfo.item_guid);
+                            stmt.AddValue(0, m.Sender);
+                            stmt.AddValue(1, itemInfo.ItemGuid);
                             DB.Characters.Execute(stmt);
 
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
-                            stmt.AddValue(0, m.sender);
-                            stmt.AddValue(1, itemInfo.item_guid);
+                            stmt.AddValue(0, m.Sender);
+                            stmt.AddValue(1, itemInfo.ItemGuid);
                             DB.Characters.Execute(stmt);
                         }
 
@@ -9718,7 +9718,7 @@ namespace Game
                 }
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
-                stmt.AddValue(0, m.messageID);
+                stmt.AddValue(0, m.MessageID);
                 DB.Characters.Execute(stmt);
                 ++deletedCount;
             } while (result.NextRow());

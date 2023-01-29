@@ -10,6 +10,9 @@ using Game.Chat;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Dos;
+using Game.Maps.Notifiers;
 using Game.Networking;
 using Game.Networking.Packets;
 

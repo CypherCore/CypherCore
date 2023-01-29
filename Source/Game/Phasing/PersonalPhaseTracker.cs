@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Notifiers;
 
 namespace Game
 {

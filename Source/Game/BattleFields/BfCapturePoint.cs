@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 
 namespace Game.BattleFields
 {

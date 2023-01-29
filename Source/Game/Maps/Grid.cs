@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using Game.Maps.Notifiers;
 
 namespace Game.Maps
 {
@@ -488,14 +489,5 @@ namespace Game.Maps
 
             return 0;
         }
-    }
-
-    public enum GridState
-    {
-        Invalid = 0,
-        Active = 1,
-        Idle = 2,
-        Removal = 3,
-        Max = 4
     }
 }

@@ -36,40 +36,40 @@ namespace Game.Maps
             using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
             MapFileHeader header = reader.Read<MapFileHeader>();
 
-            if (header.mapMagic != MapConst.MapMagic ||
-                (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
+            if (header.MapMagic != MapConst.MapMagic ||
+                (header.VersionMagic != MapConst.MapVersionMagic && header.VersionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
             {
                 Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
 
                 return LoadResult.ReadFromFileFailed;
             }
 
-            if (header.areaMapOffset != 0 &&
-                !LoadAreaData(reader, header.areaMapOffset))
+            if (header.AreaMapOffset != 0 &&
+                !LoadAreaData(reader, header.AreaMapOffset))
             {
                 Log.outError(LogFilter.Maps, "Error loading map area _data");
 
                 return LoadResult.ReadFromFileFailed;
             }
 
-            if (header.heightMapOffset != 0 &&
-                !LoadHeightData(reader, header.heightMapOffset))
+            if (header.HeightMapOffset != 0 &&
+                !LoadHeightData(reader, header.HeightMapOffset))
             {
                 Log.outError(LogFilter.Maps, "Error loading map height _data");
 
                 return LoadResult.ReadFromFileFailed;
             }
 
-            if (header.liquidMapOffset != 0 &&
-                !LoadLiquidData(reader, header.liquidMapOffset))
+            if (header.LiquidMapOffset != 0 &&
+                !LoadLiquidData(reader, header.LiquidMapOffset))
             {
                 Log.outError(LogFilter.Maps, "Error loading map liquids _data");
 
                 return LoadResult.ReadFromFileFailed;
             }
 
-            if (header.holesSize != 0 &&
-                !LoadHolesData(reader, header.holesOffset))
+            if (header.HolesSize != 0 &&
+                !LoadHolesData(reader, header.HolesOffset))
             {
                 Log.outError(LogFilter.Maps, "Error loading map holes _data");
 
@@ -81,9 +81,9 @@ namespace Game.Maps
 
         public void UnloadData()
         {
-            _areaMap = null;
-            _V9 = null;
-            _V8 = null;
+            AreaMap = null;
+            V9 = null;
+            V8 = null;
             _liquidEntry = null;
             _liquidFlags = null;
             _liquidMap = null;
@@ -92,7 +92,7 @@ namespace Game.Maps
 
         public ushort GetArea(float x, float y)
         {
-            if (_areaMap == null)
+            if (AreaMap == null)
                 return _gridArea;
 
             x = 16 * (32 - x / MapConst.SizeofGrids);
@@ -100,7 +100,7 @@ namespace Game.Maps
             int lx = (int)x & 15;
             int ly = (int)y & 15;
 
-            return _areaMap[lx * 16 + ly];
+            return AreaMap[lx * 16 + ly];
         }
 
         public float GetMinHeight(float x, float y)
@@ -251,10 +251,10 @@ namespace Game.Maps
             // All ok in water . store _data
             if (data != null)
             {
-                data.entry = entry;
-                data.type_flags = type;
-                data.level = liquid_level;
-                data.depth_level = ground_level;
+                data.Entry = entry;
+                data.Type_flags = type;
+                data.Level = liquid_level;
+                data.Depth_level = ground_level;
             }
 
             // For speed check as int values
@@ -283,13 +283,13 @@ namespace Game.Maps
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             MapAreaHeader areaHeader = reader.Read<MapAreaHeader>();
 
-            if (areaHeader.fourcc != MapConst.MapAreaMagic)
+            if (areaHeader.Fourcc != MapConst.MapAreaMagic)
                 return false;
 
-            _gridArea = areaHeader.gridArea;
+            _gridArea = areaHeader.GridArea;
 
-            if (!areaHeader.flags.HasAnyFlag(AreaHeaderFlags.NoArea))
-                _areaMap = reader.ReadArray<ushort>(16 * 16);
+            if (!areaHeader.Flags.HasAnyFlag(AreaHeaderFlags.NoArea))
+                AreaMap = reader.ReadArray<ushort>(16 * 16);
 
             return true;
         }
@@ -299,33 +299,33 @@ namespace Game.Maps
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             MapHeightHeader mapHeader = reader.Read<MapHeightHeader>();
 
-            if (mapHeader.fourcc != MapConst.MapHeightMagic)
+            if (mapHeader.Fourcc != MapConst.MapHeightMagic)
                 return false;
 
-            _gridHeight = mapHeader.gridHeight;
-            _flags = (uint)mapHeader.flags;
+            _gridHeight = mapHeader.GridHeight;
+            _flags = (uint)mapHeader.Flags;
 
-            if (!mapHeader.flags.HasAnyFlag(HeightHeaderFlags.NoHeight))
+            if (!mapHeader.Flags.HasAnyFlag(HeightHeaderFlags.NoHeight))
             {
-                if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightAsInt16))
+                if (mapHeader.Flags.HasAnyFlag(HeightHeaderFlags.HeightAsInt16))
                 {
-                    _uint16_V9 = reader.ReadArray<ushort>(129 * 129);
-                    _uint16_V8 = reader.ReadArray<ushort>(128 * 128);
+                    Uint16_V9 = reader.ReadArray<ushort>(129 * 129);
+                    Uint16_V8 = reader.ReadArray<ushort>(128 * 128);
 
-                    _gridIntHeightMultiplier = (mapHeader.gridMaxHeight - mapHeader.gridHeight) / 65535;
+                    _gridIntHeightMultiplier = (mapHeader.GridMaxHeight - mapHeader.GridHeight) / 65535;
                     _gridGetHeight = GetHeightFromUint16;
                 }
-                else if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightAsInt8))
+                else if (mapHeader.Flags.HasAnyFlag(HeightHeaderFlags.HeightAsInt8))
                 {
-                    _ubyte_V9 = reader.ReadBytes(129 * 129);
-                    _ubyte_V8 = reader.ReadBytes(128 * 128);
-                    _gridIntHeightMultiplier = (mapHeader.gridMaxHeight - mapHeader.gridHeight) / 255;
+                    Ubyte_V9 = reader.ReadBytes(129 * 129);
+                    Ubyte_V8 = reader.ReadBytes(128 * 128);
+                    _gridIntHeightMultiplier = (mapHeader.GridMaxHeight - mapHeader.GridHeight) / 255;
                     _gridGetHeight = GetHeightFromUint8;
                 }
                 else
                 {
-                    _V9 = reader.ReadArray<float>(129 * 129);
-                    _V8 = reader.ReadArray<float>(128 * 128);
+                    V9 = reader.ReadArray<float>(129 * 129);
+                    V8 = reader.ReadArray<float>(128 * 128);
 
                     _gridGetHeight = GetHeightFromFloat;
                 }
@@ -335,7 +335,7 @@ namespace Game.Maps
                 _gridGetHeight = GetHeightFromFlat;
             }
 
-            if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HasFlightBounds))
+            if (mapHeader.Flags.HasAnyFlag(HeightHeaderFlags.HasFlightBounds))
             {
                 short[] maxHeights = reader.ReadArray<short>(3 * 3);
                 short[] minHeights = reader.ReadArray<short>(3 * 3);
@@ -432,24 +432,24 @@ namespace Game.Maps
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             MapLiquidHeader liquidHeader = reader.Read<MapLiquidHeader>();
 
-            if (liquidHeader.fourcc != MapConst.MapLiquidMagic)
+            if (liquidHeader.Fourcc != MapConst.MapLiquidMagic)
                 return false;
 
-            _liquidGlobalEntry = liquidHeader.liquidType;
-            _liquidGlobalFlags = (LiquidHeaderTypeFlags)liquidHeader.liquidFlags;
-            _liquidOffX = liquidHeader.offsetX;
-            _liquidOffY = liquidHeader.offsetY;
-            _liquidWidth = liquidHeader.width;
-            _liquidHeight = liquidHeader.height;
-            _liquidLevel = liquidHeader.liquidLevel;
+            _liquidGlobalEntry = liquidHeader.LiquidType;
+            _liquidGlobalFlags = (LiquidHeaderTypeFlags)liquidHeader.LiquidFlags;
+            _liquidOffX = liquidHeader.OffsetX;
+            _liquidOffY = liquidHeader.OffsetY;
+            _liquidWidth = liquidHeader.Width;
+            _liquidHeight = liquidHeader.Height;
+            _liquidLevel = liquidHeader.LiquidLevel;
 
-            if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.NoType))
+            if (!liquidHeader.Flags.HasAnyFlag(LiquidHeaderFlags.NoType))
             {
                 _liquidEntry = reader.ReadArray<ushort>(16 * 16);
                 _liquidFlags = reader.ReadBytes(16 * 16);
             }
 
-            if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.NoHeight))
+            if (!liquidHeader.Flags.HasAnyFlag(LiquidHeaderFlags.NoHeight))
                 _liquidMap = reader.ReadArray<float>((uint)(_liquidWidth * _liquidHeight));
 
             return true;
@@ -471,8 +471,8 @@ namespace Game.Maps
 
         private float GetHeightFromFloat(float x, float y)
         {
-            if (_uint16_V8 == null ||
-                _uint16_V9 == null)
+            if (Uint16_V8 == null ||
+                Uint16_V9 == null)
                 return _gridHeight;
 
             x = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
@@ -495,9 +495,9 @@ namespace Game.Maps
                 if (x > y)
                 {
                     // 1 triangle (h1, h2, h5 points)
-                    float h1 = _V9[(x_int) * 129 + y_int];
-                    float h2 = _V9[(x_int + 1) * 129 + y_int];
-                    float h5 = 2 * _V8[x_int * 128 + y_int];
+                    float h1 = V9[(x_int) * 129 + y_int];
+                    float h2 = V9[(x_int + 1) * 129 + y_int];
+                    float h5 = 2 * V8[x_int * 128 + y_int];
                     a = h2 - h1;
                     b = h5 - h1 - h2;
                     c = h1;
@@ -505,9 +505,9 @@ namespace Game.Maps
                 else
                 {
                     // 2 triangle (h1, h3, h5 points)
-                    float h1 = _V9[x_int * 129 + y_int];
-                    float h3 = _V9[x_int * 129 + y_int + 1];
-                    float h5 = 2 * _V8[x_int * 128 + y_int];
+                    float h1 = V9[x_int * 129 + y_int];
+                    float h3 = V9[x_int * 129 + y_int + 1];
+                    float h5 = 2 * V8[x_int * 128 + y_int];
                     a = h5 - h1 - h3;
                     b = h3 - h1;
                     c = h1;
@@ -518,9 +518,9 @@ namespace Game.Maps
                 if (x > y)
                 {
                     // 3 triangle (h2, h4, h5 points)
-                    float h2 = _V9[(x_int + 1) * 129 + y_int];
-                    float h4 = _V9[(x_int + 1) * 129 + y_int + 1];
-                    float h5 = 2 * _V8[x_int * 128 + y_int];
+                    float h2 = V9[(x_int + 1) * 129 + y_int];
+                    float h4 = V9[(x_int + 1) * 129 + y_int + 1];
+                    float h5 = 2 * V8[x_int * 128 + y_int];
                     a = h2 + h4 - h5;
                     b = h4 - h2;
                     c = h5 - h4;
@@ -528,9 +528,9 @@ namespace Game.Maps
                 else
                 {
                     // 4 triangle (h3, h4, h5 points)
-                    float h3 = _V9[(x_int) * 129 + y_int + 1];
-                    float h4 = _V9[(x_int + 1) * 129 + y_int + 1];
-                    float h5 = 2 * _V8[x_int * 128 + y_int];
+                    float h3 = V9[(x_int) * 129 + y_int + 1];
+                    float h4 = V9[(x_int + 1) * 129 + y_int + 1];
+                    float h5 = 2 * V8[x_int * 128 + y_int];
                     a = h4 - h3;
                     b = h3 + h4 - h5;
                     c = h5 - h4;
@@ -543,8 +543,8 @@ namespace Game.Maps
 
         private float GetHeightFromUint8(float x, float y)
         {
-            if (_ubyte_V8 == null ||
-                _ubyte_V9 == null)
+            if (Ubyte_V8 == null ||
+                Ubyte_V9 == null)
                 return _gridHeight;
 
             x = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
@@ -564,7 +564,7 @@ namespace Game.Maps
 
             unsafe
             {
-                fixed (byte* V9 = _ubyte_V9)
+                fixed (byte* V9 = Ubyte_V9)
                 {
                     byte* V9_h1_ptr = &V9[x_int * 128 + x_int + y_int];
 
@@ -575,7 +575,7 @@ namespace Game.Maps
                             // 1 triangle (h1, h2, h5 points)
                             int h1 = V9_h1_ptr[0];
                             int h2 = V9_h1_ptr[129];
-                            int h5 = 2 * _ubyte_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Ubyte_V8[x_int * 128 + y_int];
                             a = h2 - h1;
                             b = h5 - h1 - h2;
                             c = h1;
@@ -585,7 +585,7 @@ namespace Game.Maps
                             // 2 triangle (h1, h3, h5 points)
                             int h1 = V9_h1_ptr[0];
                             int h3 = V9_h1_ptr[1];
-                            int h5 = 2 * _ubyte_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Ubyte_V8[x_int * 128 + y_int];
                             a = h5 - h1 - h3;
                             b = h3 - h1;
                             c = h1;
@@ -598,7 +598,7 @@ namespace Game.Maps
                             // 3 triangle (h2, h4, h5 points)
                             int h2 = V9_h1_ptr[129];
                             int h4 = V9_h1_ptr[130];
-                            int h5 = 2 * _ubyte_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Ubyte_V8[x_int * 128 + y_int];
                             a = h2 + h4 - h5;
                             b = h4 - h2;
                             c = h5 - h4;
@@ -608,7 +608,7 @@ namespace Game.Maps
                             // 4 triangle (h3, h4, h5 points)
                             int h3 = V9_h1_ptr[1];
                             int h4 = V9_h1_ptr[130];
-                            int h5 = 2 * _ubyte_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Ubyte_V8[x_int * 128 + y_int];
                             a = h4 - h3;
                             b = h3 + h4 - h5;
                             c = h5 - h4;
@@ -623,8 +623,8 @@ namespace Game.Maps
 
         private float GetHeightFromUint16(float x, float y)
         {
-            if (_uint16_V8 == null ||
-                _uint16_V9 == null)
+            if (Uint16_V8 == null ||
+                Uint16_V9 == null)
                 return _gridHeight;
 
             x = MapConst.MapResolution * (MapConst.CenterGridId - x / MapConst.SizeofGrids);
@@ -644,7 +644,7 @@ namespace Game.Maps
 
             unsafe
             {
-                fixed (ushort* V9 = _uint16_V9)
+                fixed (ushort* V9 = Uint16_V9)
                 {
                     ushort* V9_h1_ptr = &V9[x_int * 128 + x_int + y_int];
 
@@ -655,7 +655,7 @@ namespace Game.Maps
                             // 1 triangle (h1, h2, h5 points)
                             int h1 = V9_h1_ptr[0];
                             int h2 = V9_h1_ptr[129];
-                            int h5 = 2 * _uint16_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Uint16_V8[x_int * 128 + y_int];
                             a = h2 - h1;
                             b = h5 - h1 - h2;
                             c = h1;
@@ -665,7 +665,7 @@ namespace Game.Maps
                             // 2 triangle (h1, h3, h5 points)
                             int h1 = V9_h1_ptr[0];
                             int h3 = V9_h1_ptr[1];
-                            int h5 = 2 * _uint16_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Uint16_V8[x_int * 128 + y_int];
                             a = h5 - h1 - h3;
                             b = h3 - h1;
                             c = h1;
@@ -678,7 +678,7 @@ namespace Game.Maps
                             // 3 triangle (h2, h4, h5 points)
                             int h2 = V9_h1_ptr[129];
                             int h4 = V9_h1_ptr[130];
-                            int h5 = 2 * _uint16_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Uint16_V8[x_int * 128 + y_int];
                             a = h2 + h4 - h5;
                             b = h4 - h2;
                             c = h5 - h4;
@@ -688,7 +688,7 @@ namespace Game.Maps
                             // 4 triangle (h3, h4, h5 points)
                             int h3 = V9_h1_ptr[1];
                             int h4 = V9_h1_ptr[130];
-                            int h5 = 2 * _uint16_V8[x_int * 128 + y_int];
+                            int h5 = 2 * Uint16_V8[x_int * 128 + y_int];
                             a = h4 - h3;
                             b = h3 + h4 - h5;
                             c = h5 - h4;
@@ -721,19 +721,19 @@ namespace Game.Maps
         private GetHeightDel _gridGetHeight;
         private uint _flags;
 
-        public float[] _V9;
-        public ushort[] _uint16_V9;
-        public byte[] _ubyte_V9;
+        public float[] V9 { get; set; }
+        public ushort[] Uint16_V9 { get; set; }
+        public byte[] Ubyte_V9 { get; set; }
 
-        public float[] _V8;
-        public ushort[] _uint16_V8;
-        public byte[] _ubyte_V8;
+        public float[] V8 { get; set; }
+        public ushort[] Uint16_V8 { get; set; }
+        public byte[] Ubyte_V8 { get; set; }
         private Plane[] _minHeightPlanes;
         private float _gridHeight;
         private float _gridIntHeightMultiplier;
 
         //Area _data
-        public ushort[] _areaMap;
+        public ushort[] AreaMap { get; set; }
 
         //Liquid Map
         private float _liquidLevel;
@@ -751,56 +751,5 @@ namespace Game.Maps
         private byte[] _holes;
 
         #endregion
-    }
-
-    public struct MapFileHeader
-    {
-        public uint mapMagic;
-        public uint versionMagic;
-        public uint buildMagic;
-        public uint areaMapOffset;
-        public uint areaMapSize;
-        public uint heightMapOffset;
-        public uint heightMapSize;
-        public uint liquidMapOffset;
-        public uint liquidMapSize;
-        public uint holesOffset;
-        public uint holesSize;
-    }
-
-    public struct MapAreaHeader
-    {
-        public uint fourcc;
-        public AreaHeaderFlags flags;
-        public ushort gridArea;
-    }
-
-    public struct MapHeightHeader
-    {
-        public uint fourcc;
-        public HeightHeaderFlags flags;
-        public float gridHeight;
-        public float gridMaxHeight;
-    }
-
-    public struct MapLiquidHeader
-    {
-        public uint fourcc;
-        public LiquidHeaderFlags flags;
-        public byte liquidFlags;
-        public ushort liquidType;
-        public byte offsetX;
-        public byte offsetY;
-        public byte width;
-        public byte height;
-        public float liquidLevel;
-    }
-
-    public class LiquidData
-    {
-        public float depth_level;
-        public uint entry;
-        public float level;
-        public LiquidHeaderTypeFlags type_flags;
     }
 }

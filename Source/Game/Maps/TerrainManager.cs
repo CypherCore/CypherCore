@@ -236,11 +236,11 @@ namespace Game.Maps
                 using var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read));
                 var header = reader.Read<MapFileHeader>();
 
-                if (header.mapMagic != MapConst.MapMagic ||
-                    (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
+                if (header.MapMagic != MapConst.MapMagic ||
+                    (header.VersionMagic != MapConst.MapVersionMagic && header.VersionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
                 {
                     if (log)
-                        Log.outError(LogFilter.Maps, $"Map file '{fileName}' is from an incompatible map version ({header.versionMagic}), {MapConst.MapVersionMagic} is expected. Please pull your source, recompile tools and recreate maps using the updated mapextractor, then replace your old map files with new files. If you still have problems search on forum for error TCE00018.");
+                        Log.outError(LogFilter.Maps, $"Map file '{fileName}' is from an incompatible map version ({header.VersionMagic}), {MapConst.MapVersionMagic} is expected. Please pull your source, recompile tools and recreate maps using the updated mapextractor, then replace your old map files with new files. If you still have problems search on forum for error TCE00018.");
                 }
                 else
                 {
@@ -509,23 +509,23 @@ namespace Game.Maps
             {
                 if (wmoData.AreaInfoData.HasValue)
                 {
-                    data.areaInfo = new PositionFullTerrainStatus.AreaInfo(wmoData.AreaInfoData.Value.AdtId, wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.GroupId, wmoData.AreaInfoData.Value.MogpFlags);
+                    data.AreaInfo = new PositionFullTerrainStatus.AreaInfoData(wmoData.AreaInfoData.Value.AdtId, wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.GroupId, wmoData.AreaInfoData.Value.MogpFlags);
                     // wmo found
                     var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.AdtId, wmoData.AreaInfoData.Value.GroupId);
 
                     if (wmoEntry == null)
                         wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.AreaInfoData.Value.RootId, wmoData.AreaInfoData.Value.AdtId, -1);
 
-                    data.outdoors = (wmoData.AreaInfoData.Value.MogpFlags & 0x8) != 0;
+                    data.Outdoors = (wmoData.AreaInfoData.Value.MogpFlags & 0x8) != 0;
 
                     if (wmoEntry != null)
                     {
                         data.AreaId = wmoEntry.AreaTableID;
 
                         if ((wmoEntry.Flags & 4) != 0)
-                            data.outdoors = true;
+                            data.Outdoors = true;
                         else if ((wmoEntry.Flags & 2) != 0)
-                            data.outdoors = false;
+                            data.Outdoors = false;
                     }
 
                     if (data.AreaId == 0)
@@ -536,12 +536,12 @@ namespace Game.Maps
             }
             else
             {
-                data.outdoors = true;
+                data.Outdoors = true;
                 data.AreaId = gridAreaId;
                 var areaEntry1 = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
 
                 if (areaEntry1 != null)
-                    data.outdoors = ((AreaFlags)areaEntry1.Flags[0] & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
+                    data.Outdoors = ((AreaFlags)areaEntry1.Flags[0] & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
             }
 
             if (data.AreaId == 0)
@@ -593,10 +593,10 @@ namespace Game.Maps
                 }
 
                 data.LiquidInfo = new LiquidData();
-                data.LiquidInfo.level = wmoData.LiquidInfoData.Value.Level;
-                data.LiquidInfo.depth_level = wmoData.FloorZ;
-                data.LiquidInfo.entry = liquidType;
-                data.LiquidInfo.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
+                data.LiquidInfo.Level = wmoData.LiquidInfoData.Value.Level;
+                data.LiquidInfo.Depth_level = wmoData.FloorZ;
+                data.LiquidInfo.Entry = liquidType;
+                data.LiquidInfo.Type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
                 float delta = wmoData.LiquidInfoData.Value.Level - z;
 
@@ -617,11 +617,11 @@ namespace Game.Maps
                 ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid, collisionHeight);
 
                 if (gridMapStatus != ZLiquidStatus.NoWater &&
-                    (wmoData == null || gridMapLiquid.level > wmoData.FloorZ))
+                    (wmoData == null || gridMapLiquid.Level > wmoData.FloorZ))
                 {
                     if (GetId() == 530 &&
-                        gridMapLiquid.entry == 2)
-                        gridMapLiquid.entry = 15;
+                        gridMapLiquid.Entry == 2)
+                        gridMapLiquid.Entry = 15;
 
                     data.LiquidInfo = gridMapLiquid;
                     data.LiquidStatus = gridMapStatus;
@@ -690,11 +690,11 @@ namespace Game.Maps
                             }
                         }
 
-                        data.level = liquid_level;
-                        data.depth_level = ground_level;
+                        data.Level = liquid_level;
+                        data.Depth_level = ground_level;
 
-                        data.entry = liquid_type;
-                        data.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
+                        data.Entry = liquid_type;
+                        data.Type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
                     }
 
                     float delta = liquid_level - z;
@@ -724,14 +724,14 @@ namespace Game.Maps
 
                     // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
                     if (map_result != ZLiquidStatus.NoWater &&
-                        (map_data.level > ground_level))
+                        (map_data.Level > ground_level))
                     {
                         if (data != null)
                         {
                             // hardcoded in client like this
                             if (GetId() == 530 &&
-                                map_data.entry == 2)
-                                map_data.entry = 15;
+                                map_data.Entry == 2)
+                                map_data.Entry = 15;
 
                             data = map_data;
                         }
@@ -1004,11 +1004,11 @@ namespace Game.Maps
                 switch (res)
                 {
                     case ZLiquidStatus.AboveWater:
-                        return Math.Max(liquid_status.level, ground_z);
+                        return Math.Max(liquid_status.Level, ground_z);
                     case ZLiquidStatus.NoWater:
                         return ground_z;
                     default:
-                        return liquid_status.level;
+                        return liquid_status.Level;
                 }
             }
 

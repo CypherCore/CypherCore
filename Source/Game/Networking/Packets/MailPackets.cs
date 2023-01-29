@@ -250,24 +250,24 @@ namespace Game.Networking.Packets
 
             public MailNextTimeEntry(Mail mail)
             {
-                switch (mail.messageType)
+                switch (mail.MessageType)
                 {
                     case MailMessageType.Normal:
-                        SenderGuid = ObjectGuid.Create(HighGuid.Player, mail.sender);
+                        SenderGuid = ObjectGuid.Create(HighGuid.Player, mail.Sender);
 
                         break;
                     case MailMessageType.Auction:
                     case MailMessageType.Creature:
                     case MailMessageType.Gameobject:
                     case MailMessageType.Calendar:
-                        AltSenderID = (int)mail.sender;
+                        AltSenderID = (int)mail.Sender;
 
                         break;
                 }
 
-                TimeLeft = mail.deliver_time - GameTime.GetGameTime();
-                AltSenderType = (sbyte)mail.messageType;
-                StationeryID = (int)mail.stationery;
+                TimeLeft = mail.Deliver_time - GameTime.GetGameTime();
+                AltSenderType = (sbyte)mail.MessageType;
+                StationeryID = (int)mail.Stationery;
             }
         }
 
@@ -401,36 +401,36 @@ namespace Game.Networking.Packets
 
         public MailListEntry(Mail mail, Player player)
         {
-            MailID = (int)mail.messageID;
-            SenderType = (byte)mail.messageType;
+            MailID = (int)mail.MessageID;
+            SenderType = (byte)mail.MessageType;
 
-            switch (mail.messageType)
+            switch (mail.MessageType)
             {
                 case MailMessageType.Normal:
-                    SenderCharacter = ObjectGuid.Create(HighGuid.Player, mail.sender);
+                    SenderCharacter = ObjectGuid.Create(HighGuid.Player, mail.Sender);
 
                     break;
                 case MailMessageType.Creature:
                 case MailMessageType.Gameobject:
                 case MailMessageType.Auction:
                 case MailMessageType.Calendar:
-                    AltSenderID = (uint)mail.sender;
+                    AltSenderID = (uint)mail.Sender;
 
                     break;
             }
 
             Cod = mail.COD;
-            StationeryID = (int)mail.stationery;
-            SentMoney = mail.money;
-            Flags = (int)mail.checkMask;
-            DaysLeft = (float)(mail.expire_time - GameTime.GetGameTime()) / Time.Day;
-            MailTemplateID = (int)mail.mailTemplateId;
-            Subject = mail.subject;
-            Body = mail.body;
+            StationeryID = (int)mail.Stationery;
+            SentMoney = mail.Money;
+            Flags = (int)mail.CheckMask;
+            DaysLeft = (float)(mail.Expire_time - GameTime.GetGameTime()) / Time.Day;
+            MailTemplateID = (int)mail.MailTemplateId;
+            Subject = mail.Subject;
+            Body = mail.Body;
 
-            for (byte i = 0; i < mail.items.Count; i++)
+            for (byte i = 0; i < mail.Items.Count; i++)
             {
-                Item item = player.GetMItem(mail.items[i].item_guid);
+                Item item = player.GetMItem(mail.Items[i].ItemGuid);
 
                 if (item)
                     Attachments.Add(new MailAttachedItem(item, i));

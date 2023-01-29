@@ -224,7 +224,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
 
                 if (EventMp.ExecuteEvent() == MiscConst.EventSpawnKalecgos)
                 {
-                    Creature kalecgos = instance.SummonCreature(CreatureIds.Kalecgos, MiscConst.KalecgosSpawnPos);
+                    Creature kalecgos = Instance.SummonCreature(CreatureIds.Kalecgos, MiscConst.KalecgosSpawnPos);
 
                     if (kalecgos)
                     {

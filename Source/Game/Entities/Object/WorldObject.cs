@@ -11,6 +11,9 @@ using Game.BattleFields;
 using Game.DataStorage;
 using Game.Loots;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Dos;
+using Game.Maps.Notifiers;
 using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
@@ -119,7 +122,7 @@ namespace Game.Entities
                 if (area.ParentAreaID != 0)
                     _zoneId = area.ParentAreaID;
 
-            _outdoors = data.outdoors;
+            _outdoors = data.Outdoors;
             _staticFloorZ = data.FloorZ;
             _liquidStatus = data.LiquidStatus;
         }
@@ -1644,7 +1647,7 @@ namespace Game.Entities
             CreatureLastSearcher searcher = new(this, checker);
 
             if (options.IgnorePhases)
-                searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+                searcher._phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
             Cell.VisitAllObjects(this, searcher, range);
 
@@ -2895,7 +2898,7 @@ namespace Game.Entities
             CreatureListSearcher searcher = new(this, creatureList, check);
 
             if (options.IgnorePhases)
-                searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+                searcher._phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
 

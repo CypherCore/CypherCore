@@ -19,6 +19,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Loots;
 using Game.Maps;
+using Game.Maps.Dos;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IWorld;

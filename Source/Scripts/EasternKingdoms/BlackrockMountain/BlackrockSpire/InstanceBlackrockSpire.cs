@@ -459,7 +459,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     case BRSMiscConst.EventPyroguardEmberseer:
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.NotStarted)
                         {
-                            Creature Emberseer = instance.GetCreature(PyroguardEmberseer);
+                            Creature Emberseer = Instance.GetCreature(PyroguardEmberseer);
 
                             if (Emberseer)
                                 Emberseer.GetAI().SetData(1, 1);
@@ -490,7 +490,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     case DataTypes.BlackhandIncarcerator:
                         foreach (var itr in _incarceratorList)
                         {
-                            Creature creature = instance.GetCreature(itr);
+                            Creature creature = Instance.GetCreature(itr);
 
                             if (creature)
                                 creature.Respawn();
@@ -614,7 +614,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     // Refresh the creature list
                     runecreaturelist[i].Clear();
 
-                    GameObject rune = instance.GetGameObject(go_roomrunes[i]);
+                    GameObject rune = Instance.GetGameObject(go_roomrunes[i]);
 
                     if (rune)
                         for (byte j = 0; j < 3; ++j)
@@ -636,7 +636,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 for (byte i = 0; i < 7; ++i)
                 {
                     bool _mobAlive = false;
-                    rune = instance.GetGameObject(go_roomrunes[i]);
+                    rune = Instance.GetGameObject(go_roomrunes[i]);
 
                     if (!rune)
                         continue;
@@ -644,7 +644,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     if (rune.GetGoState() == GameObjectState.Active)
                         foreach (ObjectGuid guid in runecreaturelist[i])
                         {
-                            mob = instance.GetCreature(guid);
+                            mob = Instance.GetCreature(guid);
 
                             if (mob && mob.IsAlive())
                                 _mobAlive = true;
@@ -700,12 +700,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     GetBossState(DataTypes.HallRune7) == EncounterState.Done)
                 {
                     SetBossState(DataTypes.DragonspireRoom, EncounterState.Done);
-                    GameObject door1 = instance.GetGameObject(go_emberseerin);
+                    GameObject door1 = Instance.GetGameObject(go_emberseerin);
 
                     if (door1)
                         HandleGameObject(ObjectGuid.Empty, true, door1);
 
-                    GameObject door2 = instance.GetGameObject(go_doors);
+                    GameObject door2 = Instance.GetGameObject(go_doors);
 
                     if (door2)
                         HandleGameObject(ObjectGuid.Empty, true, door2);

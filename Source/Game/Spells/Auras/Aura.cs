@@ -9,6 +9,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Notifiers;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;

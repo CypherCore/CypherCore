@@ -86,7 +86,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                     DoorLeverGUID.IsEmpty())
                     return;
 
-                GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
+                GameObject pIronCladDoor = Instance.GetGameObject(IronCladDoorGUID);
 
                 if (!pIronCladDoor)
                     return;
@@ -176,7 +176,7 @@ namespace Scripts.EasternKingdoms.Deadmines
                     case DMData.EventRhahkzor:
                         if (data == (uint)EncounterState.Done)
                         {
-                            GameObject go = instance.GetGameObject(FactoryDoorGUID);
+                            GameObject go = Instance.GetGameObject(FactoryDoorGUID);
 
                             if (go)
                                 go.SetGoState(GameObjectState.Active);
@@ -210,7 +210,7 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             private void SummonCreatures()
             {
-                GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
+                GameObject pIronCladDoor = Instance.GetGameObject(IronCladDoorGUID);
 
                 if (pIronCladDoor)
                 {
@@ -228,8 +228,8 @@ namespace Scripts.EasternKingdoms.Deadmines
                     DefiasPirate2GUID.IsEmpty())
                     return;
 
-                Creature pDefiasPirate1 = instance.GetCreature(DefiasPirate1GUID);
-                Creature pDefiasPirate2 = instance.GetCreature(DefiasPirate2GUID);
+                Creature pDefiasPirate1 = Instance.GetCreature(DefiasPirate1GUID);
+                Creature pDefiasPirate2 = Instance.GetCreature(DefiasPirate2GUID);
 
                 if (!pDefiasPirate1 ||
                     !pDefiasPirate2)
@@ -247,7 +247,7 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             private void ShootCannon()
             {
-                GameObject pDefiasCannon = instance.GetGameObject(DefiasCannonGUID);
+                GameObject pDefiasCannon = Instance.GetGameObject(DefiasCannonGUID);
 
                 if (pDefiasCannon)
                 {
@@ -258,7 +258,7 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             private void BlastOutDoor()
             {
-                GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
+                GameObject pIronCladDoor = Instance.GetGameObject(IronCladDoorGUID);
 
                 if (pIronCladDoor)
                 {
@@ -269,7 +269,7 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             private void LeverStucked()
             {
-                GameObject pDoorLever = instance.GetGameObject(DoorLeverGUID);
+                GameObject pDoorLever = Instance.GetGameObject(DoorLeverGUID);
 
                 if (pDoorLever)
                     pDoorLever.SetFlag(GameObjectFlags.InteractCond);
