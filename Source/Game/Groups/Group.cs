@@ -88,9 +88,9 @@ namespace Game.Groups
             // Attempt to give leadership to main assistant first
             if (IsRaidGroup())
                 foreach (var memberSlot in _memberSlots)
-                    if (memberSlot.flags.HasFlag(GroupMemberFlags.Assistant))
+                    if (memberSlot.Flags.HasFlag(GroupMemberFlags.Assistant))
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(memberSlot.guid);
+                        Player player = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
 
                         if (player != null)
                         {
@@ -104,7 +104,7 @@ namespace Game.Groups
             if (!newLeader)
                 foreach (var memberSlot in _memberSlots)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(memberSlot.guid);
+                    Player player = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
 
                     if (player != null)
                     {
@@ -238,10 +238,10 @@ namespace Game.Groups
         public void LoadMemberFromDB(ulong guidLow, byte memberFlags, byte subgroup, LfgRoles roles)
         {
             MemberSlot member = new();
-            member.guid = ObjectGuid.Create(HighGuid.Player, guidLow);
+            member.Guid = ObjectGuid.Create(HighGuid.Player, guidLow);
 
             // skip non-existed member
-            var character = Global.CharacterCacheStorage.GetCharacterCacheByGuid(member.guid);
+            var character = Global.CharacterCacheStorage.GetCharacterCacheByGuid(member.Guid);
 
             if (character == null)
             {
@@ -252,19 +252,19 @@ namespace Game.Groups
                 return;
             }
 
-            member.name = character.Name;
-            member.race = character.RaceId;
-            member._class = (byte)character.ClassId;
-            member.group = subgroup;
-            member.flags = (GroupMemberFlags)memberFlags;
-            member.roles = roles;
-            member.readyChecked = false;
+            member.Name = character.Name;
+            member.Race = character.RaceId;
+            member.Class = (byte)character.ClassId;
+            member.Group = subgroup;
+            member.Flags = (GroupMemberFlags)memberFlags;
+            member.Roles = roles;
+            member.ReadyChecked = false;
 
             _memberSlots.Add(member);
 
             SubGroupCounterIncrease(subgroup);
 
-            Global.LFGMgr.SetupGroupMember(member.guid, GetGUID());
+            Global.LFGMgr.SetupGroupMember(member.Guid, GetGUID());
         }
 
         public void ConvertToLFG()
@@ -309,7 +309,7 @@ namespace Game.Groups
             // update quest related GO states (quest activity dependent from raid membership)
             foreach (var member in _memberSlots)
             {
-                Player player = Global.ObjAccessor.FindPlayer(member.guid);
+                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
 
                 player?.UpdateVisibleGameobjectsOrSpellClicks();
             }
@@ -340,7 +340,7 @@ namespace Game.Groups
             // update quest related GO states (quest activity dependent from raid membership)
             foreach (var member in _memberSlots)
             {
-                Player player = Global.ObjAccessor.FindPlayer(member.guid);
+                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
 
                 player?.UpdateVisibleGameobjectsOrSpellClicks();
             }
@@ -443,14 +443,14 @@ namespace Game.Groups
             }
 
             MemberSlot member = new();
-            member.guid = player.GetGUID();
-            member.name = player.GetName();
-            member.race = player.GetRace();
-            member._class = (byte)player.GetClass();
-            member.group = subGroup;
-            member.flags = 0;
-            member.roles = 0;
-            member.readyChecked = false;
+            member.Guid = player.GetGUID();
+            member.Name = player.GetName();
+            member.Race = player.GetRace();
+            member.Class = (byte)player.GetClass();
+            member.Group = subGroup;
+            member.Flags = 0;
+            member.Roles = 0;
+            member.ReadyChecked = false;
             _memberSlots.Add(member);
 
             SubGroupCounterIncrease(subGroup);
@@ -487,10 +487,10 @@ namespace Game.Groups
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GROUP_MEMBER);
 
                 stmt.AddValue(0, _dbStoreId);
-                stmt.AddValue(1, member.guid.GetCounter());
-                stmt.AddValue(2, (byte)member.flags);
-                stmt.AddValue(3, member.group);
-                stmt.AddValue(4, (byte)member.roles);
+                stmt.AddValue(1, member.Guid.GetCounter());
+                stmt.AddValue(2, (byte)member.Flags);
+                stmt.AddValue(3, member.Group);
+                stmt.AddValue(4, (byte)member.Roles);
 
                 DB.Characters.Execute(stmt);
             }
@@ -651,16 +651,16 @@ namespace Game.Groups
 
                 if (slot != null)
                 {
-                    SubGroupCounterDecrease(slot.group);
+                    SubGroupCounterDecrease(slot.Group);
                     _memberSlots.Remove(slot);
                 }
 
                 // Pick new leader if necessary
                 if (_leaderGuid == guid)
                     foreach (var member in _memberSlots)
-                        if (Global.ObjAccessor.FindPlayer(member.guid) != null)
+                        if (Global.ObjAccessor.FindPlayer(member.Guid) != null)
                         {
-                            ChangeLeader(member.guid);
+                            ChangeLeader(member.Guid);
 
                             break;
                         }
@@ -707,7 +707,7 @@ namespace Game.Groups
             if (slot == null)
                 return;
 
-            Player newLeader = Global.ObjAccessor.FindPlayer(slot.guid);
+            Player newLeader = Global.ObjAccessor.FindPlayer(slot.Guid);
 
             // Don't allow switching leader to offline players
             if (newLeader == null)
@@ -757,7 +757,7 @@ namespace Game.Groups
 
             foreach (var member in _memberSlots)
             {
-                player = Global.ObjAccessor.FindPlayer(member.guid);
+                player = Global.ObjAccessor.FindPlayer(member.Guid);
 
                 if (player == null)
                     continue;
@@ -859,7 +859,7 @@ namespace Game.Groups
         public void SendUpdate()
         {
             foreach (var member in _memberSlots)
-                SendUpdateToPlayer(member.guid, member);
+                SendUpdateToPlayer(member.Guid, member);
         }
 
         public void SendUpdateToPlayer(ObjectGuid playerGUID, MemberSlot memberSlot = null)
@@ -901,24 +901,24 @@ namespace Game.Groups
             {
                 var member = _memberSlots[i];
 
-                if (memberSlot.guid == member.guid)
+                if (memberSlot.Guid == member.Guid)
                     partyUpdate.MyIndex = index;
 
-                Player memberPlayer = Global.ObjAccessor.FindConnectedPlayer(member.guid);
+                Player memberPlayer = Global.ObjAccessor.FindConnectedPlayer(member.Guid);
 
                 PartyPlayerInfo playerInfos = new();
 
-                playerInfos.GUID = member.guid;
-                playerInfos.Name = member.name;
-                playerInfos.Class = member._class;
+                playerInfos.GUID = member.Guid;
+                playerInfos.Name = member.Name;
+                playerInfos.Class = member.Class;
 
-                playerInfos.FactionGroup = Player.GetFactionGroupForRace(member.race);
+                playerInfos.FactionGroup = Player.GetFactionGroupForRace(member.Race);
 
                 playerInfos.Connected = memberPlayer?.GetSession() != null && !memberPlayer.GetSession().PlayerLogout();
 
-                playerInfos.Subgroup = member.group;       // groupid
-                playerInfos.Flags = (byte)member.flags; // See enum GroupMemberFlags
-                playerInfos.RolesAssigned = (byte)member.roles; // Lfg Roles
+                playerInfos.Subgroup = member.Group;       // groupid
+                playerInfos.Flags = (byte)member.Flags; // See enum GroupMemberFlags
+                playerInfos.RolesAssigned = (byte)member.Roles; // Lfg Roles
 
                 partyUpdate.PlayerList.Add(playerInfos);
             }
@@ -1052,7 +1052,7 @@ namespace Game.Groups
             if (slot == null)
                 return false;
 
-            slot.group = group;
+            slot.Group = group;
 
             SubGroupCounterIncrease(group);
 
@@ -1095,14 +1095,14 @@ namespace Game.Groups
             if (slot == null)
                 return;
 
-            byte prevSubGroup = slot.group;
+            byte prevSubGroup = slot.Group;
 
             // Abort if the player is already in the Target sub group
             if (prevSubGroup == group)
                 return;
 
             // Update the player Slot with the new sub group setting
-            slot.group = group;
+            slot.Group = group;
 
             // Increase the counter of the new sub group..
             SubGroupCounterIncrease(group);
@@ -1151,12 +1151,12 @@ namespace Game.Groups
                 slots[1] == null)
                 return;
 
-            if (slots[0].group == slots[1].group)
+            if (slots[0].Group == slots[1].Group)
                 return;
 
-            byte tmp = slots[0].group;
-            slots[0].group = slots[1].group;
-            slots[1].group = tmp;
+            byte tmp = slots[0].Group;
+            slots[0].Group = slots[1].Group;
+            slots[1].Group = tmp;
 
             SQLTransaction trans = new();
 
@@ -1167,20 +1167,20 @@ namespace Game.Groups
                     !IsBFGroup())
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP);
-                    stmt.AddValue(0, slots[i].group);
-                    stmt.AddValue(1, slots[i].guid.GetCounter());
+                    stmt.AddValue(0, slots[i].Group);
+                    stmt.AddValue(1, slots[i].Guid.GetCounter());
 
                     trans.Append(stmt);
                 }
 
-                Player player = Global.ObjAccessor.FindConnectedPlayer(slots[i].guid);
+                Player player = Global.ObjAccessor.FindConnectedPlayer(slots[i].Guid);
 
                 if (player)
                 {
                     if (player.GetGroup() == this)
-                        player.GetGroupRef().SetSubGroup(slots[i].group);
+                        player.GetGroupRef().SetSubGroup(slots[i].Group);
                     else
-                        player.GetOriginalGroupRef().SetSubGroup(slots[i].group);
+                        player.GetOriginalGroupRef().SetSubGroup(slots[i].Group);
                 }
             }
 
@@ -1209,7 +1209,7 @@ namespace Game.Groups
                 if (ifneed)
                 {
                     // not update if only update if need and ok
-                    Player looter = Global.ObjAccessor.FindPlayer(memberSlot.guid);
+                    Player looter = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
 
                     if (looter && looter.IsAtGroupRewardDistance(pLootedObject))
                         return;
@@ -1223,7 +1223,7 @@ namespace Game.Groups
                 if (member == memberSlot)
                     continue;
 
-                Player player = Global.ObjAccessor.FindPlayer(member.guid);
+                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
 
                 if (player)
                     if (player.IsAtGroupRewardDistance(pLootedObject))
@@ -1238,7 +1238,7 @@ namespace Game.Groups
                 // search from start
                 foreach (var member in _memberSlots)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(member.guid);
+                    Player player = Global.ObjAccessor.FindPlayer(member.Guid);
 
                     if (player)
                         if (player.IsAtGroupRewardDistance(pLootedObject))
@@ -1541,7 +1541,7 @@ namespace Game.Groups
             // -- not very efficient but safe
             foreach (var member in _memberSlots)
             {
-                Player pp = Global.ObjAccessor.FindPlayer(member.guid);
+                Player pp = Global.ObjAccessor.FindPlayer(member.Guid);
 
                 if (pp && pp.IsInWorld)
                 {
@@ -1580,7 +1580,7 @@ namespace Game.Groups
             if (slot == null)
                 return;
 
-            slot.roles = roles;
+            slot.Roles = roles;
             SendUpdate();
         }
 
@@ -1591,7 +1591,7 @@ namespace Game.Groups
             if (slot == null)
                 return 0;
 
-            return slot.roles;
+            return slot.Roles;
         }
 
         private void UpdateReadyCheck(uint diff)
@@ -1649,7 +1649,7 @@ namespace Game.Groups
         private bool IsReadyCheckCompleted()
         {
             foreach (var member in _memberSlots)
-                if (!member.readyChecked)
+                if (!member.ReadyChecked)
                     return false;
 
             return true;
@@ -1670,7 +1670,7 @@ namespace Game.Groups
         {
             ReadyCheckResponse response = new();
             response.PartyGUID = _guid;
-            response.Player = slot.guid;
+            response.Player = slot.Guid;
             response.IsReady = ready;
             BroadcastPacket(response, false);
 
@@ -1681,7 +1681,7 @@ namespace Game.Groups
         {
             foreach (MemberSlot member in _memberSlots)
             {
-                Player player = Global.ObjAccessor.FindConnectedPlayer(member.guid);
+                Player player = Global.ObjAccessor.FindConnectedPlayer(member.Guid);
 
                 if (!player ||
                     !player.GetSession())
@@ -1691,7 +1691,7 @@ namespace Game.Groups
 
         private void SetMemberReadyChecked(MemberSlot slot)
         {
-            slot.readyChecked = true;
+            slot.ReadyChecked = true;
 
             if (IsReadyCheckCompleted())
                 EndReadyCheck();
@@ -1700,7 +1700,7 @@ namespace Game.Groups
         private void ResetMemberReadyChecked()
         {
             foreach (MemberSlot member in _memberSlots)
-                member.readyChecked = false;
+                member.ReadyChecked = false;
         }
 
         public void AddRaidMarker(byte markerId, uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
@@ -1838,8 +1838,8 @@ namespace Game.Groups
         public ObjectGuid GetMemberGUID(string name)
         {
             foreach (var member in _memberSlots)
-                if (member.name == name)
-                    return member.guid;
+                if (member.Name == name)
+                    return member.Guid;
 
             return ObjectGuid.Empty;
         }
@@ -1851,7 +1851,7 @@ namespace Game.Groups
             if (mslot == null)
                 return 0;
 
-            return mslot.flags;
+            return mslot.Flags;
         }
 
         public bool SameSubGroup(ObjectGuid guid1, ObjectGuid guid2)
@@ -1872,7 +1872,7 @@ namespace Game.Groups
                 slot2 == null)
                 return false;
 
-            return (mslot1.group == slot2.group);
+            return (mslot1.Group == slot2.Group);
         }
 
         public bool HasFreeSlotSubGroup(byte subgroup)
@@ -1887,7 +1887,7 @@ namespace Game.Groups
             if (mslot == null)
                 return (byte)(MapConst.MaxRaidSubGroups + 1);
 
-            return mslot.group;
+            return mslot.Group;
         }
 
         public void SetBattlegroundGroup(Battleground bg)
@@ -1935,7 +1935,7 @@ namespace Game.Groups
             // Preserve the new setting in the db
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_FLAG);
 
-            stmt.AddValue(0, (byte)slot.flags);
+            stmt.AddValue(0, (byte)slot.Flags);
             stmt.AddValue(1, guid.GetCounter());
 
             DB.Characters.Execute(stmt);
@@ -1975,13 +1975,13 @@ namespace Game.Groups
                 _subGroupsCounts = new byte[MapConst.MaxRaidSubGroups];
 
             foreach (var memberSlot in _memberSlots)
-                ++_subGroupsCounts[memberSlot.group];
+                ++_subGroupsCounts[memberSlot.Group];
         }
 
         private MemberSlot _getMemberSlot(ObjectGuid guid)
         {
             foreach (var member in _memberSlots)
-                if (member.guid == guid)
+                if (member.Guid == guid)
                     return member;
 
             return null;
@@ -2002,16 +2002,16 @@ namespace Game.Groups
         public void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag)
         {
             foreach (var member in _memberSlots)
-                if (member.flags.HasAnyFlag(flag))
-                    member.flags &= ~flag;
+                if (member.Flags.HasAnyFlag(flag))
+                    member.Flags &= ~flag;
         }
 
         private void ToggleGroupMemberFlag(MemberSlot slot, GroupMemberFlags flag, bool apply)
         {
             if (apply)
-                slot.flags |= flag;
+                slot.Flags |= flag;
             else
-                slot.flags &= ~flag;
+                slot.Flags &= ~flag;
         }
 
         public void StartLeaderOfflineTimer()
@@ -2108,30 +2108,6 @@ namespace Game.Groups
         public static implicit operator bool(Group group)
         {
             return group != null;
-        }
-    }
-
-    public class MemberSlot
-    {
-        public byte _class;
-        public GroupMemberFlags flags;
-        public byte group;
-        public ObjectGuid guid;
-        public string name;
-        public Race race;
-        public bool readyChecked;
-        public LfgRoles roles;
-    }
-
-    public class RaidMarker
-    {
-        public WorldLocation Location;
-        public ObjectGuid TransportGUID;
-
-        public RaidMarker(uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
-        {
-            Location = new WorldLocation(mapId, positionX, positionY, positionZ);
-            TransportGUID = transportGuid;
         }
     }
 }

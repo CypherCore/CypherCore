@@ -72,12 +72,12 @@ namespace Game.Chat
 
             foreach (var slot in groupTarget.GetMemberSlots())
             {
-                Player p = Global.ObjAccessor.FindPlayer(slot.guid);
+                Player p = Global.ObjAccessor.FindPlayer(slot.Guid);
 
                 if (p)
                     PrintPlayerInfo(handler, p);
                 else
-                    handler.SendSysMessage("{0} is offline.", slot.name);
+                    handler.SendSysMessage("{0} is offline.", slot.Name);
             }
 
             return true;

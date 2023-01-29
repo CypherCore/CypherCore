@@ -86,7 +86,7 @@ namespace Game.DungeonFinding
 
                 foreach (MemberSlot memberSlot in group.GetMemberSlots())
                 {
-                    player.GetSession().BuildNameQueryData(memberSlot.guid, out NameCacheLookupResult nameCacheLookupResult);
+                    player.GetSession().BuildNameQueryData(memberSlot.Guid, out NameCacheLookupResult nameCacheLookupResult);
                     response.Players.Add(nameCacheLookupResult);
                 }
 

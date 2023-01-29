@@ -10,32 +10,32 @@ namespace Game.Groups
 {
     public class GroupManager : Singleton<GroupManager>
     {
-        private readonly Dictionary<uint, Group> GroupDbStore = new();
+        private readonly Dictionary<uint, Group> _groupDbStore = new();
 
-        private readonly Dictionary<ulong, Group> GroupStore = new();
-        private uint NextGroupDbStoreId;
-        private ulong NextGroupId;
+        private readonly Dictionary<ulong, Group> _groupStore = new();
+        private uint _nextGroupDbStoreId;
+        private ulong _nextGroupId;
 
         private GroupManager()
         {
-            NextGroupDbStoreId = 1;
-            NextGroupId = 1;
+            _nextGroupDbStoreId = 1;
+            _nextGroupId = 1;
         }
 
         public uint GenerateNewGroupDbStoreId()
         {
-            uint newStorageId = NextGroupDbStoreId;
+            uint newStorageId = _nextGroupDbStoreId;
 
-            for (uint i = ++NextGroupDbStoreId; i < 0xFFFFFFFF; ++i)
-                if ((i < GroupDbStore.Count && GroupDbStore[i] == null) ||
-                    i >= GroupDbStore.Count)
+            for (uint i = ++_nextGroupDbStoreId; i < 0xFFFFFFFF; ++i)
+                if ((i < _groupDbStore.Count && _groupDbStore[i] == null) ||
+                    i >= _groupDbStore.Count)
                 {
-                    NextGroupDbStoreId = i;
+                    _nextGroupDbStoreId = i;
 
                     break;
                 }
 
-            if (newStorageId == NextGroupDbStoreId)
+            if (newStorageId == _nextGroupDbStoreId)
             {
                 Log.outError(LogFilter.Server, "Group storage ID overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -46,54 +46,54 @@ namespace Game.Groups
 
         public void RegisterGroupDbStoreId(uint storageId, Group group)
         {
-            GroupDbStore[storageId] = group;
+            _groupDbStore[storageId] = group;
         }
 
         public void FreeGroupDbStoreId(Group group)
         {
             uint storageId = group.GetDbStoreId();
 
-            if (storageId < NextGroupDbStoreId)
-                NextGroupDbStoreId = storageId;
+            if (storageId < _nextGroupDbStoreId)
+                _nextGroupDbStoreId = storageId;
 
-            GroupDbStore[storageId - 1] = null;
+            _groupDbStore[storageId - 1] = null;
         }
 
         public Group GetGroupByDbStoreId(uint storageId)
         {
-            return GroupDbStore.LookupByKey(storageId);
+            return _groupDbStore.LookupByKey(storageId);
         }
 
         public ulong GenerateGroupId()
         {
-            if (NextGroupId >= 0xFFFFFFFE)
+            if (_nextGroupId >= 0xFFFFFFFE)
             {
                 Log.outError(LogFilter.Server, "Group Guid overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
 
-            return NextGroupId++;
+            return _nextGroupId++;
         }
 
         public Group GetGroupByGUID(ObjectGuid groupId)
         {
-            return GroupStore.LookupByKey(groupId.GetCounter());
+            return _groupStore.LookupByKey(groupId.GetCounter());
         }
 
         public void Update(uint diff)
         {
-            foreach (var group in GroupStore.Values)
+            foreach (var group in _groupStore.Values)
                 group.Update(diff);
         }
 
         public void AddGroup(Group group)
         {
-            GroupStore[group.GetGUID().GetCounter()] = group;
+            _groupStore[group.GetGUID().GetCounter()] = group;
         }
 
         public void RemoveGroup(Group group)
         {
-            GroupStore.Remove(group.GetGUID().GetCounter());
+            _groupStore.Remove(group.GetGUID().GetCounter());
         }
 
         public void LoadGroups()
@@ -136,8 +136,8 @@ namespace Game.Groups
                     RegisterGroupDbStoreId(storageId, group);
 
                     // Increase the next available storage ID
-                    if (storageId == NextGroupDbStoreId)
-                        NextGroupDbStoreId++;
+                    if (storageId == _nextGroupDbStoreId)
+                        _nextGroupDbStoreId++;
 
                     ++count;
                 } while (result.NextRow());

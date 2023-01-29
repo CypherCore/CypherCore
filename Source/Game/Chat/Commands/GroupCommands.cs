@@ -208,10 +208,10 @@ namespace Game.Chat
                 // Check for given flag and assign it to that iterator
                 string flags = "";
 
-                if (slot.flags.HasAnyFlag(GroupMemberFlags.Assistant))
+                if (slot.Flags.HasAnyFlag(GroupMemberFlags.Assistant))
                     flags = "Assistant";
 
-                if (slot.flags.HasAnyFlag(GroupMemberFlags.MainTank))
+                if (slot.Flags.HasAnyFlag(GroupMemberFlags.MainTank))
                 {
                     if (!string.IsNullOrEmpty(flags))
                         flags += ", ";
@@ -219,7 +219,7 @@ namespace Game.Chat
                     flags += "MainTank";
                 }
 
-                if (slot.flags.HasAnyFlag(GroupMemberFlags.MainAssist))
+                if (slot.Flags.HasAnyFlag(GroupMemberFlags.MainAssist))
                 {
                     if (!string.IsNullOrEmpty(flags))
                         flags += ", ";
@@ -231,7 +231,7 @@ namespace Game.Chat
                     flags = "None";
 
                 // Check if iterator is online. If is...
-                Player p = Global.ObjAccessor.FindPlayer(slot.guid);
+                Player p = Global.ObjAccessor.FindPlayer(slot.Guid);
                 string phases = "";
 
                 if (p && p.IsInWorld)
@@ -259,13 +259,13 @@ namespace Game.Chat
 
                 // Now we can print those informations for every single member of each group!
                 handler.SendSysMessage(CypherStrings.GroupPlayerNameGuid,
-                                       slot.name,
+                                       slot.Name,
                                        onlineState,
                                        zoneName,
                                        phases,
-                                       slot.guid.ToString(),
+                                       slot.Guid.ToString(),
                                        flags,
-                                       LFGQueue.GetRolesString(slot.roles));
+                                       LFGQueue.GetRolesString(slot.Roles));
             }
 
             // And finish after every iterator is done.
