@@ -11,7 +11,7 @@ namespace Game
         public int BlobIndex { get; set; }
         public int Flags { get; set; }
         public int MapID { get; set; }
-        public int NavigationPlayerCoditionID { get; set; }
+        public int NavigationPlayerConditionID { get; set; }
         public int ObjectiveIndex { get; set; }
         public int PlayerConditionID { get; set; }
         public List<QuestPOIBlobPoint> Points { get; set; }

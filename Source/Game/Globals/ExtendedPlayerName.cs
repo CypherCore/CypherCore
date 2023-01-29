@@ -11,7 +11,7 @@ namespace Game
             Realm = realmName;
         }
 
-        public string Name { get; set; }
-        public string Realm { get; set; }
+        public string Name;
+        public string Realm;
     }
 }
