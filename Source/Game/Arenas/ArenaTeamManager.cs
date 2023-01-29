@@ -9,25 +9,25 @@ namespace Game.Arenas
 {
 	public class ArenaTeamManager : Singleton<ArenaTeamManager>
 	{
-		private Dictionary<uint, ArenaTeam> ArenaTeamStorage = new();
+		private readonly Dictionary<uint, ArenaTeam> _arenaTeamStorage = new();
 
-		private uint NextArenaTeamId;
+		private uint _nextArenaTeamId;
 
 		private ArenaTeamManager()
 		{
-			NextArenaTeamId = 1;
+			_nextArenaTeamId = 1;
 		}
 
 		public ArenaTeam GetArenaTeamById(uint arenaTeamId)
 		{
-			return ArenaTeamStorage.LookupByKey(arenaTeamId);
+			return _arenaTeamStorage.LookupByKey(arenaTeamId);
 		}
 
 		public ArenaTeam GetArenaTeamByName(string arenaTeamName)
 		{
 			string search = arenaTeamName.ToLower();
 
-			foreach (var (_, team) in ArenaTeamStorage)
+			foreach (var (_, team) in _arenaTeamStorage)
 				if (search == team.GetName().ToLower())
 					return team;
 
@@ -36,7 +36,7 @@ namespace Game.Arenas
 
 		public ArenaTeam GetArenaTeamByCaptain(ObjectGuid guid)
 		{
-			foreach (var (_, team) in ArenaTeamStorage)
+			foreach (var (_, team) in _arenaTeamStorage)
 				if (team.GetCaptain() == guid)
 					return team;
 
@@ -45,24 +45,24 @@ namespace Game.Arenas
 
 		public void AddArenaTeam(ArenaTeam arenaTeam)
 		{
-			var added = ArenaTeamStorage.TryAdd(arenaTeam.GetId(), arenaTeam);
+			var added = _arenaTeamStorage.TryAdd(arenaTeam.GetId(), arenaTeam);
 			Cypher.Assert(!added, $"Duplicate arena team with ID {arenaTeam.GetId()}");
 		}
 
 		public void RemoveArenaTeam(uint arenaTeamId)
 		{
-			ArenaTeamStorage.Remove(arenaTeamId);
+			_arenaTeamStorage.Remove(arenaTeamId);
 		}
 
 		public uint GenerateArenaTeamId()
 		{
-			if (NextArenaTeamId >= 0xFFFFFFFE)
+			if (_nextArenaTeamId >= 0xFFFFFFFE)
 			{
 				Log.outError(LogFilter.Battleground, "Arena team ids overflow!! Can't continue, shutting down server. ");
 				Global.WorldMgr.StopNow();
 			}
 
-			return NextArenaTeamId++;
+			return _nextArenaTeamId++;
 		}
 
 		public void LoadArenaTeams()
@@ -115,12 +115,12 @@ namespace Game.Arenas
 
 		public void SetNextArenaTeamId(uint Id)
 		{
-			NextArenaTeamId = Id;
+			_nextArenaTeamId = Id;
 		}
 
 		public Dictionary<uint, ArenaTeam> GetArenaTeamMap()
 		{
-			return ArenaTeamStorage;
+			return _arenaTeamStorage;
 		}
 	}
 }
