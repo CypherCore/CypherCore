@@ -147,14 +147,4 @@ namespace Game
             DB.Characters.DirectExecute("DELETE FROM character_queststatus WHERE status = 0");
         }
     }
-
-    [Flags]
-    public enum CleaningFlags
-    {
-        AchievementProgress = 0x1,
-        Skills = 0x2,
-        Spells = 0x4,
-        Talents = 0x8,
-        Queststatus = 0x10
-    }
 }
