@@ -11,17 +11,17 @@ namespace Game
 {
     public class PhaseShift
     {
-        public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
-        public bool IsDbPhaseShift;
+        public PhaseShiftFlags Flags { get; set; } = PhaseShiftFlags.Unphased;
+        public bool IsDbPhaseShift { get; set; }
         public ObjectGuid PersonalGuid;
-        public int PersonalReferences;
-        public Dictionary<uint, PhaseRef> Phases = new();
-        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
-        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new();
-        private int CosmeticReferences;
-        private int DefaultReferences;
+        public int PersonalReferences { get; set; }
+        public Dictionary<uint, PhaseRef> Phases { get; set; } = new();
+        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds { get; set; } = new();
+        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds { get; set; } = new();
+        private int _cosmeticReferences;
+        private int _defaultReferences;
 
-        private int NonCosmeticReferences;
+        private int _nonCosmeticReferences;
 
         public PhaseShift()
         {
@@ -36,9 +36,9 @@ namespace Game
             VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>(copy.VisibleMapIds);
             UiMapPhaseIds = new Dictionary<uint, UiMapPhaseIdRef>(copy.UiMapPhaseIds);
 
-            NonCosmeticReferences = copy.NonCosmeticReferences;
-            CosmeticReferences = copy.CosmeticReferences;
-            DefaultReferences = copy.DefaultReferences;
+            _nonCosmeticReferences = copy._nonCosmeticReferences;
+            _cosmeticReferences = copy._cosmeticReferences;
+            _defaultReferences = copy._defaultReferences;
             IsDbPhaseShift = copy.IsDbPhaseShift;
         }
 
@@ -146,10 +146,10 @@ namespace Game
             Flags &= PhaseShiftFlags.AlwaysVisible | PhaseShiftFlags.Inverse;
             PersonalGuid.Clear();
             Phases.Clear();
-            NonCosmeticReferences = 0;
-            CosmeticReferences = 0;
+            _nonCosmeticReferences = 0;
+            _cosmeticReferences = 0;
             PersonalReferences = 0;
-            DefaultReferences = 0;
+            _defaultReferences = 0;
             UpdateUnphasedFlag();
         }
 
@@ -224,16 +224,16 @@ namespace Game
             if (!IsDbPhaseShift)
             {
                 if (phaseRef.Flags.HasAnyFlag(PhaseFlags.Cosmetic))
-                    CosmeticReferences += references;
+                    _cosmeticReferences += references;
                 else if (phaseId != 169)
-                    NonCosmeticReferences += references;
+                    _nonCosmeticReferences += references;
                 else
-                    DefaultReferences += references;
+                    _defaultReferences += references;
 
                 if (phaseRef.Flags.HasFlag(PhaseFlags.Personal))
                     PersonalReferences += references;
 
-                if (CosmeticReferences != 0)
+                if (_cosmeticReferences != 0)
                     Flags |= PhaseShiftFlags.NoCosmetic;
                 else
                     Flags &= ~PhaseShiftFlags.NoCosmetic;
@@ -248,8 +248,8 @@ namespace Game
             PhaseShiftFlags unphasedFlag = !Flags.HasAnyFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.Unphased : PhaseShiftFlags.InverseUnphased;
             Flags &= ~(!Flags.HasFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.InverseUnphased : PhaseShiftFlags.Unphased);
 
-            if (NonCosmeticReferences != 0 &&
-                DefaultReferences == 0)
+            if (_nonCosmeticReferences != 0 &&
+                _defaultReferences == 0)
                 Flags &= ~unphasedFlag;
             else
                 Flags |= unphasedFlag;
@@ -304,68 +304,5 @@ namespace Game
             if (PersonalReferences == 0)
                 PersonalGuid.Clear();
         }
-    }
-
-    public class PhaseRef
-    {
-        public List<Condition> AreaConditions;
-
-        public PhaseFlags Flags;
-        public int References;
-
-        public PhaseRef(PhaseFlags flags, List<Condition> conditions)
-        {
-            Flags = flags;
-            References = 0;
-            AreaConditions = conditions;
-        }
-
-        public bool IsPersonal()
-        {
-            return Flags.HasFlag(PhaseFlags.Personal);
-        }
-    }
-
-    public struct VisibleMapIdRef
-    {
-        public VisibleMapIdRef(int references, TerrainSwapInfo visibleMapInfo)
-        {
-            References = references;
-            VisibleMapInfo = visibleMapInfo;
-        }
-
-        public int References;
-        public TerrainSwapInfo VisibleMapInfo;
-    }
-
-    public struct UiMapPhaseIdRef
-    {
-        public UiMapPhaseIdRef(int references)
-        {
-            References = references;
-        }
-
-        public int References;
-    }
-
-    [Flags]
-    public enum PhaseShiftFlags
-    {
-        None = 0x00,
-        AlwaysVisible = 0x01, // Ignores all phasing, can see everything and be seen by everything
-        Inverse = 0x02,       // By default having at least one shared phase for two objects means they can see each other
-
-        // this flag makes objects see each other if they have at least one non-shared phase
-        InverseUnphased = 0x04,
-        Unphased = 0x08,
-        NoCosmetic = 0x10 // This flag ignores shared cosmetic phases (two players that both have shared cosmetic phase but no other phase cannot see each other)
-    }
-
-    [Flags]
-    public enum PhaseFlags : ushort
-    {
-        None = 0x0,
-        Cosmetic = 0x1,
-        Personal = 0x2
     }
 }

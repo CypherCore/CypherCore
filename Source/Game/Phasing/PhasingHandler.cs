@@ -18,8 +18,8 @@ namespace Game
 {
     public class PhasingHandler
     {
-        public static PhaseShift EmptyPhaseShift = new();
-        public static PhaseShift AlwaysVisible;
+        public static PhaseShift EmptyPhaseShift { get; set; } = new();
+        public static PhaseShift AlwaysVisible { get; set; }
 
         static PhasingHandler()
         {
@@ -680,49 +680,6 @@ namespace Game
                     obj.UpdateObjectVisibility();
                 }
             }
-        }
-    }
-
-    internal class ControlledUnitVisitor
-    {
-        private readonly HashSet<WorldObject> _visited = new();
-
-        public ControlledUnitVisitor(WorldObject owner)
-        {
-            _visited.Add(owner);
-        }
-
-        public void VisitControlledOf(Unit unit, Action<Unit> func)
-        {
-            foreach (Unit controlled in unit.Controlled)
-                // Player inside nested vehicle should not phase the root vehicle and its accessories (only direct root vehicle control does)
-                if (!controlled.IsPlayer() &&
-                    controlled.GetVehicle() == null)
-                    if (_visited.Add(controlled))
-                        func(controlled);
-
-            foreach (ObjectGuid summonGuid in unit.SummonSlot)
-                if (!summonGuid.IsEmpty())
-                {
-                    Creature summon = ObjectAccessor.GetCreature(unit, summonGuid);
-
-                    if (summon != null)
-                        if (_visited.Add(summon))
-                            func(summon);
-                }
-
-            Vehicle vehicle = unit.GetVehicleKit();
-
-            if (vehicle != null)
-                foreach (var seatPair in vehicle.Seats)
-                {
-                    Unit passenger = Global.ObjAccessor.GetUnit(unit, seatPair.Value.Passenger.Guid);
-
-                    if (passenger != null &&
-                        passenger != unit)
-                        if (_visited.Add(passenger))
-                            func(passenger);
-                }
         }
     }
 }
