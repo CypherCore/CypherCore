@@ -277,13 +277,13 @@ namespace Game.AI
             }
             else if (moveType == MovementGeneratorType.Waypoint)
             {
-                Cypher.Assert(Id < _path.nodes.Count, $"EscortAI::MovementInform: referenced movement Id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
-                WaypointNode waypoint = _path.nodes[(int)Id];
+                Cypher.Assert(Id < _path.Nodes.Count, $"EscortAI::MovementInform: referenced movement Id ({Id}) points to non-existing node in loaded path ({me.GetGUID()})");
+                WaypointNode waypoint = _path.Nodes[(int)Id];
 
-                Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform: waypoint node {waypoint.id} reached ({me.GetGUID()})");
+                Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::MovementInform: waypoint node {waypoint.Id} reached ({me.GetGUID()})");
 
                 // last point
-                if (Id == _path.nodes.Count - 1)
+                if (Id == _path.Nodes.Count - 1)
                 {
                     _started = false;
                     _ended = true;
@@ -298,16 +298,16 @@ namespace Game.AI
             y = GridDefines.NormalizeMapCoord(y);
 
             WaypointNode waypoint = new();
-            waypoint.id = id;
-            waypoint.x = x;
-            waypoint.y = y;
-            waypoint.z = z;
-            waypoint.orientation = orientation;
-            waypoint.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
-            waypoint.delay = (uint)waitTime.TotalMilliseconds;
-            waypoint.eventId = 0;
-            waypoint.eventChance = 100;
-            _path.nodes.Add(waypoint);
+            waypoint.Id = id;
+            waypoint.X = x;
+            waypoint.Y = y;
+            waypoint.Z = z;
+            waypoint.Orientation = orientation;
+            waypoint.MoveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
+            waypoint.Delay = (uint)waitTime.TotalMilliseconds;
+            waypoint.EventId = 0;
+            waypoint.EventChance = 100;
+            _path.Nodes.Add(waypoint);
 
             _manualPath = true;
         }
@@ -317,8 +317,8 @@ namespace Game.AI
             if (on == _running)
                 return;
 
-            foreach (var node in _path.nodes)
-                node.moveType = on ? WaypointMoveType.Run : WaypointMoveType.Walk;
+            foreach (var node in _path.Nodes)
+                node.MoveType = on ? WaypointMoveType.Run : WaypointMoveType.Walk;
 
             me.SetWalk(!on);
 
@@ -355,7 +355,7 @@ namespace Game.AI
             if (!_manualPath && resetWaypoints)
                 FillPointMovementListForCreature();
 
-            if (_path.nodes.Empty())
+            if (_path.Nodes.Empty())
             {
                 Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()} starts with 0 waypoints (possible missing entry in script_waypoint. Quest: {(quest != null ? quest.Id : 0)} ({me.GetGUID()})");
 
@@ -385,7 +385,7 @@ namespace Game.AI
                 me.SetImmuneToNPC(false);
             }
 
-            Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}, started with {_path.nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Run = {_running}, Player = {_playerGUID} ({me.GetGUID()})");
+            Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}, started with {_path.Nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Run = {_running}, Player = {_playerGUID} ({me.GetGUID()})");
 
             // set initial speed
             me.SetWalk(!_running);
@@ -518,14 +518,14 @@ namespace Game.AI
             if (path == null)
                 return;
 
-            foreach (WaypointNode value in path.nodes)
+            foreach (WaypointNode value in path.Nodes)
             {
                 WaypointNode node = value;
-                node.x = GridDefines.NormalizeMapCoord(node.x);
-                node.y = GridDefines.NormalizeMapCoord(node.y);
-                node.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
+                node.X = GridDefines.NormalizeMapCoord(node.X);
+                node.Y = GridDefines.NormalizeMapCoord(node.Y);
+                node.MoveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
 
-                _path.nodes.Add(node);
+                _path.Nodes.Add(node);
             }
         }
 

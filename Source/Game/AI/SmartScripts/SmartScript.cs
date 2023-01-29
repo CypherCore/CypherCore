@@ -2378,7 +2378,7 @@ namespace Game.AI
                         if (e.Action.jump.Gravity != 0 ||
                             e.Action.jump.UseDefaultGravity != 0)
                         {
-                            float gravity = e.Action.jump.UseDefaultGravity != 0 ? (float)MotionMaster.gravity : e.Action.jump.Gravity;
+                            float gravity = e.Action.jump.UseDefaultGravity != 0 ? (float)MotionMaster.GRAVITY : e.Action.jump.Gravity;
                             _me.GetMotionMaster().MoveJumpWithGravity(pos, e.Action.jump.SpeedXY, gravity, e.Action.jump.PointId);
                         }
                         else
@@ -2618,18 +2618,18 @@ namespace Game.AI
                                         WaypointPath path = Global.SmartAIMgr.GetPath(pathId);
 
                                         if (path == null ||
-                                            path.nodes.Empty())
+                                            path.Nodes.Empty())
                                             continue;
 
-                                        foreach (var waypoint in path.nodes)
+                                        foreach (var waypoint in path.Nodes)
                                         {
-                                            float distToThisPath = creature.GetDistance(waypoint.x, waypoint.y, waypoint.z);
+                                            float distToThisPath = creature.GetDistance(waypoint.X, waypoint.Y, waypoint.Z);
 
                                             if (distToThisPath < distanceToClosest)
                                             {
                                                 distanceToClosest = distToThisPath;
                                                 closestPathId = pathId;
-                                                closestWaypointId = waypoint.id;
+                                                closestWaypointId = waypoint.Id;
                                             }
                                         }
                                     }

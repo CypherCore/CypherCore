@@ -405,8 +405,8 @@ namespace Game.AI
                     _waypointStore[entry] = new WaypointPath();
 
                 WaypointPath path = _waypointStore[entry];
-                path.id = entry;
-                path.nodes.Add(new WaypointNode(id, x, y, z, o, delay));
+                path.Id = entry;
+                path.Nodes.Add(new WaypointNode(id, x, y, z, o, delay));
 
                 lastEntry = entry;
                 ++total;
@@ -2112,7 +2112,7 @@ namespace Game.AI
                         WaypointPath path = GetPath(e.Action.wpStart.pathID);
 
                         if (path == null ||
-                            path.nodes.Empty())
+                            path.Nodes.Empty())
                         {
                             Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath Id {e.Action.wpStart.pathID}, skipped.");
 

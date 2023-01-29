@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using Framework.Constants;
 
@@ -93,23 +92,23 @@ namespace Game.Movement
 
         public void Initialize(MoveSplineInitArgs args)
         {
-            splineflags = args.flags;
-            facing = args.facing;
-            _Id = args.splineId;
-            point_Idx_offset = args.path_Idx_offset;
-            initialOrientation = args.initialOrientation;
+            splineflags = args.Flags;
+            facing = args.Facing;
+            _Id = args.SplineId;
+            point_Idx_offset = args.PathIdxOffset;
+            initialOrientation = args.InitialOrientation;
 
             time_passed = 0;
             vertical_acceleration = 0.0f;
             effect_start_time = 0;
-            spell_effect_extra = args.spellEffectExtra;
-            anim_tier = args.animTier;
-            splineIsFacingOnly = args.path.Count == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
+            spell_effect_extra = args.SpellEffectExtra;
+            anim_tier = args.AnimTier;
+            splineIsFacingOnly = args.Path.Count == 2 && args.Facing.type != MonsterMoveType.Normal && ((args.Path[1] - args.Path[0]).Length() < 0.1f);
 
-            velocity = args.velocity;
+            velocity = args.Velocity;
 
             // Check if its a stop spline
-            if (args.flags.HasFlag(SplineFlag.Done))
+            if (args.Flags.HasFlag(SplineFlag.Done))
             {
                 spline.Clear();
 
@@ -120,21 +119,21 @@ namespace Game.Movement
 
             // init parabolic / animation
             // spline initialized, duration known and i able to compute parabolic acceleration
-            if (args.flags.HasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
+            if (args.Flags.HasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
             {
-                effect_start_time = (int)(Duration() * args.time_perc);
+                effect_start_time = (int)(Duration() * args.TimePerc);
 
-                if (args.flags.HasFlag(SplineFlag.Parabolic) &&
+                if (args.Flags.HasFlag(SplineFlag.Parabolic) &&
                     effect_start_time < Duration())
                 {
-                    if (args.parabolic_amplitude != 0.0f)
+                    if (args.ParabolicAmplitude != 0.0f)
                     {
                         float f_duration = MSToSec((uint)(Duration() - effect_start_time));
-                        vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
+                        vertical_acceleration = args.ParabolicAmplitude * 8.0f / (f_duration * f_duration);
                     }
-                    else if (args.vertical_acceleration != 0.0f)
+                    else if (args.VerticalAcceleration != 0.0f)
                     {
-                        vertical_acceleration = args.vertical_acceleration;
+                        vertical_acceleration = args.VerticalAcceleration;
                     }
                 }
             }
@@ -201,9 +200,9 @@ namespace Game.Movement
                 facing.type != MonsterMoveType.Normal)
             {
                 if (facing.type == MonsterMoveType.FacingAngle)
-                    orientation = facing.angle;
+                    orientation = facing.Angle;
                 else if (facing.type == MonsterMoveType.FacingSpot)
-                    orientation = MathF.Atan2(facing.f.Y - c.Y, facing.f.X - c.X);
+                    orientation = MathF.Atan2(facing.F.Y - c.Y, facing.F.X - c.X);
                 //nothing to do for MoveSplineFlag.Final_Target flag
             }
             else
@@ -354,18 +353,18 @@ namespace Game.Movement
                                          EvaluationMode.Linear, EvaluationMode.Catmullrom
                                      };
 
-            if (args.flags.HasFlag(SplineFlag.Cyclic))
+            if (args.Flags.HasFlag(SplineFlag.Cyclic))
             {
                 int cyclic_point = 0;
 
                 if (splineflags.HasFlag(SplineFlag.EnterCycle))
                     cyclic_point = 1; // shouldn't be modified, came from client
 
-                spline.InitCyclicSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
+                spline.InitCyclicSpline(args.Path.ToArray(), args.Path.Count, modes[Convert.ToInt32(args.Flags.IsSmooth())], cyclic_point, args.InitialOrientation);
             }
             else
             {
-                spline.InitSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], args.initialOrientation);
+                spline.InitSpline(args.Path.ToArray(), args.Path.Count, modes[Convert.ToInt32(args.Flags.IsSmooth())], args.InitialOrientation);
             }
 
             // init spline timestamps
@@ -376,7 +375,7 @@ namespace Game.Movement
             }
             else
             {
-                CommonInitializer init = new(args.velocity);
+                CommonInitializer init = new(args.Velocity);
                 spline.InitLengths(init);
             }
 
@@ -439,16 +438,16 @@ namespace Game.Movement
                             splineflags.SetUnsetFlag(SplineFlag.EnterCycle, false);
 
                             MoveSplineInitArgs args = new(spline.GetPointCount());
-                            args.path.AddRange(spline.GetPoints().AsSpan().Slice(spline.First() + 1, spline.Last()).ToArray());
-                            args.facing = facing;
-                            args.flags = splineflags;
-                            args.path_Idx_offset = point_Idx_offset;
+                            args.Path.AddRange(spline.GetPoints().AsSpan().Slice(spline.First() + 1, spline.Last()).ToArray());
+                            args.Facing = facing;
+                            args.Flags = splineflags;
+                            args.PathIdxOffset = point_Idx_offset;
                             // MoveSplineFlag::Parabolic | MoveSplineFlag::Animation not supported currently
                             //args.parabolic_amplitude = ?;
                             //args.time_perc = ?;
-                            args.splineId = _Id;
-                            args.initialOrientation = initialOrientation;
-                            args.velocity = 1.0f; // Calculated below
+                            args.SplineId = _Id;
+                            args.InitialOrientation = initialOrientation;
+                            args.Velocity = 1.0f; // Calculated below
                             args.HasVelocity = true;
                             args.TransformForTransport = onTransport;
 
@@ -461,7 +460,7 @@ namespace Game.Movement
                                 // desired duration, thus finding out how much the velocity has to be increased for them to match.
                                 MoveSpline tempSpline = new();
                                 tempSpline.Initialize(args);
-                                args.velocity = (float)tempSpline.Duration() / Duration();
+                                args.Velocity = (float)tempSpline.Duration() / Duration();
 
                                 if (args.Validate(null))
                                     InitSpline(args);
@@ -510,68 +509,5 @@ namespace Game.Movement
         public AnimTierTransition anim_tier;
 
         #endregion
-    }
-
-    public interface IInitializer<T>
-    {
-        int Invoke(Spline<T> s, int i);
-    }
-
-    public class SplineChainLink
-    {
-        public uint ExpectedDuration;
-        public List<Vector3> Points = new();
-        public uint TimeToNext;
-        public float Velocity;
-
-        public SplineChainLink(Vector3[] points, uint expectedDuration, uint msToNext, float velocity)
-        {
-            Points.AddRange(points);
-            ExpectedDuration = expectedDuration;
-            TimeToNext = msToNext;
-            Velocity = velocity;
-        }
-
-        public SplineChainLink(uint expectedDuration, uint msToNext, float velocity)
-        {
-            ExpectedDuration = expectedDuration;
-            TimeToNext = msToNext;
-            Velocity = velocity;
-        }
-    }
-
-    public class SplineChainResumeInfo
-    {
-        public List<SplineChainLink> Chain = new();
-        public bool IsWalkMode;
-
-        public uint PointID;
-        public byte PointIndex;
-        public byte SplineIndex;
-        public uint TimeToNext;
-
-        public SplineChainResumeInfo()
-        {
-        }
-
-        public SplineChainResumeInfo(uint id, List<SplineChainLink> chain, bool walk, byte splineIndex, byte wpIndex, uint msToNext)
-        {
-            PointID = id;
-            Chain = chain;
-            IsWalkMode = walk;
-            SplineIndex = splineIndex;
-            PointIndex = wpIndex;
-            TimeToNext = msToNext;
-        }
-
-        public bool Empty()
-        {
-            return Chain.Empty();
-        }
-
-        public void Clear()
-        {
-            Chain.Clear();
-        }
     }
 }

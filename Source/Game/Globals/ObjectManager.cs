@@ -10309,8 +10309,8 @@ namespace Game
 
                 if (jumpGravity <= 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `jump_charge_params` uses invalid Jump gravity {jumpGravity} for Id {id}, set to default {MotionMaster.gravity}.");
-                    jumpGravity = (float)MotionMaster.gravity;
+                    Log.outError(LogFilter.Sql, $"Table `jump_charge_params` uses invalid Jump gravity {jumpGravity} for Id {id}, set to default {MotionMaster.GRAVITY}.");
+                    jumpGravity = (float)MotionMaster.GRAVITY;
                 }
 
                 if (!result.IsNull(4))

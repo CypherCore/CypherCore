@@ -252,15 +252,15 @@ namespace Game.Networking.Packets
                 switch (moveSpline.facing.type)
                 {
                     case MonsterMoveType.FacingSpot:
-                        data.WriteVector3(moveSpline.facing.f); // FaceSpot
+                        data.WriteVector3(moveSpline.facing.F); // FaceSpot
 
                         break;
                     case MonsterMoveType.FacingTarget:
-                        data.WritePackedGuid(moveSpline.facing.target); // FaceGUID
+                        data.WritePackedGuid(moveSpline.facing.Target); // FaceGUID
 
                         break;
                     case MonsterMoveType.FacingAngle:
-                        data.WriteFloat(moveSpline.facing.angle); // FaceDirection
+                        data.WriteFloat(moveSpline.facing.Angle); // FaceDirection
 
                         break;
                 }
@@ -413,9 +413,9 @@ namespace Game.Networking.Packets
             splineFlags.SetUnsetFlag(SplineFlag.Cyclic, moveSpline.IsCyclic());
             movementSpline.Flags = (uint)(splineFlags.Flags & ~SplineFlag.MaskNoMonsterMove);
             movementSpline.Face = moveSpline.facing.type;
-            movementSpline.FaceDirection = moveSpline.facing.angle;
-            movementSpline.FaceGUID = moveSpline.facing.target;
-            movementSpline.FaceSpot = moveSpline.facing.f;
+            movementSpline.FaceDirection = moveSpline.facing.Angle;
+            movementSpline.FaceGUID = moveSpline.facing.Target;
+            movementSpline.FaceSpot = moveSpline.facing.F;
 
             if (splineFlags.HasFlag(SplineFlag.Animation))
             {

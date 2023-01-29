@@ -12,69 +12,13 @@ using Game.Entities;
 
 namespace Game.Movement
 {
-    internal class MovementGeneratorComparator : IComparer<MovementGenerator>
-    {
-        public int Compare(MovementGenerator a, MovementGenerator b)
-        {
-            if (a.Equals(b))
-                return 0;
-
-            if (a.Mode > b.Mode)
-                return 1;
-            else if (a.Mode == b.Mode)
-                return a.Priority.CompareTo(b.Priority);
-
-            return -1;
-        }
-    }
-
-    public struct MovementGeneratorInformation
-    {
-        public MovementGeneratorType Type;
-        public ObjectGuid TargetGUID;
-        public string TargetName;
-
-        public MovementGeneratorInformation(MovementGeneratorType type, ObjectGuid targetGUID, string targetName = "")
-        {
-            Type = type;
-            TargetGUID = targetGUID;
-            TargetName = targetName;
-        }
-    }
-
-    internal class DelayedAction
-    {
-        private readonly Action Action;
-        private readonly MotionMasterDelayedActionType Type;
-        private readonly Func<bool> Validator;
-
-        public DelayedAction(Action action, Func<bool> validator, MotionMasterDelayedActionType type)
-        {
-            Action = action;
-            Validator = validator;
-            Type = type;
-        }
-
-        public DelayedAction(Action action, MotionMasterDelayedActionType type)
-        {
-            Action = action;
-            Validator = () => true;
-            Type = type;
-        }
-
-        public void Resolve()
-        {
-            if (Validator())
-                Action();
-        }
-    }
 
     public class MotionMaster
     {
-        public const double gravity = 19.29110527038574;
+        public const double GRAVITY = 19.29110527038574;
         public const float SPEED_CHARGE = 42.0f;
-        private static readonly IdleMovementGenerator staticIdleMovement = new();
-        private static uint splineId;
+        private static readonly IdleMovementGenerator _staticIdleMovement = new();
+        private static uint _splineId;
 
         public MotionMaster(Unit unit)
         {
@@ -82,15 +26,15 @@ namespace Game.Movement
             _flags = MotionMasterFlags.InitializationPending;
         }
 
-        private Unit _owner { get; }
-        private MovementGenerator _defaultGenerator { get; set; }
-        private SortedSet<MovementGenerator> _generators { get; } = new(new MovementGeneratorComparator());
+        private Unit _owner;
+        private MovementGenerator _defaultGenerator;
+        private SortedSet<MovementGenerator> _generators = new(new MovementGeneratorComparator());
 
-        private MultiMap<uint, MovementGenerator> _baseUnitStatesMap { get; } = new();
-        private Queue<DelayedAction> _delayedActions { get; } = new();
-        private MotionMasterFlags _flags { get; set; }
+        private MultiMap<uint, MovementGenerator> _baseUnitStatesMap = new();
+        private Queue<DelayedAction> _delayedActions = new();
+        private MotionMasterFlags _flags;
 
-        public static uint SplineId => splineId++;
+        public static uint SplineId => _splineId++;
 
         public void Initialize()
         {
@@ -768,7 +712,7 @@ namespace Game.Movement
                 return;
 
             Position dest = _owner.GetPosition();
-            float moveTimeHalf = (float)(speedZ / gravity);
+            float moveTimeHalf = (float)(speedZ / GRAVITY);
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
@@ -798,7 +742,7 @@ namespace Game.Movement
             if (_owner.IsTypeId(TypeId.Player))
                 return;
 
-            float moveTimeHalf = (float)(speedZ / gravity);
+            float moveTimeHalf = (float)(speedZ / GRAVITY);
             float dist = 2 * moveTimeHalf * speedXY;
             _owner.GetNearPoint2D(null, out float x, out float y, dist, _owner.GetOrientation() + angle);
             float z = _owner.GetPositionZ();
@@ -818,7 +762,7 @@ namespace Game.Movement
             if (speedXY < 0.01f)
                 return;
 
-            float moveTimeHalf = (float)(speedZ / gravity);
+            float moveTimeHalf = (float)(speedZ / GRAVITY);
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
             var initializer = (MoveSplineInit init) =>
@@ -1117,7 +1061,7 @@ namespace Game.Movement
 
         public static MovementGenerator GetIdleMovementGenerator()
         {
-            return staticIdleMovement;
+            return _staticIdleMovement;
         }
 
         public static bool IsStatic(MovementGenerator movement)
@@ -1365,86 +1309,6 @@ namespace Game.Movement
         private void RemoveFlag(MotionMasterFlags flag)
         {
             _flags &= ~flag;
-        }
-    }
-
-    public class JumpArrivalCastArgs
-    {
-        public uint SpellId;
-        public ObjectGuid Target;
-    }
-
-    public class JumpChargeParams
-    {
-        public float JumpGravity;
-        public uint? ParabolicCurveId;
-        public uint? ProgressCurveId;
-        public float Speed;
-
-        public uint? SpellVisualId;
-
-        public bool TreatSpeedAsMoveTimeSeconds;
-    }
-
-    public struct ChaseRange
-    {
-        // this contains info that informs how we should path!
-        public float MinRange;     // we have to move if we are within this range...    (min. attack range)
-        public float MinTolerance; // ...and if we are, we will move this far away
-        public float MaxRange;     // we have to move if we are outside this range...   (max. attack range)
-        public float MaxTolerance; // ...and if we are, we will move into this range
-
-        public ChaseRange(float range)
-        {
-            MinRange = range > SharedConst.ContactDistance ? 0 : range - SharedConst.ContactDistance;
-            MinTolerance = range;
-            MaxRange = range + SharedConst.ContactDistance;
-            MaxTolerance = range;
-        }
-
-        public ChaseRange(float min, float max)
-        {
-            MinRange = min;
-            MinTolerance = Math.Min(min + SharedConst.ContactDistance, (min + max) / 2);
-            MaxRange = max;
-            MaxTolerance = Math.Max(max - SharedConst.ContactDistance, MinTolerance);
-        }
-
-        public ChaseRange(float min, float tMin, float tMax, float max)
-        {
-            MinRange = min;
-            MinTolerance = tMin;
-            MaxRange = max;
-            MaxTolerance = tMax;
-        }
-    }
-
-    public struct ChaseAngle
-    {
-        public float RelativeAngle; // we want to be at this angle relative to the Target (0 = front, _PI = back)
-        public float Tolerance;     // but we'll tolerate anything within +- this much
-
-        public ChaseAngle(float angle, float tol = MathFunctions.PiOver4)
-        {
-            RelativeAngle = Position.NormalizeOrientation(angle);
-            Tolerance = tol;
-        }
-
-        public float UpperBound()
-        {
-            return Position.NormalizeOrientation(RelativeAngle + Tolerance);
-        }
-
-        public float LowerBound()
-        {
-            return Position.NormalizeOrientation(RelativeAngle - Tolerance);
-        }
-
-        public bool IsAngleOkay(float relAngle)
-        {
-            float diff = Math.Abs(relAngle - RelativeAngle);
-
-            return (Math.Min(diff, (2 * MathF.PI) - diff) <= Tolerance);
         }
     }
 }
