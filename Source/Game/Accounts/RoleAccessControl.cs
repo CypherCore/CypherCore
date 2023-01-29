@@ -471,14 +471,4 @@ namespace Game.Accounts
 			_perms.Remove(id);
 		}
 	}
-
-	public enum RBACCommandResult
-	{
-		OK,
-		CantAddAlreadyAdded,
-		CantRevokeNotInList,
-		InGrantedList,
-		InDeniedList,
-		IdDoesNotExists
-	}
 }

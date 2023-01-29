@@ -520,16 +520,4 @@ namespace Game
 			return _permissions;
 		}
 	}
-
-	public enum AccountOpResult
-	{
-		Ok,
-		NameTooLong,
-		PassTooLong,
-		EmailTooLong,
-		NameAlreadyExist,
-		NameNotExist,
-		DBInternalError,
-		BadLink
-	}
 }
