@@ -2365,7 +2365,7 @@ namespace Game
 
                         if (reward != null)
                         {
-                            Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
+                            Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.FirstQuest);
 
                             if (quest != null)
                                 if (player.CanRewardQuest(quest, false))

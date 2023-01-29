@@ -124,13 +124,13 @@ namespace Game
             if (GetPlayer().GetGroup())
             {
                 SendLfgUpdateStatus(updateData, true);
-                updateData.dungeons.Clear();
+                updateData.Dungeons.Clear();
                 SendLfgUpdateStatus(updateData, false);
             }
             else
             {
                 SendLfgUpdateStatus(updateData, false);
-                updateData.dungeons.Clear();
+                updateData.Dungeons.Clear();
                 SendLfgUpdateStatus(updateData, true);
             }
         }
@@ -146,7 +146,7 @@ namespace Game
 
             // Get player locked Dungeons
             foreach (var locked in Global.LFGMgr.GetLockedDungeons(_player.GetGUID()))
-                lfgPlayerInfo.BlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
+                lfgPlayerInfo.BlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.LockStatus, locked.Value.RequiredItemLevel, (int)locked.Value.CurrentItemLevel, 0));
 
             foreach (var slot in randomDungeons)
             {
@@ -171,14 +171,14 @@ namespace Game
 
                 if (reward != null)
                 {
-                    Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.FirstQuest);
 
                     if (quest != null)
                     {
                         playerDungeonInfo.FirstReward = !GetPlayer().CanRewardQuest(quest, false);
 
                         if (!playerDungeonInfo.FirstReward)
-                            quest = Global.ObjectMgr.GetQuestTemplate(reward.otherQuest);
+                            quest = Global.ObjectMgr.GetQuestTemplate(reward.OtherQuest);
 
                         if (quest != null)
                         {
@@ -237,7 +237,7 @@ namespace Game
                 lfgBlackList.PlayerGuid = pguid;
 
                 foreach (var locked in Global.LFGMgr.GetLockedDungeons(pguid))
-                    lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
+                    lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.LockStatus, locked.Value.RequiredItemLevel, (int)locked.Value.CurrentItemLevel, 0));
 
                 lfgPartyInfo.Player.Add(lfgBlackList);
             }
@@ -251,7 +251,7 @@ namespace Game
             bool join = false;
             bool queued = false;
 
-            switch (updateData.updateType)
+            switch (updateData.UpdateType)
             {
                 case LfgUpdateType.JoinQueueInitial: // Joined queue outside the dungeon
                     join = true;
@@ -268,8 +268,8 @@ namespace Game
 
                     break;
                 case LfgUpdateType.UpdateStatus:
-                    join = updateData.state != LfgState.Rolecheck && updateData.state != LfgState.None;
-                    queued = updateData.state == LfgState.Queued;
+                    join = updateData.State != LfgState.Rolecheck && updateData.State != LfgState.None;
+                    queued = updateData.State == LfgState.Queued;
 
                     break;
                 default:
@@ -284,9 +284,9 @@ namespace Game
                 lfgUpdateStatus.Ticket = ticket;
 
             lfgUpdateStatus.SubType = (byte)LfgQueueType.Dungeon; // other types not implemented
-            lfgUpdateStatus.Reason = (byte)updateData.updateType;
+            lfgUpdateStatus.Reason = (byte)updateData.UpdateType;
 
-            foreach (var dungeonId in updateData.dungeons)
+            foreach (var dungeonId in updateData.Dungeons)
                 lfgUpdateStatus.Slots.Add(Global.LFGMgr.GetLFGDungeonEntry(dungeonId));
 
             lfgUpdateStatus.RequestedRoles = (uint)Global.LFGMgr.GetRoles(_player.GetGUID());
@@ -294,7 +294,7 @@ namespace Game
             lfgUpdateStatus.IsParty = party;
             lfgUpdateStatus.NotifyUI = true;
             lfgUpdateStatus.Joined = join;
-            lfgUpdateStatus.LfgJoined = updateData.updateType != LfgUpdateType.RemovedFromQueue;
+            lfgUpdateStatus.LfgJoined = updateData.UpdateType != LfgUpdateType.RemovedFromQueue;
             lfgUpdateStatus.Queued = queued;
             lfgUpdateStatus.QueueMapID = Global.LFGMgr.GetDungeonMapId(_player.GetGUID());
 
@@ -314,32 +314,32 @@ namespace Game
         {
             List<uint> dungeons = new();
 
-            if (roleCheck.rDungeonId != 0)
-                dungeons.Add(roleCheck.rDungeonId);
+            if (roleCheck.DungeonId != 0)
+                dungeons.Add(roleCheck.DungeonId);
             else
-                dungeons = roleCheck.dungeons;
+                dungeons = roleCheck.Dungeons;
 
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_ROLE_CHECK_UPDATE {0}", GetPlayerInfo());
 
             LFGRoleCheckUpdate lfgRoleCheckUpdate = new();
             lfgRoleCheckUpdate.PartyIndex = 127;
-            lfgRoleCheckUpdate.RoleCheckStatus = (byte)roleCheck.state;
-            lfgRoleCheckUpdate.IsBeginning = roleCheck.state == LfgRoleCheckState.Initialiting;
+            lfgRoleCheckUpdate.RoleCheckStatus = (byte)roleCheck.State;
+            lfgRoleCheckUpdate.IsBeginning = roleCheck.State == LfgRoleCheckState.Initialiting;
 
             foreach (var dungeonId in dungeons)
                 lfgRoleCheckUpdate.JoinSlots.Add(Global.LFGMgr.GetLFGDungeonEntry(dungeonId));
 
             lfgRoleCheckUpdate.GroupFinderActivityID = 0;
 
-            if (!roleCheck.roles.Empty())
+            if (!roleCheck.Roles.Empty())
             {
                 // Leader info MUST be sent 1st :S
-                byte roles = (byte)roleCheck.roles.Find(roleCheck.leader).Value;
-                lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.leader, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(roleCheck.leader).Level, roles > 0));
+                byte roles = (byte)roleCheck.Roles.Find(roleCheck.Leader).Value;
+                lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.Leader, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(roleCheck.Leader).Level, roles > 0));
 
-                foreach (var it in roleCheck.roles)
+                foreach (var it in roleCheck.Roles)
                 {
-                    if (it.Key == roleCheck.leader)
+                    if (it.Key == roleCheck.Leader)
                         continue;
 
                     roles = (byte)it.Value;
@@ -359,14 +359,14 @@ namespace Game
             if (ticket != null)
                 lfgJoinResult.Ticket = ticket;
 
-            lfgJoinResult.Result = (byte)joinData.result;
+            lfgJoinResult.Result = (byte)joinData.Result;
 
-            if (joinData.result == LfgJoinResult.RoleCheckFailed)
-                lfgJoinResult.ResultDetail = (byte)joinData.state;
-            else if (joinData.result == LfgJoinResult.NoSlots)
-                lfgJoinResult.BlackListNames = joinData.playersMissingRequirement;
+            if (joinData.Result == LfgJoinResult.RoleCheckFailed)
+                lfgJoinResult.ResultDetail = (byte)joinData.State;
+            else if (joinData.Result == LfgJoinResult.NoSlots)
+                lfgJoinResult.BlackListNames = joinData.PlayersMissingRequirement;
 
-            foreach (var it in joinData.lockmap)
+            foreach (var it in joinData.Lockmap)
             {
                 var blackList = new LFGBlackListPkt();
                 blackList.PlayerGuid = it.Key;
@@ -377,11 +377,11 @@ namespace Game
                                  "SendLfgJoinResult:: {0} DungeonID: {1} Lock status: {2} Required itemLevel: {3} Current itemLevel: {4}",
                                  it.Key.ToString(),
                                  (lockInfo.Key & 0x00FFFFFF),
-                                 lockInfo.Value.lockStatus,
-                                 lockInfo.Value.requiredItemLevel,
-                                 lockInfo.Value.currentItemLevel);
+                                 lockInfo.Value.LockStatus,
+                                 lockInfo.Value.RequiredItemLevel,
+                                 lockInfo.Value.CurrentItemLevel);
 
-                    blackList.Slot.Add(new LFGBlackListSlot(lockInfo.Key, (uint)lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, (int)lockInfo.Value.currentItemLevel, 0));
+                    blackList.Slot.Add(new LFGBlackListSlot(lockInfo.Key, (uint)lockInfo.Value.LockStatus, lockInfo.Value.RequiredItemLevel, (int)lockInfo.Value.CurrentItemLevel, 0));
                 }
 
                 lfgJoinResult.BlackList.Add(blackList);
@@ -397,16 +397,16 @@ namespace Game
                          "avgWaitTime: {4}, waitTimeTanks: {5}, waitTimeHealer: {6}, waitTimeDps: {7}, queuedTime: {8}, tanks: {9}, healers: {10}, dps: {11}",
                          GetPlayerInfo(),
                          Global.LFGMgr.GetState(GetPlayer().GetGUID()),
-                         queueData.dungeonId,
-                         queueData.waitTime,
-                         queueData.waitTimeAvg,
-                         queueData.waitTimeTank,
-                         queueData.waitTimeHealer,
-                         queueData.waitTimeDps,
-                         queueData.queuedTime,
-                         queueData.tanks,
-                         queueData.healers,
-                         queueData.dps);
+                         queueData.DungeonId,
+                         queueData.WaitTime,
+                         queueData.WaitTimeAvg,
+                         queueData.WaitTimeTank,
+                         queueData.WaitTimeHealer,
+                         queueData.WaitTimeDps,
+                         queueData.QueuedTime,
+                         queueData.Tanks,
+                         queueData.Healers,
+                         queueData.Dps);
 
             LFGQueueStatus lfgQueueStatus = new();
 
@@ -415,54 +415,54 @@ namespace Game
             if (ticket != null)
                 lfgQueueStatus.Ticket = ticket;
 
-            lfgQueueStatus.Slot = queueData.queueId;
-            lfgQueueStatus.AvgWaitTimeMe = (uint)queueData.waitTime;
-            lfgQueueStatus.AvgWaitTime = (uint)queueData.waitTimeAvg;
-            lfgQueueStatus.AvgWaitTimeByRole[0] = (uint)queueData.waitTimeTank;
-            lfgQueueStatus.AvgWaitTimeByRole[1] = (uint)queueData.waitTimeHealer;
-            lfgQueueStatus.AvgWaitTimeByRole[2] = (uint)queueData.waitTimeDps;
-            lfgQueueStatus.LastNeeded[0] = queueData.tanks;
-            lfgQueueStatus.LastNeeded[1] = queueData.healers;
-            lfgQueueStatus.LastNeeded[2] = queueData.dps;
-            lfgQueueStatus.QueuedTime = queueData.queuedTime;
+            lfgQueueStatus.Slot = queueData.QueueId;
+            lfgQueueStatus.AvgWaitTimeMe = (uint)queueData.WaitTime;
+            lfgQueueStatus.AvgWaitTime = (uint)queueData.WaitTimeAvg;
+            lfgQueueStatus.AvgWaitTimeByRole[0] = (uint)queueData.WaitTimeTank;
+            lfgQueueStatus.AvgWaitTimeByRole[1] = (uint)queueData.WaitTimeHealer;
+            lfgQueueStatus.AvgWaitTimeByRole[2] = (uint)queueData.WaitTimeDps;
+            lfgQueueStatus.LastNeeded[0] = queueData.Tanks;
+            lfgQueueStatus.LastNeeded[1] = queueData.Healers;
+            lfgQueueStatus.LastNeeded[2] = queueData.Dps;
+            lfgQueueStatus.QueuedTime = queueData.QueuedTime;
 
             SendPacket(lfgQueueStatus);
         }
 
         public void SendLfgPlayerReward(LfgPlayerRewardData rewardData)
         {
-            if (rewardData.rdungeonEntry == 0 ||
-                rewardData.sdungeonEntry == 0 ||
-                rewardData.quest == null)
+            if (rewardData.RdungeonEntry == 0 ||
+                rewardData.SdungeonEntry == 0 ||
+                rewardData.Quest == null)
                 return;
 
             Log.outDebug(LogFilter.Lfg,
                          "SMSG_LFG_PLAYER_REWARD {0} rdungeonEntry: {1}, sdungeonEntry: {2}, done: {3}",
                          GetPlayerInfo(),
-                         rewardData.rdungeonEntry,
-                         rewardData.sdungeonEntry,
-                         rewardData.done);
+                         rewardData.RdungeonEntry,
+                         rewardData.SdungeonEntry,
+                         rewardData.Done);
 
             LFGPlayerReward lfgPlayerReward = new();
-            lfgPlayerReward.QueuedSlot = rewardData.rdungeonEntry;
-            lfgPlayerReward.ActualSlot = rewardData.sdungeonEntry;
-            lfgPlayerReward.RewardMoney = GetPlayer().GetQuestMoneyReward(rewardData.quest);
-            lfgPlayerReward.AddedXP = GetPlayer().GetQuestXPReward(rewardData.quest);
+            lfgPlayerReward.QueuedSlot = rewardData.RdungeonEntry;
+            lfgPlayerReward.ActualSlot = rewardData.SdungeonEntry;
+            lfgPlayerReward.RewardMoney = GetPlayer().GetQuestMoneyReward(rewardData.Quest);
+            lfgPlayerReward.AddedXP = GetPlayer().GetQuestXPReward(rewardData.Quest);
 
             for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
             {
-                uint itemId = rewardData.quest.RewardItemId[i];
+                uint itemId = rewardData.Quest.RewardItemId[i];
 
                 if (itemId != 0)
-                    lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(itemId, rewardData.quest.RewardItemCount[i], 0, false));
+                    lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(itemId, rewardData.Quest.RewardItemCount[i], 0, false));
             }
 
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                uint currencyId = rewardData.quest.RewardCurrencyId[i];
+                uint currencyId = rewardData.Quest.RewardCurrencyId[i];
 
                 if (currencyId != 0)
-                    lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(currencyId, rewardData.quest.RewardCurrencyCount[i], 0, true));
+                    lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(currencyId, rewardData.Quest.RewardCurrencyCount[i], 0, true));
             }
 
             SendPacket(lfgPlayerReward);
@@ -470,12 +470,12 @@ namespace Game
 
         public void SendLfgBootProposalUpdate(LfgPlayerBoot boot)
         {
-            LfgAnswer playerVote = boot.votes.LookupByKey(GetPlayer().GetGUID());
+            LfgAnswer playerVote = boot.Votes.LookupByKey(GetPlayer().GetGUID());
             byte votesNum = 0;
             byte agreeNum = 0;
-            uint secsleft = (uint)((boot.cancelTime - GameTime.GetGameTime()) / 1000);
+            uint secsleft = (uint)((boot.CancelTime - GameTime.GetGameTime()) / 1000);
 
-            foreach (var it in boot.votes)
+            foreach (var it in boot.Votes)
                 if (it.Value != LfgAnswer.Pending)
                 {
                     ++votesNum;
@@ -487,45 +487,45 @@ namespace Game
             Log.outDebug(LogFilter.Lfg,
                          "SMSG_LFG_BOOT_PROPOSAL_UPDATE {0} inProgress: {1} - didVote: {2} - agree: {3} - victim: {4} votes: {5} - agrees: {6} - left: {7} - needed: {8} - reason {9}",
                          GetPlayerInfo(),
-                         boot.inProgress,
+                         boot.InProgress,
                          playerVote != LfgAnswer.Pending,
                          playerVote == LfgAnswer.Agree,
-                         boot.victim.ToString(),
+                         boot.Victim.ToString(),
                          votesNum,
                          agreeNum,
                          secsleft,
                          SharedConst.LFGKickVotesNeeded,
-                         boot.reason);
+                         boot.Reason);
 
             LfgBootPlayer lfgBootPlayer = new();
-            lfgBootPlayer.Info.VoteInProgress = boot.inProgress;                            // Vote in progress
+            lfgBootPlayer.Info.VoteInProgress = boot.InProgress;                            // Vote in progress
             lfgBootPlayer.Info.VotePassed = agreeNum >= SharedConst.LFGKickVotesNeeded; // Did succeed
             lfgBootPlayer.Info.MyVoteCompleted = playerVote != LfgAnswer.Pending;            // Did Vote
             lfgBootPlayer.Info.MyVote = playerVote == LfgAnswer.Agree;              // Agree
-            lfgBootPlayer.Info.Target = boot.victim;                                // Victim GUID
+            lfgBootPlayer.Info.Target = boot.Victim;                                // Victim GUID
             lfgBootPlayer.Info.TotalVotes = votesNum;                                   // Total Votes
             lfgBootPlayer.Info.BootVotes = agreeNum;                                   // Agree Count
             lfgBootPlayer.Info.TimeLeft = secsleft;                                   // Time Left
             lfgBootPlayer.Info.VotesNeeded = SharedConst.LFGKickVotesNeeded;             // Needed Votes
-            lfgBootPlayer.Info.Reason = boot.reason;                                // Kick reason
+            lfgBootPlayer.Info.Reason = boot.Reason;                                // Kick reason
             SendPacket(lfgBootPlayer);
         }
 
         public void SendLfgProposalUpdate(LfgProposal proposal)
         {
             ObjectGuid playerGuid = GetPlayer().GetGUID();
-            ObjectGuid guildGuid = proposal.players.LookupByKey(playerGuid).group;
-            bool silent = !proposal.isNew && guildGuid == proposal.group;
-            uint dungeonEntry = proposal.dungeonId;
+            ObjectGuid guildGuid = proposal.Players.LookupByKey(playerGuid).Group;
+            bool silent = !proposal.IsNew && guildGuid == proposal.Group;
+            uint dungeonEntry = proposal.DungeonId;
 
-            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} State: {1}", GetPlayerInfo(), proposal.state);
+            Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} State: {1}", GetPlayerInfo(), proposal.State);
 
             // show random dungeon if player selected random dungeon and it's not lfg group
             if (!silent)
             {
                 List<uint> playerDungeons = Global.LFGMgr.GetSelectedDungeons(playerGuid);
 
-                if (!playerDungeons.Contains(proposal.dungeonId))
+                if (!playerDungeons.Contains(proposal.DungeonId))
                     dungeonEntry = playerDungeons.First();
             }
 
@@ -537,23 +537,23 @@ namespace Game
                 lfgProposalUpdate.Ticket = ticket;
 
             lfgProposalUpdate.InstanceID = 0;
-            lfgProposalUpdate.ProposalID = proposal.id;
+            lfgProposalUpdate.ProposalID = proposal.Id;
             lfgProposalUpdate.Slot = Global.LFGMgr.GetLFGDungeonEntry(dungeonEntry);
-            lfgProposalUpdate.State = (byte)proposal.state;
-            lfgProposalUpdate.CompletedMask = proposal.encounters;
+            lfgProposalUpdate.State = (byte)proposal.State;
+            lfgProposalUpdate.CompletedMask = proposal.Encounters;
             lfgProposalUpdate.ValidCompletedMask = true;
             lfgProposalUpdate.ProposalSilent = silent;
-            lfgProposalUpdate.IsRequeue = !proposal.isNew;
+            lfgProposalUpdate.IsRequeue = !proposal.IsNew;
 
-            foreach (var pair in proposal.players)
+            foreach (var pair in proposal.Players)
             {
                 var proposalPlayer = new LFGProposalUpdatePlayer();
-                proposalPlayer.Roles = (uint)pair.Value.role;
+                proposalPlayer.Roles = (uint)pair.Value.Role;
                 proposalPlayer.Me = (pair.Key == playerGuid);
-                proposalPlayer.MyParty = !pair.Value.group.IsEmpty() && pair.Value.group == proposal.group;
-                proposalPlayer.SameParty = !pair.Value.group.IsEmpty() && pair.Value.group == guildGuid;
-                proposalPlayer.Responded = (pair.Value.accept != LfgAnswer.Pending);
-                proposalPlayer.Accepted = (pair.Value.accept == LfgAnswer.Agree);
+                proposalPlayer.MyParty = !pair.Value.Group.IsEmpty() && pair.Value.Group == proposal.Group;
+                proposalPlayer.SameParty = !pair.Value.Group.IsEmpty() && pair.Value.Group == guildGuid;
+                proposalPlayer.Responded = (pair.Value.Accept != LfgAnswer.Pending);
+                proposalPlayer.Accepted = (pair.Value.Accept == LfgAnswer.Agree);
 
                 lfgProposalUpdate.Players.Add(proposalPlayer);
             }

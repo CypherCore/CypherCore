@@ -10,28 +10,28 @@ namespace Game.DungeonFinding
     public class LFGGroupData
     {
         // Dungeon
-        private uint _Dungeon;
+        private uint _dungeon;
 
         // Vote Kick
-        private byte _KicksLeft;
-        private ObjectGuid _Leader;
-        private LfgState _OldState;
-        private readonly List<ObjectGuid> _Players = new();
+        private byte _kicksLeft;
+        private ObjectGuid _leader;
+        private LfgState _oldState;
+        private readonly List<ObjectGuid> _players = new();
 
         // General
-        private LfgState _State;
-        private bool _VoteKickActive;
+        private LfgState _state;
+        private bool _voteKickActive;
 
         public LFGGroupData()
         {
-            _State = LfgState.None;
-            _OldState = LfgState.None;
-            _KicksLeft = SharedConst.LFGMaxKicks;
+            _state = LfgState.None;
+            _oldState = LfgState.None;
+            _kicksLeft = SharedConst.LFGMaxKicks;
         }
 
         public bool IsLfgGroup()
         {
-            return _OldState != LfgState.None;
+            return _oldState != LfgState.None;
         }
 
         public void SetState(LfgState state)
@@ -39,105 +39,105 @@ namespace Game.DungeonFinding
             switch (state)
             {
                 case LfgState.None:
-                    _Dungeon = 0;
-                    _KicksLeft = SharedConst.LFGMaxKicks;
-                    _OldState = state;
+                    _dungeon = 0;
+                    _kicksLeft = SharedConst.LFGMaxKicks;
+                    _oldState = state;
 
                     break;
                 case LfgState.FinishedDungeon:
                 case LfgState.Dungeon:
-                    _OldState = state;
+                    _oldState = state;
 
                     break;
             }
 
-            _State = state;
+            _state = state;
         }
 
         public void RestoreState()
         {
-            _State = _OldState;
+            _state = _oldState;
         }
 
         public void AddPlayer(ObjectGuid guid)
         {
-            _Players.Add(guid);
+            _players.Add(guid);
         }
 
         public byte RemovePlayer(ObjectGuid guid)
         {
-            _Players.Remove(guid);
+            _players.Remove(guid);
 
-            return (byte)_Players.Count;
+            return (byte)_players.Count;
         }
 
         public void RemoveAllPlayers()
         {
-            _Players.Clear();
+            _players.Clear();
         }
 
         public void SetLeader(ObjectGuid guid)
         {
-            _Leader = guid;
+            _leader = guid;
         }
 
         public void SetDungeon(uint dungeon)
         {
-            _Dungeon = dungeon;
+            _dungeon = dungeon;
         }
 
         public void DecreaseKicksLeft()
         {
-            if (_KicksLeft != 0)
-                --_KicksLeft;
+            if (_kicksLeft != 0)
+                --_kicksLeft;
         }
 
         public LfgState GetState()
         {
-            return _State;
+            return _state;
         }
 
         public LfgState GetOldState()
         {
-            return _OldState;
+            return _oldState;
         }
 
         public List<ObjectGuid> GetPlayers()
         {
-            return _Players;
+            return _players;
         }
 
         public byte GetPlayerCount()
         {
-            return (byte)_Players.Count;
+            return (byte)_players.Count;
         }
 
         public ObjectGuid GetLeader()
         {
-            return _Leader;
+            return _leader;
         }
 
         public uint GetDungeon(bool asId = true)
         {
             if (asId)
-                return (_Dungeon & 0x00FFFFFF);
+                return (_dungeon & 0x00FFFFFF);
             else
-                return _Dungeon;
+                return _dungeon;
         }
 
         public byte GetKicksLeft()
         {
-            return _KicksLeft;
+            return _kicksLeft;
         }
 
         public void SetVoteKick(bool active)
         {
-            _VoteKickActive = active;
+            _voteKickActive = active;
         }
 
         public bool IsVoteKickActive()
         {
-            return _VoteKickActive;
+            return _voteKickActive;
         }
     }
 }

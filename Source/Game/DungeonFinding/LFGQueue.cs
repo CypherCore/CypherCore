@@ -412,7 +412,7 @@ namespace Game.DungeonFinding
                 if (Global.LFGMgr.IsLfgGroup(guid))
                 {
                     if (numLfgGroups == 0)
-                        proposal.group = guid;
+                        proposal.Group = guid;
 
                     ++numLfgGroups;
                 }
@@ -556,8 +556,8 @@ namespace Game.DungeonFinding
             }
 
             ObjectGuid _guid = check.First();
-            proposal.queues = check;
-            proposal.isNew = numLfgGroups != 1 || Global.LFGMgr.GetOldState(_guid) != LfgState.Dungeon;
+            proposal.Queues = check;
+            proposal.IsNew = numLfgGroups != 1 || Global.LFGMgr.GetOldState(_guid) != LfgState.Dungeon;
 
             if (!Global.LFGMgr.AllQueued(check))
             {
@@ -568,10 +568,10 @@ namespace Game.DungeonFinding
             }
 
             // Create a new proposal
-            proposal.cancelTime = GameTime.GetGameTime() + SharedConst.LFGTimeProposal;
-            proposal.state = LfgProposalState.Initiating;
-            proposal.leader = ObjectGuid.Empty;
-            proposal.dungeonId = proposalDungeons.SelectRandom();
+            proposal.CancelTime = GameTime.GetGameTime() + SharedConst.LFGTimeProposal;
+            proposal.State = LfgProposalState.Initiating;
+            proposal.Leader = ObjectGuid.Empty;
+            proposal.DungeonId = proposalDungeons.SelectRandom();
 
             bool leader = false;
 
@@ -581,33 +581,33 @@ namespace Game.DungeonFinding
                 if (rolePair.Value.HasAnyFlag(LfgRoles.Leader))
                 {
                     if (!leader ||
-                        proposal.leader.IsEmpty() ||
+                        proposal.Leader.IsEmpty() ||
                         Convert.ToBoolean(RandomHelper.IRand(0, 1)))
-                        proposal.leader = rolePair.Key;
+                        proposal.Leader = rolePair.Key;
 
                     leader = true;
                 }
                 else if (!leader &&
-                         (proposal.leader.IsEmpty() || Convert.ToBoolean(RandomHelper.IRand(0, 1))))
+                         (proposal.Leader.IsEmpty() || Convert.ToBoolean(RandomHelper.IRand(0, 1))))
                 {
-                    proposal.leader = rolePair.Key;
+                    proposal.Leader = rolePair.Key;
                 }
 
                 // Assing player _data and roles
                 LfgProposalPlayer data = new();
-                data.role = rolePair.Value;
-                data.group = proposalGroups.LookupByKey(rolePair.Key);
+                data.Role = rolePair.Value;
+                data.Group = proposalGroups.LookupByKey(rolePair.Key);
 
-                if (!proposal.isNew &&
-                    !data.group.IsEmpty() &&
-                    data.group == proposal.group) // Player from existing group, autoaccept
-                    data.accept = LfgAnswer.Agree;
+                if (!proposal.IsNew &&
+                    !data.Group.IsEmpty() &&
+                    data.Group == proposal.Group) // Player from existing group, autoaccept
+                    data.Accept = LfgAnswer.Agree;
 
-                proposal.players[rolePair.Key] = data;
+                proposal.Players[rolePair.Key] = data;
             }
 
             // Mark proposal members as not queued (but not remove queue _data)
-            foreach (var guid in proposal.queues)
+            foreach (var guid in proposal.Queues)
             {
                 RemoveFromNewQueue(guid);
                 RemoveFromCurrentQueue(guid);

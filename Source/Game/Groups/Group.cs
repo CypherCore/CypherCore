@@ -964,7 +964,7 @@ namespace Game.Groups
 
                 if (reward != null)
                 {
-                    Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.FirstQuest);
 
                     if (quest != null)
                         lfgInfos.MyFirstReward = player.CanRewardQuest(quest, false);
