@@ -381,7 +381,7 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
                 UpdateWorldState(WSGWorldStates.FLAG_STATE_HORDE, 1);
                 UpdateWorldState(WSGWorldStates.STATE_TIMER_ACTIVE, 0);
 
-                RewardHonorToTeam(_honor[(int)_HonorMode][(int)WSGRewards.Win], winner);
+                RewardHonorToTeam(_honor[(int)HonorMode][(int)WSGRewards.Win], winner);
                 EndBattleground(winner);
             }
             else
@@ -836,8 +836,8 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
             _droppedFlagGUID[TeamId.Horde] = ObjectGuid.Empty;
             _flagState[TeamId.Alliance] = WSGFlagState.OnBase;
             _flagState[TeamId.Horde] = WSGFlagState.OnBase;
-            _TeamScores[TeamId.Alliance] = 0;
-            _TeamScores[TeamId.Horde] = 0;
+            TeamScores[TeamId.Alliance] = 0;
+            TeamScores[TeamId.Horde] = 0;
 
             if (Global.BattlegroundMgr.IsBGWeekend(GetTypeID()))
             {
@@ -1001,7 +1001,7 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
 
         private void AddPoint(Team team, uint Points = 1)
         {
-            _TeamScores[GetTeamIndexByTeamId(team)] += Points;
+            TeamScores[GetTeamIndexByTeamId(team)] += Points;
         }
     }
 

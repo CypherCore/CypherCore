@@ -8,7 +8,7 @@ namespace Game.Maps
 {
     public class ZoneScript
     {
-        protected EventMap _events = new();
+        protected EventMap EventMp { get; set; } = new();
 
         public virtual void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
         {

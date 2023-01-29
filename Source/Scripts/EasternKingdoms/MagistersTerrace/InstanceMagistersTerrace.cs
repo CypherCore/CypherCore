@@ -228,15 +228,15 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
             {
                 if (eventId == MiscConst.EventSpawnKalecgos)
                     if (!GetCreature(DataTypes.Kalecgos) &&
-                        _events.Empty())
-                        _events.ScheduleEvent(MiscConst.EventSpawnKalecgos, TimeSpan.FromMinutes(1));
+                        EventMp.Empty())
+                        EventMp.ScheduleEvent(MiscConst.EventSpawnKalecgos, TimeSpan.FromMinutes(1));
             }
 
             public override void Update(uint diff)
             {
-                _events.Update(diff);
+                EventMp.Update(diff);
 
-                if (_events.ExecuteEvent() == MiscConst.EventSpawnKalecgos)
+                if (EventMp.ExecuteEvent() == MiscConst.EventSpawnKalecgos)
                 {
                     Creature kalecgos = instance.SummonCreature(CreatureIds.Kalecgos, MiscConst.KalecgosSpawnPos);
 

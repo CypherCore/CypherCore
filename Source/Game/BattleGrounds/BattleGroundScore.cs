@@ -9,17 +9,17 @@ namespace Game.BattleGrounds
 {
     public class BattlegroundScore
     {
-        public uint BonusHonor;
-        public uint DamageDone;
-        public uint Deaths;
-        public uint HealingDone;
-        public uint HonorableKills;
+        public uint BonusHonor { get; set; }
+        public uint DamageDone { get; set; }
+        public uint Deaths { get; set; }
+        public uint HealingDone { get; set; }
+        public uint HonorableKills { get; set; }
 
         // Default score, present in every Type
-        public uint KillingBlows;
+        public uint KillingBlows { get; set; }
 
         public ObjectGuid PlayerGuid;
-        public int TeamId;
+        public int TeamId { get; set; }
 
         public BattlegroundScore(ObjectGuid playerGuid, Team team)
         {

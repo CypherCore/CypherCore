@@ -143,7 +143,7 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
         public BgArathiBasin(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             _isInformedNearVictory = false;
-            _BuffChange = true;
+            BuffChange = true;
             BgObjects = new ObjectGuid[ABObjectTypes.MAX];
             BgCreatures = new ObjectGuid[ABBattlegroundNodes.ALL_COUNT + 5]; //+5 for aura triggers
 
@@ -246,7 +246,7 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
                     if (_lastTick[team] > TickIntervals[points])
                     {
                         _lastTick[team] -= TickIntervals[points];
-                        _TeamScores[team] += TickPoints[points];
+                        TeamScores[team] += TickPoints[points];
                         _honorScoreTics[team] += TickPoints[points];
                         _reputationScoreTics[team] += TickPoints[points];
 
@@ -267,7 +267,7 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
                         }
 
                         if (!_isInformedNearVictory &&
-                            _TeamScores[team] > WARNING_NEAR_VICTORY_SCORE)
+                            TeamScores[team] > WARNING_NEAR_VICTORY_SCORE)
                         {
                             if (team == TeamId.Alliance)
                             {
@@ -283,19 +283,19 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
                             _isInformedNearVictory = true;
                         }
 
-                        if (_TeamScores[team] > MAX_TEAM_SCORE)
-                            _TeamScores[team] = MAX_TEAM_SCORE;
+                        if (TeamScores[team] > MAX_TEAM_SCORE)
+                            TeamScores[team] = MAX_TEAM_SCORE;
 
                         if (team == TeamId.Alliance)
-                            UpdateWorldState(ABWorldStates.RESOURCES_ALLY, (int)_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.RESOURCES_ALLY, (int)TeamScores[team]);
                         else
-                            UpdateWorldState(ABWorldStates.RESOURCES_HORDE, (int)_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.RESOURCES_HORDE, (int)TeamScores[team]);
 
                         // update Achievement Flags
                         // we increased _TeamScores[team] so we just need to check if it is 500 more than other teams resources
                         int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
 
-                        if (_TeamScores[team] > _TeamScores[otherTeam] + 500)
+                        if (TeamScores[team] > TeamScores[otherTeam] + 500)
                         {
                             if (team == TeamId.Alliance)
                                 UpdateWorldState(ABWorldStates.HAD_500_DISADVANTAGE_HORDE, 1);
@@ -306,9 +306,9 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
                 }
 
                 // Test win condition
-                if (_TeamScores[TeamId.Alliance] >= MAX_TEAM_SCORE)
+                if (TeamScores[TeamId.Alliance] >= MAX_TEAM_SCORE)
                     EndBattleground(Team.Alliance);
-                else if (_TeamScores[TeamId.Horde] >= MAX_TEAM_SCORE)
+                else if (TeamScores[TeamId.Horde] >= MAX_TEAM_SCORE)
                     EndBattleground(Team.Horde);
             }
         }
@@ -761,7 +761,7 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
 
             for (var i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
-                _TeamScores[i] = 0;
+                TeamScores[i] = 0;
                 _lastTick[i] = 0;
                 _honorScoreTics[i] = 0;
                 _reputationScoreTics[i] = 0;

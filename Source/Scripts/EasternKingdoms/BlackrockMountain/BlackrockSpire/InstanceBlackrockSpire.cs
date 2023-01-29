@@ -493,7 +493,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     case BRSMiscConst.Areatrigger:
                         if (data == BRSMiscConst.AreatriggerDragonspireHall)
                             if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
-                                _events.ScheduleEvent(EventIds.DargonspireRoomStore, TimeSpan.FromSeconds(1));
+                                EventMp.ScheduleEvent(EventIds.DargonspireRoomStore, TimeSpan.FromSeconds(1));
 
                         break;
                     case DataTypes.BlackhandIncarcerator:
@@ -592,22 +592,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
             public override void Update(uint diff)
             {
-                _events.Update(diff);
+                EventMp.Update(diff);
 
-                _events.ExecuteEvents(eventId =>
+                EventMp.ExecuteEvents(eventId =>
                                       {
                                           switch (eventId)
                                           {
                                               case EventIds.DargonspireRoomStore:
                                                   Dragonspireroomstore();
-                                                  _events.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
+                                                  EventMp.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
 
                                                   break;
                                               case EventIds.DargonspireRoomCheck:
                                                   Dragonspireroomcheck();
 
                                                   if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
-                                                      _events.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
+                                                      EventMp.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
 
                                                   break;
                                               default:

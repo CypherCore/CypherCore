@@ -48,7 +48,7 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
 
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
-            _BuffChange = true;
+            BuffChange = true;
             BgObjects = new ObjectGuid[EotSObjectTypes.MAX];
             BgCreatures = new ObjectGuid[EotSCreaturesTypes.MAX];
             _points_Trigger[EotSPoints.FEL_REAVER] = EotSPointsTrigger.FEL_REAVER_BUFF;
@@ -164,7 +164,7 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
         private void AddPoints(Team Team, uint Points)
         {
             int team_index = GetTeamIndexByTeamId(Team);
-            _TeamScores[team_index] += Points;
+            TeamScores[team_index] += Points;
             _honorScoreTics[team_index] += Points;
 
             if (_honorScoreTics[team_index] >= _honorTics)
@@ -636,8 +636,8 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
             //call parent's class reset
             base.Reset();
 
-            _TeamScores[TeamId.Alliance] = 0;
-            _TeamScores[TeamId.Horde] = 0;
+            TeamScores[TeamId.Alliance] = 0;
+            TeamScores[TeamId.Horde] = 0;
             _teamPointsCount[TeamId.Alliance] = 0;
             _teamPointsCount[TeamId.Horde] = 0;
             _honorScoreTics[TeamId.Alliance] = 0;
