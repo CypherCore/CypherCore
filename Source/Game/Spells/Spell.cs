@@ -5356,17 +5356,17 @@ namespace Game.Spells
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Spell, _spellInfo.Id, condInfo))
                 {
                     // mLastFailedCondition can be NULL if there was an error processing the condition in Condition.Meets (i.e. wrong _data for ConditionTarget or others)
-                    if (condInfo.mLastFailedCondition != null &&
-                        condInfo.mLastFailedCondition.ErrorType != 0)
+                    if (condInfo.LastFailedCondition != null &&
+                        condInfo.LastFailedCondition.ErrorType != 0)
                     {
-                        if (condInfo.mLastFailedCondition.ErrorType == (uint)SpellCastResult.CustomError)
-                            _customError = (SpellCustomErrors)condInfo.mLastFailedCondition.ErrorTextId;
+                        if (condInfo.LastFailedCondition.ErrorType == (uint)SpellCastResult.CustomError)
+                            _customError = (SpellCustomErrors)condInfo.LastFailedCondition.ErrorTextId;
 
-                        return (SpellCastResult)condInfo.mLastFailedCondition.ErrorType;
+                        return (SpellCastResult)condInfo.LastFailedCondition.ErrorType;
                     }
 
-                    if (condInfo.mLastFailedCondition == null ||
-                        condInfo.mLastFailedCondition.ConditionTarget == 0)
+                    if (condInfo.LastFailedCondition == null ||
+                        condInfo.LastFailedCondition.ConditionTarget == 0)
                         return SpellCastResult.CasterAurastate;
 
                     return SpellCastResult.BadTargets;
@@ -10195,7 +10195,7 @@ namespace Game.Spells
             if (_condSrcInfo == null)
                 return true;
 
-            _condSrcInfo.mConditionTargets[0] = target;
+            _condSrcInfo.ConditionTargets[0] = target;
 
             return Global.ConditionMgr.IsObjectMeetToConditions(_condSrcInfo, _condList);
         }

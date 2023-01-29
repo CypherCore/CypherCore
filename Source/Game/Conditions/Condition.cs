@@ -15,22 +15,22 @@ namespace Game.Conditions
 {
     public class Condition
     {
-        public byte ConditionTarget;
-        public ConditionTypes ConditionType; //ConditionTypeOrReference
-        public uint ConditionValue1;
-        public uint ConditionValue2;
-        public uint ConditionValue3;
-        public uint ElseGroup;
-        public uint ErrorTextId;
-        public uint ErrorType;
-        public bool NegativeCondition;
-        public uint ReferenceId;
-        public uint ScriptId;
-        public int SourceEntry;
-        public uint SourceGroup;
-        public uint SourceId; // So far, only used in CONDITION_SOURCE_TYPE_SMART_EVENT
+        public byte ConditionTarget { get; set; }
+        public ConditionTypes ConditionType { get; set; } //ConditionTypeOrReference
+        public uint ConditionValue1 { get; set; }
+        public uint ConditionValue2 { get; set; }
+        public uint ConditionValue3 { get; set; }
+        public uint ElseGroup { get; set; }
+        public uint ErrorTextId { get; set; }
+        public uint ErrorType { get; set; }
+        public bool NegativeCondition { get; set; }
+        public uint ReferenceId { get; set; }
+        public uint ScriptId { get; set; }
+        public int SourceEntry { get; set; }
+        public uint SourceGroup { get; set; }
+        public uint SourceId { get; set; } // So far, only used in CONDITION_SOURCE_TYPE_SMART_EVENT
 
-        public ConditionSourceType SourceType; //SourceTypeOrReferenceId
+        public ConditionSourceType SourceType { get; set; } //SourceTypeOrReferenceId
 
         public Condition()
         {
@@ -42,7 +42,7 @@ namespace Game.Conditions
         {
             Cypher.Assert(ConditionTarget < SharedConst.MaxConditionTargets);
 
-            Map map = sourceInfo.mConditionMap;
+            Map map = sourceInfo.ConditionMap;
             bool condMeets = false;
             bool needsObject = false;
 
@@ -140,7 +140,7 @@ namespace Game.Conditions
                     break;
             }
 
-            WorldObject obj = sourceInfo.mConditionTargets[ConditionTarget];
+            WorldObject obj = sourceInfo.ConditionTargets[ConditionTarget];
 
             // object not present, return false
             if (needsObject && obj == null)
@@ -301,7 +301,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.RelationTo:
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                        WorldObject toObject = sourceInfo.ConditionTargets[ConditionValue1];
 
                         if (toObject != null)
                         {
@@ -342,7 +342,7 @@ namespace Game.Conditions
                     }
                 case ConditionTypes.ReactionTo:
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                        WorldObject toObject = sourceInfo.ConditionTargets[ConditionValue1];
 
                         if (toObject != null)
                         {
@@ -357,7 +357,7 @@ namespace Game.Conditions
                     }
                 case ConditionTypes.DistanceTo:
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                        WorldObject toObject = sourceInfo.ConditionTargets[ConditionValue1];
 
                         if (toObject != null)
                             condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, obj.GetDistance(toObject), ConditionValue2);
@@ -542,7 +542,7 @@ namespace Game.Conditions
                 condMeets = !condMeets;
 
             if (!condMeets)
-                sourceInfo.mLastFailedCondition = this;
+                sourceInfo.LastFailedCondition = this;
 
             return condMeets && Global.ScriptMgr.RunScriptRet<IConditionCheck>(p => p.OnConditionCheck(this, sourceInfo), ScriptId, true); // Returns true by default.;
         }
@@ -740,29 +740,6 @@ namespace Game.Conditions
             ss.Append(']');
 
             return ss.ToString();
-        }
-    }
-
-    public class ConditionSourceInfo
-    {
-        public Map mConditionMap;
-
-        public WorldObject[] mConditionTargets = new WorldObject[SharedConst.MaxConditionTargets]; // an array of targets available for conditions
-        public Condition mLastFailedCondition;
-
-        public ConditionSourceInfo(WorldObject target0, WorldObject target1 = null, WorldObject target2 = null)
-        {
-            mConditionTargets[0] = target0;
-            mConditionTargets[1] = target1;
-            mConditionTargets[2] = target2;
-            mConditionMap = target0?.GetMap();
-            mLastFailedCondition = null;
-        }
-
-        public ConditionSourceInfo(Map map)
-        {
-            mConditionMap = map;
-            mLastFailedCondition = null;
         }
     }
 }

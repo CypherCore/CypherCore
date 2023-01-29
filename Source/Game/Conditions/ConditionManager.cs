@@ -20,28 +20,28 @@ namespace Game
 {
     public sealed class ConditionManager : Singleton<ConditionManager>
     {
-        private readonly MultiMap<Tuple<uint, bool>, Condition> areaTriggerConditionContainerStorage = new();
-        private readonly MultiMap<uint, Condition> conditionReferenceStorage = new();
+        private readonly MultiMap<Tuple<uint, bool>, Condition> _areaTriggerConditionContainerStorage = new();
+        private readonly MultiMap<uint, Condition> _conditionReferenceStorage = new();
 
-        private readonly Dictionary<ConditionSourceType, MultiMap<uint, Condition>> conditionStorage = new();
-        private readonly Dictionary<uint, MultiMap<uint, Condition>> npcVendorConditionContainerStorage = new();
-        private readonly MultiMap<(uint objectType, uint objectId), Condition> objectVisibilityConditionStorage = new();
-        private readonly Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> smartEventConditionStorage = new();
-        private readonly Dictionary<uint, MultiMap<uint, Condition>> spellClickEventConditionStorage = new();
-        private readonly List<uint> spellsUsedInSpellClickConditions = new();
+        private readonly Dictionary<ConditionSourceType, MultiMap<uint, Condition>> _conditionStorage = new();
+        private readonly Dictionary<uint, MultiMap<uint, Condition>> _npcVendorConditionContainerStorage = new();
+        private readonly MultiMap<(uint objectType, uint objectId), Condition> _objectVisibilityConditionStorage = new();
+        private readonly Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> _smartEventConditionStorage = new();
+        private readonly Dictionary<uint, MultiMap<uint, Condition>> _spellClickEventConditionStorage = new();
+        private readonly List<uint> _spellsUsedInSpellClickConditions = new();
 
-        public ConditionTypeInfo[] StaticConditionTypeData =
+        public ConditionTypeInfo[] StaticConditionTypeData { get; set; } =
         {
             new("None", false, false, false), new("Aura", true, true, true), new("Item Stored", true, true, true), new("Item Equipped", true, false, false), new("Zone", true, false, false), new("Reputation", true, true, false), new("Team", true, false, false), new("Skill", true, true, false), new("Quest Rewarded", true, false, false), new("Quest Taken", true, false, false), new("Drunken", true, false, false), new("WorldState", true, true, false), new("Active Event", true, false, false), new("Instance Info", true, true, true), new("Quest None", true, false, false), new("Class", true, false, false), new("Race", true, false, false), new("Achievement", true, false, false), new("Title", true, false, false), new("SpawnMask", true, false, false), new("Gender", true, false, false), new("Unit State", true, false, false), new("Map", true, false, false), new("Area", true, false, false), new("CreatureType", true, false, false), new("Spell Known", true, false, false), new("Phase", true, false, false), new("Level", true, true, false), new("Quest Completed", true, false, false), new("Near Creature", true, true, true), new("Near GameObject", true, true, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("Relation", true, true, false), new("Reaction", true, true, false), new("Distance", true, true, true), new("Alive", false, false, false), new("Health Value", true, true, false), new("Health Pct", true, true, false), new("Realm Achievement", true, false, false), new("In Water", false, false, false), new("Terrain Swap", true, false, false), new("Sit/stand State", true, true, false), new("Daily Quest Completed", true, false, false), new("Charmed", false, false, false), new("Pet Type", true, false, false), new("On Taxi", false, false, false), new("Quest State mask", true, true, false), new("Quest objective progress", true, false, true), new("Map Difficulty", true, false, false), new("Is Gamemaster", true, false, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("BattlePet Species Learned", true, true, true), new("On Scenario Step", true, false, false), new("Scene In Progress", true, false, false), new("Player Condition", true, false, false)
         };
 
-        public string[] StaticSourceTypeData =
+        public string[] StaticSourceTypeData { get; set; } =
         {
             "None", "Creature Loot", "Disenchant Loot", "Fishing Loot", "GameObject Loot", "Item Loot", "Mail Loot", "Milling Loot", "Pickpocketing Loot", "Prospecting Loot", "Reference Loot", "Skinning Loot", "Spell Loot", "Spell Impl. Target", "Gossip Menu", "Gossip Menu Option", "Creature Vehicle", "Spell Expl. Target", "Spell Click Event", "Quest Accept", "Quest Show Mark", "Vehicle Spell", "SmartScript", "Npc Vendor", "Spell Proc", "Terrain Swap", "Phase", "Graveyard", "AreaTrigger", "ConversationLine", "AreaTrigger Client Triggered", "Trainer Spell", "Object Visibility (by ID)"
         };
 
-        private readonly Dictionary<uint, MultiMap<uint, Condition>> trainerSpellConditionContainerStorage = new();
-        private readonly Dictionary<uint, MultiMap<uint, Condition>> vehicleSpellConditionStorage = new();
+        private readonly Dictionary<uint, MultiMap<uint, Condition>> _trainerSpellConditionContainerStorage = new();
+        private readonly Dictionary<uint, MultiMap<uint, Condition>> _vehicleSpellConditionStorage = new();
 
         private ConditionManager()
         {
@@ -69,7 +69,7 @@ namespace Game
 
                 if (i.ReferenceId != 0) // handle reference
                 {
-                    var refe = conditionReferenceStorage.LookupByKey(i.ReferenceId);
+                    var refe = _conditionReferenceStorage.LookupByKey(i.ReferenceId);
                     Cypher.Assert(refe.Empty(), "ConditionMgr.GetSearcherTypeMaskForConditionList - incorrect reference");
                     elseGroupSearcherTypeMasks[i.ElseGroup] &= GetSearcherTypeMaskForConditionList(refe);
                 }
@@ -111,7 +111,7 @@ namespace Game
 
                     if (condition.ReferenceId != 0) //handle reference
                     {
-                        var refe = conditionReferenceStorage.LookupByKey(condition.ReferenceId);
+                        var refe = _conditionReferenceStorage.LookupByKey(condition.ReferenceId);
 
                         if (!refe.Empty())
                         {
@@ -227,7 +227,7 @@ namespace Game
             if (sourceType > ConditionSourceType.None &&
                 sourceType < ConditionSourceType.Max)
             {
-                var conditions = conditionStorage[sourceType].LookupByKey(entry);
+                var conditions = _conditionStorage[sourceType].LookupByKey(entry);
 
                 if (!conditions.Empty())
                 {
@@ -258,7 +258,7 @@ namespace Game
         {
             if (sourceType > ConditionSourceType.None &&
                 sourceType < ConditionSourceType.Max)
-                if (conditionStorage[sourceType].ContainsKey(entry))
+                if (_conditionStorage[sourceType].ContainsKey(entry))
                     return true;
 
             return false;
@@ -266,7 +266,7 @@ namespace Game
 
         public bool IsObjectMeetingSpellClickConditions(uint creatureId, uint spellId, WorldObject clicker, WorldObject target)
         {
-            var multiMap = spellClickEventConditionStorage.LookupByKey(creatureId);
+            var multiMap = _spellClickEventConditionStorage.LookupByKey(creatureId);
 
             if (multiMap != null)
             {
@@ -286,7 +286,7 @@ namespace Game
 
         public List<Condition> GetConditionsForSpellClickEvent(uint creatureId, uint spellId)
         {
-            var multiMap = spellClickEventConditionStorage.LookupByKey(creatureId);
+            var multiMap = _spellClickEventConditionStorage.LookupByKey(creatureId);
 
             if (multiMap != null)
             {
@@ -305,7 +305,7 @@ namespace Game
 
         public bool IsObjectMeetingVehicleSpellConditions(uint creatureId, uint spellId, Player player, Unit vehicle)
         {
-            var multiMap = vehicleSpellConditionStorage.LookupByKey(creatureId);
+            var multiMap = _vehicleSpellConditionStorage.LookupByKey(creatureId);
 
             if (multiMap != null)
             {
@@ -325,7 +325,7 @@ namespace Game
 
         public bool IsObjectMeetingSmartEventConditions(long entryOrGuid, uint eventId, SmartScriptType sourceType, Unit unit, WorldObject baseObject)
         {
-            var multiMap = smartEventConditionStorage.LookupByKey(Tuple.Create((int)entryOrGuid, (uint)sourceType));
+            var multiMap = _smartEventConditionStorage.LookupByKey(Tuple.Create((int)entryOrGuid, (uint)sourceType));
 
             if (multiMap != null)
             {
@@ -345,7 +345,7 @@ namespace Game
 
         public bool IsObjectMeetingVendorItemConditions(uint creatureId, uint itemId, Player player, Creature vendor)
         {
-            var multiMap = npcVendorConditionContainerStorage.LookupByKey(creatureId);
+            var multiMap = _npcVendorConditionContainerStorage.LookupByKey(creatureId);
 
             if (multiMap != null)
             {
@@ -365,17 +365,17 @@ namespace Game
 
         public bool IsSpellUsedInSpellClickConditions(uint spellId)
         {
-            return spellsUsedInSpellClickConditions.Contains(spellId);
+            return _spellsUsedInSpellClickConditions.Contains(spellId);
         }
 
         public List<Condition> GetConditionsForAreaTrigger(uint areaTriggerId, bool isServerSide)
         {
-            return areaTriggerConditionContainerStorage.LookupByKey(Tuple.Create(areaTriggerId, isServerSide));
+            return _areaTriggerConditionContainerStorage.LookupByKey(Tuple.Create(areaTriggerId, isServerSide));
         }
 
         public bool IsObjectMeetingTrainerSpellConditions(uint trainerId, uint spellId, Player player)
         {
-            var multiMap = trainerSpellConditionContainerStorage.LookupByKey(trainerId);
+            var multiMap = _trainerSpellConditionContainerStorage.LookupByKey(trainerId);
 
             if (multiMap != null)
             {
@@ -394,7 +394,7 @@ namespace Game
 
         public bool IsObjectMeetingVisibilityByObjectIdConditions(uint objectType, uint entry, WorldObject seer)
         {
-            var conditions = objectVisibilityConditionStorage.LookupByKey((objectType, entry));
+            var conditions = _objectVisibilityConditionStorage.LookupByKey((objectType, entry));
 
             if (conditions != null)
             {
@@ -522,7 +522,7 @@ namespace Game
 
                 if (iSourceTypeOrReferenceId < 0) //it is a reference template
                 {
-                    conditionReferenceStorage.Add((uint)Math.Abs(iSourceTypeOrReferenceId), cond); //add to reference storage
+                    _conditionReferenceStorage.Add((uint)Math.Abs(iSourceTypeOrReferenceId), cond); //add to reference storage
                     count++;
 
                     continue;
@@ -629,13 +629,13 @@ namespace Game
                             break;
                         case ConditionSourceType.SpellClickEvent:
                             {
-                                if (!spellClickEventConditionStorage.ContainsKey(cond.SourceGroup))
-                                    spellClickEventConditionStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                                if (!_spellClickEventConditionStorage.ContainsKey(cond.SourceGroup))
+                                    _spellClickEventConditionStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                spellClickEventConditionStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                                _spellClickEventConditionStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
 
                                 if (cond.ConditionType == ConditionTypes.Aura)
-                                    spellsUsedInSpellClickConditions.Add(cond.ConditionValue1);
+                                    _spellsUsedInSpellClickConditions.Add(cond.ConditionValue1);
 
                                 ++count;
 
@@ -647,10 +647,10 @@ namespace Game
                             break;
                         case ConditionSourceType.VehicleSpell:
                             {
-                                if (!vehicleSpellConditionStorage.ContainsKey(cond.SourceGroup))
-                                    vehicleSpellConditionStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                                if (!_vehicleSpellConditionStorage.ContainsKey(cond.SourceGroup))
+                                    _vehicleSpellConditionStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                vehicleSpellConditionStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                                _vehicleSpellConditionStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
                                 ++count;
 
                                 continue; // do not add to _AllocatedMemory to avoid double deleting
@@ -660,20 +660,20 @@ namespace Game
                                 //! TODO: PAIR_32 ?
                                 var key = Tuple.Create(cond.SourceEntry, cond.SourceId);
 
-                                if (!smartEventConditionStorage.ContainsKey(key))
-                                    smartEventConditionStorage[key] = new MultiMap<uint, Condition>();
+                                if (!_smartEventConditionStorage.ContainsKey(key))
+                                    _smartEventConditionStorage[key] = new MultiMap<uint, Condition>();
 
-                                smartEventConditionStorage[key].Add(cond.SourceGroup, cond);
+                                _smartEventConditionStorage[key].Add(cond.SourceGroup, cond);
                                 ++count;
 
                                 continue;
                             }
                         case ConditionSourceType.NpcVendor:
                             {
-                                if (!npcVendorConditionContainerStorage.ContainsKey(cond.SourceGroup))
-                                    npcVendorConditionContainerStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                                if (!_npcVendorConditionContainerStorage.ContainsKey(cond.SourceGroup))
+                                    _npcVendorConditionContainerStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                npcVendorConditionContainerStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                                _npcVendorConditionContainerStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
                                 ++count;
 
                                 continue;
@@ -683,23 +683,23 @@ namespace Game
 
                             break;
                         case ConditionSourceType.AreaTrigger:
-                            areaTriggerConditionContainerStorage.Add(Tuple.Create(cond.SourceGroup, cond.SourceEntry != 0), cond);
+                            _areaTriggerConditionContainerStorage.Add(Tuple.Create(cond.SourceGroup, cond.SourceEntry != 0), cond);
                             ++count;
 
                             continue;
                         case ConditionSourceType.TrainerSpell:
                             {
-                                if (!trainerSpellConditionContainerStorage.ContainsKey(cond.SourceGroup))
-                                    trainerSpellConditionContainerStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                                if (!_trainerSpellConditionContainerStorage.ContainsKey(cond.SourceGroup))
+                                    _trainerSpellConditionContainerStorage[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                trainerSpellConditionContainerStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                                _trainerSpellConditionContainerStorage[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
                                 ++count;
 
                                 continue;
                             }
                         case ConditionSourceType.ObjectIdVisibility:
                             {
-                                objectVisibilityConditionStorage.Add((cond.SourceGroup, (uint)cond.SourceEntry), cond);
+                                _objectVisibilityConditionStorage.Add((cond.SourceGroup, (uint)cond.SourceEntry), cond);
                                 valid = true;
                                 ++count;
 
@@ -720,9 +720,9 @@ namespace Game
                 //add new Condition to storage based on Type/Entry
                 if (cond.SourceType == ConditionSourceType.SpellClickEvent &&
                     cond.ConditionType == ConditionTypes.Aura)
-                    spellsUsedInSpellClickConditions.Add(cond.ConditionValue1);
+                    _spellsUsedInSpellClickConditions.Add(cond.ConditionValue1);
 
-                conditionStorage[cond.SourceType].Add((uint)cond.SourceEntry, cond);
+                _conditionStorage[cond.SourceType].Add((uint)cond.SourceEntry, cond);
                 ++count;
             } while (result.NextRow());
 
@@ -2263,27 +2263,27 @@ namespace Game
 
         private void Clean()
         {
-            conditionReferenceStorage.Clear();
+            _conditionReferenceStorage.Clear();
 
-            conditionStorage.Clear();
+            _conditionStorage.Clear();
 
             for (ConditionSourceType i = 0; i < ConditionSourceType.Max; ++i)
-                conditionStorage[i] = new MultiMap<uint, Condition>(); //add new empty list for SourceType
+                _conditionStorage[i] = new MultiMap<uint, Condition>(); //add new empty list for SourceType
 
-            vehicleSpellConditionStorage.Clear();
+            _vehicleSpellConditionStorage.Clear();
 
-            smartEventConditionStorage.Clear();
+            _smartEventConditionStorage.Clear();
 
-            spellClickEventConditionStorage.Clear();
-            spellsUsedInSpellClickConditions.Clear();
+            _spellClickEventConditionStorage.Clear();
+            _spellsUsedInSpellClickConditions.Clear();
 
-            npcVendorConditionContainerStorage.Clear();
+            _npcVendorConditionContainerStorage.Clear();
 
-            areaTriggerConditionContainerStorage.Clear();
+            _areaTriggerConditionContainerStorage.Clear();
 
-            trainerSpellConditionContainerStorage.Clear();
+            _trainerSpellConditionContainerStorage.Clear();
 
-            objectVisibilityConditionStorage.Clear();
+            _objectVisibilityConditionStorage.Clear();
         }
 
         private static bool PlayerConditionCompare(int comparisonType, int value1, int value2)

@@ -13,7 +13,7 @@ namespace Game
 {
     public class DisableManager : Singleton<DisableManager>
     {
-        private readonly Dictionary<DisableType, Dictionary<uint, DisableData>> _DisableMap = new();
+        private readonly Dictionary<DisableType, Dictionary<uint, DisableData>> _disableMap = new();
 
         private DisableManager()
         {
@@ -24,7 +24,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             // reload case
-            _DisableMap.Clear();
+            _disableMap.Clear();
 
             SQLResult result = DB.World.Query("SELECT sourceType, entry, Flags, params_0, params_1 FROM disables");
 
@@ -54,7 +54,7 @@ namespace Game
                 string params_1 = result.Read<string>(4);
 
                 DisableData data = new();
-                data.flags = (ushort)flags;
+                data.Flags = (ushort)flags;
 
                 switch (type)
                 {
@@ -80,7 +80,7 @@ namespace Game
 
                             for (byte i = 0; i < array.Length;)
                                 if (uint.TryParse(array[i++], out uint id))
-                                    data.param0.Add(id);
+                                    data.Param0.Add(id);
                         }
 
                         if (flags.HasFlag(DisableFlags.SpellArea))
@@ -89,7 +89,7 @@ namespace Game
 
                             for (byte i = 0; i < array.Length;)
                                 if (uint.TryParse(array[i++], out uint id))
-                                    data.param1.Add(id);
+                                    data.Param1.Add(id);
                         }
 
                         break;
@@ -279,10 +279,10 @@ namespace Game
                         break;
                 }
 
-                if (!_DisableMap.ContainsKey(type))
-                    _DisableMap[type] = new Dictionary<uint, DisableData>();
+                if (!_disableMap.ContainsKey(type))
+                    _disableMap[type] = new Dictionary<uint, DisableData>();
 
-                _DisableMap[type].Add(entry, data);
+                _disableMap[type].Add(entry, data);
                 ++total_count;
             } while (result.NextRow());
 
@@ -291,8 +291,8 @@ namespace Game
 
         public void CheckQuestDisables()
         {
-            if (!_DisableMap.ContainsKey(DisableType.Quest) ||
-                _DisableMap[DisableType.Quest].Count == 0)
+            if (!_disableMap.ContainsKey(DisableType.Quest) ||
+                _disableMap[DisableType.Quest].Count == 0)
             {
                 Log.outInfo(LogFilter.ServerLoading, "Checked 0 quest disables.");
 
@@ -302,34 +302,34 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             // check only quests, rest already done at startup
-            foreach (var pair in _DisableMap[DisableType.Quest])
+            foreach (var pair in _disableMap[DisableType.Quest])
             {
                 uint entry = pair.Key;
 
                 if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
                 {
                     Log.outError(LogFilter.Sql, "Quest entry {0} from `disables` doesn't exist, skipped.", entry);
-                    _DisableMap[DisableType.Quest].Remove(entry);
+                    _disableMap[DisableType.Quest].Remove(entry);
 
                     continue;
                 }
 
-                if (pair.Value.flags != 0)
+                if (pair.Value.Flags != 0)
                     Log.outError(LogFilter.Sql, "Disable Flags specified for quest {0}, useless _data.", entry);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", _DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", _disableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public bool IsDisabledFor(DisableType type, uint entry, WorldObject refe, ushort flags = 0)
         {
             Cypher.Assert(type < DisableType.Max);
 
-            if (!_DisableMap.ContainsKey(type) ||
-                _DisableMap[type].Empty())
+            if (!_disableMap.ContainsKey(type) ||
+                _disableMap[type].Empty())
                 return false;
 
-            var data = _DisableMap[type].LookupByKey(entry);
+            var data = _disableMap[type].LookupByKey(entry);
 
             if (data == null) // not disabled
                 return false;
@@ -338,7 +338,7 @@ namespace Game
             {
                 case DisableType.Spell:
                     {
-                        DisableFlags spellFlags = (DisableFlags)data.flags;
+                        DisableFlags spellFlags = (DisableFlags)data.Flags;
 
                         if (refe != null)
                         {
@@ -364,7 +364,7 @@ namespace Game
 
                                 if (spellFlags.HasFlag(DisableFlags.SpellMap))
                                 {
-                                    List<uint> mapIds = data.param0;
+                                    List<uint> mapIds = data.Param0;
 
                                     if (mapIds.Contains(refe.GetMapId()))
                                         return true; // Spell is disabled on current map
@@ -377,7 +377,7 @@ namespace Game
 
                                 if (spellFlags.HasFlag(DisableFlags.SpellArea))
                                 {
-                                    var areaIds = data.param1;
+                                    var areaIds = data.Param1;
 
                                     if (areaIds.Contains(refe.GetAreaId()))
                                         return true; // Spell is disabled in this area
@@ -413,7 +413,7 @@ namespace Game
 
                         if (mapEntry.IsDungeon())
                         {
-                            DisableFlags disabledModes = (DisableFlags)data.flags;
+                            DisableFlags disabledModes = (DisableFlags)data.Flags;
                             Difficulty targetDifficulty = player.GetDifficultyID(mapEntry);
                             Global.DB2Mgr.GetDownscaledMapDifficultyData(entry, ref targetDifficulty);
 
@@ -446,7 +446,7 @@ namespace Game
                 case DisableType.MMAP:
                     return true;
                 case DisableType.VMAP:
-                    return flags.HasAnyFlag(data.flags);
+                    return flags.HasAnyFlag(data.Flags);
             }
 
             return false;
@@ -464,54 +464,9 @@ namespace Game
 
         public class DisableData
         {
-            public ushort flags;
-            public List<uint> param0 = new();
-            public List<uint> param1 = new();
+            public ushort Flags { get; set; }
+            public List<uint> Param0 { get; set; } = new();
+            public List<uint> Param1 { get; set; } = new();
         }
-    }
-
-    public enum DisableType
-    {
-        Spell = 0,
-        Quest = 1,
-        Map = 2,
-        Battleground = 3,
-        Criteria = 4,
-        OutdoorPVP = 5,
-        VMAP = 6,
-        MMAP = 7,
-        LFGMap = 8,
-        Max = 9
-    }
-
-    [Flags]
-    public enum DisableFlags
-    {
-        SpellPlayer = 0x01,
-        SpellCreature = 0x02,
-        SpellPet = 0x04,
-        SpellDeprecatedSpell = 0x08,
-        SpellMap = 0x10,
-        SpellArea = 0x20,
-        SpellLOS = 0x40,
-        SpellGameobject = 0x80,
-        SpellArenas = 0x100,
-        SpellBattleGrounds = 0x200,
-        MaxSpell = SpellPlayer | SpellCreature | SpellPet | SpellDeprecatedSpell | SpellMap | SpellArea | SpellLOS | SpellGameobject | SpellArenas | SpellBattleGrounds,
-
-        VmapAreaFlag = 0x01,
-        VmapHeight = 0x02,
-        VmapLOS = 0x04,
-        VmapLiquidStatus = 0x08,
-
-        MMapPathFinding = 0x00,
-
-        DungeonStatusNormal = 0x01,
-        DungeonStatusHeroic = 0x02,
-
-        DungeonStatusNormal10Man = 0x01,
-        DungeonStatusNormal25Man = 0x02,
-        DungeonStatusHeroic10Man = 0x04,
-        DungeonStatusHeroic25Man = 0x08
     }
 }
