@@ -1256,19 +1256,19 @@ namespace Game.Chat
             if (daily)
             {
                 Global.WorldMgr.DailyReset();
-                handler.SendSysMessage($"Daily quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextDailyQuestResetTimeVarId)).ToShortTimeString()}");
+                handler.SendSysMessage($"Daily quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NEXT_DAILY_QUEST_RESET_TIME_VAR_ID)).ToShortTimeString()}");
             }
 
             if (weekly)
             {
                 Global.WorldMgr.ResetWeeklyQuests();
-                handler.SendSysMessage($"Weekly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextWeeklyQuestResetTimeVarId)).ToShortTimeString()}");
+                handler.SendSysMessage($"Weekly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NEXT_WEEKLY_QUEST_RESET_TIME_VAR_ID)).ToShortTimeString()}");
             }
 
             if (monthly)
             {
                 Global.WorldMgr.ResetMonthlyQuests();
-                handler.SendSysMessage($"Monthly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NextMonthlyQuestResetTimeVarId)).ToShortTimeString()}");
+                handler.SendSysMessage($"Monthly quests have been reset. Next scheduled reset: {Time.UnixTimeToDateTime(Global.WorldMgr.GetPersistentWorldVariable(WorldManager.NEXT_MONTHLY_QUEST_RESET_TIME_VAR_ID)).ToShortTimeString()}");
             }
 
             return true;
