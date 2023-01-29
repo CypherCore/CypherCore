@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
@@ -16,6 +15,136 @@ namespace Game
 {
     public class Quest
     {
+        public uint Id { get; set; }
+        public QuestType Type { get; set; }
+        public uint PackageID { get; set; }
+        public uint ContentTuningId { get; set; }
+        public int QuestSortID { get; set; }
+        public uint QuestInfoID { get; set; }
+        public uint SuggestedPlayers { get; set; }
+        public uint NextQuestInChain { get; set; }
+        public uint RewardXPDifficulty { get; set; }
+        public float RewardXPMultiplier { get; set; }
+        public uint RewardMoneyDifficulty { get; set; }
+        public float RewardMoneyMultiplier { get; set; }
+        public uint RewardBonusMoney { get; set; }
+        public List<QuestRewardDisplaySpell> RewardDisplaySpell { get; set; } = new();
+        public uint RewardSpell { get; set; }
+        public uint RewardHonor { get; set; }
+        public uint RewardKillHonor { get; set; }
+        public uint RewardArtifactXPDifficulty { get; set; }
+        public float RewardArtifactXPMultiplier { get; set; }
+        public uint RewardArtifactCategoryID { get; set; }
+        public uint SourceItemId { get; set; }
+        public QuestFlags Flags { get; set; }
+        public QuestFlagsEx FlagsEx { get; set; }
+        public QuestFlagsEx2 FlagsEx2 { get; set; }
+        public uint[] RewardItemId { get; set; } = new uint[SharedConst.QuestRewardItemCount];
+        public uint[] RewardItemCount { get; set; } = new uint[SharedConst.QuestRewardItemCount];
+        public uint[] ItemDrop { get; set; } = new uint[SharedConst.QuestItemDropCount];
+        public uint[] ItemDropQuantity { get; set; } = new uint[SharedConst.QuestItemDropCount];
+        public LootItemType[] RewardChoiceItemType { get; set; } = new LootItemType[SharedConst.QuestRewardChoicesCount];
+        public uint[] RewardChoiceItemId { get; set; } = new uint[SharedConst.QuestRewardChoicesCount];
+        public uint[] RewardChoiceItemCount { get; set; } = new uint[SharedConst.QuestRewardChoicesCount];
+        public uint[] RewardChoiceItemDisplayId { get; set; } = new uint[SharedConst.QuestRewardChoicesCount];
+        public uint POIContinent { get; set; }
+        public float POIx { get; set; }
+        public float POIy { get; set; }
+        public uint POIPriority { get; set; }
+        public uint RewardTitleId { get; set; }
+        public int RewardArenaPoints { get; set; }
+        public uint RewardSkillId { get; set; }
+        public uint RewardSkillPoints { get; set; }
+        public uint QuestGiverPortrait { get; set; }
+        public uint QuestGiverPortraitMount { get; set; }
+        public int QuestGiverPortraitModelSceneId { get; set; }
+        public uint QuestTurnInPortrait { get; set; }
+        public uint[] RewardFactionId { get; set; } = new uint[SharedConst.QuestRewardReputationsCount];
+        public int[] RewardFactionValue { get; set; } = new int[SharedConst.QuestRewardReputationsCount];
+        public int[] RewardFactionOverride { get; set; } = new int[SharedConst.QuestRewardReputationsCount];
+        public int[] RewardFactionCapIn { get; set; } = new int[SharedConst.QuestRewardReputationsCount];
+        public uint RewardReputationMask { get; set; }
+        public uint[] RewardCurrencyId { get; set; } = new uint[SharedConst.QuestRewardCurrencyCount];
+        public uint[] RewardCurrencyCount { get; set; } = new uint[SharedConst.QuestRewardCurrencyCount];
+        public uint SoundAccept { get; set; }
+        public uint SoundTurnIn { get; set; }
+        public uint AreaGroupID { get; set; }
+        public uint LimitTime { get; set; }
+        public long AllowableRaces { get; set; }
+        public int TreasurePickerID { get; set; }
+        public int Expansion { get; set; }
+        public int ManagedWorldStateID { get; set; }
+        public int QuestSessionBonus { get; set; }
+        public List<QuestObjective> Objectives { get; set; } = new();
+        public string LogTitle { get; set; } = "";
+        public string LogDescription { get; set; } = "";
+        public string QuestDescription { get; set; } = "";
+        public string AreaDescription { get; set; } = "";
+        public string PortraitGiverText { get; set; } = "";
+        public string PortraitGiverName { get; set; } = "";
+        public string PortraitTurnInText { get; set; } = "";
+        public string PortraitTurnInName { get; set; } = "";
+        public string QuestCompletionLog { get; set; } = "";
+
+        // quest_description_conditional
+        public List<QuestConditionalText> ConditionalQuestDescription { get; set; } = new();
+
+        // quest_completion_log_conditional
+        public List<QuestConditionalText> ConditionalQuestCompletionLog { get; set; } = new();
+
+        // quest_detais table
+        public uint[] DetailsEmote { get; set; } = new uint[SharedConst.QuestEmoteCount];
+        public uint[] DetailsEmoteDelay { get; set; } = new uint[SharedConst.QuestEmoteCount];
+
+        // quest_request_items table
+        public uint EmoteOnComplete { get; set; }
+        public uint EmoteOnIncomplete { get; set; }
+        public uint EmoteOnCompleteDelay { get; set; }
+        public uint EmoteOnIncompleteDelay { get; set; }
+        public string RequestItemsText { get; set; } = "";
+
+        // quest_request_items_conditional
+        public List<QuestConditionalText> ConditionalRequestItemsText { get; set; } = new();
+
+        // quest_offer_reward table
+        public int[] OfferRewardEmote { get; set; } = new int[SharedConst.QuestEmoteCount];
+        public uint[] OfferRewardEmoteDelay { get; set; } = new uint[SharedConst.QuestEmoteCount];
+        public string OfferRewardText { get; set; } = "";
+
+        // quest_offer_reward_conditional
+        public List<QuestConditionalText> ConditionalOfferRewardText { get; set; } = new();
+
+        // quest_template_addon table (custom _data)
+        public uint MaxLevel { get; set; }
+        public uint AllowableClasses { get; set; }
+        public uint SourceSpellID { get; set; }
+        public int PrevQuestId { get; set; }
+        public uint NextQuestId { get; set; }
+        public int ExclusiveGroup { get; set; }
+        public int BreadcrumbForQuestId { get; set; }
+        public uint RewardMailTemplateId { get; set; }
+        public uint RewardMailDelay { get; set; }
+        public uint RequiredSkillId { get; set; }
+        public uint RequiredSkillPoints { get; set; }
+        public uint RequiredMinRepFaction { get; set; }
+        public int RequiredMinRepValue { get; set; }
+        public uint RequiredMaxRepFaction { get; set; }
+        public int RequiredMaxRepValue { get; set; }
+        public uint SourceItemIdCount { get; set; }
+        public uint RewardMailSenderEntry { get; set; }
+        public QuestSpecialFlags SpecialFlags { get; set; } // custom Flags, not sniffed/WDB
+        public BitArray UsedQuestObjectiveTypes { get; set; } = new((int)QuestObjectiveType.Max);
+        public uint ScriptId { get; set; }
+
+        public List<uint> DependentPreviousQuests { get; set; } = new();
+        public List<uint> DependentBreadcrumbQuests { get; set; } = new();
+        public QueryQuestInfoResponse[] Response { get; set; } = new QueryQuestInfoResponse[(int)Locale.Total];
+
+        private readonly uint _rewChoiceItemsCount;
+        private readonly uint _rewItemsCount;
+        private readonly uint _rewCurrencyCount;
+        private ushort _eventIdForQuest;
+
         public Quest(SQLFields fields)
         {
             Id = fields.Read<uint>(0);
@@ -250,7 +379,7 @@ namespace Game
             obj.Description = fields.Read<string>(9);
 
             Objectives.Add(obj);
-            _usedQuestObjectiveTypes[(int)obj.Type] = true;
+            UsedQuestObjectiveTypes[(int)obj.Type] = true;
         }
 
         public void LoadQuestObjectiveVisualEffect(SQLFields fields)
@@ -493,7 +622,7 @@ namespace Game
         public void InitializeQueryData()
         {
             for (var loc = Locale.enUS; loc < Locale.Total; ++loc)
-                response[(int)loc] = BuildQueryData(loc, null);
+                Response[(int)loc] = BuildQueryData(loc, null);
         }
 
         public QueryQuestInfoResponse BuildQueryData(Locale loc, Player player)
@@ -702,7 +831,7 @@ namespace Game
 
         public bool HasQuestObjectiveType(QuestObjectiveType type)
         {
-            return _usedQuestObjectiveTypes[(int)type];
+            return UsedQuestObjectiveTypes[(int)type];
         }
 
         public bool IsAutoPush()
@@ -878,292 +1007,5 @@ namespace Game
             ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
         }
 
-        #region Fields
-
-        public uint Id;
-        public QuestType Type;
-        public uint PackageID;
-        public uint ContentTuningId;
-        public int QuestSortID;
-        public uint QuestInfoID;
-        public uint SuggestedPlayers;
-        public uint NextQuestInChain { get; set; }
-        public uint RewardXPDifficulty;
-        public float RewardXPMultiplier;
-        public uint RewardMoneyDifficulty;
-        public float RewardMoneyMultiplier;
-        public uint RewardBonusMoney;
-        public List<QuestRewardDisplaySpell> RewardDisplaySpell = new();
-        public uint RewardSpell { get; set; }
-        public uint RewardHonor;
-        public uint RewardKillHonor;
-        public uint RewardArtifactXPDifficulty;
-        public float RewardArtifactXPMultiplier;
-        public uint RewardArtifactCategoryID;
-        public uint SourceItemId { get; set; }
-        public QuestFlags Flags { get; set; }
-        public QuestFlagsEx FlagsEx;
-        public QuestFlagsEx2 FlagsEx2;
-        public uint[] RewardItemId = new uint[SharedConst.QuestRewardItemCount];
-        public uint[] RewardItemCount = new uint[SharedConst.QuestRewardItemCount];
-        public uint[] ItemDrop = new uint[SharedConst.QuestItemDropCount];
-        public uint[] ItemDropQuantity = new uint[SharedConst.QuestItemDropCount];
-        public LootItemType[] RewardChoiceItemType = new LootItemType[SharedConst.QuestRewardChoicesCount];
-        public uint[] RewardChoiceItemId = new uint[SharedConst.QuestRewardChoicesCount];
-        public uint[] RewardChoiceItemCount = new uint[SharedConst.QuestRewardChoicesCount];
-        public uint[] RewardChoiceItemDisplayId = new uint[SharedConst.QuestRewardChoicesCount];
-        public uint POIContinent;
-        public float POIx;
-        public float POIy;
-        public uint POIPriority;
-        public uint RewardTitleId { get; set; }
-        public int RewardArenaPoints;
-        public uint RewardSkillId;
-        public uint RewardSkillPoints;
-        public uint QuestGiverPortrait;
-        public uint QuestGiverPortraitMount;
-        public int QuestGiverPortraitModelSceneId;
-        public uint QuestTurnInPortrait;
-        public uint[] RewardFactionId = new uint[SharedConst.QuestRewardReputationsCount];
-        public int[] RewardFactionValue = new int[SharedConst.QuestRewardReputationsCount];
-        public int[] RewardFactionOverride = new int[SharedConst.QuestRewardReputationsCount];
-        public int[] RewardFactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
-        public uint RewardReputationMask;
-        public uint[] RewardCurrencyId = new uint[SharedConst.QuestRewardCurrencyCount];
-        public uint[] RewardCurrencyCount = new uint[SharedConst.QuestRewardCurrencyCount];
-        public uint SoundAccept { get; set; }
-        public uint SoundTurnIn { get; set; }
-        public uint AreaGroupID;
-        public uint LimitTime;
-        public long AllowableRaces { get; set; }
-        public int TreasurePickerID;
-        public int Expansion;
-        public int ManagedWorldStateID;
-        public int QuestSessionBonus;
-        public List<QuestObjective> Objectives = new();
-        public string LogTitle = "";
-        public string LogDescription = "";
-        public string QuestDescription = "";
-        public string AreaDescription = "";
-        public string PortraitGiverText = "";
-        public string PortraitGiverName = "";
-        public string PortraitTurnInText = "";
-        public string PortraitTurnInName = "";
-        public string QuestCompletionLog = "";
-
-        // quest_description_conditional
-        public List<QuestConditionalText> ConditionalQuestDescription = new();
-
-        // quest_completion_log_conditional
-        public List<QuestConditionalText> ConditionalQuestCompletionLog = new();
-
-        // quest_detais table
-        public uint[] DetailsEmote = new uint[SharedConst.QuestEmoteCount];
-        public uint[] DetailsEmoteDelay = new uint[SharedConst.QuestEmoteCount];
-
-        // quest_request_items table
-        public uint EmoteOnComplete;
-        public uint EmoteOnIncomplete;
-        public uint EmoteOnCompleteDelay;
-        public uint EmoteOnIncompleteDelay;
-        public string RequestItemsText = "";
-
-        // quest_request_items_conditional
-        public List<QuestConditionalText> ConditionalRequestItemsText = new();
-
-        // quest_offer_reward table
-        public int[] OfferRewardEmote = new int[SharedConst.QuestEmoteCount];
-        public uint[] OfferRewardEmoteDelay = new uint[SharedConst.QuestEmoteCount];
-        public string OfferRewardText = "";
-
-        // quest_offer_reward_conditional
-        public List<QuestConditionalText> ConditionalOfferRewardText = new();
-
-        // quest_template_addon table (custom _data)
-        public uint MaxLevel { get; set; }
-        public uint AllowableClasses { get; set; }
-        public uint SourceSpellID { get; set; }
-        public int PrevQuestId { get; set; }
-        public uint NextQuestId { get; set; }
-        public int ExclusiveGroup { get; set; }
-        public int BreadcrumbForQuestId { get; set; }
-        public uint RewardMailTemplateId { get; set; }
-        public uint RewardMailDelay { get; set; }
-        public uint RequiredSkillId { get; set; }
-        public uint RequiredSkillPoints { get; set; }
-        public uint RequiredMinRepFaction { get; set; }
-        public int RequiredMinRepValue { get; set; }
-        public uint RequiredMaxRepFaction { get; set; }
-        public int RequiredMaxRepValue { get; set; }
-        public uint SourceItemIdCount { get; set; }
-        public uint RewardMailSenderEntry { get; set; }
-        public QuestSpecialFlags SpecialFlags { get; set; } // custom Flags, not sniffed/WDB
-        public BitArray _usedQuestObjectiveTypes = new((int)QuestObjectiveType.Max);
-        public uint ScriptId { get; set; }
-
-        public List<uint> DependentPreviousQuests = new();
-        public List<uint> DependentBreadcrumbQuests = new();
-        public QueryQuestInfoResponse[] response = new QueryQuestInfoResponse[(int)Locale.Total];
-
-        private readonly uint _rewChoiceItemsCount;
-        private readonly uint _rewItemsCount;
-        private readonly uint _rewCurrencyCount;
-        private ushort _eventIdForQuest;
-
-        #endregion
-    }
-
-    public class QuestStatusData
-    {
-        public bool Explored;
-        public ushort Slot = SharedConst.MaxQuestLogSize;
-        public QuestStatus Status;
-        public uint Timer;
-    }
-
-    public class QuestGreeting
-    {
-        public uint EmoteDelay;
-
-        public ushort EmoteType;
-        public string Text;
-
-        public QuestGreeting()
-        {
-            Text = "";
-        }
-
-        public QuestGreeting(ushort emoteType, uint emoteDelay, string text)
-        {
-            EmoteType = emoteType;
-            EmoteDelay = emoteDelay;
-            Text = text;
-        }
-    }
-
-    public class QuestGreetingLocale
-    {
-        public StringArray Greeting = new((int)Locale.Total);
-    }
-
-    public class QuestTemplateLocale
-    {
-        public StringArray AreaDescription = new((int)Locale.Total);
-        public StringArray LogDescription = new((int)Locale.Total);
-        public StringArray LogTitle = new((int)Locale.Total);
-        public StringArray PortraitGiverName = new((int)Locale.Total);
-        public StringArray PortraitGiverText = new((int)Locale.Total);
-        public StringArray PortraitTurnInName = new((int)Locale.Total);
-        public StringArray PortraitTurnInText = new((int)Locale.Total);
-        public StringArray QuestCompletionLog = new((int)Locale.Total);
-        public StringArray QuestDescription = new((int)Locale.Total);
-    }
-
-    public class QuestRequestItemsLocale
-    {
-        public StringArray CompletionText = new((int)Locale.Total);
-    }
-
-    public class QuestObjectivesLocale
-    {
-        public StringArray Description = new((int)Locale.Total);
-    }
-
-    public class QuestOfferRewardLocale
-    {
-        public StringArray RewardText = new((int)Locale.Total);
-    }
-
-    public struct QuestRewardDisplaySpell
-    {
-        public uint SpellId;
-        public uint PlayerConditionId;
-
-        public QuestRewardDisplaySpell(uint spellId, uint playerConditionId)
-        {
-            SpellId = spellId;
-            PlayerConditionId = playerConditionId;
-        }
-    }
-
-    public class QuestConditionalText
-    {
-        public int PlayerConditionId;
-        public int QuestgiverCreatureId;
-        public StringArray Text = new((int)Locale.Total);
-    }
-
-    public class QuestObjective
-    {
-        public int Amount;
-        public string Description;
-        public QuestObjectiveFlags Flags;
-        public uint Flags2;
-        public uint Id;
-        public int ObjectID;
-        public float ProgressBarWeight;
-        public uint QuestID;
-        public sbyte StorageIndex;
-        public QuestObjectiveType Type;
-        public int[] VisualEffects = Array.Empty<int>();
-
-        public bool IsStoringValue()
-        {
-            switch (Type)
-            {
-                case QuestObjectiveType.Monster:
-                case QuestObjectiveType.Item:
-                case QuestObjectiveType.GameObject:
-                case QuestObjectiveType.TalkTo:
-                case QuestObjectiveType.PlayerKills:
-                case QuestObjectiveType.WinPvpPetBattles:
-                case QuestObjectiveType.HaveCurrency:
-                case QuestObjectiveType.ObtainCurrency:
-                case QuestObjectiveType.IncreaseReputation:
-                    return true;
-                default:
-                    break;
-            }
-
-            return false;
-        }
-
-        public bool IsStoringFlag()
-        {
-            switch (Type)
-            {
-                case QuestObjectiveType.AreaTrigger:
-                case QuestObjectiveType.WinPetBattleAgainstNpc:
-                case QuestObjectiveType.DefeatBattlePet:
-                case QuestObjectiveType.CriteriaTree:
-                case QuestObjectiveType.AreaTriggerEnter:
-                case QuestObjectiveType.AreaTriggerExit:
-                    return true;
-                default:
-                    break;
-            }
-
-            return false;
-        }
-
-        public static bool CanAlwaysBeProgressedInRaid(QuestObjectiveType type)
-        {
-            switch (type)
-            {
-                case QuestObjectiveType.Item:
-                case QuestObjectiveType.Currency:
-                case QuestObjectiveType.LearnSpell:
-                case QuestObjectiveType.MinReputation:
-                case QuestObjectiveType.MaxReputation:
-                case QuestObjectiveType.Money:
-                case QuestObjectiveType.HaveCurrency:
-                case QuestObjectiveType.IncreaseReputation:
-                    return true;
-                default:
-                    break;
-            }
-
-            return false;
-        }
     }
 }

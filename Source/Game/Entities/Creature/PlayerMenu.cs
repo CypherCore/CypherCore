@@ -303,7 +303,7 @@ public class PlayerMenu
     {
         if (WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
         {
-            _session.SendPacket(quest.response[(int)_session.GetSessionDbLocaleIndex()]);
+            _session.SendPacket(quest.Response[(int)_session.GetSessionDbLocaleIndex()]);
         }
         else
         {
