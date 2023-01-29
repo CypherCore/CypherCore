@@ -257,18 +257,4 @@ namespace Game.Cache
             return true;
         }
     }
-
-    public class CharacterCacheEntry
-    {
-        public uint AccountId;
-        public uint[] ArenaTeamId = new uint[SharedConst.MaxArenaSlot];
-        public Class ClassId;
-        public ObjectGuid Guid;
-        public ulong GuildId;
-        public bool IsDeleted;
-        public byte Level;
-        public string Name;
-        public Race RaceId;
-        public Gender Sex;
-    }
 }
