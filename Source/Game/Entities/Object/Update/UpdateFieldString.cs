@@ -4,31 +4,31 @@
 namespace Game.Entities
 {
     public class UpdateFieldString : IUpdateField<string>
-	{
-		public string Value { get; set; }
+    {
+        public string Value { get; set; }
         public int Bit { get; set; }
         public int BlockBit { get; set; }
 
         public UpdateFieldString(int blockBit, int bit)
-		{
-			BlockBit = blockBit;
-			Bit      = bit;
-			Value   = "";
-		}
+        {
+            BlockBit = blockBit;
+            Bit = bit;
+            Value = "";
+        }
 
-		public void SetValue(string value)
-		{
-			Value = value;
-		}
+        public void SetValue(string value)
+        {
+            Value = value;
+        }
 
-		public string GetValue()
-		{
-			return Value;
-		}
+        public string GetValue()
+        {
+            return Value;
+        }
 
-		public static implicit operator string(UpdateFieldString updateField)
-		{
-			return updateField.Value;
-		}
-	}
+        public static implicit operator string(UpdateFieldString updateField)
+        {
+            return updateField.Value;
+        }
+    }
 }

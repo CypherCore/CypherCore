@@ -7,137 +7,137 @@ using Game.Entities;
 
 namespace Game.DungeonFinding
 {
-	public class LFGGroupData
-	{
-		// Dungeon
-		private uint _Dungeon;
+    public class LFGGroupData
+    {
+        // Dungeon
+        private uint _Dungeon;
 
-		// Vote Kick
-		private byte _KicksLeft;
-		private ObjectGuid _Leader;
-		private LfgState _OldState;
-		private List<ObjectGuid> _Players = new();
+        // Vote Kick
+        private byte _KicksLeft;
+        private ObjectGuid _Leader;
+        private LfgState _OldState;
+        private readonly List<ObjectGuid> _Players = new();
 
-		// General
-		private LfgState _State;
-		private bool _VoteKickActive;
+        // General
+        private LfgState _State;
+        private bool _VoteKickActive;
 
-		public LFGGroupData()
-		{
-			_State     = LfgState.None;
-			_OldState  = LfgState.None;
-			_KicksLeft = SharedConst.LFGMaxKicks;
-		}
+        public LFGGroupData()
+        {
+            _State = LfgState.None;
+            _OldState = LfgState.None;
+            _KicksLeft = SharedConst.LFGMaxKicks;
+        }
 
-		public bool IsLfgGroup()
-		{
-			return _OldState != LfgState.None;
-		}
+        public bool IsLfgGroup()
+        {
+            return _OldState != LfgState.None;
+        }
 
-		public void SetState(LfgState state)
-		{
-			switch (state)
-			{
-				case LfgState.None:
-					_Dungeon   = 0;
-					_KicksLeft = SharedConst.LFGMaxKicks;
-					_OldState  = state;
+        public void SetState(LfgState state)
+        {
+            switch (state)
+            {
+                case LfgState.None:
+                    _Dungeon = 0;
+                    _KicksLeft = SharedConst.LFGMaxKicks;
+                    _OldState = state;
 
-					break;
-				case LfgState.FinishedDungeon:
-				case LfgState.Dungeon:
-					_OldState = state;
+                    break;
+                case LfgState.FinishedDungeon:
+                case LfgState.Dungeon:
+                    _OldState = state;
 
-					break;
-			}
+                    break;
+            }
 
-			_State = state;
-		}
+            _State = state;
+        }
 
-		public void RestoreState()
-		{
-			_State = _OldState;
-		}
+        public void RestoreState()
+        {
+            _State = _OldState;
+        }
 
-		public void AddPlayer(ObjectGuid guid)
-		{
-			_Players.Add(guid);
-		}
+        public void AddPlayer(ObjectGuid guid)
+        {
+            _Players.Add(guid);
+        }
 
-		public byte RemovePlayer(ObjectGuid guid)
-		{
-			_Players.Remove(guid);
+        public byte RemovePlayer(ObjectGuid guid)
+        {
+            _Players.Remove(guid);
 
-			return (byte)_Players.Count;
-		}
+            return (byte)_Players.Count;
+        }
 
-		public void RemoveAllPlayers()
-		{
-			_Players.Clear();
-		}
+        public void RemoveAllPlayers()
+        {
+            _Players.Clear();
+        }
 
-		public void SetLeader(ObjectGuid guid)
-		{
-			_Leader = guid;
-		}
+        public void SetLeader(ObjectGuid guid)
+        {
+            _Leader = guid;
+        }
 
-		public void SetDungeon(uint dungeon)
-		{
-			_Dungeon = dungeon;
-		}
+        public void SetDungeon(uint dungeon)
+        {
+            _Dungeon = dungeon;
+        }
 
-		public void DecreaseKicksLeft()
-		{
-			if (_KicksLeft != 0)
-				--_KicksLeft;
-		}
+        public void DecreaseKicksLeft()
+        {
+            if (_KicksLeft != 0)
+                --_KicksLeft;
+        }
 
-		public LfgState GetState()
-		{
-			return _State;
-		}
+        public LfgState GetState()
+        {
+            return _State;
+        }
 
-		public LfgState GetOldState()
-		{
-			return _OldState;
-		}
+        public LfgState GetOldState()
+        {
+            return _OldState;
+        }
 
-		public List<ObjectGuid> GetPlayers()
-		{
-			return _Players;
-		}
+        public List<ObjectGuid> GetPlayers()
+        {
+            return _Players;
+        }
 
-		public byte GetPlayerCount()
-		{
-			return (byte)_Players.Count;
-		}
+        public byte GetPlayerCount()
+        {
+            return (byte)_Players.Count;
+        }
 
-		public ObjectGuid GetLeader()
-		{
-			return _Leader;
-		}
+        public ObjectGuid GetLeader()
+        {
+            return _Leader;
+        }
 
-		public uint GetDungeon(bool asId = true)
-		{
-			if (asId)
-				return (_Dungeon & 0x00FFFFFF);
-			else
-				return _Dungeon;
-		}
+        public uint GetDungeon(bool asId = true)
+        {
+            if (asId)
+                return (_Dungeon & 0x00FFFFFF);
+            else
+                return _Dungeon;
+        }
 
-		public byte GetKicksLeft()
-		{
-			return _KicksLeft;
-		}
+        public byte GetKicksLeft()
+        {
+            return _KicksLeft;
+        }
 
-		public void SetVoteKick(bool active)
-		{
-			_VoteKickActive = active;
-		}
+        public void SetVoteKick(bool active)
+        {
+            _VoteKickActive = active;
+        }
 
-		public bool IsVoteKickActive()
-		{
-			return _VoteKickActive;
-		}
-	}
+        public bool IsVoteKickActive()
+        {
+            return _VoteKickActive;
+        }
+    }
 }

@@ -7,73 +7,73 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-	internal class TransmogrifyItems : ClientPacket
-	{
-		public bool CurrentSpecOnly;
-		public Array<TransmogrifyItem> Items = new(13);
+    internal class TransmogrifyItems : ClientPacket
+    {
+        public bool CurrentSpecOnly;
+        public Array<TransmogrifyItem> Items = new(13);
 
-		public ObjectGuid Npc;
+        public ObjectGuid Npc;
 
-		public TransmogrifyItems(WorldPacket packet) : base(packet)
-		{
-		}
+        public TransmogrifyItems(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			var itemsCount = _worldPacket.ReadUInt32();
-			Npc = _worldPacket.ReadPackedGuid();
+        public override void Read()
+        {
+            var itemsCount = _worldPacket.ReadUInt32();
+            Npc = _worldPacket.ReadPackedGuid();
 
-			for (var i = 0; i < itemsCount; ++i)
-			{
-				TransmogrifyItem item = new();
-				item.Read(_worldPacket);
-				Items[i] = item;
-			}
+            for (var i = 0; i < itemsCount; ++i)
+            {
+                TransmogrifyItem item = new();
+                item.Read(_worldPacket);
+                Items[i] = item;
+            }
 
-			CurrentSpecOnly = _worldPacket.HasBit();
-		}
-	}
+            CurrentSpecOnly = _worldPacket.HasBit();
+        }
+    }
 
-	internal class AccountTransmogUpdate : ServerPacket
-	{
-		public List<uint> FavoriteAppearances = new();
+    internal class AccountTransmogUpdate : ServerPacket
+    {
+        public List<uint> FavoriteAppearances = new();
 
-		public bool IsFullUpdate;
-		public bool IsSetFavorite;
-		public List<uint> NewAppearances = new();
+        public bool IsFullUpdate;
+        public bool IsSetFavorite;
+        public List<uint> NewAppearances = new();
 
-		public AccountTransmogUpdate() : base(ServerOpcodes.AccountTransmogUpdate)
-		{
-		}
+        public AccountTransmogUpdate() : base(ServerOpcodes.AccountTransmogUpdate)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteBit(IsFullUpdate);
-			_worldPacket.WriteBit(IsSetFavorite);
-			_worldPacket.WriteInt32(FavoriteAppearances.Count);
-			_worldPacket.WriteInt32(NewAppearances.Count);
+        public override void Write()
+        {
+            _worldPacket.WriteBit(IsFullUpdate);
+            _worldPacket.WriteBit(IsSetFavorite);
+            _worldPacket.WriteInt32(FavoriteAppearances.Count);
+            _worldPacket.WriteInt32(NewAppearances.Count);
 
-			foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
-				_worldPacket.WriteUInt32(itemModifiedAppearanceId);
+            foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
+                _worldPacket.WriteUInt32(itemModifiedAppearanceId);
 
-			foreach (var newAppearance in NewAppearances)
-				_worldPacket.WriteUInt32(newAppearance);
-		}
-	}
+            foreach (var newAppearance in NewAppearances)
+                _worldPacket.WriteUInt32(newAppearance);
+        }
+    }
 
-	internal struct TransmogrifyItem
-	{
-		public void Read(WorldPacket data)
-		{
-			ItemModifiedAppearanceID          = data.ReadInt32();
-			Slot                              = data.ReadUInt32();
-			SpellItemEnchantmentID            = data.ReadInt32();
-			SecondaryItemModifiedAppearanceID = data.ReadInt32();
-		}
+    internal struct TransmogrifyItem
+    {
+        public void Read(WorldPacket data)
+        {
+            ItemModifiedAppearanceID = data.ReadInt32();
+            Slot = data.ReadUInt32();
+            SpellItemEnchantmentID = data.ReadInt32();
+            SecondaryItemModifiedAppearanceID = data.ReadInt32();
+        }
 
-		public int ItemModifiedAppearanceID;
-		public uint Slot;
-		public int SpellItemEnchantmentID;
-		public int SecondaryItemModifiedAppearanceID;
-	}
+        public int ItemModifiedAppearanceID;
+        public uint Slot;
+        public int SpellItemEnchantmentID;
+        public int SecondaryItemModifiedAppearanceID;
+    }
 }

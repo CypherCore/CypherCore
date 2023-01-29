@@ -5,155 +5,155 @@ using Framework.Constants;
 
 namespace Game.Chat
 {
-	[CommandGroup("event")]
-	internal class EventCommands
-	{
-		[Command("info", RBACPermissions.CommandEventInfo, true)]
-		private static bool HandleEventInfoCommand(CommandHandler handler, ushort eventId)
-		{
-			var events = Global.GameEventMgr.GetEventMap();
+    [CommandGroup("event")]
+    internal class EventCommands
+    {
+        [Command("info", RBACPermissions.CommandEventInfo, true)]
+        private static bool HandleEventInfoCommand(CommandHandler handler, ushort eventId)
+        {
+            var events = Global.GameEventMgr.GetEventMap();
 
-			if (eventId >= events.Length)
-			{
-				handler.SendSysMessage(CypherStrings.EventNotExist);
+            if (eventId >= events.Length)
+            {
+                handler.SendSysMessage(CypherStrings.EventNotExist);
 
-				return false;
-			}
+                return false;
+            }
 
-			GameEventData eventData = events[eventId];
+            GameEventData eventData = events[eventId];
 
-			if (!eventData.IsValid())
-			{
-				handler.SendSysMessage(CypherStrings.EventNotExist);
+            if (!eventData.IsValid())
+            {
+                handler.SendSysMessage(CypherStrings.EventNotExist);
 
-				return false;
-			}
+                return false;
+            }
 
-			var    activeEvents = Global.GameEventMgr.GetActiveEventList();
-			bool   active       = activeEvents.Contains(eventId);
-			string activeStr    = active ? Global.ObjectMgr.GetCypherString(CypherStrings.Active) : "";
+            var activeEvents = Global.GameEventMgr.GetActiveEventList();
+            bool active = activeEvents.Contains(eventId);
+            string activeStr = active ? Global.ObjectMgr.GetCypherString(CypherStrings.Active) : "";
 
-			string startTimeStr = Time.UnixTimeToDateTime(eventData.start).ToLongDateString();
-			string endTimeStr   = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
+            string startTimeStr = Time.UnixTimeToDateTime(eventData.start).ToLongDateString();
+            string endTimeStr = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
 
-			uint   delay    = Global.GameEventMgr.NextCheck(eventId);
-			long   nextTime = GameTime.GetGameTime() + delay;
-			string nextStr  = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(GameTime.GetGameTime() + delay).ToShortTimeString() : "-";
+            uint delay = Global.GameEventMgr.NextCheck(eventId);
+            long nextTime = GameTime.GetGameTime() + delay;
+            string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(GameTime.GetGameTime() + delay).ToShortTimeString() : "-";
 
-			string occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
-			string lengthStr    = Time.secsToTimeString(eventData.length * Time.Minute);
+            string occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
+            string lengthStr = Time.secsToTimeString(eventData.length * Time.Minute);
 
-			handler.SendSysMessage(CypherStrings.EventInfo,
-			                       eventId,
-			                       eventData.description,
-			                       activeStr,
-			                       startTimeStr,
-			                       endTimeStr,
-			                       occurenceStr,
-			                       lengthStr,
-			                       nextStr);
+            handler.SendSysMessage(CypherStrings.EventInfo,
+                                   eventId,
+                                   eventData.description,
+                                   activeStr,
+                                   startTimeStr,
+                                   endTimeStr,
+                                   occurenceStr,
+                                   lengthStr,
+                                   nextStr);
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("activelist", RBACPermissions.CommandEventActivelist, true)]
-		private static bool HandleEventActiveListCommand(CommandHandler handler)
-		{
-			uint counter = 0;
+        [Command("activelist", RBACPermissions.CommandEventActivelist, true)]
+        private static bool HandleEventActiveListCommand(CommandHandler handler)
+        {
+            uint counter = 0;
 
-			var events       = Global.GameEventMgr.GetEventMap();
-			var activeEvents = Global.GameEventMgr.GetActiveEventList();
+            var events = Global.GameEventMgr.GetEventMap();
+            var activeEvents = Global.GameEventMgr.GetActiveEventList();
 
-			string active = Global.ObjectMgr.GetCypherString(CypherStrings.Active);
+            string active = Global.ObjectMgr.GetCypherString(CypherStrings.Active);
 
-			foreach (var eventId in activeEvents)
-			{
-				GameEventData eventData = events[eventId];
+            foreach (var eventId in activeEvents)
+            {
+                GameEventData eventData = events[eventId];
 
-				if (handler.GetSession() != null)
-					handler.SendSysMessage(CypherStrings.EventEntryListChat, eventId, eventId, eventData.description, active);
-				else
-					handler.SendSysMessage(CypherStrings.EventEntryListConsole, eventId, eventData.description, active);
+                if (handler.GetSession() != null)
+                    handler.SendSysMessage(CypherStrings.EventEntryListChat, eventId, eventId, eventData.description, active);
+                else
+                    handler.SendSysMessage(CypherStrings.EventEntryListConsole, eventId, eventData.description, active);
 
-				++counter;
-			}
+                ++counter;
+            }
 
-			if (counter == 0)
-				handler.SendSysMessage(CypherStrings.Noeventfound);
+            if (counter == 0)
+                handler.SendSysMessage(CypherStrings.Noeventfound);
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("start", RBACPermissions.CommandEventStart, true)]
-		private static bool HandleEventStartCommand(CommandHandler handler, ushort eventId)
-		{
-			var events = Global.GameEventMgr.GetEventMap();
+        [Command("start", RBACPermissions.CommandEventStart, true)]
+        private static bool HandleEventStartCommand(CommandHandler handler, ushort eventId)
+        {
+            var events = Global.GameEventMgr.GetEventMap();
 
-			if (eventId < 1 ||
-			    eventId >= events.Length)
-			{
-				handler.SendSysMessage(CypherStrings.EventNotExist);
+            if (eventId < 1 ||
+                eventId >= events.Length)
+            {
+                handler.SendSysMessage(CypherStrings.EventNotExist);
 
-				return false;
-			}
+                return false;
+            }
 
-			GameEventData eventData = events[eventId];
+            GameEventData eventData = events[eventId];
 
-			if (!eventData.IsValid())
-			{
-				handler.SendSysMessage(CypherStrings.EventNotExist);
+            if (!eventData.IsValid())
+            {
+                handler.SendSysMessage(CypherStrings.EventNotExist);
 
-				return false;
-			}
+                return false;
+            }
 
-			var activeEvents = Global.GameEventMgr.GetActiveEventList();
+            var activeEvents = Global.GameEventMgr.GetActiveEventList();
 
-			if (activeEvents.Contains(eventId))
-			{
-				handler.SendSysMessage(CypherStrings.EventAlreadyActive, eventId);
+            if (activeEvents.Contains(eventId))
+            {
+                handler.SendSysMessage(CypherStrings.EventAlreadyActive, eventId);
 
-				return false;
-			}
+                return false;
+            }
 
-			Global.GameEventMgr.StartEvent(eventId, true);
+            Global.GameEventMgr.StartEvent(eventId, true);
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("stop", RBACPermissions.CommandEventStop, true)]
-		private static bool HandleEventStopCommand(CommandHandler handler, ushort eventId)
-		{
-			var events = Global.GameEventMgr.GetEventMap();
+        [Command("stop", RBACPermissions.CommandEventStop, true)]
+        private static bool HandleEventStopCommand(CommandHandler handler, ushort eventId)
+        {
+            var events = Global.GameEventMgr.GetEventMap();
 
-			if (eventId < 1 ||
-			    eventId >= events.Length)
-			{
-				handler.SendSysMessage(CypherStrings.EventNotExist);
+            if (eventId < 1 ||
+                eventId >= events.Length)
+            {
+                handler.SendSysMessage(CypherStrings.EventNotExist);
 
-				return false;
-			}
+                return false;
+            }
 
-			GameEventData eventData = events[eventId];
+            GameEventData eventData = events[eventId];
 
-			if (!eventData.IsValid())
-			{
-				handler.SendSysMessage(CypherStrings.EventNotExist);
+            if (!eventData.IsValid())
+            {
+                handler.SendSysMessage(CypherStrings.EventNotExist);
 
-				return false;
-			}
+                return false;
+            }
 
-			var activeEvents = Global.GameEventMgr.GetActiveEventList();
+            var activeEvents = Global.GameEventMgr.GetActiveEventList();
 
-			if (!activeEvents.Contains(eventId))
-			{
-				handler.SendSysMessage(CypherStrings.EventNotActive, eventId);
+            if (!activeEvents.Contains(eventId))
+            {
+                handler.SendSysMessage(CypherStrings.EventNotActive, eventId);
 
-				return false;
-			}
+                return false;
+            }
 
-			Global.GameEventMgr.StopEvent(eventId, true);
+            Global.GameEventMgr.StopEvent(eventId, true);
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }

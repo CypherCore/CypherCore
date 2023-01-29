@@ -21,10 +21,10 @@ public class VendorItem
 
     public VendorItem(uint _item, int _maxcount, uint _incrtime, uint _ExtendedCost, ItemVendorType _Type)
     {
-        Item         = _item;
-        Maxcount     = (uint)_maxcount;
-        Incrtime     = _incrtime;
+        Item = _item;
+        Maxcount = (uint)_maxcount;
+        Incrtime = _incrtime;
         ExtendedCost = _ExtendedCost;
-        Type         = _Type;
+        Type = _Type;
     }
 }

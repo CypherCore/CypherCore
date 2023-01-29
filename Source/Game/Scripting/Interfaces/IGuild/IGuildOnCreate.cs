@@ -6,8 +6,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-	public interface IGuildOnCreate : IScriptObject
-	{
-		void OnCreate(Guild guild, Player leader, string name);
-	}
+    public interface IGuildOnCreate : IScriptObject
+    {
+        void OnCreate(Guild guild, Player leader, string name);
+    }
 }

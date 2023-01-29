@@ -20,16 +20,16 @@ public class ProcEventInfo
     public ProcEventInfo(Unit actor, Unit actionTarget, Unit procTarget, ProcFlagsInit typeMask, ProcFlagsSpellType spellTypeMask,
         ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
     {
-        _actor          = actor;
-        _actionTarget   = actionTarget;
-        _procTarget     = procTarget;
-        _typeMask       = typeMask;
-        _spellTypeMask  = spellTypeMask;
+        _actor = actor;
+        _actionTarget = actionTarget;
+        _procTarget = procTarget;
+        _typeMask = typeMask;
+        _spellTypeMask = spellTypeMask;
         _spellPhaseMask = spellPhaseMask;
-        _hitMask        = hitMask;
-        _spell          = spell;
-        _damageInfo     = damageInfo;
-        _healInfo       = healInfo;
+        _hitMask = hitMask;
+        _spell = spell;
+        _damageInfo = damageInfo;
+        _healInfo = healInfo;
     }
 
     public Unit GetActor()

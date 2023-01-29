@@ -6,15 +6,15 @@ public struct DiminishingReturn
 {
     public DiminishingReturn(uint hitTime, DiminishingLevels hitCount)
     {
-        Stack    = 0;
-        HitTime  = hitTime;
+        Stack = 0;
+        HitTime = hitTime;
         HitCount = hitCount;
     }
 
     public void Clear()
     {
-        Stack    = 0;
-        HitTime  = 0;
+        Stack = 0;
+        HitTime = 0;
         HitCount = DiminishingLevels.Level1;
     }
 

@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnStartup : IScriptObject
-	{
-		void OnStartup();
-	}
+    public interface IWorldOnStartup : IScriptObject
+    {
+        void OnStartup();
+    }
 }

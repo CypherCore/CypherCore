@@ -6,61 +6,61 @@ using Framework.Constants;
 
 namespace Game.Networking.Packets
 {
-	internal class AdventureJournalOpenQuest : ClientPacket
-	{
-		public uint AdventureJournalID;
+    internal class AdventureJournalOpenQuest : ClientPacket
+    {
+        public uint AdventureJournalID;
 
-		public AdventureJournalOpenQuest(WorldPacket packet) : base(packet)
-		{
-		}
+        public AdventureJournalOpenQuest(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			AdventureJournalID = _worldPacket.ReadUInt32();
-		}
-	}
+        public override void Read()
+        {
+            AdventureJournalID = _worldPacket.ReadUInt32();
+        }
+    }
 
-	internal class AdventureJournalUpdateSuggestions : ClientPacket
-	{
-		public bool OnLevelUp;
+    internal class AdventureJournalUpdateSuggestions : ClientPacket
+    {
+        public bool OnLevelUp;
 
-		public AdventureJournalUpdateSuggestions(WorldPacket packet) : base(packet)
-		{
-		}
+        public AdventureJournalUpdateSuggestions(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			OnLevelUp = _worldPacket.HasBit();
-		}
-	}
+        public override void Read()
+        {
+            OnLevelUp = _worldPacket.HasBit();
+        }
+    }
 
-	internal class AdventureJournalDataResponse : ServerPacket
-	{
-		public List<AdventureJournalEntry> AdventureJournalDatas = new();
+    internal class AdventureJournalDataResponse : ServerPacket
+    {
+        public List<AdventureJournalEntry> AdventureJournalDatas = new();
 
-		public bool OnLevelUp;
+        public bool OnLevelUp;
 
-		public AdventureJournalDataResponse() : base(ServerOpcodes.AdventureJournalDataResponse)
-		{
-		}
+        public AdventureJournalDataResponse() : base(ServerOpcodes.AdventureJournalDataResponse)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteBit(OnLevelUp);
-			_worldPacket.FlushBits();
-			_worldPacket.WriteInt32(AdventureJournalDatas.Count);
+        public override void Write()
+        {
+            _worldPacket.WriteBit(OnLevelUp);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteInt32(AdventureJournalDatas.Count);
 
-			foreach (var adventureJournal in AdventureJournalDatas)
-			{
-				_worldPacket.WriteInt32(adventureJournal.AdventureJournalID);
-				_worldPacket.WriteInt32(adventureJournal.Priority);
-			}
-		}
-	}
+            foreach (var adventureJournal in AdventureJournalDatas)
+            {
+                _worldPacket.WriteInt32(adventureJournal.AdventureJournalID);
+                _worldPacket.WriteInt32(adventureJournal.Priority);
+            }
+        }
+    }
 
-	internal struct AdventureJournalEntry
-	{
-		public int AdventureJournalID;
-		public int Priority;
-	}
+    internal struct AdventureJournalEntry
+    {
+        public int AdventureJournalID;
+        public int Priority;
+    }
 }

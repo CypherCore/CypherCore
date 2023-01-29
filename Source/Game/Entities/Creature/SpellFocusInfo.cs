@@ -6,10 +6,10 @@ using Game.Spells;
 namespace Game.Entities
 {
     internal struct SpellFocusInfo
-	{
-		public Spell Spell;
-		public uint Delay;        // ms until the creature's Target should snap back (0 = no snapback scheduled)
-		public ObjectGuid Target; // the creature's "real" Target while casting
-		public float Orientation; // the creature's "real" orientation while casting
-	}
+    {
+        public Spell Spell;
+        public uint Delay;        // ms until the creature's Target should snap back (0 = no snapback scheduled)
+        public ObjectGuid Target; // the creature's "real" Target while casting
+        public float Orientation; // the creature's "real" orientation while casting
+    }
 }

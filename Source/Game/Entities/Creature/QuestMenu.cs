@@ -13,7 +13,7 @@ public class QuestMenu
 
         QuestMenuItem questMenuItem = new();
 
-        questMenuItem.QuestId   = QuestId;
+        questMenuItem.QuestId = QuestId;
         questMenuItem.QuestIcon = Icon;
 
         _questMenuItems.Add(questMenuItem);

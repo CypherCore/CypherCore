@@ -13,10 +13,10 @@ namespace Framework.Algorithms
     /// </summary>
     /// <seealso href="http://algs4.cs.princeton.edu/44sp/DijkstraSP.java.html">DijkstraSP class from Princeton University's Java Algorithms</seealso>
     public class DijkstraShortestPath
-	{
-		private readonly double[] _distanceTo;
-		private readonly DirectedEdge[] _edgeTo;
-		private readonly IndexMinPriorityQueue<double> _priorityQueue;
+    {
+        private readonly double[] _distanceTo;
+        private readonly DirectedEdge[] _edgeTo;
+        private readonly IndexMinPriorityQueue<double> _priorityQueue;
 
         /// <summary>
         ///  Computes a shortest paths tree from the specified sourceVertex to every other vertex in the edge-weighted directed graph
@@ -26,50 +26,50 @@ namespace Framework.Algorithms
         /// <exception cref="ArgumentOutOfRangeException">Throws an ArgumentOutOfRangeException if an edge weight is negative</exception>
         /// <exception cref="ArgumentNullException">Thrown if EdgeWeightedDigraph is null</exception>
         public DijkstraShortestPath(EdgeWeightedDigraph graph, int sourceVertex)
-		{
-			if (graph == null)
-				throw new ArgumentNullException("graph", "EdgeWeightedDigraph cannot be null");
+        {
+            if (graph == null)
+                throw new ArgumentNullException("graph", "EdgeWeightedDigraph cannot be null");
 
-			foreach (DirectedEdge edge in graph.Edges())
-				if (edge.Weight < 0)
-					throw new ArgumentOutOfRangeException($"Edge: '{edge}' has negative weight");
+            foreach (DirectedEdge edge in graph.Edges())
+                if (edge.Weight < 0)
+                    throw new ArgumentOutOfRangeException($"Edge: '{edge}' has negative weight");
 
-			_distanceTo = new double[graph.NumberOfVertices];
-			_edgeTo     = new DirectedEdge[graph.NumberOfVertices];
+            _distanceTo = new double[graph.NumberOfVertices];
+            _edgeTo = new DirectedEdge[graph.NumberOfVertices];
 
-			for (int v = 0; v < graph.NumberOfVertices; v++)
-				_distanceTo[v] = double.PositiveInfinity;
+            for (int v = 0; v < graph.NumberOfVertices; v++)
+                _distanceTo[v] = double.PositiveInfinity;
 
-			_distanceTo[sourceVertex] = 0.0;
+            _distanceTo[sourceVertex] = 0.0;
 
-			_priorityQueue = new IndexMinPriorityQueue<double>(graph.NumberOfVertices);
-			_priorityQueue.Insert(sourceVertex, _distanceTo[sourceVertex]);
+            _priorityQueue = new IndexMinPriorityQueue<double>(graph.NumberOfVertices);
+            _priorityQueue.Insert(sourceVertex, _distanceTo[sourceVertex]);
 
-			while (!_priorityQueue.IsEmpty())
-			{
-				int v = _priorityQueue.DeleteMin();
+            while (!_priorityQueue.IsEmpty())
+            {
+                int v = _priorityQueue.DeleteMin();
 
-				foreach (DirectedEdge edge in graph.Adjacent(v))
-					Relax(edge);
-			}
-		}
+                foreach (DirectedEdge edge in graph.Adjacent(v))
+                    Relax(edge);
+            }
+        }
 
-		private void Relax(DirectedEdge edge)
-		{
-			uint v = edge.From;
-			uint w = edge.To;
+        private void Relax(DirectedEdge edge)
+        {
+            uint v = edge.From;
+            uint w = edge.To;
 
-			if (_distanceTo[w] > _distanceTo[v] + edge.Weight)
-			{
-				_distanceTo[w] = _distanceTo[v] + edge.Weight;
-				_edgeTo[w]     = edge;
+            if (_distanceTo[w] > _distanceTo[v] + edge.Weight)
+            {
+                _distanceTo[w] = _distanceTo[v] + edge.Weight;
+                _edgeTo[w] = edge;
 
-				if (_priorityQueue.Contains((int)w))
-					_priorityQueue.DecreaseKey((int)w, _distanceTo[w]);
-				else
-					_priorityQueue.Insert((int)w, _distanceTo[w]);
-			}
-		}
+                if (_priorityQueue.Contains((int)w))
+                    _priorityQueue.DecreaseKey((int)w, _distanceTo[w]);
+                else
+                    _priorityQueue.Insert((int)w, _distanceTo[w]);
+            }
+        }
 
         /// <summary>
         ///  Returns the length of a shortest path from the sourceVertex to the specified destinationVertex
@@ -77,9 +77,9 @@ namespace Framework.Algorithms
         /// <param name="destinationVertex">The destination vertex to find a shortest path to</param>
         /// <returns>The length of a shortest path from the sourceVertex to the specified destinationVertex or double.PositiveInfinity if no such path exists</returns>
         public double DistanceTo(int destinationVertex)
-		{
-			return _distanceTo[destinationVertex];
-		}
+        {
+            return _distanceTo[destinationVertex];
+        }
 
         /// <summary>
         ///  Is there a path from the sourceVertex to the specified destinationVertex?
@@ -87,9 +87,9 @@ namespace Framework.Algorithms
         /// <param name="destinationVertex">The destination vertex to see if there is a path to</param>
         /// <returns>True if there is a path from the sourceVertex to the specified destinationVertex, false otherwise</returns>
         public bool HasPathTo(int destinationVertex)
-		{
-			return _distanceTo[destinationVertex] < double.PositiveInfinity;
-		}
+        {
+            return _distanceTo[destinationVertex] < double.PositiveInfinity;
+        }
 
         /// <summary>
         ///  Returns an IEnumerable of DirectedEdges representing a shortest path from the sourceVertex to the specified destinationVertex
@@ -97,19 +97,19 @@ namespace Framework.Algorithms
         /// <param name="destinationVertex">The destination vertex to find a shortest path to</param>
         /// <returns>IEnumerable of DirectedEdges representing a shortest path from the sourceVertex to the specified destinationVertex</returns>
         public IEnumerable<DirectedEdge> PathTo(int destinationVertex)
-		{
-			if (!HasPathTo(destinationVertex))
-				return null;
+        {
+            if (!HasPathTo(destinationVertex))
+                return null;
 
-			var path = new Stack<DirectedEdge>();
+            var path = new Stack<DirectedEdge>();
 
-			for (DirectedEdge edge = _edgeTo[destinationVertex]; edge != null; edge = _edgeTo[edge.From])
-				path.Push(edge);
+            for (DirectedEdge edge = _edgeTo[destinationVertex]; edge != null; edge = _edgeTo[edge.From])
+                path.Push(edge);
 
-			return path;
-		}
+            return path;
+        }
 
-		// TODO: This method should be private and should be called from the bottom of the constructor
+        // TODO: This method should be private and should be called from the bottom of the constructor
         /// <summary>
         ///  check optimality conditions:
         /// </summary>
@@ -118,49 +118,49 @@ namespace Framework.Algorithms
         /// <returns>True if all optimality conditions are met, false otherwise</returns>
         /// <exception cref="ArgumentNullException">Thrown on null EdgeWeightedDigraph</exception>
         public bool Check(EdgeWeightedDigraph graph, int sourceVertex)
-		{
-			if (graph == null)
-				throw new ArgumentNullException("graph", "EdgeWeightedDigraph cannot be null");
+        {
+            if (graph == null)
+                throw new ArgumentNullException("graph", "EdgeWeightedDigraph cannot be null");
 
-			if (_distanceTo[sourceVertex] != 0.0 ||
-			    _edgeTo[sourceVertex] != null)
-				return false;
+            if (_distanceTo[sourceVertex] != 0.0 ||
+                _edgeTo[sourceVertex] != null)
+                return false;
 
-			for (int v = 0; v < graph.NumberOfVertices; v++)
-			{
-				if (v == sourceVertex)
-					continue;
+            for (int v = 0; v < graph.NumberOfVertices; v++)
+            {
+                if (v == sourceVertex)
+                    continue;
 
-				if (_edgeTo[v] == null &&
-				    _distanceTo[v] != double.PositiveInfinity)
-					return false;
-			}
+                if (_edgeTo[v] == null &&
+                    _distanceTo[v] != double.PositiveInfinity)
+                    return false;
+            }
 
-			for (int v = 0; v < graph.NumberOfVertices; v++)
-				foreach (DirectedEdge edge in graph.Adjacent(v))
-				{
-					uint w = edge.To;
+            for (int v = 0; v < graph.NumberOfVertices; v++)
+                foreach (DirectedEdge edge in graph.Adjacent(v))
+                {
+                    uint w = edge.To;
 
-					if (_distanceTo[v] + edge.Weight < _distanceTo[w])
-						return false;
-				}
+                    if (_distanceTo[v] + edge.Weight < _distanceTo[w])
+                        return false;
+                }
 
-			for (int w = 0; w < graph.NumberOfVertices; w++)
-			{
-				if (_edgeTo[w] == null)
-					continue;
+            for (int w = 0; w < graph.NumberOfVertices; w++)
+            {
+                if (_edgeTo[w] == null)
+                    continue;
 
-				DirectedEdge edge = _edgeTo[w];
-				uint         v    = edge.From;
+                DirectedEdge edge = _edgeTo[w];
+                uint v = edge.From;
 
-				if (w != edge.To)
-					return false;
+                if (w != edge.To)
+                    return false;
 
-				if (_distanceTo[v] + edge.Weight != _distanceTo[w])
-					return false;
-			}
+                if (_distanceTo[v] + edge.Weight != _distanceTo[w])
+                    return false;
+            }
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }

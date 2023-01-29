@@ -6,8 +6,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IBattlefield
 {
-	public interface IBattlefieldGetBattlefield : IScriptObject
-	{
-		BattleField GetBattlefield(Map map);
-	}
+    public interface IBattlefieldGetBattlefield : IScriptObject
+    {
+        BattleField GetBattlefield(Map map);
+    }
 }

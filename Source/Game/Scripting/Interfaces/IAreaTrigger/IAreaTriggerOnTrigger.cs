@@ -6,8 +6,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IAreaTrigger
 {
-	public interface IAreaTriggerOnTrigger : IScriptObject
-	{
-		bool OnTrigger(Player player, AreaTriggerRecord trigger);
-	}
+    public interface IAreaTriggerOnTrigger : IScriptObject
+    {
+        bool OnTrigger(Player player, AreaTriggerRecord trigger);
+    }
 }

@@ -8,77 +8,77 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-	internal class AddToy : ClientPacket
-	{
-		public ObjectGuid Guid;
+    internal class AddToy : ClientPacket
+    {
+        public ObjectGuid Guid;
 
-		public AddToy(WorldPacket packet) : base(packet)
-		{
-		}
+        public AddToy(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			Guid = _worldPacket.ReadPackedGuid();
-		}
-	}
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid();
+        }
+    }
 
-	internal class UseToy : ClientPacket
-	{
-		public SpellCastRequest Cast = new();
+    internal class UseToy : ClientPacket
+    {
+        public SpellCastRequest Cast = new();
 
-		public UseToy(WorldPacket packet) : base(packet)
-		{
-		}
+        public UseToy(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			Cast.Read(_worldPacket);
-		}
-	}
+        public override void Read()
+        {
+            Cast.Read(_worldPacket);
+        }
+    }
 
-	internal class AccountToyUpdate : ServerPacket
-	{
-		public bool IsFullUpdate = false;
-		public Dictionary<uint, ToyFlags> Toys = new();
+    internal class AccountToyUpdate : ServerPacket
+    {
+        public bool IsFullUpdate = false;
+        public Dictionary<uint, ToyFlags> Toys = new();
 
-		public AccountToyUpdate() : base(ServerOpcodes.AccountToyUpdate, ConnectionType.Instance)
-		{
-		}
+        public AccountToyUpdate() : base(ServerOpcodes.AccountToyUpdate, ConnectionType.Instance)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteBit(IsFullUpdate);
-			_worldPacket.FlushBits();
+        public override void Write()
+        {
+            _worldPacket.WriteBit(IsFullUpdate);
+            _worldPacket.FlushBits();
 
-			// all lists have to have the same size
-			_worldPacket.WriteInt32(Toys.Count);
-			_worldPacket.WriteInt32(Toys.Count);
-			_worldPacket.WriteInt32(Toys.Count);
+            // all lists have to have the same size
+            _worldPacket.WriteInt32(Toys.Count);
+            _worldPacket.WriteInt32(Toys.Count);
+            _worldPacket.WriteInt32(Toys.Count);
 
-			foreach (var pair in Toys)
-				_worldPacket.WriteUInt32(pair.Key);
+            foreach (var pair in Toys)
+                _worldPacket.WriteUInt32(pair.Key);
 
-			foreach (var pair in Toys)
-				_worldPacket.WriteBit(pair.Value.HasAnyFlag(ToyFlags.Favorite));
+            foreach (var pair in Toys)
+                _worldPacket.WriteBit(pair.Value.HasAnyFlag(ToyFlags.Favorite));
 
-			foreach (var pair in Toys)
-				_worldPacket.WriteBit(pair.Value.HasAnyFlag(ToyFlags.HasFanfare));
+            foreach (var pair in Toys)
+                _worldPacket.WriteBit(pair.Value.HasAnyFlag(ToyFlags.HasFanfare));
 
-			_worldPacket.FlushBits();
-		}
-	}
+            _worldPacket.FlushBits();
+        }
+    }
 
-	internal class ToyClearFanfare : ClientPacket
-	{
-		public uint ItemID;
+    internal class ToyClearFanfare : ClientPacket
+    {
+        public uint ItemID;
 
-		public ToyClearFanfare(WorldPacket packet) : base(packet)
-		{
-		}
+        public ToyClearFanfare(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			ItemID = _worldPacket.ReadUInt32();
-		}
-	}
+        public override void Read()
+        {
+            ItemID = _worldPacket.ReadUInt32();
+        }
+    }
 }

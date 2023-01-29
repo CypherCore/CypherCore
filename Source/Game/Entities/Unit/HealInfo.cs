@@ -19,22 +19,22 @@ public class HealInfo
 
     public HealInfo(Unit healer, Unit target, uint heal, SpellInfo spellInfo, SpellSchoolMask schoolMask)
     {
-        _healer       = healer;
-        _target       = target;
-        _heal         = heal;
+        _healer = healer;
+        _target = target;
+        _heal = heal;
         _originalHeal = heal;
-        _spellInfo    = spellInfo;
-        _schoolMask   = schoolMask;
+        _spellInfo = spellInfo;
+        _schoolMask = schoolMask;
     }
 
     public void AbsorbHeal(uint amount)
     {
-        amount         =  Math.Min(amount, GetHeal());
-        _absorb        += amount;
-        _heal          -= amount;
-        amount         =  Math.Min(amount, GetEffectiveHeal());
+        amount = Math.Min(amount, GetHeal());
+        _absorb += amount;
+        _heal -= amount;
+        amount = Math.Min(amount, GetEffectiveHeal());
         _effectiveHeal -= amount;
-        _hitMask       |= ProcFlagsHit.Absorb;
+        _hitMask |= ProcFlagsHit.Absorb;
     }
 
     public void SetEffectiveHeal(uint amount)

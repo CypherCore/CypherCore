@@ -5,8 +5,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-	public interface IMapOnCreate<T> : IScriptObject where T : Map
-	{
-		void OnCreate(T map);
-	}
+    public interface IMapOnCreate<T> : IScriptObject where T : Map
+    {
+        void OnCreate(T map);
+    }
 }

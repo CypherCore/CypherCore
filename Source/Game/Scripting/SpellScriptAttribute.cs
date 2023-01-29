@@ -5,26 +5,26 @@ using System;
 
 namespace Game.Scripting
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-	public class SpellScriptAttribute : ScriptAttribute
-	{
-		public SpellScriptAttribute(string name = "", params object[] args) : base(name, args)
-		{
-		}
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class SpellScriptAttribute : ScriptAttribute
+    {
+        public SpellScriptAttribute(string name = "", params object[] args) : base(name, args)
+        {
+        }
 
-		public SpellScriptAttribute(uint spellId, string name = "", params object[] args) : base(name, args)
-		{
-			SpellIds = new[]
-			           {
-				           spellId
-			           };
-		}
+        public SpellScriptAttribute(uint spellId, string name = "", params object[] args) : base(name, args)
+        {
+            SpellIds = new[]
+                       {
+                           spellId
+                       };
+        }
 
-		public SpellScriptAttribute(uint[] spellId, string name = "", params object[] args) : base(name, args)
-		{
-			SpellIds = spellId;
-		}
+        public SpellScriptAttribute(uint[] spellId, string name = "", params object[] args) : base(name, args)
+        {
+            SpellIds = spellId;
+        }
 
-		public uint[] SpellIds { get; private set; }
-	}
+        public uint[] SpellIds { get; private set; }
+    }
 }

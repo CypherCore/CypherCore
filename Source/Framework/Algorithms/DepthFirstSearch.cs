@@ -6,10 +6,10 @@ using Framework.Collections;
 
 namespace Framework.Algorithms
 {
-	public class DepthFirstSearch
-	{
-		private int count;     // number of vertices connected to s
-		private bool[] marked; // marked[v] = is there an s-v path?
+    public class DepthFirstSearch
+    {
+        private int count;     // number of vertices connected to s
+        private readonly bool[] marked; // marked[v] = is there an s-v path?
 
         /**
 		 * Computes the vertices in graph {@code G} that are
@@ -24,25 +24,25 @@ namespace Framework.Algorithms
 		 * }
 		 */
         public DepthFirstSearch(EdgeWeightedDigraph G, uint s, Action<uint> action)
-		{
-			marked = new bool[G.NumberOfVertices];
-			//validateVertex(s);
-			dfs(G, s, action);
-		}
+        {
+            marked = new bool[G.NumberOfVertices];
+            //validateVertex(s);
+            dfs(G, s, action);
+        }
 
-		// depth first search from v
-		private void dfs(EdgeWeightedDigraph G, uint v, Action<uint> action)
-		{
-			count++;
-			marked[v] = true;
+        // depth first search from v
+        private void dfs(EdgeWeightedDigraph G, uint v, Action<uint> action)
+        {
+            count++;
+            marked[v] = true;
 
-			foreach (var w in G.Adjacent((int)v))
-				if (!marked[w.To])
-				{
-					action(w.To);
-					dfs(G, w.To, action);
-				}
-		}
+            foreach (var w in G.Adjacent((int)v))
+                if (!marked[w.To])
+                {
+                    action(w.To);
+                    dfs(G, w.To, action);
+                }
+        }
 
         /**
 		 * Is there a path between the source vertex {@code s} and vertex {@code v}?
@@ -56,18 +56,18 @@ namespace Framework.Algorithms
 		 * }
 		 */
         public bool Marked(int v)
-		{
-			//validateVertex(v);
-			return marked[v];
-		}
+        {
+            //validateVertex(v);
+            return marked[v];
+        }
 
         /**
 		 * Returns the number of vertices connected to the source vertex {@code s}.
 		 * @return the number of vertices connected to the source vertex {@code s}
 		 */
         public int Count()
-		{
-			return count;
-		}
-	}
+        {
+            return count;
+        }
+    }
 }

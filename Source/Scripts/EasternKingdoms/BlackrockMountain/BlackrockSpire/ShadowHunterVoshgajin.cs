@@ -9,67 +9,67 @@ using Game.Scripting;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.ShadowHunterVoshgajin
 {
-	internal struct SpellIds
-	{
-		public const uint Curseofblood = 24673;
-		public const uint Hex = 16708;
-		public const uint Cleave = 20691;
-	}
+    internal struct SpellIds
+    {
+        public const uint Curseofblood = 24673;
+        public const uint Hex = 16708;
+        public const uint Cleave = 20691;
+    }
 
-	[Script]
-	internal class boss_shadow_hunter_voshgajin : BossAI
-	{
-		public boss_shadow_hunter_voshgajin(Creature creature) : base(creature, DataTypes.ShadowHunterVoshgajin)
-		{
-		}
+    [Script]
+    internal class boss_shadow_hunter_voshgajin : BossAI
+    {
+        public boss_shadow_hunter_voshgajin(Creature creature) : base(creature, DataTypes.ShadowHunterVoshgajin)
+        {
+        }
 
-		public override void Reset()
-		{
-			_Reset();
-			//DoCast(me, SpellIcearmor, true);
-		}
+        public override void Reset()
+        {
+            _Reset();
+            //DoCast(me, SpellIcearmor, true);
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			base.JustEngagedWith(who);
+        public override void JustEngagedWith(Unit who)
+        {
+            base.JustEngagedWith(who);
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(2),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Curseofblood);
-				                    task.Repeat(TimeSpan.FromSeconds(45));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Curseofblood);
+                                    task.Repeat(TimeSpan.FromSeconds(45));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(8),
-			                    task =>
-			                    {
-				                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
+            _scheduler.Schedule(TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
 
-				                    if (target)
-					                    DoCast(target, SpellIds.Hex);
+                                    if (target)
+                                        DoCast(target, SpellIds.Hex);
 
-				                    task.Repeat(TimeSpan.FromSeconds(15));
-			                    });
+                                    task.Repeat(TimeSpan.FromSeconds(15));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(14),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.Cleave);
-				                    task.Repeat(TimeSpan.FromSeconds(7));
-			                    });
-		}
+            _scheduler.Schedule(TimeSpan.FromSeconds(14),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Cleave);
+                                    task.Repeat(TimeSpan.FromSeconds(7));
+                                });
+        }
 
-		public override void JustDied(Unit killer)
-		{
-			_JustDied();
-		}
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 }

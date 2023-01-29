@@ -6,77 +6,77 @@ using Game.Entities;
 
 namespace Game.Chat.Commands
 {
-	[CommandGroup("honor")]
-	internal class HonorCommands
-	{
-		[Command("update", RBACPermissions.CommandHonorUpdate)]
-		private static bool HandleHonorUpdateCommand(CommandHandler handler)
-		{
-			Player target = handler.GetSelectedPlayer();
+    [CommandGroup("honor")]
+    internal class HonorCommands
+    {
+        [Command("update", RBACPermissions.CommandHonorUpdate)]
+        private static bool HandleHonorUpdateCommand(CommandHandler handler)
+        {
+            Player target = handler.GetSelectedPlayer();
 
-			if (!target)
-			{
-				handler.SendSysMessage(CypherStrings.PlayerNotFound);
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-				return false;
-			}
+                return false;
+            }
 
-			// check online security
-			if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-				return false;
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
 
-			target.UpdateHonorFields();
+            target.UpdateHonorFields();
 
-			return true;
-		}
+            return true;
+        }
 
-		[CommandGroup("add")]
-		private class HonorAddCommands
-		{
-			[Command("", RBACPermissions.CommandHonorAdd)]
-			private static bool HandleHonorAddCommand(CommandHandler handler, int amount)
-			{
-				Player target = handler.GetSelectedPlayer();
+        [CommandGroup("add")]
+        private class HonorAddCommands
+        {
+            [Command("", RBACPermissions.CommandHonorAdd)]
+            private static bool HandleHonorAddCommand(CommandHandler handler, int amount)
+            {
+                Player target = handler.GetSelectedPlayer();
 
-				if (!target)
-				{
-					handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-					return false;
-				}
+                    return false;
+                }
 
-				// check online security
-				if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-					return false;
+                // check online security
+                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                    return false;
 
-				target.RewardHonor(null, 1, amount);
+                target.RewardHonor(null, 1, amount);
 
-				return true;
-			}
+                return true;
+            }
 
-			[Command("kill", RBACPermissions.CommandHonorAddKill)]
-			private static bool HandleHonorAddKillCommand(CommandHandler handler)
-			{
-				Unit target = handler.GetSelectedUnit();
+            [Command("kill", RBACPermissions.CommandHonorAddKill)]
+            private static bool HandleHonorAddKillCommand(CommandHandler handler)
+            {
+                Unit target = handler.GetSelectedUnit();
 
-				if (!target)
-				{
-					handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
-					return false;
-				}
+                    return false;
+                }
 
-				// check online security
-				Player player = target.ToPlayer();
+                // check online security
+                Player player = target.ToPlayer();
 
-				if (player)
-					if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
-						return false;
+                if (player)
+                    if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
+                        return false;
 
-				handler.GetPlayer().RewardHonor(target, 1);
+                handler.GetPlayer().RewardHonor(target, 1);
 
-				return true;
-			}
-		}
-	}
+                return true;
+            }
+        }
+    }
 }

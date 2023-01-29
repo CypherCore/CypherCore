@@ -6,8 +6,8 @@ using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IItem
 {
-	public interface IItemOnCastItemCombatSpell : IScriptObject
-	{
-		bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item);
-	}
+    public interface IItemOnCastItemCombatSpell : IScriptObject
+    {
+        bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item);
+    }
 }

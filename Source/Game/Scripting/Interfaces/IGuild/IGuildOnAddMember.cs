@@ -6,8 +6,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-	public interface IGuildOnAddMember : IScriptObject
-	{
-		void OnAddMember(Guild guild, Player player, byte plRank);
-	}
+    public interface IGuildOnAddMember : IScriptObject
+    {
+        void OnAddMember(Guild guild, Player player, byte plRank);
+    }
 }

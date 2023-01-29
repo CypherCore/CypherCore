@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IAura
 {
-	public interface IAuraScriptLoaderGetAuraScript : IScriptObject
-	{
-		AuraScript GetAuraScript();
-	}
+    public interface IAuraScriptLoaderGetAuraScript : IScriptObject
+    {
+        AuraScript GetAuraScript();
+    }
 }

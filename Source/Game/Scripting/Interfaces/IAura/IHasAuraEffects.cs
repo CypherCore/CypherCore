@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.IAura
 {
-	public interface IHasAuraEffects
-	{
-		List<IAuraEffectHandler> Effects { get; }
-	}
+    public interface IHasAuraEffects
+    {
+        List<IAuraEffectHandler> Effects { get; }
+    }
 }

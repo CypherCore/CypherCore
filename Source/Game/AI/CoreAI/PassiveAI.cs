@@ -6,26 +6,26 @@ using Game.Entities;
 
 namespace Game.AI
 {
-	public class PassiveAI : CreatureAI
-	{
-		public PassiveAI(Creature creature) : base(creature)
-		{
-			creature.SetReactState(ReactStates.Passive);
-		}
+    public class PassiveAI : CreatureAI
+    {
+        public PassiveAI(Creature creature) : base(creature)
+        {
+            creature.SetReactState(ReactStates.Passive);
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (me.IsEngaged() &&
-			    !me.IsInCombat())
-				EnterEvadeMode(EvadeReason.NoHostiles);
-		}
+        public override void UpdateAI(uint diff)
+        {
+            if (me.IsEngaged() &&
+                !me.IsInCombat())
+                EnterEvadeMode(EvadeReason.NoHostiles);
+        }
 
-		public override void AttackStart(Unit victim)
-		{
-		}
+        public override void AttackStart(Unit victim)
+        {
+        }
 
-		public override void MoveInLineOfSight(Unit who)
-		{
-		}
-	}
+        public override void MoveInLineOfSight(Unit who)
+        {
+        }
+    }
 }

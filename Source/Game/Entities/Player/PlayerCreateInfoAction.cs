@@ -4,21 +4,21 @@
 namespace Game.Entities
 {
     public class PlayerCreateInfoAction
-	{
-		public uint Action { get; set; }
+    {
+        public uint Action { get; set; }
 
         public byte Button { get; set; }
         public byte Type { get; set; }
 
         public PlayerCreateInfoAction() : this(0, 0, 0)
-		{
-		}
+        {
+        }
 
-		public PlayerCreateInfoAction(byte _button, uint _action, byte _type)
-		{
-			Button = _button;
-			Type   = _type;
-			Action = _action;
-		}
-	}
+        public PlayerCreateInfoAction(byte _button, uint _action, byte _type)
+        {
+            Button = _button;
+            Type = _type;
+            Action = _action;
+        }
+    }
 }

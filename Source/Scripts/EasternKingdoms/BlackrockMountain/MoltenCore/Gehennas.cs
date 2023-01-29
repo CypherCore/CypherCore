@@ -9,60 +9,60 @@ using Game.Scripting;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Gehennas
 {
-	internal struct SpellIds
-	{
-		public const uint GehennasCurse = 19716;
-		public const uint RainOfFire = 19717;
-		public const uint ShadowBolt = 19728;
-	}
+    internal struct SpellIds
+    {
+        public const uint GehennasCurse = 19716;
+        public const uint RainOfFire = 19717;
+        public const uint ShadowBolt = 19728;
+    }
 
-	[Script]
-	internal class boss_gehennas : BossAI
-	{
-		public boss_gehennas(Creature creature) : base(creature, DataTypes.Gehennas)
-		{
-		}
+    [Script]
+    internal class boss_gehennas : BossAI
+    {
+        public boss_gehennas(Creature creature) : base(creature, DataTypes.Gehennas)
+        {
+        }
 
-		public override void JustEngagedWith(Unit victim)
-		{
-			base.JustEngagedWith(victim);
+        public override void JustEngagedWith(Unit victim)
+        {
+            base.JustEngagedWith(victim);
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(12),
-			                    task =>
-			                    {
-				                    DoCastVictim(SpellIds.GehennasCurse);
-				                    task.Repeat(TimeSpan.FromSeconds(22), TimeSpan.FromSeconds(30));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(12),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.GehennasCurse);
+                                    task.Repeat(TimeSpan.FromSeconds(22), TimeSpan.FromSeconds(30));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(10),
-			                    task =>
-			                    {
-				                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
 
-				                    if (target)
-					                    DoCast(target, SpellIds.RainOfFire);
+                                    if (target)
+                                        DoCast(target, SpellIds.RainOfFire);
 
-				                    task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(12));
-			                    });
+                                    task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(12));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(6),
-			                    task =>
-			                    {
-				                    Unit target = SelectTarget(SelectTargetMethod.Random, 1);
+            _scheduler.Schedule(TimeSpan.FromSeconds(6),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 1);
 
-				                    if (target)
-					                    DoCast(target, SpellIds.ShadowBolt);
+                                    if (target)
+                                        DoCast(target, SpellIds.ShadowBolt);
 
-				                    task.Repeat(TimeSpan.FromSeconds(7));
-			                    });
-		}
+                                    task.Repeat(TimeSpan.FromSeconds(7));
+                                });
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 }

@@ -1,13 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting.Interfaces;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Scripting
 {
@@ -121,7 +121,7 @@ namespace Game.Scripting
             return CurrentScriptState == (byte)SpellScriptHookType.CheckCast;
         }
 
-        bool IsAfterTargetSelectionPhase()
+        private bool IsAfterTargetSelectionPhase()
         {
             return IsInHitPhase()
                 || IsInEffectHook()
@@ -145,7 +145,7 @@ namespace Game.Scripting
             return false;
         }
 
-        bool IsInModifiableHook()
+        private bool IsInModifiableHook()
         {
             // after hit hook executed after Damage/healing is already done
             // modifying it at this point has no effect
@@ -171,9 +171,9 @@ namespace Game.Scripting
                 || CurrentScriptState == (byte)SpellScriptHookType.EffectSuccessfulDispel;
         }
 
-        Spell m_spell;
-        uint m_hitPreventEffectMask;
-        uint m_hitPreventDefaultEffectMask;
+        private Spell m_spell;
+        private uint m_hitPreventEffectMask;
+        private uint m_hitPreventDefaultEffectMask;
 
         // hooks are executed in following order, at specified event of spell:
         // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
@@ -427,7 +427,8 @@ namespace Game.Scripting
             }
             m_spell._healing = heal;
         }
-        void PreventHitHeal() { SetHitHeal(0); }
+
+        private void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
 
         /// <summary>
@@ -481,12 +482,10 @@ namespace Game.Scripting
             }
 
             UnitAura unitAura = m_spell.spellAura;
-            if (unitAura != null)
-                unitAura.Remove();
+            unitAura?.Remove();
 
             DynObjAura dynAura = m_spell.dynObjAura;
-            if (dynAura != null)
-                dynAura.Remove();
+            dynAura?.Remove();
         }
 
         // prevents effect execution on current spell hit Target

@@ -16,202 +16,202 @@ using Google.Protobuf;
 
 namespace BNetServer
 {
-	public class LoginServiceManager : Singleton<LoginServiceManager>
-	{
-		private X509Certificate2 certificate;
-		private IPEndPoint externalAddress;
-		private FormInputs formInputs;
-		private IPEndPoint localAddress;
-		private ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
+    public class LoginServiceManager : Singleton<LoginServiceManager>
+    {
+        private X509Certificate2 certificate;
+        private IPEndPoint externalAddress;
+        private readonly FormInputs formInputs;
+        private IPEndPoint localAddress;
+        private readonly ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
 
-		private LoginServiceManager()
-		{
-			serviceHandlers = new ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler>();
-			formInputs      = new FormInputs();
-		}
+        private LoginServiceManager()
+        {
+            serviceHandlers = new ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler>();
+            formInputs = new FormInputs();
+        }
 
-		public void Initialize()
-		{
-			int port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
+        public void Initialize()
+        {
+            int port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
 
-			if (port < 0 ||
-			    port > 0xFFFF)
-			{
-				Log.outError(LogFilter.Network, $"Specified login service port ({port}) out of allowed range (1-65535), defaulting to 8081");
-				port = 8081;
-			}
+            if (port < 0 ||
+                port > 0xFFFF)
+            {
+                Log.outError(LogFilter.Network, $"Specified login service port ({port}) out of allowed range (1-65535), defaulting to 8081");
+                port = 8081;
+            }
 
-			string    configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
-			IPAddress address;
+            string configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
+            IPAddress address;
 
-			if (!IPAddress.TryParse(configuredAddress, out address))
-			{
-				Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
+            if (!IPAddress.TryParse(configuredAddress, out address))
+            {
+                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
 
-				return;
-			}
+                return;
+            }
 
-			externalAddress = new IPEndPoint(address, port);
+            externalAddress = new IPEndPoint(address, port);
 
-			configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
+            configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.LocalAddress", "127.0.0.1");
 
-			if (!IPAddress.TryParse(configuredAddress, out address))
-			{
-				Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
+            if (!IPAddress.TryParse(configuredAddress, out address))
+            {
+                Log.outError(LogFilter.Network, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
 
-				return;
-			}
+                return;
+            }
 
-			localAddress = new IPEndPoint(address, port);
+            localAddress = new IPEndPoint(address, port);
 
-			// set up form inputs 
-			formInputs.Type = "LOGIN_FORM";
+            // set up form inputs 
+            formInputs.Type = "LOGIN_FORM";
 
-			var input = new FormInput();
-			input.Id        = "account_name";
-			input.Type      = "text";
-			input.Label     = "E-mail";
-			input.MaxLength = 320;
-			formInputs.Inputs.Add(input);
+            var input = new FormInput();
+            input.Id = "account_name";
+            input.Type = "text";
+            input.Label = "E-mail";
+            input.MaxLength = 320;
+            formInputs.Inputs.Add(input);
 
-			input           = new FormInput();
-			input.Id        = "password";
-			input.Type      = "password";
-			input.Label     = "Password";
-			input.MaxLength = 16;
-			formInputs.Inputs.Add(input);
+            input = new FormInput();
+            input.Id = "password";
+            input.Type = "password";
+            input.Label = "Password";
+            input.MaxLength = 16;
+            formInputs.Inputs.Add(input);
 
-			input       = new FormInput();
-			input.Id    = "log_in_submit";
-			input.Type  = "submit";
-			input.Label = "Log In";
-			formInputs.Inputs.Add(input);
+            input = new FormInput();
+            input.Id = "log_in_submit";
+            input.Type = "submit";
+            input.Label = "Log In";
+            formInputs.Inputs.Add(input);
 
-			certificate = new X509Certificate2("BNetServer.pfx");
+            certificate = new X509Certificate2("BNetServer.pfx");
 
-			Assembly currentAsm = Assembly.GetExecutingAssembly();
+            Assembly currentAsm = Assembly.GetExecutingAssembly();
 
-			foreach (var type in currentAsm.GetTypes())
-			{
-				foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
-				{
-					foreach (var serviceAttr in methodInfo.GetCustomAttributes<ServiceAttribute>())
-					{
-						if (serviceAttr == null)
-							continue;
+            foreach (var type in currentAsm.GetTypes())
+            {
+                foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+                {
+                    foreach (var serviceAttr in methodInfo.GetCustomAttributes<ServiceAttribute>())
+                    {
+                        if (serviceAttr == null)
+                            continue;
 
-						var key = (serviceAttr.ServiceHash, serviceAttr.MethodId);
+                        var key = (serviceAttr.ServiceHash, serviceAttr.MethodId);
 
-						if (serviceHandlers.ContainsKey(key))
-						{
-							Log.outError(LogFilter.Network, $"Tried to override ServiceHandler: {serviceHandlers[key]} with {methodInfo.Name} (ServiceHash: {serviceAttr.ServiceHash} MethodId: {serviceAttr.MethodId})");
+                        if (serviceHandlers.ContainsKey(key))
+                        {
+                            Log.outError(LogFilter.Network, $"Tried to override ServiceHandler: {serviceHandlers[key]} with {methodInfo.Name} (ServiceHash: {serviceAttr.ServiceHash} MethodId: {serviceAttr.MethodId})");
 
-							continue;
-						}
+                            continue;
+                        }
 
-						var parameters = methodInfo.GetParameters();
+                        var parameters = methodInfo.GetParameters();
 
-						if (parameters.Length == 0)
-						{
-							Log.outError(LogFilter.Network, $"Method: {methodInfo.Name} needs atleast one paramter");
+                        if (parameters.Length == 0)
+                        {
+                            Log.outError(LogFilter.Network, $"Method: {methodInfo.Name} needs atleast one paramter");
 
-							continue;
-						}
+                            continue;
+                        }
 
-						serviceHandlers[key] = new BnetServiceHandler(methodInfo, parameters);
-					}
-				}
-			}
-		}
+                        serviceHandlers[key] = new BnetServiceHandler(methodInfo, parameters);
+                    }
+                }
+            }
+        }
 
-		public BnetServiceHandler GetHandler(uint serviceHash, uint methodId)
-		{
-			return serviceHandlers.LookupByKey((serviceHash, methodId));
-		}
+        public BnetServiceHandler GetHandler(uint serviceHash, uint methodId)
+        {
+            return serviceHandlers.LookupByKey((serviceHash, methodId));
+        }
 
-		public IPEndPoint GetAddressForClient(IPAddress address)
-		{
-			if (IPAddress.IsLoopback(address))
-				return localAddress;
+        public IPEndPoint GetAddressForClient(IPAddress address)
+        {
+            if (IPAddress.IsLoopback(address))
+                return localAddress;
 
-			return externalAddress;
-		}
+            return externalAddress;
+        }
 
-		public FormInputs GetFormInput()
-		{
-			return formInputs;
-		}
+        public FormInputs GetFormInput()
+        {
+            return formInputs;
+        }
 
-		public X509Certificate2 GetCertificate()
-		{
-			return certificate;
-		}
-	}
+        public X509Certificate2 GetCertificate()
+        {
+            return certificate;
+        }
+    }
 
-	public class BnetServiceHandler
-	{
-		private Delegate methodCaller;
-		private Type requestType;
-		private Type responseType;
+    public class BnetServiceHandler
+    {
+        private readonly Delegate methodCaller;
+        private readonly Type requestType;
+        private readonly Type responseType;
 
-		public BnetServiceHandler(MethodInfo info, ParameterInfo[] parameters)
-		{
-			requestType = parameters[0].ParameterType;
+        public BnetServiceHandler(MethodInfo info, ParameterInfo[] parameters)
+        {
+            requestType = parameters[0].ParameterType;
 
-			if (parameters.Length > 1)
-				responseType = parameters[1].ParameterType;
+            if (parameters.Length > 1)
+                responseType = parameters[1].ParameterType;
 
-			if (responseType != null)
-				methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[]
-				                                                              {
-					                                                              typeof(Session), requestType, responseType, info.ReturnType
-				                                                              }));
-			else
-				methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[]
-				                                                              {
-					                                                              typeof(Session), requestType, info.ReturnType
-				                                                              }));
-		}
+            if (responseType != null)
+                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[]
+                                                                              {
+                                                                                  typeof(Session), requestType, responseType, info.ReturnType
+                                                                              }));
+            else
+                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[]
+                                                                              {
+                                                                                  typeof(Session), requestType, info.ReturnType
+                                                                              }));
+        }
 
-		public void Invoke(Session session, uint token, CodedInputStream stream)
-		{
-			var request = (IMessage)Activator.CreateInstance(requestType);
-			request.MergeFrom(stream);
+        public void Invoke(Session session, uint token, CodedInputStream stream)
+        {
+            var request = (IMessage)Activator.CreateInstance(requestType);
+            request.MergeFrom(stream);
 
-			BattlenetRpcErrorCode status;
+            BattlenetRpcErrorCode status;
 
-			if (responseType != null)
-			{
-				var response = (IMessage)Activator.CreateInstance(responseType);
-				status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response);
-				Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Returned: {2} Status: {3}.", session.GetClientInfo(), request, response, status);
+            if (responseType != null)
+            {
+                var response = (IMessage)Activator.CreateInstance(responseType);
+                status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response);
+                Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Returned: {2} Status: {3}.", session.GetClientInfo(), request, response, status);
 
-				if (status == 0)
-					session.SendResponse(token, response);
-				else
-					session.SendResponse(token, status);
-			}
-			else
-			{
-				status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request);
-				Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Status: {2}.", session.GetClientInfo(), request, status);
+                if (status == 0)
+                    session.SendResponse(token, response);
+                else
+                    session.SendResponse(token, status);
+            }
+            else
+            {
+                status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request);
+                Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Status: {2}.", session.GetClientInfo(), request, status);
 
-				if (status != 0)
-					session.SendResponse(token, status);
-			}
-		}
-	}
+                if (status != 0)
+                    session.SendResponse(token, status);
+            }
+        }
+    }
 
-	[AttributeUsage(AttributeTargets.Method)]
-	public sealed class ServiceAttribute : Attribute
-	{
-		public ServiceAttribute(OriginalHash serviceHash, uint methodId)
-		{
-			ServiceHash = (uint)serviceHash;
-			MethodId    = methodId;
-		}
+    [AttributeUsage(AttributeTargets.Method)]
+    public sealed class ServiceAttribute : Attribute
+    {
+        public ServiceAttribute(OriginalHash serviceHash, uint methodId)
+        {
+            ServiceHash = (uint)serviceHash;
+            MethodId = methodId;
+        }
 
-		public uint ServiceHash { get; set; }
-		public uint MethodId { get; set; }
-	}
+        public uint ServiceHash { get; set; }
+        public uint MethodId { get; set; }
+    }
 }

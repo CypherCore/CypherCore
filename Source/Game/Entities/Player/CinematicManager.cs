@@ -9,202 +9,202 @@ using Game.DataStorage;
 
 namespace Game.Entities
 {
-	public class CinematicManager : IDisposable
-	{
-		public CinematicSequencesRecord _activeCinematic;
-		public int _activeCinematicCameraIndex;
-		public List<FlyByCamera> _cinematicCamera;
+    public class CinematicManager : IDisposable
+    {
+        public CinematicSequencesRecord _activeCinematic;
+        public int _activeCinematicCameraIndex;
+        public List<FlyByCamera> _cinematicCamera;
 
-		public uint _cinematicDiff;
-		public uint _cinematicLength;
-		private TempSummon _CinematicObject;
-		public uint _lastCinematicCheck;
+        public uint _cinematicDiff;
+        public uint _cinematicLength;
+        private TempSummon _CinematicObject;
+        public uint _lastCinematicCheck;
 
-		private Position _remoteSightPosition;
+        private readonly Position _remoteSightPosition;
 
-		// Remote location information
-		private Player player;
+        // Remote location information
+        private readonly Player player;
 
-		public CinematicManager(Player playerref)
-		{
-			player                      = playerref;
-			_activeCinematicCameraIndex = -1;
-			_remoteSightPosition        = new Position(0.0f, 0.0f, 0.0f);
-		}
+        public CinematicManager(Player playerref)
+        {
+            player = playerref;
+            _activeCinematicCameraIndex = -1;
+            _remoteSightPosition = new Position(0.0f, 0.0f, 0.0f);
+        }
 
-		public virtual void Dispose()
-		{
-			if (_cinematicCamera != null &&
-			    _activeCinematic != null)
-				EndCinematic();
-		}
+        public virtual void Dispose()
+        {
+            if (_cinematicCamera != null &&
+                _activeCinematic != null)
+                EndCinematic();
+        }
 
-		public void BeginCinematic(CinematicSequencesRecord cinematic)
-		{
-			_activeCinematic            = cinematic;
-			_activeCinematicCameraIndex = -1;
-		}
+        public void BeginCinematic(CinematicSequencesRecord cinematic)
+        {
+            _activeCinematic = cinematic;
+            _activeCinematicCameraIndex = -1;
+        }
 
-		public void NextCinematicCamera()
-		{
-			// Sanity check for active camera set
-			if (_activeCinematic == null ||
-			    _activeCinematicCameraIndex >= _activeCinematic.Camera.Length)
-				return;
+        public void NextCinematicCamera()
+        {
+            // Sanity check for active camera set
+            if (_activeCinematic == null ||
+                _activeCinematicCameraIndex >= _activeCinematic.Camera.Length)
+                return;
 
-			uint cinematicCameraId = _activeCinematic.Camera[++_activeCinematicCameraIndex];
+            uint cinematicCameraId = _activeCinematic.Camera[++_activeCinematicCameraIndex];
 
-			if (cinematicCameraId == 0)
-				return;
+            if (cinematicCameraId == 0)
+                return;
 
-			var flyByCameras = M2Storage.GetFlyByCameras(cinematicCameraId);
+            var flyByCameras = M2Storage.GetFlyByCameras(cinematicCameraId);
 
-			if (!flyByCameras.Empty())
-			{
-				// Initialize diff, and set camera
-				_cinematicDiff   = 0;
-				_cinematicCamera = flyByCameras;
+            if (!flyByCameras.Empty())
+            {
+                // Initialize diff, and set camera
+                _cinematicDiff = 0;
+                _cinematicCamera = flyByCameras;
 
-				if (!_cinematicCamera.Empty())
-				{
-					FlyByCamera firstCamera = _cinematicCamera.FirstOrDefault();
-					Position    pos         = new(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
+                if (!_cinematicCamera.Empty())
+                {
+                    FlyByCamera firstCamera = _cinematicCamera.FirstOrDefault();
+                    Position pos = new(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
 
-					if (!pos.IsPositionValid())
-						return;
+                    if (!pos.IsPositionValid())
+                        return;
 
-					player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
-					_CinematicObject = player.SummonCreature(1, pos.X, pos.Y, pos.Z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+                    player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
+                    _CinematicObject = player.SummonCreature(1, pos.X, pos.Y, pos.Z, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
 
-					if (_CinematicObject)
-					{
-						_CinematicObject.SetActive(true);
-						player.SetViewpoint(_CinematicObject, true);
-					}
+                    if (_CinematicObject)
+                    {
+                        _CinematicObject.SetActive(true);
+                        player.SetViewpoint(_CinematicObject, true);
+                    }
 
-					// Get cinematic length
-					_cinematicLength = _cinematicCamera.LastOrDefault().timeStamp;
-				}
-			}
-		}
+                    // Get cinematic length
+                    _cinematicLength = _cinematicCamera.LastOrDefault().timeStamp;
+                }
+            }
+        }
 
-		public void EndCinematic()
-		{
-			if (_activeCinematic == null)
-				return;
+        public void EndCinematic()
+        {
+            if (_activeCinematic == null)
+                return;
 
-			_cinematicDiff              = 0;
-			_cinematicCamera            = null;
-			_activeCinematic            = null;
-			_activeCinematicCameraIndex = -1;
+            _cinematicDiff = 0;
+            _cinematicCamera = null;
+            _activeCinematic = null;
+            _activeCinematicCameraIndex = -1;
 
-			if (_CinematicObject)
-			{
-				WorldObject vpObject = player.GetViewpoint();
+            if (_CinematicObject)
+            {
+                WorldObject vpObject = player.GetViewpoint();
 
-				if (vpObject)
-					if (vpObject == _CinematicObject)
-						player.SetViewpoint(_CinematicObject, false);
+                if (vpObject)
+                    if (vpObject == _CinematicObject)
+                        player.SetViewpoint(_CinematicObject, false);
 
-				_CinematicObject.AddObjectToRemoveList();
-			}
-		}
+                _CinematicObject.AddObjectToRemoveList();
+            }
+        }
 
-		public void UpdateCinematicLocation(uint diff)
-		{
-			if (_activeCinematic == null ||
-			    _activeCinematicCameraIndex == -1 ||
-			    _cinematicCamera == null ||
-			    _cinematicCamera.Count == 0)
-				return;
+        public void UpdateCinematicLocation(uint diff)
+        {
+            if (_activeCinematic == null ||
+                _activeCinematicCameraIndex == -1 ||
+                _cinematicCamera == null ||
+                _cinematicCamera.Count == 0)
+                return;
 
-			Position lastPosition  = new();
-			uint     lastTimestamp = 0;
-			Position nextPosition  = new();
-			uint     nextTimestamp = 0;
+            Position lastPosition = new();
+            uint lastTimestamp = 0;
+            Position nextPosition = new();
+            uint nextTimestamp = 0;
 
-			// Obtain direction of travel
-			foreach (FlyByCamera cam in _cinematicCamera)
-			{
-				if (cam.timeStamp > _cinematicDiff)
-				{
-					nextPosition  = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-					nextTimestamp = cam.timeStamp;
+            // Obtain direction of travel
+            foreach (FlyByCamera cam in _cinematicCamera)
+            {
+                if (cam.timeStamp > _cinematicDiff)
+                {
+                    nextPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
+                    nextTimestamp = cam.timeStamp;
 
-					break;
-				}
+                    break;
+                }
 
-				lastPosition  = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-				lastTimestamp = cam.timeStamp;
-			}
+                lastPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
+                lastTimestamp = cam.timeStamp;
+            }
 
-			float angle = lastPosition.GetAbsoluteAngle(nextPosition);
-			angle -= lastPosition.GetOrientation();
+            float angle = lastPosition.GetAbsoluteAngle(nextPosition);
+            angle -= lastPosition.GetOrientation();
 
-			if (angle < 0)
-				angle += 2 * MathFunctions.PI;
+            if (angle < 0)
+                angle += 2 * MathFunctions.PI;
 
-			// Look for position around 2 second ahead of us.
-			int workDiff = (int)_cinematicDiff;
+            // Look for position around 2 second ahead of us.
+            int workDiff = (int)_cinematicDiff;
 
-			// Modify result based on camera direction (Humans for example, have the camera point behind)
-			workDiff += (int)((2 * Time.InMilliseconds) * Math.Cos(angle));
+            // Modify result based on camera direction (Humans for example, have the camera point behind)
+            workDiff += (int)((2 * Time.InMilliseconds) * Math.Cos(angle));
 
-			// Get an iterator to the last entry in the cameras, to make sure we don't go beyond the end
-			var endItr = _cinematicCamera.LastOrDefault();
+            // Get an iterator to the last entry in the cameras, to make sure we don't go beyond the end
+            var endItr = _cinematicCamera.LastOrDefault();
 
-			if (endItr != null &&
-			    workDiff > endItr.timeStamp)
-				workDiff = (int)endItr.timeStamp;
+            if (endItr != null &&
+                workDiff > endItr.timeStamp)
+                workDiff = (int)endItr.timeStamp;
 
-			// Never try to go back in Time before the start of cinematic!
-			if (workDiff < 0)
-				workDiff = (int)_cinematicDiff;
+            // Never try to go back in Time before the start of cinematic!
+            if (workDiff < 0)
+                workDiff = (int)_cinematicDiff;
 
-			// Obtain the previous and next waypoint based on timestamp
-			foreach (FlyByCamera cam in _cinematicCamera)
-			{
-				if (cam.timeStamp >= workDiff)
-				{
-					nextPosition  = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-					nextTimestamp = cam.timeStamp;
+            // Obtain the previous and next waypoint based on timestamp
+            foreach (FlyByCamera cam in _cinematicCamera)
+            {
+                if (cam.timeStamp >= workDiff)
+                {
+                    nextPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
+                    nextTimestamp = cam.timeStamp;
 
-					break;
-				}
+                    break;
+                }
 
-				lastPosition  = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-				lastTimestamp = cam.timeStamp;
-			}
+                lastPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
+                lastTimestamp = cam.timeStamp;
+            }
 
-			// Never try to go beyond the end of the cinematic
-			if (workDiff > nextTimestamp)
-				workDiff = (int)nextTimestamp;
+            // Never try to go beyond the end of the cinematic
+            if (workDiff > nextTimestamp)
+                workDiff = (int)nextTimestamp;
 
-			// Interpolate the position for this moment in Time (or the adjusted moment in Time)
-			uint  timeDiff  = nextTimestamp - lastTimestamp;
-			uint  interDiff = (uint)(workDiff - lastTimestamp);
-			float xDiff     = nextPosition.X - lastPosition.X;
-			float yDiff     = nextPosition.Y - lastPosition.Y;
-			float zDiff     = nextPosition.Z - lastPosition.Z;
+            // Interpolate the position for this moment in Time (or the adjusted moment in Time)
+            uint timeDiff = nextTimestamp - lastTimestamp;
+            uint interDiff = (uint)(workDiff - lastTimestamp);
+            float xDiff = nextPosition.X - lastPosition.X;
+            float yDiff = nextPosition.Y - lastPosition.Y;
+            float zDiff = nextPosition.Z - lastPosition.Z;
 
-			Position interPosition = new(lastPosition.X + (xDiff * ((float)interDiff / timeDiff)),
-			                             lastPosition.Y +
-			                             (yDiff * ((float)interDiff / timeDiff)),
-			                             lastPosition.Z + (zDiff * ((float)interDiff / timeDiff)));
+            Position interPosition = new(lastPosition.X + (xDiff * ((float)interDiff / timeDiff)),
+                                         lastPosition.Y +
+                                         (yDiff * ((float)interDiff / timeDiff)),
+                                         lastPosition.Z + (zDiff * ((float)interDiff / timeDiff)));
 
-			// Advance (at speed) to this position. The remote sight object is used
-			// to send update information to player in cinematic
-			if (_CinematicObject && interPosition.IsPositionValid())
-				_CinematicObject.MonsterMoveWithSpeed(interPosition.X, interPosition.Y, interPosition.Z, 500.0f, false, true);
+            // Advance (at speed) to this position. The remote sight object is used
+            // to send update information to player in cinematic
+            if (_CinematicObject && interPosition.IsPositionValid())
+                _CinematicObject.MonsterMoveWithSpeed(interPosition.X, interPosition.Y, interPosition.Z, 500.0f, false, true);
 
-			// If we never received an end packet 10 seconds after the final timestamp then Force an end
-			if (_cinematicDiff > _cinematicLength + 10 * Time.InMilliseconds)
-				EndCinematic();
-		}
+            // If we never received an end packet 10 seconds after the final timestamp then Force an end
+            if (_cinematicDiff > _cinematicLength + 10 * Time.InMilliseconds)
+                EndCinematic();
+        }
 
-		public bool IsOnCinematic()
-		{
-			return _cinematicCamera != null;
-		}
-	}
+        public bool IsOnCinematic()
+        {
+            return _cinematicCamera != null;
+        }
+    }
 }

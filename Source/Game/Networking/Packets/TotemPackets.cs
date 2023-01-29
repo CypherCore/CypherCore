@@ -6,65 +6,65 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-	internal class TotemDestroyed : ClientPacket
-	{
-		public byte Slot;
+    internal class TotemDestroyed : ClientPacket
+    {
+        public byte Slot;
 
-		public ObjectGuid TotemGUID;
+        public ObjectGuid TotemGUID;
 
-		public TotemDestroyed(WorldPacket packet) : base(packet)
-		{
-		}
+        public TotemDestroyed(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			Slot      = _worldPacket.ReadUInt8();
-			TotemGUID = _worldPacket.ReadPackedGuid();
-		}
-	}
+        public override void Read()
+        {
+            Slot = _worldPacket.ReadUInt8();
+            TotemGUID = _worldPacket.ReadPackedGuid();
+        }
+    }
 
-	internal class TotemCreated : ServerPacket
-	{
-		public bool CannotDismiss;
-		public uint Duration;
-		public byte Slot;
-		public uint SpellID;
-		public float TimeMod = 1.0f;
+    internal class TotemCreated : ServerPacket
+    {
+        public bool CannotDismiss;
+        public uint Duration;
+        public byte Slot;
+        public uint SpellID;
+        public float TimeMod = 1.0f;
 
-		public ObjectGuid Totem;
+        public ObjectGuid Totem;
 
-		public TotemCreated() : base(ServerOpcodes.TotemCreated)
-		{
-		}
+        public TotemCreated() : base(ServerOpcodes.TotemCreated)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteUInt8(Slot);
-			_worldPacket.WritePackedGuid(Totem);
-			_worldPacket.WriteUInt32(Duration);
-			_worldPacket.WriteUInt32(SpellID);
-			_worldPacket.WriteFloat(TimeMod);
-			_worldPacket.WriteBit(CannotDismiss);
-			_worldPacket.FlushBits();
-		}
-	}
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(Slot);
+            _worldPacket.WritePackedGuid(Totem);
+            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteFloat(TimeMod);
+            _worldPacket.WriteBit(CannotDismiss);
+            _worldPacket.FlushBits();
+        }
+    }
 
-	internal class TotemMoved : ServerPacket
-	{
-		public byte NewSlot;
-		public byte Slot;
+    internal class TotemMoved : ServerPacket
+    {
+        public byte NewSlot;
+        public byte Slot;
 
-		public ObjectGuid Totem;
+        public ObjectGuid Totem;
 
-		public TotemMoved() : base(ServerOpcodes.TotemMoved)
-		{
-		}
+        public TotemMoved() : base(ServerOpcodes.TotemMoved)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteUInt8(Slot);
-			_worldPacket.WriteUInt8(NewSlot);
-			_worldPacket.WritePackedGuid(Totem);
-		}
-	}
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(Slot);
+            _worldPacket.WriteUInt8(NewSlot);
+            _worldPacket.WritePackedGuid(Totem);
+        }
+    }
 }

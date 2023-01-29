@@ -6,8 +6,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IAreaTriggerEntity
 {
-	public interface IAreaTriggerEntityGetAI : IScriptObject
-	{
-		AreaTriggerAI GetAI(AreaTrigger at);
-	}
+    public interface IAreaTriggerEntityGetAI : IScriptObject
+    {
+        AreaTriggerAI GetAI(AreaTrigger at);
+    }
 }

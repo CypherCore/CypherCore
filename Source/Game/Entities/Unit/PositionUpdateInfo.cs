@@ -8,6 +8,6 @@ internal struct PositionUpdateInfo
     public void Reset()
     {
         Relocated = false;
-        Turned    = false;
+        Turned = false;
     }
 }

@@ -8,25 +8,25 @@ using Game.Scripting.Interfaces.ICreature;
 
 namespace Game.Scripting.BaseScripts
 {
-	public class GenericCreatureScript<AI> : ScriptObjectAutoAddDBBound, ICreatureGetAI where AI : CreatureAI
-	{
-		private object[] _args;
+    public class GenericCreatureScript<AI> : ScriptObjectAutoAddDBBound, ICreatureGetAI where AI : CreatureAI
+    {
+        private readonly object[] _args;
 
-		public GenericCreatureScript(string name, object[] args) : base(name)
-		{
-			_args = args;
-		}
+        public GenericCreatureScript(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
 
-		public CreatureAI GetAI(Creature me)
-		{
-			if (me.GetInstanceScript() != null)
-				return GetInstanceAI<AI>(me);
-			else
-				return (AI)Activator.CreateInstance(typeof(AI),
-				                                    new object[]
-				                                    {
-					                                    me
-				                                    }.Combine(_args));
-		}
-	}
+        public CreatureAI GetAI(Creature me)
+        {
+            if (me.GetInstanceScript() != null)
+                return GetInstanceAI<AI>(me);
+            else
+                return (AI)Activator.CreateInstance(typeof(AI),
+                                                    new object[]
+                                                    {
+                                                        me
+                                                    }.Combine(_args));
+        }
+    }
 }

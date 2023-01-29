@@ -6,37 +6,37 @@ using System.Collections.Generic;
 namespace Game.Entities
 {
     public class UpdateFieldArray<T> where T : new()
-	{
-		public T[] Values { get; set; }
+    {
+        public T[] Values { get; set; }
         public int Bit { get; set; }
         public int FirstElementBit { get; set; }
 
         public UpdateFieldArray(uint size, int bit, int firstElementBit)
-		{
-			Values = new T[size];
+        {
+            Values = new T[size];
 
-			for (var i = 0; i < size; ++i)
-				Values[i] = new T();
+            for (var i = 0; i < size; ++i)
+                Values[i] = new T();
 
-			Bit             = bit;
-			FirstElementBit = firstElementBit;
-		}
+            Bit = bit;
+            FirstElementBit = firstElementBit;
+        }
 
-		public T this[int index]
-		{
-			get => Values[index];
-			set => Values[index] = value;
-		}
+        public T this[int index]
+        {
+            get => Values[index];
+            set => Values[index] = value;
+        }
 
-		public int GetSize()
-		{
-			return Values.Length;
-		}
+        public int GetSize()
+        {
+            return Values.Length;
+        }
 
-		public IEnumerator<T> GetEnumerator()
-		{
-			foreach (var obj in Values)
-				yield return obj;
-		}
-	}
+        public IEnumerator<T> GetEnumerator()
+        {
+            foreach (var obj in Values)
+                yield return obj;
+        }
+    }
 }

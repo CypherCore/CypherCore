@@ -6,26 +6,26 @@ using Framework.Constants;
 namespace Game
 {
     public class AuctionSearchClassFilters
-	{
-		public enum FilterType : uint
-		{
-			SkipClass = 0,
-			SkipSubclass = 0xFFFFFFFF,
-			SkipInvtype = 0xFFFFFFFF
-		}
+    {
+        public enum FilterType : uint
+        {
+            SkipClass = 0,
+            SkipSubclass = 0xFFFFFFFF,
+            SkipInvtype = 0xFFFFFFFF
+        }
 
-		public SubclassFilter[] Classes = new SubclassFilter[(int)ItemClass.Max];
+        public SubclassFilter[] Classes = new SubclassFilter[(int)ItemClass.Max];
 
-		public AuctionSearchClassFilters()
-		{
-			for (var i = 0; i < (int)ItemClass.Max; ++i)
-				Classes[i] = new SubclassFilter();
-		}
+        public AuctionSearchClassFilters()
+        {
+            for (var i = 0; i < (int)ItemClass.Max; ++i)
+                Classes[i] = new SubclassFilter();
+        }
 
-		public class SubclassFilter
-		{
-			public ulong[] InvTypes = new ulong[ItemConst.MaxItemSubclassTotal];
-			public FilterType SubclassMask;
-		}
-	}
+        public class SubclassFilter
+        {
+            public ulong[] InvTypes = new ulong[ItemConst.MaxItemSubclassTotal];
+            public FilterType SubclassMask;
+        }
+    }
 }

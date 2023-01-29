@@ -8,58 +8,58 @@ using Game.Entities;
 
 namespace Game.Chat
 {
-	[CommandGroup("account")]
-	internal class AccountCommands
-	{
-		[Command("", CypherStrings.CommandAccountHelp, RBACPermissions.CommandAccount)]
-		private static bool HandleAccountCommand(CommandHandler handler)
-		{
-			if (handler.GetSession() == null)
-				return false;
+    [CommandGroup("account")]
+    internal class AccountCommands
+    {
+        [Command("", CypherStrings.CommandAccountHelp, RBACPermissions.CommandAccount)]
+        private static bool HandleAccountCommand(CommandHandler handler)
+        {
+            if (handler.GetSession() == null)
+                return false;
 
-			// GM Level
-			AccountTypes securityLevel = handler.GetSession().GetSecurity();
-			handler.SendSysMessage(CypherStrings.AccountLevel, securityLevel);
+            // GM Level
+            AccountTypes securityLevel = handler.GetSession().GetSecurity();
+            handler.SendSysMessage(CypherStrings.AccountLevel, securityLevel);
 
-			// Security level required
-			WorldSession session  = handler.GetSession();
-			bool         hasRBAC  = (session.HasPermission(RBACPermissions.EmailConfirmForPassChange));
-			uint         pwConfig = 0; // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+            // Security level required
+            WorldSession session = handler.GetSession();
+            bool hasRBAC = (session.HasPermission(RBACPermissions.EmailConfirmForPassChange));
+            uint pwConfig = 0; // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
-			handler.SendSysMessage(CypherStrings.AccountSecType,
-			                       (pwConfig == 0 ? "Lowest level: No Email input required." :
-			                        pwConfig == 1 ? "Highest level: Email input required." :
-			                        pwConfig == 2 ? "Special level: Your account may require email input depending on settings. That is the case if another lien is printed." :
-			                                        "Unknown security level: Notify technician for details."));
+            handler.SendSysMessage(CypherStrings.AccountSecType,
+                                   (pwConfig == 0 ? "Lowest level: No Email input required." :
+                                    pwConfig == 1 ? "Highest level: Email input required." :
+                                    pwConfig == 2 ? "Special level: Your account may require email input depending on settings. That is the case if another lien is printed." :
+                                                    "Unknown security level: Notify technician for details."));
 
-			// RBAC required display - is not displayed for console
-			if (pwConfig == 2 && hasRBAC)
-				handler.SendSysMessage(CypherStrings.RbacEmailRequired);
+            // RBAC required display - is not displayed for console
+            if (pwConfig == 2 && hasRBAC)
+                handler.SendSysMessage(CypherStrings.RbacEmailRequired);
 
-			// Email display if sufficient rights
-			if (session.HasPermission(RBACPermissions.MayCheckOwnEmail))
-			{
-				string emailoutput;
-				uint   accountId = session.GetAccountId();
+            // Email display if sufficient rights
+            if (session.HasPermission(RBACPermissions.MayCheckOwnEmail))
+            {
+                string emailoutput;
+                uint accountId = session.GetAccountId();
 
-				PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
-				stmt.AddValue(0, accountId);
-				SQLResult result = DB.Login.Query(stmt);
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
+                stmt.AddValue(0, accountId);
+                SQLResult result = DB.Login.Query(stmt);
 
-				if (!result.IsEmpty())
-				{
-					emailoutput = result.Read<string>(0);
-					handler.SendSysMessage(CypherStrings.CommandEmailOutput, emailoutput);
-				}
-			}
+                if (!result.IsEmpty())
+                {
+                    emailoutput = result.Read<string>(0);
+                    handler.SendSysMessage(CypherStrings.CommandEmailOutput, emailoutput);
+                }
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		[Command("2fa remove", CypherStrings.CommandAcc2faRemoveHelp, RBACPermissions.CommandAccount2FaRemove)]
-		private static bool HandleAccount2FARemoveCommand(CommandHandler handler, uint? token)
-		{
-			/*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
+        [Command("2fa remove", CypherStrings.CommandAcc2faRemoveHelp, RBACPermissions.CommandAccount2FaRemove)]
+        private static bool HandleAccount2FARemoveCommand(CommandHandler handler, uint? token)
+        {
+            /*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
 			if (!masterKey.IsAvailable())
 			{
 			    handler.SendSysMessage(CypherStrings.TwoFACommandsNotSetup);
@@ -116,13 +116,13 @@ namespace Game.Chat
 			}
 
 			handler.SendSysMessage(CypherStrings.TwoFARemoveNeedToken);*/
-			return false;
-		}
+            return false;
+        }
 
-		[Command("2fa setup", CypherStrings.CommandAcc2faSetupHelp, RBACPermissions.CommandAccount2FaSetup)]
-		private static bool HandleAccount2FASetupCommand(CommandHandler handler, uint? token)
-		{
-			/*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
+        [Command("2fa setup", CypherStrings.CommandAcc2faSetupHelp, RBACPermissions.CommandAccount2FaSetup)]
+        private static bool HandleAccount2FASetupCommand(CommandHandler handler, uint? token)
+        {
+            /*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
 			if (!masterKey.IsAvailable())
 			{
 			    handler.SendSysMessage(CypherStrings.TwoFACommandsNotSetup);
@@ -177,292 +177,292 @@ namespace Game.Chat
 
 			// new suggestion, or no token specified, output TOTP parameters
 			handler.SendSysMessage(CypherStrings.TwoFASecretSuggestion, suggestions[accountId].ToBase32());*/
-			return false;
-		}
-
-		[Command("addon", CypherStrings.CommandAccAddonHelp, RBACPermissions.CommandAccountAddon)]
-		private static bool HandleAccountAddonCommand(CommandHandler handler, byte expansion)
-		{
-			if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
-			{
-				handler.SendSysMessage(CypherStrings.ImproperValue);
-
-				return false;
-			}
-
-			PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
-			stmt.AddValue(0, expansion);
-			stmt.AddValue(1, handler.GetSession().GetAccountId());
-			DB.Login.Execute(stmt);
-
-			handler.SendSysMessage(CypherStrings.AccountAddon, expansion);
-
-			return true;
-		}
-
-		[Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
-		private static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, [OptionalArg] string email)
-		{
-			if (accountName.Contains("@"))
-			{
-				handler.SendSysMessage(CypherStrings.AccountUseBnetCommands);
-
-				return false;
-			}
-
-			AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email ?? "");
-
-			switch (result)
-			{
-				case AccountOpResult.Ok:
-					handler.SendSysMessage(CypherStrings.AccountCreated, accountName);
-
-					if (handler.GetSession() != null)
-						Log.outInfo(LogFilter.Player,
-						            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) created Account {4} (Email: '{5}')",
-						            handler.GetSession().GetAccountId(),
-						            handler.GetSession().GetRemoteAddress(),
-						            handler.GetSession().GetPlayer().GetName(),
-						            handler.GetSession().GetPlayer().GetGUID().ToString(),
-						            accountName,
-						            email ?? "");
-
-					break;
-				case AccountOpResult.NameTooLong:
-					handler.SendSysMessage(CypherStrings.AccountNameTooLong);
-
-					return false;
-				case AccountOpResult.PassTooLong:
-					handler.SendSysMessage(CypherStrings.AccountPassTooLong);
-
-					return false;
-				case AccountOpResult.NameAlreadyExist:
-					handler.SendSysMessage(CypherStrings.AccountAlreadyExist);
-
-					return false;
-				case AccountOpResult.DBInternalError:
-					handler.SendSysMessage(CypherStrings.AccountNotCreatedSqlError, accountName);
-
-					return false;
-				default:
-					handler.SendSysMessage(CypherStrings.AccountNotCreated, accountName);
-
-					return false;
-			}
-
-			return true;
-		}
-
-		[Command("delete", CypherStrings.CommandAccDeleteHelp, RBACPermissions.CommandAccountDelete, true)]
-		private static bool HandleAccountDeleteCommand(CommandHandler handler, string accountName)
-		{
-			uint accountId = Global.AccountMgr.GetId(accountName);
-
-			if (accountId == 0)
-			{
-				handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-
-				return false;
-			}
-
-			if (handler.HasLowerSecurityAccount(null, accountId, true))
-				return false;
-
-			AccountOpResult result = Global.AccountMgr.DeleteAccount(accountId);
-
-			switch (result)
-			{
-				case AccountOpResult.Ok:
-					handler.SendSysMessage(CypherStrings.AccountDeleted, accountName);
-
-					break;
-				case AccountOpResult.NameNotExist:
-					handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-
-					return false;
-				case AccountOpResult.DBInternalError:
-					handler.SendSysMessage(CypherStrings.AccountNotDeletedSqlError, accountName);
-
-					return false;
-				default:
-					handler.SendSysMessage(CypherStrings.AccountNotDeleted, accountName);
-
-					return false;
-			}
-
-			return true;
-		}
-
-		[Command("email", CypherStrings.CommandAccEmailHelp, RBACPermissions.CommandAccountEmail)]
-		private static bool HandleAccountEmailCommand(CommandHandler handler, string oldEmail, string password, string email, string emailConfirm)
-		{
-			if (!Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), oldEmail))
-			{
-				handler.SendSysMessage(CypherStrings.CommandWrongemail);
-
-				Log.outInfo(LogFilter.Player,
-				            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided email [{4}] is not equal to registration email [{5}].",
-				            handler.GetSession().GetAccountId(),
-				            handler.GetSession().GetRemoteAddress(),
-				            handler.GetSession().GetPlayer().GetName(),
-				            handler.GetSession().GetPlayer().GetGUID().ToString(),
-				            email,
-				            oldEmail);
-
-				return false;
-			}
-
-			if (!Global.AccountMgr.CheckPassword(handler.GetSession().GetAccountId(), password))
-			{
-				handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
-
-				Log.outInfo(LogFilter.Player,
-				            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided password is wrong.",
-				            handler.GetSession().GetAccountId(),
-				            handler.GetSession().GetRemoteAddress(),
-				            handler.GetSession().GetPlayer().GetName(),
-				            handler.GetSession().GetPlayer().GetGUID().ToString());
-
-				return false;
-			}
-
-			if (email == oldEmail)
-			{
-				handler.SendSysMessage(CypherStrings.OldEmailIsNewEmail);
-
-				return false;
-			}
-
-			if (email != emailConfirm)
-			{
-				handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
-
-				Log.outInfo(LogFilter.Player,
-				            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided password is wrong.",
-				            handler.GetSession().GetAccountId(),
-				            handler.GetSession().GetRemoteAddress(),
-				            handler.GetSession().GetPlayer().GetName(),
-				            handler.GetSession().GetPlayer().GetGUID().ToString());
-
-				return false;
-			}
-
-
-			AccountOpResult result = Global.AccountMgr.ChangeEmail(handler.GetSession().GetAccountId(), email);
-
-			switch (result)
-			{
-				case AccountOpResult.Ok:
-					handler.SendSysMessage(CypherStrings.CommandEmail);
-
-					Log.outInfo(LogFilter.Player,
-					            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Changed Email from [{4}] to [{5}].",
-					            handler.GetSession().GetAccountId(),
-					            handler.GetSession().GetRemoteAddress(),
-					            handler.GetSession().GetPlayer().GetName(),
-					            handler.GetSession().GetPlayer().GetGUID().ToString(),
-					            oldEmail,
-					            email);
-
-					break;
-				case AccountOpResult.EmailTooLong:
-					handler.SendSysMessage(CypherStrings.EmailTooLong);
-
-					return false;
-				default:
-					handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
-
-					return false;
-			}
-
-			return true;
-		}
-
-		[Command("password", CypherStrings.CommandAccPasswordHelp, RBACPermissions.CommandAccountPassword)]
-		private static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, [OptionalArg] string confirmEmail)
-		{
-			// First, we check config. What security Type (sec Type) is it ? Depending on it, the command branches out
-			uint pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
-
-			// We compare the old, saved password to the entered old password - no chance for the unauthorized.
-			if (!Global.AccountMgr.CheckPassword(handler.GetSession().GetAccountId(), oldPassword))
-			{
-				handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
-
-				Log.outInfo(LogFilter.Player,
-				            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change password, but the provided old password is wrong.",
-				            handler.GetSession().GetAccountId(),
-				            handler.GetSession().GetRemoteAddress(),
-				            handler.GetSession().GetPlayer().GetName(),
-				            handler.GetSession().GetPlayer().GetGUID().ToString());
-
-				return false;
-			}
-
-			// This compares the old, current email to the entered email - however, only...
-			if ((pwConfig == 1 || (pwConfig == 2 && handler.GetSession().HasPermission(RBACPermissions.EmailConfirmForPassChange))) // ...if either PW_EMAIL or PW_RBAC with the Permission is active...
-			    &&
-			    !Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), confirmEmail)) // ... and returns false if the comparison fails.
-			{
-				handler.SendSysMessage(CypherStrings.CommandWrongemail);
-
-				Log.outInfo(LogFilter.Player,
-				            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change password, but the entered email [{4}] is wrong.",
-				            handler.GetSession().GetAccountId(),
-				            handler.GetSession().GetRemoteAddress(),
-				            handler.GetSession().GetPlayer().GetName(),
-				            handler.GetSession().GetPlayer().GetGUID().ToString(),
-				            confirmEmail);
-
-				return false;
-			}
-
-			// Making sure that newly entered password is correctly entered.
-			if (newPassword != confirmPassword)
-			{
-				handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
-
-				return false;
-			}
-
-			// Changes password and prints result.
-			AccountOpResult result = Global.AccountMgr.ChangePassword(handler.GetSession().GetAccountId(), newPassword);
-
-			switch (result)
-			{
-				case AccountOpResult.Ok:
-					handler.SendSysMessage(CypherStrings.CommandPassword);
-
-					Log.outInfo(LogFilter.Player,
-					            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Changed Password.",
-					            handler.GetSession().GetAccountId(),
-					            handler.GetSession().GetRemoteAddress(),
-					            handler.GetSession().GetPlayer().GetName(),
-					            handler.GetSession().GetPlayer().GetGUID().ToString());
-
-					break;
-				case AccountOpResult.PassTooLong:
-					handler.SendSysMessage(CypherStrings.PasswordTooLong);
-
-					return false;
-				default:
-					handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
-
-					return false;
-			}
-
-			return true;
-		}
-
-		[CommandGroup("lock")]
-		private class AccountLockCommands
-		{
-			[Command("country", CypherStrings.CommandAccLockCountryHelp, RBACPermissions.CommandAccountLockCountry)]
-			private static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
-			{
-				if (state)
-				{
-					/*var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
+            return false;
+        }
+
+        [Command("addon", CypherStrings.CommandAccAddonHelp, RBACPermissions.CommandAccountAddon)]
+        private static bool HandleAccountAddonCommand(CommandHandler handler, byte expansion)
+        {
+            if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
+            {
+                handler.SendSysMessage(CypherStrings.ImproperValue);
+
+                return false;
+            }
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
+            stmt.AddValue(0, expansion);
+            stmt.AddValue(1, handler.GetSession().GetAccountId());
+            DB.Login.Execute(stmt);
+
+            handler.SendSysMessage(CypherStrings.AccountAddon, expansion);
+
+            return true;
+        }
+
+        [Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
+        private static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, [OptionalArg] string email)
+        {
+            if (accountName.Contains("@"))
+            {
+                handler.SendSysMessage(CypherStrings.AccountUseBnetCommands);
+
+                return false;
+            }
+
+            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email ?? "");
+
+            switch (result)
+            {
+                case AccountOpResult.Ok:
+                    handler.SendSysMessage(CypherStrings.AccountCreated, accountName);
+
+                    if (handler.GetSession() != null)
+                        Log.outInfo(LogFilter.Player,
+                                    "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) created Account {4} (Email: '{5}')",
+                                    handler.GetSession().GetAccountId(),
+                                    handler.GetSession().GetRemoteAddress(),
+                                    handler.GetSession().GetPlayer().GetName(),
+                                    handler.GetSession().GetPlayer().GetGUID().ToString(),
+                                    accountName,
+                                    email ?? "");
+
+                    break;
+                case AccountOpResult.NameTooLong:
+                    handler.SendSysMessage(CypherStrings.AccountNameTooLong);
+
+                    return false;
+                case AccountOpResult.PassTooLong:
+                    handler.SendSysMessage(CypherStrings.AccountPassTooLong);
+
+                    return false;
+                case AccountOpResult.NameAlreadyExist:
+                    handler.SendSysMessage(CypherStrings.AccountAlreadyExist);
+
+                    return false;
+                case AccountOpResult.DBInternalError:
+                    handler.SendSysMessage(CypherStrings.AccountNotCreatedSqlError, accountName);
+
+                    return false;
+                default:
+                    handler.SendSysMessage(CypherStrings.AccountNotCreated, accountName);
+
+                    return false;
+            }
+
+            return true;
+        }
+
+        [Command("delete", CypherStrings.CommandAccDeleteHelp, RBACPermissions.CommandAccountDelete, true)]
+        private static bool HandleAccountDeleteCommand(CommandHandler handler, string accountName)
+        {
+            uint accountId = Global.AccountMgr.GetId(accountName);
+
+            if (accountId == 0)
+            {
+                handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+
+                return false;
+            }
+
+            if (handler.HasLowerSecurityAccount(null, accountId, true))
+                return false;
+
+            AccountOpResult result = Global.AccountMgr.DeleteAccount(accountId);
+
+            switch (result)
+            {
+                case AccountOpResult.Ok:
+                    handler.SendSysMessage(CypherStrings.AccountDeleted, accountName);
+
+                    break;
+                case AccountOpResult.NameNotExist:
+                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+
+                    return false;
+                case AccountOpResult.DBInternalError:
+                    handler.SendSysMessage(CypherStrings.AccountNotDeletedSqlError, accountName);
+
+                    return false;
+                default:
+                    handler.SendSysMessage(CypherStrings.AccountNotDeleted, accountName);
+
+                    return false;
+            }
+
+            return true;
+        }
+
+        [Command("email", CypherStrings.CommandAccEmailHelp, RBACPermissions.CommandAccountEmail)]
+        private static bool HandleAccountEmailCommand(CommandHandler handler, string oldEmail, string password, string email, string emailConfirm)
+        {
+            if (!Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), oldEmail))
+            {
+                handler.SendSysMessage(CypherStrings.CommandWrongemail);
+
+                Log.outInfo(LogFilter.Player,
+                            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided email [{4}] is not equal to registration email [{5}].",
+                            handler.GetSession().GetAccountId(),
+                            handler.GetSession().GetRemoteAddress(),
+                            handler.GetSession().GetPlayer().GetName(),
+                            handler.GetSession().GetPlayer().GetGUID().ToString(),
+                            email,
+                            oldEmail);
+
+                return false;
+            }
+
+            if (!Global.AccountMgr.CheckPassword(handler.GetSession().GetAccountId(), password))
+            {
+                handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
+
+                Log.outInfo(LogFilter.Player,
+                            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided password is wrong.",
+                            handler.GetSession().GetAccountId(),
+                            handler.GetSession().GetRemoteAddress(),
+                            handler.GetSession().GetPlayer().GetName(),
+                            handler.GetSession().GetPlayer().GetGUID().ToString());
+
+                return false;
+            }
+
+            if (email == oldEmail)
+            {
+                handler.SendSysMessage(CypherStrings.OldEmailIsNewEmail);
+
+                return false;
+            }
+
+            if (email != emailConfirm)
+            {
+                handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
+
+                Log.outInfo(LogFilter.Player,
+                            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change email, but the provided password is wrong.",
+                            handler.GetSession().GetAccountId(),
+                            handler.GetSession().GetRemoteAddress(),
+                            handler.GetSession().GetPlayer().GetName(),
+                            handler.GetSession().GetPlayer().GetGUID().ToString());
+
+                return false;
+            }
+
+
+            AccountOpResult result = Global.AccountMgr.ChangeEmail(handler.GetSession().GetAccountId(), email);
+
+            switch (result)
+            {
+                case AccountOpResult.Ok:
+                    handler.SendSysMessage(CypherStrings.CommandEmail);
+
+                    Log.outInfo(LogFilter.Player,
+                                "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Changed Email from [{4}] to [{5}].",
+                                handler.GetSession().GetAccountId(),
+                                handler.GetSession().GetRemoteAddress(),
+                                handler.GetSession().GetPlayer().GetName(),
+                                handler.GetSession().GetPlayer().GetGUID().ToString(),
+                                oldEmail,
+                                email);
+
+                    break;
+                case AccountOpResult.EmailTooLong:
+                    handler.SendSysMessage(CypherStrings.EmailTooLong);
+
+                    return false;
+                default:
+                    handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
+
+                    return false;
+            }
+
+            return true;
+        }
+
+        [Command("password", CypherStrings.CommandAccPasswordHelp, RBACPermissions.CommandAccountPassword)]
+        private static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, [OptionalArg] string confirmEmail)
+        {
+            // First, we check config. What security Type (sec Type) is it ? Depending on it, the command branches out
+            uint pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+
+            // We compare the old, saved password to the entered old password - no chance for the unauthorized.
+            if (!Global.AccountMgr.CheckPassword(handler.GetSession().GetAccountId(), oldPassword))
+            {
+                handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
+
+                Log.outInfo(LogFilter.Player,
+                            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change password, but the provided old password is wrong.",
+                            handler.GetSession().GetAccountId(),
+                            handler.GetSession().GetRemoteAddress(),
+                            handler.GetSession().GetPlayer().GetName(),
+                            handler.GetSession().GetPlayer().GetGUID().ToString());
+
+                return false;
+            }
+
+            // This compares the old, current email to the entered email - however, only...
+            if ((pwConfig == 1 || (pwConfig == 2 && handler.GetSession().HasPermission(RBACPermissions.EmailConfirmForPassChange))) // ...if either PW_EMAIL or PW_RBAC with the Permission is active...
+                &&
+                !Global.AccountMgr.CheckEmail(handler.GetSession().GetAccountId(), confirmEmail)) // ... and returns false if the comparison fails.
+            {
+                handler.SendSysMessage(CypherStrings.CommandWrongemail);
+
+                Log.outInfo(LogFilter.Player,
+                            "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Tried to change password, but the entered email [{4}] is wrong.",
+                            handler.GetSession().GetAccountId(),
+                            handler.GetSession().GetRemoteAddress(),
+                            handler.GetSession().GetPlayer().GetName(),
+                            handler.GetSession().GetPlayer().GetGUID().ToString(),
+                            confirmEmail);
+
+                return false;
+            }
+
+            // Making sure that newly entered password is correctly entered.
+            if (newPassword != confirmPassword)
+            {
+                handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
+
+                return false;
+            }
+
+            // Changes password and prints result.
+            AccountOpResult result = Global.AccountMgr.ChangePassword(handler.GetSession().GetAccountId(), newPassword);
+
+            switch (result)
+            {
+                case AccountOpResult.Ok:
+                    handler.SendSysMessage(CypherStrings.CommandPassword);
+
+                    Log.outInfo(LogFilter.Player,
+                                "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) Changed Password.",
+                                handler.GetSession().GetAccountId(),
+                                handler.GetSession().GetRemoteAddress(),
+                                handler.GetSession().GetPlayer().GetName(),
+                                handler.GetSession().GetPlayer().GetGUID().ToString());
+
+                    break;
+                case AccountOpResult.PassTooLong:
+                    handler.SendSysMessage(CypherStrings.PasswordTooLong);
+
+                    return false;
+                default:
+                    handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
+
+                    return false;
+            }
+
+            return true;
+        }
+
+        [CommandGroup("lock")]
+        private class AccountLockCommands
+        {
+            [Command("country", CypherStrings.CommandAccLockCountryHelp, RBACPermissions.CommandAccountLockCountry)]
+            private static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
+            {
+                if (state)
+                {
+                    /*var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
 					Array.Reverse(ipBytes);
 
 					PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
@@ -483,152 +483,152 @@ namespace Game.Chat
 					    handler.SendSysMessage("[IP2NATION] Table empty");
 					    Log.outDebug(LogFilter.Server, "[IP2NATION] Table empty");
 					}*/
-				}
-				else
-				{
-					PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
-					stmt.AddValue(0, "00");
-					stmt.AddValue(1, handler.GetSession().GetAccountId());
-					DB.Login.Execute(stmt);
-					handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-				}
+                }
+                else
+                {
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
+                    stmt.AddValue(0, "00");
+                    stmt.AddValue(1, handler.GetSession().GetAccountId());
+                    DB.Login.Execute(stmt);
+                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
+                }
 
-				return true;
-			}
+                return true;
+            }
 
-			[Command("ip", CypherStrings.CommandAccLockIpHelp, RBACPermissions.CommandAccountLockIp)]
-			private static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
-			{
-				PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
+            [Command("ip", CypherStrings.CommandAccLockIpHelp, RBACPermissions.CommandAccountLockIp)]
+            private static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
+            {
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
 
-				if (state)
-				{
-					stmt.AddValue(0, true); // locked
-					handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
-				}
-				else
-				{
-					stmt.AddValue(0, false); // unlocked
-					handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-				}
+                if (state)
+                {
+                    stmt.AddValue(0, true); // locked
+                    handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
+                }
+                else
+                {
+                    stmt.AddValue(0, false); // unlocked
+                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
+                }
 
-				stmt.AddValue(1, handler.GetSession().GetAccountId());
+                stmt.AddValue(1, handler.GetSession().GetAccountId());
 
-				DB.Login.Execute(stmt);
+                DB.Login.Execute(stmt);
 
-				return true;
-			}
-		}
+                return true;
+            }
+        }
 
-		[CommandGroup("onlinelist")]
-		private class AccountOnlineListCommands
-		{
-			[Command("", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
-			private static bool HandleAccountOnlineListCommand(CommandHandler handler)
-			{
-				return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, null);
-			}
+        [CommandGroup("onlinelist")]
+        private class AccountOnlineListCommands
+        {
+            [Command("", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
+            private static bool HandleAccountOnlineListCommand(CommandHandler handler)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, null);
+            }
 
-			[Command("ip", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
-			private static bool HandleAccountOnlineListWithIpFilterCommand(CommandHandler handler, string ipAddress)
-			{
-				return HandleAccountOnlineListCommandWithParameters(handler, ipAddress, null, null, null);
-			}
+            [Command("ip", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
+            private static bool HandleAccountOnlineListWithIpFilterCommand(CommandHandler handler, string ipAddress)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, ipAddress, null, null, null);
+            }
 
-			[Command("limit", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
-			private static bool HandleAccountOnlineListWithLimitCommand(CommandHandler handler, uint limit)
-			{
-				return HandleAccountOnlineListCommandWithParameters(handler, null, limit, null, null);
-			}
+            [Command("limit", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
+            private static bool HandleAccountOnlineListWithLimitCommand(CommandHandler handler, uint limit)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, limit, null, null);
+            }
 
-			[Command("map", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
-			private static bool HandleAccountOnlineListWithMapFilterCommand(CommandHandler handler, uint mapId)
-			{
-				return HandleAccountOnlineListCommandWithParameters(handler, null, null, mapId, null);
-			}
+            [Command("map", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
+            private static bool HandleAccountOnlineListWithMapFilterCommand(CommandHandler handler, uint mapId)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, null, mapId, null);
+            }
 
-			[Command("zone", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
-			private static bool HandleAccountOnlineListWithZoneFilterCommand(CommandHandler handler, uint zoneId)
-			{
-				return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, zoneId);
-			}
+            [Command("zone", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
+            private static bool HandleAccountOnlineListWithZoneFilterCommand(CommandHandler handler, uint zoneId)
+            {
+                return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, zoneId);
+            }
 
-			private static bool HandleAccountOnlineListCommandWithParameters(CommandHandler handler, string ipAddress, uint? limit, uint? mapId, uint? zoneId)
-			{
-				int sessionsMatchCount = 0;
+            private static bool HandleAccountOnlineListCommandWithParameters(CommandHandler handler, string ipAddress, uint? limit, uint? mapId, uint? zoneId)
+            {
+                int sessionsMatchCount = 0;
 
-				foreach (var session in Global.WorldMgr.GetAllSessions())
-				{
-					Player player = session.GetPlayer();
+                foreach (var session in Global.WorldMgr.GetAllSessions())
+                {
+                    Player player = session.GetPlayer();
 
-					// Ignore sessions on character selection screen
-					if (player == null)
-						continue;
+                    // Ignore sessions on character selection screen
+                    if (player == null)
+                        continue;
 
-					uint playerMapId  = player.GetMapId();
-					uint playerZoneId = player.GetZoneId();
+                    uint playerMapId = player.GetMapId();
+                    uint playerZoneId = player.GetZoneId();
 
-					// Apply optional ipAddress filter
-					if (!ipAddress.IsEmpty() &&
-					    ipAddress != session.GetRemoteAddress())
-						continue;
+                    // Apply optional ipAddress filter
+                    if (!ipAddress.IsEmpty() &&
+                        ipAddress != session.GetRemoteAddress())
+                        continue;
 
-					// Apply optional mapId filter
-					if (mapId.HasValue &&
-					    mapId != playerMapId)
-						continue;
+                    // Apply optional mapId filter
+                    if (mapId.HasValue &&
+                        mapId != playerMapId)
+                        continue;
 
-					// Apply optional zoneId filter
-					if (zoneId.HasValue &&
-					    zoneId != playerZoneId)
-						continue;
+                    // Apply optional zoneId filter
+                    if (zoneId.HasValue &&
+                        zoneId != playerZoneId)
+                        continue;
 
-					if (sessionsMatchCount == 0)
-					{
-						///- Display the list of account/characters online on the first matched sessions
-						handler.SendSysMessage(CypherStrings.AccountListBarHeader);
-						handler.SendSysMessage(CypherStrings.AccountListHeader);
-						handler.SendSysMessage(CypherStrings.AccountListBar);
-					}
+                    if (sessionsMatchCount == 0)
+                    {
+                        ///- Display the list of account/characters online on the first matched sessions
+                        handler.SendSysMessage(CypherStrings.AccountListBarHeader);
+                        handler.SendSysMessage(CypherStrings.AccountListHeader);
+                        handler.SendSysMessage(CypherStrings.AccountListBar);
+                    }
 
-					handler.SendSysMessage(CypherStrings.AccountListLine,
-					                       session.GetAccountName(),
-					                       session.GetPlayerName(),
-					                       session.GetRemoteAddress(),
-					                       playerMapId,
-					                       playerZoneId,
-					                       session.GetAccountExpansion(),
-					                       session.GetSecurity());
+                    handler.SendSysMessage(CypherStrings.AccountListLine,
+                                           session.GetAccountName(),
+                                           session.GetPlayerName(),
+                                           session.GetRemoteAddress(),
+                                           playerMapId,
+                                           playerZoneId,
+                                           session.GetAccountExpansion(),
+                                           session.GetSecurity());
 
-					++sessionsMatchCount;
+                    ++sessionsMatchCount;
 
-					// Apply optional Count limit
-					if (limit.HasValue &&
-					    sessionsMatchCount >= limit)
-						break;
-				}
+                    // Apply optional Count limit
+                    if (limit.HasValue &&
+                        sessionsMatchCount >= limit)
+                        break;
+                }
 
-				// Header is printed on first matched session. If it wasn't printed then no sessions matched the criteria
-				if (sessionsMatchCount == 0)
-				{
-					handler.SendSysMessage(CypherStrings.AccountListEmpty);
+                // Header is printed on first matched session. If it wasn't printed then no sessions matched the criteria
+                if (sessionsMatchCount == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.AccountListEmpty);
 
-					return true;
-				}
+                    return true;
+                }
 
-				handler.SendSysMessage(CypherStrings.AccountListBar);
+                handler.SendSysMessage(CypherStrings.AccountListBar);
 
-				return true;
-			}
-		}
+                return true;
+            }
+        }
 
-		[CommandGroup("set")]
-		private class AccountSetCommands
-		{
-			[Command("2fa", CypherStrings.CommandAccSet2faHelp, RBACPermissions.CommandAccountSet2Fa, true)]
-			private static bool HandleAccountSet2FACommand(CommandHandler handler, string accountName, string secret)
-			{
-				/*uint targetAccountId = Global.AccountMgr.GetId(accountName);
+        [CommandGroup("set")]
+        private class AccountSetCommands
+        {
+            [Command("2fa", CypherStrings.CommandAccSet2faHelp, RBACPermissions.CommandAccountSet2Fa, true)]
+            private static bool HandleAccountSet2FACommand(CommandHandler handler, string accountName, string secret)
+            {
+                /*uint targetAccountId = Global.AccountMgr.GetId(accountName);
 				if (targetAccountId == 0)
 				{
 				    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -676,307 +676,307 @@ namespace Game.Chat
 				stmt.AddValue(1, targetAccountId);
 				DB.Login.Execute(stmt);
 				handler.SendSysMessage(CypherStrings.TwoFASecretSetComplete, accountName);*/
-				return true;
-			}
+                return true;
+            }
 
-			[Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
-			private static bool HandleAccountSetAddonCommand(CommandHandler handler, [OptionalArg] string accountName, byte expansion)
-			{
-				uint accountId;
+            [Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
+            private static bool HandleAccountSetAddonCommand(CommandHandler handler, [OptionalArg] string accountName, byte expansion)
+            {
+                uint accountId;
 
-				if (!accountName.IsEmpty())
-				{
-					// Convert Account Name to Upper Format
-					accountName = accountName.ToUpper();
+                if (!accountName.IsEmpty())
+                {
+                    // Convert Account Name to Upper Format
+                    accountName = accountName.ToUpper();
 
-					accountId = Global.AccountMgr.GetId(accountName);
+                    accountId = Global.AccountMgr.GetId(accountName);
 
-					if (accountId == 0)
-					{
-						handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                    if (accountId == 0)
+                    {
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-						return false;
-					}
-				}
-				else
-				{
-					Player player = handler.GetSelectedPlayer();
+                        return false;
+                    }
+                }
+                else
+                {
+                    Player player = handler.GetSelectedPlayer();
 
-					if (!player)
-						return false;
+                    if (!player)
+                        return false;
 
-					accountId = player.GetSession().GetAccountId();
-					Global.AccountMgr.GetName(accountId, out accountName);
-				}
+                    accountId = player.GetSession().GetAccountId();
+                    Global.AccountMgr.GetName(accountId, out accountName);
+                }
 
-				// Let set addon State only for lesser (strong) security level
-				// or to self account
-				if (handler.GetSession() != null &&
-				    handler.GetSession().GetAccountId() != accountId &&
-				    handler.HasLowerSecurityAccount(null, accountId, true))
-					return false;
+                // Let set addon State only for lesser (strong) security level
+                // or to self account
+                if (handler.GetSession() != null &&
+                    handler.GetSession().GetAccountId() != accountId &&
+                    handler.HasLowerSecurityAccount(null, accountId, true))
+                    return false;
 
-				if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
-					return false;
+                if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
+                    return false;
 
-				PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
 
-				stmt.AddValue(0, expansion);
-				stmt.AddValue(1, accountId);
+                stmt.AddValue(0, expansion);
+                stmt.AddValue(1, accountId);
 
-				DB.Login.Execute(stmt);
+                DB.Login.Execute(stmt);
 
-				handler.SendSysMessage(CypherStrings.AccountSetaddon, accountName, accountId, expansion);
+                handler.SendSysMessage(CypherStrings.AccountSetaddon, accountName, accountId, expansion);
 
-				return true;
-			}
+                return true;
+            }
 
-			[Command("password", CypherStrings.CommandAccSetPasswordHelp, RBACPermissions.CommandAccountSetPassword, true)]
-			private static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string confirmPassword)
-			{
-				uint targetAccountId = Global.AccountMgr.GetId(accountName);
+            [Command("password", CypherStrings.CommandAccSetPasswordHelp, RBACPermissions.CommandAccountSetPassword, true)]
+            private static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string confirmPassword)
+            {
+                uint targetAccountId = Global.AccountMgr.GetId(accountName);
 
-				if (targetAccountId == 0)
-				{
-					handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                if (targetAccountId == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-					return false;
-				}
+                    return false;
+                }
 
-				// can set password only for Target with less security
-				// This also restricts setting handler's own password
-				if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
-					return false;
+                // can set password only for Target with less security
+                // This also restricts setting handler's own password
+                if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
+                    return false;
 
-				if (!password.Equals(confirmPassword))
-				{
-					handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
+                if (!password.Equals(confirmPassword))
+                {
+                    handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
 
-					return false;
-				}
+                    return false;
+                }
 
-				AccountOpResult result = Global.AccountMgr.ChangePassword(targetAccountId, password);
+                AccountOpResult result = Global.AccountMgr.ChangePassword(targetAccountId, password);
 
-				switch (result)
-				{
-					case AccountOpResult.Ok:
-						handler.SendSysMessage(CypherStrings.CommandPassword);
+                switch (result)
+                {
+                    case AccountOpResult.Ok:
+                        handler.SendSysMessage(CypherStrings.CommandPassword);
 
-						break;
-					case AccountOpResult.NameNotExist:
-						handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                        break;
+                    case AccountOpResult.NameNotExist:
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-						return false;
-					case AccountOpResult.PassTooLong:
-						handler.SendSysMessage(CypherStrings.PasswordTooLong);
+                        return false;
+                    case AccountOpResult.PassTooLong:
+                        handler.SendSysMessage(CypherStrings.PasswordTooLong);
 
-						return false;
-					default:
-						handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
+                        return false;
+                    default:
+                        handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
 
-						return false;
-				}
+                        return false;
+                }
 
-				return true;
-			}
+                return true;
+            }
 
-			[Command("seclevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
-			[Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
-			private static bool HandleAccountSetSecLevelCommand(CommandHandler handler, [OptionalArg] string accountName, byte securityLevel, int? realmId)
-			{
-				uint accountId;
+            [Command("seclevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
+            [Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
+            private static bool HandleAccountSetSecLevelCommand(CommandHandler handler, [OptionalArg] string accountName, byte securityLevel, int? realmId)
+            {
+                uint accountId;
 
-				if (!accountName.IsEmpty())
-				{
-					accountId = Global.AccountMgr.GetId(accountName);
+                if (!accountName.IsEmpty())
+                {
+                    accountId = Global.AccountMgr.GetId(accountName);
 
-					if (accountId == 0)
-					{
-						handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                    if (accountId == 0)
+                    {
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-						return false;
-					}
-				}
-				else
-				{
-					Player player = handler.GetSelectedPlayer();
+                        return false;
+                    }
+                }
+                else
+                {
+                    Player player = handler.GetSelectedPlayer();
 
-					if (!player)
-						return false;
+                    if (!player)
+                        return false;
 
-					accountId = player.GetSession().GetAccountId();
-					Global.AccountMgr.GetName(accountId, out accountName);
-				}
+                    accountId = player.GetSession().GetAccountId();
+                    Global.AccountMgr.GetName(accountId, out accountName);
+                }
 
-				if (securityLevel > (uint)AccountTypes.Console)
-				{
-					handler.SendSysMessage(CypherStrings.BadValue);
+                if (securityLevel > (uint)AccountTypes.Console)
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
 
-					return false;
-				}
+                    return false;
+                }
 
-				int realmID = -1;
+                int realmID = -1;
 
-				if (realmId.HasValue)
-					realmID = realmId.Value;
+                if (realmId.HasValue)
+                    realmID = realmId.Value;
 
-				AccountTypes playerSecurity;
+                AccountTypes playerSecurity;
 
-				if (handler.IsConsole())
-					playerSecurity = AccountTypes.Console;
-				else
-					playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
+                if (handler.IsConsole())
+                    playerSecurity = AccountTypes.Console;
+                else
+                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
 
-				// can set security level only for Target with less security and to less security that we have
-				// This is also reject self apply in fact
-				AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
+                // can set security level only for Target with less security and to less security that we have
+                // This is also reject self apply in fact
+                AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
 
-				if (targetSecurity >= playerSecurity ||
-				    (AccountTypes)securityLevel >= playerSecurity)
-				{
-					handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
+                if (targetSecurity >= playerSecurity ||
+                    (AccountTypes)securityLevel >= playerSecurity)
+                {
+                    handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
 
-					return false;
-				}
+                    return false;
+                }
 
-				PreparedStatement stmt;
+                PreparedStatement stmt;
 
-				// Check and abort if the Target gm has a higher rank on one of the realms and the new realm is -1
-				if (realmID == -1 &&
-				    !Global.AccountMgr.IsConsoleAccount(playerSecurity))
-				{
-					stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_SECLEVEL_TEST);
-					stmt.AddValue(0, accountId);
-					stmt.AddValue(1, securityLevel);
+                // Check and abort if the Target gm has a higher rank on one of the realms and the new realm is -1
+                if (realmID == -1 &&
+                    !Global.AccountMgr.IsConsoleAccount(playerSecurity))
+                {
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_SECLEVEL_TEST);
+                    stmt.AddValue(0, accountId);
+                    stmt.AddValue(1, securityLevel);
 
-					SQLResult result = DB.Login.Query(stmt);
+                    SQLResult result = DB.Login.Query(stmt);
 
-					if (!result.IsEmpty())
-					{
-						handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
+                    if (!result.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
 
-						return false;
-					}
-				}
+                        return false;
+                    }
+                }
 
-				// Check if provided realmID has a negative value other than -1
-				if (realmID < -1)
-				{
-					handler.SendSysMessage(CypherStrings.InvalidRealmid);
+                // Check if provided realmID has a negative value other than -1
+                if (realmID < -1)
+                {
+                    handler.SendSysMessage(CypherStrings.InvalidRealmid);
 
-					return false;
-				}
+                    return false;
+                }
 
-				Global.AccountMgr.UpdateAccountAccess(null, accountId, (byte)securityLevel, realmID);
+                Global.AccountMgr.UpdateAccountAccess(null, accountId, (byte)securityLevel, realmID);
 
-				handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
+                handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
 
-				return true;
-			}
+                return true;
+            }
 
-			[CommandGroup("sec")]
-			private class SetSecCommands
-			{
-				[Command("email", CypherStrings.CommandAccSetSecEmailHelp, RBACPermissions.CommandAccountSetSecEmail, true)]
-				private static bool HandleAccountSetEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
-				{
-					uint targetAccountId = Global.AccountMgr.GetId(accountName);
+            [CommandGroup("sec")]
+            private class SetSecCommands
+            {
+                [Command("email", CypherStrings.CommandAccSetSecEmailHelp, RBACPermissions.CommandAccountSetSecEmail, true)]
+                private static bool HandleAccountSetEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
+                {
+                    uint targetAccountId = Global.AccountMgr.GetId(accountName);
 
-					if (targetAccountId == 0)
-					{
-						handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                    if (targetAccountId == 0)
+                    {
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-						return false;
-					}
+                        return false;
+                    }
 
-					// can set email only for Target with less security
-					// This also restricts setting handler's own email.
-					if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
-						return false;
+                    // can set email only for Target with less security
+                    // This also restricts setting handler's own email.
+                    if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
+                        return false;
 
-					if (!email.Equals(confirmEmail))
-					{
-						handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
+                    if (!email.Equals(confirmEmail))
+                    {
+                        handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
 
-						return false;
-					}
+                        return false;
+                    }
 
-					AccountOpResult result = Global.AccountMgr.ChangeEmail(targetAccountId, email);
+                    AccountOpResult result = Global.AccountMgr.ChangeEmail(targetAccountId, email);
 
-					switch (result)
-					{
-						case AccountOpResult.Ok:
-							handler.SendSysMessage(CypherStrings.CommandEmail);
-							Log.outInfo(LogFilter.Player, "ChangeEmail: Account {0} [Id: {1}] had it's email changed to {2}.", accountName, targetAccountId, email);
+                    switch (result)
+                    {
+                        case AccountOpResult.Ok:
+                            handler.SendSysMessage(CypherStrings.CommandEmail);
+                            Log.outInfo(LogFilter.Player, "ChangeEmail: Account {0} [Id: {1}] had it's email changed to {2}.", accountName, targetAccountId, email);
 
-							break;
-						case AccountOpResult.NameNotExist:
-							handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                            break;
+                        case AccountOpResult.NameNotExist:
+                            handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-							return false;
-						case AccountOpResult.EmailTooLong:
-							handler.SendSysMessage(CypherStrings.EmailTooLong);
+                            return false;
+                        case AccountOpResult.EmailTooLong:
+                            handler.SendSysMessage(CypherStrings.EmailTooLong);
 
-							return false;
-						default:
-							handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
+                            return false;
+                        default:
+                            handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
 
-							return false;
-					}
+                            return false;
+                    }
 
-					return true;
-				}
+                    return true;
+                }
 
-				[Command("regmail", CypherStrings.CommandAccSetSecRegmailHelp, RBACPermissions.CommandAccountSetSecRegmail, true)]
-				private static bool HandleAccountSetRegEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
-				{
-					uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                [Command("regmail", CypherStrings.CommandAccSetSecRegmailHelp, RBACPermissions.CommandAccountSetSecRegmail, true)]
+                private static bool HandleAccountSetRegEmailCommand(CommandHandler handler, string accountName, string email, string confirmEmail)
+                {
+                    uint targetAccountId = Global.AccountMgr.GetId(accountName);
 
-					if (targetAccountId == 0)
-					{
-						handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                    if (targetAccountId == 0)
+                    {
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-						return false;
-					}
+                        return false;
+                    }
 
-					// can set email only for Target with less security
-					// This also restricts setting handler's own email.
-					if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
-						return false;
+                    // can set email only for Target with less security
+                    // This also restricts setting handler's own email.
+                    if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
+                        return false;
 
-					if (!email.Equals(confirmEmail))
-					{
-						handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
+                    if (!email.Equals(confirmEmail))
+                    {
+                        handler.SendSysMessage(CypherStrings.NewEmailsNotMatch);
 
-						return false;
-					}
+                        return false;
+                    }
 
-					AccountOpResult result = Global.AccountMgr.ChangeRegEmail(targetAccountId, email);
+                    AccountOpResult result = Global.AccountMgr.ChangeRegEmail(targetAccountId, email);
 
-					switch (result)
-					{
-						case AccountOpResult.Ok:
-							handler.SendSysMessage(CypherStrings.CommandEmail);
-							Log.outInfo(LogFilter.Player, "ChangeRegEmail: Account {0} [Id: {1}] had it's Registration Email changed to {2}.", accountName, targetAccountId, email);
+                    switch (result)
+                    {
+                        case AccountOpResult.Ok:
+                            handler.SendSysMessage(CypherStrings.CommandEmail);
+                            Log.outInfo(LogFilter.Player, "ChangeRegEmail: Account {0} [Id: {1}] had it's Registration Email changed to {2}.", accountName, targetAccountId, email);
 
-							break;
-						case AccountOpResult.NameNotExist:
-							handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                            break;
+                        case AccountOpResult.NameNotExist:
+                            handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
 
-							return false;
-						case AccountOpResult.EmailTooLong:
-							handler.SendSysMessage(CypherStrings.EmailTooLong);
+                            return false;
+                        case AccountOpResult.EmailTooLong:
+                            handler.SendSysMessage(CypherStrings.EmailTooLong);
 
-							return false;
-						default:
-							handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
+                            return false;
+                        default:
+                            handler.SendSysMessage(CypherStrings.CommandNotchangeemail);
 
-							return false;
-					}
+                            return false;
+                    }
 
-					return true;
-				}
-			}
-		}
-	}
+                    return true;
+                }
+            }
+        }
+    }
 }

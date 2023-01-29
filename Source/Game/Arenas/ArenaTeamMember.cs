@@ -7,10 +7,10 @@ using Game.Entities;
 namespace Game.Arenas
 {
     public class ArenaTeamMember
-	{
-		public byte Class { get; set; }
+    {
+        public byte Class { get; set; }
         public ObjectGuid Guid;
-		public ushort MatchMakerRating { get; set; }
+        public ushort MatchMakerRating { get; set; }
         public string Name { get; set; }
         public ushort PersonalRating { get; set; }
         public ushort SeasonGames { get; set; }
@@ -19,25 +19,25 @@ namespace Game.Arenas
         public ushort WeekWins { get; set; }
 
         public void ModifyPersonalRating(Player player, int mod, uint type)
-		{
-			if (PersonalRating + mod < 0)
-				PersonalRating = 0;
-			else
-				PersonalRating += (ushort)mod;
+        {
+            if (PersonalRating + mod < 0)
+                PersonalRating = 0;
+            else
+                PersonalRating += (ushort)mod;
 
-			if (player)
-			{
-				player.SetArenaTeamInfoField(ArenaTeam.GetSlotByType(type), ArenaTeamInfoType.PersonalRating, PersonalRating);
-				player.UpdateCriteria(CriteriaType.EarnPersonalArenaRating, PersonalRating, type);
-			}
-		}
+            if (player)
+            {
+                player.SetArenaTeamInfoField(ArenaTeam.GetSlotByType(type), ArenaTeamInfoType.PersonalRating, PersonalRating);
+                player.UpdateCriteria(CriteriaType.EarnPersonalArenaRating, PersonalRating, type);
+            }
+        }
 
-		public void ModifyMatchmakerRating(int mod, uint slot)
-		{
-			if (MatchMakerRating + mod < 0)
-				MatchMakerRating = 0;
-			else
-				MatchMakerRating += (ushort)mod;
-		}
-	}
+        public void ModifyMatchmakerRating(int mod, uint slot)
+        {
+            if (MatchMakerRating + mod < 0)
+                MatchMakerRating = 0;
+            else
+                MatchMakerRating += (ushort)mod;
+        }
+    }
 }

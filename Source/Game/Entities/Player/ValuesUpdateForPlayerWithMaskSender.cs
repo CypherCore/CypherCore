@@ -7,29 +7,29 @@ using Game.Networking.Packets;
 namespace Game.Entities
 {
     public partial class Player
-	{
+    {
         private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-		{
-			private ActivePlayerData _activePlayerMask = new();
-			private ObjectFieldData _objectMask = new();
-			private Player _owner;
-			private PlayerData _playerMask = new();
-			private UnitData _unitMask = new();
+        {
+            private readonly ActivePlayerData _activePlayerMask = new();
+            private readonly ObjectFieldData _objectMask = new();
+            private readonly Player _owner;
+            private readonly PlayerData _playerMask = new();
+            private readonly UnitData _unitMask = new();
 
-			public ValuesUpdateForPlayerWithMaskSender(Player owner)
-			{
-				_owner = owner;
-			}
+            public ValuesUpdateForPlayerWithMaskSender(Player owner)
+            {
+                _owner = owner;
+            }
 
-			public void Invoke(Player player)
-			{
-				UpdateData udata = new(_owner.GetMapId());
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(_owner.GetMapId());
 
-				_owner.BuildValuesUpdateForPlayerWithMask(udata, _objectMask.GetUpdateMask(), _unitMask.GetUpdateMask(), _playerMask.GetUpdateMask(), _activePlayerMask.GetUpdateMask(), player);
+                _owner.BuildValuesUpdateForPlayerWithMask(udata, _objectMask.GetUpdateMask(), _unitMask.GetUpdateMask(), _playerMask.GetUpdateMask(), _activePlayerMask.GetUpdateMask(), player);
 
-				udata.BuildPacket(out UpdateObject packet);
-				player.SendPacket(packet);
-			}
-		}
-	}
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
+    }
 }

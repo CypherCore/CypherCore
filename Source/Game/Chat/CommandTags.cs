@@ -7,276 +7,276 @@ using Game.Entities;
 
 namespace Game.Chat
 {
-	internal class PlayerIdentifier
-	{
-		private ObjectGuid _guid;
-		private string _name;
-		private Player _player;
+    internal class PlayerIdentifier
+    {
+        private ObjectGuid _guid;
+        private string _name;
+        private Player _player;
 
-		public PlayerIdentifier()
-		{
-		}
+        public PlayerIdentifier()
+        {
+        }
 
-		public PlayerIdentifier(Player player)
-		{
-			_name   = player.GetName();
-			_guid   = player.GetGUID();
-			_player = player;
-		}
+        public PlayerIdentifier(Player player)
+        {
+            _name = player.GetName();
+            _guid = player.GetGUID();
+            _player = player;
+        }
 
-		public string GetName()
-		{
-			return _name;
-		}
+        public string GetName()
+        {
+            return _name;
+        }
 
-		public ObjectGuid GetGUID()
-		{
-			return _guid;
-		}
+        public ObjectGuid GetGUID()
+        {
+            return _guid;
+        }
 
-		public bool IsConnected()
-		{
-			return _player != null;
-		}
+        public bool IsConnected()
+        {
+            return _player != null;
+        }
 
-		public Player GetConnectedPlayer()
-		{
-			return _player;
-		}
+        public Player GetConnectedPlayer()
+        {
+            return _player;
+        }
 
-		public static PlayerIdentifier FromTarget(CommandHandler handler)
-		{
-			Player player = handler.GetPlayer();
+        public static PlayerIdentifier FromTarget(CommandHandler handler)
+        {
+            Player player = handler.GetPlayer();
 
-			if (player != null)
-			{
-				Player target = player.GetSelectedPlayer();
+            if (player != null)
+            {
+                Player target = player.GetSelectedPlayer();
 
-				if (target != null)
-					return new PlayerIdentifier(target);
-			}
+                if (target != null)
+                    return new PlayerIdentifier(target);
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		public static PlayerIdentifier FromSelf(CommandHandler handler)
-		{
-			Player player = handler.GetPlayer();
+        public static PlayerIdentifier FromSelf(CommandHandler handler)
+        {
+            Player player = handler.GetPlayer();
 
-			if (player != null)
-				return new PlayerIdentifier(player);
+            if (player != null)
+                return new PlayerIdentifier(player);
 
-			return null;
-		}
+            return null;
+        }
 
-		public static PlayerIdentifier FromTargetOrSelf(CommandHandler handler)
-		{
-			PlayerIdentifier fromTarget = FromTarget(handler);
+        public static PlayerIdentifier FromTargetOrSelf(CommandHandler handler)
+        {
+            PlayerIdentifier fromTarget = FromTarget(handler);
 
-			if (fromTarget != null)
-				return fromTarget;
-			else
-				return FromSelf(handler);
-		}
+            if (fromTarget != null)
+                return fromTarget;
+            else
+                return FromSelf(handler);
+        }
 
-		public ChatCommandResult TryConsume(CommandHandler handler, string args)
-		{
-			ChatCommandResult next = CommandArgs.TryConsume(out dynamic tempVal, typeof(ulong), handler, args);
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
+        {
+            ChatCommandResult next = CommandArgs.TryConsume(out dynamic tempVal, typeof(ulong), handler, args);
 
-			if (!next.IsSuccessful())
-				next = CommandArgs.TryConsume(out tempVal, typeof(string), handler, args);
+            if (!next.IsSuccessful())
+                next = CommandArgs.TryConsume(out tempVal, typeof(string), handler, args);
 
-			if (!next.IsSuccessful())
-				return next;
+            if (!next.IsSuccessful())
+                return next;
 
-			if (tempVal is ulong)
-			{
-				_guid = ObjectGuid.Create(HighGuid.Player, tempVal);
+            if (tempVal is ulong)
+            {
+                _guid = ObjectGuid.Create(HighGuid.Player, tempVal);
 
-				if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())) != null)
-					_name = _player.GetName();
-				else if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(_guid, out _name))
-					return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharGuidNoExist, _guid.ToString()));
+                if ((_player = Global.ObjAccessor.FindPlayerByLowGUID(_guid.GetCounter())) != null)
+                    _name = _player.GetName();
+                else if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(_guid, out _name))
+                    return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharGuidNoExist, _guid.ToString()));
 
-				return next;
-			}
-			else
-			{
-				_name = tempVal;
+                return next;
+            }
+            else
+            {
+                _name = tempVal;
 
-				if (!ObjectManager.NormalizePlayerName(ref _name))
-					return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameInvalid, _name));
+                if (!ObjectManager.NormalizePlayerName(ref _name))
+                    return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameInvalid, _name));
 
-				if ((_player = Global.ObjAccessor.FindPlayerByName(_name)) != null)
-					_guid = _player.GetGUID();
-				else if ((_guid = Global.CharacterCacheStorage.GetCharacterGuidByName(_name)).IsEmpty())
-					return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameNoExist, _name));
+                if ((_player = Global.ObjAccessor.FindPlayerByName(_name)) != null)
+                    _guid = _player.GetGUID();
+                else if ((_guid = Global.CharacterCacheStorage.GetCharacterGuidByName(_name)).IsEmpty())
+                    return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCharNameNoExist, _name));
 
-				return next;
-			}
-		}
-	}
+                return next;
+            }
+        }
+    }
 
-	internal class AccountIdentifier
-	{
-		private uint _id;
-		private string _name;
-		private WorldSession _session;
+    internal class AccountIdentifier
+    {
+        private uint _id;
+        private string _name;
+        private WorldSession _session;
 
-		public AccountIdentifier()
-		{
-		}
+        public AccountIdentifier()
+        {
+        }
 
-		public AccountIdentifier(WorldSession session)
-		{
-			_id      = session.GetAccountId();
-			_name    = session.GetAccountName();
-			_session = session;
-		}
+        public AccountIdentifier(WorldSession session)
+        {
+            _id = session.GetAccountId();
+            _name = session.GetAccountName();
+            _session = session;
+        }
 
-		public uint GetID()
-		{
-			return _id;
-		}
+        public uint GetID()
+        {
+            return _id;
+        }
 
-		public string GetName()
-		{
-			return _name;
-		}
+        public string GetName()
+        {
+            return _name;
+        }
 
-		public bool IsConnected()
-		{
-			return _session != null;
-		}
+        public bool IsConnected()
+        {
+            return _session != null;
+        }
 
-		public WorldSession GetConnectedSession()
-		{
-			return _session;
-		}
+        public WorldSession GetConnectedSession()
+        {
+            return _session;
+        }
 
-		public ChatCommandResult TryConsume(CommandHandler handler, string args)
-		{
-			ChatCommandResult next = CommandArgs.TryConsume(out dynamic text, typeof(string), handler, args);
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
+        {
+            ChatCommandResult next = CommandArgs.TryConsume(out dynamic text, typeof(string), handler, args);
 
-			if (!next.IsSuccessful())
-				return next;
+            if (!next.IsSuccessful())
+                return next;
 
-			// first try parsing as account Name
-			_name    = text;
-			_id      = Global.AccountMgr.GetId(_name);
-			_session = Global.WorldMgr.FindSession(_id);
+            // first try parsing as account Name
+            _name = text;
+            _id = Global.AccountMgr.GetId(_name);
+            _session = Global.WorldMgr.FindSession(_id);
 
-			if (_id != 0) // account with Name exists, we are done
-				return next;
+            if (_id != 0) // account with Name exists, we are done
+                return next;
 
-			// try parsing as account Id instead
-			if (uint.TryParse(text, out uint id))
-				return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountNameNoExist, _name));
+            // try parsing as account Id instead
+            if (uint.TryParse(text, out uint id))
+                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountNameNoExist, _name));
 
-			_id      = id;
-			_session = Global.WorldMgr.FindSession(_id);
+            _id = id;
+            _session = Global.WorldMgr.FindSession(_id);
 
-			if (Global.AccountMgr.GetName(_id, out _name))
-				return next;
-			else
-				return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountIdNoExist, _id));
-		}
+            if (Global.AccountMgr.GetName(_id, out _name))
+                return next;
+            else
+                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAccountIdNoExist, _id));
+        }
 
-		public static AccountIdentifier FromTarget(CommandHandler handler)
-		{
-			Player player = handler.GetPlayer();
+        public static AccountIdentifier FromTarget(CommandHandler handler)
+        {
+            Player player = handler.GetPlayer();
 
-			if (player != null)
-			{
-				Player target = player.GetSelectedPlayer();
+            if (player != null)
+            {
+                Player target = player.GetSelectedPlayer();
 
-				if (target != null)
-				{
-					WorldSession session = target.GetSession();
+                if (target != null)
+                {
+                    WorldSession session = target.GetSession();
 
-					if (session != null)
-						return new AccountIdentifier(session);
-				}
-			}
+                    if (session != null)
+                        return new AccountIdentifier(session);
+                }
+            }
 
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 
-	internal struct Tail
-	{
-		private string str;
+    internal struct Tail
+    {
+        private string str;
 
-		public bool IsEmpty()
-		{
-			return str.IsEmpty();
-		}
+        public bool IsEmpty()
+        {
+            return str.IsEmpty();
+        }
 
-		public static implicit operator string(Tail tail)
-		{
-			return tail.str;
-		}
+        public static implicit operator string(Tail tail)
+        {
+            return tail.str;
+        }
 
-		public ChatCommandResult TryConsume(CommandHandler handler, string args)
-		{
-			str = args;
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
+        {
+            str = args;
 
-			return new ChatCommandResult(str);
-		}
-	}
+            return new ChatCommandResult(str);
+        }
+    }
 
-	internal struct QuotedString
-	{
-		private string str;
+    internal struct QuotedString
+    {
+        private string str;
 
-		public bool IsEmpty()
-		{
-			return str.IsEmpty();
-		}
+        public bool IsEmpty()
+        {
+            return str.IsEmpty();
+        }
 
-		public static implicit operator string(QuotedString quotedString)
-		{
-			return quotedString.str;
-		}
+        public static implicit operator string(QuotedString quotedString)
+        {
+            return quotedString.str;
+        }
 
-		public ChatCommandResult TryConsume(CommandHandler handler, string args)
-		{
-			str = "";
+        public ChatCommandResult TryConsume(CommandHandler handler, string args)
+        {
+            str = "";
 
-			if (args.IsEmpty())
-				return ChatCommandResult.FromErrorMessage("");
+            if (args.IsEmpty())
+                return ChatCommandResult.FromErrorMessage("");
 
-			if ((args[0] != '"') &&
-			    (args[0] != '\''))
-				return CommandArgs.TryConsume(out dynamic str, typeof(string), handler, args);
+            if ((args[0] != '"') &&
+                (args[0] != '\''))
+                return CommandArgs.TryConsume(out dynamic str, typeof(string), handler, args);
 
-			char QUOTE = args[0];
+            char QUOTE = args[0];
 
-			for (var i = 1; i < args.Length; ++i)
-			{
-				if (args[i] == QUOTE)
-				{
-					var (remainingToken, tail) = args.Substring(i + 1).Tokenize();
+            for (var i = 1; i < args.Length; ++i)
+            {
+                if (args[i] == QUOTE)
+                {
+                    var (remainingToken, tail) = args[(i + 1)..].Tokenize();
 
-					if (remainingToken.IsEmpty()) // if this is not empty, then we did not consume the full token
-						return new ChatCommandResult(tail);
-					else
-						return ChatCommandResult.FromErrorMessage("");
-				}
+                    if (remainingToken.IsEmpty()) // if this is not empty, then we did not consume the full token
+                        return new ChatCommandResult(tail);
+                    else
+                        return ChatCommandResult.FromErrorMessage("");
+                }
 
-				if (args[i] == '\\')
-				{
-					++i;
+                if (args[i] == '\\')
+                {
+                    ++i;
 
-					if (!(i < args.Length))
-						break;
-				}
+                    if (!(i < args.Length))
+                        break;
+                }
 
-				str += args[i];
-			}
+                str += args[i];
+            }
 
-			// if we reach this, we did not find a closing quote
-			return ChatCommandResult.FromErrorMessage("");
-		}
-	}
+            // if we reach this, we did not find a closing quote
+            return ChatCommandResult.FromErrorMessage("");
+        }
+    }
 }

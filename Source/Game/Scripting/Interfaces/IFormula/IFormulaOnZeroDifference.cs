@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IFormula
 {
-	public interface IFormulaOnZeroDifference : IScriptObject
-	{
-		void OnZeroDifferenceCalculation(uint diff, uint playerLevel);
-	}
+    public interface IFormulaOnZeroDifference : IScriptObject
+    {
+        void OnZeroDifferenceCalculation(uint diff, uint playerLevel);
+    }
 }

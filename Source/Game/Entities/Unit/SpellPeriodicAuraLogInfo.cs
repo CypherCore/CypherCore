@@ -16,13 +16,13 @@ public class SpellPeriodicAuraLogInfo
 
     public SpellPeriodicAuraLogInfo(AuraEffect _auraEff, uint _damage, uint _originalDamage, uint _overDamage, uint _absorb, uint _resist, float _multiplier, bool _critical)
     {
-        AuraEff        = _auraEff;
-        Damage         = _damage;
+        AuraEff = _auraEff;
+        Damage = _damage;
         OriginalDamage = _originalDamage;
-        OverDamage     = _overDamage;
-        Absorb         = _absorb;
-        Resist         = _resist;
-        Multiplier     = _multiplier;
-        Critical       = _critical;
+        OverDamage = _overDamage;
+        Absorb = _absorb;
+        Resist = _resist;
+        Multiplier = _multiplier;
+        Critical = _critical;
     }
 }

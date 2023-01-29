@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IAuctionHouse
 {
-	public interface IAuctionHouseOnAcutionRemove : IScriptObject
-	{
-		void OnAuctionRemove(AuctionHouseObject ah, AuctionPosting auction);
-	}
+    public interface IAuctionHouseOnAcutionRemove : IScriptObject
+    {
+        void OnAuctionRemove(AuctionHouseObject ah, AuctionPosting auction);
+    }
 }

@@ -6,18 +6,18 @@ using Game.Entities;
 
 namespace Game.AI
 {
-    internal struct ValidTargetSelectPredicate : ICheck<Unit>
-	{
-		private readonly UnitAI _ai;
+    internal readonly struct ValidTargetSelectPredicate : ICheck<Unit>
+    {
+        private readonly UnitAI _ai;
 
-		public ValidTargetSelectPredicate(UnitAI ai)
-		{
-			_ai = ai;
-		}
+        public ValidTargetSelectPredicate(UnitAI ai)
+        {
+            _ai = ai;
+        }
 
-		public bool Invoke(Unit target)
-		{
-			return _ai.CanAIAttack(target);
-		}
-	}
+        public bool Invoke(Unit target)
+        {
+            return _ai.CanAIAttack(target);
+        }
+    }
 }

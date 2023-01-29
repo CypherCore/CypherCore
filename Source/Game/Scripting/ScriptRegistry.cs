@@ -7,95 +7,95 @@ using Game.Scripting.Interfaces;
 
 namespace Game.Scripting
 {
-	public class ScriptRegistry
-	{
-		// Counter used for code-only scripts.
-		private uint _scriptIdCounter;
-		private Dictionary<uint, IScriptObject> _scriptMap = new();
+    public class ScriptRegistry
+    {
+        // Counter used for code-only scripts.
+        private uint _scriptIdCounter;
+        private readonly Dictionary<uint, IScriptObject> _scriptMap = new();
 
-		public void AddScript(IScriptObject script)
-		{
-			Cypher.Assert(script != null);
+        public void AddScript(IScriptObject script)
+        {
+            Cypher.Assert(script != null);
 
-			if (!script.IsDatabaseBound())
-			{
-				// We're dealing with a code-only script; just add it.
-				_scriptMap[Interlocked.Increment(ref _scriptIdCounter)] = script;
-				Global.ScriptMgr.IncrementScriptCount();
+            if (!script.IsDatabaseBound())
+            {
+                // We're dealing with a code-only script; just add it.
+                _scriptMap[Interlocked.Increment(ref _scriptIdCounter)] = script;
+                Global.ScriptMgr.IncrementScriptCount();
 
-				return;
-			}
+                return;
+            }
 
-			// Get an ID for the script. An ID only exists if it's a script that is assigned in the database
-			// through a script Name (or similar).
-			uint id = Global.ObjectMgr.GetScriptId(script.GetName());
+            // Get an ID for the script. An ID only exists if it's a script that is assigned in the database
+            // through a script Name (or similar).
+            uint id = Global.ObjectMgr.GetScriptId(script.GetName());
 
-			if (id != 0)
-			{
-				// Try to find an existing script.
-				bool existing = false;
+            if (id != 0)
+            {
+                // Try to find an existing script.
+                bool existing = false;
 
-				lock (_scriptMap)
-				{
-					foreach (var it in _scriptMap)
-						if (it.Value.GetName() == script.GetName())
-						{
-							existing = true;
+                lock (_scriptMap)
+                {
+                    foreach (var it in _scriptMap)
+                        if (it.Value.GetName() == script.GetName())
+                        {
+                            existing = true;
 
-							break;
-						}
-				}
+                            break;
+                        }
+                }
 
-				// If the script isn't assigned . assign it!
-				if (!existing)
-				{
-					lock (_scriptMap)
-					{
-						_scriptMap[id] = script;
-					}
+                // If the script isn't assigned . assign it!
+                if (!existing)
+                {
+                    lock (_scriptMap)
+                    {
+                        _scriptMap[id] = script;
+                    }
 
-					Global.ScriptMgr.IncrementScriptCount();
-				}
-				else
-				{
-					// If the script is already assigned . delete it!
-					Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script Name, so the script can't work.", script.GetName());
+                    Global.ScriptMgr.IncrementScriptCount();
+                }
+                else
+                {
+                    // If the script is already assigned . delete it!
+                    Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script Name, so the script can't work.", script.GetName());
 
-					Cypher.Assert(false); // Error that should be fixed ASAP.
-				}
-			}
-			else
-			{
-				// The script uses a script Name from database, but isn't assigned to anything.
-				Log.outError(LogFilter.Sql, "Script named '{0}' does not have a script Name assigned in database.", script.GetName());
+                    Cypher.Assert(false); // Error that should be fixed ASAP.
+                }
+            }
+            else
+            {
+                // The script uses a script Name from database, but isn't assigned to anything.
+                Log.outError(LogFilter.Sql, "Script named '{0}' does not have a script Name assigned in database.", script.GetName());
 
-				return;
-			}
-		}
+                return;
+            }
+        }
 
-		// Gets a script by its ID (assigned by ObjectMgr).
-		public T GetScriptById<T>(uint id) where T : IScriptObject
-		{
-			lock (_scriptMap)
-			{
-				return (T)_scriptMap.LookupByKey(id);
-			}
-		}
+        // Gets a script by its ID (assigned by ObjectMgr).
+        public T GetScriptById<T>(uint id) where T : IScriptObject
+        {
+            lock (_scriptMap)
+            {
+                return (T)_scriptMap.LookupByKey(id);
+            }
+        }
 
-		public bool Empty()
-		{
-			lock (_scriptMap)
-			{
-				return _scriptMap.Empty();
-			}
-		}
+        public bool Empty()
+        {
+            lock (_scriptMap)
+            {
+                return _scriptMap.Empty();
+            }
+        }
 
-		public void Unload()
-		{
-			lock (_scriptMap)
-			{
-				_scriptMap.Clear();
-			}
-		}
-	}
+        public void Unload()
+        {
+            lock (_scriptMap)
+            {
+                _scriptMap.Clear();
+            }
+        }
+    }
 }

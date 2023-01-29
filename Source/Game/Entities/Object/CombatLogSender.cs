@@ -7,20 +7,20 @@ using Game.Networking.Packets;
 namespace Game.Entities
 {
     internal class CombatLogSender : IDoWork<Player>
-	{
-		private CombatLogServerPacket _message;
+    {
+        private readonly CombatLogServerPacket _message;
 
-		public CombatLogSender(CombatLogServerPacket msg)
-		{
-			_message = msg;
-		}
+        public CombatLogSender(CombatLogServerPacket msg)
+        {
+            _message = msg;
+        }
 
-		public void Invoke(Player player)
-		{
-			_message.Clear();
-			_message.SetAdvancedCombatLogging(player.IsAdvancedCombatLoggingEnabled());
+        public void Invoke(Player player)
+        {
+            _message.Clear();
+            _message.SetAdvancedCombatLogging(player.IsAdvancedCombatLoggingEnabled());
 
-			player.SendPacket(_message);
-		}
-	}
+            player.SendPacket(_message);
+        }
+    }
 }

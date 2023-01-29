@@ -116,8 +116,8 @@ public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
 
         do
         {
-            uint   achievementId = result.Read<uint>(0);
-            string scriptName    = result.Read<string>(1);
+            uint achievementId = result.Read<uint>(0);
+            string scriptName = result.Read<string>(1);
 
             AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
 
@@ -156,8 +156,8 @@ public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
 
         do
         {
-            uint              achievementId = result.Read<uint>(0);
-            AchievementRecord achievement   = CliDB.AchievementStorage.LookupByKey(achievementId);
+            uint achievementId = result.Read<uint>(0);
+            AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
 
             if (achievement == null)
             {
@@ -197,7 +197,7 @@ public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
 
         do
         {
-            uint              id          = result.Read<uint>(0);
+            uint id = result.Read<uint>(0);
             AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(id);
 
             if (achievement == null)
@@ -208,13 +208,13 @@ public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
             }
 
             AchievementReward reward = new();
-            reward.TitleId[0]       = result.Read<uint>(1);
-            reward.TitleId[1]       = result.Read<uint>(2);
-            reward.ItemId           = result.Read<uint>(3);
+            reward.TitleId[0] = result.Read<uint>(1);
+            reward.TitleId[1] = result.Read<uint>(2);
+            reward.ItemId = result.Read<uint>(3);
             reward.SenderCreatureId = result.Read<uint>(4);
-            reward.Subject          = result.Read<string>(5);
-            reward.Body             = result.Read<string>(6);
-            reward.MailTemplateId   = result.Read<uint>(7);
+            reward.Subject = result.Read<string>(5);
+            reward.Body = result.Read<string>(6);
+            reward.MailTemplateId = result.Read<uint>(7);
 
             // must be title or mail at least
             if (reward.TitleId[0] == 0 &&
@@ -321,7 +321,7 @@ public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
 
         do
         {
-            uint   id         = result.Read<uint>(0);
+            uint id = result.Read<uint>(0);
             string localeName = result.Read<string>(1);
 
             if (!_achievementRewards.ContainsKey(id))
@@ -331,8 +331,8 @@ public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
                 continue;
             }
 
-            AchievementRewardLocale data   = new();
-            Locale                  locale = localeName.ToEnum<Locale>();
+            AchievementRewardLocale data = new();
+            Locale locale = localeName.ToEnum<Locale>();
 
             if (!SharedConst.IsValidLocale(locale) ||
                 locale == Locale.enUS)

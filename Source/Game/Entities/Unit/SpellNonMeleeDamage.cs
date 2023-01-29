@@ -29,12 +29,12 @@ public class SpellNonMeleeDamage
 
     public SpellNonMeleeDamage(Unit _attacker, Unit _target, SpellInfo _spellInfo, SpellCastVisual spellVisual, SpellSchoolMask _schoolMask, ObjectGuid _castId = default)
     {
-        Target       = _target;
-        Attacker     = _attacker;
-        Spell        = _spellInfo;
-        SpellVisual  = spellVisual;
-        SchoolMask   = _schoolMask;
-        CastId       = _castId;
+        Target = _target;
+        Attacker = _attacker;
+        Spell = _spellInfo;
+        SpellVisual = spellVisual;
+        SchoolMask = _schoolMask;
+        CastId = _castId;
         PreHitHealth = (uint)_target.GetHealth();
     }
 }

@@ -6,9 +6,9 @@ using System;
 namespace Game
 {
     public class CommodityQuote
-	{
-		public uint Quantity { get; set; }
-		public ulong TotalPrice { get; set; }
+    {
+        public uint Quantity { get; set; }
+        public ulong TotalPrice { get; set; }
         public DateTime ValidTo = DateTime.MinValue;
-	}
+    }
 }

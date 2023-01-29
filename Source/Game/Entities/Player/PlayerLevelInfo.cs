@@ -4,7 +4,7 @@
 namespace Game.Entities
 {
     public class PlayerLevelInfo
-	{
-		public int[] Stats { get; set; } = new int[(int)Framework.Constants.Stats.Max];
-	}
+    {
+        public int[] Stats { get; set; } = new int[(int)Framework.Constants.Stats.Max];
+    }
 }

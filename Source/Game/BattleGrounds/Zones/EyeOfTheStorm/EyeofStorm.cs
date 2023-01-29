@@ -24,7 +24,7 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
 {
     internal class BgEyeofStorm : Battleground
     {
-        private byte[] _CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
+        private readonly byte[] _CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
         private ObjectGuid _DroppedFlagGUID;
         private uint _FlagCapturedBgObjectType; // Type that should be despawned when flag is captured
 
@@ -32,19 +32,19 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
         private EotSFlagState _FlagState; // for checking flag State
         private int _FlagsTimer;
 
-        private uint[] _HonorScoreTics = new uint[2];
+        private readonly uint[] _HonorScoreTics = new uint[2];
         private uint _HonorTics;
-        private BattlegroundPointCaptureStatus[] _LastPointCaptureStatus = new BattlegroundPointCaptureStatus[EotSPoints.PointsMax];
-        private List<ObjectGuid>[] _PlayersNearPoint = new List<ObjectGuid>[EotSPoints.PointsMax + 1];
+        private readonly BattlegroundPointCaptureStatus[] _LastPointCaptureStatus = new BattlegroundPointCaptureStatus[EotSPoints.PointsMax];
+        private readonly List<ObjectGuid>[] _PlayersNearPoint = new List<ObjectGuid>[EotSPoints.PointsMax + 1];
 
         private int _PointAddingTimer;
-        private EotSProgressBarConsts[] _PointBarStatus = new EotSProgressBarConsts[EotSPoints.PointsMax];
+        private readonly EotSProgressBarConsts[] _PointBarStatus = new EotSProgressBarConsts[EotSPoints.PointsMax];
 
-        private Team[] _PointOwnedByTeam = new Team[EotSPoints.PointsMax];
+        private readonly Team[] _PointOwnedByTeam = new Team[EotSPoints.PointsMax];
 
-        private uint[] _Points_Trigger = new uint[EotSPoints.PointsMax];
-        private EotSPointState[] _PointState = new EotSPointState[EotSPoints.PointsMax];
-        private uint[] _TeamPointsCount = new uint[2];
+        private readonly uint[] _Points_Trigger = new uint[EotSPoints.PointsMax];
+        private readonly EotSPointState[] _PointState = new EotSPointState[EotSPoints.PointsMax];
+        private readonly uint[] _TeamPointsCount = new uint[2];
         private int _TowerCapCheckTimer;
 
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)

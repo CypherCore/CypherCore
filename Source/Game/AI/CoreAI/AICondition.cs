@@ -2,7 +2,7 @@
 
 public enum AICondition
 {
-	Aggro,
-	Combat,
-	Die
+    Aggro,
+    Combat,
+    Die
 }

@@ -10,228 +10,228 @@ using Game.Spells;
 
 namespace Game.Entities
 {
-	public class Totem : Minion
-	{
-		private uint _duration;
+    public class Totem : Minion
+    {
+        private uint _duration;
 
-		private TotemType _type;
+        private TotemType _type;
 
-		public Totem(SummonPropertiesRecord properties, Unit owner) : base(properties, owner, false)
-		{
-			UnitTypeMask |= UnitTypeMask.Totem;
-			_type        =  TotemType.Passive;
-		}
+        public Totem(SummonPropertiesRecord properties, Unit owner) : base(properties, owner, false)
+        {
+            UnitTypeMask |= UnitTypeMask.Totem;
+            _type = TotemType.Passive;
+        }
 
-		public override void Update(uint diff)
-		{
-			if (!GetOwner().IsAlive() ||
-			    !IsAlive())
-			{
-				UnSummon(); // remove self
+        public override void Update(uint diff)
+        {
+            if (!GetOwner().IsAlive() ||
+                !IsAlive())
+            {
+                UnSummon(); // remove self
 
-				return;
-			}
+                return;
+            }
 
-			if (_duration <= diff)
-			{
-				UnSummon(); // remove self
+            if (_duration <= diff)
+            {
+                UnSummon(); // remove self
 
-				return;
-			}
-			else
-			{
-				_duration -= diff;
-			}
+                return;
+            }
+            else
+            {
+                _duration -= diff;
+            }
 
-			base.Update(diff);
-		}
+            base.Update(diff);
+        }
 
-		public override void InitStats(uint duration)
-		{
-			// client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
-			Player owner = GetOwner().ToPlayer();
+        public override void InitStats(uint duration)
+        {
+            // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
+            Player owner = GetOwner().ToPlayer();
 
-			if (owner)
-			{
-				if (_Properties.Slot >= (int)Framework.Constants.SummonSlot.Totem &&
-				    _Properties.Slot < SharedConst.MaxTotemSlot)
-				{
-					TotemCreated packet = new();
-					packet.Totem    = GetGUID();
-					packet.Slot     = (byte)(_Properties.Slot - (int)Framework.Constants.SummonSlot.Totem);
-					packet.Duration = duration;
-					packet.SpellID  = UnitData.CreatedBySpell;
-					owner.ToPlayer().SendPacket(packet);
-				}
+            if (owner)
+            {
+                if (_Properties.Slot >= (int)Framework.Constants.SummonSlot.Totem &&
+                    _Properties.Slot < SharedConst.MaxTotemSlot)
+                {
+                    TotemCreated packet = new();
+                    packet.Totem = GetGUID();
+                    packet.Slot = (byte)(_Properties.Slot - (int)Framework.Constants.SummonSlot.Totem);
+                    packet.Duration = duration;
+                    packet.SpellID = UnitData.CreatedBySpell;
+                    owner.ToPlayer().SendPacket(packet);
+                }
 
-				// set display Id depending on caster's race
-				uint totemDisplayId = Global.SpellMgr.GetModelForTotem(UnitData.CreatedBySpell, owner.GetRace());
+                // set display Id depending on caster's race
+                uint totemDisplayId = Global.SpellMgr.GetModelForTotem(UnitData.CreatedBySpell, owner.GetRace());
 
-				if (totemDisplayId != 0)
-					SetDisplayId(totemDisplayId);
-				else
-					Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {UnitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
-			}
+                if (totemDisplayId != 0)
+                    SetDisplayId(totemDisplayId);
+                else
+                    Log.outDebug(LogFilter.Misc, $"Totem with entry {GetEntry()}, does not have a specialized model for spell {UnitData.CreatedBySpell} and race {owner.GetRace()}. Set to default.");
+            }
 
-			base.InitStats(duration);
+            base.InitStats(duration);
 
-			// Get spell cast by totem
-			SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
+            // Get spell cast by totem
+            SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
 
-			if (totemSpell != null)
-				if (totemSpell.CalcCastTime() != 0) // If spell has cast Time -> its an active totem
-					_type = TotemType.Active;
+            if (totemSpell != null)
+                if (totemSpell.CalcCastTime() != 0) // If spell has cast Time -> its an active totem
+                    _type = TotemType.Active;
 
-			_duration = duration;
-		}
+            _duration = duration;
+        }
 
-		public override void InitSummon()
-		{
-			if (_type == TotemType.Passive &&
-			    GetSpell() != 0)
-				CastSpell(this, GetSpell(), true);
+        public override void InitSummon()
+        {
+            if (_type == TotemType.Passive &&
+                GetSpell() != 0)
+                CastSpell(this, GetSpell(), true);
 
-			// Some totems can have both instant effect and passive spell
-			if (GetSpell(1) != 0)
-				CastSpell(this, GetSpell(1), true);
-		}
+            // Some totems can have both instant effect and passive spell
+            if (GetSpell(1) != 0)
+                CastSpell(this, GetSpell(1), true);
+        }
 
-		public override void UnSummon(uint msTime = 0)
-		{
-			if (msTime != 0)
-			{
-				Events.AddEvent(new ForcedUnsummonDelayEvent(this), Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+        public override void UnSummon(uint msTime = 0)
+        {
+            if (msTime != 0)
+            {
+                Events.AddEvent(new ForcedUnsummonDelayEvent(this), Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
 
-				return;
-			}
+                return;
+            }
 
-			CombatStop();
-			RemoveAurasDueToSpell(GetSpell(), GetGUID());
+            CombatStop();
+            RemoveAurasDueToSpell(GetSpell(), GetGUID());
 
-			// clear owner's totem Slot
-			for (byte i = (int)Framework.Constants.SummonSlot.Totem; i < SharedConst.MaxTotemSlot; ++i)
-				if (GetOwner().SummonSlot[i] == GetGUID())
-				{
-					GetOwner().SummonSlot[i].Clear();
+            // clear owner's totem Slot
+            for (byte i = (int)Framework.Constants.SummonSlot.Totem; i < SharedConst.MaxTotemSlot; ++i)
+                if (GetOwner().SummonSlot[i] == GetGUID())
+                {
+                    GetOwner().SummonSlot[i].Clear();
 
-					break;
-				}
+                    break;
+                }
 
-			GetOwner().RemoveAurasDueToSpell(GetSpell(), GetGUID());
+            GetOwner().RemoveAurasDueToSpell(GetSpell(), GetGUID());
 
-			// remove aura all party members too
-			Player owner = GetOwner().ToPlayer();
+            // remove aura all party members too
+            Player owner = GetOwner().ToPlayer();
 
-			if (owner != null)
-			{
-				owner.SendAutoRepeatCancel(this);
+            if (owner != null)
+            {
+                owner.SendAutoRepeatCancel(this);
 
-				SpellInfo spell = Global.SpellMgr.GetSpellInfo(UnitData.CreatedBySpell, GetMap().GetDifficultyID());
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(UnitData.CreatedBySpell, GetMap().GetDifficultyID());
 
-				if (spell != null)
-					GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
+                if (spell != null)
+                    GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 
-				Group group = owner.GetGroup();
+                Group group = owner.GetGroup();
 
-				if (group)
-					for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-					{
-						Player target = refe.GetSource();
+                if (group)
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                    {
+                        Player target = refe.GetSource();
 
-						if (target &&
-						    target.IsInMap(owner) &&
-						    group.SameSubGroup(owner, target))
-							target.RemoveAurasDueToSpell(GetSpell(), GetGUID());
-					}
-			}
+                        if (target &&
+                            target.IsInMap(owner) &&
+                            group.SameSubGroup(owner, target))
+                            target.RemoveAurasDueToSpell(GetSpell(), GetGUID());
+                    }
+            }
 
-			AddObjectToRemoveList();
-		}
+            AddObjectToRemoveList();
+        }
 
-		public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
-		{
-			// immune to all positive spells, except of stoneclaw totem Absorb and sentry totem bind sight
-			// totems positive spells have unit_caster Target
-			if (spellEffectInfo.Effect != SpellEffectName.Dummy &&
-			    spellEffectInfo.Effect != SpellEffectName.ScriptEffect &&
-			    spellInfo.IsPositive() &&
-			    spellEffectInfo.TargetA.GetTarget() != Targets.UnitCaster &&
-			    spellEffectInfo.TargetA.GetCheckType() != SpellTargetCheckTypes.Entry)
-				return true;
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
+        {
+            // immune to all positive spells, except of stoneclaw totem Absorb and sentry totem bind sight
+            // totems positive spells have unit_caster Target
+            if (spellEffectInfo.Effect != SpellEffectName.Dummy &&
+                spellEffectInfo.Effect != SpellEffectName.ScriptEffect &&
+                spellInfo.IsPositive() &&
+                spellEffectInfo.TargetA.GetTarget() != Targets.UnitCaster &&
+                spellEffectInfo.TargetA.GetCheckType() != SpellTargetCheckTypes.Entry)
+                return true;
 
-			switch (spellEffectInfo.ApplyAuraName)
-			{
-				case AuraType.PeriodicDamage:
-				case AuraType.PeriodicLeech:
-				case AuraType.ModFear:
-				case AuraType.Transform:
-					return true;
-				default:
-					break;
-			}
+            switch (spellEffectInfo.ApplyAuraName)
+            {
+                case AuraType.PeriodicDamage:
+                case AuraType.PeriodicLeech:
+                case AuraType.ModFear:
+                case AuraType.Transform:
+                    return true;
+                default:
+                    break;
+            }
 
-			return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);
-		}
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);
+        }
 
-		public uint GetSpell(byte slot = 0)
-		{
-			return Spells[slot];
-		}
+        public uint GetSpell(byte slot = 0)
+        {
+            return Spells[slot];
+        }
 
-		public uint GetTotemDuration()
-		{
-			return _duration;
-		}
+        public uint GetTotemDuration()
+        {
+            return _duration;
+        }
 
-		public void SetTotemDuration(uint duration)
-		{
-			_duration = duration;
-		}
+        public void SetTotemDuration(uint duration)
+        {
+            _duration = duration;
+        }
 
-		public TotemType GetTotemType()
-		{
-			return _type;
-		}
+        public TotemType GetTotemType()
+        {
+            return _type;
+        }
 
-		public override bool UpdateStats(Stats stat)
-		{
-			return true;
-		}
+        public override bool UpdateStats(Stats stat)
+        {
+            return true;
+        }
 
-		public override bool UpdateAllStats()
-		{
-			return true;
-		}
+        public override bool UpdateAllStats()
+        {
+            return true;
+        }
 
-		public override void UpdateResistances(SpellSchools school)
-		{
-		}
+        public override void UpdateResistances(SpellSchools school)
+        {
+        }
 
-		public override void UpdateArmor()
-		{
-		}
+        public override void UpdateArmor()
+        {
+        }
 
-		public override void UpdateMaxHealth()
-		{
-		}
+        public override void UpdateMaxHealth()
+        {
+        }
 
-		public override void UpdateMaxPower(PowerType power)
-		{
-		}
+        public override void UpdateMaxPower(PowerType power)
+        {
+        }
 
-		public override void UpdateAttackPowerAndDamage(bool ranged = false)
-		{
-		}
+        public override void UpdateAttackPowerAndDamage(bool ranged = false)
+        {
+        }
 
-		public override void UpdateDamagePhysical(WeaponAttackType attType)
-		{
-		}
-	}
+        public override void UpdateDamagePhysical(WeaponAttackType attType)
+        {
+        }
+    }
 
-	public enum TotemType
-	{
-		Passive = 0,
-		Active = 1,
-		Statue = 2 // copied straight from MaNGOS, may need more implementation to work
-	}
+    public enum TotemType
+    {
+        Passive = 0,
+        Active = 1,
+        Statue = 2 // copied straight from MaNGOS, may need more implementation to work
+    }
 }

@@ -4,9 +4,9 @@
 namespace Game.BattleFields
 {
     public enum BattleFieldTypes
-	{
-		WinterGrasp = 1,
-		TolBarad = 2,
-		Max
-	}
+    {
+        WinterGrasp = 1,
+        TolBarad = 2,
+        Max
+    }
 }

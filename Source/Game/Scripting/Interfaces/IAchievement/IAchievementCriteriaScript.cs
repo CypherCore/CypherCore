@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IAchievement
 {
-	public interface IAchievementCriteriaOnCheck : IScriptObject
-	{
-		bool OnCheck(Player source, Unit target);
-	}
+    public interface IAchievementCriteriaOnCheck : IScriptObject
+    {
+        bool OnCheck(Player source, Unit target);
+    }
 }

@@ -6,8 +6,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IGameObject
 {
-	public interface IGameObjectGetAI : IScriptObject
-	{
-		GameObjectAI GetAI(GameObject go);
-	}
+    public interface IGameObjectGetAI : IScriptObject
+    {
+        GameObjectAI GetAI(GameObject go);
+    }
 }

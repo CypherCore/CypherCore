@@ -8,102 +8,100 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-	internal class AreaTriggerPkt : ClientPacket
-	{
-		public uint AreaTriggerID;
-		public bool Entered;
-		public bool FromClient;
+    internal class AreaTriggerPkt : ClientPacket
+    {
+        public uint AreaTriggerID;
+        public bool Entered;
+        public bool FromClient;
 
-		public AreaTriggerPkt(WorldPacket packet) : base(packet)
-		{
-		}
+        public AreaTriggerPkt(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			AreaTriggerID = _worldPacket.ReadUInt32();
-			Entered       = _worldPacket.HasBit();
-			FromClient    = _worldPacket.HasBit();
-		}
-	}
+        public override void Read()
+        {
+            AreaTriggerID = _worldPacket.ReadUInt32();
+            Entered = _worldPacket.HasBit();
+            FromClient = _worldPacket.HasBit();
+        }
+    }
 
-	internal class AreaTriggerDenied : ServerPacket
-	{
-		public int AreaTriggerID;
-		public bool Entered;
+    internal class AreaTriggerDenied : ServerPacket
+    {
+        public int AreaTriggerID;
+        public bool Entered;
 
-		public AreaTriggerDenied() : base(ServerOpcodes.AreaTriggerDenied)
-		{
-		}
+        public AreaTriggerDenied() : base(ServerOpcodes.AreaTriggerDenied)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WriteInt32(AreaTriggerID);
-			_worldPacket.WriteBit(Entered);
-			_worldPacket.FlushBits();
-		}
-	}
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(AreaTriggerID);
+            _worldPacket.WriteBit(Entered);
+            _worldPacket.FlushBits();
+        }
+    }
 
-	internal class AreaTriggerNoCorpse : ServerPacket
-	{
-		public AreaTriggerNoCorpse() : base(ServerOpcodes.AreaTriggerNoCorpse)
-		{
-		}
+    internal class AreaTriggerNoCorpse : ServerPacket
+    {
+        public AreaTriggerNoCorpse() : base(ServerOpcodes.AreaTriggerNoCorpse)
+        {
+        }
 
-		public override void Write()
-		{
-		}
-	}
+        public override void Write()
+        {
+        }
+    }
 
-	internal class AreaTriggerRePath : ServerPacket
-	{
-		public AreaTriggerMovementScriptInfo? AreaTriggerMovementScript;
-		public AreaTriggerOrbitInfo AreaTriggerOrbit;
+    internal class AreaTriggerRePath : ServerPacket
+    {
+        public AreaTriggerMovementScriptInfo? AreaTriggerMovementScript;
+        public AreaTriggerOrbitInfo AreaTriggerOrbit;
 
-		public AreaTriggerSplineInfo AreaTriggerSpline;
-		public ObjectGuid TriggerGUID;
+        public AreaTriggerSplineInfo AreaTriggerSpline;
+        public ObjectGuid TriggerGUID;
 
-		public AreaTriggerRePath() : base(ServerOpcodes.AreaTriggerRePath)
-		{
-		}
+        public AreaTriggerRePath() : base(ServerOpcodes.AreaTriggerRePath)
+        {
+        }
 
-		public override void Write()
-		{
-			_worldPacket.WritePackedGuid(TriggerGUID);
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(TriggerGUID);
 
-			_worldPacket.WriteBit(AreaTriggerSpline != null);
-			_worldPacket.WriteBit(AreaTriggerOrbit != null);
-			_worldPacket.WriteBit(AreaTriggerMovementScript.HasValue);
-			_worldPacket.FlushBits();
+            _worldPacket.WriteBit(AreaTriggerSpline != null);
+            _worldPacket.WriteBit(AreaTriggerOrbit != null);
+            _worldPacket.WriteBit(AreaTriggerMovementScript.HasValue);
+            _worldPacket.FlushBits();
 
-			if (AreaTriggerSpline != null)
-				AreaTriggerSpline.Write(_worldPacket);
+            AreaTriggerSpline?.Write(_worldPacket);
 
-			if (AreaTriggerMovementScript.HasValue)
-				AreaTriggerMovementScript.Value.Write(_worldPacket);
+            if (AreaTriggerMovementScript.HasValue)
+                AreaTriggerMovementScript.Value.Write(_worldPacket);
 
-			if (AreaTriggerOrbit != null)
-				AreaTriggerOrbit.Write(_worldPacket);
-		}
-	}
+            AreaTriggerOrbit?.Write(_worldPacket);
+        }
+    }
 
-	//Structs
-	internal class AreaTriggerSplineInfo
-	{
-		public uint ElapsedTimeForMovement;
-		public List<Vector3> Points = new();
+    //Structs
+    internal class AreaTriggerSplineInfo
+    {
+        public uint ElapsedTimeForMovement;
+        public List<Vector3> Points = new();
 
-		public uint TimeToTarget;
+        public uint TimeToTarget;
 
-		public void Write(WorldPacket data)
-		{
-			data.WriteUInt32(TimeToTarget);
-			data.WriteUInt32(ElapsedTimeForMovement);
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TimeToTarget);
+            data.WriteUInt32(ElapsedTimeForMovement);
 
-			data.WriteBits(Points.Count, 16);
-			data.FlushBits();
+            data.WriteBits(Points.Count, 16);
+            data.FlushBits();
 
-			foreach (Vector3 point in Points)
-				data.WriteVector3(point);
-		}
-	}
+            foreach (Vector3 point in Points)
+                data.WriteVector3(point);
+        }
+    }
 }

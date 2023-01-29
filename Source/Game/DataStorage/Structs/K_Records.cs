@@ -3,17 +3,17 @@
 
 namespace Game.DataStorage
 {
-	public sealed class KeyChainRecord
-	{
-		public uint Id;
-		public byte[] Key = new byte[32];
-	}
+    public sealed class KeyChainRecord
+    {
+        public uint Id;
+        public byte[] Key = new byte[32];
+    }
 
-	public sealed class KeystoneAffixRecord
-	{
-		public LocalizedString Description;
-		public int FiledataID;
-		public uint Id;
-		public LocalizedString Name;
-	}
+    public sealed class KeystoneAffixRecord
+    {
+        public LocalizedString Description;
+        public int FiledataID;
+        public uint Id;
+        public LocalizedString Name;
+    }
 }

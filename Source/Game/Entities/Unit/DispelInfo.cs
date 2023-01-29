@@ -9,7 +9,7 @@ public class DispelInfo
 
     public DispelInfo(WorldObject dispeller, uint dispellerSpellId, byte chargesRemoved)
     {
-        _dispeller      = dispeller;
+        _dispeller = dispeller;
         _dispellerSpell = dispellerSpellId;
         _chargesRemoved = chargesRemoved;
     }

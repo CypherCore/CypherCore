@@ -7,30 +7,30 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class Runes
-	{
-		public uint[] Cooldown { get; set; } = new uint[PlayerConst.MaxRunes];
+    {
+        public uint[] Cooldown { get; set; } = new uint[PlayerConst.MaxRunes];
 
-		public List<byte> CooldownOrder { get; set; } = new();
-		public byte RuneState { get; set; } // mask of available runes
+        public List<byte> CooldownOrder { get; set; } = new();
+        public byte RuneState { get; set; } // mask of available runes
 
         public void SetRuneState(byte index, bool set = true)
-		{
-			bool foundRune = CooldownOrder.Contains(index);
+        {
+            bool foundRune = CooldownOrder.Contains(index);
 
-			if (set)
-			{
-				RuneState |= (byte)(1 << index); // usable
+            if (set)
+            {
+                RuneState |= (byte)(1 << index); // usable
 
-				if (foundRune)
-					CooldownOrder.Remove(index);
-			}
-			else
-			{
-				RuneState &= (byte)~(1 << index); // on cooldown
+                if (foundRune)
+                    CooldownOrder.Remove(index);
+            }
+            else
+            {
+                RuneState &= (byte)~(1 << index); // on cooldown
 
-				if (!foundRune)
-					CooldownOrder.Add(index);
-			}
-		}
-	}
+                if (!foundRune)
+                    CooldownOrder.Add(index);
+            }
+        }
+    }
 }

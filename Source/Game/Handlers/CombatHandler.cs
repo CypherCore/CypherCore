@@ -9,72 +9,72 @@ using Game.Networking.Packets;
 
 namespace Game
 {
-	public partial class WorldSession
-	{
-		[WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
-		private void HandleAttackSwing(AttackSwing packet)
-		{
-			Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
+    public partial class WorldSession
+    {
+        [WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
+        private void HandleAttackSwing(AttackSwing packet)
+        {
+            Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
 
-			if (!enemy)
-			{
-				// stop attack State at client
-				SendAttackStop(null);
+            if (!enemy)
+            {
+                // stop attack State at client
+                SendAttackStop(null);
 
-				return;
-			}
+                return;
+            }
 
-			if (!GetPlayer().IsValidAttackTarget(enemy))
-			{
-				// stop attack State at client
-				SendAttackStop(enemy);
+            if (!GetPlayer().IsValidAttackTarget(enemy))
+            {
+                // stop attack State at client
+                SendAttackStop(enemy);
 
-				return;
-			}
+                return;
+            }
 
-			//! Client explicitly checks the following before sending CMSG_ATTACKSWING packet,
-			//! so we'll place the same check here. Note that it might be possible to reuse this snippet
-			//! in other places as well.
-			Vehicle vehicle = GetPlayer().GetVehicle();
+            //! Client explicitly checks the following before sending CMSG_ATTACKSWING packet,
+            //! so we'll place the same check here. Note that it might be possible to reuse this snippet
+            //! in other places as well.
+            Vehicle vehicle = GetPlayer().GetVehicle();
 
-			if (vehicle)
-			{
-				VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
-				Cypher.Assert(seat != null);
+            if (vehicle)
+            {
+                VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
+                Cypher.Assert(seat != null);
 
-				if (!seat.HasFlag(VehicleSeatFlags.CanAttack))
-				{
-					SendAttackStop(enemy);
+                if (!seat.HasFlag(VehicleSeatFlags.CanAttack))
+                {
+                    SendAttackStop(enemy);
 
-					return;
-				}
-			}
+                    return;
+                }
+            }
 
-			GetPlayer().Attack(enemy, true);
-		}
+            GetPlayer().Attack(enemy, true);
+        }
 
-		[WorldPacketHandler(ClientOpcodes.AttackStop, Processing = PacketProcessing.Inplace)]
-		private void HandleAttackStop(AttackStop packet)
-		{
-			GetPlayer().AttackStop();
-		}
+        [WorldPacketHandler(ClientOpcodes.AttackStop, Processing = PacketProcessing.Inplace)]
+        private void HandleAttackStop(AttackStop packet)
+        {
+            GetPlayer().AttackStop();
+        }
 
-		[WorldPacketHandler(ClientOpcodes.SetSheathed, Processing = PacketProcessing.Inplace)]
-		private void HandleSetSheathed(SetSheathed packet)
-		{
-			if (packet.CurrentSheathState >= (int)SheathState.Max)
-			{
-				Log.outError(LogFilter.Network, "Unknown sheath State {0} ??", packet.CurrentSheathState);
+        [WorldPacketHandler(ClientOpcodes.SetSheathed, Processing = PacketProcessing.Inplace)]
+        private void HandleSetSheathed(SetSheathed packet)
+        {
+            if (packet.CurrentSheathState >= (int)SheathState.Max)
+            {
+                Log.outError(LogFilter.Network, "Unknown sheath State {0} ??", packet.CurrentSheathState);
 
-				return;
-			}
+                return;
+            }
 
-			GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
-		}
+            GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
+        }
 
-		private void SendAttackStop(Unit enemy)
-		{
-			SendPacket(new SAttackStop(GetPlayer(), enemy));
-		}
-	}
+        private void SendAttackStop(Unit enemy)
+        {
+            SendPacket(new SAttackStop(GetPlayer(), enemy));
+        }
+    }
 }

@@ -4,8 +4,8 @@
 namespace Game.Entities
 {
     internal struct GroupUpdateCounter
-	{
-		public ObjectGuid GroupGuid;
-		public int UpdateSequenceNumber;
+    {
+        public ObjectGuid GroupGuid;
+        public int UpdateSequenceNumber;
     }
 }

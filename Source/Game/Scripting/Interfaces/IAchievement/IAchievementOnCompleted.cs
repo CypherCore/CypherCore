@@ -6,8 +6,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IAchievement
 {
-	public interface IAchievementOnCompleted : IScriptObject
-	{
-		void OnCompleted(Player player, AchievementRecord achievement);
-	}
+    public interface IAchievementOnCompleted : IScriptObject
+    {
+        void OnCompleted(Player player, AchievementRecord achievement);
+    }
 }

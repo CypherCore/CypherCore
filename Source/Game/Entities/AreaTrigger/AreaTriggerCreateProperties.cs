@@ -50,8 +50,8 @@ public unsafe class AreaTriggerCreateProperties
     {
         if (Shape.TriggerType == AreaTriggerTypes.Polygon)
         {
-            Position center          = new(0.0f, 0.0f);
-            float    maxSearchRadius = 0.0f;
+            Position center = new(0.0f, 0.0f);
+            float maxSearchRadius = 0.0f;
 
             foreach (var vertice in PolygonVertices)
             {

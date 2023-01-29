@@ -16,7 +16,7 @@ public class CreatureModel
     public CreatureModel(uint creatureDisplayID, float displayScale, float probability)
     {
         CreatureDisplayID = creatureDisplayID;
-        DisplayScale      = displayScale;
-        Probability       = probability;
+        DisplayScale = displayScale;
+        Probability = probability;
     }
 }

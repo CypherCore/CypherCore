@@ -14,12 +14,12 @@ public class CreatureMovementData
 
     public CreatureMovementData()
     {
-        Ground                = CreatureGroundMovementType.Run;
-        Flight                = CreatureFlightMovementType.None;
-        Swim                  = true;
-        Rooted                = false;
-        Chase                 = CreatureChaseMovementType.Run;
-        Random                = CreatureRandomMovementType.Walk;
+        Ground = CreatureGroundMovementType.Run;
+        Flight = CreatureFlightMovementType.None;
+        Swim = true;
+        Rooted = false;
+        Chase = CreatureChaseMovementType.Run;
+        Random = CreatureRandomMovementType.Walk;
         InteractionPauseTimer = WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer);
     }
 

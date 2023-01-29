@@ -7,14 +7,14 @@ using Game.Networking.Packets;
 
 namespace Game
 {
-	public partial class WorldSession
-	{
-		[WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
-		private void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
-		{
-			ServerTimeOffset response = new();
-			response.Time = GameTime.GetGameTime();
-			SendPacket(response);
-		}
-	}
+    public partial class WorldSession
+    {
+        [WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
+        private void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
+        {
+            ServerTimeOffset response = new();
+            response.Time = GameTime.GetGameTime();
+            SendPacket(response);
+        }
+    }
 }

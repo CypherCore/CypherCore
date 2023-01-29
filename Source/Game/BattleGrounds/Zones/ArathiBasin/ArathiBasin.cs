@@ -133,7 +133,7 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
         ///  3: ally occupied
         ///  4: horde occupied
         /// </summary>
-        private ABNodeStatus[] _nodes = new ABNodeStatus[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];
+        private readonly ABNodeStatus[] _nodes = new ABNodeStatus[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];
 
         private readonly uint[] _nodeTimers = new uint[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];
         private readonly ABNodeStatus[] _prevNodes = new ABNodeStatus[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];

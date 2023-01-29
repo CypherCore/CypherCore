@@ -5,8 +5,8 @@ using Game.Groups;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
-	public interface IGroupOnDisband : IScriptObject
-	{
-		void OnDisband(Group group);
-	}
+    public interface IGroupOnDisband : IScriptObject
+    {
+        void OnDisband(Group group);
+    }
 }

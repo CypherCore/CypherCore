@@ -7,21 +7,21 @@ using Framework.Dynamic;
 namespace Game.Entities
 {
     public class ForcedDespawnDelayEvent : BasicEvent
-	{
-		private Creature _owner;
-		private TimeSpan _respawnTimer;
+    {
+        private readonly Creature _owner;
+        private readonly TimeSpan _respawnTimer;
 
-		public ForcedDespawnDelayEvent(Creature owner, TimeSpan respawnTimer = default)
-		{
-			_owner        = owner;
-			_respawnTimer = respawnTimer;
-		}
+        public ForcedDespawnDelayEvent(Creature owner, TimeSpan respawnTimer = default)
+        {
+            _owner = owner;
+            _respawnTimer = respawnTimer;
+        }
 
-		public override bool Execute(ulong e_time, uint p_time)
-		{
-			_owner.DespawnOrUnsummon(TimeSpan.Zero, _respawnTimer); // since we are here, we are not TempSummon as object Type cannot change during runtime
+        public override bool Execute(ulong e_time, uint p_time)
+        {
+            _owner.DespawnOrUnsummon(TimeSpan.Zero, _respawnTimer); // since we are here, we are not TempSummon as object Type cannot change during runtime
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }

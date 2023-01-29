@@ -13,111 +13,111 @@ using Game.Spells;
 
 namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
 {
-	internal struct SpellIds
-	{
-		public const uint MeteorSlash = 88942;
-		public const uint ConsumingDarkness = 88954;
-		public const uint FelFirestorm = 88972;
-		public const uint Berserk = 47008;
-	}
+    internal struct SpellIds
+    {
+        public const uint MeteorSlash = 88942;
+        public const uint ConsumingDarkness = 88954;
+        public const uint FelFirestorm = 88972;
+        public const uint Berserk = 47008;
+    }
 
-	[Script]
-	internal class boss_pit_lord_argaloth : BossAI
-	{
-		private boss_pit_lord_argaloth(Creature creature) : base(creature, DataTypes.Argaloth)
-		{
-		}
+    [Script]
+    internal class boss_pit_lord_argaloth : BossAI
+    {
+        private boss_pit_lord_argaloth(Creature creature) : base(creature, DataTypes.Argaloth)
+        {
+        }
 
-		public override void JustEngagedWith(Unit who)
-		{
-			base.JustEngagedWith(who);
-			Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+        public override void JustEngagedWith(Unit who)
+        {
+            base.JustEngagedWith(who);
+            Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(10),
-			                    TimeSpan.FromSeconds(20),
-			                    task =>
-			                    {
-				                    DoCastAOE(SpellIds.MeteorSlash);
-				                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCastAOE(SpellIds.MeteorSlash);
+                                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromSeconds(20),
-			                    TimeSpan.FromSeconds(25),
-			                    task =>
-			                    {
-				                    DoCastAOE(SpellIds.ConsumingDarkness, new CastSpellExtraArgs(true));
-				                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25));
-			                    });
+            _scheduler.Schedule(TimeSpan.FromSeconds(20),
+                                TimeSpan.FromSeconds(25),
+                                task =>
+                                {
+                                    DoCastAOE(SpellIds.ConsumingDarkness, new CastSpellExtraArgs(true));
+                                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25));
+                                });
 
-			_scheduler.Schedule(TimeSpan.FromMinutes(5), task => { DoCast(me, SpellIds.Berserk, new CastSpellExtraArgs(true)); });
-		}
+            _scheduler.Schedule(TimeSpan.FromMinutes(5), task => { DoCast(me, SpellIds.Berserk, new CastSpellExtraArgs(true)); });
+        }
 
-		public override void EnterEvadeMode(EvadeReason why)
-		{
-			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-			_DespawnAtEvade();
-		}
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            _DespawnAtEvade();
+        }
 
-		public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
-		{
-			if (me.HealthBelowPctDamaged(33, damage) ||
-			    me.HealthBelowPctDamaged(66, damage))
-				DoCastAOE(SpellIds.FelFirestorm);
-		}
+        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        {
+            if (me.HealthBelowPctDamaged(33, damage) ||
+                me.HealthBelowPctDamaged(66, damage))
+                DoCastAOE(SpellIds.FelFirestorm);
+        }
 
-		public override void JustDied(Unit killer)
-		{
-			_JustDied();
-			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-		}
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			if (!UpdateVictim())
-				return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			_scheduler.Update(diff, () => DoMeleeAttackIfReady());
-		}
-	}
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+    }
 
-	[Script] // 88954 / 95173 - Consuming Darkness
-	internal class spell_argaloth_consuming_darkness_SpellScript : SpellScript, IHasSpellEffects
-	{
-		public List<ISpellEffect> SpellEffects { get; } = new();
+    [Script] // 88954 / 95173 - Consuming Darkness
+    internal class spell_argaloth_consuming_darkness_SpellScript : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects { get; } = new();
 
-		private void FilterTargets(List<WorldObject> targets)
-		{
-			targets.RandomResize(GetCaster().GetMap().Is25ManRaid() ? 8 : 3u);
-		}
+        private void FilterTargets(List<WorldObject> targets)
+        {
+            targets.RandomResize(GetCaster().GetMap().Is25ManRaid() ? 8 : 3u);
+        }
 
-		public override void Register()
-		{
-			SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-		}
-	}
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+        }
+    }
 
-	[Script] // 88942 / 95172 - Meteor Slash
-	internal class spell_argaloth_meteor_slash_SpellScript : SpellScript, IOnHit, IHasSpellEffects
-	{
-		private int _targetCount;
-		public List<ISpellEffect> SpellEffects { get; } = new();
+    [Script] // 88942 / 95172 - Meteor Slash
+    internal class spell_argaloth_meteor_slash_SpellScript : SpellScript, IOnHit, IHasSpellEffects
+    {
+        private int _targetCount;
+        public List<ISpellEffect> SpellEffects { get; } = new();
 
-		public void OnHit()
-		{
-			if (_targetCount == 0)
-				return;
+        public void OnHit()
+        {
+            if (_targetCount == 0)
+                return;
 
-			SetHitDamage((GetHitDamage() / _targetCount));
-		}
+            SetHitDamage((GetHitDamage() / _targetCount));
+        }
 
-		public override void Register()
-		{
-			SpellEffects.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
-		}
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitConeCasterToDestEnemy));
+        }
 
-		private void CountTargets(List<WorldObject> targets)
-		{
-			_targetCount = targets.Count;
-		}
-	}
+        private void CountTargets(List<WorldObject> targets)
+        {
+            _targetCount = targets.Count;
+        }
+    }
 }

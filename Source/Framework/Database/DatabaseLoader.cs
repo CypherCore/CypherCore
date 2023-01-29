@@ -9,211 +9,211 @@ using MySqlConnector;
 
 namespace Framework.Database
 {
-	public class DatabaseLoader
-	{
-		private bool _autoSetup;
-		private List<Func<bool>> _open = new();
-		private List<Func<bool>> _populate = new();
-		private List<Func<bool>> _prepare = new();
-		private List<Func<bool>> _update = new();
-		private DatabaseTypeFlags _updateFlags;
+    public class DatabaseLoader
+    {
+        private readonly bool _autoSetup;
+        private readonly List<Func<bool>> _open = new();
+        private readonly List<Func<bool>> _populate = new();
+        private readonly List<Func<bool>> _prepare = new();
+        private readonly List<Func<bool>> _update = new();
+        private readonly DatabaseTypeFlags _updateFlags;
 
-		public DatabaseLoader(DatabaseTypeFlags defaultUpdateMask)
-		{
-			_autoSetup   = ConfigMgr.GetDefaultValue("Updates.AutoSetup", true);
-			_updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", defaultUpdateMask);
-		}
+        public DatabaseLoader(DatabaseTypeFlags defaultUpdateMask)
+        {
+            _autoSetup = ConfigMgr.GetDefaultValue("Updates.AutoSetup", true);
+            _updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", defaultUpdateMask);
+        }
 
-		public void AddDatabase<T>(MySqlBase<T> database, string baseDBName)
-		{
-			bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
+        public void AddDatabase<T>(MySqlBase<T> database, string baseDBName)
+        {
+            bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
 
-			_open.Add(() =>
-			          {
-				          MySqlConnectionInfo connectionObject = new()
-				                                                 {
-					                                                 Host         = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Host", ""),
-					                                                 PortOrSocket = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
-					                                                 Username     = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Username", ""),
-					                                                 Password     = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Password", ""),
-					                                                 Database     = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Database", ""),
-					                                                 UseSSL       = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.SSL", false)
-				                                                 };
+            _open.Add(() =>
+                      {
+                          MySqlConnectionInfo connectionObject = new()
+                          {
+                              Host = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Host", ""),
+                              PortOrSocket = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
+                              Username = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Username", ""),
+                              Password = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Password", ""),
+                              Database = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Database", ""),
+                              UseSSL = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.SSL", false)
+                          };
 
-				          var error = database.Initialize(connectionObject);
+                          var error = database.Initialize(connectionObject);
 
-				          if (error != MySqlErrorCode.None)
-				          {
-					          // Database does not exist
-					          if (error == MySqlErrorCode.UnknownDatabase &&
-					              updatesEnabled &&
-					              _autoSetup)
-						          // Try to create the database and connect again if auto setup is enabled
-						          if (CreateDatabase(connectionObject, database))
-							          error = database.Initialize(connectionObject);
+                          if (error != MySqlErrorCode.None)
+                          {
+                              // Database does not exist
+                              if (error == MySqlErrorCode.UnknownDatabase &&
+                                  updatesEnabled &&
+                                  _autoSetup)
+                                  // Try to create the database and connect again if auto setup is enabled
+                                  if (CreateDatabase(connectionObject, database))
+                                      error = database.Initialize(connectionObject);
 
-					          // If the error wasn't handled quit
-					          if (error != MySqlErrorCode.None)
-					          {
-						          Log.outError(LogFilter.ServerLoading, $"\nDatabase {connectionObject.Database} NOT opened. There were errors opening the MySQL connections. Check your SQLErrors for specific errors.");
+                              // If the error wasn't handled quit
+                              if (error != MySqlErrorCode.None)
+                              {
+                                  Log.outError(LogFilter.ServerLoading, $"\nDatabase {connectionObject.Database} NOT opened. There were errors opening the MySQL connections. Check your SQLErrors for specific errors.");
 
-						          return false;
-					          }
-				          }
+                                  return false;
+                              }
+                          }
 
-				          return true;
-			          });
+                          return true;
+                      });
 
-			if (updatesEnabled)
-			{
-				// Populate and update only if updates are enabled for this pool
-				_populate.Add(() =>
-				              {
-					              if (!database.GetUpdater().Populate())
-					              {
-						              Log.outError(LogFilter.ServerLoading, $"Could not populate the {database.GetDatabaseName()} database, see log for details.");
+            if (updatesEnabled)
+            {
+                // Populate and update only if updates are enabled for this pool
+                _populate.Add(() =>
+                              {
+                                  if (!database.GetUpdater().Populate())
+                                  {
+                                      Log.outError(LogFilter.ServerLoading, $"Could not populate the {database.GetDatabaseName()} database, see log for details.");
 
-						              return false;
-					              }
+                                      return false;
+                                  }
 
-					              return true;
-				              });
+                                  return true;
+                              });
 
-				_update.Add(() =>
-				            {
-					            if (!database.GetUpdater().Update())
-					            {
-						            Log.outError(LogFilter.ServerLoading, $"Could not update the {database.GetDatabaseName()} database, see log for details.");
+                _update.Add(() =>
+                            {
+                                if (!database.GetUpdater().Update())
+                                {
+                                    Log.outError(LogFilter.ServerLoading, $"Could not update the {database.GetDatabaseName()} database, see log for details.");
 
-						            return false;
-					            }
+                                    return false;
+                                }
 
-					            return true;
-				            });
-			}
+                                return true;
+                            });
+            }
 
-			_prepare.Add(() =>
-			             {
-				             database.LoadPreparedStatements();
+            _prepare.Add(() =>
+                         {
+                             database.LoadPreparedStatements();
 
-				             return true;
-			             });
-		}
+                             return true;
+                         });
+        }
 
-		public bool CreateDatabase<T>(MySqlConnectionInfo connectionObject, MySqlBase<T> database)
-		{
-			Log.outInfo(LogFilter.ServerLoading, $"Database \"{connectionObject.Database}\" does not exist, do you want to create it? [yes (default) / no]: ");
+        public bool CreateDatabase<T>(MySqlConnectionInfo connectionObject, MySqlBase<T> database)
+        {
+            Log.outInfo(LogFilter.ServerLoading, $"Database \"{connectionObject.Database}\" does not exist, do you want to create it? [yes (default) / no]: ");
 
-			string answer = Console.ReadLine();
+            string answer = Console.ReadLine();
 
-			if (!answer.IsEmpty() &&
-			    answer[0] != 'y')
-				return false;
+            if (!answer.IsEmpty() &&
+                answer[0] != 'y')
+                return false;
 
-			Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{connectionObject.Database}\"...");
+            Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{connectionObject.Database}\"...");
 
-			// Path of temp file
-			string temp = "create_table.sql";
+            // Path of temp file
+            string temp = "create_table.sql";
 
-			// Create temporary query to use external MySQL CLi
-			try
-			{
-				using StreamWriter streamWriter = new(File.Open(temp, FileMode.Create, FileAccess.Write));
-				streamWriter.Write($"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-			}
-			catch (Exception)
-			{
-				Log.outFatal(LogFilter.SqlUpdates, $"Failed to create temporary query file \"{temp}\"!");
+            // Create temporary query to use external MySQL CLi
+            try
+            {
+                using StreamWriter streamWriter = new(File.Open(temp, FileMode.Create, FileAccess.Write));
+                streamWriter.Write($"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            }
+            catch (Exception)
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Failed to create temporary query file \"{temp}\"!");
 
-				return false;
-			}
+                return false;
+            }
 
-			try
-			{
-				database.ApplyFile(temp, false);
-			}
-			catch (Exception)
-			{
-				Log.outFatal(LogFilter.SqlUpdates, $"Failed to create database {database.GetDatabaseName()}! Does the user (named in *.conf) have `CREATE`, `ALTER`, `DROP`, `INSERT` and `DELETE` privileges on the MySQL server?");
-				File.Delete(temp);
+            try
+            {
+                database.ApplyFile(temp, false);
+            }
+            catch (Exception)
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Failed to create database {database.GetDatabaseName()}! Does the user (named in *.conf) have `CREATE`, `ALTER`, `DROP`, `INSERT` and `DELETE` privileges on the MySQL server?");
+                File.Delete(temp);
 
-				return false;
-			}
+                return false;
+            }
 
-			Log.outInfo(LogFilter.SqlUpdates, "Done.");
-			File.Delete(temp);
+            Log.outInfo(LogFilter.SqlUpdates, "Done.");
+            File.Delete(temp);
 
-			return true;
-		}
+            return true;
+        }
 
-		public bool Load()
-		{
-			if (_updateFlags == 0)
-				Log.outInfo(LogFilter.SqlUpdates, "Automatic database updates are disabled for all databases!");
+        public bool Load()
+        {
+            if (_updateFlags == 0)
+                Log.outInfo(LogFilter.SqlUpdates, "Automatic database updates are disabled for all databases!");
 
-			if (_updateFlags != 0 &&
-			    !DBExecutableUtil.CheckExecutable())
-				return false;
+            if (_updateFlags != 0 &&
+                !DBExecutableUtil.CheckExecutable())
+                return false;
 
-			if (!OpenDatabases())
-				return false;
+            if (!OpenDatabases())
+                return false;
 
-			if (!PopulateDatabases())
-				return false;
+            if (!PopulateDatabases())
+                return false;
 
-			if (!UpdateDatabases())
-				return false;
+            if (!UpdateDatabases())
+                return false;
 
-			if (!PrepareStatements())
-				return false;
+            if (!PrepareStatements())
+                return false;
 
-			return true;
-		}
+            return true;
+        }
 
-		private bool OpenDatabases()
-		{
-			return Process(_open);
-		}
+        private bool OpenDatabases()
+        {
+            return Process(_open);
+        }
 
-		// Processes the elements of the given stack until a predicate returned false.
-		private bool Process(List<Func<bool>> list)
-		{
-			while (!list.Empty())
-			{
-				if (!list[0].Invoke())
-					return false;
+        // Processes the elements of the given stack until a predicate returned false.
+        private bool Process(List<Func<bool>> list)
+        {
+            while (!list.Empty())
+            {
+                if (!list[0].Invoke())
+                    return false;
 
-				list.RemoveAt(0);
-			}
+                list.RemoveAt(0);
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		private bool PopulateDatabases()
-		{
-			return Process(_populate);
-		}
+        private bool PopulateDatabases()
+        {
+            return Process(_populate);
+        }
 
-		private bool UpdateDatabases()
-		{
-			return Process(_update);
-		}
+        private bool UpdateDatabases()
+        {
+            return Process(_update);
+        }
 
-		private bool PrepareStatements()
-		{
-			return Process(_prepare);
-		}
-	}
+        private bool PrepareStatements()
+        {
+            return Process(_prepare);
+        }
+    }
 
-	public enum DatabaseTypeFlags
-	{
-		None = 0,
+    public enum DatabaseTypeFlags
+    {
+        None = 0,
 
-		Login = 1,
-		Character = 2,
-		World = 4,
-		Hotfix = 8,
+        Login = 1,
+        Character = 2,
+        World = 4,
+        Hotfix = 8,
 
-		All = Login | Character | World | Hotfix
-	}
+        All = Login | Character | World | Hotfix
+    }
 }

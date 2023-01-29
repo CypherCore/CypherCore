@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-	public interface IOnSummon : ISpellScript
-	{
-		void HandleSummon(Creature creature);
-	}
+    public interface IOnSummon : ISpellScript
+    {
+        void HandleSummon(Creature creature);
+    }
 }

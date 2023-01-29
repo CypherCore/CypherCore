@@ -6,46 +6,46 @@ using Game.Entities;
 
 namespace Game.Groups
 {
-	public class GroupReference : Reference<Group, Player>
-	{
-		private byte iSubGroup;
+    public class GroupReference : Reference<Group, Player>
+    {
+        private byte iSubGroup;
 
-		public GroupReference()
-		{
-			iSubGroup = 0;
-		}
+        public GroupReference()
+        {
+            iSubGroup = 0;
+        }
 
-		~GroupReference()
-		{
-			Unlink();
-		}
+        ~GroupReference()
+        {
+            Unlink();
+        }
 
-		public override void TargetObjectBuildLink()
-		{
-			GetTarget().LinkMember(this);
-		}
+        public override void TargetObjectBuildLink()
+        {
+            GetTarget().LinkMember(this);
+        }
 
-		public new GroupReference Next()
-		{
-			return (GroupReference)base.Next();
-		}
+        public new GroupReference Next()
+        {
+            return (GroupReference)base.Next();
+        }
 
-		public byte GetSubGroup()
-		{
-			return iSubGroup;
-		}
+        public byte GetSubGroup()
+        {
+            return iSubGroup;
+        }
 
-		public void SetSubGroup(byte pSubGroup)
-		{
-			iSubGroup = pSubGroup;
-		}
-	}
+        public void SetSubGroup(byte pSubGroup)
+        {
+            iSubGroup = pSubGroup;
+        }
+    }
 
-	public class GroupRefManager : RefManager<Group, Player>
-	{
-		public new GroupReference GetFirst()
-		{
-			return (GroupReference)base.GetFirst();
-		}
-	}
+    public class GroupRefManager : RefManager<Group, Player>
+    {
+        public new GroupReference GetFirst()
+        {
+            return (GroupReference)base.GetFirst();
+        }
+    }
 }

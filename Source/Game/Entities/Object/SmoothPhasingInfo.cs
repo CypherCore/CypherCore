@@ -4,21 +4,21 @@
 namespace Game.Entities
 {
     public class SmoothPhasingInfo
-	{
-		// Serverside fields
-		public bool Disabled { get; set; } = false;
+    {
+        // Serverside fields
+        public bool Disabled { get; set; } = false;
 
-		public bool ReplaceActive { get; set; } = true;
+        public bool ReplaceActive { get; set; } = true;
 
-		// Fields visible on client
-		public ObjectGuid? ReplaceObject;
-		public bool StopAnimKits { get; set; } = true;
+        // Fields visible on client
+        public ObjectGuid? ReplaceObject;
+        public bool StopAnimKits { get; set; } = true;
 
-		public SmoothPhasingInfo(ObjectGuid replaceObject, bool replaceActive, bool stopAnimKits)
-		{
-			ReplaceObject = replaceObject;
-			ReplaceActive = replaceActive;
-			StopAnimKits  = stopAnimKits;
-		}
-	}
+        public SmoothPhasingInfo(ObjectGuid replaceObject, bool replaceActive, bool stopAnimKits)
+        {
+            ReplaceObject = replaceObject;
+            ReplaceActive = replaceActive;
+            StopAnimKits = stopAnimKits;
+        }
+    }
 }

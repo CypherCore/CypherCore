@@ -4,8 +4,8 @@
 namespace Game.Entities
 {
     public class AccessRequirement
-	{
-		public uint Achievement { get; set; }
+    {
+        public uint Achievement { get; set; }
         public uint Item { get; set; }
         public uint Item2 { get; set; }
         public byte LevelMax { get; set; }

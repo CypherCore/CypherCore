@@ -5,8 +5,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-	public interface IMapOnUpdate<T> : IScriptObject where T : Map
-	{
-		void OnUpdate(T obj, uint diff);
-	}
+    public interface IMapOnUpdate<T> : IScriptObject where T : Map
+    {
+        void OnUpdate(T obj, uint diff);
+    }
 }

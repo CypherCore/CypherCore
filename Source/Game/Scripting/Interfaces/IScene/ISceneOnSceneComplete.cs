@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IScene
 {
-	public interface ISceneOnSceneComplete : IScriptObject
-	{
-		void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate);
-	}
+    public interface ISceneOnSceneComplete : IScriptObject
+    {
+        void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate);
+    }
 }

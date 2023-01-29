@@ -5,8 +5,8 @@ using Game.Maps;
 
 namespace Game.Scripting.Interfaces.IMap
 {
-	public interface IMapOnDestroy<T> : IScriptObject where T : Map
-	{
-		void OnDestroy(T map);
-	}
+    public interface IMapOnDestroy<T> : IScriptObject where T : Map
+    {
+        void OnDestroy(T map);
+    }
 }

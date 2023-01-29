@@ -2,8 +2,8 @@
 
 namespace Game.Scripting.Interfaces.ISpell
 {
-	public interface ICheckCastHander : ISpellScript
-	{
-		SpellCastResult CheckCast();
-	}
+    public interface ICheckCastHander : ISpellScript
+    {
+        SpellCastResult CheckCast();
+    }
 }

@@ -2,10 +2,10 @@
 
 public enum AITarget
 {
-	Self,
-	Victim,
-	Enemy,
-	Ally,
-	Buff,
-	Debuff
+    Self,
+    Victim,
+    Enemy,
+    Ally,
+    Buff,
+    Debuff
 }

@@ -11,385 +11,385 @@ namespace Game.AI
 {
 
     public class PlayerAI : UnitAI
-	{
-		public enum SpellTarget
-		{
-			None,
-			Victim,
-			Charmer,
-			Self
-		}
-
-		private bool _isSelfHealer;
-		private bool _isSelfRangedAttacker;
-		private uint _selfSpec;
-		protected new Player me;
-
-		public PlayerAI(Player player) : base(player)
-		{
-			me                    = player;
-			_selfSpec             = player.GetPrimarySpecialization();
-			_isSelfHealer         = IsPlayerHealer(player);
-			_isSelfRangedAttacker = IsPlayerRangedAttacker(player);
-		}
-
-		private bool IsPlayerHealer(Player who)
-		{
-			if (!who)
-				return false;
-
-			return who.GetClass() switch
-			       {
-				       Class.Paladin => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinHoly,
-				       Class.Priest  => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestHoly,
-				       Class.Shaman  => who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanRestoration,
-				       Class.Monk    => who.GetPrimarySpecialization() == (uint)TalentSpecialization.MonkMistweaver,
-				       Class.Druid   => who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration,
-				       _             => false
-			       };
-		}
-
-		private bool IsPlayerRangedAttacker(Player who)
-		{
-			if (!who)
-				return false;
-
-			switch (who.GetClass())
-			{
-				case Class.Warrior:
-				case Class.Paladin:
-				case Class.Rogue:
-				case Class.Deathknight:
-				default:
-					return false;
-				case Class.Mage:
-				case Class.Warlock:
-					return true;
-				case Class.Hunter:
-				{
-					// check if we have a ranged weapon equipped
-					Item rangedSlot = who.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
-
-					ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
-
-					if (rangedTemplate != null)
-						if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
-							return true;
-
-					return false;
-				}
-				case Class.Priest:
-					return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
-				case Class.Shaman:
-					return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanElemental;
-				case Class.Druid:
-					return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidBalance;
-			}
-		}
-
-		private Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
-		{
-			// Find highest spell rank that we know
-			uint knownRank, nextRank;
-
-			if (me.HasSpell(spellId))
-			{
-				// this will save us some lookups if the player has the highest rank (expected case)
-				knownRank = spellId;
-				nextRank  = Global.SpellMgr.GetNextSpellInChain(spellId);
-			}
-			else
-			{
-				knownRank = 0;
-				nextRank  = Global.SpellMgr.GetFirstSpellInChain(spellId);
-			}
-
-			while (nextRank != 0 && me.HasSpell(nextRank))
-			{
-				knownRank = nextRank;
-				nextRank  = Global.SpellMgr.GetNextSpellInChain(knownRank);
-			}
-
-			if (knownRank == 0)
-				return null;
+    {
+        public enum SpellTarget
+        {
+            None,
+            Victim,
+            Charmer,
+            Self
+        }
+
+        private readonly bool _isSelfHealer;
+        private bool _isSelfRangedAttacker;
+        private readonly uint _selfSpec;
+        protected new Player me;
+
+        public PlayerAI(Player player) : base(player)
+        {
+            me = player;
+            _selfSpec = player.GetPrimarySpecialization();
+            _isSelfHealer = IsPlayerHealer(player);
+            _isSelfRangedAttacker = IsPlayerRangedAttacker(player);
+        }
+
+        private bool IsPlayerHealer(Player who)
+        {
+            if (!who)
+                return false;
+
+            return who.GetClass() switch
+            {
+                Class.Paladin => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinHoly,
+                Class.Priest => who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestHoly,
+                Class.Shaman => who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanRestoration,
+                Class.Monk => who.GetPrimarySpecialization() == (uint)TalentSpecialization.MonkMistweaver,
+                Class.Druid => who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration,
+                _ => false
+            };
+        }
+
+        private bool IsPlayerRangedAttacker(Player who)
+        {
+            if (!who)
+                return false;
+
+            switch (who.GetClass())
+            {
+                case Class.Warrior:
+                case Class.Paladin:
+                case Class.Rogue:
+                case Class.Deathknight:
+                default:
+                    return false;
+                case Class.Mage:
+                case Class.Warlock:
+                    return true;
+                case Class.Hunter:
+                    {
+                        // check if we have a ranged weapon equipped
+                        Item rangedSlot = who.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
+
+                        ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
+
+                        if (rangedTemplate != null)
+                            if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
+                                return true;
+
+                        return false;
+                    }
+                case Class.Priest:
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
+                case Class.Shaman:
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanElemental;
+                case Class.Druid:
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidBalance;
+            }
+        }
+
+        private Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
+        {
+            // Find highest spell rank that we know
+            uint knownRank, nextRank;
+
+            if (me.HasSpell(spellId))
+            {
+                // this will save us some lookups if the player has the highest rank (expected case)
+                knownRank = spellId;
+                nextRank = Global.SpellMgr.GetNextSpellInChain(spellId);
+            }
+            else
+            {
+                knownRank = 0;
+                nextRank = Global.SpellMgr.GetFirstSpellInChain(spellId);
+            }
+
+            while (nextRank != 0 && me.HasSpell(nextRank))
+            {
+                knownRank = nextRank;
+                nextRank = Global.SpellMgr.GetNextSpellInChain(knownRank);
+            }
+
+            if (knownRank == 0)
+                return null;
 
-			SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(knownRank, me.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(knownRank, me.GetMap().GetDifficultyID());
 
-			if (spellInfo == null)
-				return null;
+            if (spellInfo == null)
+                return null;
 
-			if (me.GetSpellHistory().HasGlobalCooldown(spellInfo))
-				return null;
+            if (me.GetSpellHistory().HasGlobalCooldown(spellInfo))
+                return null;
 
-			Spell spell = new(me, spellInfo, TriggerCastFlags.None);
+            Spell spell = new(me, spellInfo, TriggerCastFlags.None);
 
-			if (spell.CanAutoCast(target))
-				return Tuple.Create(spell, target);
+            if (spell.CanAutoCast(target))
+                return Tuple.Create(spell, target);
 
-			return null;
-		}
+            return null;
+        }
 
-		public Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
-		{
-			Unit pTarget = null;
+        public Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
+        {
+            Unit pTarget = null;
 
-			switch (target)
-			{
-				case SpellTarget.None:
-					break;
-				case SpellTarget.Victim:
-					pTarget = me.GetVictim();
+            switch (target)
+            {
+                case SpellTarget.None:
+                    break;
+                case SpellTarget.Victim:
+                    pTarget = me.GetVictim();
 
-					if (!pTarget)
-						return null;
+                    if (!pTarget)
+                        return null;
 
-					break;
-				case SpellTarget.Charmer:
-					pTarget = me.GetCharmer();
+                    break;
+                case SpellTarget.Charmer:
+                    pTarget = me.GetCharmer();
 
-					if (!pTarget)
-						return null;
+                    if (!pTarget)
+                        return null;
 
-					break;
-				case SpellTarget.Self:
-					pTarget = me;
+                    break;
+                case SpellTarget.Self:
+                    pTarget = me;
 
-					break;
-			}
+                    break;
+            }
 
-			return VerifySpellCast(spellId, pTarget);
-		}
+            return VerifySpellCast(spellId, pTarget);
+        }
 
-		public Tuple<Spell, Unit> SelectSpellCast(List<Tuple<Tuple<Spell, Unit>, uint>> spells)
-		{
-			if (spells.Empty())
-				return null;
+        public Tuple<Spell, Unit> SelectSpellCast(List<Tuple<Tuple<Spell, Unit>, uint>> spells)
+        {
+            if (spells.Empty())
+                return null;
 
-			uint totalWeights = 0;
+            uint totalWeights = 0;
 
-			foreach (var wSpell in spells)
-				totalWeights += wSpell.Item2;
+            foreach (var wSpell in spells)
+                totalWeights += wSpell.Item2;
 
-			Tuple<Spell, Unit> selected = null;
-			uint               randNum  = RandomHelper.URand(0, totalWeights - 1);
+            Tuple<Spell, Unit> selected = null;
+            uint randNum = RandomHelper.URand(0, totalWeights - 1);
 
-			foreach (var wSpell in spells)
-			{
-				if (selected != null)
-					//delete wSpell.first.first;
-					continue;
+            foreach (var wSpell in spells)
+            {
+                if (selected != null)
+                    //delete wSpell.first.first;
+                    continue;
 
-				if (randNum < wSpell.Item2)
-					selected = wSpell.Item1;
-				else
-					randNum -= wSpell.Item2;
-				//delete wSpell.first.first;
-			}
+                if (randNum < wSpell.Item2)
+                    selected = wSpell.Item1;
+                else
+                    randNum -= wSpell.Item2;
+                //delete wSpell.first.first;
+            }
 
-			spells.Clear();
+            spells.Clear();
 
-			return selected;
-		}
+            return selected;
+        }
 
-		public void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
-		{
-			Tuple<Spell, Unit> spell = VerifySpellCast(spellId, target);
+        public void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
+        {
+            Tuple<Spell, Unit> spell = VerifySpellCast(spellId, target);
 
-			if (spell != null)
-				spells.Add(Tuple.Create(spell, weight));
-		}
+            if (spell != null)
+                spells.Add(Tuple.Create(spell, weight));
+        }
 
-		public void DoCastAtTarget(Tuple<Spell, Unit> spell)
-		{
-			SpellCastTargets targets = new();
-			targets.SetUnitTarget(spell.Item2);
-			spell.Item1.Prepare(targets);
-		}
+        public void DoCastAtTarget(Tuple<Spell, Unit> spell)
+        {
+            SpellCastTargets targets = new();
+            targets.SetUnitTarget(spell.Item2);
+            spell.Item1.Prepare(targets);
+        }
 
-		private void DoRangedAttackIfReady()
-		{
-			if (me.HasUnitState(UnitState.Casting))
-				return;
+        private void DoRangedAttackIfReady()
+        {
+            if (me.HasUnitState(UnitState.Casting))
+                return;
 
-			if (!me.IsAttackReady(WeaponAttackType.RangedAttack))
-				return;
+            if (!me.IsAttackReady(WeaponAttackType.RangedAttack))
+                return;
 
-			Unit victim = me.GetVictim();
+            Unit victim = me.GetVictim();
 
-			if (!victim)
-				return;
+            if (!victim)
+                return;
 
-			uint rangedAttackSpell = 0;
+            uint rangedAttackSpell = 0;
 
-			Item         rangedItem     = me.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
-			ItemTemplate rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
+            Item rangedItem = me.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
+            ItemTemplate rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
 
-			if (rangedTemplate != null)
-				switch ((ItemSubClassWeapon)rangedTemplate.GetSubClass())
-				{
-					case ItemSubClassWeapon.Bow:
-					case ItemSubClassWeapon.Gun:
-					case ItemSubClassWeapon.Crossbow:
-						rangedAttackSpell = PlayerSpells.Shoot;
+            if (rangedTemplate != null)
+                switch ((ItemSubClassWeapon)rangedTemplate.GetSubClass())
+                {
+                    case ItemSubClassWeapon.Bow:
+                    case ItemSubClassWeapon.Gun:
+                    case ItemSubClassWeapon.Crossbow:
+                        rangedAttackSpell = PlayerSpells.Shoot;
 
-						break;
-					case ItemSubClassWeapon.Thrown:
-						rangedAttackSpell = PlayerSpells.Throw;
+                        break;
+                    case ItemSubClassWeapon.Thrown:
+                        rangedAttackSpell = PlayerSpells.Throw;
 
-						break;
-					case ItemSubClassWeapon.Wand:
-						rangedAttackSpell = PlayerSpells.Wand;
+                        break;
+                    case ItemSubClassWeapon.Wand:
+                        rangedAttackSpell = PlayerSpells.Wand;
 
-						break;
-				}
+                        break;
+                }
 
-			if (rangedAttackSpell == 0)
-				return;
+            if (rangedAttackSpell == 0)
+                return;
 
-			SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(rangedAttackSpell, me.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(rangedAttackSpell, me.GetMap().GetDifficultyID());
 
-			if (spellInfo == null)
-				return;
+            if (spellInfo == null)
+                return;
 
-			Spell spell = new(me, spellInfo, TriggerCastFlags.CastDirectly);
+            Spell spell = new(me, spellInfo, TriggerCastFlags.CastDirectly);
 
-			if (spell.CheckPetCast(victim) != SpellCastResult.SpellCastOk)
-				return;
+            if (spell.CheckPetCast(victim) != SpellCastResult.SpellCastOk)
+                return;
 
-			SpellCastTargets targets = new();
-			targets.SetUnitTarget(victim);
-			spell.Prepare(targets);
+            SpellCastTargets targets = new();
+            targets.SetUnitTarget(victim);
+            spell.Prepare(targets);
 
-			me.ResetAttackTimer(WeaponAttackType.RangedAttack);
-		}
+            me.ResetAttackTimer(WeaponAttackType.RangedAttack);
+        }
 
-		public void DoAutoAttackIfReady()
-		{
-			if (IsRangedAttacker())
-				DoRangedAttackIfReady();
-			else
-				DoMeleeAttackIfReady();
-		}
+        public void DoAutoAttackIfReady()
+        {
+            if (IsRangedAttacker())
+                DoRangedAttackIfReady();
+            else
+                DoMeleeAttackIfReady();
+        }
 
-		public void CancelAllShapeshifts()
-		{
-			List<AuraEffect> shapeshiftAuras      = me.GetAuraEffectsByType(AuraType.ModShapeshift);
-			List<Aura>       removableShapeshifts = new();
+        public void CancelAllShapeshifts()
+        {
+            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
+            List<Aura> removableShapeshifts = new();
 
-			foreach (AuraEffect auraEff in shapeshiftAuras)
-			{
-				Aura aura = auraEff.GetBase();
+            foreach (AuraEffect auraEff in shapeshiftAuras)
+            {
+                Aura aura = auraEff.GetBase();
 
-				if (aura == null)
-					continue;
+                if (aura == null)
+                    continue;
 
-				SpellInfo auraInfo = aura.GetSpellInfo();
+                SpellInfo auraInfo = aura.GetSpellInfo();
 
-				if (auraInfo == null)
-					continue;
+                if (auraInfo == null)
+                    continue;
 
-				if (auraInfo.HasAttribute(SpellAttr0.NoAuraCancel))
-					continue;
+                if (auraInfo.HasAttribute(SpellAttr0.NoAuraCancel))
+                    continue;
 
-				if (!auraInfo.IsPositive() ||
-				    auraInfo.IsPassive())
-					continue;
+                if (!auraInfo.IsPositive() ||
+                    auraInfo.IsPassive())
+                    continue;
 
-				removableShapeshifts.Add(aura);
-			}
+                removableShapeshifts.Add(aura);
+            }
 
-			foreach (Aura aura in removableShapeshifts)
-				me.RemoveOwnedAura(aura, AuraRemoveMode.Cancel);
-		}
+            foreach (Aura aura in removableShapeshifts)
+                me.RemoveOwnedAura(aura, AuraRemoveMode.Cancel);
+        }
 
-		public Creature GetCharmer()
-		{
-			if (me.GetCharmerGUID().IsCreature())
-				return ObjectAccessor.GetCreature(me, me.GetCharmerGUID());
+        public Creature GetCharmer()
+        {
+            if (me.GetCharmerGUID().IsCreature())
+                return ObjectAccessor.GetCreature(me, me.GetCharmerGUID());
 
-			return null;
-		}
+            return null;
+        }
 
-		// helper functions to determine player info
-		public bool IsHealer(Player who = null)
-		{
-			return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
-		}
+        // helper functions to determine player info
+        public bool IsHealer(Player who = null)
+        {
+            return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
+        }
 
-		public bool IsRangedAttacker(Player who = null)
-		{
-			return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who);
-		}
+        public bool IsRangedAttacker(Player who = null)
+        {
+            return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who);
+        }
 
-		public uint GetSpec(Player who = null)
-		{
-			return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization();
-		}
+        public uint GetSpec(Player who = null)
+        {
+            return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization();
+        }
 
-		public void SetIsRangedAttacker(bool state)
-		{
-			_isSelfRangedAttacker = state;
-		} // this allows overriding of the default ranged Attacker detection
+        public void SetIsRangedAttacker(bool state)
+        {
+            _isSelfRangedAttacker = state;
+        } // this allows overriding of the default ranged Attacker detection
 
-		public virtual Unit SelectAttackTarget()
-		{
-			return me.GetCharmer() ? me.GetCharmer().GetVictim() : null;
-		}
-	}
+        public virtual Unit SelectAttackTarget()
+        {
+            return me.GetCharmer() ? me.GetCharmer().GetVictim() : null;
+        }
+    }
 
-	internal class SimpleCharmedPlayerAI : PlayerAI
-	{
-		private const float CASTER_CHASE_DISTANCE = 28.0f;
+    internal class SimpleCharmedPlayerAI : PlayerAI
+    {
+        private const float CASTER_CHASE_DISTANCE = 28.0f;
 
-		private uint _castCheckTimer;
-		private bool _chaseCloser;
-		private bool _forceFacing;
-		private bool _isFollowing;
+        private uint _castCheckTimer;
+        private bool _chaseCloser;
+        private bool _forceFacing;
+        private bool _isFollowing;
 
-		public SimpleCharmedPlayerAI(Player player) : base(player)
-		{
-			_castCheckTimer = 2500;
-			_chaseCloser    = false;
-			_forceFacing    = true;
-		}
+        public SimpleCharmedPlayerAI(Player player) : base(player)
+        {
+            _castCheckTimer = 2500;
+            _chaseCloser = false;
+            _forceFacing = true;
+        }
 
-		public override bool CanAIAttack(Unit who)
-		{
-			if (!me.IsValidAttackTarget(who) ||
-			    who.HasBreakableByDamageCrowdControlAura())
-				return false;
+        public override bool CanAIAttack(Unit who)
+        {
+            if (!me.IsValidAttackTarget(who) ||
+                who.HasBreakableByDamageCrowdControlAura())
+                return false;
 
-			Unit charmer = me.GetCharmer();
+            Unit charmer = me.GetCharmer();
 
-			if (charmer != null)
-				if (!charmer.IsValidAttackTarget(who))
-					return false;
+            if (charmer != null)
+                if (!charmer.IsValidAttackTarget(who))
+                    return false;
 
-			return base.CanAIAttack(who);
-		}
+            return base.CanAIAttack(who);
+        }
 
-		public override Unit SelectAttackTarget()
-		{
-			Unit charmer = me.GetCharmer();
+        public override Unit SelectAttackTarget()
+        {
+            Unit charmer = me.GetCharmer();
 
-			if (charmer)
-			{
-				UnitAI charmerAI = charmer.GetAI();
+            if (charmer)
+            {
+                UnitAI charmerAI = charmer.GetAI();
 
-				if (charmerAI != null)
-					return charmerAI.SelectTarget(SelectTargetMethod.Random, 0, new ValidTargetSelectPredicate(this));
+                if (charmerAI != null)
+                    return charmerAI.SelectTarget(SelectTargetMethod.Random, 0, new ValidTargetSelectPredicate(this));
 
-				return charmer.GetVictim();
-			}
+                return charmer.GetVictim();
+            }
 
-			return null;
-		}
+            return null;
+        }
 
-		private Tuple<Spell, Unit> SelectAppropriateCastForSpec()
-		{
-			List<Tuple<Tuple<Spell, Unit>, uint>> spells = new();
+        private Tuple<Spell, Unit> SelectAppropriateCastForSpec()
+        {
+            List<Tuple<Tuple<Spell, Unit>, uint>> spells = new();
 
-			/*
+            /*
 			switch (me.getClass())
 			{
 			    case CLASS_WARRIOR:
@@ -909,159 +909,159 @@ namespace Game.AI
 			        break;
 			}
 			*/
-			return SelectSpellCast(spells);
-		}
+            return SelectSpellCast(spells);
+        }
 
-		public override void UpdateAI(uint diff)
-		{
-			Creature charmer = GetCharmer();
+        public override void UpdateAI(uint diff)
+        {
+            Creature charmer = GetCharmer();
 
-			if (!charmer)
-				return;
+            if (!charmer)
+                return;
 
-			//kill self if charm aura has infinite duration
-			if (charmer.IsInEvadeMode())
-			{
-				var auras = me.GetAuraEffectsByType(AuraType.ModCharm);
+            //kill self if charm aura has infinite duration
+            if (charmer.IsInEvadeMode())
+            {
+                var auras = me.GetAuraEffectsByType(AuraType.ModCharm);
 
-				foreach (var effect in auras)
-					if (effect.GetCasterGUID() == charmer.GetGUID() &&
-					    effect.GetBase().IsPermanent())
-					{
-						me.KillSelf();
+                foreach (var effect in auras)
+                    if (effect.GetCasterGUID() == charmer.GetGUID() &&
+                        effect.GetBase().IsPermanent())
+                    {
+                        me.KillSelf();
 
-						return;
-					}
-			}
+                        return;
+                    }
+            }
 
-			if (charmer.IsEngaged())
-			{
-				Unit target = me.GetVictim();
+            if (charmer.IsEngaged())
+            {
+                Unit target = me.GetVictim();
 
-				if (!target ||
-				    !CanAIAttack(target))
-				{
-					target = SelectAttackTarget();
+                if (!target ||
+                    !CanAIAttack(target))
+                {
+                    target = SelectAttackTarget();
 
-					if (!target ||
-					    !CanAIAttack(target))
-					{
-						if (!_isFollowing)
-						{
-							_isFollowing = true;
-							me.AttackStop();
-							me.CastStop();
+                    if (!target ||
+                        !CanAIAttack(target))
+                    {
+                        if (!_isFollowing)
+                        {
+                            _isFollowing = true;
+                            me.AttackStop();
+                            me.CastStop();
 
-							if (me.HasUnitState(UnitState.Chase))
-								me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+                            if (me.HasUnitState(UnitState.Chase))
+                                me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
 
-							me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
-						}
+                            me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+                        }
 
-						return;
-					}
+                        return;
+                    }
 
-					_isFollowing = false;
+                    _isFollowing = false;
 
-					if (IsRangedAttacker())
-					{
-						_chaseCloser = !me.IsWithinLOSInMap(target);
+                    if (IsRangedAttacker())
+                    {
+                        _chaseCloser = !me.IsWithinLOSInMap(target);
 
-						if (_chaseCloser)
-							AttackStart(target);
-						else
-							AttackStartCaster(target, CASTER_CHASE_DISTANCE);
-					}
-					else
-					{
-						AttackStart(target);
-					}
+                        if (_chaseCloser)
+                            AttackStart(target);
+                        else
+                            AttackStartCaster(target, CASTER_CHASE_DISTANCE);
+                    }
+                    else
+                    {
+                        AttackStart(target);
+                    }
 
-					_forceFacing = true;
-				}
+                    _forceFacing = true;
+                }
 
-				if (me.IsStopped() &&
-				    !me.HasUnitState(UnitState.CannotTurn))
-				{
-					float targetAngle = me.GetAbsoluteAngle(target);
+                if (me.IsStopped() &&
+                    !me.HasUnitState(UnitState.CannotTurn))
+                {
+                    float targetAngle = me.GetAbsoluteAngle(target);
 
-					if (_forceFacing || Math.Abs(me.GetOrientation() - targetAngle) > 0.4f)
-					{
-						me.SetFacingTo(targetAngle);
-						_forceFacing = false;
-					}
-				}
+                    if (_forceFacing || Math.Abs(me.GetOrientation() - targetAngle) > 0.4f)
+                    {
+                        me.SetFacingTo(targetAngle);
+                        _forceFacing = false;
+                    }
+                }
 
-				if (_castCheckTimer <= diff)
-				{
-					if (me.HasUnitState(UnitState.Casting))
-					{
-						_castCheckTimer = 0;
-					}
-					else
-					{
-						if (IsRangedAttacker()) // chase to zero if the Target isn't in line of sight
-						{
-							bool inLOS = me.IsWithinLOSInMap(target);
+                if (_castCheckTimer <= diff)
+                {
+                    if (me.HasUnitState(UnitState.Casting))
+                    {
+                        _castCheckTimer = 0;
+                    }
+                    else
+                    {
+                        if (IsRangedAttacker()) // chase to zero if the Target isn't in line of sight
+                        {
+                            bool inLOS = me.IsWithinLOSInMap(target);
 
-							if (_chaseCloser != !inLOS)
-							{
-								_chaseCloser = !inLOS;
+                            if (_chaseCloser != !inLOS)
+                            {
+                                _chaseCloser = !inLOS;
 
-								if (_chaseCloser)
-									AttackStart(target);
-								else
-									AttackStartCaster(target, CASTER_CHASE_DISTANCE);
-							}
-						}
+                                if (_chaseCloser)
+                                    AttackStart(target);
+                                else
+                                    AttackStartCaster(target, CASTER_CHASE_DISTANCE);
+                            }
+                        }
 
-						Tuple<Spell, Unit> shouldCast = SelectAppropriateCastForSpec();
+                        Tuple<Spell, Unit> shouldCast = SelectAppropriateCastForSpec();
 
-						if (shouldCast != null)
-							DoCastAtTarget(shouldCast);
+                        if (shouldCast != null)
+                            DoCastAtTarget(shouldCast);
 
-						_castCheckTimer = 500;
-					}
-				}
-				else
-				{
-					_castCheckTimer -= diff;
-				}
+                        _castCheckTimer = 500;
+                    }
+                }
+                else
+                {
+                    _castCheckTimer -= diff;
+                }
 
-				DoAutoAttackIfReady();
-			}
-			else if (!_isFollowing)
-			{
-				_isFollowing = true;
-				me.AttackStop();
-				me.CastStop();
+                DoAutoAttackIfReady();
+            }
+            else if (!_isFollowing)
+            {
+                _isFollowing = true;
+                me.AttackStop();
+                me.CastStop();
 
-				if (me.HasUnitState(UnitState.Chase))
-					me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+                if (me.HasUnitState(UnitState.Chase))
+                    me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
 
-				me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
-			}
-		}
+                me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+            }
+        }
 
-		public override void OnCharmed(bool isNew)
-		{
-			if (me.IsCharmed())
-			{
-				me.CastStop();
-				me.AttackStop();
+        public override void OnCharmed(bool isNew)
+        {
+            if (me.IsCharmed())
+            {
+                me.CastStop();
+                me.AttackStop();
 
-				if (me.GetMotionMaster().Size() <= 1)                           // if there is no current movement (we dont want to erase/overwrite any existing stuff)
-					me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // Force re-sync of current position for all clients
-			}
-			else
-			{
-				me.CastStop();
-				me.AttackStop();
+                if (me.GetMotionMaster().Size() <= 1)                           // if there is no current movement (we dont want to erase/overwrite any existing stuff)
+                    me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // Force re-sync of current position for all clients
+            }
+            else
+            {
+                me.CastStop();
+                me.AttackStop();
 
-				me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
-			}
+                me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+            }
 
-			base.OnCharmed(isNew);
-		}
-	}
+            base.OnCharmed(isNew);
+        }
+    }
 }

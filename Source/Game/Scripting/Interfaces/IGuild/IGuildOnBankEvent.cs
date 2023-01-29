@@ -5,8 +5,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-	public interface IGuildOnBankEvent : IScriptObject
-	{
-		void OnBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId);
-	}
+    public interface IGuildOnBankEvent : IScriptObject
+    {
+        void OnBankEvent(Guild guild, byte eventType, byte tabId, ulong playerGuid, uint itemOrMoney, ushort itemStackCount, byte destTabId);
+    }
 }

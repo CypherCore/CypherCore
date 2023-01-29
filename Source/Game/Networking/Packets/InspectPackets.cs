@@ -8,359 +8,359 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-	public class Inspect : ClientPacket
-	{
-		public ObjectGuid Target;
+    public class Inspect : ClientPacket
+    {
+        public ObjectGuid Target;
 
-		public Inspect(WorldPacket packet) : base(packet)
-		{
-		}
+        public Inspect(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			Target = _worldPacket.ReadPackedGuid();
-		}
-	}
+        public override void Read()
+        {
+            Target = _worldPacket.ReadPackedGuid();
+        }
+    }
 
-	public class InspectResult : ServerPacket
-	{
-		public uint? AzeriteLevel;
-		public Array<PVPBracketData> Bracket = new(7, default);
+    public class InspectResult : ServerPacket
+    {
+        public uint? AzeriteLevel;
+        public Array<PVPBracketData> Bracket = new(7, default);
 
-		public PlayerModelDisplayInfo DisplayInfo;
-		public List<ushort> Glyphs = new();
-		public InspectGuildData? GuildData;
-		public uint HonorLevel;
-		public int ItemLevel;
-		public uint LifetimeHK;
-		public byte LifetimeMaxRank;
-		public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
-		public List<ushort> Talents = new();
-		public TraitInspectInfo TalentTraits;
-		public ushort TodayHK;
-		public ushort YesterdayHK;
+        public PlayerModelDisplayInfo DisplayInfo;
+        public List<ushort> Glyphs = new();
+        public InspectGuildData? GuildData;
+        public uint HonorLevel;
+        public int ItemLevel;
+        public uint LifetimeHK;
+        public byte LifetimeMaxRank;
+        public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
+        public List<ushort> Talents = new();
+        public TraitInspectInfo TalentTraits;
+        public ushort TodayHK;
+        public ushort YesterdayHK;
 
-		public InspectResult() : base(ServerOpcodes.InspectResult)
-		{
-			DisplayInfo = new PlayerModelDisplayInfo();
-		}
+        public InspectResult() : base(ServerOpcodes.InspectResult)
+        {
+            DisplayInfo = new PlayerModelDisplayInfo();
+        }
 
-		public override void Write()
-		{
-			DisplayInfo.Write(_worldPacket);
-			_worldPacket.WriteInt32(Glyphs.Count);
-			_worldPacket.WriteInt32(Talents.Count);
-			_worldPacket.WriteInt32(PvpTalents.Count);
-			_worldPacket.WriteInt32(ItemLevel);
-			_worldPacket.WriteUInt8(LifetimeMaxRank);
-			_worldPacket.WriteUInt16(TodayHK);
-			_worldPacket.WriteUInt16(YesterdayHK);
-			_worldPacket.WriteUInt32(LifetimeHK);
-			_worldPacket.WriteUInt32(HonorLevel);
+        public override void Write()
+        {
+            DisplayInfo.Write(_worldPacket);
+            _worldPacket.WriteInt32(Glyphs.Count);
+            _worldPacket.WriteInt32(Talents.Count);
+            _worldPacket.WriteInt32(PvpTalents.Count);
+            _worldPacket.WriteInt32(ItemLevel);
+            _worldPacket.WriteUInt8(LifetimeMaxRank);
+            _worldPacket.WriteUInt16(TodayHK);
+            _worldPacket.WriteUInt16(YesterdayHK);
+            _worldPacket.WriteUInt32(LifetimeHK);
+            _worldPacket.WriteUInt32(HonorLevel);
 
-			for (int i = 0; i < Glyphs.Count; ++i)
-				_worldPacket.WriteUInt16(Glyphs[i]);
+            for (int i = 0; i < Glyphs.Count; ++i)
+                _worldPacket.WriteUInt16(Glyphs[i]);
 
-			for (int i = 0; i < Talents.Count; ++i)
-				_worldPacket.WriteUInt16(Talents[i]);
+            for (int i = 0; i < Talents.Count; ++i)
+                _worldPacket.WriteUInt16(Talents[i]);
 
-			for (int i = 0; i < PvpTalents.Count; ++i)
-				_worldPacket.WriteUInt16(PvpTalents[i]);
+            for (int i = 0; i < PvpTalents.Count; ++i)
+                _worldPacket.WriteUInt16(PvpTalents[i]);
 
-			_worldPacket.WriteBit(GuildData.HasValue);
-			_worldPacket.WriteBit(AzeriteLevel.HasValue);
-			_worldPacket.FlushBits();
+            _worldPacket.WriteBit(GuildData.HasValue);
+            _worldPacket.WriteBit(AzeriteLevel.HasValue);
+            _worldPacket.FlushBits();
 
-			foreach (PVPBracketData bracket in Bracket)
-				bracket.Write(_worldPacket);
+            foreach (PVPBracketData bracket in Bracket)
+                bracket.Write(_worldPacket);
 
-			if (GuildData.HasValue)
-				GuildData.Value.Write(_worldPacket);
+            if (GuildData.HasValue)
+                GuildData.Value.Write(_worldPacket);
 
-			if (AzeriteLevel.HasValue)
-				_worldPacket.WriteUInt32(AzeriteLevel.Value);
+            if (AzeriteLevel.HasValue)
+                _worldPacket.WriteUInt32(AzeriteLevel.Value);
 
-			TalentTraits.Write(_worldPacket);
-		}
-	}
+            TalentTraits.Write(_worldPacket);
+        }
+    }
 
-	public class QueryInspectAchievements : ClientPacket
-	{
-		public ObjectGuid Guid;
+    public class QueryInspectAchievements : ClientPacket
+    {
+        public ObjectGuid Guid;
 
-		public QueryInspectAchievements(WorldPacket packet) : base(packet)
-		{
-		}
+        public QueryInspectAchievements(WorldPacket packet) : base(packet)
+        {
+        }
 
-		public override void Read()
-		{
-			Guid = _worldPacket.ReadPackedGuid();
-		}
-	}
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid();
+        }
+    }
 
-	/// RespondInspectAchievements in AchievementPackets
+    /// RespondInspectAchievements in AchievementPackets
 
-	//Structs
-	public struct InspectEnchantData
-	{
-		public InspectEnchantData(uint id, byte index)
-		{
-			Id    = id;
-			Index = index;
-		}
+    //Structs
+    public struct InspectEnchantData
+    {
+        public InspectEnchantData(uint id, byte index)
+        {
+            Id = id;
+            Index = index;
+        }
 
-		public void Write(WorldPacket data)
-		{
-			data.WriteUInt32(Id);
-			data.WriteUInt8(Index);
-		}
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Id);
+            data.WriteUInt8(Index);
+        }
 
-		public uint Id;
-		public byte Index;
-	}
+        public uint Id;
+        public byte Index;
+    }
 
-	public class InspectItemData
-	{
-		public List<AzeriteEssenceData> AzeriteEssences = new();
-		public List<int> AzeritePowers = new();
+    public class InspectItemData
+    {
+        public List<AzeriteEssenceData> AzeriteEssences = new();
+        public List<int> AzeritePowers = new();
 
-		public ObjectGuid CreatorGUID;
-		public List<InspectEnchantData> Enchants = new();
-		public List<ItemGemData> Gems = new();
-		public byte Index;
-		public ItemInstance Item;
-		public bool Usable;
+        public ObjectGuid CreatorGUID;
+        public List<InspectEnchantData> Enchants = new();
+        public List<ItemGemData> Gems = new();
+        public byte Index;
+        public ItemInstance Item;
+        public bool Usable;
 
-		public InspectItemData(Item item, byte index)
-		{
-			CreatorGUID = item.GetCreator();
+        public InspectItemData(Item item, byte index)
+        {
+            CreatorGUID = item.GetCreator();
 
-			Item   = new ItemInstance(item);
-			Index  = index;
-			Usable = true; // @todo
+            Item = new ItemInstance(item);
+            Index = index;
+            Usable = true; // @todo
 
-			for (EnchantmentSlot enchant = 0; enchant < EnchantmentSlot.Max; ++enchant)
-			{
-				uint enchId = item.GetEnchantmentId(enchant);
+            for (EnchantmentSlot enchant = 0; enchant < EnchantmentSlot.Max; ++enchant)
+            {
+                uint enchId = item.GetEnchantmentId(enchant);
 
-				if (enchId != 0)
-					Enchants.Add(new InspectEnchantData(enchId, (byte)enchant));
-			}
+                if (enchId != 0)
+                    Enchants.Add(new InspectEnchantData(enchId, (byte)enchant));
+            }
 
-			byte i = 0;
+            byte i = 0;
 
-			foreach (SocketedGem gemData in item._itemData.Gems)
-			{
-				if (gemData.ItemId != 0)
-				{
-					ItemGemData gem = new();
-					gem.Slot = i;
-					gem.Item = new ItemInstance(gemData);
-					Gems.Add(gem);
-				}
+            foreach (SocketedGem gemData in item._itemData.Gems)
+            {
+                if (gemData.ItemId != 0)
+                {
+                    ItemGemData gem = new();
+                    gem.Slot = i;
+                    gem.Item = new ItemInstance(gemData);
+                    Gems.Add(gem);
+                }
 
-				++i;
-			}
+                ++i;
+            }
 
-			AzeriteItem azeriteItem = item.ToAzeriteItem();
+            AzeriteItem azeriteItem = item.ToAzeriteItem();
 
-			if (azeriteItem != null)
-			{
-				SelectedAzeriteEssences essences = azeriteItem.GetSelectedAzeriteEssences();
+            if (azeriteItem != null)
+            {
+                SelectedAzeriteEssences essences = azeriteItem.GetSelectedAzeriteEssences();
 
-				if (essences != null)
-					for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
-					{
-						AzeriteEssenceData essence = new();
-						essence.Index            = slot;
-						essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
+                if (essences != null)
+                    for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
+                    {
+                        AzeriteEssenceData essence = new();
+                        essence.Index = slot;
+                        essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
 
-						if (essence.AzeriteEssenceID != 0)
-						{
-							essence.Rank         = azeriteItem.GetEssenceRank(essence.AzeriteEssenceID);
-							essence.SlotUnlocked = true;
-						}
-						else
-						{
-							essence.SlotUnlocked = azeriteItem.HasUnlockedEssenceSlot(slot);
-						}
+                        if (essence.AzeriteEssenceID != 0)
+                        {
+                            essence.Rank = azeriteItem.GetEssenceRank(essence.AzeriteEssenceID);
+                            essence.SlotUnlocked = true;
+                        }
+                        else
+                        {
+                            essence.SlotUnlocked = azeriteItem.HasUnlockedEssenceSlot(slot);
+                        }
 
-						AzeriteEssences.Add(essence);
-					}
-			}
-		}
+                        AzeriteEssences.Add(essence);
+                    }
+            }
+        }
 
-		public void Write(WorldPacket data)
-		{
-			data.WritePackedGuid(CreatorGUID);
-			data.WriteUInt8(Index);
-			data.WriteInt32(AzeritePowers.Count);
-			data.WriteInt32(AzeriteEssences.Count);
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(CreatorGUID);
+            data.WriteUInt8(Index);
+            data.WriteInt32(AzeritePowers.Count);
+            data.WriteInt32(AzeriteEssences.Count);
 
-			foreach (var id in AzeritePowers)
-				data.WriteInt32(id);
+            foreach (var id in AzeritePowers)
+                data.WriteInt32(id);
 
-			Item.Write(data);
-			data.WriteBit(Usable);
-			data.WriteBits(Enchants.Count, 4);
-			data.WriteBits(Gems.Count, 2);
-			data.FlushBits();
+            Item.Write(data);
+            data.WriteBit(Usable);
+            data.WriteBits(Enchants.Count, 4);
+            data.WriteBits(Gems.Count, 2);
+            data.FlushBits();
 
-			foreach (var azeriteEssenceData in AzeriteEssences)
-				azeriteEssenceData.Write(data);
+            foreach (var azeriteEssenceData in AzeriteEssences)
+                azeriteEssenceData.Write(data);
 
-			foreach (var enchantData in Enchants)
-				enchantData.Write(data);
+            foreach (var enchantData in Enchants)
+                enchantData.Write(data);
 
-			foreach (var gem in Gems)
-				gem.Write(data);
-		}
-	}
+            foreach (var gem in Gems)
+                gem.Write(data);
+        }
+    }
 
-	public class PlayerModelDisplayInfo
-	{
-		public byte ClassID;
-		public List<ChrCustomizationChoice> Customizations = new();
-		public byte GenderID;
-		public ObjectGuid GUID;
-		public List<InspectItemData> Items = new();
-		public string Name;
-		public byte Race;
-		public uint SpecializationID;
+    public class PlayerModelDisplayInfo
+    {
+        public byte ClassID;
+        public List<ChrCustomizationChoice> Customizations = new();
+        public byte GenderID;
+        public ObjectGuid GUID;
+        public List<InspectItemData> Items = new();
+        public string Name;
+        public byte Race;
+        public uint SpecializationID;
 
-		public void Initialize(Player player)
-		{
-			GUID             = player.GetGUID();
-			SpecializationID = player.GetPrimarySpecialization();
-			Name             = player.GetName();
-			GenderID         = (byte)player.GetNativeGender();
-			Race             = (byte)player.GetRace();
-			ClassID          = (byte)player.GetClass();
+        public void Initialize(Player player)
+        {
+            GUID = player.GetGUID();
+            SpecializationID = player.GetPrimarySpecialization();
+            Name = player.GetName();
+            GenderID = (byte)player.GetNativeGender();
+            Race = (byte)player.GetRace();
+            ClassID = (byte)player.GetClass();
 
-			foreach (var customization in player.PlayerData.Customizations)
-				Customizations.Add(customization);
+            foreach (var customization in player.PlayerData.Customizations)
+                Customizations.Add(customization);
 
-			for (byte i = 0; i < EquipmentSlot.End; ++i)
-			{
-				Item item = player.GetItemByPos(InventorySlots.Bag0, i);
+            for (byte i = 0; i < EquipmentSlot.End; ++i)
+            {
+                Item item = player.GetItemByPos(InventorySlots.Bag0, i);
 
-				if (item != null)
-					Items.Add(new InspectItemData(item, i));
-			}
-		}
+                if (item != null)
+                    Items.Add(new InspectItemData(item, i));
+            }
+        }
 
-		public void Write(WorldPacket data)
-		{
-			data.WritePackedGuid(GUID);
-			data.WriteUInt32(SpecializationID);
-			data.WriteInt32(Items.Count);
-			data.WriteBits(Name.GetByteCount(), 6);
-			data.WriteUInt8(GenderID);
-			data.WriteUInt8(Race);
-			data.WriteUInt8(ClassID);
-			data.WriteInt32(Customizations.Count);
-			data.WriteString(Name);
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(GUID);
+            data.WriteUInt32(SpecializationID);
+            data.WriteInt32(Items.Count);
+            data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteUInt8(GenderID);
+            data.WriteUInt8(Race);
+            data.WriteUInt8(ClassID);
+            data.WriteInt32(Customizations.Count);
+            data.WriteString(Name);
 
-			foreach (var customization in Customizations)
-			{
-				data.WriteUInt32(customization.ChrCustomizationOptionID);
-				data.WriteUInt32(customization.ChrCustomizationChoiceID);
-			}
+            foreach (var customization in Customizations)
+            {
+                data.WriteUInt32(customization.ChrCustomizationOptionID);
+                data.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
 
-			foreach (InspectItemData item in Items)
-				item.Write(data);
-		}
-	}
+            foreach (InspectItemData item in Items)
+                item.Write(data);
+        }
+    }
 
-	public struct InspectGuildData
-	{
-		public void Write(WorldPacket data)
-		{
-			data.WritePackedGuid(GuildGUID);
-			data.WriteInt32(NumGuildMembers);
-			data.WriteInt32(AchievementPoints);
-		}
+    public struct InspectGuildData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(GuildGUID);
+            data.WriteInt32(NumGuildMembers);
+            data.WriteInt32(AchievementPoints);
+        }
 
-		public ObjectGuid GuildGUID;
-		public int NumGuildMembers;
-		public int AchievementPoints;
-	}
+        public ObjectGuid GuildGUID;
+        public int NumGuildMembers;
+        public int AchievementPoints;
+    }
 
-	public struct PVPBracketData
-	{
-		public void Write(WorldPacket data)
-		{
-			data.WriteUInt8(Bracket);
-			data.WriteInt32(Unused3);
-			data.WriteInt32(Rating);
-			data.WriteInt32(Rank);
-			data.WriteInt32(WeeklyPlayed);
-			data.WriteInt32(WeeklyWon);
-			data.WriteInt32(SeasonPlayed);
-			data.WriteInt32(SeasonWon);
-			data.WriteInt32(WeeklyBestRating);
-			data.WriteInt32(SeasonBestRating);
-			data.WriteInt32(PvpTierID);
-			data.WriteInt32(WeeklyBestWinPvpTierID);
-			data.WriteInt32(Unused1);
-			data.WriteInt32(Unused2);
-			data.WriteInt32(RoundsSeasonPlayed);
-			data.WriteInt32(RoundsSeasonWon);
-			data.WriteInt32(RoundsWeeklyPlayed);
-			data.WriteInt32(RoundsWeeklyWon);
-			data.WriteBit(Disqualified);
-			data.FlushBits();
-		}
+    public struct PVPBracketData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(Bracket);
+            data.WriteInt32(Unused3);
+            data.WriteInt32(Rating);
+            data.WriteInt32(Rank);
+            data.WriteInt32(WeeklyPlayed);
+            data.WriteInt32(WeeklyWon);
+            data.WriteInt32(SeasonPlayed);
+            data.WriteInt32(SeasonWon);
+            data.WriteInt32(WeeklyBestRating);
+            data.WriteInt32(SeasonBestRating);
+            data.WriteInt32(PvpTierID);
+            data.WriteInt32(WeeklyBestWinPvpTierID);
+            data.WriteInt32(Unused1);
+            data.WriteInt32(Unused2);
+            data.WriteInt32(RoundsSeasonPlayed);
+            data.WriteInt32(RoundsSeasonWon);
+            data.WriteInt32(RoundsWeeklyPlayed);
+            data.WriteInt32(RoundsWeeklyWon);
+            data.WriteBit(Disqualified);
+            data.FlushBits();
+        }
 
-		public int Rating;
-		public int Rank;
-		public int WeeklyPlayed;
-		public int WeeklyWon;
-		public int SeasonPlayed;
-		public int SeasonWon;
-		public int WeeklyBestRating;
-		public int SeasonBestRating;
-		public int PvpTierID;
-		public int WeeklyBestWinPvpTierID;
-		public int Unused1;
-		public int Unused2;
-		public int Unused3;
-		public int RoundsSeasonPlayed;
-		public int RoundsSeasonWon;
-		public int RoundsWeeklyPlayed;
-		public int RoundsWeeklyWon;
-		public byte Bracket;
-		public bool Disqualified;
-	}
+        public int Rating;
+        public int Rank;
+        public int WeeklyPlayed;
+        public int WeeklyWon;
+        public int SeasonPlayed;
+        public int SeasonWon;
+        public int WeeklyBestRating;
+        public int SeasonBestRating;
+        public int PvpTierID;
+        public int WeeklyBestWinPvpTierID;
+        public int Unused1;
+        public int Unused2;
+        public int Unused3;
+        public int RoundsSeasonPlayed;
+        public int RoundsSeasonWon;
+        public int RoundsWeeklyPlayed;
+        public int RoundsWeeklyWon;
+        public byte Bracket;
+        public bool Disqualified;
+    }
 
-	public struct TraitInspectInfo
-	{
-		public int Level;
-		public int ChrSpecializationID;
-		public TraitConfigPacket Config;
+    public struct TraitInspectInfo
+    {
+        public int Level;
+        public int ChrSpecializationID;
+        public TraitConfigPacket Config;
 
-		public void Write(WorldPacket data)
-		{
-			data.WriteInt32(Level);
-			data.WriteInt32(ChrSpecializationID);
-			Config.Write(data);
-		}
-	}
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Level);
+            data.WriteInt32(ChrSpecializationID);
+            Config.Write(data);
+        }
+    }
 
-	public struct AzeriteEssenceData
-	{
-		public uint Index;
-		public uint AzeriteEssenceID;
-		public uint Rank;
-		public bool SlotUnlocked;
+    public struct AzeriteEssenceData
+    {
+        public uint Index;
+        public uint AzeriteEssenceID;
+        public uint Rank;
+        public bool SlotUnlocked;
 
-		public void Write(WorldPacket data)
-		{
-			data.WriteUInt32(Index);
-			data.WriteUInt32(AzeriteEssenceID);
-			data.WriteUInt32(Rank);
-			data.WriteBit(SlotUnlocked);
-			data.FlushBits();
-		}
-	}
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Index);
+            data.WriteUInt32(AzeriteEssenceID);
+            data.WriteUInt32(Rank);
+            data.WriteBit(SlotUnlocked);
+            data.FlushBits();
+        }
+    }
 }

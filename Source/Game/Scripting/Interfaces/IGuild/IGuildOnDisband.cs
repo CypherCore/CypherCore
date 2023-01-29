@@ -5,8 +5,8 @@ using Game.Guilds;
 
 namespace Game.Scripting.Interfaces.IGuild
 {
-	public interface IGuildOnDisband : IScriptObject
-	{
-		void OnDisband(Guild guild);
-	}
+    public interface IGuildOnDisband : IScriptObject
+    {
+        void OnDisband(Guild guild);
+    }
 }

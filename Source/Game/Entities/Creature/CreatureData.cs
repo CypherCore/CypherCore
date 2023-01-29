@@ -7,8 +7,8 @@ using Game.Maps;
 namespace Game.Entities
 {
     public class CreatureData : SpawnData
-	{
-		public uint Curhealth { get; set; }
+    {
+        public uint Curhealth { get; set; }
         public uint Curmana { get; set; }
         public uint Currentwaypoint { get; set; }
         public uint Displayid { get; set; }
@@ -22,7 +22,7 @@ namespace Game.Entities
         public float WanderDistance { get; set; }
 
         public CreatureData() : base(SpawnObjectType.Creature)
-		{
-		}
-	}
+        {
+        }
+    }
 }

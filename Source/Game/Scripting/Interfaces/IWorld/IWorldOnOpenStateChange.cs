@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IWorld
 {
-	public interface IWorldOnOpenStateChange : IScriptObject
-	{
-		void OnOpenStateChange(bool open);
-	}
+    public interface IWorldOnOpenStateChange : IScriptObject
+    {
+        void OnOpenStateChange(bool open);
+    }
 }

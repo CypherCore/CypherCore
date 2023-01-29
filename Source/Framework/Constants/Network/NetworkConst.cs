@@ -3,19 +3,19 @@
 
 namespace Framework.Constants
 {
-	// Player state
-	public enum SessionStatus
-	{
-		Authed = 0,              // Player authenticated (_player == NULL, _playerRecentlyLogout = false or will be reset before handler call, _GUID have garbage)
-		Loggedin,                // Player in game (_player != NULL, _GUID == _player.GetGUID(), inWorld())
-		Transfer,                // Player transferring to another map (_player != NULL, _GUID == _player.GetGUID(), !inWorld())
-		LoggedinOrRecentlyLogout // _player != NULL or _player == NULL && _playerRecentlyLogout && _playerLogout, _GUID store last _player guid)
-	}
+    // Player state
+    public enum SessionStatus
+    {
+        Authed = 0,              // Player authenticated (_player == NULL, _playerRecentlyLogout = false or will be reset before handler call, _GUID have garbage)
+        Loggedin,                // Player in game (_player != NULL, _GUID == _player.GetGUID(), inWorld())
+        Transfer,                // Player transferring to another map (_player != NULL, _GUID == _player.GetGUID(), !inWorld())
+        LoggedinOrRecentlyLogout // _player != NULL or _player == NULL && _playerRecentlyLogout && _playerLogout, _GUID store last _player guid)
+    }
 
-	public enum PacketProcessing
-	{
-		Inplace = 0,  //process packet whenever we receive it - mostly for non-handled or non-implemented packets
-		ThreadUnsafe, //packet is not thread-safe - process it in World.UpdateSessions()
-		ThreadSafe    //packet is thread-safe - process it in Map.Update()
-	}
+    public enum PacketProcessing
+    {
+        Inplace = 0,  //process packet whenever we receive it - mostly for non-handled or non-implemented packets
+        ThreadUnsafe, //packet is not thread-safe - process it in World.UpdateSessions()
+        ThreadSafe    //packet is thread-safe - process it in Map.Update()
+    }
 }

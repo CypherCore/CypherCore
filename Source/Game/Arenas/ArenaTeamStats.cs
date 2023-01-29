@@ -4,12 +4,12 @@
 namespace Game.Arenas
 {
     public struct ArenaTeamStats
-	{
-		public ushort Rating;
-		public ushort WeekGames;
-		public ushort WeekWins;
-		public ushort SeasonGames;
-		public ushort SeasonWins;
-		public uint Rank;
-	}
+    {
+        public ushort Rating;
+        public ushort WeekGames;
+        public ushort WeekWins;
+        public ushort SeasonGames;
+        public ushort SeasonWins;
+        public uint Rank;
+    }
 }

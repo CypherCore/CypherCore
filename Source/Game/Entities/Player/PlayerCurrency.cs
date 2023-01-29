@@ -6,11 +6,11 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class PlayerCurrency
-	{
-		public byte Flags { get; set; }
+    {
+        public byte Flags { get; set; }
         public uint Quantity { get; set; }
         public PlayerCurrencyState State;
-		public uint TrackedQuantity { get; set; }
+        public uint TrackedQuantity { get; set; }
         public uint WeeklyQuantity { get; set; }
     }
 }

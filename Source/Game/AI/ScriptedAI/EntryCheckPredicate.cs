@@ -7,17 +7,17 @@ using Game.Entities;
 namespace Game.AI
 {
     public class EntryCheckPredicate : ICheck<ObjectGuid>
-	{
-		private readonly uint _entry;
+    {
+        private readonly uint _entry;
 
-		public EntryCheckPredicate(uint entry)
-		{
-			_entry = entry;
-		}
+        public EntryCheckPredicate(uint entry)
+        {
+            _entry = entry;
+        }
 
-		public bool Invoke(ObjectGuid guid)
-		{
-			return guid.GetEntry() == _entry;
-		}
-	}
+        public bool Invoke(ObjectGuid guid)
+        {
+            return guid.GetEntry() == _entry;
+        }
+    }
 }

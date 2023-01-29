@@ -5,50 +5,50 @@ using System.Collections.Generic;
 
 internal class Logger
 {
-	private Dictionary<byte, Appender> appenders = new();
-	private LogLevel level;
+    private readonly Dictionary<byte, Appender> appenders = new();
+    private LogLevel level;
 
-	private string name;
+    private readonly string name;
 
-	public Logger(string _name, LogLevel _level)
-	{
-		name  = _name;
-		level = _level;
-	}
+    public Logger(string _name, LogLevel _level)
+    {
+        name = _name;
+        level = _level;
+    }
 
-	public void addAppender(byte id, Appender appender)
-	{
-		appenders[id] = appender;
-	}
+    public void addAppender(byte id, Appender appender)
+    {
+        appenders[id] = appender;
+    }
 
-	public void delAppender(byte id)
-	{
-		appenders.Remove(id);
-	}
+    public void delAppender(byte id)
+    {
+        appenders.Remove(id);
+    }
 
-	public void setLogLevel(LogLevel _level)
-	{
-		level = _level;
-	}
+    public void setLogLevel(LogLevel _level)
+    {
+        level = _level;
+    }
 
-	public string getName()
-	{
-		return name;
-	}
+    public string getName()
+    {
+        return name;
+    }
 
-	public LogLevel getLogLevel()
-	{
-		return level;
-	}
+    public LogLevel getLogLevel()
+    {
+        return level;
+    }
 
-	public void write(LogMessage message)
-	{
-		if (level == 0 ||
-		    level > message.level ||
-		    string.IsNullOrEmpty(message.text))
-			return;
+    public void write(LogMessage message)
+    {
+        if (level == 0 ||
+            level > message.level ||
+            string.IsNullOrEmpty(message.text))
+            return;
 
-		foreach (var appender in appenders.Values)
-			appender.Write(message);
-	}
+        foreach (var appender in appenders.Values)
+            appender.Write(message);
+    }
 }

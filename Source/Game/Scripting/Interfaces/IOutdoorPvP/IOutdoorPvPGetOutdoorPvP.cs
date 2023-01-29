@@ -6,8 +6,8 @@ using Game.PvP;
 
 namespace Game.Scripting.Interfaces.IOutdoorPvP
 {
-	public interface IOutdoorPvPGetOutdoorPvP : IScriptObject
-	{
-		OutdoorPvP GetOutdoorPvP(Map map);
-	}
+    public interface IOutdoorPvPGetOutdoorPvP : IScriptObject
+    {
+        OutdoorPvP GetOutdoorPvP(Map map);
+    }
 }

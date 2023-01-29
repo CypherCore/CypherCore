@@ -3,8 +3,8 @@
 
 namespace Game.Scripting.Interfaces.IFormula
 {
-	public interface IFormulaOnGrayLevelCalculation : IScriptObject
-	{
-		void OnGrayLevelCalculation(uint grayLevel, uint playerLevel);
-	}
+    public interface IFormulaOnGrayLevelCalculation : IScriptObject
+    {
+        void OnGrayLevelCalculation(uint grayLevel, uint playerLevel);
+    }
 }

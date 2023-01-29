@@ -14,22 +14,22 @@ namespace Game.BattleGrounds.Zones.StrandofAncients
         /// Id of Attacker team
         private int Attackers;
 
-        private Dictionary<uint /*Id*/, uint /*timer*/> DemoliserRespawnList = new();
+        private readonly Dictionary<uint /*Id*/, uint /*timer*/> DemoliserRespawnList = new();
 
         // Max Time of round
         private uint EndRoundTimer;
 
         // Status of each gate (Destroy/Damage/Intact)
-        private SAGateState[] GateStatus = new SAGateState[SAMiscConst.Gates.Length];
+        private readonly SAGateState[] GateStatus = new SAGateState[SAMiscConst.Gates.Length];
 
         // Team witch conntrol each graveyard
-        private int[] GraveyardStatus = new int[SAGraveyards.Max];
+        private readonly int[] GraveyardStatus = new int[SAGraveyards.Max];
 
         // for know if second round has been init
         private bool InitSecondRound;
 
         // Score of each round
-        private SARoundScore[] RoundScores = new SARoundScore[2];
+        private readonly SARoundScore[] RoundScores = new SARoundScore[2];
 
         // For know if boats has start moving or not yet
         private bool ShipsStarted;

@@ -6,14 +6,14 @@ using System;
 namespace Game
 {
     public class AuctionThrottleResult
-	{
-		public TimeSpan DelayUntilNext;
-		public bool Throttled { get; set; }
+    {
+        public TimeSpan DelayUntilNext;
+        public bool Throttled { get; set; }
 
-		public AuctionThrottleResult(TimeSpan delayUntilNext, bool throttled)
-		{
-			DelayUntilNext = delayUntilNext;
-			Throttled      = throttled;
-		}
-	}
+        public AuctionThrottleResult(TimeSpan delayUntilNext, bool throttled)
+        {
+            DelayUntilNext = delayUntilNext;
+            Throttled = throttled;
+        }
+    }
 }

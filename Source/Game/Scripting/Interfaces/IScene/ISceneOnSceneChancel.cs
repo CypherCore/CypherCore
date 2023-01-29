@@ -5,8 +5,8 @@ using Game.Entities;
 
 namespace Game.Scripting.Interfaces.IScene
 {
-	public interface ISceneOnSceneChancel : IScriptObject
-	{
-		void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate);
-	}
+    public interface ISceneOnSceneChancel : IScriptObject
+    {
+        void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate);
+    }
 }

@@ -6,19 +6,19 @@ using Game.Entities;
 
 namespace Game.Miscellaneous
 {
-	/// Only returns true for the given Attacker's current victim, if any
-	public class IsVictimOf : ICheck<WorldObject>
-	{
-		private WorldObject _victim;
+    /// Only returns true for the given Attacker's current victim, if any
+    public class IsVictimOf : ICheck<WorldObject>
+    {
+        private readonly WorldObject _victim;
 
-		public IsVictimOf(Unit attacker)
-		{
-			_victim = attacker?.GetVictim();
-		}
+        public IsVictimOf(Unit attacker)
+        {
+            _victim = attacker?.GetVictim();
+        }
 
-		public bool Invoke(WorldObject obj)
-		{
-			return obj != null && (_victim == obj);
-		}
-	}
+        public bool Invoke(WorldObject obj)
+        {
+            return obj != null && (_victim == obj);
+        }
+    }
 }

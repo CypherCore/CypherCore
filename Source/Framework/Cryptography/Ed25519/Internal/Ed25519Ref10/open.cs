@@ -3,10 +3,10 @@ using System.Text;
 
 namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
-	internal static partial class Ed25519Operations
-	{
-		// Original crypto_sign_open, for reference only
-		/*public static int crypto_sign_open(
+    internal static partial class Ed25519Operations
+    {
+        // Original crypto_sign_open, for reference only
+        /*public static int crypto_sign_open(
 		  byte[] m, out int mlen,
 		  byte[] sm, int smlen,
 		  byte[] pk)
@@ -46,66 +46,66 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		    return 0;
 		}*/
 
-		public static bool crypto_sign_verify(
-			byte[] sig, int sigoffset,
-			byte[] m, int moffset, int mlen,
-			byte[] pk, int pkoffset,
-			int phflag = -1,
-			byte[] ctx = null)
-		{
-			byte[]         h;
-			byte[]         checkr = new byte[32];
-			GroupElementP3 A;
-			GroupElementP2 R;
+        public static bool crypto_sign_verify(
+            byte[] sig, int sigoffset,
+            byte[] m, int moffset, int mlen,
+            byte[] pk, int pkoffset,
+            int phflag = -1,
+            byte[] ctx = null)
+        {
+            byte[] h;
+            byte[] checkr = new byte[32];
+            GroupElementP3 A;
+            GroupElementP2 R;
 
-			if ((sig[sigoffset + 63] & 224) != 0) return false;
+            if ((sig[sigoffset + 63] & 224) != 0) return false;
 
-			if (GroupOperations.ge_frombytes_negate_vartime(out A, pk, pkoffset) != 0)
-				return false;
+            if (GroupOperations.ge_frombytes_negate_vartime(out A, pk, pkoffset) != 0)
+                return false;
 
-			var hasher = new Sha512();
+            var hasher = new Sha512();
 
-			if (phflag == 0)
-			{
-				// Static ctx
-				var ed25519Ctx = Encoding.ASCII.GetBytes("SigEd25519 no Ed25519 collisions");
+            if (phflag == 0)
+            {
+                // Static ctx
+                var ed25519Ctx = Encoding.ASCII.GetBytes("SigEd25519 no Ed25519 collisions");
 
-				hasher.Update(ed25519Ctx, 0, ed25519Ctx.Length);
+                hasher.Update(ed25519Ctx, 0, ed25519Ctx.Length);
 
-				hasher.Update(new byte[1]
-				              {
-					              (byte)phflag
-				              },
-				              0,
-				              1);
+                hasher.Update(new byte[1]
+                              {
+                                  (byte)phflag
+                              },
+                              0,
+                              1);
 
-				hasher.Update(new byte[1]
-				              {
-					              ctx != null ? (byte)ctx.Length : (byte)0
-				              },
-				              0,
-				              1);
+                hasher.Update(new byte[1]
+                              {
+                                  ctx != null ? (byte)ctx.Length : (byte)0
+                              },
+                              0,
+                              1);
 
-				if (ctx != null)
-					hasher.Update(ctx, 0, ctx.Length);
-			}
+                if (ctx != null)
+                    hasher.Update(ctx, 0, ctx.Length);
+            }
 
-			hasher.Update(sig, sigoffset, 32);
-			hasher.Update(pk, pkoffset, 32);
-			hasher.Update(m, moffset, mlen);
-			h = hasher.Finalize();
+            hasher.Update(sig, sigoffset, 32);
+            hasher.Update(pk, pkoffset, 32);
+            hasher.Update(m, moffset, mlen);
+            h = hasher.Finalize();
 
-			ScalarOperations.sc_reduce(h);
+            ScalarOperations.sc_reduce(h);
 
-			var sm32 = new byte[32]; //todo: remove allocation
-			Array.Copy(sig, sigoffset + 32, sm32, 0, 32);
-			GroupOperations.ge_double_scalarmult_vartime(out R, h, ref A, sm32);
-			GroupOperations.ge_tobytes(checkr, 0, ref R);
-			var result = CryptoBytes.ConstantTimeEquals(checkr, 0, sig, sigoffset, 32);
-			CryptoBytes.Wipe(h);
-			CryptoBytes.Wipe(checkr);
+            var sm32 = new byte[32]; //todo: remove allocation
+            Array.Copy(sig, sigoffset + 32, sm32, 0, 32);
+            GroupOperations.ge_double_scalarmult_vartime(out R, h, ref A, sm32);
+            GroupOperations.ge_tobytes(checkr, 0, ref R);
+            var result = CryptoBytes.ConstantTimeEquals(checkr, 0, sig, sigoffset, 32);
+            CryptoBytes.Wipe(h);
+            CryptoBytes.Wipe(checkr);
 
-			return result;
-		}
-	}
+            return result;
+        }
+    }
 }

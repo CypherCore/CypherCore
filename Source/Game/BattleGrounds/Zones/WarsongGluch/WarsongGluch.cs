@@ -14,21 +14,21 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
         private const uint ExploitTeleportLocationAlliance = 3784;
         private const uint ExploitTeleportLocationHorde = 3785;
         private bool _bothFlagsKept;
-        private ObjectGuid[] _DroppedFlagGUID = new ObjectGuid[2];
+        private readonly ObjectGuid[] _DroppedFlagGUID = new ObjectGuid[2];
         private byte _flagDebuffState; // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
 
-        private ObjectGuid[] _FlagKeepers = new ObjectGuid[2]; // 0 - alliance, 1 - horde
-        private int[] _flagsDropTimer = new int[2];
+        private readonly ObjectGuid[] _FlagKeepers = new ObjectGuid[2]; // 0 - alliance, 1 - horde
+        private readonly int[] _flagsDropTimer = new int[2];
         private int _flagSpellForceTimer;
-        private WSGFlagState[] _flagState = new WSGFlagState[2]; // for checking flag State
-        private int[] _flagsTimer = new int[2];
+        private readonly WSGFlagState[] _flagState = new WSGFlagState[2]; // for checking flag State
+        private readonly int[] _flagsTimer = new int[2];
         private uint _HonorEndKills;
         private uint _HonorWinKills;
         private uint _lastFlagCaptureTeam; // Winner is based on this if score is equal
 
         private uint _ReputationCapture;
 
-        private uint[][] Honor =
+        private readonly uint[][] Honor =
         {
             new uint[]
             {
@@ -657,7 +657,7 @@ namespace Game.BattleGrounds.Zones.WarsongGluch
 
         private void UpdateFlagState(Team team, WSGFlagState value)
         {
-            int transformValueToOtherTeamControlWorldState(WSGFlagState value)
+            static int transformValueToOtherTeamControlWorldState(WSGFlagState value)
             {
                 switch (value)
                 {

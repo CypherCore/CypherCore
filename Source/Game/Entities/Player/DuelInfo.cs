@@ -6,8 +6,8 @@ using Framework.Constants;
 namespace Game.Entities
 {
     public class DuelInfo
-	{
-		public Player Initiator { get; set; }
+    {
+        public Player Initiator { get; set; }
         public bool IsMounted { get; set; }
         public Player Opponent { get; set; }
         public long OutOfBoundsTime { get; set; }
@@ -15,10 +15,10 @@ namespace Game.Entities
         public DuelState State { get; set; }
 
         public DuelInfo(Player opponent, Player initiator, bool isMounted)
-		{
-			Opponent  = opponent;
-			Initiator = initiator;
-			IsMounted = isMounted;
-		}
-	}
+        {
+            Opponent = opponent;
+            Initiator = initiator;
+            IsMounted = isMounted;
+        }
+    }
 }
