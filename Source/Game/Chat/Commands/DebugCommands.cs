@@ -1156,7 +1156,7 @@ namespace Game.Chat
 
             // _singleSchoolModifiers
             {
-                var mods = mgr._singleSchoolModifiers;
+                var mods = mgr.SingleSchoolModifiers;
                 handler.SendSysMessage(" - Single-school threat modifiers:");
                 handler.SendSysMessage($" |-- Physical: {mods[(int)SpellSchools.Normal] * 100.0f:0.##}");
                 handler.SendSysMessage($" |-- Holy    : {mods[(int)SpellSchools.Holy] * 100.0f:0.##}");
@@ -1169,16 +1169,16 @@ namespace Game.Chat
 
             // _multiSchoolModifiers
             {
-                var mods = mgr._multiSchoolModifiers;
-                handler.SendSysMessage($"- Multi-school threat modifiers ({mods.Count} entries):");
+                handler.SendSysMessage($"- Multi-school threat modifiers ({mgr.MultiSchoolModifiers.Count} entries):");
 
-                foreach (var pair in mods)
-                    handler.SendSysMessage($" |-- Mask {pair.Key:X}: {pair.Value:0.XX}");
+                lock (mgr.MultiSchoolModifiers)
+                    foreach (var pair in mgr.MultiSchoolModifiers)
+                        handler.SendSysMessage($" |-- Mask {pair.Key:X}: {pair.Value:0.XX}");
             }
 
             // _redirectInfo
             {
-                var redirectInfo = mgr._redirectInfo;
+                var redirectInfo = mgr.RedirectInfo;
 
                 if (redirectInfo.Empty())
                 {
@@ -1198,7 +1198,7 @@ namespace Game.Chat
 
             // _redirectRegistry
             {
-                var redirectRegistry = mgr._redirectRegistry;
+                var redirectRegistry = mgr.RedirectRegistry;
 
                 if (redirectRegistry.Empty())
                 {
