@@ -49,40 +49,4 @@ namespace Game.Chat
         /// </summary>
         public RBACPermissions RBAC { get; set; }
     }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CommandGroupAttribute : CommandAttribute
-    {
-        public CommandGroupAttribute(string command) : base(command)
-        {
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Method)]
-    public class CommandNonGroupAttribute : CommandAttribute
-    {
-        public CommandNonGroupAttribute(string command, CypherStrings help, RBACPermissions rbac, bool allowConsole = false) : base(command, help, rbac, allowConsole)
-        {
-        }
-
-        public CommandNonGroupAttribute(string command, RBACPermissions rbac, bool allowConsole = false) : base(command, rbac, allowConsole)
-        {
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class OptionalArgAttribute : Attribute
-    {
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class VariantArgAttribute : Attribute
-    {
-        public VariantArgAttribute(params Type[] types)
-        {
-            Types = types;
-        }
-
-        public Type[] Types { get; set; }
-    }
 }

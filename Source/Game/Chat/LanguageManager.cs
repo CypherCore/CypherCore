@@ -13,7 +13,7 @@ namespace Game.Chat
 {
     public class LanguageManager : Singleton<LanguageManager>
     {
-        private static readonly uint[] s_hashtable =
+        private static readonly uint[] _hashtable =
         {
             0x486E26EE, 0xDCAA16B3, 0xE1918EEF, 0x202DAFDB, 0x341C7DC7, 0x1C365303, 0x40EF2D37, 0x65FD5E49, 0xD6057177, 0x904ECE93, 0x1C38024F, 0x98FD323B, 0xE3061AE7, 0xA39B0FA1, 0x9797F25F, 0xE4444563
         };
@@ -278,7 +278,7 @@ namespace Game.Chat
                 if (caseInsensitive)
                     c = upper_backslash(c);
 
-                seed = (s_hashtable[c >> 4] - s_hashtable[c & 0xF]) ^ (shift + seed);
+                seed = (_hashtable[c >> 4] - _hashtable[c & 0xF]) ^ (shift + seed);
                 shift = c + seed + 33 * shift + 3;
             }
 

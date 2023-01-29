@@ -13,8 +13,8 @@ namespace Game.Chat
 {
     public class ChannelManager
     {
-        private static readonly ChannelManager allianceChannelMgr = new(Team.Alliance);
-        private static readonly ChannelManager hordeChannelMgr = new(Team.Horde);
+        private static readonly ChannelManager _allianceChannelMgr = new(Team.Alliance);
+        private static readonly ChannelManager _hordeChannelMgr = new(Team.Horde);
         private readonly Dictionary<ObjectGuid, Channel> _channels = new();
 
         private readonly Dictionary<string, Channel> _customChannels = new();
@@ -100,13 +100,13 @@ namespace Game.Chat
         public static ChannelManager ForTeam(Team team)
         {
             if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionChannel))
-                return allianceChannelMgr; // cross-faction
+                return _allianceChannelMgr; // cross-faction
 
             if (team == Team.Alliance)
-                return allianceChannelMgr;
+                return _allianceChannelMgr;
 
             if (team == Team.Horde)
-                return hordeChannelMgr;
+                return _hordeChannelMgr;
 
             return null;
         }

@@ -18,7 +18,7 @@ namespace Game.Chat
 {
     public class CommandHandler
     {
-        private static readonly string[] spellKeys =
+        private static readonly string[] _spellKeys =
         {
             "Hspell",   // normal spell
 			"Htalent",  // talent spell
@@ -299,7 +299,7 @@ namespace Game.Chat
             // number or [Name] Shift-click form |color|Hspell:spell_id|h[Name]|h|r
             // number or [Name] Shift-click form |color|Htalent:talent_id, rank|h[Name]|h|r
             // number or [Name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[Name]|h|r
-            string idS = ExtractKeyFromLink(args, spellKeys, out int type, out string param1Str);
+            string idS = ExtractKeyFromLink(args, _spellKeys, out int type, out string param1Str);
 
             if (string.IsNullOrEmpty(idS))
                 return 0;
