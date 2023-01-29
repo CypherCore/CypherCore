@@ -74,14 +74,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             SetCombatMovement(false);
         }
 
-        private void Initialize()
-        {
-            _emergeTimer = 90000;
-            _hasYelledMagmaBurst = false;
-            _hasSubmergedOnce = false;
-            _isBanished = false;
-        }
-
         public override void Reset()
         {
             base.Reset();
@@ -322,6 +314,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 
                 DoMeleeAttackIfReady();
             }
+        }
+
+        private void Initialize()
+        {
+            _emergeTimer = 90000;
+            _hasYelledMagmaBurst = false;
+            _hasSubmergedOnce = false;
+            _isBanished = false;
         }
     }
 

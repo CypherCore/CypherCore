@@ -163,11 +163,6 @@ namespace Scripts.World.EmeraldDragons
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _roamTimer = 0;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -205,6 +200,11 @@ namespace Scripts.World.EmeraldDragons
                 _roamTimer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            _roamTimer = 0;
+        }
     }
 
     [Script]
@@ -215,11 +215,6 @@ namespace Scripts.World.EmeraldDragons
         public boss_ysondre(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            _stage = 1;
         }
 
         public override void Reset()
@@ -254,6 +249,11 @@ namespace Scripts.World.EmeraldDragons
                 ++_stage;
             }
         }
+
+        private void Initialize()
+        {
+            _stage = 1;
+        }
     }
 
     [Script]
@@ -264,11 +264,6 @@ namespace Scripts.World.EmeraldDragons
         public boss_lethon(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            _stage = 1;
         }
 
         public override void Reset()
@@ -308,6 +303,11 @@ namespace Scripts.World.EmeraldDragons
                 Position targetPos = target.GetPosition();
                 me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(50));
             }
+        }
+
+        private void Initialize()
+        {
+            _stage = 1;
         }
     }
 
@@ -352,11 +352,6 @@ namespace Scripts.World.EmeraldDragons
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _stage = 1;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -393,6 +388,11 @@ namespace Scripts.World.EmeraldDragons
                 ++_stage;
             }
         }
+
+        private void Initialize()
+        {
+            _stage = 1;
+        }
     }
 
     [Script]
@@ -406,14 +406,6 @@ namespace Scripts.World.EmeraldDragons
         public boss_taerar(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            _stage = 1;
-            _shades = 0;
-            _banished = false;
-            _banishedTimer = 0;
         }
 
         public override void Reset()
@@ -508,12 +500,25 @@ namespace Scripts.World.EmeraldDragons
 
             base.UpdateAI(diff);
         }
+
+        private void Initialize()
+        {
+            _stage = 1;
+            _shades = 0;
+            _banished = false;
+            _banishedTimer = 0;
+        }
     }
 
     [Script] // 24778 - Sleep
     internal class spell_dream_fog_sleep_SpellScript : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+        }
 
         private void FilterTargets(List<WorldObject> targets)
         {
@@ -527,11 +532,6 @@ namespace Scripts.World.EmeraldDragons
                                   return true;
                               });
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-        }
     }
 
     [Script] // 25042 - Triggerspell - Mark of Nature
@@ -542,6 +542,12 @@ namespace Scripts.World.EmeraldDragons
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MarkOfNature, SpellIds.AuraOfNature);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
 
         private void FilterTargets(List<WorldObject> targets)
@@ -562,12 +568,6 @@ namespace Scripts.World.EmeraldDragons
         {
             PreventHitDefaultEffect(effIndex);
             GetHitUnit().CastSpell(GetHitUnit(), SpellIds.AuraOfNature, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            SpellEffects.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

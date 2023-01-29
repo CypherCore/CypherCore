@@ -143,47 +143,6 @@ namespace Game
             RemoveEvent(calendarEvent, remover);
         }
 
-        private void RemoveEvent(CalendarEvent calendarEvent, ObjectGuid remover)
-        {
-            if (calendarEvent == null)
-            {
-                SendCalendarCommandResult(remover, CalendarError.EventInvalid);
-
-                return;
-            }
-
-            SendCalendarEventRemovedAlert(calendarEvent);
-
-            SQLTransaction trans = new();
-            PreparedStatement stmt;
-            MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody());
-
-            var eventInvites = _invites[calendarEvent.EventId];
-
-            for (int i = 0; i < eventInvites.Count; ++i)
-            {
-                CalendarInvite invite = eventInvites[i];
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
-                stmt.AddValue(0, invite.InviteId);
-                trans.Append(stmt);
-
-                // guild events only? check invite status here?
-                // When an event is deleted, all invited (accepted/declined? - verify) guildies are notified via in-game mail. (wowwiki)
-                if (!remover.IsEmpty() &&
-                    invite.InviteeGuid != remover)
-                    mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied);
-            }
-
-            _invites.Remove(calendarEvent.EventId);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_EVENT);
-            stmt.AddValue(0, calendarEvent.EventId);
-            trans.Append(stmt);
-            DB.Characters.CommitTransaction(trans);
-
-            _events.Remove(calendarEvent);
-        }
-
         public void RemoveInvite(ulong inviteId, ulong eventId, ObjectGuid remover)
         {
             CalendarEvent calendarEvent = GetEvent(eventId);
@@ -306,14 +265,6 @@ namespace Game
             Log.outDebug(LogFilter.Calendar, "CalendarMgr:GetInvite: {0} not found!", inviteId);
 
             return null;
-        }
-
-        private void FreeEventId(ulong id)
-        {
-            if (id == _maxEventId)
-                --_maxEventId;
-            else
-                _freeEventIds.Add(id);
         }
 
         public ulong GetFreeEventId()
@@ -508,27 +459,6 @@ namespace Game
             SendPacketToAllEventRelatives(packet, calendarEvent);
         }
 
-        private void SendCalendarEventRemovedAlert(CalendarEvent calendarEvent)
-        {
-            CalendarEventRemovedAlert packet = new();
-            packet.ClearPending = true; // FIXME
-            packet.Date = calendarEvent.Date;
-            packet.EventID = calendarEvent.EventId;
-
-            SendPacketToAllEventRelatives(packet, calendarEvent);
-        }
-
-        private void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
-        {
-            CalendarInviteRemoved packet = new();
-            packet.ClearPending = true; // FIXME
-            packet.EventID = calendarEvent.EventId;
-            packet.Flags = flags;
-            packet.InviteGuid = invite.InviteeGuid;
-
-            SendPacketToAllEventRelatives(packet, calendarEvent);
-        }
-
         public void SendCalendarEventModeratorStatusAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
             CalendarModeratorStatus packet = new();
@@ -538,41 +468,6 @@ namespace Game
             packet.Status = invite.Status;
 
             SendPacketToAllEventRelatives(packet, calendarEvent);
-        }
-
-        private void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
-        {
-            CalendarInviteAlert packet = new();
-            packet.Date = calendarEvent.Date;
-            packet.EventID = calendarEvent.EventId;
-            packet.EventName = calendarEvent.Title;
-            packet.EventType = calendarEvent.EventType;
-            packet.Flags = calendarEvent.Flags;
-            packet.InviteID = invite.InviteId;
-            packet.InvitedByGuid = invite.SenderGuid;
-            packet.ModeratorStatus = invite.Rank;
-            packet.OwnerGuid = calendarEvent.OwnerGuid;
-            packet.Status = invite.Status;
-            packet.TextureID = calendarEvent.TextureId;
-
-            Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-            packet.EventGuildID = guild ? guild.GetGUID() : ObjectGuid.Empty;
-
-            if (calendarEvent.IsGuildEvent() ||
-                calendarEvent.IsGuildAnnouncement())
-            {
-                guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
-
-                if (guild)
-                    guild.BroadcastPacket(packet);
-            }
-            else
-            {
-                Player player = Global.ObjAccessor.FindPlayer(invite.InviteeGuid);
-
-                if (player)
-                    player.SendPacket(packet);
-            }
         }
 
         public void SendCalendarEvent(ObjectGuid guid, CalendarEvent calendarEvent, CalendarSendEventType sendType)
@@ -623,22 +518,6 @@ namespace Game
             player.SendPacket(packet);
         }
 
-        private void SendCalendarEventInviteRemoveAlert(ObjectGuid guid, CalendarEvent calendarEvent, CalendarInviteStatus status)
-        {
-            Player player = Global.ObjAccessor.FindPlayer(guid);
-
-            if (player)
-            {
-                CalendarInviteRemovedAlert packet = new();
-                packet.Date = calendarEvent.Date;
-                packet.EventID = calendarEvent.EventId;
-                packet.Flags = calendarEvent.Flags;
-                packet.Status = status;
-
-                player.SendPacket(packet);
-            }
-        }
-
         public void SendCalendarClearPendingAction(ObjectGuid guid)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -666,6 +545,127 @@ namespace Game
 
                         break;
                 }
+
+                player.SendPacket(packet);
+            }
+        }
+
+        private void RemoveEvent(CalendarEvent calendarEvent, ObjectGuid remover)
+        {
+            if (calendarEvent == null)
+            {
+                SendCalendarCommandResult(remover, CalendarError.EventInvalid);
+
+                return;
+            }
+
+            SendCalendarEventRemovedAlert(calendarEvent);
+
+            SQLTransaction trans = new();
+            PreparedStatement stmt;
+            MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody());
+
+            var eventInvites = _invites[calendarEvent.EventId];
+
+            for (int i = 0; i < eventInvites.Count; ++i)
+            {
+                CalendarInvite invite = eventInvites[i];
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
+                stmt.AddValue(0, invite.InviteId);
+                trans.Append(stmt);
+
+                // guild events only? check invite status here?
+                // When an event is deleted, all invited (accepted/declined? - verify) guildies are notified via in-game mail. (wowwiki)
+                if (!remover.IsEmpty() &&
+                    invite.InviteeGuid != remover)
+                    mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied);
+            }
+
+            _invites.Remove(calendarEvent.EventId);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_EVENT);
+            stmt.AddValue(0, calendarEvent.EventId);
+            trans.Append(stmt);
+            DB.Characters.CommitTransaction(trans);
+
+            _events.Remove(calendarEvent);
+        }
+
+        private void FreeEventId(ulong id)
+        {
+            if (id == _maxEventId)
+                --_maxEventId;
+            else
+                _freeEventIds.Add(id);
+        }
+
+        private void SendCalendarEventRemovedAlert(CalendarEvent calendarEvent)
+        {
+            CalendarEventRemovedAlert packet = new();
+            packet.ClearPending = true; // FIXME
+            packet.Date = calendarEvent.Date;
+            packet.EventID = calendarEvent.EventId;
+
+            SendPacketToAllEventRelatives(packet, calendarEvent);
+        }
+
+        private void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
+        {
+            CalendarInviteRemoved packet = new();
+            packet.ClearPending = true; // FIXME
+            packet.EventID = calendarEvent.EventId;
+            packet.Flags = flags;
+            packet.InviteGuid = invite.InviteeGuid;
+
+            SendPacketToAllEventRelatives(packet, calendarEvent);
+        }
+
+        private void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
+        {
+            CalendarInviteAlert packet = new();
+            packet.Date = calendarEvent.Date;
+            packet.EventID = calendarEvent.EventId;
+            packet.EventName = calendarEvent.Title;
+            packet.EventType = calendarEvent.EventType;
+            packet.Flags = calendarEvent.Flags;
+            packet.InviteID = invite.InviteId;
+            packet.InvitedByGuid = invite.SenderGuid;
+            packet.ModeratorStatus = invite.Rank;
+            packet.OwnerGuid = calendarEvent.OwnerGuid;
+            packet.Status = invite.Status;
+            packet.TextureID = calendarEvent.TextureId;
+
+            Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
+            packet.EventGuildID = guild ? guild.GetGUID() : ObjectGuid.Empty;
+
+            if (calendarEvent.IsGuildEvent() ||
+                calendarEvent.IsGuildAnnouncement())
+            {
+                guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
+
+                if (guild)
+                    guild.BroadcastPacket(packet);
+            }
+            else
+            {
+                Player player = Global.ObjAccessor.FindPlayer(invite.InviteeGuid);
+
+                if (player)
+                    player.SendPacket(packet);
+            }
+        }
+
+        private void SendCalendarEventInviteRemoveAlert(ObjectGuid guid, CalendarEvent calendarEvent, CalendarInviteStatus status)
+        {
+            Player player = Global.ObjAccessor.FindPlayer(guid);
+
+            if (player)
+            {
+                CalendarInviteRemovedAlert packet = new();
+                packet.Date = calendarEvent.Date;
+                packet.EventID = calendarEvent.EventId;
+                packet.Flags = calendarEvent.Flags;
+                packet.Status = status;
 
                 player.SendPacket(packet);
             }

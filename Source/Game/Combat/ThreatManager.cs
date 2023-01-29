@@ -15,24 +15,17 @@ namespace Game.Combat
     public class ThreatManager
     {
         public static uint THREAT_UPDATE_INTERVAL = 1000u;
-        private ThreatReference _currentVictimRef;
-        private ThreatReference _fixateRef;
-        public Dictionary<SpellSchoolMask, float> MultiSchoolModifiers { get; set; } = new(); // these are calculated on demand
+
+        public bool NeedClientUpdate;
         private readonly Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
         private readonly List<ThreatReference> _needsAIUpdate = new();
-
-        public Unit Owner { get; set; }
-        private bool _ownerCanHaveThreatList;
-
-        public List<Tuple<ObjectGuid, uint>> RedirectInfo { get; set; } = new();                      // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
-        public Dictionary<uint, Dictionary<ObjectGuid, uint>> RedirectRegistry { get; set; } = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
-        public float[] SingleSchoolModifiers { get; set; } = new float[(int)SpellSchools.Max];        // most spells are single school - we pre-calculate these and store them
         private readonly List<ThreatReference> _sortedThreatList = new();
 
         private readonly Dictionary<ObjectGuid, ThreatReference> _threatenedByMe = new(); // these refs are entries for myself on other units' threat lists
+        private ThreatReference _currentVictimRef;
+        private ThreatReference _fixateRef;
+        private bool _ownerCanHaveThreatList;
         private uint _updateTimer;
-
-        public bool NeedClientUpdate;
 
         public ThreatManager(Unit owner)
         {
@@ -42,6 +35,14 @@ namespace Game.Combat
             for (var i = 0; i < (int)SpellSchools.Max; ++i)
                 SingleSchoolModifiers[i] = 1.0f;
         }
+
+        public Dictionary<SpellSchoolMask, float> MultiSchoolModifiers { get; set; } = new(); // these are calculated on demand
+
+        public Unit Owner { get; set; }
+
+        public List<Tuple<ObjectGuid, uint>> RedirectInfo { get; set; } = new();                      // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
+        public Dictionary<uint, Dictionary<ObjectGuid, uint>> RedirectRegistry { get; set; } = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
+        public float[] SingleSchoolModifiers { get; set; } = new float[(int)SpellSchools.Max];        // most spells are single school - we pre-calculate these and store them
 
         public static bool CanHaveThreatList(Unit who)
         {
@@ -349,13 +350,6 @@ namespace Game.Combat
                 ProcessAIUpdates();
         }
 
-        private void ScaleThreat(Unit target, float factor)
-        {
-            var refe = _myThreatListEntries.LookupByKey(target.GetGUID());
-
-            refe?.ScaleThreat(Math.Max(factor, 0.0f));
-        }
-
         public void MatchUnitThreatToHighestThreat(Unit target)
         {
             if (_sortedThreatList.Empty())
@@ -465,102 +459,6 @@ namespace Game.Combat
         public void ClearFixate()
         {
             FixateTarget(null);
-        }
-
-        private void UpdateVictim()
-        {
-            ThreatReference newVictim = ReselectVictim();
-            bool newHighest = newVictim != null && (newVictim != _currentVictimRef);
-
-            _currentVictimRef = newVictim;
-
-            if (newHighest || NeedClientUpdate)
-            {
-                SendThreatListToClients(newHighest);
-                NeedClientUpdate = false;
-            }
-
-            ProcessAIUpdates();
-        }
-
-        private ThreatReference ReselectVictim()
-        {
-            if (_sortedThreatList.Empty())
-                return null;
-
-            foreach (var pair in _myThreatListEntries)
-                pair.Value.UpdateOffline(); // AI notifies are processed in ::UpdateVictim caller
-
-            // fixated Target is always preferred
-            if (_fixateRef != null &&
-                _fixateRef.IsAvailable())
-                return _fixateRef;
-
-            ThreatReference oldVictimRef = _currentVictimRef;
-
-            if (oldVictimRef != null &&
-                oldVictimRef.IsOffline())
-                oldVictimRef = null;
-
-            // in 99% of cases - we won't need to actually look at anything beyond the first element
-            ThreatReference highest = _sortedThreatList.First();
-
-            // if the highest reference is offline, the entire list is offline, and we indicate this
-            if (!highest.IsAvailable())
-                return null;
-
-            // if we have no old victim, or old victim is still highest, then highest is our Target and we're done
-            if (oldVictimRef == null ||
-                highest == oldVictimRef)
-                return highest;
-
-            // if highest threat doesn't break 110% of old victim, nothing below it is going to do so either; new victim = old victim and done
-            if (!CompareReferencesLT(oldVictimRef, highest, 1.1f))
-                return oldVictimRef;
-
-            // if highest threat breaks 130%, it's our new Target regardless of range (and we're done)
-            if (CompareReferencesLT(oldVictimRef, highest, 1.3f))
-                return highest;
-
-            // if it doesn't break 130%, we need to check if it's melee - if yes, it breaks 110% (we checked earlier) and is our new Target
-            if (Owner.IsWithinMeleeRange(highest.GetVictim()))
-                return highest;
-
-            // If we get here, highest threat is ranged, but below 130% of current - there might be a melee that breaks 110% below us somewhere, so now we need to actually look at the next highest element
-            // luckily, this is a heap, so getting the next highest element is O(log n), and we're just gonna do that repeatedly until we've seen enough targets (or find a Target)
-            foreach (var next in _sortedThreatList)
-            {
-                // if we've found current victim, we're done (nothing above is higher, and nothing below can be higher)
-                if (next == oldVictimRef)
-                    return next;
-
-                // if next isn't above 110% threat, then nothing below it can be either - we're done, old victim stays
-                if (!CompareReferencesLT(oldVictimRef, next, 1.1f))
-                    return oldVictimRef;
-
-                // if next is melee, he's above 110% and our new victim
-                if (Owner.IsWithinMeleeRange(next.GetVictim()))
-                    return next;
-
-                // otherwise the next highest Target may still be a melee above 110% and we need to look further
-            }
-
-            // we should have found the old victim at some point in the loop above, so execution should never get to this point
-            Cypher.Assert(false, "Current victim not found in sorted threat list even though it has a reference - manager desync!");
-
-            return null;
-        }
-
-        private void ProcessAIUpdates()
-        {
-            CreatureAI ai = Owner.ToCreature().GetAI();
-            List<ThreatReference> v = new(_needsAIUpdate); // _needClientUpdate is now empty in case this triggers a recursive call
-
-            if (ai == null)
-                return;
-
-            foreach (ThreatReference refe in v)
-                ai.JustStartedThreateningMe(refe.GetVictim());
         }
 
         // returns true if a is LOWER on the threat list than b
@@ -731,72 +629,12 @@ namespace Game.Combat
                 UpdateRedirectInfo();
         }
 
-        private void UnregisterRedirectThreat(uint spellId, ObjectGuid victim)
-        {
-            var victimMap = RedirectRegistry.LookupByKey(spellId);
-
-            if (victimMap == null)
-                return;
-
-            if (victimMap.Remove(victim))
-                UpdateRedirectInfo();
-        }
-
-        private void SendClearAllThreatToClients()
-        {
-            ThreatClear threatClear = new();
-            threatClear.UnitGUID = Owner.GetGUID();
-            Owner.SendMessageToSet(threatClear, false);
-        }
-
         public void SendRemoveToClients(Unit victim)
         {
             ThreatRemove threatRemove = new();
             threatRemove.UnitGUID = Owner.GetGUID();
             threatRemove.AboutGUID = victim.GetGUID();
             Owner.SendMessageToSet(threatRemove, false);
-        }
-
-        private void SendThreatListToClients(bool newHighest)
-        {
-            void fillSharedPacketDataAndSend(dynamic packet)
-            {
-                packet.UnitGUID = Owner.GetGUID();
-
-                foreach (ThreatReference refe in _sortedThreatList)
-                {
-                    if (!refe.IsAvailable())
-                        continue;
-
-                    ThreatInfo threatInfo = new();
-                    threatInfo.UnitGUID = refe.GetVictim().GetGUID();
-                    threatInfo.Threat = (long)(refe.GetThreat() * 100);
-                    packet.ThreatList.Add(threatInfo);
-                }
-
-                Owner.SendMessageToSet(packet, false);
-            }
-
-            if (newHighest)
-            {
-                HighestThreatUpdate highestThreatUpdate = new();
-                highestThreatUpdate.HighestThreatGUID = _currentVictimRef.GetVictim().GetGUID();
-                fillSharedPacketDataAndSend(highestThreatUpdate);
-            }
-            else
-            {
-                ThreatUpdate threatUpdate = new();
-                fillSharedPacketDataAndSend(threatUpdate);
-            }
-        }
-
-        private void PutThreatListRef(ObjectGuid guid, ThreatReference refe)
-        {
-            NeedClientUpdate = true;
-            Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {Owner.GetGUID()} for {guid}!");
-            _myThreatListEntries[guid] = refe;
-            _sortedThreatList.Add(refe);
-            _sortedThreatList.Sort();
         }
 
         public void PurgeThreatListRef(ObjectGuid guid)
@@ -816,45 +654,9 @@ namespace Game.Combat
                 _currentVictimRef = null;
         }
 
-        private void PutThreatenedByMeRef(ObjectGuid guid, ThreatReference refe)
-        {
-            Cypher.Assert(!_threatenedByMe.ContainsKey(guid), $"Duplicate threatened-by-me reference being inserted on {Owner.GetGUID()} for {guid}!");
-            _threatenedByMe[guid] = refe;
-        }
-
         public void PurgeThreatenedByMeRef(ObjectGuid guid)
         {
             _threatenedByMe.Remove(guid);
-        }
-
-        private void UpdateRedirectInfo()
-        {
-            RedirectInfo.Clear();
-            uint totalPct = 0;
-
-            foreach (var pair in RedirectRegistry) // (spellid, victim . pct)
-            {
-                foreach (var victimPair in pair.Value) // (victim,pct)
-                {
-                    uint thisPct = Math.Min(100 - totalPct, victimPair.Value);
-
-                    if (thisPct > 0)
-                    {
-                        RedirectInfo.Add(Tuple.Create(victimPair.Key, thisPct));
-                        totalPct += thisPct;
-                        Cypher.Assert(totalPct <= 100);
-
-                        if (totalPct == 100)
-                            return;
-                    }
-                }
-            }
-        }
-
-        // never nullptr
-        private Unit GetOwner()
-        {
-            return Owner;
         }
 
         // can our owner have a threat list?
@@ -901,6 +703,205 @@ namespace Game.Combat
         public void RegisterForAIUpdate(ThreatReference refe)
         {
             _needsAIUpdate.Add(refe);
+        }
+
+        private void ScaleThreat(Unit target, float factor)
+        {
+            var refe = _myThreatListEntries.LookupByKey(target.GetGUID());
+
+            refe?.ScaleThreat(Math.Max(factor, 0.0f));
+        }
+
+        private void UpdateVictim()
+        {
+            ThreatReference newVictim = ReselectVictim();
+            bool newHighest = newVictim != null && (newVictim != _currentVictimRef);
+
+            _currentVictimRef = newVictim;
+
+            if (newHighest || NeedClientUpdate)
+            {
+                SendThreatListToClients(newHighest);
+                NeedClientUpdate = false;
+            }
+
+            ProcessAIUpdates();
+        }
+
+        private ThreatReference ReselectVictim()
+        {
+            if (_sortedThreatList.Empty())
+                return null;
+
+            foreach (var pair in _myThreatListEntries)
+                pair.Value.UpdateOffline(); // AI notifies are processed in ::UpdateVictim caller
+
+            // fixated Target is always preferred
+            if (_fixateRef != null &&
+                _fixateRef.IsAvailable())
+                return _fixateRef;
+
+            ThreatReference oldVictimRef = _currentVictimRef;
+
+            if (oldVictimRef != null &&
+                oldVictimRef.IsOffline())
+                oldVictimRef = null;
+
+            // in 99% of cases - we won't need to actually look at anything beyond the first element
+            ThreatReference highest = _sortedThreatList.First();
+
+            // if the highest reference is offline, the entire list is offline, and we indicate this
+            if (!highest.IsAvailable())
+                return null;
+
+            // if we have no old victim, or old victim is still highest, then highest is our Target and we're done
+            if (oldVictimRef == null ||
+                highest == oldVictimRef)
+                return highest;
+
+            // if highest threat doesn't break 110% of old victim, nothing below it is going to do so either; new victim = old victim and done
+            if (!CompareReferencesLT(oldVictimRef, highest, 1.1f))
+                return oldVictimRef;
+
+            // if highest threat breaks 130%, it's our new Target regardless of range (and we're done)
+            if (CompareReferencesLT(oldVictimRef, highest, 1.3f))
+                return highest;
+
+            // if it doesn't break 130%, we need to check if it's melee - if yes, it breaks 110% (we checked earlier) and is our new Target
+            if (Owner.IsWithinMeleeRange(highest.GetVictim()))
+                return highest;
+
+            // If we get here, highest threat is ranged, but below 130% of current - there might be a melee that breaks 110% below us somewhere, so now we need to actually look at the next highest element
+            // luckily, this is a heap, so getting the next highest element is O(log n), and we're just gonna do that repeatedly until we've seen enough targets (or find a Target)
+            foreach (var next in _sortedThreatList)
+            {
+                // if we've found current victim, we're done (nothing above is higher, and nothing below can be higher)
+                if (next == oldVictimRef)
+                    return next;
+
+                // if next isn't above 110% threat, then nothing below it can be either - we're done, old victim stays
+                if (!CompareReferencesLT(oldVictimRef, next, 1.1f))
+                    return oldVictimRef;
+
+                // if next is melee, he's above 110% and our new victim
+                if (Owner.IsWithinMeleeRange(next.GetVictim()))
+                    return next;
+
+                // otherwise the next highest Target may still be a melee above 110% and we need to look further
+            }
+
+            // we should have found the old victim at some point in the loop above, so execution should never get to this point
+            Cypher.Assert(false, "Current victim not found in sorted threat list even though it has a reference - manager desync!");
+
+            return null;
+        }
+
+        private void ProcessAIUpdates()
+        {
+            CreatureAI ai = Owner.ToCreature().GetAI();
+            List<ThreatReference> v = new(_needsAIUpdate); // _needClientUpdate is now empty in case this triggers a recursive call
+
+            if (ai == null)
+                return;
+
+            foreach (ThreatReference refe in v)
+                ai.JustStartedThreateningMe(refe.GetVictim());
+        }
+
+        private void UnregisterRedirectThreat(uint spellId, ObjectGuid victim)
+        {
+            var victimMap = RedirectRegistry.LookupByKey(spellId);
+
+            if (victimMap == null)
+                return;
+
+            if (victimMap.Remove(victim))
+                UpdateRedirectInfo();
+        }
+
+        private void SendClearAllThreatToClients()
+        {
+            ThreatClear threatClear = new();
+            threatClear.UnitGUID = Owner.GetGUID();
+            Owner.SendMessageToSet(threatClear, false);
+        }
+
+        private void SendThreatListToClients(bool newHighest)
+        {
+            void fillSharedPacketDataAndSend(dynamic packet)
+            {
+                packet.UnitGUID = Owner.GetGUID();
+
+                foreach (ThreatReference refe in _sortedThreatList)
+                {
+                    if (!refe.IsAvailable())
+                        continue;
+
+                    ThreatInfo threatInfo = new();
+                    threatInfo.UnitGUID = refe.GetVictim().GetGUID();
+                    threatInfo.Threat = (long)(refe.GetThreat() * 100);
+                    packet.ThreatList.Add(threatInfo);
+                }
+
+                Owner.SendMessageToSet(packet, false);
+            }
+
+            if (newHighest)
+            {
+                HighestThreatUpdate highestThreatUpdate = new();
+                highestThreatUpdate.HighestThreatGUID = _currentVictimRef.GetVictim().GetGUID();
+                fillSharedPacketDataAndSend(highestThreatUpdate);
+            }
+            else
+            {
+                ThreatUpdate threatUpdate = new();
+                fillSharedPacketDataAndSend(threatUpdate);
+            }
+        }
+
+        private void PutThreatListRef(ObjectGuid guid, ThreatReference refe)
+        {
+            NeedClientUpdate = true;
+            Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {Owner.GetGUID()} for {guid}!");
+            _myThreatListEntries[guid] = refe;
+            _sortedThreatList.Add(refe);
+            _sortedThreatList.Sort();
+        }
+
+        private void PutThreatenedByMeRef(ObjectGuid guid, ThreatReference refe)
+        {
+            Cypher.Assert(!_threatenedByMe.ContainsKey(guid), $"Duplicate threatened-by-me reference being inserted on {Owner.GetGUID()} for {guid}!");
+            _threatenedByMe[guid] = refe;
+        }
+
+        private void UpdateRedirectInfo()
+        {
+            RedirectInfo.Clear();
+            uint totalPct = 0;
+
+            foreach (var pair in RedirectRegistry) // (spellid, victim . pct)
+            {
+                foreach (var victimPair in pair.Value) // (victim,pct)
+                {
+                    uint thisPct = Math.Min(100 - totalPct, victimPair.Value);
+
+                    if (thisPct > 0)
+                    {
+                        RedirectInfo.Add(Tuple.Create(victimPair.Key, thisPct));
+                        totalPct += thisPct;
+                        Cypher.Assert(totalPct <= 100);
+
+                        if (totalPct == 100)
+                            return;
+                    }
+                }
+            }
+        }
+
+        // never nullptr
+        private Unit GetOwner()
+        {
+            return Owner;
         }
     }
 }

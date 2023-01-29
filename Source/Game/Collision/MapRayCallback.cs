@@ -9,9 +9,9 @@ namespace Game.Collision
     public class MapRayCallback : WorkerCallback
     {
         private readonly ModelIgnoreFlags _flags;
-        private bool _hit;
 
         private readonly ModelInstance[] _prims;
+        private bool _hit;
 
         public MapRayCallback(ModelInstance[] val, ModelIgnoreFlags ignoreFlags)
         {

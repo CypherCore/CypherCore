@@ -15,6 +15,108 @@ namespace Game.Chat.Commands
     [CommandGroup("go")]
     internal class GoCommands
     {
+        [CommandGroup("creature")]
+        private class GoCommandCreature
+        {
+            [Command("", RBACPermissions.CommandGo)]
+            private static bool HandleGoCreatureSpawnIdCommand(CommandHandler handler, ulong spawnId)
+            {
+                CreatureData spawnpoint = Global.ObjectMgr.GetCreatureData(spawnId);
+
+                if (spawnpoint == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
+
+                    return false;
+                }
+
+                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
+            }
+
+            [Command("Id", RBACPermissions.CommandGo)]
+            private static bool HandleGoCreatureCIdCommand(CommandHandler handler, uint id)
+            {
+                CreatureData spawnpoint = null;
+
+                foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
+                {
+                    if (pair.Value.Id != id)
+                        continue;
+
+                    if (spawnpoint == null)
+                    {
+                        spawnpoint = pair.Value;
+                    }
+                    else
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
+
+                        break;
+                    }
+                }
+
+                if (spawnpoint == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
+
+                    return false;
+                }
+
+                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
+            }
+        }
+
+        [CommandGroup("gameobject")]
+        private class GoCommandGameobject
+        {
+            [Command("", RBACPermissions.CommandGo)]
+            private static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, ulong spawnId)
+            {
+                GameObjectData spawnpoint = Global.ObjectMgr.GetGameObjectData(spawnId);
+
+                if (spawnpoint == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
+
+                    return false;
+                }
+
+                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
+            }
+
+            [Command("Id", RBACPermissions.CommandGo)]
+            private static bool HandleGoGameObjectGOIdCommand(CommandHandler handler, uint goId)
+            {
+                GameObjectData spawnpoint = null;
+
+                foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
+                {
+                    if (pair.Value.Id != goId)
+                        continue;
+
+                    if (spawnpoint == null)
+                    {
+                        spawnpoint = pair.Value;
+                    }
+                    else
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
+
+                        break;
+                    }
+                }
+
+                if (spawnpoint == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
+
+                    return false;
+                }
+
+                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
+            }
+        }
+
         [Command("areatrigger", RBACPermissions.CommandGo)]
         private static bool HandleGoAreaTriggerCommand(CommandHandler handler, uint areaTriggerId)
         {
@@ -549,108 +651,6 @@ namespace Game.Chat.Commands
             player.TeleportTo(new WorldLocation(mapId, pos));
 
             return true;
-        }
-
-        [CommandGroup("creature")]
-        private class GoCommandCreature
-        {
-            [Command("", RBACPermissions.CommandGo)]
-            private static bool HandleGoCreatureSpawnIdCommand(CommandHandler handler, ulong spawnId)
-            {
-                CreatureData spawnpoint = Global.ObjectMgr.GetCreatureData(spawnId);
-
-                if (spawnpoint == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
-
-                    return false;
-                }
-
-                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
-            }
-
-            [Command("Id", RBACPermissions.CommandGo)]
-            private static bool HandleGoCreatureCIdCommand(CommandHandler handler, uint id)
-            {
-                CreatureData spawnpoint = null;
-
-                foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
-                {
-                    if (pair.Value.Id != id)
-                        continue;
-
-                    if (spawnpoint == null)
-                    {
-                        spawnpoint = pair.Value;
-                    }
-                    else
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
-
-                        break;
-                    }
-                }
-
-                if (spawnpoint == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
-
-                    return false;
-                }
-
-                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
-            }
-        }
-
-        [CommandGroup("gameobject")]
-        private class GoCommandGameobject
-        {
-            [Command("", RBACPermissions.CommandGo)]
-            private static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, ulong spawnId)
-            {
-                GameObjectData spawnpoint = Global.ObjectMgr.GetGameObjectData(spawnId);
-
-                if (spawnpoint == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
-
-                    return false;
-                }
-
-                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
-            }
-
-            [Command("Id", RBACPermissions.CommandGo)]
-            private static bool HandleGoGameObjectGOIdCommand(CommandHandler handler, uint goId)
-            {
-                GameObjectData spawnpoint = null;
-
-                foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
-                {
-                    if (pair.Value.Id != goId)
-                        continue;
-
-                    if (spawnpoint == null)
-                    {
-                        spawnpoint = pair.Value;
-                    }
-                    else
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
-
-                        break;
-                    }
-                }
-
-                if (spawnpoint == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
-
-                    return false;
-                }
-
-                return DoTeleport(handler, spawnpoint.SpawnPoint, spawnpoint.MapId);
-            }
         }
     }
 }

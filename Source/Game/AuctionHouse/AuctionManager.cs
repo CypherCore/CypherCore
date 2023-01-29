@@ -19,9 +19,40 @@ namespace Game
 {
     public class AuctionManager : Singleton<AuctionManager>
     {
+        private class PendingAuctionInfo
+        {
+            public uint AuctionHouseId;
+            public uint AuctionId;
+            public ulong Deposit;
+
+            public PendingAuctionInfo(uint auctionId, uint auctionHouseId, ulong deposit)
+            {
+                AuctionId = auctionId;
+                AuctionHouseId = auctionHouseId;
+                Deposit = deposit;
+            }
+        }
+
+        private class PlayerPendingAuctions
+        {
+            public List<PendingAuctionInfo> Auctions = new();
+            public int LastAuctionsSize;
+        }
+
+        private class PlayerThrottleObject
+        {
+            public DateTime PeriodEnd;
+            public byte QueriesRemaining = 100;
+        }
+
         private const int MIN_AUCTION_TIME = 12 * Time.Hour;
+        private readonly AuctionHouseObject _allianceAuctions;
+        private readonly AuctionHouseObject _goblinAuctions;
+
+        private readonly AuctionHouseObject _hordeAuctions;
 
         private readonly Dictionary<ObjectGuid, Item> _itemsByGuid = new();
+        private readonly AuctionHouseObject _neutralAuctions;
 
         private readonly Dictionary<ObjectGuid, PlayerPendingAuctions> _pendingAuctionsByPlayer = new();
 
@@ -29,11 +60,6 @@ namespace Game
         private DateTime _playerThrottleObjectsCleanupTime;
 
         private uint _replicateIdGenerator;
-        private readonly AuctionHouseObject _allianceAuctions;
-        private readonly AuctionHouseObject _goblinAuctions;
-
-        private readonly AuctionHouseObject _hordeAuctions;
-        private readonly AuctionHouseObject _neutralAuctions;
 
         private AuctionManager()
         {
@@ -523,36 +549,44 @@ namespace Game
 
             return CliDB.AuctionHouseStorage.LookupByKey(houseid);
         }
-
-        private class PendingAuctionInfo
-        {
-            public uint AuctionHouseId;
-            public uint AuctionId;
-            public ulong Deposit;
-
-            public PendingAuctionInfo(uint auctionId, uint auctionHouseId, ulong deposit)
-            {
-                AuctionId = auctionId;
-                AuctionHouseId = auctionHouseId;
-                Deposit = deposit;
-            }
-        }
-
-        private class PlayerPendingAuctions
-        {
-            public List<PendingAuctionInfo> Auctions = new();
-            public int LastAuctionsSize;
-        }
-
-        private class PlayerThrottleObject
-        {
-            public DateTime PeriodEnd;
-            public byte QueriesRemaining = 100;
-        }
     }
 
     public class AuctionHouseObject
     {
+        private class PlayerReplicateThrottleData
+        {
+            public uint Cursor;
+            public uint Global;
+            public DateTime NextAllowedReplication = DateTime.MinValue;
+            public uint Tombstone;
+
+            public bool IsReplicationInProgress()
+            {
+                return Cursor != Tombstone && Global != 0;
+            }
+        }
+
+        private class MailedItemsBatch
+        {
+            public Item[] Items = new Item[SharedConst.MaxMailItems];
+
+            public int ItemsCount;
+            public uint Quantity;
+            public ulong TotalPrice;
+
+            public bool IsFull()
+            {
+                return ItemsCount >= Items.Length;
+            }
+
+            public void AddItem(Item item, ulong unitPrice)
+            {
+                Items[ItemsCount++] = item;
+                Quantity += item.GetCount();
+                TotalPrice += unitPrice * item.GetCount();
+            }
+        }
+
         private readonly AuctionHouseRecord _auctionHouse;
         private readonly SortedDictionary<AuctionsBucketKey, AuctionsBucketData> _buckets = new(); // ordered for search by itemid only
         private readonly Dictionary<ObjectGuid, CommodityQuote> _commodityQuotes = new();
@@ -902,7 +936,7 @@ namespace Game
             //todo fix me
             //if (knownPetSpecies.Length < CliDB.BattlePetSpeciesStorage.GetNumRows())
             //knownPetSpecies.resize(CliDB.BattlePetSpeciesStorage.GetNumRows());
-            var sorter = new AuctionsBucketData.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            var sorter  = new AuctionsBucketData.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
             var builder = new AuctionsResultBuilder<AuctionsBucketData>(offset, sorter, AuctionHouseResultLimits.Browse);
 
             foreach (var bucket in _buckets)
@@ -1104,7 +1138,7 @@ namespace Game
 
             if (bucket != null)
             {
-                var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+                var sorter  = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
                 var builder = new AuctionsResultBuilder<AuctionPosting>(offset, sorter, AuctionHouseResultLimits.Items);
 
                 foreach (var auction in bucket.Auctions)
@@ -1128,7 +1162,7 @@ namespace Game
 
         public void BuildListAuctionItems(AuctionListItemsResult listItemsResult, Player player, uint itemId, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
-            var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            var sorter  = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
             var builder = new AuctionsResultBuilder<AuctionPosting>(offset, sorter, AuctionHouseResultLimits.Items);
 
             listItemsResult.TotalCount = 0;
@@ -1703,40 +1737,6 @@ namespace Game
                                                                                  WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay),
                                                                                  eta))
                     .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied);
-            }
-        }
-
-        private class PlayerReplicateThrottleData
-        {
-            public uint Cursor;
-            public uint Global;
-            public DateTime NextAllowedReplication = DateTime.MinValue;
-            public uint Tombstone;
-
-            public bool IsReplicationInProgress()
-            {
-                return Cursor != Tombstone && Global != 0;
-            }
-        }
-
-        private class MailedItemsBatch
-        {
-            public Item[] Items = new Item[SharedConst.MaxMailItems];
-
-            public int ItemsCount;
-            public uint Quantity;
-            public ulong TotalPrice;
-
-            public bool IsFull()
-            {
-                return ItemsCount >= Items.Length;
-            }
-
-            public void AddItem(Item item, ulong unitPrice)
-            {
-                Items[ItemsCount++] = item;
-                Quantity += item.GetCount();
-                TotalPrice += unitPrice * item.GetCount();
             }
         }
     }

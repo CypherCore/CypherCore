@@ -172,8 +172,8 @@ namespace Framework.Dynamic
 
     public class FlaggedArray32<T> where T : struct
     {
-        private uint _flags;
         private readonly int[] _values;
+        private uint _flags;
 
         public FlaggedArray32(byte arraysize)
         {
@@ -218,8 +218,8 @@ namespace Framework.Dynamic
 
     public class FlaggedArray64<T> where T : struct
     {
-        private ulong _flags;
         private readonly int[] _values;
+        private ulong _flags;
 
         public FlaggedArray64(byte arraysize)
         {

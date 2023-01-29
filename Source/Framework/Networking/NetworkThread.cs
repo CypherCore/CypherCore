@@ -8,10 +8,10 @@ namespace Framework.Networking
 {
     public class NetworkThread<TSocketType> where TSocketType : ISocket
     {
-        private int _connections;
         private readonly List<TSocketType> _newSockets = new();
 
         private readonly List<TSocketType> _Sockets = new();
+        private int _connections;
         private volatile bool _stopped;
 
         private Thread _thread;
@@ -48,14 +48,6 @@ namespace Framework.Networking
             Interlocked.Increment(ref _connections);
             _newSockets.Add(sock);
             SocketAdded(sock);
-        }
-
-        protected virtual void SocketAdded(TSocketType sock)
-        {
-        }
-
-        protected virtual void SocketRemoved(TSocketType sock)
-        {
         }
 
         private void AddNewSockets()
@@ -115,6 +107,14 @@ namespace Framework.Networking
             Log.outDebug(LogFilter.Misc, "Network Thread exits");
             _newSockets.Clear();
             _Sockets.Clear();
+        }
+
+        protected virtual void SocketAdded(TSocketType sock)
+        {
+        }
+
+        protected virtual void SocketRemoved(TSocketType sock)
+        {
         }
     }
 }

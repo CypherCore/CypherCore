@@ -69,14 +69,14 @@ namespace Scripts.Events.HallowsEnd
             return ValidateSpellInfo(spells);
         }
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetCaster(), spells.SelectRandom(), true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.Hit));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetCaster(), spells.SelectRandom(), true);
         }
     }
 
@@ -90,6 +90,12 @@ namespace Scripts.Events.HallowsEnd
             return ValidateSpellInfo(SpellIds.CandyFemaleDefiasPirate, SpellIds.CandyMaleDefiasPirate);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.CandyFemaleDefiasPirate : SpellIds.CandyMaleDefiasPirate;
@@ -100,12 +106,6 @@ namespace Scripts.Events.HallowsEnd
         {
             uint spell = GetTarget().GetNativeGender() == Gender.Female ? SpellIds.CandyFemaleDefiasPirate : SpellIds.CandyMaleDefiasPirate;
             GetTarget().RemoveAurasDueToSpell(spell);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ModIncreaseSwimSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -126,6 +126,11 @@ namespace Scripts.Events.HallowsEnd
                                      SpellIds.GhostCostumeMale,
                                      SpellIds.GhostCostumeFemale,
                                      SpellIds.TrickBuff);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -167,11 +172,6 @@ namespace Scripts.Events.HallowsEnd
                 caster.CastSpell(target, spellId, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 24751 Trick or Treat
@@ -182,6 +182,11 @@ namespace Scripts.Events.HallowsEnd
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.Trick, SpellIds.Treat, SpellIds.TrickedOrTreated);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -195,11 +200,6 @@ namespace Scripts.Events.HallowsEnd
                 caster.CastSpell(target, SpellIds.TrickedOrTreated, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 44436 - Tricky Treat
@@ -212,6 +212,11 @@ namespace Scripts.Events.HallowsEnd
             return ValidateSpellInfo(SpellIds.TrickyTreatSpeed, SpellIds.TrickyTreatTrigger, SpellIds.UpsetTummy);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -220,11 +225,6 @@ namespace Scripts.Events.HallowsEnd
                 caster.GetAuraCount(SpellIds.TrickyTreatSpeed) > 3 &&
                 RandomHelper.randChance(33))
                 caster.CastSpell(caster, SpellIds.UpsetTummy, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 

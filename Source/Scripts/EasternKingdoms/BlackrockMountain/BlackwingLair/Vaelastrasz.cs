@@ -48,12 +48,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
             creature.RemoveUnitFlag(UnitFlags.Uninteractible);
         }
 
-        private void Initialize()
-        {
-            PlayerGUID.Clear();
-            HasYelled = false;
-        }
-
         public override void Reset()
         {
             _Reset();
@@ -124,44 +118,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
                                 });
         }
 
-        private void BeginSpeech(Unit target)
-        {
-            PlayerGUID = target.GetGUID();
-            me.RemoveNpcFlag(NPCFlags.Gossip);
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(1),
-                                task =>
-                                {
-                                    Talk(TextIds.SayLine1);
-                                    me.SetStandState(UnitStandStateType.Stand);
-                                    me.HandleEmoteCommand(Emote.OneshotTalk);
-
-                                    task.Schedule(TimeSpan.FromSeconds(12),
-                                                  speechTask2 =>
-                                                  {
-                                                      Talk(TextIds.SayLine2);
-                                                      me.HandleEmoteCommand(Emote.OneshotTalk);
-
-                                                      speechTask2.Schedule(TimeSpan.FromSeconds(12),
-                                                                           speechTask3 =>
-                                                                           {
-                                                                               Talk(TextIds.SayLine3);
-                                                                               me.HandleEmoteCommand(Emote.OneshotTalk);
-
-                                                                               speechTask3.Schedule(TimeSpan.FromSeconds(16),
-                                                                                                    speechTask4 =>
-                                                                                                    {
-                                                                                                        me.SetFaction((uint)FactionTemplates.DragonflightBlack);
-                                                                                                        Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
-
-                                                                                                        if (player)
-                                                                                                            AttackStart(player);
-                                                                                                    });
-                                                                           });
-                                                  });
-                                });
-        }
-
         public override void KilledUnit(Unit victim)
         {
             if ((RandomHelper.Rand32() % 5) != 0)
@@ -202,6 +158,50 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
 
             return false;
         }
+
+        private void Initialize()
+        {
+            PlayerGUID.Clear();
+            HasYelled = false;
+        }
+
+        private void BeginSpeech(Unit target)
+        {
+            PlayerGUID = target.GetGUID();
+            me.RemoveNpcFlag(NPCFlags.Gossip);
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(1),
+                                task =>
+                                {
+                                    Talk(TextIds.SayLine1);
+                                    me.SetStandState(UnitStandStateType.Stand);
+                                    me.HandleEmoteCommand(Emote.OneshotTalk);
+
+                                    task.Schedule(TimeSpan.FromSeconds(12),
+                                                  speechTask2 =>
+                                                  {
+                                                      Talk(TextIds.SayLine2);
+                                                      me.HandleEmoteCommand(Emote.OneshotTalk);
+
+                                                      speechTask2.Schedule(TimeSpan.FromSeconds(12),
+                                                                           speechTask3 =>
+                                                                           {
+                                                                               Talk(TextIds.SayLine3);
+                                                                               me.HandleEmoteCommand(Emote.OneshotTalk);
+
+                                                                               speechTask3.Schedule(TimeSpan.FromSeconds(16),
+                                                                                                    speechTask4 =>
+                                                                                                    {
+                                                                                                        me.SetFaction((uint)FactionTemplates.DragonflightBlack);
+                                                                                                        Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
+
+                                                                                                        if (player)
+                                                                                                            AttackStart(player);
+                                                                                                    });
+                                                                           });
+                                                  });
+                                });
+        }
     }
 
     //Need to define an aurascript for EventBurningadrenaline's death effect.
@@ -210,17 +210,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Vaelastrasz
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnAuraRemoveHandler, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void OnAuraRemoveHandler(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             //The tooltip says the on death the AoE occurs. According to information: http://qaliaresponse.stage.lithium.com/t5/WoW-Mayhem/Surviving-Burning-Adrenaline-For-tanks/td-p/48609
             //Burning Adrenaline can be survived therefore Blizzard's implementation was an AoE bomb that went off if you were still alive and dealt
             //Damage to the Target. You don't have to die for it to go off. It can go off whether you live or die.
             GetTarget().CastSpell(GetTarget(), SpellIds.BurningadrenalineExplosion, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnAuraRemoveHandler, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 }

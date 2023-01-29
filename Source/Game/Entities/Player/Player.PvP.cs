@@ -217,42 +217,6 @@ namespace Game.Entities
             SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.LifetimeHonorableKills), 0u);
         }
 
-        private void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
-        {
-            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), honorLevel);
-            UpdateHonorNextLevel();
-
-            AddHonorXP(honor);
-        }
-
-        private void RewardPlayerWithRewardPack(uint rewardPackID)
-        {
-            RewardPlayerWithRewardPack(CliDB.RewardPackStorage.LookupByKey(rewardPackID));
-        }
-
-        private void RewardPlayerWithRewardPack(RewardPackRecord rewardPackEntry)
-        {
-            if (rewardPackEntry == null)
-                return;
-
-            CharTitlesRecord charTitlesEntry = CliDB.CharTitlesStorage.LookupByKey(rewardPackEntry.CharTitleID);
-
-            if (charTitlesEntry != null)
-                SetTitle(charTitlesEntry);
-
-            ModifyMoney(rewardPackEntry.Money);
-
-            var rewardCurrencyTypes = Global.DB2Mgr.GetRewardPackCurrencyTypesByRewardID(rewardPackEntry.Id);
-
-            foreach (RewardPackXCurrencyTypeRecord currency in rewardCurrencyTypes)
-                ModifyCurrency(currency.CurrencyTypeID, currency.Quantity);
-
-            var rewardPackXItems = Global.DB2Mgr.GetRewardPackItemsByRewardID(rewardPackEntry.Id);
-
-            foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
-                AddItem(rewardPackXItem.ItemID, rewardPackXItem.ItemQuantity);
-        }
-
         public void AddHonorXP(uint xp)
         {
             uint currentHonorXP = ActivePlayerData.Honor;
@@ -277,27 +241,6 @@ namespace Game.Entities
             }
 
             SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
-        }
-
-        private void SetHonorLevel(byte level)
-        {
-            byte oldHonorLevel = (byte)GetHonorLevel();
-
-            if (level == oldHonorLevel)
-                return;
-
-            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), level);
-            UpdateHonorNextLevel();
-
-            UpdateCriteria(CriteriaType.HonorLevelIncrease);
-        }
-
-        private void UpdateHonorNextLevel()
-        {
-            // 5500 at honor level 1
-            // no idea what between here
-            // 8800 at honor level ~14 (never goes above 8800)
-            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.HonorNextLevel), 8800u);
         }
 
         public uint GetHonorLevel()
@@ -342,60 +285,6 @@ namespace Game.Entities
             }
 
             UpdateItemLevelAreaBasedScaling();
-        }
-
-        private void DisablePvpRules()
-        {
-            // Don't disable pvp rules when in pvp zone.
-            if (IsInAreaThatActivatesPvpTalents())
-                return;
-
-            if (!GetCombatManager().HasPvPCombat())
-            {
-                RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
-                UpdateItemLevelAreaBasedScaling();
-            }
-            else
-            {
-                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
-
-                aura?.SetDuration(aura.GetSpellInfo().GetMaxDuration());
-            }
-        }
-
-        private bool HasPvpRulesEnabled()
-        {
-            return HasAura(PlayerConst.SpellPvpRulesEnabled);
-        }
-
-        private bool IsInAreaThatActivatesPvpTalents()
-        {
-            return IsAreaThatActivatesPvpTalents(GetAreaId());
-        }
-
-        private bool IsAreaThatActivatesPvpTalents(uint areaID)
-        {
-            if (InBattleground())
-                return true;
-
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaID);
-
-            if (area != null)
-                do
-                {
-                    if (area.IsSanctuary())
-                        return false;
-
-                    if (area.HasFlag(AreaFlags.Arena))
-                        return true;
-
-                    if (Global.BattleFieldMgr.IsWorldPvpArea(area.Id))
-                        return true;
-
-                    area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                } while (area != null);
-
-            return false;
         }
 
         public uint[] GetPvpTalentMap(byte spec)
@@ -513,13 +402,6 @@ namespace Game.Entities
                     return true;
 
             return false;
-        }
-
-        private void SetMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, bool mercenary)
-        {
-            for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-                if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
-                    _bgBattlegroundQueueID[i].Mercenary = mercenary;
         }
 
         public bool IsMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId)
@@ -699,15 +581,6 @@ namespace Game.Entities
             _bgData.AfkReporter.Clear();
         }
 
-        private bool CanReportAfkDueToLimit()
-        {
-            // a player can complain about 15 people per 5 minutes
-            if (_bgData.AfkReportedCount++ >= 15)
-                return false;
-
-            return true;
-        }
-
         /// <summary>
         ///  This player has been blamed to be inactive in a Battleground
         /// </summary>
@@ -876,6 +749,133 @@ namespace Game.Entities
         public OutdoorPvP GetOutdoorPvP()
         {
             return Global.OutdoorPvPMgr.GetOutdoorPvPToZoneId(GetMap(), GetZoneId());
+        }
+
+        private void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), honorLevel);
+            UpdateHonorNextLevel();
+
+            AddHonorXP(honor);
+        }
+
+        private void RewardPlayerWithRewardPack(uint rewardPackID)
+        {
+            RewardPlayerWithRewardPack(CliDB.RewardPackStorage.LookupByKey(rewardPackID));
+        }
+
+        private void RewardPlayerWithRewardPack(RewardPackRecord rewardPackEntry)
+        {
+            if (rewardPackEntry == null)
+                return;
+
+            CharTitlesRecord charTitlesEntry = CliDB.CharTitlesStorage.LookupByKey(rewardPackEntry.CharTitleID);
+
+            if (charTitlesEntry != null)
+                SetTitle(charTitlesEntry);
+
+            ModifyMoney(rewardPackEntry.Money);
+
+            var rewardCurrencyTypes = Global.DB2Mgr.GetRewardPackCurrencyTypesByRewardID(rewardPackEntry.Id);
+
+            foreach (RewardPackXCurrencyTypeRecord currency in rewardCurrencyTypes)
+                ModifyCurrency(currency.CurrencyTypeID, currency.Quantity);
+
+            var rewardPackXItems = Global.DB2Mgr.GetRewardPackItemsByRewardID(rewardPackEntry.Id);
+
+            foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
+                AddItem(rewardPackXItem.ItemID, rewardPackXItem.ItemQuantity);
+        }
+
+        private void SetHonorLevel(byte level)
+        {
+            byte oldHonorLevel = (byte)GetHonorLevel();
+
+            if (level == oldHonorLevel)
+                return;
+
+            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.HonorLevel), level);
+            UpdateHonorNextLevel();
+
+            UpdateCriteria(CriteriaType.HonorLevelIncrease);
+        }
+
+        private void UpdateHonorNextLevel()
+        {
+            // 5500 at honor level 1
+            // no idea what between here
+            // 8800 at honor level ~14 (never goes above 8800)
+            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.HonorNextLevel), 8800u);
+        }
+
+        private void DisablePvpRules()
+        {
+            // Don't disable pvp rules when in pvp zone.
+            if (IsInAreaThatActivatesPvpTalents())
+                return;
+
+            if (!GetCombatManager().HasPvPCombat())
+            {
+                RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
+                UpdateItemLevelAreaBasedScaling();
+            }
+            else
+            {
+                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+
+                aura?.SetDuration(aura.GetSpellInfo().GetMaxDuration());
+            }
+        }
+
+        private bool HasPvpRulesEnabled()
+        {
+            return HasAura(PlayerConst.SpellPvpRulesEnabled);
+        }
+
+        private bool IsInAreaThatActivatesPvpTalents()
+        {
+            return IsAreaThatActivatesPvpTalents(GetAreaId());
+        }
+
+        private bool IsAreaThatActivatesPvpTalents(uint areaID)
+        {
+            if (InBattleground())
+                return true;
+
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaID);
+
+            if (area != null)
+                do
+                {
+                    if (area.IsSanctuary())
+                        return false;
+
+                    if (area.HasFlag(AreaFlags.Arena))
+                        return true;
+
+                    if (Global.BattleFieldMgr.IsWorldPvpArea(area.Id))
+                        return true;
+
+                    area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                } while (area != null);
+
+            return false;
+        }
+
+        private void SetMercenaryForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, bool mercenary)
+        {
+            for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
+                if (_bgBattlegroundQueueID[i].BGQueueTypeId == bgQueueTypeId)
+                    _bgBattlegroundQueueID[i].Mercenary = mercenary;
+        }
+
+        private bool CanReportAfkDueToLimit()
+        {
+            // a player can complain about 15 people per 5 minutes
+            if (_bgData.AfkReportedCount++ >= 15)
+                return false;
+
+            return true;
         }
     }
 }

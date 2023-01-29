@@ -10,36 +10,6 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        private Player GetNextRandomRaidMember(float radius)
-        {
-            Group group = GetGroup();
-
-            if (!group)
-                return null;
-
-            List<Player> nearMembers = new();
-
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-            {
-                Player Target = refe.GetSource();
-
-                // IsHostileTo check Duel and controlled by enemy
-                if (Target &&
-                    Target != this &&
-                    IsWithinDistInMap(Target, radius) &&
-                    !Target.HasInvisibilityAura() &&
-                    !IsHostileTo(Target))
-                    nearMembers.Add(Target);
-            }
-
-            if (nearMembers.Empty())
-                return null;
-
-            int randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
-
-            return nearMembers[randTarget];
-        }
-
         public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
         {
             Group grp = GetGroup();
@@ -101,18 +71,6 @@ namespace Game.Entities
         public bool IsUsingLfg()
         {
             return Global.LFGMgr.GetState(GetGUID()) != LfgState.None;
-        }
-
-        private bool InRandomLfgDungeon()
-        {
-            if (Global.LFGMgr.SelectedRandomLfgDungeon(GetGUID()))
-            {
-                Map map = GetMap();
-
-                return Global.LFGMgr.InLfgDungeonMap(GetGUID(), map.GetId(), map.GetDifficultyID());
-            }
-
-            return false;
         }
 
         public void SetBattlegroundOrBattlefieldRaid(Group group, byte subgroup)
@@ -356,6 +314,48 @@ namespace Game.Entities
                 return;
 
             group.RemoveMember(guid, method, kicker, reason);
+        }
+
+        private Player GetNextRandomRaidMember(float radius)
+        {
+            Group group = GetGroup();
+
+            if (!group)
+                return null;
+
+            List<Player> nearMembers = new();
+
+            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            {
+                Player Target = refe.GetSource();
+
+                // IsHostileTo check Duel and controlled by enemy
+                if (Target &&
+                    Target != this &&
+                    IsWithinDistInMap(Target, radius) &&
+                    !Target.HasInvisibilityAura() &&
+                    !IsHostileTo(Target))
+                    nearMembers.Add(Target);
+            }
+
+            if (nearMembers.Empty())
+                return null;
+
+            int randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
+
+            return nearMembers[randTarget];
+        }
+
+        private bool InRandomLfgDungeon()
+        {
+            if (Global.LFGMgr.SelectedRandomLfgDungeon(GetGUID()))
+            {
+                Map map = GetMap();
+
+                return Global.LFGMgr.InLfgDungeonMap(GetGUID(), map.GetId(), map.GetDifficultyID());
+            }
+
+            return false;
         }
 
         private void SendUpdateToOutOfRangeGroupMembers()

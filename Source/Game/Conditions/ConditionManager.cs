@@ -20,6 +20,22 @@ namespace Game
 {
     public sealed class ConditionManager : Singleton<ConditionManager>
     {
+        public struct ConditionTypeInfo
+        {
+            public ConditionTypeInfo(string name, params bool[] args)
+            {
+                Name = name;
+                HasConditionValue1 = args[0];
+                HasConditionValue2 = args[1];
+                HasConditionValue3 = args[2];
+            }
+
+            public string Name;
+            public bool HasConditionValue1;
+            public bool HasConditionValue2;
+            public bool HasConditionValue3;
+        }
+
         private readonly MultiMap<Tuple<uint, bool>, Condition> _areaTriggerConditionContainerStorage = new();
         private readonly MultiMap<uint, Condition> _conditionReferenceStorage = new();
 
@@ -30,6 +46,13 @@ namespace Game
         private readonly Dictionary<uint, MultiMap<uint, Condition>> _spellClickEventConditionStorage = new();
         private readonly List<uint> _spellsUsedInSpellClickConditions = new();
 
+        private readonly Dictionary<uint, MultiMap<uint, Condition>> _trainerSpellConditionContainerStorage = new();
+        private readonly Dictionary<uint, MultiMap<uint, Condition>> _vehicleSpellConditionStorage = new();
+
+        private ConditionManager()
+        {
+        }
+
         public ConditionTypeInfo[] StaticConditionTypeData { get; set; } =
         {
             new("None", false, false, false), new("Aura", true, true, true), new("Item Stored", true, true, true), new("Item Equipped", true, false, false), new("Zone", true, false, false), new("Reputation", true, true, false), new("Team", true, false, false), new("Skill", true, true, false), new("Quest Rewarded", true, false, false), new("Quest Taken", true, false, false), new("Drunken", true, false, false), new("WorldState", true, true, false), new("Active Event", true, false, false), new("Instance Info", true, true, true), new("Quest None", true, false, false), new("Class", true, false, false), new("Race", true, false, false), new("Achievement", true, false, false), new("Title", true, false, false), new("SpawnMask", true, false, false), new("Gender", true, false, false), new("Unit State", true, false, false), new("Map", true, false, false), new("Area", true, false, false), new("CreatureType", true, false, false), new("Spell Known", true, false, false), new("Phase", true, false, false), new("Level", true, true, false), new("Quest Completed", true, false, false), new("Near Creature", true, true, true), new("Near GameObject", true, true, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("Relation", true, true, false), new("Reaction", true, true, false), new("Distance", true, true, true), new("Alive", false, false, false), new("Health Value", true, true, false), new("Health Pct", true, true, false), new("Realm Achievement", true, false, false), new("In Water", false, false, false), new("Terrain Swap", true, false, false), new("Sit/stand State", true, true, false), new("Daily Quest Completed", true, false, false), new("Charmed", false, false, false), new("Pet Type", true, false, false), new("On Taxi", false, false, false), new("Quest State mask", true, true, false), new("Quest objective progress", true, false, true), new("Map Difficulty", true, false, false), new("Is Gamemaster", true, false, false), new("Object Entry or Guid", true, true, true), new("Object TypeMask", true, false, false), new("BattlePet Species Learned", true, true, true), new("On Scenario Step", true, false, false), new("Scene In Progress", true, false, false), new("Player Condition", true, false, false)
@@ -39,13 +62,6 @@ namespace Game
         {
             "None", "Creature Loot", "Disenchant Loot", "Fishing Loot", "GameObject Loot", "Item Loot", "Mail Loot", "Milling Loot", "Pickpocketing Loot", "Prospecting Loot", "Reference Loot", "Skinning Loot", "Spell Loot", "Spell Impl. Target", "Gossip Menu", "Gossip Menu Option", "Creature Vehicle", "Spell Expl. Target", "Spell Click Event", "Quest Accept", "Quest Show Mark", "Vehicle Spell", "SmartScript", "Npc Vendor", "Spell Proc", "Terrain Swap", "Phase", "Graveyard", "AreaTrigger", "ConversationLine", "AreaTrigger Client Triggered", "Trainer Spell", "Object Visibility (by ID)"
         };
-
-        private readonly Dictionary<uint, MultiMap<uint, Condition>> _trainerSpellConditionContainerStorage = new();
-        private readonly Dictionary<uint, MultiMap<uint, Condition>> _vehicleSpellConditionStorage = new();
-
-        private ConditionManager()
-        {
-        }
 
         public GridMapTypeMask GetSearcherTypeMaskForConditionList(List<Condition> conditions)
         {
@@ -194,32 +210,6 @@ namespace Game
         public bool CanHaveSourceIdSet(ConditionSourceType sourceType)
         {
             return (sourceType == ConditionSourceType.SmartEvent);
-        }
-
-        private bool CanHaveConditionType(ConditionSourceType sourceType, ConditionTypes conditionType)
-        {
-            switch (sourceType)
-            {
-                case ConditionSourceType.SpawnGroup:
-                    switch (conditionType)
-                    {
-                        case ConditionTypes.None:
-                        case ConditionTypes.ActiveEvent:
-                        case ConditionTypes.InstanceInfo:
-                        case ConditionTypes.Mapid:
-                        case ConditionTypes.WorldState:
-                        case ConditionTypes.RealmAchievement:
-                        case ConditionTypes.DifficultyId:
-                        case ConditionTypes.ScenarioStep:
-                            return true;
-                        default:
-                            return false;
-                    }
-                default:
-                    break;
-            }
-
-            return true;
         }
 
         public bool IsObjectMeetingNotGroupedConditions(ConditionSourceType sourceType, uint entry, ConditionSourceInfo sourceInfo)
@@ -727,6 +717,751 @@ namespace Game
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} conditions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public static uint GetPlayerConditionLfgValue(Player player, PlayerConditionLfgStatus status)
+        {
+            if (player.GetGroup() == null)
+                return 0;
+
+            switch (status)
+            {
+                case PlayerConditionLfgStatus.InLFGDungeon:
+                    return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) ? 1 : 0u;
+                case PlayerConditionLfgStatus.InLFGRandomDungeon:
+                    return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) &&
+                           Global.LFGMgr.SelectedRandomLfgDungeon(player.GetGUID())
+                               ? 1
+                               : 0u;
+                case PlayerConditionLfgStatus.InLFGFirstRandomDungeon:
+                    {
+                        if (!Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()))
+                            return 0;
+
+                        uint selectedRandomDungeon = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
+
+                        if (selectedRandomDungeon == 0)
+                            return 0;
+
+                        LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(selectedRandomDungeon, player.GetLevel());
+
+                        if (reward != null)
+                        {
+                            Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.FirstQuest);
+
+                            if (quest != null)
+                                if (player.CanRewardQuest(quest, false))
+                                    return 1;
+                        }
+
+                        return 0;
+                    }
+                case PlayerConditionLfgStatus.PartialClear:
+                    break;
+                case PlayerConditionLfgStatus.StrangerCount:
+                    break;
+                case PlayerConditionLfgStatus.VoteKickCount:
+                    break;
+                case PlayerConditionLfgStatus.BootCount:
+                    break;
+                case PlayerConditionLfgStatus.GearDiff:
+                    break;
+                default:
+                    break;
+            }
+
+            return 0;
+        }
+
+        public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
+        {
+            ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, player.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
+
+            if (levels.HasValue)
+            {
+                byte minLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MinLevelWithDelta : levels.Value.MinLevel);
+                byte maxLevel = 0;
+
+                if (!condition.Flags.HasAnyFlag(0x20))
+                    maxLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MaxLevelWithDelta : levels.Value.MaxLevel);
+
+                if (condition.Flags.HasAnyFlag(0x80))
+                {
+                    if (minLevel != 0 &&
+                        player.GetLevel() >= minLevel &&
+                        (maxLevel == 0 || player.GetLevel() <= maxLevel))
+                        return false;
+
+                    if (maxLevel != 0 &&
+                        player.GetLevel() <= maxLevel &&
+                        (minLevel == 0 || player.GetLevel() >= minLevel))
+                        return false;
+                }
+                else
+                {
+                    if (minLevel != 0 &&
+                        player.GetLevel() < minLevel)
+                        return false;
+
+                    if (maxLevel != 0 &&
+                        player.GetLevel() > maxLevel)
+                        return false;
+                }
+            }
+
+            if (condition.RaceMask != 0 &&
+                !Convert.ToBoolean(SharedConst.GetMaskForRace(player.GetRace()) & condition.RaceMask))
+                return false;
+
+            if (condition.ClassMask != 0 &&
+                !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))
+                return false;
+
+            if (condition.Gender >= 0 &&
+                (int)player.GetGender() != condition.Gender)
+                return false;
+
+            if (condition.NativeGender >= 0 &&
+                player.GetNativeGender() != (Gender)condition.NativeGender)
+                return false;
+
+            if (condition.PowerType != -1 &&
+                condition.PowerTypeComp != 0)
+            {
+                int requiredPowerValue = Convert.ToBoolean(condition.Flags & 4) ? player.GetMaxPower((PowerType)condition.PowerType) : condition.PowerTypeValue;
+
+                if (!PlayerConditionCompare(condition.PowerTypeComp, player.GetPower((PowerType)condition.PowerType), requiredPowerValue))
+                    return false;
+            }
+
+            if (condition.ChrSpecializationIndex >= 0 ||
+                condition.ChrSpecializationRole >= 0)
+            {
+                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(player.GetPrimarySpecialization());
+
+                if (spec != null)
+                {
+                    if (condition.ChrSpecializationIndex >= 0 &&
+                        spec.OrderIndex != condition.ChrSpecializationIndex)
+                        return false;
+
+                    if (condition.ChrSpecializationRole >= 0 &&
+                        spec.Role != condition.ChrSpecializationRole)
+                        return false;
+                }
+            }
+
+            bool[] results;
+
+            if (condition.SkillID[0] != 0 ||
+                condition.SkillID[1] != 0 ||
+                condition.SkillID[2] != 0 ||
+                condition.SkillID[3] != 0)
+            {
+                results = new bool[condition.SkillID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.SkillID.Length; ++i)
+                    if (condition.SkillID[i] != 0)
+                    {
+                        ushort skillValue = player.GetSkillValue((SkillType)condition.SkillID[i]);
+                        results[i] = skillValue != 0 && skillValue > condition.MinSkill[i] && skillValue < condition.MaxSkill[i];
+                    }
+
+                if (!PlayerConditionLogic(condition.SkillLogic, results))
+                    return false;
+            }
+
+            if (condition.LanguageID != 0)
+            {
+                int languageSkill = 0;
+
+                if (player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, condition.LanguageID))
+                    languageSkill = 300;
+                else
+                    foreach (var languageDesc in Global.LanguageMgr.GetLanguageDescById((Language)condition.LanguageID))
+                        languageSkill = Math.Max(languageSkill, player.GetSkillValue((SkillType)languageDesc.SkillId));
+
+                if (condition.MinLanguage != 0 &&
+                    languageSkill < condition.MinLanguage)
+                    return false;
+
+                if (condition.MaxLanguage != 0 &&
+                    languageSkill > condition.MaxLanguage)
+                    return false;
+            }
+
+            if (condition.MinFactionID[0] != 0 &&
+                condition.MinFactionID[1] != 0 &&
+                condition.MinFactionID[2] != 0 &&
+                condition.MaxFactionID != 0)
+            {
+                if (condition.MinFactionID[0] == 0 &&
+                    condition.MinFactionID[1] == 0 &&
+                    condition.MinFactionID[2] == 0)
+                {
+                    ReputationRank forcedRank = player.GetReputationMgr().GetForcedRankIfAny(condition.MaxFactionID);
+
+                    if (forcedRank != 0)
+                    {
+                        if ((uint)forcedRank > condition.MaxReputation)
+                            return false;
+                    }
+                    else if (CliDB.FactionStorage.HasRecord(condition.MaxReputation) &&
+                             (uint)player.GetReputationRank(condition.MaxFactionID) > condition.MaxReputation)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    results = new bool[condition.MinFactionID.Length + 1];
+
+                    for (var i = 0; i < results.Length; ++i)
+                        results[i] = true;
+
+                    for (var i = 0; i < condition.MinFactionID.Length; ++i)
+                        if (CliDB.FactionStorage.HasRecord(condition.MinFactionID[i]))
+                        {
+                            ReputationRank forcedRank = player.GetReputationMgr().GetForcedRankIfAny(condition.MinFactionID[i]);
+
+                            if (forcedRank != 0)
+                                results[i] = (uint)forcedRank >= condition.MinReputation[i];
+                            else
+                                results[i] = (uint)player.GetReputationRank(condition.MinFactionID[i]) >= condition.MinReputation[i];
+                        }
+
+                    ReputationRank forcedRank1 = player.GetReputationMgr().GetForcedRankIfAny(condition.MaxFactionID);
+
+                    if (forcedRank1 != 0)
+                        results[3] = (uint)forcedRank1 <= condition.MaxReputation;
+                    else if (CliDB.FactionStorage.HasRecord(condition.MaxReputation))
+                        results[3] = (uint)player.GetReputationRank(condition.MaxFactionID) <= condition.MaxReputation;
+
+                    if (!PlayerConditionLogic(condition.ReputationLogic, results))
+                        return false;
+                }
+            }
+
+            if (condition.CurrentPvpFaction != 0)
+            {
+                byte team;
+
+                if (player.GetMap().IsBattlegroundOrArena())
+                    team = player.PlayerData.ArenaFaction;
+                else
+                    team = (byte)player.GetTeamId();
+
+                if (condition.CurrentPvpFaction - 1 != team)
+                    return false;
+            }
+
+            if (condition.PvpMedal != 0 &&
+                !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.ActivePlayerData.PvpMedals))
+                return false;
+
+            if (condition.LifetimeMaxPVPRank != 0 &&
+                player.ActivePlayerData.LifetimeMaxRank != condition.LifetimeMaxPVPRank)
+                return false;
+
+            if (condition.MovementFlags[0] != 0 &&
+                !Convert.ToBoolean((uint)player.GetUnitMovementFlags() & condition.MovementFlags[0]))
+                return false;
+
+            if (condition.MovementFlags[1] != 0 &&
+                !Convert.ToBoolean((uint)player.GetUnitMovementFlags2() & condition.MovementFlags[1]))
+                return false;
+
+            if (condition.WeaponSubclassMask != 0)
+            {
+                Item mainHand = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+
+                if (!mainHand ||
+                    !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
+                    return false;
+            }
+
+            if (condition.PartyStatus != 0)
+            {
+                Group group = player.GetGroup();
+
+                switch (condition.PartyStatus)
+                {
+                    case 1:
+                        if (group)
+                            return false;
+
+                        break;
+                    case 2:
+                        if (!group)
+                            return false;
+
+                        break;
+                    case 3:
+                        if (!group ||
+                            group.IsRaidGroup())
+                            return false;
+
+                        break;
+                    case 4:
+                        if (!group ||
+                            !group.IsRaidGroup())
+                            return false;
+
+                        break;
+                    case 5:
+                        if (group && group.IsRaidGroup())
+                            return false;
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (condition.PrevQuestID[0] != 0)
+            {
+                results = new bool[condition.PrevQuestID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.PrevQuestID.Length; ++i)
+                {
+                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
+
+                    if (questBit != 0)
+                        results[i] = (player.ActivePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) != 0;
+                }
+
+                if (!PlayerConditionLogic(condition.PrevQuestLogic, results))
+                    return false;
+            }
+
+            if (condition.CurrQuestID[0] != 0)
+            {
+                results = new bool[condition.CurrQuestID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.CurrQuestID.Length; ++i)
+                    if (condition.CurrQuestID[i] != 0)
+                        results[i] = player.FindQuestSlot(condition.CurrQuestID[i]) != SharedConst.MaxQuestLogSize;
+
+                if (!PlayerConditionLogic(condition.CurrQuestLogic, results))
+                    return false;
+            }
+
+            if (condition.CurrentCompletedQuestID[0] != 0)
+            {
+                results = new bool[condition.CurrentCompletedQuestID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.CurrentCompletedQuestID.Length; ++i)
+                    if (condition.CurrentCompletedQuestID[i] != 0)
+                        results[i] = player.GetQuestStatus(condition.CurrentCompletedQuestID[i]) == QuestStatus.Complete;
+
+                if (!PlayerConditionLogic(condition.CurrentCompletedQuestLogic, results))
+                    return false;
+            }
+
+
+            if (condition.SpellID[0] != 0)
+            {
+                results = new bool[condition.SpellID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.SpellID.Length; ++i)
+                    if (condition.SpellID[i] != 0)
+                        results[i] = player.HasSpell(condition.SpellID[i]);
+
+                if (!PlayerConditionLogic(condition.SpellLogic, results))
+                    return false;
+            }
+
+            if (condition.ItemID[0] != 0)
+            {
+                results = new bool[condition.ItemID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.ItemID.Length; ++i)
+                    if (condition.ItemID[i] != 0)
+                        results[i] = player.GetItemCount(condition.ItemID[i], condition.ItemFlags != 0) >= condition.ItemCount[i];
+
+                if (!PlayerConditionLogic(condition.ItemLogic, results))
+                    return false;
+            }
+
+            if (condition.CurrencyID[0] != 0)
+            {
+                results = new bool[condition.CurrencyID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.CurrencyID.Length; ++i)
+                    if (condition.CurrencyID[i] != 0)
+                        results[i] = player.GetCurrency(condition.CurrencyID[i]) >= condition.CurrencyCount[i];
+
+                if (!PlayerConditionLogic(condition.CurrencyLogic, results))
+                    return false;
+            }
+
+            if (condition.Explored[0] != 0 ||
+                condition.Explored[1] != 0)
+                for (var i = 0; i < condition.Explored.Length; ++i)
+                {
+                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(condition.Explored[i]);
+
+                    if (area != null)
+                        if (area.AreaBit != -1 &&
+                            !Convert.ToBoolean(player.ActivePlayerData.ExploredZones[area.AreaBit / ActivePlayerData.ExploredZonesBits] & (1ul << ((int)area.AreaBit % ActivePlayerData.ExploredZonesBits))))
+                            return false;
+                }
+
+            if (condition.AuraSpellID[0] != 0)
+            {
+                results = new bool[condition.AuraSpellID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.AuraSpellID.Length; ++i)
+                    if (condition.AuraSpellID[i] != 0)
+                    {
+                        if (condition.AuraStacks[i] != 0)
+                            results[i] = player.GetAuraCount(condition.AuraSpellID[i]) >= condition.AuraStacks[i];
+                        else
+                            results[i] = player.HasAura(condition.AuraSpellID[i]);
+                    }
+
+                if (!PlayerConditionLogic(condition.AuraSpellLogic, results))
+                    return false;
+            }
+
+            if (condition.Time[0] != 0)
+            {
+                var from = Time.GetUnixTimeFromPackedTime(condition.Time[0]);
+                var to = Time.GetUnixTimeFromPackedTime(condition.Time[1]);
+
+                if (GameTime.GetGameTime() < from ||
+                    GameTime.GetGameTime() > to)
+                    return false;
+            }
+
+            if (condition.WorldStateExpressionID != 0)
+            {
+                var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(condition.WorldStateExpressionID);
+
+                if (worldStateExpression == null)
+                    return false;
+
+                if (!IsPlayerMeetingExpression(player, worldStateExpression))
+                    return false;
+            }
+
+            if (condition.WeatherID != 0)
+                if (player.GetMap().GetZoneWeather(player.GetZoneId()) != (WeatherState)condition.WeatherID)
+                    return false;
+
+            if (condition.Achievement[0] != 0)
+            {
+                results = new bool[condition.Achievement.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.Achievement.Length; ++i)
+                    if (condition.Achievement[i] != 0)
+                        // if (condition.Flags & 2) { any character on account completed it } else { current character only }
+                        // TODO: part of accountwide achievements
+                        results[i] = player.HasAchieved(condition.Achievement[i]);
+
+                if (!PlayerConditionLogic(condition.AchievementLogic, results))
+                    return false;
+            }
+
+            if (condition.LfgStatus[0] != 0)
+            {
+                results = new bool[condition.LfgStatus.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (int i = 0; i < condition.LfgStatus.Length; ++i)
+                    if (condition.LfgStatus[i] != 0)
+                        results[i] = PlayerConditionCompare(condition.LfgCompare[i], (int)GetPlayerConditionLfgValue(player, (PlayerConditionLfgStatus)condition.LfgStatus[i]), (int)condition.LfgValue[i]);
+
+                if (!PlayerConditionLogic(condition.LfgLogic, results))
+                    return false;
+            }
+
+            if (condition.AreaID[0] != 0)
+            {
+                results = new bool[condition.AreaID.Length];
+
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (var i = 0; i < condition.AreaID.Length; ++i)
+                    if (condition.AreaID[i] != 0)
+                        results[i] = player.GetAreaId() == condition.AreaID[i] || player.GetZoneId() == condition.AreaID[i];
+
+                if (!PlayerConditionLogic(condition.AreaLogic, results))
+                    return false;
+            }
+
+            if (condition.MinExpansionLevel != -1 &&
+                (int)player.GetSession().GetExpansion() < condition.MinExpansionLevel)
+                return false;
+
+            if (condition.MaxExpansionLevel != -1 &&
+                (int)player.GetSession().GetExpansion() > condition.MaxExpansionLevel)
+                return false;
+
+            if (condition.MinExpansionLevel != -1 &&
+                condition.MinExpansionTier != -1 &&
+                !player.IsGameMaster() &&
+                ((condition.MinExpansionLevel == WorldConfig.GetIntValue(WorldCfg.Expansion) && condition.MinExpansionTier > 0) /*TODO: implement tier*/ || condition.MinExpansionLevel > WorldConfig.GetIntValue(WorldCfg.Expansion)))
+                return false;
+
+            if (condition.PhaseID != 0 ||
+                condition.PhaseGroupID != 0 ||
+                condition.PhaseUseFlags != 0)
+                if (!PhasingHandler.InDbPhaseShift(player, (PhaseUseFlagsValues)condition.PhaseUseFlags, condition.PhaseID, condition.PhaseGroupID))
+                    return false;
+
+            if (condition.QuestKillID != 0)
+            {
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(condition.QuestKillID);
+                ushort questSlot = player.FindQuestSlot(condition.QuestKillID);
+
+                if (quest != null &&
+                    player.GetQuestStatus(condition.QuestKillID) != QuestStatus.Complete &&
+                    questSlot < SharedConst.MaxQuestLogSize)
+                {
+                    results = new bool[condition.QuestKillMonster.Length];
+
+                    for (var i = 0; i < results.Length; ++i)
+                        results[i] = true;
+
+                    for (var i = 0; i < condition.QuestKillMonster.Length; ++i)
+                        if (condition.QuestKillMonster[i] != 0)
+                        {
+                            var questObjective = quest.Objectives.Find(objective => objective.Type == QuestObjectiveType.Monster && objective.ObjectID == condition.QuestKillMonster[i]);
+
+                            if (questObjective != null)
+                                results[i] = player.GetQuestSlotObjectiveData(questSlot, questObjective) >= questObjective.Amount;
+                        }
+
+                    if (!PlayerConditionLogic(condition.QuestKillLogic, results))
+                        return false;
+                }
+            }
+
+            if (condition.MinAvgItemLevel != 0 &&
+                Math.Floor(player.PlayerData.AvgItemLevel[0]) < condition.MinAvgItemLevel)
+                return false;
+
+            if (condition.MaxAvgItemLevel != 0 &&
+                Math.Floor(player.PlayerData.AvgItemLevel[0]) > condition.MaxAvgItemLevel)
+                return false;
+
+            if (condition.MinAvgEquippedItemLevel != 0 &&
+                Math.Floor(player.PlayerData.AvgItemLevel[1]) < condition.MinAvgEquippedItemLevel)
+                return false;
+
+            if (condition.MaxAvgEquippedItemLevel != 0 &&
+                Math.Floor(player.PlayerData.AvgItemLevel[1]) > condition.MaxAvgEquippedItemLevel)
+                return false;
+
+            if (condition.ModifierTreeID != 0 &&
+                !player.ModifierTreeSatisfied(condition.ModifierTreeID))
+                return false;
+
+            if (condition.CovenantID != 0 &&
+                player.PlayerData.CovenantID != condition.CovenantID)
+                return false;
+
+            if (condition.TraitNodeEntryID.Any(traitNodeEntryId => traitNodeEntryId != 0))
+            {
+                var getTraitNodeEntryRank = ushort? (int traitNodeEntryId) =>
+                                            {
+                                                foreach (var traitConfig in player.ActivePlayerData.TraitConfigs)
+                                                {
+                                                    if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
+                                                        if (player.ActivePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
+                                                            !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                                                            continue;
+
+                                                    foreach (var traitEntry in traitConfig.Entries)
+                                                        if (traitEntry.TraitNodeEntryID == traitNodeEntryId)
+                                                            return (ushort)traitEntry.Rank;
+                                                }
+
+                                                return null;
+                                            };
+
+                results = new bool[condition.TraitNodeEntryID.Length];
+                Array.Fill(results, true);
+
+                for (var i = 0; i < condition.TraitNodeEntryID.Count(); ++i)
+                {
+                    if (condition.TraitNodeEntryID[i] == 0)
+                        continue;
+
+                    var rank = getTraitNodeEntryRank(condition.TraitNodeEntryID[i]);
+
+                    if (!rank.HasValue)
+                        results[i] = false;
+                    else if (condition.TraitNodeEntryMinRank[i] != 0 &&
+                             rank < condition.TraitNodeEntryMinRank[i])
+                        results[i] = false;
+                    else if (condition.TraitNodeEntryMaxRank[i] != 0 &&
+                             rank > condition.TraitNodeEntryMaxRank[i])
+                        results[i] = false;
+                }
+
+                if (!PlayerConditionLogic(condition.TraitNodeEntryLogic, results))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool IsPlayerMeetingExpression(Player player, WorldStateExpressionRecord expression)
+        {
+            ByteBuffer buffer = new(expression.Expression.ToByteArray());
+
+            if (buffer.GetSize() == 0)
+                return false;
+
+            bool enabled = buffer.ReadBool();
+
+            if (!enabled)
+                return false;
+
+            bool finalResult = EvalRelOp(buffer, player);
+            WorldStateExpressionLogic resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
+
+            while (resultLogic != WorldStateExpressionLogic.None)
+            {
+                bool secondResult = EvalRelOp(buffer, player);
+
+                switch (resultLogic)
+                {
+                    case WorldStateExpressionLogic.And:
+                        finalResult = finalResult && secondResult;
+
+                        break;
+                    case WorldStateExpressionLogic.Or:
+                        finalResult = finalResult || secondResult;
+
+                        break;
+                    case WorldStateExpressionLogic.Xor:
+                        finalResult = finalResult != secondResult;
+
+                        break;
+                    default:
+                        break;
+                }
+
+                if (buffer.GetCurrentStream().Position < buffer.GetSize())
+                    break;
+
+                resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
+            }
+
+            return finalResult;
+        }
+
+        public static bool IsUnitMeetingCondition(Unit unit, Unit otherUnit, UnitConditionRecord condition)
+        {
+            for (int i = 0; i < condition.Variable.Length; ++i)
+            {
+                if (condition.Variable[i] == 0)
+                    break;
+
+                int unitValue = GetUnitConditionVariable(unit, otherUnit, (UnitConditionVariable)condition.Variable[i], condition.Value[i]);
+                bool meets = false;
+
+                switch ((UnitConditionOp)condition.Op[i])
+                {
+                    case UnitConditionOp.EqualTo:
+                        meets = unitValue == condition.Value[i];
+
+                        break;
+                    case UnitConditionOp.NotEqualTo:
+                        meets = unitValue != condition.Value[i];
+
+                        break;
+                    case UnitConditionOp.LessThan:
+                        meets = unitValue < condition.Value[i];
+
+                        break;
+                    case UnitConditionOp.LessThanOrEqualTo:
+                        meets = unitValue <= condition.Value[i];
+
+                        break;
+                    case UnitConditionOp.GreaterThan:
+                        meets = unitValue > condition.Value[i];
+
+                        break;
+                    case UnitConditionOp.GreaterThanOrEqualTo:
+                        meets = unitValue >= condition.Value[i];
+
+                        break;
+                    default:
+                        break;
+                }
+
+                if (condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr))
+                {
+                    if (meets)
+                        return true;
+                }
+                else if (!meets)
+                {
+                    return false;
+                }
+            }
+
+            return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
+        }
+
+        private bool CanHaveConditionType(ConditionSourceType sourceType, ConditionTypes conditionType)
+        {
+            switch (sourceType)
+            {
+                case ConditionSourceType.SpawnGroup:
+                    switch (conditionType)
+                    {
+                        case ConditionTypes.None:
+                        case ConditionTypes.ActiveEvent:
+                        case ConditionTypes.InstanceInfo:
+                        case ConditionTypes.Mapid:
+                        case ConditionTypes.WorldState:
+                        case ConditionTypes.RealmAchievement:
+                        case ConditionTypes.DifficultyId:
+                        case ConditionTypes.ScenarioStep:
+                            return true;
+                        default:
+                            return false;
+                    }
+                default:
+                    break;
+            }
+
+            return true;
         }
 
         private bool AddToLootTemplate(Condition cond, LootTemplate loot)
@@ -2337,671 +3072,6 @@ namespace Game
             return result;
         }
 
-        public static uint GetPlayerConditionLfgValue(Player player, PlayerConditionLfgStatus status)
-        {
-            if (player.GetGroup() == null)
-                return 0;
-
-            switch (status)
-            {
-                case PlayerConditionLfgStatus.InLFGDungeon:
-                    return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) ? 1 : 0u;
-                case PlayerConditionLfgStatus.InLFGRandomDungeon:
-                    return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) &&
-                           Global.LFGMgr.SelectedRandomLfgDungeon(player.GetGUID())
-                               ? 1
-                               : 0u;
-                case PlayerConditionLfgStatus.InLFGFirstRandomDungeon:
-                    {
-                        if (!Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()))
-                            return 0;
-
-                        uint selectedRandomDungeon = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
-
-                        if (selectedRandomDungeon == 0)
-                            return 0;
-
-                        LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(selectedRandomDungeon, player.GetLevel());
-
-                        if (reward != null)
-                        {
-                            Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.FirstQuest);
-
-                            if (quest != null)
-                                if (player.CanRewardQuest(quest, false))
-                                    return 1;
-                        }
-
-                        return 0;
-                    }
-                case PlayerConditionLfgStatus.PartialClear:
-                    break;
-                case PlayerConditionLfgStatus.StrangerCount:
-                    break;
-                case PlayerConditionLfgStatus.VoteKickCount:
-                    break;
-                case PlayerConditionLfgStatus.BootCount:
-                    break;
-                case PlayerConditionLfgStatus.GearDiff:
-                    break;
-                default:
-                    break;
-            }
-
-            return 0;
-        }
-
-        public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
-        {
-            ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, player.PlayerData.CtrOptions.GetValue().ContentTuningConditionMask);
-
-            if (levels.HasValue)
-            {
-                byte minLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MinLevelWithDelta : levels.Value.MinLevel);
-                byte maxLevel = 0;
-
-                if (!condition.Flags.HasAnyFlag(0x20))
-                    maxLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MaxLevelWithDelta : levels.Value.MaxLevel);
-
-                if (condition.Flags.HasAnyFlag(0x80))
-                {
-                    if (minLevel != 0 &&
-                        player.GetLevel() >= minLevel &&
-                        (maxLevel == 0 || player.GetLevel() <= maxLevel))
-                        return false;
-
-                    if (maxLevel != 0 &&
-                        player.GetLevel() <= maxLevel &&
-                        (minLevel == 0 || player.GetLevel() >= minLevel))
-                        return false;
-                }
-                else
-                {
-                    if (minLevel != 0 &&
-                        player.GetLevel() < minLevel)
-                        return false;
-
-                    if (maxLevel != 0 &&
-                        player.GetLevel() > maxLevel)
-                        return false;
-                }
-            }
-
-            if (condition.RaceMask != 0 &&
-                !Convert.ToBoolean(SharedConst.GetMaskForRace(player.GetRace()) & condition.RaceMask))
-                return false;
-
-            if (condition.ClassMask != 0 &&
-                !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))
-                return false;
-
-            if (condition.Gender >= 0 &&
-                (int)player.GetGender() != condition.Gender)
-                return false;
-
-            if (condition.NativeGender >= 0 &&
-                player.GetNativeGender() != (Gender)condition.NativeGender)
-                return false;
-
-            if (condition.PowerType != -1 &&
-                condition.PowerTypeComp != 0)
-            {
-                int requiredPowerValue = Convert.ToBoolean(condition.Flags & 4) ? player.GetMaxPower((PowerType)condition.PowerType) : condition.PowerTypeValue;
-
-                if (!PlayerConditionCompare(condition.PowerTypeComp, player.GetPower((PowerType)condition.PowerType), requiredPowerValue))
-                    return false;
-            }
-
-            if (condition.ChrSpecializationIndex >= 0 ||
-                condition.ChrSpecializationRole >= 0)
-            {
-                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(player.GetPrimarySpecialization());
-
-                if (spec != null)
-                {
-                    if (condition.ChrSpecializationIndex >= 0 &&
-                        spec.OrderIndex != condition.ChrSpecializationIndex)
-                        return false;
-
-                    if (condition.ChrSpecializationRole >= 0 &&
-                        spec.Role != condition.ChrSpecializationRole)
-                        return false;
-                }
-            }
-
-            bool[] results;
-
-            if (condition.SkillID[0] != 0 ||
-                condition.SkillID[1] != 0 ||
-                condition.SkillID[2] != 0 ||
-                condition.SkillID[3] != 0)
-            {
-                results = new bool[condition.SkillID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.SkillID.Length; ++i)
-                    if (condition.SkillID[i] != 0)
-                    {
-                        ushort skillValue = player.GetSkillValue((SkillType)condition.SkillID[i]);
-                        results[i] = skillValue != 0 && skillValue > condition.MinSkill[i] && skillValue < condition.MaxSkill[i];
-                    }
-
-                if (!PlayerConditionLogic(condition.SkillLogic, results))
-                    return false;
-            }
-
-            if (condition.LanguageID != 0)
-            {
-                int languageSkill = 0;
-
-                if (player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, condition.LanguageID))
-                    languageSkill = 300;
-                else
-                    foreach (var languageDesc in Global.LanguageMgr.GetLanguageDescById((Language)condition.LanguageID))
-                        languageSkill = Math.Max(languageSkill, player.GetSkillValue((SkillType)languageDesc.SkillId));
-
-                if (condition.MinLanguage != 0 &&
-                    languageSkill < condition.MinLanguage)
-                    return false;
-
-                if (condition.MaxLanguage != 0 &&
-                    languageSkill > condition.MaxLanguage)
-                    return false;
-            }
-
-            if (condition.MinFactionID[0] != 0 &&
-                condition.MinFactionID[1] != 0 &&
-                condition.MinFactionID[2] != 0 &&
-                condition.MaxFactionID != 0)
-            {
-                if (condition.MinFactionID[0] == 0 &&
-                    condition.MinFactionID[1] == 0 &&
-                    condition.MinFactionID[2] == 0)
-                {
-                    ReputationRank forcedRank = player.GetReputationMgr().GetForcedRankIfAny(condition.MaxFactionID);
-
-                    if (forcedRank != 0)
-                    {
-                        if ((uint)forcedRank > condition.MaxReputation)
-                            return false;
-                    }
-                    else if (CliDB.FactionStorage.HasRecord(condition.MaxReputation) &&
-                             (uint)player.GetReputationRank(condition.MaxFactionID) > condition.MaxReputation)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    results = new bool[condition.MinFactionID.Length + 1];
-
-                    for (var i = 0; i < results.Length; ++i)
-                        results[i] = true;
-
-                    for (var i = 0; i < condition.MinFactionID.Length; ++i)
-                        if (CliDB.FactionStorage.HasRecord(condition.MinFactionID[i]))
-                        {
-                            ReputationRank forcedRank = player.GetReputationMgr().GetForcedRankIfAny(condition.MinFactionID[i]);
-
-                            if (forcedRank != 0)
-                                results[i] = (uint)forcedRank >= condition.MinReputation[i];
-                            else
-                                results[i] = (uint)player.GetReputationRank(condition.MinFactionID[i]) >= condition.MinReputation[i];
-                        }
-
-                    ReputationRank forcedRank1 = player.GetReputationMgr().GetForcedRankIfAny(condition.MaxFactionID);
-
-                    if (forcedRank1 != 0)
-                        results[3] = (uint)forcedRank1 <= condition.MaxReputation;
-                    else if (CliDB.FactionStorage.HasRecord(condition.MaxReputation))
-                        results[3] = (uint)player.GetReputationRank(condition.MaxFactionID) <= condition.MaxReputation;
-
-                    if (!PlayerConditionLogic(condition.ReputationLogic, results))
-                        return false;
-                }
-            }
-
-            if (condition.CurrentPvpFaction != 0)
-            {
-                byte team;
-
-                if (player.GetMap().IsBattlegroundOrArena())
-                    team = player.PlayerData.ArenaFaction;
-                else
-                    team = (byte)player.GetTeamId();
-
-                if (condition.CurrentPvpFaction - 1 != team)
-                    return false;
-            }
-
-            if (condition.PvpMedal != 0 &&
-                !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.ActivePlayerData.PvpMedals))
-                return false;
-
-            if (condition.LifetimeMaxPVPRank != 0 &&
-                player.ActivePlayerData.LifetimeMaxRank != condition.LifetimeMaxPVPRank)
-                return false;
-
-            if (condition.MovementFlags[0] != 0 &&
-                !Convert.ToBoolean((uint)player.GetUnitMovementFlags() & condition.MovementFlags[0]))
-                return false;
-
-            if (condition.MovementFlags[1] != 0 &&
-                !Convert.ToBoolean((uint)player.GetUnitMovementFlags2() & condition.MovementFlags[1]))
-                return false;
-
-            if (condition.WeaponSubclassMask != 0)
-            {
-                Item mainHand = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-
-                if (!mainHand ||
-                    !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
-                    return false;
-            }
-
-            if (condition.PartyStatus != 0)
-            {
-                Group group = player.GetGroup();
-
-                switch (condition.PartyStatus)
-                {
-                    case 1:
-                        if (group)
-                            return false;
-
-                        break;
-                    case 2:
-                        if (!group)
-                            return false;
-
-                        break;
-                    case 3:
-                        if (!group ||
-                            group.IsRaidGroup())
-                            return false;
-
-                        break;
-                    case 4:
-                        if (!group ||
-                            !group.IsRaidGroup())
-                            return false;
-
-                        break;
-                    case 5:
-                        if (group && group.IsRaidGroup())
-                            return false;
-
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (condition.PrevQuestID[0] != 0)
-            {
-                results = new bool[condition.PrevQuestID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.PrevQuestID.Length; ++i)
-                {
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
-
-                    if (questBit != 0)
-                        results[i] = (player.ActivePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) != 0;
-                }
-
-                if (!PlayerConditionLogic(condition.PrevQuestLogic, results))
-                    return false;
-            }
-
-            if (condition.CurrQuestID[0] != 0)
-            {
-                results = new bool[condition.CurrQuestID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.CurrQuestID.Length; ++i)
-                    if (condition.CurrQuestID[i] != 0)
-                        results[i] = player.FindQuestSlot(condition.CurrQuestID[i]) != SharedConst.MaxQuestLogSize;
-
-                if (!PlayerConditionLogic(condition.CurrQuestLogic, results))
-                    return false;
-            }
-
-            if (condition.CurrentCompletedQuestID[0] != 0)
-            {
-                results = new bool[condition.CurrentCompletedQuestID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.CurrentCompletedQuestID.Length; ++i)
-                    if (condition.CurrentCompletedQuestID[i] != 0)
-                        results[i] = player.GetQuestStatus(condition.CurrentCompletedQuestID[i]) == QuestStatus.Complete;
-
-                if (!PlayerConditionLogic(condition.CurrentCompletedQuestLogic, results))
-                    return false;
-            }
-
-
-            if (condition.SpellID[0] != 0)
-            {
-                results = new bool[condition.SpellID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.SpellID.Length; ++i)
-                    if (condition.SpellID[i] != 0)
-                        results[i] = player.HasSpell(condition.SpellID[i]);
-
-                if (!PlayerConditionLogic(condition.SpellLogic, results))
-                    return false;
-            }
-
-            if (condition.ItemID[0] != 0)
-            {
-                results = new bool[condition.ItemID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.ItemID.Length; ++i)
-                    if (condition.ItemID[i] != 0)
-                        results[i] = player.GetItemCount(condition.ItemID[i], condition.ItemFlags != 0) >= condition.ItemCount[i];
-
-                if (!PlayerConditionLogic(condition.ItemLogic, results))
-                    return false;
-            }
-
-            if (condition.CurrencyID[0] != 0)
-            {
-                results = new bool[condition.CurrencyID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.CurrencyID.Length; ++i)
-                    if (condition.CurrencyID[i] != 0)
-                        results[i] = player.GetCurrency(condition.CurrencyID[i]) >= condition.CurrencyCount[i];
-
-                if (!PlayerConditionLogic(condition.CurrencyLogic, results))
-                    return false;
-            }
-
-            if (condition.Explored[0] != 0 ||
-                condition.Explored[1] != 0)
-                for (var i = 0; i < condition.Explored.Length; ++i)
-                {
-                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(condition.Explored[i]);
-
-                    if (area != null)
-                        if (area.AreaBit != -1 &&
-                            !Convert.ToBoolean(player.ActivePlayerData.ExploredZones[area.AreaBit / ActivePlayerData.ExploredZonesBits] & (1ul << ((int)area.AreaBit % ActivePlayerData.ExploredZonesBits))))
-                            return false;
-                }
-
-            if (condition.AuraSpellID[0] != 0)
-            {
-                results = new bool[condition.AuraSpellID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.AuraSpellID.Length; ++i)
-                    if (condition.AuraSpellID[i] != 0)
-                    {
-                        if (condition.AuraStacks[i] != 0)
-                            results[i] = player.GetAuraCount(condition.AuraSpellID[i]) >= condition.AuraStacks[i];
-                        else
-                            results[i] = player.HasAura(condition.AuraSpellID[i]);
-                    }
-
-                if (!PlayerConditionLogic(condition.AuraSpellLogic, results))
-                    return false;
-            }
-
-            if (condition.Time[0] != 0)
-            {
-                var from = Time.GetUnixTimeFromPackedTime(condition.Time[0]);
-                var to = Time.GetUnixTimeFromPackedTime(condition.Time[1]);
-
-                if (GameTime.GetGameTime() < from ||
-                    GameTime.GetGameTime() > to)
-                    return false;
-            }
-
-            if (condition.WorldStateExpressionID != 0)
-            {
-                var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(condition.WorldStateExpressionID);
-
-                if (worldStateExpression == null)
-                    return false;
-
-                if (!IsPlayerMeetingExpression(player, worldStateExpression))
-                    return false;
-            }
-
-            if (condition.WeatherID != 0)
-                if (player.GetMap().GetZoneWeather(player.GetZoneId()) != (WeatherState)condition.WeatherID)
-                    return false;
-
-            if (condition.Achievement[0] != 0)
-            {
-                results = new bool[condition.Achievement.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.Achievement.Length; ++i)
-                    if (condition.Achievement[i] != 0)
-                        // if (condition.Flags & 2) { any character on account completed it } else { current character only }
-                        // TODO: part of accountwide achievements
-                        results[i] = player.HasAchieved(condition.Achievement[i]);
-
-                if (!PlayerConditionLogic(condition.AchievementLogic, results))
-                    return false;
-            }
-
-            if (condition.LfgStatus[0] != 0)
-            {
-                results = new bool[condition.LfgStatus.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (int i = 0; i < condition.LfgStatus.Length; ++i)
-                    if (condition.LfgStatus[i] != 0)
-                        results[i] = PlayerConditionCompare(condition.LfgCompare[i], (int)GetPlayerConditionLfgValue(player, (PlayerConditionLfgStatus)condition.LfgStatus[i]), (int)condition.LfgValue[i]);
-
-                if (!PlayerConditionLogic(condition.LfgLogic, results))
-                    return false;
-            }
-
-            if (condition.AreaID[0] != 0)
-            {
-                results = new bool[condition.AreaID.Length];
-
-                for (var i = 0; i < results.Length; ++i)
-                    results[i] = true;
-
-                for (var i = 0; i < condition.AreaID.Length; ++i)
-                    if (condition.AreaID[i] != 0)
-                        results[i] = player.GetAreaId() == condition.AreaID[i] || player.GetZoneId() == condition.AreaID[i];
-
-                if (!PlayerConditionLogic(condition.AreaLogic, results))
-                    return false;
-            }
-
-            if (condition.MinExpansionLevel != -1 &&
-                (int)player.GetSession().GetExpansion() < condition.MinExpansionLevel)
-                return false;
-
-            if (condition.MaxExpansionLevel != -1 &&
-                (int)player.GetSession().GetExpansion() > condition.MaxExpansionLevel)
-                return false;
-
-            if (condition.MinExpansionLevel != -1 &&
-                condition.MinExpansionTier != -1 &&
-                !player.IsGameMaster() &&
-                ((condition.MinExpansionLevel == WorldConfig.GetIntValue(WorldCfg.Expansion) && condition.MinExpansionTier > 0) /*TODO: implement tier*/ || condition.MinExpansionLevel > WorldConfig.GetIntValue(WorldCfg.Expansion)))
-                return false;
-
-            if (condition.PhaseID != 0 ||
-                condition.PhaseGroupID != 0 ||
-                condition.PhaseUseFlags != 0)
-                if (!PhasingHandler.InDbPhaseShift(player, (PhaseUseFlagsValues)condition.PhaseUseFlags, condition.PhaseID, condition.PhaseGroupID))
-                    return false;
-
-            if (condition.QuestKillID != 0)
-            {
-                Quest quest = Global.ObjectMgr.GetQuestTemplate(condition.QuestKillID);
-                ushort questSlot = player.FindQuestSlot(condition.QuestKillID);
-
-                if (quest != null &&
-                    player.GetQuestStatus(condition.QuestKillID) != QuestStatus.Complete &&
-                    questSlot < SharedConst.MaxQuestLogSize)
-                {
-                    results = new bool[condition.QuestKillMonster.Length];
-
-                    for (var i = 0; i < results.Length; ++i)
-                        results[i] = true;
-
-                    for (var i = 0; i < condition.QuestKillMonster.Length; ++i)
-                        if (condition.QuestKillMonster[i] != 0)
-                        {
-                            var questObjective = quest.Objectives.Find(objective => objective.Type == QuestObjectiveType.Monster && objective.ObjectID == condition.QuestKillMonster[i]);
-
-                            if (questObjective != null)
-                                results[i] = player.GetQuestSlotObjectiveData(questSlot, questObjective) >= questObjective.Amount;
-                        }
-
-                    if (!PlayerConditionLogic(condition.QuestKillLogic, results))
-                        return false;
-                }
-            }
-
-            if (condition.MinAvgItemLevel != 0 &&
-                Math.Floor(player.PlayerData.AvgItemLevel[0]) < condition.MinAvgItemLevel)
-                return false;
-
-            if (condition.MaxAvgItemLevel != 0 &&
-                Math.Floor(player.PlayerData.AvgItemLevel[0]) > condition.MaxAvgItemLevel)
-                return false;
-
-            if (condition.MinAvgEquippedItemLevel != 0 &&
-                Math.Floor(player.PlayerData.AvgItemLevel[1]) < condition.MinAvgEquippedItemLevel)
-                return false;
-
-            if (condition.MaxAvgEquippedItemLevel != 0 &&
-                Math.Floor(player.PlayerData.AvgItemLevel[1]) > condition.MaxAvgEquippedItemLevel)
-                return false;
-
-            if (condition.ModifierTreeID != 0 &&
-                !player.ModifierTreeSatisfied(condition.ModifierTreeID))
-                return false;
-
-            if (condition.CovenantID != 0 &&
-                player.PlayerData.CovenantID != condition.CovenantID)
-                return false;
-
-            if (condition.TraitNodeEntryID.Any(traitNodeEntryId => traitNodeEntryId != 0))
-            {
-                var getTraitNodeEntryRank = ushort? (int traitNodeEntryId) =>
-                                            {
-                                                foreach (var traitConfig in player.ActivePlayerData.TraitConfigs)
-                                                {
-                                                    if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
-                                                        if (player.ActivePlayerData.ActiveCombatTraitConfigID != traitConfig.ID ||
-                                                            !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
-                                                            continue;
-
-                                                    foreach (var traitEntry in traitConfig.Entries)
-                                                        if (traitEntry.TraitNodeEntryID == traitNodeEntryId)
-                                                            return (ushort)traitEntry.Rank;
-                                                }
-
-                                                return null;
-                                            };
-
-                results = new bool[condition.TraitNodeEntryID.Length];
-                Array.Fill(results, true);
-
-                for (var i = 0; i < condition.TraitNodeEntryID.Count(); ++i)
-                {
-                    if (condition.TraitNodeEntryID[i] == 0)
-                        continue;
-
-                    var rank = getTraitNodeEntryRank(condition.TraitNodeEntryID[i]);
-
-                    if (!rank.HasValue)
-                        results[i] = false;
-                    else if (condition.TraitNodeEntryMinRank[i] != 0 &&
-                             rank < condition.TraitNodeEntryMinRank[i])
-                        results[i] = false;
-                    else if (condition.TraitNodeEntryMaxRank[i] != 0 &&
-                             rank > condition.TraitNodeEntryMaxRank[i])
-                        results[i] = false;
-                }
-
-                if (!PlayerConditionLogic(condition.TraitNodeEntryLogic, results))
-                    return false;
-            }
-
-            return true;
-        }
-
-        public static bool IsPlayerMeetingExpression(Player player, WorldStateExpressionRecord expression)
-        {
-            ByteBuffer buffer = new(expression.Expression.ToByteArray());
-
-            if (buffer.GetSize() == 0)
-                return false;
-
-            bool enabled = buffer.ReadBool();
-
-            if (!enabled)
-                return false;
-
-            bool finalResult = EvalRelOp(buffer, player);
-            WorldStateExpressionLogic resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
-
-            while (resultLogic != WorldStateExpressionLogic.None)
-            {
-                bool secondResult = EvalRelOp(buffer, player);
-
-                switch (resultLogic)
-                {
-                    case WorldStateExpressionLogic.And:
-                        finalResult = finalResult && secondResult;
-
-                        break;
-                    case WorldStateExpressionLogic.Or:
-                        finalResult = finalResult || secondResult;
-
-                        break;
-                    case WorldStateExpressionLogic.Xor:
-                        finalResult = finalResult != secondResult;
-
-                        break;
-                    default:
-                        break;
-                }
-
-                if (buffer.GetCurrentStream().Position < buffer.GetSize())
-                    break;
-
-                resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
-            }
-
-            return finalResult;
-        }
-
         private static int GetUnitConditionVariable(Unit unit, Unit otherUnit, UnitConditionVariable variable, int value)
         {
             switch (variable)
@@ -3272,60 +3342,6 @@ namespace Game
             return 0;
         }
 
-        public static bool IsUnitMeetingCondition(Unit unit, Unit otherUnit, UnitConditionRecord condition)
-        {
-            for (int i = 0; i < condition.Variable.Length; ++i)
-            {
-                if (condition.Variable[i] == 0)
-                    break;
-
-                int unitValue = GetUnitConditionVariable(unit, otherUnit, (UnitConditionVariable)condition.Variable[i], condition.Value[i]);
-                bool meets = false;
-
-                switch ((UnitConditionOp)condition.Op[i])
-                {
-                    case UnitConditionOp.EqualTo:
-                        meets = unitValue == condition.Value[i];
-
-                        break;
-                    case UnitConditionOp.NotEqualTo:
-                        meets = unitValue != condition.Value[i];
-
-                        break;
-                    case UnitConditionOp.LessThan:
-                        meets = unitValue < condition.Value[i];
-
-                        break;
-                    case UnitConditionOp.LessThanOrEqualTo:
-                        meets = unitValue <= condition.Value[i];
-
-                        break;
-                    case UnitConditionOp.GreaterThan:
-                        meets = unitValue > condition.Value[i];
-
-                        break;
-                    case UnitConditionOp.GreaterThanOrEqualTo:
-                        meets = unitValue >= condition.Value[i];
-
-                        break;
-                    default:
-                        break;
-                }
-
-                if (condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr))
-                {
-                    if (meets)
-                        return true;
-                }
-                else if (!meets)
-                {
-                    return false;
-                }
-            }
-
-            return !condition.GetFlags().HasFlag(UnitConditionFlags.LogicOr);
-        }
-
         private static int EvalSingleValue(ByteBuffer buffer, Player player)
         {
             WorldStateExpressionValueType valueType = (WorldStateExpressionValueType)buffer.ReadUInt8();
@@ -3516,22 +3532,6 @@ namespace Game
             }
 
             return false;
-        }
-
-        public struct ConditionTypeInfo
-        {
-            public ConditionTypeInfo(string name, params bool[] args)
-            {
-                Name = name;
-                HasConditionValue1 = args[0];
-                HasConditionValue2 = args[1];
-                HasConditionValue3 = args[2];
-            }
-
-            public string Name;
-            public bool HasConditionValue1;
-            public bool HasConditionValue2;
-            public bool HasConditionValue3;
         }
     }
 }

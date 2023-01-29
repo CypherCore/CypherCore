@@ -124,62 +124,6 @@ namespace Game.Entities
             SendPacket(raidGroupOnly);
         }
 
-        private void UpdateArea(uint newArea)
-        {
-            // FFA_PVP Flags are area and not zone Id dependent
-            // so apply them accordingly
-            _areaUpdateId = newArea;
-
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
-            bool oldFFAPvPArea = PvpInfo.IsInFFAPvPArea;
-            PvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.Arena);
-            UpdatePvPState(true);
-
-            // check if we were in ffa arena and we left
-            if (oldFFAPvPArea && !PvpInfo.IsInFFAPvPArea)
-                ValidateAttackersAndOwnTarget();
-
-            PhasingHandler.OnAreaChange(this);
-            UpdateAreaDependentAuras(newArea);
-
-            if (IsAreaThatActivatesPvpTalents(newArea))
-                EnablePvpRules();
-            else
-                DisablePvpRules();
-
-            // previously this was in UpdateZone (but after UpdateArea) so nothing will break
-            PvpInfo.IsInNoPvPArea = false;
-
-            if (area != null &&
-                area.IsSanctuary()) // in sanctuary
-            {
-                SetPvpFlag(UnitPVPStateFlags.Sanctuary);
-                PvpInfo.IsInNoPvPArea = true;
-
-                if (Duel == null &&
-                    GetCombatManager().HasPvPCombat())
-                    CombatStopWithPets();
-            }
-            else
-            {
-                RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
-            }
-
-            AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.RestZoneAlliance : AreaFlags.RestZoneHorde;
-
-            if (area != null &&
-                area.HasFlag(areaRestFlag))
-                _restMgr.SetRestFlag(RestFlag.FactionArea);
-            else
-                _restMgr.RemoveRestFlag(RestFlag.FactionArea);
-
-            PushQuests();
-
-            UpdateCriteria(CriteriaType.EnterTopLevelArea, newArea);
-
-            UpdateMountCapability();
-        }
-
         public void UpdateZone(uint newZone, uint newArea)
         {
             if (!IsInWorld)
@@ -514,16 +458,6 @@ namespace Game.Entities
             return true;
         }
 
-        private bool IsInstanceLoginGameMasterException()
-        {
-            if (!CanBeGameMaster())
-                return false;
-
-            SendSysMessage(CypherStrings.InstanceLoginGamemasterException);
-
-            return true;
-        }
-
         public bool CheckInstanceValidity(bool isLogin)
         {
             // game masters' instances are always valid
@@ -721,6 +655,72 @@ namespace Game.Entities
         public void SetRecentInstance(uint mapId, uint instanceId)
         {
             _recentInstances[mapId] = instanceId;
+        }
+
+        private void UpdateArea(uint newArea)
+        {
+            // FFA_PVP Flags are area and not zone Id dependent
+            // so apply them accordingly
+            _areaUpdateId = newArea;
+
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
+            bool oldFFAPvPArea = PvpInfo.IsInFFAPvPArea;
+            PvpInfo.IsInFFAPvPArea = area != null && area.HasFlag(AreaFlags.Arena);
+            UpdatePvPState(true);
+
+            // check if we were in ffa arena and we left
+            if (oldFFAPvPArea && !PvpInfo.IsInFFAPvPArea)
+                ValidateAttackersAndOwnTarget();
+
+            PhasingHandler.OnAreaChange(this);
+            UpdateAreaDependentAuras(newArea);
+
+            if (IsAreaThatActivatesPvpTalents(newArea))
+                EnablePvpRules();
+            else
+                DisablePvpRules();
+
+            // previously this was in UpdateZone (but after UpdateArea) so nothing will break
+            PvpInfo.IsInNoPvPArea = false;
+
+            if (area != null &&
+                area.IsSanctuary()) // in sanctuary
+            {
+                SetPvpFlag(UnitPVPStateFlags.Sanctuary);
+                PvpInfo.IsInNoPvPArea = true;
+
+                if (Duel == null &&
+                    GetCombatManager().HasPvPCombat())
+                    CombatStopWithPets();
+            }
+            else
+            {
+                RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
+            }
+
+            AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.RestZoneAlliance : AreaFlags.RestZoneHorde;
+
+            if (area != null &&
+                area.HasFlag(areaRestFlag))
+                _restMgr.SetRestFlag(RestFlag.FactionArea);
+            else
+                _restMgr.RemoveRestFlag(RestFlag.FactionArea);
+
+            PushQuests();
+
+            UpdateCriteria(CriteriaType.EnterTopLevelArea, newArea);
+
+            UpdateMountCapability();
+        }
+
+        private bool IsInstanceLoginGameMasterException()
+        {
+            if (!CanBeGameMaster())
+                return false;
+
+            SendSysMessage(CypherStrings.InstanceLoginGamemasterException);
+
+            return true;
         }
     }
 }

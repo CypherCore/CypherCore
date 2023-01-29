@@ -102,25 +102,6 @@ namespace Framework.Networking
                 ProcessReadAsync(receiveSocketAsyncEventArgs);
         }
 
-        private void ProcessReadAsync(SocketAsyncEventArgs args)
-        {
-            if (args.SocketError != SocketError.Success)
-            {
-                CloseSocket();
-
-                return;
-            }
-
-            if (args.BytesTransferred == 0)
-            {
-                CloseSocket();
-
-                return;
-            }
-
-            ReadHandler(args);
-        }
-
         public abstract void ReadHandler(SocketAsyncEventArgs args);
 
         public void AsyncWrite(byte[] data)
@@ -139,6 +120,25 @@ namespace Framework.Networking
         public void SetNoDelay(bool enable)
         {
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
+        }
+
+        private void ProcessReadAsync(SocketAsyncEventArgs args)
+        {
+            if (args.SocketError != SocketError.Success)
+            {
+                CloseSocket();
+
+                return;
+            }
+
+            if (args.BytesTransferred == 0)
+            {
+                CloseSocket();
+
+                return;
+            }
+
+            ReadHandler(args);
         }
     }
 }

@@ -27,15 +27,6 @@ namespace Game.Entities
             return _charmInfo;
         }
 
-        private void DeleteCharmInfo()
-        {
-            if (_charmInfo == null)
-                return;
-
-            _charmInfo.RestoreState();
-            _charmInfo = null;
-        }
-
         public void UpdateCharmAI()
         {
             if (IsCharmed())
@@ -844,6 +835,35 @@ namespace Game.Entities
             return pet;
         }
 
+        public void UpdatePetCombatState()
+        {
+            Cypher.Assert(!IsPet()); // player pets do not use UNIT_FLAG_PET_IN_COMBAT for this purpose - but player pets should also never have minions of their own to call this
+
+            bool state = false;
+
+            foreach (Unit minion in Controlled)
+                if (minion.IsInCombat())
+                {
+                    state = true;
+
+                    break;
+                }
+
+            if (state)
+                SetUnitFlag(UnitFlags.PetInCombat);
+            else
+                RemoveUnitFlag(UnitFlags.PetInCombat);
+        }
+
+        private void DeleteCharmInfo()
+        {
+            if (_charmInfo == null)
+                return;
+
+            _charmInfo.RestoreState();
+            _charmInfo = null;
+        }
+
         private bool InitTamedPet(Pet pet, uint level, uint spell_id)
         {
             Player player = ToPlayer();
@@ -882,26 +902,6 @@ namespace Game.Entities
             petStable.ActivePets[freeActiveSlot] = petInfo;
 
             return true;
-        }
-
-        public void UpdatePetCombatState()
-        {
-            Cypher.Assert(!IsPet()); // player pets do not use UNIT_FLAG_PET_IN_COMBAT for this purpose - but player pets should also never have minions of their own to call this
-
-            bool state = false;
-
-            foreach (Unit minion in Controlled)
-                if (minion.IsInCombat())
-                {
-                    state = true;
-
-                    break;
-                }
-
-            if (state)
-                SetUnitFlag(UnitFlags.PetInCombat);
-            else
-                RemoveUnitFlag(UnitFlags.PetInCombat);
         }
     }
 }

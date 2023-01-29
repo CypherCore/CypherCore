@@ -597,6 +597,12 @@ namespace Game.Networking.Packets
 
     public class TransferPending : ServerPacket
     {
+        public struct ShipTransferPending
+        {
+            public uint Id;         // gameobject_template.entry of the Transport the player is teleporting on
+            public int OriginMapID; // Map Id the player is currently on (before teleport)
+        }
+
         public int MapID = -1;
         public Position OldMapPosition;
         public ShipTransferPending? Ship;
@@ -623,12 +629,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(TransferSpellID.Value);
 
             _worldPacket.FlushBits();
-        }
-
-        public struct ShipTransferPending
-        {
-            public uint Id;         // gameobject_template.entry of the Transport the player is teleporting on
-            public int OriginMapID; // Map Id the player is currently on (before teleport)
         }
     }
 
@@ -899,9 +899,8 @@ namespace Game.Networking.Packets
 
     internal class MoveTeleportAck : ClientPacket
     {
-        private int AckIndex;
-
         public ObjectGuid MoverGUID;
+        private int AckIndex;
         private int MoveTime;
 
         public MoveTeleportAck(WorldPacket packet) : base(packet)
@@ -1261,22 +1260,6 @@ namespace Game.Networking.Packets
 
     internal class MoveSetCompoundState : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-        public List<MoveStateChange> StateChanges = new();
-
-        public MoveSetCompoundState() : base(ServerOpcodes.MoveSetCompoundState, ConnectionType.Instance)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteInt32(StateChanges.Count);
-
-            foreach (MoveStateChange stateChange in StateChanges)
-                stateChange.Write(_worldPacket);
-        }
-
         public struct CollisionHeightInfo
         {
             public float Height;
@@ -1371,6 +1354,22 @@ namespace Game.Networking.Packets
                 if (MovementInertiaLifetimeMs.HasValue)
                     data.WriteUInt32(MovementInertiaLifetimeMs.Value);
             }
+        }
+
+        public ObjectGuid MoverGUID;
+        public List<MoveStateChange> StateChanges = new();
+
+        public MoveSetCompoundState() : base(ServerOpcodes.MoveSetCompoundState, ConnectionType.Instance)
+        {
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteInt32(StateChanges.Count);
+
+            foreach (MoveStateChange stateChange in StateChanges)
+                stateChange.Write(_worldPacket);
         }
     }
 
@@ -1488,6 +1487,13 @@ namespace Game.Networking.Packets
 
     public class MonsterSplineUnknown901
     {
+        public struct Inner
+        {
+            public int Unknown_1;
+            public SpellCastVisual Visual;
+            public uint Unknown_4;
+        }
+
         public Array<Inner> Data = new(16);
 
         public void Write(WorldPacket data)
@@ -1498,13 +1504,6 @@ namespace Game.Networking.Packets
                 unkInner.Visual.Write(data);
                 data.WriteUInt32(unkInner.Unknown_4);
             }
-        }
-
-        public struct Inner
-        {
-            public int Unknown_1;
-            public SpellCastVisual Visual;
-            public uint Unknown_4;
         }
     }
 

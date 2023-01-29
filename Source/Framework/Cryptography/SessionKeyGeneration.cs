@@ -7,11 +7,11 @@ namespace Framework.Cryptography
 {
     public class SessionKeyGenerator256
     {
-        private byte[] o0 = new byte[32];
         private readonly byte[] o1 = new byte[32];
         private readonly byte[] o2 = new byte[32];
 
         private readonly SHA256 sh;
+        private byte[] o0 = new byte[32];
         private uint taken;
 
         public SessionKeyGenerator256(byte[] buff, int size = 0)
@@ -58,11 +58,11 @@ namespace Framework.Cryptography
 
     public class SessionKeyGenerator
     {
-        private byte[] o0 = new byte[32];
         private readonly byte[] o1 = new byte[32];
         private readonly byte[] o2 = new byte[32];
 
         private readonly SHA1 sh;
+        private byte[] o0 = new byte[32];
         private uint taken;
 
         public SessionKeyGenerator(byte[] buff, int size = 0)

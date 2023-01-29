@@ -9,18 +9,8 @@ namespace Game.DungeonFinding
 {
     public class LfgProposal
     {
-        public long CancelTime { get; set; }
-        public uint DungeonId { get; set; }
-        public uint Encounters { get; set; }
         public ObjectGuid Group;
-
-        public uint Id { get; set; }
-        public bool IsNew { get; set; }
         public ObjectGuid Leader;
-        public Dictionary<ObjectGuid, LfgProposalPlayer> Players { get; set; } = new(); // Players _data
-        public List<ObjectGuid> Queues { get; set; } = new();
-        public List<ulong> Showorder { get; set; } = new();
-        public LfgProposalState State { get; set; }
 
         public LfgProposal(uint dungeon = 0)
         {
@@ -33,5 +23,16 @@ namespace Game.DungeonFinding
             Encounters = 0;
             IsNew = true;
         }
+
+        public long CancelTime { get; set; }
+        public uint DungeonId { get; set; }
+        public uint Encounters { get; set; }
+
+        public uint Id { get; set; }
+        public bool IsNew { get; set; }
+        public Dictionary<ObjectGuid, LfgProposalPlayer> Players { get; set; } = new(); // Players _data
+        public List<ObjectGuid> Queues { get; set; } = new();
+        public List<ulong> Showorder { get; set; } = new();
+        public LfgProposalState State { get; set; }
     }
 }

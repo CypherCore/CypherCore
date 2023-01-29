@@ -76,8 +76,8 @@ namespace Game.Collision
 
     public class ModelInstance : ModelMinimalData
     {
-        private Matrix4x4 iInvRot;
         private readonly float iInvScale;
+        private Matrix4x4 iInvRot;
         private WorldModel iModel;
 
         public ModelInstance()

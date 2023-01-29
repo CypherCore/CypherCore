@@ -5,11 +5,6 @@ namespace Game.Entities
 {
     public class PlayerCreateInfoAction
     {
-        public uint Action { get; set; }
-
-        public byte Button { get; set; }
-        public byte Type { get; set; }
-
         public PlayerCreateInfoAction() : this(0, 0, 0)
         {
         }
@@ -20,5 +15,10 @@ namespace Game.Entities
             Type = _type;
             Action = _action;
         }
+
+        public uint Action { get; set; }
+
+        public byte Button { get; set; }
+        public byte Type { get; set; }
     }
 }

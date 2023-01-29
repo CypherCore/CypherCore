@@ -9,10 +9,24 @@ namespace Game.Scripting
 {
     public class AuraScript : BaseSpellScript, IAuraScript
     {
+        private class ScriptStateStore
+        {
+            public AuraApplication _auraApplication;
+            public byte _currentScriptState;
+            public bool _defaultActionPrevented;
+
+            public ScriptStateStore(byte currentScriptState, AuraApplication auraApplication, bool defaultActionPrevented)
+            {
+                _auraApplication = auraApplication;
+                _currentScriptState = currentScriptState;
+                _defaultActionPrevented = defaultActionPrevented;
+            }
+        }
+
+        private readonly Stack<ScriptStateStore> _scriptStates = new();
         private Aura _aura;
         private AuraApplication _auraApplication;
         private bool _defaultActionPrevented;
-        private readonly Stack<ScriptStateStore> _scriptStates = new();
 
         public AuraScript()
         {
@@ -341,20 +355,6 @@ namespace Game.Scripting
         private bool HasEffectType(AuraType type)
         {
             return _aura.HasEffectType(type);
-        }
-
-        private class ScriptStateStore
-        {
-            public AuraApplication _auraApplication;
-            public byte _currentScriptState;
-            public bool _defaultActionPrevented;
-
-            public ScriptStateStore(byte currentScriptState, AuraApplication auraApplication, bool defaultActionPrevented)
-            {
-                _auraApplication = auraApplication;
-                _currentScriptState = currentScriptState;
-                _defaultActionPrevented = defaultActionPrevented;
-            }
         }
     }
 }

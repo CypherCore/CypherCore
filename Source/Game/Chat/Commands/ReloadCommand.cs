@@ -13,6 +13,173 @@ namespace Game.Chat
     [CommandGroup("reload")]
     internal class ReloadCommand
     {
+        [CommandGroup("all")]
+        private class AllCommand
+        {
+            [Command("", RBACPermissions.CommandReloadAll, true)]
+            private static bool HandleReloadAllCommand(CommandHandler handler)
+            {
+                HandleReloadSkillFishingBaseLevelCommand(handler);
+
+                HandleReloadAllAchievementCommand(handler);
+                HandleReloadAllAreaCommand(handler);
+                HandleReloadAllLootCommand(handler);
+                HandleReloadAllNpcCommand(handler);
+                HandleReloadAllQuestCommand(handler);
+                HandleReloadAllSpellCommand(handler);
+                HandleReloadAllItemCommand(handler);
+                HandleReloadAllGossipsCommand(handler);
+                HandleReloadAllLocalesCommand(handler);
+
+                HandleReloadAccessRequirementCommand(handler);
+                HandleReloadMailLevelRewardCommand(handler);
+                HandleReloadReservedNameCommand(handler);
+                HandleReloadCypherStringCommand(handler);
+                HandleReloadGameTeleCommand(handler);
+
+                HandleReloadCreatureMovementOverrideCommand(handler);
+                HandleReloadCreatureSummonGroupsCommand(handler);
+
+                HandleReloadVehicleAccessoryCommand(handler);
+                HandleReloadVehicleTemplateAccessoryCommand(handler);
+
+                HandleReloadAutobroadcastCommand(handler);
+                HandleReloadBattlegroundTemplate(handler);
+                HandleReloadCharacterTemplate(handler);
+
+                return true;
+            }
+
+            [Command("Achievement", RBACPermissions.CommandReloadAllAchievement, true)]
+            private static bool HandleReloadAllAchievementCommand(CommandHandler handler)
+            {
+                HandleReloadCriteriaDataCommand(handler);
+                HandleReloadAchievementRewardCommand(handler);
+
+                return true;
+            }
+
+            [Command("area", RBACPermissions.CommandReloadAllArea, true)]
+            private static bool HandleReloadAllAreaCommand(CommandHandler handler)
+            {
+                HandleReloadAreaTriggerTeleportCommand(handler);
+                HandleReloadAreaTriggerTavernCommand(handler);
+                HandleReloadGameGraveyardZoneCommand(handler);
+
+                return true;
+            }
+
+            [Command("gossips", RBACPermissions.CommandReloadAllGossip, true)]
+            private static bool HandleReloadAllGossipsCommand(CommandHandler handler)
+            {
+                HandleReloadGossipMenuCommand(handler);
+                HandleReloadGossipMenuOptionCommand(handler);
+                HandleReloadPointsOfInterestCommand(handler);
+
+                return true;
+            }
+
+            [Command("Item", RBACPermissions.CommandReloadAllItem, true)]
+            private static bool HandleReloadAllItemCommand(CommandHandler handler)
+            {
+                HandleReloadPageTextsCommand(handler);
+                HandleReloadItemRandomBonusListTemplatesCommand(handler);
+
+                return true;
+            }
+
+            [Command("locales", RBACPermissions.CommandReloadAllLocales, true)]
+            private static bool HandleReloadAllLocalesCommand(CommandHandler handler)
+            {
+                HandleReloadAchievementRewardLocaleCommand(handler);
+                HandleReloadCreatureTemplateLocaleCommand(handler);
+                HandleReloadCreatureTextLocaleCommand(handler);
+                HandleReloadGameobjectTemplateLocaleCommand(handler);
+                HandleReloadGossipMenuOptionLocaleCommand(handler);
+                HandleReloadPageTextLocaleCommand(handler);
+                HandleReloadPointsOfInterestCommand(handler);
+                HandleReloadQuestTemplateLocaleCommand(handler);
+
+                return true;
+            }
+
+            [Command("loot", RBACPermissions.CommandReloadAllLoot, true)]
+            private static bool HandleReloadAllLootCommand(CommandHandler handler)
+            {
+                Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables...");
+                LootManager.LoadLootTables();
+                handler.SendGlobalGMSysMessage("DB tables `*_loot_template` reloaded.");
+                Global.ConditionMgr.LoadConditions(true);
+
+                return true;
+            }
+
+            [Command("npc", RBACPermissions.CommandReloadAllNpc, true)]
+            private static bool HandleReloadAllNpcCommand(CommandHandler handler)
+            {
+                HandleReloadTrainerCommand(handler);
+                HandleReloadNpcVendorCommand(handler);
+                HandleReloadPointsOfInterestCommand(handler);
+                HandleReloadSpellClickSpellsCommand(handler);
+
+                return true;
+            }
+
+            [Command("quest", RBACPermissions.CommandReloadAllQuest, true)]
+            private static bool HandleReloadAllQuestCommand(CommandHandler handler)
+            {
+                HandleReloadQuestAreaTriggersCommand(handler);
+                HandleReloadQuestGreetingCommand(handler);
+                HandleReloadQuestPOICommand(handler);
+                HandleReloadQuestTemplateCommand(handler);
+
+                Log.outInfo(LogFilter.Server, "Re-Loading Quests Relations...");
+                Global.ObjectMgr.LoadQuestStartersAndEnders();
+                handler.SendGlobalGMSysMessage("DB tables `*_queststarter` and `*_questender` reloaded.");
+
+                return true;
+            }
+
+            [Command("scripts", RBACPermissions.CommandReloadAllScripts, true)]
+            private static bool HandleReloadAllScriptsCommand(CommandHandler handler)
+            {
+                if (Global.MapMgr.IsScriptScheduled())
+                {
+                    handler.SendSysMessage("DB scripts used currently, please attempt reload later.");
+
+                    return false;
+                }
+
+                Log.outInfo(LogFilter.Server, "Re-Loading Scripts...");
+                HandleReloadEventScriptsCommand(handler, null);
+                HandleReloadSpellScriptsCommand(handler, null);
+                handler.SendGlobalGMSysMessage("DB tables `*_scripts` reloaded.");
+                HandleReloadWpScriptsCommand(handler, null);
+                HandleReloadWpCommand(handler, null);
+
+                return true;
+            }
+
+            [Command("spell", RBACPermissions.CommandReloadAllSpell, true)]
+            private static bool HandleReloadAllSpellCommand(CommandHandler handler)
+            {
+                HandleReloadSkillDiscoveryTemplateCommand(handler);
+                HandleReloadSkillExtraItemTemplateCommand(handler);
+                HandleReloadSpellRequiredCommand(handler);
+                HandleReloadSpellAreaCommand(handler);
+                HandleReloadSpellGroupsCommand(handler);
+                HandleReloadSpellLearnSpellCommand(handler);
+                HandleReloadSpellLinkedSpellCommand(handler);
+                HandleReloadSpellProcsCommand(handler);
+                HandleReloadSpellTargetPositionCommand(handler);
+                HandleReloadSpellThreatsCommand(handler);
+                HandleReloadSpellGroupStackRulesCommand(handler);
+                HandleReloadSpellPetAurasCommand(handler);
+
+                return true;
+            }
+        }
+
         [Command("access_requirement", RBACPermissions.CommandReloadAccessRequirement, true)]
         private static bool HandleReloadAccessRequirementCommand(CommandHandler handler)
         {
@@ -1038,173 +1205,6 @@ namespace Game.Chat
                 handler.SendGlobalGMSysMessage("DB table `waypoint_scripts` reloaded.");
 
             return true;
-        }
-
-        [CommandGroup("all")]
-        private class AllCommand
-        {
-            [Command("", RBACPermissions.CommandReloadAll, true)]
-            private static bool HandleReloadAllCommand(CommandHandler handler)
-            {
-                HandleReloadSkillFishingBaseLevelCommand(handler);
-
-                HandleReloadAllAchievementCommand(handler);
-                HandleReloadAllAreaCommand(handler);
-                HandleReloadAllLootCommand(handler);
-                HandleReloadAllNpcCommand(handler);
-                HandleReloadAllQuestCommand(handler);
-                HandleReloadAllSpellCommand(handler);
-                HandleReloadAllItemCommand(handler);
-                HandleReloadAllGossipsCommand(handler);
-                HandleReloadAllLocalesCommand(handler);
-
-                HandleReloadAccessRequirementCommand(handler);
-                HandleReloadMailLevelRewardCommand(handler);
-                HandleReloadReservedNameCommand(handler);
-                HandleReloadCypherStringCommand(handler);
-                HandleReloadGameTeleCommand(handler);
-
-                HandleReloadCreatureMovementOverrideCommand(handler);
-                HandleReloadCreatureSummonGroupsCommand(handler);
-
-                HandleReloadVehicleAccessoryCommand(handler);
-                HandleReloadVehicleTemplateAccessoryCommand(handler);
-
-                HandleReloadAutobroadcastCommand(handler);
-                HandleReloadBattlegroundTemplate(handler);
-                HandleReloadCharacterTemplate(handler);
-
-                return true;
-            }
-
-            [Command("Achievement", RBACPermissions.CommandReloadAllAchievement, true)]
-            private static bool HandleReloadAllAchievementCommand(CommandHandler handler)
-            {
-                HandleReloadCriteriaDataCommand(handler);
-                HandleReloadAchievementRewardCommand(handler);
-
-                return true;
-            }
-
-            [Command("area", RBACPermissions.CommandReloadAllArea, true)]
-            private static bool HandleReloadAllAreaCommand(CommandHandler handler)
-            {
-                HandleReloadAreaTriggerTeleportCommand(handler);
-                HandleReloadAreaTriggerTavernCommand(handler);
-                HandleReloadGameGraveyardZoneCommand(handler);
-
-                return true;
-            }
-
-            [Command("gossips", RBACPermissions.CommandReloadAllGossip, true)]
-            private static bool HandleReloadAllGossipsCommand(CommandHandler handler)
-            {
-                HandleReloadGossipMenuCommand(handler);
-                HandleReloadGossipMenuOptionCommand(handler);
-                HandleReloadPointsOfInterestCommand(handler);
-
-                return true;
-            }
-
-            [Command("Item", RBACPermissions.CommandReloadAllItem, true)]
-            private static bool HandleReloadAllItemCommand(CommandHandler handler)
-            {
-                HandleReloadPageTextsCommand(handler);
-                HandleReloadItemRandomBonusListTemplatesCommand(handler);
-
-                return true;
-            }
-
-            [Command("locales", RBACPermissions.CommandReloadAllLocales, true)]
-            private static bool HandleReloadAllLocalesCommand(CommandHandler handler)
-            {
-                HandleReloadAchievementRewardLocaleCommand(handler);
-                HandleReloadCreatureTemplateLocaleCommand(handler);
-                HandleReloadCreatureTextLocaleCommand(handler);
-                HandleReloadGameobjectTemplateLocaleCommand(handler);
-                HandleReloadGossipMenuOptionLocaleCommand(handler);
-                HandleReloadPageTextLocaleCommand(handler);
-                HandleReloadPointsOfInterestCommand(handler);
-                HandleReloadQuestTemplateLocaleCommand(handler);
-
-                return true;
-            }
-
-            [Command("loot", RBACPermissions.CommandReloadAllLoot, true)]
-            private static bool HandleReloadAllLootCommand(CommandHandler handler)
-            {
-                Log.outInfo(LogFilter.Server, "Re-Loading Loot Tables...");
-                LootManager.LoadLootTables();
-                handler.SendGlobalGMSysMessage("DB tables `*_loot_template` reloaded.");
-                Global.ConditionMgr.LoadConditions(true);
-
-                return true;
-            }
-
-            [Command("npc", RBACPermissions.CommandReloadAllNpc, true)]
-            private static bool HandleReloadAllNpcCommand(CommandHandler handler)
-            {
-                HandleReloadTrainerCommand(handler);
-                HandleReloadNpcVendorCommand(handler);
-                HandleReloadPointsOfInterestCommand(handler);
-                HandleReloadSpellClickSpellsCommand(handler);
-
-                return true;
-            }
-
-            [Command("quest", RBACPermissions.CommandReloadAllQuest, true)]
-            private static bool HandleReloadAllQuestCommand(CommandHandler handler)
-            {
-                HandleReloadQuestAreaTriggersCommand(handler);
-                HandleReloadQuestGreetingCommand(handler);
-                HandleReloadQuestPOICommand(handler);
-                HandleReloadQuestTemplateCommand(handler);
-
-                Log.outInfo(LogFilter.Server, "Re-Loading Quests Relations...");
-                Global.ObjectMgr.LoadQuestStartersAndEnders();
-                handler.SendGlobalGMSysMessage("DB tables `*_queststarter` and `*_questender` reloaded.");
-
-                return true;
-            }
-
-            [Command("scripts", RBACPermissions.CommandReloadAllScripts, true)]
-            private static bool HandleReloadAllScriptsCommand(CommandHandler handler)
-            {
-                if (Global.MapMgr.IsScriptScheduled())
-                {
-                    handler.SendSysMessage("DB scripts used currently, please attempt reload later.");
-
-                    return false;
-                }
-
-                Log.outInfo(LogFilter.Server, "Re-Loading Scripts...");
-                HandleReloadEventScriptsCommand(handler, null);
-                HandleReloadSpellScriptsCommand(handler, null);
-                handler.SendGlobalGMSysMessage("DB tables `*_scripts` reloaded.");
-                HandleReloadWpScriptsCommand(handler, null);
-                HandleReloadWpCommand(handler, null);
-
-                return true;
-            }
-
-            [Command("spell", RBACPermissions.CommandReloadAllSpell, true)]
-            private static bool HandleReloadAllSpellCommand(CommandHandler handler)
-            {
-                HandleReloadSkillDiscoveryTemplateCommand(handler);
-                HandleReloadSkillExtraItemTemplateCommand(handler);
-                HandleReloadSpellRequiredCommand(handler);
-                HandleReloadSpellAreaCommand(handler);
-                HandleReloadSpellGroupsCommand(handler);
-                HandleReloadSpellLearnSpellCommand(handler);
-                HandleReloadSpellLinkedSpellCommand(handler);
-                HandleReloadSpellProcsCommand(handler);
-                HandleReloadSpellTargetPositionCommand(handler);
-                HandleReloadSpellThreatsCommand(handler);
-                HandleReloadSpellGroupStackRulesCommand(handler);
-                HandleReloadSpellPetAurasCommand(handler);
-
-                return true;
-            }
         }
     }
 }

@@ -8,6 +8,18 @@ namespace Game.Networking.Packets
 {
     public class InitWorldStates : ServerPacket
     {
+        private struct WorldStateInfo
+        {
+            public WorldStateInfo(uint variableID, int value)
+            {
+                VariableID = variableID;
+                Value = value;
+            }
+
+            public uint VariableID;
+            public int Value;
+        }
+
         public uint AreaID;
         public uint MapID;
         public uint SubareaID;
@@ -56,18 +68,6 @@ namespace Game.Networking.Packets
         public void AddState(uint variableID, bool value)
         {
             Worldstates.Add(new WorldStateInfo(variableID, value ? 1 : 0));
-        }
-
-        private struct WorldStateInfo
-        {
-            public WorldStateInfo(uint variableID, int value)
-            {
-                VariableID = variableID;
-                Value = value;
-            }
-
-            public uint VariableID;
-            public int Value;
         }
     }
 

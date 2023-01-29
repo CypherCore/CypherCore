@@ -82,13 +82,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
     {
         private readonly ObjectGuid[] BeamerGUID = new ObjectGuid[3]; // Guid's of auxiliary beaming portals
         private readonly ObjectGuid[] BeamTarget = new ObjectGuid[3]; // Guid's of portals' current targets
+        private readonly InstanceScript instance;
+        private readonly ObjectGuid[] PortalGUID = new ObjectGuid[3]; // Guid's of portals
         private bool Berserk;
         private uint EmpowermentTimer;
-        private readonly InstanceScript instance;
         private uint NetherbreathTimer;
-        private uint NetherInfusionTimer;                    // berserking timer
-        private uint PhaseTimer;                             // timer for phase switching
-        private readonly ObjectGuid[] PortalGUID = new ObjectGuid[3]; // Guid's of portals
+        private uint NetherInfusionTimer; // berserking timer
+        private uint PhaseTimer;          // timer for phase switching
 
         private bool PortalPhase;
         private uint PortalTimer; // timer for beam checking
@@ -103,6 +103,129 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
             PhaseTimer = 0;
             EmpowermentTimer = 0;
             PortalTimer = 0;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            HandleDoors(true);
+            DestroyPortals();
+        }
+
+        public override void JustEngagedWith(Unit who)
+        {
+            HandleDoors(false);
+            SwitchToPortalPhase();
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            HandleDoors(true);
+            DestroyPortals();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            // Void Zone
+            if (VoidZoneTimer <= diff)
+            {
+                DoCast(SelectTarget(SelectTargetMethod.Random, 1, 45, true), SpellIds.Voidzone, new CastSpellExtraArgs(true));
+                VoidZoneTimer = 15000;
+            }
+            else
+            {
+                VoidZoneTimer -= diff;
+            }
+
+            // NetherInfusion Berserk
+            if (!Berserk &&
+                NetherInfusionTimer <= diff)
+            {
+                me.AddAura(SpellIds.NetherInfusion, me);
+                DoCast(me, SpellIds.NetherspiteRoar);
+                Berserk = true;
+            }
+            else
+            {
+                NetherInfusionTimer -= diff;
+            }
+
+            if (PortalPhase) // Portal Phase
+            {
+                // Distribute beams and buffs
+                if (PortalTimer <= diff)
+                {
+                    UpdatePortals();
+                    PortalTimer = 1000;
+                }
+                else
+                {
+                    PortalTimer -= diff;
+                }
+
+                // Empowerment & Nether Burn
+                if (EmpowermentTimer <= diff)
+                {
+                    DoCast(me, SpellIds.Empowerment);
+                    me.AddAura(SpellIds.NetherburnAura, me);
+                    EmpowermentTimer = 90000;
+                }
+                else
+                {
+                    EmpowermentTimer -= diff;
+                }
+
+                if (PhaseTimer <= diff)
+                {
+                    if (!me.IsNonMeleeSpellCast(false))
+                    {
+                        SwitchToBanishPhase();
+
+                        return;
+                    }
+                }
+                else
+                {
+                    PhaseTimer -= diff;
+                }
+            }
+            else // Banish Phase
+            {
+                // Netherbreath
+                if (NetherbreathTimer <= diff)
+                {
+                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
+
+                    if (target)
+                        DoCast(target, SpellIds.Netherbreath);
+
+                    NetherbreathTimer = RandomHelper.URand(5000, 7000);
+                }
+                else
+                {
+                    NetherbreathTimer -= diff;
+                }
+
+                if (PhaseTimer <= diff)
+                {
+                    if (!me.IsNonMeleeSpellCast(false))
+                    {
+                        SwitchToPortalPhase();
+
+                        return;
+                    }
+                }
+                else
+                {
+                    PhaseTimer -= diff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
         }
 
         private void Initialize()
@@ -140,14 +263,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
         private float dist(float xa, float ya, float xb, float yb) // auxiliary method for distance
         {
             return MathF.Sqrt((xa - xb) * (xa - xb) + (ya - yb) * (ya - yb));
-        }
-
-        public override void Reset()
-        {
-            Initialize();
-
-            HandleDoors(true);
-            DestroyPortals();
         }
 
         private void SummonPortals()
@@ -293,121 +408,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Netherspite
 
             if (Door)
                 Door.SetGoState(open ? GameObjectState.Active : GameObjectState.Ready);
-        }
-
-        public override void JustEngagedWith(Unit who)
-        {
-            HandleDoors(false);
-            SwitchToPortalPhase();
-        }
-
-        public override void JustDied(Unit killer)
-        {
-            HandleDoors(true);
-            DestroyPortals();
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            // Void Zone
-            if (VoidZoneTimer <= diff)
-            {
-                DoCast(SelectTarget(SelectTargetMethod.Random, 1, 45, true), SpellIds.Voidzone, new CastSpellExtraArgs(true));
-                VoidZoneTimer = 15000;
-            }
-            else
-            {
-                VoidZoneTimer -= diff;
-            }
-
-            // NetherInfusion Berserk
-            if (!Berserk &&
-                NetherInfusionTimer <= diff)
-            {
-                me.AddAura(SpellIds.NetherInfusion, me);
-                DoCast(me, SpellIds.NetherspiteRoar);
-                Berserk = true;
-            }
-            else
-            {
-                NetherInfusionTimer -= diff;
-            }
-
-            if (PortalPhase) // Portal Phase
-            {
-                // Distribute beams and buffs
-                if (PortalTimer <= diff)
-                {
-                    UpdatePortals();
-                    PortalTimer = 1000;
-                }
-                else
-                {
-                    PortalTimer -= diff;
-                }
-
-                // Empowerment & Nether Burn
-                if (EmpowermentTimer <= diff)
-                {
-                    DoCast(me, SpellIds.Empowerment);
-                    me.AddAura(SpellIds.NetherburnAura, me);
-                    EmpowermentTimer = 90000;
-                }
-                else
-                {
-                    EmpowermentTimer -= diff;
-                }
-
-                if (PhaseTimer <= diff)
-                {
-                    if (!me.IsNonMeleeSpellCast(false))
-                    {
-                        SwitchToBanishPhase();
-
-                        return;
-                    }
-                }
-                else
-                {
-                    PhaseTimer -= diff;
-                }
-            }
-            else // Banish Phase
-            {
-                // Netherbreath
-                if (NetherbreathTimer <= diff)
-                {
-                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 40, true);
-
-                    if (target)
-                        DoCast(target, SpellIds.Netherbreath);
-
-                    NetherbreathTimer = RandomHelper.URand(5000, 7000);
-                }
-                else
-                {
-                    NetherbreathTimer -= diff;
-                }
-
-                if (PhaseTimer <= diff)
-                {
-                    if (!me.IsNonMeleeSpellCast(false))
-                    {
-                        SwitchToPortalPhase();
-
-                        return;
-                    }
-                }
-                else
-                {
-                    PhaseTimer -= diff;
-                }
-            }
-
-            DoMeleeAttackIfReady();
         }
     }
 }

@@ -17,18 +17,17 @@ namespace Game.Entities
 
     public class Transport : GameObject, ITransport
     {
+        private readonly HashSet<WorldObject> _passengers = new();
+        private readonly TimeTracker _positionChangeTimer = new();
+        private readonly HashSet<WorldObject> _staticPassengers = new();
         private int _currentPathLeg;
 
         private bool _delayedAddModel;
         private BitArray _eventsToTrigger;
 
         private TransportMovementState _movementState;
-
-        private readonly HashSet<WorldObject> _passengers = new();
         private uint _pathProgress;
-        private readonly TimeTracker _positionChangeTimer = new();
         private uint? _requestStopTimestamp;
-        private readonly HashSet<WorldObject> _staticPassengers = new();
 
         private TransportTemplate _transportInfo;
 
@@ -363,47 +362,6 @@ namespace Game.Entities
             return creature;
         }
 
-        private GameObject CreateGOPassenger(ulong guid, GameObjectData data)
-        {
-            Map map = GetMap();
-
-            if (map.GetGORespawnTime(guid) != 0)
-                return null;
-
-            GameObject go = CreateGameObjectFromDB(guid, map, false);
-
-            if (!go)
-                return null;
-
-            float x, y, z, o;
-            data.SpawnPoint.GetPosition(out x, out y, out z, out o);
-
-            go.SetTransport(this);
-            go.MovementInfo.Transport.Guid = GetGUID();
-            go.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
-            go.MovementInfo.Transport.Seat = -1;
-            CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-            go.Relocate(x, y, z, o);
-            go.RelocateStationaryPosition(x, y, z, o);
-
-            if (!go.IsPositionValid())
-            {
-                Log.outError(LogFilter.Transport, "GameObject (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", go.GetGUID().ToString(), go.GetEntry(), go.GetPositionX(), go.GetPositionY());
-
-                return null;
-            }
-
-            PhasingHandler.InitDbPhaseShift(go.GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
-            PhasingHandler.InitDbVisibleMapId(go.GetPhaseShift(), data.terrainSwapMap);
-
-            if (!map.AddToMap(go))
-                return null;
-
-            _staticPassengers.Add(go);
-
-            return go;
-        }
-
         public TempSummon SummonPassenger(uint entry, Position pos, TempSummonType summonType, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0)
         {
             Map map = GetMap();
@@ -565,6 +523,108 @@ namespace Game.Entities
             // 4. is handed by grid unload
         }
 
+        public void EnableMovement(bool enabled)
+        {
+            if (GetGoInfo().MoTransport.allowstopping == 0)
+                return;
+
+            if (!enabled)
+            {
+                _requestStopTimestamp = (_pathProgress / GetTransportPeriod()) * GetTransportPeriod() + _transportInfo.GetNextPauseWaypointTimestamp(_pathProgress);
+            }
+            else
+            {
+                _requestStopTimestamp = null;
+                SetGoState(GameObjectState.Active);
+                RemoveDynamicFlag(GameObjectDynamicLowFlags.Stopped);
+            }
+        }
+
+        public void SetDelayedAddModelToMap()
+        {
+            _delayedAddModel = true;
+        }
+
+        public override void BuildUpdate(Dictionary<Player, UpdateData> data_map)
+        {
+            var players = GetMap().GetPlayers();
+
+            if (players.Empty())
+                return;
+
+            foreach (var playerReference in players)
+                if (playerReference.InSamePhase(this))
+                    BuildFieldsUpdate(playerReference, data_map);
+
+            ClearUpdateMask(true);
+        }
+
+        public uint GetExpectedMapId()
+        {
+            return _transportInfo.PathLegs[_currentPathLeg].MapId;
+        }
+
+        public HashSet<WorldObject> GetPassengers()
+        {
+            return _passengers;
+        }
+
+        public uint GetTransportPeriod()
+        {
+            return _gameObjectData.Level;
+        }
+
+        public void SetPeriod(uint period)
+        {
+            SetLevel(period);
+        }
+
+        public uint GetTimer()
+        {
+            return _pathProgress;
+        }
+
+        private GameObject CreateGOPassenger(ulong guid, GameObjectData data)
+        {
+            Map map = GetMap();
+
+            if (map.GetGORespawnTime(guid) != 0)
+                return null;
+
+            GameObject go = CreateGameObjectFromDB(guid, map, false);
+
+            if (!go)
+                return null;
+
+            float x, y, z, o;
+            data.SpawnPoint.GetPosition(out x, out y, out z, out o);
+
+            go.SetTransport(this);
+            go.MovementInfo.Transport.Guid = GetGUID();
+            go.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
+            go.MovementInfo.Transport.Seat = -1;
+            CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+            go.Relocate(x, y, z, o);
+            go.RelocateStationaryPosition(x, y, z, o);
+
+            if (!go.IsPositionValid())
+            {
+                Log.outError(LogFilter.Transport, "GameObject (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", go.GetGUID().ToString(), go.GetEntry(), go.GetPositionX(), go.GetPositionY());
+
+                return null;
+            }
+
+            PhasingHandler.InitDbPhaseShift(go.GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
+            PhasingHandler.InitDbVisibleMapId(go.GetPhaseShift(), data.terrainSwapMap);
+
+            if (!map.AddToMap(go))
+                return null;
+
+            _staticPassengers.Add(go);
+
+            return go;
+        }
+
         private void LoadStaticPassengers()
         {
             uint mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
@@ -592,28 +652,6 @@ namespace Game.Entities
                 WorldObject obj = _staticPassengers.First();
                 obj.AddObjectToRemoveList(); // also removes from _staticPassengers
             }
-        }
-
-        public void EnableMovement(bool enabled)
-        {
-            if (GetGoInfo().MoTransport.allowstopping == 0)
-                return;
-
-            if (!enabled)
-            {
-                _requestStopTimestamp = (_pathProgress / GetTransportPeriod()) * GetTransportPeriod() + _transportInfo.GetNextPauseWaypointTimestamp(_pathProgress);
-            }
-            else
-            {
-                _requestStopTimestamp = null;
-                SetGoState(GameObjectState.Active);
-                RemoveDynamicFlag(GameObjectDynamicLowFlags.Stopped);
-            }
-        }
-
-        public void SetDelayedAddModelToMap()
-        {
-            _delayedAddModel = true;
         }
 
         private bool TeleportTransport(uint oldMapId, uint newMapId, float x, float y, float z, float o)
@@ -723,45 +761,6 @@ namespace Game.Entities
                 CalculatePassengerPosition(ref x, ref y, ref z, ref o);
                 ITransport.UpdatePassengerPosition(this, GetMap(), passenger, x, y, z, o, true);
             }
-        }
-
-        public override void BuildUpdate(Dictionary<Player, UpdateData> data_map)
-        {
-            var players = GetMap().GetPlayers();
-
-            if (players.Empty())
-                return;
-
-            foreach (var playerReference in players)
-                if (playerReference.InSamePhase(this))
-                    BuildFieldsUpdate(playerReference, data_map);
-
-            ClearUpdateMask(true);
-        }
-
-        public uint GetExpectedMapId()
-        {
-            return _transportInfo.PathLegs[_currentPathLeg].MapId;
-        }
-
-        public HashSet<WorldObject> GetPassengers()
-        {
-            return _passengers;
-        }
-
-        public uint GetTransportPeriod()
-        {
-            return _gameObjectData.Level;
-        }
-
-        public void SetPeriod(uint period)
-        {
-            SetLevel(period);
-        }
-
-        public uint GetTimer()
-        {
-            return _pathProgress;
         }
     }
 }

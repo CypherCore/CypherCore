@@ -102,8 +102,8 @@ namespace Game.Chat
             handler.SendSysMessage("tileloc [{0}, {1}]", gx, gy);
 
             // calculate navmesh tile location
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), x, y);
-            Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
+            uint                  terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), x, y);
+            Detour.dtNavMesh      navmesh      = Global.MMapMgr.GetNavMesh(terrainMapId);
             Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, player.GetInstanceId());
 
             if (navmesh == null ||
@@ -150,7 +150,7 @@ namespace Game.Chat
             else
             {
                 Detour.dtMeshTile tile = new();
-                Detour.dtPoly poly = new();
+                Detour.dtPoly     poly = new();
 
                 if (Detour.dtStatusSucceed(navmesh.getTileAndPolyByRef(polyRef, ref tile, ref poly)))
                     if (tile != null)
@@ -169,9 +169,9 @@ namespace Game.Chat
         [Command("loadedtiles", RBACPermissions.CommandMmapLoadedtiles)]
         private static bool HandleMmapLoadedTilesCommand(CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
-            Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
+            Player                player       = handler.GetSession().GetPlayer();
+            uint                  terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), player.GetPositionX(), player.GetPositionY());
+            Detour.dtNavMesh      navmesh      = Global.MMapMgr.GetNavMesh(terrainMapId);
             Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, handler.GetPlayer().GetInstanceId());
 
             if (navmesh == null ||

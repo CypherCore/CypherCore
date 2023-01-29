@@ -12,10 +12,10 @@ namespace Game.Movement
     {
         public const float MIN_QUIET_DISTANCE = 28.0f;
         public const float MAX_QUIET_DISTANCE = 43.0f;
+        private readonly TimeTracker _timer;
         private ObjectGuid _fleeTargetGUID;
 
         private PathGenerator _path;
-        private readonly TimeTracker _timer;
 
         public FleeingMovementGenerator(ObjectGuid fright)
         {
@@ -108,6 +108,16 @@ namespace Game.Movement
                         owner.SetTarget(owner.GetVictim().GetGUID());
                 }
             }
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Fleeing;
+        }
+
+        public override void UnitSpeedChanged()
+        {
+            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
         }
 
         private void SetTargetLocation(T owner)
@@ -203,16 +213,6 @@ namespace Game.Movement
             }
 
             owner.MovePositionToFirstCollision(position, distance, angle);
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Fleeing;
-        }
-
-        public override void UnitSpeedChanged()
-        {
-            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
         }
     }
 

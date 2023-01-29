@@ -304,6 +304,185 @@ namespace Game.AI
             AttackStart(target);
         }
 
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            // Receives notification when pet reaches stay or follow owner
+            switch (type)
+            {
+                case MovementGeneratorType.Point:
+                    {
+                        // Pet is returning to where stay was clicked. _data should be
+                        // pet's GUIDLow since we set that as the waypoint ID
+                        if (id == me.GetGUID().GetCounter() &&
+                            me.GetCharmInfo().IsReturning())
+                        {
+                            ClearCharmInfoFlags();
+                            me.GetCharmInfo().SetIsAtStay(true);
+                            me.GetMotionMaster().MoveIdle();
+                        }
+
+                        break;
+                    }
+                case MovementGeneratorType.Follow:
+                    {
+                        // If _data is owner's GUIDLow then we've reached follow point,
+                        // otherwise we're probably chasing a creature
+                        if (me.GetCharmerOrOwner() &&
+                            me.GetCharmInfo() != null &&
+                            id == me.GetCharmerOrOwner().GetGUID().GetCounter() &&
+                            me.GetCharmInfo().IsReturning())
+                        {
+                            ClearCharmInfoFlags();
+                            me.GetCharmInfo().SetIsFollowing(true);
+                        }
+
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
+        public bool CanAttack(Unit victim)
+        {
+            // Evaluates wether a pet can attack a specific Target based on CommandState, ReactState and other Flags
+            // IMPORTANT: The order in which things are checked is important, be careful if you add or remove checks
+
+            // Hmmm...
+            if (!victim)
+                return false;
+
+            if (!victim.IsAlive())
+                // if Target is invalid, pet should evade automaticly
+                // Clear Target to prevent getting stuck on dead targets
+                //me.AttackStop();
+                //me.InterruptNonMeleeSpells(false);
+                return false;
+
+            if (me.GetCharmInfo() == null)
+            {
+                Log.outWarn(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {GetDebugInfo()}");
+
+                return false;
+            }
+
+            // Passive - passive pets can attack if told to
+            if (me.HasReactState(ReactStates.Passive))
+                return me.GetCharmInfo().IsCommandAttack();
+
+            // CC - mobs under crowd control can be attacked if owner commanded
+            if (victim.HasBreakableByDamageCrowdControlAura())
+                return me.GetCharmInfo().IsCommandAttack();
+
+            // Returning - pets ignore attacks only if owner clicked follow
+            if (me.GetCharmInfo().IsReturning())
+                return !me.GetCharmInfo().IsCommandFollow();
+
+            // Stay - can attack if Target is within range or commanded to
+            if (me.GetCharmInfo().HasCommandState(CommandStates.Stay))
+                return (me.IsWithinMeleeRange(victim) || me.GetCharmInfo().IsCommandAttack());
+
+            //  Pets attacking something (or chasing) should only switch targets if owner tells them to
+            if (me.GetVictim() &&
+                me.GetVictim() != victim)
+            {
+                // Check if our owner selected this Target and clicked "attack"
+                Unit ownerTarget;
+                Player owner = me.GetCharmerOrOwner().ToPlayer();
+
+                if (owner)
+                    ownerTarget = owner.GetSelectedUnit();
+                else
+                    ownerTarget = me.GetCharmerOrOwner().GetVictim();
+
+                if (ownerTarget && me.GetCharmInfo().IsCommandAttack())
+                    return (victim.GetGUID() == ownerTarget.GetGUID());
+            }
+
+            // Follow
+            if (me.GetCharmInfo().HasCommandState(CommandStates.Follow))
+                return !me.GetCharmInfo().IsReturning();
+
+            // default, though we shouldn't ever get here
+            return false;
+        }
+
+        public override void ReceiveEmote(Player player, TextEmotes emoteId)
+        {
+            if (me.GetOwnerGUID() != player.GetGUID())
+                return;
+
+            switch (emoteId)
+            {
+                case TextEmotes.Cower:
+                    if (me.IsPet() &&
+                        me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
+
+                    break;
+                case TextEmotes.Angry:
+                    if (me.IsPet() &&
+                        me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.StateStun);
+
+                    break;
+                case TextEmotes.Glare:
+                    if (me.IsPet() &&
+                        me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.StateStun);
+
+                    break;
+                case TextEmotes.Soothe:
+                    if (me.IsPet() &&
+                        me.ToPet().IsPetGhoul())
+                        me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
+
+                    break;
+            }
+        }
+
+        public override void OnCharmed(bool isNew)
+        {
+            if (!me.IsPossessedByPlayer() &&
+                me.IsCharmed())
+                me.GetMotionMaster().MoveFollow(me.GetCharmer(), SharedConst.PetFollowDist, me.GetFollowAngle());
+
+            base.OnCharmed(isNew);
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        {
+            AttackStart(attacker);
+        }
+
+        public override void JustEnteredCombat(Unit who)
+        {
+            EngagementStart(who);
+        }
+
+        public override void JustExitedCombat()
+        {
+            EngagementOver();
+        }
+
+        // The following aren't used by the PetAI but need to be defined to override
+        //  default CreatureAI functions which interfere with the PetAI
+        public override void MoveInLineOfSight(Unit who)
+        {
+        }
+
+        public override void MoveInLineOfSight_Safe(Unit who)
+        {
+        }
+
+        public override void JustAppeared()
+        {
+        } // we will control following manually
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+        }
+
         private Unit SelectNextTarget(bool allowAutoSelect)
         {
             // Provides next Target selection after current Target death.
@@ -452,143 +631,6 @@ namespace Game.AI
             }
         }
 
-        public override void MovementInform(MovementGeneratorType type, uint id)
-        {
-            // Receives notification when pet reaches stay or follow owner
-            switch (type)
-            {
-                case MovementGeneratorType.Point:
-                    {
-                        // Pet is returning to where stay was clicked. _data should be
-                        // pet's GUIDLow since we set that as the waypoint ID
-                        if (id == me.GetGUID().GetCounter() &&
-                            me.GetCharmInfo().IsReturning())
-                        {
-                            ClearCharmInfoFlags();
-                            me.GetCharmInfo().SetIsAtStay(true);
-                            me.GetMotionMaster().MoveIdle();
-                        }
-
-                        break;
-                    }
-                case MovementGeneratorType.Follow:
-                    {
-                        // If _data is owner's GUIDLow then we've reached follow point,
-                        // otherwise we're probably chasing a creature
-                        if (me.GetCharmerOrOwner() &&
-                            me.GetCharmInfo() != null &&
-                            id == me.GetCharmerOrOwner().GetGUID().GetCounter() &&
-                            me.GetCharmInfo().IsReturning())
-                        {
-                            ClearCharmInfoFlags();
-                            me.GetCharmInfo().SetIsFollowing(true);
-                        }
-
-                        break;
-                    }
-                default:
-                    break;
-            }
-        }
-
-        public bool CanAttack(Unit victim)
-        {
-            // Evaluates wether a pet can attack a specific Target based on CommandState, ReactState and other Flags
-            // IMPORTANT: The order in which things are checked is important, be careful if you add or remove checks
-
-            // Hmmm...
-            if (!victim)
-                return false;
-
-            if (!victim.IsAlive())
-                // if Target is invalid, pet should evade automaticly
-                // Clear Target to prevent getting stuck on dead targets
-                //me.AttackStop();
-                //me.InterruptNonMeleeSpells(false);
-                return false;
-
-            if (me.GetCharmInfo() == null)
-            {
-                Log.outWarn(LogFilter.ScriptsAi, $"me.GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: {GetDebugInfo()}");
-
-                return false;
-            }
-
-            // Passive - passive pets can attack if told to
-            if (me.HasReactState(ReactStates.Passive))
-                return me.GetCharmInfo().IsCommandAttack();
-
-            // CC - mobs under crowd control can be attacked if owner commanded
-            if (victim.HasBreakableByDamageCrowdControlAura())
-                return me.GetCharmInfo().IsCommandAttack();
-
-            // Returning - pets ignore attacks only if owner clicked follow
-            if (me.GetCharmInfo().IsReturning())
-                return !me.GetCharmInfo().IsCommandFollow();
-
-            // Stay - can attack if Target is within range or commanded to
-            if (me.GetCharmInfo().HasCommandState(CommandStates.Stay))
-                return (me.IsWithinMeleeRange(victim) || me.GetCharmInfo().IsCommandAttack());
-
-            //  Pets attacking something (or chasing) should only switch targets if owner tells them to
-            if (me.GetVictim() &&
-                me.GetVictim() != victim)
-            {
-                // Check if our owner selected this Target and clicked "attack"
-                Unit ownerTarget;
-                Player owner = me.GetCharmerOrOwner().ToPlayer();
-
-                if (owner)
-                    ownerTarget = owner.GetSelectedUnit();
-                else
-                    ownerTarget = me.GetCharmerOrOwner().GetVictim();
-
-                if (ownerTarget && me.GetCharmInfo().IsCommandAttack())
-                    return (victim.GetGUID() == ownerTarget.GetGUID());
-            }
-
-            // Follow
-            if (me.GetCharmInfo().HasCommandState(CommandStates.Follow))
-                return !me.GetCharmInfo().IsReturning();
-
-            // default, though we shouldn't ever get here
-            return false;
-        }
-
-        public override void ReceiveEmote(Player player, TextEmotes emoteId)
-        {
-            if (me.GetOwnerGUID() != player.GetGUID())
-                return;
-
-            switch (emoteId)
-            {
-                case TextEmotes.Cower:
-                    if (me.IsPet() &&
-                        me.ToPet().IsPetGhoul())
-                        me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
-
-                    break;
-                case TextEmotes.Angry:
-                    if (me.IsPet() &&
-                        me.ToPet().IsPetGhoul())
-                        me.HandleEmoteCommand(Emote.StateStun);
-
-                    break;
-                case TextEmotes.Glare:
-                    if (me.IsPet() &&
-                        me.ToPet().IsPetGhoul())
-                        me.HandleEmoteCommand(Emote.StateStun);
-
-                    break;
-                case TextEmotes.Soothe:
-                    if (me.IsPet() &&
-                        me.ToPet().IsPetGhoul())
-                        me.HandleEmoteCommand(Emote.OneshotOmnicastGhoul);
-
-                    break;
-            }
-        }
-
         private bool NeedToStop()
         {
             // This is needed for charmed creatures, as once their Target was reset other effects can trigger threat
@@ -672,15 +714,6 @@ namespace Game.AI
                 _allySet.Add(owner.GetGUID());
         }
 
-        public override void OnCharmed(bool isNew)
-        {
-            if (!me.IsPossessedByPlayer() &&
-                me.IsCharmed())
-                me.GetMotionMaster().MoveFollow(me.GetCharmer(), SharedConst.PetFollowDist, me.GetFollowAngle());
-
-            base.OnCharmed(isNew);
-        }
-
         /// <summary>
         ///  Quick access to set all Flags to FALSE
         /// </summary>
@@ -696,39 +729,6 @@ namespace Game.AI
                 ci.SetIsFollowing(false);
                 ci.SetIsReturning(false);
             }
-        }
-
-        public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
-        {
-            AttackStart(attacker);
-        }
-
-        public override void JustEnteredCombat(Unit who)
-        {
-            EngagementStart(who);
-        }
-
-        public override void JustExitedCombat()
-        {
-            EngagementOver();
-        }
-
-        // The following aren't used by the PetAI but need to be defined to override
-        //  default CreatureAI functions which interfere with the PetAI
-        public override void MoveInLineOfSight(Unit who)
-        {
-        }
-
-        public override void MoveInLineOfSight_Safe(Unit who)
-        {
-        }
-
-        public override void JustAppeared()
-        {
-        } // we will control following manually
-
-        public override void EnterEvadeMode(EvadeReason why)
-        {
         }
     }
 }

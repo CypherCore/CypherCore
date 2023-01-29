@@ -11,6 +11,172 @@ namespace Game.Chat
     [CommandGroup("server")]
     internal class ServerCommands
     {
+        [CommandGroup("idleRestart")]
+        private class IdleRestartCommands
+        {
+            [Command("", RBACPermissions.CommandServerIdlerestart, true)]
+            private static bool HandleServerIdleRestartCommand(CommandHandler handler, StringArguments args)
+            {
+                return ShutdownServer(args, handler, ShutdownMask.Restart | ShutdownMask.Idle, ShutdownExitCode.Restart);
+            }
+
+            [Command("cancel", RBACPermissions.CommandServerIdlerestartCancel, true)]
+            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
+            {
+                uint timer = Global.WorldMgr.ShutdownCancel();
+
+                if (timer != 0)
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("idleshutdown")]
+        private class IdleshutdownCommands
+        {
+            [Command("", RBACPermissions.CommandServerIdleshutdown, true)]
+            private static bool HandleServerIdleShutDownCommand(CommandHandler handler, StringArguments args)
+            {
+                return ShutdownServer(args, handler, ShutdownMask.Idle, ShutdownExitCode.Shutdown);
+            }
+
+            [Command("cancel", RBACPermissions.CommandServerIdleshutdownCancel, true)]
+            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
+            {
+                uint timer = Global.WorldMgr.ShutdownCancel();
+
+                if (timer != 0)
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("restart")]
+        private class RestartCommands
+        {
+            [Command("", RBACPermissions.CommandServerRestart, true)]
+            private static bool HandleServerRestartCommand(CommandHandler handler, StringArguments args)
+            {
+                return ShutdownServer(args, handler, ShutdownMask.Restart, ShutdownExitCode.Restart);
+            }
+
+            [Command("cancel", RBACPermissions.CommandServerRestartCancel, true)]
+            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
+            {
+                uint timer = Global.WorldMgr.ShutdownCancel();
+
+                if (timer != 0)
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+
+                return true;
+            }
+
+            [Command("Force", RBACPermissions.CommandServerRestartCancel, true)]
+            private static bool HandleServerForceRestartCommand(CommandHandler handler, StringArguments args)
+            {
+                return ShutdownServer(args, handler, ShutdownMask.Force | ShutdownMask.Restart, ShutdownExitCode.Restart);
+            }
+        }
+
+        [CommandGroup("shutdown")]
+        private class ShutdownCommands
+        {
+            [Command("", RBACPermissions.CommandServerShutdown, true)]
+            private static bool HandleServerShutDownCommand(CommandHandler handler, StringArguments args)
+            {
+                return ShutdownServer(args, handler, 0, ShutdownExitCode.Shutdown);
+            }
+
+            [Command("cancel", RBACPermissions.CommandServerShutdownCancel, true)]
+            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
+            {
+                uint timer = Global.WorldMgr.ShutdownCancel();
+
+                if (timer != 0)
+                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
+
+                return true;
+            }
+
+            [Command("Force", RBACPermissions.CommandServerShutdownCancel, true)]
+            private static bool HandleServerForceShutDownCommand(CommandHandler handler, StringArguments args)
+            {
+                return ShutdownServer(args, handler, ShutdownMask.Force, ShutdownExitCode.Shutdown);
+            }
+        }
+
+        [CommandGroup("set")]
+        private class SetCommands
+        {
+            [Command("difftime", RBACPermissions.CommandServerSetDifftime, true)]
+            private static bool HandleServerSetDiffTimeCommand(CommandHandler handler, StringArguments args)
+            {
+                if (args.Empty())
+                    return false;
+
+                string newTimeStr = args.NextString();
+
+                if (newTimeStr.IsEmpty())
+                    return false;
+
+                if (!int.TryParse(newTimeStr, out int newTime) ||
+                    newTime < 0)
+                    return false;
+
+                //Global.WorldMgr.SetRecordDiffInterval(newTime);
+                //printf("Record diff every %i ms\n", newTime);
+
+                return true;
+            }
+
+            [Command("loglevel", RBACPermissions.CommandServerSetLoglevel, true)]
+            private static bool HandleServerSetLogLevelCommand(CommandHandler handler, string type, string name, int level)
+            {
+                if (name.IsEmpty() ||
+                    level < 0 ||
+                    (type != "a" && type != "l"))
+                    return false;
+
+                return Log.SetLogLevel(name, level, type == "l");
+            }
+
+            [Command("motd", RBACPermissions.CommandServerSetMotd, true)]
+            private static bool HandleServerSetMotdCommand(CommandHandler handler, StringArguments args)
+            {
+                Global.WorldMgr.SetMotd(args.NextString(""));
+                handler.SendSysMessage(CypherStrings.MotdNew, args.GetString());
+
+                return true;
+            }
+
+            [Command("closed", RBACPermissions.CommandServerSetClosed, true)]
+            private static bool HandleServerSetClosedCommand(CommandHandler handler, StringArguments args)
+            {
+                string arg1 = args.NextString();
+
+                if (arg1.Equals("on", StringComparison.OrdinalIgnoreCase))
+                {
+                    handler.SendSysMessage(CypherStrings.WorldClosed);
+                    Global.WorldMgr.SetClosed(true);
+
+                    return true;
+                }
+                else if (arg1.Equals("off", StringComparison.OrdinalIgnoreCase))
+                {
+                    handler.SendSysMessage(CypherStrings.WorldOpened);
+                    Global.WorldMgr.SetClosed(false);
+
+                    return true;
+                }
+
+                handler.SendSysMessage(CypherStrings.UseBol);
+
+                return false;
+            }
+        }
+
         [Command("corpses", RBACPermissions.CommandServerCorpses, true)]
         private static bool HandleServerCorpsesCommand(CommandHandler handler)
         {
@@ -245,172 +411,6 @@ namespace Game.Chat
             Global.WorldMgr.ShutdownServ((uint)delay, shutdownMask, (ShutdownExitCode)exitCode, reason);
 
             return true;
-        }
-
-        [CommandGroup("idleRestart")]
-        private class IdleRestartCommands
-        {
-            [Command("", RBACPermissions.CommandServerIdlerestart, true)]
-            private static bool HandleServerIdleRestartCommand(CommandHandler handler, StringArguments args)
-            {
-                return ShutdownServer(args, handler, ShutdownMask.Restart | ShutdownMask.Idle, ShutdownExitCode.Restart);
-            }
-
-            [Command("cancel", RBACPermissions.CommandServerIdlerestartCancel, true)]
-            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
-            {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
-
-                return true;
-            }
-        }
-
-        [CommandGroup("idleshutdown")]
-        private class IdleshutdownCommands
-        {
-            [Command("", RBACPermissions.CommandServerIdleshutdown, true)]
-            private static bool HandleServerIdleShutDownCommand(CommandHandler handler, StringArguments args)
-            {
-                return ShutdownServer(args, handler, ShutdownMask.Idle, ShutdownExitCode.Shutdown);
-            }
-
-            [Command("cancel", RBACPermissions.CommandServerIdleshutdownCancel, true)]
-            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
-            {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
-
-                return true;
-            }
-        }
-
-        [CommandGroup("restart")]
-        private class RestartCommands
-        {
-            [Command("", RBACPermissions.CommandServerRestart, true)]
-            private static bool HandleServerRestartCommand(CommandHandler handler, StringArguments args)
-            {
-                return ShutdownServer(args, handler, ShutdownMask.Restart, ShutdownExitCode.Restart);
-            }
-
-            [Command("cancel", RBACPermissions.CommandServerRestartCancel, true)]
-            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
-            {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
-
-                return true;
-            }
-
-            [Command("Force", RBACPermissions.CommandServerRestartCancel, true)]
-            private static bool HandleServerForceRestartCommand(CommandHandler handler, StringArguments args)
-            {
-                return ShutdownServer(args, handler, ShutdownMask.Force | ShutdownMask.Restart, ShutdownExitCode.Restart);
-            }
-        }
-
-        [CommandGroup("shutdown")]
-        private class ShutdownCommands
-        {
-            [Command("", RBACPermissions.CommandServerShutdown, true)]
-            private static bool HandleServerShutDownCommand(CommandHandler handler, StringArguments args)
-            {
-                return ShutdownServer(args, handler, 0, ShutdownExitCode.Shutdown);
-            }
-
-            [Command("cancel", RBACPermissions.CommandServerShutdownCancel, true)]
-            private static bool HandleServerShutDownCancelCommand(CommandHandler handler)
-            {
-                uint timer = Global.WorldMgr.ShutdownCancel();
-
-                if (timer != 0)
-                    handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
-
-                return true;
-            }
-
-            [Command("Force", RBACPermissions.CommandServerShutdownCancel, true)]
-            private static bool HandleServerForceShutDownCommand(CommandHandler handler, StringArguments args)
-            {
-                return ShutdownServer(args, handler, ShutdownMask.Force, ShutdownExitCode.Shutdown);
-            }
-        }
-
-        [CommandGroup("set")]
-        private class SetCommands
-        {
-            [Command("difftime", RBACPermissions.CommandServerSetDifftime, true)]
-            private static bool HandleServerSetDiffTimeCommand(CommandHandler handler, StringArguments args)
-            {
-                if (args.Empty())
-                    return false;
-
-                string newTimeStr = args.NextString();
-
-                if (newTimeStr.IsEmpty())
-                    return false;
-
-                if (!int.TryParse(newTimeStr, out int newTime) ||
-                    newTime < 0)
-                    return false;
-
-                //Global.WorldMgr.SetRecordDiffInterval(newTime);
-                //printf("Record diff every %i ms\n", newTime);
-
-                return true;
-            }
-
-            [Command("loglevel", RBACPermissions.CommandServerSetLoglevel, true)]
-            private static bool HandleServerSetLogLevelCommand(CommandHandler handler, string type, string name, int level)
-            {
-                if (name.IsEmpty() ||
-                    level < 0 ||
-                    (type != "a" && type != "l"))
-                    return false;
-
-                return Log.SetLogLevel(name, level, type == "l");
-            }
-
-            [Command("motd", RBACPermissions.CommandServerSetMotd, true)]
-            private static bool HandleServerSetMotdCommand(CommandHandler handler, StringArguments args)
-            {
-                Global.WorldMgr.SetMotd(args.NextString(""));
-                handler.SendSysMessage(CypherStrings.MotdNew, args.GetString());
-
-                return true;
-            }
-
-            [Command("closed", RBACPermissions.CommandServerSetClosed, true)]
-            private static bool HandleServerSetClosedCommand(CommandHandler handler, StringArguments args)
-            {
-                string arg1 = args.NextString();
-
-                if (arg1.Equals("on", StringComparison.OrdinalIgnoreCase))
-                {
-                    handler.SendSysMessage(CypherStrings.WorldClosed);
-                    Global.WorldMgr.SetClosed(true);
-
-                    return true;
-                }
-                else if (arg1.Equals("off", StringComparison.OrdinalIgnoreCase))
-                {
-                    handler.SendSysMessage(CypherStrings.WorldOpened);
-                    Global.WorldMgr.SetClosed(false);
-
-                    return true;
-                }
-
-                handler.SendSysMessage(CypherStrings.UseBol);
-
-                return false;
-            }
         }
     }
 }

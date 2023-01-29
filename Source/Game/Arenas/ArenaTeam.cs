@@ -15,14 +15,13 @@ namespace Game.Arenas
 {
     public class ArenaTeam
     {
+        private readonly List<ArenaTeamMember> _members = new();
         private uint _backgroundColor; // ARGB format
         private uint _borderColor;     // ARGB format
         private byte _borderStyle;     // border image Id
         private ObjectGuid _captainGuid;
         private uint _emblemColor; // ARGB format
         private byte _emblemStyle; // icon Id
-
-        private readonly List<ArenaTeamMember> _members = new();
         private ArenaTeamStats _stats;
 
         private uint _teamId;
@@ -430,17 +429,6 @@ namespace Game.Arenas
             }
         }
 
-        private void BroadcastPacket(ServerPacket packet)
-        {
-            foreach (var member in _members)
-            {
-                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
-
-                if (player)
-                    player.SendPacket(packet);
-            }
-        }
-
         public static byte GetSlotByType(uint type)
         {
             switch ((ArenaTypes)type)
@@ -511,73 +499,6 @@ namespace Game.Arenas
             matchMakerRating /= playerDivider;
 
             return matchMakerRating;
-        }
-
-        private float GetChanceAgainst(uint ownRating, uint opponentRating)
-        {
-            // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
-            // ELO system
-            return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - ownRating) / 650.0f)));
-        }
-
-        private int GetMatchmakerRatingMod(uint ownRating, uint opponentRating, bool won)
-        {
-            // 'Chance' calculation - to beat the opponent
-            // This is a simulation. Not much info on how it really works
-            float chance = GetChanceAgainst(ownRating, opponentRating);
-            float won_mod = (won) ? 1.0f : 0.0f;
-            float mod = won_mod - chance;
-
-            // Work in progress:
-            /*
-			// This is a simulation, as there is not much info on how it really works
-			float confidence_mod = min(1.0f - fabs(mod), 0.5f);
-
-			// Apply confidence factor to the mod:
-			mod *= confidence_factor
-
-			// And only after that update the new confidence factor
-			confidence_factor -= ((confidence_factor - 1.0f) * confidence_mod) / confidence_factor;
-			*/
-
-            // Real rating modification
-            mod *= WorldConfig.GetFloatValue(WorldCfg.ArenaMatchmakerRatingModifier);
-
-            return (int)Math.Ceiling(mod);
-        }
-
-        private int GetRatingMod(uint ownRating, uint opponentRating, bool won)
-        {
-            // 'Chance' calculation - to beat the opponent
-            // This is a simulation. Not much info on how it really works
-            float chance = GetChanceAgainst(ownRating, opponentRating);
-
-            // Calculate the rating modification
-            float mod;
-
-            // todo Replace this hack with using the confidence factor (limiting the factor to 2.0f)
-            if (won)
-            {
-                if (ownRating < 1300)
-                {
-                    float win_rating_modifier1 = WorldConfig.GetFloatValue(WorldCfg.ArenaWinRatingModifier1);
-
-                    if (ownRating < 1000)
-                        mod = win_rating_modifier1 * (1.0f - chance);
-                    else
-                        mod = ((win_rating_modifier1 / 2.0f) + ((win_rating_modifier1 / 2.0f) * (1300.0f - ownRating) / 300.0f)) * (1.0f - chance);
-                }
-                else
-                {
-                    mod = WorldConfig.GetFloatValue(WorldCfg.ArenaWinRatingModifier2) * (1.0f - chance);
-                }
-            }
-            else
-            {
-                mod = WorldConfig.GetFloatValue(WorldCfg.ArenaLoseRatingModifier) * (-chance);
-            }
-
-            return (int)Math.Ceiling(mod);
         }
 
         public void FinishGame(int mod)
@@ -857,14 +778,92 @@ namespace Game.Arenas
             return _members.Count;
         }
 
-        private bool Empty()
-        {
-            return _members.Empty();
-        }
-
         public List<ArenaTeamMember> GetMembers()
         {
             return _members;
+        }
+
+        private void BroadcastPacket(ServerPacket packet)
+        {
+            foreach (var member in _members)
+            {
+                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
+
+                if (player)
+                    player.SendPacket(packet);
+            }
+        }
+
+        private float GetChanceAgainst(uint ownRating, uint opponentRating)
+        {
+            // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
+            // ELO system
+            return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - ownRating) / 650.0f)));
+        }
+
+        private int GetMatchmakerRatingMod(uint ownRating, uint opponentRating, bool won)
+        {
+            // 'Chance' calculation - to beat the opponent
+            // This is a simulation. Not much info on how it really works
+            float chance = GetChanceAgainst(ownRating, opponentRating);
+            float won_mod = (won) ? 1.0f : 0.0f;
+            float mod = won_mod - chance;
+
+            // Work in progress:
+            /*
+			// This is a simulation, as there is not much info on how it really works
+			float confidence_mod = min(1.0f - fabs(mod), 0.5f);
+
+			// Apply confidence factor to the mod:
+			mod *= confidence_factor
+
+			// And only after that update the new confidence factor
+			confidence_factor -= ((confidence_factor - 1.0f) * confidence_mod) / confidence_factor;
+			*/
+
+            // Real rating modification
+            mod *= WorldConfig.GetFloatValue(WorldCfg.ArenaMatchmakerRatingModifier);
+
+            return (int)Math.Ceiling(mod);
+        }
+
+        private int GetRatingMod(uint ownRating, uint opponentRating, bool won)
+        {
+            // 'Chance' calculation - to beat the opponent
+            // This is a simulation. Not much info on how it really works
+            float chance = GetChanceAgainst(ownRating, opponentRating);
+
+            // Calculate the rating modification
+            float mod;
+
+            // todo Replace this hack with using the confidence factor (limiting the factor to 2.0f)
+            if (won)
+            {
+                if (ownRating < 1300)
+                {
+                    float win_rating_modifier1 = WorldConfig.GetFloatValue(WorldCfg.ArenaWinRatingModifier1);
+
+                    if (ownRating < 1000)
+                        mod = win_rating_modifier1 * (1.0f - chance);
+                    else
+                        mod = ((win_rating_modifier1 / 2.0f) + ((win_rating_modifier1 / 2.0f) * (1300.0f - ownRating) / 300.0f)) * (1.0f - chance);
+                }
+                else
+                {
+                    mod = WorldConfig.GetFloatValue(WorldCfg.ArenaWinRatingModifier2) * (1.0f - chance);
+                }
+            }
+            else
+            {
+                mod = WorldConfig.GetFloatValue(WorldCfg.ArenaLoseRatingModifier) * (-chance);
+            }
+
+            return (int)Math.Ceiling(mod);
+        }
+
+        private bool Empty()
+        {
+            return _members.Empty();
         }
     }
 }

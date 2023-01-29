@@ -11,9 +11,31 @@ namespace Game.Entities
 {
     public class Bag : Item
     {
-        private Item[] _bagslot = new Item[36];
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly ContainerData ContainerMask = new();
+            private readonly ItemData ItemMask = new();
+            private readonly ObjectFieldData ObjectMask = new();
+            private readonly Bag Owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(Bag owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), ContainerMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
 
         private readonly ContainerData _containerData;
+        private Item[] _bagslot = new Item[36];
 
         public Bag()
         {
@@ -208,6 +230,34 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
+        public override void ClearUpdateMask(bool remove)
+        {
+            Values.ClearChangesMask(_containerData);
+            base.ClearUpdateMask(remove);
+        }
+
+        public bool IsEmpty()
+        {
+            for (var i = 0; i < GetBagSize(); ++i)
+                if (_bagslot[i] != null)
+                    return false;
+
+            return true;
+        }
+
+        public Item GetItemByPos(byte slot)
+        {
+            if (slot < GetBagSize())
+                return _bagslot[slot];
+
+            return null;
+        }
+
+        public uint GetBagSize()
+        {
+            return _containerData.NumSlots;
+        }
+
         private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedContainerMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
@@ -245,21 +295,6 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
-        {
-            Values.ClearChangesMask(_containerData);
-            base.ClearUpdateMask(remove);
-        }
-
-        public bool IsEmpty()
-        {
-            for (var i = 0; i < GetBagSize(); ++i)
-                if (_bagslot[i] != null)
-                    return false;
-
-            return true;
-        }
-
         private byte GetSlotByItemGUID(ObjectGuid guid)
         {
             for (byte i = 0; i < GetBagSize(); ++i)
@@ -270,19 +305,6 @@ namespace Game.Entities
             return ItemConst.NullSlot;
         }
 
-        public Item GetItemByPos(byte slot)
-        {
-            if (slot < GetBagSize())
-                return _bagslot[slot];
-
-            return null;
-        }
-
-        public uint GetBagSize()
-        {
-            return _containerData.NumSlots;
-        }
-
         private void SetBagSize(uint numSlots)
         {
             SetUpdateFieldValue(Values.ModifyValue(_containerData).ModifyValue(_containerData.NumSlots), numSlots);
@@ -291,29 +313,6 @@ namespace Game.Entities
         private void SetSlot(int slot, ObjectGuid guid)
         {
             SetUpdateFieldValue(ref Values.ModifyValue(_containerData).ModifyValue(_containerData.Slots, slot), guid);
-        }
-
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            private readonly ContainerData ContainerMask = new();
-            private readonly ItemData ItemMask = new();
-            private readonly ObjectFieldData ObjectMask = new();
-            private readonly Bag Owner;
-
-            public ValuesUpdateForPlayerWithMaskSender(Bag owner)
-            {
-                Owner = owner;
-            }
-
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
-
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), ContainerMask.GetUpdateMask(), player);
-
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
         }
     }
 }

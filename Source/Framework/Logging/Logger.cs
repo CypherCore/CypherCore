@@ -6,9 +6,9 @@ using System.Collections.Generic;
 internal class Logger
 {
     private readonly Dictionary<byte, Appender> appenders = new();
-    private LogLevel level;
 
     private readonly string name;
+    private LogLevel level;
 
     public Logger(string _name, LogLevel _level)
     {

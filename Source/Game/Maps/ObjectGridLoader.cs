@@ -204,9 +204,8 @@ namespace Game.Maps
 
     internal class ObjectWorldLoader : Notifier
     {
-        private readonly Cell i_cell;
-
         public uint i_corpses;
+        private readonly Cell i_cell;
         private readonly Grid i_grid;
         private readonly Map i_map;
 

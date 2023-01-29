@@ -9,9 +9,10 @@ namespace Game.AI
 {
     public class SmartGameObjectAI : GameObjectAI
     {
+        private readonly SmartScript _script = new();
+
         // Gossip
         private bool _gossipReturn;
-        private readonly SmartScript _script = new();
 
         public SmartGameObjectAI(GameObject go) : base(go)
         {

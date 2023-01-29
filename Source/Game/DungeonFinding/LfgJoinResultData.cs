@@ -9,16 +9,16 @@ namespace Game.DungeonFinding
 {
     public class LfgJoinResultData
     {
-        public Dictionary<ObjectGuid, Dictionary<uint, LfgLockInfoData>> Lockmap { get; set; } = new();
-        public List<string> PlayersMissingRequirement { get; set; } = new();
-
-        public LfgJoinResult Result { get; set; }
-        public LfgRoleCheckState State { get; set; }
-
         public LfgJoinResultData(LfgJoinResult _result = LfgJoinResult.Ok, LfgRoleCheckState _state = LfgRoleCheckState.Default)
         {
             Result = _result;
             State = _state;
         }
+
+        public Dictionary<ObjectGuid, Dictionary<uint, LfgLockInfoData>> Lockmap { get; set; } = new();
+        public List<string> PlayersMissingRequirement { get; set; } = new();
+
+        public LfgJoinResult Result { get; set; }
+        public LfgRoleCheckState State { get; set; }
     }
 }

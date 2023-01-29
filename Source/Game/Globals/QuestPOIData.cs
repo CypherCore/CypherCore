@@ -8,16 +8,16 @@ namespace Game
 {
     public class QuestPOIData
     {
-        public List<QuestPOIBlobData> Blobs { get; set; }
-        public ByteBuffer QueryDataBuffer { get; set; }
-        public uint QuestID { get; set; }
-
         public QuestPOIData(uint questId)
         {
             QuestID = questId;
             Blobs = new List<QuestPOIBlobData>();
             QueryDataBuffer = new ByteBuffer();
         }
+
+        public List<QuestPOIBlobData> Blobs { get; set; }
+        public ByteBuffer QueryDataBuffer { get; set; }
+        public uint QuestID { get; set; }
 
         public void InitializeQueryData()
         {

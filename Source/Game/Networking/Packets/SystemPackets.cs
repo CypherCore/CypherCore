@@ -10,6 +10,57 @@ namespace Game.Networking.Packets
 {
     public class FeatureSystemStatus : ServerPacket
     {
+        public struct SessionAlertConfig
+        {
+            public int Delay;
+            public int Period;
+            public int DisplayTime;
+        }
+
+        public struct SocialQueueConfig
+        {
+            public bool ToastsDisabled;
+            public float ToastDuration;
+            public float DelayDuration;
+            public float QueueMultiplier;
+            public float PlayerMultiplier;
+            public float PlayerFriendValue;
+            public float PlayerGuildValue;
+            public float ThrottleInitialThreshold;
+            public float ThrottleDecayTime;
+            public float ThrottlePrioritySpike;
+            public float ThrottleMinThreshold;
+            public float ThrottlePvPPriorityNormal;
+            public float ThrottlePvPPriorityLow;
+            public float ThrottlePvPHonorThreshold;
+            public float ThrottleLfgListPriorityDefault;
+            public float ThrottleLfgListPriorityAbove;
+            public float ThrottleLfgListPriorityBelow;
+            public float ThrottleLfgListIlvlScalingAbove;
+            public float ThrottleLfgListIlvlScalingBelow;
+            public float ThrottleRfPriorityAbove;
+            public float ThrottleRfIlvlScalingAbove;
+            public float ThrottleDfMaxItemLevel;
+            public float ThrottleDfBestPriority;
+        }
+
+        public struct SquelchInfo
+        {
+            public bool IsSquelched;
+            public ObjectGuid BnetAccountGuid;
+            public ObjectGuid GuildGuid;
+        }
+
+        public struct RafSystemFeatureInfo
+        {
+            public bool Enabled;
+            public bool RecruitingEnabled;
+            public uint MaxRecruits;
+            public uint MaxRecruitMonths;
+            public uint MaxRecruitmentUses;
+            public uint DaysInCycle;
+        }
+
         public int ActiveSeason; // Currently active Classic season
         public bool AddonsDisabled;
         public bool BpayStoreAvailable;
@@ -195,57 +246,6 @@ namespace Game.Networking.Packets
 
             if (EuropaTicketSystemStatus.HasValue)
                 EuropaTicketSystemStatus.Value.Write(_worldPacket);
-        }
-
-        public struct SessionAlertConfig
-        {
-            public int Delay;
-            public int Period;
-            public int DisplayTime;
-        }
-
-        public struct SocialQueueConfig
-        {
-            public bool ToastsDisabled;
-            public float ToastDuration;
-            public float DelayDuration;
-            public float QueueMultiplier;
-            public float PlayerMultiplier;
-            public float PlayerFriendValue;
-            public float PlayerGuildValue;
-            public float ThrottleInitialThreshold;
-            public float ThrottleDecayTime;
-            public float ThrottlePrioritySpike;
-            public float ThrottleMinThreshold;
-            public float ThrottlePvPPriorityNormal;
-            public float ThrottlePvPPriorityLow;
-            public float ThrottlePvPHonorThreshold;
-            public float ThrottleLfgListPriorityDefault;
-            public float ThrottleLfgListPriorityAbove;
-            public float ThrottleLfgListPriorityBelow;
-            public float ThrottleLfgListIlvlScalingAbove;
-            public float ThrottleLfgListIlvlScalingBelow;
-            public float ThrottleRfPriorityAbove;
-            public float ThrottleRfIlvlScalingAbove;
-            public float ThrottleDfMaxItemLevel;
-            public float ThrottleDfBestPriority;
-        }
-
-        public struct SquelchInfo
-        {
-            public bool IsSquelched;
-            public ObjectGuid BnetAccountGuid;
-            public ObjectGuid GuildGuid;
-        }
-
-        public struct RafSystemFeatureInfo
-        {
-            public bool Enabled;
-            public bool RecruitingEnabled;
-            public uint MaxRecruits;
-            public uint MaxRecruitMonths;
-            public uint MaxRecruitmentUses;
-            public uint DaysInCycle;
         }
     }
 

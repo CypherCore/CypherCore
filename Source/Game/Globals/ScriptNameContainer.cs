@@ -8,6 +8,20 @@ namespace Game
 {
     internal class ScriptNameContainer
     {
+        public class Entry
+        {
+            public uint Id;
+            public bool IsScriptDatabaseBound;
+            public string Name;
+
+            public Entry(uint id, bool isScriptDatabaseBound, string name)
+            {
+                Id = id;
+                IsScriptDatabaseBound = isScriptDatabaseBound;
+                Name = name;
+            }
+        }
+
         private readonly List<Entry> _indexToName = new();
         private readonly Dictionary<string, Entry> _nameToIndex = new();
 
@@ -62,20 +76,6 @@ namespace Game
                     scriptNames.Add(name);
 
             return scriptNames;
-        }
-
-        public class Entry
-        {
-            public uint Id;
-            public bool IsScriptDatabaseBound;
-            public string Name;
-
-            public Entry(uint id, bool isScriptDatabaseBound, string name)
-            {
-                Id = id;
-                IsScriptDatabaseBound = isScriptDatabaseBound;
-                Name = name;
-            }
         }
     }
 }

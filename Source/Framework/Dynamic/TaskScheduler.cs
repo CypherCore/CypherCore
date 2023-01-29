@@ -19,13 +19,13 @@ namespace Framework.Dynamic
         // the next update tick.
         private readonly List<Action> _asyncHolder;
 
+        // The Task Queue which contains all task objects.
+        private readonly TaskQueue _task_holder;
+
         // The current time point (now)
         private DateTime _now;
 
         private predicate_t _predicate;
-
-        // The Task Queue which contains all task objects.
-        private readonly TaskQueue _task_holder;
 
         public TaskScheduler()
         {
@@ -41,17 +41,6 @@ namespace Framework.Dynamic
             _task_holder = new TaskQueue();
             _asyncHolder = new List<Action>();
             _predicate = predicate;
-        }
-
-        /// <summary>
-        ///  Clears the validator which is asked if tasks are allowed to be executed.
-        /// </summary>
-        /// <returns></returns>
-        private TaskScheduler ClearValidator()
-        {
-            _predicate = EmptyValidator;
-
-            return this;
         }
 
         /// <summary>
@@ -89,21 +78,6 @@ namespace Framework.Dynamic
         public TaskScheduler Update(uint milliseconds, success_t callback = null)
         {
             return Update(TimeSpan.FromMilliseconds(milliseconds), callback);
-        }
-
-        /// <summary>
-        ///  Update the scheduler with a difftime.
-        ///  Calls the optional callback on successfully finish.
-        /// </summary>
-        /// <param name="difftime"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        private TaskScheduler Update(TimeSpan difftime, success_t callback = null)
-        {
-            _now += difftime;
-            Dispatch(callback);
-
-            return this;
         }
 
         public TaskScheduler Async(Action callable)
@@ -348,6 +322,32 @@ namespace Framework.Dynamic
             return InsertTask(new Task(end + time, time, group, 0, task));
         }
 
+        /// <summary>
+        ///  Clears the validator which is asked if tasks are allowed to be executed.
+        /// </summary>
+        /// <returns></returns>
+        private TaskScheduler ClearValidator()
+        {
+            _predicate = EmptyValidator;
+
+            return this;
+        }
+
+        /// <summary>
+        ///  Update the scheduler with a difftime.
+        ///  Calls the optional callback on successfully finish.
+        /// </summary>
+        /// <param name="difftime"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        private TaskScheduler Update(TimeSpan difftime, success_t callback = null)
+        {
+            _now += difftime;
+            Dispatch(callback);
+
+            return this;
+        }
+
         private void Dispatch(success_t callback = null)
         {
             // If the validation failed abort the dispatching here.
@@ -497,14 +497,14 @@ namespace Framework.Dynamic
 
     public class TaskContext
     {
-        // Marks the task as consumed
-        private bool _consumed = true;
-
         // Owner
         private readonly TaskScheduler _owner;
 
         // Associated task
         private readonly Task _task;
+
+        // Marks the task as consumed
+        private bool _consumed = true;
 
         public TaskContext(Task task, TaskScheduler owner)
         {
@@ -514,80 +514,12 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        ///  Dispatches an action safe on the TaskScheduler
-        /// </summary>
-        /// <param name="apply"></param>
-        /// <returns></returns>
-        private TaskContext Dispatch(Action apply)
-        {
-            apply();
-
-            return this;
-        }
-
-        private TaskContext Dispatch(Func<TaskScheduler, TaskScheduler> apply)
-        {
-            apply(_owner);
-
-            return this;
-        }
-
-        private bool IsExpired()
-        {
-            return _owner == null;
-        }
-
-        /// <summary>
-        ///  Returns true if the event is in the given group
-        /// </summary>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        private bool IsInGroup(uint group)
-        {
-            return _task.IsInGroup(group);
-        }
-
-        /// <summary>
-        ///  Sets the event in the given group
-        /// </summary>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        private TaskContext SetGroup(uint group)
-        {
-            _task._group = group;
-
-            return this;
-        }
-
-        /// <summary>
-        ///  Removes the group from the event
-        /// </summary>
-        /// <returns></returns>
-        private TaskContext ClearGroup()
-        {
-            _task._group = null;
-
-            return this;
-        }
-
-        /// <summary>
         ///  Returns the repeat counter which increases every time the task is repeated.
         /// </summary>
         /// <returns></returns>
         public uint GetRepeatCounter()
         {
             return _task._repeated;
-        }
-
-        /// <summary>
-        ///  Schedule a callable function that is executed at the next update tick from within the context.
-        ///  Its safe to modify the TaskScheduler from within the callable.
-        /// </summary>
-        /// <param name="callable"></param>
-        /// <returns></returns>
-        private TaskContext Async(Action callable)
-        {
-            return Dispatch(() => _owner.Async(callable));
         }
 
         /// <summary>
@@ -617,16 +549,6 @@ namespace Framework.Dynamic
         public TaskContext CancelGroupsOf(List<uint> groups)
         {
             return Dispatch(() => _owner.CancelGroupsOf(groups));
-        }
-
-        /// <summary>
-        ///  Asserts if the task was consumed already.
-        /// </summary>
-        private void AssertOnConsumed()
-        {
-            // This was adapted to TC to prevent static analysis tools from complaining.
-            // If you encounter this assertion check if you repeat a TaskContext more then 1 time!
-            Cypher.Assert(!_consumed, "Bad task logic, task context was consumed already!");
         }
 
         /// <summary>
@@ -851,6 +773,84 @@ namespace Framework.Dynamic
         public TaskContext RescheduleGroup(uint group, TimeSpan min, TimeSpan max)
         {
             return RescheduleGroup(group, RandomHelper.RandTime(min, max));
+        }
+
+        /// <summary>
+        ///  Dispatches an action safe on the TaskScheduler
+        /// </summary>
+        /// <param name="apply"></param>
+        /// <returns></returns>
+        private TaskContext Dispatch(Action apply)
+        {
+            apply();
+
+            return this;
+        }
+
+        private TaskContext Dispatch(Func<TaskScheduler, TaskScheduler> apply)
+        {
+            apply(_owner);
+
+            return this;
+        }
+
+        private bool IsExpired()
+        {
+            return _owner == null;
+        }
+
+        /// <summary>
+        ///  Returns true if the event is in the given group
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        private bool IsInGroup(uint group)
+        {
+            return _task.IsInGroup(group);
+        }
+
+        /// <summary>
+        ///  Sets the event in the given group
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        private TaskContext SetGroup(uint group)
+        {
+            _task._group = group;
+
+            return this;
+        }
+
+        /// <summary>
+        ///  Removes the group from the event
+        /// </summary>
+        /// <returns></returns>
+        private TaskContext ClearGroup()
+        {
+            _task._group = null;
+
+            return this;
+        }
+
+        /// <summary>
+        ///  Schedule a callable function that is executed at the next update tick from within the context.
+        ///  Its safe to modify the TaskScheduler from within the callable.
+        /// </summary>
+        /// <param name="callable"></param>
+        /// <returns></returns>
+        private TaskContext Async(Action callable)
+        {
+            return Dispatch(() => _owner.Async(callable));
+        }
+
+        /// <summary>
+        ///  Asserts if the task was consumed already.
+        /// </summary>
+        private void AssertOnConsumed()
+        {
+            // This was adapted to TC to prevent static analysis tools from complaining.
+            // If you encounter this assertion check if you repeat a TaskContext more then 1 time!
+            Cypher.Assert(!_consumed, "Bad task logic, task context was consumed already!");
         }
     }
 }

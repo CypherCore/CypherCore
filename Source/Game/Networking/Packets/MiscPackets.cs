@@ -195,6 +195,19 @@ namespace Game.Networking.Packets
 
     public class SetupCurrency : ServerPacket
     {
+        public struct Record
+        {
+            public uint Type;
+            public uint Quantity;
+            public uint? WeeklyQuantity;    // Currency Count obtained this Week.  
+            public uint? MaxWeeklyQuantity; // Weekly Currency cap.
+            public uint? TrackedQuantity;
+            public int? MaxQuantity;
+            public int? TotalEarned;
+            public long? LastSpendTime;
+            public byte Flags; // 0 = none, 
+        }
+
         public List<Record> Data = new();
 
         public SetupCurrency() : base(ServerOpcodes.SetupCurrency, ConnectionType.Instance)
@@ -237,19 +250,6 @@ namespace Game.Networking.Packets
                 if (data.LastSpendTime.HasValue)
                     _worldPacket.WriteInt64(data.LastSpendTime.Value);
             }
-        }
-
-        public struct Record
-        {
-            public uint Type;
-            public uint Quantity;
-            public uint? WeeklyQuantity;    // Currency Count obtained this Week.  
-            public uint? MaxWeeklyQuantity; // Weekly Currency cap.
-            public uint? TrackedQuantity;
-            public int? MaxQuantity;
-            public int? TotalEarned;
-            public long? LastSpendTime;
-            public byte Flags; // 0 = none, 
         }
     }
 

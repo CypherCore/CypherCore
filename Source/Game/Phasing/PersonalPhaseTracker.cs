@@ -109,6 +109,11 @@ namespace Game
             }
         }
 
+        public bool IsEmpty()
+        {
+            return _spawns.Empty();
+        }
+
         private void DespawnPhase(Map map, PersonalPhaseSpawns spawns)
         {
             foreach (var obj in spawns.Objects)
@@ -116,11 +121,6 @@ namespace Game
 
             spawns.Objects.Clear();
             spawns.Grids.Clear();
-        }
-
-        public bool IsEmpty()
-        {
-            return _spawns.Empty();
         }
     }
 

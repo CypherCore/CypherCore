@@ -16,15 +16,31 @@ namespace Game.Entities
 {
     public class Corpse : WorldObject
     {
-        private CellCoord _cellCoord; // gride for corpse position for fast search
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly CorpseData _corpseMask = new();
+            private readonly ObjectFieldData _objectMask = new();
+            private readonly Corpse _owner;
 
-        public CorpseData CorpseData { get; set; }
-        private long _time;
+            public ValuesUpdateForPlayerWithMaskSender(Corpse owner)
+            {
+                _owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(_owner.GetMapId());
+
+                _owner.BuildValuesUpdateForPlayerWithMask(udata, _objectMask.GetUpdateMask(), _corpseMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
 
         private readonly CorpseType _type;
-
-        public Loot Loot { get; set; }
-        public Player LootRecipient { get; set; }
+        private CellCoord _cellCoord; // gride for corpse position for fast search
+        private long _time;
 
         public Corpse(CorpseType type = CorpseType.Bones) : base(type != CorpseType.Bones)
         {
@@ -38,6 +54,11 @@ namespace Game.Entities
 
             _time = GameTime.GetGameTime();
         }
+
+        public CorpseData CorpseData { get; set; }
+
+        public Loot Loot { get; set; }
+        public Player LootRecipient { get; set; }
 
         public override void AddToWorld()
         {
@@ -272,34 +293,6 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
-        {
-            UpdateMask valuesMask = new((int)TypeId.Max);
-
-            if (requestedObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Object);
-
-            if (requestedCorpseMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Corpse);
-
-            WorldPacket buffer = new();
-            buffer.WriteUInt32(valuesMask.GetBlock(0));
-
-            if (valuesMask[(int)TypeId.Object])
-                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
-
-            if (valuesMask[(int)TypeId.Corpse])
-                CorpseData.WriteUpdate(buffer, requestedCorpseMask, true, this, target);
-
-            WorldPacket buffer1 = new();
-            buffer1.WriteUInt8((byte)UpdateType.Values);
-            buffer1.WritePackedGuid(GetGUID());
-            buffer1.WriteUInt32(buffer.GetSize());
-            buffer1.WriteBytes(buffer.GetData());
-
-            data.AddUpdateBlock(buffer1);
-        }
-
         public override void ClearUpdateMask(bool remove)
         {
             Values.ClearChangesMask(CorpseData);
@@ -439,26 +432,32 @@ namespace Game.Entities
             return Loot;
         }
 
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
         {
-            private readonly CorpseData _corpseMask = new();
-            private readonly ObjectFieldData _objectMask = new();
-            private readonly Corpse _owner;
+            UpdateMask valuesMask = new((int)TypeId.Max);
 
-            public ValuesUpdateForPlayerWithMaskSender(Corpse owner)
-            {
-                _owner = owner;
-            }
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
 
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(_owner.GetMapId());
+            if (requestedCorpseMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Corpse);
 
-                _owner.BuildValuesUpdateForPlayerWithMask(udata, _objectMask.GetUpdateMask(), _corpseMask.GetUpdateMask(), player);
+            WorldPacket buffer = new();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
 
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
+            if (valuesMask[(int)TypeId.Object])
+                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.Corpse])
+                CorpseData.WriteUpdate(buffer, requestedCorpseMask, true, this, target);
+
+            WorldPacket buffer1 = new();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
         }
     }
 }

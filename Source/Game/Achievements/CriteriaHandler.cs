@@ -825,6 +825,77 @@ namespace Game.Achievements
             return true;
         }
 
+        public bool ModifierTreeSatisfied(ModifierTreeNode tree, ulong miscValue1, ulong miscValue2, WorldObject refe, Player referencePlayer)
+        {
+            switch ((ModifierTreeOperator)tree.Entry.Operator)
+            {
+                case ModifierTreeOperator.SingleTrue:
+                    return tree.Entry.Type != 0 && ModifierSatisfied(tree.Entry, miscValue1, miscValue2, refe, referencePlayer);
+                case ModifierTreeOperator.SingleFalse:
+                    return tree.Entry.Type != 0 && !ModifierSatisfied(tree.Entry, miscValue1, miscValue2, refe, referencePlayer);
+                case ModifierTreeOperator.All:
+                    foreach (ModifierTreeNode node in tree.Children)
+                        if (!ModifierTreeSatisfied(node, miscValue1, miscValue2, refe, referencePlayer))
+                            return false;
+
+                    return true;
+                case ModifierTreeOperator.Some:
+                    {
+                        sbyte requiredAmount = Math.Max(tree.Entry.Amount, (sbyte)1);
+
+                        foreach (ModifierTreeNode node in tree.Children)
+                            if (ModifierTreeSatisfied(node, miscValue1, miscValue2, refe, referencePlayer))
+                                if (--requiredAmount == 0)
+                                    return true;
+
+                        return false;
+                    }
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        public virtual void SendAllData(Player receiver)
+        {
+        }
+
+        public virtual void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
+        {
+        }
+
+        public virtual void SendCriteriaProgressRemoved(uint criteriaId)
+        {
+        }
+
+        public virtual void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer)
+        {
+        }
+
+        public virtual void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer)
+        {
+        }
+
+        public virtual void SendPacket(ServerPacket data)
+        {
+        }
+
+        public virtual bool RequiredAchievementSatisfied(uint achievementId)
+        {
+            return false;
+        }
+
+        public virtual string GetOwnerInfo()
+        {
+            return "";
+        }
+
+        public virtual List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+        {
+            return null;
+        }
+
         private bool IsCompletedCriteria(Criteria criteria, ulong requiredAmount)
         {
             CriteriaProgress progress = GetCriteriaProgress(criteria);
@@ -1385,38 +1456,6 @@ namespace Game.Achievements
             }
 
             return true;
-        }
-
-        public bool ModifierTreeSatisfied(ModifierTreeNode tree, ulong miscValue1, ulong miscValue2, WorldObject refe, Player referencePlayer)
-        {
-            switch ((ModifierTreeOperator)tree.Entry.Operator)
-            {
-                case ModifierTreeOperator.SingleTrue:
-                    return tree.Entry.Type != 0 && ModifierSatisfied(tree.Entry, miscValue1, miscValue2, refe, referencePlayer);
-                case ModifierTreeOperator.SingleFalse:
-                    return tree.Entry.Type != 0 && !ModifierSatisfied(tree.Entry, miscValue1, miscValue2, refe, referencePlayer);
-                case ModifierTreeOperator.All:
-                    foreach (ModifierTreeNode node in tree.Children)
-                        if (!ModifierTreeSatisfied(node, miscValue1, miscValue2, refe, referencePlayer))
-                            return false;
-
-                    return true;
-                case ModifierTreeOperator.Some:
-                    {
-                        sbyte requiredAmount = Math.Max(tree.Entry.Amount, (sbyte)1);
-
-                        foreach (ModifierTreeNode node in tree.Children)
-                            if (ModifierTreeSatisfied(node, miscValue1, miscValue2, refe, referencePlayer))
-                                if (--requiredAmount == 0)
-                                    return true;
-
-                        return false;
-                    }
-                default:
-                    break;
-            }
-
-            return false;
         }
 
         private bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, WorldObject refe, Player referencePlayer)
@@ -4347,45 +4386,6 @@ namespace Game.Achievements
 
             return true;
         }
-
-        public virtual void SendAllData(Player receiver)
-        {
-        }
-
-        public virtual void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
-        {
-        }
-
-        public virtual void SendCriteriaProgressRemoved(uint criteriaId)
-        {
-        }
-
-        public virtual void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer)
-        {
-        }
-
-        public virtual void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer)
-        {
-        }
-
-        public virtual void SendPacket(ServerPacket data)
-        {
-        }
-
-        public virtual bool RequiredAchievementSatisfied(uint achievementId)
-        {
-            return false;
-        }
-
-        public virtual string GetOwnerInfo()
-        {
-            return "";
-        }
-
-        public virtual List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
-        {
-            return null;
-        }
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
@@ -4445,30 +4445,6 @@ namespace Game.Achievements
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-
-        private T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
-        {
-            CriteriaTreeRecord cur = tree;
-            var obj = map.LookupByKey(tree.Id);
-
-            while (obj == null)
-            {
-                if (cur.Parent == 0)
-                    break;
-
-                cur = CliDB.CriteriaTreeStorage.LookupByKey(cur.Parent);
-
-                if (cur == null)
-                    break;
-
-                obj = map.LookupByKey(cur.Id);
-            }
-
-            if (obj == null)
-                return default;
-
-            return obj;
         }
 
         public void LoadCriteriaList()
@@ -4734,47 +4710,6 @@ namespace Game.Achievements
             return _criteriaModifiers.LookupByKey(modifierTreeId);
         }
 
-        private bool IsCriteriaTypeStoredByAsset(CriteriaType type)
-        {
-            switch (type)
-            {
-                case CriteriaType.KillCreature:
-                case CriteriaType.WinBattleground:
-                case CriteriaType.SkillRaised:
-                case CriteriaType.EarnAchievement:
-                case CriteriaType.CompleteQuestsInZone:
-                case CriteriaType.ParticipateInBattleground:
-                case CriteriaType.KilledByCreature:
-                case CriteriaType.CompleteQuest:
-                case CriteriaType.BeSpellTarget:
-                case CriteriaType.CastSpell:
-                case CriteriaType.TrackedWorldStateUIModified:
-                case CriteriaType.PVPKillInArea:
-                case CriteriaType.LearnOrKnowSpell:
-                case CriteriaType.AcquireItem:
-                case CriteriaType.AchieveSkillStep:
-                case CriteriaType.UseItem:
-                case CriteriaType.LootItem:
-                case CriteriaType.RevealWorldMapOverlay:
-                case CriteriaType.ReputationGained:
-                case CriteriaType.EquipItemInSlot:
-                case CriteriaType.DeliverKillingBlowToClass:
-                case CriteriaType.DeliverKillingBlowToRace:
-                case CriteriaType.DoEmote:
-                case CriteriaType.EquipItem:
-                case CriteriaType.UseGameobject:
-                case CriteriaType.GainAura:
-                case CriteriaType.CatchFishInFishingHole:
-                case CriteriaType.LearnSpellFromSkillLine:
-                case CriteriaType.GetLootByType:
-                case CriteriaType.LandTargetedSpellOnTarget:
-                case CriteriaType.LearnTradeskillSkillLine:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
         public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
         {
             if (asset != 0 &&
@@ -4848,6 +4783,71 @@ namespace Game.Achievements
                 WalkCriteriaTree(node, func);
 
             func(tree);
+        }
+
+        private T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
+        {
+            CriteriaTreeRecord cur = tree;
+            var obj = map.LookupByKey(tree.Id);
+
+            while (obj == null)
+            {
+                if (cur.Parent == 0)
+                    break;
+
+                cur = CliDB.CriteriaTreeStorage.LookupByKey(cur.Parent);
+
+                if (cur == null)
+                    break;
+
+                obj = map.LookupByKey(cur.Id);
+            }
+
+            if (obj == null)
+                return default;
+
+            return obj;
+        }
+
+        private bool IsCriteriaTypeStoredByAsset(CriteriaType type)
+        {
+            switch (type)
+            {
+                case CriteriaType.KillCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.SkillRaised:
+                case CriteriaType.EarnAchievement:
+                case CriteriaType.CompleteQuestsInZone:
+                case CriteriaType.ParticipateInBattleground:
+                case CriteriaType.KilledByCreature:
+                case CriteriaType.CompleteQuest:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.CastSpell:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.PVPKillInArea:
+                case CriteriaType.LearnOrKnowSpell:
+                case CriteriaType.AcquireItem:
+                case CriteriaType.AchieveSkillStep:
+                case CriteriaType.UseItem:
+                case CriteriaType.LootItem:
+                case CriteriaType.RevealWorldMapOverlay:
+                case CriteriaType.ReputationGained:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.DeliverKillingBlowToClass:
+                case CriteriaType.DeliverKillingBlowToRace:
+                case CriteriaType.DoEmote:
+                case CriteriaType.EquipItem:
+                case CriteriaType.UseGameobject:
+                case CriteriaType.GainAura:
+                case CriteriaType.CatchFishInFishingHole:
+                case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.LearnTradeskillSkillLine:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 

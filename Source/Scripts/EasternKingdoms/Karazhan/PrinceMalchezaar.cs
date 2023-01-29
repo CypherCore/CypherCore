@@ -132,24 +132,24 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             new(-10922.8f, -1985.2f), new(-10916.2f, -1996.2f), new(-10932.2f, -2008.1f), new(-10948.8f, -2022.1f), new(-10958.7f, -1997.7f), new(-10971.5f, -1997.5f), new(-10990.8f, -1995.1f), new(-10989.8f, -1976.5f), new(-10971.6f, -1973.0f), new(-10955.5f, -1974.0f), new(-10939.6f, -1969.8f), new(-10958.0f, -1952.2f), new(-10941.7f, -1954.8f), new(-10943.1f, -1988.5f), new(-10948.8f, -2005.1f), new(-10984.0f, -2019.3f), new(-10932.8f, -1979.6f), new(-10935.7f, -1996.0f)
         };
 
-        private uint AmplifyDamageTimer;
-
         private readonly ObjectGuid[] axes = new ObjectGuid[2];
-        private uint AxesTargetSwitchTimer;
-        private uint Cleave_Timer;
         private readonly ulong[] enfeeble_health = new ulong[5];
         private readonly ObjectGuid[] enfeeble_targets = new ObjectGuid[5];
+
+        private readonly List<ObjectGuid> infernals = new();
+
+        private readonly InstanceScript instance;
+        private readonly List<Vector2> positions = new();
+
+        private uint AmplifyDamageTimer;
+        private uint AxesTargetSwitchTimer;
+        private uint Cleave_Timer;
         private uint EnfeebleResetTimer;
         private uint EnfeebleTimer;
         private uint InfernalCleanupTimer;
-
-        private readonly List<ObjectGuid> infernals = new();
         private uint InfernalTimer;
 
-        private readonly InstanceScript instance;
-
         private uint phase;
-        private readonly List<Vector2> positions = new();
         private uint ShadowNovaTimer;
         private uint SunderArmorTimer;
         private uint SWPainTimer;
@@ -159,27 +159,6 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             Initialize();
 
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            EnfeebleTimer = 30000;
-            EnfeebleResetTimer = 38000;
-            ShadowNovaTimer = 35500;
-            SWPainTimer = 20000;
-            AmplifyDamageTimer = 5000;
-            Cleave_Timer = 8000;
-            InfernalTimer = 40000;
-            InfernalCleanupTimer = 47000;
-            AxesTargetSwitchTimer = RandomHelper.URand(7500, 20000);
-            SunderArmorTimer = RandomHelper.URand(5000, 10000);
-            phase = 1;
-
-            for (byte i = 0; i < 5; ++i)
-            {
-                enfeeble_targets[i].Clear();
-                enfeeble_health[i] = 0;
-            }
         }
 
         public override void Reset()
@@ -222,136 +201,6 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
             Talk(TextIds.SayAggro);
 
             instance.HandleGameObject(instance.GetGuidData(DataTypes.GoNetherDoor), false); // Open the door leading further in
-        }
-
-        private void InfernalCleanup()
-        {
-            //Infernal Cleanup
-            foreach (var guid in infernals)
-            {
-                Unit pInfernal = Global.ObjAccessor.GetUnit(me, guid);
-
-                if (pInfernal && pInfernal.IsAlive())
-                {
-                    pInfernal.SetVisible(false);
-                    pInfernal.SetDeathState(DeathState.JustDied);
-                }
-            }
-
-            infernals.Clear();
-        }
-
-        private void AxesCleanup()
-        {
-            for (byte i = 0; i < 2; ++i)
-            {
-                Unit axe = Global.ObjAccessor.GetUnit(me, axes[i]);
-
-                if (axe && axe.IsAlive())
-                    axe.KillSelf();
-
-                axes[i].Clear();
-            }
-        }
-
-        private void ClearWeapons()
-        {
-            SetEquipmentSlots(false, 0, 0);
-            me.SetCanDualWield(false);
-        }
-
-        private void EnfeebleHealthEffect()
-        {
-            SpellInfo info = Global.SpellMgr.GetSpellInfo(SpellIds.EnfeebleEffect, GetDifficulty());
-
-            if (info == null)
-                return;
-
-            Unit tank = me.GetThreatManager().GetCurrentVictim();
-            List<Unit> targets = new();
-
-            foreach (var refe in me.GetThreatManager().GetSortedThreatList())
-            {
-                Unit target = refe.GetVictim();
-
-                if (target != tank &&
-                    target.IsAlive() &&
-                    target.IsPlayer())
-                    targets.Add(target);
-            }
-
-            if (targets.Empty())
-                return;
-
-            //cut down to size if we have more than 5 targets
-            targets.RandomResize(5);
-
-            uint i = 0;
-
-            foreach (var target in targets)
-            {
-                if (target)
-                {
-                    enfeeble_targets[i] = target.GetGUID();
-                    enfeeble_health[i] = target.GetHealth();
-
-                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                    args.OriginalCaster = me.GetGUID();
-                    target.CastSpell(target, SpellIds.Enfeeble, args);
-                    target.SetHealth(1);
-                }
-
-                i++;
-            }
-        }
-
-        private void EnfeebleResetHealth()
-        {
-            for (byte i = 0; i < 5; ++i)
-            {
-                Unit target = Global.ObjAccessor.GetUnit(me, enfeeble_targets[i]);
-
-                if (target && target.IsAlive())
-                    target.SetHealth(enfeeble_health[i]);
-
-                enfeeble_targets[i].Clear();
-                enfeeble_health[i] = 0;
-            }
-        }
-
-        private void SummonInfernal(uint diff)
-        {
-            Vector2 point = Vector2.Zero;
-            Position pos = null;
-
-            if ((me.GetMapId() != 532) ||
-                positions.Empty())
-            {
-                pos = me.GetRandomNearPosition(60);
-            }
-            else
-            {
-                point = positions.SelectRandom();
-                pos.Relocate(point.X, point.Y, 275.5f, RandomHelper.FRand(0.0f, (MathF.PI * 2)));
-            }
-
-            Creature infernal = me.SummonCreature(MiscConst.NetherspiteInfernal, pos, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(3));
-
-            if (infernal)
-            {
-                infernal.SetDisplayId(MiscConst.InfernalModelInvisible);
-                infernal.SetFaction(me.GetFaction());
-
-                if (point != Vector2.Zero)
-                    infernal.GetAI<netherspite_infernal>().Point = point;
-
-                infernal.GetAI<netherspite_infernal>().Malchezaar = me.GetGUID();
-
-                infernals.Add(infernal.GetGUID());
-                DoCast(infernal, SpellIds.InfernalRelay);
-            }
-
-            Talk(TextIds.SaySummon);
         }
 
         public override void UpdateAI(uint diff)
@@ -568,6 +417,170 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                 DoMeleeAttackIfReady();
         }
 
+        public void Cleanup(Creature infernal, Vector2 point)
+        {
+            foreach (var guid in infernals)
+                if (guid == infernal.GetGUID())
+                {
+                    infernals.Remove(guid);
+
+                    break;
+                }
+
+            positions.Add(point);
+        }
+
+        private void Initialize()
+        {
+            EnfeebleTimer = 30000;
+            EnfeebleResetTimer = 38000;
+            ShadowNovaTimer = 35500;
+            SWPainTimer = 20000;
+            AmplifyDamageTimer = 5000;
+            Cleave_Timer = 8000;
+            InfernalTimer = 40000;
+            InfernalCleanupTimer = 47000;
+            AxesTargetSwitchTimer = RandomHelper.URand(7500, 20000);
+            SunderArmorTimer = RandomHelper.URand(5000, 10000);
+            phase = 1;
+
+            for (byte i = 0; i < 5; ++i)
+            {
+                enfeeble_targets[i].Clear();
+                enfeeble_health[i] = 0;
+            }
+        }
+
+        private void InfernalCleanup()
+        {
+            //Infernal Cleanup
+            foreach (var guid in infernals)
+            {
+                Unit pInfernal = Global.ObjAccessor.GetUnit(me, guid);
+
+                if (pInfernal && pInfernal.IsAlive())
+                {
+                    pInfernal.SetVisible(false);
+                    pInfernal.SetDeathState(DeathState.JustDied);
+                }
+            }
+
+            infernals.Clear();
+        }
+
+        private void AxesCleanup()
+        {
+            for (byte i = 0; i < 2; ++i)
+            {
+                Unit axe = Global.ObjAccessor.GetUnit(me, axes[i]);
+
+                if (axe && axe.IsAlive())
+                    axe.KillSelf();
+
+                axes[i].Clear();
+            }
+        }
+
+        private void ClearWeapons()
+        {
+            SetEquipmentSlots(false, 0, 0);
+            me.SetCanDualWield(false);
+        }
+
+        private void EnfeebleHealthEffect()
+        {
+            SpellInfo info = Global.SpellMgr.GetSpellInfo(SpellIds.EnfeebleEffect, GetDifficulty());
+
+            if (info == null)
+                return;
+
+            Unit tank = me.GetThreatManager().GetCurrentVictim();
+            List<Unit> targets = new();
+
+            foreach (var refe in me.GetThreatManager().GetSortedThreatList())
+            {
+                Unit target = refe.GetVictim();
+
+                if (target != tank &&
+                    target.IsAlive() &&
+                    target.IsPlayer())
+                    targets.Add(target);
+            }
+
+            if (targets.Empty())
+                return;
+
+            //cut down to size if we have more than 5 targets
+            targets.RandomResize(5);
+
+            uint i = 0;
+
+            foreach (var target in targets)
+            {
+                if (target)
+                {
+                    enfeeble_targets[i] = target.GetGUID();
+                    enfeeble_health[i] = target.GetHealth();
+
+                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                    args.OriginalCaster = me.GetGUID();
+                    target.CastSpell(target, SpellIds.Enfeeble, args);
+                    target.SetHealth(1);
+                }
+
+                i++;
+            }
+        }
+
+        private void EnfeebleResetHealth()
+        {
+            for (byte i = 0; i < 5; ++i)
+            {
+                Unit target = Global.ObjAccessor.GetUnit(me, enfeeble_targets[i]);
+
+                if (target && target.IsAlive())
+                    target.SetHealth(enfeeble_health[i]);
+
+                enfeeble_targets[i].Clear();
+                enfeeble_health[i] = 0;
+            }
+        }
+
+        private void SummonInfernal(uint diff)
+        {
+            Vector2 point = Vector2.Zero;
+            Position pos = null;
+
+            if ((me.GetMapId() != 532) ||
+                positions.Empty())
+            {
+                pos = me.GetRandomNearPosition(60);
+            }
+            else
+            {
+                point = positions.SelectRandom();
+                pos.Relocate(point.X, point.Y, 275.5f, RandomHelper.FRand(0.0f, (MathF.PI * 2)));
+            }
+
+            Creature infernal = me.SummonCreature(MiscConst.NetherspiteInfernal, pos, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(3));
+
+            if (infernal)
+            {
+                infernal.SetDisplayId(MiscConst.InfernalModelInvisible);
+                infernal.SetFaction(me.GetFaction());
+
+                if (point != Vector2.Zero)
+                    infernal.GetAI<netherspite_infernal>().Point = point;
+
+                infernal.GetAI<netherspite_infernal>().Malchezaar = me.GetGUID();
+
+                infernals.Add(infernal.GetGUID());
+                DoCast(infernal, SpellIds.InfernalRelay);
+            }
+
+            Talk(TextIds.SaySummon);
+        }
+
         private void DoMeleeAttacksIfReady()
         {
             if (me.IsWithinMeleeRange(me.GetVictim()) &&
@@ -589,19 +602,6 @@ namespace Scripts.EasternKingdoms.Karazhan.PrinceMalchezaar
                     me.ResetAttackTimer(WeaponAttackType.OffAttack);
                 }
             }
-        }
-
-        public void Cleanup(Creature infernal, Vector2 point)
-        {
-            foreach (var guid in infernals)
-                if (guid == infernal.GetGUID())
-                {
-                    infernals.Remove(guid);
-
-                    break;
-                }
-
-            positions.Add(point);
         }
     }
 }

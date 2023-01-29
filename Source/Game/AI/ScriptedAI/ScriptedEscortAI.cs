@@ -13,6 +13,7 @@ namespace Game.AI
 {
     public class EscortAI : ScriptedAI
     {
+        private readonly WaypointPath _path;
         private bool _activeAttacker; // obsolete, determined by faction.
         private bool _despawnAtEnd;
         private bool _despawnAtFar;
@@ -24,8 +25,6 @@ namespace Game.AI
         private bool _instantRespawn; // if creature should respawn instantly after escort over (if not, database respawntime are used)
         private bool _manualPath;
         private float _maxPlayerDistance;
-
-        private readonly WaypointPath _path;
         private TimeSpan _pauseTimer;
         private uint _playerCheckTimer;
 
@@ -50,40 +49,6 @@ namespace Game.AI
         public Player GetPlayerForEscort()
         {
             return Global.ObjAccessor.GetPlayer(me, _playerGUID);
-        }
-
-        //see followerAI
-        private bool AssistPlayerInCombatAgainst(Unit who)
-        {
-            if (!who ||
-                !who.GetVictim())
-                return false;
-
-            if (me.HasReactState(ReactStates.Passive))
-                return false;
-
-            //experimental (unknown) flag not present
-            if (!me.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist))
-                return false;
-
-            //not a player
-            if (!who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself())
-                return false;
-
-            //never attack friendly
-            if (me.IsValidAssistTarget(who.GetVictim()))
-                return false;
-
-            //too far away and no free sight?
-            if (me.IsWithinDistInMap(who, GetMaxPlayerDistance()) &&
-                me.IsWithinLOSInMap(who))
-            {
-                me.EngageWithTarget(who);
-
-                return true;
-            }
-
-            return false;
         }
 
         public override void MoveInLineOfSight(Unit who)
@@ -141,11 +106,6 @@ namespace Game.AI
             Reset();
         }
 
-        private void ReturnToLastPoint()
-        {
-            me.GetMotionMaster().MovePoint(0xFFFFFF, me.GetHomePosition());
-        }
-
         public override void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
             me.RemoveAllAuras();
@@ -169,30 +129,6 @@ namespace Game.AI
 
                 Reset();
             }
-        }
-
-        private bool IsPlayerOrGroupInRange()
-        {
-            Player player = GetPlayerForEscort();
-
-            if (player)
-            {
-                Group group = player.GetGroup();
-
-                if (group)
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
-                    {
-                        Player member = groupRef.GetSource();
-
-                        if (member)
-                            if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
-                                return true;
-                    }
-                else if (me.IsWithinDistInMap(player, GetMaxPlayerDistance()))
-                    return true;
-            }
-
-            return false;
         }
 
         public override void UpdateAI(uint diff)
@@ -376,24 +312,6 @@ namespace Game.AI
             _manualPath = true;
         }
 
-        private void FillPointMovementListForCreature()
-        {
-            WaypointPath path = Global.WaypointMgr.GetPath(me.GetEntry());
-
-            if (path == null)
-                return;
-
-            foreach (WaypointNode value in path.nodes)
-            {
-                WaypointNode node = value;
-                node.x = GridDefines.NormalizeMapCoord(node.x);
-                node.y = GridDefines.NormalizeMapCoord(node.y);
-                node.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
-
-                _path.nodes.Add(node);
-            }
-        }
-
         public void SetRun(bool on = true)
         {
             if (on == _running)
@@ -510,16 +428,6 @@ namespace Game.AI
             return !_playerGUID.IsEmpty();
         }
 
-        private void SetMaxPlayerDistance(float newMax)
-        {
-            _maxPlayerDistance = newMax;
-        }
-
-        private float GetMaxPlayerDistance()
-        {
-            return _maxPlayerDistance;
-        }
-
         public void SetDespawnAtEnd(bool despawn)
         {
             _despawnAtEnd = despawn;
@@ -538,6 +446,97 @@ namespace Game.AI
         public void SetActiveAttacker(bool attack)
         {
             _activeAttacker = attack;
+        }
+
+        //see followerAI
+        private bool AssistPlayerInCombatAgainst(Unit who)
+        {
+            if (!who ||
+                !who.GetVictim())
+                return false;
+
+            if (me.HasReactState(ReactStates.Passive))
+                return false;
+
+            //experimental (unknown) flag not present
+            if (!me.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist))
+                return false;
+
+            //not a player
+            if (!who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself())
+                return false;
+
+            //never attack friendly
+            if (me.IsValidAssistTarget(who.GetVictim()))
+                return false;
+
+            //too far away and no free sight?
+            if (me.IsWithinDistInMap(who, GetMaxPlayerDistance()) &&
+                me.IsWithinLOSInMap(who))
+            {
+                me.EngageWithTarget(who);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ReturnToLastPoint()
+        {
+            me.GetMotionMaster().MovePoint(0xFFFFFF, me.GetHomePosition());
+        }
+
+        private bool IsPlayerOrGroupInRange()
+        {
+            Player player = GetPlayerForEscort();
+
+            if (player)
+            {
+                Group group = player.GetGroup();
+
+                if (group)
+                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    {
+                        Player member = groupRef.GetSource();
+
+                        if (member)
+                            if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
+                                return true;
+                    }
+                else if (me.IsWithinDistInMap(player, GetMaxPlayerDistance()))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void FillPointMovementListForCreature()
+        {
+            WaypointPath path = Global.WaypointMgr.GetPath(me.GetEntry());
+
+            if (path == null)
+                return;
+
+            foreach (WaypointNode value in path.nodes)
+            {
+                WaypointNode node = value;
+                node.x = GridDefines.NormalizeMapCoord(node.x);
+                node.y = GridDefines.NormalizeMapCoord(node.y);
+                node.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
+
+                _path.nodes.Add(node);
+            }
+        }
+
+        private void SetMaxPlayerDistance(float newMax)
+        {
+            _maxPlayerDistance = newMax;
+        }
+
+        private float GetMaxPlayerDistance()
+        {
+            return _maxPlayerDistance;
         }
 
         private ObjectGuid GetEventStarterGUID()

@@ -67,8 +67,8 @@ namespace Framework.Database
 
     public class SQLQueryHolderCallback<R> : ISqlCallback
     {
-        private Action<SQLQueryHolder<R>> _callback;
         private readonly Task<SQLQueryHolder<R>> _future;
+        private Action<SQLQueryHolder<R>> _callback;
 
         public SQLQueryHolderCallback(Task<SQLQueryHolder<R>> future)
         {

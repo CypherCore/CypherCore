@@ -4,6 +4,5 @@
 namespace Game.BattleGrounds.Zones.SilvershardMines
 {
     internal class SilvershardMines
-    {
-    }
+    {}
 }

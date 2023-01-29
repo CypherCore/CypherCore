@@ -13,8 +13,8 @@ namespace Game.BlackMarket
     public class BlackMarketManager : Singleton<BlackMarketManager>
     {
         private readonly Dictionary<uint, BlackMarketEntry> _auctions = new();
-        private long _lastUpdate;
         private readonly Dictionary<uint, BlackMarketTemplate> _templates = new();
+        private long _lastUpdate;
 
         private BlackMarketManager()
         {

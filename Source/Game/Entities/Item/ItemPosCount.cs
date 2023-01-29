@@ -7,15 +7,15 @@ namespace Game.Entities
 {
     public class ItemPosCount
     {
-        public uint Count { get; set; }
-
-        public ushort Pos { get; set; }
-
         public ItemPosCount(ushort _pos, uint _count)
         {
             Pos = _pos;
             Count = _count;
         }
+
+        public uint Count { get; set; }
+
+        public ushort Pos { get; set; }
 
         public bool IsContainedIn(List<ItemPosCount> vec)
         {

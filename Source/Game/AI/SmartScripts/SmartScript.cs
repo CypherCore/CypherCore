@@ -19,21 +19,27 @@ namespace Game.AI
 {
     public class SmartScript
     {
+        public ObjectGuid LastInvoker;
+
         // Max number of nested ProcessEventsFor() calls to avoid infinite loops
         private const uint MaxNestedEvents = 10;
+
+        private readonly Dictionary<uint, uint> _counterList = new();
+
+        private readonly List<SmartScriptHolder> _events = new();
+        private readonly List<SmartScriptHolder> _installEvents = new();
+        private readonly List<uint> _remIDs = new();
+        private readonly List<SmartScriptHolder> _storedEvents = new();
+
+        private readonly Dictionary<uint, ObjectGuidList> _storedTargets = new();
         private SmartEventFlags _allEventFlags;
         private AreaTrigger _areaTrigger;
         private Player _atPlayer;
-
-        private readonly Dictionary<uint, uint> _counterList = new();
         private uint _currentPriority;
         private uint _eventPhase;
-
-        private readonly List<SmartScriptHolder> _events = new();
         private bool _eventSortingRequired;
         private GameObject _go;
         private ObjectGuid _goOrigGUID;
-        private readonly List<SmartScriptHolder> _installEvents = new();
         private uint _lastTextID;
         private Creature _me;
         private ObjectGuid _meOrigGUID;
@@ -41,12 +47,8 @@ namespace Game.AI
 
         private uint _pathId;
         private Quest _quest;
-        private readonly List<uint> _remIDs = new();
         private SceneTemplate _sceneTemplate;
         private SmartScriptType _scriptType;
-        private readonly List<SmartScriptHolder> _storedEvents = new();
-
-        private readonly Dictionary<uint, ObjectGuidList> _storedTargets = new();
         private uint _talkerEntry;
         private ObjectGuid _textGUID;
 
@@ -54,8 +56,6 @@ namespace Game.AI
         private List<SmartScriptHolder> _timedActionList = new();
         private AreaTriggerRecord _trigger;
         private bool _useTextTimer;
-
-        public ObjectGuid LastInvoker;
         private ObjectGuid mTimedActionListInvoker;
 
         public SmartScript()
@@ -120,6 +120,279 @@ namespace Game.AI
                 }
 
             --_nestedEventsCounter;
+        }
+
+        public bool CheckTimer(SmartScriptHolder e)
+        {
+            return e.Active;
+        }
+
+        public void OnUpdate(uint diff)
+        {
+            if ((_scriptType == SmartScriptType.Creature || _scriptType == SmartScriptType.GameObject || _scriptType == SmartScriptType.AreaTriggerEntity || _scriptType == SmartScriptType.AreaTriggerEntityServerside) &&
+                !GetBaseObject())
+                return;
+
+            if (_me != null &&
+                _me.IsInEvadeMode())
+            {
+                // Check if the timed Action list finished and clear it if so.
+                // This is required by SMART_ACTION_CALL_TIMED_ACTIONLIST failing if mTimedActionList is not empty.
+                if (!_timedActionList.Empty())
+                {
+                    bool needCleanup1 = true;
+
+                    foreach (SmartScriptHolder scriptholder in _timedActionList)
+                        if (scriptholder.EnableTimed)
+                            needCleanup1 = false;
+
+                    if (needCleanup1)
+                        _timedActionList.Clear();
+                }
+
+                return;
+            }
+
+            InstallEvents(); //before UpdateTimers
+
+            if (_eventSortingRequired)
+            {
+                SortEvents(_events);
+                _eventSortingRequired = false;
+            }
+
+            foreach (var holder in _events)
+                UpdateTimer(holder, diff);
+
+            if (!_storedEvents.Empty())
+                foreach (var holder in _storedEvents)
+                    UpdateTimer(holder, diff);
+
+            bool needCleanup = true;
+
+            if (!_timedActionList.Empty())
+                for (int i = 0; i < _timedActionList.Count; ++i)
+                {
+                    SmartScriptHolder scriptHolder = _timedActionList[i];
+
+                    if (scriptHolder.EnableTimed)
+                    {
+                        UpdateTimer(scriptHolder, diff);
+                        needCleanup = false;
+                    }
+                }
+
+            if (needCleanup)
+                _timedActionList.Clear();
+
+            if (!_remIDs.Empty())
+            {
+                foreach (var id in _remIDs)
+                    RemoveStoredEvent(id);
+
+                _remIDs.Clear();
+            }
+
+            if (_useTextTimer && _me != null)
+            {
+                if (_textTimer < diff)
+                {
+                    uint textID = _lastTextID;
+                    _lastTextID = 0;
+                    uint entry = _talkerEntry;
+                    _talkerEntry = 0;
+                    _textTimer = 0;
+                    _useTextTimer = false;
+                    ProcessEventsFor(SmartEvents.TextOver, null, textID, entry);
+                }
+                else
+                {
+                    _textTimer -= diff;
+                }
+            }
+        }
+
+        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null)
+        {
+            if (obj != null)
+            {
+                switch (obj.GetTypeId())
+                {
+                    case TypeId.Unit:
+                        _scriptType = SmartScriptType.Creature;
+                        _me = obj.ToCreature();
+                        Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is Creature {_me.GetEntry()}");
+
+                        break;
+                    case TypeId.GameObject:
+                        _scriptType = SmartScriptType.GameObject;
+                        _go = obj.ToGameObject();
+                        Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is GameObject {_go.GetEntry()}");
+
+                        break;
+                    case TypeId.Player:
+                        if (at != null)
+                        {
+                            _scriptType = SmartScriptType.AreaTrigger;
+                            _trigger = at;
+                            _atPlayer = obj.ToPlayer();
+                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger {_trigger.Id}, triggered by player {_atPlayer.GetGUID()}");
+                        }
+                        else
+                        {
+                            Log.outError(LogFilter.Misc, "SmartScript::OnInitialize: !WARNING! Player TypeID is only allowed for AreaTriggers");
+                        }
+
+                        break;
+                    case TypeId.AreaTrigger:
+                        _areaTrigger = obj.ToAreaTrigger();
+                        _scriptType = _areaTrigger.IsServerSide() ? SmartScriptType.AreaTriggerEntityServerside : SmartScriptType.AreaTriggerEntity;
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is AreaTrigger {_areaTrigger.GetEntry()}, IsServerSide {_areaTrigger.IsServerSide()}");
+
+                        break;
+                    default:
+                        Log.outError(LogFilter.Scripts, "SmartScript.OnInitialize: Unhandled TypeID !WARNING!");
+
+                        return;
+                }
+            }
+            else if (scene != null)
+            {
+                _scriptType = SmartScriptType.Scene;
+                _sceneTemplate = scene;
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: Scene with Id {scene.SceneId}");
+            }
+            else if (qst != null)
+            {
+                _scriptType = SmartScriptType.Quest;
+                _quest = qst;
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is Quest with Id {qst.Id}");
+            }
+            else
+            {
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized WorldObject is Null.");
+
+                return;
+            }
+
+            GetScript(); //load copy of script
+
+            foreach (var holder in _events)
+                InitTimer(holder); //calculate timers for first Time use
+
+            ProcessEventsFor(SmartEvents.AiInit);
+            InstallEvents();
+            ProcessEventsFor(SmartEvents.JustCreated);
+            _counterList.Clear();
+        }
+
+        public void OnMoveInLineOfSight(Unit who)
+        {
+            if (_me == null)
+                return;
+
+            ProcessEventsFor(_me.IsEngaged() ? SmartEvents.IcLos : SmartEvents.OocLos, who);
+        }
+
+        public Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
+        {
+            FriendlyBelowHpPctEntryInRange u_check = new(_me, entry, range, minHPDiff, excludeSelf);
+            UnitLastSearcher searcher = new(_me, u_check);
+            Cell.VisitAllObjects(_me, searcher, range);
+
+            return searcher.GetTarget();
+        }
+
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)
+        {
+            // Do NOT allow to start a new actionlist if a previous one is already running, unless explicitly allowed. We need to always finish the current actionlist
+            if (e.GetActionType() == SmartActions.CallTimedActionlist &&
+                e.Action.timedActionList.allowOverride == 0 &&
+                !_timedActionList.Empty())
+                return;
+
+            _timedActionList.Clear();
+            _timedActionList = Global.SmartAIMgr.GetScript((int)entry, SmartScriptType.TimedActionlist);
+
+            if (_timedActionList.Empty())
+                return;
+
+            _timedActionList.RemoveAll(script => { return script.EventId < startFromEventId; });
+
+            mTimedActionListInvoker = invoker != null ? invoker.GetGUID() : ObjectGuid.Empty;
+
+            for (var i = 0; i < _timedActionList.Count; ++i)
+            {
+                var scriptHolder = _timedActionList[i];
+                scriptHolder.EnableTimed = i == 0; //enable processing only for the first Action
+
+                if (e.Action.timedActionList.timerType == 0)
+                    scriptHolder.Event.type = SmartEvents.UpdateOoc;
+                else if (e.Action.timedActionList.timerType == 1)
+                    scriptHolder.Event.type = SmartEvents.UpdateIc;
+                else if (e.Action.timedActionList.timerType > 1)
+                    scriptHolder.Event.type = SmartEvents.Update;
+
+                InitTimer(scriptHolder);
+            }
+        }
+
+        public void SetPathId(uint id)
+        {
+            _pathId = id;
+        }
+
+        public uint GetPathId()
+        {
+            return _pathId;
+        }
+
+        public bool HasAnyEventWithFlag(SmartEventFlags flag)
+        {
+            return _allEventFlags.HasAnyFlag(flag);
+        }
+
+        public bool IsUnit(WorldObject obj)
+        {
+            return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player));
+        }
+
+        public bool IsPlayer(WorldObject obj)
+        {
+            return obj != null && obj.IsTypeId(TypeId.Player);
+        }
+
+        public bool IsCreature(WorldObject obj)
+        {
+            return obj != null && obj.IsTypeId(TypeId.Unit);
+        }
+
+        public bool IsCharmedCreature(WorldObject obj)
+        {
+            if (!obj)
+                return false;
+
+            Creature creatureObj = obj.ToCreature();
+
+            if (creatureObj)
+                return creatureObj.IsCharmed();
+
+            return false;
+        }
+
+        public bool IsGameObject(WorldObject obj)
+        {
+            return obj != null && obj.IsTypeId(TypeId.GameObject);
+        }
+
+        public List<WorldObject> GetStoredTargetList(uint id, WorldObject obj)
+        {
+            var list = _storedTargets.LookupByKey(id);
+
+            if (list != null)
+                return list.GetObjectList(obj);
+
+            return null;
         }
 
         private void ProcessAction(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
@@ -4371,11 +4644,6 @@ namespace Game.AI
             }
         }
 
-        public bool CheckTimer(SmartScriptHolder e)
-        {
-            return e.Active;
-        }
-
         private void InstallEvents()
         {
             if (!_installEvents.Empty())
@@ -4384,91 +4652,6 @@ namespace Game.AI
                     _events.Add(holder); //must be before UpdateTimers
 
                 _installEvents.Clear();
-            }
-        }
-
-        public void OnUpdate(uint diff)
-        {
-            if ((_scriptType == SmartScriptType.Creature || _scriptType == SmartScriptType.GameObject || _scriptType == SmartScriptType.AreaTriggerEntity || _scriptType == SmartScriptType.AreaTriggerEntityServerside) &&
-                !GetBaseObject())
-                return;
-
-            if (_me != null &&
-                _me.IsInEvadeMode())
-            {
-                // Check if the timed Action list finished and clear it if so.
-                // This is required by SMART_ACTION_CALL_TIMED_ACTIONLIST failing if mTimedActionList is not empty.
-                if (!_timedActionList.Empty())
-                {
-                    bool needCleanup1 = true;
-
-                    foreach (SmartScriptHolder scriptholder in _timedActionList)
-                        if (scriptholder.EnableTimed)
-                            needCleanup1 = false;
-
-                    if (needCleanup1)
-                        _timedActionList.Clear();
-                }
-
-                return;
-            }
-
-            InstallEvents(); //before UpdateTimers
-
-            if (_eventSortingRequired)
-            {
-                SortEvents(_events);
-                _eventSortingRequired = false;
-            }
-
-            foreach (var holder in _events)
-                UpdateTimer(holder, diff);
-
-            if (!_storedEvents.Empty())
-                foreach (var holder in _storedEvents)
-                    UpdateTimer(holder, diff);
-
-            bool needCleanup = true;
-
-            if (!_timedActionList.Empty())
-                for (int i = 0; i < _timedActionList.Count; ++i)
-                {
-                    SmartScriptHolder scriptHolder = _timedActionList[i];
-
-                    if (scriptHolder.EnableTimed)
-                    {
-                        UpdateTimer(scriptHolder, diff);
-                        needCleanup = false;
-                    }
-                }
-
-            if (needCleanup)
-                _timedActionList.Clear();
-
-            if (!_remIDs.Empty())
-            {
-                foreach (var id in _remIDs)
-                    RemoveStoredEvent(id);
-
-                _remIDs.Clear();
-            }
-
-            if (_useTextTimer && _me != null)
-            {
-                if (_textTimer < diff)
-                {
-                    uint textID = _lastTextID;
-                    _lastTextID = 0;
-                    uint entry = _talkerEntry;
-                    _talkerEntry = 0;
-                    _textTimer = 0;
-                    _useTextTimer = false;
-                    ProcessEventsFor(SmartEvents.TextOver, null, textID, entry);
-                }
-                else
-                {
-                    _textTimer -= diff;
-                }
             }
         }
 
@@ -4605,88 +4788,6 @@ namespace Game.AI
             }
         }
 
-        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null, Quest qst = null)
-        {
-            if (obj != null)
-            {
-                switch (obj.GetTypeId())
-                {
-                    case TypeId.Unit:
-                        _scriptType = SmartScriptType.Creature;
-                        _me = obj.ToCreature();
-                        Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is Creature {_me.GetEntry()}");
-
-                        break;
-                    case TypeId.GameObject:
-                        _scriptType = SmartScriptType.GameObject;
-                        _go = obj.ToGameObject();
-                        Log.outDebug(LogFilter.Scripts, $"SmartScript.OnInitialize: source is GameObject {_go.GetEntry()}");
-
-                        break;
-                    case TypeId.Player:
-                        if (at != null)
-                        {
-                            _scriptType = SmartScriptType.AreaTrigger;
-                            _trigger = at;
-                            _atPlayer = obj.ToPlayer();
-                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::OnInitialize: source is AreaTrigger {_trigger.Id}, triggered by player {_atPlayer.GetGUID()}");
-                        }
-                        else
-                        {
-                            Log.outError(LogFilter.Misc, "SmartScript::OnInitialize: !WARNING! Player TypeID is only allowed for AreaTriggers");
-                        }
-
-                        break;
-                    case TypeId.AreaTrigger:
-                        _areaTrigger = obj.ToAreaTrigger();
-                        _scriptType = _areaTrigger.IsServerSide() ? SmartScriptType.AreaTriggerEntityServerside : SmartScriptType.AreaTriggerEntity;
-                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is AreaTrigger {_areaTrigger.GetEntry()}, IsServerSide {_areaTrigger.IsServerSide()}");
-
-                        break;
-                    default:
-                        Log.outError(LogFilter.Scripts, "SmartScript.OnInitialize: Unhandled TypeID !WARNING!");
-
-                        return;
-                }
-            }
-            else if (scene != null)
-            {
-                _scriptType = SmartScriptType.Scene;
-                _sceneTemplate = scene;
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: Scene with Id {scene.SceneId}");
-            }
-            else if (qst != null)
-            {
-                _scriptType = SmartScriptType.Quest;
-                _quest = qst;
-                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is Quest with Id {qst.Id}");
-            }
-            else
-            {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized WorldObject is Null.");
-
-                return;
-            }
-
-            GetScript(); //load copy of script
-
-            foreach (var holder in _events)
-                InitTimer(holder); //calculate timers for first Time use
-
-            ProcessEventsFor(SmartEvents.AiInit);
-            InstallEvents();
-            ProcessEventsFor(SmartEvents.JustCreated);
-            _counterList.Clear();
-        }
-
-        public void OnMoveInLineOfSight(Unit who)
-        {
-            if (_me == null)
-                return;
-
-            ProcessEventsFor(_me.IsEngaged() ? SmartEvents.IcLos : SmartEvents.OocLos, who);
-        }
-
         private Unit DoSelectLowestHpFriendly(float range, uint MinHPDiff)
         {
             if (!_me)
@@ -4695,15 +4796,6 @@ namespace Game.AI
             var u_check = new MostHPMissingInRange<Unit>(_me, range, MinHPDiff);
             var searcher = new UnitLastSearcher(_me, u_check);
             Cell.VisitGridObjects(_me, searcher, range);
-
-            return searcher.GetTarget();
-        }
-
-        public Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
-        {
-            FriendlyBelowHpPctEntryInRange u_check = new(_me, entry, range, minHPDiff, excludeSelf);
-            UnitLastSearcher searcher = new(_me, u_check);
-            Cell.VisitAllObjects(_me, searcher, range);
 
             return searcher.GetTarget();
         }
@@ -4752,40 +4844,6 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
-        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)
-        {
-            // Do NOT allow to start a new actionlist if a previous one is already running, unless explicitly allowed. We need to always finish the current actionlist
-            if (e.GetActionType() == SmartActions.CallTimedActionlist &&
-                e.Action.timedActionList.allowOverride == 0 &&
-                !_timedActionList.Empty())
-                return;
-
-            _timedActionList.Clear();
-            _timedActionList = Global.SmartAIMgr.GetScript((int)entry, SmartScriptType.TimedActionlist);
-
-            if (_timedActionList.Empty())
-                return;
-
-            _timedActionList.RemoveAll(script => { return script.EventId < startFromEventId; });
-
-            mTimedActionListInvoker = invoker != null ? invoker.GetGUID() : ObjectGuid.Empty;
-
-            for (var i = 0; i < _timedActionList.Count; ++i)
-            {
-                var scriptHolder = _timedActionList[i];
-                scriptHolder.EnableTimed = i == 0; //enable processing only for the first Action
-
-                if (e.Action.timedActionList.timerType == 0)
-                    scriptHolder.Event.type = SmartEvents.UpdateOoc;
-                else if (e.Action.timedActionList.timerType == 1)
-                    scriptHolder.Event.type = SmartEvents.UpdateIc;
-                else if (e.Action.timedActionList.timerType > 1)
-                    scriptHolder.Event.type = SmartEvents.Update;
-
-                InitTimer(scriptHolder);
-            }
-        }
-
         private Unit GetLastInvoker(Unit invoker = null)
         {
             // Look for invoker only on map of base object... Prevents multithreaded crashes
@@ -4798,16 +4856,6 @@ namespace Game.AI
                 return Global.ObjAccessor.GetUnit(invoker, LastInvoker);
 
             return null;
-        }
-
-        public void SetPathId(uint id)
-        {
-            _pathId = id;
-        }
-
-        public uint GetPathId()
-        {
-            return _pathId;
         }
 
         private WorldObject GetBaseObject()
@@ -4837,44 +4885,6 @@ namespace Game.AI
         private WorldObject GetBaseObjectOrPlayerTrigger()
         {
             return _trigger != null ? _atPlayer : GetBaseObject();
-        }
-
-        public bool HasAnyEventWithFlag(SmartEventFlags flag)
-        {
-            return _allEventFlags.HasAnyFlag(flag);
-        }
-
-        public bool IsUnit(WorldObject obj)
-        {
-            return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player));
-        }
-
-        public bool IsPlayer(WorldObject obj)
-        {
-            return obj != null && obj.IsTypeId(TypeId.Player);
-        }
-
-        public bool IsCreature(WorldObject obj)
-        {
-            return obj != null && obj.IsTypeId(TypeId.Unit);
-        }
-
-        public bool IsCharmedCreature(WorldObject obj)
-        {
-            if (!obj)
-                return false;
-
-            Creature creatureObj = obj.ToCreature();
-
-            if (creatureObj)
-                return creatureObj.IsCharmed();
-
-            return false;
-        }
-
-        public bool IsGameObject(WorldObject obj)
-        {
-            return obj != null && obj.IsTypeId(TypeId.GameObject);
         }
 
         private bool IsSmart(Creature creature, bool silent = false)
@@ -4936,16 +4946,6 @@ namespace Game.AI
             if (!inserted)
                 foreach (WorldObject obj in targets)
                     _storedTargets[id].AddGuid(obj.GetGUID());
-        }
-
-        public List<WorldObject> GetStoredTargetList(uint id, WorldObject obj)
-        {
-            var list = _storedTargets.LookupByKey(id);
-
-            if (list != null)
-                return list.GetObjectList(obj);
-
-            return null;
         }
 
         private void StoreCounter(uint id, uint value, uint reset)

@@ -7,8 +7,8 @@ namespace Game
 {
     public class CommodityQuote
     {
+        public DateTime ValidTo = DateTime.MinValue;
         public uint Quantity { get; set; }
         public ulong TotalPrice { get; set; }
-        public DateTime ValidTo = DateTime.MinValue;
     }
 }

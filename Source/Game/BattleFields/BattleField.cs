@@ -14,52 +14,17 @@ namespace Game.BattleFields
 {
     public class BattleField : ZoneScript
     {
-        protected uint BattleId { get; set; }  // BattleID (for packet)
-        protected uint BattleTime { get; set; } // Length of a battle
+        public ObjectGuid StalkerGuid;
 
         // Map of the objectives belonging to this OutdoorPvP
         private readonly Dictionary<uint, BfCapturePoint> _capturePoints = new();
-        protected Dictionary<int, uint> Data32 { get; set; } = new();
 
         private readonly Dictionary<int, ulong> _data64 = new();
-        protected uint DefenderTeam { get; set; }
-
-        // Graveyard variables
-        protected List<BfGraveyard> GraveyardList { get; set; } = new(); // Vector witch contain the different GY of the battle
 
         private readonly List<ObjectGuid>[] _groups = new List<ObjectGuid>[2]; // Contain different raid group
-        protected Dictionary<ObjectGuid, long>[] InvitedPlayers { get; set; } = new Dictionary<ObjectGuid, long>[2];
-        protected bool IsActive { get; set; }
-        protected bool Enabled { get; set; }
-        private uint _lastResurectTimer; // Timer for resurect player every 30 sec
-        protected Map Map { get; set; }
-        protected uint MapId { get; set; }          // _mapId where is Battlefield
-        protected uint MaxPlayer { get; set; }       // Maximum number of player that participated to Battlefield
-        protected uint MinLevel { get; set; }        // Required level to participate at Battlefield
-        protected uint MinPlayer { get; set; }       // Minimum number of player for Battlefield start
-        protected uint NoWarBattleTime { get; set; } // Time between two battles
-
-        // Players info maps
-        protected List<ObjectGuid>[] Players { get; set; } = new List<ObjectGuid>[2];        // Players in zone
-        protected List<ObjectGuid>[] PlayersInQueue { get; set; } = new List<ObjectGuid>[2]; // Players in the queue
-        protected List<ObjectGuid>[] PlayersInWar { get; set; } = new List<ObjectGuid>[2];   // Players in WG combat
-        protected Dictionary<ObjectGuid, long>[] PlayersWillBeKick { get; set; } = new Dictionary<ObjectGuid, long>[2];
-        protected uint RestartAfterCrash { get; set; } // Delay to restart Wintergrasp if the server crashed during a running battle.
-        protected bool StartGrouping { get; set; }     // bool for know if all players in area has been invited
-
-        protected uint StartGroupingTimer { get; set; } // Timer for invite players in area 15 minute before start battle
-        protected uint TimeForAcceptInvite { get; set; }
-        protected uint Timer { get; set; } // Global timer for event
-
-        // Variables that must exist for each battlefield
-        protected uint TypeId { get; set; } // See enum BattlefieldTypes
+        private uint _lastResurectTimer;                                       // Timer for resurect player every 30 sec
 
         private uint _uiKickAfkPlayersTimer; // Timer for check Afk in war
-        protected uint UiKickDontAcceptTimer { get; set; }
-        protected uint ZoneId { get; set; }               // ZoneID of Wintergrasp = 4197
-        protected WorldLocation KickPosition { get; set; } // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
-
-        public ObjectGuid StalkerGuid;
 
         public BattleField(Map map)
         {
@@ -85,6 +50,41 @@ namespace Game.BattleFields
                 _groups[i] = new List<ObjectGuid>();
             }
         }
+
+        protected uint BattleId { get; set; }   // BattleID (for packet)
+        protected uint BattleTime { get; set; } // Length of a battle
+        protected Dictionary<int, uint> Data32 { get; set; } = new();
+        protected uint DefenderTeam { get; set; }
+
+        // Graveyard variables
+        protected List<BfGraveyard> GraveyardList { get; set; } = new(); // Vector witch contain the different GY of the battle
+        protected Dictionary<ObjectGuid, long>[] InvitedPlayers { get; set; } = new Dictionary<ObjectGuid, long>[2];
+        protected bool IsActive { get; set; }
+        protected bool Enabled { get; set; }
+        protected Map Map { get; set; }
+        protected uint MapId { get; set; }           // _mapId where is Battlefield
+        protected uint MaxPlayer { get; set; }       // Maximum number of player that participated to Battlefield
+        protected uint MinLevel { get; set; }        // Required level to participate at Battlefield
+        protected uint MinPlayer { get; set; }       // Minimum number of player for Battlefield start
+        protected uint NoWarBattleTime { get; set; } // Time between two battles
+
+        // Players info maps
+        protected List<ObjectGuid>[] Players { get; set; } = new List<ObjectGuid>[2];        // Players in zone
+        protected List<ObjectGuid>[] PlayersInQueue { get; set; } = new List<ObjectGuid>[2]; // Players in the queue
+        protected List<ObjectGuid>[] PlayersInWar { get; set; } = new List<ObjectGuid>[2];   // Players in WG combat
+        protected Dictionary<ObjectGuid, long>[] PlayersWillBeKick { get; set; } = new Dictionary<ObjectGuid, long>[2];
+        protected uint RestartAfterCrash { get; set; } // Delay to restart Wintergrasp if the server crashed during a running battle.
+        protected bool StartGrouping { get; set; }     // bool for know if all players in area has been invited
+
+        protected uint StartGroupingTimer { get; set; } // Timer for invite players in area 15 minute before start battle
+        protected uint TimeForAcceptInvite { get; set; }
+        protected uint Timer { get; set; } // Global timer for event
+
+        // Variables that must exist for each battlefield
+        protected uint TypeId { get; set; } // See enum BattlefieldTypes
+        protected uint UiKickDontAcceptTimer { get; set; }
+        protected uint ZoneId { get; set; }                // ZoneID of Wintergrasp = 4197
+        protected WorldLocation KickPosition { get; set; } // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
 
         public void HandlePlayerEnterZone(Player player, uint zone)
         {
@@ -228,110 +228,6 @@ namespace Game.BattleFields
             return objective_changed;
         }
 
-        private void InvitePlayersInZoneToQueue()
-        {
-            for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
-                foreach (var guid in Players[team])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                    if (player)
-                        InvitePlayerToQueue(player);
-                }
-        }
-
-        private void InvitePlayerToQueue(Player player)
-        {
-            if (PlayersInQueue[player.GetTeamId()].Contains(player.GetGUID()))
-                return;
-
-            if (PlayersInQueue[player.GetTeamId()].Count <= MinPlayer ||
-                PlayersInQueue[GetOtherTeam(player.GetTeamId())].Count >= MinPlayer)
-                PlayerAcceptInviteToQueue(player);
-        }
-
-        private void InvitePlayersInQueueToWar()
-        {
-            for (byte team = 0; team < 2; ++team)
-            {
-                foreach (var guid in PlayersInQueue[team])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                    if (player)
-                    {
-                        if (PlayersInWar[player.GetTeamId()].Count + InvitedPlayers[player.GetTeamId()].Count < MaxPlayer)
-                        {
-                            InvitePlayerToWar(player);
-                        }
-                        else
-                        {
-                            //Full
-                        }
-                    }
-                }
-
-                PlayersInQueue[team].Clear();
-            }
-        }
-
-        private void InvitePlayersInZoneToWar()
-        {
-            for (byte team = 0; team < 2; ++team)
-                foreach (var guid in Players[team])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                    if (player)
-                    {
-                        if (PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) ||
-                            InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
-                            continue;
-
-                        if (PlayersInWar[player.GetTeamId()].Count + InvitedPlayers[player.GetTeamId()].Count < MaxPlayer)
-                            InvitePlayerToWar(player);
-                        else // Battlefield is full of players
-                            PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
-                    }
-                }
-        }
-
-        private void InvitePlayerToWar(Player player)
-        {
-            if (!player)
-                return;
-
-            // todo needed ?
-            if (player.IsInFlight())
-                return;
-
-            if (player.InArena() ||
-                player.GetBattleground())
-            {
-                PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
-
-                return;
-            }
-
-            // If the player does not match minimal level requirements for the battlefield, kick him
-            if (player.GetLevel() < MinLevel)
-            {
-                if (!PlayersWillBeKick[player.GetTeamId()].ContainsKey(player.GetGUID()))
-                    PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
-
-                return;
-            }
-
-            // Check if player is not already in war
-            if (PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) ||
-                InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
-                return;
-
-            PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
-            InvitedPlayers[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + TimeForAcceptInvite;
-            PlayerAcceptInviteToWar(player);
-        }
-
         public void InitStalker(uint entry, Position pos)
         {
             Creature creature = SpawnCreature(entry, pos);
@@ -340,19 +236,6 @@ namespace Game.BattleFields
                 StalkerGuid = creature.GetGUID();
             else
                 Log.outError(LogFilter.Battlefield, "Battlefield.InitStalker: could not spawn Stalker (Creature entry {0}), zone messeges will be un-available", entry);
-        }
-
-        private void KickAfkPlayers()
-        {
-            for (byte team = 0; team < 2; ++team)
-                foreach (var guid in PlayersInWar[team])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                    if (player)
-                        if (player.IsAFK())
-                            KickPlayerFromBattlefield(guid);
-                }
         }
 
         public void KickPlayerFromBattlefield(ObjectGuid guid)
@@ -400,11 +283,6 @@ namespace Game.BattleFields
             Timer = NoWarBattleTime;
 
             OnBattleEnd(endByTimer);
-        }
-
-        private void DoPlaySoundToAll(uint soundID)
-        {
-            BroadcastPacketToWar(new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
 
         public bool HasPlayer(Player player)
@@ -520,11 +398,6 @@ namespace Game.BattleFields
             _capturePoints[cp.GetCapturePointEntry()] = cp;
         }
 
-        private BfCapturePoint GetCapturePoint(uint entry)
-        {
-            return _capturePoints.LookupByKey(entry);
-        }
-
         public void RegisterZone(uint zoneId)
         {
             Global.BattleFieldMgr.AddZone(zoneId, this);
@@ -556,70 +429,6 @@ namespace Game.BattleFields
                 creature.SetUnitFlag(UnitFlags.NonAttackable);
                 creature.SetReactState(ReactStates.Passive);
             }
-        }
-
-        // ****************************************************
-        // ******************* Group System *******************
-        // ****************************************************
-        private Group GetFreeBfRaid(int teamIndex)
-        {
-            foreach (var guid in _groups[teamIndex])
-            {
-                Group group = Global.GroupMgr.GetGroupByGUID(guid);
-
-                if (group)
-                    if (!group.IsFull())
-                        return group;
-            }
-
-            return null;
-        }
-
-        private Group GetGroupPlayer(ObjectGuid plguid, int teamIndex)
-        {
-            foreach (var guid in _groups[teamIndex])
-            {
-                Group group = Global.GroupMgr.GetGroupByGUID(guid);
-
-                if (group)
-                    if (group.IsMember(plguid))
-                        return group;
-            }
-
-            return null;
-        }
-
-        private bool AddOrSetPlayerToCorrectBfGroup(Player player)
-        {
-            if (!player.IsInWorld)
-                return false;
-
-            Group oldgroup = player.GetGroup();
-
-            if (oldgroup)
-                oldgroup.RemoveMember(player.GetGUID());
-
-            Group group = GetFreeBfRaid(player.GetTeamId());
-
-            if (!group)
-            {
-                group = new Group();
-                group.SetBattlefieldGroup(this);
-                group.Create(player);
-                Global.GroupMgr.AddGroup(group);
-                _groups[player.GetTeamId()].Add(group.GetGUID());
-            }
-            else if (group.IsMember(player.GetGUID()))
-            {
-                byte subgroup = group.GetMemberGroup(player.GetGUID());
-                player.SetBattlegroundOrBattlefieldRaid(group, subgroup);
-            }
-            else
-            {
-                group.AddMember(player);
-            }
-
-            return true;
         }
 
         //***************End of Group System*******************
@@ -825,11 +634,6 @@ namespace Game.BattleFields
             return IsActive;
         }
 
-        private BattlefieldState GetState()
-        {
-            return IsActive ? BattlefieldState.InProgress : (Timer <= StartGroupingTimer ? BattlefieldState.Warnup : BattlefieldState.Inactive);
-        }
-
         // Enable or Disable battlefield
         public void ToggleBattlefield(bool enable)
         {
@@ -888,11 +692,6 @@ namespace Game.BattleFields
             return (teamIndex == TeamId.Horde ? TeamId.Alliance : TeamId.Horde);
         }
 
-        private void SetDefenderTeam(uint team)
-        {
-            DefenderTeam = team;
-        }
-
         // Called on start
         public virtual void OnBattleStart()
         {
@@ -943,11 +742,6 @@ namespace Game.BattleFields
             return !IsActive;
         }
 
-        private List<BfGraveyard> GetGraveyardVector()
-        {
-            return GraveyardList;
-        }
-
         public uint GetTimer()
         {
             return Timer;
@@ -961,6 +755,212 @@ namespace Game.BattleFields
         // use for switch off all worldstate for client
         public virtual void SendRemoveWorldStates(Player player)
         {
+        }
+
+        private void InvitePlayersInZoneToQueue()
+        {
+            for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
+                foreach (var guid in Players[team])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                    if (player)
+                        InvitePlayerToQueue(player);
+                }
+        }
+
+        private void InvitePlayerToQueue(Player player)
+        {
+            if (PlayersInQueue[player.GetTeamId()].Contains(player.GetGUID()))
+                return;
+
+            if (PlayersInQueue[player.GetTeamId()].Count <= MinPlayer ||
+                PlayersInQueue[GetOtherTeam(player.GetTeamId())].Count >= MinPlayer)
+                PlayerAcceptInviteToQueue(player);
+        }
+
+        private void InvitePlayersInQueueToWar()
+        {
+            for (byte team = 0; team < 2; ++team)
+            {
+                foreach (var guid in PlayersInQueue[team])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                    if (player)
+                    {
+                        if (PlayersInWar[player.GetTeamId()].Count + InvitedPlayers[player.GetTeamId()].Count < MaxPlayer)
+                        {
+                            InvitePlayerToWar(player);
+                        }
+                        else
+                        {
+                            //Full
+                        }
+                    }
+                }
+
+                PlayersInQueue[team].Clear();
+            }
+        }
+
+        private void InvitePlayersInZoneToWar()
+        {
+            for (byte team = 0; team < 2; ++team)
+                foreach (var guid in Players[team])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                    if (player)
+                    {
+                        if (PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) ||
+                            InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
+                            continue;
+
+                        if (PlayersInWar[player.GetTeamId()].Count + InvitedPlayers[player.GetTeamId()].Count < MaxPlayer)
+                            InvitePlayerToWar(player);
+                        else // Battlefield is full of players
+                            PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+                    }
+                }
+        }
+
+        private void InvitePlayerToWar(Player player)
+        {
+            if (!player)
+                return;
+
+            // todo needed ?
+            if (player.IsInFlight())
+                return;
+
+            if (player.InArena() ||
+                player.GetBattleground())
+            {
+                PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
+
+                return;
+            }
+
+            // If the player does not match minimal level requirements for the battlefield, kick him
+            if (player.GetLevel() < MinLevel)
+            {
+                if (!PlayersWillBeKick[player.GetTeamId()].ContainsKey(player.GetGUID()))
+                    PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
+
+                return;
+            }
+
+            // Check if player is not already in war
+            if (PlayersInWar[player.GetTeamId()].Contains(player.GetGUID()) ||
+                InvitedPlayers[player.GetTeamId()].ContainsKey(player.GetGUID()))
+                return;
+
+            PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
+            InvitedPlayers[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + TimeForAcceptInvite;
+            PlayerAcceptInviteToWar(player);
+        }
+
+        private void KickAfkPlayers()
+        {
+            for (byte team = 0; team < 2; ++team)
+                foreach (var guid in PlayersInWar[team])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                    if (player)
+                        if (player.IsAFK())
+                            KickPlayerFromBattlefield(guid);
+                }
+        }
+
+        private void DoPlaySoundToAll(uint soundID)
+        {
+            BroadcastPacketToWar(new PlaySound(ObjectGuid.Empty, soundID, 0));
+        }
+
+        private BfCapturePoint GetCapturePoint(uint entry)
+        {
+            return _capturePoints.LookupByKey(entry);
+        }
+
+        // ****************************************************
+        // ******************* Group System *******************
+        // ****************************************************
+        private Group GetFreeBfRaid(int teamIndex)
+        {
+            foreach (var guid in _groups[teamIndex])
+            {
+                Group group = Global.GroupMgr.GetGroupByGUID(guid);
+
+                if (group)
+                    if (!group.IsFull())
+                        return group;
+            }
+
+            return null;
+        }
+
+        private Group GetGroupPlayer(ObjectGuid plguid, int teamIndex)
+        {
+            foreach (var guid in _groups[teamIndex])
+            {
+                Group group = Global.GroupMgr.GetGroupByGUID(guid);
+
+                if (group)
+                    if (group.IsMember(plguid))
+                        return group;
+            }
+
+            return null;
+        }
+
+        private bool AddOrSetPlayerToCorrectBfGroup(Player player)
+        {
+            if (!player.IsInWorld)
+                return false;
+
+            Group oldgroup = player.GetGroup();
+
+            if (oldgroup)
+                oldgroup.RemoveMember(player.GetGUID());
+
+            Group group = GetFreeBfRaid(player.GetTeamId());
+
+            if (!group)
+            {
+                group = new Group();
+                group.SetBattlefieldGroup(this);
+                group.Create(player);
+                Global.GroupMgr.AddGroup(group);
+                _groups[player.GetTeamId()].Add(group.GetGUID());
+            }
+            else if (group.IsMember(player.GetGUID()))
+            {
+                byte subgroup = group.GetMemberGroup(player.GetGUID());
+                player.SetBattlegroundOrBattlefieldRaid(group, subgroup);
+            }
+            else
+            {
+                group.AddMember(player);
+            }
+
+            return true;
+        }
+
+        private BattlefieldState GetState()
+        {
+            return IsActive ? BattlefieldState.InProgress : (Timer <= StartGroupingTimer ? BattlefieldState.Warnup : BattlefieldState.Inactive);
+        }
+
+        private void SetDefenderTeam(uint team)
+        {
+            DefenderTeam = team;
+        }
+
+        private List<BfGraveyard> GetGraveyardVector()
+        {
+            return GraveyardList;
         }
     }
 }

@@ -7,6 +7,12 @@ namespace Game
 {
     public class AuctionSearchClassFilters
     {
+        public class SubclassFilter
+        {
+            public ulong[] InvTypes = new ulong[ItemConst.MaxItemSubclassTotal];
+            public FilterType SubclassMask;
+        }
+
         public enum FilterType : uint
         {
             SkipClass = 0,
@@ -20,12 +26,6 @@ namespace Game
         {
             for (var i = 0; i < (int)ItemClass.Max; ++i)
                 Classes[i] = new SubclassFilter();
-        }
-
-        public class SubclassFilter
-        {
-            public ulong[] InvTypes = new ulong[ItemConst.MaxItemSubclassTotal];
-            public FilterType SubclassMask;
         }
     }
 }

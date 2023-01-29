@@ -550,6 +550,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(_triggeredSpellId);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -557,11 +562,6 @@ namespace Scripts.Spells.Items
 
             if (item)
                 caster.CastSpell(caster, _triggeredSpellId, new CastSpellExtraArgs(item));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -575,15 +575,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.AegisHeal);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.AegisHeal, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -597,6 +597,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.EyeOfGrillok);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+
         private void PeriodicTick(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -608,11 +613,6 @@ namespace Scripts.Spells.Items
             GetCaster().CastSpell(GetCaster(), SpellIds.EyeOfGrillok, new CastSpellExtraArgs(aurEff));
             GetTarget().ToCreature().DespawnOrUnsummon();
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     // 37877 - Blessing of Faith
@@ -623,6 +623,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlessingOfLowerCityDruid, SpellIds.BlessingOfLowerCityPaladin, SpellIds.BlessingOfLowerCityPriest, SpellIds.BlessingOfLowerCityShaman);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -659,11 +664,6 @@ namespace Scripts.Spells.Items
                 caster.CastSpell(caster, spellId, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     // Item - 13503: Alchemist's Stone
@@ -682,6 +682,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AlchemistStoneExtraHeal, SpellIds.AlchemistStoneExtraMana);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private bool CheckProc(ProcEventInfo eventInfo)
@@ -709,11 +714,6 @@ namespace Scripts.Spells.Items
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell((Unit)null, spellId, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     // Item - 50351: Tiny Abomination in a Jar
@@ -736,6 +736,12 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MoteOfAnger, SpellIds.ManifestAngerMainHand, SpellIds.ManifestAngerOffHand);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -767,12 +773,6 @@ namespace Scripts.Spells.Items
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.MoteOfAnger);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // 26400 - Arcane Shroud
@@ -780,17 +780,17 @@ namespace Scripts.Spells.Items
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
+        }
+
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             int diff = (int)GetUnitOwner().GetLevel() - 60;
 
             if (diff > 0)
                 amount += 2 * diff;
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
         }
     }
 
@@ -812,6 +812,11 @@ namespace Scripts.Spells.Items
                                      SpellIds.Narcissism,
                                      SpellIds.MartyrComplex,
                                      SpellIds.Dementia);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -882,11 +887,6 @@ namespace Scripts.Spells.Items
             if (RandomHelper.randChance(10))
                 caster.Say(TextIds.SayMadness);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 41404 - Dementia
@@ -899,15 +899,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.DementiaPos, SpellIds.DementiaNeg);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
+        }
+
         private void HandlePeriodicDummy(AuraEffect aurEff)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), RandomHelper.RAND(SpellIds.DementiaPos, SpellIds.DementiaNeg), new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -921,14 +921,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BrittleArmor);
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetHitUnit().RemoveAuraFromStack(SpellIds.BrittleArmor);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAuraFromStack(SpellIds.BrittleArmor);
         }
     }
 
@@ -996,15 +996,15 @@ namespace Scripts.Spells.Items
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleStackDrop, 0, AuraType.ModRating, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleStackDrop(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().RemoveAuraFromStack(GetId(), GetTarget().GetGUID());
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleStackDrop, 0, AuraType.ModRating, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1018,17 +1018,17 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.DeadlyPrecision);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DeadlyPrecision, GetCastDifficulty());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.AuraStack, (int)spellInfo.StackAmount);
             GetCaster().CastSpell(GetCaster(), spellInfo.Id, args);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1062,6 +1062,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(_strengthSpellId, _agilitySpellId, _apSpellId, _criticalSpellId, _hasteSpellId);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1125,11 +1130,6 @@ namespace Scripts.Spells.Items
             uint spellId = randomSpells.SelectRandom();
             caster.CastSpell(caster, spellId, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 47770 - Roll Dice
@@ -1150,6 +1150,11 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             GetCaster().TextEmote(TextIds.DecahedralDwarvenDice, GetHitUnit());
@@ -1158,11 +1163,6 @@ namespace Scripts.Spells.Items
             uint maximum = 100;
 
             GetCaster().ToPlayer().DoRandomRoll(minimum, maximum);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1176,17 +1176,17 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.SummonGoblinBomb, SpellIds.MalfunctionExplosion);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Item item = GetCastItem();
 
             if (item != null)
                 GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(95) ? SpellIds.SummonGoblinBomb : SpellIds.MalfunctionExplosion, item);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1195,17 +1195,17 @@ namespace Scripts.Spells.Items
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit target = GetHitUnit();
 
             uint spellId = RandomHelper.RAND(SpellIds.PersonalizedWeather1, SpellIds.PersonalizedWeather2, SpellIds.PersonalizedWeather3, SpellIds.PersonalizedWeather4);
             target.CastSpell(target, spellId, new CastSpellExtraArgs(GetSpell()));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1237,6 +1237,11 @@ namespace Scripts.Spells.Items
             return true;
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Resurrect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             if (RandomHelper.randChance(_chance))
@@ -1246,11 +1251,6 @@ namespace Scripts.Spells.Items
                 if (_failSpell != 0)
                     GetCaster().CastSpell(GetCaster(), _failSpell, new CastSpellExtraArgs(GetCastItem()));
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Resurrect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1264,15 +1264,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.DesperateRage);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 2, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.DesperateRage, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 2, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1292,16 +1292,16 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             uint spellId = RandomHelper.RAND(SpellIds.Sleepy, SpellIds.Invigorate, SpellIds.Shrink, SpellIds.PartyTime, SpellIds.HealthySpirit, SpellIds.Rejuvenation);
             caster.CastSpell(caster, spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1335,6 +1335,11 @@ namespace Scripts.Spells.Items
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+        }
+
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Player player = GetOwner().ToPlayer();
@@ -1344,17 +1349,17 @@ namespace Scripts.Spells.Items
 
             player.Events.AddEventAtOffset(new PartyTimeEmoteEvent(player), TimeSpan.FromSeconds(RandomHelper.RAND(5, 10, 15)));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-        }
     }
 
     [Script] // 51010 - Dire Brew
     internal class spell_item_dire_brew : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+        }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -1376,11 +1381,6 @@ namespace Scripts.Spells.Items
             if (model != 0)
                 target.SetDisplayId(model);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-        }
     }
 
     [Script] // 59915 - Discerning Eye of the Beast Dummy
@@ -1393,15 +1393,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.DiscerningEyeBeast);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetActor().CastSpell((Unit)null, SpellIds.DiscerningEyeBeast, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1409,6 +1409,11 @@ namespace Scripts.Spells.Items
     internal class spell_item_echoes_of_light : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
 
         private void FilterTargets(List<WorldObject> targets)
         {
@@ -1421,17 +1426,17 @@ namespace Scripts.Spells.Items
             targets.Clear();
             targets.Add(target);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
-        }
     }
 
     [Script] // 30427 - Extract Gas (23821: Zapthrottle Mote Extractor)
     internal class spell_item_extract_gas : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
 
         private void PeriodicTick(AuraEffect aurEff)
         {
@@ -1454,11 +1459,6 @@ namespace Scripts.Spells.Items
                 creature.DespawnOrUnsummon();
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     [Script] // 7434 - Fate Rune of Unsurpassed Vigor
@@ -1471,15 +1471,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.UnsurpassedVigor);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.UnsurpassedVigor, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1504,15 +1504,15 @@ namespace Scripts.Spells.Items
             return CliDB.BroadcastTextStorage.ContainsKey(_text);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
             caster.TextEmote(_text, caster, false);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -1525,6 +1525,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlaskOfTheNorthSp, SpellIds.FlaskOfTheNorthAp, SpellIds.FlaskOfTheNorthStr);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
         private void HandleDummy(uint effIndex)
@@ -1572,11 +1577,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, possibleSpells.SelectRandom(), true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     // 39372 - Frozen Shadoweave
@@ -1588,6 +1588,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Shadowmend);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1604,11 +1609,6 @@ namespace Scripts.Spells.Items
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
             caster.CastSpell((Unit)null, SpellIds.Shadowmend, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     // http://www.wowhead.com/Item=10645 Gnomish Death Ray
@@ -1620,6 +1620,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GnomishDeathRaySelf, SpellIds.GnomishDeathRayTarget);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -1634,11 +1639,6 @@ namespace Scripts.Spells.Items
                 else
                     caster.CastSpell(target, SpellIds.GnomishDeathRayTarget, true);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1669,6 +1669,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(_energySpellId, _manaSpellId, _rageSpellId, _rpSpellId);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1703,11 +1708,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell((Unit)null, spellId, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 23645 - Hourglass Sand
@@ -1720,14 +1720,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BroodAfflictionBronze);
         }
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().RemoveAurasDueToSpell(SpellIds.BroodAfflictionBronze);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().RemoveAurasDueToSpell(SpellIds.BroodAfflictionBronze);
         }
     }
 
@@ -1773,6 +1773,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.MrPinchysBlessing, SpellIds.SummonMightyMrPinchy, SpellIds.SummonFuriousMrPinchy, SpellIds.TinyMagicalCrawdad, SpellIds.MrPinchysGift);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -1800,11 +1805,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, spellId, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     // Item - 27920: Mark of Conquest
@@ -1819,6 +1819,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.MarkOfConquestEnergize);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DealRangedAttack | ProcFlags.DealRangedAbility))
@@ -1828,11 +1833,6 @@ namespace Scripts.Spells.Items
                 // but mana instead
                 eventInfo.GetActor().CastSpell((Unit)null, SpellIds.MarkOfConquestEnergize, new CastSpellExtraArgs(aurEff));
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -1846,14 +1846,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.MercurialShield);
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetHitUnit().RemoveAuraFromStack(SpellIds.MercurialShield);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAuraFromStack(SpellIds.MercurialShield);
         }
     }
 
@@ -1873,14 +1873,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(CreateFortuneSpells);
         }
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetCaster(), CreateFortuneSpells.SelectRandom(), true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetCaster(), CreateFortuneSpells.SelectRandom(), true);
         }
     }
 
@@ -1930,6 +1930,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.NetOMaticTriggered1, SpellIds.NetOMaticTriggered2, SpellIds.NetOMaticTriggered3);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit target = GetHitUnit();
@@ -1947,11 +1952,6 @@ namespace Scripts.Spells.Items
                 GetCaster().CastSpell(target, spellId, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     // http://www.wowhead.com/Item=8529 Noggenfogger Elixir
@@ -1968,6 +1968,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.NoggenfoggerElixirTriggered1, SpellIds.NoggenfoggerElixirTriggered2, SpellIds.NoggenfoggerElixirTriggered3);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
         private void HandleDummy(uint effIndex)
@@ -1988,11 +1993,6 @@ namespace Scripts.Spells.Items
             }
 
             caster.CastSpell(caster, spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -2067,6 +2067,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.HealthLink);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -2080,17 +2085,17 @@ namespace Scripts.Spells.Items
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
             eventInfo.GetActor().CastSpell((Unit)null, SpellIds.HealthLink, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 17512 - Piccolo of the Flaming Fire
     internal class spell_item_piccolo_of_the_flaming_fire : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint effIndex)
         {
@@ -2099,11 +2104,6 @@ namespace Scripts.Spells.Items
 
             if (target)
                 target.HandleEmoteCommand(Emote.StateDance);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2158,6 +2158,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.FlipOutMale, SpellIds.FlipOutFemale, SpellIds.YaaarrrrMale, SpellIds.YaaarrrrFemale);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -2179,11 +2184,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, spellId, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     // 48129 - Scroll of Recall
@@ -2196,6 +2196,11 @@ namespace Scripts.Spells.Items
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -2236,11 +2241,6 @@ namespace Scripts.Spells.Items
                 PreventHitDefaultEffect(effIndex);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 23442 - Dimensional Ripper - Everlook
@@ -2258,6 +2258,11 @@ namespace Scripts.Spells.Items
             return GetCaster().IsPlayer();
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             int r = RandomHelper.IRand(0, 119);
@@ -2271,11 +2276,6 @@ namespace Scripts.Spells.Items
                 caster.CastSpell(caster, SpellIds.EvilTwin, true);
             else // 1/12 fire
                 caster.CastSpell(caster, SpellIds.TransporterMalfunctionFire, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2292,6 +2292,11 @@ namespace Scripts.Spells.Items
         public override bool Load()
         {
             return GetCaster().IsPlayer();
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -2340,11 +2345,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, spellId, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 36890 - Dimensional Ripper - Area 52
@@ -2360,6 +2360,11 @@ namespace Scripts.Spells.Items
         public override bool Load()
         {
             return GetCaster().IsPlayer();
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -2395,11 +2400,6 @@ namespace Scripts.Spells.Items
             }
 
             caster.CastSpell(caster, spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2500,6 +2500,12 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.ShadowmourneVisualLow, SpellIds.ShadowmourneVisualHigh, SpellIds.ShadowmourneChaosBaneBuff);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnStackChange, 0, AuraType.ModStat, AuraEffectHandleModes.Real | AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStat, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void OnStackChange(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -2531,12 +2537,6 @@ namespace Scripts.Spells.Items
             target.RemoveAurasDueToSpell(SpellIds.ShadowmourneVisualLow);
             target.RemoveAurasDueToSpell(SpellIds.ShadowmourneVisualHigh);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnStackChange, 0, AuraType.ModStat, AuraEffectHandleModes.Real | AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStat, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     // http://www.wowhead.com/Item=7734 Six Demon Bag
@@ -2548,6 +2548,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Frostbolt, SpellIds.Polymorph, SpellIds.SummonFelhoundMinion, SpellIds.Fireball, SpellIds.ChainLightning, SpellIds.EnvelopingWinds);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -2592,11 +2597,6 @@ namespace Scripts.Spells.Items
                 caster.CastSpell(target, spellId, new CastSpellExtraArgs(GetCastItem()));
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 59906 - Swift Hand of Justice Dummy
@@ -2609,6 +2609,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.SwiftHandOfJusticeHeal);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -2618,11 +2623,6 @@ namespace Scripts.Spells.Items
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(aurEff.GetAmount()));
             caster.CastSpell((Unit)null, SpellIds.SwiftHandOfJusticeHeal, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 28862 - The Eye of Diminution
@@ -2630,17 +2630,17 @@ namespace Scripts.Spells.Items
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
+        }
+
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             int diff = (int)GetUnitOwner().GetLevel() - 60;
 
             if (diff > 0)
                 amount += diff;
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModThreat));
         }
     }
 
@@ -2658,6 +2658,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.UnderbellyElixirTriggered1, SpellIds.UnderbellyElixirTriggered2, SpellIds.UnderbellyElixirTriggered3);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
         private void HandleDummy(uint effIndex)
@@ -2679,11 +2684,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, spellId, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     [Script] // 126755 - Wormhole: Pandaria
@@ -2701,16 +2701,16 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(WormholeTargetLocations);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleTeleport(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             uint spellId = WormholeTargetLocations.SelectRandom();
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2732,6 +2732,11 @@ namespace Scripts.Spells.Items
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             GetCaster().TextEmote(TextIds.WornTrollDice, GetHitUnit());
@@ -2743,11 +2748,6 @@ namespace Scripts.Spells.Items
             GetCaster().ToPlayer().DoRandomRoll(minimum, maximum);
             GetCaster().ToPlayer().DoRandomRoll(minimum, maximum);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -2758,6 +2758,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.AirRifleHoldVisual, SpellIds.AirRifleShoot, SpellIds.AirRifleShootSelf);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -2780,11 +2785,6 @@ namespace Scripts.Spells.Items
                 else
                     caster.CastSpell(caster, SpellIds.AirRifleShootSelf, false);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2875,16 +2875,16 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.Crusher, SpellIds.Constrictor, SpellIds.Corruptor);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             uint spellId = RandomHelper.RAND(SpellIds.Crusher, SpellIds.Constrictor, SpellIds.Corruptor);
             Unit caster = GetCaster();
             caster.CastSpell(caster, spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -2896,6 +2896,11 @@ namespace Scripts.Spells.Items
         public override bool Load()
         {
             return GetCaster().GetTypeId() == TypeId.Player;
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(OnDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
         private void OnDummyEffect(uint effIndex)
@@ -2921,17 +2926,17 @@ namespace Scripts.Spells.Items
             if (RandomHelper.URand(0, 60) < 1)
                 player.PlayDirectSound(sound_id, player);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(OnDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     [Script] // 58886 - Food
     internal class spell_magic_eater_food : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 1, AuraType.PeriodicTriggerSpell));
+        }
 
         private void HandleTriggerSpell(AuraEffect aurEff)
         {
@@ -2966,11 +2971,6 @@ namespace Scripts.Spells.Items
                     break;
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 1, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     [Script]
@@ -2988,15 +2988,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.SummonPurifiedHelboarMeat, SpellIds.SummonToxicHelboarMeat);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             caster.CastSpell(caster, RandomHelper.randChance(50) ? SpellIds.SummonPurifiedHelboarMeat : SpellIds.SummonToxicHelboarMeat, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3008,6 +3008,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.NighInvulnerability, SpellIds.CompleteVulnerability);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -3023,11 +3028,6 @@ namespace Scripts.Spells.Items
                     caster.CastSpell(caster, SpellIds.CompleteVulnerability, new CastSpellExtraArgs(castItem));
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3040,16 +3040,16 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.PoultryizerSuccess, SpellIds.PoultryizerBackfire);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetCastItem() &&
                 GetHitUnit())
                 GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(80) ? SpellIds.PoultryizerSuccess : SpellIds.PoultryizerBackfire, new CastSpellExtraArgs(GetCastItem()));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3066,6 +3066,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.SocretharToSeat, SpellIds.SocretharFromSeat);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -3085,11 +3090,6 @@ namespace Scripts.Spells.Items
                 default:
                     return;
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3146,6 +3146,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.RaptorCaptureCredit);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -3157,11 +3162,6 @@ namespace Scripts.Spells.Items
                 //cast spell Raptor Capture Credit
                 caster.CastSpell(caster, SpellIds.RaptorCaptureCredit, true);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3178,6 +3178,11 @@ namespace Scripts.Spells.Items
             return true;
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Creature target = GetHitCreature();
@@ -3189,11 +3194,6 @@ namespace Scripts.Spells.Items
                     target.CastSpell(target, SpellIds.LevirothSelfImpale, true);
                     target.ResetPlayerDamageReq();
                 }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3207,16 +3207,16 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.GiftOfLife1, SpellIds.GiftOfLife2);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             caster.CastSpell(caster, SpellIds.GiftOfLife1, true);
             caster.CastSpell(caster, SpellIds.GiftOfLife2, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -3238,6 +3238,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.NitroBoostsSuccess, SpellIds.NitroBoostsBackfire);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -3251,11 +3256,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, success ? SpellIds.NitroBoostsSuccess : SpellIds.NitroBoostsBackfire, new CastSpellExtraArgs(GetCastItem()));
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3267,6 +3267,12 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.NitroBoostsParachute);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleApply(AuraEffect effect, AuraEffectHandleModes mode)
@@ -3290,12 +3296,6 @@ namespace Scripts.Spells.Items
             {
                 lastZ = curZ;
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 1, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -3351,6 +3351,11 @@ namespace Scripts.Spells.Items
             return GetCaster().IsPlayer();
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleHeal(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
@@ -3358,11 +3363,6 @@ namespace Scripts.Spells.Items
             if (caster != null)
                 if (caster.HasSkill(SkillType.Engineering))
                     SetHitHeal((int)(GetHitHeal() * 1.25f));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3374,6 +3374,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.PygmyOilPygmyAura, SpellIds.PygmyOilSmallerAura);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -3402,11 +3407,6 @@ namespace Scripts.Spells.Items
                 }
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3414,15 +3414,15 @@ namespace Scripts.Spells.Items
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             caster.SetFacingTo(RandomHelper.FRand(0.0f, 2.0f * (float)Math.PI));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3441,6 +3441,11 @@ namespace Scripts.Spells.Items
             return Global.ObjectMgr.GetQuestTemplate(QuestIds.ChickenParty) != null && Global.ObjectMgr.GetQuestTemplate(QuestIds.FlownTheCoop) != null && ValidateSpellInfo(SpellIds.ChickenNet, SpellIds.CaptureChickenEscape);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
@@ -3454,17 +3459,17 @@ namespace Scripts.Spells.Items
                     target.KillSelf();
                 }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
     internal class spell_item_muisek_vessel : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleDummy(uint effIndex)
         {
@@ -3474,11 +3479,6 @@ namespace Scripts.Spells.Items
                 if (target.IsDead())
                     target.DespawnOrUnsummon();
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3486,15 +3486,15 @@ namespace Scripts.Spells.Items
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetHitUnit())
                 GetCaster().CastSpell(GetCaster(), SpellIds.ForceCastSummonGnomeSoul);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3524,6 +3524,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(_healProcSpellId, _damageProcSpellId);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -3536,11 +3541,6 @@ namespace Scripts.Spells.Items
             if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DealHarmfulSpell))
                 caster.CastSpell(target, _damageProcSpellId, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script]
@@ -3551,6 +3551,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SoulPreserverDruid, SpellIds.SoulPreserverPaladin, SpellIds.SoulPreserverPriest, SpellIds.SoulPreserverShaman);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3580,11 +3585,6 @@ namespace Scripts.Spells.Items
                 default:
                     break;
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -3643,6 +3643,12 @@ namespace Scripts.Spells.Items
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(HandleTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
+        }
+
         private void HandleDummy(uint index)
         {
             Player target = GetHitUnit().ToPlayer();
@@ -3661,12 +3667,6 @@ namespace Scripts.Spells.Items
         {
             targetList.RemoveAll(obj => !obj.IsTypeId(TypeId.Player));
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(HandleTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
-        }
     }
 
     [Script]
@@ -3677,6 +3677,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeathChoiceNormalStrength, SpellIds.DeathChoiceNormalAgility, SpellIds.DeathChoiceHeroicStrength, SpellIds.DeathChoiceHeroicAgility);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3711,11 +3716,6 @@ namespace Scripts.Spells.Items
                     break;
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script("spell_item_lightning_capacitor", SpellIds.LightningCapacitorStack, SpellIds.LightningCapacitorTrigger)]
@@ -3738,6 +3738,12 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(_stackSpell, _triggerSpell);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3767,12 +3773,6 @@ namespace Scripts.Spells.Items
         {
             GetTarget().RemoveAurasDueToSpell(_stackSpell);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // 57345 - Darkmoon Card: Greatness
@@ -3783,6 +3783,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DarkmoonCardStrenght, SpellIds.DarkmoonCardAgility, SpellIds.DarkmoonCardIntellect, SpellIds.DarkmoonCardVersatility);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3824,11 +3829,6 @@ namespace Scripts.Spells.Items
 
             caster.CastSpell(caster, spellTrigger, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 27522, 40336 - Mana Drain
@@ -3839,6 +3839,11 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ManaDrainEnergize, SpellIds.ManaDrainLeech);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3854,11 +3859,6 @@ namespace Scripts.Spells.Items
             if (target && target.IsAlive())
                 caster.CastSpell(target, SpellIds.ManaDrainLeech, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 51640 - Taunt Flag Targeting
@@ -3869,6 +3869,12 @@ namespace Scripts.Spells.Items
         public override bool Validate(SpellInfo spellInfo)
         {
             return CliDB.BroadcastTextStorage.ContainsKey(TextIds.EmotePlantsFlag) && ValidateSpellInfo(SpellIds.TauntFlag);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.CorpseSrcAreaEnemy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void FilterTargets(List<WorldObject> targets)
@@ -3893,18 +3899,17 @@ namespace Scripts.Spells.Items
 
             GetCaster().CastSpell(GetHitUnit(), SpellIds.TauntFlag, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.CorpseSrcAreaEnemy));
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 29830 - Mirren's Drinking Hat
     internal class spell_item_mirrens_drinking_hat : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScriptEffect(uint effIndex)
         {
@@ -3934,11 +3939,6 @@ namespace Scripts.Spells.Items
             Unit caster = GetCaster();
             caster.CastSpell(caster, spellId, new CastSpellExtraArgs(GetSpell()));
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 13180 - Gnomish Mind Control Cap
@@ -3959,6 +3959,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.GnomishMindControlCap, SpellIds.Dullard);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -3971,11 +3976,6 @@ namespace Scripts.Spells.Items
                 else
                     target.CastSpell(caster, SpellIds.GnomishMindControlCap, true); // backfire - 5% chance
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3997,6 +3997,11 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.ControlMachine, SpellIds.MobilityMalfunction, SpellIds.TargetLock);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit target = GetHitUnit();
@@ -4012,11 +4017,6 @@ namespace Scripts.Spells.Items
                 else
                     GetCaster().CastSpell(target, SpellIds.ControlMachine, new CastSpellExtraArgs(GetCastItem()));
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -4080,17 +4080,17 @@ namespace Scripts.Spells.Items
             return GetOwner().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModTotalStatPercentage));
+        }
+
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
 
             if (artifact)
                 amount = (int)(GetEffectInfo(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModTotalStatPercentage));
         }
     }
 
@@ -4109,17 +4109,17 @@ namespace Scripts.Spells.Items
             return GetOwner().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentDone));
+        }
+
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
 
             if (artifact)
                 amount = (int)(GetSpellInfo().GetEffect(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDamagePercentDone));
         }
     }
 
@@ -4133,14 +4133,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.TalismanOfAscendance);
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
         }
     }
 
@@ -4154,14 +4154,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.JomGabbar);
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
         }
     }
 
@@ -4175,14 +4175,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BattleTrance);
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
         }
     }
 
@@ -4196,14 +4196,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.WorldQuellerFocus);
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
         }
     }
 
@@ -4221,14 +4221,14 @@ namespace Scripts.Spells.Items
             return spellInfo.GetEffects().Count > 1;
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(GetSpellInfo().GetEffect(1).TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Mounted, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(GetSpellInfo().GetEffect(1).TriggerSpell);
         }
     }
 
@@ -4243,14 +4243,14 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.BrutalKinship1, SpellIds.BrutalKinship2);
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
         }
     }
 
@@ -4369,15 +4369,15 @@ namespace Scripts.Spells.Items
             return ValidateSpellInfo(SpellIds.EggNogReindeer, SpellIds.EggNogSnowman);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             if (RandomHelper.randChance(40))
                 GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(50) ? SpellIds.EggNogReindeer : SpellIds.EggNogSnowman, GetCastItem());
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.Inebriate, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

@@ -521,11 +521,11 @@ namespace Game.Maps
     {
         private readonly InstanceLockData _data = new();
         private readonly Difficulty _difficultyId;
+        private readonly uint _mapId;
         private DateTime _expiryTime;
         private bool _extended;
         private uint _instanceId;
         private bool _isInUse;
-        private readonly uint _mapId;
 
         public InstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId)
         {

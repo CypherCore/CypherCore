@@ -81,45 +81,10 @@ namespace Game
             AddPhase(obj, phaseId, obj.GetGUID(), updateVisibility, visitor);
         }
 
-        private static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
-        {
-            bool changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null);
-
-            if (obj.GetPhaseShift().PersonalReferences != 0)
-                obj.GetPhaseShift().PersonalGuid = personalGuid;
-
-            Unit unit = obj.ToUnit();
-
-            if (unit)
-            {
-                unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled => { AddPhase(controlled, phaseId, personalGuid, updateVisibility, visitor); });
-                unit.RemoveNotOwnSingleTargetAuras(true);
-            }
-
-            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
-        }
-
         public static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility)
         {
             ControlledUnitVisitor visitor = new(obj);
             RemovePhase(obj, phaseId, updateVisibility, visitor);
-        }
-
-        private static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility, ControlledUnitVisitor visitor)
-        {
-            bool changed = obj.GetPhaseShift().RemovePhase(phaseId);
-
-            Unit unit = obj.ToUnit();
-
-            if (unit)
-            {
-                unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled => { RemovePhase(controlled, phaseId, updateVisibility, visitor); });
-                unit.RemoveNotOwnSingleTargetAuras(true);
-            }
-
-            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
         }
 
         public static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, bool updateVisibility)
@@ -133,28 +98,6 @@ namespace Game
             AddPhaseGroup(obj, phasesInGroup, obj.GetGUID(), updateVisibility, visitor);
         }
 
-        private static void AddPhaseGroup(WorldObject obj, List<uint> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
-        {
-            bool changed = false;
-
-            foreach (uint phaseId in phasesInGroup)
-                changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
-
-            if (obj.GetPhaseShift().PersonalReferences != 0)
-                obj.GetPhaseShift().PersonalGuid = personalGuid;
-
-            Unit unit = obj.ToUnit();
-
-            if (unit)
-            {
-                unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled => { AddPhaseGroup(controlled, phasesInGroup, personalGuid, updateVisibility, visitor); });
-                unit.RemoveNotOwnSingleTargetAuras(true);
-            }
-
-            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
-        }
-
         public static void RemovePhaseGroup(WorldObject obj, uint phaseGroupId, bool updateVisibility)
         {
             var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
@@ -166,67 +109,16 @@ namespace Game
             RemovePhaseGroup(obj, phasesInGroup, updateVisibility, visitor);
         }
 
-        private static void RemovePhaseGroup(WorldObject obj, List<uint> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
-        {
-            bool changed = false;
-
-            foreach (uint phaseId in phasesInGroup)
-                changed = obj.GetPhaseShift().RemovePhase(phaseId) || changed;
-
-            Unit unit = obj.ToUnit();
-
-            if (unit)
-            {
-                unit.OnPhaseChange();
-                visitor.VisitControlledOf(unit, controlled => { RemovePhaseGroup(controlled, phasesInGroup, updateVisibility, visitor); });
-                unit.RemoveNotOwnSingleTargetAuras(true);
-            }
-
-            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
-        }
-
         public static void AddVisibleMapId(WorldObject obj, uint visibleMapId)
         {
             ControlledUnitVisitor visitor = new(obj);
             AddVisibleMapId(obj, visibleMapId, visitor);
         }
 
-        private static void AddVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
-        {
-            TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
-            bool changed = obj.GetPhaseShift().AddVisibleMapId(visibleMapId, terrainSwapInfo);
-
-            foreach (uint uiMapPhaseId in terrainSwapInfo.UiMapPhaseIDs)
-                changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId) || changed;
-
-            Unit unit = obj.ToUnit();
-
-            if (unit)
-                visitor.VisitControlledOf(unit, controlled => { AddVisibleMapId(controlled, visibleMapId, visitor); });
-
-            UpdateVisibilityIfNeeded(obj, false, changed);
-        }
-
         public static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId)
         {
             ControlledUnitVisitor visitor = new(obj);
             RemoveVisibleMapId(obj, visibleMapId, visitor);
-        }
-
-        private static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
-        {
-            TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
-            bool changed = obj.GetPhaseShift().RemoveVisibleMapId(visibleMapId);
-
-            foreach (uint uiWorldMapAreaIDSwap in terrainSwapInfo.UiMapPhaseIDs)
-                changed = obj.GetPhaseShift().RemoveUiMapPhaseId(uiWorldMapAreaIDSwap) || changed;
-
-            Unit unit = obj.ToUnit();
-
-            if (unit)
-                visitor.VisitControlledOf(unit, controlled => { RemoveVisibleMapId(controlled, visibleMapId, visitor); });
-
-            UpdateVisibilityIfNeeded(obj, false, changed);
         }
 
         public static void ResetPhaseShift(WorldObject obj)
@@ -661,6 +553,114 @@ namespace Game
                 return phase.Flags.HasFlag(PhaseEntryFlags.Personal);
 
             return false;
+        }
+
+        private static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
+            bool changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null);
+
+            if (obj.GetPhaseShift().PersonalReferences != 0)
+                obj.GetPhaseShift().PersonalGuid = personalGuid;
+
+            Unit unit = obj.ToUnit();
+
+            if (unit)
+            {
+                unit.OnPhaseChange();
+                visitor.VisitControlledOf(unit, controlled => { AddPhase(controlled, phaseId, personalGuid, updateVisibility, visitor); });
+                unit.RemoveNotOwnSingleTargetAuras(true);
+            }
+
+            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
+        }
+
+        private static void RemovePhase(WorldObject obj, uint phaseId, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
+            bool changed = obj.GetPhaseShift().RemovePhase(phaseId);
+
+            Unit unit = obj.ToUnit();
+
+            if (unit)
+            {
+                unit.OnPhaseChange();
+                visitor.VisitControlledOf(unit, controlled => { RemovePhase(controlled, phaseId, updateVisibility, visitor); });
+                unit.RemoveNotOwnSingleTargetAuras(true);
+            }
+
+            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
+        }
+
+        private static void AddPhaseGroup(WorldObject obj, List<uint> phasesInGroup, ObjectGuid personalGuid, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
+            bool changed = false;
+
+            foreach (uint phaseId in phasesInGroup)
+                changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
+
+            if (obj.GetPhaseShift().PersonalReferences != 0)
+                obj.GetPhaseShift().PersonalGuid = personalGuid;
+
+            Unit unit = obj.ToUnit();
+
+            if (unit)
+            {
+                unit.OnPhaseChange();
+                visitor.VisitControlledOf(unit, controlled => { AddPhaseGroup(controlled, phasesInGroup, personalGuid, updateVisibility, visitor); });
+                unit.RemoveNotOwnSingleTargetAuras(true);
+            }
+
+            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
+        }
+
+        private static void RemovePhaseGroup(WorldObject obj, List<uint> phasesInGroup, bool updateVisibility, ControlledUnitVisitor visitor)
+        {
+            bool changed = false;
+
+            foreach (uint phaseId in phasesInGroup)
+                changed = obj.GetPhaseShift().RemovePhase(phaseId) || changed;
+
+            Unit unit = obj.ToUnit();
+
+            if (unit)
+            {
+                unit.OnPhaseChange();
+                visitor.VisitControlledOf(unit, controlled => { RemovePhaseGroup(controlled, phasesInGroup, updateVisibility, visitor); });
+                unit.RemoveNotOwnSingleTargetAuras(true);
+            }
+
+            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
+        }
+
+        private static void AddVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
+        {
+            TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
+            bool changed = obj.GetPhaseShift().AddVisibleMapId(visibleMapId, terrainSwapInfo);
+
+            foreach (uint uiMapPhaseId in terrainSwapInfo.UiMapPhaseIDs)
+                changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId) || changed;
+
+            Unit unit = obj.ToUnit();
+
+            if (unit)
+                visitor.VisitControlledOf(unit, controlled => { AddVisibleMapId(controlled, visibleMapId, visitor); });
+
+            UpdateVisibilityIfNeeded(obj, false, changed);
+        }
+
+        private static void RemoveVisibleMapId(WorldObject obj, uint visibleMapId, ControlledUnitVisitor visitor)
+        {
+            TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
+            bool changed = obj.GetPhaseShift().RemoveVisibleMapId(visibleMapId);
+
+            foreach (uint uiWorldMapAreaIDSwap in terrainSwapInfo.UiMapPhaseIDs)
+                changed = obj.GetPhaseShift().RemoveUiMapPhaseId(uiWorldMapAreaIDSwap) || changed;
+
+            Unit unit = obj.ToUnit();
+
+            if (unit)
+                visitor.VisitControlledOf(unit, controlled => { RemoveVisibleMapId(controlled, visibleMapId, visitor); });
+
+            UpdateVisibilityIfNeeded(obj, false, changed);
         }
 
         private static void UpdateVisibilityIfNeeded(WorldObject obj, bool updateVisibility, bool changed)

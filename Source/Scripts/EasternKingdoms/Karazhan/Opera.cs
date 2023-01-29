@@ -184,13 +184,12 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     [Script]
     internal class boss_dorothee : ScriptedAI
     {
+        public bool SummonedTito;
+        public bool TitoDied;
+        private readonly InstanceScript instance;
         private uint AggroTimer;
         private uint FearTimer;
-        private readonly InstanceScript instance;
-
-        public bool SummonedTito;
         private uint SummonTitoTimer;
-        public bool TitoDied;
 
         private uint WaterBoltTimer;
 
@@ -198,18 +197,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            AggroTimer = 500;
-
-            WaterBoltTimer = 5000;
-            FearTimer = 15000;
-            SummonTitoTimer = 47500;
-
-            SummonedTito = false;
-            TitoDied = false;
         }
 
         public override void Reset()
@@ -298,6 +285,18 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             DoMeleeAttackIfReady();
         }
 
+        private void Initialize()
+        {
+            AggroTimer = 500;
+
+            WaterBoltTimer = 5000;
+            FearTimer = 15000;
+            SummonTitoTimer = 47500;
+
+            SummonedTito = false;
+            TitoDied = false;
+        }
+
         private void SummonTito()
         {
             Creature pTito = me.SummonCreature(CreatureIds.Tito, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(30));
@@ -322,12 +321,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         public npc_tito(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            DorotheeGUID.Clear();
-            YipTimer = 10000;
         }
 
         public override void Reset()
@@ -370,27 +363,26 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             DoMeleeAttackIfReady();
         }
+
+        private void Initialize()
+        {
+            DorotheeGUID.Clear();
+            YipTimer = 10000;
+        }
     }
 
     [Script]
     internal class boss_strawman : ScriptedAI
     {
+        private readonly InstanceScript instance;
         private uint AggroTimer;
         private uint BrainBashTimer;
         private uint BrainWipeTimer;
-        private readonly InstanceScript instance;
 
         public boss_strawman(Creature creature) : base(creature)
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            AggroTimer = 13000;
-            BrainBashTimer = 5000;
-            BrainWipeTimer = 7000;
         }
 
         public override void Reset()
@@ -487,14 +479,21 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             DoMeleeAttackIfReady();
         }
+
+        private void Initialize()
+        {
+            AggroTimer = 13000;
+            BrainBashTimer = 5000;
+            BrainWipeTimer = 7000;
+        }
     }
 
     [Script]
     internal class boss_tinhead : ScriptedAI
     {
+        private readonly InstanceScript instance;
         private uint AggroTimer;
         private uint CleaveTimer;
-        private readonly InstanceScript instance;
 
         private byte RustCount;
         private uint RustTimer;
@@ -503,15 +502,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            AggroTimer = 15000;
-            CleaveTimer = 5000;
-            RustTimer = 30000;
-
-            RustCount = 0;
         }
 
         public override void Reset()
@@ -602,13 +592,22 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             DoMeleeAttackIfReady();
         }
+
+        private void Initialize()
+        {
+            AggroTimer = 15000;
+            CleaveTimer = 5000;
+            RustTimer = 30000;
+
+            RustCount = 0;
+        }
     }
 
     [Script]
     internal class boss_roar : ScriptedAI
     {
-        private uint AggroTimer;
         private readonly InstanceScript instance;
+        private uint AggroTimer;
         private uint MangleTimer;
         private uint ScreamTimer;
         private uint ShredTimer;
@@ -617,14 +616,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            AggroTimer = 20000;
-            MangleTimer = 5000;
-            ShredTimer = 10000;
-            ScreamTimer = 15000;
         }
 
         public override void Reset()
@@ -721,33 +712,28 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             DoMeleeAttackIfReady();
         }
+
+        private void Initialize()
+        {
+            AggroTimer = 20000;
+            MangleTimer = 5000;
+            ShredTimer = 10000;
+            ScreamTimer = 15000;
+        }
     }
 
     [Script]
     internal class boss_crone : ScriptedAI
     {
+        private readonly InstanceScript instance;
         private uint ChainLightningTimer;
 
         private uint CycloneTimer;
-        private readonly InstanceScript instance;
 
         public boss_crone(Creature creature) : base(creature)
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            // Hello, developer from the future! It's me again!
-            // This Time, you're fixing Karazhan scripts. Awesome. These are a mess of hacks. An amalgamation of hacks, so to speak. Maybe even a Patchwerk thereof.
-            // Anyway, I digress.
-            // @todo This line below is obviously a hack. Duh. I'm just coming in here to hackfix the encounter to actually be completable.
-            // It needs a rewrite. Badly. Please, take good care of it.
-            me.RemoveUnitFlag(UnitFlags.NonAttackable);
-            me.SetImmuneToPC(false);
-            CycloneTimer = 30000;
-            ChainLightningTimer = 10000;
         }
 
         public override void Reset()
@@ -807,6 +793,19 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             DoMeleeAttackIfReady();
         }
+
+        private void Initialize()
+        {
+            // Hello, developer from the future! It's me again!
+            // This Time, you're fixing Karazhan scripts. Awesome. These are a mess of hacks. An amalgamation of hacks, so to speak. Maybe even a Patchwerk thereof.
+            // Anyway, I digress.
+            // @todo This line below is obviously a hack. Duh. I'm just coming in here to hackfix the encounter to actually be completable.
+            // It needs a rewrite. Badly. Please, take good care of it.
+            me.RemoveUnitFlag(UnitFlags.NonAttackable);
+            me.SetImmuneToPC(false);
+            CycloneTimer = 30000;
+            ChainLightningTimer = 10000;
+        }
     }
 
     [Script]
@@ -817,11 +816,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         public npc_cyclone(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            MoveTimer = 1000;
         }
 
         public override void Reset()
@@ -854,6 +848,11 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 MoveTimer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            MoveTimer = 1000;
+        }
     }
 
     [Script]
@@ -885,11 +884,11 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
     [Script]
     internal class boss_bigbadwolf : ScriptedAI
     {
+        private readonly InstanceScript instance;
         private uint ChaseTimer;
         private uint FearTimer;
 
         private ObjectGuid HoodGUID;
-        private readonly InstanceScript instance;
 
         private bool IsChasing;
         private uint SwipeTimer;
@@ -899,18 +898,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            ChaseTimer = 30000;
-            FearTimer = RandomHelper.URand(25000, 35000);
-            SwipeTimer = 5000;
-
-            HoodGUID.Clear();
-            TempThreat = 0;
-
-            IsChasing = false;
         }
 
         public override void Reset()
@@ -1015,11 +1002,28 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
                 SwipeTimer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            ChaseTimer = 30000;
+            FearTimer = RandomHelper.URand(25000, 35000);
+            SwipeTimer = 5000;
+
+            HoodGUID.Clear();
+            TempThreat = 0;
+
+            IsChasing = false;
+        }
     }
 
     [Script]
     internal class boss_julianne : ScriptedAI
     {
+        public bool IsFakingDeath;
+        public uint ResurrectSelfTimer;
+        public uint ResurrectTimer;
+        public bool RomuloDead;
+        private readonly InstanceScript instance;
         private uint AggroYellTimer;
 
         private uint BlindingPassionTimer;
@@ -1028,15 +1032,9 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
         private uint EntryYellTimer;
         private uint EternalAffectionTimer;
-        private readonly InstanceScript instance;
-
-        public bool IsFakingDeath;
 
         private RAJPhase Phase;
         private uint PowerfulAttractionTimer;
-        public uint ResurrectSelfTimer;
-        public uint ResurrectTimer;
-        public bool RomuloDead;
 
         private ObjectGuid RomuloGUID;
         private bool SummonedRomulo;
@@ -1050,23 +1048,6 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             AggroYellTimer = 10000;
             IsFakingDeath = false;
             ResurrectTimer = 0;
-        }
-
-        private void Initialize()
-        {
-            RomuloGUID.Clear();
-            Phase = RAJPhase.Julianne;
-
-            BlindingPassionTimer = 30000;
-            DevotionTimer = 15000;
-            EternalAffectionTimer = 25000;
-            PowerfulAttractionTimer = 5000;
-            SummonRomuloTimer = 10000;
-            DrinkPoisonTimer = 0;
-            ResurrectSelfTimer = 0;
-
-            SummonedRomulo = false;
-            RomuloDead = false;
         }
 
         public override void Reset()
@@ -1368,43 +1349,44 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
 
             DoMeleeAttackIfReady();
         }
+
+        private void Initialize()
+        {
+            RomuloGUID.Clear();
+            Phase = RAJPhase.Julianne;
+
+            BlindingPassionTimer = 30000;
+            DevotionTimer = 15000;
+            EternalAffectionTimer = 25000;
+            PowerfulAttractionTimer = 5000;
+            SummonRomuloTimer = 10000;
+            DrinkPoisonTimer = 0;
+            ResurrectSelfTimer = 0;
+
+            SummonedRomulo = false;
+            RomuloDead = false;
+        }
     }
 
     [Script]
     internal class boss_romulo : ScriptedAI
     {
-        private uint BackwardLungeTimer;
-        private uint DaringTimer;
-        private uint DeadlySwatheTimer;
-        private readonly InstanceScript instance;
-
         public bool IsFakingDeath;
         public bool JulianneDead;
 
         public ObjectGuid JulianneGUID;
         public RAJPhase Phase;
-        private uint PoisonThrustTimer;
         public uint ResurrectTimer;
+        private readonly InstanceScript instance;
+        private uint BackwardLungeTimer;
+        private uint DaringTimer;
+        private uint DeadlySwatheTimer;
+        private uint PoisonThrustTimer;
 
         public boss_romulo(Creature creature) : base(creature)
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            JulianneGUID.Clear();
-            Phase = RAJPhase.Romulo;
-
-            BackwardLungeTimer = 15000;
-            DaringTimer = 20000;
-            DeadlySwatheTimer = 25000;
-            PoisonThrustTimer = 10000;
-            ResurrectTimer = 10000;
-
-            IsFakingDeath = false;
-            JulianneDead = false;
         }
 
         public override void Reset()
@@ -1590,6 +1572,21 @@ namespace Scripts.EasternKingdoms.Karazhan.EsOpera
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        private void Initialize()
+        {
+            JulianneGUID.Clear();
+            Phase = RAJPhase.Romulo;
+
+            BackwardLungeTimer = 15000;
+            DaringTimer = 20000;
+            DeadlySwatheTimer = 25000;
+            PoisonThrustTimer = 10000;
+            ResurrectTimer = 10000;
+
+            IsFakingDeath = false;
+            JulianneDead = false;
         }
     }
 }

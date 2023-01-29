@@ -12,8 +12,6 @@ namespace Game.AI
     public class BossAI : ScriptedAI
     {
         private readonly uint _bossId;
-        public InstanceScript Instance { get; set; }
-        public SummonList Summons { get; set; }
 
         public BossAI(Creature creature, uint bossId) : base(creature)
         {
@@ -26,6 +24,9 @@ namespace Game.AI
 
             _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
         }
+
+        public InstanceScript Instance { get; set; }
+        public SummonList Summons { get; set; }
 
         public void _Reset()
         {
@@ -85,29 +86,6 @@ namespace Game.AI
                 if (target.IsControlledByPlayer() &&
                     !IsInBoundary(target))
                     target.NearTeleportTo(x, y, z, 0);
-            }
-        }
-
-        private void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool reset = true)
-        {
-            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
-
-            List<Creature> creatures = me.GetCreatureListWithEntryInGrid(entry, maxSearchRange);
-
-            foreach (Creature creature in creatures)
-            {
-                creature.CombatStop(true);
-                creature.DoNotReacquireSpellFocusTarget();
-                creature.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
-
-                if (reset)
-                {
-                    creature.LoadCreaturesAddon();
-                    creature.SetTappedBy(null);
-                    creature.ResetPlayerDamageReq();
-                    creature.SetLastDamagedTime(0);
-                    creature.SetCannotReachTarget(false);
-                }
             }
         }
 
@@ -220,6 +198,29 @@ namespace Game.AI
         public uint GetBossId()
         {
             return _bossId;
+        }
+
+        private void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool reset = true)
+        {
+            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
+
+            List<Creature> creatures = me.GetCreatureListWithEntryInGrid(entry, maxSearchRange);
+
+            foreach (Creature creature in creatures)
+            {
+                creature.CombatStop(true);
+                creature.DoNotReacquireSpellFocusTarget();
+                creature.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+                if (reset)
+                {
+                    creature.LoadCreaturesAddon();
+                    creature.SetTappedBy(null);
+                    creature.ResetPlayerDamageReq();
+                    creature.SetLastDamagedTime(0);
+                    creature.SetCannotReachTarget(false);
+                }
+            }
         }
     }
 }

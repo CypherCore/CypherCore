@@ -11,18 +11,17 @@ namespace Game
 {
     public class PhaseShift
     {
-        private int CosmeticReferences;
-        private int DefaultReferences;
-
         public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
         public bool IsDbPhaseShift;
-
-        private int NonCosmeticReferences;
         public ObjectGuid PersonalGuid;
         public int PersonalReferences;
         public Dictionary<uint, PhaseRef> Phases = new();
         public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
         public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new();
+        private int CosmeticReferences;
+        private int DefaultReferences;
+
+        private int NonCosmeticReferences;
 
         public PhaseShift()
         {
@@ -256,12 +255,6 @@ namespace Game
                 Flags |= unphasedFlag;
         }
 
-        private void UpdatePersonalGuid()
-        {
-            if (PersonalReferences == 0)
-                PersonalGuid.Clear();
-        }
-
         public bool HasPersonalPhase()
         {
             foreach (PhaseRef phaseRef in GetPhases().Values)
@@ -304,6 +297,12 @@ namespace Game
         public ObjectGuid GetPersonalGuid()
         {
             return PersonalGuid;
+        }
+
+        private void UpdatePersonalGuid()
+        {
+            if (PersonalReferences == 0)
+                PersonalGuid.Clear();
         }
     }
 

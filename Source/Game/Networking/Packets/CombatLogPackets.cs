@@ -11,9 +11,8 @@ namespace Game.Networking.Packets
 {
     public class CombatLogServerPacket : ServerPacket
     {
-        private bool _includeLogData;
-
         internal SpellCastLogData LogData;
+        private bool _includeLogData;
 
         public CombatLogServerPacket(ServerOpcodes opcode, ConnectionType connection = ConnectionType.Realm) : base(opcode, connection)
         {
@@ -243,30 +242,6 @@ namespace Game.Networking.Packets
 
     internal class SpellPeriodicAuraLog : CombatLogServerPacket
     {
-        public ObjectGuid CasterGUID;
-        public List<SpellLogEffect> Effects = new();
-        public uint SpellID;
-
-        public ObjectGuid TargetGUID;
-
-        public SpellPeriodicAuraLog() : base(ServerOpcodes.SpellPeriodicAuraLog, ConnectionType.Instance)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(TargetGUID);
-            _worldPacket.WritePackedGuid(CasterGUID);
-            _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteInt32(Effects.Count);
-            WriteLogDataBit();
-            FlushBits();
-
-            Effects.ForEach(p => p.Write(_worldPacket));
-
-            WriteLogData();
-        }
-
         public struct PeriodicalAuraLogEffectDebugInfo
         {
             public float CritRollMade;
@@ -310,6 +285,30 @@ namespace Game.Networking.Packets
                     data.WriteFloat(DebugInfo.Value.CritRollNeeded);
                 }
             }
+        }
+
+        public ObjectGuid CasterGUID;
+        public List<SpellLogEffect> Effects = new();
+        public uint SpellID;
+
+        public ObjectGuid TargetGUID;
+
+        public SpellPeriodicAuraLog() : base(ServerOpcodes.SpellPeriodicAuraLog, ConnectionType.Instance)
+        {
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(TargetGUID);
+            _worldPacket.WritePackedGuid(CasterGUID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(Effects.Count);
+            WriteLogDataBit();
+            FlushBits();
+
+            Effects.ForEach(p => p.Write(_worldPacket));
+
+            WriteLogData();
         }
     }
 
@@ -743,10 +742,10 @@ namespace Game.Networking.Packets
 
     public class SpellLogMissEntry
     {
-        private SpellLogMissDebug? Debug;
         public byte MissReason;
 
         public ObjectGuid Victim;
+        private SpellLogMissDebug? Debug;
 
         public SpellLogMissEntry(ObjectGuid victim, byte missReason)
         {

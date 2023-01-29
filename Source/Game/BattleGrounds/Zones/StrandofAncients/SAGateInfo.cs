@@ -5,13 +5,6 @@ namespace Game.BattleGrounds.Zones.StrandofAncients
 {
     internal class SAGateInfo
     {
-        public uint DamagedText { get; set; }
-        public uint DestroyedText { get; set; }
-        public uint GameObjectId { get; set; }
-
-        public uint GateId { get; set; }
-        public uint WorldState { get; set; }
-
         public SAGateInfo(uint gateId, uint gameObjectId, uint worldState, uint damagedText, uint destroyedText)
         {
             GateId = gateId;
@@ -20,6 +13,13 @@ namespace Game.BattleGrounds.Zones.StrandofAncients
             DamagedText = damagedText;
             DestroyedText = destroyedText;
         }
+
+        public uint DamagedText { get; set; }
+        public uint DestroyedText { get; set; }
+        public uint GameObjectId { get; set; }
+
+        public uint GateId { get; set; }
+        public uint WorldState { get; set; }
     }
 
 }

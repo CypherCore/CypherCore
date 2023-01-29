@@ -84,15 +84,15 @@ namespace Scripts.Pets
                 return ValidateSpellInfo(SpellIds.LichPetAura);
             }
 
+            public override void Register()
+            {
+                SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+            }
+
             private void HandleScriptEffect(uint effIndex)
             {
                 Unit target = GetHitUnit();
                 target.CastSpell(target, SpellIds.LichPetAura, true);
-            }
-
-            public override void Register()
-            {
-                SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
         }
 
@@ -106,14 +106,14 @@ namespace Scripts.Pets
                 return ValidateSpellInfo(SpellIds.LichPetAura);
             }
 
-            private void HandleScriptEffect(uint effIndex)
-            {
-                GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
-            }
-
             public override void Register()
             {
                 SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+            }
+
+            private void HandleScriptEffect(uint effIndex)
+            {
+                GetHitUnit().RemoveAurasDueToSpell(SpellIds.LichPetAura);
             }
         }
 
@@ -160,6 +160,11 @@ namespace Scripts.Pets
                 return ValidateSpellInfo(SpellIds.LichPetEmote);
             }
 
+            public override void Register()
+            {
+                Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+            }
+
             private void OnPeriodic(AuraEffect aurEff)
             {
                 // The chance to cast this spell is not 100%.
@@ -172,11 +177,6 @@ namespace Scripts.Pets
                 if (RandomHelper.randChance(50))
                     GetTarget().CastSpell(GetTarget(), SpellIds.LichPetEmote, true);
             }
-
-            public override void Register()
-            {
-                Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
-            }
         }
 
         [Script] // 70049 - [DND] Lich Pet
@@ -184,14 +184,14 @@ namespace Scripts.Pets
         {
             public List<IAuraEffectHandler> Effects { get; } = new();
 
-            private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                GetTarget().HandleEmoteCommand(Emote.OneshotCustomSpell01);
-            }
-
             public override void Register()
             {
                 Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModRoot, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            }
+
+            private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+            {
+                GetTarget().HandleEmoteCommand(Emote.OneshotCustomSpell01);
             }
         }
 
@@ -205,14 +205,14 @@ namespace Scripts.Pets
                 return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
             }
 
-            private void HandleScript(uint effIndex)
-            {
-                GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue());
-            }
-
             public override void Register()
             {
                 SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+            }
+
+            private void HandleScript(uint effIndex)
+            {
+                GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue());
             }
         }
     }

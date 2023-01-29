@@ -32,11 +32,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Halycon
             Initialize();
         }
 
-        private void Initialize()
-        {
-            Summoned = false;
-        }
-
         public override void Reset()
         {
             _Reset();
@@ -72,6 +67,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Halycon
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void Initialize()
+        {
+            Summoned = false;
         }
     }
 }

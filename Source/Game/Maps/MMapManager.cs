@@ -15,9 +15,9 @@ namespace Game
         private const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
 
         private readonly Dictionary<uint, MMapData> loadedMMaps = new();
-        private uint loadedTiles;
 
         private readonly Dictionary<uint, uint> parentMapData = new();
+        private uint loadedTiles;
 
         private MMapManager()
         {
@@ -27,61 +27,6 @@ namespace Game
         {
             foreach (var pair in mapData)
                 parentMapData[pair.Value] = pair.Key;
-        }
-
-        private MMapData GetMMapData(uint mapId)
-        {
-            return loadedMMaps.LookupByKey(mapId);
-        }
-
-        private bool LoadMapData(string basePath, uint mapId)
-        {
-            // we already have this map loaded?
-            if (loadedMMaps.ContainsKey(mapId) &&
-                loadedMMaps[mapId] != null)
-                return true;
-
-            // load and init dtNavMesh - read parameters from file
-            string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
-
-            if (!File.Exists(filename))
-            {
-                Log.outError(LogFilter.Maps, "Could not open mmap file {0}", filename);
-
-                return false;
-            }
-
-            using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8);
-            Detour.dtNavMeshParams Params = new();
-            Params.orig[0] = reader.ReadSingle();
-            Params.orig[1] = reader.ReadSingle();
-            Params.orig[2] = reader.ReadSingle();
-
-            Params.tileWidth = reader.ReadSingle();
-            Params.tileHeight = reader.ReadSingle();
-            Params.maxTiles = reader.ReadInt32();
-            Params.maxPolys = reader.ReadInt32();
-
-            Detour.dtNavMesh mesh = new();
-
-            if (Detour.dtStatusFailed(mesh.init(Params)))
-            {
-                Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
-
-                return false;
-            }
-
-            Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
-
-            // store inside our map list
-            loadedMMaps[mapId] = new MMapData(mesh);
-
-            return true;
-        }
-
-        private uint PackTileID(int x, int y)
-        {
-            return (uint)((x << 16) | y);
         }
 
         public bool LoadMap(string basePath, uint mapId, int x, int y)
@@ -137,8 +82,8 @@ namespace Game
                 return false;
             }
 
-            var bytes = reader.ReadBytes((int)fileHeader.size);
-            Detour.dtRawTileData data = new();
+            var                  bytes = reader.ReadBytes((int)fileHeader.size);
+            Detour.dtRawTileData data  = new();
             data.FromBytes(bytes, 0);
 
             ulong tileRef = 0;
@@ -320,6 +265,61 @@ namespace Game
         public int GetLoadedMapsCount()
         {
             return loadedMMaps.Count;
+        }
+
+        private MMapData GetMMapData(uint mapId)
+        {
+            return loadedMMaps.LookupByKey(mapId);
+        }
+
+        private bool LoadMapData(string basePath, uint mapId)
+        {
+            // we already have this map loaded?
+            if (loadedMMaps.ContainsKey(mapId) &&
+                loadedMMaps[mapId] != null)
+                return true;
+
+            // load and init dtNavMesh - read parameters from file
+            string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
+
+            if (!File.Exists(filename))
+            {
+                Log.outError(LogFilter.Maps, "Could not open mmap file {0}", filename);
+
+                return false;
+            }
+
+            using BinaryReader     reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8);
+            Detour.dtNavMeshParams Params = new();
+            Params.orig[0] = reader.ReadSingle();
+            Params.orig[1] = reader.ReadSingle();
+            Params.orig[2] = reader.ReadSingle();
+
+            Params.tileWidth = reader.ReadSingle();
+            Params.tileHeight = reader.ReadSingle();
+            Params.maxTiles = reader.ReadInt32();
+            Params.maxPolys = reader.ReadInt32();
+
+            Detour.dtNavMesh mesh = new();
+
+            if (Detour.dtStatusFailed(mesh.init(Params)))
+            {
+                Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
+
+                return false;
+            }
+
+            Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
+
+            // store inside our map list
+            loadedMMaps[mapId] = new MMapData(mesh);
+
+            return true;
+        }
+
+        private uint PackTileID(int x, int y)
+        {
+            return (uint)((x << 16) | y);
         }
     }
 

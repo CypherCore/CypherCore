@@ -14,9 +14,10 @@ namespace Game.Maps
 {
     public class TerrainManager : Singleton<TerrainManager>
     {
+        private readonly Dictionary<uint, TerrainInfo> _terrainMaps = new();
+
         // parent map links
         private MultiMap<uint, uint> _parentMapData = new();
-        private readonly Dictionary<uint, TerrainInfo> _terrainMaps = new();
 
         private TerrainManager()
         {
@@ -127,6 +128,16 @@ namespace Game.Maps
             terrain?.GetZoneAndAreaId(phaseShift, mapid, out zoneid, out areaid, x, y, z);
         }
 
+        public static bool ExistMapAndVMap(uint mapid, float x, float y)
+        {
+            GridCoord p = GridDefines.ComputeGridCoord(x, y);
+
+            int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
+            int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
+
+            return TerrainInfo.ExistMap(mapid, gx, gy) && TerrainInfo.ExistVMap(mapid, gx, gy);
+        }
+
         private TerrainInfo LoadTerrainImpl(uint mapId)
         {
             TerrainInfo rootTerrain = new(mapId);
@@ -137,16 +148,6 @@ namespace Game.Maps
                 rootTerrain.AddChildTerrain(LoadTerrainImpl(childMapId));
 
             return rootTerrain;
-        }
-
-        public static bool ExistMapAndVMap(uint mapid, float x, float y)
-        {
-            GridCoord p = GridDefines.ComputeGridCoord(x, y);
-
-            int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
-            int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
-
-            return TerrainInfo.ExistMap(mapid, gx, gy) && TerrainInfo.ExistVMap(mapid, gx, gy);
         }
     }
 
@@ -164,9 +165,9 @@ namespace Game.Maps
 
         private readonly object _loadLock = new();
         private readonly uint _mapId;
+        private readonly ushort[][] _referenceCountFromMap = new ushort[MapConst.MaxGrids][];
 
         private TerrainInfo _parentTerrain;
-        private readonly ushort[][] _referenceCountFromMap = new ushort[MapConst.MaxGrids][];
 
         public TerrainInfo(uint mapId)
         {

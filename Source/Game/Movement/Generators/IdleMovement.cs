@@ -50,10 +50,10 @@ namespace Game.Movement
     public class RotateMovementGenerator : MovementGenerator
     {
         private readonly RotateDirection _direction;
-        private uint _duration;
 
         private readonly uint _id;
         private readonly uint _maxDuration;
+        private uint _duration;
 
         public RotateMovementGenerator(uint id, uint time, RotateDirection direction)
         {

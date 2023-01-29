@@ -9,6 +9,46 @@ namespace Game.Collision
 {
     public class BoundingIntervalHierarchyWrap<T> where T : IModel
     {
+        public class MDLCallback : WorkerCallback
+        {
+            private readonly WorkerCallback _callback;
+            private readonly T[] objects;
+            private readonly uint objects_size;
+
+            public MDLCallback(WorkerCallback callback, T[] objects_array, uint size)
+            {
+                objects = objects_array;
+                _callback = callback;
+                objects_size = size;
+            }
+
+            /// Intersect ray
+            public override bool Invoke(Ray ray, uint idx, ref float maxDist, bool stopAtFirst)
+            {
+                if (idx >= objects_size)
+                    return false;
+
+                T obj = objects[idx];
+
+                if (obj != null)
+                    return _callback.Invoke(ray, obj, ref maxDist);
+
+                return false;
+            }
+
+            /// Intersect point
+            public override void Invoke(Vector3 p, uint idx)
+            {
+                if (idx >= objects_size)
+                    return;
+
+                T obj = objects[idx];
+
+                if (obj != null)
+                    _callback.Invoke(p, obj as GameObjectModel);
+            }
+        }
+
         private readonly Dictionary<T, uint> _obj2Idx = new();
         private readonly List<T> _objects = new();
         private readonly HashSet<T> _objects_to_push = new();
@@ -58,46 +98,6 @@ namespace Game.Collision
             Balance();
             MDLCallback callback = new(intersectCallback, _objects.ToArray(), (uint)_objects.Count);
             _tree.IntersectPoint(point, callback);
-        }
-
-        public class MDLCallback : WorkerCallback
-        {
-            private readonly WorkerCallback _callback;
-            private readonly T[] objects;
-            private readonly uint objects_size;
-
-            public MDLCallback(WorkerCallback callback, T[] objects_array, uint size)
-            {
-                objects = objects_array;
-                _callback = callback;
-                objects_size = size;
-            }
-
-            /// Intersect ray
-            public override bool Invoke(Ray ray, uint idx, ref float maxDist, bool stopAtFirst)
-            {
-                if (idx >= objects_size)
-                    return false;
-
-                T obj = objects[idx];
-
-                if (obj != null)
-                    return _callback.Invoke(ray, obj, ref maxDist);
-
-                return false;
-            }
-
-            /// Intersect point
-            public override void Invoke(Vector3 p, uint idx)
-            {
-                if (idx >= objects_size)
-                    return;
-
-                T obj = objects[idx];
-
-                if (obj != null)
-                    _callback.Invoke(p, obj as GameObjectModel);
-            }
         }
     }
 }

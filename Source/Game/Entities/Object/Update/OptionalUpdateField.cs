@@ -6,15 +6,16 @@ namespace Game.Entities
     public class OptionalUpdateField<T> : IUpdateField<T> where T : new()
     {
         private bool _hasValue;
-        public T Value { get; set; }
-        public int Bit { get; set; }
-        public int BlockBit { get; set; }
 
         public OptionalUpdateField(int blockBit, int bit)
         {
             BlockBit = blockBit;
             Bit = bit;
         }
+
+        public T Value { get; set; }
+        public int Bit { get; set; }
+        public int BlockBit { get; set; }
 
         public void SetValue(T value)
         {

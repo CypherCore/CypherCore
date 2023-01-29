@@ -10,63 +10,6 @@ namespace Game.Chat.Commands
     [CommandGroup("rbac")]
     internal class RbacComands
     {
-        [Command("list", RBACPermissions.CommandRbacList, true)]
-        private static bool HandleRBACListPermissionsCommand(CommandHandler handler, uint? permId)
-        {
-            if (!permId.HasValue)
-            {
-                var permissions = Global.AccountMgr.GetRBACPermissionList();
-                handler.SendSysMessage(CypherStrings.RbacListPermissionsHeader);
-
-                foreach (var (_, permission) in permissions)
-                    handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
-            }
-            else
-            {
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(permId.Value);
-
-                if (permission == null)
-                {
-                    handler.SendSysMessage(CypherStrings.RbacWrongParameterId, permId.Value);
-
-                    return false;
-                }
-
-                handler.SendSysMessage(CypherStrings.RbacListPermissionsHeader);
-                handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
-                handler.SendSysMessage(CypherStrings.RbacListPermsLinkedHeader);
-
-                foreach (var linkedPerm in permission.GetLinkedPermissions())
-                {
-                    RBACPermission rbacPermission = Global.AccountMgr.GetRBACPermission(linkedPerm);
-
-                    if (rbacPermission != null)
-                        handler.SendSysMessage(CypherStrings.RbacListElement, rbacPermission.GetId(), rbacPermission.GetName());
-                }
-            }
-
-            return true;
-        }
-
-        private static RBACCommandData GetRBACData(AccountIdentifier account)
-        {
-            if (account.IsConnected())
-                return new RBACCommandData()
-                {
-                    rbac = account.GetConnectedSession().GetRBACData(),
-                    needDelete = false
-                };
-
-            RBACData rbac = new(account.GetID(), account.GetName(), (int)Global.WorldMgr.GetRealmId().Index, (byte)Global.AccountMgr.GetSecurity(account.GetID(), (int)Global.WorldMgr.GetRealmId().Index));
-            rbac.LoadFromDB();
-
-            return new RBACCommandData()
-            {
-                rbac = rbac,
-                needDelete = true
-            };
-        }
-
         [CommandGroup("account")]
         private class RbacAccountCommands
         {
@@ -296,6 +239,63 @@ namespace Game.Chat.Commands
         {
             public bool needDelete;
             public RBACData rbac;
+        }
+
+        [Command("list", RBACPermissions.CommandRbacList, true)]
+        private static bool HandleRBACListPermissionsCommand(CommandHandler handler, uint? permId)
+        {
+            if (!permId.HasValue)
+            {
+                var permissions = Global.AccountMgr.GetRBACPermissionList();
+                handler.SendSysMessage(CypherStrings.RbacListPermissionsHeader);
+
+                foreach (var (_, permission) in permissions)
+                    handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
+            }
+            else
+            {
+                RBACPermission permission = Global.AccountMgr.GetRBACPermission(permId.Value);
+
+                if (permission == null)
+                {
+                    handler.SendSysMessage(CypherStrings.RbacWrongParameterId, permId.Value);
+
+                    return false;
+                }
+
+                handler.SendSysMessage(CypherStrings.RbacListPermissionsHeader);
+                handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
+                handler.SendSysMessage(CypherStrings.RbacListPermsLinkedHeader);
+
+                foreach (var linkedPerm in permission.GetLinkedPermissions())
+                {
+                    RBACPermission rbacPermission = Global.AccountMgr.GetRBACPermission(linkedPerm);
+
+                    if (rbacPermission != null)
+                        handler.SendSysMessage(CypherStrings.RbacListElement, rbacPermission.GetId(), rbacPermission.GetName());
+                }
+            }
+
+            return true;
+        }
+
+        private static RBACCommandData GetRBACData(AccountIdentifier account)
+        {
+            if (account.IsConnected())
+                return new RBACCommandData()
+                {
+                    rbac = account.GetConnectedSession().GetRBACData(),
+                    needDelete = false
+                };
+
+            RBACData rbac = new(account.GetID(), account.GetName(), (int)Global.WorldMgr.GetRealmId().Index, (byte)Global.AccountMgr.GetSecurity(account.GetID(), (int)Global.WorldMgr.GetRealmId().Index));
+            rbac.LoadFromDB();
+
+            return new RBACCommandData()
+            {
+                rbac = rbac,
+                needDelete = true
+            };
         }
     }
 }

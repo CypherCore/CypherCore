@@ -9,8 +9,6 @@ namespace Game.Collision
     public class GameobjectModelData
     {
         public AxisAlignedBox Bound;
-        public bool IsWmo { get; set; }
-        public string Name { get; set; }
 
         public GameobjectModelData(string name_, Vector3 lowBound, Vector3 highBound, bool isWmo_)
         {
@@ -18,5 +16,8 @@ namespace Game.Collision
             Name = name_;
             IsWmo = isWmo_;
         }
+
+        public bool IsWmo { get; set; }
+        public string Name { get; set; }
     }
 }

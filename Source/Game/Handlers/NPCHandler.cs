@@ -16,25 +16,6 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.TabardVendorActivate, Processing = PacketProcessing.Inplace)]
-        private void HandleTabardVendorActivate(Hello packet)
-        {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
-
-            if (!unit)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleTabardVendorActivateOpcode - {0} not found or you can not interact with him.", packet.Unit.ToString());
-
-                return;
-            }
-
-            // remove fake death
-            if (GetPlayer().HasUnitState(UnitState.Died))
-                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
-
-            SendTabardVendorActivate(packet.Unit);
-        }
-
         public void SendTabardVendorActivate(ObjectGuid guid)
         {
             NPCInteractionOpenResult npcInteraction = new();
@@ -42,26 +23,6 @@ namespace Game
             npcInteraction.InteractionType = PlayerInteractionType.TabardVendor;
             npcInteraction.Success = true;
             SendPacket(npcInteraction);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.TrainerList, Processing = PacketProcessing.Inplace)]
-        private void HandleTrainerList(Hello packet)
-        {
-            Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
-
-            if (!npc)
-            {
-                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
-
-                return;
-            }
-
-            uint trainerId = Global.ObjectMgr.GetCreatureDefaultTrainer(npc.GetEntry());
-
-            if (trainerId != 0)
-                SendTrainerList(npc, trainerId);
-            else
-                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - Creature Id {npc.GetEntry()} has no trainer _data.");
         }
 
         public void SendTrainerList(Creature npc, uint trainerId)
@@ -83,6 +44,237 @@ namespace Game
             _player.PlayerTalkClass.GetInteractionData().SourceGuid = npc.GetGUID();
             _player.PlayerTalkClass.GetInteractionData().TrainerId = trainerId;
             trainer.SendSpells(npc, _player, GetSessionDbLocaleIndex());
+        }
+
+        public void SendStablePet(ObjectGuid guid)
+        {
+            PetStableList packet = new();
+            packet.StableMaster = guid;
+
+            PetStable petStable = GetPlayer().GetPetStable();
+
+            if (petStable == null)
+            {
+                SendPacket(packet);
+
+                return;
+            }
+
+            for (uint petSlot = 0; petSlot < petStable.ActivePets.Length; ++petSlot)
+            {
+                if (petStable.ActivePets[petSlot] == null)
+                    continue;
+
+                PetStable.PetInfo pet = petStable.ActivePets[petSlot];
+                PetStableInfo stableEntry;
+                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstActiveSlot;
+                stableEntry.PetNumber = pet.PetNumber;
+                stableEntry.CreatureID = pet.CreatureId;
+                stableEntry.DisplayID = pet.DisplayId;
+                stableEntry.ExperienceLevel = pet.Level;
+                stableEntry.PetFlags = PetStableinfo.Active;
+                stableEntry.PetName = pet.Name;
+
+                packet.Pets.Add(stableEntry);
+            }
+
+            for (uint petSlot = 0; petSlot < petStable.StabledPets.Length; ++petSlot)
+            {
+                if (petStable.StabledPets[petSlot] == null)
+                    continue;
+
+                PetStable.PetInfo pet = petStable.StabledPets[petSlot];
+                PetStableInfo stableEntry;
+                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstStableSlot;
+                stableEntry.PetNumber = pet.PetNumber;
+                stableEntry.CreatureID = pet.CreatureId;
+                stableEntry.DisplayID = pet.DisplayId;
+                stableEntry.ExperienceLevel = pet.Level;
+                stableEntry.PetFlags = PetStableinfo.Inactive;
+                stableEntry.PetName = pet.Name;
+
+                packet.Pets.Add(stableEntry);
+            }
+
+            SendPacket(packet);
+        }
+
+        public void SendListInventory(ObjectGuid vendorGuid)
+        {
+            Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
+
+            if (vendor == null)
+            {
+                Log.outDebug(LogFilter.Network, "WORLD: SendListInventory - {0} not found or you can not interact with him.", vendorGuid.ToString());
+                GetPlayer().SendSellError(SellResult.CantFindVendor, null, ObjectGuid.Empty);
+
+                return;
+            }
+
+            // remove fake death
+            if (GetPlayer().HasUnitState(UnitState.Died))
+                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+
+            // Stop the npc if moving
+            uint pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();
+
+            if (pause != 0)
+                vendor.PauseMovement(pause);
+
+            vendor.SetHomePosition(vendor.GetPosition());
+
+            VendorItemData vendorItems = vendor.GetVendorItems();
+            int rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;
+
+            VendorInventory packet = new();
+            packet.Vendor = vendor.GetGUID();
+
+            float discountMod = GetPlayer().GetReputationPriceDiscount(vendor);
+            byte count = 0;
+
+            for (uint slot = 0; slot < rawItemCount; ++slot)
+            {
+                VendorItem vendorItem = vendorItems.GetItem(slot);
+
+                if (vendorItem == null)
+                    continue;
+
+                VendorItemPkt item = new();
+
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
+
+                if (playerCondition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
+                        item.PlayerConditionFailed = (int)playerCondition.Id;
+
+                if (vendorItem.Type == ItemVendorType.Item)
+                {
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(vendorItem.Item);
+
+                    if (itemTemplate == null)
+                        continue;
+
+                    int leftInStock = vendorItem.Maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
+
+                    if (!GetPlayer().IsGameMaster())
+                    {
+                        if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().GetClassMask()) &&
+                            itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
+                            continue;
+
+                        if ((itemTemplate.HasFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||
+                            (itemTemplate.HasFlag(ItemFlags2.FactionAlliance) && GetPlayer().GetTeam() == Team.Horde))
+                            continue;
+
+                        if (leftInStock == 0)
+                            continue;
+                    }
+
+                    if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(vendor.GetEntry(), vendorItem.Item, _player, vendor))
+                    {
+                        Log.outDebug(LogFilter.Condition, "SendListInventory: conditions not met for creature entry {0} Item {1}", vendor.GetEntry(), vendorItem.Item);
+
+                        continue;
+                    }
+
+                    ulong price = (ulong)Math.Floor(itemTemplate.GetBuyPrice() * discountMod);
+                    price = itemTemplate.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
+
+                    int priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
+
+                    if (priceMod != 0)
+                        price -= MathFunctions.CalculatePct(price, priceMod);
+
+                    item.MuID = (int)slot + 1;
+                    item.Durability = (int)itemTemplate.MaxDurability;
+                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
+                    item.Type = (int)vendorItem.Type;
+                    item.Quantity = leftInStock;
+                    item.StackCount = (int)itemTemplate.GetBuyCount();
+                    item.Price = (ulong)price;
+                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
+                    item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
+
+                    item.Item.ItemID = vendorItem.Item;
+
+                    if (!vendorItem.BonusListIDs.Empty())
+                    {
+                        item.Item.ItemBonus = new ItemBonuses();
+                        item.Item.ItemBonus.BonusListIDs = vendorItem.BonusListIDs;
+                    }
+
+                    packet.Items.Add(item);
+                }
+                else if (vendorItem.Type == ItemVendorType.Currency)
+                {
+                    CurrencyTypesRecord currencyTemplate = CliDB.CurrencyTypesStorage.LookupByKey(vendorItem.Item);
+
+                    if (currencyTemplate == null)
+                        continue;
+
+                    if (vendorItem.ExtendedCost == 0)
+                        continue; // there's no price defined for currencies, only extendedcost is used
+
+                    item.MuID = (int)slot + 1; // client expects counting to start at 1
+                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
+                    item.Item.ItemID = vendorItem.Item;
+                    item.Type = (int)vendorItem.Type;
+                    item.StackCount = (int)vendorItem.Maxcount;
+                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
+
+                    packet.Items.Add(item);
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (++count >= SharedConst.MaxVendorItems)
+                    break;
+            }
+
+            packet.Reason = (byte)(count != 0 ? VendorInventoryReason.None : VendorInventoryReason.Empty);
+
+            SendPacket(packet);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TabardVendorActivate, Processing = PacketProcessing.Inplace)]
+        private void HandleTabardVendorActivate(Hello packet)
+        {
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
+
+            if (!unit)
+            {
+                Log.outDebug(LogFilter.Network, "WORLD: HandleTabardVendorActivateOpcode - {0} not found or you can not interact with him.", packet.Unit.ToString());
+
+                return;
+            }
+
+            // remove fake death
+            if (GetPlayer().HasUnitState(UnitState.Died))
+                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+
+            SendTabardVendorActivate(packet.Unit);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TrainerList, Processing = PacketProcessing.Inplace)]
+        private void HandleTrainerList(Hello packet)
+        {
+            Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
+
+            if (!npc)
+            {
+                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
+
+                return;
+            }
+
+            uint trainerId = Global.ObjectMgr.GetCreatureDefaultTrainer(npc.GetEntry());
+
+            if (trainerId != 0)
+                SendTrainerList(npc, trainerId);
+            else
+                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - Creature Id {npc.GetEntry()} has no trainer _data.");
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerBuySpell, Processing = PacketProcessing.Inplace)]
@@ -367,59 +559,6 @@ namespace Game
             SendStablePet(packet.StableMaster);
         }
 
-        public void SendStablePet(ObjectGuid guid)
-        {
-            PetStableList packet = new();
-            packet.StableMaster = guid;
-
-            PetStable petStable = GetPlayer().GetPetStable();
-
-            if (petStable == null)
-            {
-                SendPacket(packet);
-
-                return;
-            }
-
-            for (uint petSlot = 0; petSlot < petStable.ActivePets.Length; ++petSlot)
-            {
-                if (petStable.ActivePets[petSlot] == null)
-                    continue;
-
-                PetStable.PetInfo pet = petStable.ActivePets[petSlot];
-                PetStableInfo stableEntry;
-                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstActiveSlot;
-                stableEntry.PetNumber = pet.PetNumber;
-                stableEntry.CreatureID = pet.CreatureId;
-                stableEntry.DisplayID = pet.DisplayId;
-                stableEntry.ExperienceLevel = pet.Level;
-                stableEntry.PetFlags = PetStableinfo.Active;
-                stableEntry.PetName = pet.Name;
-
-                packet.Pets.Add(stableEntry);
-            }
-
-            for (uint petSlot = 0; petSlot < petStable.StabledPets.Length; ++petSlot)
-            {
-                if (petStable.StabledPets[petSlot] == null)
-                    continue;
-
-                PetStable.PetInfo pet = petStable.StabledPets[petSlot];
-                PetStableInfo stableEntry;
-                stableEntry.PetSlot = petSlot + (int)PetSaveMode.FirstStableSlot;
-                stableEntry.PetNumber = pet.PetNumber;
-                stableEntry.CreatureID = pet.CreatureId;
-                stableEntry.DisplayID = pet.DisplayId;
-                stableEntry.ExperienceLevel = pet.Level;
-                stableEntry.PetFlags = PetStableinfo.Inactive;
-                stableEntry.PetName = pet.Name;
-
-                packet.Pets.Add(stableEntry);
-            }
-
-            SendPacket(packet);
-        }
-
         private void SendPetStableResult(StableResult result)
         {
             PetStableResult petStableResult = new();
@@ -450,8 +589,8 @@ namespace Game
             }
 
             (PetStable.PetInfo srcPet, PetSaveMode srcPetSlot) = Pet.GetLoadPetInfo(petStable, 0, setPetSlot.PetNumber, null);
-            PetSaveMode dstPetSlot = (PetSaveMode)setPetSlot.DestSlot;
-            PetStable.PetInfo dstPet = Pet.GetLoadPetInfo(petStable, 0, 0, dstPetSlot).Item1;
+            PetSaveMode       dstPetSlot = (PetSaveMode)setPetSlot.DestSlot;
+            PetStable.PetInfo dstPet     = Pet.GetLoadPetInfo(petStable, 0, 0, dstPetSlot).Item1;
 
             if (srcPet == null ||
                 srcPet.Type != PetType.Hunter)
@@ -469,9 +608,9 @@ namespace Game
                 return;
             }
 
-            PetStable.PetInfo src = null;
-            PetStable.PetInfo dst = null;
-            PetSaveMode? newActivePetIndex = null;
+            PetStable.PetInfo src               = null;
+            PetStable.PetInfo dst               = null;
+            PetSaveMode?      newActivePetIndex = null;
 
             if (SharedConst.IsActivePetSlot(srcPetSlot) &&
                 SharedConst.IsActivePetSlot(dstPetSlot))
@@ -643,145 +782,6 @@ namespace Game
                 return;
 
             SendListInventory(packet.Unit);
-        }
-
-        public void SendListInventory(ObjectGuid vendorGuid)
-        {
-            Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
-
-            if (vendor == null)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: SendListInventory - {0} not found or you can not interact with him.", vendorGuid.ToString());
-                GetPlayer().SendSellError(SellResult.CantFindVendor, null, ObjectGuid.Empty);
-
-                return;
-            }
-
-            // remove fake death
-            if (GetPlayer().HasUnitState(UnitState.Died))
-                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
-
-            // Stop the npc if moving
-            uint pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();
-
-            if (pause != 0)
-                vendor.PauseMovement(pause);
-
-            vendor.SetHomePosition(vendor.GetPosition());
-
-            VendorItemData vendorItems = vendor.GetVendorItems();
-            int rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;
-
-            VendorInventory packet = new();
-            packet.Vendor = vendor.GetGUID();
-
-            float discountMod = GetPlayer().GetReputationPriceDiscount(vendor);
-            byte count = 0;
-
-            for (uint slot = 0; slot < rawItemCount; ++slot)
-            {
-                VendorItem vendorItem = vendorItems.GetItem(slot);
-
-                if (vendorItem == null)
-                    continue;
-
-                VendorItemPkt item = new();
-
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
-
-                if (playerCondition != null)
-                    if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
-                        item.PlayerConditionFailed = (int)playerCondition.Id;
-
-                if (vendorItem.Type == ItemVendorType.Item)
-                {
-                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(vendorItem.Item);
-
-                    if (itemTemplate == null)
-                        continue;
-
-                    int leftInStock = vendorItem.Maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
-
-                    if (!GetPlayer().IsGameMaster())
-                    {
-                        if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().GetClassMask()) &&
-                            itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
-                            continue;
-
-                        if ((itemTemplate.HasFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||
-                            (itemTemplate.HasFlag(ItemFlags2.FactionAlliance) && GetPlayer().GetTeam() == Team.Horde))
-                            continue;
-
-                        if (leftInStock == 0)
-                            continue;
-                    }
-
-                    if (!Global.ConditionMgr.IsObjectMeetingVendorItemConditions(vendor.GetEntry(), vendorItem.Item, _player, vendor))
-                    {
-                        Log.outDebug(LogFilter.Condition, "SendListInventory: conditions not met for creature entry {0} Item {1}", vendor.GetEntry(), vendorItem.Item);
-
-                        continue;
-                    }
-
-                    ulong price = (ulong)Math.Floor(itemTemplate.GetBuyPrice() * discountMod);
-                    price = itemTemplate.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
-
-                    int priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
-
-                    if (priceMod != 0)
-                        price -= MathFunctions.CalculatePct(price, priceMod);
-
-                    item.MuID = (int)slot + 1;
-                    item.Durability = (int)itemTemplate.MaxDurability;
-                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
-                    item.Type = (int)vendorItem.Type;
-                    item.Quantity = leftInStock;
-                    item.StackCount = (int)itemTemplate.GetBuyCount();
-                    item.Price = (ulong)price;
-                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
-                    item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
-
-                    item.Item.ItemID = vendorItem.Item;
-
-                    if (!vendorItem.BonusListIDs.Empty())
-                    {
-                        item.Item.ItemBonus = new ItemBonuses();
-                        item.Item.ItemBonus.BonusListIDs = vendorItem.BonusListIDs;
-                    }
-
-                    packet.Items.Add(item);
-                }
-                else if (vendorItem.Type == ItemVendorType.Currency)
-                {
-                    CurrencyTypesRecord currencyTemplate = CliDB.CurrencyTypesStorage.LookupByKey(vendorItem.Item);
-
-                    if (currencyTemplate == null)
-                        continue;
-
-                    if (vendorItem.ExtendedCost == 0)
-                        continue; // there's no price defined for currencies, only extendedcost is used
-
-                    item.MuID = (int)slot + 1; // client expects counting to start at 1
-                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
-                    item.Item.ItemID = vendorItem.Item;
-                    item.Type = (int)vendorItem.Type;
-                    item.StackCount = (int)vendorItem.Maxcount;
-                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
-
-                    packet.Items.Add(item);
-                }
-                else
-                {
-                    continue;
-                }
-
-                if (++count >= SharedConst.MaxVendorItems)
-                    break;
-            }
-
-            packet.Reason = (byte)(count != 0 ? VendorInventoryReason.None : VendorInventoryReason.Empty);
-
-            SendPacket(packet);
         }
     }
 }

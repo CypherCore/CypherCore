@@ -8,14 +8,14 @@ namespace Game.BattleGrounds
 {
     public class BattlegroundData
     {
-        public Dictionary<uint, Battleground> Battlegrounds { get; set; } = new();
-        public List<uint>[] ClientBattlegroundIds { get; set; } = new List<uint>[(int)BattlegroundBracketId.Max];
-        public Battleground Template { get; set; }
-
         public BattlegroundData()
         {
             for (var i = 0; i < (int)BattlegroundBracketId.Max; ++i)
                 ClientBattlegroundIds[i] = new List<uint>();
         }
+
+        public Dictionary<uint, Battleground> Battlegrounds { get; set; } = new();
+        public List<uint>[] ClientBattlegroundIds { get; set; } = new List<uint>[(int)BattlegroundBracketId.Max];
+        public Battleground Template { get; set; }
     }
 }

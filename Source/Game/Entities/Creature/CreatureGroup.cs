@@ -6,13 +6,12 @@ namespace Game.Entities;
 
 public class CreatureGroup
 {
+    private readonly ulong _leaderSpawnId;
+    private readonly List<ulong> _memberIds = new();
+    private readonly Dictionary<Creature, FormationInfo> _members = new();
     private bool _engaging;
     private bool _formed;
     private Creature _leader;
-
-    private readonly ulong _leaderSpawnId;
-    private readonly Dictionary<Creature, FormationInfo> _members = new();
-    private readonly List<ulong> _memberIds = new();
 
     public CreatureGroup(ulong leaderSpawnId)
     {

@@ -24,7 +24,7 @@ namespace Game
                 if (store != null &&
                     store.HasRecord(record.RecordID))
                 {
-                    dbReply.Status = HotfixRecord.Status.Valid;
+                    dbReply.Status    = HotfixRecord.Status.Valid;
                     dbReply.Timestamp = (uint)GameTime.GetGameTime();
                     store.WriteRecord(record.RecordID, GetSessionDbcLocale(), dbReply.Data);
 

@@ -15,29 +15,6 @@ namespace Game.AI
             _summons = new SummonList(creature);
         }
 
-        private void _Reset()
-        {
-            if (!me.IsAlive())
-                return;
-
-            Events.Reset();
-            _summons.DespawnAll();
-        }
-
-        private void _JustDied()
-        {
-            Events.Reset();
-            _summons.DespawnAll();
-        }
-
-        private void _JustEngagedWith()
-        {
-            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-
-            if (target)
-                AttackStart(target);
-        }
-
         public override void JustSummoned(Creature summon)
         {
             _summons.Summon(summon);
@@ -94,6 +71,29 @@ namespace Game.AI
         public override void JustDied(Unit killer)
         {
             _JustDied();
+        }
+
+        private void _Reset()
+        {
+            if (!me.IsAlive())
+                return;
+
+            Events.Reset();
+            _summons.DespawnAll();
+        }
+
+        private void _JustDied()
+        {
+            Events.Reset();
+            _summons.DespawnAll();
+        }
+
+        private void _JustEngagedWith()
+        {
+            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+            if (target)
+                AttackStart(target);
         }
     }
 }

@@ -15,61 +15,23 @@ namespace Game
 {
     public class GameEventManager : Singleton<GameEventManager>
     {
+        public List<ulong>[] mGameEventCreatureGuids;
+        public List<ulong>[] mGameEventGameobjectGuids;
         private readonly List<ushort> _ActiveEvents = new();
+        private readonly Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
         private bool isSystemInit;
         private GameEventData[] mGameEvent;
         private uint[] mGameEventBattlegroundHolidays;
 
-        public List<ulong>[] mGameEventCreatureGuids;
-
         private List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
-        public List<ulong>[] mGameEventGameobjectGuids;
         private List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
         private List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
         private List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
         private List<uint>[] mGameEventPoolIds;
         private Dictionary<uint, VendorItem>[] mGameEventVendors;
-        private readonly Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
 
         private GameEventManager()
         {
-        }
-
-        private bool CheckOneGameEvent(ushort entry)
-        {
-            switch (mGameEvent[entry].State)
-            {
-                default:
-                case GameEventState.Normal:
-                    {
-                        long currenttime = GameTime.GetGameTime();
-
-                        // Get the event information
-                        return mGameEvent[entry].Start < currenttime && currenttime < mGameEvent[entry].End && (currenttime - mGameEvent[entry].Start) % (mGameEvent[entry].Occurence * Time.Minute) < mGameEvent[entry].Length * Time.Minute;
-                    }
-                // if the State is conditions or nextphase, then the event should be active
-                case GameEventState.WorldConditions:
-                case GameEventState.WorldNextPhase:
-                    return true;
-                // finished world events are inactive
-                case GameEventState.WorldFinished:
-                case GameEventState.Internal:
-                    return false;
-                // if inactive world event, check the prerequisite events
-                case GameEventState.WorldInactive:
-                    {
-                        long currenttime = GameTime.GetGameTime();
-
-                        foreach (var gameEventId in mGameEvent[entry].Prerequisite_events)
-                            if ((mGameEvent[gameEventId].State != GameEventState.WorldNextPhase && mGameEvent[gameEventId].State != GameEventState.WorldFinished) || // if prereq not in nextphase or finished State, then can't start this one
-                                mGameEvent[gameEventId].Nextstart > currenttime)                                                                                     // if not in nextphase State for long enough, can't start this one
-                                return false;
-
-                        // all prerequisite events are met
-                        // but if there are no prerequisites, this can be only activated through gm command
-                        return !(mGameEvent[entry].Prerequisite_events.Empty());
-                    }
-            }
         }
 
         public uint NextCheck(ushort entry)
@@ -112,21 +74,6 @@ namespace Game
                 return (uint)(mGameEvent[entry].End - currenttime);
             else
                 return delay;
-        }
-
-        private void StartInternalEvent(ushort event_id)
-        {
-            if (event_id < 1 ||
-                event_id >= mGameEvent.Length)
-                return;
-
-            if (!mGameEvent[event_id].IsValid())
-                return;
-
-            if (_ActiveEvents.Contains(event_id))
-                return;
-
-            StartEvent(event_id);
         }
 
         public bool StartEvent(ushort event_id, bool overwrite = false)
@@ -1190,6 +1137,155 @@ namespace Game
             return (nextEventDelay + 1) * Time.InMilliseconds; // Add 1 second to be sure event has started/stopped at next call
         }
 
+        public void HandleQuestComplete(uint quest_id)
+        {
+            // translate the quest to event and condition
+            var questToEvent = mQuestToEventConditions.LookupByKey(quest_id);
+
+            // quest is registered
+            if (questToEvent != null)
+            {
+                ushort event_id = questToEvent.Event_id;
+                uint condition = questToEvent.Condition;
+                float num = questToEvent.Num;
+
+                // the event is not active, so return, don't increase condition finishes
+                if (!IsActiveEvent(event_id))
+                    return;
+
+                // not in correct phase, return
+                if (mGameEvent[event_id].State != GameEventState.WorldConditions)
+                    return;
+
+                var eventFinishCond = mGameEvent[event_id].Conditions.LookupByKey(condition);
+
+                // condition is registered
+                if (eventFinishCond != null)
+                    // increase the done Count, only if less then the req
+                    if (eventFinishCond.Done < eventFinishCond.ReqNum)
+                    {
+                        eventFinishCond.Done += num;
+
+                        // check max limit
+                        if (eventFinishCond.Done > eventFinishCond.ReqNum)
+                            eventFinishCond.Done = eventFinishCond.ReqNum;
+
+                        // save the change to db
+                        SQLTransaction trans = new();
+
+                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GAME_EVENT_CONDITION_SAVE);
+                        stmt.AddValue(0, event_id);
+                        stmt.AddValue(1, condition);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GAME_EVENT_CONDITION_SAVE);
+                        stmt.AddValue(0, event_id);
+                        stmt.AddValue(1, condition);
+                        stmt.AddValue(2, eventFinishCond.Done);
+                        trans.Append(stmt);
+                        DB.Characters.CommitTransaction(trans);
+
+                        // check if all conditions are met, if so, update the event State
+                        if (CheckOneGameEventConditions(event_id))
+                        {
+                            // changed, save to DB the gameevent State
+                            SaveWorldEventStateToDB(event_id);
+                            // Force update events to set timer
+                            Global.WorldMgr.ForceGameEventUpdate();
+                        }
+                    }
+            }
+        }
+
+        public bool IsHolidayActive(HolidayIds id)
+        {
+            if (id == HolidayIds.None)
+                return false;
+
+            var events = GetEventMap();
+            var activeEvents = GetActiveEventList();
+
+            foreach (var eventId in activeEvents)
+                if (events[eventId].Holiday_id == id)
+                    return true;
+
+            return false;
+        }
+
+        public bool IsEventActive(ushort eventId)
+        {
+            var ae = GetActiveEventList();
+
+            return ae.Contains(eventId);
+        }
+
+        public List<ushort> GetActiveEventList()
+        {
+            return _ActiveEvents;
+        }
+
+        public GameEventData[] GetEventMap()
+        {
+            return mGameEvent;
+        }
+
+        public bool IsActiveEvent(ushort event_id)
+        {
+            return _ActiveEvents.Contains(event_id);
+        }
+
+        private bool CheckOneGameEvent(ushort entry)
+        {
+            switch (mGameEvent[entry].State)
+            {
+                default:
+                case GameEventState.Normal:
+                    {
+                        long currenttime = GameTime.GetGameTime();
+
+                        // Get the event information
+                        return mGameEvent[entry].Start < currenttime && currenttime < mGameEvent[entry].End && (currenttime - mGameEvent[entry].Start) % (mGameEvent[entry].Occurence * Time.Minute) < mGameEvent[entry].Length * Time.Minute;
+                    }
+                // if the State is conditions or nextphase, then the event should be active
+                case GameEventState.WorldConditions:
+                case GameEventState.WorldNextPhase:
+                    return true;
+                // finished world events are inactive
+                case GameEventState.WorldFinished:
+                case GameEventState.Internal:
+                    return false;
+                // if inactive world event, check the prerequisite events
+                case GameEventState.WorldInactive:
+                    {
+                        long currenttime = GameTime.GetGameTime();
+
+                        foreach (var gameEventId in mGameEvent[entry].Prerequisite_events)
+                            if ((mGameEvent[gameEventId].State != GameEventState.WorldNextPhase && mGameEvent[gameEventId].State != GameEventState.WorldFinished) || // if prereq not in nextphase or finished State, then can't start this one
+                                mGameEvent[gameEventId].Nextstart > currenttime)                                                                                     // if not in nextphase State for long enough, can't start this one
+                                return false;
+
+                        // all prerequisite events are met
+                        // but if there are no prerequisites, this can be only activated through gm command
+                        return !(mGameEvent[entry].Prerequisite_events.Empty());
+                    }
+            }
+        }
+
+        private void StartInternalEvent(ushort event_id)
+        {
+            if (event_id < 1 ||
+                event_id >= mGameEvent.Length)
+                return;
+
+            if (!mGameEvent[event_id].IsValid())
+                return;
+
+            if (_ActiveEvents.Contains(event_id))
+                return;
+
+            StartEvent(event_id);
+        }
+
         private void UnApplyEvent(ushort event_id)
         {
             Log.outInfo(LogFilter.Gameevent, "GameEvent {0} \"{1}\" removed.", event_id, mGameEvent[event_id].Description);
@@ -1666,66 +1762,6 @@ namespace Game
             }
         }
 
-        public void HandleQuestComplete(uint quest_id)
-        {
-            // translate the quest to event and condition
-            var questToEvent = mQuestToEventConditions.LookupByKey(quest_id);
-
-            // quest is registered
-            if (questToEvent != null)
-            {
-                ushort event_id = questToEvent.Event_id;
-                uint condition = questToEvent.Condition;
-                float num = questToEvent.Num;
-
-                // the event is not active, so return, don't increase condition finishes
-                if (!IsActiveEvent(event_id))
-                    return;
-
-                // not in correct phase, return
-                if (mGameEvent[event_id].State != GameEventState.WorldConditions)
-                    return;
-
-                var eventFinishCond = mGameEvent[event_id].Conditions.LookupByKey(condition);
-
-                // condition is registered
-                if (eventFinishCond != null)
-                    // increase the done Count, only if less then the req
-                    if (eventFinishCond.Done < eventFinishCond.ReqNum)
-                    {
-                        eventFinishCond.Done += num;
-
-                        // check max limit
-                        if (eventFinishCond.Done > eventFinishCond.ReqNum)
-                            eventFinishCond.Done = eventFinishCond.ReqNum;
-
-                        // save the change to db
-                        SQLTransaction trans = new();
-
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GAME_EVENT_CONDITION_SAVE);
-                        stmt.AddValue(0, event_id);
-                        stmt.AddValue(1, condition);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GAME_EVENT_CONDITION_SAVE);
-                        stmt.AddValue(0, event_id);
-                        stmt.AddValue(1, condition);
-                        stmt.AddValue(2, eventFinishCond.Done);
-                        trans.Append(stmt);
-                        DB.Characters.CommitTransaction(trans);
-
-                        // check if all conditions are met, if so, update the event State
-                        if (CheckOneGameEventConditions(event_id))
-                        {
-                            // changed, save to DB the gameevent State
-                            SaveWorldEventStateToDB(event_id);
-                            // Force update events to set timer
-                            Global.WorldMgr.ForceGameEventUpdate();
-                        }
-                    }
-            }
-        }
-
         private bool CheckOneGameEventConditions(ushort event_id)
         {
             foreach (var pair in mGameEvent[event_id].Conditions)
@@ -1887,43 +1923,6 @@ namespace Game
             TimeSpan durationSinceLastStart = TimeSpan.FromTicks((now - eventInitialStart).Ticks % occurence.Ticks);
 
             return Time.DateTimeToUnixTime(now - durationSinceLastStart);
-        }
-
-        public bool IsHolidayActive(HolidayIds id)
-        {
-            if (id == HolidayIds.None)
-                return false;
-
-            var events = GetEventMap();
-            var activeEvents = GetActiveEventList();
-
-            foreach (var eventId in activeEvents)
-                if (events[eventId].Holiday_id == id)
-                    return true;
-
-            return false;
-        }
-
-        public bool IsEventActive(ushort eventId)
-        {
-            var ae = GetActiveEventList();
-
-            return ae.Contains(eventId);
-        }
-
-        public List<ushort> GetActiveEventList()
-        {
-            return _ActiveEvents;
-        }
-
-        public GameEventData[] GetEventMap()
-        {
-            return mGameEvent;
-        }
-
-        public bool IsActiveEvent(ushort event_id)
-        {
-            return _ActiveEvents.Contains(event_id);
         }
 
         private void AddActiveEvent(ushort event_id)

@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		h = f * g
 		Can overlap h with f or g.
 
@@ -14,7 +14,7 @@
 		   |h| bounded by 1.01*2^25,1.01*2^24,1.01*2^25,1.01*2^24,etc.
 		*/
 
-        /*
+	    /*
 		Notes on implementation strategy:
 
 		Using schoolbook multiplication.
@@ -34,7 +34,7 @@
 		With tighter constraints on inputs can squeeze carries into int32.
 		*/
 
-        internal static void fe_mul(out FieldElement h, ref FieldElement f, ref FieldElement g)
+	    internal static void fe_mul(out FieldElement h, ref FieldElement f, ref FieldElement g)
         {
             int f0 = f.x0;
             int f1 = f.x1;

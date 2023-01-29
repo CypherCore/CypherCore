@@ -209,31 +209,6 @@ namespace Game.Networking.Packets
             ChatText = message;
         }
 
-        private void SetSender(WorldObject sender, Locale locale)
-        {
-            SenderGUID = sender.GetGUID();
-
-            Creature creatureSender = sender.ToCreature();
-
-            if (creatureSender)
-                SenderName = creatureSender.GetName(locale);
-
-            Player playerSender = sender.ToPlayer();
-
-            if (playerSender)
-            {
-                SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
-                _ChatFlags = playerSender.GetChatFlags();
-
-                SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
-
-                Group group = playerSender.GetGroup();
-
-                if (group)
-                    PartyGUID = group.GetGUID();
-            }
-        }
-
         public void SetReceiver(WorldObject receiver, Locale locale)
         {
             TargetGUID = receiver.GetGUID();
@@ -280,6 +255,31 @@ namespace Game.Networking.Packets
 
             if (ChannelGUID.HasValue)
                 _worldPacket.WritePackedGuid(ChannelGUID.Value);
+        }
+
+        private void SetSender(WorldObject sender, Locale locale)
+        {
+            SenderGUID = sender.GetGUID();
+
+            Creature creatureSender = sender.ToCreature();
+
+            if (creatureSender)
+                SenderName = creatureSender.GetName(locale);
+
+            Player playerSender = sender.ToPlayer();
+
+            if (playerSender)
+            {
+                SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
+                _ChatFlags = playerSender.GetChatFlags();
+
+                SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
+
+                Group group = playerSender.GetGroup();
+
+                if (group)
+                    PartyGUID = group.GetGUID();
+            }
         }
     }
 

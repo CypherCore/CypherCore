@@ -12,6 +12,46 @@ namespace Game.Chat.Commands
     [CommandGroup("titles")]
     internal class TitleCommands
     {
+        [CommandGroup("set")]
+        private class TitleSetCommands
+        {
+            //Edit Player KnownTitles
+            [Command("mask", RBACPermissions.CommandTitlesSetMask)]
+            private static bool HandleTitlesSetMaskCommand(CommandHandler handler, ulong mask)
+            {
+                Player target = handler.GetSelectedPlayer();
+
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.NoCharSelected);
+
+                    return false;
+                }
+
+                // check online security
+                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                    return false;
+
+                ulong titles2 = mask;
+
+                foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
+                    titles2 &= ~(1ul << tEntry.MaskID);
+
+                mask &= ~titles2; // remove not existed titles
+
+                target.SetKnownTitles(0, mask);
+                handler.SendSysMessage(CypherStrings.Done);
+
+                if (!target.HasTitle(target.PlayerData.PlayerTitle))
+                {
+                    target.SetChosenTitle(0);
+                    handler.SendSysMessage(CypherStrings.CurrentTitleReset, handler.GetNameLink(target));
+                }
+
+                return true;
+            }
+        }
+
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
         private static bool HandleTitlesCurrentCommand(CommandHandler handler, uint titleId)
         {
@@ -122,46 +162,6 @@ namespace Game.Chat.Commands
             }
 
             return true;
-        }
-
-        [CommandGroup("set")]
-        private class TitleSetCommands
-        {
-            //Edit Player KnownTitles
-            [Command("mask", RBACPermissions.CommandTitlesSetMask)]
-            private static bool HandleTitlesSetMaskCommand(CommandHandler handler, ulong mask)
-            {
-                Player target = handler.GetSelectedPlayer();
-
-                if (!target)
-                {
-                    handler.SendSysMessage(CypherStrings.NoCharSelected);
-
-                    return false;
-                }
-
-                // check online security
-                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                    return false;
-
-                ulong titles2 = mask;
-
-                foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
-                    titles2 &= ~(1ul << tEntry.MaskID);
-
-                mask &= ~titles2; // remove not existed titles
-
-                target.SetKnownTitles(0, mask);
-                handler.SendSysMessage(CypherStrings.Done);
-
-                if (!target.HasTitle(target.PlayerData.PlayerTitle))
-                {
-                    target.SetChosenTitle(0);
-                    handler.SendSysMessage(CypherStrings.CurrentTitleReset, handler.GetNameLink(target));
-                }
-
-                return true;
-            }
         }
     }
 }

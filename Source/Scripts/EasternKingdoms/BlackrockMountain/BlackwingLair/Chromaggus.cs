@@ -184,12 +184,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             EnterEvadeMode();
         }
 
-        private void Initialize()
-        {
-            CurrentVurln_Spell = 0; // We use this to store our last vulnerabilty spell so we can remove it later
-            Enraged = false;
-        }
-
         public override void Reset()
         {
             _Reset();
@@ -275,6 +269,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        private void Initialize()
+        {
+            CurrentVurln_Spell = 0; // We use this to store our last vulnerabilty spell so we can remove it later
+            Enraged = false;
         }
     }
 

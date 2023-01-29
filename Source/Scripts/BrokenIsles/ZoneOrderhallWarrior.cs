@@ -59,8 +59,6 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
     [Script]
     internal class npc_danica_the_reclaimer : ScriptedAI
     {
-        private ObjectGuid _summonerGuid;
-
         private readonly Vector3[] DanicaPath01 =
         {
             new(1050.219f, 7232.470f, 100.5846f), new(1046.207f, 7240.372f, 100.5846f), new(1040.963f, 7245.498f, 100.6819f), new(1034.726f, 7250.083f, 100.5846f), new(1027.422f, 7257.835f, 100.5846f), new(1027.542f, 7259.735f, 100.5846f)
@@ -75,6 +73,8 @@ namespace Scripts.BrokenIsles.ZoneOrderhallWarrior
         {
             new(962.5208f, 7223.089f, 100.5846f), new(934.2795f, 7223.116f, 100.5846f), new(911.8507f, 7223.776f, 100.5846f), new(879.0139f, 7224.100f, 100.9079f), new(851.691f, 7224.5490f, 109.5846f)
         };
+
+        private ObjectGuid _summonerGuid;
 
         public npc_danica_the_reclaimer(Creature creature) : base(creature)
         {

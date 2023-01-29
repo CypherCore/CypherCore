@@ -10,10 +10,9 @@ namespace Game.Misc
 {
     public class GossipMenu
     {
+        private readonly SortedDictionary<uint, GossipMenuItem> _menuItems = new();
         private Locale _locale;
         private uint _menuId;
-
-        private readonly SortedDictionary<uint, GossipMenuItem> _menuItems = new();
 
         public uint AddMenuItem(int gossipOptionId, int orderIndex, GossipOptionNpc optionNpc, string optionText, uint language,
                                 GossipOptionFlags flags, int? gossipNpcOptionId, uint actionMenuId, uint actionPoiId, bool boxCoded, uint boxMoney,
@@ -165,11 +164,6 @@ namespace Game.Misc
             return _menuItems.Values.FirstOrDefault(item => item.GossipOptionID == gossipOptionId);
         }
 
-        private GossipMenuItem GetItemByIndex(uint orderIndex)
-        {
-            return _menuItems.LookupByKey(orderIndex);
-        }
-
         public uint GetMenuItemSender(uint orderIndex)
         {
             GossipMenuItem item = GetItemByIndex(orderIndex);
@@ -220,11 +214,6 @@ namespace Game.Misc
             _locale = locale;
         }
 
-        private Locale GetLocale()
-        {
-            return _locale;
-        }
-
         public int GetMenuItemCount()
         {
             return _menuItems.Count;
@@ -238,6 +227,16 @@ namespace Game.Misc
         public SortedDictionary<uint, GossipMenuItem> GetMenuItems()
         {
             return _menuItems;
+        }
+
+        private GossipMenuItem GetItemByIndex(uint orderIndex)
+        {
+            return _menuItems.LookupByKey(orderIndex);
+        }
+
+        private Locale GetLocale()
+        {
+            return _locale;
         }
     }
 }

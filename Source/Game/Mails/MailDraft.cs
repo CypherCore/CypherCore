@@ -12,15 +12,15 @@ namespace Game.Mails
     public class MailDraft
     {
         private readonly string _body;
-        private ulong _COD;
 
         private readonly Dictionary<ulong, Item> _items = new();
 
         private readonly uint _mailTemplateId;
+        private readonly string _subject;
+        private ulong _COD;
         private bool _mailTemplateItemsNeed;
 
         private ulong _money;
-        private readonly string _subject;
 
         public MailDraft(uint mailTemplateId, bool need_items = true)
         {
@@ -45,49 +45,6 @@ namespace Game.Mails
             _items[item.GetGUID().GetCounter()] = item;
 
             return this;
-        }
-
-        private void PrepareItems(Player receiver, SQLTransaction trans)
-        {
-            if (_mailTemplateId == 0 ||
-                !_mailTemplateItemsNeed)
-                return;
-
-            _mailTemplateItemsNeed = false;
-
-            // The mail sent after turning in the quest The Good News and The Bad News contains 100g
-            if (_mailTemplateId == 123)
-                _money = 1000000;
-
-            Loot mailLoot = new(null, ObjectGuid.Empty, LootType.None, null);
-
-            // can be empty
-            mailLoot.FillLoot(_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
-
-            for (uint i = 0; _items.Count < SharedConst.MaxMailItems && i < mailLoot.items.Count; ++i)
-            {
-                LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
-
-                if (lootitem != null)
-                {
-                    Item item = Item.CreateItem(lootitem.itemid, lootitem.count, lootitem.context, receiver);
-
-                    if (item != null)
-                    {
-                        item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then Item will deleted
-                        AddItem(item);
-                    }
-                }
-            }
-        }
-
-        private void DeleteIncludedItems(SQLTransaction trans, bool inDB = false)
-        {
-            foreach (var item in _items.Values)
-                if (inDB)
-                    item.DeleteFromDB(trans);
-
-            _items.Clear();
         }
 
         public void SendReturnToSender(uint senderAcc, ulong senderGuid, ulong receiver_guid, SQLTransaction trans)
@@ -234,6 +191,63 @@ namespace Game.Mails
             }
         }
 
+        public MailDraft AddMoney(ulong money)
+        {
+            _money = money;
+
+            return this;
+        }
+
+        public MailDraft AddCOD(uint COD)
+        {
+            _COD = COD;
+
+            return this;
+        }
+
+        private void PrepareItems(Player receiver, SQLTransaction trans)
+        {
+            if (_mailTemplateId == 0 ||
+                !_mailTemplateItemsNeed)
+                return;
+
+            _mailTemplateItemsNeed = false;
+
+            // The mail sent after turning in the quest The Good News and The Bad News contains 100g
+            if (_mailTemplateId == 123)
+                _money = 1000000;
+
+            Loot mailLoot = new(null, ObjectGuid.Empty, LootType.None, null);
+
+            // can be empty
+            mailLoot.FillLoot(_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
+
+            for (uint i = 0; _items.Count < SharedConst.MaxMailItems && i < mailLoot.Items.Count; ++i)
+            {
+                LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
+
+                if (lootitem != null)
+                {
+                    Item item = Item.CreateItem(lootitem.Itemid, lootitem.Count, lootitem.Context, receiver);
+
+                    if (item != null)
+                    {
+                        item.SaveToDB(trans); // save for prevent lost at next mail load, if send fail then Item will deleted
+                        AddItem(item);
+                    }
+                }
+            }
+        }
+
+        private void DeleteIncludedItems(SQLTransaction trans, bool inDB = false)
+        {
+            foreach (var item in _items.Values)
+                if (inDB)
+                    item.DeleteFromDB(trans);
+
+            _items.Clear();
+        }
+
         private uint GetMailTemplateId()
         {
             return _mailTemplateId;
@@ -257,20 +271,6 @@ namespace Game.Mails
         private string GetBody()
         {
             return _body;
-        }
-
-        public MailDraft AddMoney(ulong money)
-        {
-            _money = money;
-
-            return this;
-        }
-
-        public MailDraft AddCOD(uint COD)
-        {
-            _COD = COD;
-
-            return this;
         }
     }
 }

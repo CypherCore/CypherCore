@@ -276,19 +276,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_dailyPools.Count} daily, {_weeklyPools.Count} weekly and {_monthlyPools.Count} monthly quest pools in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        private void Regenerate(List<QuestPool> pools)
-        {
-            SQLTransaction trans = new();
-
-            foreach (QuestPool pool in pools)
-            {
-                RegeneratePool(pool);
-                SaveToDB(pool, trans);
-            }
-
-            DB.Characters.CommitTransaction(trans);
-        }
-
         // the storage structure ends up making this kind of inefficient
         // we don't use it in practice (only in debug commands), so that's fine
         public QuestPool FindQuestPool(uint poolId)
@@ -346,6 +333,19 @@ namespace Game
         public bool IsQuestPooled(uint questId)
         {
             return _poolLookup.ContainsKey(questId);
+        }
+
+        private void Regenerate(List<QuestPool> pools)
+        {
+            SQLTransaction trans = new();
+
+            foreach (QuestPool pool in pools)
+            {
+                RegeneratePool(pool);
+                SaveToDB(pool, trans);
+            }
+
+            DB.Characters.CommitTransaction(trans);
         }
     }
 

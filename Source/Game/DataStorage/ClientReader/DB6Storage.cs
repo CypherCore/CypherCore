@@ -375,6 +375,16 @@ namespace Game.DataStorage
             }
         }
 
+        public uint GetTableHash()
+        {
+            return _header.TableHash;
+        }
+
+        public uint GetNumRows()
+        {
+            return Keys.Max() + 1;
+        }
+
         private TValue[] ReadArray<TValue>(SQLResult result, int dbIndex, int arrayLength)
         {
             TValue[] values = new TValue[arrayLength];
@@ -439,16 +449,6 @@ namespace Game.DataStorage
 
                         break;
                 }
-        }
-
-        public uint GetTableHash()
-        {
-            return _header.TableHash;
-        }
-
-        public uint GetNumRows()
-        {
-            return Keys.Max() + 1;
         }
     }
 }

@@ -5,16 +5,16 @@ namespace Game.DungeonFinding
 {
     public class LfgReward
     {
-        public uint FirstQuest { get; set; }
-
-        public uint MaxLevel { get; set; }
-        public uint OtherQuest { get; set; }
-
         public LfgReward(uint _maxLevel = 0, uint _firstQuest = 0, uint _otherQuest = 0)
         {
             MaxLevel = _maxLevel;
             FirstQuest = _firstQuest;
             OtherQuest = _otherQuest;
         }
+
+        public uint FirstQuest { get; set; }
+
+        public uint MaxLevel { get; set; }
+        public uint OtherQuest { get; set; }
     }
 }

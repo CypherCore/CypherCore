@@ -66,10 +66,10 @@ namespace Game.Garrisons
     {
         private readonly Cell i_cell;
         private readonly uint i_creatures;
-        private uint i_gameObjects;
         private readonly Garrison i_garrison;
         private readonly Grid i_grid;
         private readonly GarrisonMap i_map;
+        private uint i_gameObjects;
 
         public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
         {

@@ -118,9 +118,8 @@ namespace Framework.Database
 
     public class TransactionCallback : ISqlCallback
     {
-        private Action<bool> _callback;
-
         private readonly Task<bool> _future;
+        private Action<bool> _callback;
 
         public TransactionCallback(Task<bool> future)
         {

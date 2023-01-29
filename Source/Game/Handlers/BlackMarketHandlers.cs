@@ -12,6 +12,27 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendBlackMarketWonNotification(BlackMarketEntry entry, Item item)
+        {
+            BlackMarketWon packet = new();
+
+            packet.MarketID = entry.GetMarketId();
+            packet.Item = new ItemInstance(item);
+
+            SendPacket(packet);
+        }
+
+        public void SendBlackMarketOutbidNotification(BlackMarketTemplate templ)
+        {
+            BlackMarketOutbid packet = new();
+
+            packet.MarketID = templ.MarketID;
+            packet.Item = templ.Item;
+            packet.RandomPropertiesID = 0;
+
+            SendPacket(packet);
+        }
+
         [WorldPacketHandler(ClientOpcodes.BlackMarketOpen)]
         private void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
         {
@@ -135,27 +156,6 @@ namespace Game
             packet.MarketID = marketId;
             packet.Item = item;
             packet.Result = result;
-
-            SendPacket(packet);
-        }
-
-        public void SendBlackMarketWonNotification(BlackMarketEntry entry, Item item)
-        {
-            BlackMarketWon packet = new();
-
-            packet.MarketID = entry.GetMarketId();
-            packet.Item = new ItemInstance(item);
-
-            SendPacket(packet);
-        }
-
-        public void SendBlackMarketOutbidNotification(BlackMarketTemplate templ)
-        {
-            BlackMarketOutbid packet = new();
-
-            packet.MarketID = templ.MarketID;
-            packet.Item = templ.Item;
-            packet.RandomPropertiesID = 0;
 
             SendPacket(packet);
         }

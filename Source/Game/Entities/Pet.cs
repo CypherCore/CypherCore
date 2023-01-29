@@ -29,9 +29,6 @@ namespace Game.Entities
         private ushort _petSpecialization;
 
         private PetType _petType;
-        public bool Removed { get; set; }
-
-        public Dictionary<uint, PetSpell> PetSpells { get; set; } = new();
 
         public Pet(Player owner, PetType type = PetType.Max) : base(null, owner, true)
         {
@@ -53,6 +50,10 @@ namespace Game.Entities
             SetName("Pet");
             _focusRegenTimer = PET_FOCUS_REGEN_INTERVAL;
         }
+
+        public bool Removed { get; set; }
+
+        public Dictionary<uint, PetSpell> PetSpells { get; set; } = new();
 
         public override void Dispose()
         {
@@ -837,6 +838,393 @@ namespace Game.Entities
             return true;
         }
 
+        public bool HaveInDiet(ItemTemplate item)
+        {
+            if (item.FoodType == 0)
+                return false;
+
+            CreatureTemplate cInfo = GetCreatureTemplate();
+
+            if (cInfo == null)
+                return false;
+
+            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
+
+            if (cFamily == null)
+                return false;
+
+            uint diet = cFamily.PetFoodMask;
+            uint FoodMask = (uint)(1 << ((int)item.FoodType - 1));
+
+            return diet.HasAnyFlag(FoodMask);
+        }
+
+        public bool LearnSpell(uint spellId)
+        {
+            // prevent duplicated entires in spell book
+            if (!AddSpell(spellId))
+                return false;
+
+            if (!_loading)
+            {
+                PetLearnedSpells packet = new();
+                packet.Spells.Add(spellId);
+                GetOwner().SendPacket(packet);
+                GetOwner().PetSpellInitialize();
+            }
+
+            return true;
+        }
+
+        public bool RemoveSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
+        {
+            var petSpell = PetSpells.LookupByKey(spellId);
+
+            if (petSpell == null)
+                return false;
+
+            if (petSpell.State == PetSpellState.Removed)
+                return false;
+
+            if (petSpell.State == PetSpellState.New)
+                PetSpells.Remove(spellId);
+            else
+                petSpell.State = PetSpellState.Removed;
+
+            RemoveAurasDueToSpell(spellId);
+
+            if (learnPrev)
+            {
+                uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
+
+                if (prev_id != 0)
+                    LearnSpell(prev_id);
+                else
+                    learnPrev = false;
+            }
+
+            // if remove last rank or non-ranked then update Action bar at server and client if need
+            if (clearActionBar &&
+                !learnPrev &&
+                GetCharmInfo().RemoveSpellFromActionBar(spellId))
+                if (!_loading)
+                {
+                    // need update Action bar for last removed rank
+                    Unit owner = GetOwner();
+
+                    if (owner)
+                        if (owner.IsTypeId(TypeId.Player))
+                            owner.ToPlayer().PetSpellInitialize();
+                }
+
+            return true;
+        }
+
+        public void InitPetCreateSpells()
+        {
+            GetCharmInfo().InitPetActionBar();
+            PetSpells.Clear();
+
+            LearnPetPassives();
+            InitLevelupSpellsForLevel();
+
+            CastPetAuras(false);
+        }
+
+        public void ToggleAutocast(SpellInfo spellInfo, bool apply)
+        {
+            if (!spellInfo.IsAutocastable())
+                return;
+
+            var petSpell = PetSpells.LookupByKey(spellInfo.Id);
+
+            if (petSpell == null)
+                return;
+
+            var hasSpell = _autospells.Contains(spellInfo.Id);
+
+            if (apply)
+            {
+                if (!hasSpell)
+                {
+                    _autospells.Add(spellInfo.Id);
+
+                    if (petSpell.Active != ActiveStates.Enabled)
+                    {
+                        petSpell.Active = ActiveStates.Enabled;
+
+                        if (petSpell.State != PetSpellState.New)
+                            petSpell.State = PetSpellState.Changed;
+                    }
+                }
+            }
+            else
+            {
+                if (hasSpell)
+                {
+                    _autospells.Remove(spellInfo.Id);
+
+                    if (petSpell.Active != ActiveStates.Disabled)
+                    {
+                        petSpell.Active = ActiveStates.Disabled;
+
+                        if (petSpell.State != PetSpellState.New)
+                            petSpell.State = PetSpellState.Changed;
+                    }
+                }
+            }
+        }
+
+        public bool IsPermanentPetFor(Player owner)
+        {
+            switch (GetPetType())
+            {
+                case PetType.Summon:
+                    switch (owner.GetClass())
+                    {
+                        case Class.Warlock:
+                            return GetCreatureTemplate().CreatureType == CreatureType.Demon;
+                        case Class.Deathknight:
+                            return GetCreatureTemplate().CreatureType == CreatureType.Undead;
+                        case Class.Mage:
+                            return GetCreatureTemplate().CreatureType == CreatureType.Elemental;
+                        default:
+                            return false;
+                    }
+                case PetType.Hunter:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public bool Create(ulong guidlow, Map map, uint entry, uint petNumber)
+        {
+            Cypher.Assert(map);
+            SetMap(map);
+
+            // TODO: counter should be constructed as (summon_count << 32) | petNumber
+            _Create(ObjectGuid.Create(HighGuid.Pet, map.GetId(), entry, guidlow));
+
+            SpawnId = guidlow;
+            OriginalEntry = entry;
+
+            if (!InitEntry(entry))
+                return false;
+
+            // Force regen flag for player pets, just like we do for players themselves
+            SetUnitFlag2(UnitFlags2.RegeneratePower);
+            SetSheath(SheathState.Melee);
+
+            GetThreatManager().Initialize();
+
+            return true;
+        }
+
+        public override bool HasSpell(uint spell)
+        {
+            var petSpell = PetSpells.LookupByKey(spell);
+
+            return petSpell != null && petSpell.State != PetSpellState.Removed;
+        }
+
+        public void CastPetAura(PetAura aura)
+        {
+            uint auraId = aura.GetAura(GetEntry());
+
+            if (auraId == 0)
+                return;
+
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+
+            if (auraId == 35696) // Demonic Knowledge
+                args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
+
+            CastSpell(this, auraId, args);
+        }
+
+        public void SynchronizeLevelWithOwner()
+        {
+            Unit owner = GetOwner();
+
+            if (!owner ||
+                !owner.IsTypeId(TypeId.Player))
+                return;
+
+            switch (GetPetType())
+            {
+                // always same level
+                case PetType.Summon:
+                case PetType.Hunter:
+                    GivePetLevel((int)owner.GetLevel());
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public new Player GetOwner()
+        {
+            return base.GetOwner().ToPlayer();
+        }
+
+        public override float GetNativeObjectScale()
+        {
+            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey(GetCreatureTemplate().Family);
+
+            if (creatureFamily != null &&
+                creatureFamily.MinScale > 0.0f &&
+                GetPetType() == PetType.Hunter)
+            {
+                float scale;
+
+                if (GetLevel() >= creatureFamily.MaxScaleLevel)
+                    scale = creatureFamily.MaxScale;
+                else if (GetLevel() <= creatureFamily.MinScaleLevel)
+                    scale = creatureFamily.MinScale;
+                else
+                    scale = creatureFamily.MinScale + (float)(GetLevel() - creatureFamily.MinScaleLevel) / creatureFamily.MaxScaleLevel * (creatureFamily.MaxScale - creatureFamily.MinScale);
+
+                return scale;
+            }
+
+            return base.GetNativeObjectScale();
+        }
+
+        public override void SetDisplayId(uint modelId, float displayScale = 1f)
+        {
+            base.SetDisplayId(modelId, displayScale);
+
+            if (!IsControlled())
+                return;
+
+            SetGroupUpdateFlag(GroupUpdatePetFlags.ModelId);
+        }
+
+        public PetType GetPetType()
+        {
+            return _petType;
+        }
+
+        public void SetPetType(PetType type)
+        {
+            _petType = type;
+        }
+
+        public bool IsControlled()
+        {
+            return GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter;
+        }
+
+        public bool IsTemporarySummoned()
+        {
+            return _duration > 0;
+        }
+
+        public override bool IsLoading()
+        {
+            return _loading;
+        }
+
+        public override byte GetPetAutoSpellSize()
+        {
+            return (byte)_autospells.Count;
+        }
+
+        public override uint GetPetAutoSpellOnPos(byte pos)
+        {
+            if (pos >= _autospells.Count)
+                return 0;
+            else
+                return _autospells[pos];
+        }
+
+        public void SetDuration(uint dur)
+        {
+            _duration = (int)dur;
+        }
+
+        public int GetDuration()
+        {
+            return _duration;
+        }
+
+        public void SetPetExperience(uint xp)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.PetExperience), xp);
+        }
+
+        public void SetPetNextLevelExperience(uint xp)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.PetNextLevelExperience), xp);
+        }
+
+        public ushort GetSpecialization()
+        {
+            return _petSpecialization;
+        }
+
+        public GroupUpdatePetFlags GetGroupUpdateFlag()
+        {
+            return _groupUpdateMask;
+        }
+
+        public void SetGroupUpdateFlag(GroupUpdatePetFlags flag)
+        {
+            if (GetOwner().GetGroup())
+            {
+                _groupUpdateMask |= flag;
+                GetOwner().SetGroupUpdateFlag(GroupUpdateFlags.Pet);
+            }
+        }
+
+        public void ResetGroupUpdateFlag()
+        {
+            _groupUpdateMask = GroupUpdatePetFlags.None;
+
+            if (GetOwner().GetGroup())
+                GetOwner().RemoveGroupUpdateFlag(GroupUpdateFlags.Pet);
+        }
+
+        public void SetSpecialization(uint spec)
+        {
+            if (_petSpecialization == spec)
+                return;
+
+            // remove all the old spec's specalization spells, set the new spec, then add the new spec's spells
+            // clearActionBars is false because we'll be updating the pet actionbar later so we don't have to do it now
+            RemoveSpecializationSpells(false);
+
+            if (!CliDB.ChrSpecializationStorage.ContainsKey(spec))
+            {
+                _petSpecialization = 0;
+
+                return;
+            }
+
+            _petSpecialization = (ushort)spec;
+            LearnSpecializationSpells();
+
+            // resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet Action bar
+            CleanupActionBar();
+            GetOwner().PetSpellInitialize();
+
+            SetPetSpecialization setPetSpecialization = new();
+            setPetSpecialization.SpecID = _petSpecialization;
+            GetOwner().SendPacket(setPetSpecialization);
+        }
+
+        public override string GetDebugInfo()
+        {
+            return $"{base.GetDebugInfo()}\nPetType: {GetPetType()} PetNumber: {GetCharmInfo().GetPetNumber()}";
+        }
+
+        public DeclinedName GetDeclinedNames()
+        {
+            return _declinedname;
+        }
+
         private bool CreateBaseAtTamed(CreatureTemplate cinfo, Map map)
         {
             Log.outDebug(LogFilter.Pet, "CreateBaseForTamed");
@@ -860,27 +1248,6 @@ namespace Game.Entities
             }
 
             return true;
-        }
-
-        public bool HaveInDiet(ItemTemplate item)
-        {
-            if (item.FoodType == 0)
-                return false;
-
-            CreatureTemplate cInfo = GetCreatureTemplate();
-
-            if (cInfo == null)
-                return false;
-
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
-
-            if (cFamily == null)
-                return false;
-
-            uint diet = cFamily.PetFoodMask;
-            uint FoodMask = (uint)(1 << ((int)item.FoodType - 1));
-
-            return diet.HasAnyFlag(FoodMask);
         }
 
         private void _LoadSpells(SQLResult result)
@@ -1227,23 +1594,6 @@ namespace Game.Entities
             return true;
         }
 
-        public bool LearnSpell(uint spellId)
-        {
-            // prevent duplicated entires in spell book
-            if (!AddSpell(spellId))
-                return false;
-
-            if (!_loading)
-            {
-                PetLearnedSpells packet = new();
-                packet.Spells.Add(spellId);
-                GetOwner().SendPacket(packet);
-                GetOwner().PetSpellInitialize();
-            }
-
-            return true;
-        }
-
         private void LearnSpells(List<uint> spellIds)
         {
             PetLearnedSpells packet = new();
@@ -1328,50 +1678,6 @@ namespace Game.Entities
                 GetOwner().SendPacket(packet);
         }
 
-        public bool RemoveSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
-        {
-            var petSpell = PetSpells.LookupByKey(spellId);
-
-            if (petSpell == null)
-                return false;
-
-            if (petSpell.State == PetSpellState.Removed)
-                return false;
-
-            if (petSpell.State == PetSpellState.New)
-                PetSpells.Remove(spellId);
-            else
-                petSpell.State = PetSpellState.Removed;
-
-            RemoveAurasDueToSpell(spellId);
-
-            if (learnPrev)
-            {
-                uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
-
-                if (prev_id != 0)
-                    LearnSpell(prev_id);
-                else
-                    learnPrev = false;
-            }
-
-            // if remove last rank or non-ranked then update Action bar at server and client if need
-            if (clearActionBar &&
-                !learnPrev &&
-                GetCharmInfo().RemoveSpellFromActionBar(spellId))
-                if (!_loading)
-                {
-                    // need update Action bar for last removed rank
-                    Unit owner = GetOwner();
-
-                    if (owner)
-                        if (owner.IsTypeId(TypeId.Player))
-                            owner.ToPlayer().PetSpellInitialize();
-                }
-
-            return true;
-        }
-
         private void CleanupActionBar()
         {
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
@@ -1395,114 +1701,6 @@ namespace Game.Entities
                         }
                     }
             }
-        }
-
-        public void InitPetCreateSpells()
-        {
-            GetCharmInfo().InitPetActionBar();
-            PetSpells.Clear();
-
-            LearnPetPassives();
-            InitLevelupSpellsForLevel();
-
-            CastPetAuras(false);
-        }
-
-        public void ToggleAutocast(SpellInfo spellInfo, bool apply)
-        {
-            if (!spellInfo.IsAutocastable())
-                return;
-
-            var petSpell = PetSpells.LookupByKey(spellInfo.Id);
-
-            if (petSpell == null)
-                return;
-
-            var hasSpell = _autospells.Contains(spellInfo.Id);
-
-            if (apply)
-            {
-                if (!hasSpell)
-                {
-                    _autospells.Add(spellInfo.Id);
-
-                    if (petSpell.Active != ActiveStates.Enabled)
-                    {
-                        petSpell.Active = ActiveStates.Enabled;
-
-                        if (petSpell.State != PetSpellState.New)
-                            petSpell.State = PetSpellState.Changed;
-                    }
-                }
-            }
-            else
-            {
-                if (hasSpell)
-                {
-                    _autospells.Remove(spellInfo.Id);
-
-                    if (petSpell.Active != ActiveStates.Disabled)
-                    {
-                        petSpell.Active = ActiveStates.Disabled;
-
-                        if (petSpell.State != PetSpellState.New)
-                            petSpell.State = PetSpellState.Changed;
-                    }
-                }
-            }
-        }
-
-        public bool IsPermanentPetFor(Player owner)
-        {
-            switch (GetPetType())
-            {
-                case PetType.Summon:
-                    switch (owner.GetClass())
-                    {
-                        case Class.Warlock:
-                            return GetCreatureTemplate().CreatureType == CreatureType.Demon;
-                        case Class.Deathknight:
-                            return GetCreatureTemplate().CreatureType == CreatureType.Undead;
-                        case Class.Mage:
-                            return GetCreatureTemplate().CreatureType == CreatureType.Elemental;
-                        default:
-                            return false;
-                    }
-                case PetType.Hunter:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        public bool Create(ulong guidlow, Map map, uint entry, uint petNumber)
-        {
-            Cypher.Assert(map);
-            SetMap(map);
-
-            // TODO: counter should be constructed as (summon_count << 32) | petNumber
-            _Create(ObjectGuid.Create(HighGuid.Pet, map.GetId(), entry, guidlow));
-
-            SpawnId = guidlow;
-            OriginalEntry = entry;
-
-            if (!InitEntry(entry))
-                return false;
-
-            // Force regen flag for player pets, just like we do for players themselves
-            SetUnitFlag2(UnitFlags2.RegeneratePower);
-            SetSheath(SheathState.Melee);
-
-            GetThreatManager().Initialize();
-
-            return true;
-        }
-
-        public override bool HasSpell(uint spell)
-        {
-            var petSpell = PetSpells.LookupByKey(spell);
-
-            return petSpell != null && petSpell.State != PetSpellState.Removed;
         }
 
         // Get all passive spells in our skill line
@@ -1543,21 +1741,6 @@ namespace Game.Entities
                     CastPetAura(pa);
         }
 
-        public void CastPetAura(PetAura aura)
-        {
-            uint auraId = aura.GetAura(GetEntry());
-
-            if (auraId == 0)
-                return;
-
-            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-
-            if (auraId == 35696) // Demonic Knowledge
-                args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
-
-            CastSpell(this, auraId, args);
-        }
-
         private bool IsPetAura(Aura aura)
         {
             Player owner = GetOwner();
@@ -1577,150 +1760,6 @@ namespace Game.Entities
 
             if (next != 0)
                 LearnSpellHighRank(next);
-        }
-
-        public void SynchronizeLevelWithOwner()
-        {
-            Unit owner = GetOwner();
-
-            if (!owner ||
-                !owner.IsTypeId(TypeId.Player))
-                return;
-
-            switch (GetPetType())
-            {
-                // always same level
-                case PetType.Summon:
-                case PetType.Hunter:
-                    GivePetLevel((int)owner.GetLevel());
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public new Player GetOwner()
-        {
-            return base.GetOwner().ToPlayer();
-        }
-
-        public override float GetNativeObjectScale()
-        {
-            var creatureFamily = CliDB.CreatureFamilyStorage.LookupByKey(GetCreatureTemplate().Family);
-
-            if (creatureFamily != null &&
-                creatureFamily.MinScale > 0.0f &&
-                GetPetType() == PetType.Hunter)
-            {
-                float scale;
-
-                if (GetLevel() >= creatureFamily.MaxScaleLevel)
-                    scale = creatureFamily.MaxScale;
-                else if (GetLevel() <= creatureFamily.MinScaleLevel)
-                    scale = creatureFamily.MinScale;
-                else
-                    scale = creatureFamily.MinScale + (float)(GetLevel() - creatureFamily.MinScaleLevel) / creatureFamily.MaxScaleLevel * (creatureFamily.MaxScale - creatureFamily.MinScale);
-
-                return scale;
-            }
-
-            return base.GetNativeObjectScale();
-        }
-
-        public override void SetDisplayId(uint modelId, float displayScale = 1f)
-        {
-            base.SetDisplayId(modelId, displayScale);
-
-            if (!IsControlled())
-                return;
-
-            SetGroupUpdateFlag(GroupUpdatePetFlags.ModelId);
-        }
-
-        public PetType GetPetType()
-        {
-            return _petType;
-        }
-
-        public void SetPetType(PetType type)
-        {
-            _petType = type;
-        }
-
-        public bool IsControlled()
-        {
-            return GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter;
-        }
-
-        public bool IsTemporarySummoned()
-        {
-            return _duration > 0;
-        }
-
-        public override bool IsLoading()
-        {
-            return _loading;
-        }
-
-        public override byte GetPetAutoSpellSize()
-        {
-            return (byte)_autospells.Count;
-        }
-
-        public override uint GetPetAutoSpellOnPos(byte pos)
-        {
-            if (pos >= _autospells.Count)
-                return 0;
-            else
-                return _autospells[pos];
-        }
-
-        public void SetDuration(uint dur)
-        {
-            _duration = (int)dur;
-        }
-
-        public int GetDuration()
-        {
-            return _duration;
-        }
-
-        public void SetPetExperience(uint xp)
-        {
-            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.PetExperience), xp);
-        }
-
-        public void SetPetNextLevelExperience(uint xp)
-        {
-            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.PetNextLevelExperience), xp);
-        }
-
-        public ushort GetSpecialization()
-        {
-            return _petSpecialization;
-        }
-
-        public GroupUpdatePetFlags GetGroupUpdateFlag()
-        {
-            return _groupUpdateMask;
-        }
-
-        public void SetGroupUpdateFlag(GroupUpdatePetFlags flag)
-        {
-            if (GetOwner().GetGroup())
-            {
-                _groupUpdateMask |= flag;
-                GetOwner().SetGroupUpdateFlag(GroupUpdateFlags.Pet);
-            }
-        }
-
-        public void ResetGroupUpdateFlag()
-        {
-            _groupUpdateMask = GroupUpdatePetFlags.None;
-
-            if (GetOwner().GetGroup())
-                GetOwner().RemoveGroupUpdateFlag(GroupUpdateFlags.Pet);
         }
 
         private void LearnSpecializationSpells()
@@ -1776,34 +1815,6 @@ namespace Game.Entities
             UnlearnSpells(unlearnedSpells, true, clearActionBar);
         }
 
-        public void SetSpecialization(uint spec)
-        {
-            if (_petSpecialization == spec)
-                return;
-
-            // remove all the old spec's specalization spells, set the new spec, then add the new spec's spells
-            // clearActionBars is false because we'll be updating the pet actionbar later so we don't have to do it now
-            RemoveSpecializationSpells(false);
-
-            if (!CliDB.ChrSpecializationStorage.ContainsKey(spec))
-            {
-                _petSpecialization = 0;
-
-                return;
-            }
-
-            _petSpecialization = (ushort)spec;
-            LearnSpecializationSpells();
-
-            // resend SMSG_PET_SPELLS_MESSAGE to remove old specialization spells from the pet Action bar
-            CleanupActionBar();
-            GetOwner().PetSpellInitialize();
-
-            SetPetSpecialization setPetSpecialization = new();
-            setPetSpecialization.SpecID = _petSpecialization;
-            GetOwner().SendPacket(setPetSpecialization);
-        }
-
         private string GenerateActionBarData()
         {
             StringBuilder ss = new();
@@ -1812,16 +1823,6 @@ namespace Game.Entities
                 ss.AppendFormat("{0} {1} ", (uint)GetCharmInfo().GetActionBarEntry(i).GetActiveState(), (uint)GetCharmInfo().GetActionBarEntry(i).GetAction());
 
             return ss.ToString();
-        }
-
-        public override string GetDebugInfo()
-        {
-            return $"{base.GetDebugInfo()}\nPetType: {GetPetType()} PetNumber: {GetCharmInfo().GetPetNumber()}";
-        }
-
-        public DeclinedName GetDeclinedNames()
-        {
-            return _declinedname;
         }
     }
 }

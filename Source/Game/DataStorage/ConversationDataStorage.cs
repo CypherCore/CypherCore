@@ -9,6 +9,126 @@ namespace Game.DataStorage
 {
     public class ConversationDataStorage : Singleton<ConversationDataStorage>
     {
+        private struct ConversationActorDbRow
+        {
+            public uint ConversationId;
+            public uint ActorIndex;
+
+            public ulong SpawnId;
+            public uint CreatureId;
+            public uint CreatureDisplayInfoId;
+
+            public bool Invoke(ConversationActorTemplate template)
+            {
+                if (template.WorldObjectTemplate == null)
+                    return Invoke(template.WorldObjectTemplate);
+
+                if (template.NoObjectTemplate == null)
+                    return Invoke(template.NoObjectTemplate);
+
+                if (template.ActivePlayerTemplate == null)
+                    return Invoke(template.ActivePlayerTemplate);
+
+                if (template.TalkingHeadTemplate == null)
+                    return Invoke(template.TalkingHeadTemplate);
+
+                return false;
+            }
+
+            public bool Invoke(ConversationActorWorldObjectTemplate worldObject)
+            {
+                if (Global.ObjectMgr.GetCreatureData(SpawnId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Guid (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+
+                    return false;
+                }
+
+                if (CreatureId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ConversationActorGuid cannot have CreatureId ({CreatureId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                if (CreatureDisplayInfoId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ConversationActorGuid cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                if (worldObject == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references null world object (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+
+                    return false;
+                }
+
+                worldObject.SpawnId = SpawnId;
+
+                return true;
+            }
+
+            public bool Invoke(ConversationActorNoObjectTemplate noObject)
+            {
+                if (Global.ObjectMgr.GetCreatureTemplate(CreatureId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+
+                    return false;
+                }
+
+                if (CreatureDisplayInfoId != 0 &&
+                    !CliDB.CreatureDisplayInfoStorage.ContainsKey(CreatureDisplayInfoId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display Id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+
+                    return false;
+                }
+
+                if (SpawnId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with NoActorObject cannot have ConversationActorGuid ({SpawnId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                noObject.CreatureId = CreatureId;
+                noObject.CreatureDisplayInfoId = CreatureDisplayInfoId;
+
+                return true;
+            }
+
+            public bool Invoke(ConversationActorActivePlayerTemplate activePlayer)
+            {
+                if (SpawnId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ActivePlayerObject cannot have ConversationActorGuid ({SpawnId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                if (CreatureId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ActivePlayerObject cannot have CreatureId ({CreatureId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                if (CreatureDisplayInfoId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ActivePlayerObject cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                return true;
+            }
+
+            public bool Invoke(ConversationActorTalkingHeadTemplate talkingHead)
+            {
+                if (Global.ObjectMgr.GetCreatureTemplate(CreatureId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+
+                    return false;
+                }
+
+                if (CreatureDisplayInfoId != 0 &&
+                    !CliDB.CreatureDisplayInfoStorage.ContainsKey(CreatureDisplayInfoId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display Id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+
+                    return false;
+                }
+
+                if (SpawnId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with TalkingHead cannot have ConversationActorGuid ({SpawnId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                talkingHead.CreatureId = CreatureId;
+                talkingHead.CreatureDisplayInfoId = CreatureDisplayInfoId;
+
+                return true;
+            }
+        }
+
         private readonly Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new();
 
         private readonly Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new();
@@ -187,126 +307,6 @@ namespace Game.DataStorage
         {
             return _conversationLineTemplateStorage.LookupByKey(conversationLineId);
         }
-
-        private struct ConversationActorDbRow
-        {
-            public uint ConversationId;
-            public uint ActorIndex;
-
-            public ulong SpawnId;
-            public uint CreatureId;
-            public uint CreatureDisplayInfoId;
-
-            public bool Invoke(ConversationActorTemplate template)
-            {
-                if (template.WorldObjectTemplate == null)
-                    return Invoke(template.WorldObjectTemplate);
-
-                if (template.NoObjectTemplate == null)
-                    return Invoke(template.NoObjectTemplate);
-
-                if (template.ActivePlayerTemplate == null)
-                    return Invoke(template.ActivePlayerTemplate);
-
-                if (template.TalkingHeadTemplate == null)
-                    return Invoke(template.TalkingHeadTemplate);
-
-                return false;
-            }
-
-            public bool Invoke(ConversationActorWorldObjectTemplate worldObject)
-            {
-                if (Global.ObjectMgr.GetCreatureData(SpawnId) == null)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Guid (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
-
-                    return false;
-                }
-
-                if (CreatureId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ConversationActorGuid cannot have CreatureId ({CreatureId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                if (CreatureDisplayInfoId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ConversationActorGuid cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                if (worldObject == null)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references null world object (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
-
-                    return false;
-                }
-
-                worldObject.SpawnId = SpawnId;
-
-                return true;
-            }
-
-            public bool Invoke(ConversationActorNoObjectTemplate noObject)
-            {
-                if (Global.ObjectMgr.GetCreatureTemplate(CreatureId) == null)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
-
-                    return false;
-                }
-
-                if (CreatureDisplayInfoId != 0 &&
-                    !CliDB.CreatureDisplayInfoStorage.ContainsKey(CreatureDisplayInfoId))
-                {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display Id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
-
-                    return false;
-                }
-
-                if (SpawnId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with NoActorObject cannot have ConversationActorGuid ({SpawnId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                noObject.CreatureId = CreatureId;
-                noObject.CreatureDisplayInfoId = CreatureDisplayInfoId;
-
-                return true;
-            }
-
-            public bool Invoke(ConversationActorActivePlayerTemplate activePlayer)
-            {
-                if (SpawnId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ActivePlayerObject cannot have ConversationActorGuid ({SpawnId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                if (CreatureId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ActivePlayerObject cannot have CreatureId ({CreatureId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                if (CreatureDisplayInfoId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ActivePlayerObject cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                return true;
-            }
-
-            public bool Invoke(ConversationActorTalkingHeadTemplate talkingHead)
-            {
-                if (Global.ObjectMgr.GetCreatureTemplate(CreatureId) == null)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature Id ({CreatureId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
-
-                    return false;
-                }
-
-                if (CreatureDisplayInfoId != 0 &&
-                    !CliDB.CreatureDisplayInfoStorage.ContainsKey(CreatureDisplayInfoId))
-                {
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature display Id ({CreatureDisplayInfoId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
-
-                    return false;
-                }
-
-                if (SpawnId != 0)
-                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` with TalkingHead cannot have ConversationActorGuid ({SpawnId}). Conversation {ConversationId} and Idx {ActorIndex}.");
-
-                talkingHead.CreatureId = CreatureId;
-                talkingHead.CreatureDisplayInfoId = CreatureDisplayInfoId;
-
-                return true;
-            }
-        }
     }
 
     public class ConversationActorWorldObjectTemplate
@@ -321,8 +321,7 @@ namespace Game.DataStorage
     }
 
     public class ConversationActorActivePlayerTemplate
-    {
-    }
+    {}
 
     public class ConversationActorTalkingHeadTemplate
     {

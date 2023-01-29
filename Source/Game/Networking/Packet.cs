@@ -38,9 +38,9 @@ namespace Game.Networking
     public abstract class ServerPacket
     {
         protected WorldPacket _worldPacket;
+        private readonly ConnectionType connectionType;
 
         private byte[] buffer;
-        private readonly ConnectionType connectionType;
 
         protected ServerPacket(ServerOpcodes opcode)
         {
@@ -96,9 +96,8 @@ namespace Game.Networking
 
     public class WorldPacket : ByteBuffer
     {
-        private DateTime _receivedTime; // only set for a specific set of opcodes, for performance reasons.
-
         private readonly uint opcode;
+        private DateTime _receivedTime; // only set for a specific set of opcodes, for performance reasons.
 
         public WorldPacket(ServerOpcodes opcode = ServerOpcodes.None)
         {
@@ -117,20 +116,6 @@ namespace Game.Networking
             var low = ReadPackedUInt64(loLength);
 
             return new ObjectGuid(ReadPackedUInt64(hiLength), low);
-        }
-
-        private ulong ReadPackedUInt64(byte length)
-        {
-            if (length == 0)
-                return 0;
-
-            var guid = 0ul;
-
-            for (var i = 0; i < 8; i++)
-                if (((1 << i) & length) != 0)
-                    guid |= (ulong)ReadUInt8() << (i * 8);
-
-            return guid;
         }
 
         public Position ReadPosition()
@@ -168,26 +153,6 @@ namespace Game.Networking
 
             WriteUInt8(mask);
             WriteBytes(packed, packedSize);
-        }
-
-        private uint PackUInt64(ulong value, out byte mask, out byte[] result)
-        {
-            uint resultSize = 0;
-            mask = 0;
-            result = new byte[8];
-
-            for (byte i = 0; value != 0; ++i)
-            {
-                if ((value & 0xFF) != 0)
-                {
-                    mask |= (byte)(1 << i);
-                    result[resultSize++] = (byte)(value & 0xFF);
-                }
-
-                value >>= 8;
-            }
-
-            return resultSize;
         }
 
         public void WriteBytes(WorldPacket data)
@@ -231,6 +196,40 @@ namespace Game.Networking
         public void SetReceiveTime(DateTime receivedTime)
         {
             _receivedTime = receivedTime;
+        }
+
+        private ulong ReadPackedUInt64(byte length)
+        {
+            if (length == 0)
+                return 0;
+
+            var guid = 0ul;
+
+            for (var i = 0; i < 8; i++)
+                if (((1 << i) & length) != 0)
+                    guid |= (ulong)ReadUInt8() << (i * 8);
+
+            return guid;
+        }
+
+        private uint PackUInt64(ulong value, out byte mask, out byte[] result)
+        {
+            uint resultSize = 0;
+            mask = 0;
+            result = new byte[8];
+
+            for (byte i = 0; value != 0; ++i)
+            {
+                if ((value & 0xFF) != 0)
+                {
+                    mask |= (byte)(1 << i);
+                    result[resultSize++] = (byte)(value & 0xFF);
+                }
+
+                value >>= 8;
+            }
+
+            return resultSize;
         }
     }
 

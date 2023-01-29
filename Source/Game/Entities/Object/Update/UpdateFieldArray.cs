@@ -7,10 +7,6 @@ namespace Game.Entities
 {
     public class UpdateFieldArray<T> where T : new()
     {
-        public T[] Values { get; set; }
-        public int Bit { get; set; }
-        public int FirstElementBit { get; set; }
-
         public UpdateFieldArray(uint size, int bit, int firstElementBit)
         {
             Values = new T[size];
@@ -21,6 +17,10 @@ namespace Game.Entities
             Bit = bit;
             FirstElementBit = firstElementBit;
         }
+
+        public T[] Values { get; set; }
+        public int Bit { get; set; }
+        public int FirstElementBit { get; set; }
 
         public T this[int index]
         {

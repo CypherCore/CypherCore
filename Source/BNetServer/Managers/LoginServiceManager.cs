@@ -18,11 +18,11 @@ namespace BNetServer
 {
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
+        private readonly FormInputs formInputs;
+        private readonly ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
         private X509Certificate2 certificate;
         private IPEndPoint externalAddress;
-        private readonly FormInputs formInputs;
         private IPEndPoint localAddress;
-        private readonly ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
 
         private LoginServiceManager()
         {

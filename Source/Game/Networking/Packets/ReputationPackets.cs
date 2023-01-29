@@ -8,11 +8,11 @@ namespace Game.Networking.Packets
 {
     public class InitializeFactions : ServerPacket
     {
-        private const ushort FactionCount = 443;
         public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
         public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
 
         public int[] FactionStandings = new int[FactionCount];
+        private const ushort FactionCount = 443;
 
         public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance)
         {

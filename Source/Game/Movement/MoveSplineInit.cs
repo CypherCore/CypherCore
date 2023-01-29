@@ -30,36 +30,6 @@ namespace Game.Movement
             args.flags.SetUnsetFlag(SplineFlag.Steering, unit.HasNpcFlag2(NPCFlags2.Steering));
         }
 
-        private UnitMoveType SelectSpeedType(MovementFlag moveFlags)
-        {
-            if (moveFlags.HasAnyFlag(MovementFlag.Flying))
-            {
-                if (moveFlags.HasAnyFlag(MovementFlag.Backward))
-                    return UnitMoveType.FlightBack;
-                else
-                    return UnitMoveType.Flight;
-            }
-            else if (moveFlags.HasAnyFlag(MovementFlag.Swimming))
-            {
-                if (moveFlags.HasAnyFlag(MovementFlag.Backward))
-                    return UnitMoveType.SwimBack;
-                else
-                    return UnitMoveType.Swim;
-            }
-            else if (moveFlags.HasAnyFlag(MovementFlag.Walking))
-            {
-                return UnitMoveType.Walk;
-            }
-            else if (moveFlags.HasAnyFlag(MovementFlag.Backward))
-            {
-                return UnitMoveType.RunBack;
-            }
-
-            // Flying creatures use MOVEMENTFLAG_CAN_FLY or MOVEMENTFLAG_DISABLE_GRAVITY
-            // Run speed is their default flight speed.
-            return UnitMoveType.Run;
-        }
-
         public int Launch()
         {
             MoveSpline move_spline = unit.MoveSpline;
@@ -313,11 +283,6 @@ namespace Game.Movement
             args.HasVelocity = true;
         }
 
-        private void SetBackward()
-        {
-            args.flags.SetUnsetFlag(SplineFlag.Backward);
-        }
-
         public void SetTransportEnter()
         {
             args.flags.EnableTransportEnter();
@@ -397,6 +362,41 @@ namespace Game.Movement
         public List<Vector3> Path()
         {
             return args.path;
+        }
+
+        private UnitMoveType SelectSpeedType(MovementFlag moveFlags)
+        {
+            if (moveFlags.HasAnyFlag(MovementFlag.Flying))
+            {
+                if (moveFlags.HasAnyFlag(MovementFlag.Backward))
+                    return UnitMoveType.FlightBack;
+                else
+                    return UnitMoveType.Flight;
+            }
+            else if (moveFlags.HasAnyFlag(MovementFlag.Swimming))
+            {
+                if (moveFlags.HasAnyFlag(MovementFlag.Backward))
+                    return UnitMoveType.SwimBack;
+                else
+                    return UnitMoveType.Swim;
+            }
+            else if (moveFlags.HasAnyFlag(MovementFlag.Walking))
+            {
+                return UnitMoveType.Walk;
+            }
+            else if (moveFlags.HasAnyFlag(MovementFlag.Backward))
+            {
+                return UnitMoveType.RunBack;
+            }
+
+            // Flying creatures use MOVEMENTFLAG_CAN_FLY or MOVEMENTFLAG_DISABLE_GRAVITY
+            // Run speed is their default flight speed.
+            return UnitMoveType.Run;
+        }
+
+        private void SetBackward()
+        {
+            args.flags.SetUnsetFlag(SplineFlag.Backward);
         }
     }
 

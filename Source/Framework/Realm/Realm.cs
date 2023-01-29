@@ -12,11 +12,6 @@ public class Realm : IEquatable<Realm>
     public AccountTypes AllowedSecurityLevel;
     public uint Build;
 
-    private readonly uint[] ConfigIdByType =
-    {
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
-    };
-
     public IPAddress ExternalAddress;
     public RealmFlags Flags;
 
@@ -29,6 +24,11 @@ public class Realm : IEquatable<Realm>
     public ushort Port;
     public byte Timezone;
     public byte Type;
+
+    private readonly uint[] ConfigIdByType =
+    {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+    };
 
     public bool Equals(Realm other)
     {

@@ -60,12 +60,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _midnightGUID.Clear();
-            _phase = Phases.None;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -281,6 +275,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 }
             }
         }
+
+        private void Initialize()
+        {
+            _midnightGUID.Clear();
+            _phase = Phases.None;
+        }
     }
 
     [Script]
@@ -292,11 +292,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         public boss_midnight(Creature creature) : base(creature, DataTypes.Attumen)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            _phase = Phases.None;
         }
 
         public override void Reset()
@@ -377,6 +372,11 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void Initialize()
+        {
+            _phase = Phases.None;
         }
     }
 }

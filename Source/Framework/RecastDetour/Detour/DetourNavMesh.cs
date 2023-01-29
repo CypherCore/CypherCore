@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+
 /**
     @typedef dtPolyRef
     @par
@@ -39,133 +40,6 @@ public static partial class Detour
 
 public static partial class Detour
 {
-    public static bool overlapSlabs(float[] amin, float[] amax, float[] bmin, float[] bmax, float px, float py)
-    {
-        // Check for horizontal overlap.
-        // The segment is shrunken a little so that slabs which touch
-        // at end points are not connected.
-        float minx = (float)Math.Max(amin[0] + px, bmin[0] + px);
-        float maxx = (float)Math.Min(amax[0] - px, bmax[0] - px);
-
-        if (minx > maxx)
-            return false;
-
-        // Check vertical overlap.
-        float ad = (amax[1] - amin[1]) / (amax[0] - amin[0]);
-        float ak = amin[1] - ad * amin[0];
-        float bd = (bmax[1] - bmin[1]) / (bmax[0] - bmin[0]);
-        float bk = bmin[1] - bd * bmin[0];
-        float aminy = ad * minx + ak;
-        float amaxy = ad * maxx + ak;
-        float bminy = bd * minx + bk;
-        float bmaxy = bd * maxx + bk;
-        float dmin = bminy - aminy;
-        float dmax = bmaxy - amaxy;
-
-        // Crossing segments always overlap.
-        if (dmin * dmax < 0)
-            return true;
-
-        // Check for overlap at endpoints.
-        float thr = dtSqr(py * 2);
-
-        if (dmin * dmin <= thr ||
-            dmax * dmax <= thr)
-            return true;
-
-        return false;
-    }
-
-    public static float getSlabCoord(float[] va, int side)
-    {
-        if (side == 0 ||
-            side == 4)
-            return va[0];
-        else if (side == 2 ||
-                 side == 6)
-            return va[2];
-
-        return 0;
-    }
-
-    public static float getSlabCoord(float[] va, int vaStart, int side)
-    {
-        if (side == 0 ||
-            side == 4)
-            return va[vaStart + 0];
-        else if (side == 2 ||
-                 side == 6)
-            return va[vaStart + 2];
-
-        return 0;
-    }
-
-    public static void calcSlabEndPoints(float[] va, int vaStart, float[] vb, int vbStart, float[] bmin, float[] bmax, int side)
-    {
-        if (side == 0 ||
-            side == 4)
-        {
-            if (va[vaStart + 2] < vb[vbStart + 2])
-            {
-                bmin[0] = va[vaStart + 2];
-                bmin[1] = va[vaStart + 1];
-                bmax[0] = vb[vbStart + 2];
-                bmax[1] = vb[vbStart + 1];
-            }
-            else
-            {
-                bmin[0] = vb[vbStart + 2];
-                bmin[1] = vb[vbStart + 1];
-                bmax[0] = va[vaStart + 2];
-                bmax[1] = va[vaStart + 1];
-            }
-        }
-        else if (side == 2 ||
-                 side == 6)
-        {
-            if (va[vaStart] < vb[vbStart])
-            {
-                bmin[0] = va[vaStart + 0];
-                bmin[1] = va[vaStart + 1];
-                bmax[0] = vb[vbStart + 0];
-                bmax[1] = vb[vbStart + 1];
-            }
-            else
-            {
-                bmin[0] = vb[vbStart + 0];
-                bmin[1] = vb[vbStart + 1];
-                bmax[0] = va[vaStart + 0];
-                bmax[1] = va[vaStart + 1];
-            }
-        }
-    }
-
-    public static int computeTileHash(int x, int y, int mask)
-    {
-        const uint h1 = 0x8da6b343; // Large multiplicative constants;
-        const uint h2 = 0xd8163841; // here arbitrarily chosen primes
-        uint n = (uint)(h1 * x + h2 * y);
-
-        return (int)(n & mask);
-    }
-
-    public static uint allocLink(dtMeshTile tile)
-    {
-        if (tile.linksFreeList == DT_NULL_LINK)
-            return DT_NULL_LINK;
-
-        uint link = tile.linksFreeList;
-        tile.linksFreeList = tile.links[link].next;
-
-        return link;
-    }
-
-    public static void freeLink(dtMeshTile tile, uint link)
-    {
-        tile.links[link].next = tile.linksFreeList;
-        tile.linksFreeList = link;
-    }
-
     /*
 	@class dtNavMesh
 
@@ -199,10 +73,10 @@ public static partial class Detour
     // @ingroup detour
     public class dtNavMesh
     {
-        private int _maxTiles;                //< Max number of tiles.
-        private dtMeshTile _nextFree;         //< Freelist of tiles.
         private readonly float[] _orig = new float[3]; //< Origin of the tile (0,0)
-        private dtNavMeshParams _params;      //< Current initialization params. TODO: do not store this info twice.
+        private int _maxTiles;                         //< Max number of tiles.
+        private dtMeshTile _nextFree;                  //< Freelist of tiles.
+        private dtNavMeshParams _params;               //< Current initialization params. TODO: do not store this info twice.
 
         //dtMeshTile**
         private dtMeshTile[] _posLookup;       //< Tile hash lookup.
@@ -222,26 +96,6 @@ public static partial class Detour
             _orig[0] = 0;
             _orig[1] = 0;
             _orig[2] = 0;
-        }
-
-        ~dtNavMesh()
-        {
-            //C#: all this auto
-            /*
-			for (int i = 0; i < _maxTiles; ++i)
-			{
-				if (_tiles[i].flags & Detour.DT_TILE_FREE_DATA)
-				{
-					//dtFree(_tiles[i].data);
-					_tiles[i].data = null;
-					_tiles[i].dataSize = 0;
-				}
-			}
-			//dtFree(_posLookup);
-			//dtFree(_tiles);
-			_posLookup = null;
-			_tiles = null;
-			    * */
         }
 
         /// Derives a standard polygon reference.
@@ -784,72 +638,6 @@ public static partial class Detour
                     landPoly.firstLink = tidx;
                 }
             }
-        }
-
-        private void closestPointOnDetailEdges(bool onlyBoundary, dtMeshTile tile, dtPoly poly, float[] pos, float[] closest)
-        {
-            int ip = Array.IndexOf(tile.polys, poly);
-            dtPolyDetail pd = tile.detailMeshes[ip];
-
-            float dmin = float.MaxValue;
-            float tmin = 0;
-            int pmin = 0;
-            int pmax = 0;
-
-            Vector3[] v = new Vector3[3];
-
-            for (int i = 0; i < pd.triCount; i++)
-            {
-                Span<byte> tris = tile.detailTris.AsSpan()[((int)(pd.triBase + i) * 4)..];
-
-                const int ANY_BOUNDARY_EDGE =
-                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 0) |
-                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 2) |
-                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 4);
-
-                if (onlyBoundary && (tris[3] & ANY_BOUNDARY_EDGE) == 0)
-                    continue;
-
-                for (int j = 0; j < 3; ++j)
-                    if (tris[j] < poly.vertCount)
-                        v[j] = new Vector3(tile.verts.AsSpan(poly.verts[tris[j]] * 3));
-                    else
-                        v[j] = new Vector3(tile.detailVerts.AsSpan((int)(pd.vertBase + (tris[j] - poly.vertCount)) * 3));
-
-                for (int k = 0, j = 2; k < 3; j = k++)
-                {
-                    if ((dtGetDetailTriEdgeFlags(tris[3], j) & (int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
-                        (onlyBoundary || tris[j] < tris[k]))
-                        // Only looking at boundary edges and this is internal, or
-                        // this is an inner edge that we will see again or have already seen.
-                        continue;
-
-                    float t = 0;
-                    float d = dtDistancePtSegSqr2D(pos, 0, v[j], v[k], ref t);
-
-                    if (d < dmin)
-                    {
-                        dmin = d;
-                        tmin = t;
-                        pmin = j;
-                        pmax = k;
-                    }
-                }
-            }
-
-            dtVlerp(closest,
-                    0,
-                    new float[]
-                    {
-                        v[pmin].X, v[pmin].Y, v[pmin].Z
-                    },
-                    0,
-                    new float[]
-                    {
-                        v[pmax].X, v[pmax].Y, v[pmax].Z
-                    },
-                    0,
-                    tmin);
         }
 
         public bool getPolyHeight(dtMeshTile tile, dtPoly poly, float[] pos, ref float height)
@@ -2011,5 +1799,218 @@ public static partial class Detour
 
             return DT_SUCCESS;
         }
+
+        private void closestPointOnDetailEdges(bool onlyBoundary, dtMeshTile tile, dtPoly poly, float[] pos, float[] closest)
+        {
+            int ip = Array.IndexOf(tile.polys, poly);
+            dtPolyDetail pd = tile.detailMeshes[ip];
+
+            float dmin = float.MaxValue;
+            float tmin = 0;
+            int pmin = 0;
+            int pmax = 0;
+
+            Vector3[] v = new Vector3[3];
+
+            for (int i = 0; i < pd.triCount; i++)
+            {
+                Span<byte> tris = tile.detailTris.AsSpan()[((int)(pd.triBase + i) * 4)..];
+
+                const int ANY_BOUNDARY_EDGE =
+                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 0) |
+                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 2) |
+                    ((int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY << 4);
+
+                if (onlyBoundary && (tris[3] & ANY_BOUNDARY_EDGE) == 0)
+                    continue;
+
+                for (int j = 0; j < 3; ++j)
+                    if (tris[j] < poly.vertCount)
+                        v[j] = new Vector3(tile.verts.AsSpan(poly.verts[tris[j]] * 3));
+                    else
+                        v[j] = new Vector3(tile.detailVerts.AsSpan((int)(pd.vertBase + (tris[j] - poly.vertCount)) * 3));
+
+                for (int k = 0, j = 2; k < 3; j = k++)
+                {
+                    if ((dtGetDetailTriEdgeFlags(tris[3], j) & (int)dtDetailTriEdgeFlags.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
+                        (onlyBoundary || tris[j] < tris[k]))
+                        // Only looking at boundary edges and this is internal, or
+                        // this is an inner edge that we will see again or have already seen.
+                        continue;
+
+                    float t = 0;
+                    float d = dtDistancePtSegSqr2D(pos, 0, v[j], v[k], ref t);
+
+                    if (d < dmin)
+                    {
+                        dmin = d;
+                        tmin = t;
+                        pmin = j;
+                        pmax = k;
+                    }
+                }
+            }
+
+            dtVlerp(closest,
+                    0,
+                    new float[]
+                    {
+                        v[pmin].X, v[pmin].Y, v[pmin].Z
+                    },
+                    0,
+                    new float[]
+                    {
+                        v[pmax].X, v[pmax].Y, v[pmax].Z
+                    },
+                    0,
+                    tmin);
+        }
+
+        ~dtNavMesh()
+        {
+            //C#: all this auto
+            /*
+			for (int i = 0; i < _maxTiles; ++i)
+			{
+				if (_tiles[i].flags & Detour.DT_TILE_FREE_DATA)
+				{
+					//dtFree(_tiles[i].data);
+					_tiles[i].data = null;
+					_tiles[i].dataSize = 0;
+				}
+			}
+			//dtFree(_posLookup);
+			//dtFree(_tiles);
+			_posLookup = null;
+			_tiles = null;
+			    * */
+        }
+    }
+
+    public static bool overlapSlabs(float[] amin, float[] amax, float[] bmin, float[] bmax, float px, float py)
+    {
+        // Check for horizontal overlap.
+        // The segment is shrunken a little so that slabs which touch
+        // at end points are not connected.
+        float minx = (float)Math.Max(amin[0] + px, bmin[0] + px);
+        float maxx = (float)Math.Min(amax[0] - px, bmax[0] - px);
+
+        if (minx > maxx)
+            return false;
+
+        // Check vertical overlap.
+        float ad = (amax[1] - amin[1]) / (amax[0] - amin[0]);
+        float ak = amin[1] - ad * amin[0];
+        float bd = (bmax[1] - bmin[1]) / (bmax[0] - bmin[0]);
+        float bk = bmin[1] - bd * bmin[0];
+        float aminy = ad * minx + ak;
+        float amaxy = ad * maxx + ak;
+        float bminy = bd * minx + bk;
+        float bmaxy = bd * maxx + bk;
+        float dmin = bminy - aminy;
+        float dmax = bmaxy - amaxy;
+
+        // Crossing segments always overlap.
+        if (dmin * dmax < 0)
+            return true;
+
+        // Check for overlap at endpoints.
+        float thr = dtSqr(py * 2);
+
+        if (dmin * dmin <= thr ||
+            dmax * dmax <= thr)
+            return true;
+
+        return false;
+    }
+
+    public static float getSlabCoord(float[] va, int side)
+    {
+        if (side == 0 ||
+            side == 4)
+            return va[0];
+        else if (side == 2 ||
+                 side == 6)
+            return va[2];
+
+        return 0;
+    }
+
+    public static float getSlabCoord(float[] va, int vaStart, int side)
+    {
+        if (side == 0 ||
+            side == 4)
+            return va[vaStart + 0];
+        else if (side == 2 ||
+                 side == 6)
+            return va[vaStart + 2];
+
+        return 0;
+    }
+
+    public static void calcSlabEndPoints(float[] va, int vaStart, float[] vb, int vbStart, float[] bmin, float[] bmax, int side)
+    {
+        if (side == 0 ||
+            side == 4)
+        {
+            if (va[vaStart + 2] < vb[vbStart + 2])
+            {
+                bmin[0] = va[vaStart + 2];
+                bmin[1] = va[vaStart + 1];
+                bmax[0] = vb[vbStart + 2];
+                bmax[1] = vb[vbStart + 1];
+            }
+            else
+            {
+                bmin[0] = vb[vbStart + 2];
+                bmin[1] = vb[vbStart + 1];
+                bmax[0] = va[vaStart + 2];
+                bmax[1] = va[vaStart + 1];
+            }
+        }
+        else if (side == 2 ||
+                 side == 6)
+        {
+            if (va[vaStart] < vb[vbStart])
+            {
+                bmin[0] = va[vaStart + 0];
+                bmin[1] = va[vaStart + 1];
+                bmax[0] = vb[vbStart + 0];
+                bmax[1] = vb[vbStart + 1];
+            }
+            else
+            {
+                bmin[0] = vb[vbStart + 0];
+                bmin[1] = vb[vbStart + 1];
+                bmax[0] = va[vaStart + 0];
+                bmax[1] = va[vaStart + 1];
+            }
+        }
+    }
+
+    public static int computeTileHash(int x, int y, int mask)
+    {
+        const uint h1 = 0x8da6b343; // Large multiplicative constants;
+        const uint h2 = 0xd8163841; // here arbitrarily chosen primes
+        uint n = (uint)(h1 * x + h2 * y);
+
+        return (int)(n & mask);
+    }
+
+    public static uint allocLink(dtMeshTile tile)
+    {
+        if (tile.linksFreeList == DT_NULL_LINK)
+            return DT_NULL_LINK;
+
+        uint link = tile.linksFreeList;
+        tile.linksFreeList = tile.links[link].next;
+
+        return link;
+    }
+
+    public static void freeLink(dtMeshTile tile, uint link)
+    {
+        tile.links[link].next = tile.linksFreeList;
+        tile.linksFreeList = link;
     }
 }

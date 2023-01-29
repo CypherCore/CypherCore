@@ -353,20 +353,6 @@ namespace Game.Movement
             ResolveDelayedActions();
         }
 
-        private void Add(MovementGenerator movement, MovementSlot slot = MovementSlot.Active)
-        {
-            if (movement == null)
-                return;
-
-            if (IsInvalidMovementSlot(slot))
-                return;
-
-            if (HasFlag(MotionMasterFlags.Delayed))
-                _delayedActions.Enqueue(new DelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
-            else
-                DirectAdd(movement, slot);
-        }
-
         public void Remove(MovementGenerator movement, MovementSlot slot = MovementSlot.Active)
         {
             if (movement == null ||
@@ -986,23 +972,6 @@ namespace Game.Movement
             MoveAlongSplineChain(pointId, chain, walk);
         }
 
-        private void MoveAlongSplineChain(uint pointId, List<SplineChainLink> chain, bool walk)
-        {
-            Add(new SplineChainMovementGenerator(pointId, chain, walk));
-        }
-
-        private void ResumeSplineChain(SplineChainResumeInfo info)
-        {
-            if (info.Empty())
-            {
-                Log.outError(LogFilter.Movement, "MotionMaster.ResumeSplineChain: unit with entry {0} tried to resume a spline chain from empty info.", _owner.GetEntry());
-
-                return;
-            }
-
-            Add(new SplineChainMovementGenerator(info));
-        }
-
         public void MoveFall(uint id = 0)
         {
             // Use larger distance for vmap height search than in most other cases
@@ -1144,6 +1113,57 @@ namespace Game.Movement
             GenericMovementGenerator movement = new(initializer, type, id);
             movement.Priority = priority;
             Add(movement);
+        }
+
+        public static MovementGenerator GetIdleMovementGenerator()
+        {
+            return staticIdleMovement;
+        }
+
+        public static bool IsStatic(MovementGenerator movement)
+        {
+            return (movement == GetIdleMovementGenerator());
+        }
+
+        public static bool IsInvalidMovementGeneratorType(MovementGeneratorType type)
+        {
+            return type == MovementGeneratorType.MaxDB || type >= MovementGeneratorType.Max;
+        }
+
+        public static bool IsInvalidMovementSlot(MovementSlot slot)
+        {
+            return slot >= MovementSlot.Max;
+        }
+
+        private void Add(MovementGenerator movement, MovementSlot slot = MovementSlot.Active)
+        {
+            if (movement == null)
+                return;
+
+            if (IsInvalidMovementSlot(slot))
+                return;
+
+            if (HasFlag(MotionMasterFlags.Delayed))
+                _delayedActions.Enqueue(new DelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
+            else
+                DirectAdd(movement, slot);
+        }
+
+        private void MoveAlongSplineChain(uint pointId, List<SplineChainLink> chain, bool walk)
+        {
+            Add(new SplineChainMovementGenerator(pointId, chain, walk));
+        }
+
+        private void ResumeSplineChain(SplineChainResumeInfo info)
+        {
+            if (info.Empty())
+            {
+                Log.outError(LogFilter.Movement, "MotionMaster.ResumeSplineChain: unit with entry {0} tried to resume a spline chain from empty info.", _owner.GetEntry());
+
+                return;
+            }
+
+            Add(new SplineChainMovementGenerator(info));
         }
 
         private void ResolveDelayedActions()
@@ -1345,26 +1365,6 @@ namespace Game.Movement
         private void RemoveFlag(MotionMasterFlags flag)
         {
             _flags &= ~flag;
-        }
-
-        public static MovementGenerator GetIdleMovementGenerator()
-        {
-            return staticIdleMovement;
-        }
-
-        public static bool IsStatic(MovementGenerator movement)
-        {
-            return (movement == GetIdleMovementGenerator());
-        }
-
-        public static bool IsInvalidMovementGeneratorType(MovementGeneratorType type)
-        {
-            return type == MovementGeneratorType.MaxDB || type >= MovementGeneratorType.Max;
-        }
-
-        public static bool IsInvalidMovementSlot(MovementSlot slot)
-        {
-            return slot >= MovementSlot.Max;
         }
     }
 

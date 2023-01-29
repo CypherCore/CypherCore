@@ -11,6 +11,8 @@ namespace Game
 {
     public class WorldConfig : ConfigMgr
     {
+        private static readonly Dictionary<WorldCfg, object> Values = new();
+
         public static void Load(bool reload = false)
         {
             if (reload)
@@ -1060,7 +1062,5 @@ namespace Game
         {
             Values[confi] = value;
         }
-
-        private static readonly Dictionary<WorldCfg, object> Values = new();
     }
 }

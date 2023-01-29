@@ -13,6 +13,57 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendPetitionQuery(ObjectGuid petitionGuid)
+        {
+            QueryPetitionResponse responsePacket = new();
+            responsePacket.PetitionID = (uint)petitionGuid.GetCounter(); // PetitionID (in Trinity always same as GUID_LOPART(petition Guid))
+
+            Petition petition = Global.PetitionMgr.GetPetition(petitionGuid);
+
+            if (petition == null)
+            {
+                responsePacket.Allow = false;
+                SendPacket(responsePacket);
+                Log.outDebug(LogFilter.Network, $"CMSG_PETITION_Select failed for petition ({petitionGuid})");
+
+                return;
+            }
+
+            uint reqSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
+
+            PetitionInfo petitionInfo = new();
+            petitionInfo.PetitionID = (int)petitionGuid.GetCounter();
+            petitionInfo.Petitioner = petition.ownerGuid;
+            petitionInfo.MinSignatures = reqSignatures;
+            petitionInfo.MaxSignatures = reqSignatures;
+            petitionInfo.Title = petition.PetitionName;
+
+            responsePacket.Allow = true;
+            responsePacket.Info = petitionInfo;
+
+            SendPacket(responsePacket);
+        }
+
+        public void SendPetitionShowList(ObjectGuid guid)
+        {
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
+
+            if (!creature)
+            {
+                Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionShowListOpcode - {0} not found or you can't interact with him.", guid.ToString());
+
+                return;
+            }
+
+            WorldPacket data = new(ServerOpcodes.PetitionShowList);
+            data.WritePackedGuid(guid); // npc Guid
+
+            ServerPetitionShowList packet = new();
+            packet.Unit = guid;
+            packet.Price = WorldConfig.GetUIntValue(WorldCfg.CharterCostGuild);
+            SendPacket(packet);
+        }
+
         [WorldPacketHandler(ClientOpcodes.PetitionBuy)]
         private void HandlePetitionBuy(PetitionBuy packet)
         {
@@ -147,37 +198,6 @@ namespace Game
         private void HandleQueryPetition(QueryPetition packet)
         {
             SendPetitionQuery(packet.ItemGUID);
-        }
-
-        public void SendPetitionQuery(ObjectGuid petitionGuid)
-        {
-            QueryPetitionResponse responsePacket = new();
-            responsePacket.PetitionID = (uint)petitionGuid.GetCounter(); // PetitionID (in Trinity always same as GUID_LOPART(petition Guid))
-
-            Petition petition = Global.PetitionMgr.GetPetition(petitionGuid);
-
-            if (petition == null)
-            {
-                responsePacket.Allow = false;
-                SendPacket(responsePacket);
-                Log.outDebug(LogFilter.Network, $"CMSG_PETITION_Select failed for petition ({petitionGuid})");
-
-                return;
-            }
-
-            uint reqSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
-
-            PetitionInfo petitionInfo = new();
-            petitionInfo.PetitionID = (int)petitionGuid.GetCounter();
-            petitionInfo.Petitioner = petition.ownerGuid;
-            petitionInfo.MinSignatures = reqSignatures;
-            petitionInfo.MaxSignatures = reqSignatures;
-            petitionInfo.Title = petition.PetitionName;
-
-            responsePacket.Allow = true;
-            responsePacket.Info = petitionInfo;
-
-            SendPacket(responsePacket);
         }
 
         [WorldPacketHandler(ClientOpcodes.PetitionRenameGuild)]
@@ -462,26 +482,6 @@ namespace Game
         private void HandlePetitionShowList(PetitionShowList packet)
         {
             SendPetitionShowList(packet.PetitionUnit);
-        }
-
-        public void SendPetitionShowList(ObjectGuid guid)
-        {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
-
-            if (!creature)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionShowListOpcode - {0} not found or you can't interact with him.", guid.ToString());
-
-                return;
-            }
-
-            WorldPacket data = new(ServerOpcodes.PetitionShowList);
-            data.WritePackedGuid(guid); // npc Guid
-
-            ServerPetitionShowList packet = new();
-            packet.Unit = guid;
-            packet.Price = WorldConfig.GetUIntValue(WorldCfg.CharterCostGuild);
-            SendPacket(packet);
         }
     }
 }

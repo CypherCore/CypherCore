@@ -14,8 +14,15 @@ namespace Game.AI
 {
     public class SmartAI : CreatureAI
     {
+        public uint EscortQuestID;
         private const int SMART_ESCORT_MAX_PLAYER_DIST = 60;
         private const int SMART_MAX_AID_DIST = SMART_ESCORT_MAX_PLAYER_DIST / 2;
+
+        // Vehicle conditions
+        private readonly bool _hasConditions;
+        private readonly WaypointPath _path = new();
+
+        private readonly SmartScript _script = new();
         private bool _canAutoAttack;
         private bool _canCombatMove;
         private uint _conditionsTimer;
@@ -38,25 +45,17 @@ namespace Game.AI
 
         // Gossip
         private bool _gossipReturn;
-
-        // Vehicle conditions
-        private readonly bool _hasConditions;
         private uint _invincibilityHpLevel;
 
         private bool _isCharmed;
         private bool _OOCReached;
-        private readonly WaypointPath _path = new();
         private bool _repeatWaypointPath;
 
         private bool _run;
-
-        private readonly SmartScript _script = new();
         private bool _waypointPathEnded;
         private bool _waypointPauseForced;
         private uint _waypointPauseTimer;
         private bool _waypointReached;
-
-        public uint EscortQuestID;
 
         public SmartAI(Creature creature) : base(creature)
         {
@@ -66,11 +65,6 @@ namespace Game.AI
             _canCombatMove = true;
 
             _hasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, creature.GetEntry());
-        }
-
-        private bool IsAIControlled()
-        {
-            return !_isCharmed;
         }
 
         public void StartPath(bool run = false, uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 1)
@@ -102,36 +96,6 @@ namespace Game.AI
             }
 
             me.GetMotionMaster().MovePath(_path, _repeatWaypointPath);
-        }
-
-        private bool LoadPath(uint entry)
-        {
-            if (HasEscortState(SmartEscortState.Escorting))
-                return false;
-
-            WaypointPath path = Global.SmartAIMgr.GetPath(entry);
-
-            if (path == null ||
-                path.nodes.Empty())
-            {
-                _script.SetPathId(0);
-
-                return false;
-            }
-
-            _path.id = path.id;
-            _path.nodes.AddRange(path.nodes);
-
-            foreach (WaypointNode waypoint in _path.nodes)
-            {
-                waypoint.x = GridDefines.NormalizeMapCoord(waypoint.x);
-                waypoint.y = GridDefines.NormalizeMapCoord(waypoint.y);
-                waypoint.moveType = _run ? WaypointMoveType.Run : WaypointMoveType.Walk;
-            }
-
-            _script.SetPathId(entry);
-
-            return true;
         }
 
         public void PausePath(uint delay, bool forced)
@@ -325,15 +289,6 @@ namespace Game.AI
             me.ResumeMovement();
         }
 
-        private void ReturnToLastOOCPos()
-        {
-            if (!IsAIControlled())
-                return;
-
-            me.SetWalk(false);
-            me.GetMotionMaster().MovePoint(EventId.SmartEscortLastOCCPoint, me.GetHomePosition());
-        }
-
         public override void UpdateAI(uint diff)
         {
             if (!me.IsAlive())
@@ -362,50 +317,6 @@ namespace Game.AI
 
             if (_canAutoAttack)
                 DoMeleeAttackIfReady();
-        }
-
-        private bool IsEscortInvokerInRange()
-        {
-            var targets = _script.GetStoredTargetList(SharedConst.SmartEscortTargets, me);
-
-            if (targets != null)
-            {
-                float checkDist = me.GetInstanceScript() != null ? SMART_ESCORT_MAX_PLAYER_DIST * 2 : SMART_ESCORT_MAX_PLAYER_DIST;
-
-                if (targets.Count == 1 &&
-                    _script.IsPlayer(targets.First()))
-                {
-                    Player player = targets.First().ToPlayer();
-
-                    if (me.GetDistance(player) <= checkDist)
-                        return true;
-
-                    Group group = player.GetGroup();
-
-                    if (group)
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
-                        {
-                            Player groupGuy = groupRef.GetSource();
-
-                            if (groupGuy.IsInMap(player) &&
-                                me.GetDistance(groupGuy) <= checkDist)
-                                return true;
-                        }
-                }
-                else
-                {
-                    foreach (var obj in targets)
-                        if (_script.IsPlayer(obj))
-                            if (me.GetDistance(obj.ToPlayer()) <= checkDist)
-                                return true;
-                }
-
-                // no valid Target found
-                return false;
-            }
-
-            // no player invoker was stored, just ignore range check
-            return true;
         }
 
         public override void WaypointReached(uint nodeId, uint pathId)
@@ -536,54 +447,6 @@ namespace Game.AI
                 return;
 
             base.MoveInLineOfSight(who);
-        }
-
-        private bool AssistPlayerInCombatAgainst(Unit who)
-        {
-            if (me.HasReactState(ReactStates.Passive) ||
-                !IsAIControlled())
-                return false;
-
-            if (who == null ||
-                who.GetVictim() == null)
-                return false;
-
-            //experimental (unknown) flag not present
-            if (!me.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist))
-                return false;
-
-            //not a player
-            if (who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself() == null)
-                return false;
-
-            if (!who.IsInAccessiblePlaceFor(me))
-                return false;
-
-            if (!CanAIAttack(who))
-                return false;
-
-            // we cannot attack in evade mode
-            if (me.IsInEvadeMode())
-                return false;
-
-            // or if enemy is in evade mode
-            if (who.IsCreature() &&
-                who.ToCreature().IsInEvadeMode())
-                return false;
-
-            if (!me.IsValidAssistTarget(who.GetVictim()))
-                return false;
-
-            //too far away and no free sight
-            if (me.IsWithinDistInMap(who, SMART_MAX_AID_DIST) &&
-                me.IsWithinLOSInMap(who))
-            {
-                me.EngageWithTarget(who);
-
-                return true;
-            }
-
-            return false;
         }
 
         public override void InitializeAI()
@@ -1001,6 +864,206 @@ namespace Game.AI
             _script.ProcessEventsFor(SmartEvents.OnSpellclick, clicker);
         }
 
+        public override void Reset()
+        {
+            if (!HasEscortState(SmartEscortState.Escorting)) //dont mess up escort movement after combat
+                SetRun(_run);
+
+            _script.OnReset();
+        }
+
+        public bool HasEscortState(SmartEscortState escortState)
+        {
+            return (_escortState & escortState) != 0;
+        }
+
+        public void AddEscortState(SmartEscortState escortState)
+        {
+            _escortState |= escortState;
+        }
+
+        public void RemoveEscortState(SmartEscortState escortState)
+        {
+            _escortState &= ~escortState;
+        }
+
+        public void SetAutoAttack(bool on)
+        {
+            _canAutoAttack = on;
+        }
+
+        public bool CanCombatMove()
+        {
+            return _canCombatMove;
+        }
+
+        public SmartScript GetScript()
+        {
+            return _script;
+        }
+
+        public void SetInvincibilityHpLevel(uint level)
+        {
+            _invincibilityHpLevel = level;
+        }
+
+        public void SetDespawnTime(uint t, uint r = 0)
+        {
+            _despawnTime = t;
+            _despawnState = t != 0 ? 1 : 0u;
+        }
+
+        public void StartDespawn()
+        {
+            _despawnState = 2;
+        }
+
+        public void SetWPPauseTimer(uint time)
+        {
+            _waypointPauseTimer = time;
+        }
+
+        public void SetGossipReturn(bool val)
+        {
+            _gossipReturn = val;
+        }
+
+        private bool IsAIControlled()
+        {
+            return !_isCharmed;
+        }
+
+        private bool LoadPath(uint entry)
+        {
+            if (HasEscortState(SmartEscortState.Escorting))
+                return false;
+
+            WaypointPath path = Global.SmartAIMgr.GetPath(entry);
+
+            if (path == null ||
+                path.nodes.Empty())
+            {
+                _script.SetPathId(0);
+
+                return false;
+            }
+
+            _path.id = path.id;
+            _path.nodes.AddRange(path.nodes);
+
+            foreach (WaypointNode waypoint in _path.nodes)
+            {
+                waypoint.x = GridDefines.NormalizeMapCoord(waypoint.x);
+                waypoint.y = GridDefines.NormalizeMapCoord(waypoint.y);
+                waypoint.moveType = _run ? WaypointMoveType.Run : WaypointMoveType.Walk;
+            }
+
+            _script.SetPathId(entry);
+
+            return true;
+        }
+
+        private void ReturnToLastOOCPos()
+        {
+            if (!IsAIControlled())
+                return;
+
+            me.SetWalk(false);
+            me.GetMotionMaster().MovePoint(EventId.SmartEscortLastOCCPoint, me.GetHomePosition());
+        }
+
+        private bool IsEscortInvokerInRange()
+        {
+            var targets = _script.GetStoredTargetList(SharedConst.SmartEscortTargets, me);
+
+            if (targets != null)
+            {
+                float checkDist = me.GetInstanceScript() != null ? SMART_ESCORT_MAX_PLAYER_DIST * 2 : SMART_ESCORT_MAX_PLAYER_DIST;
+
+                if (targets.Count == 1 &&
+                    _script.IsPlayer(targets.First()))
+                {
+                    Player player = targets.First().ToPlayer();
+
+                    if (me.GetDistance(player) <= checkDist)
+                        return true;
+
+                    Group group = player.GetGroup();
+
+                    if (group)
+                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        {
+                            Player groupGuy = groupRef.GetSource();
+
+                            if (groupGuy.IsInMap(player) &&
+                                me.GetDistance(groupGuy) <= checkDist)
+                                return true;
+                        }
+                }
+                else
+                {
+                    foreach (var obj in targets)
+                        if (_script.IsPlayer(obj))
+                            if (me.GetDistance(obj.ToPlayer()) <= checkDist)
+                                return true;
+                }
+
+                // no valid Target found
+                return false;
+            }
+
+            // no player invoker was stored, just ignore range check
+            return true;
+        }
+
+        private bool AssistPlayerInCombatAgainst(Unit who)
+        {
+            if (me.HasReactState(ReactStates.Passive) ||
+                !IsAIControlled())
+                return false;
+
+            if (who == null ||
+                who.GetVictim() == null)
+                return false;
+
+            //experimental (unknown) flag not present
+            if (!me.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.CanAssist))
+                return false;
+
+            //not a player
+            if (who.GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself() == null)
+                return false;
+
+            if (!who.IsInAccessiblePlaceFor(me))
+                return false;
+
+            if (!CanAIAttack(who))
+                return false;
+
+            // we cannot attack in evade mode
+            if (me.IsInEvadeMode())
+                return false;
+
+            // or if enemy is in evade mode
+            if (who.IsCreature() &&
+                who.ToCreature().IsInEvadeMode())
+                return false;
+
+            if (!me.IsValidAssistTarget(who.GetVictim()))
+                return false;
+
+            //too far away and no free sight
+            if (me.IsWithinDistInMap(who, SMART_MAX_AID_DIST) &&
+                me.IsWithinLOSInMap(who))
+            {
+                me.EngageWithTarget(who);
+
+                return true;
+            }
+
+            return false;
+        }
+
         private void CheckConditions(uint diff)
         {
             if (!_hasConditions)
@@ -1141,70 +1204,6 @@ namespace Game.AI
             {
                 _despawnTime -= diff;
             }
-        }
-
-        public override void Reset()
-        {
-            if (!HasEscortState(SmartEscortState.Escorting)) //dont mess up escort movement after combat
-                SetRun(_run);
-
-            _script.OnReset();
-        }
-
-        public bool HasEscortState(SmartEscortState escortState)
-        {
-            return (_escortState & escortState) != 0;
-        }
-
-        public void AddEscortState(SmartEscortState escortState)
-        {
-            _escortState |= escortState;
-        }
-
-        public void RemoveEscortState(SmartEscortState escortState)
-        {
-            _escortState &= ~escortState;
-        }
-
-        public void SetAutoAttack(bool on)
-        {
-            _canAutoAttack = on;
-        }
-
-        public bool CanCombatMove()
-        {
-            return _canCombatMove;
-        }
-
-        public SmartScript GetScript()
-        {
-            return _script;
-        }
-
-        public void SetInvincibilityHpLevel(uint level)
-        {
-            _invincibilityHpLevel = level;
-        }
-
-        public void SetDespawnTime(uint t, uint r = 0)
-        {
-            _despawnTime = t;
-            _despawnState = t != 0 ? 1 : 0u;
-        }
-
-        public void StartDespawn()
-        {
-            _despawnState = 2;
-        }
-
-        public void SetWPPauseTimer(uint time)
-        {
-            _waypointPauseTimer = time;
-        }
-
-        public void SetGossipReturn(bool val)
-        {
-            _gossipReturn = val;
         }
     }
 }

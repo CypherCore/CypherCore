@@ -10,6 +10,8 @@ namespace Game.Scripting
 {
     public abstract class ScriptObject : IScriptObject
     {
+        private readonly string _name;
+
         public ScriptObject(string name)
         {
             _name = name;
@@ -29,8 +31,6 @@ namespace Game.Scripting
 
             return null;
         }
-
-        private readonly string _name;
     }
 
     public abstract class ScriptObjectAutoAdd : ScriptObject

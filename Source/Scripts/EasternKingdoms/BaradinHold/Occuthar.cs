@@ -141,8 +141,8 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     [Script]
     internal class npc_eyestalk : ScriptedAI
     {
-        private byte _damageCount;
         private readonly InstanceScript _instance;
+        private byte _damageCount;
 
         public npc_eyestalk(Creature creature) : base(creature)
         {
@@ -186,6 +186,11 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+        }
+
         private void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Count < 2)
@@ -195,11 +200,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 
             if (targets.Count >= 2)
                 targets.RandomResize(1);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 
@@ -218,6 +218,12 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
             return GetCaster().IsPlayer();
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Empty())
@@ -229,12 +235,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         private void HandleScript(uint effIndex)
         {
             GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -276,6 +276,11 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
             return GetCaster() && GetCaster().GetTypeId() == TypeId.Unit;
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnRemove, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
@@ -287,11 +292,6 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 
                 caster.ToCreature().DespawnOrUnsummon(TimeSpan.FromMilliseconds(500));
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnRemove, 2, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 }

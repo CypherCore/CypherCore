@@ -472,14 +472,14 @@ namespace Scripts.Spells.Generic
             return true;
         }
 
-        private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
-        {
-            absorbAmount = (uint)Math.Min(limit, absorbAmount);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectAbsorbHandler(Absorb, 0, false, AuraScriptHookType.EffectAbsorb));
+        }
+
+        private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            absorbAmount = (uint)Math.Min(limit, absorbAmount);
         }
     }
 
@@ -577,6 +577,12 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.SpawnBloodPool);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Remove all Auras with spell Id 46221, except the one currently being applied
@@ -593,18 +599,17 @@ namespace Scripts.Spells.Generic
             if (owner)
                 owner.CastSpell(owner, SpellIds.SpawnBloodPool, true);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // 63471 -Spawn Blood Pool
     internal class spell_spawn_blood_pool : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
+        }
 
         private void SetDest(ref SpellDestination dest)
         {
@@ -616,11 +621,6 @@ namespace Scripts.Spells.Generic
                 summonPos.Z = liquidStatus.level;
 
             dest.Relocate(summonPos);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
         }
     }
 
@@ -661,6 +661,13 @@ namespace Scripts.Spells.Generic
             }
 
             return true;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcPeriodicHandler(CalcPeriodic, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectCalcAmountHandler(CalcAmount, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
         }
 
         private void CalcPeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
@@ -726,13 +733,6 @@ namespace Scripts.Spells.Generic
                     break;
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcPeriodicHandler(CalcPeriodic, 1, AuraType.PeriodicDummy));
-            Effects.Add(new EffectCalcAmountHandler(CalcAmount, 1, AuraType.PeriodicDummy));
-            Effects.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
-        }
     }
 
     [Script] // 28313 - Aura of Fear
@@ -745,6 +745,11 @@ namespace Scripts.Spells.Generic
             return !spellInfo.GetEffects().Empty() && ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+
         private void PeriodicTick(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -753,11 +758,6 @@ namespace Scripts.Spells.Generic
                 return;
 
             GetTarget().CastSpell(null, aurEff.GetSpellEffectInfo().TriggerSpell, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -810,337 +810,315 @@ namespace Scripts.Spells.Generic
         //using OtherFactionRacePriorityList = std::array<Races, 3>;
 
         private static readonly Dictionary<Race, Race[]> RaceInfo = new()
-                                                           {
-                                                               {
-                                                                   Race.Human, new[]
-                                                                               {
-                                                                                   Race.Undead, Race.BloodElf
-                                                                               }
-                                                               },
-                                                               {
-                                                                   Race.Orc, new[]
-                                                                             {
-                                                                                 Race.Dwarf
-                                                                             }
-                                                               },
-                                                               {
-                                                                   Race.Dwarf, new[]
-                                                                               {
-                                                                                   Race.Orc, Race.Undead, Race.Tauren
-                                                                               }
-                                                               },
-                                                               {
-                                                                   Race.NightElf, new[]
-                                                                                  {
-                                                                                      Race.Troll, Race.BloodElf
-                                                                                  }
-                                                               },
-                                                               {
-                                                                   Race.Undead, new[]
-                                                                                {
-                                                                                    Race.Human
-                                                                                }
-                                                               },
-                                                               {
-                                                                   Race.Tauren, new[]
-                                                                                {
-                                                                                    Race.Draenei, Race.NightElf
-                                                                                }
-                                                               },
-                                                               {
-                                                                   Race.Gnome, new[]
-                                                                               {
-                                                                                   Race.Goblin, Race.BloodElf
-                                                                               }
-                                                               },
-                                                               {
-                                                                   Race.Troll, new[]
-                                                                               {
-                                                                                   Race.NightElf, Race.Human, Race.Draenei
-                                                                               }
-                                                               },
-                                                               {
-                                                                   Race.Goblin, new[]
-                                                                                {
-                                                                                    Race.Gnome, Race.Dwarf
-                                                                                }
-                                                               },
-                                                               {
-                                                                   Race.BloodElf, new[]
-                                                                                  {
-                                                                                      Race.Human, Race.NightElf
-                                                                                  }
-                                                               },
-                                                               {
-                                                                   Race.Draenei, new[]
-                                                                                 {
-                                                                                     Race.Tauren, Race.Orc
-                                                                                 }
-                                                               },
-                                                               {
-                                                                   Race.Worgen, new[]
-                                                                                {
-                                                                                    Race.Troll
-                                                                                }
-                                                               },
-                                                               {
-                                                                   Race.PandarenNeutral, new[]
-                                                                                         {
-                                                                                             Race.PandarenNeutral
-                                                                                         }
-                                                               },
-                                                               {
-                                                                   Race.PandarenAlliance, new[]
-                                                                                          {
-                                                                                              Race.PandarenHorde, Race.PandarenNeutral
-                                                                                          }
-                                                               },
-                                                               {
-                                                                   Race.PandarenHorde, new[]
-                                                                                       {
-                                                                                           Race.PandarenAlliance, Race.PandarenNeutral
-                                                                                       }
-                                                               },
-                                                               {
-                                                                   Race.Nightborne, new[]
-                                                                                    {
-                                                                                        Race.NightElf, Race.Human
-                                                                                    }
-                                                               },
-                                                               {
-                                                                   Race.HighmountainTauren, new[]
-                                                                                            {
-                                                                                                Race.Draenei, Race.NightElf
-                                                                                            }
-                                                               },
-                                                               {
-                                                                   Race.VoidElf, new[]
-                                                                                 {
-                                                                                     Race.Troll, Race.BloodElf
-                                                                                 }
-                                                               },
-                                                               {
-                                                                   Race.LightforgedDraenei, new[]
-                                                                                            {
-                                                                                                Race.Tauren, Race.Orc
-                                                                                            }
-                                                               },
-                                                               {
-                                                                   Race.ZandalariTroll, new[]
+                                                                    {
+                                                                        {
+                                                                            Race.Human, new[]
                                                                                         {
-                                                                                            Race.KulTiran, Race.Human
+                                                                                            Race.Undead, Race.BloodElf
                                                                                         }
-                                                               },
-                                                               {
-                                                                   Race.KulTiran, new[]
-                                                                                  {
-                                                                                      Race.ZandalariTroll
-                                                                                  }
-                                                               },
-                                                               {
-                                                                   Race.DarkIronDwarf, new[]
-                                                                                       {
-                                                                                           Race.MagharOrc, Race.Orc
-                                                                                       }
-                                                               },
-                                                               {
-                                                                   Race.Vulpera, new[]
-                                                                                 {
-                                                                                     Race.MechaGnome, Race.DarkIronDwarf /*Guessed, For Shamans*/
-				                                                                 }
-                                                               },
-                                                               {
-                                                                   Race.MagharOrc, new[]
-                                                                                   {
-                                                                                       Race.DarkIronDwarf
-                                                                                   }
-                                                               },
-                                                               {
-                                                                   Race.MechaGnome, new[]
-                                                                                    {
-                                                                                        Race.Vulpera
-                                                                                    }
-                                                               }
-                                                           };
+                                                                        },
+                                                                        {
+                                                                            Race.Orc, new[]
+                                                                                      {
+                                                                                          Race.Dwarf
+                                                                                      }
+                                                                        },
+                                                                        {
+                                                                            Race.Dwarf, new[]
+                                                                                        {
+                                                                                            Race.Orc, Race.Undead, Race.Tauren
+                                                                                        }
+                                                                        },
+                                                                        {
+                                                                            Race.NightElf, new[]
+                                                                                           {
+                                                                                               Race.Troll, Race.BloodElf
+                                                                                           }
+                                                                        },
+                                                                        {
+                                                                            Race.Undead, new[]
+                                                                                         {
+                                                                                             Race.Human
+                                                                                         }
+                                                                        },
+                                                                        {
+                                                                            Race.Tauren, new[]
+                                                                                         {
+                                                                                             Race.Draenei, Race.NightElf
+                                                                                         }
+                                                                        },
+                                                                        {
+                                                                            Race.Gnome, new[]
+                                                                                        {
+                                                                                            Race.Goblin, Race.BloodElf
+                                                                                        }
+                                                                        },
+                                                                        {
+                                                                            Race.Troll, new[]
+                                                                                        {
+                                                                                            Race.NightElf, Race.Human, Race.Draenei
+                                                                                        }
+                                                                        },
+                                                                        {
+                                                                            Race.Goblin, new[]
+                                                                                         {
+                                                                                             Race.Gnome, Race.Dwarf
+                                                                                         }
+                                                                        },
+                                                                        {
+                                                                            Race.BloodElf, new[]
+                                                                                           {
+                                                                                               Race.Human, Race.NightElf
+                                                                                           }
+                                                                        },
+                                                                        {
+                                                                            Race.Draenei, new[]
+                                                                                          {
+                                                                                              Race.Tauren, Race.Orc
+                                                                                          }
+                                                                        },
+                                                                        {
+                                                                            Race.Worgen, new[]
+                                                                                         {
+                                                                                             Race.Troll
+                                                                                         }
+                                                                        },
+                                                                        {
+                                                                            Race.PandarenNeutral, new[]
+                                                                                                  {
+                                                                                                      Race.PandarenNeutral
+                                                                                                  }
+                                                                        },
+                                                                        {
+                                                                            Race.PandarenAlliance, new[]
+                                                                                                   {
+                                                                                                       Race.PandarenHorde, Race.PandarenNeutral
+                                                                                                   }
+                                                                        },
+                                                                        {
+                                                                            Race.PandarenHorde, new[]
+                                                                                                {
+                                                                                                    Race.PandarenAlliance, Race.PandarenNeutral
+                                                                                                }
+                                                                        },
+                                                                        {
+                                                                            Race.Nightborne, new[]
+                                                                                             {
+                                                                                                 Race.NightElf, Race.Human
+                                                                                             }
+                                                                        },
+                                                                        {
+                                                                            Race.HighmountainTauren, new[]
+                                                                                                     {
+                                                                                                         Race.Draenei, Race.NightElf
+                                                                                                     }
+                                                                        },
+                                                                        {
+                                                                            Race.VoidElf, new[]
+                                                                                          {
+                                                                                              Race.Troll, Race.BloodElf
+                                                                                          }
+                                                                        },
+                                                                        {
+                                                                            Race.LightforgedDraenei, new[]
+                                                                                                     {
+                                                                                                         Race.Tauren, Race.Orc
+                                                                                                     }
+                                                                        },
+                                                                        {
+                                                                            Race.ZandalariTroll, new[]
+                                                                                                 {
+                                                                                                     Race.KulTiran, Race.Human
+                                                                                                 }
+                                                                        },
+                                                                        {
+                                                                            Race.KulTiran, new[]
+                                                                                           {
+                                                                                               Race.ZandalariTroll
+                                                                                           }
+                                                                        },
+                                                                        {
+                                                                            Race.DarkIronDwarf, new[]
+                                                                                                {
+                                                                                                    Race.MagharOrc, Race.Orc
+                                                                                                }
+                                                                        },
+                                                                        {
+                                                                            Race.Vulpera, new[]
+                                                                                          {
+                                                                                              Race.MechaGnome, Race.DarkIronDwarf /*Guessed, For Shamans*/
+                                                                                          }
+                                                                        },
+                                                                        {
+                                                                            Race.MagharOrc, new[]
+                                                                                            {
+                                                                                                Race.DarkIronDwarf
+                                                                                            }
+                                                                        },
+                                                                        {
+                                                                            Race.MechaGnome, new[]
+                                                                                             {
+                                                                                                 Race.Vulpera
+                                                                                             }
+                                                                        }
+                                                                    };
 
         private static readonly Dictionary<Race, uint[]> RaceDisplayIds = new()
-                                                                 {
-                                                                     {
-                                                                         Race.Human, new uint[]
-                                                                                     {
-                                                                                         55239, 55238
-                                                                                     }
-                                                                     },
-                                                                     {
-                                                                         Race.Orc, new uint[]
-                                                                                   {
-                                                                                       55257, 55256
-                                                                                   }
-                                                                     },
-                                                                     {
-                                                                         Race.Dwarf, new uint[]
-                                                                                     {
-                                                                                         55241, 55240
-                                                                                     }
-                                                                     },
-                                                                     {
-                                                                         Race.NightElf, new uint[]
-                                                                                        {
-                                                                                            55243, 55242
-                                                                                        }
-                                                                     },
-                                                                     {
-                                                                         Race.Undead, new uint[]
-                                                                                      {
-                                                                                          55259, 55258
-                                                                                      }
-                                                                     },
-                                                                     {
-                                                                         Race.Tauren, new uint[]
-                                                                                      {
-                                                                                          55261, 55260
-                                                                                      }
-                                                                     },
-                                                                     {
-                                                                         Race.Gnome, new uint[]
-                                                                                     {
-                                                                                         55245, 55244
-                                                                                     }
-                                                                     },
-                                                                     {
-                                                                         Race.Troll, new uint[]
-                                                                                     {
-                                                                                         55263, 55262
-                                                                                     }
-                                                                     },
-                                                                     {
-                                                                         Race.Goblin, new uint[]
-                                                                                      {
-                                                                                          55267, 57244
-                                                                                      }
-                                                                     },
-                                                                     {
-                                                                         Race.BloodElf, new uint[]
-                                                                                        {
-                                                                                            55265, 55264
-                                                                                        }
-                                                                     },
-                                                                     {
-                                                                         Race.Draenei, new uint[]
-                                                                                       {
-                                                                                           55247, 55246
-                                                                                       }
-                                                                     },
-                                                                     {
-                                                                         Race.Worgen, new uint[]
-                                                                                      {
-                                                                                          55255, 55254
-                                                                                      }
-                                                                     },
-                                                                     {
-                                                                         Race.PandarenNeutral, new uint[]
-                                                                                               {
-                                                                                                   55253, 55252
-                                                                                               }
-                                                                     }, // Not Verified, Might Be Swapped With Race.PandarenHorde
-			                                                         {
-                                                                         Race.PandarenAlliance, new uint[]
-                                                                                                {
-                                                                                                    55249, 55248
-                                                                                                }
-                                                                     },
-                                                                     {
-                                                                         Race.PandarenHorde, new uint[]
-                                                                                             {
-                                                                                                 55251, 55250
-                                                                                             }
-                                                                     },
-                                                                     {
-                                                                         Race.Nightborne, new uint[]
-                                                                                          {
-                                                                                              82375, 82376
-                                                                                          }
-                                                                     },
-                                                                     {
-                                                                         Race.HighmountainTauren, new uint[]
-                                                                                                  {
-                                                                                                      82377, 82378
-                                                                                                  }
-                                                                     },
-                                                                     {
-                                                                         Race.VoidElf, new uint[]
-                                                                                       {
-                                                                                           82371, 82372
-                                                                                       }
-                                                                     },
-                                                                     {
-                                                                         Race.LightforgedDraenei, new uint[]
-                                                                                                  {
-                                                                                                      82373, 82374
-                                                                                                  }
-                                                                     },
-                                                                     {
-                                                                         Race.ZandalariTroll, new uint[]
+                                                                          {
+                                                                              {
+                                                                                  Race.Human, new uint[]
                                                                                               {
-                                                                                                  88417, 88416
+                                                                                                  55239, 55238
                                                                                               }
-                                                                     },
-                                                                     {
-                                                                         Race.KulTiran, new uint[]
-                                                                                        {
-                                                                                            88414, 88413
-                                                                                        }
-                                                                     },
-                                                                     {
-                                                                         Race.DarkIronDwarf, new uint[]
-                                                                                             {
-                                                                                                 88409, 88408
-                                                                                             }
-                                                                     },
-                                                                     {
-                                                                         Race.Vulpera, new uint[]
-                                                                                       {
-                                                                                           94999, 95001
-                                                                                       }
-                                                                     },
-                                                                     {
-                                                                         Race.MagharOrc, new uint[]
-                                                                                         {
-                                                                                             88420, 88410
-                                                                                         }
-                                                                     },
-                                                                     {
-                                                                         Race.MechaGnome, new uint[]
-                                                                                          {
-                                                                                              94998, 95000
-                                                                                          }
-                                                                     }
-                                                                 };
+                                                                              },
+                                                                              {
+                                                                                  Race.Orc, new uint[]
+                                                                                            {
+                                                                                                55257, 55256
+                                                                                            }
+                                                                              },
+                                                                              {
+                                                                                  Race.Dwarf, new uint[]
+                                                                                              {
+                                                                                                  55241, 55240
+                                                                                              }
+                                                                              },
+                                                                              {
+                                                                                  Race.NightElf, new uint[]
+                                                                                                 {
+                                                                                                     55243, 55242
+                                                                                                 }
+                                                                              },
+                                                                              {
+                                                                                  Race.Undead, new uint[]
+                                                                                               {
+                                                                                                   55259, 55258
+                                                                                               }
+                                                                              },
+                                                                              {
+                                                                                  Race.Tauren, new uint[]
+                                                                                               {
+                                                                                                   55261, 55260
+                                                                                               }
+                                                                              },
+                                                                              {
+                                                                                  Race.Gnome, new uint[]
+                                                                                              {
+                                                                                                  55245, 55244
+                                                                                              }
+                                                                              },
+                                                                              {
+                                                                                  Race.Troll, new uint[]
+                                                                                              {
+                                                                                                  55263, 55262
+                                                                                              }
+                                                                              },
+                                                                              {
+                                                                                  Race.Goblin, new uint[]
+                                                                                               {
+                                                                                                   55267, 57244
+                                                                                               }
+                                                                              },
+                                                                              {
+                                                                                  Race.BloodElf, new uint[]
+                                                                                                 {
+                                                                                                     55265, 55264
+                                                                                                 }
+                                                                              },
+                                                                              {
+                                                                                  Race.Draenei, new uint[]
+                                                                                                {
+                                                                                                    55247, 55246
+                                                                                                }
+                                                                              },
+                                                                              {
+                                                                                  Race.Worgen, new uint[]
+                                                                                               {
+                                                                                                   55255, 55254
+                                                                                               }
+                                                                              },
+                                                                              {
+                                                                                  Race.PandarenNeutral, new uint[]
+                                                                                                        {
+                                                                                                            55253, 55252
+                                                                                                        }
+                                                                              }, // Not Verified, Might Be Swapped With Race.PandarenHorde
+                                                                              {
+                                                                                  Race.PandarenAlliance, new uint[]
+                                                                                                         {
+                                                                                                             55249, 55248
+                                                                                                         }
+                                                                              },
+                                                                              {
+                                                                                  Race.PandarenHorde, new uint[]
+                                                                                                      {
+                                                                                                          55251, 55250
+                                                                                                      }
+                                                                              },
+                                                                              {
+                                                                                  Race.Nightborne, new uint[]
+                                                                                                   {
+                                                                                                       82375, 82376
+                                                                                                   }
+                                                                              },
+                                                                              {
+                                                                                  Race.HighmountainTauren, new uint[]
+                                                                                                           {
+                                                                                                               82377, 82378
+                                                                                                           }
+                                                                              },
+                                                                              {
+                                                                                  Race.VoidElf, new uint[]
+                                                                                                {
+                                                                                                    82371, 82372
+                                                                                                }
+                                                                              },
+                                                                              {
+                                                                                  Race.LightforgedDraenei, new uint[]
+                                                                                                           {
+                                                                                                               82373, 82374
+                                                                                                           }
+                                                                              },
+                                                                              {
+                                                                                  Race.ZandalariTroll, new uint[]
+                                                                                                       {
+                                                                                                           88417, 88416
+                                                                                                       }
+                                                                              },
+                                                                              {
+                                                                                  Race.KulTiran, new uint[]
+                                                                                                 {
+                                                                                                     88414, 88413
+                                                                                                 }
+                                                                              },
+                                                                              {
+                                                                                  Race.DarkIronDwarf, new uint[]
+                                                                                                      {
+                                                                                                          88409, 88408
+                                                                                                      }
+                                                                              },
+                                                                              {
+                                                                                  Race.Vulpera, new uint[]
+                                                                                                {
+                                                                                                    94999, 95001
+                                                                                                }
+                                                                              },
+                                                                              {
+                                                                                  Race.MagharOrc, new uint[]
+                                                                                                  {
+                                                                                                      88420, 88410
+                                                                                                  }
+                                                                              },
+                                                                              {
+                                                                                  Race.MechaGnome, new uint[]
+                                                                                                   {
+                                                                                                       94998, 95000
+                                                                                                   }
+                                                                              }
+                                                                          };
 
         private static readonly List<uint> RacialSkills = new();
         public List<IAuraEffectHandler> Effects { get; } = new();
-
-        private static Race GetReplacementRace(Race nativeRace, Class playerClass)
-        {
-            var otherRaces = RaceInfo.LookupByKey(nativeRace);
-
-            if (otherRaces != null)
-                foreach (Race race in otherRaces)
-                    if (Global.ObjectMgr.GetPlayerInfo(race, playerClass) != null)
-                        return race;
-
-            return Race.None;
-        }
-
-        private static uint GetDisplayIdForRace(Race race, Gender gender)
-        {
-            var displayIds = RaceDisplayIds.LookupByKey(race);
-
-            if (displayIds != null)
-                return displayIds[(int)gender];
-
-            return 0;
-        }
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1171,6 +1149,34 @@ namespace Scripts.Spells.Generic
                     RacialSkills.Add(skillLine.Id);
 
             return true;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Transform, AuraEffectHandleModes.SendForClientMask, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private static Race GetReplacementRace(Race nativeRace, Class playerClass)
+        {
+            var otherRaces = RaceInfo.LookupByKey(nativeRace);
+
+            if (otherRaces != null)
+                foreach (Race race in otherRaces)
+                    if (Global.ObjectMgr.GetPlayerInfo(race, playerClass) != null)
+                        return race;
+
+            return Race.None;
+        }
+
+        private static uint GetDisplayIdForRace(Race race, Gender gender)
+        {
+            var displayIds = RaceDisplayIds.LookupByKey(race);
+
+            if (displayIds != null)
+                return displayIds[(int)gender];
+
+            return 0;
         }
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1223,12 +1229,6 @@ namespace Scripts.Spells.Generic
                     player.LearnSkillRewardedSpells(racialSkillId, player.GetMaxSkillValueForLevel(), newRace);
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Transform, AuraEffectHandleModes.SendForClientMask, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // Blood Reserve - 64568
@@ -1274,6 +1274,11 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Player target = GetHitPlayer();
@@ -1299,11 +1304,6 @@ namespace Scripts.Spells.Generic
                 }
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script("spell_gen_break_shield")]
@@ -1315,6 +1315,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(62552, 62719, 64100, 66482);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScriptEffect(uint effIndex)
@@ -1386,11 +1391,6 @@ namespace Scripts.Spells.Generic
                     break;
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 48750 - Burning Depths Necrolyte Image
@@ -1401,6 +1401,12 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.GetEffects().Count > 2 && ValidateSpellInfo((uint)spellInfo.GetEffect(2).CalcValue());
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1414,12 +1420,6 @@ namespace Scripts.Spells.Generic
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(2).CalcValue(), GetCasterGUID());
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -1467,6 +1467,11 @@ namespace Scripts.Spells.Generic
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
+        }
+
         private void UpdatePeriodic(AuraEffect aurEff)
         {
             // Get 0 effect aura
@@ -1478,11 +1483,6 @@ namespace Scripts.Spells.Generic
             int newAmount = Math.Min(slow.GetAmount() + aurEff.GetAmount(), 0);
             slow.ChangeAmount(newAmount);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
-        }
     }
 
     [Script]
@@ -1493,6 +1493,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChaosBlast);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -1508,11 +1513,6 @@ namespace Scripts.Spells.Generic
                 caster.CastSpell(target, SpellIds.ChaosBlast, args);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 28471 - ClearAll
@@ -1520,15 +1520,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
             caster.RemoveAllAurasOnDeath();
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1536,12 +1536,6 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_clone : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
-
-        private void HandleScriptEffect(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-            GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
-        }
 
         public override void Register()
         {
@@ -1556,6 +1550,12 @@ namespace Scripts.Spells.Generic
                 SpellEffects.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
             }
         }
+
+        private void HandleScriptEffect(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+        }
     }
 
     [Script]
@@ -1563,15 +1563,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScriptEffect(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1591,6 +1591,12 @@ namespace Scripts.Spells.Generic
             prevItem = 0;
 
             return true;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1696,12 +1702,6 @@ namespace Scripts.Spells.Generic
                     break;
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectRemove));
-        }
     }
 
     [Script("spell_gen_default_count_pct_from_max_hp", 0)]
@@ -1730,6 +1730,11 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
+        }
+
         private void HandleDamageCalc(uint effIndex)
         {
             Creature caster = GetCaster().ToCreature();
@@ -1746,11 +1751,6 @@ namespace Scripts.Spells.Generic
             if (damage != 0)
                 SetEffectValue(damage);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDamageCalc, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.LaunchTarget));
-        }
     }
 
     [Script] // 63845 - Create Lance
@@ -1761,6 +1761,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CreateLanceAlliance, SpellIds.CreateLanceHorde);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -1776,11 +1781,6 @@ namespace Scripts.Spells.Generic
                 else
                     GetCaster().CastSpell(target, SpellIds.CreateLanceHorde, true);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1798,6 +1798,11 @@ namespace Scripts.Spells.Generic
                 SpellIds.SilverCovenantTrigger => ValidateSpellInfo(SpellIds.SilverCovenantFemale, SpellIds.SilverCovenantMale),
                 _ => false
             };
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -1826,11 +1831,6 @@ namespace Scripts.Spells.Generic
 
                 GetCaster().CastSpell(player, spellId, true);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1907,14 +1907,14 @@ namespace Scripts.Spells.Generic
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().ToCreature()?.DespawnOrUnsummon();
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, SpellConst.EffectFirstFound, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().ToCreature()?.DespawnOrUnsummon();
         }
     }
 
@@ -1928,16 +1928,16 @@ namespace Scripts.Spells.Generic
             return GetCaster().IsTypeId(TypeId.Unit);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, SpellConst.EffectAll, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) ||
                 GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
                 GetCaster().ToCreature().DespawnOrUnsummon();
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, SpellConst.EffectAll, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1945,6 +1945,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_despawn_target : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDespawn, SpellConst.EffectAll, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleDespawn(uint effIndex)
         {
@@ -1955,11 +1960,6 @@ namespace Scripts.Spells.Generic
 
                 target?.DespawnOrUnsummon();
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDespawn, SpellConst.EffectAll, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -1978,14 +1978,14 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.DivineStorm);
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetCaster().GetSpellHistory().ResetCooldown(SpellIds.DivineStorm, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetCaster().GetSpellHistory().ResetCooldown(SpellIds.DivineStorm, true);
         }
     }
 
@@ -1993,6 +1993,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_ds_flush_knockback : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint effIndex)
         {
@@ -2012,11 +2017,6 @@ namespace Scripts.Spells.Generic
                     player.KnockbackFrom(target.GetPosition(), horizontalSpeed, verticalSpeed);
                 }
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2091,15 +2091,15 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.ProcTriggerOnKillAura);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScriptEffect(uint effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, SpellIds.ProcTriggerOnKillAura, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2114,14 +2114,14 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.EtherealPetAura);
         }
 
-        private void HandleScriptEffect(uint effIndex)
-        {
-            GetHitUnit().RemoveAurasDueToSpell(SpellIds.EtherealPetAura);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScriptEffect(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell(SpellIds.EtherealPetAura);
         }
     }
 
@@ -2130,6 +2130,11 @@ namespace Scripts.Spells.Generic
     internal class spell_steal_essence_visual : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -2142,11 +2147,6 @@ namespace Scripts.Spells.Generic
 
                 soulTrader?.GetAI().Talk(TextIds.SayCreateToken);
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -2171,6 +2171,11 @@ namespace Scripts.Spells.Generic
                                      SpellIds.GiganticFeastRefreshment,
                                      SpellIds.SmallFeastRefreshment,
                                      SpellIds.BountifulFeastRefreshment);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -2213,11 +2218,6 @@ namespace Scripts.Spells.Generic
                     break;
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     /*
@@ -2237,6 +2237,12 @@ namespace Scripts.Spells.Generic
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -2259,12 +2265,6 @@ namespace Scripts.Spells.Generic
             Creature creature = target.ToCreature();
 
             creature?.InitializeReactState();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -2274,6 +2274,12 @@ namespace Scripts.Spells.Generic
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -2295,18 +2301,18 @@ namespace Scripts.Spells.Generic
 
             creature?.InitializeReactState();
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-        }
     }
 
     [Script] // 58951 - Permanent Feign Death
     internal class spell_gen_feign_death_no_prevent_emotes : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -2328,12 +2334,6 @@ namespace Scripts.Spells.Generic
             Creature creature = target.ToCreature();
 
             creature?.InitializeReactState();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -2347,6 +2347,12 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.Exhaustion) &&
                    CliDB.BroadcastTextStorage.HasRecord(EmoteIds.FuriousRage) &&
                    CliDB.BroadcastTextStorage.HasRecord(EmoteIds.Exhausted);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -2364,12 +2370,6 @@ namespace Scripts.Spells.Generic
             target.TextEmote(EmoteIds.Exhausted, target, false);
             target.CastSpell(target, SpellIds.Exhaustion, true);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModDamagePercentDone, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // 46642 - 5,000 Gold
@@ -2377,16 +2377,16 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Player target = GetHitPlayer();
 
             target?.ModifyMoney(5000 * MoneyConstants.Gold);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2405,6 +2405,11 @@ namespace Scripts.Spells.Generic
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -2420,11 +2425,6 @@ namespace Scripts.Spells.Generic
 
             GetCaster().CastSpell(GetCaster(), spellId, false);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -2435,6 +2435,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TransporterMalfunctionPolymorph, SpellIds.TransporterEviltwin, SpellIds.TransporterMalfunctionMiss);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -2449,11 +2454,6 @@ namespace Scripts.Spells.Generic
             else // Transporter Malfunction - 1/6 miss the Target
                 caster.CastSpell(caster, SpellIds.TransporterMalfunctionMiss, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -2464,6 +2464,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.GetEffects().Count > 1;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicHeal));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -2477,11 +2482,6 @@ namespace Scripts.Spells.Generic
             int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
             amount += healTick;
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicHeal));
-        }
     }
 
     [Script]
@@ -2494,14 +2494,14 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.TransporterSuccess, SpellIds.TransporterFailure);
         }
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(50) ? SpellIds.TransporterSuccess : SpellIds.TransporterFailure, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetCaster(), RandomHelper.randChance(50) ? SpellIds.TransporterSuccess : SpellIds.TransporterFailure, true);
         }
     }
 
@@ -2509,6 +2509,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_gryphon_wyvern_mount_check : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
         {
@@ -2522,11 +2527,6 @@ namespace Scripts.Spells.Generic
                 target.SetDisableGravity(true);
             else
                 target.SetDisableGravity(false);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -2543,15 +2543,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetCaster().CanHaveThreatList())
                 GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -100);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2561,6 +2561,11 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit target = GetHitUnit();
@@ -2569,11 +2574,6 @@ namespace Scripts.Spells.Generic
                 if (target.CanHaveThreatList())
                     target.GetThreatManager().ModifyThreatByPercent(GetCaster(), -100);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 19707 - Hate to 50%
@@ -2581,15 +2581,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetCaster().CanHaveThreatList())
                 GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -50);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2598,15 +2598,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetCaster().CanHaveThreatList())
                 GetCaster().GetThreatManager().ModifyThreatByPercent(GetHitUnit(), -25);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2620,15 +2620,15 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.GenThrowInterrupt);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.GenThrowInterrupt, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -2641,17 +2641,17 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             if (GetHitUnit().IsInRaidWith(GetCaster()))
                 GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue() + 1, true); // raid buff
             else
                 GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true); // single-Target buff
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -2676,6 +2676,11 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(_spellId);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Final heal only on duration end
@@ -2685,11 +2690,6 @@ namespace Scripts.Spells.Generic
 
             // final heal
             GetTarget().CastSpell(GetTarget(), _spellId, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -2701,6 +2701,17 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(62552, 62719, 64100, 66482);
+        }
+
+        public override void Register()
+        {
+            SpellInfo spell = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
+
+            if (spell.HasEffect(SpellEffectName.ScriptEffect))
+                SpellEffects.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+
+            if (spell.GetEffect(0).IsEffect(SpellEffectName.Charge))
+                SpellEffects.Add(new EffectHandler(HandleChargeEffect, 0, SpellEffectName.Charge, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScriptEffect(uint effIndex)
@@ -2807,17 +2818,6 @@ namespace Scripts.Spells.Generic
             else
                 GetCaster().CastSpell(GetHitUnit(), spellId, false);
         }
-
-        public override void Register()
-        {
-            SpellInfo spell = Global.SpellMgr.GetSpellInfo(ScriptSpellId, Difficulty.None);
-
-            if (spell.HasEffect(SpellEffectName.ScriptEffect))
-                SpellEffects.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-
-            if (spell.GetEffect(0).IsEffect(SpellEffectName.Charge))
-                SpellEffects.Add(new EffectHandler(HandleChargeEffect, 0, SpellEffectName.Charge, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     // 6870 Moss Covered Feet
@@ -2831,15 +2831,15 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.FallDown);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetActionTarget().CastSpell((Unit)null, SpellIds.FallDown, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -2855,6 +2855,11 @@ namespace Scripts.Spells.Generic
                     return false;
 
             return true;
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -2880,11 +2885,6 @@ namespace Scripts.Spells.Generic
                 target.CastSpell(target, SpellIds.NetherBloomPollen1 + RandomHelper.URand(0, 4), true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 28720 - Nightmare Vine
@@ -2897,6 +2897,11 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.NightmarePollen);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -2907,17 +2912,17 @@ namespace Scripts.Spells.Generic
                 if (RandomHelper.randChance(25))
                     target.CastSpell(target, SpellIds.NightmarePollen, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 27746 -  Nitrous Boost
     internal class spell_gen_nitrous_boost : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+        }
 
         private void PeriodicTick(AuraEffect aurEff)
         {
@@ -2928,11 +2933,6 @@ namespace Scripts.Spells.Generic
                 GetTarget().ModifyPower(PowerType.Mana, -10);
             else
                 Remove();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -3017,6 +3017,11 @@ namespace Scripts.Spells.Generic
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Player player = GetCaster().ToPlayer();
@@ -3035,11 +3040,6 @@ namespace Scripts.Spells.Generic
 
             // EFFECT_INDEX_2 most likely update at war State, we already handle this in SetReputation
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     [Script]
@@ -3050,6 +3050,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.OrcDisguiseTrigger, SpellIds.OrcDisguiseMale, SpellIds.OrcDisguiseFemale);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -3067,11 +3072,6 @@ namespace Scripts.Spells.Generic
                     caster.CastSpell(target, SpellIds.OrcDisguiseFemale, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 35201 - Paralytic Poison
@@ -3084,6 +3084,11 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.Paralysis);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleStun, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void HandleStun(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
@@ -3091,17 +3096,18 @@ namespace Scripts.Spells.Generic
 
             GetTarget().CastSpell((Unit)null, SpellIds.Paralysis, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleStun, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script]
     internal class spell_gen_prevent_emotes : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, SpellConst.EffectFirstFound, AuraType.Any, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, SpellConst.EffectFirstFound, AuraType.Any, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -3113,12 +3119,6 @@ namespace Scripts.Spells.Generic
         {
             Unit target = GetTarget();
             target.RemoveUnitFlag(UnitFlags.PreventEmotesFromChatText);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, SpellConst.EffectFirstFound, AuraType.Any, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, SpellConst.EffectFirstFound, AuraType.Any, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -3132,17 +3132,17 @@ namespace Scripts.Spells.Generic
             return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             // Note: Target here is always player; caster here is gameobject, creature or player (self cast)
             Unit target = GetHitUnit();
 
             target?.Say((uint)GetEffectValue(), target);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3190,6 +3190,11 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.Parachute, SpellIds.ParachuteBuff);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             Player target = GetTarget().ToPlayer();
@@ -3201,11 +3206,6 @@ namespace Scripts.Spells.Generic
                     target.CastSpell(target, SpellIds.ParachuteBuff, true);
                 }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
-        }
     }
 
     [Script]
@@ -3216,6 +3216,11 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -3255,11 +3260,6 @@ namespace Scripts.Spells.Generic
                 }
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 36553 - PetWait
@@ -3267,15 +3267,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             GetCaster().GetMotionMaster().Clear();
             GetCaster().GetMotionMaster().MoveIdle();
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3358,6 +3358,11 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit target = GetHitUnit();
@@ -3368,11 +3373,6 @@ namespace Scripts.Spells.Generic
                 target.RemoveAurasByType(AuraType.ModIncreaseMountedFlightSpeed);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3380,14 +3380,14 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleScriptEffect(uint effIndex)
-        {
-            GetHitUnit().RemoveMovementImpairingAuras(true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScriptEffect(uint effIndex)
+        {
+            GetHitUnit().RemoveMovementImpairingAuras(true);
         }
     }
 
@@ -3396,6 +3396,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_restoration : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
 
         private void PeriodicTick(AuraEffect aurEff)
         {
@@ -3419,11 +3424,6 @@ namespace Scripts.Spells.Generic
                 target.EnergizeBySpell(target, GetSpellInfo(), mana, PowerType.Mana);
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     // 38772 Grievous Wound
@@ -3439,6 +3439,11 @@ namespace Scripts.Spells.Generic
             return spellInfo.GetEffects().Count > 1;
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
+        }
+
         private void PeriodicTick(AuraEffect aurEff)
         {
             // they apply Damage so no need to check for ticks here
@@ -3448,11 +3453,6 @@ namespace Scripts.Spells.Generic
                 Remove(AuraRemoveMode.EnemySpell);
                 PreventDefaultAction();
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
         }
     }
 
@@ -3464,6 +3464,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_remove_on_full_health : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
+        }
 
         private void PeriodicTick(AuraEffect aurEff)
         {
@@ -3479,11 +3484,6 @@ namespace Scripts.Spells.Generic
                 PreventDefaultAction();
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
-        }
     }
 
     // 70292 - Glacial Strike
@@ -3491,6 +3491,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_remove_on_full_health_pct : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 2, AuraType.PeriodicDamagePercent));
+        }
 
         private void PeriodicTick(AuraEffect aurEff)
         {
@@ -3502,17 +3507,17 @@ namespace Scripts.Spells.Generic
                 PreventDefaultAction();
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 2, AuraType.PeriodicDamagePercent));
-        }
     }
 
     [Script]
     internal class spell_gen_replenishment : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 255, Targets.UnitCasterAreaRaid));
+        }
 
         private void RemoveInvalidTargets(List<WorldObject> targets)
         {
@@ -3546,11 +3551,6 @@ namespace Scripts.Spells.Generic
                 targets.Resize(maxTargets);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(RemoveInvalidTargets, 255, Targets.UnitCasterAreaRaid));
-        }
     }
 
     [Script]
@@ -3561,6 +3561,11 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             return GetUnitOwner().GetPower(PowerType.Mana) != 0;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicEnergize));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -3578,11 +3583,6 @@ namespace Scripts.Spells.Generic
                 default:
                     break;
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicEnergize));
         }
     }
 
@@ -3621,6 +3621,11 @@ namespace Scripts.Spells.Generic
             return true;
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleMount, 1, AuraType.Mounted, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+        }
+
         private void HandleMount(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -3633,11 +3638,6 @@ namespace Scripts.Spells.Generic
 
             if (mountCapability != null)
                 target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleMount, 1, AuraType.Mounted, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 
@@ -3708,6 +3708,11 @@ namespace Scripts.Spells.Generic
             return GetGObjCaster().GetOwnerGUID().IsPlayer();
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(AchievementCredit, 1, SpellEffectName.GameObjectDamage, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void AchievementCredit(uint effIndex)
         {
             // but in effect handling OriginalCaster can become null
@@ -3722,11 +3727,6 @@ namespace Scripts.Spells.Generic
                         owner.CastSpell(null, SpellIds.PlantChargesCreditAchievement, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(AchievementCredit, 1, SpellEffectName.GameObjectDamage, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3739,14 +3739,14 @@ namespace Scripts.Spells.Generic
 
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().HandleEmoteCommand(EmoteArray.SelectRandom());
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().HandleEmoteCommand(EmoteArray.SelectRandom());
         }
     }
 
@@ -3758,6 +3758,11 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             return GetOriginalCaster() && GetOriginalCaster().IsTypeId(TypeId.Player);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -3773,11 +3778,6 @@ namespace Scripts.Spells.Generic
                 spiritHealerConfirm.Success = true;
                 originalCaster.SendPacket(spiritHealerConfirm);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3810,15 +3810,15 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScriptEffect(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3830,6 +3830,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.OnTournamentMount, SpellIds.MountedDuel);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScriptEffect(uint effIndex)
@@ -3858,11 +3863,6 @@ namespace Scripts.Spells.Generic
                         rider.CastSpell(unitTarget.GetCharmer(), SpellIds.MountedDuel, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -3875,6 +3875,11 @@ namespace Scripts.Spells.Generic
             return GetCaster() && GetCaster().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApplyEffect, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
+        }
+
         private void HandleApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
@@ -3883,17 +3888,17 @@ namespace Scripts.Spells.Generic
                 if (!caster.GetVehicleBase())
                     caster.RemoveAurasDueToSpell(GetId());
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApplyEffect, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
-        }
     }
 
     [Script]
     internal class spell_gen_teleporting : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint effIndex)
         {
@@ -3908,11 +3913,6 @@ namespace Scripts.Spells.Generic
             // teleport atop
             else
                 target.CastSpell(target, SpellIds.TeleportSpireUp, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -3997,6 +3997,12 @@ namespace Scripts.Spells.Generic
         private readonly List<uint> _applyTimes = new();
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // store stack apply times, so we can pop them while they expire
@@ -4022,12 +4028,6 @@ namespace Scripts.Spells.Generic
             if (removeCount != 0)
                 ModStackAmount(-removeCount, AuraRemoveMode.Expire);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
-        }
     }
 
     [Script]
@@ -4040,6 +4040,11 @@ namespace Scripts.Spells.Generic
         };
 
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint effIndex)
         {
@@ -4055,11 +4060,6 @@ namespace Scripts.Spells.Generic
                 CreateItem(itemId[RandomHelper.URand(0, 4)], ItemContext.None);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     // 52723 - Vampiric Touch
@@ -4071,6 +4071,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VampiricTouchHeal);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -4087,11 +4092,6 @@ namespace Scripts.Spells.Generic
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage() / 2);
             caster.CastSpell(caster, SpellIds.VampiricTouchHeal, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script]
@@ -4102,6 +4102,13 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             return GetCaster() && GetCaster().IsTypeId(TypeId.Player);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModHealingPct));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModDamagePercentDone));
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 2, AuraType.ModIncreaseHealthPercent));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -4132,19 +4139,17 @@ namespace Scripts.Spells.Generic
 
             amount = (int)((avgILvl - baseItemLevel) * factor);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModHealingPct));
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModDamagePercentDone));
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 2, AuraType.ModIncreaseHealthPercent));
-        }
     }
 
     [Script]
     internal class spell_gen_vendor_bark_trigger : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleDummy(uint effIndex)
         {
@@ -4153,11 +4158,6 @@ namespace Scripts.Spells.Generic
             if (vendor)
                 if (vendor.GetEntry() == CreatureIds.AmphitheaterVendor)
                     vendor.GetAI().Talk(TextIds.SayAmphitheaterVendor);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -4183,15 +4183,15 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.YoggSaronWhisperDummy);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
             GetTarget().CastSpell((Unit)null, SpellIds.YoggSaronWhisperDummy, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -4205,6 +4205,11 @@ namespace Scripts.Spells.Generic
             return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleScript(uint effIndex)
         {
             TempSummon casterSummon = GetCaster().ToTempSummon();
@@ -4216,11 +4221,6 @@ namespace Scripts.Spells.Generic
                 if (target != null)
                     casterSummon.Whisper((uint)GetEffectValue(), target, false);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -4242,6 +4242,11 @@ namespace Scripts.Spells.Generic
 
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             // Same for all spells
@@ -4262,11 +4267,6 @@ namespace Scripts.Spells.Generic
                         targetSummon.GetAI().Talk(_text, player);
                 }
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -4298,6 +4298,11 @@ namespace Scripts.Spells.Generic
             return true;
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void EjectPassenger(uint effIndex)
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
@@ -4309,11 +4314,6 @@ namespace Scripts.Spells.Generic
                 if (passenger)
                     passenger.ExitVehicle();
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -4330,6 +4330,11 @@ namespace Scripts.Spells.Generic
 
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void EjectPassenger(uint effIndex)
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
@@ -4341,11 +4346,6 @@ namespace Scripts.Spells.Generic
                 passenger?.ExitVehicle();
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -4356,6 +4356,12 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GmFreeze);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -4406,18 +4412,17 @@ namespace Scripts.Spells.Generic
                 player.SaveToDB();
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-        }
     }
 
     [Script]
     internal class spell_gen_stand : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint eff)
         {
@@ -4428,11 +4433,6 @@ namespace Scripts.Spells.Generic
 
             target.SetStandState(UnitStandStateType.Stand);
             target.HandleEmoteCommand(Emote.StateNone);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -4540,6 +4540,11 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             return GetCaster() && GetCaster().GetTypeId() == TypeId.Player;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, SpellConst.EffectAll, AuraType.Any));
         }
 
         private void SetBonusValueForEffect(uint effIndex, int value, AuraEffect aurEff)
@@ -4757,17 +4762,17 @@ namespace Scripts.Spells.Generic
                 amount += bonus;
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, SpellConst.EffectAll, AuraType.Any));
-        }
     }
 
     [Script]
     internal class spell_gen_landmine_knockback_achievement : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint effIndex)
         {
@@ -4784,17 +4789,17 @@ namespace Scripts.Spells.Generic
                 target.CastSpell(target, SpellIds.LandmineKnockbackAchievement, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 34098 - ClearAllDebuffs
     internal class spell_gen_clear_debuffs : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScript(uint effIndex)
         {
@@ -4808,17 +4813,17 @@ namespace Scripts.Spells.Generic
                                             return !spellInfo.IsPositive() && !spellInfo.IsPassive();
                                         });
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
     internal class spell_gen_pony_mount_check : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
 
         private void HandleEffectPeriodic(AuraEffect aurEff)
         {
@@ -4843,11 +4848,6 @@ namespace Scripts.Spells.Generic
                 caster.Dismount();
                 caster.SetSpeedRate(UnitMoveType.Run, owner.GetSpeedRate(UnitMoveType.Run));
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -4885,6 +4885,11 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.CorruptingPlague);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+        }
+
         private void OnPeriodic(AuraEffect aurEff)
         {
             Unit owner = GetTarget();
@@ -4899,11 +4904,6 @@ namespace Scripts.Spells.Generic
 
             PreventDefaultAction();
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     [Script] // 40306 - Stasis Field
@@ -4914,6 +4914,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StasisField);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
 
         private void OnPeriodic(AuraEffect aurEff)
@@ -4930,11 +4935,6 @@ namespace Scripts.Spells.Generic
 
             PreventDefaultAction();
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     [Script]
@@ -4942,14 +4942,14 @@ namespace Scripts.Spells.Generic
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(SpellIds.SiegeTankControl); //aurEff.GetAmount()
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.SiegeTankControl); //aurEff.GetAmount()
         }
     }
 
@@ -4961,6 +4961,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FreezingCirclePitOfSaronNormal, SpellIds.FreezingCirclePitOfSaronHeroic, SpellIds.FreezingCircle, SpellIds.FreezingCircleScenario);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDamage(uint effIndex)
@@ -4979,11 +4984,6 @@ namespace Scripts.Spells.Generic
             if (spellInfo != null)
                 if (!spellInfo.GetEffects().Empty())
                     SetHitDamage(spellInfo.GetEffect(0).CalcValue());
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -5016,6 +5016,11 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.CannonBlast);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             int bp = GetEffectValue();
@@ -5024,11 +5029,6 @@ namespace Scripts.Spells.Generic
             args.AddSpellMod(SpellValueMod.BasePoint0, bp);
             target.CastSpell(target, SpellIds.CannonBlastDamage, args);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 37751 - Submerged
@@ -5036,16 +5036,16 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint eff)
         {
             Creature target = GetHitCreature();
 
             target?.SetStandState(UnitStandStateType.Submerged);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -5054,17 +5054,17 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit target = GetHitUnit();
 
             if (target)
                 target.SetHealth(target.CountPctFromMaxHealth(25));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -5073,14 +5073,14 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
         }
     }
 
@@ -5088,6 +5088,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_mark_of_kazrogal_hellfire : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+        }
 
         private void FilterTargets(List<WorldObject> targets)
         {
@@ -5101,11 +5106,6 @@ namespace Scripts.Spells.Generic
                                   return false;
                               });
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-        }
     }
 
     [Script]
@@ -5116,6 +5116,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.MarkOfKazrogalDamageHellfire);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PowerBurn));
         }
 
         private void OnPeriodic(AuraEffect aurEff)
@@ -5129,11 +5134,6 @@ namespace Scripts.Spells.Generic
                 SetDuration(0);
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PowerBurn));
-        }
     }
 
     [Script]
@@ -5141,14 +5141,14 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
         }
     }
 
@@ -5162,14 +5162,14 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.FaceRage) && spellInfo.GetEffects().Count > 2;
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(GetEffectInfo(2).TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(GetEffectInfo(2).TriggerSpell);
         }
     }
 
@@ -5183,14 +5183,14 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(SpellIds.ImpatientMind);
         }
 
-        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(effect.GetSpellEffectInfo().TriggerSpell);
         }
     }
 
@@ -5199,26 +5199,6 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_war_mode_enlisted : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
-
-        private void CalcWarModeBonus(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            Player target = GetUnitOwner().ToPlayer();
-
-            if (target == null)
-                return;
-
-            switch (target.GetTeamId())
-            {
-                case TeamId.Alliance:
-                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, target.GetMap());
-
-                    break;
-                case TeamId.Horde:
-                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, target.GetMap());
-
-                    break;
-            }
-        }
 
         public override void Register()
         {
@@ -5242,6 +5222,26 @@ namespace Scripts.Spells.Generic
             if (spellInfo.HasAura(AuraType.Dummy))
                 Effects.Add(new EffectCalcAmountHandler(CalcWarModeBonus, SpellConst.EffectAll, AuraType.Dummy));
         }
+
+        private void CalcWarModeBonus(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            Player target = GetUnitOwner().ToPlayer();
+
+            if (target == null)
+                return;
+
+            switch (target.GetTeamId())
+            {
+                case TeamId.Alliance:
+                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeAllianceBuffValue, target.GetMap());
+
+                    break;
+                case TeamId.Horde:
+                    amount = Global.WorldStateMgr.GetValue(WorldStates.WarModeHordeBuffValue, target.GetMap());
+
+                    break;
+            }
+        }
     }
 
     [Script]
@@ -5254,6 +5254,11 @@ namespace Scripts.Spells.Generic
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.DeathGateTeleportStormwind, SpellIds.DeathGateTeleportOrgrimmar);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -5274,17 +5279,17 @@ namespace Scripts.Spells.Generic
 
             player.CastSpell(player, player.GetTeam() == Team.Alliance ? SpellIds.DeathGateTeleportStormwind : SpellIds.DeathGateTeleportOrgrimmar);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
     internal class spell_defender_of_azeroth_speak_with_mograine : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleDummy(uint effIndex)
         {
@@ -5310,17 +5315,17 @@ namespace Scripts.Spells.Generic
 
             // @TODO: spawntracking - show death gate for casting player
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 118301 - Summon Battle Pet
     internal class spell_summon_battle_pet : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleSummon, 0, SpellEffectName.Summon, SpellScriptHookType.EffectHit));
+        }
 
         private void HandleSummon(uint effIndex)
         {
@@ -5340,11 +5345,6 @@ namespace Scripts.Spells.Generic
                 summon?.SetImmuneToAll(true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleSummon, 0, SpellEffectName.Summon, SpellScriptHookType.EffectHit));
-        }
     }
 
     [Script] // 132334 - Trainer Heal Cooldown (SERVERSIDE)
@@ -5360,6 +5360,11 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             return GetUnitOwner().IsPlayer();
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(UpdateReviveBattlePetCooldown, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void UpdateReviveBattlePetCooldown(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -5383,11 +5388,6 @@ namespace Scripts.Spells.Generic
                 }
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(UpdateReviveBattlePetCooldown, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-        }
     }
 
     [Script] // 45313 - Anchor Here
@@ -5395,16 +5395,16 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Creature creature = GetHitCreature();
 
             creature?.SetHomePosition(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ(), creature.GetOrientation());
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -5412,6 +5412,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_mount_check_aura : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
 
         private void OnPeriodic(AuraEffect aurEff)
         {
@@ -5446,11 +5451,6 @@ namespace Scripts.Spells.Generic
             if (mountDisplayId != target.GetMountDisplayId())
                 target.SetMountDisplayId(mountDisplayId);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
-        }
     }
 
     [Script] // 274738 - Ancestral Call (Mag'har Orc Racial)
@@ -5480,6 +5480,11 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScriptEffect(uint effIndex)
         {
             Vehicle vehicle = GetHitUnit().GetVehicleKit();
@@ -5490,11 +5495,6 @@ namespace Scripts.Spells.Generic
             for (sbyte i = 2; i < 8; i++)
                 vehicle.GetPassenger(i)?.ExitVehicle();
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 83781 - Reverse Cast Ride Vehicle
@@ -5502,14 +5502,14 @@ namespace Scripts.Spells.Generic
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleScript(uint effIndex)
-        {
-            GetHitUnit().CastSpell(GetCaster(), (uint)GetSpellInfo().GetEffect(effIndex).CalcValue(), true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetHitUnit().CastSpell(GetCaster(), (uint)GetSpellInfo().GetEffect(effIndex).CalcValue(), true);
         }
     }
 
@@ -5520,6 +5520,11 @@ namespace Scripts.Spells.Generic
     internal class spell_gen_despawn_all_summons_owned_by_caster : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScriptEffect(uint effIndex)
         {
@@ -5532,11 +5537,6 @@ namespace Scripts.Spells.Generic
                 if (target.GetOwner() == caster)
                     target.DespawnOrUnsummon();
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 

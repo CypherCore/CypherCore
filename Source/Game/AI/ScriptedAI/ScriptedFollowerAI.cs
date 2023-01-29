@@ -177,14 +177,6 @@ namespace Game.AI
             UpdateFollowerAI(uiDiff);
         }
 
-        private void UpdateFollowerAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
-        }
-
         public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
         {
             CreatureData cdata = me.GetCreatureData();
@@ -271,6 +263,19 @@ namespace Game.AI
             AddFollowState(FollowState.Complete);
         }
 
+        public override bool IsEscorted()
+        {
+            return HasFollowState(FollowState.Inprogress);
+        }
+
+        private void UpdateFollowerAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
         private Player GetLeaderForFollower()
         {
             Player player = Global.ObjAccessor.GetPlayer(me, _leaderGUID);
@@ -346,11 +351,6 @@ namespace Game.AI
                 return false;
 
             return true;
-        }
-
-        public override bool IsEscorted()
-        {
-            return HasFollowState(FollowState.Inprogress);
         }
 
         private bool HasFollowState(FollowState uiFollowState)

@@ -132,14 +132,6 @@ namespace Game.Spells
             _targetMask |= SpellCastTargetFlags.Unit;
         }
 
-        private ObjectGuid GetGOTargetGUID()
-        {
-            if (_objectTargetGUID.IsAnyTypeGameObject())
-                return _objectTargetGUID;
-
-            return ObjectGuid.Empty;
-        }
-
         public GameObject GetGOTarget()
         {
             if (_objectTarget != null)
@@ -229,18 +221,6 @@ namespace Game.Spells
         public Position GetSrcPos()
         {
             return _src.Position;
-        }
-
-        private void SetSrc(float x, float y, float z)
-        {
-            _src = new SpellDestination(x, y, z);
-            _targetMask |= SpellCastTargetFlags.SourceLocation;
-        }
-
-        private void SetSrc(Position pos)
-        {
-            _src = new SpellDestination(pos);
-            _targetMask |= SpellCastTargetFlags.SourceLocation;
         }
 
         public void SetSrc(WorldObject wObj)
@@ -423,11 +403,6 @@ namespace Game.Spells
             _pitch = pitch;
         }
 
-        private float GetSpeed()
-        {
-            return _speed;
-        }
-
         public void SetSpeed(float speed)
         {
             _speed = speed;
@@ -451,6 +426,31 @@ namespace Game.Spells
         public string GetTargetString()
         {
             return _strTarget;
+        }
+
+        private ObjectGuid GetGOTargetGUID()
+        {
+            if (_objectTargetGUID.IsAnyTypeGameObject())
+                return _objectTargetGUID;
+
+            return ObjectGuid.Empty;
+        }
+
+        private void SetSrc(float x, float y, float z)
+        {
+            _src = new SpellDestination(x, y, z);
+            _targetMask |= SpellCastTargetFlags.SourceLocation;
+        }
+
+        private void SetSrc(Position pos)
+        {
+            _src = new SpellDestination(pos);
+            _targetMask |= SpellCastTargetFlags.SourceLocation;
+        }
+
+        private float GetSpeed()
+        {
+            return _speed;
         }
 
         #region Fields

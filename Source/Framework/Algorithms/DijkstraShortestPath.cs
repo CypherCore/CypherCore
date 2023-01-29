@@ -54,23 +54,6 @@ namespace Framework.Algorithms
             }
         }
 
-        private void Relax(DirectedEdge edge)
-        {
-            uint v = edge.From;
-            uint w = edge.To;
-
-            if (_distanceTo[w] > _distanceTo[v] + edge.Weight)
-            {
-                _distanceTo[w] = _distanceTo[v] + edge.Weight;
-                _edgeTo[w] = edge;
-
-                if (_priorityQueue.Contains((int)w))
-                    _priorityQueue.DecreaseKey((int)w, _distanceTo[w]);
-                else
-                    _priorityQueue.Insert((int)w, _distanceTo[w]);
-            }
-        }
-
         /// <summary>
         ///  Returns the length of a shortest path from the sourceVertex to the specified destinationVertex
         /// </summary>
@@ -161,6 +144,23 @@ namespace Framework.Algorithms
             }
 
             return true;
+        }
+
+        private void Relax(DirectedEdge edge)
+        {
+            uint v = edge.From;
+            uint w = edge.To;
+
+            if (_distanceTo[w] > _distanceTo[v] + edge.Weight)
+            {
+                _distanceTo[w] = _distanceTo[v] + edge.Weight;
+                _edgeTo[w] = edge;
+
+                if (_priorityQueue.Contains((int)w))
+                    _priorityQueue.DecreaseKey((int)w, _distanceTo[w]);
+                else
+                    _priorityQueue.Insert((int)w, _distanceTo[w]);
+            }
         }
     }
 }

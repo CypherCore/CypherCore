@@ -8,14 +8,14 @@ namespace Game
 {
     public class PhaseAreaInfo
     {
-        public List<Condition> Conditions { get; set; } = new();
-
-        public PhaseInfoStruct PhaseInfo { get; set; }
-        public List<uint> SubAreaExclusions { get; set; } = new();
-
         public PhaseAreaInfo(PhaseInfoStruct phaseInfo)
         {
             PhaseInfo = phaseInfo;
         }
+
+        public List<Condition> Conditions { get; set; } = new();
+
+        public PhaseInfoStruct PhaseInfo { get; set; }
+        public List<uint> SubAreaExclusions { get; set; } = new();
     }
 }

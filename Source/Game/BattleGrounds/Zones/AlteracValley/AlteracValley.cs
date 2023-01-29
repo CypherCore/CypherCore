@@ -4,6 +4,5 @@
 namespace Game.BattleGrounds.Zones.AlteracValley
 {
     internal class AlteracValley
-    {
-    }
+    {}
 }

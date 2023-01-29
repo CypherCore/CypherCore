@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		Preconditions:
 		  |h| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
 
@@ -26,7 +26,7 @@
 		  Have q+2^(-255)x = 2^(-255)(h + 19 2^(-25) h9 + 2^(-1))
 		  so floor(2^(-255)(h + 19 2^(-25) h9 + 2^(-1))) = q.
 		*/
-        internal static void fe_tobytes(byte[] s, int offset, ref FieldElement h)
+	    internal static void fe_tobytes(byte[] s, int offset, ref FieldElement h)
         {
             FieldElement hr;
             fe_reduce(out hr, ref h);
@@ -85,7 +85,7 @@
             }
         }
 
-        internal static void fe_reduce(out FieldElement hr, ref FieldElement h)
+	    internal static void fe_reduce(out FieldElement hr, ref FieldElement h)
         {
             int h0 = h.x0;
             int h1 = h.x1;

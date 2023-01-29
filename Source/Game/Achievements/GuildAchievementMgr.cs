@@ -353,6 +353,21 @@ public class GuildAchievementMgr : AchievementManager
         SendPacket(guildCriteriaDeleted);
     }
 
+    public override void SendPacket(ServerPacket data)
+    {
+        _owner.BroadcastPacket(data);
+    }
+
+    public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+    {
+        return Global.CriteriaMgr.GetGuildCriteriaByType(type);
+    }
+
+    public override string GetOwnerInfo()
+    {
+        return $"Guild ID {_owner.GetId()} {_owner.GetName()}";
+    }
+
     private void SendAchievementEarned(AchievementRecord achievement)
     {
         if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
@@ -371,20 +386,5 @@ public class GuildAchievementMgr : AchievementManager
         guildAchievementEarned.GuildGUID = _owner.GetGUID();
         guildAchievementEarned.TimeEarned = GameTime.GetGameTime();
         SendPacket(guildAchievementEarned);
-    }
-
-    public override void SendPacket(ServerPacket data)
-    {
-        _owner.BroadcastPacket(data);
-    }
-
-    public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
-    {
-        return Global.CriteriaMgr.GetGuildCriteriaByType(type);
-    }
-
-    public override string GetOwnerInfo()
-    {
-        return $"Guild ID {_owner.GetId()} {_owner.GetName()}";
     }
 }

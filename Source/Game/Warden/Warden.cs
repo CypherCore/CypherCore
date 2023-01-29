@@ -245,6 +245,20 @@ namespace Game
             }
         }
 
+        public abstract void Init(WorldSession session, BigInteger k);
+
+        public abstract void InitializeModule();
+
+        public abstract void RequestHash();
+
+        public abstract void HandleHashResult(ByteBuffer buff);
+
+        public abstract void HandleCheckResult(ByteBuffer buff);
+
+        public abstract void InitializeModuleForClient(out ClientWardenModule module);
+
+        public abstract void RequestChecks();
+
         private bool ProcessLuaCheckResponse(string msg)
         {
             string WARDEN_TOKEN = "_TW\t";
@@ -273,20 +287,6 @@ namespace Game
 
             return true;
         }
-
-        public abstract void Init(WorldSession session, BigInteger k);
-
-        public abstract void InitializeModule();
-
-        public abstract void RequestHash();
-
-        public abstract void HandleHashResult(ByteBuffer buff);
-
-        public abstract void HandleCheckResult(ByteBuffer buff);
-
-        public abstract void InitializeModuleForClient(out ClientWardenModule module);
-
-        public abstract void RequestChecks();
     }
 
     internal class WardenModuleUse

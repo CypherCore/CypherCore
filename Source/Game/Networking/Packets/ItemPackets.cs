@@ -998,17 +998,17 @@ namespace Game.Networking.Packets
 
         public ItemInstance(LootItem lootItem)
         {
-            ItemID = lootItem.itemid;
+            ItemID = lootItem.Itemid;
 
             if (!lootItem.BonusListIDs.Empty() ||
-                lootItem.randomBonusListId != 0)
+                lootItem.RandomBonusListId != 0)
             {
                 ItemBonus = new ItemBonuses();
                 ItemBonus.BonusListIDs = lootItem.BonusListIDs;
-                ItemBonus.Context = lootItem.context;
+                ItemBonus.Context = lootItem.Context;
 
-                if (lootItem.randomBonusListId != 0)
-                    ItemBonus.BonusListIDs.Add(lootItem.randomBonusListId);
+                if (lootItem.RandomBonusListId != 0)
+                    ItemBonus.BonusListIDs.Add(lootItem.RandomBonusListId);
             }
         }
 

@@ -21,65 +21,6 @@ namespace Game.Entities
 {
     public abstract class WorldObject : WorldLocation, IDisposable
     {
-
-        #region Fields
-
-        public TypeMask ObjectTypeMask { get; set; }
-        protected TypeId ObjectTypeId { get; set; }
-        protected CreateObjectBits UpdateFlag;
-        private ObjectGuid _guid;
-        private bool _isNewObject;
-        private bool _isDestroyedObject;
-
-        public UpdateFieldHolder Values { get; set; }
-        public ObjectFieldData ObjectData { get; set; }
-
-        public uint LastUsedScriptID { get; set; }
-
-        private bool _objectUpdated;
-
-        private uint _zoneId;
-        private uint _areaId;
-        private float _staticFloorZ;
-        private bool _outdoors;
-        private ZLiquidStatus _liquidStatus;
-
-        // Event handler
-        public EventSystem Events = new();
-
-        public MovementInfo MovementInfo { get; set; }
-        private string _name;
-        protected bool IsActive;
-        private bool _isFarVisible;
-        private float? _visibilityDistanceOverride;
-        private readonly bool _isWorldObject;
-        public ZoneScript ZoneScript { get; set; }
-
-        private ITransport _transport;
-        private Map _currMap;
-        public uint InstanceId { get; set; }
-        private PhaseShift _phaseShift = new();
-        private PhaseShift _suppressedPhaseShift = new(); // contains phases for current area but not applied due to conditions
-        private int _dbPhase;
-        public bool IsInWorld { get; set; }
-
-        private NotifyFlags _notifyflags;
-
-        private ObjectGuid _privateObjectOwner;
-
-        private SmoothPhasing _smoothPhasing;
-
-        public FlaggedArray32<StealthType> Stealth { get; set; } = new(2);
-        public FlaggedArray32<StealthType> StealthDetect { get; set; } = new(2);
-
-        public FlaggedArray64<InvisibilityType> Invisibility { get; set; } = new((int)InvisibilityType.Max);
-        public FlaggedArray64<InvisibilityType> InvisibilityDetect { get; set; } = new((int)InvisibilityType.Max);
-
-        public FlaggedArray32<ServerSideVisibilityType> ServerSideVisibility { get; set; } = new(2);
-        public FlaggedArray32<ServerSideVisibilityType> ServerSideVisibilityDetect { get; set; } = new(2);
-
-        #endregion
-
         public WorldObject(bool isWorldObject)
         {
             _name = "";
@@ -1069,22 +1010,12 @@ namespace Game.Entities
                 map.RemoveFromActive(this);
         }
 
-        private bool IsFarVisible()
-        {
-            return _isFarVisible;
-        }
-
         public void SetFarVisible(bool on)
         {
             if (IsPlayer())
                 return;
 
             _isFarVisible = on;
-        }
-
-        private bool IsVisibilityOverridden()
-        {
-            return _visibilityDistanceOverride.HasValue;
         }
 
         public void SetVisibilityDistanceOverride(VisibilityDistanceType type)
@@ -1415,162 +1346,6 @@ namespace Game.Entities
         public virtual bool CanAlwaysSee(WorldObject obj)
         {
             return false;
-        }
-
-        private bool CanDetect(WorldObject obj, bool ignoreStealth, bool checkAlert = false)
-        {
-            WorldObject seer = this;
-
-            // If a unit is possessing another one, it uses the detection of the latter
-            // Pets don't have detection, they use the detection of their masters
-            Unit thisUnit = ToUnit();
-
-            if (thisUnit != null)
-            {
-                if (thisUnit.IsPossessing())
-                {
-                    Unit charmed = thisUnit.GetCharmed();
-
-                    if (charmed != null)
-                        seer = charmed;
-                }
-                else
-                {
-                    Unit controller = thisUnit.GetCharmerOrOwner();
-
-                    if (controller != null)
-                        seer = controller;
-                }
-            }
-
-            if (obj.IsAlwaysDetectableFor(seer))
-                return true;
-
-            if (!ignoreStealth &&
-                !seer.CanDetectInvisibilityOf(obj))
-                return false;
-
-            if (!ignoreStealth &&
-                !seer.CanDetectStealthOf(obj, checkAlert))
-                return false;
-
-            return true;
-        }
-
-        private bool CanDetectInvisibilityOf(WorldObject obj)
-        {
-            ulong mask = obj.Invisibility.GetFlags() & InvisibilityDetect.GetFlags();
-
-            // Check for not detected types
-            if (mask != obj.Invisibility.GetFlags())
-                return false;
-
-            for (int i = 0; i < (int)InvisibilityType.Max; ++i)
-            {
-                if (!Convert.ToBoolean(mask & (1ul << i)))
-                    continue;
-
-                int objInvisibilityValue = obj.Invisibility.GetValue((InvisibilityType)i);
-                int ownInvisibilityDetectValue = InvisibilityDetect.GetValue((InvisibilityType)i);
-
-                // Too low value to detect
-                if (ownInvisibilityDetectValue < objInvisibilityValue)
-                    return false;
-            }
-
-            return true;
-        }
-
-        private bool CanDetectStealthOf(WorldObject obj, bool checkAlert = false)
-        {
-            // Combat reach is the minimal distance (both in front and behind),
-            //   and it is also used in the range calculation.
-            // One stealth point increases the visibility range by 0.3 yard.
-
-            if (obj.Stealth.GetFlags() == 0)
-                return true;
-
-            float distance = GetExactDist(obj);
-            float combatReach = 0.0f;
-
-            Unit unit = ToUnit();
-
-            if (unit != null)
-                combatReach = unit.GetCombatReach();
-
-            if (distance < combatReach)
-                return true;
-
-            // Only check back for units, it does not make sense for gameobjects
-            if (unit && !HasInArc(MathF.PI, obj))
-                return false;
-
-            // Traps should detect stealth always
-            GameObject go = ToGameObject();
-
-            if (go != null)
-                if (go.GetGoType() == GameObjectTypes.Trap)
-                    return true;
-
-            go = obj.ToGameObject();
-
-            for (int i = 0; i < (int)StealthType.Max; ++i)
-            {
-                if (!Convert.ToBoolean(obj.Stealth.GetFlags() & (1 << i)))
-                    continue;
-
-                if (unit != null &&
-                    unit.HasAuraTypeWithMiscvalue(AuraType.DetectStealth, i))
-                    return true;
-
-                // Starting points
-                int detectionValue = 30;
-
-                // Level difference: 5 point / level, starting from level 1.
-                // There may be spells for this and the starting points too, but
-                // not in the DBCs of the client.
-                detectionValue += (int)(GetLevelForTarget(obj) - 1) * 5;
-
-                // Apply modifiers
-                detectionValue += StealthDetect.GetValue((StealthType)i);
-
-                if (go != null)
-                {
-                    Unit owner = go.GetOwner();
-
-                    if (owner != null)
-                        detectionValue -= (int)(owner.GetLevelForTarget(this) - 1) * 5;
-                }
-
-                detectionValue -= obj.Stealth.GetValue((StealthType)i);
-
-                // Calculate max distance
-                float visibilityRange = detectionValue * 0.3f + combatReach;
-
-                // If this unit is an NPC then player detect range doesn't apply
-                if (unit &&
-                    unit.IsTypeId(TypeId.Player) &&
-                    visibilityRange > SharedConst.MaxPlayerStealthDetectRange)
-                    visibilityRange = SharedConst.MaxPlayerStealthDetectRange;
-
-                // When checking for alert State, look 8% further, and then 1.5 yards more than that.
-                if (checkAlert)
-                    visibilityRange += (visibilityRange * 0.08f) + 1.5f;
-
-                // If checking for alert, and creature's visibility range is greater than aggro distance, No alert
-                Unit tunit = obj.ToUnit();
-
-                if (checkAlert &&
-                    unit &&
-                    unit.ToCreature() &&
-                    visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature().CombatDistance)
-                    return false;
-
-                if (distance > visibilityRange)
-                    return false;
-            }
-
-            return true;
         }
 
         public virtual void SendMessageToSet(ServerPacket packet, bool self)
@@ -2258,112 +2033,6 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
-        private SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spellInfo)
-        {
-            // Can`t miss on dead Target (on skinning for example)
-            if (!victim.IsAlive() &&
-                !victim.IsPlayer())
-                return SpellMissInfo.None;
-
-            if (spellInfo.HasAttribute(SpellAttr3.NoAvoidance))
-                return SpellMissInfo.None;
-
-            float missChance;
-
-            if (spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
-            {
-                missChance = 0.0f;
-            }
-            else
-            {
-                SpellSchoolMask schoolMask = spellInfo.GetSchoolMask();
-                // PvP - PvE spell misschances per leveldif > 2
-                int lchance = victim.IsPlayer() ? 7 : 11;
-                uint thisLevel = GetLevelForTarget(victim);
-
-                if (IsCreature() &&
-                    ToCreature().IsTrigger())
-                    thisLevel = Math.Max(thisLevel, spellInfo.SpellLevel);
-
-                int leveldif = (int)(victim.GetLevelForTarget(this) - thisLevel);
-                int levelBasedHitDiff = leveldif;
-
-                // Base hit chance from Attacker and victim levels
-                int modHitChance = 100;
-
-                if (levelBasedHitDiff >= 0)
-                {
-                    if (!victim.IsPlayer())
-                    {
-                        modHitChance = 94 - 3 * Math.Min(levelBasedHitDiff, 3);
-                        levelBasedHitDiff -= 3;
-                    }
-                    else
-                    {
-                        modHitChance = 96 - Math.Min(levelBasedHitDiff, 2);
-                        levelBasedHitDiff -= 2;
-                    }
-
-                    if (levelBasedHitDiff > 0)
-                        modHitChance -= lchance * Math.Min(levelBasedHitDiff, 7);
-                }
-                else
-                {
-                    modHitChance = 97 - levelBasedHitDiff;
-                }
-
-                // Spellmod from SpellModOp::HitChance
-                Player modOwner = GetSpellModOwner();
-
-                modOwner?.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref modHitChance);
-
-                // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore Target's avoidance effects
-                if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
-                    // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE Auras
-                    modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
-
-                float HitChance = modHitChance;
-                // Increase hit chance from Attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and Attacker ratings
-                Unit unit = ToUnit();
-
-                if (unit != null)
-                    HitChance += unit.ModSpellHitChance;
-
-                MathFunctions.RoundToInterval(ref HitChance, 0.0f, 100.0f);
-
-                missChance = 100.0f - HitChance;
-            }
-
-            int tmp = (int)(missChance * 100.0f);
-
-            int rand = RandomHelper.IRand(0, 9999);
-
-            if (tmp > 0 &&
-                rand < tmp)
-                return SpellMissInfo.Miss;
-
-            // Chance Resist mechanic (select max value from every mechanic spell effect)
-            int resist_chance = victim.GetMechanicResistChance(spellInfo) * 100;
-
-            // Roll chance
-            if (resist_chance > 0 &&
-                rand < (tmp += resist_chance))
-                return SpellMissInfo.Resist;
-
-            // cast by caster in front of victim
-            if (!victim.HasUnitState(UnitState.Controlled) &&
-                (victim.HasInArc(MathF.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
-            {
-                int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
-
-                if (deflect_chance > 0 &&
-                    rand < (tmp += deflect_chance))
-                    return SpellMissInfo.Deflect;
-            }
-
-            return SpellMissInfo.None;
-        }
-
         // Calculate spell hit result can be:
         // Every spell can: Evade/Immune/Reflect/Sucesful hit
         // For melee based spells:
@@ -2805,79 +2474,6 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisual, true);
         }
 
-        private void SendCancelSpellVisual(uint id)
-        {
-            CancelSpellVisual cancelSpellVisual = new();
-            cancelSpellVisual.Source = GetGUID();
-            cancelSpellVisual.SpellVisualID = id;
-            SendMessageToSet(cancelSpellVisual, true);
-        }
-
-        private void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
-        {
-            PlayOrphanSpellVisual playOrphanSpellVisual = new();
-            playOrphanSpellVisual.SourceLocation = GetPosition();
-
-            if (withSourceOrientation)
-            {
-                if (IsGameObject())
-                {
-                    var rotation = ToGameObject().GetWorldRotation();
-
-                    rotation.toEulerAnglesZYX(out playOrphanSpellVisual.SourceRotation.Z,
-                                              out playOrphanSpellVisual.SourceRotation.Y,
-                                              out playOrphanSpellVisual.SourceRotation.X);
-                }
-                else
-                {
-                    playOrphanSpellVisual.SourceRotation = new Position(0.0f, 0.0f, GetOrientation());
-                }
-            }
-
-            playOrphanSpellVisual.Target = target; // exclusive with TargetLocation
-            playOrphanSpellVisual.SpellVisualID = spellVisualId;
-            playOrphanSpellVisual.TravelSpeed = travelSpeed;
-            playOrphanSpellVisual.SpeedAsTime = speedAsTime;
-            playOrphanSpellVisual.LaunchDelay = 0.0f;
-            SendMessageToSet(playOrphanSpellVisual, true);
-        }
-
-        private void SendPlayOrphanSpellVisual(Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
-        {
-            PlayOrphanSpellVisual playOrphanSpellVisual = new();
-            playOrphanSpellVisual.SourceLocation = GetPosition();
-
-            if (withSourceOrientation)
-            {
-                if (IsGameObject())
-                {
-                    var rotation = ToGameObject().GetWorldRotation();
-
-                    rotation.toEulerAnglesZYX(out playOrphanSpellVisual.SourceRotation.Z,
-                                              out playOrphanSpellVisual.SourceRotation.Y,
-                                              out playOrphanSpellVisual.SourceRotation.X);
-                }
-                else
-                {
-                    playOrphanSpellVisual.SourceRotation = new Position(0.0f, 0.0f, GetOrientation());
-                }
-            }
-
-            playOrphanSpellVisual.TargetLocation = targetLocation; // exclusive with Target
-            playOrphanSpellVisual.SpellVisualID = spellVisualId;
-            playOrphanSpellVisual.TravelSpeed = travelSpeed;
-            playOrphanSpellVisual.SpeedAsTime = speedAsTime;
-            playOrphanSpellVisual.LaunchDelay = 0.0f;
-            SendMessageToSet(playOrphanSpellVisual, true);
-        }
-
-        private void SendCancelOrphanSpellVisual(uint id)
-        {
-            CancelOrphanSpellVisual cancelOrphanSpellVisual = new();
-            cancelOrphanSpellVisual.SpellVisualID = id;
-            SendMessageToSet(cancelOrphanSpellVisual, true);
-        }
-
         public void SendPlaySpellVisualKit(uint id, uint type, uint duration)
         {
             PlaySpellVisualKit playSpellVisualKit = new();
@@ -2886,14 +2482,6 @@ namespace Game.Entities
             playSpellVisualKit.KitType = type;
             playSpellVisualKit.Duration = duration;
             SendMessageToSet(playSpellVisualKit, true);
-        }
-
-        private void SendCancelSpellVisualKit(uint id)
-        {
-            CancelSpellVisualKit cancelSpellVisualKit = new();
-            cancelSpellVisualKit.Source = GetGUID();
-            cancelSpellVisualKit.SpellVisualKitID = id;
-            SendMessageToSet(cancelSpellVisualKit, true);
         }
 
         // function based on function Unit::CanAttack from 13850 client
@@ -3699,11 +3287,6 @@ namespace Game.Entities
             return Convert.ToBoolean(_notifyflags & f);
         }
 
-        private NotifyFlags GetNotifyFlags()
-        {
-            return _notifyflags;
-        }
-
         public void ResetAllNotifies()
         {
             _notifyflags = 0;
@@ -3747,11 +3330,6 @@ namespace Game.Entities
         public float GetTransOffsetO()
         {
             return MovementInfo.Transport.Pos.GetOrientation();
-        }
-
-        private Position GetTransOffset()
-        {
-            return MovementInfo.Transport.Pos;
         }
 
         public uint GetTransTime()
@@ -4096,23 +3674,6 @@ namespace Game.Entities
         public bool IsInBetween(WorldObject obj1, WorldObject obj2, float size = 0)
         {
             return obj1 && obj2 && IsInBetween(obj1.GetPosition(), obj2.GetPosition(), size);
-        }
-
-        private bool IsInBetween(Position pos1, Position pos2, float size)
-        {
-            float dist = GetExactDist2d(pos1);
-
-            // not using sqrt() for performance
-            if ((dist * dist) >= pos1.GetExactDist2dSq(pos2))
-                return false;
-
-            if (size == 0)
-                size = GetCombatReach() / 2;
-
-            float angle = pos1.GetAbsoluteAngle(pos2);
-
-            // not using sqrt() for performance
-            return (size * size) >= GetExactDist2dSq(pos1.GetPositionX() + (float)Math.Cos(angle) * dist, pos1.GetPositionY() + (float)Math.Sin(angle) * dist);
         }
 
         public bool IsInFront(WorldObject target, float arc = MathFunctions.PI)
@@ -4525,5 +4086,442 @@ namespace Game.Entities
             return obj != null;
         }
 
+        private bool IsFarVisible()
+        {
+            return _isFarVisible;
+        }
+
+        private bool IsVisibilityOverridden()
+        {
+            return _visibilityDistanceOverride.HasValue;
+        }
+
+        private bool CanDetect(WorldObject obj, bool ignoreStealth, bool checkAlert = false)
+        {
+            WorldObject seer = this;
+
+            // If a unit is possessing another one, it uses the detection of the latter
+            // Pets don't have detection, they use the detection of their masters
+            Unit thisUnit = ToUnit();
+
+            if (thisUnit != null)
+            {
+                if (thisUnit.IsPossessing())
+                {
+                    Unit charmed = thisUnit.GetCharmed();
+
+                    if (charmed != null)
+                        seer = charmed;
+                }
+                else
+                {
+                    Unit controller = thisUnit.GetCharmerOrOwner();
+
+                    if (controller != null)
+                        seer = controller;
+                }
+            }
+
+            if (obj.IsAlwaysDetectableFor(seer))
+                return true;
+
+            if (!ignoreStealth &&
+                !seer.CanDetectInvisibilityOf(obj))
+                return false;
+
+            if (!ignoreStealth &&
+                !seer.CanDetectStealthOf(obj, checkAlert))
+                return false;
+
+            return true;
+        }
+
+        private bool CanDetectInvisibilityOf(WorldObject obj)
+        {
+            ulong mask = obj.Invisibility.GetFlags() & InvisibilityDetect.GetFlags();
+
+            // Check for not detected types
+            if (mask != obj.Invisibility.GetFlags())
+                return false;
+
+            for (int i = 0; i < (int)InvisibilityType.Max; ++i)
+            {
+                if (!Convert.ToBoolean(mask & (1ul << i)))
+                    continue;
+
+                int objInvisibilityValue = obj.Invisibility.GetValue((InvisibilityType)i);
+                int ownInvisibilityDetectValue = InvisibilityDetect.GetValue((InvisibilityType)i);
+
+                // Too low value to detect
+                if (ownInvisibilityDetectValue < objInvisibilityValue)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool CanDetectStealthOf(WorldObject obj, bool checkAlert = false)
+        {
+            // Combat reach is the minimal distance (both in front and behind),
+            //   and it is also used in the range calculation.
+            // One stealth point increases the visibility range by 0.3 yard.
+
+            if (obj.Stealth.GetFlags() == 0)
+                return true;
+
+            float distance = GetExactDist(obj);
+            float combatReach = 0.0f;
+
+            Unit unit = ToUnit();
+
+            if (unit != null)
+                combatReach = unit.GetCombatReach();
+
+            if (distance < combatReach)
+                return true;
+
+            // Only check back for units, it does not make sense for gameobjects
+            if (unit && !HasInArc(MathF.PI, obj))
+                return false;
+
+            // Traps should detect stealth always
+            GameObject go = ToGameObject();
+
+            if (go != null)
+                if (go.GetGoType() == GameObjectTypes.Trap)
+                    return true;
+
+            go = obj.ToGameObject();
+
+            for (int i = 0; i < (int)StealthType.Max; ++i)
+            {
+                if (!Convert.ToBoolean(obj.Stealth.GetFlags() & (1 << i)))
+                    continue;
+
+                if (unit != null &&
+                    unit.HasAuraTypeWithMiscvalue(AuraType.DetectStealth, i))
+                    return true;
+
+                // Starting points
+                int detectionValue = 30;
+
+                // Level difference: 5 point / level, starting from level 1.
+                // There may be spells for this and the starting points too, but
+                // not in the DBCs of the client.
+                detectionValue += (int)(GetLevelForTarget(obj) - 1) * 5;
+
+                // Apply modifiers
+                detectionValue += StealthDetect.GetValue((StealthType)i);
+
+                if (go != null)
+                {
+                    Unit owner = go.GetOwner();
+
+                    if (owner != null)
+                        detectionValue -= (int)(owner.GetLevelForTarget(this) - 1) * 5;
+                }
+
+                detectionValue -= obj.Stealth.GetValue((StealthType)i);
+
+                // Calculate max distance
+                float visibilityRange = detectionValue * 0.3f + combatReach;
+
+                // If this unit is an NPC then player detect range doesn't apply
+                if (unit &&
+                    unit.IsTypeId(TypeId.Player) &&
+                    visibilityRange > SharedConst.MaxPlayerStealthDetectRange)
+                    visibilityRange = SharedConst.MaxPlayerStealthDetectRange;
+
+                // When checking for alert State, look 8% further, and then 1.5 yards more than that.
+                if (checkAlert)
+                    visibilityRange += (visibilityRange * 0.08f) + 1.5f;
+
+                // If checking for alert, and creature's visibility range is greater than aggro distance, No alert
+                Unit tunit = obj.ToUnit();
+
+                if (checkAlert &&
+                    unit &&
+                    unit.ToCreature() &&
+                    visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature().CombatDistance)
+                    return false;
+
+                if (distance > visibilityRange)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spellInfo)
+        {
+            // Can`t miss on dead Target (on skinning for example)
+            if (!victim.IsAlive() &&
+                !victim.IsPlayer())
+                return SpellMissInfo.None;
+
+            if (spellInfo.HasAttribute(SpellAttr3.NoAvoidance))
+                return SpellMissInfo.None;
+
+            float missChance;
+
+            if (spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
+            {
+                missChance = 0.0f;
+            }
+            else
+            {
+                SpellSchoolMask schoolMask = spellInfo.GetSchoolMask();
+                // PvP - PvE spell misschances per leveldif > 2
+                int lchance = victim.IsPlayer() ? 7 : 11;
+                uint thisLevel = GetLevelForTarget(victim);
+
+                if (IsCreature() &&
+                    ToCreature().IsTrigger())
+                    thisLevel = Math.Max(thisLevel, spellInfo.SpellLevel);
+
+                int leveldif = (int)(victim.GetLevelForTarget(this) - thisLevel);
+                int levelBasedHitDiff = leveldif;
+
+                // Base hit chance from Attacker and victim levels
+                int modHitChance = 100;
+
+                if (levelBasedHitDiff >= 0)
+                {
+                    if (!victim.IsPlayer())
+                    {
+                        modHitChance = 94 - 3 * Math.Min(levelBasedHitDiff, 3);
+                        levelBasedHitDiff -= 3;
+                    }
+                    else
+                    {
+                        modHitChance = 96 - Math.Min(levelBasedHitDiff, 2);
+                        levelBasedHitDiff -= 2;
+                    }
+
+                    if (levelBasedHitDiff > 0)
+                        modHitChance -= lchance * Math.Min(levelBasedHitDiff, 7);
+                }
+                else
+                {
+                    modHitChance = 97 - levelBasedHitDiff;
+                }
+
+                // Spellmod from SpellModOp::HitChance
+                Player modOwner = GetSpellModOwner();
+
+                modOwner?.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref modHitChance);
+
+                // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore Target's avoidance effects
+                if (!spellInfo.HasAttribute(SpellAttr3.AlwaysHit))
+                    // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE Auras
+                    modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
+
+                float HitChance = modHitChance;
+                // Increase hit chance from Attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and Attacker ratings
+                Unit unit = ToUnit();
+
+                if (unit != null)
+                    HitChance += unit.ModSpellHitChance;
+
+                MathFunctions.RoundToInterval(ref HitChance, 0.0f, 100.0f);
+
+                missChance = 100.0f - HitChance;
+            }
+
+            int tmp = (int)(missChance * 100.0f);
+
+            int rand = RandomHelper.IRand(0, 9999);
+
+            if (tmp > 0 &&
+                rand < tmp)
+                return SpellMissInfo.Miss;
+
+            // Chance Resist mechanic (select max value from every mechanic spell effect)
+            int resist_chance = victim.GetMechanicResistChance(spellInfo) * 100;
+
+            // Roll chance
+            if (resist_chance > 0 &&
+                rand < (tmp += resist_chance))
+                return SpellMissInfo.Resist;
+
+            // cast by caster in front of victim
+            if (!victim.HasUnitState(UnitState.Controlled) &&
+                (victim.HasInArc(MathF.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
+            {
+                int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
+
+                if (deflect_chance > 0 &&
+                    rand < (tmp += deflect_chance))
+                    return SpellMissInfo.Deflect;
+            }
+
+            return SpellMissInfo.None;
+        }
+
+        private void SendCancelSpellVisual(uint id)
+        {
+            CancelSpellVisual cancelSpellVisual = new();
+            cancelSpellVisual.Source = GetGUID();
+            cancelSpellVisual.SpellVisualID = id;
+            SendMessageToSet(cancelSpellVisual, true);
+        }
+
+        private void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        {
+            PlayOrphanSpellVisual playOrphanSpellVisual = new();
+            playOrphanSpellVisual.SourceLocation = GetPosition();
+
+            if (withSourceOrientation)
+            {
+                if (IsGameObject())
+                {
+                    var rotation = ToGameObject().GetWorldRotation();
+
+                    rotation.toEulerAnglesZYX(out playOrphanSpellVisual.SourceRotation.Z,
+                                              out playOrphanSpellVisual.SourceRotation.Y,
+                                              out playOrphanSpellVisual.SourceRotation.X);
+                }
+                else
+                {
+                    playOrphanSpellVisual.SourceRotation = new Position(0.0f, 0.0f, GetOrientation());
+                }
+            }
+
+            playOrphanSpellVisual.Target = target; // exclusive with TargetLocation
+            playOrphanSpellVisual.SpellVisualID = spellVisualId;
+            playOrphanSpellVisual.TravelSpeed = travelSpeed;
+            playOrphanSpellVisual.SpeedAsTime = speedAsTime;
+            playOrphanSpellVisual.LaunchDelay = 0.0f;
+            SendMessageToSet(playOrphanSpellVisual, true);
+        }
+
+        private void SendPlayOrphanSpellVisual(Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        {
+            PlayOrphanSpellVisual playOrphanSpellVisual = new();
+            playOrphanSpellVisual.SourceLocation = GetPosition();
+
+            if (withSourceOrientation)
+            {
+                if (IsGameObject())
+                {
+                    var rotation = ToGameObject().GetWorldRotation();
+
+                    rotation.toEulerAnglesZYX(out playOrphanSpellVisual.SourceRotation.Z,
+                                              out playOrphanSpellVisual.SourceRotation.Y,
+                                              out playOrphanSpellVisual.SourceRotation.X);
+                }
+                else
+                {
+                    playOrphanSpellVisual.SourceRotation = new Position(0.0f, 0.0f, GetOrientation());
+                }
+            }
+
+            playOrphanSpellVisual.TargetLocation = targetLocation; // exclusive with Target
+            playOrphanSpellVisual.SpellVisualID = spellVisualId;
+            playOrphanSpellVisual.TravelSpeed = travelSpeed;
+            playOrphanSpellVisual.SpeedAsTime = speedAsTime;
+            playOrphanSpellVisual.LaunchDelay = 0.0f;
+            SendMessageToSet(playOrphanSpellVisual, true);
+        }
+
+        private void SendCancelOrphanSpellVisual(uint id)
+        {
+            CancelOrphanSpellVisual cancelOrphanSpellVisual = new();
+            cancelOrphanSpellVisual.SpellVisualID = id;
+            SendMessageToSet(cancelOrphanSpellVisual, true);
+        }
+
+        private void SendCancelSpellVisualKit(uint id)
+        {
+            CancelSpellVisualKit cancelSpellVisualKit = new();
+            cancelSpellVisualKit.Source = GetGUID();
+            cancelSpellVisualKit.SpellVisualKitID = id;
+            SendMessageToSet(cancelSpellVisualKit, true);
+        }
+
+        private NotifyFlags GetNotifyFlags()
+        {
+            return _notifyflags;
+        }
+
+        private Position GetTransOffset()
+        {
+            return MovementInfo.Transport.Pos;
+        }
+
+        private bool IsInBetween(Position pos1, Position pos2, float size)
+        {
+            float dist = GetExactDist2d(pos1);
+
+            // not using sqrt() for performance
+            if ((dist * dist) >= pos1.GetExactDist2dSq(pos2))
+                return false;
+
+            if (size == 0)
+                size = GetCombatReach() / 2;
+
+            float angle = pos1.GetAbsoluteAngle(pos2);
+
+            // not using sqrt() for performance
+            return (size * size) >= GetExactDist2dSq(pos1.GetPositionX() + (float)Math.Cos(angle) * dist, pos1.GetPositionY() + (float)Math.Sin(angle) * dist);
+        }
+
+        #region Fields
+
+        public TypeMask ObjectTypeMask { get; set; }
+        protected TypeId ObjectTypeId { get; set; }
+        protected CreateObjectBits UpdateFlag;
+        private ObjectGuid _guid;
+        private bool _isNewObject;
+        private bool _isDestroyedObject;
+
+        public UpdateFieldHolder Values { get; set; }
+        public ObjectFieldData ObjectData { get; set; }
+
+        public uint LastUsedScriptID { get; set; }
+
+        private bool _objectUpdated;
+
+        private uint _zoneId;
+        private uint _areaId;
+        private float _staticFloorZ;
+        private bool _outdoors;
+        private ZLiquidStatus _liquidStatus;
+
+        // Event handler
+        public EventSystem Events = new();
+
+        public MovementInfo MovementInfo { get; set; }
+        private string _name;
+        protected bool IsActive;
+        private bool _isFarVisible;
+        private float? _visibilityDistanceOverride;
+        private readonly bool _isWorldObject;
+        public ZoneScript ZoneScript { get; set; }
+
+        private ITransport _transport;
+        private Map _currMap;
+        public uint InstanceId { get; set; }
+        private PhaseShift _phaseShift = new();
+        private PhaseShift _suppressedPhaseShift = new(); // contains phases for current area but not applied due to conditions
+        private int _dbPhase;
+        public bool IsInWorld { get; set; }
+
+        private NotifyFlags _notifyflags;
+
+        private ObjectGuid _privateObjectOwner;
+
+        private SmoothPhasing _smoothPhasing;
+
+        public FlaggedArray32<StealthType> Stealth { get; set; } = new(2);
+        public FlaggedArray32<StealthType> StealthDetect { get; set; } = new(2);
+
+        public FlaggedArray64<InvisibilityType> Invisibility { get; set; } = new((int)InvisibilityType.Max);
+        public FlaggedArray64<InvisibilityType> InvisibilityDetect { get; set; } = new((int)InvisibilityType.Max);
+
+        public FlaggedArray32<ServerSideVisibilityType> ServerSideVisibility { get; set; } = new(2);
+        public FlaggedArray32<ServerSideVisibilityType> ServerSideVisibilityDetect { get; set; } = new(2);
+
+        #endregion
     }
 }

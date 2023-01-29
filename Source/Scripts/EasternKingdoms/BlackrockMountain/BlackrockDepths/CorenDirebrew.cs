@@ -235,14 +235,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             }
         }
 
-        private void SummonSister(uint entry)
-        {
-            Creature sister = me.SummonCreature(entry, me.GetPosition(), TempSummonType.DeadDespawn);
-
-            if (sister)
-                DoZoneInCombat(sister);
-        }
-
         public override void UpdateAI(uint diff)
         {
             if (!UpdateVictim() &&
@@ -250,6 +242,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void SummonSister(uint entry)
+        {
+            Creature sister = me.SummonCreature(entry, me.GetPosition(), TempSummonType.DeadDespawn);
+
+            if (sister)
+                DoZoneInCombat(sister);
         }
     }
 
@@ -410,14 +410,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             return ValidateSpellInfo(SpellIds.MoleMachineMinionSummoner);
         }
 
-        private void HandleScriptEffect(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.MoleMachineMinionSummoner, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScriptEffect(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.MoleMachineMinionSummoner, true);
         }
     }
 
@@ -425,6 +425,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
     internal class spell_send_mug_target_picker : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void FilterTargets(List<WorldObject> targets)
         {
@@ -455,12 +461,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             caster.GetAI().SetGUID(GetHitUnit().GetGUID(), MiscConst.DataTargetGuid);
             caster.CastSpell(GetHitUnit(), SpellIds.SendFirstMug, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     // 47344 - Request Second Mug
@@ -473,14 +473,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             return ValidateSpellInfo(SpellIds.SendSecondMug);
         }
 
-        private void HandleScriptEffect(uint effIndex)
-        {
-            GetHitUnit().CastSpell(GetCaster(), SpellIds.SendSecondMug, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScriptEffect(uint effIndex)
+        {
+            GetHitUnit().CastSpell(GetCaster(), SpellIds.SendSecondMug, true);
         }
     }
 
@@ -494,14 +494,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
             return ValidateSpellInfo(SpellIds.SendMugTargetPicker);
         }
 
-        private void PeriodicTick(AuraEffect aurEff)
-        {
-            GetTarget().CastSpell(GetTarget(), SpellIds.SendMugTargetPicker, true);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+        }
+
+        private void PeriodicTick(AuraEffect aurEff)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.SendMugTargetPicker, true);
         }
     }
 
@@ -510,15 +510,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+
         private void PeriodicTick(AuraEffect aurEff)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(null, SpellIds.Barreled, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -530,6 +530,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DirebrewDisarm, SpellIds.DirebrewDisarmGrow);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void PeriodicTick(AuraEffect aurEff)
@@ -547,12 +553,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         {
             GetTarget().CastSpell(GetTarget(), SpellIds.DirebrewDisarmGrow, true);
             GetTarget().CastSpell(GetTarget(), SpellIds.DirebrewDisarm);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicDummy));
-            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 }

@@ -26,6 +26,35 @@ namespace Game.Networking.Packets
 
     public class QueryGuildInfoResponse : ServerPacket
     {
+        public class GuildInfo
+        {
+            public struct RankInfo
+            {
+                public RankInfo(uint id, uint order, string name)
+                {
+                    RankID = id;
+                    RankOrder = order;
+                    RankName = name;
+                }
+
+                public uint RankID;
+                public uint RankOrder;
+                public string RankName;
+            }
+
+            public uint BackgroundColor;
+            public uint BorderColor;
+            public uint BorderStyle;
+            public uint EmblemColor;
+
+            public uint EmblemStyle;
+            public ObjectGuid GuildGuid;
+            public string GuildName = "";
+            public List<RankInfo> Ranks = new();
+
+            public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region.
+        }
+
         public ObjectGuid GuildGUID;
         public bool HasGuildInfo;
         public GuildInfo Info = new();
@@ -63,35 +92,6 @@ namespace Game.Networking.Packets
                 }
 
                 _worldPacket.WriteString(Info.GuildName);
-            }
-        }
-
-        public class GuildInfo
-        {
-            public uint BackgroundColor;
-            public uint BorderColor;
-            public uint BorderStyle;
-            public uint EmblemColor;
-
-            public uint EmblemStyle;
-            public ObjectGuid GuildGuid;
-            public string GuildName = "";
-            public List<RankInfo> Ranks = new();
-
-            public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region.
-
-            public struct RankInfo
-            {
-                public RankInfo(uint id, uint order, string name)
-                {
-                    RankID = id;
-                    RankOrder = order;
-                    RankName = name;
-                }
-
-                public uint RankID;
-                public uint RankOrder;
-                public string RankName;
             }
         }
     }
@@ -595,6 +595,12 @@ namespace Game.Networking.Packets
 
     public class GuildPermissionsQueryResults : ServerPacket
     {
+        public struct GuildRankTabPermissions
+        {
+            public int Flags;
+            public int WithdrawItemLimit;
+        }
+
         public int Flags;
 
         public int NumTabs;
@@ -620,12 +626,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(tab.Flags);
                 _worldPacket.WriteInt32(tab.WithdrawItemLimit);
             }
-        }
-
-        public struct GuildRankTabPermissions
-        {
-            public int Flags;
-            public int WithdrawItemLimit;
         }
     }
 

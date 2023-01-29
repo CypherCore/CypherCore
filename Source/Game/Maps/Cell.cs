@@ -9,6 +9,15 @@ namespace Game.Maps
 {
     public class Cell
     {
+        public struct Data
+        {
+            public uint grid_x;
+            public uint grid_y;
+            public uint cell_x;
+            public uint cell_y;
+            public bool nocreate;
+        }
+
         public Data data;
 
         public Cell(ICoord p)
@@ -194,59 +203,6 @@ namespace Game.Maps
             }
         }
 
-        private void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
-        {
-            //here is an algorithm for 'filling' circum-squared octagon
-            uint x_shift = (uint)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
-            //lets calculate x_start/x_end coords for central strip...
-            uint x_start = begin_cell.X_coord + x_shift;
-            uint x_end = end_cell.X_coord - x_shift;
-
-            //visit central strip with constant width...
-            for (uint x = x_start; x <= x_end; ++x)
-            {
-                for (uint y = begin_cell.Y_coord; y <= end_cell.Y_coord; ++y)
-                {
-                    CellCoord cellCoord = new(x, y);
-                    Cell r_zone = new(cellCoord);
-                    r_zone.data.nocreate = data.nocreate;
-                    map.Visit(r_zone, visitor);
-                }
-            }
-
-            //if x_shift == 0 then we have too small cell area, which were already
-            //visited at previous step, so just return from procedure...
-            if (x_shift == 0)
-                return;
-
-            uint y_start = end_cell.Y_coord;
-            uint y_end = begin_cell.Y_coord;
-
-            //now we are visiting borders of an octagon...
-            for (uint step = 1; step <= (x_start - begin_cell.X_coord); ++step)
-            {
-                //each step reduces strip height by 2 cells...
-                y_end += 1;
-                y_start -= 1;
-
-                for (uint y = y_start; y >= y_end; --y)
-                {
-                    //we visit cells symmetrically from both sides, heading from center to sides and from up to bottom
-                    //e.g. filling 2 trapezoids after filling central cell strip...
-                    CellCoord cellCoord_left = new(x_start - step, y);
-                    Cell r_zone_left = new(cellCoord_left);
-                    r_zone_left.data.nocreate = data.nocreate;
-                    map.Visit(r_zone_left, visitor);
-
-                    //right trapezoid cell visit
-                    CellCoord cellCoord_right = new(x_end + step, y);
-                    Cell r_zone_right = new(cellCoord_right);
-                    r_zone_right.data.nocreate = data.nocreate;
-                    map.Visit(r_zone_right, visitor);
-                }
-            }
-        }
-
         public static void VisitGridObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
@@ -338,13 +294,57 @@ namespace Game.Maps
             return new CellArea(centerX, centerY);
         }
 
-        public struct Data
+        private void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
         {
-            public uint grid_x;
-            public uint grid_y;
-            public uint cell_x;
-            public uint cell_y;
-            public bool nocreate;
+            //here is an algorithm for 'filling' circum-squared octagon
+            uint x_shift = (uint)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
+            //lets calculate x_start/x_end coords for central strip...
+            uint x_start = begin_cell.X_coord + x_shift;
+            uint x_end = end_cell.X_coord - x_shift;
+
+            //visit central strip with constant width...
+            for (uint x = x_start; x <= x_end; ++x)
+            {
+                for (uint y = begin_cell.Y_coord; y <= end_cell.Y_coord; ++y)
+                {
+                    CellCoord cellCoord = new(x, y);
+                    Cell r_zone = new(cellCoord);
+                    r_zone.data.nocreate = data.nocreate;
+                    map.Visit(r_zone, visitor);
+                }
+            }
+
+            //if x_shift == 0 then we have too small cell area, which were already
+            //visited at previous step, so just return from procedure...
+            if (x_shift == 0)
+                return;
+
+            uint y_start = end_cell.Y_coord;
+            uint y_end = begin_cell.Y_coord;
+
+            //now we are visiting borders of an octagon...
+            for (uint step = 1; step <= (x_start - begin_cell.X_coord); ++step)
+            {
+                //each step reduces strip height by 2 cells...
+                y_end += 1;
+                y_start -= 1;
+
+                for (uint y = y_start; y >= y_end; --y)
+                {
+                    //we visit cells symmetrically from both sides, heading from center to sides and from up to bottom
+                    //e.g. filling 2 trapezoids after filling central cell strip...
+                    CellCoord cellCoord_left = new(x_start - step, y);
+                    Cell r_zone_left = new(cellCoord_left);
+                    r_zone_left.data.nocreate = data.nocreate;
+                    map.Visit(r_zone_left, visitor);
+
+                    //right trapezoid cell visit
+                    CellCoord cellCoord_right = new(x_end + step, y);
+                    Cell r_zone_right = new(cellCoord_right);
+                    r_zone_right.data.nocreate = data.nocreate;
+                    map.Visit(r_zone_right, visitor);
+                }
+            }
         }
     }
 
@@ -364,15 +364,15 @@ namespace Game.Maps
             high_bound = high;
         }
 
+        public bool Check()
+        {
+            return low_bound == high_bound;
+        }
+
         private void ResizeBorders(ref ICoord begin_cell, ref ICoord end_cell)
         {
             begin_cell = low_bound;
             end_cell = high_bound;
-        }
-
-        public bool Check()
-        {
-            return low_bound == high_bound;
         }
     }
 }

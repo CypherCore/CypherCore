@@ -8,9 +8,8 @@ namespace Framework.IO
 {
     public sealed class StringArguments
     {
-        private int activeposition;
-
         private readonly string activestring;
+        private int activeposition;
         private string Current;
 
         public StringArguments(string args)

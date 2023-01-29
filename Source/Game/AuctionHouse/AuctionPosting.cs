@@ -12,22 +12,84 @@ namespace Game
 {
     public class AuctionPosting
     {
-        public ulong BidAmount { get; set; }
+        public class Sorter : IComparer<AuctionPosting>
+        {
+            private readonly Locale _locale;
+            private readonly int _sortCount;
+            private readonly AuctionSortDef[] _sorts;
+
+            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
+            {
+                _locale = locale;
+                _sorts = sorts;
+                _sortCount = sortCount;
+            }
+
+            public int Compare(AuctionPosting left, AuctionPosting right)
+            {
+                for (var i = 0; i < _sortCount; ++i)
+                {
+                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
+
+                    if (ordering != 0)
+                        return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
+                }
+
+                // Auctions are processed in LIFO order
+                if (left.StartTime != right.StartTime)
+                    return left.StartTime.CompareTo(right.StartTime);
+
+                return left.Id.CompareTo(right.Id);
+            }
+
+            private long CompareColumns(AuctionHouseSortOrder column, AuctionPosting left, AuctionPosting right)
+            {
+                switch (column)
+                {
+                    case AuctionHouseSortOrder.Price:
+                        {
+                            ulong leftPrice = left.BuyoutOrUnitPrice != 0 ? left.BuyoutOrUnitPrice : (left.BidAmount != 0 ? left.BidAmount : left.MinBid);
+                            ulong rightPrice = right.BuyoutOrUnitPrice != 0 ? right.BuyoutOrUnitPrice : (right.BidAmount != 0 ? right.BidAmount : right.MinBid);
+
+                            return (long)(leftPrice - rightPrice);
+                        }
+                    case AuctionHouseSortOrder.Name:
+                        return left.Bucket.FullName[(int)_locale].CompareTo(right.Bucket.FullName[(int)_locale]);
+                    case AuctionHouseSortOrder.Level:
+                        {
+                            int leftLevel = left.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? left.Bucket.SortLevel : (int)left.Items[0].GetModifier(ItemModifier.BattlePetLevel);
+                            int rightLevel = right.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? right.Bucket.SortLevel : (int)right.Items[0].GetModifier(ItemModifier.BattlePetLevel);
+
+                            return leftLevel - rightLevel;
+                        }
+                    case AuctionHouseSortOrder.Bid:
+                        return (long)(left.BidAmount - right.BidAmount);
+                    case AuctionHouseSortOrder.Buyout:
+                        return (long)(left.BuyoutOrUnitPrice - right.BuyoutOrUnitPrice);
+                    default:
+                        break;
+                }
+
+                return 0;
+            }
+        }
+
         public ObjectGuid Bidder;
+        public DateTime EndTime = DateTime.MinValue;
+        public ObjectGuid Owner;
+        public ObjectGuid OwnerAccount;
+        public DateTime StartTime = DateTime.MinValue;
+        public ulong BidAmount { get; set; }
 
         public List<ObjectGuid> BidderHistory { get; set; } = new();
         public AuctionsBucketData Bucket { get; set; }
         public ulong BuyoutOrUnitPrice { get; set; }
         public ulong Deposit { get; set; }
-        public DateTime EndTime = DateTime.MinValue;
         public uint Id { get; set; }
 
         public List<Item> Items { get; set; } = new();
         public ulong MinBid { get; set; }
-        public ObjectGuid Owner;
-        public ObjectGuid OwnerAccount;
         public AuctionPostingServerFlag ServerFlags { get; set; }
-        public DateTime StartTime = DateTime.MinValue;
 
         public bool IsCommodity()
         {
@@ -138,68 +200,6 @@ namespace Game
         public ulong CalculateMinIncrement()
         {
             return CalculateMinIncrement(BidAmount);
-        }
-
-        public class Sorter : IComparer<AuctionPosting>
-        {
-            private readonly Locale _locale;
-            private readonly int _sortCount;
-            private readonly AuctionSortDef[] _sorts;
-
-            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
-            {
-                _locale = locale;
-                _sorts = sorts;
-                _sortCount = sortCount;
-            }
-
-            public int Compare(AuctionPosting left, AuctionPosting right)
-            {
-                for (var i = 0; i < _sortCount; ++i)
-                {
-                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
-
-                    if (ordering != 0)
-                        return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
-                }
-
-                // Auctions are processed in LIFO order
-                if (left.StartTime != right.StartTime)
-                    return left.StartTime.CompareTo(right.StartTime);
-
-                return left.Id.CompareTo(right.Id);
-            }
-
-            private long CompareColumns(AuctionHouseSortOrder column, AuctionPosting left, AuctionPosting right)
-            {
-                switch (column)
-                {
-                    case AuctionHouseSortOrder.Price:
-                        {
-                            ulong leftPrice = left.BuyoutOrUnitPrice != 0 ? left.BuyoutOrUnitPrice : (left.BidAmount != 0 ? left.BidAmount : left.MinBid);
-                            ulong rightPrice = right.BuyoutOrUnitPrice != 0 ? right.BuyoutOrUnitPrice : (right.BidAmount != 0 ? right.BidAmount : right.MinBid);
-
-                            return (long)(leftPrice - rightPrice);
-                        }
-                    case AuctionHouseSortOrder.Name:
-                        return left.Bucket.FullName[(int)_locale].CompareTo(right.Bucket.FullName[(int)_locale]);
-                    case AuctionHouseSortOrder.Level:
-                        {
-                            int leftLevel = left.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? left.Bucket.SortLevel : (int)left.Items[0].GetModifier(ItemModifier.BattlePetLevel);
-                            int rightLevel = right.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? right.Bucket.SortLevel : (int)right.Items[0].GetModifier(ItemModifier.BattlePetLevel);
-
-                            return leftLevel - rightLevel;
-                        }
-                    case AuctionHouseSortOrder.Bid:
-                        return (long)(left.BidAmount - right.BidAmount);
-                    case AuctionHouseSortOrder.Buyout:
-                        return (long)(left.BuyoutOrUnitPrice - right.BuyoutOrUnitPrice);
-                    default:
-                        break;
-                }
-
-                return 0;
-            }
         }
     }
 }

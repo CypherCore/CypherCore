@@ -5,13 +5,13 @@ namespace Game
 {
     public class PlayerChoiceResponseRewardEntry
     {
-        public uint Id { get; set; }
-        public int Quantity { get; set; }
-
         public PlayerChoiceResponseRewardEntry(uint id, int quantity)
         {
             Id = id;
             Quantity = quantity;
         }
+
+        public uint Id { get; set; }
+        public int Quantity { get; set; }
     }
 }

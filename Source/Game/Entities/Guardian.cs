@@ -18,9 +18,9 @@ namespace Game.Entities
         private const int ENTRY_FIRE_ELEMENTAL = 15438;
         private const int ENTRY_GHOUL = 26125;
         private const int ENTRY_BLOODWORM = 28017;
+        private readonly float[] _statFromOwner = new float[(int)Stats.Max];
 
         private int _bonusSpellDamage;
-        private readonly float[] _statFromOwner = new float[(int)Stats.Max];
 
         public Guardian(SummonPropertiesRecord properties, Unit owner, bool isWorldObject)
             : base(properties, owner, isWorldObject)
@@ -671,14 +671,6 @@ namespace Game.Entities
             SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxDamage), maxdamage);
         }
 
-        private void SetBonusDamage(int damage)
-        {
-            _bonusSpellDamage = damage;
-            Player playerOwner = GetOwner().ToPlayer();
-
-            playerOwner?.SetPetSpellPower((uint)damage);
-        }
-
         public int GetBonusDamage()
         {
             return _bonusSpellDamage;
@@ -687,6 +679,14 @@ namespace Game.Entities
         public float GetBonusStatFromOwner(Stats stat)
         {
             return _statFromOwner[(int)stat];
+        }
+
+        private void SetBonusDamage(int damage)
+        {
+            _bonusSpellDamage = damage;
+            Player playerOwner = GetOwner().ToPlayer();
+
+            playerOwner?.SetPetSpellPower((uint)damage);
         }
     }
 }

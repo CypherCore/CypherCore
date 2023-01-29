@@ -96,6 +96,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+        }
+
         private void OnPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -109,11 +114,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
             args.TriggeringAura = aurEff;
             args.AddSpellMod(SpellValueMod.BasePoint0, damageForTick[aurEff.GetTickNumber() - 1]);
             GetTarget().CastSpell((WorldObject)null, SpellIds.InfernoDmg, args);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 }

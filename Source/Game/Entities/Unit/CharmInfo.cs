@@ -13,6 +13,11 @@ namespace Game.Entities
     public class CharmInfo
     {
         private readonly UnitActionBarEntry[] _charmspells = new UnitActionBarEntry[4];
+
+        private readonly ReactStates _oldReactState;
+
+        private readonly Unit _unit;
+        private readonly UnitActionBarEntry[] PetActionBar = new UnitActionBarEntry[SharedConst.ActionBarIndexMax];
         private CommandStates _CommandState;
         private bool _isAtStay;
 
@@ -20,15 +25,10 @@ namespace Game.Entities
         private bool _isCommandFollow;
         private bool _isFollowing;
         private bool _isReturning;
-
-        private readonly ReactStates _oldReactState;
         private uint _petnumber;
         private float _stayX;
         private float _stayY;
         private float _stayZ;
-
-        private readonly Unit _unit;
-        private readonly UnitActionBarEntry[] PetActionBar = new UnitActionBarEntry[SharedConst.ActionBarIndexMax];
 
         public CharmInfo(Unit unit)
         {

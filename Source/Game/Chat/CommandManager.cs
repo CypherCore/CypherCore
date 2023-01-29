@@ -90,6 +90,29 @@ namespace Game.Chat
                 cmd.ResolveNames(name);
         }
 
+        public static void InitConsole()
+        {
+            if (ConfigMgr.GetDefaultValue("BeepAtStart", true))
+                Console.Beep();
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("Cypher>> ");
+
+            var handler = new ConsoleHandler();
+
+            while (!Global.WorldMgr.IsStopped)
+            {
+                handler.ParseCommands(Console.ReadLine());
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("Cypher>> ");
+            }
+        }
+
+        public static SortedDictionary<string, ChatCommandNode> GetCommands()
+        {
+            return _commands;
+        }
+
         private static void BuildSubCommandsForCommand(ChatCommandNode command, Type type)
         {
             foreach (var nestedType in type.GetNestedTypes(BindingFlags.NonPublic))
@@ -120,29 +143,6 @@ namespace Game.Chat
                 }
             }
         }
-
-        public static void InitConsole()
-        {
-            if (ConfigMgr.GetDefaultValue("BeepAtStart", true))
-                Console.Beep();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("Cypher>> ");
-
-            var handler = new ConsoleHandler();
-
-            while (!Global.WorldMgr.IsStopped)
-            {
-                handler.ParseCommands(Console.ReadLine());
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("Cypher>> ");
-            }
-        }
-
-        public static SortedDictionary<string, ChatCommandNode> GetCommands()
-        {
-            return _commands;
-        }
     }
 
     public delegate bool HandleCommandDelegate(CommandHandler handler, StringArguments args);
@@ -151,11 +151,11 @@ namespace Game.Chat
     {
         public CypherStrings _helpString;
         public string _helpText;
-
-        private MethodInfo _methodInfo;
         public string _name;
         public CommandPermissions _permission;
         public SortedDictionary<string, ChatCommandNode> _subCommands = new();
+
+        private MethodInfo _methodInfo;
         private ParameterInfo[] parameters;
 
         public ChatCommandNode(CommandAttribute attribute)
@@ -308,27 +308,6 @@ namespace Game.Chat
             }
         }
 
-        private bool IsInvokerVisible(CommandHandler who)
-        {
-            if (_methodInfo == null)
-                return false;
-
-            if (who.IsConsole() &&
-                !_permission.AllowConsole)
-                return false;
-
-            return who.HasPermission(_permission.RequiredPermission);
-        }
-
-        private bool HasVisibleSubCommands(CommandHandler who)
-        {
-            foreach (var (_, command) in _subCommands)
-                if (command.IsVisible(who))
-                    return true;
-
-            return false;
-        }
-
         public void ResolveNames(string name)
         {
             if (_methodInfo != null &&
@@ -339,38 +318,6 @@ namespace Game.Chat
 
             foreach (var (subToken, cmd) in _subCommands)
                 cmd.ResolveNames($"{name} {subToken}");
-        }
-
-        private static void LogCommandUsage(WorldSession session, uint permission, string cmdStr)
-        {
-            if (Global.AccountMgr.IsPlayerAccount(session.GetSecurity()))
-                return;
-
-            if (Global.AccountMgr.GetRBACPermission((uint)RBACPermissions.RolePlayer).GetLinkedPermissions().Contains(permission))
-                return;
-
-            Player player = session.GetPlayer();
-            ObjectGuid targetGuid = player.GetTarget();
-            uint areaId = player.GetAreaId();
-            string areaName = "Unknown";
-            string zoneName = "Unknown";
-
-            var area = CliDB.AreaTableStorage.LookupByKey(areaId);
-
-            if (area != null)
-            {
-                Locale locale = session.GetSessionDbcLocale();
-                areaName = area.AreaName[locale];
-                var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-
-                if (zone != null)
-                    zoneName = zone.AreaName[locale];
-            }
-
-            Log.outCommand(session.GetAccountId(),
-                           $"Command: {cmdStr} [Player: {player.GetName()} ({player.GetGUID()}) (Account: {session.GetAccountId()}) " +
-                           $"X: {player.GetPositionX()} Y: {player.GetPositionY()} Z: {player.GetPositionZ()} Map: {player.GetMapId()} ({(player.GetMap() ? player.GetMap().GetMapName() : "Unknown")}) " +
-                           $"Area: {areaId} ({areaName}) Zone: {zoneName} Selected: {(player.GetSelectedUnit() ? player.GetSelectedUnit().GetName() : "")} ({targetGuid})]");
         }
 
         public void SendCommandHelp(CommandHandler handler)
@@ -415,11 +362,6 @@ namespace Game.Chat
 
                 handler.SendSysMessage(subCommandHasSubCommand ? CypherStrings.SubcmdsListEntryEllipsis : CypherStrings.SubcmdsListEntry, command._name);
             }
-        }
-
-        private bool IsVisible(CommandHandler who)
-        {
-            return IsInvokerVisible(who) || HasVisibleSubCommands(who);
         }
 
         public void AddSubCommand(ChatCommandNode command)
@@ -470,6 +412,64 @@ namespace Game.Chat
                     return false;
                 }
             }
+        }
+
+        private bool IsInvokerVisible(CommandHandler who)
+        {
+            if (_methodInfo == null)
+                return false;
+
+            if (who.IsConsole() &&
+                !_permission.AllowConsole)
+                return false;
+
+            return who.HasPermission(_permission.RequiredPermission);
+        }
+
+        private bool HasVisibleSubCommands(CommandHandler who)
+        {
+            foreach (var (_, command) in _subCommands)
+                if (command.IsVisible(who))
+                    return true;
+
+            return false;
+        }
+
+        private static void LogCommandUsage(WorldSession session, uint permission, string cmdStr)
+        {
+            if (Global.AccountMgr.IsPlayerAccount(session.GetSecurity()))
+                return;
+
+            if (Global.AccountMgr.GetRBACPermission((uint)RBACPermissions.RolePlayer).GetLinkedPermissions().Contains(permission))
+                return;
+
+            Player player = session.GetPlayer();
+            ObjectGuid targetGuid = player.GetTarget();
+            uint areaId = player.GetAreaId();
+            string areaName = "Unknown";
+            string zoneName = "Unknown";
+
+            var area = CliDB.AreaTableStorage.LookupByKey(areaId);
+
+            if (area != null)
+            {
+                Locale locale = session.GetSessionDbcLocale();
+                areaName = area.AreaName[locale];
+                var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+
+                if (zone != null)
+                    zoneName = zone.AreaName[locale];
+            }
+
+            Log.outCommand(session.GetAccountId(),
+                           $"Command: {cmdStr} [Player: {player.GetName()} ({player.GetGUID()}) (Account: {session.GetAccountId()}) " +
+                           $"X: {player.GetPositionX()} Y: {player.GetPositionY()} Z: {player.GetPositionZ()} Map: {player.GetMapId()} ({(player.GetMap() ? player.GetMap().GetMapName() : "Unknown")}) " +
+                           $"Area: {areaId} ({areaName}) Zone: {zoneName} Selected: {(player.GetSelectedUnit() ? player.GetSelectedUnit().GetName() : "")} ({targetGuid})]");
+        }
+
+        private bool IsVisible(CommandHandler who)
+        {
+            return IsInvokerVisible(who) || HasVisibleSubCommands(who);
         }
     }
 }

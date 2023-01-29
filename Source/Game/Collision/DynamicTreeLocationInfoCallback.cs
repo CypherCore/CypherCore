@@ -7,10 +7,10 @@ namespace Game.Collision
 {
     public class DynamicTreeLocationInfoCallback : WorkerCallback
     {
-        private GameObjectModel _hitModel = new();
         private readonly LocationInfo _locationInfo = new();
 
         private readonly PhaseShift _phaseShift;
+        private GameObjectModel _hitModel = new();
 
         public DynamicTreeLocationInfoCallback(PhaseShift phaseShift)
         {

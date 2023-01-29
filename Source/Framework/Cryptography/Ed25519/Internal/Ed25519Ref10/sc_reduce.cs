@@ -2,7 +2,7 @@
 {
     internal static partial class ScalarOperations
     {
-        /*
+	    /*
 		Input:
 		  s[0]+256*s[1]+...+256^63*s[63] = s
 
@@ -12,7 +12,7 @@
 		  Overwrites s in place.
 		*/
 
-        public static void sc_reduce(byte[] s)
+	    public static void sc_reduce(byte[] s)
         {
             long s0 = 2097151 & load_3(s, 0);
             long s1 = 2097151 & (load_4(s, 2) >> 5);

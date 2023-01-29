@@ -4,6 +4,5 @@
 namespace Game.Arenas
 {
     internal class TolvironArena
-    {
-    }
+    {}
 }

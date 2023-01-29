@@ -111,6 +111,59 @@ namespace Scripts.Events.LunarFestival
         {
         }
 
+        public override void Reset()
+        {
+            GameObject launcher = FindNearestLauncher();
+
+            if (launcher)
+            {
+                launcher.SendCustomAnim(MiscConst.AnimGoLaunchFirework);
+                me.SetOrientation(launcher.GetOrientation() + MathF.PI / 2);
+            }
+            else
+            {
+                return;
+            }
+
+            if (isCluster())
+            {
+                // Check if we are near Elune'ara lake south, if so try to summon Omen or a minion
+                if (me.GetZoneId() == MiscConst.ZoneMoonglade)
+                    if (!me.FindNearestCreature(CreatureIds.Omen, 100.0f) &&
+                        me.GetDistance2d(MiscConst.OmenSummonPos.GetPositionX(), MiscConst.OmenSummonPos.GetPositionY()) <= 100.0f)
+                        switch (RandomHelper.URand(0, 9))
+                        {
+                            case 0:
+                            case 1:
+                            case 2:
+                            case 3:
+                                Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(20));
+
+                                if (minion)
+                                    minion.GetAI().AttackStart(me.SelectNearestPlayer(20.0f));
+
+                                break;
+                            case 9:
+                                me.SummonCreature(CreatureIds.Omen, MiscConst.OmenSummonPos);
+
+                                break;
+                        }
+
+                if (me.GetEntry() == CreatureIds.ClusterElune)
+                    DoCast(SpellIds.LunarFortune);
+
+                float displacement = 0.7f;
+
+                for (byte i = 0; i < 4; i++)
+                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(1));
+            }
+            else
+            //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);
+            {
+                me.CastSpell(me.GetPosition(), GetFireworkSpell(me.GetEntry()), new CastSpellExtraArgs(true));
+            }
+        }
+
         private bool isCluster()
         {
             switch (me.GetEntry())
@@ -284,59 +337,6 @@ namespace Scripts.Events.LunarFestival
 
             return 0;
         }
-
-        public override void Reset()
-        {
-            GameObject launcher = FindNearestLauncher();
-
-            if (launcher)
-            {
-                launcher.SendCustomAnim(MiscConst.AnimGoLaunchFirework);
-                me.SetOrientation(launcher.GetOrientation() + MathF.PI / 2);
-            }
-            else
-            {
-                return;
-            }
-
-            if (isCluster())
-            {
-                // Check if we are near Elune'ara lake south, if so try to summon Omen or a minion
-                if (me.GetZoneId() == MiscConst.ZoneMoonglade)
-                    if (!me.FindNearestCreature(CreatureIds.Omen, 100.0f) &&
-                        me.GetDistance2d(MiscConst.OmenSummonPos.GetPositionX(), MiscConst.OmenSummonPos.GetPositionY()) <= 100.0f)
-                        switch (RandomHelper.URand(0, 9))
-                        {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                Creature minion = me.SummonCreature(CreatureIds.MinionOfOmen, me.GetPositionX() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionY() + RandomHelper.FRand(-5.0f, 5.0f), me.GetPositionZ(), 0.0f, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(20));
-
-                                if (minion)
-                                    minion.GetAI().AttackStart(me.SelectNearestPlayer(20.0f));
-
-                                break;
-                            case 9:
-                                me.SummonCreature(CreatureIds.Omen, MiscConst.OmenSummonPos);
-
-                                break;
-                        }
-
-                if (me.GetEntry() == CreatureIds.ClusterElune)
-                    DoCast(SpellIds.LunarFortune);
-
-                float displacement = 0.7f;
-
-                for (byte i = 0; i < 4; i++)
-                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(1));
-            }
-            else
-            //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);
-            {
-                me.CastSpell(me.GetPosition(), GetFireworkSpell(me.GetEntry()), new CastSpellExtraArgs(true));
-            }
-        }
     }
 
     [Script]
@@ -466,6 +466,11 @@ namespace Scripts.Events.LunarFestival
             return ValidateSpellInfo(SpellIds.EluneCandleOmenHead, SpellIds.EluneCandleOmenChest, SpellIds.EluneCandleOmenHandR, SpellIds.EluneCandleOmenHandL, SpellIds.EluneCandleNormal);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             uint spellId = 0;
@@ -494,11 +499,6 @@ namespace Scripts.Events.LunarFestival
                 spellId = SpellIds.EluneCandleNormal;
 
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

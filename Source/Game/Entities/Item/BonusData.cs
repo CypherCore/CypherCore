@@ -11,34 +11,17 @@ namespace Game.Entities
 {
     public class BonusData
     {
-        private State _state;
-        public uint AppearanceModID { get; set; }
-        public uint AzeriteTierUnlockSetId { get; set; }
-        public ItemBondingType Bonding { get; set; }
-        public bool CanDisenchant { get; set; }
-        public bool CanScrap { get; set; }
-        public uint ContentTuningId { get; set; }
-        public uint DisenchantLootId { get; set; }
-        public int EffectCount { get; set; }
-        public ItemEffectRecord[] Effects { get; set; } = new ItemEffectRecord[13];
-        public uint[] GemItemLevelBonus { get; set; } = new uint[ItemConst.MaxGemSockets];
-        public ushort[] GemRelicRankBonus { get; set; } = new ushort[ItemConst.MaxGemSockets];
-        public int[] GemRelicType { get; set; } = new int[ItemConst.MaxGemSockets];
-        public bool HasFixedLevel { get; set; }
-        public int ItemLevelBonus { get; set; }
-        public float[] ItemStatSocketCostMultiplier { get; set; } = new float[ItemConst.MaxStats];
-        public int[] ItemStatType { get; set; } = new int[ItemConst.MaxStats];
-        public uint PlayerLevelToItemLevelCurveId { get; set; }
+        private struct State
+        {
+            public int SuffixPriority;
+            public int AppearanceModPriority;
+            public int ScalingStatDistributionPriority;
+            public int AzeriteTierUnlockSetPriority;
+            public int RequiredLevelCurvePriority;
+            public bool HasQualityBonus;
+        }
 
-        public ItemQuality Quality { get; set; }
-        public int RelicType { get; set; }
-        public float RepairCostMultiplier { get; set; }
-        public int RequiredLevel { get; set; }
-        public uint RequiredLevelCurve { get; set; }
-        public int RequiredLevelOverride { get; set; }
-        public SocketColor[] SocketColor { get; set; } = new SocketColor[ItemConst.MaxGemSockets];
-        public int[] StatPercentEditor { get; set; } = new int[ItemConst.MaxStats];
-        public uint Suffix { get; set; }
+        private State _state;
 
         public BonusData(ItemTemplate proto)
         {
@@ -107,6 +90,34 @@ namespace Game.Entities
                 foreach (uint bonusListID in itemInstance.ItemBonus.BonusListIDs)
                     AddBonusList(bonusListID);
         }
+
+        public uint AppearanceModID { get; set; }
+        public uint AzeriteTierUnlockSetId { get; set; }
+        public ItemBondingType Bonding { get; set; }
+        public bool CanDisenchant { get; set; }
+        public bool CanScrap { get; set; }
+        public uint ContentTuningId { get; set; }
+        public uint DisenchantLootId { get; set; }
+        public int EffectCount { get; set; }
+        public ItemEffectRecord[] Effects { get; set; } = new ItemEffectRecord[13];
+        public uint[] GemItemLevelBonus { get; set; } = new uint[ItemConst.MaxGemSockets];
+        public ushort[] GemRelicRankBonus { get; set; } = new ushort[ItemConst.MaxGemSockets];
+        public int[] GemRelicType { get; set; } = new int[ItemConst.MaxGemSockets];
+        public bool HasFixedLevel { get; set; }
+        public int ItemLevelBonus { get; set; }
+        public float[] ItemStatSocketCostMultiplier { get; set; } = new float[ItemConst.MaxStats];
+        public int[] ItemStatType { get; set; } = new int[ItemConst.MaxStats];
+        public uint PlayerLevelToItemLevelCurveId { get; set; }
+
+        public ItemQuality Quality { get; set; }
+        public int RelicType { get; set; }
+        public float RepairCostMultiplier { get; set; }
+        public int RequiredLevel { get; set; }
+        public uint RequiredLevelCurve { get; set; }
+        public int RequiredLevelOverride { get; set; }
+        public SocketColor[] SocketColor { get; set; } = new SocketColor[ItemConst.MaxGemSockets];
+        public int[] StatPercentEditor { get; set; } = new int[ItemConst.MaxStats];
+        public uint Suffix { get; set; }
 
         public void AddBonusList(uint bonusListId)
         {
@@ -249,16 +260,6 @@ namespace Game.Entities
 
                     break;
             }
-        }
-
-        private struct State
-        {
-            public int SuffixPriority;
-            public int AppearanceModPriority;
-            public int ScalingStatDistributionPriority;
-            public int AzeriteTierUnlockSetPriority;
-            public int RequiredLevelCurvePriority;
-            public bool HasQualityBonus;
         }
     }
 }

@@ -17,9 +17,9 @@ namespace Game.Collision
         private readonly Dictionary<uint, bool> _iLoadedTiles = new();
 
         private readonly uint _iMapID;
-        private uint _iNTreeValues;
         private readonly Dictionary<uint, uint> _iSpawnIndices = new();
         private readonly BoundingIntervalHierarchy _iTree = new();
+        private uint _iNTreeValues;
         private ModelInstance[] _iTreeValues;
 
         public StaticMapTree(uint mapId)
@@ -227,50 +227,6 @@ namespace Game.Collision
             _iLoadedTiles.Remove(tileID);
         }
 
-        private static uint PackTileID(int tileX, int tileY)
-        {
-            return (uint)((tileX << 16) | tileY);
-        }
-
-        private static void UnpackTileID(int ID, ref int tileX, ref int tileY)
-        {
-            tileX = ID >> 16;
-            tileY = ID & 0xFF;
-        }
-
-        private static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
-        {
-            TileFileOpenResult result = new();
-            result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
-
-            if (File.Exists(result.Name))
-            {
-                result.UsedMapId = mapID;
-                result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
-
-                return result;
-            }
-
-            int parentMapId = vm.GetParentMapId(mapID);
-
-            while (parentMapId != -1)
-            {
-                result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
-
-                if (File.Exists(result.Name))
-                {
-                    result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
-                    result.UsedMapId = (uint)parentMapId;
-
-                    return result;
-                }
-
-                parentMapId = vm.GetParentMapId((uint)parentMapId);
-            }
-
-            return result;
-        }
-
         public static LoadResult CanLoadMap(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
         {
             string fullname = vmapPath + VMapManager.GetMapFileName(mapID);
@@ -348,18 +304,6 @@ namespace Game.Collision
             return height;
         }
 
-        private bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
-        {
-            float distance = pMaxDist;
-            MapRayCallback intersectionCallBack = new(_iTreeValues, ignoreFlags);
-            _iTree.IntersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
-
-            if (intersectionCallBack.DidHit())
-                pMaxDist = distance;
-
-            return intersectionCallBack.DidHit();
-        }
-
         public bool GetObjectHitPos(Vector3 pPos1, Vector3 pPos2, out Vector3 pResultHitPos, float pModifyDist)
         {
             bool result;
@@ -434,6 +378,62 @@ namespace Game.Collision
         public int NumLoadedTiles()
         {
             return _iLoadedTiles.Count;
+        }
+
+        private static uint PackTileID(int tileX, int tileY)
+        {
+            return (uint)((tileX << 16) | tileY);
+        }
+
+        private static void UnpackTileID(int ID, ref int tileX, ref int tileY)
+        {
+            tileX = ID >> 16;
+            tileY = ID & 0xFF;
+        }
+
+        private static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, int tileX, int tileY, VMapManager vm)
+        {
+            TileFileOpenResult result = new();
+            result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
+
+            if (File.Exists(result.Name))
+            {
+                result.UsedMapId = mapID;
+                result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
+
+                return result;
+            }
+
+            int parentMapId = vm.GetParentMapId(mapID);
+
+            while (parentMapId != -1)
+            {
+                result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
+
+                if (File.Exists(result.Name))
+                {
+                    result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
+                    result.UsedMapId = (uint)parentMapId;
+
+                    return result;
+                }
+
+                parentMapId = vm.GetParentMapId((uint)parentMapId);
+            }
+
+            return result;
+        }
+
+        private bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
+        {
+            float distance = pMaxDist;
+            MapRayCallback intersectionCallBack = new(_iTreeValues, ignoreFlags);
+            _iTree.IntersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
+
+            if (intersectionCallBack.DidHit())
+                pMaxDist = distance;
+
+            return intersectionCallBack.DidHit();
         }
     }
 }

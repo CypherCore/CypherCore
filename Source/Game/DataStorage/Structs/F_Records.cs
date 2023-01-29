@@ -35,7 +35,6 @@ namespace Game.DataStorage
 
     public sealed class FactionTemplateRecord
     {
-        private static readonly int MAX_FACTION_RELATIONS = 8;
         public ushort[] Enemies = new ushort[MAX_FACTION_RELATIONS];
         public byte EnemyGroup;
         public ushort Faction;
@@ -45,6 +44,7 @@ namespace Game.DataStorage
         public byte FriendGroup;
 
         public uint Id;
+        private static readonly int MAX_FACTION_RELATIONS = 8;
 
         // helpers
         public bool IsFriendlyTo(FactionTemplateRecord entry)

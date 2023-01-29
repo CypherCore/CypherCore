@@ -59,6 +59,12 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo(SpellIds.BasketCheck, SpellIds.MealPeriodic, SpellIds.MealEatVisual, SpellIds.DrinkVisual, SpellIds.RomanticPicnicAchiev);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -106,12 +112,6 @@ namespace Scripts.Events.LoveIsInTheAir
                 target.HasAura(SpellIds.RomanticPicnicAchiev))
                 target.RemoveAura(SpellIds.RomanticPicnicAchiev);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
-        }
     }
 
     [Script] // 26678 - Create Heart Candy
@@ -129,17 +129,17 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo(CreateHeartCandySpells);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             Player target = GetHitPlayer();
 
             target?.CastSpell(target, CreateHeartCandySpells.SelectRandom(), true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -153,14 +153,14 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
         }
     }
 
@@ -174,14 +174,14 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
-        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().CastSpell(GetTarget(), (uint)GetEffectInfo(0).CalcValue());
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), (uint)GetEffectInfo(0).CalcValue());
         }
     }
 
@@ -195,14 +195,14 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo(SpellIds.HeavilyPerfumed);
         }
 
-        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().CastSpell(GetTarget(), SpellIds.HeavilyPerfumed);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.HeavilyPerfumed);
         }
     }
 
@@ -211,15 +211,15 @@ namespace Scripts.Events.LoveIsInTheAir
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void OnPeriodic(AuraEffect aurEff)
         {
             if (RandomHelper.randChance(30))
                 Remove();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -231,6 +231,12 @@ namespace Scripts.Events.LoveIsInTheAir
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -250,12 +256,6 @@ namespace Scripts.Events.LoveIsInTheAir
         {
             GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(0).CalcValue());
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Transform, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     // 71522 - Crown Chemical Co. Supplies
@@ -269,14 +269,14 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo(SpellIds.ServiceUniform);
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetHitUnit().RemoveAurasDueToSpell(SpellIds.ServiceUniform);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell(SpellIds.ServiceUniform);
         }
     }
 
@@ -291,15 +291,15 @@ namespace Scripts.Events.LoveIsInTheAir
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue(), (uint)spellInfo.GetEffect(1).CalcValue());
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetCaster().RemoveAurasDueToSpell((uint)GetEffectValue());
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
             SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHit));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetCaster().RemoveAurasDueToSpell((uint)GetEffectValue());
         }
     }
 }

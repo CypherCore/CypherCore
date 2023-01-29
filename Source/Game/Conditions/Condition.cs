@@ -15,6 +15,12 @@ namespace Game.Conditions
 {
     public class Condition
     {
+        public Condition()
+        {
+            SourceType = ConditionSourceType.None;
+            ConditionType = ConditionTypes.None;
+        }
+
         public byte ConditionTarget { get; set; }
         public ConditionTypes ConditionType { get; set; } //ConditionTypeOrReference
         public uint ConditionValue1 { get; set; }
@@ -31,12 +37,6 @@ namespace Game.Conditions
         public uint SourceId { get; set; } // So far, only used in CONDITION_SOURCE_TYPE_SMART_EVENT
 
         public ConditionSourceType SourceType { get; set; } //SourceTypeOrReferenceId
-
-        public Condition()
-        {
-            SourceType = ConditionSourceType.None;
-            ConditionType = ConditionTypes.None;
-        }
 
         public bool Meets(ConditionSourceInfo sourceInfo)
         {

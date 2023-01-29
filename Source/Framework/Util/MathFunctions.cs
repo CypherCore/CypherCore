@@ -36,16 +36,6 @@ public static class MathFunctions
         rhs = temp;
     }
 
-    private static double eps(float a, float b)
-    {
-        float aa = Math.Abs(a) + 1.0f;
-
-        if (float.IsPositiveInfinity(aa))
-            return 0.0000005f;
-
-        return 0.0000005f * aa;
-    }
-
     public static float lerp(float a, float b, float f)
     {
         return a + (b - a) * f;
@@ -362,6 +352,16 @@ public static class MathFunctions
         return new Vector3(elt.M11 * v.GetAt(0) + elt.M12 * v.GetAt(1) + elt.M13 * v.GetAt(2),
                            elt.M21 * v.GetAt(0) + elt.M22 * v.GetAt(1) + elt.M23 * v.GetAt(2),
                            elt.M31 * v.GetAt(0) + elt.M32 * v.GetAt(1) + elt.M33 * v.GetAt(2));
+    }
+
+    private static double eps(float a, float b)
+    {
+        float aa = Math.Abs(a) + 1.0f;
+
+        if (float.IsPositiveInfinity(aa))
+            return 0.0000005f;
+
+        return 0.0000005f * aa;
     }
 
     #region Clamp

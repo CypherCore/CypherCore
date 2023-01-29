@@ -44,8 +44,6 @@ using System.Diagnostics;
 
 public static partial class Detour
 {
-    private const float H_SCALE = 0.999f; // Search heuristic scale.
-
     /// Defines polygon filtering and traversal costs for navigation mesh query operations.
     // @ingroup detour
     public class dtQueryFilter
@@ -187,14 +185,54 @@ public static partial class Detour
     // @ingroup detour
     public class dtNavMeshQuery
     {
+        private class dtQueryData
+        {
+            public float[] endPos = new float[3];
+            public ulong endRef;
+            public dtQueryFilter filter;
+            public dtNode lastBestNode;
+            public float lastBestNodeCost;
+            public uint options;
+            public float raycastLimitSqr;
+            public float[] startPos = new float[3];
+            public ulong startRef;
+            public uint status;
+
+            public void dtcsClear()
+            {
+                status = 0;
+                lastBestNode = null;
+                lastBestNodeCost = .0f;
+                startRef = 0;
+                endRef = 0;
+
+                for (int i = 0; i < 3; ++i)
+                {
+                    startPos[i] = 0f;
+                    endPos[i] = 0f;
+                }
+
+                filter = null;
+                options = 0;
+                raycastLimitSqr = 0f;
+            }
+        }
+
+        private class dtSegInterval
+        {
+            public ulong polyRef;
+            public short tmax;
+            public short tmin;
+        };
         // @name Standard Pathfinding Functions
 
         public delegate float randomFloatGenerator();
 
-        private dtNavMesh _nav;             //< Pointer to navmesh data.
-        private dtNodePool _nodePool;       //< Pointer to node pool.
-        private dtNodeQueue _openList;      //< Pointer to open list queue.
         private readonly dtQueryData _query = new(); //< Sliced query state.
+
+        private dtNavMesh _nav;        //< Pointer to navmesh data.
+        private dtNodePool _nodePool;  //< Pointer to node pool.
+        private dtNodeQueue _openList; //< Pointer to open list queue.
 
         private dtNodePool _tinyNodePool; //< Pointer to small node pool.
 
@@ -1238,46 +1276,6 @@ public static partial class Detour
             return status;
         }
 
-        private uint getPathToNode(dtNode endNode, ulong[] path, ref uint pathCount, int maxPath)
-        {
-            // Find the length of the entire path.
-            dtNode curNode = endNode;
-            int length = 0;
-
-            do
-            {
-                length++;
-                curNode = _nodePool.getNodeAtIdx(curNode.pidx);
-            } while (curNode != null);
-
-            // If the path cannot be fully stored then advance to the last node we will be able to store.
-            curNode = endNode;
-            int writeCount;
-
-            for (writeCount = length; writeCount > maxPath; writeCount--)
-                //dtAssert(curNode);
-                curNode = _nodePool.getNodeAtIdx(curNode.pidx);
-
-            // Write path
-            for (int i = writeCount - 1; i >= 0; i--)
-            {
-                //dtAssert(curNode);
-
-                path[i] = curNode.id;
-                curNode = _nodePool.getNodeAtIdx(curNode.pidx);
-            }
-
-            //dtAssert(!curNode);
-
-
-            pathCount = (uint)Math.Min(length, maxPath);
-
-            if (length > maxPath)
-                return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
-
-            return DT_SUCCESS;
-        }
-
         ///@}
         // @name Sliced Pathfinding Functions
         /// Common use case:
@@ -1856,105 +1854,6 @@ public static partial class Detour
             return DT_SUCCESS | details;
         }
 
-        // Appends vertex to a straight path
-        private uint appendVertex(float[] pos, byte flags, ulong polyRef, float[] straightPath, byte[] straightPathFlags, ulong[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
-        {
-            if (straightPathCount > 0 &&
-                dtVequal(straightPath, (straightPathCount - 1) * 3, pos, 0))
-            {
-                // The vertices are equal, update flags and poly.
-                if (straightPathFlags != null)
-                    straightPathFlags[straightPathCount - 1] = flags;
-
-                if (straightPathRefs != null)
-                    straightPathRefs[straightPathCount - 1] = polyRef;
-            }
-            else
-            {
-                // Append new vertex.
-                dtVcopy(straightPath, straightPathCount * 3, pos, 0);
-
-                if (straightPathFlags != null)
-                    straightPathFlags[straightPathCount] = flags;
-
-                if (straightPathRefs != null)
-                    straightPathRefs[straightPathCount] = polyRef;
-
-                straightPathCount++;
-
-                // If there is no space to append more vertices, return.
-                if (straightPathCount >= maxStraightPath)
-                    return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
-
-                // If reached end of path or there is no space to append more vertices, return.
-                if (flags == (byte)dtStraightPathFlags.DT_STRAIGHTPATH_END)
-                    return DT_SUCCESS;
-            }
-
-            return DT_IN_PROGRESS;
-        }
-
-        // Appends intermediate portal points to a straight path.
-        private uint appendPortals(int startIdx, int endIdx, float[] endPos, ulong[] path, float[] straightPath, byte[] straightPathFlags, ulong[] straightPathRefs, ref int straightPathCount, int maxStraightPath, int options)
-        {
-            //float* startPos = &straightPath[(*straightPathCount-1)*3];
-            int startPosStart = (straightPathCount - 1) * 3;
-            // Append or update last vertex
-            uint stat = 0;
-
-            for (int i = startIdx; i < endIdx; i++)
-            {
-                // Calculate portal
-                ulong from = path[i];
-                dtMeshTile fromTile = null;
-                dtPoly fromPoly = null;
-
-                if (dtStatusFailed(_nav.getTileAndPolyByRef(from, ref fromTile, ref fromPoly)))
-                    return DT_FAILURE | DT_INVALID_PARAM;
-
-                ulong to = path[i + 1];
-                dtMeshTile toTile = null;
-                dtPoly toPoly = null;
-
-                if (dtStatusFailed(_nav.getTileAndPolyByRef(to, ref toTile, ref toPoly)))
-                    return DT_FAILURE | DT_INVALID_PARAM;
-
-                float[] left = new float[3]; //, right[3];
-                float[] right = new float[3];
-
-                if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
-                    break;
-
-                if ((options & (int)dtStraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS) != 0)
-                    // Skip intersection if only area crossings are requested.
-                    if (fromPoly.getArea() == toPoly.getArea())
-                        continue;
-
-                // Append intersection
-                float s = .0f, t = .0f;
-
-                if (dtIntersectSegSeg2D(straightPath, startPosStart, endPos, 0, left, 0, right, 0, ref s, ref t))
-                {
-                    float[] pt = new float[3];
-                    dtVlerp(pt, left, right, t);
-
-                    stat = appendVertex(pt,
-                                        0,
-                                        path[i + 1],
-                                        straightPath,
-                                        straightPathFlags,
-                                        straightPathRefs,
-                                        ref straightPathCount,
-                                        maxStraightPath);
-
-                    if (stat != DT_IN_PROGRESS)
-                        return stat;
-                }
-            }
-
-            return DT_IN_PROGRESS;
-        }
-
         /// Finds the straight path from the start to the end position within the polygon corridor.
         ///  @param[in]		startPos			Path start position. [(x, y, z)]
         ///  @param[in]		endPos				Path end position. [(x, y, z)]
@@ -2514,134 +2413,6 @@ public static partial class Detour
             return status;
         }
 
-        /// Returns portal points between two polygons.
-        private uint getPortalPoints(ulong from, ulong to, float[] left, float[] right, ref byte fromType, ref byte toType)
-        {
-            Debug.Assert(_nav != null);
-
-            dtMeshTile fromTile = null;
-            dtPoly fromPoly = null;
-
-            if (dtStatusFailed(_nav.getTileAndPolyByRef(from, ref fromTile, ref fromPoly)))
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            fromType = fromPoly.getType();
-
-            dtMeshTile toTile = null;
-            dtPoly toPoly = null;
-
-            if (dtStatusFailed(_nav.getTileAndPolyByRef(to, ref toTile, ref toPoly)))
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            toType = toPoly.getType();
-
-            return getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right);
-        }
-
-        // Returns portal points between two polygons.
-        private uint getPortalPoints(ulong from, dtPoly fromPoly, dtMeshTile fromTile, ulong to, dtPoly toPoly, dtMeshTile toTile, float[] left, float[] right)
-        {
-            // Find the link that points to the 'to' polygon.
-            dtLink link = null;
-
-            for (uint i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
-                if (fromTile.links[i].polyRef == to)
-                {
-                    link = fromTile.links[i];
-
-                    break;
-                }
-
-            if (link == null)
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            // Handle off-mesh connections.
-            if (fromPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                // Find link that points to first vertex.
-                for (uint i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
-                    if (fromTile.links[i].polyRef == to)
-                    {
-                        int v = fromTile.links[i].edge;
-                        dtVcopy(left, 0, fromTile.verts, fromPoly.verts[v] * 3);
-                        dtVcopy(right, 0, fromTile.verts, fromPoly.verts[v] * 3);
-
-                        return DT_SUCCESS;
-                    }
-
-                return DT_FAILURE | DT_INVALID_PARAM;
-            }
-
-            if (toPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                for (uint i = toPoly.firstLink; i != DT_NULL_LINK; i = toTile.links[i].next)
-                    if (toTile.links[i].polyRef == from)
-                    {
-                        int v = toTile.links[i].edge;
-                        dtVcopy(left, 0, toTile.verts, toPoly.verts[v] * 3);
-                        dtVcopy(right, 0, toTile.verts, toPoly.verts[v] * 3);
-
-                        return DT_SUCCESS;
-                    }
-
-                return DT_FAILURE | DT_INVALID_PARAM;
-            }
-
-            // Find portal vertices.
-            int v0 = fromPoly.verts[link.edge];
-            int v1 = fromPoly.verts[(link.edge + 1) % (int)fromPoly.vertCount];
-            dtVcopy(left, 0, fromTile.verts, v0 * 3);
-            dtVcopy(right, 0, fromTile.verts, v1 * 3);
-
-            // If the link is at tile boundary, dtClamp the vertices to
-            // the link width.
-            if (link.side != 0xff)
-                // Unpack portal limits.
-                if (link.bmin != 0 ||
-                    link.bmax != 255)
-                {
-                    float s = 1.0f / 255.0f;
-                    float tmin = link.bmin * s;
-                    float tmax = link.bmax * s;
-                    dtVlerp(left, 0, fromTile.verts, v0 * 3, fromTile.verts, v1 * 3, tmin);
-                    dtVlerp(right, 0, fromTile.verts, v0 * 3, fromTile.verts, v1 * 3, tmax);
-                }
-
-            return DT_SUCCESS;
-        }
-
-        // Returns edge mid point between two polygons.
-        private uint getEdgeMidPoint(ulong from, ulong to, float[] mid)
-        {
-            float[] left = new float[3]; //, right[3];
-            float[] right = new float[3];
-            byte fromType = 0, toType = 0;
-
-            if (dtStatusFailed(getPortalPoints(from, to, left, right, ref fromType, ref toType)))
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            mid[0] = (left[0] + right[0]) * 0.5f;
-            mid[1] = (left[1] + right[1]) * 0.5f;
-            mid[2] = (left[2] + right[2]) * 0.5f;
-
-            return DT_SUCCESS;
-        }
-
-        private uint getEdgeMidPoint(ulong from, dtPoly fromPoly, dtMeshTile fromTile, ulong to, dtPoly toPoly, dtMeshTile toTile, float[] mid)
-        {
-            float[] left = new float[3]; //, right[3];
-            float[] right = new float[3];
-
-            if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            mid[0] = (left[0] + right[0]) * 0.5f;
-            mid[1] = (left[1] + right[1]) * 0.5f;
-            mid[2] = (left[2] + right[2]) * 0.5f;
-
-            return DT_SUCCESS;
-        }
-
         /// @par
         /// 
         /// This method is meant to be used for quick, short distance checks.
@@ -2991,6 +2762,280 @@ public static partial class Detour
             hit.pathCount = n;
 
             return status;
+        }
+
+        /// Gets the navigation mesh the query object is using.
+        // @return The navigation mesh the query object is using.
+        public dtNavMesh getAttachedNavMesh()
+        {
+            return _nav;
+        }
+
+        private uint getPathToNode(dtNode endNode, ulong[] path, ref uint pathCount, int maxPath)
+        {
+            // Find the length of the entire path.
+            dtNode curNode = endNode;
+            int length = 0;
+
+            do
+            {
+                length++;
+                curNode = _nodePool.getNodeAtIdx(curNode.pidx);
+            } while (curNode != null);
+
+            // If the path cannot be fully stored then advance to the last node we will be able to store.
+            curNode = endNode;
+            int writeCount;
+
+            for (writeCount = length; writeCount > maxPath; writeCount--)
+                //dtAssert(curNode);
+                curNode = _nodePool.getNodeAtIdx(curNode.pidx);
+
+            // Write path
+            for (int i = writeCount - 1; i >= 0; i--)
+            {
+                //dtAssert(curNode);
+
+                path[i] = curNode.id;
+                curNode = _nodePool.getNodeAtIdx(curNode.pidx);
+            }
+
+            //dtAssert(!curNode);
+
+
+            pathCount = (uint)Math.Min(length, maxPath);
+
+            if (length > maxPath)
+                return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
+
+            return DT_SUCCESS;
+        }
+
+        // Appends vertex to a straight path
+        private uint appendVertex(float[] pos, byte flags, ulong polyRef, float[] straightPath, byte[] straightPathFlags, ulong[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
+        {
+            if (straightPathCount > 0 &&
+                dtVequal(straightPath, (straightPathCount - 1) * 3, pos, 0))
+            {
+                // The vertices are equal, update flags and poly.
+                if (straightPathFlags != null)
+                    straightPathFlags[straightPathCount - 1] = flags;
+
+                if (straightPathRefs != null)
+                    straightPathRefs[straightPathCount - 1] = polyRef;
+            }
+            else
+            {
+                // Append new vertex.
+                dtVcopy(straightPath, straightPathCount * 3, pos, 0);
+
+                if (straightPathFlags != null)
+                    straightPathFlags[straightPathCount] = flags;
+
+                if (straightPathRefs != null)
+                    straightPathRefs[straightPathCount] = polyRef;
+
+                straightPathCount++;
+
+                // If there is no space to append more vertices, return.
+                if (straightPathCount >= maxStraightPath)
+                    return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
+
+                // If reached end of path or there is no space to append more vertices, return.
+                if (flags == (byte)dtStraightPathFlags.DT_STRAIGHTPATH_END)
+                    return DT_SUCCESS;
+            }
+
+            return DT_IN_PROGRESS;
+        }
+
+        // Appends intermediate portal points to a straight path.
+        private uint appendPortals(int startIdx, int endIdx, float[] endPos, ulong[] path, float[] straightPath, byte[] straightPathFlags, ulong[] straightPathRefs, ref int straightPathCount, int maxStraightPath, int options)
+        {
+            //float* startPos = &straightPath[(*straightPathCount-1)*3];
+            int startPosStart = (straightPathCount - 1) * 3;
+            // Append or update last vertex
+            uint stat = 0;
+
+            for (int i = startIdx; i < endIdx; i++)
+            {
+                // Calculate portal
+                ulong from = path[i];
+                dtMeshTile fromTile = null;
+                dtPoly fromPoly = null;
+
+                if (dtStatusFailed(_nav.getTileAndPolyByRef(from, ref fromTile, ref fromPoly)))
+                    return DT_FAILURE | DT_INVALID_PARAM;
+
+                ulong to = path[i + 1];
+                dtMeshTile toTile = null;
+                dtPoly toPoly = null;
+
+                if (dtStatusFailed(_nav.getTileAndPolyByRef(to, ref toTile, ref toPoly)))
+                    return DT_FAILURE | DT_INVALID_PARAM;
+
+                float[] left = new float[3]; //, right[3];
+                float[] right = new float[3];
+
+                if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
+                    break;
+
+                if ((options & (int)dtStraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS) != 0)
+                    // Skip intersection if only area crossings are requested.
+                    if (fromPoly.getArea() == toPoly.getArea())
+                        continue;
+
+                // Append intersection
+                float s = .0f, t = .0f;
+
+                if (dtIntersectSegSeg2D(straightPath, startPosStart, endPos, 0, left, 0, right, 0, ref s, ref t))
+                {
+                    float[] pt = new float[3];
+                    dtVlerp(pt, left, right, t);
+
+                    stat = appendVertex(pt,
+                                        0,
+                                        path[i + 1],
+                                        straightPath,
+                                        straightPathFlags,
+                                        straightPathRefs,
+                                        ref straightPathCount,
+                                        maxStraightPath);
+
+                    if (stat != DT_IN_PROGRESS)
+                        return stat;
+                }
+            }
+
+            return DT_IN_PROGRESS;
+        }
+
+        /// Returns portal points between two polygons.
+        private uint getPortalPoints(ulong from, ulong to, float[] left, float[] right, ref byte fromType, ref byte toType)
+        {
+            Debug.Assert(_nav != null);
+
+            dtMeshTile fromTile = null;
+            dtPoly fromPoly = null;
+
+            if (dtStatusFailed(_nav.getTileAndPolyByRef(from, ref fromTile, ref fromPoly)))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            fromType = fromPoly.getType();
+
+            dtMeshTile toTile = null;
+            dtPoly toPoly = null;
+
+            if (dtStatusFailed(_nav.getTileAndPolyByRef(to, ref toTile, ref toPoly)))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            toType = toPoly.getType();
+
+            return getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right);
+        }
+
+        // Returns portal points between two polygons.
+        private uint getPortalPoints(ulong from, dtPoly fromPoly, dtMeshTile fromTile, ulong to, dtPoly toPoly, dtMeshTile toTile, float[] left, float[] right)
+        {
+            // Find the link that points to the 'to' polygon.
+            dtLink link = null;
+
+            for (uint i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
+                if (fromTile.links[i].polyRef == to)
+                {
+                    link = fromTile.links[i];
+
+                    break;
+                }
+
+            if (link == null)
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            // Handle off-mesh connections.
+            if (fromPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+            {
+                // Find link that points to first vertex.
+                for (uint i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
+                    if (fromTile.links[i].polyRef == to)
+                    {
+                        int v = fromTile.links[i].edge;
+                        dtVcopy(left, 0, fromTile.verts, fromPoly.verts[v] * 3);
+                        dtVcopy(right, 0, fromTile.verts, fromPoly.verts[v] * 3);
+
+                        return DT_SUCCESS;
+                    }
+
+                return DT_FAILURE | DT_INVALID_PARAM;
+            }
+
+            if (toPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+            {
+                for (uint i = toPoly.firstLink; i != DT_NULL_LINK; i = toTile.links[i].next)
+                    if (toTile.links[i].polyRef == from)
+                    {
+                        int v = toTile.links[i].edge;
+                        dtVcopy(left, 0, toTile.verts, toPoly.verts[v] * 3);
+                        dtVcopy(right, 0, toTile.verts, toPoly.verts[v] * 3);
+
+                        return DT_SUCCESS;
+                    }
+
+                return DT_FAILURE | DT_INVALID_PARAM;
+            }
+
+            // Find portal vertices.
+            int v0 = fromPoly.verts[link.edge];
+            int v1 = fromPoly.verts[(link.edge + 1) % (int)fromPoly.vertCount];
+            dtVcopy(left, 0, fromTile.verts, v0 * 3);
+            dtVcopy(right, 0, fromTile.verts, v1 * 3);
+
+            // If the link is at tile boundary, dtClamp the vertices to
+            // the link width.
+            if (link.side != 0xff)
+                // Unpack portal limits.
+                if (link.bmin != 0 ||
+                    link.bmax != 255)
+                {
+                    float s = 1.0f / 255.0f;
+                    float tmin = link.bmin * s;
+                    float tmax = link.bmax * s;
+                    dtVlerp(left, 0, fromTile.verts, v0 * 3, fromTile.verts, v1 * 3, tmin);
+                    dtVlerp(right, 0, fromTile.verts, v0 * 3, fromTile.verts, v1 * 3, tmax);
+                }
+
+            return DT_SUCCESS;
+        }
+
+        // Returns edge mid point between two polygons.
+        private uint getEdgeMidPoint(ulong from, ulong to, float[] mid)
+        {
+            float[] left = new float[3]; //, right[3];
+            float[] right = new float[3];
+            byte fromType = 0, toType = 0;
+
+            if (dtStatusFailed(getPortalPoints(from, to, left, right, ref fromType, ref toType)))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            mid[0] = (left[0] + right[0]) * 0.5f;
+            mid[1] = (left[1] + right[1]) * 0.5f;
+            mid[2] = (left[2] + right[2]) * 0.5f;
+
+            return DT_SUCCESS;
+        }
+
+        private uint getEdgeMidPoint(ulong from, dtPoly fromPoly, dtMeshTile fromTile, ulong to, dtPoly toPoly, dtMeshTile toTile, float[] mid)
+        {
+            float[] left = new float[3]; //, right[3];
+            float[] right = new float[3];
+
+            if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            mid[0] = (left[0] + right[0]) * 0.5f;
+            mid[1] = (left[1] + right[1]) * 0.5f;
+            mid[2] = (left[2] + right[2]) * 0.5f;
+
+            return DT_SUCCESS;
         }
 
         ///@}
@@ -4143,62 +4188,15 @@ public static partial class Detour
 
             return node != null && node.dtcsTestFlag(dtNodeFlags.DT_NODE_CLOSED); // .flags & DT_NODE_CLOSED;
         }
-
-        /// Gets the navigation mesh the query object is using.
-        // @return The navigation mesh the query object is using.
-        public dtNavMesh getAttachedNavMesh()
-        {
-            return _nav;
-        }
-
-        private class dtQueryData
-        {
-            public float[] endPos = new float[3];
-            public ulong endRef;
-            public dtQueryFilter filter;
-            public dtNode lastBestNode;
-            public float lastBestNodeCost;
-            public uint options;
-            public float raycastLimitSqr;
-            public float[] startPos = new float[3];
-            public ulong startRef;
-            public uint status;
-
-            public void dtcsClear()
-            {
-                status = 0;
-                lastBestNode = null;
-                lastBestNodeCost = .0f;
-                startRef = 0;
-                endRef = 0;
-
-                for (int i = 0; i < 3; ++i)
-                {
-                    startPos[i] = 0f;
-                    endPos[i] = 0f;
-                }
-
-                filter = null;
-                options = 0;
-                raycastLimitSqr = 0f;
-            }
-        }
-
-        private class dtSegInterval
-        {
-            public ulong polyRef;
-            public short tmax;
-            public short tmin;
-        };
     }
 
     public class dtFindNearestPolyQuery
     {
         private readonly float[] _center;
-        private float _nearestDistanceSqr;
         private readonly float[] _nearestPoint = new float[3];
-        private ulong _nearestRef;
         private readonly dtNavMeshQuery _query;
+        private float _nearestDistanceSqr;
+        private ulong _nearestRef;
 
         public dtFindNearestPolyQuery(dtNavMeshQuery query, float[] center)
         {
@@ -4253,4 +4251,6 @@ public static partial class Detour
             }
         }
     }
+
+    private const float H_SCALE = 0.999f; // Search heuristic scale.
 }

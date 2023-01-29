@@ -5,14 +5,14 @@ namespace Game.Entities
 {
     public class PlayerCreateInfoItem
     {
-        public uint ItemAmount { get; set; }
-
-        public uint ItemId { get; set; }
-
         public PlayerCreateInfoItem(uint id, uint amount)
         {
             ItemId = id;
             ItemAmount = amount;
         }
+
+        public uint ItemAmount { get; set; }
+
+        public uint ItemId { get; set; }
     }
 }

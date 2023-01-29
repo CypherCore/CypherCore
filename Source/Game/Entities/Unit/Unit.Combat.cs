@@ -470,16 +470,6 @@ namespace Game.Entities
             return true;
         }
 
-        private void _addAttacker(Unit pAttacker)
-        {
-            AttackerList.Add(pAttacker);
-        }
-
-        private void _removeAttacker(Unit pAttacker)
-        {
-            AttackerList.Remove(pAttacker);
-        }
-
         public void SetLastExtraAttackSpell(uint spellId)
         {
             _lastExtraAttackSpell = spellId;
@@ -493,11 +483,6 @@ namespace Game.Entities
         public void SetLastDamagedTargetGuid(ObjectGuid guid)
         {
             _lastDamagedTargetGuid = guid;
-        }
-
-        private ObjectGuid GetLastDamagedTargetGuid()
-        {
-            return _lastDamagedTargetGuid;
         }
 
         public Unit GetVictim()
@@ -787,11 +772,6 @@ namespace Game.Entities
                 myPlayerOwner.SetContestedPvP(targetPlayerOwner);
                 myPlayerOwner.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
             }
-        }
-
-        private bool IsThreatened()
-        {
-            return !_threatManager.IsThreatListEmpty();
         }
 
         public static void Kill(Unit attacker, Unit victim, bool durabilityLoss = true, bool skipSettingDeathState = false)
@@ -1179,6 +1159,256 @@ namespace Game.Entities
             }
         }
 
+        public uint CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
+        {
+            float minDamage;
+            float maxDamage;
+
+            if (normalized || !addTotalPct)
+            {
+                CalculateMinMaxDamage(attType, normalized, addTotalPct, out minDamage, out maxDamage);
+
+                if (IsInFeralForm() &&
+                    attType == WeaponAttackType.BaseAttack)
+                {
+                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out float minOffhandDamage, out float maxOffhandDamage);
+                    minDamage += minOffhandDamage;
+                    maxDamage += maxOffhandDamage;
+                }
+            }
+            else
+            {
+                switch (attType)
+                {
+                    case WeaponAttackType.RangedAttack:
+                        minDamage = UnitData.MinRangedDamage;
+                        maxDamage = UnitData.MaxRangedDamage;
+
+                        break;
+                    case WeaponAttackType.BaseAttack:
+                        minDamage = UnitData.MinDamage;
+                        maxDamage = UnitData.MaxDamage;
+
+                        if (IsInFeralForm())
+                        {
+                            minDamage += UnitData.MinOffHandDamage;
+                            maxDamage += UnitData.MaxOffHandDamage;
+                        }
+
+                        break;
+                    case WeaponAttackType.OffAttack:
+                        minDamage = UnitData.MinOffHandDamage;
+                        maxDamage = UnitData.MaxOffHandDamage;
+
+                        break;
+                    // Just for good manner
+                    default:
+                        minDamage = 0.0f;
+                        maxDamage = 0.0f;
+
+                        break;
+                }
+            }
+
+            minDamage = Math.Max(0.0f, minDamage);
+            maxDamage = Math.Max(0.0f, maxDamage);
+
+            if (minDamage > maxDamage)
+                Extensions.Swap(ref minDamage, ref maxDamage);
+
+            return RandomHelper.URand(minDamage, maxDamage);
+        }
+
+        public float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type)
+        {
+            if (attType == WeaponAttackType.OffAttack &&
+                !HaveOffhandWeapon())
+                return 0.0f;
+
+            return WeaponDamage[(int)attType][(int)type];
+        }
+
+        public float GetAPMultiplier(WeaponAttackType attType, bool normalized)
+        {
+            if (!IsTypeId(TypeId.Player) ||
+                (IsInFeralForm() && !normalized))
+                return GetBaseAttackTime(attType) / 1000.0f;
+
+            Item weapon = ToPlayer().GetWeaponForAttack(attType, true);
+
+            if (!weapon)
+                return 2.0f;
+
+            if (!normalized)
+                return weapon.GetTemplate().GetDelay() / 1000.0f;
+
+            switch ((ItemSubClassWeapon)weapon.GetTemplate().GetSubClass())
+            {
+                case ItemSubClassWeapon.Axe2:
+                case ItemSubClassWeapon.Mace2:
+                case ItemSubClassWeapon.Polearm:
+                case ItemSubClassWeapon.Sword2:
+                case ItemSubClassWeapon.Staff:
+                case ItemSubClassWeapon.FishingPole:
+                    return 3.3f;
+                case ItemSubClassWeapon.Axe:
+                case ItemSubClassWeapon.Mace:
+                case ItemSubClassWeapon.Sword:
+                case ItemSubClassWeapon.Warglaives:
+                case ItemSubClassWeapon.Exotic:
+                case ItemSubClassWeapon.Exotic2:
+                case ItemSubClassWeapon.Fist:
+                    return 2.4f;
+                case ItemSubClassWeapon.Dagger:
+                    return 1.7f;
+                case ItemSubClassWeapon.Thrown:
+                    return 2.0f;
+                default:
+                    return weapon.GetTemplate().GetDelay() / 1000.0f;
+            }
+        }
+
+        public float GetTotalAttackPowerValue(WeaponAttackType attType, bool includeWeapon = true)
+        {
+            if (attType == WeaponAttackType.RangedAttack)
+            {
+                float ap = UnitData.RangedAttackPower + UnitData.RangedAttackPowerModPos + UnitData.RangedAttackPowerModNeg;
+
+                if (includeWeapon)
+                    ap += Math.Max(UnitData.MainHandWeaponAttackPower, UnitData.RangedWeaponAttackPower);
+
+                if (ap < 0)
+                    return 0.0f;
+
+                return ap * (1.0f + UnitData.RangedAttackPowerMultiplier);
+            }
+            else
+            {
+                float ap = UnitData.AttackPower + UnitData.AttackPowerModPos + UnitData.AttackPowerModNeg;
+
+                if (includeWeapon)
+                {
+                    if (attType == WeaponAttackType.BaseAttack)
+                    {
+                        ap += Math.Max(UnitData.MainHandWeaponAttackPower, UnitData.RangedWeaponAttackPower);
+                    }
+                    else
+                    {
+                        ap += UnitData.OffHandWeaponAttackPower;
+                        ap /= 2;
+                    }
+                }
+
+                if (ap < 0)
+                    return 0.0f;
+
+                return ap * (1.0f + UnitData.AttackPowerMultiplier);
+            }
+        }
+
+        public bool IsWithinMeleeRange(Unit obj)
+        {
+            return IsWithinMeleeRangeAt(GetPosition(), obj);
+        }
+
+        public bool IsWithinMeleeRangeAt(Position pos, Unit obj)
+        {
+            if (!obj ||
+                !IsInMap(obj) ||
+                !InSamePhase(obj))
+                return false;
+
+            float dx = pos.GetPositionX() - obj.GetPositionX();
+            float dy = pos.GetPositionY() - obj.GetPositionY();
+            float dz = pos.GetPositionZ() - obj.GetPositionZ();
+            float distsq = (dx * dx) + (dy * dy) + (dz * dz);
+
+            float maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);
+
+            return distsq <= maxdist * maxdist;
+        }
+
+        public float GetMeleeRange(Unit target)
+        {
+            float range = GetCombatReach() + target.GetCombatReach() + 4.0f / 3.0f;
+
+            return Math.Max(range, SharedConst.NominalMeleeRange);
+        }
+
+        public void SetBaseAttackTime(WeaponAttackType att, uint val)
+        {
+            _baseAttackSpeed[(int)att] = val;
+            UpdateAttackTimeField(att);
+        }
+
+        public virtual bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff)
+        {
+            return true;
+        }
+
+        public void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
+        {
+            float remainingTimePct = AttackTimer[(int)att] / (_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att]);
+
+            if (val > 0.0f)
+            {
+                MathFunctions.ApplyPercentModFloatVar(ref ModAttackSpeedPct[(int)att], val, !apply);
+
+                if (att == WeaponAttackType.BaseAttack)
+                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), val, !apply);
+                else if (att == WeaponAttackType.RangedAttack)
+                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), val, !apply);
+            }
+            else
+            {
+                MathFunctions.ApplyPercentModFloatVar(ref ModAttackSpeedPct[(int)att], -val, apply);
+
+                if (att == WeaponAttackType.BaseAttack)
+                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), -val, apply);
+                else if (att == WeaponAttackType.RangedAttack)
+                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), -val, apply);
+            }
+
+            UpdateAttackTimeField(att);
+            AttackTimer[(int)att] = (uint)(_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att] * remainingTimePct);
+        }
+
+        /// <summary>
+        ///  returns if the unit can't enter combat
+        /// </summary>
+        public bool IsCombatDisallowed()
+        {
+            return _isCombatDisallowed;
+        }
+
+        /// <summary>
+        ///  enables / disables combat interaction of this unit
+        /// </summary>
+        public void SetIsCombatDisallowed(bool apply)
+        {
+            _isCombatDisallowed = apply;
+        }
+
+        private void _addAttacker(Unit pAttacker)
+        {
+            AttackerList.Add(pAttacker);
+        }
+
+        private void _removeAttacker(Unit pAttacker)
+        {
+            AttackerList.Remove(pAttacker);
+        }
+
+        private ObjectGuid GetLastDamagedTargetGuid()
+        {
+            return _lastDamagedTargetGuid;
+        }
+
+        private bool IsThreatened()
+        {
+            return !_threatManager.IsThreatListEmpty();
+        }
+
         // TODO for melee need create structure as in
         private void CalculateMeleeDamage(Unit victim, out CalcDamageInfo damageInfo, WeaponAttackType attackType)
         {
@@ -1529,188 +1759,6 @@ namespace Game.Entities
             return MeleeHitOutcome.Normal;
         }
 
-        public uint CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
-        {
-            float minDamage;
-            float maxDamage;
-
-            if (normalized || !addTotalPct)
-            {
-                CalculateMinMaxDamage(attType, normalized, addTotalPct, out minDamage, out maxDamage);
-
-                if (IsInFeralForm() &&
-                    attType == WeaponAttackType.BaseAttack)
-                {
-                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out float minOffhandDamage, out float maxOffhandDamage);
-                    minDamage += minOffhandDamage;
-                    maxDamage += maxOffhandDamage;
-                }
-            }
-            else
-            {
-                switch (attType)
-                {
-                    case WeaponAttackType.RangedAttack:
-                        minDamage = UnitData.MinRangedDamage;
-                        maxDamage = UnitData.MaxRangedDamage;
-
-                        break;
-                    case WeaponAttackType.BaseAttack:
-                        minDamage = UnitData.MinDamage;
-                        maxDamage = UnitData.MaxDamage;
-
-                        if (IsInFeralForm())
-                        {
-                            minDamage += UnitData.MinOffHandDamage;
-                            maxDamage += UnitData.MaxOffHandDamage;
-                        }
-
-                        break;
-                    case WeaponAttackType.OffAttack:
-                        minDamage = UnitData.MinOffHandDamage;
-                        maxDamage = UnitData.MaxOffHandDamage;
-
-                        break;
-                    // Just for good manner
-                    default:
-                        minDamage = 0.0f;
-                        maxDamage = 0.0f;
-
-                        break;
-                }
-            }
-
-            minDamage = Math.Max(0.0f, minDamage);
-            maxDamage = Math.Max(0.0f, maxDamage);
-
-            if (minDamage > maxDamage)
-                Extensions.Swap(ref minDamage, ref maxDamage);
-
-            return RandomHelper.URand(minDamage, maxDamage);
-        }
-
-        public float GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type)
-        {
-            if (attType == WeaponAttackType.OffAttack &&
-                !HaveOffhandWeapon())
-                return 0.0f;
-
-            return WeaponDamage[(int)attType][(int)type];
-        }
-
-        public float GetAPMultiplier(WeaponAttackType attType, bool normalized)
-        {
-            if (!IsTypeId(TypeId.Player) ||
-                (IsInFeralForm() && !normalized))
-                return GetBaseAttackTime(attType) / 1000.0f;
-
-            Item weapon = ToPlayer().GetWeaponForAttack(attType, true);
-
-            if (!weapon)
-                return 2.0f;
-
-            if (!normalized)
-                return weapon.GetTemplate().GetDelay() / 1000.0f;
-
-            switch ((ItemSubClassWeapon)weapon.GetTemplate().GetSubClass())
-            {
-                case ItemSubClassWeapon.Axe2:
-                case ItemSubClassWeapon.Mace2:
-                case ItemSubClassWeapon.Polearm:
-                case ItemSubClassWeapon.Sword2:
-                case ItemSubClassWeapon.Staff:
-                case ItemSubClassWeapon.FishingPole:
-                    return 3.3f;
-                case ItemSubClassWeapon.Axe:
-                case ItemSubClassWeapon.Mace:
-                case ItemSubClassWeapon.Sword:
-                case ItemSubClassWeapon.Warglaives:
-                case ItemSubClassWeapon.Exotic:
-                case ItemSubClassWeapon.Exotic2:
-                case ItemSubClassWeapon.Fist:
-                    return 2.4f;
-                case ItemSubClassWeapon.Dagger:
-                    return 1.7f;
-                case ItemSubClassWeapon.Thrown:
-                    return 2.0f;
-                default:
-                    return weapon.GetTemplate().GetDelay() / 1000.0f;
-            }
-        }
-
-        public float GetTotalAttackPowerValue(WeaponAttackType attType, bool includeWeapon = true)
-        {
-            if (attType == WeaponAttackType.RangedAttack)
-            {
-                float ap = UnitData.RangedAttackPower + UnitData.RangedAttackPowerModPos + UnitData.RangedAttackPowerModNeg;
-
-                if (includeWeapon)
-                    ap += Math.Max(UnitData.MainHandWeaponAttackPower, UnitData.RangedWeaponAttackPower);
-
-                if (ap < 0)
-                    return 0.0f;
-
-                return ap * (1.0f + UnitData.RangedAttackPowerMultiplier);
-            }
-            else
-            {
-                float ap = UnitData.AttackPower + UnitData.AttackPowerModPos + UnitData.AttackPowerModNeg;
-
-                if (includeWeapon)
-                {
-                    if (attType == WeaponAttackType.BaseAttack)
-                    {
-                        ap += Math.Max(UnitData.MainHandWeaponAttackPower, UnitData.RangedWeaponAttackPower);
-                    }
-                    else
-                    {
-                        ap += UnitData.OffHandWeaponAttackPower;
-                        ap /= 2;
-                    }
-                }
-
-                if (ap < 0)
-                    return 0.0f;
-
-                return ap * (1.0f + UnitData.AttackPowerMultiplier);
-            }
-        }
-
-        public bool IsWithinMeleeRange(Unit obj)
-        {
-            return IsWithinMeleeRangeAt(GetPosition(), obj);
-        }
-
-        public bool IsWithinMeleeRangeAt(Position pos, Unit obj)
-        {
-            if (!obj ||
-                !IsInMap(obj) ||
-                !InSamePhase(obj))
-                return false;
-
-            float dx = pos.GetPositionX() - obj.GetPositionX();
-            float dy = pos.GetPositionY() - obj.GetPositionY();
-            float dz = pos.GetPositionZ() - obj.GetPositionZ();
-            float distsq = (dx * dx) + (dy * dy) + (dz * dz);
-
-            float maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);
-
-            return distsq <= maxdist * maxdist;
-        }
-
-        public float GetMeleeRange(Unit target)
-        {
-            float range = GetCombatReach() + target.GetCombatReach() + 4.0f / 3.0f;
-
-            return Math.Max(range, SharedConst.NominalMeleeRange);
-        }
-
-        public void SetBaseAttackTime(WeaponAttackType att, uint val)
-        {
-            _baseAttackSpeed[(int)att] = val;
-            UpdateAttackTimeField(att);
-        }
-
         private void UpdateAttackTimeField(WeaponAttackType att)
         {
             switch (att)
@@ -1729,54 +1777,6 @@ namespace Game.Entities
 
                     ;
             }
-        }
-
-        public virtual bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff)
-        {
-            return true;
-        }
-
-        public void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
-        {
-            float remainingTimePct = AttackTimer[(int)att] / (_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att]);
-
-            if (val > 0.0f)
-            {
-                MathFunctions.ApplyPercentModFloatVar(ref ModAttackSpeedPct[(int)att], val, !apply);
-
-                if (att == WeaponAttackType.BaseAttack)
-                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), val, !apply);
-                else if (att == WeaponAttackType.RangedAttack)
-                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), val, !apply);
-            }
-            else
-            {
-                MathFunctions.ApplyPercentModFloatVar(ref ModAttackSpeedPct[(int)att], -val, apply);
-
-                if (att == WeaponAttackType.BaseAttack)
-                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), -val, apply);
-                else if (att == WeaponAttackType.RangedAttack)
-                    ApplyPercentModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), -val, apply);
-            }
-
-            UpdateAttackTimeField(att);
-            AttackTimer[(int)att] = (uint)(_baseAttackSpeed[(int)att] * ModAttackSpeedPct[(int)att] * remainingTimePct);
-        }
-
-        /// <summary>
-        ///  returns if the unit can't enter combat
-        /// </summary>
-        public bool IsCombatDisallowed()
-        {
-            return _isCombatDisallowed;
-        }
-
-        /// <summary>
-        ///  enables / disables combat interaction of this unit
-        /// </summary>
-        public void SetIsCombatDisallowed(bool apply)
-        {
-            _isCombatDisallowed = apply;
         }
     }
 }

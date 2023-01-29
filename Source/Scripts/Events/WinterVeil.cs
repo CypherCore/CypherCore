@@ -42,6 +42,11 @@ namespace Scripts.Events.WinterVeil
             return ValidateSpellInfo(SpellIds.CreateMistletoe, SpellIds.CreateHolly, SpellIds.CreateSnowflakes);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Player target = GetHitPlayer();
@@ -51,11 +56,6 @@ namespace Scripts.Events.WinterVeil
                 uint spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
                 GetCaster().CastSpell(target, spellId, true);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -77,6 +77,11 @@ namespace Scripts.Events.WinterVeil
                                      SpellIds.Px238WinterWondervoltTransform4);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -92,11 +97,6 @@ namespace Scripts.Events.WinterVeil
                 target.CastSpell(target, spells[RandomHelper.URand(0, 3)], true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -107,6 +107,11 @@ namespace Scripts.Events.WinterVeil
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.FlyingReindeer310, SpellIds.FlyingReindeer280, SpellIds.FlyingReindeer60, SpellIds.Reindeer100, SpellIds.Reindeer60);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -137,11 +142,6 @@ namespace Scripts.Events.WinterVeil
                     // Reindeer
                     caster.CastSpell(caster, SpellIds.Reindeer60, true); //60% ground Reindeer
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

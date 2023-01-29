@@ -79,6 +79,11 @@ namespace Game.AI
             }
         }
 
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Home;
+        }
+
         private void SetTargetLocation(T owner)
         {
             // if we are ROOT/STUNNED/DISTRACTED even after aura clear, finalize on next update - otherwise we would get stuck in evade
@@ -109,11 +114,6 @@ namespace Game.AI
             init.SetFacing(destination.GetOrientation());
             init.SetWalk(false);
             init.Launch();
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Home;
         }
     }
 }

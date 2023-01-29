@@ -10,9 +10,6 @@ namespace Game.Entities
     public class WorldLocation : Position
     {
         private uint _mapId;
-        public ObjectCellMoveState MoveState { get; set; }
-
-        public Position NewPosition { get; set; } = new();
         private Cell currentCell;
 
         public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0)
@@ -38,6 +35,10 @@ namespace Game.Entities
             _mapId = 0xFFFFFFFF;
             Relocate(pos);
         }
+
+        public ObjectCellMoveState MoveState { get; set; }
+
+        public Position NewPosition { get; set; } = new();
 
         public void WorldRelocate(uint mapId, Position pos)
         {

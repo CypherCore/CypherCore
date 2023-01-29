@@ -10,9 +10,9 @@ namespace Framework.IO
 {
     public class ByteBuffer : IDisposable
     {
+        private readonly BinaryReader readStream;
         private byte _bitPosition = 8;
         private byte BitValue;
-        private readonly BinaryReader readStream;
         private BinaryWriter writeStream;
 
         public ByteBuffer()

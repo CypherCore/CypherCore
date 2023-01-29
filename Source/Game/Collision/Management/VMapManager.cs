@@ -12,14 +12,14 @@ namespace Game.Collision
     public class VMapManager : Singleton<VMapManager>
     {
         public static string VMapPath = Global.WorldMgr.GetDataPath() + "/vmaps/";
-        private bool _enableHeightCalc;
-        private bool _enableLineOfSightCalc;
         private readonly Dictionary<uint, StaticMapTree> _iInstanceMapTrees = new();
 
         private readonly Dictionary<string, ManagedModel> _iLoadedModelFiles = new();
         private readonly Dictionary<uint, uint> _iParentMapData = new();
 
         private readonly object _loadedModelFilesLock = new();
+        private bool _enableHeightCalc;
+        private bool _enableLineOfSightCalc;
 
         private VMapManager()
         {
@@ -315,17 +315,6 @@ namespace Game.Collision
             return -1;
         }
 
-        private Vector3 ConvertPositionToInternalRep(float x, float y, float z)
-        {
-            Vector3 pos = new();
-            float mid = 0.5f * 64.0f * 533.33333333f;
-            pos.X = mid - x;
-            pos.Y = mid - y;
-            pos.Z = z;
-
-            return pos;
-        }
-
         public static string GetMapFileName(uint mapId)
         {
             return $"{mapId:D4}.vmtree";
@@ -354,6 +343,17 @@ namespace Game.Collision
         public bool IsMapLoadingEnabled()
         {
             return _enableLineOfSightCalc || _enableHeightCalc;
+        }
+
+        private Vector3 ConvertPositionToInternalRep(float x, float y, float z)
+        {
+            Vector3 pos = new();
+            float mid = 0.5f * 64.0f * 533.33333333f;
+            pos.X = mid - x;
+            pos.Y = mid - y;
+            pos.Z = z;
+
+            return pos;
         }
     }
 }

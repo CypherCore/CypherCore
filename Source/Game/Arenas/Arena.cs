@@ -65,12 +65,6 @@ namespace Game.Arenas
             CheckWinConditions();
         }
 
-        private void UpdateArenaWorldState()
-        {
-            UpdateWorldState(ArenaWorldStates.AlivePlayersGreen, (int)GetAlivePlayersCountByTeam(Team.Horde));
-            UpdateWorldState(ArenaWorldStates.AlivePlayersGold, (int)GetAlivePlayersCountByTeam(Team.Alliance));
-        }
-
         public override void HandleKillPlayer(Player victim, Player killer)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
@@ -320,6 +314,12 @@ namespace Game.Arenas
 
             // end Battleground
             base.EndBattleground(winner);
+        }
+
+        private void UpdateArenaWorldState()
+        {
+            UpdateWorldState(ArenaWorldStates.AlivePlayersGreen, (int)GetAlivePlayersCountByTeam(Team.Horde));
+            UpdateWorldState(ArenaWorldStates.AlivePlayersGold, (int)GetAlivePlayersCountByTeam(Team.Alliance));
         }
     }
 

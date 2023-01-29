@@ -48,6 +48,12 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.AMurderOfCrowsDamage, SpellIds.AMurderOfCrowsVisual1, SpellIds.AMurderOfCrowsVisual2, SpellIds.AMurderOfCrowsVisual3);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
         private void HandleDummyTick(AuraEffect aurEff)
         {
             Unit target = GetTarget();
@@ -70,12 +76,6 @@ namespace Scripts.Spells.Hunter
                 caster?.GetSpellHistory().ResetCooldown(GetId(), true);
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 0, AuraType.PeriodicDummy));
-            Effects.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-        }
     }
 
     [Script] // 186257 - Aspect of the Cheetah
@@ -88,15 +88,15 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.AspectCheetahSlow);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
                 GetTarget().CastSpell(GetTarget(), SpellIds.AspectCheetahSlow, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -126,16 +126,16 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.Exhilaration, SpellIds.ExhilarationPet);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.Exhilaration, -TimeSpan.FromSeconds(aurEff.GetAmount()));
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.ExhilarationPet, -TimeSpan.FromSeconds(aurEff.GetAmount()));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -150,17 +150,17 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.PetLastStandTriggered);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(30));
             caster.CastSpell(caster, SpellIds.PetLastStandTriggered, args);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -244,6 +244,12 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.MisdirectionProc);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Default ||
@@ -259,12 +265,6 @@ namespace Scripts.Spells.Hunter
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.MisdirectionProc, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     // 35079 - Misdirection (Proc)
@@ -273,14 +273,14 @@ namespace Scripts.Spells.Hunter
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.Misdirection);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.Misdirection);
         }
     }
 
@@ -303,6 +303,11 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.PetHeartOfThePhoenixTriggered, SpellIds.PetHeartOfThePhoenixDebuff);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -316,11 +321,6 @@ namespace Scripts.Spells.Hunter
                     owner.CastSpell(caster, SpellIds.PetHeartOfThePhoenixTriggered, args);
                     caster.CastSpell(caster, SpellIds.PetHeartOfThePhoenixDebuff, true);
                 }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -352,6 +352,12 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.RoarOfSacrificeTriggered);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 1, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             DamageInfo damageInfo = eventInfo.GetDamageInfo();
@@ -374,12 +380,6 @@ namespace Scripts.Spells.Hunter
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
             eventInfo.GetActor().CastSpell(GetCaster(), SpellIds.RoarOfSacrificeTriggered, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 1, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     // 37506 - Scatter Shot
@@ -393,6 +393,11 @@ namespace Scripts.Spells.Hunter
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
@@ -400,11 +405,6 @@ namespace Scripts.Spells.Hunter
             caster.InterruptSpell(CurrentSpellTypes.AutoRepeat);
             caster.AttackStop();
             caster.SendAttackSwingCancelAttack();
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 

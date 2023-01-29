@@ -8,12 +8,19 @@ namespace Game.Entities
     // Base class for GameObject Type specific implementations
     internal class GameObjectTypeBase
     {
-        protected GameObject Owner { get; set; }
+        public class CustomCommand
+        {
+            public virtual void Execute(GameObjectTypeBase type)
+            {
+            }
+        }
 
         public GameObjectTypeBase(GameObject owner)
         {
             Owner = owner;
         }
+
+        protected GameObject Owner { get; set; }
 
         public virtual void Update(uint diff)
         {
@@ -25,13 +32,6 @@ namespace Game.Entities
 
         public virtual void OnRelocated()
         {
-        }
-
-        public class CustomCommand
-        {
-            public virtual void Execute(GameObjectTypeBase type)
-            {
-            }
         }
     }
 

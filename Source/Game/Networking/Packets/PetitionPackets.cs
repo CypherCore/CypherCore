@@ -115,6 +115,12 @@ namespace Game.Networking.Packets
 
     public class ServerPetitionShowSignatures : ServerPacket
     {
+        public struct PetitionSignature
+        {
+            public ObjectGuid Signer;
+            public int Choice;
+        }
+
         public ObjectGuid Item;
         public ObjectGuid Owner;
         public ObjectGuid OwnerAccountID;
@@ -140,12 +146,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WritePackedGuid(signature.Signer);
                 _worldPacket.WriteInt32(signature.Choice);
             }
-        }
-
-        public struct PetitionSignature
-        {
-            public ObjectGuid Signer;
-            public int Choice;
         }
     }
 

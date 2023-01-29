@@ -25,11 +25,6 @@ namespace Game.Maps
         {
         }
 
-        private void Unload()
-        {
-            _transportTemplates.Clear();
-        }
-
         public void LoadTransportTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -168,6 +163,136 @@ namespace Game.Maps
                 } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Spawned {count} continent transports in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
+        {
+            if (!_transportAnimations.ContainsKey(transportEntry))
+                _transportAnimations[transportEntry] = new TransportAnimation();
+
+            TransportAnimation animNode = _transportAnimations[transportEntry];
+
+            if (animNode.TotalTime < timeSeg)
+                animNode.TotalTime = timeSeg;
+
+            animNode.Path[timeSeg] = node;
+        }
+
+        public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
+        {
+            if (!_transportAnimations.ContainsKey(transportEntry))
+                _transportAnimations[transportEntry] = new TransportAnimation();
+
+            TransportAnimation animNode = _transportAnimations[transportEntry];
+            animNode.Rotations[timeSeg] = node;
+
+            if (animNode.Path.Empty() &&
+                animNode.TotalTime < timeSeg)
+                animNode.TotalTime = timeSeg;
+        }
+
+        public Transport CreateTransport(uint entry, Map map, ulong guid = 0, PhaseUseFlagsValues phaseUseFlags = 0, uint phaseId = 0, uint phaseGroupId = 0)
+        {
+            // SetZoneScript() is called after adding to map, so fetch the script using map
+            InstanceMap instanceMap = map.ToInstanceMap();
+
+            if (instanceMap != null)
+            {
+                InstanceScript instance = instanceMap.GetInstanceScript();
+
+                if (instance != null)
+                    entry = instance.GetGameObjectEntry(0, entry);
+            }
+
+            if (entry == 0)
+                return null;
+
+            TransportTemplate tInfo = GetTransportTemplate(entry);
+
+            if (tInfo == null)
+            {
+                Log.outError(LogFilter.Sql, "Transport {0} will not be loaded, `transport_template` missing", entry);
+
+                return null;
+            }
+
+            if (!tInfo.MapIds.Contains(map.GetId()))
+            {
+                Log.outError(LogFilter.Transport, $"Transport {entry} attempted creation on map it has no path for {map.GetId()}!");
+
+                return null;
+            }
+
+            Position startingPosition = tInfo.ComputePosition(0, out _, out _);
+
+            if (startingPosition == null)
+            {
+                Log.outError(LogFilter.Sql, $"Transport {entry} will not be loaded, failed to compute starting position");
+
+                return null;
+            }
+
+            // create Transport...
+            Transport trans = new();
+
+            // ...at first waypoint
+            float x = startingPosition.GetPositionX();
+            float y = startingPosition.GetPositionY();
+            float z = startingPosition.GetPositionZ();
+            float o = startingPosition.GetOrientation();
+
+            // initialize the gameobject base
+            ulong guidLow = guid != 0 ? guid : map.GenerateLowGuid(HighGuid.Transport);
+
+            if (!trans.Create(guidLow, entry, x, y, z, o))
+                return null;
+
+            PhasingHandler.InitDbPhaseShift(trans.GetPhaseShift(), phaseUseFlags, phaseId, phaseGroupId);
+
+            // use preset map for instances (need to know which instance)
+            trans.SetMap(map);
+
+            if (instanceMap != null)
+                trans.ZoneScript = instanceMap.GetInstanceScript();
+
+            // Passengers will be loaded once a player is near
+
+            map.AddToMap(trans);
+
+            return trans;
+        }
+
+        public void CreateTransportsForMap(Map map)
+        {
+            var mapTransports = _transportsByMap.LookupByKey(map.GetId());
+
+            // no transports here
+            if (mapTransports.Empty())
+                return;
+
+            // create transports
+            foreach (var transport in mapTransports)
+                CreateTransport(transport.TransportGameObjectId, map, transport.SpawnId, transport.PhaseUseFlags, transport.PhaseId, transport.PhaseGroup);
+        }
+
+        public TransportTemplate GetTransportTemplate(uint entry)
+        {
+            return _transportTemplates.LookupByKey(entry);
+        }
+
+        public TransportAnimation GetTransportAnimInfo(uint entry)
+        {
+            return _transportAnimations.LookupByKey(entry);
+        }
+
+        public TransportSpawn GetTransportSpawn(ulong spawnId)
+        {
+            return _transportSpawns.LookupByKey(spawnId);
+        }
+
+        private void Unload()
+        {
+            _transportTemplates.Clear();
         }
 
         private static void InitializeLeg(TransportPathLeg leg, List<TransportPathEvent> outEvents, List<TaxiPathNodeRecord> pathPoints, List<TaxiPathNodeRecord> pauses, List<TaxiPathNodeRecord> events, GameObjectTemplate goInfo, ref uint totalTime)
@@ -381,131 +506,6 @@ namespace Game.Maps
                     Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
 
             transport.TotalPathTime = totalTime;
-        }
-
-        public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
-        {
-            if (!_transportAnimations.ContainsKey(transportEntry))
-                _transportAnimations[transportEntry] = new TransportAnimation();
-
-            TransportAnimation animNode = _transportAnimations[transportEntry];
-
-            if (animNode.TotalTime < timeSeg)
-                animNode.TotalTime = timeSeg;
-
-            animNode.Path[timeSeg] = node;
-        }
-
-        public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
-        {
-            if (!_transportAnimations.ContainsKey(transportEntry))
-                _transportAnimations[transportEntry] = new TransportAnimation();
-
-            TransportAnimation animNode = _transportAnimations[transportEntry];
-            animNode.Rotations[timeSeg] = node;
-
-            if (animNode.Path.Empty() &&
-                animNode.TotalTime < timeSeg)
-                animNode.TotalTime = timeSeg;
-        }
-
-        public Transport CreateTransport(uint entry, Map map, ulong guid = 0, PhaseUseFlagsValues phaseUseFlags = 0, uint phaseId = 0, uint phaseGroupId = 0)
-        {
-            // SetZoneScript() is called after adding to map, so fetch the script using map
-            InstanceMap instanceMap = map.ToInstanceMap();
-
-            if (instanceMap != null)
-            {
-                InstanceScript instance = instanceMap.GetInstanceScript();
-
-                if (instance != null)
-                    entry = instance.GetGameObjectEntry(0, entry);
-            }
-
-            if (entry == 0)
-                return null;
-
-            TransportTemplate tInfo = GetTransportTemplate(entry);
-
-            if (tInfo == null)
-            {
-                Log.outError(LogFilter.Sql, "Transport {0} will not be loaded, `transport_template` missing", entry);
-
-                return null;
-            }
-
-            if (!tInfo.MapIds.Contains(map.GetId()))
-            {
-                Log.outError(LogFilter.Transport, $"Transport {entry} attempted creation on map it has no path for {map.GetId()}!");
-
-                return null;
-            }
-
-            Position startingPosition = tInfo.ComputePosition(0, out _, out _);
-
-            if (startingPosition == null)
-            {
-                Log.outError(LogFilter.Sql, $"Transport {entry} will not be loaded, failed to compute starting position");
-
-                return null;
-            }
-
-            // create Transport...
-            Transport trans = new();
-
-            // ...at first waypoint
-            float x = startingPosition.GetPositionX();
-            float y = startingPosition.GetPositionY();
-            float z = startingPosition.GetPositionZ();
-            float o = startingPosition.GetOrientation();
-
-            // initialize the gameobject base
-            ulong guidLow = guid != 0 ? guid : map.GenerateLowGuid(HighGuid.Transport);
-
-            if (!trans.Create(guidLow, entry, x, y, z, o))
-                return null;
-
-            PhasingHandler.InitDbPhaseShift(trans.GetPhaseShift(), phaseUseFlags, phaseId, phaseGroupId);
-
-            // use preset map for instances (need to know which instance)
-            trans.SetMap(map);
-
-            if (instanceMap != null)
-                trans.ZoneScript = instanceMap.GetInstanceScript();
-
-            // Passengers will be loaded once a player is near
-
-            map.AddToMap(trans);
-
-            return trans;
-        }
-
-        public void CreateTransportsForMap(Map map)
-        {
-            var mapTransports = _transportsByMap.LookupByKey(map.GetId());
-
-            // no transports here
-            if (mapTransports.Empty())
-                return;
-
-            // create transports
-            foreach (var transport in mapTransports)
-                CreateTransport(transport.TransportGameObjectId, map, transport.SpawnId, transport.PhaseUseFlags, transport.PhaseId, transport.PhaseGroup);
-        }
-
-        public TransportTemplate GetTransportTemplate(uint entry)
-        {
-            return _transportTemplates.LookupByKey(entry);
-        }
-
-        public TransportAnimation GetTransportAnimInfo(uint entry)
-        {
-            return _transportAnimations.LookupByKey(entry);
-        }
-
-        public TransportSpawn GetTransportSpawn(ulong spawnId)
-        {
-            return _transportSpawns.LookupByKey(spawnId);
         }
     }
 

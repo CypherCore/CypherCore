@@ -54,11 +54,6 @@ namespace Scripts.EasternKingdoms.AlteracValley
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _hasAura = false;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -146,6 +141,11 @@ namespace Scripts.EasternKingdoms.AlteracValley
                 return;
 
             DoMeleeAttackIfReady();
+        }
+
+        private void Initialize()
+        {
+            _hasAura = false;
         }
     }
 }

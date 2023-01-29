@@ -27,8 +27,9 @@ namespace Game.Chat
 			"Hglyph"    // glyph
 		};
 
-        private bool _sentErrorMessage;
         private readonly WorldSession _session;
+
+        private bool _sentErrorMessage;
 
         public CommandHandler(WorldSession session = null)
         {
@@ -159,20 +160,6 @@ namespace Game.Chat
                 return str;
 
             return str.Replace("\"", string.Empty);
-        }
-
-        private string ExtractPlayerNameFromLink(StringArguments args)
-        {
-            // |color|Hplayer:Name|h[Name]|h|r
-            string name = ExtractKeyFromLink(args, "Hplayer");
-
-            if (name.IsEmpty())
-                return "";
-
-            if (!ObjectManager.NormalizePlayerName(ref name))
-                return "";
-
-            return name;
         }
 
         public bool ExtractPlayerTarget(StringArguments args, out Player player)
@@ -442,19 +429,6 @@ namespace Game.Chat
             return creature;
         }
 
-        private GameObject GetNearbyGameObject()
-        {
-            if (_session == null)
-                return null;
-
-            Player pl = _session.GetPlayer();
-            NearestGameObjectCheck check = new(pl);
-            GameObjectLastSearcher searcher = new(pl, check);
-            Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
-
-            return searcher.GetTarget();
-        }
-
         public string PlayerLink(string name)
         {
             return _session != null ? "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r" : name;
@@ -530,35 +504,6 @@ namespace Game.Chat
             }
 
             return false;
-        }
-
-        private bool HasStringAbbr(string name, string part)
-        {
-            // non "" command
-            if (!name.IsEmpty())
-            {
-                // "" part from non-"" command
-                if (part.IsEmpty())
-                    return false;
-
-                int partIndex = 0;
-
-                while (true)
-                {
-                    if (partIndex >= part.Length ||
-                        part[partIndex] == ' ')
-                        return true;
-                    else if (partIndex >= name.Length)
-                        return false;
-                    else if (char.ToLower(name[partIndex]) != char.ToLower(part[partIndex]))
-                        return false;
-
-                    ++partIndex;
-                }
-            }
-            // allow with any for ""
-
-            return true;
         }
 
         public bool IsConsole()
@@ -700,6 +645,62 @@ namespace Game.Chat
         {
             _sentErrorMessage = val;
         }
+
+        private string ExtractPlayerNameFromLink(StringArguments args)
+        {
+            // |color|Hplayer:Name|h[Name]|h|r
+            string name = ExtractKeyFromLink(args, "Hplayer");
+
+            if (name.IsEmpty())
+                return "";
+
+            if (!ObjectManager.NormalizePlayerName(ref name))
+                return "";
+
+            return name;
+        }
+
+        private GameObject GetNearbyGameObject()
+        {
+            if (_session == null)
+                return null;
+
+            Player pl = _session.GetPlayer();
+            NearestGameObjectCheck check = new(pl);
+            GameObjectLastSearcher searcher = new(pl, check);
+            Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
+
+            return searcher.GetTarget();
+        }
+
+        private bool HasStringAbbr(string name, string part)
+        {
+            // non "" command
+            if (!name.IsEmpty())
+            {
+                // "" part from non-"" command
+                if (part.IsEmpty())
+                    return false;
+
+                int partIndex = 0;
+
+                while (true)
+                {
+                    if (partIndex >= part.Length ||
+                        part[partIndex] == ' ')
+                        return true;
+                    else if (partIndex >= name.Length)
+                        return false;
+                    else if (char.ToLower(name[partIndex]) != char.ToLower(part[partIndex]))
+                        return false;
+
+                    ++partIndex;
+                }
+            }
+            // allow with any for ""
+
+            return true;
+        }
     }
 
     internal class AddonChannelCommandHandler : CommandHandler
@@ -758,29 +759,6 @@ namespace Game.Chat
             }
         }
 
-        private void Send(string msg)
-        {
-            ChatPkt chat = new();
-            chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
-            GetSession().SendPacket(chat);
-        }
-
-        private void SendAck() // a Command acknowledged, no body
-        {
-            Send($"a{echo:4}\0");
-            hadAck = true;
-        }
-
-        private void SendOK() // o Command OK, no body
-        {
-            Send($"o{echo:4}\0");
-        }
-
-        private void SendFailed() // f Command failed, no body
-        {
-            Send($"f{echo:4}\0");
-        }
-
         public override void SendSysMessage(string str, bool escapeCharacters)
         {
             if (!hadAck)
@@ -809,6 +787,29 @@ namespace Game.Chat
         public override bool IsHumanReadable()
         {
             return humanReadable;
+        }
+
+        private void Send(string msg)
+        {
+            ChatPkt chat = new();
+            chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
+            GetSession().SendPacket(chat);
+        }
+
+        private void SendAck() // a Command acknowledged, no body
+        {
+            Send($"a{echo:4}\0");
+            hadAck = true;
+        }
+
+        private void SendOK() // o Command OK, no body
+        {
+            Send($"o{echo:4}\0");
+        }
+
+        private void SendFailed() // f Command failed, no body
+        {
+            Send($"f{echo:4}\0");
         }
     }
 

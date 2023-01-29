@@ -57,10 +57,10 @@ namespace Game.Entities
                     Properties.Slot < SharedConst.MaxTotemSlot)
                 {
                     TotemCreated packet = new();
-                    packet.Totem = GetGUID();
-                    packet.Slot = (byte)(Properties.Slot - (int)Framework.Constants.SummonSlot.Totem);
+                    packet.Totem    = GetGUID();
+                    packet.Slot     = (byte)(Properties.Slot - (int)Framework.Constants.SummonSlot.Totem);
                     packet.Duration = duration;
-                    packet.SpellID = UnitData.CreatedBySpell;
+                    packet.SpellID  = UnitData.CreatedBySpell;
                     owner.ToPlayer().SendPacket(packet);
                 }
 

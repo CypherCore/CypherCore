@@ -150,28 +150,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     [Script]
     internal class instance_blackrock_spire : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_blackrock_spire() : base(nameof(instance_blackrock_spire), 229)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_blackrock_spireMapScript(map);
-        }
-
         private class instance_blackrock_spireMapScript : InstanceScript
         {
             private readonly List<ObjectGuid> _incarceratorList = new();
+            private readonly ObjectGuid[] go_emberseerrunes = new ObjectGuid[7];
+            private readonly ObjectGuid[] go_roomrunes = new ObjectGuid[7];
+            private readonly List<ObjectGuid>[] runecreaturelist = new List<ObjectGuid>[7];
             private ObjectGuid GeneralDrakkisath;
             private ObjectGuid GizrultheSlavener;
             private ObjectGuid go_blackrockaltar;
             private ObjectGuid go_doors;
             private ObjectGuid go_emberseerin;
             private ObjectGuid go_emberseerout;
-            private readonly ObjectGuid[] go_emberseerrunes = new ObjectGuid[7];
             private ObjectGuid go_portcullis_active;
             private ObjectGuid go_portcullis_tobossrooms;
-            private readonly ObjectGuid[] go_roomrunes = new ObjectGuid[7];
             private ObjectGuid Gyth;
             private ObjectGuid Halycon;
 
@@ -181,7 +173,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
             private ObjectGuid OverlordWyrmthalak;
             private ObjectGuid PyroguardEmberseer;
             private ObjectGuid QuartermasterZigris;
-            private readonly List<ObjectGuid>[] runecreaturelist = new List<ObjectGuid>[7];
             private ObjectGuid ScarshieldInfiltrator;
             private ObjectGuid ShadowHunterVoshgajin;
             private ObjectGuid TheBeast;
@@ -720,6 +711,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         HandleGameObject(ObjectGuid.Empty, true, door2);
                 }
             }
+        }
+
+        public instance_blackrock_spire() : base(nameof(instance_blackrock_spire), 229)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_blackrock_spireMapScript(map);
         }
     }
 

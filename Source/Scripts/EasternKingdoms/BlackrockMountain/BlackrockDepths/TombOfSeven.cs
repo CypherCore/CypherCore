@@ -127,11 +127,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             _instance = creature.GetInstanceScript();
         }
 
-        private void Initialize()
-        {
-            _voidwalkers = false;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -247,6 +242,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             player.SendGossipMenu(2601, me.GetGUID());
 
             return true;
+        }
+
+        private void Initialize()
+        {
+            _voidwalkers = false;
         }
     }
 }

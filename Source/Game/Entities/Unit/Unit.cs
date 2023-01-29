@@ -213,59 +213,6 @@ namespace Game.Entities
             RefreshAI();
         }
 
-        private void _UpdateSpells(uint diff)
-        {
-            _spellHistory.Update();
-
-            if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
-                _UpdateAutoRepeatSpell();
-
-            for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
-                if (GetCurrentSpell(i) != null &&
-                    CurrentSpells[i].GetState() == SpellState.Finished)
-                {
-                    CurrentSpells[i].SetReferencedFromCurrent(false);
-                    CurrentSpells[i] = null;
-                }
-
-            foreach (var app in GetOwnedAuras())
-            {
-                Aura i_aura = app.Value;
-
-                if (i_aura == null)
-                    continue;
-
-                i_aura.UpdateOwner(diff, this);
-            }
-
-            // remove expired Auras - do that after updates(used in scripts?)
-            foreach (var pair in GetOwnedAuras())
-                if (pair.Value != null &&
-                    pair.Value.IsExpired())
-                    RemoveOwnedAura(pair, AuraRemoveMode.Expire);
-
-            foreach (var aura in _visibleAurasToUpdate)
-                aura.ClientUpdate();
-
-            _visibleAurasToUpdate.Clear();
-
-            _DeleteRemovedAuras();
-
-            if (!GameObj.Empty())
-                for (var i = 0; i < GameObj.Count; ++i)
-                {
-                    GameObject go = GameObj[i];
-
-                    if (!go.IsSpawned())
-                    {
-                        go.SetOwnerGUID(ObjectGuid.Empty);
-                        go.SetRespawnTime(0);
-                        go.Delete();
-                        GameObj.Remove(go);
-                    }
-                }
-        }
-
         public void HandleEmoteCommand(Emote emoteId, Player target = null, uint[] spellVisualKitIds = null, int sequenceVariation = 0)
         {
             EmoteMessage packet = new();
@@ -607,22 +554,6 @@ namespace Game.Entities
             return Vehicle?.GetBase();
         }
 
-        private Unit GetVehicleRoot()
-        {
-            Unit vehicleRoot = GetVehicleBase();
-
-            if (!vehicleRoot)
-                return null;
-
-            for (; ; )
-            {
-                if (!vehicleRoot.GetVehicleBase())
-                    return vehicleRoot;
-
-                vehicleRoot = vehicleRoot.GetVehicleBase();
-            }
-        }
-
         public Creature GetVehicleCreatureBase()
         {
             Unit veh = GetVehicleBase();
@@ -671,17 +602,6 @@ namespace Game.Entities
             return GetDynObjects(spellId).FirstOrDefault();
         }
 
-        private List<DynamicObject> GetDynObjects(uint spellId)
-        {
-            List<DynamicObject> dynamicobjects = new();
-
-            foreach (var obj in DynObj)
-                if (obj.GetSpellId() == spellId)
-                    dynamicobjects.Add(obj);
-
-            return dynamicobjects;
-        }
-
         public void RemoveDynObject(uint spellId)
         {
             for (var i = 0; i < DynObj.Count; ++i)
@@ -702,17 +622,6 @@ namespace Game.Entities
         public GameObject GetGameObject(uint spellId)
         {
             return GetGameObjects(spellId).FirstOrDefault();
-        }
-
-        private List<GameObject> GetGameObjects(uint spellId)
-        {
-            List<GameObject> gameobjects = new();
-
-            foreach (var obj in GameObj)
-                if (obj.GetSpellId() == spellId)
-                    gameobjects.Add(obj);
-
-            return gameobjects;
         }
 
         public void AddGameObject(GameObject gameObj)
@@ -1364,32 +1273,6 @@ namespace Game.Entities
             }
         }
 
-        private void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
-        {
-            bool hasMissile = false;
-
-            foreach (var pair in Events.GetEvents())
-            {
-                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
-
-                if (spell != null)
-                    if (spell.GetSpellInfo().Id == spellId)
-                    {
-                        pair.Value.ScheduleAbort();
-                        hasMissile = true;
-                    }
-            }
-
-            if (hasMissile)
-            {
-                MissileCancel packet = new();
-                packet.OwnerGUID = GetGUID();
-                packet.SpellID = spellId;
-                packet.Reverse = reverseMissile;
-                SendMessageToSet(packet, false);
-            }
-        }
-
         public void UnsummonAllTotems()
         {
             for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
@@ -1485,35 +1368,6 @@ namespace Game.Entities
                 RestoreDisabledAI();
                 PushAI(GetScheduledChangeAI()); //This could actually be PopAI() to get the previous AI but it's required atm to trigger UpdateCharmAI()
             }
-        }
-
-        private void RestoreDisabledAI()
-        {
-            // Keep popping the stack until we either reach the bottom or find a valid AI
-            while (PopAI())
-                if (GetTopAI() != null &&
-                    GetTopAI() is not ScheduledChangeAI)
-                    return;
-        }
-
-        private UnitAI GetScheduledChangeAI()
-        {
-            Creature creature = ToCreature();
-
-            if (creature != null)
-                return new ScheduledChangeAI(creature);
-            else
-                return null;
-        }
-
-        private bool HasScheduledAIChange()
-        {
-            UnitAI ai = GetAI();
-
-            if (ai != null)
-                return ai is ScheduledChangeAI;
-            else
-                return true;
         }
 
         public bool IsPossessedByPlayer()
@@ -1708,12 +1562,6 @@ namespace Game.Entities
             return IsSummon() ? (this as TempSummon) : null;
         }
 
-        private void RemoveAllFollowers()
-        {
-            while (!_followingMe.Empty())
-                _followingMe[0].SetTarget(null);
-        }
-
         public virtual void SetDeathState(DeathState s)
         {
             // Death State needs to be updated before RemoveAllAurasOnDeath() is called, to prevent entering combat
@@ -1843,59 +1691,10 @@ namespace Game.Entities
             return aurApp;
         }
 
-        private bool HasInterruptFlag(SpellAuraInterruptFlags flags)
-        {
-            return _interruptMask.HasAnyFlag(flags);
-        }
-
-        private bool HasInterruptFlag(SpellAuraInterruptFlags2 flags)
-        {
-            return _interruptMask2.HasAnyFlag(flags);
-        }
-
         public void AddInterruptMask(SpellAuraInterruptFlags flags, SpellAuraInterruptFlags2 flags2)
         {
             _interruptMask |= flags;
             _interruptMask2 |= flags2;
-        }
-
-        private void _UpdateAutoRepeatSpell()
-        {
-            SpellInfo autoRepeatSpellInfo = CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo;
-
-            // check "realtime" interrupts
-            // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if ((IsMoving() && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).CheckMovement() != SpellCastResult.SpellCastOk) ||
-                IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75))
-            {
-                // cancel wand shoot
-                if (autoRepeatSpellInfo.Id != 75)
-                    InterruptSpell(CurrentSpellTypes.AutoRepeat);
-
-                return;
-            }
-
-            // castroutine
-            if (IsAttackReady(WeaponAttackType.RangedAttack) &&
-                GetCurrentSpell(CurrentSpellTypes.AutoRepeat).GetState() != SpellState.Preparing)
-            {
-                // Check if able to cast
-                SpellCastResult result = CurrentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true);
-
-                if (result != SpellCastResult.SpellCastOk)
-                {
-                    if (autoRepeatSpellInfo.Id != 75)
-                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                    else if (GetTypeId() == TypeId.Player)
-                        Spell.SendCastResult(ToPlayer(), autoRepeatSpellInfo, CurrentSpells[CurrentSpellTypes.AutoRepeat]._SpellVisual, CurrentSpells[CurrentSpellTypes.AutoRepeat]._castId, result);
-
-                    return;
-                }
-
-                // we want to shoot
-                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.IgnoreGCD);
-                spell.Prepare(CurrentSpells[CurrentSpellTypes.AutoRepeat]._targets);
-            }
         }
 
         public void UpdateDisplayPower()
@@ -2161,7 +1960,7 @@ namespace Game.Entities
 
         public Race GetRace()
         {
-            return (Race)(byte)UnitData.Race;
+            return (Race)UnitData.Race.Value;
         }
 
         public void SetRace(Race race)
@@ -2171,7 +1970,7 @@ namespace Game.Entities
 
         public Class GetClass()
         {
-            return (Class)(byte)UnitData.ClassId;
+            return (Class)UnitData.ClassId.Value;
         }
 
         public void SetClass(Class classId)
@@ -2186,7 +1985,7 @@ namespace Game.Entities
 
         public Gender GetGender()
         {
-            return (Gender)(byte)UnitData.Sex;
+            return (Gender)UnitData.Sex.Value;
         }
 
         public void SetGender(Gender sex)
@@ -2335,11 +2134,6 @@ namespace Game.Entities
             SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MountDisplayID), mountDisplayId);
         }
 
-        private uint GetCosmeticMountDisplayId()
-        {
-            return UnitData.CosmeticMountDisplayID;
-        }
-
         public void SetCosmeticMountDisplayId(uint mountDisplayId)
         {
             SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.CosmeticMountDisplayID), mountDisplayId);
@@ -2462,25 +2256,6 @@ namespace Game.Entities
         public override ObjectGuid GetCharmerOrOwnerGUID()
         {
             return IsCharmed() ? GetCharmerGUID() : GetOwnerGUID();
-        }
-
-        private Player GetControllingPlayer()
-        {
-            ObjectGuid guid = GetCharmerOrOwnerGUID();
-
-            if (!guid.IsEmpty())
-            {
-                Unit master = Global.ObjAccessor.GetUnit(this, guid);
-
-                if (master != null)
-                    return master.GetControllingPlayer();
-
-                return null;
-            }
-            else
-            {
-                return ToPlayer();
-            }
         }
 
         public override Unit GetCharmerOrOwner()
@@ -3191,11 +2966,6 @@ namespace Game.Entities
                 return CanDualWieldWep;
         }
 
-        private void StartReactiveTimer(ReactiveType reactive)
-        {
-            _reactiveTimer[reactive] = 4000;
-        }
-
         public static void DealDamageMods(Unit attacker, Unit victim, ref uint damage)
         {
             if (victim == null ||
@@ -3629,157 +3399,6 @@ namespace Game.Entities
             return damage;
         }
 
-        private void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
-        {
-            Unit victim = damageInfo.Target;
-
-            if (!victim.IsAlive() ||
-                victim.HasUnitState(UnitState.InFlight) ||
-                (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
-                return;
-
-            if (damageInfo.TargetState == VictimState.Parry &&
-                (!victim.IsCreature() || victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParryHasten)))
-            {
-                // Get attack timers
-                float offtime = victim.GetAttackTimer(WeaponAttackType.OffAttack);
-                float basetime = victim.GetAttackTimer(WeaponAttackType.BaseAttack);
-
-                // Reduce attack Time
-                if (victim.HaveOffhandWeapon() &&
-                    offtime < basetime)
-                {
-                    float percent20 = victim.GetBaseAttackTime(WeaponAttackType.OffAttack) * 0.20f;
-                    float percent60 = 3.0f * percent20;
-
-                    if (offtime > percent20 &&
-                        offtime <= percent60)
-                    {
-                        victim.SetAttackTimer(WeaponAttackType.OffAttack, (uint)percent20);
-                    }
-                    else if (offtime > percent60)
-                    {
-                        offtime -= 2.0f * percent20;
-                        victim.SetAttackTimer(WeaponAttackType.OffAttack, (uint)offtime);
-                    }
-                }
-                else
-                {
-                    float percent20 = victim.GetBaseAttackTime(WeaponAttackType.BaseAttack) * 0.20f;
-                    float percent60 = 3.0f * percent20;
-
-                    if (basetime > percent20 &&
-                        basetime <= percent60)
-                    {
-                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, (uint)percent20);
-                    }
-                    else if (basetime > percent60)
-                    {
-                        basetime -= 2.0f * percent20;
-                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, (uint)basetime);
-                    }
-                }
-            }
-
-            // Call default DealDamage
-            CleanDamage cleanDamage = new(damageInfo.CleanDamage, damageInfo.Absorb, damageInfo.AttackType, damageInfo.HitOutCome);
-            DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.DamageSchoolMask, null, durabilityLoss);
-
-            // If this is a creature and it attacks from behind it has a probability to daze it's victim
-            if ((damageInfo.HitOutCome == MeleeHitOutcome.Crit || damageInfo.HitOutCome == MeleeHitOutcome.Crushing || damageInfo.HitOutCome == MeleeHitOutcome.Normal || damageInfo.HitOutCome == MeleeHitOutcome.Glancing) &&
-                !IsTypeId(TypeId.Player) &&
-                !ToCreature().IsControlledByPlayer() &&
-                !victim.HasInArc(MathFunctions.PI, this) &&
-                (victim.IsTypeId(TypeId.Player) || !victim.ToCreature().IsWorldBoss()) &&
-                !victim.IsVehicle())
-            {
-                // 20% base chance
-                float chance = 20.0f;
-
-                // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
-                if (victim.GetLevel() < 30)
-                    chance = 0.65f * victim.GetLevelForTarget(this) + 0.5f;
-
-                uint victimDefense = victim.GetMaxSkillValueForLevel(this);
-                uint attackerMeleeSkill = GetMaxSkillValueForLevel();
-
-                chance *= attackerMeleeSkill / (float)victimDefense * 0.16f;
-
-                // -probability is between 0% and 40%
-                MathFunctions.RoundToInterval(ref chance, 0.0f, 40.0f);
-
-                if (RandomHelper.randChance(chance))
-                    CastSpell(victim, 1604, true);
-            }
-
-            if (IsTypeId(TypeId.Player))
-            {
-                DamageInfo dmgInfo = new(damageInfo);
-                ToPlayer().CastItemCombatSpell(dmgInfo);
-            }
-
-            // Do effect if any Damage done to Target
-            if (damageInfo.Damage != 0)
-            {
-                // We're going to call functions which can modify content of the list during iteration over it's elements
-                // Let's copy the list so we can prevent iterator invalidation
-                var vDamageShieldsCopy = victim.GetAuraEffectsByType(AuraType.DamageShield);
-
-                foreach (var dmgShield in vDamageShieldsCopy)
-                {
-                    SpellInfo spellInfo = dmgShield.GetSpellInfo();
-
-                    // Damage shield can be resisted...
-                    var missInfo = victim.SpellHitResult(this, spellInfo, false);
-
-                    if (missInfo != SpellMissInfo.None)
-                    {
-                        victim.SendSpellMiss(this, spellInfo.Id, missInfo);
-
-                        continue;
-                    }
-
-                    // ...or immuned
-                    if (IsImmunedToDamage(spellInfo))
-                    {
-                        victim.SendSpellDamageImmune(this, spellInfo.Id, false);
-
-                        continue;
-                    }
-
-                    uint damage = (uint)dmgShield.GetAmount();
-                    Unit caster = dmgShield.GetCaster();
-
-                    if (caster)
-                    {
-                        damage = caster.SpellDamageBonusDone(this, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
-                        damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect);
-                    }
-
-                    DamageInfo damageInfo1 = new(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
-                    CalcAbsorbResist(damageInfo1);
-                    damage = damageInfo1.GetDamage();
-
-                    DealDamageMods(victim, this, ref damage);
-
-                    SpellDamageShield damageShield = new();
-                    damageShield.Attacker = victim.GetGUID();
-                    damageShield.Defender = GetGUID();
-                    damageShield.SpellID = spellInfo.Id;
-                    damageShield.TotalDamage = damage;
-                    damageShield.OriginalDamage = (int)damageInfo.OriginalDamage;
-                    damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
-                    damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
-                    damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
-
-                    DealDamage(victim, this, damage, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
-                    damageShield.LogData.Initialize(this);
-
-                    victim.SendCombatLogMessage(damageShield);
-                }
-            }
-        }
-
         public long ModifyHealth(long dVal)
         {
             long gain = 0;
@@ -3848,36 +3467,6 @@ namespace Game.Entities
                 gain = maxHealth - curHealth;
 
             return gain;
-        }
-
-        private void TriggerOnHealthChangeAuras(ulong oldVal, ulong newVal)
-        {
-            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.TriggerSpellOnHealthPct))
-            {
-                int triggerHealthPct = effect.GetAmount();
-                uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
-                ulong threshold = CountPctFromMaxHealth(triggerHealthPct);
-
-                switch ((AuraTriggerOnHealthChangeDirection)effect.GetMiscValue())
-                {
-                    case AuraTriggerOnHealthChangeDirection.Above:
-                        if (newVal < threshold ||
-                            oldVal > threshold)
-                            continue;
-
-                        break;
-                    case AuraTriggerOnHealthChangeDirection.Below:
-                        if (newVal > threshold ||
-                            oldVal < threshold)
-                            continue;
-
-                        break;
-                    default:
-                        break;
-                }
-
-                CastSpell(this, triggerSpell, new CastSpellExtraArgs(effect));
-            }
         }
 
         public bool IsImmuneToAll()
@@ -3987,38 +3576,6 @@ namespace Game.Entities
         public virtual float GetBlockPercent(uint attackerLevel)
         {
             return 30.0f;
-        }
-
-        private void UpdateReactives(uint p_time)
-        {
-            for (ReactiveType reactive = 0; reactive < ReactiveType.Max; ++reactive)
-            {
-                if (!_reactiveTimer.ContainsKey(reactive))
-                    continue;
-
-                if (_reactiveTimer[reactive] <= p_time)
-                {
-                    _reactiveTimer[reactive] = 0;
-
-                    switch (reactive)
-                    {
-                        case ReactiveType.Defense:
-                            if (HasAuraState(AuraStateType.Defensive))
-                                ModifyAuraState(AuraStateType.Defensive, false);
-
-                            break;
-                        case ReactiveType.Defense2:
-                            if (HasAuraState(AuraStateType.Defensive2))
-                                ModifyAuraState(AuraStateType.Defensive2, false);
-
-                            break;
-                    }
-                }
-                else
-                {
-                    _reactiveTimer[reactive] -= p_time;
-                }
-            }
         }
 
         public void RewardRage(uint baseRage)
@@ -4144,21 +3701,6 @@ namespace Game.Entities
                 spell._comboPointGain = comboPoints;
         }
 
-        private void GainSpellComboPoints(sbyte count)
-        {
-            if (count == 0)
-                return;
-
-            sbyte cp = (sbyte)GetPower(PowerType.ComboPoints);
-
-            cp += count;
-
-            if (cp > 5) cp = 5;
-            else if (cp < 0) cp = 0;
-
-            SetPower(PowerType.ComboPoints, cp);
-        }
-
         public void ClearComboPoints()
         {
             SetPower(PowerType.ComboPoints, 0);
@@ -4182,126 +3724,6 @@ namespace Game.Entities
                 SetPvpFlag(UnitPVPStateFlags.PvP);
             else
                 RemovePvpFlag(UnitPVPStateFlags.PvP);
-        }
-
-        private static uint CalcSpellResistedDamage(Unit attacker, Unit victim, uint damage, SpellSchoolMask schoolMask, SpellInfo spellInfo)
-        {
-            // Magic Damage, check for resists
-            if (!Convert.ToBoolean(schoolMask & SpellSchoolMask.Magic))
-                return 0;
-
-            // Npcs can have holy resistance
-            if (schoolMask.HasAnyFlag(SpellSchoolMask.Holy) &&
-                victim.GetTypeId() != TypeId.Unit)
-                return 0;
-
-            float averageResist = CalculateAverageResistReduction(attacker, schoolMask, victim, spellInfo);
-
-            float[] discreteResistProbability = new float[11];
-
-            if (averageResist <= 0.1f)
-            {
-                discreteResistProbability[0] = 1.0f - 7.5f * averageResist;
-                discreteResistProbability[1] = 5.0f * averageResist;
-                discreteResistProbability[2] = 2.5f * averageResist;
-            }
-            else
-            {
-                for (uint i = 0; i < 11; ++i)
-                    discreteResistProbability[i] = Math.Max(0.5f - 2.5f * Math.Abs(0.1f * i - averageResist), 0.0f);
-            }
-
-            float roll = (float)RandomHelper.NextDouble();
-            float probabilitySum = 0.0f;
-
-            uint resistance = 0;
-
-            for (; resistance < 11; ++resistance)
-                if (roll < (probabilitySum += discreteResistProbability[resistance]))
-                    break;
-
-            float damageResisted = damage * resistance / 10f;
-
-            if (damageResisted > 0.0f) // if any Damage was resisted
-            {
-                int ignoredResistance = 0;
-
-                if (attacker != null)
-                    ignoredResistance += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
-
-                ignoredResistance = Math.Min(ignoredResistance, 100);
-                MathFunctions.ApplyPct(ref damageResisted, 100 - ignoredResistance);
-
-                // Spells with melee and magic school mask, decide whether resistance or armor Absorb is higher
-                if (spellInfo != null &&
-                    spellInfo.HasAttribute(SpellCustomAttributes.SchoolmaskNormalWithMagic))
-                {
-                    uint damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, spellInfo.GetAttackType());
-                    float armorReduction = damage - damageAfterArmor;
-
-                    // pick the lower one, the weakest resistance counts
-                    damageResisted = Math.Min(damageResisted, armorReduction);
-                }
-            }
-
-            damageResisted = Math.Max(damageResisted, 0.0f);
-
-            return (uint)damageResisted;
-        }
-
-        private static float CalculateAverageResistReduction(WorldObject caster, SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo = null)
-        {
-            float victimResistance = victim.GetResistance(schoolMask);
-
-            if (caster != null)
-            {
-                // pets inherit 100% of masters penetration
-                Player player = caster.GetSpellModOwner();
-
-                if (player != null)
-                {
-                    victimResistance += player.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
-                    victimResistance -= player.GetSpellPenetrationItemMod();
-                }
-                else
-                {
-                    Unit unitCaster = caster.ToUnit();
-
-                    if (unitCaster != null)
-                        victimResistance += unitCaster.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
-                }
-            }
-
-            // holy resistance exists in pve and comes from level difference, ignore template values
-            if (schoolMask.HasAnyFlag(SpellSchoolMask.Holy))
-                victimResistance = 0.0f;
-
-            // Chaos Bolt exception, ignore all Target resistances (unknown attribute?)
-            if (spellInfo != null &&
-                spellInfo.SpellFamilyName == SpellFamilyNames.Warlock &&
-                spellInfo.Id == 116858)
-                victimResistance = 0.0f;
-
-            victimResistance = Math.Max(victimResistance, 0.0f);
-
-            // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
-            // gameobject caster -- should it have level based resistance?
-            if (caster != null &&
-                !caster.IsGameObject() &&
-                (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell)))
-                victimResistance += Math.Max(((float)victim.GetLevelForTarget(caster) - (float)caster.GetLevelForTarget(victim)) * 5.0f, 0.0f);
-
-            uint bossLevel = 83;
-            float bossResistanceConstant = 510.0f;
-            uint level = caster ? victim.GetLevelForTarget(caster) : victim.GetLevel();
-            float resistanceConstant;
-
-            if (level == bossLevel)
-                resistanceConstant = bossResistanceConstant;
-            else
-                resistanceConstant = level * 5.0f;
-
-            return victimResistance / (victimResistance + resistanceConstant);
         }
 
         public static void CalcAbsorbResist(DamageInfo damageInfo, Spell spell = null)
@@ -4939,14 +4361,6 @@ namespace Game.Entities
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
-        private bool IsBlockCritical()
-        {
-            if (RandomHelper.randChance(GetTotalAuraModifier(AuraType.ModBlockCritChance)))
-                return true;
-
-            return false;
-        }
-
         public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             return SpellSchoolMask.None;
@@ -5022,6 +4436,592 @@ namespace Game.Entities
         public ThreatManager GetThreatManager()
         {
             return _threatManager;
+        }
+
+        private void _UpdateSpells(uint diff)
+        {
+            _spellHistory.Update();
+
+            if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
+                _UpdateAutoRepeatSpell();
+
+            for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
+                if (GetCurrentSpell(i) != null &&
+                    CurrentSpells[i].GetState() == SpellState.Finished)
+                {
+                    CurrentSpells[i].SetReferencedFromCurrent(false);
+                    CurrentSpells[i] = null;
+                }
+
+            foreach (var app in GetOwnedAuras())
+            {
+                Aura i_aura = app.Value;
+
+                if (i_aura == null)
+                    continue;
+
+                i_aura.UpdateOwner(diff, this);
+            }
+
+            // remove expired Auras - do that after updates(used in scripts?)
+            foreach (var pair in GetOwnedAuras())
+                if (pair.Value != null &&
+                    pair.Value.IsExpired())
+                    RemoveOwnedAura(pair, AuraRemoveMode.Expire);
+
+            foreach (var aura in _visibleAurasToUpdate)
+                aura.ClientUpdate();
+
+            _visibleAurasToUpdate.Clear();
+
+            _DeleteRemovedAuras();
+
+            if (!GameObj.Empty())
+                for (var i = 0; i < GameObj.Count; ++i)
+                {
+                    GameObject go = GameObj[i];
+
+                    if (!go.IsSpawned())
+                    {
+                        go.SetOwnerGUID(ObjectGuid.Empty);
+                        go.SetRespawnTime(0);
+                        go.Delete();
+                        GameObj.Remove(go);
+                    }
+                }
+        }
+
+        private Unit GetVehicleRoot()
+        {
+            Unit vehicleRoot = GetVehicleBase();
+
+            if (!vehicleRoot)
+                return null;
+
+            for (; ; )
+            {
+                if (!vehicleRoot.GetVehicleBase())
+                    return vehicleRoot;
+
+                vehicleRoot = vehicleRoot.GetVehicleBase();
+            }
+        }
+
+        private List<DynamicObject> GetDynObjects(uint spellId)
+        {
+            List<DynamicObject> dynamicobjects = new();
+
+            foreach (var obj in DynObj)
+                if (obj.GetSpellId() == spellId)
+                    dynamicobjects.Add(obj);
+
+            return dynamicobjects;
+        }
+
+        private List<GameObject> GetGameObjects(uint spellId)
+        {
+            List<GameObject> gameobjects = new();
+
+            foreach (var obj in GameObj)
+                if (obj.GetSpellId() == spellId)
+                    gameobjects.Add(obj);
+
+            return gameobjects;
+        }
+
+        private void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
+        {
+            bool hasMissile = false;
+
+            foreach (var pair in Events.GetEvents())
+            {
+                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
+
+                if (spell != null)
+                    if (spell.GetSpellInfo().Id == spellId)
+                    {
+                        pair.Value.ScheduleAbort();
+                        hasMissile = true;
+                    }
+            }
+
+            if (hasMissile)
+            {
+                MissileCancel packet = new();
+                packet.OwnerGUID = GetGUID();
+                packet.SpellID = spellId;
+                packet.Reverse = reverseMissile;
+                SendMessageToSet(packet, false);
+            }
+        }
+
+        private void RestoreDisabledAI()
+        {
+            // Keep popping the stack until we either reach the bottom or find a valid AI
+            while (PopAI())
+                if (GetTopAI() != null &&
+                    GetTopAI() is not ScheduledChangeAI)
+                    return;
+        }
+
+        private UnitAI GetScheduledChangeAI()
+        {
+            Creature creature = ToCreature();
+
+            if (creature != null)
+                return new ScheduledChangeAI(creature);
+            else
+                return null;
+        }
+
+        private bool HasScheduledAIChange()
+        {
+            UnitAI ai = GetAI();
+
+            if (ai != null)
+                return ai is ScheduledChangeAI;
+            else
+                return true;
+        }
+
+        private void RemoveAllFollowers()
+        {
+            while (!_followingMe.Empty())
+                _followingMe[0].SetTarget(null);
+        }
+
+        private bool HasInterruptFlag(SpellAuraInterruptFlags flags)
+        {
+            return _interruptMask.HasAnyFlag(flags);
+        }
+
+        private bool HasInterruptFlag(SpellAuraInterruptFlags2 flags)
+        {
+            return _interruptMask2.HasAnyFlag(flags);
+        }
+
+        private void _UpdateAutoRepeatSpell()
+        {
+            SpellInfo autoRepeatSpellInfo = CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo;
+
+            // check "realtime" interrupts
+            // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
+            if ((IsMoving() && GetCurrentSpell(CurrentSpellTypes.AutoRepeat).CheckMovement() != SpellCastResult.SpellCastOk) ||
+                IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75))
+            {
+                // cancel wand shoot
+                if (autoRepeatSpellInfo.Id != 75)
+                    InterruptSpell(CurrentSpellTypes.AutoRepeat);
+
+                return;
+            }
+
+            // castroutine
+            if (IsAttackReady(WeaponAttackType.RangedAttack) &&
+                GetCurrentSpell(CurrentSpellTypes.AutoRepeat).GetState() != SpellState.Preparing)
+            {
+                // Check if able to cast
+                SpellCastResult result = CurrentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true);
+
+                if (result != SpellCastResult.SpellCastOk)
+                {
+                    if (autoRepeatSpellInfo.Id != 75)
+                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    else if (GetTypeId() == TypeId.Player)
+                        Spell.SendCastResult(ToPlayer(), autoRepeatSpellInfo, CurrentSpells[CurrentSpellTypes.AutoRepeat]._SpellVisual, CurrentSpells[CurrentSpellTypes.AutoRepeat]._castId, result);
+
+                    return;
+                }
+
+                // we want to shoot
+                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.IgnoreGCD);
+                spell.Prepare(CurrentSpells[CurrentSpellTypes.AutoRepeat]._targets);
+            }
+        }
+
+        private uint GetCosmeticMountDisplayId()
+        {
+            return UnitData.CosmeticMountDisplayID;
+        }
+
+        private Player GetControllingPlayer()
+        {
+            ObjectGuid guid = GetCharmerOrOwnerGUID();
+
+            if (!guid.IsEmpty())
+            {
+                Unit master = Global.ObjAccessor.GetUnit(this, guid);
+
+                if (master != null)
+                    return master.GetControllingPlayer();
+
+                return null;
+            }
+            else
+            {
+                return ToPlayer();
+            }
+        }
+
+        private void StartReactiveTimer(ReactiveType reactive)
+        {
+            _reactiveTimer[reactive] = 4000;
+        }
+
+        private void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
+        {
+            Unit victim = damageInfo.Target;
+
+            if (!victim.IsAlive() ||
+                victim.HasUnitState(UnitState.InFlight) ||
+                (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
+                return;
+
+            if (damageInfo.TargetState == VictimState.Parry &&
+                (!victim.IsCreature() || victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParryHasten)))
+            {
+                // Get attack timers
+                float offtime = victim.GetAttackTimer(WeaponAttackType.OffAttack);
+                float basetime = victim.GetAttackTimer(WeaponAttackType.BaseAttack);
+
+                // Reduce attack Time
+                if (victim.HaveOffhandWeapon() &&
+                    offtime < basetime)
+                {
+                    float percent20 = victim.GetBaseAttackTime(WeaponAttackType.OffAttack) * 0.20f;
+                    float percent60 = 3.0f * percent20;
+
+                    if (offtime > percent20 &&
+                        offtime <= percent60)
+                    {
+                        victim.SetAttackTimer(WeaponAttackType.OffAttack, (uint)percent20);
+                    }
+                    else if (offtime > percent60)
+                    {
+                        offtime -= 2.0f * percent20;
+                        victim.SetAttackTimer(WeaponAttackType.OffAttack, (uint)offtime);
+                    }
+                }
+                else
+                {
+                    float percent20 = victim.GetBaseAttackTime(WeaponAttackType.BaseAttack) * 0.20f;
+                    float percent60 = 3.0f * percent20;
+
+                    if (basetime > percent20 &&
+                        basetime <= percent60)
+                    {
+                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, (uint)percent20);
+                    }
+                    else if (basetime > percent60)
+                    {
+                        basetime -= 2.0f * percent20;
+                        victim.SetAttackTimer(WeaponAttackType.BaseAttack, (uint)basetime);
+                    }
+                }
+            }
+
+            // Call default DealDamage
+            CleanDamage cleanDamage = new(damageInfo.CleanDamage, damageInfo.Absorb, damageInfo.AttackType, damageInfo.HitOutCome);
+            DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.DamageSchoolMask, null, durabilityLoss);
+
+            // If this is a creature and it attacks from behind it has a probability to daze it's victim
+            if ((damageInfo.HitOutCome == MeleeHitOutcome.Crit || damageInfo.HitOutCome == MeleeHitOutcome.Crushing || damageInfo.HitOutCome == MeleeHitOutcome.Normal || damageInfo.HitOutCome == MeleeHitOutcome.Glancing) &&
+                !IsTypeId(TypeId.Player) &&
+                !ToCreature().IsControlledByPlayer() &&
+                !victim.HasInArc(MathFunctions.PI, this) &&
+                (victim.IsTypeId(TypeId.Player) || !victim.ToCreature().IsWorldBoss()) &&
+                !victim.IsVehicle())
+            {
+                // 20% base chance
+                float chance = 20.0f;
+
+                // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
+                if (victim.GetLevel() < 30)
+                    chance = 0.65f * victim.GetLevelForTarget(this) + 0.5f;
+
+                uint victimDefense = victim.GetMaxSkillValueForLevel(this);
+                uint attackerMeleeSkill = GetMaxSkillValueForLevel();
+
+                chance *= attackerMeleeSkill / (float)victimDefense * 0.16f;
+
+                // -probability is between 0% and 40%
+                MathFunctions.RoundToInterval(ref chance, 0.0f, 40.0f);
+
+                if (RandomHelper.randChance(chance))
+                    CastSpell(victim, 1604, true);
+            }
+
+            if (IsTypeId(TypeId.Player))
+            {
+                DamageInfo dmgInfo = new(damageInfo);
+                ToPlayer().CastItemCombatSpell(dmgInfo);
+            }
+
+            // Do effect if any Damage done to Target
+            if (damageInfo.Damage != 0)
+            {
+                // We're going to call functions which can modify content of the list during iteration over it's elements
+                // Let's copy the list so we can prevent iterator invalidation
+                var vDamageShieldsCopy = victim.GetAuraEffectsByType(AuraType.DamageShield);
+
+                foreach (var dmgShield in vDamageShieldsCopy)
+                {
+                    SpellInfo spellInfo = dmgShield.GetSpellInfo();
+
+                    // Damage shield can be resisted...
+                    var missInfo = victim.SpellHitResult(this, spellInfo, false);
+
+                    if (missInfo != SpellMissInfo.None)
+                    {
+                        victim.SendSpellMiss(this, spellInfo.Id, missInfo);
+
+                        continue;
+                    }
+
+                    // ...or immuned
+                    if (IsImmunedToDamage(spellInfo))
+                    {
+                        victim.SendSpellDamageImmune(this, spellInfo.Id, false);
+
+                        continue;
+                    }
+
+                    uint damage = (uint)dmgShield.GetAmount();
+                    Unit caster = dmgShield.GetCaster();
+
+                    if (caster)
+                    {
+                        damage = caster.SpellDamageBonusDone(this, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect);
+                    }
+
+                    DamageInfo damageInfo1 = new(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                    CalcAbsorbResist(damageInfo1);
+                    damage = damageInfo1.GetDamage();
+
+                    DealDamageMods(victim, this, ref damage);
+
+                    SpellDamageShield damageShield = new();
+                    damageShield.Attacker = victim.GetGUID();
+                    damageShield.Defender = GetGUID();
+                    damageShield.SpellID = spellInfo.Id;
+                    damageShield.TotalDamage = damage;
+                    damageShield.OriginalDamage = (int)damageInfo.OriginalDamage;
+                    damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
+                    damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
+                    damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
+
+                    DealDamage(victim, this, damage, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
+                    damageShield.LogData.Initialize(this);
+
+                    victim.SendCombatLogMessage(damageShield);
+                }
+            }
+        }
+
+        private void TriggerOnHealthChangeAuras(ulong oldVal, ulong newVal)
+        {
+            foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.TriggerSpellOnHealthPct))
+            {
+                int triggerHealthPct = effect.GetAmount();
+                uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
+                ulong threshold = CountPctFromMaxHealth(triggerHealthPct);
+
+                switch ((AuraTriggerOnHealthChangeDirection)effect.GetMiscValue())
+                {
+                    case AuraTriggerOnHealthChangeDirection.Above:
+                        if (newVal < threshold ||
+                            oldVal > threshold)
+                            continue;
+
+                        break;
+                    case AuraTriggerOnHealthChangeDirection.Below:
+                        if (newVal > threshold ||
+                            oldVal < threshold)
+                            continue;
+
+                        break;
+                    default:
+                        break;
+                }
+
+                CastSpell(this, triggerSpell, new CastSpellExtraArgs(effect));
+            }
+        }
+
+        private void UpdateReactives(uint p_time)
+        {
+            for (ReactiveType reactive = 0; reactive < ReactiveType.Max; ++reactive)
+            {
+                if (!_reactiveTimer.ContainsKey(reactive))
+                    continue;
+
+                if (_reactiveTimer[reactive] <= p_time)
+                {
+                    _reactiveTimer[reactive] = 0;
+
+                    switch (reactive)
+                    {
+                        case ReactiveType.Defense:
+                            if (HasAuraState(AuraStateType.Defensive))
+                                ModifyAuraState(AuraStateType.Defensive, false);
+
+                            break;
+                        case ReactiveType.Defense2:
+                            if (HasAuraState(AuraStateType.Defensive2))
+                                ModifyAuraState(AuraStateType.Defensive2, false);
+
+                            break;
+                    }
+                }
+                else
+                {
+                    _reactiveTimer[reactive] -= p_time;
+                }
+            }
+        }
+
+        private void GainSpellComboPoints(sbyte count)
+        {
+            if (count == 0)
+                return;
+
+            sbyte cp = (sbyte)GetPower(PowerType.ComboPoints);
+
+            cp += count;
+
+            if (cp > 5) cp = 5;
+            else if (cp < 0) cp = 0;
+
+            SetPower(PowerType.ComboPoints, cp);
+        }
+
+        private static uint CalcSpellResistedDamage(Unit attacker, Unit victim, uint damage, SpellSchoolMask schoolMask, SpellInfo spellInfo)
+        {
+            // Magic Damage, check for resists
+            if (!Convert.ToBoolean(schoolMask & SpellSchoolMask.Magic))
+                return 0;
+
+            // Npcs can have holy resistance
+            if (schoolMask.HasAnyFlag(SpellSchoolMask.Holy) &&
+                victim.GetTypeId() != TypeId.Unit)
+                return 0;
+
+            float averageResist = CalculateAverageResistReduction(attacker, schoolMask, victim, spellInfo);
+
+            float[] discreteResistProbability = new float[11];
+
+            if (averageResist <= 0.1f)
+            {
+                discreteResistProbability[0] = 1.0f - 7.5f * averageResist;
+                discreteResistProbability[1] = 5.0f * averageResist;
+                discreteResistProbability[2] = 2.5f * averageResist;
+            }
+            else
+            {
+                for (uint i = 0; i < 11; ++i)
+                    discreteResistProbability[i] = Math.Max(0.5f - 2.5f * Math.Abs(0.1f * i - averageResist), 0.0f);
+            }
+
+            float roll = (float)RandomHelper.NextDouble();
+            float probabilitySum = 0.0f;
+
+            uint resistance = 0;
+
+            for (; resistance < 11; ++resistance)
+                if (roll < (probabilitySum += discreteResistProbability[resistance]))
+                    break;
+
+            float damageResisted = damage * resistance / 10f;
+
+            if (damageResisted > 0.0f) // if any Damage was resisted
+            {
+                int ignoredResistance = 0;
+
+                if (attacker != null)
+                    ignoredResistance += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
+
+                ignoredResistance = Math.Min(ignoredResistance, 100);
+                MathFunctions.ApplyPct(ref damageResisted, 100 - ignoredResistance);
+
+                // Spells with melee and magic school mask, decide whether resistance or armor Absorb is higher
+                if (spellInfo != null &&
+                    spellInfo.HasAttribute(SpellCustomAttributes.SchoolmaskNormalWithMagic))
+                {
+                    uint damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, spellInfo.GetAttackType());
+                    float armorReduction = damage - damageAfterArmor;
+
+                    // pick the lower one, the weakest resistance counts
+                    damageResisted = Math.Min(damageResisted, armorReduction);
+                }
+            }
+
+            damageResisted = Math.Max(damageResisted, 0.0f);
+
+            return (uint)damageResisted;
+        }
+
+        private static float CalculateAverageResistReduction(WorldObject caster, SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo = null)
+        {
+            float victimResistance = victim.GetResistance(schoolMask);
+
+            if (caster != null)
+            {
+                // pets inherit 100% of masters penetration
+                Player player = caster.GetSpellModOwner();
+
+                if (player != null)
+                {
+                    victimResistance += player.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
+                    victimResistance -= player.GetSpellPenetrationItemMod();
+                }
+                else
+                {
+                    Unit unitCaster = caster.ToUnit();
+
+                    if (unitCaster != null)
+                        victimResistance += unitCaster.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
+                }
+            }
+
+            // holy resistance exists in pve and comes from level difference, ignore template values
+            if (schoolMask.HasAnyFlag(SpellSchoolMask.Holy))
+                victimResistance = 0.0f;
+
+            // Chaos Bolt exception, ignore all Target resistances (unknown attribute?)
+            if (spellInfo != null &&
+                spellInfo.SpellFamilyName == SpellFamilyNames.Warlock &&
+                spellInfo.Id == 116858)
+                victimResistance = 0.0f;
+
+            victimResistance = Math.Max(victimResistance, 0.0f);
+
+            // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
+            // gameobject caster -- should it have level based resistance?
+            if (caster != null &&
+                !caster.IsGameObject() &&
+                (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell)))
+                victimResistance += Math.Max(((float)victim.GetLevelForTarget(caster) - (float)caster.GetLevelForTarget(victim)) * 5.0f, 0.0f);
+
+            uint bossLevel = 83;
+            float bossResistanceConstant = 510.0f;
+            uint level = caster ? victim.GetLevelForTarget(caster) : victim.GetLevel();
+            float resistanceConstant;
+
+            if (level == bossLevel)
+                resistanceConstant = bossResistanceConstant;
+            else
+                resistanceConstant = level * 5.0f;
+
+            return victimResistance / (victimResistance + resistanceConstant);
+        }
+
+        private bool IsBlockCritical()
+        {
+            if (RandomHelper.randChance(GetTotalAuraModifier(AuraType.ModBlockCritChance)))
+                return true;
+
+            return false;
         }
     }
 }

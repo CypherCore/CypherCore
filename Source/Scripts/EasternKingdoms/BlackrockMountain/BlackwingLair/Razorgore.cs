@@ -57,11 +57,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
             Initialize();
         }
 
-        private void Initialize()
-        {
-            secondPhase = false;
-        }
-
         public override void Reset()
         {
             _Reset();
@@ -76,6 +71,32 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
             Talk(TextIds.SayDeath);
 
             Instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
+        }
+
+        public override void DoAction(int action)
+        {
+            if (action == BWLMisc.ActionPhaseTwo)
+                DoChangePhase();
+        }
+
+        public override void DamageTaken(Unit who, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
+        {
+            // @todo this is wrong - razorgore should still take Damage, he should just nuke the whole room and respawn if he dies during P1
+            if (!secondPhase)
+                damage = 0;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void Initialize()
+        {
+            secondPhase = false;
         }
 
         private void DoChangePhase()
@@ -111,27 +132,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
             secondPhase = true;
             me.RemoveAllAuras();
             me.SetFullHealth();
-        }
-
-        public override void DoAction(int action)
-        {
-            if (action == BWLMisc.ActionPhaseTwo)
-                DoChangePhase();
-        }
-
-        public override void DamageTaken(Unit who, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
-        {
-            // @todo this is wrong - razorgore should still take Damage, he should just nuke the whole room and respawn if he dies during P1
-            if (!secondPhase)
-                damage = 0;
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
     }
 

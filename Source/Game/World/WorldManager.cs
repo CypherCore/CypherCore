@@ -144,52 +144,9 @@ namespace Game
             }
         }
 
-        private void DoGuidWarningRestart()
-        {
-            if (_ShutdownTimer != 0)
-                return;
-
-            ShutdownServ(1800, ShutdownMask.Restart, ShutdownExitCode.Restart);
-            _warnShutdownTime += Time.Hour;
-        }
-
-        private void DoGuidAlertRestart()
-        {
-            if (_ShutdownTimer != 0)
-                return;
-
-            ShutdownServ(300, ShutdownMask.Restart, ShutdownExitCode.Restart, _alertRestartReason);
-        }
-
-        private void SendGuidWarning()
-        {
-            if (_ShutdownTimer == 0 &&
-                _guidWarn &&
-                WorldConfig.GetIntValue(WorldCfg.RespawnGuidWarningFrequency) > 0)
-                SendServerMessage(ServerMessageType.String, _guidWarningMsg);
-
-            _warnDiff = 0;
-        }
-
         public WorldSession FindSession(uint id)
         {
             return _sessions.LookupByKey(id);
-        }
-
-        private bool RemoveSession(uint id)
-        {
-            // Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
-            var session = _sessions.LookupByKey(id);
-
-            if (session != null)
-            {
-                if (session.PlayerLoading())
-                    return false;
-
-                session.KickPlayer("World::RemoveSession");
-            }
-
-            return true;
         }
 
         public void AddSession(WorldSession s)
@@ -200,200 +157,6 @@ namespace Game
         public void AddInstanceSocket(WorldSocket sock, ulong connectToKey)
         {
             _linkSocketQueue.Enqueue(Tuple.Create(sock, connectToKey));
-        }
-
-        private void AddSession_(WorldSession s)
-        {
-            Cypher.Assert(s != null);
-
-            //NOTE - Still there is race condition in WorldSession* being used in the Sockets
-
-            // kick already loaded player with same account (if any) and remove session
-            // if player is in loading and want to load again, return
-            if (!RemoveSession(s.GetAccountId()))
-            {
-                s.KickPlayer("World::AddSession_ Couldn't remove the other session while on loading screen");
-
-                return;
-            }
-
-            // decrease session counts only at not reconnection case
-            bool decrease_session = true;
-
-            // if session already exist, prepare to it deleting at next world update
-            // NOTE - KickPlayer() should be called on "old" in RemoveSession()
-            {
-                var old = _sessions.LookupByKey(s.GetAccountId());
-
-                if (old != null)
-                {
-                    // prevent decrease sessions Count if session queued
-                    if (RemoveQueuedPlayer(old))
-                        decrease_session = false;
-
-                    _sessionsByBnetGuid.Remove(old.GetBattlenetAccountGUID(), old);
-                    old.Dispose();
-                }
-            }
-
-            _sessions[s.GetAccountId()] = s;
-            _sessionsByBnetGuid.Add(s.GetBattlenetAccountGUID(), s);
-
-            int Sessions = GetActiveAndQueuedSessionCount();
-            uint pLimit = GetPlayerAmountLimit();
-            int QueueSize = GetQueuedSessionCount(); //number of players in the queue
-
-            //so we don't Count the user trying to
-            //login as a session and queue the socket that we are using
-            if (decrease_session)
-                --Sessions;
-
-            if (pLimit > 0 &&
-                Sessions >= pLimit &&
-                !s.HasPermission(RBACPermissions.SkipQueue) &&
-                !HasRecentlyDisconnected(s))
-            {
-                AddQueuedPlayer(s);
-                UpdateMaxSessionCounters();
-                Log.outInfo(LogFilter.Server, "PlayerQueue: Account Id {0} is in Queue Position ({1}).", s.GetAccountId(), ++QueueSize);
-
-                return;
-            }
-
-            s.InitializeSession();
-
-            UpdateMaxSessionCounters();
-
-            // Updates the population
-            if (pLimit > 0)
-            {
-                float popu = GetActiveSessionCount(); // updated number of users on the server
-                popu /= pLimit;
-                popu *= 2;
-                Log.outInfo(LogFilter.Server, "Server Population ({0}).", popu);
-            }
-        }
-
-        private void ProcessLinkInstanceSocket(Tuple<WorldSocket, ulong> linkInfo)
-        {
-            if (!linkInfo.Item1.IsOpen())
-                return;
-
-            ConnectToKey key = new();
-            key.Raw = linkInfo.Item2;
-
-            WorldSession session = FindSession(key.AccountId);
-
-            if (!session ||
-                session.GetConnectToInstanceKey() != linkInfo.Item2)
-            {
-                linkInfo.Item1.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
-                linkInfo.Item1.CloseSocket();
-
-                return;
-            }
-
-            linkInfo.Item1.SetWorldSession(session);
-            session.AddInstanceConnection(linkInfo.Item1);
-            session.HandleContinuePlayerLogin();
-        }
-
-        private bool HasRecentlyDisconnected(WorldSession session)
-        {
-            if (session == null)
-                return false;
-
-            uint tolerance = 0;
-
-            if (tolerance != 0)
-                foreach (var disconnect in _disconnects)
-                    if ((disconnect.Value - GameTime.GetGameTime()) < tolerance)
-                    {
-                        if (disconnect.Key == session.GetAccountId())
-                            return true;
-                    }
-                    else
-                    {
-                        _disconnects.Remove(disconnect.Key);
-                    }
-
-            return false;
-        }
-
-        private uint GetQueuePos(WorldSession sess)
-        {
-            uint position = 1;
-
-            foreach (var iter in _QueuedPlayer)
-                if (iter != sess)
-                    ++position;
-                else
-                    return position;
-
-            return 0;
-        }
-
-        private void AddQueuedPlayer(WorldSession sess)
-        {
-            sess.SetInQueue(true);
-            _QueuedPlayer.Add(sess);
-
-            // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
-            sess.SendAuthResponse(BattlenetRpcErrorCode.Ok, true, GetQueuePos(sess));
-        }
-
-        private bool RemoveQueuedPlayer(WorldSession sess)
-        {
-            // sessions Count including queued to remove (if removed_session set)
-            int sessions = GetActiveSessionCount();
-
-            uint position = 1;
-
-            // search to remove and Count skipped positions
-            bool found = false;
-
-            foreach (var iter in _QueuedPlayer)
-                if (iter != sess)
-                {
-                    ++position;
-                }
-                else
-                {
-                    sess.SetInQueue(false);
-                    sess.ResetTimeOutTime(false);
-                    _QueuedPlayer.Remove(iter);
-                    found = true; // removing queued session
-
-                    break;
-                }
-
-            // iter point to next socked after removed or end()
-            // position store position of removed socket and then new position next socket after removed
-
-            // if session not queued then we need decrease sessions Count
-            if (!found &&
-                sessions != 0)
-                --sessions;
-
-            // accept first in queue
-            if ((_playerLimit == 0 || sessions < _playerLimit) &&
-                !_QueuedPlayer.Empty())
-            {
-                WorldSession pop_sess = _QueuedPlayer.First();
-                pop_sess.InitializeSession();
-
-                _QueuedPlayer.RemoveAt(0);
-
-                // update iter to point first queued socket or end() if queue is empty now
-                position = 1;
-            }
-
-            // update position from iter to end()
-            // iter point to first not updated socket, position store new position
-            foreach (var iter in _QueuedPlayer)
-                iter.SendAuthWaitQueue(++position);
-
-            return found;
         }
 
         public void SetInitialWorldSettings()
@@ -1650,14 +1413,6 @@ namespace Game
                 session.KickPlayer("World::KickAll");
         }
 
-        private void KickAllLess(AccountTypes sec)
-        {
-            // session not removed at kick and will removed in next update tick
-            foreach (var session in _sessions.Values)
-                if (session.GetSecurity() < sec)
-                    session.KickPlayer("World::KickAllLess");
-        }
-
         /// Ban an account or ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
         public BanReturn BanAccount(BanMode mode, string nameOrIP, string duration, string reason, string author)
         {
@@ -1859,38 +1614,6 @@ namespace Game
             return true;
         }
 
-        private void UpdateGameTime()
-        {
-            // update the Time
-            long lastGameTime = GameTime.GetGameTime();
-            GameTime.UpdateGameTimers();
-
-            uint elapsed = (uint)(GameTime.GetGameTime() - lastGameTime);
-
-            //- if there is a shutdown timer
-            if (!IsStopped &&
-                _ShutdownTimer > 0 &&
-                elapsed > 0)
-            {
-                //- ... and it is overdue, stop the world
-                if (_ShutdownTimer <= elapsed)
-                {
-                    if (!_ShutdownMask.HasAnyFlag(ShutdownMask.Idle) ||
-                        GetActiveAndQueuedSessionCount() == 0)
-                        IsStopped = true; // exist code already set
-                    else
-                        _ShutdownTimer = 1; // minimum timer value to wait idle State
-                }
-                //- ... else decrease it and if necessary display a shutdown countdown to the users
-                else
-                {
-                    _ShutdownTimer -= elapsed;
-
-                    ShutdownMsg();
-                }
-            }
-        }
-
         public void ShutdownServ(uint time, ShutdownMask options, ShutdownExitCode exitcode, string reason = "")
         {
             // ignore if server shutdown at next tick
@@ -2010,64 +1733,11 @@ namespace Game
             }
         }
 
-        private void SendAutoBroadcast()
-        {
-            if (_Autobroadcasts.Empty())
-                return;
-
-            var pair = _Autobroadcasts.SelectRandomElementByWeight(autoPair => autoPair.Value.Weight);
-
-            uint abcenter = WorldConfig.GetUIntValue(WorldCfg.AutoBroadcastCenter);
-
-            if (abcenter == 0)
-            {
-                SendWorldText(CypherStrings.AutoBroadcast, pair.Value.Message);
-            }
-            else if (abcenter == 1)
-            {
-                SendGlobalMessage(new PrintNotification(pair.Value.Message));
-            }
-            else if (abcenter == 2)
-            {
-                SendWorldText(CypherStrings.AutoBroadcast, pair.Value.Message);
-                SendGlobalMessage(new PrintNotification(pair.Value.Message));
-            }
-
-            Log.outDebug(LogFilter.Misc, "AutoBroadcast: '{0}'", pair.Value.Message);
-        }
-
         public void UpdateRealmCharCount(uint accountId)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
             stmt.AddValue(0, accountId);
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(UpdateRealmCharCount));
-        }
-
-        private void UpdateRealmCharCount(SQLResult result)
-        {
-            if (!result.IsEmpty())
-            {
-                uint Id = result.Read<uint>(0);
-                uint charCount = result.Read<uint>(1);
-
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
-                stmt.AddValue(0, charCount);
-                stmt.AddValue(1, Id);
-                stmt.AddValue(2, _realm.Id.Index);
-                DB.Login.DirectExecute(stmt);
-            }
-        }
-
-        private void InitQuestResetTimes()
-        {
-            _NextDailyQuestReset = GetPersistentWorldVariable(NextDailyQuestResetTimeVarId);
-            _NextWeeklyQuestReset = GetPersistentWorldVariable(NextWeeklyQuestResetTimeVarId);
-            _NextMonthlyQuestReset = GetPersistentWorldVariable(NextMonthlyQuestResetTimeVarId);
-        }
-
-        private static long GetNextDailyResetTime(long t)
-        {
-            return Time.GetLocalHourTimestamp(t, WorldConfig.GetUIntValue(WorldCfg.DailyQuestResetTimeHour), true);
         }
 
         public void DailyReset()
@@ -2105,21 +1775,6 @@ namespace Game
             Log.outInfo(LogFilter.Misc, "Daily quests for all characters have been reset.");
         }
 
-        private static long GetNextWeeklyResetTime(long t)
-        {
-            t = GetNextDailyResetTime(t);
-            DateTime time = Time.UnixTimeToDateTime(t);
-            int wday = (int)time.DayOfWeek;
-            int target = WorldConfig.GetIntValue(WorldCfg.WeeklyQuestResetTimeWDay);
-
-            if (target < wday)
-                wday -= 7;
-
-            t += (Time.Day * (target - wday));
-
-            return t;
-        }
-
         public void ResetWeeklyQuests()
         {
             // reset all saved quest status
@@ -2146,19 +1801,6 @@ namespace Game
             SetPersistentWorldVariable(NextWeeklyQuestResetTimeVarId, (int)next);
 
             Log.outInfo(LogFilter.Misc, "Weekly quests for all characters have been reset.");
-        }
-
-        private static long GetNextMonthlyResetTime(long t)
-        {
-            t = GetNextDailyResetTime(t);
-            DateTime time = Time.UnixTimeToDateTime(t);
-
-            if (time.Day == 1)
-                return t;
-
-            var newDate = new DateTime(time.Year, time.Month + 1, 1, 0, 0, 0, time.Kind);
-
-            return Time.DateTimeToUnixTime(newDate);
         }
 
         public void ResetMonthlyQuests()
@@ -2189,115 +1831,6 @@ namespace Game
             Log.outInfo(LogFilter.Misc, "Monthly quests for all characters have been reset.");
         }
 
-        private void CheckScheduledResetTimes()
-        {
-            long now = GameTime.GetGameTime();
-
-            if (_NextDailyQuestReset <= now)
-                DailyReset();
-
-            if (_NextWeeklyQuestReset <= now)
-                ResetWeeklyQuests();
-
-            if (_NextMonthlyQuestReset <= now)
-                ResetMonthlyQuests();
-        }
-
-        private void InitRandomBGResetTime()
-        {
-            long bgtime = GetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId);
-
-            if (bgtime == 0)
-                _NextRandomBGReset = GameTime.GetGameTime(); // game Time not yet init
-
-            // generate Time by config
-            long curTime = GameTime.GetGameTime();
-
-            // current day reset Time
-            long nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.RandomBgResetHour));
-
-            // next reset Time before current moment
-            if (curTime >= nextDayResetTime)
-                nextDayResetTime += Time.Day;
-
-            // normalize reset Time
-            _NextRandomBGReset = bgtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
-
-            if (bgtime == 0)
-                SetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId, (int)_NextRandomBGReset);
-        }
-
-        private void InitCalendarOldEventsDeletionTime()
-        {
-            long now = GameTime.GetGameTime();
-            long nextDeletionTime = Time.GetLocalHourTimestamp(now, WorldConfig.GetUIntValue(WorldCfg.CalendarDeleteOldEventsHour));
-            long currentDeletionTime = GetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId);
-
-            // If the reset Time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.
-            // In this case we set the reset Time in the past and next world update will do the reset and schedule next one in the future.
-            if (currentDeletionTime < now)
-                _NextCalendarOldEventsDeletionTime = nextDeletionTime - Time.Day;
-            else
-                _NextCalendarOldEventsDeletionTime = nextDeletionTime;
-
-            if (currentDeletionTime == 0)
-                SetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId, (int)_NextCalendarOldEventsDeletionTime);
-        }
-
-        private void InitGuildResetTime()
-        {
-            long gtime = GetPersistentWorldVariable(NextGuildDailyResetTimeVarId);
-
-            if (gtime == 0)
-                _NextGuildReset = GameTime.GetGameTime(); // game Time not yet init
-
-            long curTime = GameTime.GetGameTime();
-            var nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.GuildResetHour));
-
-            if (curTime >= nextDayResetTime)
-                nextDayResetTime += Time.Day;
-
-            // normalize reset Time
-            _NextGuildReset = gtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
-
-            if (gtime == 0)
-                SetPersistentWorldVariable(NextGuildDailyResetTimeVarId, (int)_NextGuildReset);
-        }
-
-        private void InitCurrencyResetTime()
-        {
-            long currencytime = GetPersistentWorldVariable(NextCurrencyResetTimeVarId);
-
-            if (currencytime == 0)
-                _NextCurrencyReset = GameTime.GetGameTime(); // game Time not yet init
-
-            // generate Time by config
-            long curTime = GameTime.GetGameTime();
-
-            var nextWeekResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.CurrencyResetDay), WorldConfig.GetIntValue(WorldCfg.CurrencyResetHour));
-
-            // next reset Time before current moment
-            if (curTime >= nextWeekResetTime)
-                nextWeekResetTime += WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day;
-
-            // normalize reset Time
-            _NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day : nextWeekResetTime;
-
-            if (currencytime == 0)
-                SetPersistentWorldVariable(NextCurrencyResetTimeVarId, (int)_NextCurrencyReset);
-        }
-
-        private void ResetCurrencyWeekCap()
-        {
-            DB.Characters.Execute("UPDATE `character_currency` SET `WeeklyQuantity` = 0");
-
-            foreach (var session in _sessions.Values)
-                session.GetPlayer()?.ResetCurrencyWeekCap();
-
-            _NextCurrencyReset += Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
-            SetPersistentWorldVariable(NextCurrencyResetTimeVarId, (int)_NextCurrencyReset);
-        }
-
         public void ResetEventSeasonalQuests(ushort event_id, long eventStartTime)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
@@ -2307,48 +1840,6 @@ namespace Game
 
             foreach (var session in _sessions.Values)
                 session.GetPlayer()?.ResetSeasonalQuestStatus(event_id, eventStartTime);
-        }
-
-        private void ResetRandomBG()
-        {
-            Log.outInfo(LogFilter.Server, "Random BG status reset for all characters.");
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM_ALL);
-            DB.Characters.Execute(stmt);
-
-            foreach (var session in _sessions.Values)
-                if (session.GetPlayer())
-                    session.GetPlayer().SetRandomWinner(false);
-
-            _NextRandomBGReset += Time.Day;
-            SetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId, (int)_NextRandomBGReset);
-        }
-
-        private void CalendarDeleteOldEvents()
-        {
-            Log.outInfo(LogFilter.Misc, "Calendar deletion of old events.");
-
-            _NextCalendarOldEventsDeletionTime = _NextCalendarOldEventsDeletionTime + Time.Day;
-            SetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId, (int)_NextCalendarOldEventsDeletionTime);
-            Global.CalendarMgr.DeleteOldEvents();
-        }
-
-        private void ResetGuildCap()
-        {
-            _NextGuildReset += Time.Day;
-            SetPersistentWorldVariable(NextGuildDailyResetTimeVarId, (int)_NextGuildReset);
-            int week = GetPersistentWorldVariable(NextGuildWeeklyResetTimeVarId);
-            week = week < 7 ? week + 1 : 1;
-
-            Log.outInfo(LogFilter.Server, "Guild Daily Cap reset. Week: {0}", week == 1);
-            SetPersistentWorldVariable(NextGuildWeeklyResetTimeVarId, week);
-            Global.GuildMgr.ResetTimes(week == 1);
-        }
-
-        private void UpdateMaxSessionCounters()
-        {
-            _maxActiveSessionCount = Math.Max(_maxActiveSessionCount, (uint)(_sessions.Count - _QueuedPlayer.Count));
-            _maxQueuedSessionCount = Math.Max(_maxQueuedSessionCount, (uint)_QueuedPlayer.Count);
         }
 
         public string LoadDBVersion()
@@ -2365,17 +1856,6 @@ namespace Game
             }
 
             return DBVersion;
-        }
-
-        private void UpdateAreaDependentAuras()
-        {
-            foreach (var session in _sessions.Values)
-                if (session.GetPlayer() != null &&
-                    session.GetPlayer().IsInWorld)
-                {
-                    session.GetPlayer().UpdateAreaDependentAuras(session.GetPlayer().GetAreaId());
-                    session.GetPlayer().UpdateZoneDependentAuras(session.GetPlayer().GetZoneId());
-                }
         }
 
         public bool IsBattlePetJournalLockAcquired(ObjectGuid battlenetAccountGuid)
@@ -2400,26 +1880,6 @@ namespace Game
             stmt.AddValue(0, var);
             stmt.AddValue(1, value);
             DB.Characters.Execute(stmt);
-        }
-
-        private void LoadPersistentWorldVariables()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            SQLResult result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
-
-            if (!result.IsEmpty())
-                do
-                {
-                    _worldVariables[result.Read<string>(0)] = result.Read<int>(1);
-                } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldVariables.Count} world variables in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
-
-        private void ProcessQueryCallbacks()
-        {
-            _queryProcessor.ProcessReadyCallbacks();
         }
 
         public void ReloadRBAC()
@@ -2539,11 +1999,6 @@ namespace Game
             _NextMonthlyQuestReset = time;
         }
 
-        private long GetNextRandomBGResetTime()
-        {
-            return _NextRandomBGReset;
-        }
-
         public uint GetConfigMaxSkillValue()
         {
             int lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
@@ -2628,67 +2083,6 @@ namespace Game
             _timers[WorldTimers.Corpses].SetCurrent(_timers[WorldTimers.Corpses].GetInterval());
         }
 
-        private void UpdateWarModeRewardValues()
-        {
-            long[] warModeEnabledFaction = new long[2];
-
-            // Search for characters that have war mode enabled and played during the last week
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_WAR_MODE_TUNING);
-            stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
-            stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
-
-            SQLResult result = DB.Characters.Query(stmt);
-
-            if (!result.IsEmpty())
-                do
-                {
-                    byte race = result.Read<byte>(0);
-
-                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey(race);
-
-                    if (raceEntry != null)
-                    {
-                        var raceFaction = CliDB.FactionTemplateStorage.LookupByKey(raceEntry.FactionID);
-
-                        if (raceFaction != null)
-                        {
-                            if ((raceFaction.FactionGroup & (byte)FactionMasks.Alliance) != 0)
-                                warModeEnabledFaction[TeamId.Alliance] += result.Read<long>(1);
-                            else if ((raceFaction.FactionGroup & (byte)FactionMasks.Horde) != 0)
-                                warModeEnabledFaction[TeamId.Horde] += result.Read<long>(1);
-                        }
-                    }
-                } while (result.NextRow());
-
-
-            int dominantFaction = TeamId.Alliance;
-            int outnumberedFactionReward = 0;
-
-            if (warModeEnabledFaction.Any(val => val != 0))
-            {
-                long dominantFactionCount = warModeEnabledFaction[TeamId.Alliance];
-
-                if (warModeEnabledFaction[TeamId.Alliance] < warModeEnabledFaction[TeamId.Horde])
-                {
-                    dominantFactionCount = warModeEnabledFaction[TeamId.Horde];
-                    dominantFaction = TeamId.Horde;
-                }
-
-                double total = warModeEnabledFaction[TeamId.Alliance] + warModeEnabledFaction[TeamId.Horde];
-                double pct = dominantFactionCount / total;
-
-                if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms20Pct))
-                    outnumberedFactionReward = 20;
-                else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms10Pct))
-                    outnumberedFactionReward = 10;
-                else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms5Pct))
-                    outnumberedFactionReward = 5;
-            }
-
-            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), false, null);
-            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), false, null);
-        }
-
         public uint GetVirtualRealmAddress()
         {
             return _realm.Id.GetAddress();
@@ -2765,6 +2159,612 @@ namespace Game
         public WorldUpdateTime GetWorldUpdateTime()
         {
             return _worldUpdateTime;
+        }
+
+        private void DoGuidWarningRestart()
+        {
+            if (_ShutdownTimer != 0)
+                return;
+
+            ShutdownServ(1800, ShutdownMask.Restart, ShutdownExitCode.Restart);
+            _warnShutdownTime += Time.Hour;
+        }
+
+        private void DoGuidAlertRestart()
+        {
+            if (_ShutdownTimer != 0)
+                return;
+
+            ShutdownServ(300, ShutdownMask.Restart, ShutdownExitCode.Restart, _alertRestartReason);
+        }
+
+        private void SendGuidWarning()
+        {
+            if (_ShutdownTimer == 0 &&
+                _guidWarn &&
+                WorldConfig.GetIntValue(WorldCfg.RespawnGuidWarningFrequency) > 0)
+                SendServerMessage(ServerMessageType.String, _guidWarningMsg);
+
+            _warnDiff = 0;
+        }
+
+        private bool RemoveSession(uint id)
+        {
+            // Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
+            var session = _sessions.LookupByKey(id);
+
+            if (session != null)
+            {
+                if (session.PlayerLoading())
+                    return false;
+
+                session.KickPlayer("World::RemoveSession");
+            }
+
+            return true;
+        }
+
+        private void AddSession_(WorldSession s)
+        {
+            Cypher.Assert(s != null);
+
+            //NOTE - Still there is race condition in WorldSession* being used in the Sockets
+
+            // kick already loaded player with same account (if any) and remove session
+            // if player is in loading and want to load again, return
+            if (!RemoveSession(s.GetAccountId()))
+            {
+                s.KickPlayer("World::AddSession_ Couldn't remove the other session while on loading screen");
+
+                return;
+            }
+
+            // decrease session counts only at not reconnection case
+            bool decrease_session = true;
+
+            // if session already exist, prepare to it deleting at next world update
+            // NOTE - KickPlayer() should be called on "old" in RemoveSession()
+            {
+                var old = _sessions.LookupByKey(s.GetAccountId());
+
+                if (old != null)
+                {
+                    // prevent decrease sessions Count if session queued
+                    if (RemoveQueuedPlayer(old))
+                        decrease_session = false;
+
+                    _sessionsByBnetGuid.Remove(old.GetBattlenetAccountGUID(), old);
+                    old.Dispose();
+                }
+            }
+
+            _sessions[s.GetAccountId()] = s;
+            _sessionsByBnetGuid.Add(s.GetBattlenetAccountGUID(), s);
+
+            int Sessions = GetActiveAndQueuedSessionCount();
+            uint pLimit = GetPlayerAmountLimit();
+            int QueueSize = GetQueuedSessionCount(); //number of players in the queue
+
+            //so we don't Count the user trying to
+            //login as a session and queue the socket that we are using
+            if (decrease_session)
+                --Sessions;
+
+            if (pLimit > 0 &&
+                Sessions >= pLimit &&
+                !s.HasPermission(RBACPermissions.SkipQueue) &&
+                !HasRecentlyDisconnected(s))
+            {
+                AddQueuedPlayer(s);
+                UpdateMaxSessionCounters();
+                Log.outInfo(LogFilter.Server, "PlayerQueue: Account Id {0} is in Queue Position ({1}).", s.GetAccountId(), ++QueueSize);
+
+                return;
+            }
+
+            s.InitializeSession();
+
+            UpdateMaxSessionCounters();
+
+            // Updates the population
+            if (pLimit > 0)
+            {
+                float popu = GetActiveSessionCount(); // updated number of users on the server
+                popu /= pLimit;
+                popu *= 2;
+                Log.outInfo(LogFilter.Server, "Server Population ({0}).", popu);
+            }
+        }
+
+        private void ProcessLinkInstanceSocket(Tuple<WorldSocket, ulong> linkInfo)
+        {
+            if (!linkInfo.Item1.IsOpen())
+                return;
+
+            ConnectToKey key = new();
+            key.Raw = linkInfo.Item2;
+
+            WorldSession session = FindSession(key.AccountId);
+
+            if (!session ||
+                session.GetConnectToInstanceKey() != linkInfo.Item2)
+            {
+                linkInfo.Item1.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
+                linkInfo.Item1.CloseSocket();
+
+                return;
+            }
+
+            linkInfo.Item1.SetWorldSession(session);
+            session.AddInstanceConnection(linkInfo.Item1);
+            session.HandleContinuePlayerLogin();
+        }
+
+        private bool HasRecentlyDisconnected(WorldSession session)
+        {
+            if (session == null)
+                return false;
+
+            uint tolerance = 0;
+
+            if (tolerance != 0)
+                foreach (var disconnect in _disconnects)
+                    if ((disconnect.Value - GameTime.GetGameTime()) < tolerance)
+                    {
+                        if (disconnect.Key == session.GetAccountId())
+                            return true;
+                    }
+                    else
+                    {
+                        _disconnects.Remove(disconnect.Key);
+                    }
+
+            return false;
+        }
+
+        private uint GetQueuePos(WorldSession sess)
+        {
+            uint position = 1;
+
+            foreach (var iter in _QueuedPlayer)
+                if (iter != sess)
+                    ++position;
+                else
+                    return position;
+
+            return 0;
+        }
+
+        private void AddQueuedPlayer(WorldSession sess)
+        {
+            sess.SetInQueue(true);
+            _QueuedPlayer.Add(sess);
+
+            // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
+            sess.SendAuthResponse(BattlenetRpcErrorCode.Ok, true, GetQueuePos(sess));
+        }
+
+        private bool RemoveQueuedPlayer(WorldSession sess)
+        {
+            // sessions Count including queued to remove (if removed_session set)
+            int sessions = GetActiveSessionCount();
+
+            uint position = 1;
+
+            // search to remove and Count skipped positions
+            bool found = false;
+
+            foreach (var iter in _QueuedPlayer)
+                if (iter != sess)
+                {
+                    ++position;
+                }
+                else
+                {
+                    sess.SetInQueue(false);
+                    sess.ResetTimeOutTime(false);
+                    _QueuedPlayer.Remove(iter);
+                    found = true; // removing queued session
+
+                    break;
+                }
+
+            // iter point to next socked after removed or end()
+            // position store position of removed socket and then new position next socket after removed
+
+            // if session not queued then we need decrease sessions Count
+            if (!found &&
+                sessions != 0)
+                --sessions;
+
+            // accept first in queue
+            if ((_playerLimit == 0 || sessions < _playerLimit) &&
+                !_QueuedPlayer.Empty())
+            {
+                WorldSession pop_sess = _QueuedPlayer.First();
+                pop_sess.InitializeSession();
+
+                _QueuedPlayer.RemoveAt(0);
+
+                // update iter to point first queued socket or end() if queue is empty now
+                position = 1;
+            }
+
+            // update position from iter to end()
+            // iter point to first not updated socket, position store new position
+            foreach (var iter in _QueuedPlayer)
+                iter.SendAuthWaitQueue(++position);
+
+            return found;
+        }
+
+        private void KickAllLess(AccountTypes sec)
+        {
+            // session not removed at kick and will removed in next update tick
+            foreach (var session in _sessions.Values)
+                if (session.GetSecurity() < sec)
+                    session.KickPlayer("World::KickAllLess");
+        }
+
+        private void UpdateGameTime()
+        {
+            // update the Time
+            long lastGameTime = GameTime.GetGameTime();
+            GameTime.UpdateGameTimers();
+
+            uint elapsed = (uint)(GameTime.GetGameTime() - lastGameTime);
+
+            //- if there is a shutdown timer
+            if (!IsStopped &&
+                _ShutdownTimer > 0 &&
+                elapsed > 0)
+            {
+                //- ... and it is overdue, stop the world
+                if (_ShutdownTimer <= elapsed)
+                {
+                    if (!_ShutdownMask.HasAnyFlag(ShutdownMask.Idle) ||
+                        GetActiveAndQueuedSessionCount() == 0)
+                        IsStopped = true; // exist code already set
+                    else
+                        _ShutdownTimer = 1; // minimum timer value to wait idle State
+                }
+                //- ... else decrease it and if necessary display a shutdown countdown to the users
+                else
+                {
+                    _ShutdownTimer -= elapsed;
+
+                    ShutdownMsg();
+                }
+            }
+        }
+
+        private void SendAutoBroadcast()
+        {
+            if (_Autobroadcasts.Empty())
+                return;
+
+            var pair = _Autobroadcasts.SelectRandomElementByWeight(autoPair => autoPair.Value.Weight);
+
+            uint abcenter = WorldConfig.GetUIntValue(WorldCfg.AutoBroadcastCenter);
+
+            if (abcenter == 0)
+            {
+                SendWorldText(CypherStrings.AutoBroadcast, pair.Value.Message);
+            }
+            else if (abcenter == 1)
+            {
+                SendGlobalMessage(new PrintNotification(pair.Value.Message));
+            }
+            else if (abcenter == 2)
+            {
+                SendWorldText(CypherStrings.AutoBroadcast, pair.Value.Message);
+                SendGlobalMessage(new PrintNotification(pair.Value.Message));
+            }
+
+            Log.outDebug(LogFilter.Misc, "AutoBroadcast: '{0}'", pair.Value.Message);
+        }
+
+        private void UpdateRealmCharCount(SQLResult result)
+        {
+            if (!result.IsEmpty())
+            {
+                uint Id = result.Read<uint>(0);
+                uint charCount = result.Read<uint>(1);
+
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
+                stmt.AddValue(0, charCount);
+                stmt.AddValue(1, Id);
+                stmt.AddValue(2, _realm.Id.Index);
+                DB.Login.DirectExecute(stmt);
+            }
+        }
+
+        private void InitQuestResetTimes()
+        {
+            _NextDailyQuestReset = GetPersistentWorldVariable(NextDailyQuestResetTimeVarId);
+            _NextWeeklyQuestReset = GetPersistentWorldVariable(NextWeeklyQuestResetTimeVarId);
+            _NextMonthlyQuestReset = GetPersistentWorldVariable(NextMonthlyQuestResetTimeVarId);
+        }
+
+        private static long GetNextDailyResetTime(long t)
+        {
+            return Time.GetLocalHourTimestamp(t, WorldConfig.GetUIntValue(WorldCfg.DailyQuestResetTimeHour), true);
+        }
+
+        private static long GetNextWeeklyResetTime(long t)
+        {
+            t = GetNextDailyResetTime(t);
+            DateTime time = Time.UnixTimeToDateTime(t);
+            int wday = (int)time.DayOfWeek;
+            int target = WorldConfig.GetIntValue(WorldCfg.WeeklyQuestResetTimeWDay);
+
+            if (target < wday)
+                wday -= 7;
+
+            t += (Time.Day * (target - wday));
+
+            return t;
+        }
+
+        private static long GetNextMonthlyResetTime(long t)
+        {
+            t = GetNextDailyResetTime(t);
+            DateTime time = Time.UnixTimeToDateTime(t);
+
+            if (time.Day == 1)
+                return t;
+
+            var newDate = new DateTime(time.Year, time.Month + 1, 1, 0, 0, 0, time.Kind);
+
+            return Time.DateTimeToUnixTime(newDate);
+        }
+
+        private void CheckScheduledResetTimes()
+        {
+            long now = GameTime.GetGameTime();
+
+            if (_NextDailyQuestReset <= now)
+                DailyReset();
+
+            if (_NextWeeklyQuestReset <= now)
+                ResetWeeklyQuests();
+
+            if (_NextMonthlyQuestReset <= now)
+                ResetMonthlyQuests();
+        }
+
+        private void InitRandomBGResetTime()
+        {
+            long bgtime = GetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId);
+
+            if (bgtime == 0)
+                _NextRandomBGReset = GameTime.GetGameTime(); // game Time not yet init
+
+            // generate Time by config
+            long curTime = GameTime.GetGameTime();
+
+            // current day reset Time
+            long nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.RandomBgResetHour));
+
+            // next reset Time before current moment
+            if (curTime >= nextDayResetTime)
+                nextDayResetTime += Time.Day;
+
+            // normalize reset Time
+            _NextRandomBGReset = bgtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
+
+            if (bgtime == 0)
+                SetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId, (int)_NextRandomBGReset);
+        }
+
+        private void InitCalendarOldEventsDeletionTime()
+        {
+            long now = GameTime.GetGameTime();
+            long nextDeletionTime = Time.GetLocalHourTimestamp(now, WorldConfig.GetUIntValue(WorldCfg.CalendarDeleteOldEventsHour));
+            long currentDeletionTime = GetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId);
+
+            // If the reset Time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.
+            // In this case we set the reset Time in the past and next world update will do the reset and schedule next one in the future.
+            if (currentDeletionTime < now)
+                _NextCalendarOldEventsDeletionTime = nextDeletionTime - Time.Day;
+            else
+                _NextCalendarOldEventsDeletionTime = nextDeletionTime;
+
+            if (currentDeletionTime == 0)
+                SetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId, (int)_NextCalendarOldEventsDeletionTime);
+        }
+
+        private void InitGuildResetTime()
+        {
+            long gtime = GetPersistentWorldVariable(NextGuildDailyResetTimeVarId);
+
+            if (gtime == 0)
+                _NextGuildReset = GameTime.GetGameTime(); // game Time not yet init
+
+            long curTime = GameTime.GetGameTime();
+            var nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.GuildResetHour));
+
+            if (curTime >= nextDayResetTime)
+                nextDayResetTime += Time.Day;
+
+            // normalize reset Time
+            _NextGuildReset = gtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
+
+            if (gtime == 0)
+                SetPersistentWorldVariable(NextGuildDailyResetTimeVarId, (int)_NextGuildReset);
+        }
+
+        private void InitCurrencyResetTime()
+        {
+            long currencytime = GetPersistentWorldVariable(NextCurrencyResetTimeVarId);
+
+            if (currencytime == 0)
+                _NextCurrencyReset = GameTime.GetGameTime(); // game Time not yet init
+
+            // generate Time by config
+            long curTime = GameTime.GetGameTime();
+
+            var nextWeekResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.CurrencyResetDay), WorldConfig.GetIntValue(WorldCfg.CurrencyResetHour));
+
+            // next reset Time before current moment
+            if (curTime >= nextWeekResetTime)
+                nextWeekResetTime += WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day;
+
+            // normalize reset Time
+            _NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day : nextWeekResetTime;
+
+            if (currencytime == 0)
+                SetPersistentWorldVariable(NextCurrencyResetTimeVarId, (int)_NextCurrencyReset);
+        }
+
+        private void ResetCurrencyWeekCap()
+        {
+            DB.Characters.Execute("UPDATE `character_currency` SET `WeeklyQuantity` = 0");
+
+            foreach (var session in _sessions.Values)
+                session.GetPlayer()?.ResetCurrencyWeekCap();
+
+            _NextCurrencyReset += Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
+            SetPersistentWorldVariable(NextCurrencyResetTimeVarId, (int)_NextCurrencyReset);
+        }
+
+        private void ResetRandomBG()
+        {
+            Log.outInfo(LogFilter.Server, "Random BG status reset for all characters.");
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM_ALL);
+            DB.Characters.Execute(stmt);
+
+            foreach (var session in _sessions.Values)
+                if (session.GetPlayer())
+                    session.GetPlayer().SetRandomWinner(false);
+
+            _NextRandomBGReset += Time.Day;
+            SetPersistentWorldVariable(NextBGRandomDailyResetTimeVarId, (int)_NextRandomBGReset);
+        }
+
+        private void CalendarDeleteOldEvents()
+        {
+            Log.outInfo(LogFilter.Misc, "Calendar deletion of old events.");
+
+            _NextCalendarOldEventsDeletionTime = _NextCalendarOldEventsDeletionTime + Time.Day;
+            SetPersistentWorldVariable(NextOldCalendarEventDeletionTimeVarId, (int)_NextCalendarOldEventsDeletionTime);
+            Global.CalendarMgr.DeleteOldEvents();
+        }
+
+        private void ResetGuildCap()
+        {
+            _NextGuildReset += Time.Day;
+            SetPersistentWorldVariable(NextGuildDailyResetTimeVarId, (int)_NextGuildReset);
+            int week = GetPersistentWorldVariable(NextGuildWeeklyResetTimeVarId);
+            week = week < 7 ? week + 1 : 1;
+
+            Log.outInfo(LogFilter.Server, "Guild Daily Cap reset. Week: {0}", week == 1);
+            SetPersistentWorldVariable(NextGuildWeeklyResetTimeVarId, week);
+            Global.GuildMgr.ResetTimes(week == 1);
+        }
+
+        private void UpdateMaxSessionCounters()
+        {
+            _maxActiveSessionCount = Math.Max(_maxActiveSessionCount, (uint)(_sessions.Count - _QueuedPlayer.Count));
+            _maxQueuedSessionCount = Math.Max(_maxQueuedSessionCount, (uint)_QueuedPlayer.Count);
+        }
+
+        private void UpdateAreaDependentAuras()
+        {
+            foreach (var session in _sessions.Values)
+                if (session.GetPlayer() != null &&
+                    session.GetPlayer().IsInWorld)
+                {
+                    session.GetPlayer().UpdateAreaDependentAuras(session.GetPlayer().GetAreaId());
+                    session.GetPlayer().UpdateZoneDependentAuras(session.GetPlayer().GetZoneId());
+                }
+        }
+
+        private void LoadPersistentWorldVariables()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            SQLResult result = DB.Characters.Query("SELECT ID, Value FROM world_variable");
+
+            if (!result.IsEmpty())
+                do
+                {
+                    _worldVariables[result.Read<string>(0)] = result.Read<int>(1);
+                } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldVariables.Count} world variables in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        private void ProcessQueryCallbacks()
+        {
+            _queryProcessor.ProcessReadyCallbacks();
+        }
+
+        private long GetNextRandomBGResetTime()
+        {
+            return _NextRandomBGReset;
+        }
+
+        private void UpdateWarModeRewardValues()
+        {
+            long[] warModeEnabledFaction = new long[2];
+
+            // Search for characters that have war mode enabled and played during the last week
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_WAR_MODE_TUNING);
+            stmt.AddValue(0, (uint)PlayerFlags.WarModeDesired);
+            stmt.AddValue(1, (uint)PlayerFlags.WarModeDesired);
+
+            SQLResult result = DB.Characters.Query(stmt);
+
+            if (!result.IsEmpty())
+                do
+                {
+                    byte race = result.Read<byte>(0);
+
+                    var raceEntry = CliDB.ChrRacesStorage.LookupByKey(race);
+
+                    if (raceEntry != null)
+                    {
+                        var raceFaction = CliDB.FactionTemplateStorage.LookupByKey(raceEntry.FactionID);
+
+                        if (raceFaction != null)
+                        {
+                            if ((raceFaction.FactionGroup & (byte)FactionMasks.Alliance) != 0)
+                                warModeEnabledFaction[TeamId.Alliance] += result.Read<long>(1);
+                            else if ((raceFaction.FactionGroup & (byte)FactionMasks.Horde) != 0)
+                                warModeEnabledFaction[TeamId.Horde] += result.Read<long>(1);
+                        }
+                    }
+                } while (result.NextRow());
+
+
+            int dominantFaction = TeamId.Alliance;
+            int outnumberedFactionReward = 0;
+
+            if (warModeEnabledFaction.Any(val => val != 0))
+            {
+                long dominantFactionCount = warModeEnabledFaction[TeamId.Alliance];
+
+                if (warModeEnabledFaction[TeamId.Alliance] < warModeEnabledFaction[TeamId.Horde])
+                {
+                    dominantFactionCount = warModeEnabledFaction[TeamId.Horde];
+                    dominantFaction = TeamId.Horde;
+                }
+
+                double total = warModeEnabledFaction[TeamId.Alliance] + warModeEnabledFaction[TeamId.Horde];
+                double pct = dominantFactionCount / total;
+
+                if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms20Pct))
+                    outnumberedFactionReward = 20;
+                else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms10Pct))
+                    outnumberedFactionReward = 10;
+                else if (pct >= WorldConfig.GetFloatValue(WorldCfg.CallToArms5Pct))
+                    outnumberedFactionReward = 5;
+            }
+
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeHordeBuffValue, 10 + (dominantFaction == TeamId.Alliance ? outnumberedFactionReward : 0), false, null);
+            Global.WorldStateMgr.SetValueAndSaveInDb(WorldStates.WarModeAllianceBuffValue, 10 + (dominantFaction == TeamId.Horde ? outnumberedFactionReward : 0), false, null);
         }
 
         #region Fields
@@ -2900,6 +2900,17 @@ namespace Game
 
     public class WorldWorldTextBuilder : MessageBuilder
     {
+        public class MultiplePacketSender : IDoWork<Player>
+        {
+            public List<ServerPacket> Packets = new();
+
+            public void Invoke(Player receiver)
+            {
+                foreach (var packet in Packets)
+                    receiver.SendPacket(packet);
+            }
+        }
+
         private readonly object[] i_args;
 
         private readonly uint i_textId;
@@ -2930,17 +2941,6 @@ namespace Game
             }
 
             return sender;
-        }
-
-        public class MultiplePacketSender : IDoWork<Player>
-        {
-            public List<ServerPacket> Packets = new();
-
-            public void Invoke(Player receiver)
-            {
-                foreach (var packet in Packets)
-                    receiver.SendPacket(packet);
-            }
         }
     }
 

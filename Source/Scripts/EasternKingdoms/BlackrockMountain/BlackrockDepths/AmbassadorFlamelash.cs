@@ -45,20 +45,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.AmbassadorFl
                                 });
         }
 
-        private void SummonSpirit(Unit victim)
-        {
-            Creature spirit = DoSpawnCreature(9178, RandomHelper.FRand(-9, 9), RandomHelper.FRand(-9, 9), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(60));
-
-            if (spirit)
-                spirit.GetAI().AttackStart(victim);
-        }
-
         public override void UpdateAI(uint diff)
         {
             if (!UpdateVictim())
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void SummonSpirit(Unit victim)
+        {
+            Creature spirit = DoSpawnCreature(9178, RandomHelper.FRand(-9, 9), RandomHelper.FRand(-9, 9), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(60));
+
+            if (spirit)
+                spirit.GetAI().AttackStart(victim);
         }
     }
 }

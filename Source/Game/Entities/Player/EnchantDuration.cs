@@ -7,8 +7,6 @@ namespace Game.Entities
 {
     public class EnchantDuration
     {
-        public Item Item { get; set; }
-        public uint Leftduration { get; set; }
         public EnchantmentSlot Slot;
 
         public EnchantDuration(Item _item = null, EnchantmentSlot _slot = EnchantmentSlot.Max, uint _leftduration = 0)
@@ -17,5 +15,8 @@ namespace Game.Entities
             Slot = _slot;
             Leftduration = _leftduration;
         }
+
+        public Item Item { get; set; }
+        public uint Leftduration { get; set; }
     }
 }

@@ -20,10 +20,10 @@ namespace Game.PvP
     {
         // the map of the objectives belonging to this outdoorpvp
         public Dictionary<ulong, OPvPCapturePoint> _capturePoints = new();
+        public OutdoorPvPTypes _TypeId;
 
         private readonly Map _map;
         private readonly List<ObjectGuid>[] _players = new List<ObjectGuid>[2];
-        public OutdoorPvPTypes _TypeId;
 
         public OutdoorPvP(Map map)
         {
@@ -110,15 +110,6 @@ namespace Game.PvP
             }
         }
 
-        private bool IsInsideObjective(Player player)
-        {
-            foreach (var pair in _capturePoints)
-                if (pair.Value.IsInsideObjective(player))
-                    return true;
-
-            return false;
-        }
-
         public virtual bool HandleCustomSpell(Player player, uint spellId, GameObject go)
         {
             foreach (var pair in _capturePoints)
@@ -149,19 +140,6 @@ namespace Game.PvP
         public virtual bool HandleAreaTrigger(Player player, uint trigger, bool entered)
         {
             return false;
-        }
-
-        private void BroadcastPacket(ServerPacket packet)
-        {
-            // This is faster than sWorld.SendZoneMessage
-            for (int team = 0; team < 2; ++team)
-                foreach (var guid in _players[team])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                    if (player)
-                        player.SendPacket(packet);
-                }
         }
 
         public void RegisterZone(uint zoneId)
@@ -225,19 +203,6 @@ namespace Game.PvP
             BroadcastWorker(localizer, zoneId);
         }
 
-        private void BroadcastWorker(IDoWork<Player> _worker, uint zoneId)
-        {
-            for (uint i = 0; i < SharedConst.PvpTeamsCount; ++i)
-                foreach (var guid in _players[i])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                    if (player)
-                        if (player.GetZoneId() == zoneId)
-                            _worker.Invoke(player);
-                }
-        }
-
         // setup stuff
         public virtual bool SetupOutdoorPvP()
         {
@@ -270,14 +235,49 @@ namespace Game.PvP
             _capturePoints[cp._capturePointSpawnId] = cp;
         }
 
-        private OPvPCapturePoint GetCapturePoint(ulong lowguid)
-        {
-            return _capturePoints.LookupByKey(lowguid);
-        }
-
         public Map GetMap()
         {
             return _map;
+        }
+
+        private bool IsInsideObjective(Player player)
+        {
+            foreach (var pair in _capturePoints)
+                if (pair.Value.IsInsideObjective(player))
+                    return true;
+
+            return false;
+        }
+
+        private void BroadcastPacket(ServerPacket packet)
+        {
+            // This is faster than sWorld.SendZoneMessage
+            for (int team = 0; team < 2; ++team)
+                foreach (var guid in _players[team])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                    if (player)
+                        player.SendPacket(packet);
+                }
+        }
+
+        private void BroadcastWorker(IDoWork<Player> _worker, uint zoneId)
+        {
+            for (uint i = 0; i < SharedConst.PvpTeamsCount; ++i)
+                foreach (var guid in _players[i])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                    if (player)
+                        if (player.GetZoneId() == zoneId)
+                            _worker.Invoke(player);
+                }
+        }
+
+        private OPvPCapturePoint GetCapturePoint(ulong lowguid)
+        {
+            return _capturePoints.LookupByKey(lowguid);
         }
     }
 
@@ -289,21 +289,21 @@ namespace Game.PvP
 
         public ulong _capturePointSpawnId;
 
-        // maximum speed of capture
-        private float _maxSpeed;
-
         // total shift needed to capture the objective
         public float _maxValue;
-
-        private float _minValue;
 
         // neutral value on capture bar
         public uint _neutralValuePct;
 
-        private uint _team;
-
         // the status of the objective
         public float _value;
+
+        // maximum speed of capture
+        private float _maxSpeed;
+
+        private float _minValue;
+
+        private uint _team;
 
         public OPvPCapturePoint(OutdoorPvP pvp)
         {

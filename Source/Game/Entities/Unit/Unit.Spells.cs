@@ -1257,31 +1257,6 @@ namespace Game.Entities
             return diseases;
         }
 
-        private uint GetDoTsByCaster(ObjectGuid casterGUID)
-        {
-            AuraType[] diseaseAuraTypes =
-            {
-                AuraType.PeriodicDamage, AuraType.PeriodicDamagePercent, AuraType.None
-            };
-
-            uint dots = 0;
-
-            foreach (var aura in diseaseAuraTypes)
-            {
-                if (aura == AuraType.None)
-                    break;
-
-                var auras = GetAuraEffectsByType(aura);
-
-                foreach (var eff in auras)
-                    // Get Auras by caster
-                    if (eff.GetCasterGUID() == casterGUID)
-                        ++dots;
-            }
-
-            return dots;
-        }
-
         public void SendEnergizeSpellLog(Unit victim, uint spellId, int amount, int overEnergize, PowerType powerType)
         {
             SpellEnergizeLog data = new();
@@ -1645,166 +1620,6 @@ namespace Game.Entities
             actor?.TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
         }
 
-        private void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlagsInit typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
-        {
-            // Player is loaded now - do not allow passive spell casts to proc
-            if (IsPlayer() &&
-                ToPlayer().GetSession().PlayerLoading())
-                return;
-
-            // For melee/ranged based attack need update Skills and set some Aura states if victim present
-            if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
-                // If exist crit/parry/dodge/block need update aura State (for victim and Attacker)
-                if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
-                    // for victim
-                    if (isVictim)
-                    {
-                        // if victim and dodge attack
-                        if (hitMask.HasAnyFlag(ProcFlagsHit.Dodge))
-                            // Update AURA_STATE on dodge
-                            if (GetClass() != Class.Rogue) // skip Rogue Riposte
-                            {
-                                ModifyAuraState(AuraStateType.Defensive, true);
-                                StartReactiveTimer(ReactiveType.Defense);
-                            }
-
-                        // if victim and parry attack
-                        if (hitMask.HasAnyFlag(ProcFlagsHit.Parry))
-                        {
-                            ModifyAuraState(AuraStateType.Defensive, true);
-                            StartReactiveTimer(ReactiveType.Defense);
-                        }
-
-                        // if and victim block attack
-                        if (hitMask.HasAnyFlag(ProcFlagsHit.Block))
-                        {
-                            ModifyAuraState(AuraStateType.Defensive, true);
-                            StartReactiveTimer(ReactiveType.Defense);
-                        }
-                    }
-        }
-
-        private void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
-        {
-            DateTime now = GameTime.Now();
-
-            void processAuraApplication(AuraApplication aurApp)
-            {
-                uint procEffectMask = aurApp.GetBase().GetProcEffectMask(aurApp, eventInfo, now);
-
-                if (procEffectMask != 0)
-                {
-                    aurApp.GetBase().PrepareProcToTrigger(aurApp, eventInfo, now);
-                    aurasTriggeringProc.Add(Tuple.Create(procEffectMask, aurApp));
-                }
-                else
-                {
-                    if (aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr0.ProcFailureBurnsCharge))
-                    {
-                        SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(aurApp.GetBase().GetSpellInfo());
-
-                        if (procEntry != null)
-                        {
-                            aurApp.GetBase().PrepareProcChargeDrop(procEntry, eventInfo);
-                            aurApp.GetBase().ConsumeProcCharges(procEntry);
-                        }
-                    }
-
-                    if (aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr2.ProcCooldownOnFailure))
-                    {
-                        SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(aurApp.GetBase().GetSpellInfo());
-
-                        if (procEntry != null)
-                            aurApp.GetBase().AddProcCooldown(procEntry, now);
-                    }
-                }
-            }
-
-            // use provided list of Auras which can proc
-            if (procAuras != null)
-                foreach (AuraApplication aurApp in procAuras)
-                {
-                    Cypher.Assert(aurApp.GetTarget() == this);
-                    processAuraApplication(aurApp);
-                }
-            // or generate one on our own
-            else
-                foreach (var pair in GetAppliedAuras())
-                    processAuraApplication(pair.Value);
-        }
-
-        private void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
-        {
-            // prepare _data for self trigger
-            ProcEventInfo myProcEventInfo = new(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
-            List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new();
-
-            if (typeMaskActor)
-            {
-                GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
-
-                // needed for example for Cobra Strikes, pet does the attack, but aura is on owner
-                Player modOwner = GetSpellModOwner();
-
-                if (modOwner)
-                    if (modOwner != this && spell)
-                    {
-                        List<AuraApplication> modAuras = new();
-
-                        foreach (var itr in modOwner.GetAppliedAuras())
-                            if (spell._appliedMods.Contains(itr.Value.GetBase()))
-                                modAuras.Add(itr.Value);
-
-                        modOwner.GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, modAuras, myProcEventInfo);
-                    }
-            }
-
-            // prepare _data for Target trigger
-            ProcEventInfo targetProcEventInfo = new(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
-            List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new();
-
-            if (typeMaskActionTarget && actionTarget)
-                actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
-
-            TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);
-
-            if (typeMaskActionTarget && actionTarget)
-                actionTarget.TriggerAurasProcOnEvent(targetProcEventInfo, targetAurasTriggeringProc);
-        }
-
-        private void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
-        {
-            Spell triggeringSpell = eventInfo.GetProcSpell();
-            bool disableProcs = triggeringSpell && triggeringSpell.IsProcDisabled();
-
-            if (disableProcs)
-                SetCantProc(true);
-
-            foreach (var (procEffectMask, aurApp) in aurasTriggeringProc)
-            {
-                if (aurApp.GetRemoveMode() != 0)
-                    continue;
-
-                aurApp.GetBase().TriggerProcOnEvent(procEffectMask, aurApp, eventInfo);
-            }
-
-            if (disableProcs)
-                SetCantProc(false);
-        }
-
-        private void SetCantProc(bool apply)
-        {
-            if (apply)
-            {
-                ++ProcDeep;
-            }
-            else
-            {
-                Cypher.Assert(ProcDeep != 0);
-                --ProcDeep;
-            }
-        }
-
         public void CastStop(uint except_spellid = 0)
         {
             for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
@@ -2077,23 +1892,6 @@ namespace Game.Entities
                 healInfo.SetEffectiveHeal(gain > 0 ? (uint)gain : 0u);
         }
 
-        private void SendHealSpellLog(HealInfo healInfo, bool critical = false)
-        {
-            SpellHealLog spellHealLog = new();
-
-            spellHealLog.TargetGUID = healInfo.GetTarget().GetGUID();
-            spellHealLog.CasterGUID = healInfo.GetHealer().GetGUID();
-            spellHealLog.SpellID = healInfo.GetSpellInfo().Id;
-            spellHealLog.Health = healInfo.GetHeal();
-            spellHealLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
-            spellHealLog.OverHeal = healInfo.GetHeal() - healInfo.GetEffectiveHeal();
-            spellHealLog.Absorbed = healInfo.GetAbsorb();
-            spellHealLog.Crit = critical;
-
-            spellHealLog.LogData.Initialize(healInfo.GetTarget());
-            SendCombatLogMessage(spellHealLog);
-        }
-
         public uint HealBySpell(HealInfo healInfo, bool critical = false)
         {
             // calculate heal Absorb and reduce healing
@@ -2354,15 +2152,6 @@ namespace Game.Entities
             data.Effects.Add(spellLogEffect);
 
             SendCombatLogMessage(data);
-        }
-
-        private void SendSpellDamageResist(Unit target, uint spellId)
-        {
-            ProcResist procResist = new();
-            procResist.Caster = GetGUID();
-            procResist.SpellID = spellId;
-            procResist.Target = target.GetGUID();
-            SendMessageToSet(procResist, true);
         }
 
         public void SendSpellDamageImmune(Unit target, uint spellId, bool isPeriodic)
@@ -2646,12 +2435,6 @@ namespace Game.Entities
                 if (diminish.Stack == 0)
                     diminish.HitTime = GameTime.GetGameTimeMS();
             }
-        }
-
-        private void ClearDiminishings()
-        {
-            for (int i = 0; i < (int)DiminishingGroup.Max; ++i)
-                _diminishing[i].Clear();
         }
 
         // Interrupts
@@ -3073,23 +2856,6 @@ namespace Game.Entities
             return aurApp?.GetBase();
         }
 
-        private AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
-        {
-            uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
-
-            while (rankSpell != 0)
-            {
-                AuraApplication aurApp = GetAuraApplication(rankSpell, casterGUID, itemCasterGUID, reqEffMask, except);
-
-                if (aurApp != null)
-                    return aurApp;
-
-                rankSpell = Global.SpellMgr.GetNextSpellInChain(rankSpell);
-            }
-
-            return null;
-        }
-
         public List<DispelableAura> GetDispellableAuraList(WorldObject caster, uint dispelMask, bool isReflect = false)
         {
             List<DispelableAura> dispelList = new();
@@ -3134,38 +2900,6 @@ namespace Game.Entities
             }
 
             return dispelList;
-        }
-
-        private bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
-        {
-            switch (flag)
-            {
-                case SpellAuraInterruptFlags.Moving:
-                    return unit.CanCastSpellWhileMoving(auraSpellInfo);
-                case SpellAuraInterruptFlags.Action:
-                case SpellAuraInterruptFlags.ActionDelayed:
-                    if (interruptSource != null)
-                    {
-                        if (interruptSource.HasAttribute(SpellAttr1.AllowWhileStealthed) &&
-                            auraSpellInfo.Dispel == DispelType.Stealth)
-                            return true;
-
-                        if (interruptSource.HasAttribute(SpellAttr2.AllowWhileInvisible) &&
-                            auraSpellInfo.Dispel == DispelType.Invisibility)
-                            return true;
-                    }
-
-                    break;
-                default:
-                    break;
-            }
-
-            return false;
-        }
-
-        private bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
-        {
-            return false;
         }
 
         public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags flag, SpellInfo source = null)
@@ -3689,24 +3423,6 @@ namespace Game.Entities
                     RemoveOwnedAura(pair, removeMode);
         }
 
-        private void RemoveAppliedAuras(uint spellId, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
-        {
-            var list = _appliedAuras.LookupByKey(spellId);
-
-            foreach (var app in list)
-                if (check(app))
-                    RemoveAura(app, removeMode);
-        }
-
-        private void RemoveOwnedAuras(uint spellId, Func<Aura, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
-        {
-            var list = _ownedAuras.LookupByKey(spellId);
-
-            foreach (var aura in list)
-                if (check(aura))
-                    RemoveOwnedAura(aura, removeMode);
-        }
-
         public void RemoveAurasByType(AuraType auraType, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             var list = _modAuras[auraType];
@@ -3744,31 +3460,6 @@ namespace Game.Entities
                     continue;
                 }
             }
-        }
-
-        private void RemoveAreaAurasDueToLeaveWorld()
-        {
-            // make sure that all area Auras not applied on self are removed
-            foreach (var pair in GetOwnedAuras())
-            {
-                var appMap = pair.Value.GetApplicationMap();
-
-                foreach (var aurApp in appMap.Values.ToList())
-                {
-                    Unit target = aurApp.GetTarget();
-
-                    if (target == this)
-                        continue;
-
-                    target.RemoveAura(aurApp);
-                    // things linked on aura remove may apply new area aura - so start from the beginning
-                }
-            }
-
-            // remove area Auras owned by others
-            foreach (var pair in GetAppliedAuras())
-                if (pair.Value.GetBase().GetOwner() != this)
-                    RemoveAura(pair);
         }
 
         public void RemoveAllAuras()
@@ -3974,41 +3665,6 @@ namespace Game.Entities
             }
 
             return (UnitData.AuraState & (1 << ((int)flag - 1))) != 0;
-        }
-
-        private SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
-        {
-            SpellSchools school = SpellSchools.Normal;
-
-            switch (unitMod)
-            {
-                case UnitMods.ResistanceHoly:
-                    school = SpellSchools.Holy;
-
-                    break;
-                case UnitMods.ResistanceFire:
-                    school = SpellSchools.Fire;
-
-                    break;
-                case UnitMods.ResistanceNature:
-                    school = SpellSchools.Nature;
-
-                    break;
-                case UnitMods.ResistanceFrost:
-                    school = SpellSchools.Frost;
-
-                    break;
-                case UnitMods.ResistanceShadow:
-                    school = SpellSchools.Shadow;
-
-                    break;
-                case UnitMods.ResistanceArcane:
-                    school = SpellSchools.Arcane;
-
-                    break;
-            }
-
-            return school;
         }
 
         public void _ApplyAllAuraStatMods()
@@ -4463,30 +4119,6 @@ namespace Game.Entities
             return null;
         }
 
-        private void _RemoveNoStackAurasDueToAura(Aura aura)
-        {
-            SpellInfo spellProto = aura.GetSpellInfo();
-
-            // passive spell special case (only non stackable with ranks)
-            if (spellProto.IsPassiveStackableWithRanks())
-                return;
-
-            if (!IsHighestExclusiveAura(aura))
-            {
-                aura.Remove();
-
-                return;
-            }
-
-            foreach (var app in GetAppliedAuras())
-            {
-                if (aura.CanStackWith(app.Value.GetBase()))
-                    continue;
-
-                RemoveAura(app, AuraRemoveMode.Default);
-            }
-        }
-
         public int GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect aurEff, AuraType auraType, bool checkMiscValue = false, int miscValue = 0)
         {
             int val = 0;
@@ -4751,18 +4383,6 @@ namespace Game.Entities
                                           });
         }
 
-        private int GetMaxPositiveAuraModifierByMiscValue(AuraType auraType, int miscValue)
-        {
-            return GetMaxPositiveAuraModifier(auraType,
-                                              aurEff =>
-                                              {
-                                                  if (aurEff.GetMiscValue() == miscValue)
-                                                      return true;
-
-                                                  return false;
-                                              });
-        }
-
         public int GetMaxNegativeAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
             return GetMaxNegativeAuraModifier(auraType,
@@ -4814,6 +4434,401 @@ namespace Game.Entities
             UpdateAuraForGroup();
         }
 
+        public SortedSet<AuraApplication> GetVisibleAuras()
+        {
+            return _visibleAuras;
+        }
+
+        public bool HasVisibleAura(AuraApplication aurApp)
+        {
+            return _visibleAuras.Contains(aurApp);
+        }
+
+        public void SetVisibleAuraUpdate(AuraApplication aurApp)
+        {
+            _visibleAurasToUpdate.Add(aurApp);
+        }
+
+        private uint GetDoTsByCaster(ObjectGuid casterGUID)
+        {
+            AuraType[] diseaseAuraTypes =
+            {
+                AuraType.PeriodicDamage, AuraType.PeriodicDamagePercent, AuraType.None
+            };
+
+            uint dots = 0;
+
+            foreach (var aura in diseaseAuraTypes)
+            {
+                if (aura == AuraType.None)
+                    break;
+
+                var auras = GetAuraEffectsByType(aura);
+
+                foreach (var eff in auras)
+                    // Get Auras by caster
+                    if (eff.GetCasterGUID() == casterGUID)
+                        ++dots;
+            }
+
+            return dots;
+        }
+
+        private void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlagsInit typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
+        {
+            // Player is loaded now - do not allow passive spell casts to proc
+            if (IsPlayer() &&
+                ToPlayer().GetSession().PlayerLoading())
+                return;
+
+            // For melee/ranged based attack need update Skills and set some Aura states if victim present
+            if (typeMask.HasFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
+                // If exist crit/parry/dodge/block need update aura State (for victim and Attacker)
+                if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
+                    // for victim
+                    if (isVictim)
+                    {
+                        // if victim and dodge attack
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Dodge))
+                            // Update AURA_STATE on dodge
+                            if (GetClass() != Class.Rogue) // skip Rogue Riposte
+                            {
+                                ModifyAuraState(AuraStateType.Defensive, true);
+                                StartReactiveTimer(ReactiveType.Defense);
+                            }
+
+                        // if victim and parry attack
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Parry))
+                        {
+                            ModifyAuraState(AuraStateType.Defensive, true);
+                            StartReactiveTimer(ReactiveType.Defense);
+                        }
+
+                        // if and victim block attack
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Block))
+                        {
+                            ModifyAuraState(AuraStateType.Defensive, true);
+                            StartReactiveTimer(ReactiveType.Defense);
+                        }
+                    }
+        }
+
+        private void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
+        {
+            DateTime now = GameTime.Now();
+
+            void processAuraApplication(AuraApplication aurApp)
+            {
+                uint procEffectMask = aurApp.GetBase().GetProcEffectMask(aurApp, eventInfo, now);
+
+                if (procEffectMask != 0)
+                {
+                    aurApp.GetBase().PrepareProcToTrigger(aurApp, eventInfo, now);
+                    aurasTriggeringProc.Add(Tuple.Create(procEffectMask, aurApp));
+                }
+                else
+                {
+                    if (aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr0.ProcFailureBurnsCharge))
+                    {
+                        SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(aurApp.GetBase().GetSpellInfo());
+
+                        if (procEntry != null)
+                        {
+                            aurApp.GetBase().PrepareProcChargeDrop(procEntry, eventInfo);
+                            aurApp.GetBase().ConsumeProcCharges(procEntry);
+                        }
+                    }
+
+                    if (aurApp.GetBase().GetSpellInfo().HasAttribute(SpellAttr2.ProcCooldownOnFailure))
+                    {
+                        SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(aurApp.GetBase().GetSpellInfo());
+
+                        if (procEntry != null)
+                            aurApp.GetBase().AddProcCooldown(procEntry, now);
+                    }
+                }
+            }
+
+            // use provided list of Auras which can proc
+            if (procAuras != null)
+                foreach (AuraApplication aurApp in procAuras)
+                {
+                    Cypher.Assert(aurApp.GetTarget() == this);
+                    processAuraApplication(aurApp);
+                }
+            // or generate one on our own
+            else
+                foreach (var pair in GetAppliedAuras())
+                    processAuraApplication(pair.Value);
+        }
+
+        private void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlagsInit typeMaskActor, ProcFlagsInit typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        {
+            // prepare _data for self trigger
+            ProcEventInfo myProcEventInfo = new(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new();
+
+            if (typeMaskActor)
+            {
+                GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
+
+                // needed for example for Cobra Strikes, pet does the attack, but aura is on owner
+                Player modOwner = GetSpellModOwner();
+
+                if (modOwner)
+                    if (modOwner != this && spell)
+                    {
+                        List<AuraApplication> modAuras = new();
+
+                        foreach (var itr in modOwner.GetAppliedAuras())
+                            if (spell._appliedMods.Contains(itr.Value.GetBase()))
+                                modAuras.Add(itr.Value);
+
+                        modOwner.GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, modAuras, myProcEventInfo);
+                    }
+            }
+
+            // prepare _data for Target trigger
+            ProcEventInfo targetProcEventInfo = new(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new();
+
+            if (typeMaskActionTarget && actionTarget)
+                actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
+
+            TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);
+
+            if (typeMaskActionTarget && actionTarget)
+                actionTarget.TriggerAurasProcOnEvent(targetProcEventInfo, targetAurasTriggeringProc);
+        }
+
+        private void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
+        {
+            Spell triggeringSpell = eventInfo.GetProcSpell();
+            bool disableProcs = triggeringSpell && triggeringSpell.IsProcDisabled();
+
+            if (disableProcs)
+                SetCantProc(true);
+
+            foreach (var (procEffectMask, aurApp) in aurasTriggeringProc)
+            {
+                if (aurApp.GetRemoveMode() != 0)
+                    continue;
+
+                aurApp.GetBase().TriggerProcOnEvent(procEffectMask, aurApp, eventInfo);
+            }
+
+            if (disableProcs)
+                SetCantProc(false);
+        }
+
+        private void SetCantProc(bool apply)
+        {
+            if (apply)
+            {
+                ++ProcDeep;
+            }
+            else
+            {
+                Cypher.Assert(ProcDeep != 0);
+                --ProcDeep;
+            }
+        }
+
+        private void SendHealSpellLog(HealInfo healInfo, bool critical = false)
+        {
+            SpellHealLog spellHealLog = new();
+
+            spellHealLog.TargetGUID = healInfo.GetTarget().GetGUID();
+            spellHealLog.CasterGUID = healInfo.GetHealer().GetGUID();
+            spellHealLog.SpellID = healInfo.GetSpellInfo().Id;
+            spellHealLog.Health = healInfo.GetHeal();
+            spellHealLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
+            spellHealLog.OverHeal = healInfo.GetHeal() - healInfo.GetEffectiveHeal();
+            spellHealLog.Absorbed = healInfo.GetAbsorb();
+            spellHealLog.Crit = critical;
+
+            spellHealLog.LogData.Initialize(healInfo.GetTarget());
+            SendCombatLogMessage(spellHealLog);
+        }
+
+        private void SendSpellDamageResist(Unit target, uint spellId)
+        {
+            ProcResist procResist = new();
+            procResist.Caster = GetGUID();
+            procResist.SpellID = spellId;
+            procResist.Target = target.GetGUID();
+            SendMessageToSet(procResist, true);
+        }
+
+        private void ClearDiminishings()
+        {
+            for (int i = 0; i < (int)DiminishingGroup.Max; ++i)
+                _diminishing[i].Clear();
+        }
+
+        private AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
+        {
+            uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
+
+            while (rankSpell != 0)
+            {
+                AuraApplication aurApp = GetAuraApplication(rankSpell, casterGUID, itemCasterGUID, reqEffMask, except);
+
+                if (aurApp != null)
+                    return aurApp;
+
+                rankSpell = Global.SpellMgr.GetNextSpellInChain(rankSpell);
+            }
+
+            return null;
+        }
+
+        private bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
+        {
+            switch (flag)
+            {
+                case SpellAuraInterruptFlags.Moving:
+                    return unit.CanCastSpellWhileMoving(auraSpellInfo);
+                case SpellAuraInterruptFlags.Action:
+                case SpellAuraInterruptFlags.ActionDelayed:
+                    if (interruptSource != null)
+                    {
+                        if (interruptSource.HasAttribute(SpellAttr1.AllowWhileStealthed) &&
+                            auraSpellInfo.Dispel == DispelType.Stealth)
+                            return true;
+
+                        if (interruptSource.HasAttribute(SpellAttr2.AllowWhileInvisible) &&
+                            auraSpellInfo.Dispel == DispelType.Invisibility)
+                            return true;
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo auraSpellInfo, SpellInfo interruptSource)
+        {
+            return false;
+        }
+
+        private void RemoveAppliedAuras(uint spellId, Func<AuraApplication, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        {
+            var list = _appliedAuras.LookupByKey(spellId);
+
+            foreach (var app in list)
+                if (check(app))
+                    RemoveAura(app, removeMode);
+        }
+
+        private void RemoveOwnedAuras(uint spellId, Func<Aura, bool> check, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        {
+            var list = _ownedAuras.LookupByKey(spellId);
+
+            foreach (var aura in list)
+                if (check(aura))
+                    RemoveOwnedAura(aura, removeMode);
+        }
+
+        private void RemoveAreaAurasDueToLeaveWorld()
+        {
+            // make sure that all area Auras not applied on self are removed
+            foreach (var pair in GetOwnedAuras())
+            {
+                var appMap = pair.Value.GetApplicationMap();
+
+                foreach (var aurApp in appMap.Values.ToList())
+                {
+                    Unit target = aurApp.GetTarget();
+
+                    if (target == this)
+                        continue;
+
+                    target.RemoveAura(aurApp);
+                    // things linked on aura remove may apply new area aura - so start from the beginning
+                }
+            }
+
+            // remove area Auras owned by others
+            foreach (var pair in GetAppliedAuras())
+                if (pair.Value.GetBase().GetOwner() != this)
+                    RemoveAura(pair);
+        }
+
+        private SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
+        {
+            SpellSchools school = SpellSchools.Normal;
+
+            switch (unitMod)
+            {
+                case UnitMods.ResistanceHoly:
+                    school = SpellSchools.Holy;
+
+                    break;
+                case UnitMods.ResistanceFire:
+                    school = SpellSchools.Fire;
+
+                    break;
+                case UnitMods.ResistanceNature:
+                    school = SpellSchools.Nature;
+
+                    break;
+                case UnitMods.ResistanceFrost:
+                    school = SpellSchools.Frost;
+
+                    break;
+                case UnitMods.ResistanceShadow:
+                    school = SpellSchools.Shadow;
+
+                    break;
+                case UnitMods.ResistanceArcane:
+                    school = SpellSchools.Arcane;
+
+                    break;
+            }
+
+            return school;
+        }
+
+        private void _RemoveNoStackAurasDueToAura(Aura aura)
+        {
+            SpellInfo spellProto = aura.GetSpellInfo();
+
+            // passive spell special case (only non stackable with ranks)
+            if (spellProto.IsPassiveStackableWithRanks())
+                return;
+
+            if (!IsHighestExclusiveAura(aura))
+            {
+                aura.Remove();
+
+                return;
+            }
+
+            foreach (var app in GetAppliedAuras())
+            {
+                if (aura.CanStackWith(app.Value.GetBase()))
+                    continue;
+
+                RemoveAura(app, AuraRemoveMode.Default);
+            }
+        }
+
+        private int GetMaxPositiveAuraModifierByMiscValue(AuraType auraType, int miscValue)
+        {
+            return GetMaxPositiveAuraModifier(auraType,
+                                              aurEff =>
+                                              {
+                                                  if (aurEff.GetMiscValue() == miscValue)
+                                                      return true;
+
+                                                  return false;
+                                              });
+        }
+
         private void UpdateAuraForGroup()
         {
             Player player = ToPlayer();
@@ -4830,21 +4845,6 @@ namespace Game.Entities
                 if (pet.IsControlled())
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Auras);
             }
-        }
-
-        public SortedSet<AuraApplication> GetVisibleAuras()
-        {
-            return _visibleAuras;
-        }
-
-        public bool HasVisibleAura(AuraApplication aurApp)
-        {
-            return _visibleAuras.Contains(aurApp);
-        }
-
-        public void SetVisibleAuraUpdate(AuraApplication aurApp)
-        {
-            _visibleAurasToUpdate.Add(aurApp);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace Game
 {
     public class UpdateTime
     {
+        private readonly uint[] _updateTimeDataTable = new uint[500];
         private uint _averageUpdateTime;
         private uint _maxUpdateTime;
         private uint _maxUpdateTimeOfCurrentTable;
@@ -12,7 +13,6 @@ namespace Game
 
         private uint _recordedTime;
         private uint _totalUpdateTime;
-        private readonly uint[] _updateTimeDataTable = new uint[500];
         private uint _updateTimeTableIndex;
 
         public uint GetAverageUpdateTime()

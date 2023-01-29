@@ -2,27 +2,6 @@
 {
     internal static partial class ScalarOperations
     {
-        private static long load_3(byte[] input, int offset)
-        {
-            long result;
-            result = (long)input[offset + 0];
-            result |= ((long)input[offset + 1]) << 8;
-            result |= ((long)input[offset + 2]) << 16;
-
-            return result;
-        }
-
-        private static long load_4(byte[] input, int offset)
-        {
-            long result;
-            result = (long)input[offset + 0];
-            result |= ((long)input[offset + 1]) << 8;
-            result |= ((long)input[offset + 2]) << 16;
-            result |= ((long)input[offset + 3]) << 24;
-
-            return result;
-        }
-
         /*
 		Input:
 		  a[0]+256*a[1]+...+256^31*a[31] = a
@@ -507,6 +486,27 @@
                 s[30] = (byte)(s11 >> 9);
                 s[31] = (byte)(s11 >> 17);
             }
+        }
+
+        private static long load_3(byte[] input, int offset)
+        {
+            long result;
+            result = (long)input[offset + 0];
+            result |= ((long)input[offset + 1]) << 8;
+            result |= ((long)input[offset + 2]) << 16;
+
+            return result;
+        }
+
+        private static long load_4(byte[] input, int offset)
+        {
+            long result;
+            result = (long)input[offset + 0];
+            result |= ((long)input[offset + 1]) << 8;
+            result |= ((long)input[offset + 2]) << 16;
+            result |= ((long)input[offset + 3]) << 24;
+
+            return result;
         }
     }
 }

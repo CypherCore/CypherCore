@@ -85,14 +85,14 @@ namespace Scripts.EasternKingdoms.BaradinHold.PitLordArgaloth
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void FilterTargets(List<WorldObject> targets)
-        {
-            targets.RandomResize(GetCaster().GetMap().Is25ManRaid() ? 8 : 3u);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+        }
+
+        private void FilterTargets(List<WorldObject> targets)
+        {
+            targets.RandomResize(GetCaster().GetMap().Is25ManRaid() ? 8 : 3u);
         }
     }
 

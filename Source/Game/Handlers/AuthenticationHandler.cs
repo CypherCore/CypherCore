@@ -17,11 +17,11 @@ namespace Game
             {
                 response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
 
-                response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.ActiveExpansionLevel = (byte)GetExpansion();
+                response.SuccessInfo                       = new AuthResponse.AuthSuccessInfo();
+                response.SuccessInfo.ActiveExpansionLevel  = (byte)GetExpansion();
                 response.SuccessInfo.AccountExpansionLevel = (byte)GetAccountExpansion();
-                response.SuccessInfo.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-                response.SuccessInfo.Time = (uint)GameTime.GetGameTime();
+                response.SuccessInfo.VirtualRealmAddress   = Global.WorldMgr.GetVirtualRealmAddress();
+                response.SuccessInfo.Time                  = (uint)GameTime.GetGameTime();
 
                 var realm = Global.WorldMgr.GetRealm();
 

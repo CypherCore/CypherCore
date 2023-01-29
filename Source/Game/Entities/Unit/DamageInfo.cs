@@ -6,19 +6,18 @@ namespace Game.Entities;
 
 public class DamageInfo
 {
-    private uint _absorb;
-
     private readonly Unit _attacker;
     private readonly WeaponAttackType _attackType;
-    private uint _block;
-    private uint _damage;
     private readonly DamageEffectType _damageType;
-    private ProcFlagsHit _hitMask;
     private readonly uint _originalDamage;
-    private uint _resist;
     private readonly SpellSchoolMask _schoolMask;
     private readonly SpellInfo _spellInfo;
     private readonly Unit _victim;
+    private uint _absorb;
+    private uint _block;
+    private uint _damage;
+    private ProcFlagsHit _hitMask;
+    private uint _resist;
 
     public DamageInfo(Unit attacker, Unit victim, uint damage, SpellInfo spellInfo, SpellSchoolMask schoolMask, DamageEffectType damageType, WeaponAttackType attackType)
     {
@@ -151,20 +150,6 @@ public class DamageInfo
         }
     }
 
-    private void BlockDamage(uint amount)
-    {
-        amount = Math.Min(amount, GetDamage());
-        _block += amount;
-        _damage -= amount;
-        _hitMask |= ProcFlagsHit.Block;
-
-        if (_damage == 0)
-        {
-            _hitMask |= ProcFlagsHit.FullBlock;
-            _hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
-        }
-    }
-
     public Unit GetAttacker()
     {
         return _attacker;
@@ -183,11 +168,6 @@ public class DamageInfo
     public SpellSchoolMask GetSchoolMask()
     {
         return _schoolMask;
-    }
-
-    private DamageEffectType GetDamageType()
-    {
-        return _damageType;
     }
 
     public WeaponAttackType GetAttackType()
@@ -215,13 +195,32 @@ public class DamageInfo
         return _resist;
     }
 
-    private uint GetBlock()
-    {
-        return _block;
-    }
-
     public ProcFlagsHit GetHitMask()
     {
         return _hitMask;
+    }
+
+    private void BlockDamage(uint amount)
+    {
+        amount = Math.Min(amount, GetDamage());
+        _block += amount;
+        _damage -= amount;
+        _hitMask |= ProcFlagsHit.Block;
+
+        if (_damage == 0)
+        {
+            _hitMask |= ProcFlagsHit.FullBlock;
+            _hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
+        }
+    }
+
+    private DamageEffectType GetDamageType()
+    {
+        return _damageType;
+    }
+
+    private uint GetBlock()
+    {
+        return _block;
     }
 }

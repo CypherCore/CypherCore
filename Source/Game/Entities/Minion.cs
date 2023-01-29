@@ -10,8 +10,6 @@ namespace Game.Entities
     {
         private float _followAngle;
 
-        protected Unit Owner { get; set; }
-
         public Minion(SummonPropertiesRecord properties, Unit owner, bool isWorldObject)
             : base(properties, owner, isWorldObject)
         {
@@ -22,6 +20,8 @@ namespace Game.Entities
             /// @todo: Find correct way
             InitCharmInfo();
         }
+
+        protected Unit Owner { get; set; }
 
         public override void InitStats(uint duration)
         {

@@ -292,31 +292,11 @@ namespace Game.Combat
                 }
         }
 
-        private void EndAllPvPCombat()
-        {
-            while (!_pvpRefs.Empty())
-                _pvpRefs.First().Value.EndCombat();
-        }
-
         public static void NotifyAICombat(Unit me, Unit other)
         {
             UnitAI ai = me.GetAI();
 
             ai?.JustEnteredCombat(other);
-        }
-
-        private void PutReference(ObjectGuid guid, CombatReference refe)
-        {
-            if (refe.IsPvP)
-            {
-                Cypher.Assert(!_pvpRefs.ContainsKey(guid), "Duplicate combat State detected!");
-                _pvpRefs[guid] = (PvPCombatReference)refe;
-            }
-            else
-            {
-                Cypher.Assert(!_pveRefs.ContainsKey(guid), "Duplicate combat State detected!");
-                _pveRefs[guid] = refe;
-            }
         }
 
         public void PurgeReference(ObjectGuid guid, bool pvp)
@@ -382,6 +362,26 @@ namespace Game.Combat
         {
             EndAllPvECombat();
             EndAllPvPCombat();
+        }
+
+        private void EndAllPvPCombat()
+        {
+            while (!_pvpRefs.Empty())
+                _pvpRefs.First().Value.EndCombat();
+        }
+
+        private void PutReference(ObjectGuid guid, CombatReference refe)
+        {
+            if (refe.IsPvP)
+            {
+                Cypher.Assert(!_pvpRefs.ContainsKey(guid), "Duplicate combat State detected!");
+                _pvpRefs[guid] = (PvPCombatReference)refe;
+            }
+            else
+            {
+                Cypher.Assert(!_pveRefs.ContainsKey(guid), "Duplicate combat State detected!");
+                _pveRefs[guid] = refe;
+            }
         }
     }
 }

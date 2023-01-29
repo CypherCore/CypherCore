@@ -28,12 +28,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
             Initialize();
         }
 
-        private void Initialize()
-        {
-            frenzy40 = false;
-            frenzy15 = false;
-        }
-
         public override void Reset()
         {
             _Reset();
@@ -102,6 +96,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 }
 
             DoMeleeAttackIfReady();
+        }
+
+        private void Initialize()
+        {
+            frenzy40 = false;
+            frenzy15 = false;
         }
     }
 }

@@ -33,27 +33,6 @@ namespace Game.Spells
             CalculateSpellMod();
         }
 
-        private void GetTargetList(out List<Unit> targetList)
-        {
-            targetList = new List<Unit>();
-            var targetMap = GetBase().GetApplicationMap();
-
-            // remove all targets which were not added to new list - they no longer deserve area aura
-            foreach (var app in targetMap.Values)
-                if (app.HasEffect(GetEffIndex()))
-                    targetList.Add(app.GetTarget());
-        }
-
-        private void GetApplicationList(out List<AuraApplication> applicationList)
-        {
-            applicationList = new List<AuraApplication>();
-            var targetMap = GetBase().GetApplicationMap();
-
-            foreach (var app in targetMap.Values)
-                if (app.HasEffect(GetEffIndex()))
-                    applicationList.Add(app);
-        }
-
         public int CalculateAmount(Unit caster)
         {
             // default amount calculation
@@ -172,20 +151,6 @@ namespace Game.Spells
             }
 
             return totalTicks;
-        }
-
-        private void ResetPeriodic(bool resetPeriodicTimer = false)
-        {
-            _ticksDone = 0;
-
-            if (resetPeriodicTimer)
-            {
-                _periodicTimer = 0;
-
-                // Start periodic on next tick or at aura apply
-                if (_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
-                    _periodicTimer = _period;
-            }
         }
 
         public void CalculatePeriodic(Unit caster, bool resetPeriodicTimer = true, bool load = false)
@@ -417,82 +382,6 @@ namespace Game.Spells
             HandleEffect(aurApp, mode, apply, triggeredBy);
         }
 
-        private void ApplySpellMod(Unit target, bool apply, AuraEffect triggeredBy = null)
-        {
-            if (_spellmod == null ||
-                !target.IsTypeId(TypeId.Player))
-                return;
-
-            target.ToPlayer().AddSpellMod(_spellmod, apply);
-
-            // Auras with charges do not mod amount of passive Auras
-            if (GetBase().IsUsingCharges())
-                return;
-
-            // reapply some passive spells after add/remove related spellmods
-            // Warning: it is a dead loop if 2 Auras each other amount-shouldn't happen
-            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
-
-            switch ((SpellModOp)GetMiscValue())
-            {
-                case SpellModOp.Points:
-                    recalculateEffectMask.SetAll(true);
-
-                    break;
-                case SpellModOp.PointsIndex0:
-                    recalculateEffectMask.Set(0, true);
-
-                    break;
-                case SpellModOp.PointsIndex1:
-                    recalculateEffectMask.Set(1, true);
-
-                    break;
-                case SpellModOp.PointsIndex2:
-                    recalculateEffectMask.Set(2, true);
-
-                    break;
-                case SpellModOp.PointsIndex3:
-                    recalculateEffectMask.Set(3, true);
-
-                    break;
-                case SpellModOp.PointsIndex4:
-                    recalculateEffectMask.Set(4, true);
-
-                    break;
-                default:
-                    break;
-            }
-
-            if (recalculateEffectMask.Any())
-            {
-                if (triggeredBy == null)
-                    triggeredBy = this;
-
-                ObjectGuid guid = target.GetGUID();
-                var auras = target.GetAppliedAuras();
-
-                foreach (var iter in auras)
-                {
-                    Aura aura = iter.Value.GetBase();
-
-                    // only passive and permament Auras-active Auras should have amount set on spellcast and not be affected
-                    // if aura is cast by others, it will not be affected
-                    if ((aura.IsPassive() || aura.IsPermanent()) &&
-                        aura.GetCasterGUID() == guid &&
-                        aura.GetSpellInfo().IsAffectedBySpellMod(_spellmod))
-                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
-                            if (recalculateEffectMask[(int)i])
-                            {
-                                AuraEffect aurEff = aura.GetEffect(i);
-
-                                if (aurEff != null)
-                                    if (aurEff != triggeredBy)
-                                        aurEff.RecalculateAmount(triggeredBy);
-                            }
-                }
-            }
-        }
-
         public void Update(uint diff, Unit caster)
         {
             if (!_isPeriodic ||
@@ -538,95 +427,6 @@ namespace Game.Spells
                 return false;
 
             return true;
-        }
-
-        private void SendTickImmune(Unit target, Unit caster)
-        {
-            caster?.SendSpellDamageImmune(target, _spellInfo.Id, true);
-        }
-
-        private void PeriodicTick(AuraApplication aurApp, Unit caster)
-        {
-            bool prevented = GetBase().CallScriptEffectPeriodicHandlers(this, aurApp);
-
-            if (prevented)
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            // Update serverside orientation of tracking channeled Auras on periodic update ticks
-            // exclude players because can turn during channeling and shouldn't desync orientation client/server
-            if (caster != null &&
-                !caster.IsPlayer() &&
-                _spellInfo.IsChanneled() &&
-                _spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel) &&
-                caster.UnitData.ChannelObjects.Size() != 0)
-            {
-                ObjectGuid channelGuid = caster.UnitData.ChannelObjects[0];
-
-                if (channelGuid != caster.GetGUID())
-                {
-                    WorldObject objectTarget = Global.ObjAccessor.GetWorldObject(caster, channelGuid);
-
-                    if (objectTarget != null)
-                        caster.SetInFront(objectTarget);
-                }
-            }
-
-            switch (GetAuraType())
-            {
-                case AuraType.PeriodicDummy:
-                    // handled via scripts
-                    break;
-                case AuraType.PeriodicTriggerSpell:
-                    HandlePeriodicTriggerSpellAuraTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicTriggerSpellFromClient:
-                    // Don't actually do anything - client will trigger casts of these spells by itself
-                    break;
-                case AuraType.PeriodicTriggerSpellWithValue:
-                    HandlePeriodicTriggerSpellWithValueAuraTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicDamage:
-                case AuraType.PeriodicWeaponPercentDamage:
-                case AuraType.PeriodicDamagePercent:
-                    HandlePeriodicDamageAurasTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicLeech:
-                    HandlePeriodicHealthLeechAuraTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicHealthFunnel:
-                    HandlePeriodicHealthFunnelAuraTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicHeal:
-                case AuraType.ObsModHealth:
-                    HandlePeriodicHealAurasTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicManaLeech:
-                    HandlePeriodicManaLeechAuraTick(target, caster);
-
-                    break;
-                case AuraType.ObsModPower:
-                    HandleObsModPowerAuraTick(target, caster);
-
-                    break;
-                case AuraType.PeriodicEnergize:
-                    HandlePeriodicEnergizeAuraTick(target, caster);
-
-                    break;
-                case AuraType.PowerBurn:
-                    HandlePeriodicPowerBurnAuraTick(target, caster);
-
-                    break;
-                default:
-                    break;
-            }
         }
 
         public bool CheckEffectProc(AuraApplication aurApp, ProcEventInfo eventInfo)
@@ -1078,11 +878,6 @@ namespace Game.Spells
             _isPeriodic = isPeriodic;
         }
 
-        private bool HasSpellClassMask()
-        {
-            return GetSpellEffectInfo().SpellClassMask;
-        }
-
         public SpellEffectInfo GetSpellEffectInfo()
         {
             return _effectInfo;
@@ -1101,6 +896,211 @@ namespace Game.Spells
         public bool IsAreaAuraEffect()
         {
             return _effectInfo.IsAreaAuraEffect();
+        }
+
+        private void GetTargetList(out List<Unit> targetList)
+        {
+            targetList = new List<Unit>();
+            var targetMap = GetBase().GetApplicationMap();
+
+            // remove all targets which were not added to new list - they no longer deserve area aura
+            foreach (var app in targetMap.Values)
+                if (app.HasEffect(GetEffIndex()))
+                    targetList.Add(app.GetTarget());
+        }
+
+        private void GetApplicationList(out List<AuraApplication> applicationList)
+        {
+            applicationList = new List<AuraApplication>();
+            var targetMap = GetBase().GetApplicationMap();
+
+            foreach (var app in targetMap.Values)
+                if (app.HasEffect(GetEffIndex()))
+                    applicationList.Add(app);
+        }
+
+        private void ResetPeriodic(bool resetPeriodicTimer = false)
+        {
+            _ticksDone = 0;
+
+            if (resetPeriodicTimer)
+            {
+                _periodicTimer = 0;
+
+                // Start periodic on next tick or at aura apply
+                if (_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
+                    _periodicTimer = _period;
+            }
+        }
+
+        private void ApplySpellMod(Unit target, bool apply, AuraEffect triggeredBy = null)
+        {
+            if (_spellmod == null ||
+                !target.IsTypeId(TypeId.Player))
+                return;
+
+            target.ToPlayer().AddSpellMod(_spellmod, apply);
+
+            // Auras with charges do not mod amount of passive Auras
+            if (GetBase().IsUsingCharges())
+                return;
+
+            // reapply some passive spells after add/remove related spellmods
+            // Warning: it is a dead loop if 2 Auras each other amount-shouldn't happen
+            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
+
+            switch ((SpellModOp)GetMiscValue())
+            {
+                case SpellModOp.Points:
+                    recalculateEffectMask.SetAll(true);
+
+                    break;
+                case SpellModOp.PointsIndex0:
+                    recalculateEffectMask.Set(0, true);
+
+                    break;
+                case SpellModOp.PointsIndex1:
+                    recalculateEffectMask.Set(1, true);
+
+                    break;
+                case SpellModOp.PointsIndex2:
+                    recalculateEffectMask.Set(2, true);
+
+                    break;
+                case SpellModOp.PointsIndex3:
+                    recalculateEffectMask.Set(3, true);
+
+                    break;
+                case SpellModOp.PointsIndex4:
+                    recalculateEffectMask.Set(4, true);
+
+                    break;
+                default:
+                    break;
+            }
+
+            if (recalculateEffectMask.Any())
+            {
+                if (triggeredBy == null)
+                    triggeredBy = this;
+
+                ObjectGuid guid = target.GetGUID();
+                var auras = target.GetAppliedAuras();
+
+                foreach (var iter in auras)
+                {
+                    Aura aura = iter.Value.GetBase();
+
+                    // only passive and permament Auras-active Auras should have amount set on spellcast and not be affected
+                    // if aura is cast by others, it will not be affected
+                    if ((aura.IsPassive() || aura.IsPermanent()) &&
+                        aura.GetCasterGUID() == guid &&
+                        aura.GetSpellInfo().IsAffectedBySpellMod(_spellmod))
+                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
+                            if (recalculateEffectMask[(int)i])
+                            {
+                                AuraEffect aurEff = aura.GetEffect(i);
+
+                                if (aurEff != null)
+                                    if (aurEff != triggeredBy)
+                                        aurEff.RecalculateAmount(triggeredBy);
+                            }
+                }
+            }
+        }
+
+        private void SendTickImmune(Unit target, Unit caster)
+        {
+            caster?.SendSpellDamageImmune(target, _spellInfo.Id, true);
+        }
+
+        private void PeriodicTick(AuraApplication aurApp, Unit caster)
+        {
+            bool prevented = GetBase().CallScriptEffectPeriodicHandlers(this, aurApp);
+
+            if (prevented)
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            // Update serverside orientation of tracking channeled Auras on periodic update ticks
+            // exclude players because can turn during channeling and shouldn't desync orientation client/server
+            if (caster != null &&
+                !caster.IsPlayer() &&
+                _spellInfo.IsChanneled() &&
+                _spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel) &&
+                caster.UnitData.ChannelObjects.Size() != 0)
+            {
+                ObjectGuid channelGuid = caster.UnitData.ChannelObjects[0];
+
+                if (channelGuid != caster.GetGUID())
+                {
+                    WorldObject objectTarget = Global.ObjAccessor.GetWorldObject(caster, channelGuid);
+
+                    if (objectTarget != null)
+                        caster.SetInFront(objectTarget);
+                }
+            }
+
+            switch (GetAuraType())
+            {
+                case AuraType.PeriodicDummy:
+                    // handled via scripts
+                    break;
+                case AuraType.PeriodicTriggerSpell:
+                    HandlePeriodicTriggerSpellAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicTriggerSpellFromClient:
+                    // Don't actually do anything - client will trigger casts of these spells by itself
+                    break;
+                case AuraType.PeriodicTriggerSpellWithValue:
+                    HandlePeriodicTriggerSpellWithValueAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicDamage:
+                case AuraType.PeriodicWeaponPercentDamage:
+                case AuraType.PeriodicDamagePercent:
+                    HandlePeriodicDamageAurasTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicLeech:
+                    HandlePeriodicHealthLeechAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicHealthFunnel:
+                    HandlePeriodicHealthFunnelAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicHeal:
+                case AuraType.ObsModHealth:
+                    HandlePeriodicHealAurasTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicManaLeech:
+                    HandlePeriodicManaLeechAuraTick(target, caster);
+
+                    break;
+                case AuraType.ObsModPower:
+                    HandleObsModPowerAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicEnergize:
+                    HandlePeriodicEnergizeAuraTick(target, caster);
+
+                    break;
+                case AuraType.PowerBurn:
+                    HandlePeriodicPowerBurnAuraTick(target, caster);
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private bool HasSpellClassMask()
+        {
+            return GetSpellEffectInfo().SpellClassMask;
         }
 
         #region Fields

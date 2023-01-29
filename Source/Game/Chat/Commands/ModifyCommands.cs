@@ -14,6 +14,104 @@ namespace Game.Chat
     [CommandGroup("modify")]
     internal class ModifyCommand
     {
+        [CommandGroup("speed")]
+        private class ModifySpeed
+        {
+            [Command("", RBACPermissions.CommandModifySpeed)]
+            private static bool HandleModifySpeedCommand(CommandHandler handler, StringArguments args)
+            {
+                return HandleModifyASpeedCommand(handler, args);
+            }
+
+            [Command("all", RBACPermissions.CommandModifySpeedAll)]
+            private static bool HandleModifyASpeedCommand(CommandHandler handler, StringArguments args)
+            {
+                float allSpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out allSpeed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeAspeed, CypherStrings.YoursAspeedChanged, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Walk, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Run, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Swim, allSpeed);
+                    target.SetSpeedRate(UnitMoveType.Flight, allSpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("swim", RBACPermissions.CommandModifySpeedSwim)]
+            private static bool HandleModifySwimCommand(CommandHandler handler, StringArguments args)
+            {
+                float swimSpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out swimSpeed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeSwimSpeed, CypherStrings.YoursSwimSpeedChanged, swimSpeed);
+                    target.SetSpeedRate(UnitMoveType.Swim, swimSpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("backwalk", RBACPermissions.CommandModifySpeedBackwalk)]
+            private static bool HandleModifyBWalkCommand(CommandHandler handler, StringArguments args)
+            {
+                float backSpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out backSpeed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeBackSpeed, CypherStrings.YoursBackSpeedChanged, backSpeed);
+                    target.SetSpeedRate(UnitMoveType.RunBack, backSpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("fly", RBACPermissions.CommandModifySpeedFly)]
+            private static bool HandleModifyFlyCommand(CommandHandler handler, StringArguments args)
+            {
+                float flySpeed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out flySpeed, 0.1f, 50.0f, false))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeFlySpeed, CypherStrings.YoursFlySpeedChanged, flySpeed);
+                    target.SetSpeedRate(UnitMoveType.Flight, flySpeed);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            [Command("walk", RBACPermissions.CommandModifySpeedWalk)]
+            private static bool HandleModifyWalkSpeedCommand(CommandHandler handler, StringArguments args)
+            {
+                float Speed;
+                Player target = handler.GetSelectedPlayerOrSelf();
+
+                if (CheckModifySpeed(args, handler, target, out Speed, 0.1f, 50.0f))
+                {
+                    NotifyModification(handler, target, CypherStrings.YouChangeSpeed, CypherStrings.YoursSpeedChanged, Speed);
+                    target.SetSpeedRate(UnitMoveType.Run, Speed);
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         [Command("hp", RBACPermissions.CommandModifyHp)]
         private static bool HandleModifyHPCommand(CommandHandler handler, int hp, int? maxHp)
         {
@@ -916,104 +1014,6 @@ namespace Game.Chat
             }
 
             return true;
-        }
-
-        [CommandGroup("speed")]
-        private class ModifySpeed
-        {
-            [Command("", RBACPermissions.CommandModifySpeed)]
-            private static bool HandleModifySpeedCommand(CommandHandler handler, StringArguments args)
-            {
-                return HandleModifyASpeedCommand(handler, args);
-            }
-
-            [Command("all", RBACPermissions.CommandModifySpeedAll)]
-            private static bool HandleModifyASpeedCommand(CommandHandler handler, StringArguments args)
-            {
-                float allSpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
-
-                if (CheckModifySpeed(args, handler, target, out allSpeed, 0.1f, 50.0f))
-                {
-                    NotifyModification(handler, target, CypherStrings.YouChangeAspeed, CypherStrings.YoursAspeedChanged, allSpeed);
-                    target.SetSpeedRate(UnitMoveType.Walk, allSpeed);
-                    target.SetSpeedRate(UnitMoveType.Run, allSpeed);
-                    target.SetSpeedRate(UnitMoveType.Swim, allSpeed);
-                    target.SetSpeedRate(UnitMoveType.Flight, allSpeed);
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            [Command("swim", RBACPermissions.CommandModifySpeedSwim)]
-            private static bool HandleModifySwimCommand(CommandHandler handler, StringArguments args)
-            {
-                float swimSpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
-
-                if (CheckModifySpeed(args, handler, target, out swimSpeed, 0.1f, 50.0f))
-                {
-                    NotifyModification(handler, target, CypherStrings.YouChangeSwimSpeed, CypherStrings.YoursSwimSpeedChanged, swimSpeed);
-                    target.SetSpeedRate(UnitMoveType.Swim, swimSpeed);
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            [Command("backwalk", RBACPermissions.CommandModifySpeedBackwalk)]
-            private static bool HandleModifyBWalkCommand(CommandHandler handler, StringArguments args)
-            {
-                float backSpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
-
-                if (CheckModifySpeed(args, handler, target, out backSpeed, 0.1f, 50.0f))
-                {
-                    NotifyModification(handler, target, CypherStrings.YouChangeBackSpeed, CypherStrings.YoursBackSpeedChanged, backSpeed);
-                    target.SetSpeedRate(UnitMoveType.RunBack, backSpeed);
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            [Command("fly", RBACPermissions.CommandModifySpeedFly)]
-            private static bool HandleModifyFlyCommand(CommandHandler handler, StringArguments args)
-            {
-                float flySpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
-
-                if (CheckModifySpeed(args, handler, target, out flySpeed, 0.1f, 50.0f, false))
-                {
-                    NotifyModification(handler, target, CypherStrings.YouChangeFlySpeed, CypherStrings.YoursFlySpeedChanged, flySpeed);
-                    target.SetSpeedRate(UnitMoveType.Flight, flySpeed);
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            [Command("walk", RBACPermissions.CommandModifySpeedWalk)]
-            private static bool HandleModifyWalkSpeedCommand(CommandHandler handler, StringArguments args)
-            {
-                float Speed;
-                Player target = handler.GetSelectedPlayerOrSelf();
-
-                if (CheckModifySpeed(args, handler, target, out Speed, 0.1f, 50.0f))
-                {
-                    NotifyModification(handler, target, CypherStrings.YouChangeSpeed, CypherStrings.YoursSpeedChanged, Speed);
-                    target.SetSpeedRate(UnitMoveType.Run, Speed);
-
-                    return true;
-                }
-
-                return false;
-            }
         }
     }
 }

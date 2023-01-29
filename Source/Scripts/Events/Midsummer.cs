@@ -73,6 +73,11 @@ namespace Scripts.Events.Midsummer
             return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
+        }
+
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Player player = GetTarget().ToPlayer();
@@ -91,11 +96,6 @@ namespace Scripts.Events.Midsummer
                 Remove();
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply, AuraScriptHookType.EffectAfterApply));
-        }
     }
 
     [Script] // 45907 - Torch Target Picker
@@ -108,16 +108,16 @@ namespace Scripts.Events.Midsummer
             return ValidateSpellInfo(SpellIds.TargetIndicatorCosmetic, SpellIds.TargetIndicator);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             Unit target = GetHitUnit();
             target.CastSpell(target, SpellIds.TargetIndicatorCosmetic, true);
             target.CastSpell(target, SpellIds.TargetIndicator, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -131,14 +131,14 @@ namespace Scripts.Events.Midsummer
             return ValidateSpellInfo(SpellIds.BraziersHit);
         }
 
-        private void HandleScript(uint effIndex)
-        {
-            GetHitUnit().CastSpell(GetCaster(), SpellIds.BraziersHit, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetHitUnit().CastSpell(GetCaster(), SpellIds.BraziersHit, true);
         }
     }
 
@@ -150,6 +150,12 @@ namespace Scripts.Events.Midsummer
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RibbonPolePeriodicVisual, SpellIds.BurningHotPoleDance, SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
 
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -178,12 +184,6 @@ namespace Scripts.Events.Midsummer
                 target.CastSpell(target, SpellIds.RibbonDance, true);
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
-        }
     }
 
     [Script] // 45406 - Holiday - Midsummer, Ribbon Pole Periodic Visual
@@ -196,6 +196,11 @@ namespace Scripts.Events.Midsummer
             return ValidateSpellInfo(SpellIds.TestRibbonPole1, SpellIds.TestRibbonPole2, SpellIds.TestRibbonPole3);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
+        }
+
         private void PeriodicTick(AuraEffect aurEff)
         {
             Unit target = GetTarget();
@@ -204,11 +209,6 @@ namespace Scripts.Events.Midsummer
                 !target.HasAura(SpellIds.TestRibbonPole2) &&
                 !target.HasAura(SpellIds.TestRibbonPole3))
                 Remove();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -227,6 +227,11 @@ namespace Scripts.Events.Midsummer
                                      SpellIds.JuggleTorchShadowMedium,
                                      SpellIds.JuggleTorchShadowFast,
                                      SpellIds.JuggleTorchShadowSelf);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
 
         private void HandleDummy(uint effIndex)
@@ -265,11 +270,6 @@ namespace Scripts.Events.Midsummer
             GetCaster().CastSpell(spellDest, torchSpellID, new CastSpellExtraArgs(false));
             GetCaster().CastSpell(spellDest, torchShadowSpellID, new CastSpellExtraArgs(false));
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
-        }
     }
 
     [Script] // 45644 - Juggle Torch (Catch)
@@ -280,6 +280,11 @@ namespace Scripts.Events.Midsummer
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GiveTorch);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -293,11 +298,6 @@ namespace Scripts.Events.Midsummer
                 player.GetQuestStatus(QuestIds.TorchCatchingH) == QuestStatus.Rewarded)
                 player.CastSpell(player, SpellIds.GiveTorch);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 46747 - Fling torch
@@ -310,16 +310,16 @@ namespace Scripts.Events.Midsummer
             return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.FlingTorchShadow);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Position dest = GetCaster().GetFirstCollisionPosition(30.0f, (float)RandomHelper.NextDouble() * (2 * MathF.PI));
             GetCaster().CastSpell(dest, SpellIds.FlingTorchTriggered, new CastSpellExtraArgs(true));
             GetCaster().CastSpell(dest, SpellIds.FlingTorchShadow, new CastSpellExtraArgs(false));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -331,6 +331,11 @@ namespace Scripts.Events.Midsummer
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.JuggleTorchMissed);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHit));
         }
 
         private void HandleTriggerMissile(uint effIndex)
@@ -345,11 +350,6 @@ namespace Scripts.Events.Midsummer
                     GetCaster().RemoveAura(SpellIds.TorchesCaught);
                 }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleTriggerMissile, 0, SpellEffectName.TriggerMissile, SpellScriptHookType.EffectHit));
-        }
     }
 
     [Script] // 45671 - Juggle Torch (Catch, Quest)
@@ -360,6 +360,11 @@ namespace Scripts.Events.Midsummer
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlingTorchTriggered, SpellIds.TorchCatchingSuccessAlliance, SpellIds.TorchCatchingSuccessHorde, SpellIds.TorchCatchingRemoveTorches, SpellIds.FlingTorchShadow);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScriptEffect(uint effIndex)
@@ -404,11 +409,6 @@ namespace Scripts.Events.Midsummer
                 player.CastSpell(dest, SpellIds.FlingTorchShadow, new CastSpellExtraArgs(false));
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 45676 - Juggle Torch (Quest, Missed)
@@ -416,16 +416,16 @@ namespace Scripts.Events.Midsummer
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void FilterTargets(List<WorldObject> targets)
-        {
-            // This spell only hits the caster
-            targets.RemoveAll(obj => obj.GetGUID() != GetCaster().GetGUID());
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEntry));
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitDestAreaEntry));
+        }
+
+        private void FilterTargets(List<WorldObject> targets)
+        {
+            // This spell only hits the caster
+            targets.RemoveAll(obj => obj.GetGUID() != GetCaster().GetGUID());
         }
     }
 }

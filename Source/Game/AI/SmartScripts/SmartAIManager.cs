@@ -415,6 +415,171 @@ namespace Game.AI
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SmartAI waypoint paths (total {total} waypoints) in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
+        public List<SmartScriptHolder> GetScript(int entry, SmartScriptType type)
+        {
+            List<SmartScriptHolder> temp = new();
+
+            if (_eventMap[(uint)type].ContainsKey(entry))
+            {
+                foreach (var holder in _eventMap[(uint)type][entry])
+                    temp.Add(new SmartScriptHolder(holder));
+            }
+            else
+            {
+                if (entry > 0) //first search is for Guid (negative), do not drop error if not found
+                    Log.outDebug(LogFilter.ScriptsAi, "SmartAIMgr.GetScript: Could not load Script for Entry {0} ScriptType {1}.", entry, type);
+            }
+
+            return temp;
+        }
+
+        public WaypointPath GetPath(uint id)
+        {
+            return _waypointStore.LookupByKey(id);
+        }
+
+        public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, uint eventId)
+        {
+            var sch = list.Find(p => p.Link == eventId);
+
+            if (sch != null)
+                return sch;
+
+            return null;
+        }
+
+        public SmartScriptHolder FindLinkedEvent(List<SmartScriptHolder> list, uint link)
+        {
+            var sch = list.Find(p => p.EventId == link && p.GetEventType() == SmartEvents.Link);
+
+            if (sch != null)
+                return sch;
+
+            return null;
+        }
+
+        public static uint GetTypeMask(SmartScriptType smartScriptType)
+        {
+            return smartScriptType switch
+            {
+                SmartScriptType.Creature => SmartScriptTypeMaskId.Creature,
+                SmartScriptType.GameObject => SmartScriptTypeMaskId.Gameobject,
+                SmartScriptType.AreaTrigger => SmartScriptTypeMaskId.Areatrigger,
+                SmartScriptType.Event => SmartScriptTypeMaskId.Event,
+                SmartScriptType.Gossip => SmartScriptTypeMaskId.Gossip,
+                SmartScriptType.Quest => SmartScriptTypeMaskId.Quest,
+                SmartScriptType.Spell => SmartScriptTypeMaskId.Spell,
+                SmartScriptType.Transport => SmartScriptTypeMaskId.Transport,
+                SmartScriptType.Instance => SmartScriptTypeMaskId.Instance,
+                SmartScriptType.TimedActionlist => SmartScriptTypeMaskId.TimedActionlist,
+                SmartScriptType.Scene => SmartScriptTypeMaskId.Scene,
+                SmartScriptType.AreaTriggerEntity => SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartScriptType.AreaTriggerEntityServerside => SmartScriptTypeMaskId.AreatrigggerEntity,
+                _ => 0
+            };
+        }
+
+        public static uint GetEventMask(SmartEvents smartEvent)
+        {
+            return smartEvent switch
+            {
+                SmartEvents.UpdateIc => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.TimedActionlist,
+                SmartEvents.UpdateOoc => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartEvents.HealthPct => SmartScriptTypeMaskId.Creature,
+                SmartEvents.ManaPct => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Aggro => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Kill => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Death => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Evade => SmartScriptTypeMaskId.Creature,
+                SmartEvents.SpellHit => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.Range => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OocLos => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Respawn => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.TargetHealthPct => SmartScriptTypeMaskId.Creature,
+                SmartEvents.VictimCasting => SmartScriptTypeMaskId.Creature,
+                SmartEvents.FriendlyHealth => SmartScriptTypeMaskId.Creature,
+                SmartEvents.FriendlyIsCc => SmartScriptTypeMaskId.Creature,
+                SmartEvents.FriendlyMissingBuff => SmartScriptTypeMaskId.Creature,
+                SmartEvents.SummonedUnit => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.TargetManaPct => SmartScriptTypeMaskId.Creature,
+                SmartEvents.AcceptedQuest => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.RewardQuest => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.ReachedHome => SmartScriptTypeMaskId.Creature,
+                SmartEvents.ReceiveEmote => SmartScriptTypeMaskId.Creature,
+                SmartEvents.HasAura => SmartScriptTypeMaskId.Creature,
+                SmartEvents.TargetBuffed => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Reset => SmartScriptTypeMaskId.Creature,
+                SmartEvents.IcLos => SmartScriptTypeMaskId.Creature,
+                SmartEvents.PassengerBoarded => SmartScriptTypeMaskId.Creature,
+                SmartEvents.PassengerRemoved => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Charmed => SmartScriptTypeMaskId.Creature,
+                SmartEvents.CharmedTarget => SmartScriptTypeMaskId.Creature,
+                SmartEvents.SpellHitTarget => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Damaged => SmartScriptTypeMaskId.Creature,
+                SmartEvents.DamagedTarget => SmartScriptTypeMaskId.Creature,
+                SmartEvents.Movementinform => SmartScriptTypeMaskId.Creature,
+                SmartEvents.SummonDespawned => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.CorpseRemoved => SmartScriptTypeMaskId.Creature,
+                SmartEvents.AiInit => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.DataSet => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.WaypointStart => SmartScriptTypeMaskId.Creature,
+                SmartEvents.WaypointReached => SmartScriptTypeMaskId.Creature,
+                SmartEvents.TransportAddplayer => SmartScriptTypeMaskId.Transport,
+                SmartEvents.TransportAddcreature => SmartScriptTypeMaskId.Transport,
+                SmartEvents.TransportRemovePlayer => SmartScriptTypeMaskId.Transport,
+                SmartEvents.TransportRelocate => SmartScriptTypeMaskId.Transport,
+                SmartEvents.InstancePlayerEnter => SmartScriptTypeMaskId.Instance,
+                SmartEvents.AreatriggerOntrigger => SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartEvents.QuestAccepted => SmartScriptTypeMaskId.Quest,
+                SmartEvents.QuestObjCompletion => SmartScriptTypeMaskId.Quest,
+                SmartEvents.QuestRewarded => SmartScriptTypeMaskId.Quest,
+                SmartEvents.QuestCompletion => SmartScriptTypeMaskId.Quest,
+                SmartEvents.QuestFail => SmartScriptTypeMaskId.Quest,
+                SmartEvents.TextOver => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.ReceiveHeal => SmartScriptTypeMaskId.Creature,
+                SmartEvents.JustSummoned => SmartScriptTypeMaskId.Creature,
+                SmartEvents.WaypointPaused => SmartScriptTypeMaskId.Creature,
+                SmartEvents.WaypointResumed => SmartScriptTypeMaskId.Creature,
+                SmartEvents.WaypointStopped => SmartScriptTypeMaskId.Creature,
+                SmartEvents.WaypointEnded => SmartScriptTypeMaskId.Creature,
+                SmartEvents.TimedEventTriggered => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.Update => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartEvents.Link => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.Event + SmartScriptTypeMaskId.Gossip + SmartScriptTypeMaskId.Quest + SmartScriptTypeMaskId.Spell + SmartScriptTypeMaskId.Transport + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartEvents.GossipSelect => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.JustCreated => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.GossipHello => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.FollowCompleted => SmartScriptTypeMaskId.Creature,
+                SmartEvents.PhaseChange => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.IsBehindTarget => SmartScriptTypeMaskId.Creature,
+                SmartEvents.GameEventStart => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.GameEventEnd => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.GoLootStateChanged => SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.GoEventInform => SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.ActionDone => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnSpellclick => SmartScriptTypeMaskId.Creature,
+                SmartEvents.FriendlyHealthPCT => SmartScriptTypeMaskId.Creature,
+                SmartEvents.DistanceCreature => SmartScriptTypeMaskId.Creature,
+                SmartEvents.DistanceGameobject => SmartScriptTypeMaskId.Creature,
+                SmartEvents.CounterSet => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.SceneStart => SmartScriptTypeMaskId.Scene,
+                SmartEvents.SceneTrigger => SmartScriptTypeMaskId.Scene,
+                SmartEvents.SceneCancel => SmartScriptTypeMaskId.Scene,
+                SmartEvents.SceneComplete => SmartScriptTypeMaskId.Scene,
+                SmartEvents.SummonedUnitDies => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
+                SmartEvents.OnSpellCast => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnSpellFailed => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
+                _ => 0
+            };
+        }
+
+        public static void TC_SAI_IS_BOOLEAN_VALID(SmartScriptHolder e, uint value, [CallerArgumentExpression("value")] string valueName = null)
+        {
+            if (value > 1)
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses param {valueName} of Type Boolean with value {value}, valid values are 0 or 1, skipped.");
+        }
+
         private static bool EventHasInvoker(SmartEvents smartEvent)
         {
             switch (smartEvent)
@@ -647,90 +812,90 @@ namespace Game.AI
         {
             int paramsStructSize = e.Event.type switch
             {
-                SmartEvents.UpdateIc => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.UpdateOoc => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.HealthPct => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.ManaPct => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.Aggro => 0,
-                SmartEvents.Kill => Marshal.SizeOf(typeof(SmartEvent.Kill)),
-                SmartEvents.Death => 0,
-                SmartEvents.Evade => 0,
-                SmartEvents.SpellHit => Marshal.SizeOf(typeof(SmartEvent.SpellHit)),
-                SmartEvents.Range => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.OocLos => Marshal.SizeOf(typeof(SmartEvent.Los)),
-                SmartEvents.Respawn => Marshal.SizeOf(typeof(SmartEvent.Respawn)),
-                SmartEvents.VictimCasting => Marshal.SizeOf(typeof(SmartEvent.TargetCasting)),
-                SmartEvents.FriendlyIsCc => Marshal.SizeOf(typeof(SmartEvent.FriendlyCC)),
-                SmartEvents.FriendlyMissingBuff => Marshal.SizeOf(typeof(SmartEvent.MissingBuff)),
-                SmartEvents.SummonedUnit => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
-                SmartEvents.AcceptedQuest => Marshal.SizeOf(typeof(SmartEvent.Quest)),
-                SmartEvents.RewardQuest => Marshal.SizeOf(typeof(SmartEvent.Quest)),
-                SmartEvents.ReachedHome => 0,
-                SmartEvents.ReceiveEmote => Marshal.SizeOf(typeof(SmartEvent.Emote)),
-                SmartEvents.HasAura => Marshal.SizeOf(typeof(SmartEvent.Aura)),
-                SmartEvents.TargetBuffed => Marshal.SizeOf(typeof(SmartEvent.Aura)),
-                SmartEvents.Reset => 0,
-                SmartEvents.IcLos => Marshal.SizeOf(typeof(SmartEvent.Los)),
-                SmartEvents.PassengerBoarded => Marshal.SizeOf(typeof(SmartEvent.MinMax)),
-                SmartEvents.PassengerRemoved => Marshal.SizeOf(typeof(SmartEvent.MinMax)),
-                SmartEvents.Charmed => Marshal.SizeOf(typeof(SmartEvent.Charm)),
-                SmartEvents.SpellHitTarget => Marshal.SizeOf(typeof(SmartEvent.SpellHit)),
-                SmartEvents.Damaged => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.DamagedTarget => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.Movementinform => Marshal.SizeOf(typeof(SmartEvent.MovementInform)),
-                SmartEvents.SummonDespawned => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
-                SmartEvents.CorpseRemoved => 0,
-                SmartEvents.AiInit => 0,
-                SmartEvents.DataSet => Marshal.SizeOf(typeof(SmartEvent.DataSet)),
-                SmartEvents.WaypointReached => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
-                SmartEvents.TransportAddplayer => 0,
-                SmartEvents.TransportAddcreature => Marshal.SizeOf(typeof(SmartEvent.TransportAddCreature)),
+                SmartEvents.UpdateIc              => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.UpdateOoc             => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.HealthPct             => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.ManaPct               => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.Aggro                 => 0,
+                SmartEvents.Kill                  => Marshal.SizeOf(typeof(SmartEvent.Kill)),
+                SmartEvents.Death                 => 0,
+                SmartEvents.Evade                 => 0,
+                SmartEvents.SpellHit              => Marshal.SizeOf(typeof(SmartEvent.SpellHit)),
+                SmartEvents.Range                 => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.OocLos                => Marshal.SizeOf(typeof(SmartEvent.Los)),
+                SmartEvents.Respawn               => Marshal.SizeOf(typeof(SmartEvent.Respawn)),
+                SmartEvents.VictimCasting         => Marshal.SizeOf(typeof(SmartEvent.TargetCasting)),
+                SmartEvents.FriendlyIsCc          => Marshal.SizeOf(typeof(SmartEvent.FriendlyCC)),
+                SmartEvents.FriendlyMissingBuff   => Marshal.SizeOf(typeof(SmartEvent.MissingBuff)),
+                SmartEvents.SummonedUnit          => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
+                SmartEvents.AcceptedQuest         => Marshal.SizeOf(typeof(SmartEvent.Quest)),
+                SmartEvents.RewardQuest           => Marshal.SizeOf(typeof(SmartEvent.Quest)),
+                SmartEvents.ReachedHome           => 0,
+                SmartEvents.ReceiveEmote          => Marshal.SizeOf(typeof(SmartEvent.Emote)),
+                SmartEvents.HasAura               => Marshal.SizeOf(typeof(SmartEvent.Aura)),
+                SmartEvents.TargetBuffed          => Marshal.SizeOf(typeof(SmartEvent.Aura)),
+                SmartEvents.Reset                 => 0,
+                SmartEvents.IcLos                 => Marshal.SizeOf(typeof(SmartEvent.Los)),
+                SmartEvents.PassengerBoarded      => Marshal.SizeOf(typeof(SmartEvent.MinMax)),
+                SmartEvents.PassengerRemoved      => Marshal.SizeOf(typeof(SmartEvent.MinMax)),
+                SmartEvents.Charmed               => Marshal.SizeOf(typeof(SmartEvent.Charm)),
+                SmartEvents.SpellHitTarget        => Marshal.SizeOf(typeof(SmartEvent.SpellHit)),
+                SmartEvents.Damaged               => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.DamagedTarget         => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.Movementinform        => Marshal.SizeOf(typeof(SmartEvent.MovementInform)),
+                SmartEvents.SummonDespawned       => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
+                SmartEvents.CorpseRemoved         => 0,
+                SmartEvents.AiInit                => 0,
+                SmartEvents.DataSet               => Marshal.SizeOf(typeof(SmartEvent.DataSet)),
+                SmartEvents.WaypointReached       => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
+                SmartEvents.TransportAddplayer    => 0,
+                SmartEvents.TransportAddcreature  => Marshal.SizeOf(typeof(SmartEvent.TransportAddCreature)),
                 SmartEvents.TransportRemovePlayer => 0,
-                SmartEvents.TransportRelocate => Marshal.SizeOf(typeof(SmartEvent.TransportRelocate)),
-                SmartEvents.InstancePlayerEnter => Marshal.SizeOf(typeof(SmartEvent.InstancePlayerEnter)),
-                SmartEvents.AreatriggerOntrigger => Marshal.SizeOf(typeof(SmartEvent.Areatrigger)),
-                SmartEvents.QuestAccepted => 0,
-                SmartEvents.QuestObjCompletion => 0,
-                SmartEvents.QuestCompletion => 0,
-                SmartEvents.QuestRewarded => 0,
-                SmartEvents.QuestFail => 0,
-                SmartEvents.TextOver => Marshal.SizeOf(typeof(SmartEvent.TextOver)),
-                SmartEvents.ReceiveHeal => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.JustSummoned => 0,
-                SmartEvents.WaypointPaused => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
-                SmartEvents.WaypointResumed => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
-                SmartEvents.WaypointStopped => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
-                SmartEvents.WaypointEnded => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
-                SmartEvents.TimedEventTriggered => Marshal.SizeOf(typeof(SmartEvent.TimedEvent)),
-                SmartEvents.Update => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
-                SmartEvents.Link => 0,
-                SmartEvents.GossipSelect => Marshal.SizeOf(typeof(SmartEvent.Gossip)),
-                SmartEvents.JustCreated => 0,
-                SmartEvents.GossipHello => Marshal.SizeOf(typeof(SmartEvent.GossipHello)),
-                SmartEvents.FollowCompleted => 0,
-                SmartEvents.GameEventStart => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
-                SmartEvents.GameEventEnd => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
-                SmartEvents.GoLootStateChanged => Marshal.SizeOf(typeof(SmartEvent.GoLootStateChanged)),
-                SmartEvents.GoEventInform => Marshal.SizeOf(typeof(SmartEvent.EventInform)),
-                SmartEvents.ActionDone => Marshal.SizeOf(typeof(SmartEvent.DoAction)),
-                SmartEvents.OnSpellclick => 0,
-                SmartEvents.FriendlyHealthPCT => Marshal.SizeOf(typeof(SmartEvent.FriendlyHealthPct)),
-                SmartEvents.DistanceCreature => Marshal.SizeOf(typeof(SmartEvent.Distance)),
-                SmartEvents.DistanceGameobject => Marshal.SizeOf(typeof(SmartEvent.Distance)),
-                SmartEvents.CounterSet => Marshal.SizeOf(typeof(SmartEvent.Counter)),
-                SmartEvents.SceneStart => 0,
-                SmartEvents.SceneTrigger => 0,
-                SmartEvents.SceneCancel => 0,
-                SmartEvents.SceneComplete => 0,
-                SmartEvents.SummonedUnitDies => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
-                SmartEvents.OnSpellCast => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
-                SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
-                SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
-                SmartEvents.OnDespawn => 0,
-                _ => Marshal.SizeOf(typeof(SmartEvent.Raw))
+                SmartEvents.TransportRelocate     => Marshal.SizeOf(typeof(SmartEvent.TransportRelocate)),
+                SmartEvents.InstancePlayerEnter   => Marshal.SizeOf(typeof(SmartEvent.InstancePlayerEnter)),
+                SmartEvents.AreatriggerOntrigger  => Marshal.SizeOf(typeof(SmartEvent.Areatrigger)),
+                SmartEvents.QuestAccepted         => 0,
+                SmartEvents.QuestObjCompletion    => 0,
+                SmartEvents.QuestCompletion       => 0,
+                SmartEvents.QuestRewarded         => 0,
+                SmartEvents.QuestFail             => 0,
+                SmartEvents.TextOver              => Marshal.SizeOf(typeof(SmartEvent.TextOver)),
+                SmartEvents.ReceiveHeal           => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.JustSummoned          => 0,
+                SmartEvents.WaypointPaused        => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
+                SmartEvents.WaypointResumed       => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
+                SmartEvents.WaypointStopped       => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
+                SmartEvents.WaypointEnded         => Marshal.SizeOf(typeof(SmartEvent.Waypoint)),
+                SmartEvents.TimedEventTriggered   => Marshal.SizeOf(typeof(SmartEvent.TimedEvent)),
+                SmartEvents.Update                => Marshal.SizeOf(typeof(SmartEvent.MinMaxRepeat)),
+                SmartEvents.Link                  => 0,
+                SmartEvents.GossipSelect          => Marshal.SizeOf(typeof(SmartEvent.Gossip)),
+                SmartEvents.JustCreated           => 0,
+                SmartEvents.GossipHello           => Marshal.SizeOf(typeof(SmartEvent.GossipHello)),
+                SmartEvents.FollowCompleted       => 0,
+                SmartEvents.GameEventStart        => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
+                SmartEvents.GameEventEnd          => Marshal.SizeOf(typeof(SmartEvent.GameEvent)),
+                SmartEvents.GoLootStateChanged    => Marshal.SizeOf(typeof(SmartEvent.GoLootStateChanged)),
+                SmartEvents.GoEventInform         => Marshal.SizeOf(typeof(SmartEvent.EventInform)),
+                SmartEvents.ActionDone            => Marshal.SizeOf(typeof(SmartEvent.DoAction)),
+                SmartEvents.OnSpellclick          => 0,
+                SmartEvents.FriendlyHealthPCT     => Marshal.SizeOf(typeof(SmartEvent.FriendlyHealthPct)),
+                SmartEvents.DistanceCreature      => Marshal.SizeOf(typeof(SmartEvent.Distance)),
+                SmartEvents.DistanceGameobject    => Marshal.SizeOf(typeof(SmartEvent.Distance)),
+                SmartEvents.CounterSet            => Marshal.SizeOf(typeof(SmartEvent.Counter)),
+                SmartEvents.SceneStart            => 0,
+                SmartEvents.SceneTrigger          => 0,
+                SmartEvents.SceneCancel           => 0,
+                SmartEvents.SceneComplete         => 0,
+                SmartEvents.SummonedUnitDies      => Marshal.SizeOf(typeof(SmartEvent.Summoned)),
+                SmartEvents.OnSpellCast           => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnSpellFailed         => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnSpellStart          => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnDespawn             => 0,
+                _                                 => Marshal.SizeOf(typeof(SmartEvent.Raw))
             };
 
-            int rawCount = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
+            int rawCount    = Marshal.SizeOf(typeof(SmartEvent.Raw)) / sizeof(uint);
             int paramsCount = paramsStructSize / sizeof(uint);
 
             for (int index = paramsCount; index < rawCount; index++)
@@ -772,142 +937,142 @@ namespace Game.AI
         {
             int paramsStructSize = e.Action.type switch
             {
-                SmartActions.None => 0,
-                SmartActions.Talk => Marshal.SizeOf(typeof(Talk)),
-                SmartActions.SetFaction => Marshal.SizeOf(typeof(Faction)),
-                SmartActions.MorphToEntryOrModel => Marshal.SizeOf(typeof(MorphOrMount)),
-                SmartActions.Sound => Marshal.SizeOf(typeof(Sound)),
-                SmartActions.PlayEmote => Marshal.SizeOf(typeof(SmartAction.Emote)),
-                SmartActions.FailQuest => Marshal.SizeOf(typeof(SmartAction.Quest)),
-                SmartActions.OfferQuest => Marshal.SizeOf(typeof(QuestOffer)),
-                SmartActions.SetReactState => Marshal.SizeOf(typeof(React)),
-                SmartActions.ActivateGobject => 0,
-                SmartActions.RandomEmote => Marshal.SizeOf(typeof(RandomEmote)),
-                SmartActions.Cast => Marshal.SizeOf(typeof(Cast)),
-                SmartActions.SummonCreature => Marshal.SizeOf(typeof(SummonCreature)),
-                SmartActions.ThreatSinglePct => Marshal.SizeOf(typeof(ThreatPCT)),
-                SmartActions.ThreatAllPct => Marshal.SizeOf(typeof(ThreatPCT)),
+                SmartActions.None                           => 0,
+                SmartActions.Talk                           => Marshal.SizeOf(typeof(Talk)),
+                SmartActions.SetFaction                     => Marshal.SizeOf(typeof(Faction)),
+                SmartActions.MorphToEntryOrModel            => Marshal.SizeOf(typeof(MorphOrMount)),
+                SmartActions.Sound                          => Marshal.SizeOf(typeof(Sound)),
+                SmartActions.PlayEmote                      => Marshal.SizeOf(typeof(SmartAction.Emote)),
+                SmartActions.FailQuest                      => Marshal.SizeOf(typeof(SmartAction.Quest)),
+                SmartActions.OfferQuest                     => Marshal.SizeOf(typeof(QuestOffer)),
+                SmartActions.SetReactState                  => Marshal.SizeOf(typeof(React)),
+                SmartActions.ActivateGobject                => 0,
+                SmartActions.RandomEmote                    => Marshal.SizeOf(typeof(RandomEmote)),
+                SmartActions.Cast                           => Marshal.SizeOf(typeof(Cast)),
+                SmartActions.SummonCreature                 => Marshal.SizeOf(typeof(SummonCreature)),
+                SmartActions.ThreatSinglePct                => Marshal.SizeOf(typeof(ThreatPCT)),
+                SmartActions.ThreatAllPct                   => Marshal.SizeOf(typeof(ThreatPCT)),
                 SmartActions.CallAreaexploredoreventhappens => Marshal.SizeOf(typeof(SmartAction.Quest)),
-                SmartActions.SetIngamePhaseGroup => Marshal.SizeOf(typeof(IngamePhaseGroup)),
-                SmartActions.SetEmoteState => Marshal.SizeOf(typeof(SmartAction.Emote)),
-                SmartActions.AutoAttack => Marshal.SizeOf(typeof(AutoAttack)),
-                SmartActions.AllowCombatMovement => Marshal.SizeOf(typeof(CombatMove)),
-                SmartActions.SetEventPhase => Marshal.SizeOf(typeof(SetEventPhase)),
-                SmartActions.IncEventPhase => Marshal.SizeOf(typeof(IncEventPhase)),
-                SmartActions.Evade => Marshal.SizeOf(typeof(Evade)),
-                SmartActions.FleeForAssist => Marshal.SizeOf(typeof(FleeAssist)),
-                SmartActions.CallGroupeventhappens => Marshal.SizeOf(typeof(SmartAction.Quest)),
-                SmartActions.CombatStop => 0,
-                SmartActions.RemoveAurasFromSpell => Marshal.SizeOf(typeof(RemoveAura)),
-                SmartActions.Follow => Marshal.SizeOf(typeof(Follow)),
-                SmartActions.RandomPhase => Marshal.SizeOf(typeof(RandomPhase)),
-                SmartActions.RandomPhaseRange => Marshal.SizeOf(typeof(RandomPhaseRange)),
-                SmartActions.ResetGobject => 0,
-                SmartActions.CallKilledmonster => Marshal.SizeOf(typeof(KilledMonster)),
-                SmartActions.SetInstData => Marshal.SizeOf(typeof(SetInstanceData)),
-                SmartActions.SetInstData64 => Marshal.SizeOf(typeof(SetInstanceData64)),
-                SmartActions.UpdateTemplate => Marshal.SizeOf(typeof(UpdateTemplate)),
-                SmartActions.Die => 0,
-                SmartActions.SetInCombatWithZone => 0,
-                SmartActions.CallForHelp => Marshal.SizeOf(typeof(CallHelp)),
-                SmartActions.SetSheath => Marshal.SizeOf(typeof(SetSheath)),
-                SmartActions.ForceDespawn => Marshal.SizeOf(typeof(ForceDespawn)),
-                SmartActions.SetInvincibilityHpLevel => Marshal.SizeOf(typeof(InvincHP)),
-                SmartActions.MountToEntryOrModel => Marshal.SizeOf(typeof(MorphOrMount)),
-                SmartActions.SetIngamePhaseId => Marshal.SizeOf(typeof(IngamePhaseId)),
-                SmartActions.SetData => Marshal.SizeOf(typeof(SetData)),
-                SmartActions.AttackStop => 0,
-                SmartActions.SetVisibility => Marshal.SizeOf(typeof(Visibility)),
-                SmartActions.SetActive => Marshal.SizeOf(typeof(Active)),
-                SmartActions.AttackStart => 0,
-                SmartActions.SummonGo => Marshal.SizeOf(typeof(SummonGO)),
-                SmartActions.KillUnit => 0,
-                SmartActions.ActivateTaxi => Marshal.SizeOf(typeof(Taxi)),
-                SmartActions.WpStart => Marshal.SizeOf(typeof(WpStart)),
-                SmartActions.WpPause => Marshal.SizeOf(typeof(WpPause)),
-                SmartActions.WpStop => Marshal.SizeOf(typeof(WpStop)),
-                SmartActions.AddItem => Marshal.SizeOf(typeof(SmartAction.Item)),
-                SmartActions.RemoveItem => Marshal.SizeOf(typeof(SmartAction.Item)),
-                SmartActions.SetRun => Marshal.SizeOf(typeof(SetRun)),
-                SmartActions.SetDisableGravity => Marshal.SizeOf(typeof(SetDisableGravity)),
-                SmartActions.Teleport => Marshal.SizeOf(typeof(Teleport)),
-                SmartActions.SetCounter => Marshal.SizeOf(typeof(SetCounter)),
-                SmartActions.StoreTargetList => Marshal.SizeOf(typeof(StoreTargets)),
-                SmartActions.WpResume => 0,
-                SmartActions.SetOrientation => 0,
-                SmartActions.CreateTimedEvent => Marshal.SizeOf(typeof(TimeEvent)),
-                SmartActions.Playmovie => Marshal.SizeOf(typeof(Movie)),
-                SmartActions.MoveToPos => Marshal.SizeOf(typeof(MoveToPos)),
-                SmartActions.EnableTempGobj => Marshal.SizeOf(typeof(EnableTempGO)),
-                SmartActions.Equip => Marshal.SizeOf(typeof(Equip)),
-                SmartActions.CloseGossip => 0,
-                SmartActions.TriggerTimedEvent => Marshal.SizeOf(typeof(TimeEvent)),
-                SmartActions.RemoveTimedEvent => Marshal.SizeOf(typeof(TimeEvent)),
-                SmartActions.CallScriptReset => 0,
-                SmartActions.SetRangedMovement => Marshal.SizeOf(typeof(SetRangedMovement)),
-                SmartActions.CallTimedActionlist => Marshal.SizeOf(typeof(TimedActionList)),
-                SmartActions.SetNpcFlag => Marshal.SizeOf(typeof(Flag)),
-                SmartActions.AddNpcFlag => Marshal.SizeOf(typeof(Flag)),
-                SmartActions.RemoveNpcFlag => Marshal.SizeOf(typeof(Flag)),
-                SmartActions.SimpleTalk => Marshal.SizeOf(typeof(SimpleTalk)),
-                SmartActions.SelfCast => Marshal.SizeOf(typeof(Cast)),
-                SmartActions.CrossCast => Marshal.SizeOf(typeof(CrossCast)),
-                SmartActions.CallRandomTimedActionlist => Marshal.SizeOf(typeof(RandTimedActionList)),
+                SmartActions.SetIngamePhaseGroup            => Marshal.SizeOf(typeof(IngamePhaseGroup)),
+                SmartActions.SetEmoteState                  => Marshal.SizeOf(typeof(SmartAction.Emote)),
+                SmartActions.AutoAttack                     => Marshal.SizeOf(typeof(AutoAttack)),
+                SmartActions.AllowCombatMovement            => Marshal.SizeOf(typeof(CombatMove)),
+                SmartActions.SetEventPhase                  => Marshal.SizeOf(typeof(SetEventPhase)),
+                SmartActions.IncEventPhase                  => Marshal.SizeOf(typeof(IncEventPhase)),
+                SmartActions.Evade                          => Marshal.SizeOf(typeof(Evade)),
+                SmartActions.FleeForAssist                  => Marshal.SizeOf(typeof(FleeAssist)),
+                SmartActions.CallGroupeventhappens          => Marshal.SizeOf(typeof(SmartAction.Quest)),
+                SmartActions.CombatStop                     => 0,
+                SmartActions.RemoveAurasFromSpell           => Marshal.SizeOf(typeof(RemoveAura)),
+                SmartActions.Follow                         => Marshal.SizeOf(typeof(Follow)),
+                SmartActions.RandomPhase                    => Marshal.SizeOf(typeof(RandomPhase)),
+                SmartActions.RandomPhaseRange               => Marshal.SizeOf(typeof(RandomPhaseRange)),
+                SmartActions.ResetGobject                   => 0,
+                SmartActions.CallKilledmonster              => Marshal.SizeOf(typeof(KilledMonster)),
+                SmartActions.SetInstData                    => Marshal.SizeOf(typeof(SetInstanceData)),
+                SmartActions.SetInstData64                  => Marshal.SizeOf(typeof(SetInstanceData64)),
+                SmartActions.UpdateTemplate                 => Marshal.SizeOf(typeof(UpdateTemplate)),
+                SmartActions.Die                            => 0,
+                SmartActions.SetInCombatWithZone            => 0,
+                SmartActions.CallForHelp                    => Marshal.SizeOf(typeof(CallHelp)),
+                SmartActions.SetSheath                      => Marshal.SizeOf(typeof(SetSheath)),
+                SmartActions.ForceDespawn                   => Marshal.SizeOf(typeof(ForceDespawn)),
+                SmartActions.SetInvincibilityHpLevel        => Marshal.SizeOf(typeof(InvincHP)),
+                SmartActions.MountToEntryOrModel            => Marshal.SizeOf(typeof(MorphOrMount)),
+                SmartActions.SetIngamePhaseId               => Marshal.SizeOf(typeof(IngamePhaseId)),
+                SmartActions.SetData                        => Marshal.SizeOf(typeof(SetData)),
+                SmartActions.AttackStop                     => 0,
+                SmartActions.SetVisibility                  => Marshal.SizeOf(typeof(Visibility)),
+                SmartActions.SetActive                      => Marshal.SizeOf(typeof(Active)),
+                SmartActions.AttackStart                    => 0,
+                SmartActions.SummonGo                       => Marshal.SizeOf(typeof(SummonGO)),
+                SmartActions.KillUnit                       => 0,
+                SmartActions.ActivateTaxi                   => Marshal.SizeOf(typeof(Taxi)),
+                SmartActions.WpStart                        => Marshal.SizeOf(typeof(WpStart)),
+                SmartActions.WpPause                        => Marshal.SizeOf(typeof(WpPause)),
+                SmartActions.WpStop                         => Marshal.SizeOf(typeof(WpStop)),
+                SmartActions.AddItem                        => Marshal.SizeOf(typeof(SmartAction.Item)),
+                SmartActions.RemoveItem                     => Marshal.SizeOf(typeof(SmartAction.Item)),
+                SmartActions.SetRun                         => Marshal.SizeOf(typeof(SetRun)),
+                SmartActions.SetDisableGravity              => Marshal.SizeOf(typeof(SetDisableGravity)),
+                SmartActions.Teleport                       => Marshal.SizeOf(typeof(Teleport)),
+                SmartActions.SetCounter                     => Marshal.SizeOf(typeof(SetCounter)),
+                SmartActions.StoreTargetList                => Marshal.SizeOf(typeof(StoreTargets)),
+                SmartActions.WpResume                       => 0,
+                SmartActions.SetOrientation                 => 0,
+                SmartActions.CreateTimedEvent               => Marshal.SizeOf(typeof(TimeEvent)),
+                SmartActions.Playmovie                      => Marshal.SizeOf(typeof(Movie)),
+                SmartActions.MoveToPos                      => Marshal.SizeOf(typeof(MoveToPos)),
+                SmartActions.EnableTempGobj                 => Marshal.SizeOf(typeof(EnableTempGO)),
+                SmartActions.Equip                          => Marshal.SizeOf(typeof(Equip)),
+                SmartActions.CloseGossip                    => 0,
+                SmartActions.TriggerTimedEvent              => Marshal.SizeOf(typeof(TimeEvent)),
+                SmartActions.RemoveTimedEvent               => Marshal.SizeOf(typeof(TimeEvent)),
+                SmartActions.CallScriptReset                => 0,
+                SmartActions.SetRangedMovement              => Marshal.SizeOf(typeof(SetRangedMovement)),
+                SmartActions.CallTimedActionlist            => Marshal.SizeOf(typeof(TimedActionList)),
+                SmartActions.SetNpcFlag                     => Marshal.SizeOf(typeof(Flag)),
+                SmartActions.AddNpcFlag                     => Marshal.SizeOf(typeof(Flag)),
+                SmartActions.RemoveNpcFlag                  => Marshal.SizeOf(typeof(Flag)),
+                SmartActions.SimpleTalk                     => Marshal.SizeOf(typeof(SimpleTalk)),
+                SmartActions.SelfCast                       => Marshal.SizeOf(typeof(Cast)),
+                SmartActions.CrossCast                      => Marshal.SizeOf(typeof(CrossCast)),
+                SmartActions.CallRandomTimedActionlist      => Marshal.SizeOf(typeof(RandTimedActionList)),
                 SmartActions.CallRandomRangeTimedActionlist => Marshal.SizeOf(typeof(RandRangeTimedActionList)),
-                SmartActions.RandomMove => Marshal.SizeOf(typeof(MoveRandom)),
-                SmartActions.SetUnitFieldBytes1 => Marshal.SizeOf(typeof(SetunitByte)),
-                SmartActions.RemoveUnitFieldBytes1 => Marshal.SizeOf(typeof(DelunitByte)),
-                SmartActions.InterruptSpell => Marshal.SizeOf(typeof(InterruptSpellCasting)),
-                SmartActions.AddDynamicFlag => Marshal.SizeOf(typeof(Flag)),
-                SmartActions.RemoveDynamicFlag => Marshal.SizeOf(typeof(Flag)),
-                SmartActions.JumpToPos => Marshal.SizeOf(typeof(Jump)),
-                SmartActions.SendGossipMenu => Marshal.SizeOf(typeof(SendGossipMenu)),
-                SmartActions.GoSetLootState => Marshal.SizeOf(typeof(SetGoLootState)),
-                SmartActions.SendTargetToTarget => Marshal.SizeOf(typeof(SendTargetToTarget)),
-                SmartActions.SetHomePos => 0,
-                SmartActions.SetHealthRegen => Marshal.SizeOf(typeof(SetHealthRegen)),
-                SmartActions.SetRoot => Marshal.SizeOf(typeof(SetRoot)),
-                SmartActions.SummonCreatureGroup => Marshal.SizeOf(typeof(SmartAction.CreatureGroup)),
-                SmartActions.SetPower => Marshal.SizeOf(typeof(Power)),
-                SmartActions.AddPower => Marshal.SizeOf(typeof(Power)),
-                SmartActions.RemovePower => Marshal.SizeOf(typeof(Power)),
-                SmartActions.GameEventStop => Marshal.SizeOf(typeof(GameEventStop)),
-                SmartActions.GameEventStart => Marshal.SizeOf(typeof(GameEventStart)),
-                SmartActions.StartClosestWaypoint => Marshal.SizeOf(typeof(ClosestWaypointFromList)),
-                SmartActions.MoveOffset => Marshal.SizeOf(typeof(MoveOffset)),
-                SmartActions.RandomSound => Marshal.SizeOf(typeof(RandomSound)),
-                SmartActions.SetCorpseDelay => Marshal.SizeOf(typeof(CorpseDelay)),
-                SmartActions.DisableEvade => Marshal.SizeOf(typeof(DisableEvade)),
-                SmartActions.GoSetGoState => Marshal.SizeOf(typeof(GoState)),
-                SmartActions.AddThreat => Marshal.SizeOf(typeof(Threat)),
-                SmartActions.LoadEquipment => Marshal.SizeOf(typeof(LoadEquipment)),
-                SmartActions.TriggerRandomTimedEvent => Marshal.SizeOf(typeof(RandomTimedEvent)),
-                SmartActions.PauseMovement => Marshal.SizeOf(typeof(PauseMovement)),
-                SmartActions.PlayAnimkit => Marshal.SizeOf(typeof(AnimKit)),
-                SmartActions.ScenePlay => Marshal.SizeOf(typeof(Scene)),
-                SmartActions.SceneCancel => Marshal.SizeOf(typeof(Scene)),
-                SmartActions.SpawnSpawngroup => Marshal.SizeOf(typeof(GroupSpawn)),
-                SmartActions.DespawnSpawngroup => Marshal.SizeOf(typeof(GroupSpawn)),
-                SmartActions.RespawnBySpawnId => Marshal.SizeOf(typeof(RespawnData)),
-                SmartActions.InvokerCast => Marshal.SizeOf(typeof(Cast)),
-                SmartActions.PlayCinematic => Marshal.SizeOf(typeof(Cinematic)),
-                SmartActions.SetMovementSpeed => Marshal.SizeOf(typeof(MovementSpeed)),
-                SmartActions.PlaySpellVisualKit => Marshal.SizeOf(typeof(SpellVisualKit)),
-                SmartActions.OverrideLight => Marshal.SizeOf(typeof(OverrideLight)),
-                SmartActions.OverrideWeather => Marshal.SizeOf(typeof(OverrideWeather)),
-                SmartActions.SetAIAnimKit => 0,
-                SmartActions.SetHover => Marshal.SizeOf(typeof(SetHover)),
-                SmartActions.SetHealthPct => Marshal.SizeOf(typeof(SetHealthPct)),
-                SmartActions.CreateConversation => Marshal.SizeOf(typeof(SmartAction.Conversation)),
-                SmartActions.SetImmunePC => Marshal.SizeOf(typeof(SetImmunePC)),
-                SmartActions.SetImmuneNPC => Marshal.SizeOf(typeof(SetImmuneNPC)),
-                SmartActions.SetUninteractible => Marshal.SizeOf(typeof(SetUninteractible)),
-                SmartActions.ActivateGameobject => Marshal.SizeOf(typeof(ActivateGameObject)),
-                SmartActions.AddToStoredTargetList => Marshal.SizeOf(typeof(AddToStoredTargets)),
-                SmartActions.BecomePersonalCloneForPlayer => Marshal.SizeOf(typeof(BecomePersonalClone)),
-                SmartActions.TriggerGameEvent => Marshal.SizeOf(typeof(TriggerGameEvent)),
-                SmartActions.DoAction => Marshal.SizeOf(typeof(DoAction)),
-                _ => Marshal.SizeOf(typeof(Raw))
+                SmartActions.RandomMove                     => Marshal.SizeOf(typeof(MoveRandom)),
+                SmartActions.SetUnitFieldBytes1             => Marshal.SizeOf(typeof(SetunitByte)),
+                SmartActions.RemoveUnitFieldBytes1          => Marshal.SizeOf(typeof(DelunitByte)),
+                SmartActions.InterruptSpell                 => Marshal.SizeOf(typeof(InterruptSpellCasting)),
+                SmartActions.AddDynamicFlag                 => Marshal.SizeOf(typeof(Flag)),
+                SmartActions.RemoveDynamicFlag              => Marshal.SizeOf(typeof(Flag)),
+                SmartActions.JumpToPos                      => Marshal.SizeOf(typeof(Jump)),
+                SmartActions.SendGossipMenu                 => Marshal.SizeOf(typeof(SendGossipMenu)),
+                SmartActions.GoSetLootState                 => Marshal.SizeOf(typeof(SetGoLootState)),
+                SmartActions.SendTargetToTarget             => Marshal.SizeOf(typeof(SendTargetToTarget)),
+                SmartActions.SetHomePos                     => 0,
+                SmartActions.SetHealthRegen                 => Marshal.SizeOf(typeof(SetHealthRegen)),
+                SmartActions.SetRoot                        => Marshal.SizeOf(typeof(SetRoot)),
+                SmartActions.SummonCreatureGroup            => Marshal.SizeOf(typeof(SmartAction.CreatureGroup)),
+                SmartActions.SetPower                       => Marshal.SizeOf(typeof(Power)),
+                SmartActions.AddPower                       => Marshal.SizeOf(typeof(Power)),
+                SmartActions.RemovePower                    => Marshal.SizeOf(typeof(Power)),
+                SmartActions.GameEventStop                  => Marshal.SizeOf(typeof(GameEventStop)),
+                SmartActions.GameEventStart                 => Marshal.SizeOf(typeof(GameEventStart)),
+                SmartActions.StartClosestWaypoint           => Marshal.SizeOf(typeof(ClosestWaypointFromList)),
+                SmartActions.MoveOffset                     => Marshal.SizeOf(typeof(MoveOffset)),
+                SmartActions.RandomSound                    => Marshal.SizeOf(typeof(RandomSound)),
+                SmartActions.SetCorpseDelay                 => Marshal.SizeOf(typeof(CorpseDelay)),
+                SmartActions.DisableEvade                   => Marshal.SizeOf(typeof(DisableEvade)),
+                SmartActions.GoSetGoState                   => Marshal.SizeOf(typeof(GoState)),
+                SmartActions.AddThreat                      => Marshal.SizeOf(typeof(Threat)),
+                SmartActions.LoadEquipment                  => Marshal.SizeOf(typeof(LoadEquipment)),
+                SmartActions.TriggerRandomTimedEvent        => Marshal.SizeOf(typeof(RandomTimedEvent)),
+                SmartActions.PauseMovement                  => Marshal.SizeOf(typeof(PauseMovement)),
+                SmartActions.PlayAnimkit                    => Marshal.SizeOf(typeof(AnimKit)),
+                SmartActions.ScenePlay                      => Marshal.SizeOf(typeof(Scene)),
+                SmartActions.SceneCancel                    => Marshal.SizeOf(typeof(Scene)),
+                SmartActions.SpawnSpawngroup                => Marshal.SizeOf(typeof(GroupSpawn)),
+                SmartActions.DespawnSpawngroup              => Marshal.SizeOf(typeof(GroupSpawn)),
+                SmartActions.RespawnBySpawnId               => Marshal.SizeOf(typeof(RespawnData)),
+                SmartActions.InvokerCast                    => Marshal.SizeOf(typeof(Cast)),
+                SmartActions.PlayCinematic                  => Marshal.SizeOf(typeof(Cinematic)),
+                SmartActions.SetMovementSpeed               => Marshal.SizeOf(typeof(MovementSpeed)),
+                SmartActions.PlaySpellVisualKit             => Marshal.SizeOf(typeof(SpellVisualKit)),
+                SmartActions.OverrideLight                  => Marshal.SizeOf(typeof(OverrideLight)),
+                SmartActions.OverrideWeather                => Marshal.SizeOf(typeof(OverrideWeather)),
+                SmartActions.SetAIAnimKit                   => 0,
+                SmartActions.SetHover                       => Marshal.SizeOf(typeof(SetHover)),
+                SmartActions.SetHealthPct                   => Marshal.SizeOf(typeof(SetHealthPct)),
+                SmartActions.CreateConversation             => Marshal.SizeOf(typeof(SmartAction.Conversation)),
+                SmartActions.SetImmunePC                    => Marshal.SizeOf(typeof(SetImmunePC)),
+                SmartActions.SetImmuneNPC                   => Marshal.SizeOf(typeof(SetImmuneNPC)),
+                SmartActions.SetUninteractible              => Marshal.SizeOf(typeof(SetUninteractible)),
+                SmartActions.ActivateGameobject             => Marshal.SizeOf(typeof(ActivateGameObject)),
+                SmartActions.AddToStoredTargetList          => Marshal.SizeOf(typeof(AddToStoredTargets)),
+                SmartActions.BecomePersonalCloneForPlayer   => Marshal.SizeOf(typeof(BecomePersonalClone)),
+                SmartActions.TriggerGameEvent               => Marshal.SizeOf(typeof(TriggerGameEvent)),
+                SmartActions.DoAction                       => Marshal.SizeOf(typeof(DoAction)),
+                _                                           => Marshal.SizeOf(typeof(Raw))
             };
 
             int rawCount = Marshal.SizeOf(typeof(Raw)) / sizeof(uint);
@@ -956,41 +1121,41 @@ namespace Game.AI
         {
             int paramsStructSize = e.Target.type switch
             {
-                SmartTargets.None => 0,
-                SmartTargets.Self => 0,
-                SmartTargets.Victim => 0,
-                SmartTargets.HostileSecondAggro => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
-                SmartTargets.HostileLastAggro => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
-                SmartTargets.HostileRandom => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
-                SmartTargets.HostileRandomNotTop => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
-                SmartTargets.ActionInvoker => 0,
-                SmartTargets.Position => 0, //Uses X,Y,Z,O
-                SmartTargets.CreatureRange => Marshal.SizeOf(typeof(SmartTarget.UnitRange)),
-                SmartTargets.CreatureGuid => Marshal.SizeOf(typeof(SmartTarget.UnitGUID)),
-                SmartTargets.CreatureDistance => Marshal.SizeOf(typeof(SmartTarget.UnitDistance)),
-                SmartTargets.Stored => Marshal.SizeOf(typeof(SmartTarget.Stored)),
-                SmartTargets.GameobjectRange => Marshal.SizeOf(typeof(SmartTarget.GoRange)),
-                SmartTargets.GameobjectGuid => Marshal.SizeOf(typeof(SmartTarget.GoGUID)),
-                SmartTargets.GameobjectDistance => Marshal.SizeOf(typeof(SmartTarget.GoDistance)),
-                SmartTargets.InvokerParty => 0,
-                SmartTargets.PlayerRange => Marshal.SizeOf(typeof(SmartTarget.PlayerRange)),
-                SmartTargets.PlayerDistance => Marshal.SizeOf(typeof(SmartTarget.PlayerDistance)),
-                SmartTargets.ClosestCreature => Marshal.SizeOf(typeof(SmartTarget.UnitClosest)),
-                SmartTargets.ClosestGameobject => Marshal.SizeOf(typeof(SmartTarget.GoClosest)),
-                SmartTargets.ClosestPlayer => Marshal.SizeOf(typeof(SmartTarget.PlayerDistance)),
-                SmartTargets.ActionInvokerVehicle => 0,
-                SmartTargets.OwnerOrSummoner => Marshal.SizeOf(typeof(SmartTarget.Owner)),
-                SmartTargets.ThreatList => Marshal.SizeOf(typeof(SmartTarget.ThreatList)),
-                SmartTargets.ClosestEnemy => Marshal.SizeOf(typeof(SmartTarget.ClosestAttackable)),
-                SmartTargets.ClosestFriendly => Marshal.SizeOf(typeof(SmartTarget.ClosestFriendly)),
-                SmartTargets.LootRecipients => 0,
-                SmartTargets.Farthest => Marshal.SizeOf(typeof(SmartTarget.Farthest)),
-                SmartTargets.VehiclePassenger => Marshal.SizeOf(typeof(SmartTarget.Vehicle)),
+                SmartTargets.None                       => 0,
+                SmartTargets.Self                       => 0,
+                SmartTargets.Victim                     => 0,
+                SmartTargets.HostileSecondAggro         => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
+                SmartTargets.HostileLastAggro           => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
+                SmartTargets.HostileRandom              => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
+                SmartTargets.HostileRandomNotTop        => Marshal.SizeOf(typeof(SmartTarget.HostilRandom)),
+                SmartTargets.ActionInvoker              => 0,
+                SmartTargets.Position                   => 0, //Uses X,Y,Z,O
+                SmartTargets.CreatureRange              => Marshal.SizeOf(typeof(SmartTarget.UnitRange)),
+                SmartTargets.CreatureGuid               => Marshal.SizeOf(typeof(SmartTarget.UnitGUID)),
+                SmartTargets.CreatureDistance           => Marshal.SizeOf(typeof(SmartTarget.UnitDistance)),
+                SmartTargets.Stored                     => Marshal.SizeOf(typeof(SmartTarget.Stored)),
+                SmartTargets.GameobjectRange            => Marshal.SizeOf(typeof(SmartTarget.GoRange)),
+                SmartTargets.GameobjectGuid             => Marshal.SizeOf(typeof(SmartTarget.GoGUID)),
+                SmartTargets.GameobjectDistance         => Marshal.SizeOf(typeof(SmartTarget.GoDistance)),
+                SmartTargets.InvokerParty               => 0,
+                SmartTargets.PlayerRange                => Marshal.SizeOf(typeof(SmartTarget.PlayerRange)),
+                SmartTargets.PlayerDistance             => Marshal.SizeOf(typeof(SmartTarget.PlayerDistance)),
+                SmartTargets.ClosestCreature            => Marshal.SizeOf(typeof(SmartTarget.UnitClosest)),
+                SmartTargets.ClosestGameobject          => Marshal.SizeOf(typeof(SmartTarget.GoClosest)),
+                SmartTargets.ClosestPlayer              => Marshal.SizeOf(typeof(SmartTarget.PlayerDistance)),
+                SmartTargets.ActionInvokerVehicle       => 0,
+                SmartTargets.OwnerOrSummoner            => Marshal.SizeOf(typeof(SmartTarget.Owner)),
+                SmartTargets.ThreatList                 => Marshal.SizeOf(typeof(SmartTarget.ThreatList)),
+                SmartTargets.ClosestEnemy               => Marshal.SizeOf(typeof(SmartTarget.ClosestAttackable)),
+                SmartTargets.ClosestFriendly            => Marshal.SizeOf(typeof(SmartTarget.ClosestFriendly)),
+                SmartTargets.LootRecipients             => 0,
+                SmartTargets.Farthest                   => Marshal.SizeOf(typeof(SmartTarget.Farthest)),
+                SmartTargets.VehiclePassenger           => Marshal.SizeOf(typeof(SmartTarget.Vehicle)),
                 SmartTargets.ClosestUnspawnedGameobject => Marshal.SizeOf(typeof(SmartTarget.GoClosest)),
-                _ => Marshal.SizeOf(typeof(SmartTarget.Raw))
+                _                                       => Marshal.SizeOf(typeof(SmartTarget.Raw))
             };
 
-            int rawCount = Marshal.SizeOf(typeof(SmartTarget.Raw)) / sizeof(uint);
+            int rawCount    = Marshal.SizeOf(typeof(SmartTarget.Raw)) / sizeof(uint);
             int paramsCount = paramsStructSize / sizeof(uint);
 
             for (int index = paramsCount; index < rawCount; index++)
@@ -2730,171 +2895,6 @@ namespace Game.AI
             }
 
             return true;
-        }
-
-        public List<SmartScriptHolder> GetScript(int entry, SmartScriptType type)
-        {
-            List<SmartScriptHolder> temp = new();
-
-            if (_eventMap[(uint)type].ContainsKey(entry))
-            {
-                foreach (var holder in _eventMap[(uint)type][entry])
-                    temp.Add(new SmartScriptHolder(holder));
-            }
-            else
-            {
-                if (entry > 0) //first search is for Guid (negative), do not drop error if not found
-                    Log.outDebug(LogFilter.ScriptsAi, "SmartAIMgr.GetScript: Could not load Script for Entry {0} ScriptType {1}.", entry, type);
-            }
-
-            return temp;
-        }
-
-        public WaypointPath GetPath(uint id)
-        {
-            return _waypointStore.LookupByKey(id);
-        }
-
-        public static SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, uint eventId)
-        {
-            var sch = list.Find(p => p.Link == eventId);
-
-            if (sch != null)
-                return sch;
-
-            return null;
-        }
-
-        public SmartScriptHolder FindLinkedEvent(List<SmartScriptHolder> list, uint link)
-        {
-            var sch = list.Find(p => p.EventId == link && p.GetEventType() == SmartEvents.Link);
-
-            if (sch != null)
-                return sch;
-
-            return null;
-        }
-
-        public static uint GetTypeMask(SmartScriptType smartScriptType)
-        {
-            return smartScriptType switch
-            {
-                SmartScriptType.Creature => SmartScriptTypeMaskId.Creature,
-                SmartScriptType.GameObject => SmartScriptTypeMaskId.Gameobject,
-                SmartScriptType.AreaTrigger => SmartScriptTypeMaskId.Areatrigger,
-                SmartScriptType.Event => SmartScriptTypeMaskId.Event,
-                SmartScriptType.Gossip => SmartScriptTypeMaskId.Gossip,
-                SmartScriptType.Quest => SmartScriptTypeMaskId.Quest,
-                SmartScriptType.Spell => SmartScriptTypeMaskId.Spell,
-                SmartScriptType.Transport => SmartScriptTypeMaskId.Transport,
-                SmartScriptType.Instance => SmartScriptTypeMaskId.Instance,
-                SmartScriptType.TimedActionlist => SmartScriptTypeMaskId.TimedActionlist,
-                SmartScriptType.Scene => SmartScriptTypeMaskId.Scene,
-                SmartScriptType.AreaTriggerEntity => SmartScriptTypeMaskId.AreatrigggerEntity,
-                SmartScriptType.AreaTriggerEntityServerside => SmartScriptTypeMaskId.AreatrigggerEntity,
-                _ => 0
-            };
-        }
-
-        public static uint GetEventMask(SmartEvents smartEvent)
-        {
-            return smartEvent switch
-            {
-                SmartEvents.UpdateIc => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.TimedActionlist,
-                SmartEvents.UpdateOoc => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity,
-                SmartEvents.HealthPct => SmartScriptTypeMaskId.Creature,
-                SmartEvents.ManaPct => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Aggro => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Kill => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Death => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Evade => SmartScriptTypeMaskId.Creature,
-                SmartEvents.SpellHit => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.Range => SmartScriptTypeMaskId.Creature,
-                SmartEvents.OocLos => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Respawn => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.TargetHealthPct => SmartScriptTypeMaskId.Creature,
-                SmartEvents.VictimCasting => SmartScriptTypeMaskId.Creature,
-                SmartEvents.FriendlyHealth => SmartScriptTypeMaskId.Creature,
-                SmartEvents.FriendlyIsCc => SmartScriptTypeMaskId.Creature,
-                SmartEvents.FriendlyMissingBuff => SmartScriptTypeMaskId.Creature,
-                SmartEvents.SummonedUnit => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.TargetManaPct => SmartScriptTypeMaskId.Creature,
-                SmartEvents.AcceptedQuest => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.RewardQuest => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.ReachedHome => SmartScriptTypeMaskId.Creature,
-                SmartEvents.ReceiveEmote => SmartScriptTypeMaskId.Creature,
-                SmartEvents.HasAura => SmartScriptTypeMaskId.Creature,
-                SmartEvents.TargetBuffed => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Reset => SmartScriptTypeMaskId.Creature,
-                SmartEvents.IcLos => SmartScriptTypeMaskId.Creature,
-                SmartEvents.PassengerBoarded => SmartScriptTypeMaskId.Creature,
-                SmartEvents.PassengerRemoved => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Charmed => SmartScriptTypeMaskId.Creature,
-                SmartEvents.CharmedTarget => SmartScriptTypeMaskId.Creature,
-                SmartEvents.SpellHitTarget => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Damaged => SmartScriptTypeMaskId.Creature,
-                SmartEvents.DamagedTarget => SmartScriptTypeMaskId.Creature,
-                SmartEvents.Movementinform => SmartScriptTypeMaskId.Creature,
-                SmartEvents.SummonDespawned => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.CorpseRemoved => SmartScriptTypeMaskId.Creature,
-                SmartEvents.AiInit => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.DataSet => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.WaypointStart => SmartScriptTypeMaskId.Creature,
-                SmartEvents.WaypointReached => SmartScriptTypeMaskId.Creature,
-                SmartEvents.TransportAddplayer => SmartScriptTypeMaskId.Transport,
-                SmartEvents.TransportAddcreature => SmartScriptTypeMaskId.Transport,
-                SmartEvents.TransportRemovePlayer => SmartScriptTypeMaskId.Transport,
-                SmartEvents.TransportRelocate => SmartScriptTypeMaskId.Transport,
-                SmartEvents.InstancePlayerEnter => SmartScriptTypeMaskId.Instance,
-                SmartEvents.AreatriggerOntrigger => SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity,
-                SmartEvents.QuestAccepted => SmartScriptTypeMaskId.Quest,
-                SmartEvents.QuestObjCompletion => SmartScriptTypeMaskId.Quest,
-                SmartEvents.QuestRewarded => SmartScriptTypeMaskId.Quest,
-                SmartEvents.QuestCompletion => SmartScriptTypeMaskId.Quest,
-                SmartEvents.QuestFail => SmartScriptTypeMaskId.Quest,
-                SmartEvents.TextOver => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.ReceiveHeal => SmartScriptTypeMaskId.Creature,
-                SmartEvents.JustSummoned => SmartScriptTypeMaskId.Creature,
-                SmartEvents.WaypointPaused => SmartScriptTypeMaskId.Creature,
-                SmartEvents.WaypointResumed => SmartScriptTypeMaskId.Creature,
-                SmartEvents.WaypointStopped => SmartScriptTypeMaskId.Creature,
-                SmartEvents.WaypointEnded => SmartScriptTypeMaskId.Creature,
-                SmartEvents.TimedEventTriggered => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.Update => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.AreatrigggerEntity,
-                SmartEvents.Link => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.Event + SmartScriptTypeMaskId.Gossip + SmartScriptTypeMaskId.Quest + SmartScriptTypeMaskId.Spell + SmartScriptTypeMaskId.Transport + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity,
-                SmartEvents.GossipSelect => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.JustCreated => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.GossipHello => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.FollowCompleted => SmartScriptTypeMaskId.Creature,
-                SmartEvents.PhaseChange => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.IsBehindTarget => SmartScriptTypeMaskId.Creature,
-                SmartEvents.GameEventStart => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.GameEventEnd => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.GoLootStateChanged => SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.GoEventInform => SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.ActionDone => SmartScriptTypeMaskId.Creature,
-                SmartEvents.OnSpellclick => SmartScriptTypeMaskId.Creature,
-                SmartEvents.FriendlyHealthPCT => SmartScriptTypeMaskId.Creature,
-                SmartEvents.DistanceCreature => SmartScriptTypeMaskId.Creature,
-                SmartEvents.DistanceGameobject => SmartScriptTypeMaskId.Creature,
-                SmartEvents.CounterSet => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.SceneStart => SmartScriptTypeMaskId.Scene,
-                SmartEvents.SceneTrigger => SmartScriptTypeMaskId.Scene,
-                SmartEvents.SceneCancel => SmartScriptTypeMaskId.Scene,
-                SmartEvents.SceneComplete => SmartScriptTypeMaskId.Scene,
-                SmartEvents.SummonedUnitDies => SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject,
-                SmartEvents.OnSpellCast => SmartScriptTypeMaskId.Creature,
-                SmartEvents.OnSpellFailed => SmartScriptTypeMaskId.Creature,
-                SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
-                SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
-                _ => 0
-            };
-        }
-
-        public static void TC_SAI_IS_BOOLEAN_VALID(SmartScriptHolder e, uint value, [CallerArgumentExpression("value")] string valueName = null)
-        {
-            if (value > 1)
-                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses param {valueName} of Type Boolean with value {value}, valid values are 0 or 1, skipped.");
         }
     }
 }

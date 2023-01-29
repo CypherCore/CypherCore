@@ -761,13 +761,6 @@ namespace Game.Entities
             SET_GUID_INFO(HighGuid.ClubFinder, FormatClubFinder, ParseClubFinder);
         }
 
-        private static void SET_GUID_INFO(HighGuid type, Func<HighGuid, ObjectGuid, string> format, Func<HighGuid, string, ObjectGuid> parse)
-        {
-            Names[type] = type.ToString();
-            ClientFormatFunction[type] = format;
-            ClientParseFunction[type] = parse;
-        }
-
         public static string Format(ObjectGuid guid)
         {
             if (guid.GetHigh() >= HighGuid.Count)
@@ -793,6 +786,13 @@ namespace Game.Entities
                 return ObjectGuid.FromStringFailed;
 
             return ClientParseFunction[type](type, guidString[(typeEnd + 1)..]);
+        }
+
+        private static void SET_GUID_INFO(HighGuid type, Func<HighGuid, ObjectGuid, string> format, Func<HighGuid, string, ObjectGuid> parse)
+        {
+            Names[type] = type.ToString();
+            ClientFormatFunction[type] = format;
+            ClientParseFunction[type] = parse;
         }
 
         private static string FormatNull(HighGuid typeName, ObjectGuid guid)

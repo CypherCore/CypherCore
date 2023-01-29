@@ -13,6 +13,8 @@ namespace Game
 {
     internal class CharacterDatabaseCleaner
     {
+        private delegate bool CheckFor(uint id);
+
         public static void CleanDatabase()
         {
             // config to disable
@@ -144,8 +146,6 @@ namespace Game
         {
             DB.Characters.DirectExecute("DELETE FROM character_queststatus WHERE status = 0");
         }
-
-        private delegate bool CheckFor(uint id);
     }
 
     [Flags]

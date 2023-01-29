@@ -8,7 +8,6 @@ namespace Game.Collision
 {
     public class WModelRayCallBack : WorkerCallback
     {
-        public bool Hit { get; set; }
         private readonly List<GroupModel> _models;
 
         public WModelRayCallBack(List<GroupModel> mod)
@@ -16,6 +15,8 @@ namespace Game.Collision
             _models = mod;
             Hit = false;
         }
+
+        public bool Hit { get; set; }
 
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
         {

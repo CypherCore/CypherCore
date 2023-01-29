@@ -30,9 +30,9 @@ namespace Game.Maps
             AdditionalDataUnexpectedValueType
         }
 
-        private JsonDocument _doc;
-
         private readonly InstanceScript _instance;
+
+        private JsonDocument _doc;
 
         public InstanceScriptDataReader(InstanceScript instance)
         {
@@ -217,8 +217,8 @@ namespace Game.Maps
 
     internal class InstanceScriptDataWriter
     {
-        private JsonObject _doc = new();
         private readonly InstanceScript _instance;
+        private JsonObject _doc = new();
 
         public InstanceScriptDataWriter(InstanceScript instance)
         {

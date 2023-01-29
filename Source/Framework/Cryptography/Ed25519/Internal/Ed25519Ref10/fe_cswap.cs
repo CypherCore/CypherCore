@@ -2,13 +2,13 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		Replace (f,g) with (g,f) if b == 1;
 		replace (f,g) with (f,g) if b == 0.
 
 		Preconditions: b in {0,1}.
 		*/
-        public static void fe_cswap(ref FieldElement f, ref FieldElement g, uint b)
+	    public static void fe_cswap(ref FieldElement f, ref FieldElement g, uint b)
         {
             int f0 = f.x0;
             int f1 = f.x1;

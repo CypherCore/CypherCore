@@ -43,6 +43,11 @@ namespace Scripts.Spells.Monk
             return ValidateSpellInfo(SpellIds.StanceOfTheSpiritedCrane, SpellIds.CracklingJadeLightningChiProc);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
+        }
+
         private void OnTick(AuraEffect aurEff)
         {
             Unit caster = GetCaster();
@@ -50,11 +55,6 @@ namespace Scripts.Spells.Monk
             if (caster)
                 if (caster.HasAura(SpellIds.StanceOfTheSpiritedCrane))
                     caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
         }
     }
 
@@ -186,6 +186,19 @@ namespace Scripts.Spells.Monk
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            // Values need manual correction
+            Effects.Add(new EffectCalcAmountHandler(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
+            Effects.Add(new EffectCalcAmountHandler(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
+            Effects.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
+            Effects.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
+
+            // This is a special aura that sets backward run speed equal to forward speed
+            Effects.Add(new EffectApplyHandler(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void CalcMovementAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             amount += 100;
@@ -205,19 +218,6 @@ namespace Scripts.Spells.Monk
         {
             GetTarget().UpdateSpeed(UnitMoveType.RunBack);
         }
-
-        public override void Register()
-        {
-            // Values need manual correction
-            Effects.Add(new EffectCalcAmountHandler(CalcMovementAmount, 0, AuraType.ModSpeedNoControl));
-            Effects.Add(new EffectCalcAmountHandler(CalcMovementAmount, 2, AuraType.ModMinimumSpeed));
-            Effects.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 5, AuraType.MechanicImmunity));
-            Effects.Add(new EffectCalcAmountHandler(CalcImmunityAmount, 6, AuraType.MechanicImmunity));
-
-            // This is a special aura that sets backward run speed equal to forward speed
-            Effects.Add(new EffectApplyHandler(ChangeRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(RestoreRunBackSpeed, 4, AuraType.UseNormalMovementSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // 115069 - Stagger
@@ -228,6 +228,32 @@ namespace Scripts.Spells.Monk
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StaggerLight, SpellIds.StaggerModerate, SpellIds.StaggerHeavy);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectAbsorbHandler(AbsorbNormal, 1, false, AuraScriptHookType.EffectAbsorb));
+            Effects.Add(new EffectAbsorbHandler(AbsorbMagic, 2, false, AuraScriptHookType.EffectAbsorb));
+        }
+
+        public static Aura FindExistingStaggerEffect(Unit unit)
+        {
+            Aura auraLight = unit.GetAura(SpellIds.StaggerLight);
+
+            if (auraLight != null)
+                return auraLight;
+
+            Aura auraModerate = unit.GetAura(SpellIds.StaggerModerate);
+
+            if (auraModerate != null)
+                return auraModerate;
+
+            Aura auraHeavy = unit.GetAura(SpellIds.StaggerHeavy);
+
+            if (auraHeavy != null)
+                return auraHeavy;
+
+            return null;
         }
 
         private void AbsorbNormal(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
@@ -282,12 +308,6 @@ namespace Scripts.Spells.Monk
             }
         }
 
-        public override void Register()
-        {
-            Effects.Add(new EffectAbsorbHandler(AbsorbNormal, 1, false, AuraScriptHookType.EffectAbsorb));
-            Effects.Add(new EffectAbsorbHandler(AbsorbMagic, 2, false, AuraScriptHookType.EffectAbsorb));
-        }
-
         private void AddAndRefreshStagger(float amount)
         {
             Unit target = GetTarget();
@@ -338,26 +358,6 @@ namespace Scripts.Spells.Monk
             // We only set the total stagger amount. The amount per tick will be set by the stagger spell script
             unit.CastSpell(unit, staggerSpellId, new CastSpellExtraArgs(SpellValueMod.BasePoint1, (int)staggerAmount).SetTriggerFlags(TriggerCastFlags.FullMask));
         }
-
-        public static Aura FindExistingStaggerEffect(Unit unit)
-        {
-            Aura auraLight = unit.GetAura(SpellIds.StaggerLight);
-
-            if (auraLight != null)
-                return auraLight;
-
-            Aura auraModerate = unit.GetAura(SpellIds.StaggerModerate);
-
-            if (auraModerate != null)
-                return auraModerate;
-
-            Aura auraHeavy = unit.GetAura(SpellIds.StaggerHeavy);
-
-            if (auraHeavy != null)
-                return auraHeavy;
-
-            return null;
-        }
     }
 
     [Script] // 124255 - Stagger - SPELL_MONK_STAGGER_DAMAGE_AURA
@@ -368,6 +368,11 @@ namespace Scripts.Spells.Monk
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StaggerLight, SpellIds.StaggerModerate, SpellIds.StaggerHeavy);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
         }
 
         private void OnPeriodicDamage(AuraEffect aurEff)
@@ -387,11 +392,6 @@ namespace Scripts.Spells.Monk
                 }
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
-        }
     }
 
     [Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - SPELL_MONK_STAGGER_LIGHT / SPELL_MONK_STAGGER_MODERATE / SPELL_MONK_STAGGER_HEAVY
@@ -410,6 +410,12 @@ namespace Scripts.Spells.Monk
             _period = (float)Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, GetCastDifficulty()).GetEffect(0).ApplyAuraPeriod;
 
             return true;
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -434,12 +440,6 @@ namespace Scripts.Spells.Monk
 
             // Remove Damage aura
             GetTarget().RemoveAura(SpellIds.StaggerDamageAura);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void CastOrChangeTickDamage(float tickDamage)

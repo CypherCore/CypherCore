@@ -9,10 +9,23 @@ namespace Game.Entities
 {
     public class PlayerInfo
     {
-        public List<PlayerCreateInfoAction> Action { get; set; } = new();
-        public List<uint>[] CastSpells { get; set; } = new List<uint>[(int)PlayerCreateMode.Max];
+        public struct CreatePosition
+        {
+            public WorldLocation Loc { get; set; }
+            public ulong? TransportGuid { get; set; }
+        }
+
         public CreatePosition CreatePositionInfo;
         public CreatePosition? CreatePositionNPE;
+
+        public PlayerInfo()
+        {
+            for (var i = 0; i < CastSpells.Length; ++i)
+                CastSpells[i] = new List<uint>();
+        }
+
+        public List<PlayerCreateInfoAction> Action { get; set; } = new();
+        public List<uint>[] CastSpells { get; set; } = new List<uint>[(int)PlayerCreateMode.Max];
         public List<uint> CustomSpells { get; set; } = new();
 
         public uint? IntroMovieId { get; set; }
@@ -24,17 +37,5 @@ namespace Game.Entities
 
         public PlayerLevelInfo[] LevelInfo { get; set; } = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
         public List<SkillRaceClassInfoRecord> Skills { get; set; } = new();
-
-        public PlayerInfo()
-        {
-            for (var i = 0; i < CastSpells.Length; ++i)
-                CastSpells[i] = new List<uint>();
-        }
-
-        public struct CreatePosition
-        {
-            public WorldLocation Loc { get; set; }
-            public ulong? TransportGuid { get; set; }
-        }
     }
 }

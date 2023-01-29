@@ -15,126 +15,6 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.DfJoin)]
-        private void HandleLfgJoin(DFJoin dfJoin)
-        {
-            if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser) ||
-                (GetPlayer().GetGroup() &&
-                 GetPlayer().GetGroup().GetLeaderGUID() != GetPlayer().GetGUID() &&
-                 (GetPlayer().GetGroup().GetMembersCount() == MapConst.MaxGroupSize || !GetPlayer().GetGroup().IsLFGGroup())))
-                return;
-
-            if (dfJoin.Slots.Empty())
-            {
-                Log.outDebug(LogFilter.Lfg, "CMSG_DF_JOIN {0} no dungeons selected", GetPlayerInfo());
-
-                return;
-            }
-
-            List<uint> newDungeons = new();
-
-            foreach (uint slot in dfJoin.Slots)
-            {
-                uint dungeon = slot & 0x00FFFFFF;
-
-                if (CliDB.LFGDungeonsStorage.ContainsKey(dungeon))
-                    newDungeons.Add(dungeon);
-            }
-
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_JOIN {0} roles: {1}, Dungeons: {2}", GetPlayerInfo(), dfJoin.Roles, newDungeons.Count);
-
-            Global.LFGMgr.JoinLfg(GetPlayer(), dfJoin.Roles, newDungeons);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfLeave)]
-        private void HandleLfgLeave(DFLeave dfLeave)
-        {
-            Group group = GetPlayer().GetGroup();
-
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent Guid {2}.", GetPlayerInfo(), group ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
-
-            // Check cheating - only leader can leave the queue
-            if (!group ||
-                group.GetLeaderGUID() == dfLeave.Ticket.RequesterGuid)
-                Global.LFGMgr.LeaveLfg(dfLeave.Ticket.RequesterGuid);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfProposalResponse)]
-        private void HandleLfgProposalResult(DFProposalResponse dfProposalResponse)
-        {
-            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_PROPOSAL_RESULT {0} proposal: {1} accept: {2}", GetPlayerInfo(), dfProposalResponse.ProposalID, dfProposalResponse.Accepted ? 1 : 0);
-            Global.LFGMgr.UpdateProposal(dfProposalResponse.ProposalID, GetPlayer().GetGUID(), dfProposalResponse.Accepted);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfSetRoles)]
-        private void HandleLfgSetRoles(DFSetRoles dfSetRoles)
-        {
-            ObjectGuid guid = GetPlayer().GetGUID();
-            Group group = GetPlayer().GetGroup();
-
-            if (!group)
-            {
-                Log.outDebug(LogFilter.Lfg,
-                             "CMSG_DF_SET_ROLES {0} Not in group",
-                             GetPlayerInfo());
-
-                return;
-            }
-
-            ObjectGuid gguid = group.GetGUID();
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_SET_ROLES: Group {0}, Player {1}, Roles: {2}", gguid.ToString(), GetPlayerInfo(), dfSetRoles.RolesDesired);
-            Global.LFGMgr.UpdateRoleCheck(gguid, guid, dfSetRoles.RolesDesired);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfBootPlayerVote)]
-        private void HandleLfgSetBootVote(DFBootPlayerVote dfBootPlayerVote)
-        {
-            ObjectGuid guid = GetPlayer().GetGUID();
-            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_SET_BOOT_VOTE {0} agree: {1}", GetPlayerInfo(), dfBootPlayerVote.Vote ? 1 : 0);
-            Global.LFGMgr.UpdateBoot(guid, dfBootPlayerVote.Vote);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfTeleport)]
-        private void HandleLfgTeleport(DFTeleport dfTeleport)
-        {
-            Log.outDebug(LogFilter.Lfg, "CMSG_DF_TELEPORT {0} out: {1}", GetPlayerInfo(), dfTeleport.TeleportOut ? 1 : 0);
-            Global.LFGMgr.TeleportPlayer(GetPlayer(), dfTeleport.TeleportOut, true);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfGetSystemInfo, Processing = PacketProcessing.ThreadSafe)]
-        private void HandleDfGetSystemInfo(DFGetSystemInfo dfGetSystemInfo)
-        {
-            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_Lock_INFO_REQUEST {0} for {1}", GetPlayerInfo(), (dfGetSystemInfo.Player ? "player" : "party"));
-
-            if (dfGetSystemInfo.Player)
-                SendLfgPlayerLockInfo();
-            else
-                SendLfgPartyLockInfo();
-        }
-
-        [WorldPacketHandler(ClientOpcodes.DfGetJoinStatus, Processing = PacketProcessing.ThreadSafe)]
-        private void HandleDfGetJoinStatus(DFGetJoinStatus packet)
-        {
-            if (!GetPlayer().IsUsingLfg())
-                return;
-
-            ObjectGuid guid = GetPlayer().GetGUID();
-            LfgUpdateData updateData = Global.LFGMgr.GetLfgStatus(guid);
-
-            if (GetPlayer().GetGroup())
-            {
-                SendLfgUpdateStatus(updateData, true);
-                updateData.Dungeons.Clear();
-                SendLfgUpdateStatus(updateData, false);
-            }
-            else
-            {
-                SendLfgUpdateStatus(updateData, false);
-                updateData.Dungeons.Clear();
-                SendLfgUpdateStatus(updateData, true);
-            }
-        }
-
         public void SendLfgPlayerLockInfo()
         {
             // Get Random dungeons that can be done at a certain level and expansion
@@ -576,6 +456,126 @@ namespace Game
         {
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_TELEPORT_DENIED {0} reason: {1}", GetPlayerInfo(), err);
             SendPacket(new LfgTeleportDenied(err));
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfJoin)]
+        private void HandleLfgJoin(DFJoin dfJoin)
+        {
+            if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser) ||
+                (GetPlayer().GetGroup() &&
+                 GetPlayer().GetGroup().GetLeaderGUID() != GetPlayer().GetGUID() &&
+                 (GetPlayer().GetGroup().GetMembersCount() == MapConst.MaxGroupSize || !GetPlayer().GetGroup().IsLFGGroup())))
+                return;
+
+            if (dfJoin.Slots.Empty())
+            {
+                Log.outDebug(LogFilter.Lfg, "CMSG_DF_JOIN {0} no dungeons selected", GetPlayerInfo());
+
+                return;
+            }
+
+            List<uint> newDungeons = new();
+
+            foreach (uint slot in dfJoin.Slots)
+            {
+                uint dungeon = slot & 0x00FFFFFF;
+
+                if (CliDB.LFGDungeonsStorage.ContainsKey(dungeon))
+                    newDungeons.Add(dungeon);
+            }
+
+            Log.outDebug(LogFilter.Lfg, "CMSG_DF_JOIN {0} roles: {1}, Dungeons: {2}", GetPlayerInfo(), dfJoin.Roles, newDungeons.Count);
+
+            Global.LFGMgr.JoinLfg(GetPlayer(), dfJoin.Roles, newDungeons);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfLeave)]
+        private void HandleLfgLeave(DFLeave dfLeave)
+        {
+            Group group = GetPlayer().GetGroup();
+
+            Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent Guid {2}.", GetPlayerInfo(), group ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
+
+            // Check cheating - only leader can leave the queue
+            if (!group ||
+                group.GetLeaderGUID() == dfLeave.Ticket.RequesterGuid)
+                Global.LFGMgr.LeaveLfg(dfLeave.Ticket.RequesterGuid);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfProposalResponse)]
+        private void HandleLfgProposalResult(DFProposalResponse dfProposalResponse)
+        {
+            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_PROPOSAL_RESULT {0} proposal: {1} accept: {2}", GetPlayerInfo(), dfProposalResponse.ProposalID, dfProposalResponse.Accepted ? 1 : 0);
+            Global.LFGMgr.UpdateProposal(dfProposalResponse.ProposalID, GetPlayer().GetGUID(), dfProposalResponse.Accepted);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfSetRoles)]
+        private void HandleLfgSetRoles(DFSetRoles dfSetRoles)
+        {
+            ObjectGuid guid = GetPlayer().GetGUID();
+            Group group = GetPlayer().GetGroup();
+
+            if (!group)
+            {
+                Log.outDebug(LogFilter.Lfg,
+                             "CMSG_DF_SET_ROLES {0} Not in group",
+                             GetPlayerInfo());
+
+                return;
+            }
+
+            ObjectGuid gguid = group.GetGUID();
+            Log.outDebug(LogFilter.Lfg, "CMSG_DF_SET_ROLES: Group {0}, Player {1}, Roles: {2}", gguid.ToString(), GetPlayerInfo(), dfSetRoles.RolesDesired);
+            Global.LFGMgr.UpdateRoleCheck(gguid, guid, dfSetRoles.RolesDesired);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfBootPlayerVote)]
+        private void HandleLfgSetBootVote(DFBootPlayerVote dfBootPlayerVote)
+        {
+            ObjectGuid guid = GetPlayer().GetGUID();
+            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_SET_BOOT_VOTE {0} agree: {1}", GetPlayerInfo(), dfBootPlayerVote.Vote ? 1 : 0);
+            Global.LFGMgr.UpdateBoot(guid, dfBootPlayerVote.Vote);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfTeleport)]
+        private void HandleLfgTeleport(DFTeleport dfTeleport)
+        {
+            Log.outDebug(LogFilter.Lfg, "CMSG_DF_TELEPORT {0} out: {1}", GetPlayerInfo(), dfTeleport.TeleportOut ? 1 : 0);
+            Global.LFGMgr.TeleportPlayer(GetPlayer(), dfTeleport.TeleportOut, true);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfGetSystemInfo, Processing = PacketProcessing.ThreadSafe)]
+        private void HandleDfGetSystemInfo(DFGetSystemInfo dfGetSystemInfo)
+        {
+            Log.outDebug(LogFilter.Lfg, "CMSG_LFG_Lock_INFO_REQUEST {0} for {1}", GetPlayerInfo(), (dfGetSystemInfo.Player ? "player" : "party"));
+
+            if (dfGetSystemInfo.Player)
+                SendLfgPlayerLockInfo();
+            else
+                SendLfgPartyLockInfo();
+        }
+
+        [WorldPacketHandler(ClientOpcodes.DfGetJoinStatus, Processing = PacketProcessing.ThreadSafe)]
+        private void HandleDfGetJoinStatus(DFGetJoinStatus packet)
+        {
+            if (!GetPlayer().IsUsingLfg())
+                return;
+
+            ObjectGuid guid = GetPlayer().GetGUID();
+            LfgUpdateData updateData = Global.LFGMgr.GetLfgStatus(guid);
+
+            if (GetPlayer().GetGroup())
+            {
+                SendLfgUpdateStatus(updateData, true);
+                updateData.Dungeons.Clear();
+                SendLfgUpdateStatus(updateData, false);
+            }
+            else
+            {
+                SendLfgUpdateStatus(updateData, false);
+                updateData.Dungeons.Clear();
+                SendLfgUpdateStatus(updateData, true);
+            }
         }
     }
 }

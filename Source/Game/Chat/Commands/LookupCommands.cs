@@ -15,689 +15,6 @@ namespace Game.Chat
     [CommandGroup("lookup")]
     internal class LookupCommands
     {
-        private static readonly int maxResults = 50;
-
-        [Command("area", RBACPermissions.CommandLookupArea, true)]
-        private static bool HandleLookupAreaCommand(CommandHandler handler, string namePart)
-        {
-            namePart = namePart.ToLower();
-
-            bool found = false;
-            uint count = 0;
-
-            // Search in AreaTable.dbc
-            foreach (var areaEntry in CliDB.AreaTableStorage.Values)
-            {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = areaEntry.AreaName[locale];
-
-                if (string.IsNullOrEmpty(name))
-                    continue;
-
-                if (!name.Like(namePart))
-                {
-                    locale = 0;
-
-                    for (; locale < Locale.Total; ++locale)
-                    {
-                        if (locale == handler.GetSessionDbcLocale())
-                            continue;
-
-                        name = areaEntry.AreaName[locale];
-
-                        if (name.IsEmpty())
-                            continue;
-
-                        if (name.Like(namePart))
-                            break;
-                    }
-                }
-
-                if (locale < Locale.Total)
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    // send area in "Id - [Name]" format
-                    string ss = "";
-
-                    if (handler.GetSession() != null)
-                        ss += areaEntry.Id + " - |cffffffff|Harea:" + areaEntry.Id + "|h[" + name + "]|h|r";
-                    else
-                        ss += areaEntry.Id + " - " + name;
-
-                    handler.SendSysMessage(ss);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNoareafound);
-
-            return true;
-        }
-
-        [Command("creature", RBACPermissions.CommandLookupCreature, true)]
-        private static bool HandleLookupCreatureCommand(CommandHandler handler, string namePart)
-        {
-            namePart = namePart.ToLower();
-
-            bool found = false;
-            uint count = 0;
-
-            var ctc = Global.ObjectMgr.GetCreatureTemplates();
-
-            foreach (var template in ctc)
-            {
-                uint id = template.Value.Entry;
-                byte localeIndex = handler.GetSessionDbLocaleIndex();
-                CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(id);
-
-                if (creatureLocale != null)
-                    if (creatureLocale.Name.Length > localeIndex &&
-                        !string.IsNullOrEmpty(creatureLocale.Name[localeIndex]))
-                    {
-                        string name = creatureLocale.Name[localeIndex];
-
-                        if (name.Like(namePart))
-                        {
-                            if (maxResults != 0 &&
-                                count++ == maxResults)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                                return true;
-                            }
-
-                            if (handler.GetSession() != null)
-                                handler.SendSysMessage(CypherStrings.CreatureEntryListChat, id, id, name);
-                            else
-                                handler.SendSysMessage(CypherStrings.CreatureEntryListConsole, id, name);
-
-                            if (!found)
-                                found = true;
-
-                            continue;
-                        }
-                    }
-
-                string _name = template.Value.Name;
-
-                if (string.IsNullOrEmpty(_name))
-                    continue;
-
-                if (_name.Like(namePart))
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.CreatureEntryListChat, id, id, _name);
-                    else
-                        handler.SendSysMessage(CypherStrings.CreatureEntryListConsole, id, _name);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNocreaturefound);
-
-            return true;
-        }
-
-        [Command("event", RBACPermissions.CommandLookupEvent, true)]
-        private static bool HandleLookupEventCommand(CommandHandler handler, string namePart)
-        {
-            namePart = namePart.ToLower();
-
-            bool found = false;
-            uint count = 0;
-
-            var events = Global.GameEventMgr.GetEventMap();
-            var activeEvents = Global.GameEventMgr.GetActiveEventList();
-
-            for (ushort id = 0; id < events.Length; ++id)
-            {
-                GameEventData eventData = events[id];
-
-                string descr = eventData.Description;
-
-                if (string.IsNullOrEmpty(descr))
-                    continue;
-
-                if (descr.Like(namePart))
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    string active = activeEvents.Contains(id) ? handler.GetCypherString(CypherStrings.Active) : "";
-
-                    if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.EventEntryListChat, id, id, eventData.Description, active);
-                    else
-                        handler.SendSysMessage(CypherStrings.EventEntryListConsole, id, eventData.Description, active);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.Noeventfound);
-
-            return true;
-        }
-
-        [Command("faction", RBACPermissions.CommandLookupFaction, true)]
-        private static bool HandleLookupFactionCommand(CommandHandler handler, string namePart)
-        {
-            // Can be NULL at console call
-            Player target = handler.GetSelectedPlayer();
-
-            namePart = namePart.ToLower();
-
-            bool found = false;
-            uint count = 0;
-
-
-            foreach (var factionEntry in CliDB.FactionStorage.Values)
-            {
-                FactionState factionState = target ? target.GetReputationMgr().GetState(factionEntry) : null;
-
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = factionEntry.Name[locale];
-
-                if (string.IsNullOrEmpty(name))
-                    continue;
-
-                if (!name.Like(namePart))
-                {
-                    locale = 0;
-
-                    for (; locale < Locale.Total; ++locale)
-                    {
-                        if (locale == handler.GetSessionDbcLocale())
-                            continue;
-
-                        name = factionEntry.Name[locale];
-
-                        if (name.IsEmpty())
-                            continue;
-
-                        if (name.Like(namePart))
-                            break;
-                    }
-                }
-
-                if (locale < Locale.Total)
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    // send faction in "Id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
-                    // or              "Id - [faction] [no reputation]" format
-                    StringBuilder ss = new();
-
-                    if (handler.GetSession() != null)
-                        ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1}]|h|r", factionEntry.Id, name);
-                    else
-                        ss.Append(factionEntry.Id + " - " + name);
-
-                    if (factionState != null) // and then Target != NULL also
-                    {
-                        uint index = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
-                        string rankName = handler.GetCypherString((CypherStrings)index);
-
-                        ss.AppendFormat(" {0}|h|r ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
-
-                        if (factionState.Flags.HasFlag(ReputationFlags.Visible))
-                            ss.Append(handler.GetCypherString(CypherStrings.FactionVisible));
-
-                        if (factionState.Flags.HasFlag(ReputationFlags.AtWar))
-                            ss.Append(handler.GetCypherString(CypherStrings.FactionAtwar));
-
-                        if (factionState.Flags.HasFlag(ReputationFlags.Peaceful))
-                            ss.Append(handler.GetCypherString(CypherStrings.FactionPeaceForced));
-
-                        if (factionState.Flags.HasFlag(ReputationFlags.Hidden))
-                            ss.Append(handler.GetCypherString(CypherStrings.FactionHidden));
-
-                        if (factionState.Flags.HasFlag(ReputationFlags.Header))
-                            ss.Append(handler.GetCypherString(CypherStrings.FactionInvisibleForced));
-
-                        if (factionState.Flags.HasFlag(ReputationFlags.Inactive))
-                            ss.Append(handler.GetCypherString(CypherStrings.FactionInactive));
-                    }
-                    else
-                    {
-                        ss.Append(handler.GetCypherString(CypherStrings.FactionNoreputation));
-                    }
-
-                    handler.SendSysMessage(ss.ToString());
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandFactionNotfound);
-
-            return true;
-        }
-
-        [Command("itemset", RBACPermissions.CommandLookupItemset, true)]
-        private static bool HandleLookupItemSetCommand(CommandHandler handler, string namePart)
-        {
-            namePart = namePart.ToLower();
-
-            bool found = false;
-            uint count = 0;
-
-            // Search in ItemSet.dbc
-            foreach (var set in CliDB.ItemSetStorage.Values)
-            {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = set.Name[locale];
-
-                if (name.IsEmpty())
-                    continue;
-
-                if (!name.Like(namePart))
-                {
-                    locale = 0;
-
-                    for (; locale < Locale.Total; ++locale)
-                    {
-                        if (locale == handler.GetSessionDbcLocale())
-                            continue;
-
-                        name = set.Name[locale];
-
-                        if (name.IsEmpty())
-                            continue;
-
-                        if (name.Like(namePart))
-                            break;
-                    }
-                }
-
-                if (locale < Locale.Total)
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    // send Item set in "Id - [namedlink locale]" format
-                    if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.ItemsetListChat, set.Id, set.Id, name, "");
-                    else
-                        handler.SendSysMessage(CypherStrings.ItemsetListConsole, set.Id, name, "");
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNoitemsetfound);
-
-            return true;
-        }
-
-        [Command("object", RBACPermissions.CommandLookupObject, true)]
-        private static bool HandleLookupObjectCommand(CommandHandler handler, string namePart)
-        {
-            bool found = false;
-            uint count = 0;
-
-            var gotc = Global.ObjectMgr.GetGameObjectTemplates();
-
-            foreach (var template in gotc.Values)
-            {
-                byte localeIndex = handler.GetSessionDbLocaleIndex();
-
-                GameObjectLocale objectLocalte = Global.ObjectMgr.GetGameObjectLocale(template.entry);
-
-                if (objectLocalte != null)
-                    if (objectLocalte.Name.Length > localeIndex &&
-                        !string.IsNullOrEmpty(objectLocalte.Name[localeIndex]))
-                    {
-                        string name = objectLocalte.Name[localeIndex];
-
-                        if (name.Like(namePart))
-                        {
-                            if (maxResults != 0 &&
-                                count++ == maxResults)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                                return true;
-                            }
-
-                            if (handler.GetSession() != null)
-                                handler.SendSysMessage(CypherStrings.GoEntryListChat, template.entry, template.entry, name);
-                            else
-                                handler.SendSysMessage(CypherStrings.GoEntryListConsole, template.entry, name);
-
-                            if (!found)
-                                found = true;
-
-                            continue;
-                        }
-                    }
-
-                string _name = template.name;
-
-                if (string.IsNullOrEmpty(_name))
-                    continue;
-
-                if (_name.Like(namePart))
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.GoEntryListChat, template.entry, template.entry, _name);
-                    else
-                        handler.SendSysMessage(CypherStrings.GoEntryListConsole, template.entry, _name);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNogameobjectfound);
-
-            return true;
-        }
-
-        [Command("skill", RBACPermissions.CommandLookupSkill, true)]
-        private static bool HandleLookupSkillCommand(CommandHandler handler, string namePart)
-        {
-            // can be NULL in console call
-            Player target = handler.GetSelectedPlayer();
-
-            bool found = false;
-            uint count = 0;
-
-            // Search in SkillLine.dbc
-            foreach (var skillInfo in CliDB.SkillLineStorage.Values)
-            {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = skillInfo.DisplayName[locale];
-
-                if (string.IsNullOrEmpty(name))
-                    continue;
-
-                if (!name.Like(namePart))
-                {
-                    locale = 0;
-
-                    for (; locale < Locale.Total; ++locale)
-                    {
-                        if (locale == handler.GetSessionDbcLocale())
-                            continue;
-
-                        name = skillInfo.DisplayName[locale];
-
-                        if (name.IsEmpty())
-                            continue;
-
-                        if (name.Like(namePart))
-                            break;
-                    }
-                }
-
-                if (locale < Locale.Total)
-                {
-                    if (maxResults != 0 &&
-                        count++ == maxResults)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                        return true;
-                    }
-
-                    string valStr = "";
-                    string knownStr = "";
-
-                    if (target && target.HasSkill((SkillType)skillInfo.Id))
-                    {
-                        knownStr = handler.GetCypherString(CypherStrings.Known);
-                        uint curValue = target.GetPureSkillValue((SkillType)skillInfo.Id);
-                        uint maxValue = target.GetPureMaxSkillValue((SkillType)skillInfo.Id);
-                        uint permValue = target.GetSkillPermBonusValue(skillInfo.Id);
-                        uint tempValue = target.GetSkillTempBonusValue(skillInfo.Id);
-
-                        string valFormat = handler.GetCypherString(CypherStrings.SkillValues);
-                        valStr = string.Format(valFormat, curValue, maxValue, permValue, tempValue);
-                    }
-
-                    // send skill in "Id - [namedlink locale]" format
-                    if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.SkillListChat, skillInfo.Id, skillInfo.Id, name, "", knownStr, valStr);
-                    else
-                        handler.SendSysMessage(CypherStrings.SkillListConsole, skillInfo.Id, name, "", knownStr, valStr);
-
-                    if (!found)
-                        found = true;
-                }
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNoskillfound);
-
-            return true;
-        }
-
-        [Command("taxinode", RBACPermissions.CommandLookupTaxinode, true)]
-        private static bool HandleLookupTaxiNodeCommand(CommandHandler handler, string namePart)
-        {
-            bool found = false;
-            uint count = 0;
-            Locale locale = handler.GetSessionDbcLocale();
-
-            // Search in TaxiNodes.dbc
-            foreach (var nodeEntry in CliDB.TaxiNodesStorage.Values)
-            {
-                string name = nodeEntry.Name[locale];
-
-                if (string.IsNullOrEmpty(name))
-                    continue;
-
-                if (!name.Like(namePart))
-                    continue;
-
-                if (maxResults != 0 &&
-                    count++ == maxResults)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                    return true;
-                }
-
-                // send taxinode in "Id - [Name] (Map:m X:x Y:y Z:z)" format
-                if (handler.GetSession() != null)
-                    handler.SendSysMessage(CypherStrings.TaxinodeEntryListChat,
-                                           nodeEntry.Id,
-                                           nodeEntry.Id,
-                                           name,
-                                           "",
-                                           nodeEntry.ContinentID,
-                                           nodeEntry.Pos.X,
-                                           nodeEntry.Pos.Y,
-                                           nodeEntry.Pos.Z);
-                else
-                    handler.SendSysMessage(CypherStrings.TaxinodeEntryListConsole,
-                                           nodeEntry.Id,
-                                           name,
-                                           "",
-                                           nodeEntry.ContinentID,
-                                           nodeEntry.Pos.X,
-                                           nodeEntry.Pos.Y,
-                                           nodeEntry.Pos.Z);
-
-                if (!found)
-                    found = true;
-            }
-
-            if (!found)
-                handler.SendSysMessage(CypherStrings.CommandNotaxinodefound);
-
-            return true;
-        }
-
-        [Command("tele", RBACPermissions.CommandLookupTele, true)]
-        private static bool HandleLookupTeleCommand(CommandHandler handler, string namePart)
-        {
-            namePart = namePart.ToLower();
-
-            StringBuilder reply = new();
-            uint count = 0;
-            bool limitReached = false;
-
-            foreach (var tele in Global.ObjectMgr.gameTeleStorage)
-            {
-                if (!tele.Value.Name.Like(namePart))
-                    continue;
-
-                if (maxResults != 0 &&
-                    count++ == maxResults)
-                {
-                    limitReached = true;
-
-                    break;
-                }
-
-                if (handler.GetPlayer() != null)
-                    reply.AppendFormat("  |cffffffff|Htele:{0}|h[{1}]|h|r\n", tele.Key, tele.Value.Name);
-                else
-                    reply.AppendFormat("  {0} : {1}\n", tele.Key, tele.Value.Name);
-            }
-
-            if (reply.Capacity == 0)
-                handler.SendSysMessage(CypherStrings.CommandTeleNolocation);
-            else
-                handler.SendSysMessage(CypherStrings.CommandTeleLocation, reply.ToString());
-
-            if (limitReached)
-                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-            return true;
-        }
-
-        [Command("title", RBACPermissions.CommandLookupTitle, true)]
-        private static bool HandleLookupTitleCommand(CommandHandler handler, string namePart)
-        {
-            // can be NULL in console call
-            Player target = handler.GetSelectedPlayer();
-
-            // title Name have single string arg for player Name
-            string targetName = target ? target.GetName() : "NAME";
-
-            uint counter = 0; // Counter for figure out that we found smth.
-
-            // Search in CharTitles.dbc
-            foreach (var titleInfo in CliDB.CharTitlesStorage.Values)
-                for (Gender gender = Gender.Male; gender <= Gender.Female; ++gender)
-                {
-                    if (target && target.GetGender() != gender)
-                        continue;
-
-                    Locale locale = handler.GetSessionDbcLocale();
-                    string name = gender == Gender.Male ? titleInfo.Name[locale] : titleInfo.Name1[locale];
-
-                    if (string.IsNullOrEmpty(name))
-                        continue;
-
-                    if (!name.Like(namePart))
-                    {
-                        locale = 0;
-
-                        for (; locale < Locale.Total; ++locale)
-                        {
-                            if (locale == handler.GetSessionDbcLocale())
-                                continue;
-
-                            name = (gender == Gender.Male ? titleInfo.Name : titleInfo.Name1)[locale];
-
-                            if (name.IsEmpty())
-                                continue;
-
-                            if (name.Like(namePart))
-                                break;
-                        }
-                    }
-
-                    if (locale < Locale.Total)
-                    {
-                        if (maxResults != 0 &&
-                            counter == maxResults)
-                        {
-                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
-
-                            return true;
-                        }
-
-                        string knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
-
-                        string activeStr = target && target.PlayerData.PlayerTitle == titleInfo.MaskID
-                                               ? handler.GetCypherString(CypherStrings.Active)
-                                               : "";
-
-                        string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
-
-                        // send title in "Id (idx:idx) - [namedlink locale]" format
-                        if (handler.GetSession() != null)
-                            handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleNameStr, "", knownStr, activeStr);
-                        else
-                            handler.SendSysMessage(CypherStrings.TitleListConsole, titleInfo.Id, titleInfo.MaskID, titleNameStr, "", knownStr, activeStr);
-
-                        ++counter;
-                    }
-                }
-
-            if (counter == 0) // if counter == 0 then we found nth
-                handler.SendSysMessage(CypherStrings.CommandNotitlefound);
-
-            return true;
-        }
-
         [CommandGroup("Item")]
         private class LookupItemCommands
         {
@@ -1517,6 +834,689 @@ namespace Game.Chat
 
                 return true;
             }
+        }
+
+        private static readonly int maxResults = 50;
+
+        [Command("area", RBACPermissions.CommandLookupArea, true)]
+        private static bool HandleLookupAreaCommand(CommandHandler handler, string namePart)
+        {
+            namePart = namePart.ToLower();
+
+            bool found = false;
+            uint count = 0;
+
+            // Search in AreaTable.dbc
+            foreach (var areaEntry in CliDB.AreaTableStorage.Values)
+            {
+                Locale locale = handler.GetSessionDbcLocale();
+                string name = areaEntry.AreaName[locale];
+
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                if (!name.Like(namePart))
+                {
+                    locale = 0;
+
+                    for (; locale < Locale.Total; ++locale)
+                    {
+                        if (locale == handler.GetSessionDbcLocale())
+                            continue;
+
+                        name = areaEntry.AreaName[locale];
+
+                        if (name.IsEmpty())
+                            continue;
+
+                        if (name.Like(namePart))
+                            break;
+                    }
+                }
+
+                if (locale < Locale.Total)
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    // send area in "Id - [Name]" format
+                    string ss = "";
+
+                    if (handler.GetSession() != null)
+                        ss += areaEntry.Id + " - |cffffffff|Harea:" + areaEntry.Id + "|h[" + name + "]|h|r";
+                    else
+                        ss += areaEntry.Id + " - " + name;
+
+                    handler.SendSysMessage(ss);
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandNoareafound);
+
+            return true;
+        }
+
+        [Command("creature", RBACPermissions.CommandLookupCreature, true)]
+        private static bool HandleLookupCreatureCommand(CommandHandler handler, string namePart)
+        {
+            namePart = namePart.ToLower();
+
+            bool found = false;
+            uint count = 0;
+
+            var ctc = Global.ObjectMgr.GetCreatureTemplates();
+
+            foreach (var template in ctc)
+            {
+                uint id = template.Value.Entry;
+                byte localeIndex = handler.GetSessionDbLocaleIndex();
+                CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(id);
+
+                if (creatureLocale != null)
+                    if (creatureLocale.Name.Length > localeIndex &&
+                        !string.IsNullOrEmpty(creatureLocale.Name[localeIndex]))
+                    {
+                        string name = creatureLocale.Name[localeIndex];
+
+                        if (name.Like(namePart))
+                        {
+                            if (maxResults != 0 &&
+                                count++ == maxResults)
+                            {
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                                return true;
+                            }
+
+                            if (handler.GetSession() != null)
+                                handler.SendSysMessage(CypherStrings.CreatureEntryListChat, id, id, name);
+                            else
+                                handler.SendSysMessage(CypherStrings.CreatureEntryListConsole, id, name);
+
+                            if (!found)
+                                found = true;
+
+                            continue;
+                        }
+                    }
+
+                string _name = template.Value.Name;
+
+                if (string.IsNullOrEmpty(_name))
+                    continue;
+
+                if (_name.Like(namePart))
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    if (handler.GetSession() != null)
+                        handler.SendSysMessage(CypherStrings.CreatureEntryListChat, id, id, _name);
+                    else
+                        handler.SendSysMessage(CypherStrings.CreatureEntryListConsole, id, _name);
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandNocreaturefound);
+
+            return true;
+        }
+
+        [Command("event", RBACPermissions.CommandLookupEvent, true)]
+        private static bool HandleLookupEventCommand(CommandHandler handler, string namePart)
+        {
+            namePart = namePart.ToLower();
+
+            bool found = false;
+            uint count = 0;
+
+            var events = Global.GameEventMgr.GetEventMap();
+            var activeEvents = Global.GameEventMgr.GetActiveEventList();
+
+            for (ushort id = 0; id < events.Length; ++id)
+            {
+                GameEventData eventData = events[id];
+
+                string descr = eventData.Description;
+
+                if (string.IsNullOrEmpty(descr))
+                    continue;
+
+                if (descr.Like(namePart))
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    string active = activeEvents.Contains(id) ? handler.GetCypherString(CypherStrings.Active) : "";
+
+                    if (handler.GetSession() != null)
+                        handler.SendSysMessage(CypherStrings.EventEntryListChat, id, id, eventData.Description, active);
+                    else
+                        handler.SendSysMessage(CypherStrings.EventEntryListConsole, id, eventData.Description, active);
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.Noeventfound);
+
+            return true;
+        }
+
+        [Command("faction", RBACPermissions.CommandLookupFaction, true)]
+        private static bool HandleLookupFactionCommand(CommandHandler handler, string namePart)
+        {
+            // Can be NULL at console call
+            Player target = handler.GetSelectedPlayer();
+
+            namePart = namePart.ToLower();
+
+            bool found = false;
+            uint count = 0;
+
+
+            foreach (var factionEntry in CliDB.FactionStorage.Values)
+            {
+                FactionState factionState = target ? target.GetReputationMgr().GetState(factionEntry) : null;
+
+                Locale locale = handler.GetSessionDbcLocale();
+                string name = factionEntry.Name[locale];
+
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                if (!name.Like(namePart))
+                {
+                    locale = 0;
+
+                    for (; locale < Locale.Total; ++locale)
+                    {
+                        if (locale == handler.GetSessionDbcLocale())
+                            continue;
+
+                        name = factionEntry.Name[locale];
+
+                        if (name.IsEmpty())
+                            continue;
+
+                        if (name.Like(namePart))
+                            break;
+                    }
+                }
+
+                if (locale < Locale.Total)
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    // send faction in "Id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
+                    // or              "Id - [faction] [no reputation]" format
+                    StringBuilder ss = new();
+
+                    if (handler.GetSession() != null)
+                        ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1}]|h|r", factionEntry.Id, name);
+                    else
+                        ss.Append(factionEntry.Id + " - " + name);
+
+                    if (factionState != null) // and then Target != NULL also
+                    {
+                        uint index = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
+                        string rankName = handler.GetCypherString((CypherStrings)index);
+
+                        ss.AppendFormat(" {0}|h|r ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
+
+                        if (factionState.Flags.HasFlag(ReputationFlags.Visible))
+                            ss.Append(handler.GetCypherString(CypherStrings.FactionVisible));
+
+                        if (factionState.Flags.HasFlag(ReputationFlags.AtWar))
+                            ss.Append(handler.GetCypherString(CypherStrings.FactionAtwar));
+
+                        if (factionState.Flags.HasFlag(ReputationFlags.Peaceful))
+                            ss.Append(handler.GetCypherString(CypherStrings.FactionPeaceForced));
+
+                        if (factionState.Flags.HasFlag(ReputationFlags.Hidden))
+                            ss.Append(handler.GetCypherString(CypherStrings.FactionHidden));
+
+                        if (factionState.Flags.HasFlag(ReputationFlags.Header))
+                            ss.Append(handler.GetCypherString(CypherStrings.FactionInvisibleForced));
+
+                        if (factionState.Flags.HasFlag(ReputationFlags.Inactive))
+                            ss.Append(handler.GetCypherString(CypherStrings.FactionInactive));
+                    }
+                    else
+                    {
+                        ss.Append(handler.GetCypherString(CypherStrings.FactionNoreputation));
+                    }
+
+                    handler.SendSysMessage(ss.ToString());
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandFactionNotfound);
+
+            return true;
+        }
+
+        [Command("itemset", RBACPermissions.CommandLookupItemset, true)]
+        private static bool HandleLookupItemSetCommand(CommandHandler handler, string namePart)
+        {
+            namePart = namePart.ToLower();
+
+            bool found = false;
+            uint count = 0;
+
+            // Search in ItemSet.dbc
+            foreach (var set in CliDB.ItemSetStorage.Values)
+            {
+                Locale locale = handler.GetSessionDbcLocale();
+                string name = set.Name[locale];
+
+                if (name.IsEmpty())
+                    continue;
+
+                if (!name.Like(namePart))
+                {
+                    locale = 0;
+
+                    for (; locale < Locale.Total; ++locale)
+                    {
+                        if (locale == handler.GetSessionDbcLocale())
+                            continue;
+
+                        name = set.Name[locale];
+
+                        if (name.IsEmpty())
+                            continue;
+
+                        if (name.Like(namePart))
+                            break;
+                    }
+                }
+
+                if (locale < Locale.Total)
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    // send Item set in "Id - [namedlink locale]" format
+                    if (handler.GetSession() != null)
+                        handler.SendSysMessage(CypherStrings.ItemsetListChat, set.Id, set.Id, name, "");
+                    else
+                        handler.SendSysMessage(CypherStrings.ItemsetListConsole, set.Id, name, "");
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandNoitemsetfound);
+
+            return true;
+        }
+
+        [Command("object", RBACPermissions.CommandLookupObject, true)]
+        private static bool HandleLookupObjectCommand(CommandHandler handler, string namePart)
+        {
+            bool found = false;
+            uint count = 0;
+
+            var gotc = Global.ObjectMgr.GetGameObjectTemplates();
+
+            foreach (var template in gotc.Values)
+            {
+                byte localeIndex = handler.GetSessionDbLocaleIndex();
+
+                GameObjectLocale objectLocalte = Global.ObjectMgr.GetGameObjectLocale(template.entry);
+
+                if (objectLocalte != null)
+                    if (objectLocalte.Name.Length > localeIndex &&
+                        !string.IsNullOrEmpty(objectLocalte.Name[localeIndex]))
+                    {
+                        string name = objectLocalte.Name[localeIndex];
+
+                        if (name.Like(namePart))
+                        {
+                            if (maxResults != 0 &&
+                                count++ == maxResults)
+                            {
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                                return true;
+                            }
+
+                            if (handler.GetSession() != null)
+                                handler.SendSysMessage(CypherStrings.GoEntryListChat, template.entry, template.entry, name);
+                            else
+                                handler.SendSysMessage(CypherStrings.GoEntryListConsole, template.entry, name);
+
+                            if (!found)
+                                found = true;
+
+                            continue;
+                        }
+                    }
+
+                string _name = template.name;
+
+                if (string.IsNullOrEmpty(_name))
+                    continue;
+
+                if (_name.Like(namePart))
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    if (handler.GetSession() != null)
+                        handler.SendSysMessage(CypherStrings.GoEntryListChat, template.entry, template.entry, _name);
+                    else
+                        handler.SendSysMessage(CypherStrings.GoEntryListConsole, template.entry, _name);
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandNogameobjectfound);
+
+            return true;
+        }
+
+        [Command("skill", RBACPermissions.CommandLookupSkill, true)]
+        private static bool HandleLookupSkillCommand(CommandHandler handler, string namePart)
+        {
+            // can be NULL in console call
+            Player target = handler.GetSelectedPlayer();
+
+            bool found = false;
+            uint count = 0;
+
+            // Search in SkillLine.dbc
+            foreach (var skillInfo in CliDB.SkillLineStorage.Values)
+            {
+                Locale locale = handler.GetSessionDbcLocale();
+                string name = skillInfo.DisplayName[locale];
+
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                if (!name.Like(namePart))
+                {
+                    locale = 0;
+
+                    for (; locale < Locale.Total; ++locale)
+                    {
+                        if (locale == handler.GetSessionDbcLocale())
+                            continue;
+
+                        name = skillInfo.DisplayName[locale];
+
+                        if (name.IsEmpty())
+                            continue;
+
+                        if (name.Like(namePart))
+                            break;
+                    }
+                }
+
+                if (locale < Locale.Total)
+                {
+                    if (maxResults != 0 &&
+                        count++ == maxResults)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                        return true;
+                    }
+
+                    string valStr = "";
+                    string knownStr = "";
+
+                    if (target && target.HasSkill((SkillType)skillInfo.Id))
+                    {
+                        knownStr = handler.GetCypherString(CypherStrings.Known);
+                        uint curValue = target.GetPureSkillValue((SkillType)skillInfo.Id);
+                        uint maxValue = target.GetPureMaxSkillValue((SkillType)skillInfo.Id);
+                        uint permValue = target.GetSkillPermBonusValue(skillInfo.Id);
+                        uint tempValue = target.GetSkillTempBonusValue(skillInfo.Id);
+
+                        string valFormat = handler.GetCypherString(CypherStrings.SkillValues);
+                        valStr = string.Format(valFormat, curValue, maxValue, permValue, tempValue);
+                    }
+
+                    // send skill in "Id - [namedlink locale]" format
+                    if (handler.GetSession() != null)
+                        handler.SendSysMessage(CypherStrings.SkillListChat, skillInfo.Id, skillInfo.Id, name, "", knownStr, valStr);
+                    else
+                        handler.SendSysMessage(CypherStrings.SkillListConsole, skillInfo.Id, name, "", knownStr, valStr);
+
+                    if (!found)
+                        found = true;
+                }
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandNoskillfound);
+
+            return true;
+        }
+
+        [Command("taxinode", RBACPermissions.CommandLookupTaxinode, true)]
+        private static bool HandleLookupTaxiNodeCommand(CommandHandler handler, string namePart)
+        {
+            bool found = false;
+            uint count = 0;
+            Locale locale = handler.GetSessionDbcLocale();
+
+            // Search in TaxiNodes.dbc
+            foreach (var nodeEntry in CliDB.TaxiNodesStorage.Values)
+            {
+                string name = nodeEntry.Name[locale];
+
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                if (!name.Like(namePart))
+                    continue;
+
+                if (maxResults != 0 &&
+                    count++ == maxResults)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                    return true;
+                }
+
+                // send taxinode in "Id - [Name] (Map:m X:x Y:y Z:z)" format
+                if (handler.GetSession() != null)
+                    handler.SendSysMessage(CypherStrings.TaxinodeEntryListChat,
+                                           nodeEntry.Id,
+                                           nodeEntry.Id,
+                                           name,
+                                           "",
+                                           nodeEntry.ContinentID,
+                                           nodeEntry.Pos.X,
+                                           nodeEntry.Pos.Y,
+                                           nodeEntry.Pos.Z);
+                else
+                    handler.SendSysMessage(CypherStrings.TaxinodeEntryListConsole,
+                                           nodeEntry.Id,
+                                           name,
+                                           "",
+                                           nodeEntry.ContinentID,
+                                           nodeEntry.Pos.X,
+                                           nodeEntry.Pos.Y,
+                                           nodeEntry.Pos.Z);
+
+                if (!found)
+                    found = true;
+            }
+
+            if (!found)
+                handler.SendSysMessage(CypherStrings.CommandNotaxinodefound);
+
+            return true;
+        }
+
+        [Command("tele", RBACPermissions.CommandLookupTele, true)]
+        private static bool HandleLookupTeleCommand(CommandHandler handler, string namePart)
+        {
+            namePart = namePart.ToLower();
+
+            StringBuilder reply = new();
+            uint count = 0;
+            bool limitReached = false;
+
+            foreach (var tele in Global.ObjectMgr.gameTeleStorage)
+            {
+                if (!tele.Value.Name.Like(namePart))
+                    continue;
+
+                if (maxResults != 0 &&
+                    count++ == maxResults)
+                {
+                    limitReached = true;
+
+                    break;
+                }
+
+                if (handler.GetPlayer() != null)
+                    reply.AppendFormat("  |cffffffff|Htele:{0}|h[{1}]|h|r\n", tele.Key, tele.Value.Name);
+                else
+                    reply.AppendFormat("  {0} : {1}\n", tele.Key, tele.Value.Name);
+            }
+
+            if (reply.Capacity == 0)
+                handler.SendSysMessage(CypherStrings.CommandTeleNolocation);
+            else
+                handler.SendSysMessage(CypherStrings.CommandTeleLocation, reply.ToString());
+
+            if (limitReached)
+                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+            return true;
+        }
+
+        [Command("title", RBACPermissions.CommandLookupTitle, true)]
+        private static bool HandleLookupTitleCommand(CommandHandler handler, string namePart)
+        {
+            // can be NULL in console call
+            Player target = handler.GetSelectedPlayer();
+
+            // title Name have single string arg for player Name
+            string targetName = target ? target.GetName() : "NAME";
+
+            uint counter = 0; // Counter for figure out that we found smth.
+
+            // Search in CharTitles.dbc
+            foreach (var titleInfo in CliDB.CharTitlesStorage.Values)
+                for (Gender gender = Gender.Male; gender <= Gender.Female; ++gender)
+                {
+                    if (target && target.GetGender() != gender)
+                        continue;
+
+                    Locale locale = handler.GetSessionDbcLocale();
+                    string name = gender == Gender.Male ? titleInfo.Name[locale] : titleInfo.Name1[locale];
+
+                    if (string.IsNullOrEmpty(name))
+                        continue;
+
+                    if (!name.Like(namePart))
+                    {
+                        locale = 0;
+
+                        for (; locale < Locale.Total; ++locale)
+                        {
+                            if (locale == handler.GetSessionDbcLocale())
+                                continue;
+
+                            name = (gender == Gender.Male ? titleInfo.Name : titleInfo.Name1)[locale];
+
+                            if (name.IsEmpty())
+                                continue;
+
+                            if (name.Like(namePart))
+                                break;
+                        }
+                    }
+
+                    if (locale < Locale.Total)
+                    {
+                        if (maxResults != 0 &&
+                            counter == maxResults)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+
+                            return true;
+                        }
+
+                        string knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
+
+                        string activeStr = target && target.PlayerData.PlayerTitle == titleInfo.MaskID
+                                               ? handler.GetCypherString(CypherStrings.Active)
+                                               : "";
+
+                        string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
+
+                        // send title in "Id (idx:idx) - [namedlink locale]" format
+                        if (handler.GetSession() != null)
+                            handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleNameStr, "", knownStr, activeStr);
+                        else
+                            handler.SendSysMessage(CypherStrings.TitleListConsole, titleInfo.Id, titleInfo.MaskID, titleNameStr, "", knownStr, activeStr);
+
+                        ++counter;
+                    }
+                }
+
+            if (counter == 0) // if counter == 0 then we found nth
+                handler.SendSysMessage(CypherStrings.CommandNotitlefound);
+
+            return true;
         }
     }
 }

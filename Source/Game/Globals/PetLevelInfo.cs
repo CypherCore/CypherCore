@@ -5,16 +5,16 @@ namespace Game
 {
     public class PetLevelInfo
     {
-        public uint Armor { get; set; }
-        public uint Health { get; set; }
-        public uint Mana { get; set; }
-
-        public uint[] Stats { get; set; } = new uint[(int)Framework.Constants.Stats.Max];
-
         public PetLevelInfo()
         {
             Health = 0;
             Mana = 0;
         }
+
+        public uint Armor { get; set; }
+        public uint Health { get; set; }
+        public uint Mana { get; set; }
+
+        public uint[] Stats { get; set; } = new uint[(int)Framework.Constants.Stats.Max];
     }
 }

@@ -13,15 +13,15 @@ namespace Game.Movement
         private static readonly uint RANGE_CHECK_INTERVAL = 100; // Time (ms) until we attempt to recalculate
 
         private readonly AbstractFollower _abstractFollower;
+        private readonly bool _movingTowards = true;
+        private readonly TimeTracker _rangeCheckTimer;
         private ChaseAngle? _angle;
         private Position _lastTargetPosition;
-        private readonly bool _movingTowards = true;
         private bool _mutualChase = true;
 
         private PathGenerator _path;
 
         private ChaseRange? _range;
-        private readonly TimeTracker _rangeCheckTimer;
 
         public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle)
         {
@@ -264,6 +264,11 @@ namespace Game.Movement
             _lastTargetPosition = null;
         }
 
+        public Unit GetTarget()
+        {
+            return _abstractFollower.GetTarget();
+        }
+
         private static bool HasLostTarget(Unit owner, Unit target)
         {
             return owner.GetVictim() != target;
@@ -312,11 +317,6 @@ namespace Game.Movement
             CreatureAI ai = owner.ToCreature().GetAI();
 
             ai?.MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
-        }
-
-        public Unit GetTarget()
-        {
-            return _abstractFollower.GetTarget();
         }
     }
 }

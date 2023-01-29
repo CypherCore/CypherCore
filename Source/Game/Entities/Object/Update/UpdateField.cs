@@ -6,16 +6,16 @@ namespace Game.Entities
 
     public class UpdateField<T> : IUpdateField<T> where T : new()
     {
-        public T Value { get; set; }
-        public int Bit { get; set; }
-        public int BlockBit { get; set; }
-
         public UpdateField(int blockBit, int bit)
         {
             BlockBit = blockBit;
             Bit = bit;
             Value = new T();
         }
+
+        public T Value { get; set; }
+        public int Bit { get; set; }
+        public int BlockBit { get; set; }
 
         public void SetValue(T value)
         {

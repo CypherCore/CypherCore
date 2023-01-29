@@ -65,34 +65,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
         {
         }
 
-        private void ScheduleTasks()
-        {
-            // Timers for this are probably wrong
-            _scheduler.Schedule(TimeSpan.FromSeconds(4),
-                                task =>
-                                {
-                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-
-                                    if (target)
-                                        DoCast(target, SpellIds.Immolate);
-
-                                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10));
-                                });
-
-            // Separation Anxiety - Periodically check if Garr is nearby
-            // ...and enrage if he is not.
-            _scheduler.Schedule(TimeSpan.FromSeconds(3),
-                                task =>
-                                {
-                                    if (!me.FindNearestCreature(MCCreatureIds.Garr, 20.0f))
-                                        DoCastSelf(SpellIds.SeparationAnxiety);
-                                    else if (me.HasAura(SpellIds.SeparationAnxiety))
-                                        me.RemoveAurasDueToSpell(SpellIds.SeparationAnxiety);
-
-                                    task.Repeat();
-                                });
-        }
-
         public override void Reset()
         {
             _scheduler.CancelAll();
@@ -122,6 +94,34 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Garr
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void ScheduleTasks()
+        {
+            // Timers for this are probably wrong
+            _scheduler.Schedule(TimeSpan.FromSeconds(4),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.Immolate);
+
+                                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10));
+                                });
+
+            // Separation Anxiety - Periodically check if Garr is nearby
+            // ...and enrage if he is not.
+            _scheduler.Schedule(TimeSpan.FromSeconds(3),
+                                task =>
+                                {
+                                    if (!me.FindNearestCreature(MCCreatureIds.Garr, 20.0f))
+                                        DoCastSelf(SpellIds.SeparationAnxiety);
+                                    else if (me.HasAura(SpellIds.SeparationAnxiety))
+                                        me.RemoveAurasDueToSpell(SpellIds.SeparationAnxiety);
+
+                                    task.Repeat();
+                                });
         }
     }
 }

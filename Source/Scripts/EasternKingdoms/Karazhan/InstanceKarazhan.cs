@@ -94,29 +94,10 @@ namespace Scripts.EasternKingdoms.Karazhan
     [Script]
     internal class instance_karazhan : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public static Position[] OptionalSpawn =
-        {
-            new(-10960.981445f, -1940.138428f, 46.178097f, 4.12f),  // Hyakiss the Lurker
-			new(-10945.769531f, -2040.153320f, 49.474438f, 0.077f), // Shadikith the Glider
-			new(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)   // Rokad the Ravager
-		};
-
-        private static readonly DungeonEncounterData[] encounters =
-        {
-            new(DataTypes.Attumen, 652), new(DataTypes.Moroes, 653), new(DataTypes.MaidenOfVirtue, 654), new(DataTypes.OperaPerformance, 655), new(DataTypes.Curator, 656), new(DataTypes.Aran, 658), new(DataTypes.Terestian, 657), new(DataTypes.Netherspite, 659), new(DataTypes.Chess, 660), new(DataTypes.Malchezzar, 661), new(DataTypes.Nightbane, 662)
-        };
-
-        public instance_karazhan() : base(nameof(instance_karazhan), 532)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_karazhan_InstanceMapScript(map);
-        }
-
         private class instance_karazhan_InstanceMapScript : InstanceScript
         {
+            private readonly ObjectGuid[] MastersTerraceDoor = new ObjectGuid[2];
+            private readonly uint OperaEvent;
             private ObjectGuid BlackenedUrnGUID;
             private ObjectGuid CurtainGUID;
             private ObjectGuid DustCoveredChest;
@@ -126,11 +107,9 @@ namespace Scripts.EasternKingdoms.Karazhan
             private ObjectGuid KilrekGUID;
             private ObjectGuid LibraryDoor; // Door at Shade of Aran
             private ObjectGuid MassiveDoor; // Door at Netherspite
-            private readonly ObjectGuid[] MastersTerraceDoor = new ObjectGuid[2];
             private ObjectGuid MoroesGUID;
             private ObjectGuid NetherspaceDoor; // Door at Malchezaar
             private ObjectGuid NightbaneGUID;
-            private readonly uint OperaEvent;
             private uint OptionalBossCount;
             private uint OzDeathCount;
             private ObjectGuid SideEntranceDoor; // Side Entrance
@@ -411,6 +390,27 @@ namespace Scripts.EasternKingdoms.Karazhan
 
                 return ObjectGuid.Empty;
             }
+        }
+
+        public static Position[] OptionalSpawn =
+        {
+            new(-10960.981445f, -1940.138428f, 46.178097f, 4.12f),  // Hyakiss the Lurker
+			new(-10945.769531f, -2040.153320f, 49.474438f, 0.077f), // Shadikith the Glider
+			new(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)   // Rokad the Ravager
+		};
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.Attumen, 652), new(DataTypes.Moroes, 653), new(DataTypes.MaidenOfVirtue, 654), new(DataTypes.OperaPerformance, 655), new(DataTypes.Curator, 656), new(DataTypes.Aran, 658), new(DataTypes.Terestian, 657), new(DataTypes.Netherspite, 659), new(DataTypes.Chess, 660), new(DataTypes.Malchezzar, 661), new(DataTypes.Nightbane, 662)
+        };
+
+        public instance_karazhan() : base(nameof(instance_karazhan), 532)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_karazhan_InstanceMapScript(map);
         }
     }
 }

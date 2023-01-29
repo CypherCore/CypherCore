@@ -47,6 +47,18 @@ namespace Game.Networking.Packets
 
     public class GMTicketCaseStatus : ServerPacket
     {
+        public struct GMTicketCase
+        {
+            public int CaseID;
+            public long CaseOpened;
+            public int CaseStatus;
+            public ushort CfgRealmID;
+            public ulong CharacterID;
+            public int WaitTimeOverrideMinutes;
+            public string Url;
+            public string WaitTimeOverrideMessage;
+        }
+
         public List<GMTicketCase> Cases = new();
 
         public GMTicketCaseStatus() : base(ServerOpcodes.GmTicketCaseStatus)
@@ -72,18 +84,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteString(c.Url);
                 _worldPacket.WriteString(c.WaitTimeOverrideMessage);
             }
-        }
-
-        public struct GMTicketCase
-        {
-            public int CaseID;
-            public long CaseOpened;
-            public int CaseStatus;
-            public ushort CfgRealmID;
-            public ulong CharacterID;
-            public int WaitTimeOverrideMinutes;
-            public string Url;
-            public string WaitTimeOverrideMessage;
         }
     }
 
@@ -124,112 +124,6 @@ namespace Game.Networking.Packets
 
     public class SupportTicketSubmitComplaint : ClientPacket
     {
-        public SupportTicketCalendarEventInfo? CalenderInfo;
-        public SupportTicketChatLog ChatLog;
-        public SupportTicketClubFinderResult? ClubFinderResult;
-        public SupportTicketCommunityMessage? CommunityMessage;
-        public SupportTicketGuildInfo? GuildInfo;
-
-        public SupportTicketHeader Header;
-        public SupportTicketHorusChatLog HorusChatLog;
-        public SupportTicketLFGListApplicant? LFGListApplicant;
-        public SupportTicketLFGListSearchResult? LFGListSearchResult;
-        public SupportTicketMailInfo? MailInfo;
-        public int MajorCategory;
-        public int MinorCategoryFlags;
-        public string Note;
-        public SupportTicketPetInfo? PetInfo;
-        public int ReportType;
-        public ObjectGuid TargetCharacterGUID;
-        public SupportTicketUnused910? Unused910;
-
-        public SupportTicketSubmitComplaint(WorldPacket packet) : base(packet)
-        {
-        }
-
-        public override void Read()
-        {
-            Header.Read(_worldPacket);
-            TargetCharacterGUID = _worldPacket.ReadPackedGuid();
-            ReportType = _worldPacket.ReadInt32();
-            MajorCategory = _worldPacket.ReadInt32();
-            MinorCategoryFlags = _worldPacket.ReadInt32();
-            ChatLog.Read(_worldPacket);
-
-            uint noteLength = _worldPacket.ReadBits<uint>(10);
-            bool hasMailInfo = _worldPacket.HasBit();
-            bool hasCalendarInfo = _worldPacket.HasBit();
-            bool hasPetInfo = _worldPacket.HasBit();
-            bool hasGuildInfo = _worldPacket.HasBit();
-            bool hasLFGListSearchResult = _worldPacket.HasBit();
-            bool hasLFGListApplicant = _worldPacket.HasBit();
-            bool hasClubMessage = _worldPacket.HasBit();
-            bool hasClubFinderResult = _worldPacket.HasBit();
-            bool hasUnk910 = _worldPacket.HasBit();
-
-            _worldPacket.ResetBitPos();
-
-            if (hasClubMessage)
-            {
-                SupportTicketCommunityMessage communityMessage = new();
-                communityMessage.IsPlayerUsingVoice = _worldPacket.HasBit();
-                CommunityMessage = communityMessage;
-                _worldPacket.ResetBitPos();
-            }
-
-            HorusChatLog.Read(_worldPacket);
-
-            Note = _worldPacket.ReadString(noteLength);
-
-            if (hasMailInfo)
-            {
-                MailInfo = new SupportTicketMailInfo();
-                MailInfo.Value.Read(_worldPacket);
-            }
-
-            if (hasCalendarInfo)
-            {
-                CalenderInfo = new SupportTicketCalendarEventInfo();
-                CalenderInfo.Value.Read(_worldPacket);
-            }
-
-            if (hasPetInfo)
-            {
-                PetInfo = new SupportTicketPetInfo();
-                PetInfo.Value.Read(_worldPacket);
-            }
-
-            if (hasGuildInfo)
-            {
-                GuildInfo = new SupportTicketGuildInfo();
-                GuildInfo.Value.Read(_worldPacket);
-            }
-
-            if (hasLFGListSearchResult)
-            {
-                LFGListSearchResult = new SupportTicketLFGListSearchResult();
-                LFGListSearchResult.Value.Read(_worldPacket);
-            }
-
-            if (hasLFGListApplicant)
-            {
-                LFGListApplicant = new SupportTicketLFGListApplicant();
-                LFGListApplicant.Value.Read(_worldPacket);
-            }
-
-            if (hasClubFinderResult)
-            {
-                ClubFinderResult = new SupportTicketClubFinderResult();
-                ClubFinderResult.Value.Read(_worldPacket);
-            }
-
-            if (hasUnk910)
-            {
-                Unused910 = new SupportTicketUnused910();
-                Unused910.Value.Read(_worldPacket);
-            }
-        }
-
         public struct SupportTicketChatLine
         {
             public long Timestamp;
@@ -483,13 +377,146 @@ namespace Game.Networking.Packets
                 field_0 = data.ReadString(field_0Length);
             }
         }
+
+        public SupportTicketCalendarEventInfo? CalenderInfo;
+        public SupportTicketChatLog ChatLog;
+        public SupportTicketClubFinderResult? ClubFinderResult;
+        public SupportTicketCommunityMessage? CommunityMessage;
+        public SupportTicketGuildInfo? GuildInfo;
+
+        public SupportTicketHeader Header;
+        public SupportTicketHorusChatLog HorusChatLog;
+        public SupportTicketLFGListApplicant? LFGListApplicant;
+        public SupportTicketLFGListSearchResult? LFGListSearchResult;
+        public SupportTicketMailInfo? MailInfo;
+        public int MajorCategory;
+        public int MinorCategoryFlags;
+        public string Note;
+        public SupportTicketPetInfo? PetInfo;
+        public int ReportType;
+        public ObjectGuid TargetCharacterGUID;
+        public SupportTicketUnused910? Unused910;
+
+        public SupportTicketSubmitComplaint(WorldPacket packet) : base(packet)
+        {
+        }
+
+        public override void Read()
+        {
+            Header.Read(_worldPacket);
+            TargetCharacterGUID = _worldPacket.ReadPackedGuid();
+            ReportType = _worldPacket.ReadInt32();
+            MajorCategory = _worldPacket.ReadInt32();
+            MinorCategoryFlags = _worldPacket.ReadInt32();
+            ChatLog.Read(_worldPacket);
+
+            uint noteLength = _worldPacket.ReadBits<uint>(10);
+            bool hasMailInfo = _worldPacket.HasBit();
+            bool hasCalendarInfo = _worldPacket.HasBit();
+            bool hasPetInfo = _worldPacket.HasBit();
+            bool hasGuildInfo = _worldPacket.HasBit();
+            bool hasLFGListSearchResult = _worldPacket.HasBit();
+            bool hasLFGListApplicant = _worldPacket.HasBit();
+            bool hasClubMessage = _worldPacket.HasBit();
+            bool hasClubFinderResult = _worldPacket.HasBit();
+            bool hasUnk910 = _worldPacket.HasBit();
+
+            _worldPacket.ResetBitPos();
+
+            if (hasClubMessage)
+            {
+                SupportTicketCommunityMessage communityMessage = new();
+                communityMessage.IsPlayerUsingVoice = _worldPacket.HasBit();
+                CommunityMessage = communityMessage;
+                _worldPacket.ResetBitPos();
+            }
+
+            HorusChatLog.Read(_worldPacket);
+
+            Note = _worldPacket.ReadString(noteLength);
+
+            if (hasMailInfo)
+            {
+                MailInfo = new SupportTicketMailInfo();
+                MailInfo.Value.Read(_worldPacket);
+            }
+
+            if (hasCalendarInfo)
+            {
+                CalenderInfo = new SupportTicketCalendarEventInfo();
+                CalenderInfo.Value.Read(_worldPacket);
+            }
+
+            if (hasPetInfo)
+            {
+                PetInfo = new SupportTicketPetInfo();
+                PetInfo.Value.Read(_worldPacket);
+            }
+
+            if (hasGuildInfo)
+            {
+                GuildInfo = new SupportTicketGuildInfo();
+                GuildInfo.Value.Read(_worldPacket);
+            }
+
+            if (hasLFGListSearchResult)
+            {
+                LFGListSearchResult = new SupportTicketLFGListSearchResult();
+                LFGListSearchResult.Value.Read(_worldPacket);
+            }
+
+            if (hasLFGListApplicant)
+            {
+                LFGListApplicant = new SupportTicketLFGListApplicant();
+                LFGListApplicant.Value.Read(_worldPacket);
+            }
+
+            if (hasClubFinderResult)
+            {
+                ClubFinderResult = new SupportTicketClubFinderResult();
+                ClubFinderResult.Value.Read(_worldPacket);
+            }
+
+            if (hasUnk910)
+            {
+                Unused910 = new SupportTicketUnused910();
+                Unused910.Value.Read(_worldPacket);
+            }
+        }
     }
 
     internal class Complaint : ClientPacket
     {
-        private ComplaintChat Chat;
+        private struct ComplaintOffender
+        {
+            public void Read(WorldPacket data)
+            {
+                PlayerGuid = data.ReadPackedGuid();
+                RealmAddress = data.ReadUInt32();
+                TimeSinceOffence = data.ReadUInt32();
+            }
+
+            public ObjectGuid PlayerGuid;
+            public uint RealmAddress;
+            public uint TimeSinceOffence;
+        }
+
+        private struct ComplaintChat
+        {
+            public void Read(WorldPacket data)
+            {
+                Command = data.ReadUInt32();
+                ChannelID = data.ReadUInt32();
+                MessageLog = data.ReadString(data.ReadBits<uint>(12));
+            }
+
+            public uint Command;
+            public uint ChannelID;
+            public string MessageLog;
+        }
 
         public SupportSpamType ComplaintType;
+        private ComplaintChat Chat;
 
         private ulong EventGuid;
         private ulong InviteGuid;
@@ -521,34 +548,6 @@ namespace Game.Networking.Packets
 
                     break;
             }
-        }
-
-        private struct ComplaintOffender
-        {
-            public void Read(WorldPacket data)
-            {
-                PlayerGuid = data.ReadPackedGuid();
-                RealmAddress = data.ReadUInt32();
-                TimeSinceOffence = data.ReadUInt32();
-            }
-
-            public ObjectGuid PlayerGuid;
-            public uint RealmAddress;
-            public uint TimeSinceOffence;
-        }
-
-        private struct ComplaintChat
-        {
-            public void Read(WorldPacket data)
-            {
-                Command = data.ReadUInt32();
-                ChannelID = data.ReadUInt32();
-                MessageLog = data.ReadString(data.ReadBits<uint>(12));
-            }
-
-            public uint Command;
-            public uint ChannelID;
-            public string MessageLog;
         }
     }
 

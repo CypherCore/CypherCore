@@ -32,6 +32,23 @@ namespace Framework.IO
 {
     public static partial class ZLib
     {
+        private class static_tree_desc
+        {
+            public readonly int[] extra_bits;      // extra bits for each code or NULL
+            public readonly ct_data[] static_tree; // static tree or NULL
+            public int elems;                      // max number of elements in the tree
+            public int extra_base;                 // base index for extra_bits
+            public int max_length;                 // max bit length for the codes
+
+            public static_tree_desc(ct_data[] static_tree, int[] extra_bits, int extra_base, int elems, int max_length)
+            {
+                this.static_tree = static_tree;
+                this.extra_bits = extra_bits;
+                this.extra_base = extra_base;
+                this.elems = elems;
+                this.max_length = max_length;
+            }
+        }
         // ===========================================================================
         // Constants
         //
@@ -1038,24 +1055,6 @@ namespace Framework.IO
             while (len-- != 0)
                 //was put_byte(s, *buf++);
                 s.pending_buf[s.pending++] = buf[buf_ind++];
-        }
-
-        private class static_tree_desc
-        {
-            public readonly int[] extra_bits;      // extra bits for each code or NULL
-            public readonly ct_data[] static_tree; // static tree or NULL
-            public int elems;                      // max number of elements in the tree
-            public int extra_base;                 // base index for extra_bits
-            public int max_length;                 // max bit length for the codes
-
-            public static_tree_desc(ct_data[] static_tree, int[] extra_bits, int extra_base, int elems, int max_length)
-            {
-                this.static_tree = static_tree;
-                this.extra_bits = extra_bits;
-                this.extra_base = extra_base;
-                this.elems = elems;
-                this.max_length = max_length;
-            }
         }
 
         #region Tables

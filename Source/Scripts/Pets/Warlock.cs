@@ -17,17 +17,6 @@ namespace Scripts.Pets
         // Doomguard - 11859, Terrorguard - 59000
         public class npc_warlock_doomguard : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warlock_doomguard() : base("npc_warlock_doomguard")
-            {
-            }
-
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warlock_doomguardAI(creature);
-            }
-
             public class npc_warlock_doomguardAI : ScriptedAI
             {
                 public EventMap events = new();
@@ -92,12 +81,8 @@ namespace Scripts.Pets
                     }
                 }
             }
-        }
 
-        [Script]
-        public class npc_warl_demonic_gateway : ScriptObjectAutoAddDBBound, ICreatureGetAI
-        {
-            public npc_warl_demonic_gateway() : base("npc_warl_demonic_gateway")
+            public npc_warlock_doomguard() : base("npc_warlock_doomguard")
             {
             }
 
@@ -105,9 +90,13 @@ namespace Scripts.Pets
             //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
             public CreatureAI GetAI(Creature creature)
             {
-                return new npc_warl_demonic_gatewayAI(creature);
+                return new npc_warlock_doomguardAI(creature);
             }
+        }
 
+        [Script]
+        public class npc_warl_demonic_gateway : ScriptObjectAutoAddDBBound, ICreatureGetAI
+        {
             public class npc_warl_demonic_gatewayAI : CreatureAI
             {
                 public EventMap events = new();
@@ -206,21 +195,23 @@ namespace Scripts.Pets
                     }
                 }
             }
+
+            public npc_warl_demonic_gateway() : base("npc_warl_demonic_gateway")
+            {
+            }
+
+            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
+            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warl_demonic_gatewayAI(creature);
+            }
         }
 
         // Dreadstalker - 98035
         [Script]
         public class npc_warlock_dreadstalker : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warlock_dreadstalker() : base("npc_warlock_dreadstalker")
-            {
-            }
-
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warlock_dreadstalkerAI(creature);
-            }
-
             public class npc_warlock_dreadstalkerAI : ScriptedAI
             {
                 public bool firstTick = true;
@@ -256,6 +247,15 @@ namespace Scripts.Pets
                     DoMeleeAttackIfReady();
                 }
             }
+
+            public npc_warlock_dreadstalker() : base("npc_warlock_dreadstalker")
+            {
+            }
+
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warlock_dreadstalkerAI(creature);
+            }
         }
 
 
@@ -263,17 +263,6 @@ namespace Scripts.Pets
         // Darkglare - 103673
         public class npc_pet_warlock_darkglare : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_pet_warlock_darkglare() : base("npc_pet_warlock_darkglare")
-            {
-            }
-
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const override
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_pet_warlock_darkglare_PetAI(creature);
-            }
-
             public class npc_pet_warlock_darkglare_PetAI : PetAI
             {
                 public npc_pet_warlock_darkglare_PetAI(Creature creature) : base(creature)
@@ -296,22 +285,22 @@ namespace Scripts.Pets
                     }
                 }
             }
+
+            public npc_pet_warlock_darkglare() : base("npc_pet_warlock_darkglare")
+            {
+            }
+
+            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
+            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const override
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_pet_warlock_darkglare_PetAI(creature);
+            }
         }
 
         [Script]
         public class npc_warlock_infernal : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warlock_infernal() : base("npc_warlock_infernal")
-            {
-            }
-
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warlock_infernalAI(creature);
-            }
-
             public class npc_warlock_infernalAI : ScriptedAI
             {
                 public Position spawnPos = new();
@@ -385,21 +374,23 @@ namespace Scripts.Pets
                     DoMeleeAttackIfReady();
                 }
             }
+
+            public npc_warlock_infernal() : base("npc_warlock_infernal")
+            {
+            }
+
+            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
+            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warlock_infernalAI(creature);
+            }
         }
 
         // 107024 - Fel Lord
         [Script]
         public class npc_warl_fel_lord : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warl_fel_lord() : base("npc_warl_fel_lord")
-            {
-            }
-
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warl_fel_lordAI(creature);
-            }
-
             public class npc_warl_fel_lordAI : CreatureAI
             {
                 public npc_warl_fel_lordAI(Creature creature) : base(creature)
@@ -425,6 +416,15 @@ namespace Scripts.Pets
 
                     me.CastSpell(me, SpellIds.FEL_LORD_CLEAVE, false);
                 }
+            }
+
+            public npc_warl_fel_lord() : base("npc_warl_fel_lord")
+            {
+            }
+
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warl_fel_lordAI(creature);
             }
         }
 

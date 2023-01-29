@@ -167,11 +167,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             Initialize();
         }
 
-        private void Initialize()
-        {
-            SpawnedAdds = 0;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -192,24 +187,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
         public override void JustReachedHome()
         {
             Reset();
-        }
-
-        private void BeginEvent(Player target)
-        {
-            _JustEngagedWith(target);
-
-            Talk(TextIds.SayGamesbegin2);
-
-            me.SetFaction((uint)FactionTemplates.DragonflightBlack);
-            me.RemoveNpcFlag(NPCFlags.Gossip);
-            DoCast(me, SpellIds.NefariansBarrier);
-            me.SetStandState(UnitStandStateType.Stand);
-            me.SetImmuneToPC(false);
-            AttackStart(target);
-            Events.ScheduleEvent(EventIds.ShadowBolt, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(10));
-            Events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
-            //_events.ScheduleEvent(EventIds.MindControl, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
-            Events.ScheduleEvent(EventIds.SpawnAdd, TimeSpan.FromSeconds(10));
         }
 
         public override void SummonedCreatureDies(Creature summon, Unit killer)
@@ -430,6 +407,29 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 
             return false;
         }
+
+        private void Initialize()
+        {
+            SpawnedAdds = 0;
+        }
+
+        private void BeginEvent(Player target)
+        {
+            _JustEngagedWith(target);
+
+            Talk(TextIds.SayGamesbegin2);
+
+            me.SetFaction((uint)FactionTemplates.DragonflightBlack);
+            me.RemoveNpcFlag(NPCFlags.Gossip);
+            DoCast(me, SpellIds.NefariansBarrier);
+            me.SetStandState(UnitStandStateType.Stand);
+            me.SetImmuneToPC(false);
+            AttackStart(target);
+            Events.ScheduleEvent(EventIds.ShadowBolt, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(10));
+            Events.ScheduleEvent(EventIds.Fear, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20));
+            //_events.ScheduleEvent(EventIds.MindControl, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+            Events.ScheduleEvent(EventIds.SpawnAdd, TimeSpan.FromSeconds(10));
+        }
     }
 
     [Script]
@@ -442,13 +442,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
         public boss_nefarian(Creature creature) : base(creature, DataTypes.Nefarian)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            Phase3 = false;
-            canDespawn = false;
-            DespawnTimer = 30000;
         }
 
         public override void Reset()
@@ -648,6 +641,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        private void Initialize()
+        {
+            Phase3 = false;
+            canDespawn = false;
+            DespawnTimer = 30000;
         }
     }
 }

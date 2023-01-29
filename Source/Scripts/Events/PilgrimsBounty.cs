@@ -111,6 +111,11 @@ namespace Scripts.Events.PilgrimsBounty
 
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
+        }
+
         private void HandleTriggerSpell(AuraEffect aurEff)
         {
             PreventDefaultAction();
@@ -120,11 +125,6 @@ namespace Scripts.Events.PilgrimsBounty
 
             _handled = true;
             GetTarget().CastSpell(GetTarget(), _triggeredSpellId, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -141,6 +141,11 @@ namespace Scripts.Events.PilgrimsBounty
         public override bool Validate(SpellInfo spellInfo)
         {
             return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue()) && !Global.SpellMgr.GetSpellInfo((uint)spellInfo.GetEffect(0).CalcValue(), Difficulty.None).GetEffects().Empty();
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -207,11 +212,6 @@ namespace Scripts.Events.PilgrimsBounty
                 aura.ModStackAmount(-1);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 62014 - Turkey Tracker
@@ -222,6 +222,11 @@ namespace Scripts.Events.PilgrimsBounty
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.KillCounterVisual, SpellIds.KillCounterVisualMax);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -267,11 +272,6 @@ namespace Scripts.Events.PilgrimsBounty
                 target.CastSpell(target, SpellIds.KillCounterVisual, true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script("spell_pilgrims_bounty_well_fed_turkey", SpellIds.WellFedApTrigger)]
@@ -293,6 +293,11 @@ namespace Scripts.Events.PilgrimsBounty
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(_triggeredSpellId);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleScript(uint effIndex)
@@ -329,11 +334,6 @@ namespace Scripts.Events.PilgrimsBounty
                 target.RemoveAurasDueToSpell(SpellIds.PieHelpins);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script("spell_pilgrims_bounty_on_plate_turkey", SpellIds.OnPlateTurkey, SpellIds.PassTheTurkey, SpellIds.OnPlateVisualTurkey, SpellIds.AServingOfTurkeyChair)]
@@ -361,6 +361,11 @@ namespace Scripts.Events.PilgrimsBounty
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(_triggeredSpellId1, _triggeredSpellId2, _triggeredSpellId3, _triggeredSpellId4);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private Vehicle GetTable(Unit target)
@@ -457,11 +462,6 @@ namespace Scripts.Events.PilgrimsBounty
                 }
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script("spell_pilgrims_bounty_a_serving_of_cranberries", SpellIds.AServingOfCranberriesPlate)]
@@ -483,6 +483,12 @@ namespace Scripts.Events.PilgrimsBounty
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(_triggeredSpellId);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -525,12 +531,6 @@ namespace Scripts.Events.PilgrimsBounty
                     }
                 }
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 }

@@ -166,6 +166,11 @@ namespace Scripts.Spells.DemonHunter
             return ValidateSpellInfo(SpellIds.ChaosStrikeEnergize);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -173,11 +178,6 @@ namespace Scripts.Spells.DemonHunter
             args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
             args.SetTriggeringAura(aurEff);
             GetTarget().CastSpell(GetTarget(), SpellIds.ChaosStrikeEnergize, args);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -212,6 +212,11 @@ namespace Scripts.Spells.DemonHunter
             return ValidateSpellInfo(SpellIds.FirstBlood);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
+        }
+
         private void DecideFirstTarget(List<WorldObject> targetList)
         {
             if (targetList.Empty())
@@ -241,11 +246,6 @@ namespace Scripts.Spells.DemonHunter
             spell_dh_first_blood script = aura.GetScript<spell_dh_first_blood>();
 
             script?.SetFirstTarget(firstTargetGUID);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
         }
     }
 
@@ -312,6 +312,11 @@ namespace Scripts.Spells.DemonHunter
             return ValidateSpellInfo(SpellIds.SigilOfChainsSlow, SpellIds.SigilOfChainsGrip);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleEffectHitTarget(uint effIndex)
         {
             WorldLocation loc = GetExplTargetDest();
@@ -321,11 +326,6 @@ namespace Scripts.Spells.DemonHunter
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.SigilOfChainsSlow, new CastSpellExtraArgs(true));
                 GetHitUnit().CastSpell(loc.GetPosition(), SpellIds.SigilOfChainsGrip, new CastSpellExtraArgs(true));
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -395,14 +395,14 @@ namespace Scripts.Spells.DemonHunter
             return ValidateSpellInfo(SpellIds.GlideDuration);
         }
 
-        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAura(SpellIds.GlideDuration);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.FeatherFall, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.GlideDuration);
         }
     }
 
@@ -416,14 +416,14 @@ namespace Scripts.Spells.DemonHunter
             return ValidateSpellInfo(SpellIds.Glide);
         }
 
-        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAura(SpellIds.Glide);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.Glide);
         }
     }
 }

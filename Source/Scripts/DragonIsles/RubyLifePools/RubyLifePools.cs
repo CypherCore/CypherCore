@@ -26,17 +26,17 @@ namespace Scripts.DragonIsles.RubyLifePools
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+        }
+
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
             target.SetUnitFlag3(UnitFlags3.FakeDead);
             target.SetUnitFlag2(UnitFlags2.FeignDeath);
             target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
     }
 
@@ -45,15 +45,15 @@ namespace Scripts.DragonIsles.RubyLifePools
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             Aura iceShield = GetTarget()?.GetAura(SpellIds.IceShield);
             iceShield?.RefreshDuration();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -62,14 +62,14 @@ namespace Scripts.DragonIsles.RubyLifePools
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void HandleEffectPeriodic(AuraEffect aurEff)
-        {
-            GetCaster()?.CastSpell(GetTarget(), SpellIds.Excavate, true);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
+        private void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            GetCaster()?.CastSpell(GetTarget(), SpellIds.Excavate, true);
         }
     }
 
@@ -78,14 +78,14 @@ namespace Scripts.DragonIsles.RubyLifePools
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void SetDest(ref SpellDestination dest)
-        {
-            dest.RelocateOffset(new Position(9.0f, 0.0f, 4.0f, 0.0f));
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 1, Targets.DestDest));
+        }
+
+        private void SetDest(ref SpellDestination dest)
+        {
+            dest.RelocateOffset(new Position(9.0f, 0.0f, 4.0f, 0.0f));
         }
     }
 }

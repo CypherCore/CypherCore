@@ -83,9 +83,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Set.Type = (EquipmentSetInfo.EquipmentSetType)_worldPacket.ReadInt32();
-            Set.Guid = _worldPacket.ReadUInt64();
-            Set.SetID = _worldPacket.ReadUInt32();
+            Set.Type       = (EquipmentSetInfo.EquipmentSetType)_worldPacket.ReadInt32();
+            Set.Guid       = _worldPacket.ReadUInt64();
+            Set.SetID      = _worldPacket.ReadUInt32();
             Set.IgnoreMask = _worldPacket.ReadUInt32();
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
@@ -131,6 +131,13 @@ namespace Game.Networking.Packets
 
     internal class UseEquipmentSet : ClientPacket
     {
+        public struct EquipmentSetItem
+        {
+            public ObjectGuid Item;
+            public byte ContainerSlot;
+            public byte Slot;
+        }
+
         public ulong GUID; //Set Identifier
 
         public InvUpdate Inv;
@@ -152,13 +159,6 @@ namespace Game.Networking.Packets
             }
 
             GUID = _worldPacket.ReadUInt64();
-        }
-
-        public struct EquipmentSetItem
-        {
-            public ObjectGuid Item;
-            public byte ContainerSlot;
-            public byte Slot;
         }
     }
 

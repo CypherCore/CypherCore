@@ -17,20 +17,19 @@ namespace BNetServer.Networking
 {
     public partial class Session : SSLSocket
     {
+        private readonly byte[] clientSecret;
+
+        private readonly AsyncCallbackProcessor<QueryCallback> queryProcessor;
+        private readonly Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
         private AccountInfo accountInfo;
         private bool authed;
         private uint build;
-
-        private readonly byte[] clientSecret;
         private GameAccountInfo gameAccountInfo;
         private string ipCountry;
 
         private string locale;
         private string os;
-
-        private readonly AsyncCallbackProcessor<QueryCallback> queryProcessor;
         private uint requestToken;
-        private readonly Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
 
         public Session(Socket socket) : base(socket)
         {

@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		h = -f
 
 		Preconditions:
@@ -11,7 +11,7 @@
 		Postconditions:
 		   |h| bounded by 1.1*2^25,1.1*2^24,1.1*2^25,1.1*2^24,etc.
 		*/
-        internal static void fe_neg(out FieldElement h, ref FieldElement f)
+	    internal static void fe_neg(out FieldElement h, ref FieldElement f)
         {
             int f0 = f.x0;
             int f1 = f.x1;

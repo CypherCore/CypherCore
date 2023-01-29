@@ -16,24 +16,30 @@ namespace Game.Maps
 {
     public class InstanceScript : ZoneScript
     {
+        private enum states
+        {
+            Block,
+            Spawn,
+            ForceBlock
+        };
+
+        public InstanceMap instance;
         private readonly List<uint> _activatedAreaTriggers = new();
-        private byte _combatResurrectionCharges; // the counter for available battle resurrections
-        private uint _combatResurrectionTimer;
-        private bool _combatResurrectionTimerStarted;
         private readonly Dictionary<uint, uint> _creatureInfo = new();
-        private uint _entranceId;
         private readonly Dictionary<uint, uint> _gameObjectInfo = new();
         private readonly List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new();
         private readonly Dictionary<uint, ObjectGuid> _objectGuids = new();
         private readonly List<PersistentInstanceScriptValueBase> _persistentScriptValues = new();
-        private uint _temporaryEntranceId;
         private readonly Dictionary<uint, BossInfo> bosses = new();
-        private uint completedEncounters; // DEPRECATED, REMOVE
         private readonly MultiMap<uint, DoorInfo> doors = new();
-        private string headers;
-
-        public InstanceMap instance;
         private readonly Dictionary<uint, MinionInfo> minions = new();
+        private byte _combatResurrectionCharges; // the counter for available battle resurrections
+        private uint _combatResurrectionTimer;
+        private bool _combatResurrectionTimerStarted;
+        private uint _entranceId;
+        private uint _temporaryEntranceId;
+        private uint completedEncounters; // DEPRECATED, REMOVE
+        private string headers;
 
         public InstanceScript(InstanceMap map)
         {
@@ -135,26 +141,10 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadObjectData: {0} objects loaded.", _creatureInfo.Count + _gameObjectInfo.Count);
         }
 
-        private void LoadObjectData(ObjectData[] objectData, Dictionary<uint, uint> objectInfo)
-        {
-            foreach (var data in objectData)
-            {
-                Cypher.Assert(!objectInfo.ContainsKey(data.entry));
-                objectInfo[data.entry] = data.type;
-            }
-        }
-
         public void LoadDungeonEncounterData(DungeonEncounterData[] encounters)
         {
             foreach (DungeonEncounterData encounter in encounters)
                 LoadDungeonEncounterData(encounter.BossId, encounter.DungeonEncounterId);
-        }
-
-        private void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
-        {
-            if (bossId < bosses.Count)
-                for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
-                    bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
         }
 
         public virtual void UpdateDoorState(GameObject door)
@@ -193,107 +183,11 @@ namespace Game.Maps
             door.SetGoState(open ? GameObjectState.Active : GameObjectState.Ready);
         }
 
-        private void UpdateMinionState(Creature minion, EncounterState state)
-        {
-            switch (state)
-            {
-                case EncounterState.NotStarted:
-                    if (!minion.IsAlive())
-                        minion.Respawn();
-                    else if (minion.IsInCombat())
-                        minion.GetAI().EnterEvadeMode();
-
-                    break;
-                case EncounterState.InProgress:
-                    if (!minion.IsAlive())
-                        minion.Respawn();
-                    else if (minion.GetVictim() == null)
-                        minion.GetAI().DoZoneInCombat();
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void UpdateSpawnGroups()
-        {
-            if (_instanceSpawnGroups.Empty())
-                return;
-
-            Dictionary<uint, states> newStates = new();
-
-            foreach (var info in _instanceSpawnGroups)
-            {
-                if (!newStates.ContainsKey(info.SpawnGroupId))
-                    newStates[info.SpawnGroupId] = 0; // makes sure there's a BLOCK value in the map
-
-                if (newStates[info.SpawnGroupId] == states.ForceBlock) // nothing will change this
-                    continue;
-
-                if (((1 << (int)GetBossState(info.BossStateId)) & info.BossStates) == 0)
-                    continue;
-
-                if (((instance.GetTeamIdInInstance() == TeamId.Alliance) && info.Flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly)) ||
-                    ((instance.GetTeamIdInInstance() == TeamId.Horde) && info.Flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly)))
-                    continue;
-
-                if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.BlockSpawn))
-                    newStates[info.SpawnGroupId] = states.ForceBlock;
-
-                else if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.ActivateSpawn))
-                    newStates[info.SpawnGroupId] = states.Spawn;
-            }
-
-            foreach (var pair in newStates)
-            {
-                uint groupId = pair.Key;
-                bool doSpawn = pair.Value == states.Spawn;
-
-                if (instance.IsSpawnGroupActive(groupId) == doSpawn)
-                    continue; // nothing to do here
-
-                // if we should spawn group, then spawn it...
-                if (doSpawn)
-                    instance.SpawnGroupSpawn(groupId, instance);
-                else // otherwise, set it as inactive so it no longer respawns (but don't despawn it)
-                    instance.SetSpawnGroupInactive(groupId);
-            }
-        }
-
         public BossInfo GetBossInfo(uint id)
         {
             Cypher.Assert(id < bosses.Count);
 
             return bosses[id];
-        }
-
-        private void AddObject(Creature obj, bool add)
-        {
-            if (_creatureInfo.ContainsKey(obj.GetEntry()))
-                AddObject(obj, _creatureInfo[obj.GetEntry()], add);
-        }
-
-        private void AddObject(GameObject obj, bool add)
-        {
-            if (_gameObjectInfo.ContainsKey(obj.GetEntry()))
-                AddObject(obj, _gameObjectInfo[obj.GetEntry()], add);
-        }
-
-        private void AddObject(WorldObject obj, uint type, bool add)
-        {
-            if (add)
-            {
-                _objectGuids[type] = obj.GetGUID();
-            }
-            else
-            {
-                var guid = _objectGuids.LookupByKey(type);
-
-                if (!guid.IsEmpty() &&
-                    guid == obj.GetGUID())
-                    _objectGuids.Remove(type);
-            }
         }
 
         public virtual void AddDoor(GameObject door, bool add)
@@ -594,32 +488,6 @@ namespace Game.Maps
             }
         }
 
-        private void DoCloseDoorOrButton(ObjectGuid guid)
-        {
-            if (guid.IsEmpty())
-                return;
-
-            GameObject go = instance.GetGameObject(guid);
-
-            if (go)
-            {
-                if (go.GetGoType() == GameObjectTypes.Door ||
-                    go.GetGoType() == GameObjectTypes.Button)
-                {
-                    if (go.GetLootState() == LootState.Activated)
-                        go.ResetDoorOrButton();
-                }
-                else
-                {
-                    Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
-                }
-            }
-            else
-            {
-                Log.outDebug(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton failed");
-            }
-        }
-
         public void DoRespawnGameObject(ObjectGuid guid, TimeSpan timeToDespawn)
         {
             GameObject go = instance.GetGameObject(guid);
@@ -654,12 +522,6 @@ namespace Game.Maps
         public void DoUpdateWorldState(uint worldStateId, int value)
         {
             Global.WorldStateMgr.SetValue(worldStateId, value, false, instance);
-        }
-
-        // Send Notify to all players in instance
-        private void DoSendNotifyToInstance(string format, params object[] args)
-        {
-            instance.DoOnPlayers(player => player.GetSession()?.SendNotification(format, args));
         }
 
         // Update Achievement Criteria for all players in instance
@@ -843,22 +705,6 @@ namespace Game.Maps
             }
         }
 
-        private void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)
-        {
-            InstanceEncounterStart encounterStartMessage = new();
-            encounterStartMessage.InCombatResCount = inCombatResCount;
-            encounterStartMessage.MaxInCombatResCount = maxInCombatResCount;
-            encounterStartMessage.CombatResChargeRecovery = inCombatResChargeRecovery;
-            encounterStartMessage.NextCombatResChargeTime = nextCombatResChargeTime;
-
-            instance.SendToPlayers(encounterStartMessage);
-        }
-
-        private void SendEncounterEnd()
-        {
-            instance.SendToPlayers(new InstanceEncounterEnd());
-        }
-
         public void SendBossKillCredit(uint encounterId)
         {
             BossKill bossKillCreditMessage = new();
@@ -877,58 +723,6 @@ namespace Game.Maps
             UpdateEncounterState(EncounterCreditType.CastSpell, spellId, source);
         }
 
-        private void UpdateEncounterState(EncounterCreditType type, uint creditEntry, Unit source)
-        {
-            var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
-
-            if (encounters.Empty())
-                return;
-
-            uint dungeonId = 0;
-
-            foreach (var encounter in encounters)
-                if (encounter.CreditType == type &&
-                    encounter.CreditEntry == creditEntry)
-                {
-                    completedEncounters |= (1u << encounter.DbcEntry.Bit);
-
-                    if (encounter.DbcEntry.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)encounter.DbcEntry.CompleteWorldStateID, 1);
-
-                    if (encounter.LastEncounterDungeon != 0)
-                    {
-                        dungeonId = encounter.LastEncounterDungeon;
-
-                        Log.outDebug(LogFilter.Lfg,
-                                     "UpdateEncounterState: Instance {0} (InstanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
-                                     instance.GetMapName(),
-                                     instance.GetInstanceId(),
-                                     encounter.DbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()],
-                                     dungeonId);
-
-                        break;
-                    }
-                }
-
-            if (dungeonId != 0)
-            {
-                var players = instance.GetPlayers();
-
-                foreach (var player in players)
-                {
-                    Group grp = player.GetGroup();
-
-                    if (grp != null)
-                        if (grp.IsLFGGroup())
-                        {
-                            Global.LFGMgr.FinishDungeon(grp.GetGUID(), dungeonId, instance);
-
-                            return;
-                        }
-                }
-            }
-        }
-
         public void SetCompletedEncountersMask(uint newMask)
         {
             completedEncounters = newMask;
@@ -942,11 +736,6 @@ namespace Game.Maps
                         DoUpdateWorldState((uint)encounter.DbcEntry.CompleteWorldStateID, 1);
         }
 
-        private void UpdatePhasing()
-        {
-            instance.DoOnPlayers(player => PhasingHandler.SendToPlayer(player));
-        }
-
         public void UpdateCombatResurrection(uint diff)
         {
             if (!_combatResurrectionTimerStarted)
@@ -956,17 +745,6 @@ namespace Game.Maps
                 AddCombatResurrectionCharge();
             else
                 _combatResurrectionTimer -= diff;
-        }
-
-        private void InitializeCombatResurrections(byte charges = 1, uint interval = 0)
-        {
-            _combatResurrectionCharges = charges;
-
-            if (interval == 0)
-                return;
-
-            _combatResurrectionTimer = interval;
-            _combatResurrectionTimerStarted = true;
         }
 
         public void AddCombatResurrectionCharge()
@@ -1150,12 +928,233 @@ namespace Game.Maps
         {
         }
 
-        private enum states
+        private void LoadObjectData(ObjectData[] objectData, Dictionary<uint, uint> objectInfo)
         {
-            Block,
-            Spawn,
-            ForceBlock
-        };
+            foreach (var data in objectData)
+            {
+                Cypher.Assert(!objectInfo.ContainsKey(data.entry));
+                objectInfo[data.entry] = data.type;
+            }
+        }
+
+        private void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
+        {
+            if (bossId < bosses.Count)
+                for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
+                    bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
+        }
+
+        private void UpdateMinionState(Creature minion, EncounterState state)
+        {
+            switch (state)
+            {
+                case EncounterState.NotStarted:
+                    if (!minion.IsAlive())
+                        minion.Respawn();
+                    else if (minion.IsInCombat())
+                        minion.GetAI().EnterEvadeMode();
+
+                    break;
+                case EncounterState.InProgress:
+                    if (!minion.IsAlive())
+                        minion.Respawn();
+                    else if (minion.GetVictim() == null)
+                        minion.GetAI().DoZoneInCombat();
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateSpawnGroups()
+        {
+            if (_instanceSpawnGroups.Empty())
+                return;
+
+            Dictionary<uint, states> newStates = new();
+
+            foreach (var info in _instanceSpawnGroups)
+            {
+                if (!newStates.ContainsKey(info.SpawnGroupId))
+                    newStates[info.SpawnGroupId] = 0; // makes sure there's a BLOCK value in the map
+
+                if (newStates[info.SpawnGroupId] == states.ForceBlock) // nothing will change this
+                    continue;
+
+                if (((1 << (int)GetBossState(info.BossStateId)) & info.BossStates) == 0)
+                    continue;
+
+                if (((instance.GetTeamIdInInstance() == TeamId.Alliance) && info.Flags.HasFlag(InstanceSpawnGroupFlags.HordeOnly)) ||
+                    ((instance.GetTeamIdInInstance() == TeamId.Horde) && info.Flags.HasFlag(InstanceSpawnGroupFlags.AllianceOnly)))
+                    continue;
+
+                if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.BlockSpawn))
+                    newStates[info.SpawnGroupId] = states.ForceBlock;
+
+                else if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.ActivateSpawn))
+                    newStates[info.SpawnGroupId] = states.Spawn;
+            }
+
+            foreach (var pair in newStates)
+            {
+                uint groupId = pair.Key;
+                bool doSpawn = pair.Value == states.Spawn;
+
+                if (instance.IsSpawnGroupActive(groupId) == doSpawn)
+                    continue; // nothing to do here
+
+                // if we should spawn group, then spawn it...
+                if (doSpawn)
+                    instance.SpawnGroupSpawn(groupId, instance);
+                else // otherwise, set it as inactive so it no longer respawns (but don't despawn it)
+                    instance.SetSpawnGroupInactive(groupId);
+            }
+        }
+
+        private void AddObject(Creature obj, bool add)
+        {
+            if (_creatureInfo.ContainsKey(obj.GetEntry()))
+                AddObject(obj, _creatureInfo[obj.GetEntry()], add);
+        }
+
+        private void AddObject(GameObject obj, bool add)
+        {
+            if (_gameObjectInfo.ContainsKey(obj.GetEntry()))
+                AddObject(obj, _gameObjectInfo[obj.GetEntry()], add);
+        }
+
+        private void AddObject(WorldObject obj, uint type, bool add)
+        {
+            if (add)
+            {
+                _objectGuids[type] = obj.GetGUID();
+            }
+            else
+            {
+                var guid = _objectGuids.LookupByKey(type);
+
+                if (!guid.IsEmpty() &&
+                    guid == obj.GetGUID())
+                    _objectGuids.Remove(type);
+            }
+        }
+
+        private void DoCloseDoorOrButton(ObjectGuid guid)
+        {
+            if (guid.IsEmpty())
+                return;
+
+            GameObject go = instance.GetGameObject(guid);
+
+            if (go)
+            {
+                if (go.GetGoType() == GameObjectTypes.Door ||
+                    go.GetGoType() == GameObjectTypes.Button)
+                {
+                    if (go.GetLootState() == LootState.Activated)
+                        go.ResetDoorOrButton();
+                }
+                else
+                {
+                    Log.outError(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton can't use gameobject entry {0}, because Type is {1}.", go.GetEntry(), go.GetGoType());
+                }
+            }
+            else
+            {
+                Log.outDebug(LogFilter.Scripts, "InstanceScript: DoCloseDoorOrButton failed");
+            }
+        }
+
+        // Send Notify to all players in instance
+        private void DoSendNotifyToInstance(string format, params object[] args)
+        {
+            instance.DoOnPlayers(player => player.GetSession()?.SendNotification(format, args));
+        }
+
+        private void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)
+        {
+            InstanceEncounterStart encounterStartMessage = new();
+            encounterStartMessage.InCombatResCount = inCombatResCount;
+            encounterStartMessage.MaxInCombatResCount = maxInCombatResCount;
+            encounterStartMessage.CombatResChargeRecovery = inCombatResChargeRecovery;
+            encounterStartMessage.NextCombatResChargeTime = nextCombatResChargeTime;
+
+            instance.SendToPlayers(encounterStartMessage);
+        }
+
+        private void SendEncounterEnd()
+        {
+            instance.SendToPlayers(new InstanceEncounterEnd());
+        }
+
+        private void UpdateEncounterState(EncounterCreditType type, uint creditEntry, Unit source)
+        {
+            var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
+
+            if (encounters.Empty())
+                return;
+
+            uint dungeonId = 0;
+
+            foreach (var encounter in encounters)
+                if (encounter.CreditType == type &&
+                    encounter.CreditEntry == creditEntry)
+                {
+                    completedEncounters |= (1u << encounter.DbcEntry.Bit);
+
+                    if (encounter.DbcEntry.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)encounter.DbcEntry.CompleteWorldStateID, 1);
+
+                    if (encounter.LastEncounterDungeon != 0)
+                    {
+                        dungeonId = encounter.LastEncounterDungeon;
+
+                        Log.outDebug(LogFilter.Lfg,
+                                     "UpdateEncounterState: Instance {0} (InstanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
+                                     instance.GetMapName(),
+                                     instance.GetInstanceId(),
+                                     encounter.DbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()],
+                                     dungeonId);
+
+                        break;
+                    }
+                }
+
+            if (dungeonId != 0)
+            {
+                var players = instance.GetPlayers();
+
+                foreach (var player in players)
+                {
+                    Group grp = player.GetGroup();
+
+                    if (grp != null)
+                        if (grp.IsLFGGroup())
+                        {
+                            Global.LFGMgr.FinishDungeon(grp.GetGUID(), dungeonId, instance);
+
+                            return;
+                        }
+                }
+            }
+        }
+
+        private void UpdatePhasing()
+        {
+            instance.DoOnPlayers(player => PhasingHandler.SendToPlayer(player));
+        }
+
+        private void InitializeCombatResurrections(byte charges = 1, uint interval = 0)
+        {
+            _combatResurrectionCharges = charges;
+
+            if (interval == 0)
+                return;
+
+            _combatResurrectionTimer = interval;
+            _combatResurrectionTimerStarted = true;
+        }
     }
 
     public class DungeonEncounterData

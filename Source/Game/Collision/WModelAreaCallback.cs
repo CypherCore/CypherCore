@@ -8,10 +8,7 @@ namespace Game.Collision
 {
     public class WModelAreaCallback : WorkerCallback
     {
-        public GroupModel Hit { get; set; }
-
         private readonly List<GroupModel> _prims;
-        public float ZDist { get; set; }
         private Vector3 _zVec;
 
         public WModelAreaCallback(List<GroupModel> vals, Vector3 down)
@@ -21,6 +18,9 @@ namespace Game.Collision
             ZDist = float.PositiveInfinity;
             _zVec = down;
         }
+
+        public GroupModel Hit { get; set; }
+        public float ZDist { get; set; }
 
         public override void Invoke(Vector3 point, uint entry)
         {

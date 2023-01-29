@@ -14,6 +14,36 @@ namespace Game.Chat
     [CommandGroup("quest")]
     internal class QuestCommands
     {
+        [CommandGroup("objective")]
+        private class ObjectiveCommands
+        {
+            [Command("complete", RBACPermissions.CommandQuestObjectiveComplete)]
+            private static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
+            {
+                Player player = handler.GetSelectedPlayerOrSelf();
+
+                if (!player)
+                {
+                    handler.SendSysMessage(CypherStrings.NoCharSelected);
+
+                    return false;
+                }
+
+                QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
+
+                if (obj == null)
+                {
+                    handler.SendSysMessage(CypherStrings.QuestObjectiveNotfound);
+
+                    return false;
+                }
+
+                CompleteObjective(player, obj);
+
+                return true;
+            }
+        }
+
         [Command("add", RBACPermissions.CommandQuestAdd)]
         private static bool HandleQuestAdd(CommandHandler handler, Quest quest)
         {
@@ -239,36 +269,6 @@ namespace Game.Chat
 
                         break;
                     }
-            }
-        }
-
-        [CommandGroup("objective")]
-        private class ObjectiveCommands
-        {
-            [Command("complete", RBACPermissions.CommandQuestObjectiveComplete)]
-            private static bool HandleQuestObjectiveComplete(CommandHandler handler, uint objectiveId)
-            {
-                Player player = handler.GetSelectedPlayerOrSelf();
-
-                if (!player)
-                {
-                    handler.SendSysMessage(CypherStrings.NoCharSelected);
-
-                    return false;
-                }
-
-                QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
-
-                if (obj == null)
-                {
-                    handler.SendSysMessage(CypherStrings.QuestObjectiveNotfound);
-
-                    return false;
-                }
-
-                CompleteObjective(player, obj);
-
-                return true;
             }
         }
     }

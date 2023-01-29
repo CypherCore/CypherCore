@@ -8,13 +8,12 @@ namespace Game.Maps
 {
     public class MapUpdater
     {
-        private volatile bool _cancelationToken;
-
         private readonly object _lock = new();
-        private int _pendingRequests;
         private readonly ProducerConsumerQueue<MapUpdateRequest> _queue = new();
 
         private readonly Thread[] _workerThreads;
+        private volatile bool _cancelationToken;
+        private int _pendingRequests;
 
         public MapUpdater(int numThreads)
         {

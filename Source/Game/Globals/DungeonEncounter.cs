@@ -8,12 +8,6 @@ namespace Game
 {
     public class DungeonEncounter
     {
-        public uint CreditEntry { get; set; }
-        public EncounterCreditType CreditType { get; set; }
-
-        public DungeonEncounterRecord DbcEntry { get; set; }
-        public uint LastEncounterDungeon { get; set; }
-
         public DungeonEncounter(DungeonEncounterRecord _dbcEntry, EncounterCreditType _creditType, uint _creditEntry, uint _lastEncounterDungeon)
         {
             DbcEntry = _dbcEntry;
@@ -21,5 +15,11 @@ namespace Game
             CreditEntry = _creditEntry;
             LastEncounterDungeon = _lastEncounterDungeon;
         }
+
+        public uint CreditEntry { get; set; }
+        public EncounterCreditType CreditType { get; set; }
+
+        public DungeonEncounterRecord DbcEntry { get; set; }
+        public uint LastEncounterDungeon { get; set; }
     }
 }

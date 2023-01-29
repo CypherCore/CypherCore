@@ -1050,9 +1050,8 @@ namespace Game.Maps
 
     public class LocalizedDo : IDoWork<Player>
     {
-        private IDoWork<Player>[] _localizedCache = new IDoWork<Player>[(int)Locale.Total]; // 0 = default, i => i-1 locale index
-
         private readonly MessageBuilder _localizer;
+        private IDoWork<Player>[] _localizedCache = new IDoWork<Player>[(int)Locale.Total]; // 0 = default, i => i-1 locale index
 
         public LocalizedDo(MessageBuilder localizer)
         {
@@ -1107,8 +1106,8 @@ namespace Game.Maps
     {
         private readonly ICheck<WorldObject> i_check;
         private readonly GridMapTypeMask i_mapTypeMask;
-        private WorldObject i_object;
         private readonly PhaseShift i_phaseShift;
+        private WorldObject i_object;
 
         public WorldObjectSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
         {
@@ -1327,8 +1326,8 @@ namespace Game.Maps
     {
         private readonly ICheck<WorldObject> i_check;
         private readonly GridMapTypeMask i_mapTypeMask;
-        private WorldObject i_object;
         private readonly PhaseShift i_phaseShift;
+        private WorldObject i_object;
 
         public WorldObjectLastSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
         {
@@ -1610,8 +1609,8 @@ namespace Game.Maps
     public class GameObjectSearcher : Notifier
     {
         private readonly ICheck<GameObject> i_check;
-        private GameObject i_object;
         private readonly PhaseShift i_phaseShift;
+        private GameObject i_object;
 
         public GameObjectSearcher(WorldObject searcher, ICheck<GameObject> check)
         {
@@ -1650,8 +1649,8 @@ namespace Game.Maps
     public class GameObjectLastSearcher : Notifier
     {
         private readonly ICheck<GameObject> i_check;
-        private GameObject i_object;
         private readonly PhaseShift i_phaseShift;
+        private GameObject i_object;
 
         public GameObjectLastSearcher(WorldObject searcher, ICheck<GameObject> check)
         {
@@ -1708,8 +1707,8 @@ namespace Game.Maps
     public class UnitSearcher : Notifier
     {
         private readonly ICheck<Unit> i_check;
-        private Unit i_object;
         private readonly PhaseShift i_phaseShift;
+        private Unit i_object;
 
         public UnitSearcher(WorldObject searcher, ICheck<Unit> check)
         {
@@ -1762,8 +1761,8 @@ namespace Game.Maps
     public class UnitLastSearcher : Notifier
     {
         private readonly ICheck<Unit> i_check;
-        private Unit i_object;
         private readonly PhaseShift i_phaseShift;
+        private Unit i_object;
 
         public UnitLastSearcher(WorldObject searcher, ICheck<Unit> check)
         {
@@ -1846,8 +1845,8 @@ namespace Game.Maps
     public class CreatureSearcher : Notifier
     {
         private readonly ICheck<Creature> i_check;
-        private Creature i_object;
         private readonly PhaseShift i_phaseShift;
+        private Creature i_object;
 
         public CreatureSearcher(WorldObject searcher, ICheck<Creature> check)
         {
@@ -1885,9 +1884,9 @@ namespace Game.Maps
 
     public class CreatureLastSearcher : Notifier
     {
+        internal PhaseShift i_phaseShift;
         private readonly ICheck<Creature> i_check;
         private Creature i_object;
-        internal PhaseShift i_phaseShift;
 
         public CreatureLastSearcher(WorldObject searcher, ICheck<Creature> check)
         {
@@ -1917,9 +1916,9 @@ namespace Game.Maps
 
     public class CreatureListSearcher : Notifier
     {
+        internal PhaseShift i_phaseShift;
         private readonly ICheck<Creature> i_check;
         private readonly List<Creature> i_objects;
-        internal PhaseShift i_phaseShift;
 
         public CreatureListSearcher(WorldObject searcher, List<Creature> objects, ICheck<Creature> check)
         {
@@ -1944,8 +1943,8 @@ namespace Game.Maps
     public class PlayerSearcher : Notifier
     {
         private readonly ICheck<Player> i_check;
-        private Player i_object;
         private readonly PhaseShift i_phaseShift;
+        private Player i_object;
 
         public PlayerSearcher(WorldObject searcher, ICheck<Player> check)
         {
@@ -1984,8 +1983,8 @@ namespace Game.Maps
     public class PlayerLastSearcher : Notifier
     {
         private readonly ICheck<Player> i_check;
-        private Player i_object;
         private readonly PhaseShift i_phaseShift;
+        private Player i_object;
 
         public PlayerLastSearcher(WorldObject searcher, ICheck<Player> check)
         {
@@ -2052,10 +2051,9 @@ namespace Game.Maps
 
     public class MostHPMissingInRange<T> : ICheck<T> where T : Unit
     {
-        private ulong i_hp;
-
         private readonly Unit i_obj;
         private readonly float i_range;
+        private ulong i_hp;
 
         public MostHPMissingInRange(Unit obj, float range, uint hp)
         {
@@ -2083,11 +2081,11 @@ namespace Game.Maps
 
     internal class MostHPPercentMissingInRange : ICheck<Unit>
     {
-        private float _hpPct;
         private readonly float _maxHpPct;
         private readonly float _minHpPct;
         private readonly Unit _obj;
         private readonly float _range;
+        private float _hpPct;
 
         public MostHPPercentMissingInRange(Unit obj, float range, uint minHpPct, uint maxHpPct)
         {
@@ -2487,10 +2485,10 @@ namespace Game.Maps
 
     public class NearestHostileUnitCheck : ICheck<Unit>
     {
-        private float _range;
         private readonly bool i_playerOnly;
 
         private readonly Creature me;
+        private float _range;
 
         public NearestHostileUnitCheck(Creature creature, float dist = 0, bool playerOnly = false)
         {
@@ -2520,9 +2518,9 @@ namespace Game.Maps
     internal class NearestHostileUnitInAttackDistanceCheck : ICheck<Unit>
     {
         private readonly bool _force;
-        private float _range;
 
         private readonly Creature me;
+        private float _range;
 
         public NearestHostileUnitInAttackDistanceCheck(Creature creature, float dist = 0)
         {
@@ -2704,9 +2702,9 @@ namespace Game.Maps
 
     public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : NoopCheckCustomizer
     {
-        private FindCreatureOptions i_args;
         private readonly T i_customizer;
         private readonly WorldObject i_obj;
+        private FindCreatureOptions i_args;
 
         public CreatureWithOptionsInObjectRangeCheck(WorldObject obj, T customizer, FindCreatureOptions args)
         {
@@ -3050,10 +3048,9 @@ namespace Game.Maps
 
     public class UnitAuraCheck<T> : ICheck<T> where T : WorldObject
     {
-        private ObjectGuid _casterGUID;
-
         private readonly bool _present;
         private readonly uint _spellId;
+        private ObjectGuid _casterGUID;
 
         public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default)
         {
@@ -3173,8 +3170,8 @@ namespace Game.Maps
         private readonly uint _entry;
 
         private readonly WorldObject _obj;
-        private float _range;
         private readonly bool _spawnedOnly;
+        private float _range;
 
         public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range, bool spawnedOnly = true)
         {
@@ -3234,8 +3231,8 @@ namespace Game.Maps
     internal class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
     {
         private readonly WorldObject i_obj;
-        private float i_range;
         private readonly GameObjectTypes i_type;
+        private float i_range;
 
         public NearestGameObjectTypeInObjectRangeCheck(WorldObject obj, GameObjectTypes type, float range)
         {

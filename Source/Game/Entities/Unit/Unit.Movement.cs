@@ -94,11 +94,6 @@ namespace Game.Entities
             return GetLiquidStatus().HasFlag(ZLiquidStatus.UnderWater);
         }
 
-        private void PropagateSpeedChange()
-        {
-            GetMotionMaster().PropagateSpeedChange();
-        }
-
         public float GetSpeed(UnitMoveType mtype)
         {
             return SpeedRate[(int)mtype] * (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
@@ -330,50 +325,6 @@ namespace Game.Entities
                 float vsin = MathF.Sin(o);
                 SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
             }
-        }
-
-        private void SendMoveKnockBack(Player player, float speedXY, float speedZ, float vcos, float vsin)
-        {
-            MoveKnockBack moveKnockBack = new();
-            moveKnockBack.MoverGUID = GetGUID();
-            moveKnockBack.SequenceIndex = MovementCounter++;
-            moveKnockBack.Speeds.HorzSpeed = speedXY;
-            moveKnockBack.Speeds.VertSpeed = speedZ;
-            moveKnockBack.Direction = new Vector2(vcos, vsin);
-            player.SendPacket(moveKnockBack);
-        }
-
-        private bool SetCollision(bool disable)
-        {
-            if (disable == HasUnitMovementFlag(MovementFlag.DisableCollision))
-                return false;
-
-            if (disable)
-                AddUnitMovementFlag(MovementFlag.DisableCollision);
-            else
-                RemoveUnitMovementFlag(MovementFlag.DisableCollision);
-
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
-
-            if (playerMover)
-            {
-                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
-                packet.MoverGUID = GetGUID();
-                packet.SequenceIndex = MovementCounter++;
-                playerMover.SendPacket(packet);
-
-                MoveUpdate moveUpdate = new();
-                moveUpdate.Status = MovementInfo;
-                SendMessageToSet(moveUpdate, playerMover);
-            }
-            else
-            {
-                MoveSplineSetFlag packet = new(disable ? ServerOpcodes.MoveSplineDisableCollision : ServerOpcodes.MoveDisableCollision);
-                packet.MoverGUID = GetGUID();
-                SendMessageToSet(packet, true);
-            }
-
-            return true;
         }
 
         public bool SetCanTransitionBetweenSwimAndFly(bool enable)
@@ -753,23 +704,6 @@ namespace Game.Entities
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Swimming);
 
             return (relocated || turn);
-        }
-
-        private void UpdateOrientation(float orientation)
-        {
-            SetOrientation(orientation);
-
-            if (IsVehicle())
-                GetVehicleKit().RelocatePassengers();
-        }
-
-        //! Only server-side height update, does not broadcast to client
-        private void UpdateHeight(float newZ)
-        {
-            Relocate(GetPositionX(), GetPositionY(), newZ);
-
-            if (IsVehicle())
-                GetVehicleKit().RelocatePassengers();
         }
 
         public float GetHoverOffset()
@@ -1433,64 +1367,6 @@ namespace Game.Entities
             }
         }
 
-        private void ApplyControlStatesIfNeeded()
-        {
-            // Unit States might have been already cleared but Auras still present. I need to check with HasAuraType
-            if (HasUnitState(UnitState.Stunned) ||
-                HasAuraType(AuraType.ModStun) ||
-                HasAuraType(AuraType.ModStunDisableGravity))
-                SetStunned(true);
-
-            if (HasUnitState(UnitState.Root) ||
-                HasAuraType(AuraType.ModRoot) ||
-                HasAuraType(AuraType.ModRoot2) ||
-                HasAuraType(AuraType.ModRootDisableGravity))
-                SetRooted(true);
-
-            if (HasUnitState(UnitState.Confused) ||
-                HasAuraType(AuraType.ModConfuse))
-                SetConfused(true);
-
-            if (HasUnitState(UnitState.Fleeing) ||
-                HasAuraType(AuraType.ModFear))
-                SetFeared(true);
-        }
-
-        private void SetStunned(bool apply)
-        {
-            if (apply)
-            {
-                SetTarget(ObjectGuid.Empty);
-                SetUnitFlag(UnitFlags.Stunned);
-
-                StopMoving();
-
-                if (IsTypeId(TypeId.Player))
-                    SetStandState(UnitStandStateType.Stand);
-
-                SetRooted(true);
-
-                CastStop();
-            }
-            else
-            {
-                if (IsAlive() &&
-                    GetVictim() != null)
-                    SetTarget(GetVictim().GetGUID());
-
-                // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
-                Unit owner = GetCharmerOrOwner();
-
-                if (owner == null ||
-                    !owner.IsTypeId(TypeId.Player) ||
-                    !owner.ToPlayer().IsMounted())
-                    RemoveUnitFlag(UnitFlags.Stunned);
-
-                if (!HasUnitState(UnitState.Root)) // prevent moving if it also has root effect
-                    SetRooted(false);
-            }
-        }
-
         public void SetRooted(bool apply, bool packetOnly = false)
         {
             if (!packetOnly)
@@ -1529,68 +1405,6 @@ namespace Game.Entities
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
-        }
-
-        private void SetFeared(bool apply)
-        {
-            if (apply)
-            {
-                SetTarget(ObjectGuid.Empty);
-
-                Unit caster = null;
-                var fearAuras = GetAuraEffectsByType(AuraType.ModFear);
-
-                if (!fearAuras.Empty())
-                    caster = Global.ObjAccessor.GetUnit(this, fearAuras[0].GetCasterGUID());
-
-                if (caster == null)
-                    caster = GetAttackerForHelper();
-
-                GetMotionMaster().MoveFleeing(caster, (uint)(fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
-            }
-            else
-            {
-                if (IsAlive())
-                {
-                    GetMotionMaster().Remove(MovementGeneratorType.Fleeing);
-
-                    if (GetVictim() != null)
-                        SetTarget(GetVictim().GetGUID());
-
-                    if (!IsPlayer() &&
-                        !IsInCombat())
-                        GetMotionMaster().MoveTargetedHome();
-                }
-            }
-
-            // block / allow control to real player in control (eg charmer)
-            if (IsPlayer())
-                if (PlayerMovingMe)
-                    PlayerMovingMe.SetClientControl(this, !apply);
-        }
-
-        private void SetConfused(bool apply)
-        {
-            if (apply)
-            {
-                SetTarget(ObjectGuid.Empty);
-                GetMotionMaster().MoveConfused();
-            }
-            else
-            {
-                if (IsAlive())
-                {
-                    GetMotionMaster().Remove(MovementGeneratorType.Confused);
-
-                    if (GetVictim() != null)
-                        SetTarget(GetVictim().GetGUID());
-                }
-            }
-
-            // block / allow control to real player in control (eg charmer)
-            if (IsPlayer())
-                if (PlayerMovingMe)
-                    PlayerMovingMe.SetClientControl(this, !apply);
         }
 
         public bool CanFreeMove()
@@ -1739,96 +1553,9 @@ namespace Game.Entities
             RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
-        private void SendSetVehicleRecId(uint vehicleId)
-        {
-            Player player = ToPlayer();
-
-            if (player)
-            {
-                MoveSetVehicleRecID moveSetVehicleRec = new();
-                moveSetVehicleRec.MoverGUID = GetGUID();
-                moveSetVehicleRec.SequenceIndex = MovementCounter++;
-                moveSetVehicleRec.VehicleRecID = vehicleId;
-                player.SendPacket(moveSetVehicleRec);
-            }
-
-            SetVehicleRecID setVehicleRec = new();
-            setVehicleRec.VehicleGUID = GetGUID();
-            setVehicleRec.VehicleRecID = vehicleId;
-            SendMessageToSet(setVehicleRec, true);
-        }
-
         public MovementForces GetMovementForces()
         {
             return _movementForces;
-        }
-
-        private void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, MovementForceType type, Vector3 direction, ObjectGuid transportGuid = default)
-        {
-            if (_movementForces == null)
-                _movementForces = new MovementForces();
-
-            MovementForce force = new();
-            force.ID = id;
-            force.Origin = origin;
-            force.Direction = direction;
-
-            if (transportGuid.IsMOTransport())
-                force.TransportID = (uint)transportGuid.GetCounter();
-
-            force.Magnitude = magnitude;
-            force.Type = type;
-
-            if (_movementForces.Add(force))
-            {
-                Player movingPlayer = GetPlayerMovingMe();
-
-                if (movingPlayer != null)
-                {
-                    MoveApplyMovementForce applyMovementForce = new();
-                    applyMovementForce.MoverGUID = GetGUID();
-                    applyMovementForce.SequenceIndex = (int)MovementCounter++;
-                    applyMovementForce.Force = force;
-                    movingPlayer.SendPacket(applyMovementForce);
-                }
-                else
-                {
-                    MoveUpdateApplyMovementForce updateApplyMovementForce = new();
-                    updateApplyMovementForce.Status = MovementInfo;
-                    updateApplyMovementForce.Force = force;
-                    SendMessageToSet(updateApplyMovementForce, true);
-                }
-            }
-        }
-
-        private void RemoveMovementForce(ObjectGuid id)
-        {
-            if (_movementForces == null)
-                return;
-
-            if (_movementForces.Remove(id))
-            {
-                Player movingPlayer = GetPlayerMovingMe();
-
-                if (movingPlayer != null)
-                {
-                    MoveRemoveMovementForce moveRemoveMovementForce = new();
-                    moveRemoveMovementForce.MoverGUID = GetGUID();
-                    moveRemoveMovementForce.SequenceIndex = (int)MovementCounter++;
-                    moveRemoveMovementForce.ID = id;
-                    movingPlayer.SendPacket(moveRemoveMovementForce);
-                }
-                else
-                {
-                    MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
-                    updateRemoveMovementForce.Status = MovementInfo;
-                    updateRemoveMovementForce.TriggerGUID = id;
-                    SendMessageToSet(updateRemoveMovementForce, true);
-                }
-            }
-
-            if (_movementForces.IsEmpty())
-                _movementForces = new MovementForces();
         }
 
         public bool SetIgnoreMovementForces(bool ignore)
@@ -1904,30 +1631,9 @@ namespace Game.Entities
             return _playHoverAnim;
         }
 
-        private void SetPlayHoverAnim(bool enable)
-        {
-            _playHoverAnim = enable;
-
-            SetPlayHoverAnim data = new();
-            data.UnitGUID = GetGUID();
-            data.PlayHoverAnim = enable;
-
-            SendMessageToSet(data, true);
-        }
-
         public Unit GetUnitBeingMoved()
         {
             return UnitMovedByMe;
-        }
-
-        private Player GetPlayerBeingMoved()
-        {
-            Unit mover = GetUnitBeingMoved();
-
-            if (mover)
-                return mover.ToPlayer();
-
-            return null;
         }
 
         public Player GetPlayerMovingMe()
@@ -1963,11 +1669,6 @@ namespace Game.Entities
         public void AddUnitMovementFlag2(MovementFlag2 f)
         {
             MovementInfo.AddMovementFlag2(f);
-        }
-
-        private void RemoveUnitMovementFlag2(MovementFlag2 f)
-        {
-            MovementInfo.RemoveMovementFlag2(f);
         }
 
         public bool HasUnitMovementFlag2(MovementFlag2 f)
@@ -2014,79 +1715,6 @@ namespace Game.Entities
         public bool IsSplineEnabled()
         {
             return MoveSpline.Initialized() && !MoveSpline.Finalized();
-        }
-
-        private void UpdateSplineMovement(uint diff)
-        {
-            if (MoveSpline.Finalized())
-                return;
-
-            MoveSpline.UpdateState((int)diff);
-            bool arrived = MoveSpline.Finalized();
-
-            if (MoveSpline.IsCyclic())
-            {
-                _splineSyncTimer.Update(diff);
-
-                if (_splineSyncTimer.Passed())
-                {
-                    _splineSyncTimer.Reset(5000); // Retail value, do not change
-
-                    FlightSplineSync flightSplineSync = new();
-                    flightSplineSync.Guid = GetGUID();
-                    flightSplineSync.SplineDist = MoveSpline.TimePassed() / MoveSpline.Duration();
-                    SendMessageToSet(flightSplineSync, true);
-                }
-            }
-
-            if (arrived)
-            {
-                DisableSpline();
-
-                AnimTier? animTier = MoveSpline.GetAnimation();
-
-                if (animTier.HasValue)
-                    SetAnimTier(animTier.Value);
-            }
-
-            UpdateSplinePosition();
-        }
-
-        private void UpdateSplinePosition()
-        {
-            Vector4 loc = MoveSpline.ComputePosition();
-
-            if (MoveSpline.onTransport)
-            {
-                Position pos = MovementInfo.Transport.Pos;
-                pos.X = loc.X;
-                pos.Y = loc.Y;
-                pos.Z = loc.Z;
-                pos.SetOrientation(loc.W);
-
-                ITransport transport = GetDirectTransport();
-
-                if (transport != null)
-                    transport.CalculatePassengerPosition(ref loc.X, ref loc.Y, ref loc.Z, ref loc.W);
-                else
-                    return;
-            }
-
-            if (HasUnitState(UnitState.CannotTurn))
-                loc.W = GetOrientation();
-
-            UpdatePosition(loc.X, loc.Y, loc.Z, loc.W);
-        }
-
-        private void InterruptMovementBasedAuras()
-        {
-            // TODO: Check if orientation Transport offset changed instead of only global orientation
-            if (_positionUpdateInfo.Turned)
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
-
-            if (_positionUpdateInfo.Relocated &&
-                !GetVehicle())
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving);
         }
 
         public void DisableSpline()
@@ -2165,6 +1793,378 @@ namespace Game.Entities
 
             // Broadcast the packet to everyone except self.
             broadcastSource.SendMessageToSet(moveUpdateTeleport, false);
+        }
+
+        private void PropagateSpeedChange()
+        {
+            GetMotionMaster().PropagateSpeedChange();
+        }
+
+        private void SendMoveKnockBack(Player player, float speedXY, float speedZ, float vcos, float vsin)
+        {
+            MoveKnockBack moveKnockBack = new();
+            moveKnockBack.MoverGUID = GetGUID();
+            moveKnockBack.SequenceIndex = MovementCounter++;
+            moveKnockBack.Speeds.HorzSpeed = speedXY;
+            moveKnockBack.Speeds.VertSpeed = speedZ;
+            moveKnockBack.Direction = new Vector2(vcos, vsin);
+            player.SendPacket(moveKnockBack);
+        }
+
+        private bool SetCollision(bool disable)
+        {
+            if (disable == HasUnitMovementFlag(MovementFlag.DisableCollision))
+                return false;
+
+            if (disable)
+                AddUnitMovementFlag(MovementFlag.DisableCollision);
+            else
+                RemoveUnitMovementFlag(MovementFlag.DisableCollision);
+
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+
+            if (playerMover)
+            {
+                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = MovementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = MovementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+            else
+            {
+                MoveSplineSetFlag packet = new(disable ? ServerOpcodes.MoveSplineDisableCollision : ServerOpcodes.MoveDisableCollision);
+                packet.MoverGUID = GetGUID();
+                SendMessageToSet(packet, true);
+            }
+
+            return true;
+        }
+
+        private void UpdateOrientation(float orientation)
+        {
+            SetOrientation(orientation);
+
+            if (IsVehicle())
+                GetVehicleKit().RelocatePassengers();
+        }
+
+        //! Only server-side height update, does not broadcast to client
+        private void UpdateHeight(float newZ)
+        {
+            Relocate(GetPositionX(), GetPositionY(), newZ);
+
+            if (IsVehicle())
+                GetVehicleKit().RelocatePassengers();
+        }
+
+        private void ApplyControlStatesIfNeeded()
+        {
+            // Unit States might have been already cleared but Auras still present. I need to check with HasAuraType
+            if (HasUnitState(UnitState.Stunned) ||
+                HasAuraType(AuraType.ModStun) ||
+                HasAuraType(AuraType.ModStunDisableGravity))
+                SetStunned(true);
+
+            if (HasUnitState(UnitState.Root) ||
+                HasAuraType(AuraType.ModRoot) ||
+                HasAuraType(AuraType.ModRoot2) ||
+                HasAuraType(AuraType.ModRootDisableGravity))
+                SetRooted(true);
+
+            if (HasUnitState(UnitState.Confused) ||
+                HasAuraType(AuraType.ModConfuse))
+                SetConfused(true);
+
+            if (HasUnitState(UnitState.Fleeing) ||
+                HasAuraType(AuraType.ModFear))
+                SetFeared(true);
+        }
+
+        private void SetStunned(bool apply)
+        {
+            if (apply)
+            {
+                SetTarget(ObjectGuid.Empty);
+                SetUnitFlag(UnitFlags.Stunned);
+
+                StopMoving();
+
+                if (IsTypeId(TypeId.Player))
+                    SetStandState(UnitStandStateType.Stand);
+
+                SetRooted(true);
+
+                CastStop();
+            }
+            else
+            {
+                if (IsAlive() &&
+                    GetVictim() != null)
+                    SetTarget(GetVictim().GetGUID());
+
+                // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
+                Unit owner = GetCharmerOrOwner();
+
+                if (owner == null ||
+                    !owner.IsTypeId(TypeId.Player) ||
+                    !owner.ToPlayer().IsMounted())
+                    RemoveUnitFlag(UnitFlags.Stunned);
+
+                if (!HasUnitState(UnitState.Root)) // prevent moving if it also has root effect
+                    SetRooted(false);
+            }
+        }
+
+        private void SetFeared(bool apply)
+        {
+            if (apply)
+            {
+                SetTarget(ObjectGuid.Empty);
+
+                Unit caster = null;
+                var fearAuras = GetAuraEffectsByType(AuraType.ModFear);
+
+                if (!fearAuras.Empty())
+                    caster = Global.ObjAccessor.GetUnit(this, fearAuras[0].GetCasterGUID());
+
+                if (caster == null)
+                    caster = GetAttackerForHelper();
+
+                GetMotionMaster().MoveFleeing(caster, (uint)(fearAuras.Empty() ? WorldConfig.GetIntValue(WorldCfg.CreatureFamilyFleeDelay) : 0)); // caster == NULL processed in MoveFleeing
+            }
+            else
+            {
+                if (IsAlive())
+                {
+                    GetMotionMaster().Remove(MovementGeneratorType.Fleeing);
+
+                    if (GetVictim() != null)
+                        SetTarget(GetVictim().GetGUID());
+
+                    if (!IsPlayer() &&
+                        !IsInCombat())
+                        GetMotionMaster().MoveTargetedHome();
+                }
+            }
+
+            // block / allow control to real player in control (eg charmer)
+            if (IsPlayer())
+                if (PlayerMovingMe)
+                    PlayerMovingMe.SetClientControl(this, !apply);
+        }
+
+        private void SetConfused(bool apply)
+        {
+            if (apply)
+            {
+                SetTarget(ObjectGuid.Empty);
+                GetMotionMaster().MoveConfused();
+            }
+            else
+            {
+                if (IsAlive())
+                {
+                    GetMotionMaster().Remove(MovementGeneratorType.Confused);
+
+                    if (GetVictim() != null)
+                        SetTarget(GetVictim().GetGUID());
+                }
+            }
+
+            // block / allow control to real player in control (eg charmer)
+            if (IsPlayer())
+                if (PlayerMovingMe)
+                    PlayerMovingMe.SetClientControl(this, !apply);
+        }
+
+        private void SendSetVehicleRecId(uint vehicleId)
+        {
+            Player player = ToPlayer();
+
+            if (player)
+            {
+                MoveSetVehicleRecID moveSetVehicleRec = new();
+                moveSetVehicleRec.MoverGUID = GetGUID();
+                moveSetVehicleRec.SequenceIndex = MovementCounter++;
+                moveSetVehicleRec.VehicleRecID = vehicleId;
+                player.SendPacket(moveSetVehicleRec);
+            }
+
+            SetVehicleRecID setVehicleRec = new();
+            setVehicleRec.VehicleGUID = GetGUID();
+            setVehicleRec.VehicleRecID = vehicleId;
+            SendMessageToSet(setVehicleRec, true);
+        }
+
+        private void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, MovementForceType type, Vector3 direction, ObjectGuid transportGuid = default)
+        {
+            if (_movementForces == null)
+                _movementForces = new MovementForces();
+
+            MovementForce force = new();
+            force.ID = id;
+            force.Origin = origin;
+            force.Direction = direction;
+
+            if (transportGuid.IsMOTransport())
+                force.TransportID = (uint)transportGuid.GetCounter();
+
+            force.Magnitude = magnitude;
+            force.Type = type;
+
+            if (_movementForces.Add(force))
+            {
+                Player movingPlayer = GetPlayerMovingMe();
+
+                if (movingPlayer != null)
+                {
+                    MoveApplyMovementForce applyMovementForce = new();
+                    applyMovementForce.MoverGUID = GetGUID();
+                    applyMovementForce.SequenceIndex = (int)MovementCounter++;
+                    applyMovementForce.Force = force;
+                    movingPlayer.SendPacket(applyMovementForce);
+                }
+                else
+                {
+                    MoveUpdateApplyMovementForce updateApplyMovementForce = new();
+                    updateApplyMovementForce.Status = MovementInfo;
+                    updateApplyMovementForce.Force = force;
+                    SendMessageToSet(updateApplyMovementForce, true);
+                }
+            }
+        }
+
+        private void RemoveMovementForce(ObjectGuid id)
+        {
+            if (_movementForces == null)
+                return;
+
+            if (_movementForces.Remove(id))
+            {
+                Player movingPlayer = GetPlayerMovingMe();
+
+                if (movingPlayer != null)
+                {
+                    MoveRemoveMovementForce moveRemoveMovementForce = new();
+                    moveRemoveMovementForce.MoverGUID = GetGUID();
+                    moveRemoveMovementForce.SequenceIndex = (int)MovementCounter++;
+                    moveRemoveMovementForce.ID = id;
+                    movingPlayer.SendPacket(moveRemoveMovementForce);
+                }
+                else
+                {
+                    MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
+                    updateRemoveMovementForce.Status = MovementInfo;
+                    updateRemoveMovementForce.TriggerGUID = id;
+                    SendMessageToSet(updateRemoveMovementForce, true);
+                }
+            }
+
+            if (_movementForces.IsEmpty())
+                _movementForces = new MovementForces();
+        }
+
+        private void SetPlayHoverAnim(bool enable)
+        {
+            _playHoverAnim = enable;
+
+            SetPlayHoverAnim data = new();
+            data.UnitGUID = GetGUID();
+            data.PlayHoverAnim = enable;
+
+            SendMessageToSet(data, true);
+        }
+
+        private Player GetPlayerBeingMoved()
+        {
+            Unit mover = GetUnitBeingMoved();
+
+            if (mover)
+                return mover.ToPlayer();
+
+            return null;
+        }
+
+        private void RemoveUnitMovementFlag2(MovementFlag2 f)
+        {
+            MovementInfo.RemoveMovementFlag2(f);
+        }
+
+        private void UpdateSplineMovement(uint diff)
+        {
+            if (MoveSpline.Finalized())
+                return;
+
+            MoveSpline.UpdateState((int)diff);
+            bool arrived = MoveSpline.Finalized();
+
+            if (MoveSpline.IsCyclic())
+            {
+                _splineSyncTimer.Update(diff);
+
+                if (_splineSyncTimer.Passed())
+                {
+                    _splineSyncTimer.Reset(5000); // Retail value, do not change
+
+                    FlightSplineSync flightSplineSync = new();
+                    flightSplineSync.Guid = GetGUID();
+                    flightSplineSync.SplineDist = MoveSpline.TimePassed() / MoveSpline.Duration();
+                    SendMessageToSet(flightSplineSync, true);
+                }
+            }
+
+            if (arrived)
+            {
+                DisableSpline();
+
+                AnimTier? animTier = MoveSpline.GetAnimation();
+
+                if (animTier.HasValue)
+                    SetAnimTier(animTier.Value);
+            }
+
+            UpdateSplinePosition();
+        }
+
+        private void UpdateSplinePosition()
+        {
+            Vector4 loc = MoveSpline.ComputePosition();
+
+            if (MoveSpline.onTransport)
+            {
+                Position pos = MovementInfo.Transport.Pos;
+                pos.X = loc.X;
+                pos.Y = loc.Y;
+                pos.Z = loc.Z;
+                pos.SetOrientation(loc.W);
+
+                ITransport transport = GetDirectTransport();
+
+                if (transport != null)
+                    transport.CalculatePassengerPosition(ref loc.X, ref loc.Y, ref loc.Z, ref loc.W);
+                else
+                    return;
+            }
+
+            if (HasUnitState(UnitState.CannotTurn))
+                loc.W = GetOrientation();
+
+            UpdatePosition(loc.X, loc.Y, loc.Z, loc.W);
+        }
+
+        private void InterruptMovementBasedAuras()
+        {
+            // TODO: Check if orientation Transport offset changed instead of only global orientation
+            if (_positionUpdateInfo.Turned)
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
+
+            if (_positionUpdateInfo.Relocated &&
+                !GetVehicle())
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving);
         }
     }
 }

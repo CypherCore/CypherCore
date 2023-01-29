@@ -90,6 +90,194 @@ namespace Game.Maps
             _gridGetHeight = GetHeightFromFlat;
         }
 
+        public ushort GetArea(float x, float y)
+        {
+            if (_areaMap == null)
+                return _gridArea;
+
+            x = 16 * (32 - x / MapConst.SizeofGrids);
+            y = 16 * (32 - y / MapConst.SizeofGrids);
+            int lx = (int)x & 15;
+            int ly = (int)y & 15;
+
+            return _areaMap[lx * 16 + ly];
+        }
+
+        public float GetMinHeight(float x, float y)
+        {
+            if (_minHeightPlanes == null)
+                return -500.0f;
+
+            GridCoord gridCoord = GridDefines.ComputeGridCoordSimple(x, y);
+
+            int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
+            int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
+
+            float gx = x - ((int)gridCoord.X_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gy = y - ((int)gridCoord.Y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+
+            uint quarterIndex;
+
+            if (Convert.ToBoolean(doubleGridY & 1))
+            {
+                if (Convert.ToBoolean(doubleGridX & 1))
+                    quarterIndex = 4 + (gx <= gy ? 1 : 0u);
+                else
+                    quarterIndex = (2 + ((-MapConst.SizeofGrids - gx) > gy ? 1u : 0));
+            }
+            else if (Convert.ToBoolean(doubleGridX & 1))
+            {
+                quarterIndex = 6 + ((-MapConst.SizeofGrids - gx) <= gy ? 1u : 0);
+            }
+            else
+            {
+                quarterIndex = gx > gy ? 1u : 0;
+            }
+
+            Ray ray = new(new Vector3(gx, gy, 0.0f), Vector3.UnitZ);
+
+            return ray.intersection(_minHeightPlanes[quarterIndex]).Z;
+        }
+
+        public float GetLiquidLevel(float x, float y)
+        {
+            if (_liquidMap == null)
+                return _liquidLevel;
+
+            x = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
+            y = MapConst.MapResolution * (32 - y / MapConst.SizeofGrids);
+
+            int cx_int = ((int)x & (MapConst.MapResolution - 1)) - _liquidOffY;
+            int cy_int = ((int)y & (MapConst.MapResolution - 1)) - _liquidOffX;
+
+            if (cx_int < 0 ||
+                cx_int >= _liquidHeight)
+                return MapConst.InvalidHeight;
+
+            if (cy_int < 0 ||
+                cy_int >= _liquidWidth)
+                return MapConst.InvalidHeight;
+
+            return _liquidMap[cx_int * _liquidWidth + cy_int];
+        }
+
+        // Get water State on map
+        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, LiquidHeaderTypeFlags? reqLiquidType, LiquidData data, float collisionHeight)
+        {
+            // Check water Type (if no water return)
+            if (_liquidGlobalFlags == LiquidHeaderTypeFlags.NoWater &&
+                _liquidFlags == null)
+                return ZLiquidStatus.NoWater;
+
+            // Get cell
+            float cx = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
+            float cy = MapConst.MapResolution * (32 - y / MapConst.SizeofGrids);
+
+            int x_int = (int)cx & (MapConst.MapResolution - 1);
+            int y_int = (int)cy & (MapConst.MapResolution - 1);
+
+            // Check water Type in cell
+            int idx = (x_int >> 3) * 16 + (y_int >> 3);
+            LiquidHeaderTypeFlags type = _liquidFlags != null ? (LiquidHeaderTypeFlags)_liquidFlags[idx] : _liquidGlobalFlags;
+            uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
+            LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
+
+            if (liquidEntry != null)
+            {
+                type &= LiquidHeaderTypeFlags.DarkWater;
+                uint liqTypeIdx = liquidEntry.SoundBank;
+
+                if (entry < 21)
+                {
+                    var area = CliDB.AreaTableStorage.LookupByKey(GetArea(x, y));
+
+                    if (area != null)
+                    {
+                        uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+
+                        if (overrideLiquid == 0 &&
+                            area.ParentAreaID == 0)
+                        {
+                            area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+
+                            if (area != null)
+                                overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        }
+
+                        var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
+
+                        if (liq != null)
+                        {
+                            entry = overrideLiquid;
+                            liqTypeIdx = liq.SoundBank;
+                        }
+                    }
+                }
+
+                type |= (LiquidHeaderTypeFlags)(1 << (int)liqTypeIdx);
+            }
+
+            if (type == LiquidHeaderTypeFlags.NoWater)
+                return ZLiquidStatus.NoWater;
+
+            // Check req liquid Type mask
+            if (reqLiquidType.HasValue &&
+                (reqLiquidType & type) == LiquidHeaderTypeFlags.NoWater)
+                return ZLiquidStatus.NoWater;
+
+            // Check water level:
+            // Check water height map
+            int lx_int = x_int - _liquidOffY;
+            int ly_int = y_int - _liquidOffX;
+
+            if (lx_int < 0 ||
+                lx_int >= _liquidHeight)
+                return ZLiquidStatus.NoWater;
+
+            if (ly_int < 0 ||
+                ly_int >= _liquidWidth)
+                return ZLiquidStatus.NoWater;
+
+            // Get water level
+            float liquid_level = _liquidMap != null ? _liquidMap[lx_int * _liquidWidth + ly_int] : _liquidLevel;
+            // Get ground level (sub 0.2 for fix some errors)
+            float ground_level = GetHeight(x, y);
+
+            // Check water level and ground level
+            if (liquid_level < ground_level ||
+                z < ground_level)
+                return ZLiquidStatus.NoWater;
+
+            // All ok in water . store _data
+            if (data != null)
+            {
+                data.entry = entry;
+                data.type_flags = type;
+                data.level = liquid_level;
+                data.depth_level = ground_level;
+            }
+
+            // For speed check as int values
+            float delta = liquid_level - z;
+
+            if (delta > collisionHeight) // Under water
+                return ZLiquidStatus.UnderWater;
+
+            if (delta > 0.0f) // In water
+                return ZLiquidStatus.InWater;
+
+            if (delta > -0.1f) // Walk on water
+                return ZLiquidStatus.WaterWalk;
+
+            // Above water
+            return ZLiquidStatus.AboveWater;
+        }
+
+        public float GetHeight(float x, float y)
+        {
+            return _gridGetHeight(x, y);
+        }
+
         private bool LoadAreaData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
@@ -274,19 +462,6 @@ namespace Game.Maps
             _holes = reader.ReadArray<byte>(16 * 16 * 8);
 
             return true;
-        }
-
-        public ushort GetArea(float x, float y)
-        {
-            if (_areaMap == null)
-                return _gridArea;
-
-            x = 16 * (32 - x / MapConst.SizeofGrids);
-            y = 16 * (32 - y / MapConst.SizeofGrids);
-            int lx = (int)x & 15;
-            int ly = (int)y & 15;
-
-            return _areaMap[lx * 16 + ly];
         }
 
         private float GetHeightFromFlat(float x, float y)
@@ -537,181 +712,6 @@ namespace Game.Maps
             int holeCol = col % 8;
 
             return (_holes[cellRow * 16 * 8 + cellCol * 8 + holeRow] & (1 << holeCol)) != 0;
-        }
-
-        public float GetMinHeight(float x, float y)
-        {
-            if (_minHeightPlanes == null)
-                return -500.0f;
-
-            GridCoord gridCoord = GridDefines.ComputeGridCoordSimple(x, y);
-
-            int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
-            int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
-
-            float gx = x - ((int)gridCoord.X_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
-            float gy = y - ((int)gridCoord.Y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
-
-            uint quarterIndex;
-
-            if (Convert.ToBoolean(doubleGridY & 1))
-            {
-                if (Convert.ToBoolean(doubleGridX & 1))
-                    quarterIndex = 4 + (gx <= gy ? 1 : 0u);
-                else
-                    quarterIndex = (2 + ((-MapConst.SizeofGrids - gx) > gy ? 1u : 0));
-            }
-            else if (Convert.ToBoolean(doubleGridX & 1))
-            {
-                quarterIndex = 6 + ((-MapConst.SizeofGrids - gx) <= gy ? 1u : 0);
-            }
-            else
-            {
-                quarterIndex = gx > gy ? 1u : 0;
-            }
-
-            Ray ray = new(new Vector3(gx, gy, 0.0f), Vector3.UnitZ);
-
-            return ray.intersection(_minHeightPlanes[quarterIndex]).Z;
-        }
-
-        public float GetLiquidLevel(float x, float y)
-        {
-            if (_liquidMap == null)
-                return _liquidLevel;
-
-            x = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
-            y = MapConst.MapResolution * (32 - y / MapConst.SizeofGrids);
-
-            int cx_int = ((int)x & (MapConst.MapResolution - 1)) - _liquidOffY;
-            int cy_int = ((int)y & (MapConst.MapResolution - 1)) - _liquidOffX;
-
-            if (cx_int < 0 ||
-                cx_int >= _liquidHeight)
-                return MapConst.InvalidHeight;
-
-            if (cy_int < 0 ||
-                cy_int >= _liquidWidth)
-                return MapConst.InvalidHeight;
-
-            return _liquidMap[cx_int * _liquidWidth + cy_int];
-        }
-
-        // Get water State on map
-        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, LiquidHeaderTypeFlags? reqLiquidType, LiquidData data, float collisionHeight)
-        {
-            // Check water Type (if no water return)
-            if (_liquidGlobalFlags == LiquidHeaderTypeFlags.NoWater &&
-                _liquidFlags == null)
-                return ZLiquidStatus.NoWater;
-
-            // Get cell
-            float cx = MapConst.MapResolution * (32 - x / MapConst.SizeofGrids);
-            float cy = MapConst.MapResolution * (32 - y / MapConst.SizeofGrids);
-
-            int x_int = (int)cx & (MapConst.MapResolution - 1);
-            int y_int = (int)cy & (MapConst.MapResolution - 1);
-
-            // Check water Type in cell
-            int idx = (x_int >> 3) * 16 + (y_int >> 3);
-            LiquidHeaderTypeFlags type = _liquidFlags != null ? (LiquidHeaderTypeFlags)_liquidFlags[idx] : _liquidGlobalFlags;
-            uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
-            LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
-
-            if (liquidEntry != null)
-            {
-                type &= LiquidHeaderTypeFlags.DarkWater;
-                uint liqTypeIdx = liquidEntry.SoundBank;
-
-                if (entry < 21)
-                {
-                    var area = CliDB.AreaTableStorage.LookupByKey(GetArea(x, y));
-
-                    if (area != null)
-                    {
-                        uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
-
-                        if (overrideLiquid == 0 &&
-                            area.ParentAreaID == 0)
-                        {
-                            area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-
-                            if (area != null)
-                                overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
-                        }
-
-                        var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-
-                        if (liq != null)
-                        {
-                            entry = overrideLiquid;
-                            liqTypeIdx = liq.SoundBank;
-                        }
-                    }
-                }
-
-                type |= (LiquidHeaderTypeFlags)(1 << (int)liqTypeIdx);
-            }
-
-            if (type == LiquidHeaderTypeFlags.NoWater)
-                return ZLiquidStatus.NoWater;
-
-            // Check req liquid Type mask
-            if (reqLiquidType.HasValue &&
-                (reqLiquidType & type) == LiquidHeaderTypeFlags.NoWater)
-                return ZLiquidStatus.NoWater;
-
-            // Check water level:
-            // Check water height map
-            int lx_int = x_int - _liquidOffY;
-            int ly_int = y_int - _liquidOffX;
-
-            if (lx_int < 0 ||
-                lx_int >= _liquidHeight)
-                return ZLiquidStatus.NoWater;
-
-            if (ly_int < 0 ||
-                ly_int >= _liquidWidth)
-                return ZLiquidStatus.NoWater;
-
-            // Get water level
-            float liquid_level = _liquidMap != null ? _liquidMap[lx_int * _liquidWidth + ly_int] : _liquidLevel;
-            // Get ground level (sub 0.2 for fix some errors)
-            float ground_level = GetHeight(x, y);
-
-            // Check water level and ground level
-            if (liquid_level < ground_level ||
-                z < ground_level)
-                return ZLiquidStatus.NoWater;
-
-            // All ok in water . store _data
-            if (data != null)
-            {
-                data.entry = entry;
-                data.type_flags = type;
-                data.level = liquid_level;
-                data.depth_level = ground_level;
-            }
-
-            // For speed check as int values
-            float delta = liquid_level - z;
-
-            if (delta > collisionHeight) // Under water
-                return ZLiquidStatus.UnderWater;
-
-            if (delta > 0.0f) // In water
-                return ZLiquidStatus.InWater;
-
-            if (delta > -0.1f) // Walk on water
-                return ZLiquidStatus.WaterWalk;
-
-            // Above water
-            return ZLiquidStatus.AboveWater;
-        }
-
-        public float GetHeight(float x, float y)
-        {
-            return _gridGetHeight(x, y);
         }
 
         #region Fields

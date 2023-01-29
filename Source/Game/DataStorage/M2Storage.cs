@@ -12,6 +12,59 @@ namespace Game.DataStorage
     {
         private static readonly MultiMap<uint, FlyByCamera> FlyByCameraStorage = new();
 
+        public static void LoadM2Cameras(string dataPath)
+        {
+            FlyByCameraStorage.Clear();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Cinematic Camera files");
+
+            uint oldMSTime = Time.GetMSTime();
+
+            foreach (CinematicCameraRecord cameraEntry in CliDB.CinematicCameraStorage.Values)
+            {
+                string filename = dataPath + "/cameras/" + $"FILE{cameraEntry.FileDataID:X8}.xxx";
+
+                try
+                {
+                    using BinaryReader m2file = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
+
+                    // Check file has correct magic (MD21)
+                    if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
+                    {
+                        Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. File identifier not found.", filename);
+
+                        continue;
+                    }
+
+                    m2file.ReadUInt32(); //unknown size
+
+                    // Read header
+                    M2Header header = m2file.Read<M2Header>();
+
+                    // Get camera(s) - Main header, then dump them.
+                    m2file.BaseStream.Position = 8 + header.ofsCameras;
+                    M2Camera cam = m2file.Read<M2Camera>();
+
+                    m2file.BaseStream.Position = 8;
+                    ReadCamera(cam, new BinaryReader(new MemoryStream(m2file.ReadBytes((int)m2file.BaseStream.Length - 8))), cameraEntry);
+                }
+                catch (EndOfStreamException)
+                {
+                    Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. Camera references position beyond file end", filename);
+                }
+                catch (FileNotFoundException)
+                {
+                    Log.outError(LogFilter.ServerLoading, "File {0} not found!!!!", filename);
+                }
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public static List<FlyByCamera> GetFlyByCameras(uint cameraId)
+        {
+            return FlyByCameraStorage.LookupByKey(cameraId);
+        }
+
         // Convert the geomoetry from a spline value, to an actual WoW XYZ
         private static Vector3 TranslateLocation(Vector4 dbcLocation, Vector3 basePosition, Vector3 splineVector)
         {
@@ -150,59 +203,6 @@ namespace Game.DataStorage
             }
 
             FlyByCameraStorage[dbcentry.Id] = cameras;
-        }
-
-        public static void LoadM2Cameras(string dataPath)
-        {
-            FlyByCameraStorage.Clear();
-            Log.outInfo(LogFilter.ServerLoading, "Loading Cinematic Camera files");
-
-            uint oldMSTime = Time.GetMSTime();
-
-            foreach (CinematicCameraRecord cameraEntry in CliDB.CinematicCameraStorage.Values)
-            {
-                string filename = dataPath + "/cameras/" + $"FILE{cameraEntry.FileDataID:X8}.xxx";
-
-                try
-                {
-                    using BinaryReader m2file = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
-
-                    // Check file has correct magic (MD21)
-                    if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
-                    {
-                        Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. File identifier not found.", filename);
-
-                        continue;
-                    }
-
-                    m2file.ReadUInt32(); //unknown size
-
-                    // Read header
-                    M2Header header = m2file.Read<M2Header>();
-
-                    // Get camera(s) - Main header, then dump them.
-                    m2file.BaseStream.Position = 8 + header.ofsCameras;
-                    M2Camera cam = m2file.Read<M2Camera>();
-
-                    m2file.BaseStream.Position = 8;
-                    ReadCamera(cam, new BinaryReader(new MemoryStream(m2file.ReadBytes((int)m2file.BaseStream.Length - 8))), cameraEntry);
-                }
-                catch (EndOfStreamException)
-                {
-                    Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. Camera references position beyond file end", filename);
-                }
-                catch (FileNotFoundException)
-                {
-                    Log.outError(LogFilter.ServerLoading, "File {0} not found!!!!", filename);
-                }
-            }
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-
-        public static List<FlyByCamera> GetFlyByCameras(uint cameraId)
-        {
-            return FlyByCameraStorage.LookupByKey(cameraId);
         }
     }
 

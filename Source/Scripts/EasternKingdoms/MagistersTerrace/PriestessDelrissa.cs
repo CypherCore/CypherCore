@@ -165,6 +165,63 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             LackeyEntryList.Clear();
         }
 
+        public override void Reset()
+        {
+            Initialize();
+
+            InitializeLackeys();
+        }
+
+        //this mean she at some point evaded
+        public override void JustReachedHome()
+        {
+            Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Fail);
+        }
+
+        public override void JustEngagedWith(Unit who)
+        {
+            Talk(TextIds.SayAggro);
+
+            foreach (var lackeyGuid in _auiLackeyGUID)
+            {
+                Unit pAdd = Global.ObjAccessor.GetUnit(me, lackeyGuid);
+
+                if (pAdd && !pAdd.IsEngaged())
+                    AddThreat(who, 0.0f, pAdd);
+            }
+
+            Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.InProgress);
+        }
+
+        public override void KilledUnit(Unit victim)
+        {
+            if (!victim.IsPlayer())
+                return;
+
+            Talk(MiscConst.PlayerDeath[PlayersKilled]);
+
+            if (PlayersKilled < 4)
+                ++PlayersKilled;
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(TextIds.SayDeath);
+
+            if (Instance.GetData(DataTypes.DelrissaDeathCount) == MiscConst.MaxActiveLackey)
+                Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Done);
+            else
+                me.RemoveDynamicFlag(UnitDynFlags.Lootable);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
         private void Initialize()
         {
             PlayersKilled = 0;
@@ -284,34 +341,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                 });
         }
 
-        public override void Reset()
-        {
-            Initialize();
-
-            InitializeLackeys();
-        }
-
-        //this mean she at some point evaded
-        public override void JustReachedHome()
-        {
-            Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Fail);
-        }
-
-        public override void JustEngagedWith(Unit who)
-        {
-            Talk(TextIds.SayAggro);
-
-            foreach (var lackeyGuid in _auiLackeyGUID)
-            {
-                Unit pAdd = Global.ObjAccessor.GetUnit(me, lackeyGuid);
-
-                if (pAdd && !pAdd.IsEngaged())
-                    AddThreat(who, 0.0f, pAdd);
-            }
-
-            Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.InProgress);
-        }
-
         private void InitializeLackeys()
         {
             //can be called if Creature are dead, so avoid
@@ -360,35 +389,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 }
             }
         }
-
-        public override void KilledUnit(Unit victim)
-        {
-            if (!victim.IsPlayer())
-                return;
-
-            Talk(MiscConst.PlayerDeath[PlayersKilled]);
-
-            if (PlayersKilled < 4)
-                ++PlayersKilled;
-        }
-
-        public override void JustDied(Unit killer)
-        {
-            Talk(TextIds.SayDeath);
-
-            if (Instance.GetData(DataTypes.DelrissaDeathCount) == MiscConst.MaxActiveLackey)
-                Instance.SetBossState(DataTypes.PriestessDelrissa, EncounterState.Done);
-            else
-                me.RemoveDynamicFlag(UnitDynFlags.Lootable);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
     }
 
     //all 8 possible lackey use this common
@@ -402,23 +402,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            UsedPotion = false;
-
-            // These guys does not follow normal threat system rules
-            // For later development, some alternative threat system should be made
-            // We do not know what this system is based upon, but one theory is class (healers=high threat, dps=medium, etc)
-            // We reset their threat frequently as an alternative until such a system exist
-            _scheduler.Schedule(TimeSpan.FromSeconds(5),
-                                TimeSpan.FromSeconds(20),
-                                task =>
-                                {
-                                    ResetThreatList();
-                                    task.Repeat();
-                                });
         }
 
         public override void Reset()
@@ -491,15 +474,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                 delrissa.GetAI().KilledUnit(victim);
         }
 
-        private void AcquireGUIDs()
-        {
-            Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
-
-            if (delrissa)
-                for (byte i = 0; i < MiscConst.MaxActiveLackey; ++i)
-                    _auiLackeyGUIDs[i] = (delrissa.GetAI() as boss_priestess_delrissa)._auiLackeyGUID[i];
-        }
-
         public override void UpdateAI(uint diff)
         {
             if (!UsedPotion &&
@@ -510,6 +484,32 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             }
 
             _scheduler.Update(diff);
+        }
+
+        private void Initialize()
+        {
+            UsedPotion = false;
+
+            // These guys does not follow normal threat system rules
+            // For later development, some alternative threat system should be made
+            // We do not know what this system is based upon, but one theory is class (healers=high threat, dps=medium, etc)
+            // We reset their threat frequently as an alternative until such a system exist
+            _scheduler.Schedule(TimeSpan.FromSeconds(5),
+                                TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    ResetThreatList();
+                                    task.Repeat();
+                                });
+        }
+
+        private void AcquireGUIDs()
+        {
+            Creature delrissa = instance.GetCreature(DataTypes.PriestessDelrissa);
+
+            if (delrissa)
+                for (byte i = 0; i < MiscConst.MaxActiveLackey; ++i)
+                    _auiLackeyGUIDs[i] = (delrissa.GetAI() as boss_priestess_delrissa)._auiLackeyGUID[i];
         }
     }
 
@@ -522,6 +522,27 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public boss_kagani_nightstrike(Creature creature) : base(creature)
         {
             Initialize();
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+            me.SetVisible(true);
+
+            base.Reset();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            base.UpdateAI(diff);
+
+            _scheduler.Update(diff);
+
+            if (!InVanish)
+                DoMeleeAttackIfReady();
         }
 
         private void Initialize()
@@ -579,27 +600,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             InVanish = false;
         }
-
-        public override void Reset()
-        {
-            Initialize();
-            me.SetVisible(true);
-
-            base.Reset();
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            base.UpdateAI(diff);
-
-            _scheduler.Update(diff);
-
-            if (!InVanish)
-                DoMeleeAttackIfReady();
-        }
     }
 
     [Script]
@@ -609,6 +609,28 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public boss_ellris_duskhallow(Creature creature) : base(creature)
         {
             Initialize();
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            base.Reset();
+        }
+
+        public override void JustEngagedWith(Unit who)
+        {
+            DoCast(me, SpellIds.SummonImp);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            base.UpdateAI(diff);
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
 
         private void Initialize()
@@ -660,17 +682,22 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     task.Repeat();
                                 });
         }
+    }
+
+    [Script]
+    internal class boss_eramas_brightblaze : boss_priestess_lackey_common
+    {
+        //Monk
+        public boss_eramas_brightblaze(Creature creature) : base(creature)
+        {
+            Initialize();
+        }
 
         public override void Reset()
         {
             Initialize();
 
             base.Reset();
-        }
-
-        public override void JustEngagedWith(Unit who)
-        {
-            DoCast(me, SpellIds.SummonImp);
         }
 
         public override void UpdateAI(uint diff)
@@ -681,16 +708,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.UpdateAI(diff);
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
-    }
-
-    [Script]
-    internal class boss_eramas_brightblaze : boss_priestess_lackey_common
-    {
-        //Monk
-        public boss_eramas_brightblaze(Creature creature) : base(creature)
-        {
-            Initialize();
         }
 
         private void Initialize()
@@ -709,6 +726,18 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     task.Repeat();
                                 });
         }
+    }
+
+    [Script]
+    internal class boss_yazzai : boss_priestess_lackey_common
+    {
+        private bool HasIceBlocked;
+
+        //Mage
+        public boss_yazzai(Creature creature) : base(creature)
+        {
+            Initialize();
+        }
 
         public override void Reset()
         {
@@ -724,19 +753,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
 
             base.UpdateAI(diff);
 
+            if (HealthBelowPct(35) &&
+                !HasIceBlocked)
+            {
+                DoCast(me, SpellIds.IceBlock);
+                HasIceBlocked = true;
+            }
+
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
-    }
-
-    [Script]
-    internal class boss_yazzai : boss_priestess_lackey_common
-    {
-        private bool HasIceBlocked;
-
-        //Mage
-        public boss_yazzai(Creature creature) : base(creature)
-        {
-            Initialize();
         }
 
         private void Initialize()
@@ -807,30 +831,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     task.Repeat();
                                 });
         }
-
-        public override void Reset()
-        {
-            Initialize();
-
-            base.Reset();
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            base.UpdateAI(diff);
-
-            if (HealthBelowPct(35) &&
-                !HasIceBlocked)
-            {
-                DoCast(me, SpellIds.IceBlock);
-                HasIceBlocked = true;
-            }
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
     }
 
     [Script]
@@ -840,6 +840,28 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public boss_warlord_salaris(Creature creature) : base(creature)
         {
             Initialize();
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            base.Reset();
+        }
+
+        public override void JustEngagedWith(Unit who)
+        {
+            DoCast(me, SpellIds.BattleShout);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            base.UpdateAI(diff);
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
 
         private void Initialize()
@@ -904,28 +926,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     task.Repeat(TimeSpan.FromSeconds(4.5));
                                 });
         }
-
-        public override void Reset()
-        {
-            Initialize();
-
-            base.Reset();
-        }
-
-        public override void JustEngagedWith(Unit who)
-        {
-            DoCast(me, SpellIds.BattleShout);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            base.UpdateAI(diff);
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
     }
 
     [Script]
@@ -939,6 +939,36 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public boss_garaxxas(Creature creature) : base(creature)
         {
             Initialize();
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            Unit pPet = Global.ObjAccessor.GetUnit(me, _uiPetGUID);
+
+            if (!pPet)
+                me.SummonCreature(CreatureIds.Sliver, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.CorpseDespawn);
+
+            base.Reset();
+        }
+
+        public override void JustSummoned(Creature summoned)
+        {
+            _uiPetGUID = summoned.GetGUID();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            base.UpdateAI(diff);
+
+            if (me.IsWithinDistInMap(me.GetVictim(), SharedConst.AttackDistance))
+                _meleeScheduler.Update(diff, () => DoMeleeAttackIfReady());
+            else
+                _scheduler.Update(diff);
         }
 
         private void Initialize()
@@ -997,36 +1027,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     }
                                 });
         }
-
-        public override void Reset()
-        {
-            Initialize();
-
-            Unit pPet = Global.ObjAccessor.GetUnit(me, _uiPetGUID);
-
-            if (!pPet)
-                me.SummonCreature(CreatureIds.Sliver, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.CorpseDespawn);
-
-            base.Reset();
-        }
-
-        public override void JustSummoned(Creature summoned)
-        {
-            _uiPetGUID = summoned.GetGUID();
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            base.UpdateAI(diff);
-
-            if (me.IsWithinDistInMap(me.GetVictim(), SharedConst.AttackDistance))
-                _meleeScheduler.Update(diff, () => DoMeleeAttackIfReady());
-            else
-                _scheduler.Update(diff);
-        }
     }
 
     [Script]
@@ -1038,6 +1038,23 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
         public boss_apoko(Creature creature) : base(creature)
         {
             Initialize();
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            base.Reset();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            base.UpdateAI(diff);
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
 
         private void Initialize()
@@ -1084,6 +1101,16 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     task.Repeat();
                                 });
         }
+    }
+
+    [Script]
+    internal class boss_zelfan : boss_priestess_lackey_common
+    {
+        //Engineer
+        public boss_zelfan(Creature creature) : base(creature)
+        {
+            Initialize();
+        }
 
         public override void Reset()
         {
@@ -1100,16 +1127,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
             base.UpdateAI(diff);
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
-    }
-
-    [Script]
-    internal class boss_zelfan : boss_priestess_lackey_common
-    {
-        //Engineer
-        public boss_zelfan(Creature creature) : base(creature)
-        {
-            Initialize();
         }
 
         private void Initialize()
@@ -1160,23 +1177,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.PriestessDelrissa
                                     DoCastVictim(SpellIds.FelIronBomb);
                                     task.Repeat();
                                 });
-        }
-
-        public override void Reset()
-        {
-            Initialize();
-
-            base.Reset();
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            base.UpdateAI(diff);
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
     }
 }

@@ -12,10 +12,11 @@ namespace Game.PvP
 {
     internal class HellfirePeninsulaPvP : OutdoorPvP
     {
+        private readonly ulong[] _towerFlagSpawnIds = new ulong[(int)OutdoorPvPHPTowerType.Num];
+
         // how many towers are controlled
         private uint _AllianceTowersControlled;
         private uint _HordeTowersControlled;
-        private readonly ulong[] _towerFlagSpawnIds = new ulong[(int)OutdoorPvPHPTowerType.Num];
 
         public HellfirePeninsulaPvP(Map map) : base(map)
         {

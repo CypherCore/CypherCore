@@ -14,9 +14,6 @@ namespace Game.BattleFields
         // active Players in the area of the objective, 0 - alliance, 1 - horde
         private readonly HashSet<ObjectGuid>[] _activePlayers = new HashSet<ObjectGuid>[SharedConst.PvpTeamsCount];
 
-        // Battlefield this objective belongs to
-        protected BattleField Bf { get; set; }
-
         // Capture point entry
         private uint _capturePointEntry;
 
@@ -36,7 +33,6 @@ namespace Game.BattleFields
         // Objective states
         private BattleFieldObjectiveStates _oldState;
         private BattleFieldObjectiveStates _state;
-        protected uint Team { get; set; }
 
         // The status of the objective
         private float _value;
@@ -58,6 +54,10 @@ namespace Game.BattleFields
             _activePlayers[0] = new HashSet<ObjectGuid>();
             _activePlayers[1] = new HashSet<ObjectGuid>();
         }
+
+        // Battlefield this objective belongs to
+        protected BattleField Bf { get; set; }
+        protected uint Team { get; set; }
 
         public virtual bool HandlePlayerEnter(Player player)
         {
@@ -141,30 +141,6 @@ namespace Game.BattleFields
             {
                 _value = -_maxValue;
                 _state = BattleFieldObjectiveStates.Horde;
-            }
-
-            return true;
-        }
-
-        private GameObject GetCapturePointGo()
-        {
-            return Bf.GetGameObject(_capturePointGUID);
-        }
-
-        private bool DelCapturePoint()
-        {
-            if (!_capturePointGUID.IsEmpty())
-            {
-                GameObject capturePoint = Bf.GetGameObject(_capturePointGUID);
-
-                if (capturePoint)
-                {
-                    capturePoint.SetRespawnTime(0); // not save respawn Time
-                    capturePoint.Delete();
-                    capturePoint.Dispose();
-                }
-
-                _capturePointGUID.Clear();
             }
 
             return true;
@@ -298,6 +274,39 @@ namespace Game.BattleFields
             return false;
         }
 
+        public virtual void ChangeTeam(uint oldTeam)
+        {
+        }
+
+        public uint GetCapturePointEntry()
+        {
+            return _capturePointEntry;
+        }
+
+        private GameObject GetCapturePointGo()
+        {
+            return Bf.GetGameObject(_capturePointGUID);
+        }
+
+        private bool DelCapturePoint()
+        {
+            if (!_capturePointGUID.IsEmpty())
+            {
+                GameObject capturePoint = Bf.GetGameObject(_capturePointGUID);
+
+                if (capturePoint)
+                {
+                    capturePoint.SetRespawnTime(0); // not save respawn Time
+                    capturePoint.Delete();
+                    capturePoint.Dispose();
+                }
+
+                _capturePointGUID.Clear();
+            }
+
+            return true;
+        }
+
         private void SendUpdateWorldState(uint field, uint value)
         {
             for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
@@ -341,15 +350,6 @@ namespace Game.BattleFields
         private bool IsInsideObjective(Player player)
         {
             return _activePlayers[player.GetTeamId()].Contains(player.GetGUID());
-        }
-
-        public virtual void ChangeTeam(uint oldTeam)
-        {
-        }
-
-        public uint GetCapturePointEntry()
-        {
-            return _capturePointEntry;
         }
 
         private uint GetTeamId()

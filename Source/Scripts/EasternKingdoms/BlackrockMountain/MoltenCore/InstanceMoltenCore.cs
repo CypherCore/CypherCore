@@ -70,20 +70,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
     [Script]
     internal class instance_molten_core : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        private static readonly DungeonEncounterData[] encounters =
-        {
-            new(DataTypes.Lucifron, 663), new(DataTypes.Magmadar, 664), new(DataTypes.Gehennas, 665), new(DataTypes.Garr, 666), new(DataTypes.Shazzrah, 667), new(DataTypes.BaronGeddon, 668), new(DataTypes.SulfuronHarbinger, 669), new(DataTypes.GolemaggTheIncinerator, 670), new(DataTypes.MajordomoExecutus, 671), new(DataTypes.Ragnaros, 672)
-        };
-
-        public instance_molten_core() : base(nameof(instance_molten_core), 409)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_molten_core_InstanceMapScript(map);
-        }
-
         private class instance_molten_core_InstanceMapScript : InstanceScript
         {
             private ObjectGuid _cacheOfTheFirelordGUID;
@@ -189,6 +175,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
                 return true;
             }
 
+            public override void AfterDataLoad()
+            {
+                if (CheckMajordomoExecutus())
+                    _executusSchedule = true;
+            }
+
             private void SummonMajordomoExecutus()
             {
                 _executusSchedule = false;
@@ -228,12 +220,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 
                 return true;
             }
+        }
 
-            public override void AfterDataLoad()
-            {
-                if (CheckMajordomoExecutus())
-                    _executusSchedule = true;
-            }
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.Lucifron, 663), new(DataTypes.Magmadar, 664), new(DataTypes.Gehennas, 665), new(DataTypes.Garr, 666), new(DataTypes.Shazzrah, 667), new(DataTypes.BaronGeddon, 668), new(DataTypes.SulfuronHarbinger, 669), new(DataTypes.GolemaggTheIncinerator, 670), new(DataTypes.MajordomoExecutus, 671), new(DataTypes.Ragnaros, 672)
+        };
+
+        public instance_molten_core() : base(nameof(instance_molten_core), 409)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_molten_core_InstanceMapScript(map);
         }
     }
 }

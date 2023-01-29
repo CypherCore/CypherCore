@@ -12,6 +12,15 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendOpenTransmogrifier(ObjectGuid guid)
+        {
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Transmogrifier;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
+        }
+
         [WorldPacketHandler(ClientOpcodes.TransmogrifyItems)]
         private void HandleTransmogrifyItems(TransmogrifyItems transmogrifyItems)
         {
@@ -371,15 +380,6 @@ namespace Game
                     }
                 }
             }
-        }
-
-        public void SendOpenTransmogrifier(ObjectGuid guid)
-        {
-            NPCInteractionOpenResult npcInteraction = new();
-            npcInteraction.Npc = guid;
-            npcInteraction.InteractionType = PlayerInteractionType.Transmogrifier;
-            npcInteraction.Success = true;
-            SendPacket(npcInteraction);
         }
     }
 }

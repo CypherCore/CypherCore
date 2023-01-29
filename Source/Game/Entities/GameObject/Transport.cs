@@ -18,13 +18,13 @@ namespace Game.Entities
         {
             private static readonly TimeSpan PositionUpdateInterval = TimeSpan.FromMilliseconds(50);
             private readonly TransportAnimation _animationInfo;
-            private bool _autoCycleBetweenStopFrames;
             private readonly List<WorldObject> _passengers = new();
-            private uint _pathProgress;
             private readonly TimeTracker _positionUpdateTimer = new();
+            private readonly List<uint> _stopFrames = new();
+            private bool _autoCycleBetweenStopFrames;
+            private uint _pathProgress;
             private uint _stateChangeProgress;
             private uint _stateChangeTime;
-            private readonly List<uint> _stopFrames = new();
 
             public Transport(GameObject owner) : base(owner)
             {

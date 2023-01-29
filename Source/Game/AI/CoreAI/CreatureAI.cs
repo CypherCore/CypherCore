@@ -16,16 +16,16 @@ namespace Game.AI
 {
     public class CreatureAI : UnitAI
     {
-        private List<AreaBoundary> _boundary = new();
+        protected readonly TaskScheduler _scheduler = new();
 
         protected readonly EventMap Events = new();
         protected InstanceScript InstanceScript;
+
+        protected new Creature me;
+        private List<AreaBoundary> _boundary = new();
         private bool _isEngaged;
         private bool _moveInLosLocked;
         private bool _negateBoundary;
-        protected readonly TaskScheduler _scheduler = new();
-
-        protected new Creature me;
 
         public CreatureAI(Creature _creature) : base(_creature)
         {
@@ -114,17 +114,6 @@ namespace Game.AI
             if (me.HasReactState(ReactStates.Aggressive) &&
                 me.CanStartAttack(who, false))
                 me.EngageWithTarget(who);
-        }
-
-        private void OnOwnerCombatInteraction(Unit target)
-        {
-            if (target == null ||
-                !me.IsAlive())
-                return;
-
-            if (!me.HasReactState(ReactStates.Passive) &&
-                me.CanStartAttack(target, true))
-                me.EngageWithTarget(target);
         }
 
         // Distract creature, if player gets too close while stealthed/prowling
@@ -713,6 +702,17 @@ namespace Game.AI
         public bool IsEngaged()
         {
             return _isEngaged;
+        }
+
+        private void OnOwnerCombatInteraction(Unit target)
+        {
+            if (target == null ||
+                !me.IsAlive())
+                return;
+
+            if (!me.HasReactState(ReactStates.Passive) &&
+                me.CanStartAttack(target, true))
+                me.EngageWithTarget(target);
         }
     }
 }

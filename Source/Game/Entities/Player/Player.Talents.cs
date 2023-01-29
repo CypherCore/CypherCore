@@ -247,49 +247,14 @@ namespace Game.Entities
             UpdateItemSetAuras(false);
         }
 
-        private bool HasTalent(uint talentId, byte group)
-        {
-            return GetTalentMap(group).ContainsKey(talentId) && GetTalentMap(group)[talentId] != PlayerSpellState.Removed;
-        }
-
-        private uint GetTalentResetCost()
-        {
-            return _specializationInfo.ResetTalentsCost;
-        }
-
-        private void SetTalentResetCost(uint cost)
-        {
-            _specializationInfo.ResetTalentsCost = cost;
-        }
-
-        private long GetTalentResetTime()
-        {
-            return _specializationInfo.ResetTalentsTime;
-        }
-
-        private void SetTalentResetTime(long time_)
-        {
-            _specializationInfo.ResetTalentsTime = time_;
-        }
-
         public uint GetPrimarySpecialization()
         {
             return PlayerData.CurrentSpecID;
         }
 
-        private void SetPrimarySpecialization(uint spec)
-        {
-            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.CurrentSpecID), spec);
-        }
-
         public byte GetActiveTalentGroup()
         {
             return _specializationInfo.ActiveGroup;
-        }
-
-        private void SetActiveTalentGroup(byte group)
-        {
-            _specializationInfo.ActiveGroup = group;
         }
 
         // Loot Spec
@@ -526,47 +491,6 @@ namespace Game.Entities
             }
         }
 
-        private void StartLoadingActionButtons(Action callback = null)
-        {
-            uint traitConfigId = 0;
-
-            TraitConfig traitConfig = GetTraitConfig((int)(uint)ActivePlayerData.ActiveCombatTraitConfigID);
-
-            if (traitConfig != null)
-            {
-                int usedSavedTraitConfigIndex = ActivePlayerData.TraitConfigs.FindIndexIf(savedConfig => { return (TraitConfigType)(int)savedConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.SharedActionBars) == TraitCombatConfigFlags.None && savedConfig.LocalIdentifier == traitConfig.LocalIdentifier; });
-
-                if (usedSavedTraitConfigIndex >= 0)
-                    traitConfigId = (uint)(int)ActivePlayerData.TraitConfigs[usedSavedTraitConfigIndex].ID;
-            }
-
-            // load them asynchronously
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            stmt.AddValue(1, GetActiveTalentGroup());
-            stmt.AddValue(2, traitConfigId);
-
-            var myGuid = GetGUID();
-
-            WorldSession mySess = GetSession();
-
-            mySess.GetQueryProcessor()
-                  .AddCallback(DB.Characters.AsyncQuery(stmt)
-                                 .WithCallback(result =>
-                                               {
-                                                   // safe callback, we can't pass this pointer directly
-                                                   // in case player logs out before db response (player would be deleted in that case)
-                                                   Player thisPlayer = mySess.GetPlayer();
-
-                                                   if (thisPlayer != null &&
-                                                       thisPlayer.GetGUID() == myGuid)
-                                                       thisPlayer.LoadActions(result);
-
-                                                   if (callback != null)
-                                                       callback();
-                                               }));
-        }
-
         public Dictionary<uint, PlayerSpellState> GetTalentMap(uint spec)
         {
             return _specializationInfo.Talents[spec];
@@ -772,19 +696,6 @@ namespace Game.Entities
             SendPacket(respecWipeConfirm);
         }
 
-        //Pvp
-        private void ResetPvpTalents()
-        {
-            for (byte spec = 0; spec < PlayerConst.MaxSpecializations; ++spec)
-                foreach (uint talentId in GetPvpTalentMap(spec))
-                {
-                    var talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentId);
-
-                    if (talentInfo != null)
-                        RemovePvpTalent(talentInfo, spec);
-                }
-        }
-
         public TalentLearnResult LearnPvpTalent(uint talentID, byte slot, ref uint spellOnCooldown)
         {
             if (slot >= PlayerConst.MaxPvpTalentSlots)
@@ -850,61 +761,6 @@ namespace Game.Entities
             return TalentLearnResult.LearnOk;
         }
 
-        private bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
-        {
-            //ASSERT(talent);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
-
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
-
-                return false;
-            }
-
-            if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
-            {
-                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) is invalid");
-
-                return false;
-            }
-
-            if (activeTalentGroup == GetActiveTalentGroup() &&
-                HasAuraType(AuraType.PvpTalents))
-            {
-                LearnSpell(talent.SpellID, true);
-
-                // Move this to toggle ?
-                if (talent.OverridesSpellID != 0)
-                    AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
-            }
-
-            GetPvpTalentMap(activeTalentGroup)[slot] = talent.Id;
-
-            return true;
-        }
-
-        private void RemovePvpTalent(PvpTalentRecord talent, byte activeTalentGroup)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
-
-            if (spellInfo == null)
-                return;
-
-            RemoveSpell(talent.SpellID, true);
-
-            // Move this to toggle ?
-            if (talent.OverridesSpellID != 0)
-                RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
-
-            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-            var talents = GetPvpTalentMap(activeTalentGroup);
-
-            for (var i = 0; i < PlayerConst.MaxPvpTalentSlots; ++i)
-                if (talents[i] == talent.Id)
-                    talents[i] = 0;
-        }
-
         public void TogglePvpTalents(bool enable)
         {
             var pvpTalents = GetPvpTalentMap(GetActiveTalentGroup());
@@ -931,11 +787,6 @@ namespace Game.Entities
                     }
                 }
             }
-        }
-
-        private bool HasPvpTalent(uint talentID, byte activeTalentGroup)
-        {
-            return GetPvpTalentMap(activeTalentGroup).Contains(talentID);
         }
 
         //Traits
@@ -968,31 +819,6 @@ namespace Game.Entities
             }
 
             _traitConfigStates[(int)configId] = PlayerSpellState.Changed;
-        }
-
-        private void AddTraitConfig(TraitConfigPacket traitConfig)
-        {
-            var setter = new TraitConfig();
-            setter.ModifyValue(setter.ID).SetValue(traitConfig.ID);
-            setter.ModifyValue(setter.Name).SetValue(traitConfig.Name);
-            setter.ModifyValue(setter.Type).SetValue((int)traitConfig.Type);
-            setter.ModifyValue(setter.SkillLineID).SetValue((int)traitConfig.SkillLineID);
-            setter.ModifyValue(setter.ChrSpecializationID).SetValue(traitConfig.ChrSpecializationID);
-            setter.ModifyValue(setter.CombatConfigFlags).SetValue((int)traitConfig.CombatConfigFlags);
-            setter.ModifyValue(setter.LocalIdentifier).SetValue(traitConfig.LocalIdentifier);
-            setter.ModifyValue(setter.TraitSystemID).SetValue(traitConfig.TraitSystemID);
-
-            AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs), setter);
-
-            foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
-            {
-                TraitEntry newEntry = new();
-                newEntry.TraitNodeID = traitEntry.TraitNodeID;
-                newEntry.TraitNodeEntryID = traitEntry.TraitNodeEntryID;
-                newEntry.Rank = traitEntry.Rank;
-                newEntry.GrantedRanks = traitEntry.GrantedRanks;
-                AddDynamicUpdateFieldValue(setter.ModifyValue(setter.Entries), newEntry);
-            }
         }
 
         public TraitConfig GetTraitConfig(int configId)
@@ -1062,6 +888,272 @@ namespace Game.Entities
             else
             {
                 finalizeTraitConfigUpdate();
+            }
+        }
+
+        public void RenameTraitConfig(int editedConfigId, string newName)
+        {
+            int editedIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == editedConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None; });
+
+            if (editedIndex < 0)
+                return;
+
+            TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
+            SetUpdateFieldValue(traitConfig.ModifyValue(traitConfig.Name), newName);
+
+            _traitConfigStates[editedConfigId] = PlayerSpellState.Changed;
+        }
+
+        public void DeleteTraitConfig(int deletedConfigId)
+        {
+            int deletedIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == deletedConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None; });
+
+            if (deletedIndex < 0)
+                return;
+
+            RemoveDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData)
+                                                 .ModifyValue(ActivePlayerData.TraitConfigs),
+                                          deletedIndex);
+
+            _traitConfigStates[deletedConfigId] = PlayerSpellState.Removed;
+        }
+
+        public void SetTraitConfigUseStarterBuild(int traitConfigId, bool useStarterBuild)
+        {
+            int configIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == traitConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None; });
+
+            if (configIndex < 0)
+                return;
+
+            bool currentlyUsesStarterBuild = ((TraitCombatConfigFlags)(int)ActivePlayerData.TraitConfigs[configIndex].CombatConfigFlags).HasFlag(TraitCombatConfigFlags.StarterBuild);
+
+            if (currentlyUsesStarterBuild == useStarterBuild)
+                return;
+
+            if (useStarterBuild)
+            {
+                TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
+                SetUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
+            }
+            else
+            {
+                TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
+                RemoveUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
+            }
+
+            _traitConfigStates[(int)traitConfigId] = PlayerSpellState.Changed;
+        }
+
+        public void SetTraitConfigUseSharedActionBars(int traitConfigId, bool usesSharedActionBars, bool isLastSelectedSavedConfig)
+        {
+            int configIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == traitConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None; });
+
+            if (configIndex < 0)
+                return;
+
+            bool currentlyUsesSharedActionBars = ((TraitCombatConfigFlags)(int)ActivePlayerData.TraitConfigs[configIndex].CombatConfigFlags).HasFlag(TraitCombatConfigFlags.SharedActionBars);
+
+            if (currentlyUsesSharedActionBars == usesSharedActionBars)
+                return;
+
+            TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
+
+            if (usesSharedActionBars)
+            {
+                SetUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.SharedActionBars);
+
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION_BY_TRAIT_CONFIG);
+                stmt.AddValue(0, GetGUID().GetCounter());
+                stmt.AddValue(1, traitConfigId);
+                DB.Characters.Execute(stmt);
+
+                if (isLastSelectedSavedConfig)
+                    StartLoadingActionButtons(); // load Action buttons that were saved in shared mode
+            }
+            else
+            {
+                RemoveUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.SharedActionBars);
+
+                // trigger a save with traitConfigId
+                foreach (var (_, button) in _actionButtons)
+                    if (button.UState != ActionButtonUpdateState.Deleted)
+                        button.UState = ActionButtonUpdateState.New;
+            }
+
+            _traitConfigStates[traitConfigId] = PlayerSpellState.Changed;
+        }
+
+        private bool HasTalent(uint talentId, byte group)
+        {
+            return GetTalentMap(group).ContainsKey(talentId) && GetTalentMap(group)[talentId] != PlayerSpellState.Removed;
+        }
+
+        private uint GetTalentResetCost()
+        {
+            return _specializationInfo.ResetTalentsCost;
+        }
+
+        private void SetTalentResetCost(uint cost)
+        {
+            _specializationInfo.ResetTalentsCost = cost;
+        }
+
+        private long GetTalentResetTime()
+        {
+            return _specializationInfo.ResetTalentsTime;
+        }
+
+        private void SetTalentResetTime(long time_)
+        {
+            _specializationInfo.ResetTalentsTime = time_;
+        }
+
+        private void SetPrimarySpecialization(uint spec)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.CurrentSpecID), spec);
+        }
+
+        private void SetActiveTalentGroup(byte group)
+        {
+            _specializationInfo.ActiveGroup = group;
+        }
+
+        private void StartLoadingActionButtons(Action callback = null)
+        {
+            uint traitConfigId = 0;
+
+            TraitConfig traitConfig = GetTraitConfig((int)(uint)ActivePlayerData.ActiveCombatTraitConfigID);
+
+            if (traitConfig != null)
+            {
+                int usedSavedTraitConfigIndex = ActivePlayerData.TraitConfigs.FindIndexIf(savedConfig => { return (TraitConfigType)(int)savedConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.SharedActionBars) == TraitCombatConfigFlags.None && savedConfig.LocalIdentifier == traitConfig.LocalIdentifier; });
+
+                if (usedSavedTraitConfigIndex >= 0)
+                    traitConfigId = (uint)(int)ActivePlayerData.TraitConfigs[usedSavedTraitConfigIndex].ID;
+            }
+
+            // load them asynchronously
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
+            stmt.AddValue(0, GetGUID().GetCounter());
+            stmt.AddValue(1, GetActiveTalentGroup());
+            stmt.AddValue(2, traitConfigId);
+
+            var myGuid = GetGUID();
+
+            WorldSession mySess = GetSession();
+
+            mySess.GetQueryProcessor()
+                  .AddCallback(DB.Characters.AsyncQuery(stmt)
+                                 .WithCallback(result =>
+                                               {
+                                                   // safe callback, we can't pass this pointer directly
+                                                   // in case player logs out before db response (player would be deleted in that case)
+                                                   Player thisPlayer = mySess.GetPlayer();
+
+                                                   if (thisPlayer != null &&
+                                                       thisPlayer.GetGUID() == myGuid)
+                                                       thisPlayer.LoadActions(result);
+
+                                                   if (callback != null)
+                                                       callback();
+                                               }));
+        }
+
+        //Pvp
+        private void ResetPvpTalents()
+        {
+            for (byte spec = 0; spec < PlayerConst.MaxSpecializations; ++spec)
+                foreach (uint talentId in GetPvpTalentMap(spec))
+                {
+                    var talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentId);
+
+                    if (talentInfo != null)
+                        RemovePvpTalent(talentInfo, spec);
+                }
+        }
+
+        private bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
+        {
+            //ASSERT(talent);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+
+            if (spellInfo == null)
+            {
+                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
+
+                return false;
+            }
+
+            if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
+            {
+                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) is invalid");
+
+                return false;
+            }
+
+            if (activeTalentGroup == GetActiveTalentGroup() &&
+                HasAuraType(AuraType.PvpTalents))
+            {
+                LearnSpell(talent.SpellID, true);
+
+                // Move this to toggle ?
+                if (talent.OverridesSpellID != 0)
+                    AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+            }
+
+            GetPvpTalentMap(activeTalentGroup)[slot] = talent.Id;
+
+            return true;
+        }
+
+        private void RemovePvpTalent(PvpTalentRecord talent, byte activeTalentGroup)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+
+            if (spellInfo == null)
+                return;
+
+            RemoveSpell(talent.SpellID, true);
+
+            // Move this to toggle ?
+            if (talent.OverridesSpellID != 0)
+                RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+
+            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
+            var talents = GetPvpTalentMap(activeTalentGroup);
+
+            for (var i = 0; i < PlayerConst.MaxPvpTalentSlots; ++i)
+                if (talents[i] == talent.Id)
+                    talents[i] = 0;
+        }
+
+        private bool HasPvpTalent(uint talentID, byte activeTalentGroup)
+        {
+            return GetPvpTalentMap(activeTalentGroup).Contains(talentID);
+        }
+
+        private void AddTraitConfig(TraitConfigPacket traitConfig)
+        {
+            var setter = new TraitConfig();
+            setter.ModifyValue(setter.ID).SetValue(traitConfig.ID);
+            setter.ModifyValue(setter.Name).SetValue(traitConfig.Name);
+            setter.ModifyValue(setter.Type).SetValue((int)traitConfig.Type);
+            setter.ModifyValue(setter.SkillLineID).SetValue((int)traitConfig.SkillLineID);
+            setter.ModifyValue(setter.ChrSpecializationID).SetValue(traitConfig.ChrSpecializationID);
+            setter.ModifyValue(setter.CombatConfigFlags).SetValue((int)traitConfig.CombatConfigFlags);
+            setter.ModifyValue(setter.LocalIdentifier).SetValue(traitConfig.LocalIdentifier);
+            setter.ModifyValue(setter.TraitSystemID).SetValue(traitConfig.TraitSystemID);
+
+            AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs), setter);
+
+            foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
+            {
+                TraitEntry newEntry = new();
+                newEntry.TraitNodeID = traitEntry.TraitNodeID;
+                newEntry.TraitNodeEntryID = traitEntry.TraitNodeEntryID;
+                newEntry.Rank = traitEntry.Rank;
+                newEntry.GrantedRanks = traitEntry.GrantedRanks;
+                AddDynamicUpdateFieldValue(setter.ModifyValue(setter.Entries), newEntry);
             }
         }
 
@@ -1176,33 +1268,6 @@ namespace Game.Entities
             _traitConfigStates[(int)editedConfigId] = PlayerSpellState.Changed;
         }
 
-        public void RenameTraitConfig(int editedConfigId, string newName)
-        {
-            int editedIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == editedConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None; });
-
-            if (editedIndex < 0)
-                return;
-
-            TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, editedIndex);
-            SetUpdateFieldValue(traitConfig.ModifyValue(traitConfig.Name), newName);
-
-            _traitConfigStates[editedConfigId] = PlayerSpellState.Changed;
-        }
-
-        public void DeleteTraitConfig(int deletedConfigId)
-        {
-            int deletedIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == deletedConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None; });
-
-            if (deletedIndex < 0)
-                return;
-
-            RemoveDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData)
-                                                 .ModifyValue(ActivePlayerData.TraitConfigs),
-                                          deletedIndex);
-
-            _traitConfigStates[deletedConfigId] = PlayerSpellState.Removed;
-        }
-
         private void ApplyTraitConfig(int configId, bool apply)
         {
             TraitConfig traitConfig = GetTraitConfig(configId);
@@ -1233,71 +1298,6 @@ namespace Game.Entities
                 else
                     RemoveSpell(traitDefinition.SpellID);
             }
-        }
-
-        public void SetTraitConfigUseStarterBuild(int traitConfigId, bool useStarterBuild)
-        {
-            int configIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == traitConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None; });
-
-            if (configIndex < 0)
-                return;
-
-            bool currentlyUsesStarterBuild = ((TraitCombatConfigFlags)(int)ActivePlayerData.TraitConfigs[configIndex].CombatConfigFlags).HasFlag(TraitCombatConfigFlags.StarterBuild);
-
-            if (currentlyUsesStarterBuild == useStarterBuild)
-                return;
-
-            if (useStarterBuild)
-            {
-                TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
-                SetUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
-            }
-            else
-            {
-                TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
-                RemoveUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.StarterBuild);
-            }
-
-            _traitConfigStates[(int)traitConfigId] = PlayerSpellState.Changed;
-        }
-
-        public void SetTraitConfigUseSharedActionBars(int traitConfigId, bool usesSharedActionBars, bool isLastSelectedSavedConfig)
-        {
-            int configIndex = ActivePlayerData.TraitConfigs.FindIndexIf(traitConfig => { return traitConfig.ID == traitConfigId && (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None; });
-
-            if (configIndex < 0)
-                return;
-
-            bool currentlyUsesSharedActionBars = ((TraitCombatConfigFlags)(int)ActivePlayerData.TraitConfigs[configIndex].CombatConfigFlags).HasFlag(TraitCombatConfigFlags.SharedActionBars);
-
-            if (currentlyUsesSharedActionBars == usesSharedActionBars)
-                return;
-
-            TraitConfig traitConfig = Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.TraitConfigs, configIndex);
-
-            if (usesSharedActionBars)
-            {
-                SetUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.SharedActionBars);
-
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION_BY_TRAIT_CONFIG);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                stmt.AddValue(1, traitConfigId);
-                DB.Characters.Execute(stmt);
-
-                if (isLastSelectedSavedConfig)
-                    StartLoadingActionButtons(); // load Action buttons that were saved in shared mode
-            }
-            else
-            {
-                RemoveUpdateFieldFlagValue(traitConfig.ModifyValue(traitConfig.CombatConfigFlags), (int)TraitCombatConfigFlags.SharedActionBars);
-
-                // trigger a save with traitConfigId
-                foreach (var (_, button) in _actionButtons)
-                    if (button.UState != ActionButtonUpdateState.Deleted)
-                        button.UState = ActionButtonUpdateState.New;
-            }
-
-            _traitConfigStates[traitConfigId] = PlayerSpellState.Changed;
         }
     }
 }

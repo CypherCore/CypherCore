@@ -57,11 +57,6 @@ internal class FileAppender : Appender, IDisposable
         _logStream = OpenFile(_fileName, FileMode.Create);
     }
 
-    private FileStream OpenFile(string filename, FileMode mode)
-    {
-        return new FileStream(_logDir + "/" + filename, mode, FileAccess.Write, FileShare.ReadWrite);
-    }
-
     public override void _write(LogMessage message)
     {
         lock (locker)
@@ -86,6 +81,11 @@ internal class FileAppender : Appender, IDisposable
     public override AppenderType GetAppenderType()
     {
         return AppenderType.File;
+    }
+
+    private FileStream OpenFile(string filename, FileMode mode)
+    {
+        return new FileStream(_logDir + "/" + filename, mode, FileAccess.Write, FileShare.ReadWrite);
     }
 
     #region IDisposable Support
@@ -154,8 +154,8 @@ internal abstract class Appender
     private readonly AppenderFlags _flags;
 
     private readonly byte _id;
-    private LogLevel _level;
     private readonly string _name;
+    private LogLevel _level;
 
     protected Appender(byte id, string name, LogLevel level = LogLevel.Disabled, AppenderFlags flags = AppenderFlags.None)
     {

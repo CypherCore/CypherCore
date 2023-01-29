@@ -20,14 +20,14 @@ namespace Game.DataStorage
     internal class DBReader
     {
         private const uint WDC3FmtSig = 0x33434457; // WDC3
-
-        private readonly Dictionary<int, WDC3Row> _records = new();
         internal ColumnMetaData[] ColumnMeta;
         internal Dictionary<int, Value32>[] CommonData;
         internal FieldMetaData[] FieldMeta;
 
         internal WDCHeader Header;
         internal Value32[][] PalletData;
+
+        private readonly Dictionary<int, WDC3Row> _records = new();
 
         public static DB6Storage<T> Read<T>(BitSet availableDb2Locales, string db2Path, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale, ref uint loadedFileCount) where T : new()
         {
@@ -308,89 +308,6 @@ namespace Game.DataStorage
 
         public int Id { get; set; }
 
-        private T GetFieldValue<T>(int fieldIndex) where T : unmanaged
-        {
-            var columnMeta = _columnMeta[fieldIndex];
-
-            switch (columnMeta.CompressionType)
-            {
-                case DB2ColumnCompression.None:
-                    int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
-
-                    if (bitSize > 0)
-                        return _data.Read<T>(bitSize);
-                    else
-                        return _data.Read<T>(columnMeta.Immediate.BitWidth);
-                case DB2ColumnCompression.Immediate:
-                    return _data.Read<T>(columnMeta.Immediate.BitWidth);
-                case DB2ColumnCompression.SignedImmediate:
-                    return _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
-                case DB2ColumnCompression.Common:
-                    if (_commonData[fieldIndex].TryGetValue(Id, out Value32 val))
-                        return val.As<T>();
-                    else
-                        return columnMeta.Common.DefaultValue.As<T>();
-                case DB2ColumnCompression.Pallet:
-                case DB2ColumnCompression.PalletArray:
-                    uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
-
-                    return _palletData[fieldIndex][palletIndex].As<T>();
-            }
-
-            throw new Exception(string.Format("Unexpected compression Type {0}", _columnMeta[fieldIndex].CompressionType));
-        }
-
-        private T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
-        {
-            var columnMeta = _columnMeta[fieldIndex];
-
-            switch (columnMeta.CompressionType)
-            {
-                case DB2ColumnCompression.None:
-                    int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
-
-                    T[] arr1 = new T[arraySize];
-
-                    for (int i = 0; i < arr1.Length; i++)
-                        if (bitSize > 0)
-                            arr1[i] = _data.Read<T>(bitSize);
-                        else
-                            arr1[i] = _data.Read<T>(columnMeta.Immediate.BitWidth);
-
-                    return arr1;
-                case DB2ColumnCompression.Immediate:
-                    T[] arr2 = new T[arraySize];
-
-                    for (int i = 0; i < arr2.Length; i++)
-                        arr2[i] = _data.Read<T>(columnMeta.Immediate.BitWidth);
-
-                    return arr2;
-                case DB2ColumnCompression.SignedImmediate:
-                    T[] arr3 = new T[arraySize];
-
-                    for (int i = 0; i < arr3.Length; i++)
-                        arr3[i] = _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
-
-                    return arr3;
-                case DB2ColumnCompression.PalletArray:
-                    int cardinality = columnMeta.Pallet.Cardinality;
-
-                    if (arraySize != cardinality)
-                        throw new Exception("Struct missmatch for pallet array field?");
-
-                    uint palletArrayIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
-
-                    T[] arr4 = new T[cardinality];
-
-                    for (int i = 0; i < arr4.Length; i++)
-                        arr4[i] = _palletData[fieldIndex][i + cardinality * (int)palletArrayIndex].As<T>();
-
-                    return arr4;
-            }
-
-            throw new Exception(string.Format("Unexpected compression Type {0}", columnMeta.CompressionType));
-        }
-
         public T As<T>() where T : new()
         {
             _data.Position = 0;
@@ -608,6 +525,89 @@ namespace Game.DataStorage
         public WDC3Row Clone()
         {
             return (WDC3Row)MemberwiseClone();
+        }
+
+        private T GetFieldValue<T>(int fieldIndex) where T : unmanaged
+        {
+            var columnMeta = _columnMeta[fieldIndex];
+
+            switch (columnMeta.CompressionType)
+            {
+                case DB2ColumnCompression.None:
+                    int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
+
+                    if (bitSize > 0)
+                        return _data.Read<T>(bitSize);
+                    else
+                        return _data.Read<T>(columnMeta.Immediate.BitWidth);
+                case DB2ColumnCompression.Immediate:
+                    return _data.Read<T>(columnMeta.Immediate.BitWidth);
+                case DB2ColumnCompression.SignedImmediate:
+                    return _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
+                case DB2ColumnCompression.Common:
+                    if (_commonData[fieldIndex].TryGetValue(Id, out Value32 val))
+                        return val.As<T>();
+                    else
+                        return columnMeta.Common.DefaultValue.As<T>();
+                case DB2ColumnCompression.Pallet:
+                case DB2ColumnCompression.PalletArray:
+                    uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
+
+                    return _palletData[fieldIndex][palletIndex].As<T>();
+            }
+
+            throw new Exception(string.Format("Unexpected compression Type {0}", _columnMeta[fieldIndex].CompressionType));
+        }
+
+        private T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
+        {
+            var columnMeta = _columnMeta[fieldIndex];
+
+            switch (columnMeta.CompressionType)
+            {
+                case DB2ColumnCompression.None:
+                    int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
+
+                    T[] arr1 = new T[arraySize];
+
+                    for (int i = 0; i < arr1.Length; i++)
+                        if (bitSize > 0)
+                            arr1[i] = _data.Read<T>(bitSize);
+                        else
+                            arr1[i] = _data.Read<T>(columnMeta.Immediate.BitWidth);
+
+                    return arr1;
+                case DB2ColumnCompression.Immediate:
+                    T[] arr2 = new T[arraySize];
+
+                    for (int i = 0; i < arr2.Length; i++)
+                        arr2[i] = _data.Read<T>(columnMeta.Immediate.BitWidth);
+
+                    return arr2;
+                case DB2ColumnCompression.SignedImmediate:
+                    T[] arr3 = new T[arraySize];
+
+                    for (int i = 0; i < arr3.Length; i++)
+                        arr3[i] = _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
+
+                    return arr3;
+                case DB2ColumnCompression.PalletArray:
+                    int cardinality = columnMeta.Pallet.Cardinality;
+
+                    if (arraySize != cardinality)
+                        throw new Exception("Struct missmatch for pallet array field?");
+
+                    uint palletArrayIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
+
+                    T[] arr4 = new T[cardinality];
+
+                    for (int i = 0; i < arr4.Length; i++)
+                        arr4[i] = _palletData[fieldIndex][i + cardinality * (int)palletArrayIndex].As<T>();
+
+                    return arr4;
+            }
+
+            throw new Exception(string.Format("Unexpected compression Type {0}", columnMeta.CompressionType));
         }
     }
 

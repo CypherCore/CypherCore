@@ -6,16 +6,15 @@ namespace Game.Entities;
 
 public class HealInfo
 {
-    private uint _absorb;
-    private uint _effectiveHeal;
-    private uint _heal;
-
     private readonly Unit _healer;
-    private ProcFlagsHit _hitMask;
     private readonly uint _originalHeal;
     private readonly SpellSchoolMask _schoolMask;
     private readonly SpellInfo _spellInfo;
     private readonly Unit _target;
+    private uint _absorb;
+    private uint _effectiveHeal;
+    private uint _heal;
+    private ProcFlagsHit _hitMask;
 
     public HealInfo(Unit healer, Unit target, uint heal, SpellInfo spellInfo, SpellSchoolMask schoolMask)
     {

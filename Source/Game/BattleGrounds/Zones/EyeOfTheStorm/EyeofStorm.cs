@@ -24,19 +24,10 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
     internal class BgEyeofStorm : Battleground
     {
         private readonly byte[] _currentPointPlayersCount = new byte[2 * EotSPoints.POINTS_MAX];
-        private ObjectGuid _droppedFlagGUID;
-        private uint _flagCapturedBgObjectType; // Type that should be despawned when flag is captured
-
-        private ObjectGuid _flagKeeper;   // keepers Guid
-        private EotSFlagState _flagState; // for checking flag State
-        private int _flagsTimer;
 
         private readonly uint[] _honorScoreTics = new uint[2];
-        private uint _honorTics;
         private readonly BattlegroundPointCaptureStatus[] _lastPointCaptureStatus = new BattlegroundPointCaptureStatus[EotSPoints.POINTS_MAX];
         private readonly List<ObjectGuid>[] _playersNearPoint = new List<ObjectGuid>[EotSPoints.POINTS_MAX + 1];
-
-        private int _pointAddingTimer;
         private readonly EotSProgressBarConsts[] _pointBarStatus = new EotSProgressBarConsts[EotSPoints.POINTS_MAX];
 
         private readonly Team[] _pointOwnedByTeam = new Team[EotSPoints.POINTS_MAX];
@@ -44,6 +35,15 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
         private readonly uint[] _points_Trigger = new uint[EotSPoints.POINTS_MAX];
         private readonly EotSPointState[] _pointState = new EotSPointState[EotSPoints.POINTS_MAX];
         private readonly uint[] _teamPointsCount = new uint[2];
+        private ObjectGuid _droppedFlagGUID;
+        private uint _flagCapturedBgObjectType; // Type that should be despawned when flag is captured
+
+        private ObjectGuid _flagKeeper;   // keepers Guid
+        private EotSFlagState _flagState; // for checking flag State
+        private int _flagsTimer;
+        private uint _honorTics;
+
+        private int _pointAddingTimer;
         private int _towerCapCheckTimer;
 
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
@@ -161,226 +161,6 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
             TriggerGameEvent(EotSMisc.EVENT_START_BATTLE);
         }
 
-        private void AddPoints(Team Team, uint Points)
-        {
-            int team_index = GetTeamIndexByTeamId(Team);
-            TeamScores[team_index] += Points;
-            _honorScoreTics[team_index] += Points;
-
-            if (_honorScoreTics[team_index] >= _honorTics)
-            {
-                RewardHonorToTeam(GetBonusHonorFromKill(1), Team);
-                _honorScoreTics[team_index] -= _honorTics;
-            }
-
-            UpdateTeamScore(team_index);
-        }
-
-        private BattlegroundPointCaptureStatus GetPointCaptureStatus(uint point)
-        {
-            if (_pointBarStatus[point] >= EotSProgressBarConsts.ProgressBarAliControlled)
-                return BattlegroundPointCaptureStatus.AllianceControlled;
-
-            if (_pointBarStatus[point] <= EotSProgressBarConsts.ProgressBarHordeControlled)
-                return BattlegroundPointCaptureStatus.HordeControlled;
-
-            if (_currentPointPlayersCount[2 * point] == _currentPointPlayersCount[2 * point + 1])
-                return BattlegroundPointCaptureStatus.Neutral;
-
-            return _currentPointPlayersCount[2 * point] > _currentPointPlayersCount[2 * point + 1]
-                       ? BattlegroundPointCaptureStatus.AllianceCapturing
-                       : BattlegroundPointCaptureStatus.HordeCapturing;
-        }
-
-        private void CheckSomeoneJoinedPoint()
-        {
-            GameObject obj;
-
-            for (byte i = 0; i < EotSPoints.POINTS_MAX; ++i)
-            {
-                obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TOWER_CAP_FEL_REAVER + i]);
-
-                if (obj)
-                {
-                    byte j = 0;
-
-                    while (j < _playersNearPoint[EotSPoints.POINTS_MAX].Count)
-                    {
-                        Player player = Global.ObjAccessor.FindPlayer(_playersNearPoint[EotSPoints.POINTS_MAX][j]);
-
-                        if (!player)
-                        {
-                            Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneJoinedPoint: Player ({0}) could not be found!", _playersNearPoint[EotSPoints.POINTS_MAX][j].ToString());
-                            ++j;
-
-                            continue;
-                        }
-
-                        if (player.CanCaptureTowerPoint() &&
-                            player.IsWithinDistInMap(obj, (float)EotSProgressBarConsts.PointRadius))
-                        {
-                            //player joined point!
-                            //show progress bar
-                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_PERCENT_GREY, (uint)EotSProgressBarConsts.ProgressBarPercentGrey);
-                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_STATUS, (uint)_pointBarStatus[i]);
-                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_SHOW, (uint)EotSProgressBarConsts.ProgressBarShow);
-                            //add player to point
-                            _playersNearPoint[i].Add(_playersNearPoint[EotSPoints.POINTS_MAX][j]);
-                            //remove player from "free space"
-                            _playersNearPoint[EotSPoints.POINTS_MAX].RemoveAt(j);
-                        }
-                        else
-                        {
-                            ++j;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void CheckSomeoneLeftPo()
-        {
-            //reset current point counts
-            for (byte i = 0; i < 2 * EotSPoints.POINTS_MAX; ++i)
-                _currentPointPlayersCount[i] = 0;
-
-            GameObject obj;
-
-            for (byte i = 0; i < EotSPoints.POINTS_MAX; ++i)
-            {
-                obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TOWER_CAP_FEL_REAVER + i]);
-
-                if (obj)
-                {
-                    byte j = 0;
-
-                    while (j < _playersNearPoint[i].Count)
-                    {
-                        Player player = Global.ObjAccessor.FindPlayer(_playersNearPoint[i][j]);
-
-                        if (!player)
-                        {
-                            Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneLeftPoint Player ({0}) could not be found!", _playersNearPoint[i][j].ToString());
-                            //move non-existing players to "free space" - this will cause many errors showing in log, but it is a very important bug
-                            _playersNearPoint[EotSPoints.POINTS_MAX].Add(_playersNearPoint[i][j]);
-                            _playersNearPoint[i].RemoveAt(j);
-
-                            continue;
-                        }
-
-                        if (!player.CanCaptureTowerPoint() ||
-                            !player.IsWithinDistInMap(obj, (float)EotSProgressBarConsts.PointRadius))
-                        //move player out of point (add him to players that are out of points
-                        {
-                            _playersNearPoint[EotSPoints.POINTS_MAX].Add(_playersNearPoint[i][j]);
-                            _playersNearPoint[i].RemoveAt(j);
-                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_SHOW, (uint)EotSProgressBarConsts.ProgressBarDontShow);
-                        }
-                        else
-                        {
-                            //player is neat flag, so update Count:
-                            _currentPointPlayersCount[2 * i + GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()))]++;
-                            ++j;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void UpdatePointStatuses()
-        {
-            for (byte point = 0; point < EotSPoints.POINTS_MAX; ++point)
-            {
-                if (!_playersNearPoint[point].Empty())
-                {
-                    //Count new point bar status:
-                    int pointDelta = _currentPointPlayersCount[2 * point] - _currentPointPlayersCount[2 * point + 1];
-                    MathFunctions.RoundToInterval(ref pointDelta, -(int)EotSProgressBarConsts.PointMaxCapturersCount, EotSProgressBarConsts.PointMaxCapturersCount);
-                    _pointBarStatus[point] += pointDelta;
-
-                    if (_pointBarStatus[point] > EotSProgressBarConsts.ProgressBarAliControlled)
-                        //point is fully alliance's
-                        _pointBarStatus[point] = EotSProgressBarConsts.ProgressBarAliControlled;
-
-                    if (_pointBarStatus[point] < EotSProgressBarConsts.ProgressBarHordeControlled)
-                        //point is fully horde's
-                        _pointBarStatus[point] = EotSProgressBarConsts.ProgressBarHordeControlled;
-
-                    uint pointOwnerTeamId;
-
-                    //find which team should own this point
-                    if (_pointBarStatus[point] <= EotSProgressBarConsts.ProgressBarNeutralLow)
-                        pointOwnerTeamId = (uint)Team.Horde;
-                    else if (_pointBarStatus[point] >= EotSProgressBarConsts.ProgressBarNeutralHigh)
-                        pointOwnerTeamId = (uint)Team.Alliance;
-                    else
-                        pointOwnerTeamId = (uint)EotSPointState.NoOwner;
-
-                    for (byte i = 0; i < _playersNearPoint[point].Count; ++i)
-                    {
-                        Player player = Global.ObjAccessor.FindPlayer(_playersNearPoint[point][i]);
-
-                        if (player)
-                        {
-                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_STATUS, (uint)_pointBarStatus[point]);
-                            Team team = GetPlayerTeam(player.GetGUID());
-
-                            //if point owner changed we must evoke event!
-                            if (pointOwnerTeamId != (uint)_pointOwnedByTeam[point])
-                            {
-                                //point was uncontrolled and player is from team which captured point
-                                if (_pointState[point] == EotSPointState.Uncontrolled &&
-                                    (uint)team == pointOwnerTeamId)
-                                    EventTeamCapturedPoint(player, point);
-
-                                //point was under control and player isn't from team which controlled it
-                                if (_pointState[point] == EotSPointState.UnderControl &&
-                                    team != _pointOwnedByTeam[point])
-                                    EventTeamLostPoint(player, point);
-                            }
-
-                            // @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
-                            if (point == EotSPoints.FEL_REAVER &&
-                                _pointOwnedByTeam[point] == team)
-                                if (_flagState != 0 &&
-                                    GetFlagPickerGUID() == player.GetGUID())
-                                    if (player.GetDistance(2044.0f, 1729.729f, 1190.03f) < 3.0f)
-                                        EventPlayerCapturedFlag(player, EotSObjectTypes.FLAG_FEL_REAVER);
-                        }
-                    }
-                }
-
-                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
-
-                if (_lastPointCaptureStatus[point] != captureStatus)
-                {
-                    UpdateWorldState(EotSMisc.PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0);
-                    UpdateWorldState(EotSMisc.PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0);
-                    _lastPointCaptureStatus[point] = captureStatus;
-                }
-            }
-        }
-
-        private void UpdateTeamScore(int team)
-        {
-            uint score = GetTeamScore(team);
-
-            if (score >= EotSScoreIds.MAX_TEAM_SCORE)
-            {
-                score = EotSScoreIds.MAX_TEAM_SCORE;
-
-                if (team == TeamId.Alliance)
-                    EndBattleground(Team.Alliance);
-                else
-                    EndBattleground(Team.Horde);
-            }
-
-            if (team == TeamId.Alliance)
-                UpdateWorldState(EotSWorldStateIds.ALLIANCE_RESOURCES, (int)score);
-            else
-                UpdateWorldState(EotSWorldStateIds.HORDE_RESOURCES, (int)score);
-        }
-
         public override void EndBattleground(Team winner)
         {
             // Win reward
@@ -395,37 +175,6 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
             RewardHonorToTeam(GetBonusHonorFromKill(1), Team.Horde);
 
             base.EndBattleground(winner);
-        }
-
-        private void UpdatePointsCount(Team team)
-        {
-            if (team == Team.Alliance)
-                UpdateWorldState(EotSWorldStateIds.ALLIANCE_BASE, (int)_teamPointsCount[TeamId.Alliance]);
-            else
-                UpdateWorldState(EotSWorldStateIds.HORDE_BASE, (int)_teamPointsCount[TeamId.Horde]);
-        }
-
-        private void UpdatePointsIcons(Team team, int Point)
-        {
-            //we MUST firstly send 0, after that we can send 1!!!
-            if (_pointState[Point] == EotSPointState.UnderControl)
-            {
-                UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateControlIndex, 0);
-
-                if (team == Team.Alliance)
-                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateAllianceControlledIndex, 1);
-                else
-                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateHordeControlledIndex, 1);
-            }
-            else
-            {
-                if (team == Team.Alliance)
-                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateAllianceControlledIndex, 0);
-                else
-                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateHordeControlledIndex, 0);
-
-                UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateControlIndex, 1);
-            }
         }
 
         public override void AddPlayer(Player player)
@@ -662,38 +411,6 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
             _playersNearPoint[EotSPoints.PLAYERS_OUT_OF_POINTS].Clear();
         }
 
-        private void RespawnFlag(bool send_message)
-        {
-            if (_flagCapturedBgObjectType > 0)
-                SpawnBGObject((int)_flagCapturedBgObjectType, BattlegroundConst.RespawnOneDay);
-
-            _flagCapturedBgObjectType = 0;
-            _flagState = EotSFlagState.OnBase;
-            SpawnBGObject(EotSObjectTypes.FLAG_NETHERSTORM, BattlegroundConst.RespawnImmediately);
-
-            if (send_message)
-            {
-                SendBroadcastText(EotSBroadcastTexts.FLAG_RESET, ChatMsg.BgSystemNeutral);
-                PlaySoundToAll(EotSSoundIds.FLAG_RESET); // Flags respawned sound...
-            }
-
-            UpdateWorldState(EotSWorldStateIds.NETHERSTORM_FLAG, 1);
-        }
-
-        private void RespawnFlagAfterDrop()
-        {
-            RespawnFlag(true);
-
-            GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
-
-            if (obj)
-                obj.Delete();
-            else
-                Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown dropped flag ({0}).", GetDroppedFlagGUID().ToString());
-
-            SetDroppedFlagGUID(ObjectGuid.Empty);
-        }
-
         public override void HandleKillPlayer(Player player, Player killer)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
@@ -774,6 +491,392 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
                 SendBroadcastText(EotSBroadcastTexts.TAKEN_FLAG, ChatMsg.BgSystemAlliance, player);
             else
                 SendBroadcastText(EotSBroadcastTexts.TAKEN_FLAG, ChatMsg.BgSystemHorde, player);
+        }
+
+        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        {
+            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
+                return false;
+
+            switch (type)
+            {
+                case ScoreType.FlagCaptures:
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, EotSMisc.OBJECTIVE_CAPTURE_FLAG);
+
+                    break;
+                default:
+                    break;
+            }
+
+            return true;
+        }
+
+        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
+        {
+            uint g_id;
+            Team team = GetPlayerTeam(player.GetGUID());
+
+            switch (team)
+            {
+                case Team.Alliance:
+                    g_id = EotSGaveyardIds.MAIN_ALLIANCE;
+
+                    break;
+                case Team.Horde:
+                    g_id = EotSGaveyardIds.MAIN_HORDE;
+
+                    break;
+                default: return null;
+            }
+
+            WorldSafeLocsEntry entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
+            WorldSafeLocsEntry nearestEntry = entry;
+
+            if (entry == null)
+            {
+                Log.outError(LogFilter.Battleground, "BattlegroundEY: The main team graveyard could not be found. The graveyard system will not be operational!");
+
+                return null;
+            }
+
+            float plr_x = player.GetPositionX();
+            float plr_y = player.GetPositionY();
+            float plr_z = player.GetPositionZ();
+
+            float distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
+            float nearestDistance = distance;
+
+            for (byte i = 0; i < EotSPoints.POINTS_MAX; ++i)
+                if (_pointOwnedByTeam[i] == team &&
+                    _pointState[i] == EotSPointState.UnderControl)
+                {
+                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.CapturingPointTypes[i].GraveYardId);
+
+                    if (entry == null)
+                    {
+                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.CapturingPointTypes[i].GraveYardId);
+                    }
+                    else
+                    {
+                        distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
+
+                        if (distance < nearestDistance)
+                        {
+                            nearestDistance = distance;
+                            nearestEntry = entry;
+                        }
+                    }
+                }
+
+            return nearestEntry;
+        }
+
+        public override WorldSafeLocsEntry GetExploitTeleportLocation(Team team)
+        {
+            return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? EotSMisc.EXPLOIT_TELEPORT_LOCATION_ALLIANCE : EotSMisc.EXPLOIT_TELEPORT_LOCATION_HORDE);
+        }
+
+        public override Team GetPrematureWinner()
+        {
+            if (GetTeamScore(TeamId.Alliance) > GetTeamScore(TeamId.Horde))
+                return Team.Alliance;
+            else if (GetTeamScore(TeamId.Horde) > GetTeamScore(TeamId.Alliance))
+                return Team.Horde;
+
+            return base.GetPrematureWinner();
+        }
+
+        public override ObjectGuid GetFlagPickerGUID(int team = -1)
+        {
+            return _flagKeeper;
+        }
+
+        public override void SetDroppedFlagGUID(ObjectGuid guid, int TeamID = -1)
+        {
+            _droppedFlagGUID = guid;
+        }
+
+        private void AddPoints(Team Team, uint Points)
+        {
+            int team_index = GetTeamIndexByTeamId(Team);
+            TeamScores[team_index] += Points;
+            _honorScoreTics[team_index] += Points;
+
+            if (_honorScoreTics[team_index] >= _honorTics)
+            {
+                RewardHonorToTeam(GetBonusHonorFromKill(1), Team);
+                _honorScoreTics[team_index] -= _honorTics;
+            }
+
+            UpdateTeamScore(team_index);
+        }
+
+        private BattlegroundPointCaptureStatus GetPointCaptureStatus(uint point)
+        {
+            if (_pointBarStatus[point] >= EotSProgressBarConsts.ProgressBarAliControlled)
+                return BattlegroundPointCaptureStatus.AllianceControlled;
+
+            if (_pointBarStatus[point] <= EotSProgressBarConsts.ProgressBarHordeControlled)
+                return BattlegroundPointCaptureStatus.HordeControlled;
+
+            if (_currentPointPlayersCount[2 * point] == _currentPointPlayersCount[2 * point + 1])
+                return BattlegroundPointCaptureStatus.Neutral;
+
+            return _currentPointPlayersCount[2 * point] > _currentPointPlayersCount[2 * point + 1]
+                       ? BattlegroundPointCaptureStatus.AllianceCapturing
+                       : BattlegroundPointCaptureStatus.HordeCapturing;
+        }
+
+        private void CheckSomeoneJoinedPoint()
+        {
+            GameObject obj;
+
+            for (byte i = 0; i < EotSPoints.POINTS_MAX; ++i)
+            {
+                obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TOWER_CAP_FEL_REAVER + i]);
+
+                if (obj)
+                {
+                    byte j = 0;
+
+                    while (j < _playersNearPoint[EotSPoints.POINTS_MAX].Count)
+                    {
+                        Player player = Global.ObjAccessor.FindPlayer(_playersNearPoint[EotSPoints.POINTS_MAX][j]);
+
+                        if (!player)
+                        {
+                            Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneJoinedPoint: Player ({0}) could not be found!", _playersNearPoint[EotSPoints.POINTS_MAX][j].ToString());
+                            ++j;
+
+                            continue;
+                        }
+
+                        if (player.CanCaptureTowerPoint() &&
+                            player.IsWithinDistInMap(obj, (float)EotSProgressBarConsts.PointRadius))
+                        {
+                            //player joined point!
+                            //show progress bar
+                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_PERCENT_GREY, (uint)EotSProgressBarConsts.ProgressBarPercentGrey);
+                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_STATUS, (uint)_pointBarStatus[i]);
+                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_SHOW, (uint)EotSProgressBarConsts.ProgressBarShow);
+                            //add player to point
+                            _playersNearPoint[i].Add(_playersNearPoint[EotSPoints.POINTS_MAX][j]);
+                            //remove player from "free space"
+                            _playersNearPoint[EotSPoints.POINTS_MAX].RemoveAt(j);
+                        }
+                        else
+                        {
+                            ++j;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CheckSomeoneLeftPo()
+        {
+            //reset current point counts
+            for (byte i = 0; i < 2 * EotSPoints.POINTS_MAX; ++i)
+                _currentPointPlayersCount[i] = 0;
+
+            GameObject obj;
+
+            for (byte i = 0; i < EotSPoints.POINTS_MAX; ++i)
+            {
+                obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TOWER_CAP_FEL_REAVER + i]);
+
+                if (obj)
+                {
+                    byte j = 0;
+
+                    while (j < _playersNearPoint[i].Count)
+                    {
+                        Player player = Global.ObjAccessor.FindPlayer(_playersNearPoint[i][j]);
+
+                        if (!player)
+                        {
+                            Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneLeftPoint Player ({0}) could not be found!", _playersNearPoint[i][j].ToString());
+                            //move non-existing players to "free space" - this will cause many errors showing in log, but it is a very important bug
+                            _playersNearPoint[EotSPoints.POINTS_MAX].Add(_playersNearPoint[i][j]);
+                            _playersNearPoint[i].RemoveAt(j);
+
+                            continue;
+                        }
+
+                        if (!player.CanCaptureTowerPoint() ||
+                            !player.IsWithinDistInMap(obj, (float)EotSProgressBarConsts.PointRadius))
+                        //move player out of point (add him to players that are out of points
+                        {
+                            _playersNearPoint[EotSPoints.POINTS_MAX].Add(_playersNearPoint[i][j]);
+                            _playersNearPoint[i].RemoveAt(j);
+                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_SHOW, (uint)EotSProgressBarConsts.ProgressBarDontShow);
+                        }
+                        else
+                        {
+                            //player is neat flag, so update Count:
+                            _currentPointPlayersCount[2 * i + GetTeamIndexByTeamId(GetPlayerTeam(player.GetGUID()))]++;
+                            ++j;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdatePointStatuses()
+        {
+            for (byte point = 0; point < EotSPoints.POINTS_MAX; ++point)
+            {
+                if (!_playersNearPoint[point].Empty())
+                {
+                    //Count new point bar status:
+                    int pointDelta = _currentPointPlayersCount[2 * point] - _currentPointPlayersCount[2 * point + 1];
+                    MathFunctions.RoundToInterval(ref pointDelta, -(int)EotSProgressBarConsts.PointMaxCapturersCount, EotSProgressBarConsts.PointMaxCapturersCount);
+                    _pointBarStatus[point] += pointDelta;
+
+                    if (_pointBarStatus[point] > EotSProgressBarConsts.ProgressBarAliControlled)
+                        //point is fully alliance's
+                        _pointBarStatus[point] = EotSProgressBarConsts.ProgressBarAliControlled;
+
+                    if (_pointBarStatus[point] < EotSProgressBarConsts.ProgressBarHordeControlled)
+                        //point is fully horde's
+                        _pointBarStatus[point] = EotSProgressBarConsts.ProgressBarHordeControlled;
+
+                    uint pointOwnerTeamId;
+
+                    //find which team should own this point
+                    if (_pointBarStatus[point] <= EotSProgressBarConsts.ProgressBarNeutralLow)
+                        pointOwnerTeamId = (uint)Team.Horde;
+                    else if (_pointBarStatus[point] >= EotSProgressBarConsts.ProgressBarNeutralHigh)
+                        pointOwnerTeamId = (uint)Team.Alliance;
+                    else
+                        pointOwnerTeamId = (uint)EotSPointState.NoOwner;
+
+                    for (byte i = 0; i < _playersNearPoint[point].Count; ++i)
+                    {
+                        Player player = Global.ObjAccessor.FindPlayer(_playersNearPoint[point][i]);
+
+                        if (player)
+                        {
+                            player.SendUpdateWorldState(EotSWorldStateIds.PROGRESS_BAR_STATUS, (uint)_pointBarStatus[point]);
+                            Team team = GetPlayerTeam(player.GetGUID());
+
+                            //if point owner changed we must evoke event!
+                            if (pointOwnerTeamId != (uint)_pointOwnedByTeam[point])
+                            {
+                                //point was uncontrolled and player is from team which captured point
+                                if (_pointState[point] == EotSPointState.Uncontrolled &&
+                                    (uint)team == pointOwnerTeamId)
+                                    EventTeamCapturedPoint(player, point);
+
+                                //point was under control and player isn't from team which controlled it
+                                if (_pointState[point] == EotSPointState.UnderControl &&
+                                    team != _pointOwnedByTeam[point])
+                                    EventTeamLostPoint(player, point);
+                            }
+
+                            // @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
+                            if (point == EotSPoints.FEL_REAVER &&
+                                _pointOwnedByTeam[point] == team)
+                                if (_flagState != 0 &&
+                                    GetFlagPickerGUID() == player.GetGUID())
+                                    if (player.GetDistance(2044.0f, 1729.729f, 1190.03f) < 3.0f)
+                                        EventPlayerCapturedFlag(player, EotSObjectTypes.FLAG_FEL_REAVER);
+                        }
+                    }
+                }
+
+                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
+
+                if (_lastPointCaptureStatus[point] != captureStatus)
+                {
+                    UpdateWorldState(EotSMisc.PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0);
+                    UpdateWorldState(EotSMisc.PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0);
+                    _lastPointCaptureStatus[point] = captureStatus;
+                }
+            }
+        }
+
+        private void UpdateTeamScore(int team)
+        {
+            uint score = GetTeamScore(team);
+
+            if (score >= EotSScoreIds.MAX_TEAM_SCORE)
+            {
+                score = EotSScoreIds.MAX_TEAM_SCORE;
+
+                if (team == TeamId.Alliance)
+                    EndBattleground(Team.Alliance);
+                else
+                    EndBattleground(Team.Horde);
+            }
+
+            if (team == TeamId.Alliance)
+                UpdateWorldState(EotSWorldStateIds.ALLIANCE_RESOURCES, (int)score);
+            else
+                UpdateWorldState(EotSWorldStateIds.HORDE_RESOURCES, (int)score);
+        }
+
+        private void UpdatePointsCount(Team team)
+        {
+            if (team == Team.Alliance)
+                UpdateWorldState(EotSWorldStateIds.ALLIANCE_BASE, (int)_teamPointsCount[TeamId.Alliance]);
+            else
+                UpdateWorldState(EotSWorldStateIds.HORDE_BASE, (int)_teamPointsCount[TeamId.Horde]);
+        }
+
+        private void UpdatePointsIcons(Team team, int Point)
+        {
+            //we MUST firstly send 0, after that we can send 1!!!
+            if (_pointState[Point] == EotSPointState.UnderControl)
+            {
+                UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateControlIndex, 0);
+
+                if (team == Team.Alliance)
+                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateAllianceControlledIndex, 1);
+                else
+                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateHordeControlledIndex, 1);
+            }
+            else
+            {
+                if (team == Team.Alliance)
+                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateAllianceControlledIndex, 0);
+                else
+                    UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateHordeControlledIndex, 0);
+
+                UpdateWorldState(EotSMisc.PointsIconStruct[Point].WorldStateControlIndex, 1);
+            }
+        }
+
+        private void RespawnFlag(bool send_message)
+        {
+            if (_flagCapturedBgObjectType > 0)
+                SpawnBGObject((int)_flagCapturedBgObjectType, BattlegroundConst.RespawnOneDay);
+
+            _flagCapturedBgObjectType = 0;
+            _flagState = EotSFlagState.OnBase;
+            SpawnBGObject(EotSObjectTypes.FLAG_NETHERSTORM, BattlegroundConst.RespawnImmediately);
+
+            if (send_message)
+            {
+                SendBroadcastText(EotSBroadcastTexts.FLAG_RESET, ChatMsg.BgSystemNeutral);
+                PlaySoundToAll(EotSSoundIds.FLAG_RESET); // Flags respawned sound...
+            }
+
+            UpdateWorldState(EotSWorldStateIds.NETHERSTORM_FLAG, 1);
+        }
+
+        private void RespawnFlagAfterDrop()
+        {
+            RespawnFlag(true);
+
+            GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
+
+            if (obj)
+                obj.Delete();
+            else
+                Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown dropped flag ({0}).", GetDroppedFlagGUID().ToString());
+
+            SetDroppedFlagGUID(ObjectGuid.Empty);
         }
 
         private void EventTeamLostPoint(Player player, int Point)
@@ -937,104 +1040,6 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
             UpdatePlayerScore(player, ScoreType.FlagCaptures, 1);
         }
 
-        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
-        {
-            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
-                return false;
-
-            switch (type)
-            {
-                case ScoreType.FlagCaptures:
-                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, EotSMisc.OBJECTIVE_CAPTURE_FLAG);
-
-                    break;
-                default:
-                    break;
-            }
-
-            return true;
-        }
-
-        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
-        {
-            uint g_id;
-            Team team = GetPlayerTeam(player.GetGUID());
-
-            switch (team)
-            {
-                case Team.Alliance:
-                    g_id = EotSGaveyardIds.MAIN_ALLIANCE;
-
-                    break;
-                case Team.Horde:
-                    g_id = EotSGaveyardIds.MAIN_HORDE;
-
-                    break;
-                default: return null;
-            }
-
-            WorldSafeLocsEntry entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
-            WorldSafeLocsEntry nearestEntry = entry;
-
-            if (entry == null)
-            {
-                Log.outError(LogFilter.Battleground, "BattlegroundEY: The main team graveyard could not be found. The graveyard system will not be operational!");
-
-                return null;
-            }
-
-            float plr_x = player.GetPositionX();
-            float plr_y = player.GetPositionY();
-            float plr_z = player.GetPositionZ();
-
-            float distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
-            float nearestDistance = distance;
-
-            for (byte i = 0; i < EotSPoints.POINTS_MAX; ++i)
-                if (_pointOwnedByTeam[i] == team &&
-                    _pointState[i] == EotSPointState.UnderControl)
-                {
-                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.CapturingPointTypes[i].GraveYardId);
-
-                    if (entry == null)
-                    {
-                        Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.CapturingPointTypes[i].GraveYardId);
-                    }
-                    else
-                    {
-                        distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
-
-                        if (distance < nearestDistance)
-                        {
-                            nearestDistance = distance;
-                            nearestEntry = entry;
-                        }
-                    }
-                }
-
-            return nearestEntry;
-        }
-
-        public override WorldSafeLocsEntry GetExploitTeleportLocation(Team team)
-        {
-            return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? EotSMisc.EXPLOIT_TELEPORT_LOCATION_ALLIANCE : EotSMisc.EXPLOIT_TELEPORT_LOCATION_HORDE);
-        }
-
-        public override Team GetPrematureWinner()
-        {
-            if (GetTeamScore(TeamId.Alliance) > GetTeamScore(TeamId.Horde))
-                return Team.Alliance;
-            else if (GetTeamScore(TeamId.Horde) > GetTeamScore(TeamId.Alliance))
-                return Team.Horde;
-
-            return base.GetPrematureWinner();
-        }
-
-        public override ObjectGuid GetFlagPickerGUID(int team = -1)
-        {
-            return _flagKeeper;
-        }
-
         private void SetFlagPicker(ObjectGuid guid)
         {
             _flagKeeper = guid;
@@ -1043,11 +1048,6 @@ namespace Game.BattleGrounds.Zones.EyeOfTheStorm
         private bool IsFlagPickedup()
         {
             return !_flagKeeper.IsEmpty();
-        }
-
-        public override void SetDroppedFlagGUID(ObjectGuid guid, int TeamID = -1)
-        {
-            _droppedFlagGUID = guid;
         }
 
         private ObjectGuid GetDroppedFlagGUID()

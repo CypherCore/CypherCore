@@ -7,6 +7,5 @@ namespace Game.Chat
 {
     [AttributeUsage(AttributeTargets.Parameter)]
     public class OptionalArgAttribute : Attribute
-    {
-    }
+    {}
 }

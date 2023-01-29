@@ -12,6 +12,17 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendShowBank(ObjectGuid guid)
+        {
+            _player.PlayerTalkClass.GetInteractionData().Reset();
+            _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.Banker;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
+        }
+
         [WorldPacketHandler(ClientOpcodes.AutobankItem, Processing = PacketProcessing.Inplace)]
         private void HandleAutoBankItem(AutoBankItem packet)
         {
@@ -322,17 +333,6 @@ namespace Game
                 _player.RemoveItem(autoStoreBankReagent.Slot, autoStoreBankReagent.PackSlot, true);
                 _player.BankItem(dest, pItem, true);
             }
-        }
-
-        public void SendShowBank(ObjectGuid guid)
-        {
-            _player.PlayerTalkClass.GetInteractionData().Reset();
-            _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
-            NPCInteractionOpenResult npcInteraction = new();
-            npcInteraction.Npc = guid;
-            npcInteraction.InteractionType = PlayerInteractionType.Banker;
-            npcInteraction.Success = true;
-            SendPacket(npcInteraction);
         }
     }
 }

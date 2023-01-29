@@ -10,6 +10,45 @@ namespace Game.Collision
 {
     public class RegularGrid2D<T, Node> where T : IModel where Node : BoundingIntervalHierarchyWrap<T>, new()
     {
+        public struct Cell
+        {
+            public int x, y;
+
+            public static bool operator ==(Cell c1, Cell c2)
+            {
+                return c1.x == c2.x && c1.y == c2.y;
+            }
+
+            public static bool operator !=(Cell c1, Cell c2)
+            {
+                return !(c1 == c2);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return base.Equals(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return x.GetHashCode() ^ y.GetHashCode();
+            }
+
+            public static Cell ComputeCell(float fx, float fy)
+            {
+                Cell c = new();
+                c.x = (int)(fx * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
+                c.y = (int)(fy * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
+
+                return c;
+            }
+
+            public bool IsValid()
+            {
+                return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER;
+            }
+        }
+
         public const int CELL_NUMBER = 64;
         public const float HGRID_MAP_SIZE = (533.33333f * 64.0f); // shouldn't be changed
         public const float CELL_SIZE = HGRID_MAP_SIZE / CELL_NUMBER;
@@ -67,16 +106,6 @@ namespace Game.Collision
         public bool Empty()
         {
             return memberTable.Empty();
-        }
-
-        private Node GetGrid(int x, int y)
-        {
-            Cypher.Assert(x < CELL_NUMBER && y < CELL_NUMBER);
-
-            if (nodes[x][y] == null)
-                nodes[x][y] = new Node();
-
-            return nodes[x][y];
         }
 
         public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist)
@@ -185,43 +214,14 @@ namespace Game.Collision
             node?.IntersectRay(ray, intersectCallback, ref max_dist);
         }
 
-        public struct Cell
+        private Node GetGrid(int x, int y)
         {
-            public int x, y;
+            Cypher.Assert(x < CELL_NUMBER && y < CELL_NUMBER);
 
-            public static bool operator ==(Cell c1, Cell c2)
-            {
-                return c1.x == c2.x && c1.y == c2.y;
-            }
+            if (nodes[x][y] == null)
+                nodes[x][y] = new Node();
 
-            public static bool operator !=(Cell c1, Cell c2)
-            {
-                return !(c1 == c2);
-            }
-
-            public override bool Equals(object obj)
-            {
-                return base.Equals(obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return x.GetHashCode() ^ y.GetHashCode();
-            }
-
-            public static Cell ComputeCell(float fx, float fy)
-            {
-                Cell c = new();
-                c.x = (int)(fx * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
-                c.y = (int)(fy * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
-
-                return c;
-            }
-
-            public bool IsValid()
-            {
-                return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER;
-            }
+            return nodes[x][y];
         }
     }
 }

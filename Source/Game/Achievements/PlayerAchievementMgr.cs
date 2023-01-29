@@ -480,6 +480,21 @@ public class PlayerAchievementMgr : AchievementManager
         SendPacket(criteriaDeleted);
     }
 
+    public override void SendPacket(ServerPacket data)
+    {
+        _owner.SendPacket(data);
+    }
+
+    public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
+    {
+        return Global.CriteriaMgr.GetPlayerCriteriaByType(type, asset);
+    }
+
+    public override string GetOwnerInfo()
+    {
+        return $"{_owner.GetGUID()} {_owner.GetName()}";
+    }
+
     private void SendAchievementEarned(AchievementRecord achievement)
     {
         // Don't send for achievements with ACHIEVEMENT_FLAG_HIDDEN
@@ -529,20 +544,5 @@ public class PlayerAchievementMgr : AchievementManager
             _owner.SendMessageToSetInRange(achievementEarned, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), true);
         else
             _owner.SendPacket(achievementEarned);
-    }
-
-    public override void SendPacket(ServerPacket data)
-    {
-        _owner.SendPacket(data);
-    }
-
-    public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
-    {
-        return Global.CriteriaMgr.GetPlayerCriteriaByType(type, asset);
-    }
-
-    public override string GetOwnerInfo()
-    {
-        return $"{_owner.GetGUID()} {_owner.GetName()}";
     }
 }

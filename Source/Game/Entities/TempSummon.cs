@@ -15,8 +15,6 @@ namespace Game.Entities
         private uint? _creatureIdVisibleToSummoner;
         private uint? _displayIdVisibleToSummoner;
         private uint _lifetime;
-
-        public SummonPropertiesRecord Properties { get; set; }
         private ObjectGuid _summonerGUID;
         private uint _timer;
         private TempSummonType _type;
@@ -30,6 +28,8 @@ namespace Game.Entities
             UnitTypeMask |= UnitTypeMask.Summon;
             _canFollowOwner = true;
         }
+
+        public SummonPropertiesRecord Properties { get; set; }
 
         public WorldObject GetSummoner()
         {
@@ -431,11 +431,6 @@ namespace Game.Entities
             return _summonerGUID;
         }
 
-        private TempSummonType GetSummonType()
-        {
-            return _type;
-        }
-
         public uint GetTimer()
         {
             return _timer;
@@ -459,6 +454,11 @@ namespace Game.Entities
         public void SetCanFollowOwner(bool can)
         {
             _canFollowOwner = can;
+        }
+
+        private TempSummonType GetSummonType()
+        {
+            return _type;
         }
     }
 }

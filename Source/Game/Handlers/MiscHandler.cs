@@ -22,6 +22,23 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendLoadCUFProfiles()
+        {
+            Player player = GetPlayer();
+
+            LoadCUFProfiles loadCUFProfiles = new();
+
+            for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
+            {
+                CUFProfile cufProfile = player.GetCUFProfile(i);
+
+                if (cufProfile != null)
+                    loadCUFProfiles.CUFProfiles.Add(cufProfile);
+            }
+
+            SendPacket(loadCUFProfiles);
+        }
+
         [WorldPacketHandler(ClientOpcodes.RequestAccountData, Status = SessionStatus.Authed)]
         private void HandleRequestAccountData(RequestAccountData request)
         {
@@ -460,23 +477,6 @@ namespace Game
 
             for (byte i = (byte)packet.CUFProfiles.Count; i < PlayerConst.MaxCUFProfiles; ++i)
                 GetPlayer().SaveCUFProfile(i, null);
-        }
-
-        public void SendLoadCUFProfiles()
-        {
-            Player player = GetPlayer();
-
-            LoadCUFProfiles loadCUFProfiles = new();
-
-            for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
-            {
-                CUFProfile cufProfile = player.GetCUFProfile(i);
-
-                if (cufProfile != null)
-                    loadCUFProfiles.CUFProfiles.Add(cufProfile);
-            }
-
-            SendPacket(loadCUFProfiles);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetAdvancedCombatLogging, Processing = PacketProcessing.Inplace)]

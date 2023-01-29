@@ -13,72 +13,6 @@ namespace Game.Chat.Commands
     [CommandGroup("learn")]
     internal class LearnCommands
     {
-        [Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
-        private static bool HandleLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
-        {
-            Player targetPlayer = handler.GetSelectedPlayerOrSelf();
-
-            if (!targetPlayer)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-
-                return false;
-            }
-
-            if (!Global.SpellMgr.IsSpellValid(spellId, handler.GetSession().GetPlayer()))
-            {
-                handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
-
-                return false;
-            }
-
-            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
-
-            if (!allRanks &&
-                targetPlayer.HasSpell(spellId))
-            {
-                if (targetPlayer == handler.GetPlayer())
-                    handler.SendSysMessage(CypherStrings.YouKnownSpell);
-                else
-                    handler.SendSysMessage(CypherStrings.TargetKnownSpell, handler.GetNameLink(targetPlayer));
-
-                return false;
-            }
-
-            targetPlayer.LearnSpell(spellId, false);
-
-            if (allRanks)
-                while ((spellId = Global.SpellMgr.GetNextSpellInChain(spellId)) != 0)
-                    targetPlayer.LearnSpell(spellId, false);
-
-            return true;
-        }
-
-        [CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
-        private static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
-        {
-            Player target = handler.GetSelectedPlayer();
-
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-
-                return false;
-            }
-
-            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
-
-            if (allRanks)
-                spellId = Global.SpellMgr.GetFirstSpellInChain(spellId);
-
-            if (target.HasSpell(spellId))
-                target.RemoveSpell(spellId, false, !allRanks);
-            else
-                handler.SendSysMessage(CypherStrings.ForgetSpell);
-
-            return true;
-        }
-
         [CommandGroup("all")]
         private class LearnAllCommands
         {
@@ -374,6 +308,72 @@ namespace Game.Chat.Commands
 
                 return true;
             }
+        }
+
+        [Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
+        private static bool HandleLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
+        {
+            Player targetPlayer = handler.GetSelectedPlayerOrSelf();
+
+            if (!targetPlayer)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+
+                return false;
+            }
+
+            if (!Global.SpellMgr.IsSpellValid(spellId, handler.GetSession().GetPlayer()))
+            {
+                handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
+
+                return false;
+            }
+
+            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
+
+            if (!allRanks &&
+                targetPlayer.HasSpell(spellId))
+            {
+                if (targetPlayer == handler.GetPlayer())
+                    handler.SendSysMessage(CypherStrings.YouKnownSpell);
+                else
+                    handler.SendSysMessage(CypherStrings.TargetKnownSpell, handler.GetNameLink(targetPlayer));
+
+                return false;
+            }
+
+            targetPlayer.LearnSpell(spellId, false);
+
+            if (allRanks)
+                while ((spellId = Global.SpellMgr.GetNextSpellInChain(spellId)) != 0)
+                    targetPlayer.LearnSpell(spellId, false);
+
+            return true;
+        }
+
+        [CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
+        private static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, string allRanksStr)
+        {
+            Player target = handler.GetSelectedPlayer();
+
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
+
+                return false;
+            }
+
+            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
+
+            if (allRanks)
+                spellId = Global.SpellMgr.GetFirstSpellInChain(spellId);
+
+            if (target.HasSpell(spellId))
+                target.RemoveSpell(spellId, false, !allRanks);
+            else
+                handler.SendSysMessage(CypherStrings.ForgetSpell);
+
+            return true;
         }
     }
 }

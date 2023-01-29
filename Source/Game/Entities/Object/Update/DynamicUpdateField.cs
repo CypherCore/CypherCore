@@ -10,11 +10,6 @@ namespace Game.Entities
 {
     public class DynamicUpdateField<T> where T : new()
     {
-        public List<uint> UpdateMask { get; set; }
-        public List<T> Values { get; set; }
-        public int Bit { get; set; }
-        public int BlockBit { get; set; }
-
         public DynamicUpdateField()
         {
             Values = new List<T>();
@@ -32,6 +27,11 @@ namespace Game.Entities
             BlockBit = blockBit;
             Bit = bit;
         }
+
+        public List<uint> UpdateMask { get; set; }
+        public List<T> Values { get; set; }
+        public int Bit { get; set; }
+        public int BlockBit { get; set; }
 
         public T this[int index]
         {
@@ -129,12 +129,6 @@ namespace Game.Entities
                 UpdateMask.RemoveAt(UpdateMask.Count - 1);
         }
 
-        private void MarkAllUpdateMaskFields(T value)
-        {
-            if (value is IHasChangesMask)
-                ((IHasChangesMask)value).GetUpdateMask().SetAll();
-        }
-
         public void Clear()
         {
             Values.Clear();
@@ -180,6 +174,12 @@ namespace Game.Entities
         {
             foreach (var obj in Values)
                 yield return obj;
+        }
+
+        private void MarkAllUpdateMaskFields(T value)
+        {
+            if (value is IHasChangesMask)
+                ((IHasChangesMask)value).GetUpdateMask().SetAll();
         }
     }
 }

@@ -5,16 +5,16 @@ namespace Game
 {
     public class MailLevelReward
     {
-        public uint MailTemplateId { get; set; }
-
-        public ulong RaceMask { get; set; }
-        public uint SenderEntry { get; set; }
-
         public MailLevelReward(ulong _raceMask = 0, uint _mailTemplateId = 0, uint _senderEntry = 0)
         {
             RaceMask = _raceMask;
             MailTemplateId = _mailTemplateId;
             SenderEntry = _senderEntry;
         }
+
+        public uint MailTemplateId { get; set; }
+
+        public ulong RaceMask { get; set; }
+        public uint SenderEntry { get; set; }
     }
 }

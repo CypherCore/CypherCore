@@ -10,6 +10,65 @@ namespace Game.Movement
 {
     public class MoveSpline
     {
+        public class CommonInitializer : IInitializer<int>
+        {
+            public int time;
+            public float velocityInv;
+
+            public CommonInitializer(float _velocity)
+            {
+                velocityInv = 1000f / _velocity;
+                time = 1;
+            }
+
+            public int Invoke(Spline<int> s, int i)
+            {
+                time += (int)(s.SegLength(i) * velocityInv);
+
+                return time;
+            }
+        }
+
+        public class FallInitializer : IInitializer<int>
+        {
+            private readonly float startElevation;
+
+            public FallInitializer(float startelevation)
+            {
+                startElevation = startelevation;
+            }
+
+            public int Invoke(Spline<int> s, int i)
+            {
+                return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
+            }
+
+            private float ComputeFallTime(float path_length, bool isSafeFall)
+            {
+                if (path_length < 0.0f)
+                    return 0.0f;
+
+                float time;
+
+                if (isSafeFall)
+                {
+                    if (path_length >= SharedConst.terminal_safeFall_length)
+                        time = (path_length - SharedConst.terminal_safeFall_length) / SharedConst.terminalSafefallVelocity + SharedConst.terminal_safeFall_fallTime;
+                    else
+                        time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
+                }
+                else
+                {
+                    if (path_length >= SharedConst.terminal_length)
+                        time = (path_length - SharedConst.terminal_length) / SharedConst.terminalVelocity + SharedConst.terminal_fallTime;
+                    else
+                        time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
+                }
+
+                return time;
+            }
+        }
+
         public enum UpdateResult
         {
             None = 0x01,
@@ -81,49 +140,6 @@ namespace Game.Movement
             }
         }
 
-        private void InitSpline(MoveSplineInitArgs args)
-        {
-            EvaluationMode[] modes = new EvaluationMode[2]
-                                     {
-                                         EvaluationMode.Linear, EvaluationMode.Catmullrom
-                                     };
-
-            if (args.flags.HasFlag(SplineFlag.Cyclic))
-            {
-                int cyclic_point = 0;
-
-                if (splineflags.HasFlag(SplineFlag.EnterCycle))
-                    cyclic_point = 1; // shouldn't be modified, came from client
-
-                spline.InitCyclicSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
-            }
-            else
-            {
-                spline.InitSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], args.initialOrientation);
-            }
-
-            // init spline timestamps
-            if (splineflags.HasFlag(SplineFlag.Falling))
-            {
-                FallInitializer init = new(spline.GetPoint(spline.First()).Z);
-                spline.InitLengths(init);
-            }
-            else
-            {
-                CommonInitializer init = new(args.velocity);
-                spline.InitLengths(init);
-            }
-
-            // TODO: what to do in such cases? problem is in input _data (all points are at same coords)
-            if (spline.Length() < 1)
-            {
-                Log.outError(LogFilter.Unit, "MoveSpline.init_spline: zero length spline, wrong input _data?");
-                spline.Set_length(spline.Last(), spline.IsCyclic() ? 1000 : 1);
-            }
-
-            point_Idx = spline.First();
-        }
-
         public int CurrentPathIdx()
         {
             int point = point_Idx_offset + point_Idx - spline.First() + (Finalized() ? 1 : 0);
@@ -162,13 +178,6 @@ namespace Game.Movement
         public bool Finalized()
         {
             return splineflags.HasFlag(SplineFlag.Done);
-        }
-
-        private void _Finalize()
-        {
-            splineflags.SetUnsetFlag(SplineFlag.Done);
-            point_Idx = spline.Last() - 1;
-            time_passed = Duration();
         }
 
         public Vector4 ComputePosition(int time_point, int point_index)
@@ -290,11 +299,6 @@ namespace Game.Movement
             return result;
         }
 
-        private float MSToSec(uint ms)
-        {
-            return ms / 1000.0f;
-        }
-
         public bool HasStarted()
         {
             return time_passed > 0;
@@ -311,6 +315,91 @@ namespace Game.Movement
             {
                 UpdateState(ref difftime);
             } while (difftime > 0);
+        }
+
+        public bool IsCyclic()
+        {
+            return splineflags.HasFlag(SplineFlag.Cyclic);
+        }
+
+        public bool IsFalling()
+        {
+            return splineflags.HasFlag(SplineFlag.Falling);
+        }
+
+        public bool Initialized()
+        {
+            return !spline.Empty();
+        }
+
+        public Vector3 FinalDestination()
+        {
+            return Initialized() ? spline.GetPoint(spline.Last()) : Vector3.Zero;
+        }
+
+        public Vector3 CurrentDestination()
+        {
+            return Initialized() ? spline.GetPoint(point_Idx + 1) : Vector3.Zero;
+        }
+
+        public AnimTier? GetAnimation()
+        {
+            return anim_tier != null ? (AnimTier)anim_tier.AnimTier : null;
+        }
+
+        private void InitSpline(MoveSplineInitArgs args)
+        {
+            EvaluationMode[] modes = new EvaluationMode[2]
+                                     {
+                                         EvaluationMode.Linear, EvaluationMode.Catmullrom
+                                     };
+
+            if (args.flags.HasFlag(SplineFlag.Cyclic))
+            {
+                int cyclic_point = 0;
+
+                if (splineflags.HasFlag(SplineFlag.EnterCycle))
+                    cyclic_point = 1; // shouldn't be modified, came from client
+
+                spline.InitCyclicSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], cyclic_point, args.initialOrientation);
+            }
+            else
+            {
+                spline.InitSpline(args.path.ToArray(), args.path.Count, modes[Convert.ToInt32(args.flags.IsSmooth())], args.initialOrientation);
+            }
+
+            // init spline timestamps
+            if (splineflags.HasFlag(SplineFlag.Falling))
+            {
+                FallInitializer init = new(spline.GetPoint(spline.First()).Z);
+                spline.InitLengths(init);
+            }
+            else
+            {
+                CommonInitializer init = new(args.velocity);
+                spline.InitLengths(init);
+            }
+
+            // TODO: what to do in such cases? problem is in input _data (all points are at same coords)
+            if (spline.Length() < 1)
+            {
+                Log.outError(LogFilter.Unit, "MoveSpline.init_spline: zero length spline, wrong input _data?");
+                spline.Set_length(spline.Last(), spline.IsCyclic() ? 1000 : 1);
+            }
+
+            point_Idx = spline.First();
+        }
+
+        private void _Finalize()
+        {
+            splineflags.SetUnsetFlag(SplineFlag.Done);
+            point_Idx = spline.Last() - 1;
+            time_passed = Duration();
+        }
+
+        private float MSToSec(uint ms)
+        {
+            return ms / 1000.0f;
         }
 
         private UpdateResult UpdateState(ref int ms_time_diff)
@@ -399,95 +488,6 @@ namespace Game.Movement
         private int SegmentTimeElapsed()
         {
             return NextTimestamp() - time_passed;
-        }
-
-        public bool IsCyclic()
-        {
-            return splineflags.HasFlag(SplineFlag.Cyclic);
-        }
-
-        public bool IsFalling()
-        {
-            return splineflags.HasFlag(SplineFlag.Falling);
-        }
-
-        public bool Initialized()
-        {
-            return !spline.Empty();
-        }
-
-        public Vector3 FinalDestination()
-        {
-            return Initialized() ? spline.GetPoint(spline.Last()) : Vector3.Zero;
-        }
-
-        public Vector3 CurrentDestination()
-        {
-            return Initialized() ? spline.GetPoint(point_Idx + 1) : Vector3.Zero;
-        }
-
-        public AnimTier? GetAnimation()
-        {
-            return anim_tier != null ? (AnimTier)anim_tier.AnimTier : null;
-        }
-
-        public class CommonInitializer : IInitializer<int>
-        {
-            public int time;
-            public float velocityInv;
-
-            public CommonInitializer(float _velocity)
-            {
-                velocityInv = 1000f / _velocity;
-                time = 1;
-            }
-
-            public int Invoke(Spline<int> s, int i)
-            {
-                time += (int)(s.SegLength(i) * velocityInv);
-
-                return time;
-            }
-        }
-
-        public class FallInitializer : IInitializer<int>
-        {
-            private readonly float startElevation;
-
-            public FallInitializer(float startelevation)
-            {
-                startElevation = startelevation;
-            }
-
-            public int Invoke(Spline<int> s, int i)
-            {
-                return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
-            }
-
-            private float ComputeFallTime(float path_length, bool isSafeFall)
-            {
-                if (path_length < 0.0f)
-                    return 0.0f;
-
-                float time;
-
-                if (isSafeFall)
-                {
-                    if (path_length >= SharedConst.terminal_safeFall_length)
-                        time = (path_length - SharedConst.terminal_safeFall_length) / SharedConst.terminalSafefallVelocity + SharedConst.terminal_safeFall_fallTime;
-                    else
-                        time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
-                }
-                else
-                {
-                    if (path_length >= SharedConst.terminal_length)
-                        time = (path_length - SharedConst.terminal_length) / SharedConst.terminalVelocity + SharedConst.terminal_fallTime;
-                    else
-                        time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
-                }
-
-                return time;
-            }
         }
 
         #region Fields

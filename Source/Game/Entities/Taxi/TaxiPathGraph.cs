@@ -17,88 +17,6 @@ namespace Game.Entities
         private static readonly List<TaxiNodesRecord> _nodesByVertex = new();
         private static readonly Dictionary<uint, uint> _verticesByNode = new();
 
-        private static void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
-        {
-            if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
-                Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
-        }
-
-        private static uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
-        {
-            if (!_verticesByNode.ContainsKey(node.Id))
-            {
-                _verticesByNode.Add(node.Id, (uint)_nodesByVertex.Count);
-                _nodesByVertex.Add(node);
-            }
-
-            return _verticesByNode[node.Id];
-        }
-
-        private static void AddVerticeAndEdgeFromNodeInfo(TaxiNodesRecord from, TaxiNodesRecord to, uint pathId, List<Tuple<Tuple<uint, uint>, uint>> edges)
-        {
-            if (from.Id != to.Id)
-            {
-                uint fromVertexID = CreateVertexFromFromNodeInfoIfNeeded(from);
-                uint toVertexID = CreateVertexFromFromNodeInfoIfNeeded(to);
-
-                float totalDist = 0.0f;
-                TaxiPathNodeRecord[] nodes = CliDB.TaxiPathNodesByPath[pathId];
-
-                if (nodes.Length < 2)
-                {
-                    edges.Add(Tuple.Create(Tuple.Create(fromVertexID, toVertexID), 0xFFFFu));
-
-                    return;
-                }
-
-                int last = nodes.Length;
-                int first = 0;
-
-                if (nodes.Length > 2)
-                {
-                    --last;
-                    ++first;
-                }
-
-                for (int i = first + 1; i < last; ++i)
-                {
-                    if (nodes[i - 1].Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport))
-                        continue;
-
-                    int uiMap1, uiMap2;
-                    Vector2 pos1, pos2;
-
-                    GetTaxiMapPosition(nodes[i - 1].Loc, nodes[i - 1].ContinentID, out pos1, out uiMap1);
-                    GetTaxiMapPosition(nodes[i].Loc, nodes[i].ContinentID, out pos2, out uiMap2);
-
-                    if (uiMap1 != uiMap2)
-                        continue;
-
-                    totalDist += (float)Math.Sqrt((float)Math.Pow(pos2.X - pos1.X, 2) + (float)Math.Pow(pos2.Y - pos1.Y, 2));
-                }
-
-                uint dist = (uint)(totalDist * 32767.0f);
-
-                if (dist > 0xFFFF)
-                    dist = 0xFFFF;
-
-                edges.Add(Tuple.Create(Tuple.Create(fromVertexID, toVertexID), dist));
-            }
-        }
-
-        private static uint GetVertexIDFromNodeID(TaxiNodesRecord node)
-        {
-            return _verticesByNode.ContainsKey(node.Id) ? _verticesByNode[node.Id] : uint.MaxValue;
-        }
-
-        private static uint GetNodeIDFromVertexID(uint vertexID)
-        {
-            if (vertexID < _nodesByVertex.Count)
-                return _nodesByVertex[(int)vertexID].Id;
-
-            return uint.MaxValue;
-        }
-
         public static void Initialize()
         {
             if (_graph != null)
@@ -188,6 +106,88 @@ namespace Game.Entities
                                                   if (taxiNode != null)
                                                       mask[(taxiNode.Id - 1) / 8] |= (byte)(1 << (int)((taxiNode.Id - 1) % 8));
                                               });
+        }
+
+        private static void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
+        {
+            if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
+                Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
+        }
+
+        private static uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
+        {
+            if (!_verticesByNode.ContainsKey(node.Id))
+            {
+                _verticesByNode.Add(node.Id, (uint)_nodesByVertex.Count);
+                _nodesByVertex.Add(node);
+            }
+
+            return _verticesByNode[node.Id];
+        }
+
+        private static void AddVerticeAndEdgeFromNodeInfo(TaxiNodesRecord from, TaxiNodesRecord to, uint pathId, List<Tuple<Tuple<uint, uint>, uint>> edges)
+        {
+            if (from.Id != to.Id)
+            {
+                uint fromVertexID = CreateVertexFromFromNodeInfoIfNeeded(from);
+                uint toVertexID = CreateVertexFromFromNodeInfoIfNeeded(to);
+
+                float totalDist = 0.0f;
+                TaxiPathNodeRecord[] nodes = CliDB.TaxiPathNodesByPath[pathId];
+
+                if (nodes.Length < 2)
+                {
+                    edges.Add(Tuple.Create(Tuple.Create(fromVertexID, toVertexID), 0xFFFFu));
+
+                    return;
+                }
+
+                int last = nodes.Length;
+                int first = 0;
+
+                if (nodes.Length > 2)
+                {
+                    --last;
+                    ++first;
+                }
+
+                for (int i = first + 1; i < last; ++i)
+                {
+                    if (nodes[i - 1].Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport))
+                        continue;
+
+                    int uiMap1, uiMap2;
+                    Vector2 pos1, pos2;
+
+                    GetTaxiMapPosition(nodes[i - 1].Loc, nodes[i - 1].ContinentID, out pos1, out uiMap1);
+                    GetTaxiMapPosition(nodes[i].Loc, nodes[i].ContinentID, out pos2, out uiMap2);
+
+                    if (uiMap1 != uiMap2)
+                        continue;
+
+                    totalDist += (float)Math.Sqrt((float)Math.Pow(pos2.X - pos1.X, 2) + (float)Math.Pow(pos2.Y - pos1.Y, 2));
+                }
+
+                uint dist = (uint)(totalDist * 32767.0f);
+
+                if (dist > 0xFFFF)
+                    dist = 0xFFFF;
+
+                edges.Add(Tuple.Create(Tuple.Create(fromVertexID, toVertexID), dist));
+            }
+        }
+
+        private static uint GetVertexIDFromNodeID(TaxiNodesRecord node)
+        {
+            return _verticesByNode.ContainsKey(node.Id) ? _verticesByNode[node.Id] : uint.MaxValue;
+        }
+
+        private static uint GetNodeIDFromVertexID(uint vertexID)
+        {
+            if (vertexID < _nodesByVertex.Count)
+                return _nodesByVertex[(int)vertexID].Id;
+
+            return uint.MaxValue;
         }
     }
 }

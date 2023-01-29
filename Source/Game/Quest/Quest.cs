@@ -274,102 +274,6 @@ namespace Game
                 }
         }
 
-        private void LoadConditionalConditionalQuestDescription(SQLFields fields)
-        {
-            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
-
-            if (locale >= Locale.Total)
-            {
-                Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
-
-                return;
-            }
-
-            QuestConditionalText text = ConditionalQuestDescription.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<int>(2));
-
-            if (text == null)
-            {
-                text = new QuestConditionalText();
-                ConditionalQuestDescription.Add(text);
-            }
-
-            text.PlayerConditionId = fields.Read<int>(1);
-            text.QuestgiverCreatureId = fields.Read<int>(2);
-            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
-        }
-
-        private void LoadConditionalConditionalRequestItemsText(SQLFields fields)
-        {
-            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
-
-            if (locale >= Locale.Total)
-            {
-                Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
-
-                return;
-            }
-
-            QuestConditionalText text = ConditionalRequestItemsText.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
-
-            if (text == null)
-            {
-                text = new QuestConditionalText();
-                ConditionalRequestItemsText.Add(text);
-            }
-
-            text.PlayerConditionId = fields.Read<int>(1);
-            text.QuestgiverCreatureId = fields.Read<int>(2);
-            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
-        }
-
-        private void LoadConditionalConditionalOfferRewardText(SQLFields fields)
-        {
-            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
-
-            if (locale >= Locale.Total)
-            {
-                Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
-
-                return;
-            }
-
-            QuestConditionalText text = ConditionalOfferRewardText.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
-
-            if (text == null)
-            {
-                text = new QuestConditionalText();
-                ConditionalOfferRewardText.Add(text);
-            }
-
-            text.PlayerConditionId = fields.Read<int>(1);
-            text.QuestgiverCreatureId = fields.Read<int>(2);
-            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
-        }
-
-        private void LoadConditionalConditionalQuestCompletionLog(SQLFields fields)
-        {
-            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
-
-            if (locale >= Locale.Total)
-            {
-                Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
-
-                return;
-            }
-
-            QuestConditionalText text = ConditionalQuestCompletionLog.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
-
-            if (text == null)
-            {
-                text = new QuestConditionalText();
-                ConditionalQuestCompletionLog.Add(text);
-            }
-
-            text.PlayerConditionId = fields.Read<int>(1);
-            text.QuestgiverCreatureId = fields.Read<int>(2);
-            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
-        }
-
         public uint XPValue(Player player)
         {
             return XPValue(player, ContentTuningId, RewardXPDifficulty, RewardXPMultiplier, Expansion);
@@ -876,6 +780,102 @@ namespace Game
         public ushort GetEventIdForQuest()
         {
             return _eventIdForQuest;
+        }
+
+        private void LoadConditionalConditionalQuestDescription(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_description_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+
+                return;
+            }
+
+            QuestConditionalText text = ConditionalQuestDescription.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<int>(2));
+
+            if (text == null)
+            {
+                text = new QuestConditionalText();
+                ConditionalQuestDescription.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
+        private void LoadConditionalConditionalRequestItemsText(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_request_items_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+
+                return;
+            }
+
+            QuestConditionalText text = ConditionalRequestItemsText.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
+
+            if (text == null)
+            {
+                text = new QuestConditionalText();
+                ConditionalRequestItemsText.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
+        private void LoadConditionalConditionalOfferRewardText(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_offer_reward_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+
+                return;
+            }
+
+            QuestConditionalText text = ConditionalOfferRewardText.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
+
+            if (text == null)
+            {
+                text = new QuestConditionalText();
+                ConditionalOfferRewardText.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
+        }
+
+        private void LoadConditionalConditionalQuestCompletionLog(SQLFields fields)
+        {
+            Locale locale = fields.Read<string>(4).ToEnum<Locale>();
+
+            if (locale >= Locale.Total)
+            {
+                Log.outError(LogFilter.Sql, $"Table `quest_completion_log_conditional` has invalid locale {fields.Read<string>(4)} set for quest {fields.Read<uint>(0)}. Skipped.");
+
+                return;
+            }
+
+            QuestConditionalText text = ConditionalQuestCompletionLog.Find(text => text.PlayerConditionId == fields.Read<int>(1) && text.QuestgiverCreatureId == fields.Read<uint>(2));
+
+            if (text == null)
+            {
+                text = new QuestConditionalText();
+                ConditionalQuestCompletionLog.Add(text);
+            }
+
+            text.PlayerConditionId = fields.Read<int>(1);
+            text.QuestgiverCreatureId = fields.Read<int>(2);
+            ObjectManager.AddLocaleString(fields.Read<string>(3), locale, text.Text);
         }
 
         #region Fields

@@ -14,6 +14,138 @@ namespace Game.Chat
     [CommandGroup("tele")]
     internal class TeleCommands
     {
+        [CommandGroup("Name")]
+        private class TeleNameCommands
+        {
+            [CommandGroup("npc")]
+            private class TeleNameNpcCommands
+            {
+                [Command("Guid", RBACPermissions.CommandTeleName, true)]
+                private static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, PlayerIdentifier player, ulong spawnId)
+                {
+                    if (player == null)
+                        return false;
+
+                    CreatureData spawnpoint = Global.ObjectMgr.GetCreatureData(spawnId);
+
+                    if (spawnpoint == null)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
+
+                        return false;
+                    }
+
+                    CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(spawnpoint.Id);
+
+                    return DoNameTeleport(handler, player, spawnpoint.MapId, spawnpoint.SpawnPoint, creatureTemplate.Name);
+                }
+
+                [Command("Id", RBACPermissions.CommandTeleName, true)]
+                private static bool HandleTeleNameNpcIdCommand(CommandHandler handler, PlayerIdentifier player, uint creatureId)
+                {
+                    if (player == null)
+                        return false;
+
+                    CreatureData spawnpoint = null;
+
+                    foreach (var (id, creatureData) in Global.ObjectMgr.GetAllCreatureData())
+                    {
+                        if (id != creatureId)
+                            continue;
+
+                        if (spawnpoint == null)
+                        {
+                            spawnpoint = creatureData;
+                        }
+                        else
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
+
+                            break;
+                        }
+                    }
+
+                    if (spawnpoint == null)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
+
+                        return false;
+                    }
+
+                    CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(creatureId);
+
+                    return DoNameTeleport(handler, player, spawnpoint.MapId, spawnpoint.SpawnPoint, creatureTemplate.Name);
+                }
+
+                [Command("Name", RBACPermissions.CommandTeleName, true)]
+                private static bool HandleTeleNameNpcNameCommand(CommandHandler handler, PlayerIdentifier player, Tail name)
+                {
+                    string normalizedName = name;
+
+                    if (player == null)
+                        return false;
+
+                    WorldDatabase.EscapeString(ref normalizedName);
+
+                    SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.Name FROM creature c INNER JOIN creature_template ct ON c.Id = ct.entry WHERE ct.Name LIKE '{normalizedName}'");
+
+                    if (result.IsEmpty())
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
+
+                        return false;
+                    }
+
+                    if (result.NextRow())
+                        handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
+
+                    return DoNameTeleport(handler, player, result.Read<ushort>(4), new Position(result.Read<float>(0), result.Read<float>(1), result.Read<float>(2), result.Read<float>(3)), result.Read<string>(5));
+                }
+            }
+
+            [Command("", RBACPermissions.CommandTeleName, true)]
+            private static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg(typeof(GameTele), typeof(string))] object where)
+            {
+                if (player == null)
+                    player = PlayerIdentifier.FromTargetOrSelf(handler);
+
+                if (player == null)
+                    return false;
+
+                Player target = player.GetConnectedPlayer();
+
+                if (where is string &&
+                    where.Equals("$home")) // References Target's _homebind
+                {
+                    if (target)
+                    {
+                        target.TeleportTo(target.GetHomebind());
+                    }
+                    else
+                    {
+                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                        stmt.AddValue(0, player.GetGUID().GetCounter());
+                        SQLResult result = DB.Characters.Query(stmt);
+
+                        if (!result.IsEmpty())
+                        {
+                            WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
+                            uint zoneId = result.Read<ushort>(1);
+
+                            Player.SavePositionInDB(loc, zoneId, player.GetGUID());
+                        }
+                    }
+
+                    return true;
+                }
+
+                // Id, or string, or [Name] Shift-click form |color|Htele:Id|h[Name]|h|r
+                GameTele tele = where as GameTele;
+
+                return DoNameTeleport(handler, player, tele.MapId, new Position(tele.PosX, tele.PosY, tele.PosZ, tele.Orientation), tele.Name);
+            }
+        }
+
         [Command("", RBACPermissions.CommandTele)]
         private static bool HandleTeleCommand(CommandHandler handler, GameTele tele)
         {
@@ -245,138 +377,6 @@ namespace Game.Chat
             }
 
             return true;
-        }
-
-        [CommandGroup("Name")]
-        private class TeleNameCommands
-        {
-            [Command("", RBACPermissions.CommandTeleName, true)]
-            private static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg(typeof(GameTele), typeof(string))] object where)
-            {
-                if (player == null)
-                    player = PlayerIdentifier.FromTargetOrSelf(handler);
-
-                if (player == null)
-                    return false;
-
-                Player target = player.GetConnectedPlayer();
-
-                if (where is string &&
-                    where.Equals("$home")) // References Target's _homebind
-                {
-                    if (target)
-                    {
-                        target.TeleportTo(target.GetHomebind());
-                    }
-                    else
-                    {
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
-                        stmt.AddValue(0, player.GetGUID().GetCounter());
-                        SQLResult result = DB.Characters.Query(stmt);
-
-                        if (!result.IsEmpty())
-                        {
-                            WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
-                            uint zoneId = result.Read<ushort>(1);
-
-                            Player.SavePositionInDB(loc, zoneId, player.GetGUID());
-                        }
-                    }
-
-                    return true;
-                }
-
-                // Id, or string, or [Name] Shift-click form |color|Htele:Id|h[Name]|h|r
-                GameTele tele = where as GameTele;
-
-                return DoNameTeleport(handler, player, tele.MapId, new Position(tele.PosX, tele.PosY, tele.PosZ, tele.Orientation), tele.Name);
-            }
-
-            [CommandGroup("npc")]
-            private class TeleNameNpcCommands
-            {
-                [Command("Guid", RBACPermissions.CommandTeleName, true)]
-                private static bool HandleTeleNameNpcSpawnIdCommand(CommandHandler handler, PlayerIdentifier player, ulong spawnId)
-                {
-                    if (player == null)
-                        return false;
-
-                    CreatureData spawnpoint = Global.ObjectMgr.GetCreatureData(spawnId);
-
-                    if (spawnpoint == null)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
-
-                        return false;
-                    }
-
-                    CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(spawnpoint.Id);
-
-                    return DoNameTeleport(handler, player, spawnpoint.MapId, spawnpoint.SpawnPoint, creatureTemplate.Name);
-                }
-
-                [Command("Id", RBACPermissions.CommandTeleName, true)]
-                private static bool HandleTeleNameNpcIdCommand(CommandHandler handler, PlayerIdentifier player, uint creatureId)
-                {
-                    if (player == null)
-                        return false;
-
-                    CreatureData spawnpoint = null;
-
-                    foreach (var (id, creatureData) in Global.ObjectMgr.GetAllCreatureData())
-                    {
-                        if (id != creatureId)
-                            continue;
-
-                        if (spawnpoint == null)
-                        {
-                            spawnpoint = creatureData;
-                        }
-                        else
-                        {
-                            handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
-
-                            break;
-                        }
-                    }
-
-                    if (spawnpoint == null)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
-
-                        return false;
-                    }
-
-                    CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(creatureId);
-
-                    return DoNameTeleport(handler, player, spawnpoint.MapId, spawnpoint.SpawnPoint, creatureTemplate.Name);
-                }
-
-                [Command("Name", RBACPermissions.CommandTeleName, true)]
-                private static bool HandleTeleNameNpcNameCommand(CommandHandler handler, PlayerIdentifier player, Tail name)
-                {
-                    string normalizedName = name;
-
-                    if (player == null)
-                        return false;
-
-                    WorldDatabase.EscapeString(ref normalizedName);
-
-                    SQLResult result = DB.World.Query($"SELECT c.position_x, c.position_y, c.position_z, c.orientation, c.map, ct.Name FROM creature c INNER JOIN creature_template ct ON c.Id = ct.entry WHERE ct.Name LIKE '{normalizedName}'");
-
-                    if (result.IsEmpty())
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
-
-                        return false;
-                    }
-
-                    if (result.NextRow())
-                        handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
-
-                    return DoNameTeleport(handler, player, result.Read<ushort>(4), new Position(result.Read<float>(0), result.Read<float>(1), result.Read<float>(2), result.Read<float>(3)), result.Read<string>(5));
-                }
-            }
         }
     }
 }

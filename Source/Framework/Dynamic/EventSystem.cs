@@ -137,9 +137,9 @@ namespace Framework.Dynamic
 
     public class BasicEvent
     {
-        private AbortState _abortState; // set by externals when the event is aborted, aborted events don't execute
         public ulong _addTime;          // time when the event was added to queue, filled by event handler
         public ulong _execTime;         // planned time of next execution, filled by event handler
+        private AbortState _abortState; // set by externals when the event is aborted, aborted events don't execute
 
         public BasicEvent()
         {

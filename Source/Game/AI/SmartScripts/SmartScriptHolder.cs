@@ -10,18 +10,8 @@ namespace Game.AI
     {
         public const uint DEFAULT_PRIORITY = uint.MaxValue;
         public SmartAction Action;
-        public bool Active { get; set; }
-        public bool EnableTimed { get; set; }
-
-        public int EntryOrGuid { get; set; }
         public SmartEvent Event;
-        public uint EventId { get; set; }
-        public uint Link { get; set; }
-        public uint Priority { get; set; }
-        public bool RunOnce { get; set; }
-        public SmartScriptType SourceType { get; set; }
         public SmartTarget Target;
-        public uint Timer { get; set; }
 
         public SmartScriptHolder()
         {
@@ -41,6 +31,17 @@ namespace Game.AI
             RunOnce = other.RunOnce;
             EnableTimed = other.EnableTimed;
         }
+
+        public bool Active { get; set; }
+        public bool EnableTimed { get; set; }
+
+        public int EntryOrGuid { get; set; }
+        public uint EventId { get; set; }
+        public uint Link { get; set; }
+        public uint Priority { get; set; }
+        public bool RunOnce { get; set; }
+        public SmartScriptType SourceType { get; set; }
+        public uint Timer { get; set; }
 
         public int CompareTo(SmartScriptHolder other)
         {

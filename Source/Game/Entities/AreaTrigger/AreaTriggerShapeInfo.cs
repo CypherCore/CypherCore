@@ -5,12 +5,12 @@ namespace Game.Entities;
 
 public class AreaTriggerShapeInfo : AreaTriggerData
 {
-    public AreaTriggerTypes TriggerType { get; set; }
-
     public AreaTriggerShapeInfo()
     {
         TriggerType = AreaTriggerTypes.Max;
     }
+
+    public AreaTriggerTypes TriggerType { get; set; }
 
     public unsafe float GetMaxSearchRadius()
     {

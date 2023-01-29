@@ -9,6 +9,8 @@ namespace Game.DungeonFinding
 {
     public class LFGGroupData
     {
+        private readonly List<ObjectGuid> _players = new();
+
         // Dungeon
         private uint _dungeon;
 
@@ -16,7 +18,6 @@ namespace Game.DungeonFinding
         private byte _kicksLeft;
         private ObjectGuid _leader;
         private LfgState _oldState;
-        private readonly List<ObjectGuid> _players = new();
 
         // General
         private LfgState _state;

@@ -62,23 +62,6 @@ namespace Framework.Dynamic
         }
 
         /// <summary>
-        ///  Updates the timer of the event map.
-        /// </summary>
-        /// <param name="time">Value in ms to be added to time.</param>
-        private void Update(TimeSpan time)
-        {
-            _time += time;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns>Active phases as mask.</returns>
-        private byte GetPhaseMask()
-        {
-            return _phase;
-        }
-
-        /// <summary>
         /// </summary>
         /// <returns>True, if there are no events scheduled.</returns>
         public bool Empty()
@@ -96,28 +79,6 @@ namespace Framework.Dynamic
                 _phase = 0;
             else if (phase <= 8)
                 _phase = (byte)(1 << (phase - 1));
-        }
-
-        /// <summary>
-        ///  Activates the given phase (bitwise).
-        /// </summary>
-        /// <param name="phase">Phase which should be activated. Values: 1 - 8</param>
-        private void AddPhase(byte phase)
-        {
-            if (phase != 0 &&
-                phase <= 8)
-                _phase |= (byte)(1 << (phase - 1));
-        }
-
-        /// <summary>
-        ///  Deactivates the given phase (bitwise).
-        /// </summary>
-        /// <param name="phase">Phase which should be deactivated. Values: 1 - 8.</param>
-        private void RemovePhase(byte phase)
-        {
-            if (phase != 0 &&
-                phase <= 8)
-                _phase &= (byte)~(1 << (phase - 1));
         }
 
         /// <summary>
@@ -337,6 +298,45 @@ namespace Framework.Dynamic
         public bool IsInPhase(byte phase)
         {
             return phase <= 8 && (phase == 0 || Convert.ToBoolean(_phase & (1 << (phase - 1))));
+        }
+
+        /// <summary>
+        ///  Updates the timer of the event map.
+        /// </summary>
+        /// <param name="time">Value in ms to be added to time.</param>
+        private void Update(TimeSpan time)
+        {
+            _time += time;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <returns>Active phases as mask.</returns>
+        private byte GetPhaseMask()
+        {
+            return _phase;
+        }
+
+        /// <summary>
+        ///  Activates the given phase (bitwise).
+        /// </summary>
+        /// <param name="phase">Phase which should be activated. Values: 1 - 8</param>
+        private void AddPhase(byte phase)
+        {
+            if (phase != 0 &&
+                phase <= 8)
+                _phase |= (byte)(1 << (phase - 1));
+        }
+
+        /// <summary>
+        ///  Deactivates the given phase (bitwise).
+        /// </summary>
+        /// <param name="phase">Phase which should be deactivated. Values: 1 - 8.</param>
+        private void RemovePhase(byte phase)
+        {
+            if (phase != 0 &&
+                phase <= 8)
+                _phase &= (byte)~(1 << (phase - 1));
         }
     }
 }

@@ -8,24 +8,6 @@ namespace Game.Entities
 {
     public class CUFProfile
     {
-        public BitSet BoolOptions { get; set; }
-        public ushort BottomOffset { get; set; }
-        public byte BottomPoint { get; set; }
-        public ushort FrameHeight { get; set; }
-        public ushort FrameWidth { get; set; }
-        public byte HealthText { get; set; }
-        public ushort LeftOffset { get; set; }
-        public byte LeftPoint { get; set; }
-
-        public string ProfileName { get; set; }
-        public byte SortBy { get; set; }
-
-        // LeftOffset, TopOffset and BottomOffset
-        public ushort TopOffset { get; set; }
-
-        // LeftAlign, TopAlight, BottomAlign
-        public byte TopPoint { get; set; }
-
         public CUFProfile()
         {
             BoolOptions = new BitSet((int)CUFBoolOptions.BoolOptionsCount);
@@ -52,6 +34,24 @@ namespace Game.Entities
             BottomOffset = bottomOffset;
             LeftOffset = leftOffset;
         }
+
+        public BitSet BoolOptions { get; set; }
+        public ushort BottomOffset { get; set; }
+        public byte BottomPoint { get; set; }
+        public ushort FrameHeight { get; set; }
+        public ushort FrameWidth { get; set; }
+        public byte HealthText { get; set; }
+        public ushort LeftOffset { get; set; }
+        public byte LeftPoint { get; set; }
+
+        public string ProfileName { get; set; }
+        public byte SortBy { get; set; }
+
+        // LeftOffset, TopOffset and BottomOffset
+        public ushort TopOffset { get; set; }
+
+        // LeftAlign, TopAlight, BottomAlign
+        public byte TopPoint { get; set; }
 
         public void SetOption(CUFBoolOptions opt, byte arg)
         {

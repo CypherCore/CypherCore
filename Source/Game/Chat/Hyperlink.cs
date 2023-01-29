@@ -113,11 +113,6 @@ namespace Game.Chat
             return true;
         }
 
-        private static byte toHex(char c)
-        {
-            return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00);
-        }
-
         //|color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
         public static HyperlinkInfo ParseHyperlink(string currentString)
         {
@@ -194,6 +189,11 @@ namespace Game.Chat
 
             // ok, valid hyperlink, return info
             return new HyperlinkInfo(currentString[pos..], color, currentString.Substring(tagStart, tagLength), currentString.Substring(dataStart, dataLength), currentString.Substring(textStart, textLength));
+        }
+
+        private static byte toHex(char c)
+        {
+            return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00);
         }
     }
 

@@ -19,6 +19,28 @@ namespace Game.Entities
 {
     public class Item : WorldObject
     {
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly ItemData ItemMask = new();
+            private readonly ObjectFieldData ObjectMask = new();
+            private readonly Item Owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(Item owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
+
         public static int[] ItemTransmogrificationSlots =
         {
             -1,                      // INVTYPE_NON_EQUIP
@@ -806,27 +828,6 @@ namespace Game.Entities
             }
         }
 
-        private static void AddItemToUpdateQueueOf(Item item, Player player)
-        {
-            if (item.IsInUpdateQueue())
-                return;
-
-            Cypher.Assert(player != null);
-
-            if (player.GetGUID() != item.GetOwnerGUID())
-            {
-                Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - _owner's Guid ({0}) and player's Guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
-
-                return;
-            }
-
-            if (player.ItemUpdateQueueBlocked)
-                return;
-
-            player.ItemUpdateQueue.Add(item);
-            item.uQueuePos = player.ItemUpdateQueue.Count - 1;
-        }
-
         public static void RemoveItemFromUpdateQueueOf(Item item, Player player)
         {
             if (!item.IsInUpdateQueue())
@@ -950,69 +951,6 @@ namespace Game.Entities
                 cost = 1;
 
             return cost;
-        }
-
-        private bool HasEnchantRequiredSkill(Player player)
-        {
-            // Check all enchants for required skill
-            for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
-            {
-                uint enchant_id = GetEnchantmentId(enchant_slot);
-
-                if (enchant_id != 0)
-                {
-                    SpellItemEnchantmentRecord enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
-
-                    if (enchantEntry != null)
-                        if (enchantEntry.RequiredSkillID != 0 &&
-                            player.GetSkillValue((SkillType)enchantEntry.RequiredSkillID) < enchantEntry.RequiredSkillRank)
-                            return false;
-                }
-            }
-
-            return true;
-        }
-
-        private uint GetEnchantRequiredLevel()
-        {
-            uint level = 0;
-
-            // Check all enchants for required level
-            for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
-            {
-                uint enchant_id = GetEnchantmentId(enchant_slot);
-
-                if (enchant_id != 0)
-                {
-                    var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
-
-                    if (enchantEntry != null)
-                        if (enchantEntry.MinLevel > level)
-                            level = enchantEntry.MinLevel;
-                }
-            }
-
-            return level;
-        }
-
-        private bool IsBoundByEnchant()
-        {
-            // Check all enchants for soulbound
-            for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
-            {
-                uint enchant_id = GetEnchantmentId(enchant_slot);
-
-                if (enchant_id != 0)
-                {
-                    var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
-
-                    if (enchantEntry != null)
-                        if (enchantEntry.GetFlags().HasFlag(SpellItemEnchantmentFlags.Soulbound))
-                            return true;
-                }
-            }
-
-            return false;
         }
 
         public InventoryResult CanBeMergedPartlyWith(ItemTemplate proto)
@@ -1431,37 +1369,6 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new((int)TypeId.Max);
-
-            if (requestedObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Object);
-
-            _itemData.FilterDisallowedFieldsMaskForFlag(requestedItemMask, flags);
-
-            if (requestedItemMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Item);
-
-            WorldPacket buffer = new();
-            buffer.WriteUInt32(valuesMask.GetBlock(0));
-
-            if (valuesMask[(int)TypeId.Object])
-                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
-
-            if (valuesMask[(int)TypeId.Item])
-                _itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
-
-            WorldPacket buffer1 = new();
-            buffer1.WriteUInt8((byte)UpdateType.Values);
-            buffer1.WritePackedGuid(GetGUID());
-            buffer1.WriteUInt32(buffer.GetSize());
-            buffer1.WriteBytes(buffer.GetData());
-
-            data.AddUpdateBlock(buffer1);
-        }
-
         public override void ClearUpdateMask(bool remove)
         {
             Values.ClearChangesMask(_itemData);
@@ -1613,82 +1520,6 @@ namespace Game.Entities
             return false;
         }
 
-        private bool IsValidTransmogrificationTarget()
-        {
-            ItemTemplate proto = GetTemplate();
-
-            if (proto == null)
-                return false;
-
-            if (proto.GetClass() != ItemClass.Armor &&
-                proto.GetClass() != ItemClass.Weapon)
-                return false;
-
-            if (proto.GetClass() == ItemClass.Weapon &&
-                proto.GetSubClass() == (uint)ItemSubClassWeapon.FishingPole)
-                return false;
-
-            if (proto.HasFlag(ItemFlags2.NoAlterItemVisual))
-                return false;
-
-            if (!HasStats())
-                return false;
-
-            return true;
-        }
-
-        private bool HasStats()
-        {
-            ItemTemplate proto = GetTemplate();
-            Player owner = GetOwner();
-
-            for (byte i = 0; i < ItemConst.MaxStats; ++i)
-                if ((owner ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
-                    return true;
-
-            return false;
-        }
-
-        private static bool HasStats(ItemInstance itemInstance, BonusData bonus)
-        {
-            for (byte i = 0; i < ItemConst.MaxStats; ++i)
-                if (bonus.StatPercentEditor[i] != 0)
-                    return true;
-
-            return false;
-        }
-
-        private static ItemTransmogrificationWeaponCategory GetTransmogrificationWeaponCategory(ItemTemplate proto)
-        {
-            if (proto.GetClass() == ItemClass.Weapon)
-                switch ((ItemSubClassWeapon)proto.GetSubClass())
-                {
-                    case ItemSubClassWeapon.Axe2:
-                    case ItemSubClassWeapon.Mace2:
-                    case ItemSubClassWeapon.Sword2:
-                    case ItemSubClassWeapon.Staff:
-                    case ItemSubClassWeapon.Polearm:
-                        return ItemTransmogrificationWeaponCategory.Melee2H;
-                    case ItemSubClassWeapon.Bow:
-                    case ItemSubClassWeapon.Gun:
-                    case ItemSubClassWeapon.Crossbow:
-                        return ItemTransmogrificationWeaponCategory.Ranged;
-                    case ItemSubClassWeapon.Axe:
-                    case ItemSubClassWeapon.Mace:
-                    case ItemSubClassWeapon.Sword:
-                    case ItemSubClassWeapon.Warglaives:
-                        return ItemTransmogrificationWeaponCategory.AxeMaceSword1H;
-                    case ItemSubClassWeapon.Dagger:
-                        return ItemTransmogrificationWeaponCategory.Dagger;
-                    case ItemSubClassWeapon.Fist:
-                        return ItemTransmogrificationWeaponCategory.Fist;
-                    default:
-                        break;
-                }
-
-            return ItemTransmogrificationWeaponCategory.Invalid;
-        }
-
         public static bool CanTransmogrifyItemWithItem(Item item, ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
             ItemTemplate source = Global.ObjectMgr.GetItemTemplate(itemModifiedAppearance.ItemID); // source
@@ -1737,158 +1568,6 @@ namespace Game.Entities
                 }
 
             return true;
-        }
-
-        private uint GetBuyPrice(Player owner, out bool standardPrice)
-        {
-            return GetBuyPrice(GetTemplate(), (uint)GetQuality(), GetItemLevel(owner), out standardPrice);
-        }
-
-        private static uint GetBuyPrice(ItemTemplate proto, uint quality, uint itemLevel, out bool standardPrice)
-        {
-            standardPrice = true;
-
-            if (proto.HasFlag(ItemFlags2.OverrideGoldCost))
-                return proto.GetBuyPrice();
-
-            var qualityPrice = CliDB.ImportPriceQualityStorage.LookupByKey(quality + 1);
-
-            if (qualityPrice == null)
-                return 0;
-
-            var basePrice = CliDB.ItemPriceBaseStorage.LookupByKey(proto.GetBaseItemLevel());
-
-            if (basePrice == null)
-                return 0;
-
-            float qualityFactor = qualityPrice.Data;
-            float baseFactor;
-
-            var inventoryType = proto.GetInventoryType();
-
-            if (inventoryType == InventoryType.Weapon ||
-                inventoryType == InventoryType.Weapon2Hand ||
-                inventoryType == InventoryType.WeaponMainhand ||
-                inventoryType == InventoryType.WeaponOffhand ||
-                inventoryType == InventoryType.Ranged ||
-                inventoryType == InventoryType.Thrown ||
-                inventoryType == InventoryType.RangedRight)
-                baseFactor = basePrice.Weapon;
-            else
-                baseFactor = basePrice.Armor;
-
-            if (inventoryType == InventoryType.Robe)
-                inventoryType = InventoryType.Chest;
-
-            if (proto.GetClass() == ItemClass.Gem &&
-                (ItemSubClassGem)proto.GetSubClass() == ItemSubClassGem.ArtifactRelic)
-            {
-                inventoryType = InventoryType.Weapon;
-                baseFactor = basePrice.Weapon / 3.0f;
-            }
-
-
-            float typeFactor = 0.0f;
-            sbyte weapType = -1;
-
-            switch (inventoryType)
-            {
-                case InventoryType.Head:
-                case InventoryType.Neck:
-                case InventoryType.Shoulders:
-                case InventoryType.Chest:
-                case InventoryType.Waist:
-                case InventoryType.Legs:
-                case InventoryType.Feet:
-                case InventoryType.Wrists:
-                case InventoryType.Hands:
-                case InventoryType.Finger:
-                case InventoryType.Trinket:
-                case InventoryType.Cloak:
-                case InventoryType.Holdable:
-                    {
-                        var armorPrice = CliDB.ImportPriceArmorStorage.LookupByKey(inventoryType);
-
-                        if (armorPrice == null)
-                            return 0;
-
-                        switch ((ItemSubClassArmor)proto.GetSubClass())
-                        {
-                            case ItemSubClassArmor.Miscellaneous:
-                            case ItemSubClassArmor.Cloth:
-                                typeFactor = armorPrice.ClothModifier;
-
-                                break;
-                            case ItemSubClassArmor.Leather:
-                                typeFactor = armorPrice.LeatherModifier;
-
-                                break;
-                            case ItemSubClassArmor.Mail:
-                                typeFactor = armorPrice.ChainModifier;
-
-                                break;
-                            case ItemSubClassArmor.Plate:
-                                typeFactor = armorPrice.PlateModifier;
-
-                                break;
-                            default:
-                                typeFactor = 1.0f;
-
-                                break;
-                        }
-
-                        break;
-                    }
-                case InventoryType.Shield:
-                    {
-                        var shieldPrice = CliDB.ImportPriceShieldStorage.LookupByKey(2); // it only has two rows, it's unclear which is the one used
-
-                        if (shieldPrice == null)
-                            return 0;
-
-                        typeFactor = shieldPrice.Data;
-
-                        break;
-                    }
-                case InventoryType.WeaponMainhand:
-                    weapType = 0;
-
-                    break;
-                case InventoryType.WeaponOffhand:
-                    weapType = 1;
-
-                    break;
-                case InventoryType.Weapon:
-                    weapType = 2;
-
-                    break;
-                case InventoryType.Weapon2Hand:
-                    weapType = 3;
-
-                    break;
-                case InventoryType.Ranged:
-                case InventoryType.RangedRight:
-                case InventoryType.Relic:
-                    weapType = 4;
-
-                    break;
-                default:
-                    return proto.GetBuyPrice();
-            }
-
-            if (weapType != -1)
-            {
-                var weaponPrice = CliDB.ImportPriceWeaponStorage.LookupByKey(weapType + 1);
-
-                if (weaponPrice == null)
-                    return 0;
-
-                typeFactor = weaponPrice.Data;
-            }
-
-            standardPrice = false;
-
-            return (uint)(proto.GetPriceVariance() * typeFactor * baseFactor * qualityFactor * proto.GetPriceRandomValue());
         }
 
         public uint GetSellPrice(Player owner)
@@ -2288,19 +1967,6 @@ namespace Game.Entities
             return null;
         }
 
-        private void AddArtifactPower(ArtifactPowerData artifactPower)
-        {
-            int index = _artifactPowerIdToIndex.Count;
-            _artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
-
-            ArtifactPower powerField = new();
-            powerField.ArtifactPowerId = (ushort)artifactPower.ArtifactPowerId;
-            powerField.PurchasedRank = artifactPower.PurchasedRank;
-            powerField.CurrentRankWithBonus = artifactPower.CurrentRankWithBonus;
-
-            AddDynamicUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers), powerField);
-        }
-
         public void SetArtifactPower(ushort artifactPowerId, byte purchasedRank, byte currentRankWithBonus)
         {
             var foundIndex = _artifactPowerIdToIndex.LookupByKey(artifactPowerId);
@@ -2364,118 +2030,6 @@ namespace Game.Entities
                 purchasedRanks += power.PurchasedRank;
 
             return purchasedRanks;
-        }
-
-        private void ApplyArtifactPowerEnchantmentBonuses(EnchantmentSlot slot, uint enchantId, bool apply, Player owner)
-        {
-            SpellItemEnchantmentRecord enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
-
-            if (enchant != null)
-                for (uint i = 0; i < ItemConst.MaxItemEnchantmentEffects; ++i)
-                    switch (enchant.Effect[i])
-                    {
-                        case ItemEnchantmentType.ArtifactPowerBonusRankByType:
-                            {
-                                for (int artifactPowerIndex = 0; artifactPowerIndex < _itemData.ArtifactPowers.Size(); ++artifactPowerIndex)
-                                {
-                                    ArtifactPower artifactPower = _itemData.ArtifactPowers[artifactPowerIndex];
-
-                                    if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).Label == enchant.EffectArg[i])
-                                    {
-                                        byte newRank = artifactPower.CurrentRankWithBonus;
-
-                                        if (apply)
-                                            newRank += (byte)enchant.EffectPointsMin[i];
-                                        else
-                                            newRank -= (byte)enchant.EffectPointsMin[i];
-
-                                        artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
-                                        SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
-
-                                        if (IsEquipped())
-                                        {
-                                            ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
-
-                                            if (artifactPowerRank != null)
-                                                owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
-                                        }
-                                    }
-                                }
-                            }
-
-                            break;
-                        case ItemEnchantmentType.ArtifactPowerBonusRankByID:
-                            {
-                                ushort artifactPowerIndex = _artifactPowerIdToIndex.LookupByKey(enchant.EffectArg[i]);
-
-                                if (artifactPowerIndex != 0)
-                                {
-                                    byte newRank = _itemData.ArtifactPowers[artifactPowerIndex].CurrentRankWithBonus;
-
-                                    if (apply)
-                                        newRank += (byte)enchant.EffectPointsMin[i];
-                                    else
-                                        newRank -= (byte)enchant.EffectPointsMin[i];
-
-                                    ArtifactPower artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
-                                    SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
-
-                                    if (IsEquipped())
-                                    {
-                                        ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(_itemData.ArtifactPowers[artifactPowerIndex].ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
-
-                                        if (artifactPowerRank != null)
-                                            owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
-                                    }
-                                }
-                            }
-
-                            break;
-                        case ItemEnchantmentType.ArtifactPowerBonusRankPicker:
-                            if (slot >= EnchantmentSlot.Sock1 &&
-                                slot <= EnchantmentSlot.Sock3 &&
-                                _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1] != -1)
-                            {
-                                ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectArg[i]);
-
-                                if (artifactPowerPicker != null)
-                                {
-                                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
-
-                                    if (playerCondition == null ||
-                                        ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
-                                        for (int artifactPowerIndex = 0; artifactPowerIndex < _itemData.ArtifactPowers.Size(); ++artifactPowerIndex)
-                                        {
-                                            ArtifactPower artifactPower = _itemData.ArtifactPowers[artifactPowerIndex];
-
-                                            if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).Label == _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1])
-                                            {
-                                                byte newRank = artifactPower.CurrentRankWithBonus;
-
-                                                if (apply)
-                                                    newRank += (byte)enchant.EffectPointsMin[i];
-                                                else
-                                                    newRank -= (byte)enchant.EffectPointsMin[i];
-
-                                                artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
-                                                SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
-
-                                                if (IsEquipped())
-                                                {
-                                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
-
-                                                    if (artifactPowerRank != null)
-                                                        owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
-                                                }
-                                            }
-                                        }
-                                }
-                            }
-
-                            break;
-                        default:
-                            break;
-                    }
         }
 
         public void CopyArtifactDataFromParent(Item parent)
@@ -2795,11 +2349,6 @@ namespace Game.Entities
             SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.GiftCreator), guid);
         }
 
-        private void SetExpiration(uint expiration)
-        {
-            SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Expiration), expiration);
-        }
-
         public ItemBondingType GetBonding()
         {
             return _bonusData.Bonding;
@@ -2981,11 +2530,6 @@ namespace Game.Entities
         public void SetContainer(Bag container)
         {
             _container = container;
-        }
-
-        private bool IsInBag()
-        {
-            return _container != null;
         }
 
         public uint GetItemRandomBonusListId()
@@ -3279,26 +2823,482 @@ namespace Game.Entities
             return 0;
         }
 
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        private static void AddItemToUpdateQueueOf(Item item, Player player)
         {
-            private readonly ItemData ItemMask = new();
-            private readonly ObjectFieldData ObjectMask = new();
-            private readonly Item Owner;
+            if (item.IsInUpdateQueue())
+                return;
 
-            public ValuesUpdateForPlayerWithMaskSender(Item owner)
+            Cypher.Assert(player != null);
+
+            if (player.GetGUID() != item.GetOwnerGUID())
             {
-                Owner = owner;
+                Log.outError(LogFilter.Player, "Item.AddToUpdateQueueOf - _owner's Guid ({0}) and player's Guid ({1}) don't match!", item.GetOwnerGUID(), player.GetGUID().ToString());
+
+                return;
             }
 
-            public void Invoke(Player player)
+            if (player.ItemUpdateQueueBlocked)
+                return;
+
+            player.ItemUpdateQueue.Add(item);
+            item.uQueuePos = player.ItemUpdateQueue.Count - 1;
+        }
+
+        private bool HasEnchantRequiredSkill(Player player)
+        {
+            // Check all enchants for required skill
+            for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
             {
-                UpdateData udata = new(Owner.GetMapId());
+                uint enchant_id = GetEnchantmentId(enchant_slot);
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), player);
+                if (enchant_id != 0)
+                {
+                    SpellItemEnchantmentRecord enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
 
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
+                    if (enchantEntry != null)
+                        if (enchantEntry.RequiredSkillID != 0 &&
+                            player.GetSkillValue((SkillType)enchantEntry.RequiredSkillID) < enchantEntry.RequiredSkillRank)
+                            return false;
+                }
             }
+
+            return true;
+        }
+
+        private uint GetEnchantRequiredLevel()
+        {
+            uint level = 0;
+
+            // Check all enchants for required level
+            for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
+            {
+                uint enchant_id = GetEnchantmentId(enchant_slot);
+
+                if (enchant_id != 0)
+                {
+                    var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
+
+                    if (enchantEntry != null)
+                        if (enchantEntry.MinLevel > level)
+                            level = enchantEntry.MinLevel;
+                }
+            }
+
+            return level;
+        }
+
+        private bool IsBoundByEnchant()
+        {
+            // Check all enchants for soulbound
+            for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
+            {
+                uint enchant_id = GetEnchantmentId(enchant_slot);
+
+                if (enchant_id != 0)
+                {
+                    var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
+
+                    if (enchantEntry != null)
+                        if (enchantEntry.GetFlags().HasFlag(SpellItemEnchantmentFlags.Soulbound))
+                            return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            UpdateMask valuesMask = new((int)TypeId.Max);
+
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            _itemData.FilterDisallowedFieldsMaskForFlag(requestedItemMask, flags);
+
+            if (requestedItemMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Item);
+
+            WorldPacket buffer = new();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.Item])
+                _itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
+
+            WorldPacket buffer1 = new();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
+        }
+
+        private bool IsValidTransmogrificationTarget()
+        {
+            ItemTemplate proto = GetTemplate();
+
+            if (proto == null)
+                return false;
+
+            if (proto.GetClass() != ItemClass.Armor &&
+                proto.GetClass() != ItemClass.Weapon)
+                return false;
+
+            if (proto.GetClass() == ItemClass.Weapon &&
+                proto.GetSubClass() == (uint)ItemSubClassWeapon.FishingPole)
+                return false;
+
+            if (proto.HasFlag(ItemFlags2.NoAlterItemVisual))
+                return false;
+
+            if (!HasStats())
+                return false;
+
+            return true;
+        }
+
+        private bool HasStats()
+        {
+            ItemTemplate proto = GetTemplate();
+            Player owner = GetOwner();
+
+            for (byte i = 0; i < ItemConst.MaxStats; ++i)
+                if ((owner ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
+                    return true;
+
+            return false;
+        }
+
+        private static bool HasStats(ItemInstance itemInstance, BonusData bonus)
+        {
+            for (byte i = 0; i < ItemConst.MaxStats; ++i)
+                if (bonus.StatPercentEditor[i] != 0)
+                    return true;
+
+            return false;
+        }
+
+        private static ItemTransmogrificationWeaponCategory GetTransmogrificationWeaponCategory(ItemTemplate proto)
+        {
+            if (proto.GetClass() == ItemClass.Weapon)
+                switch ((ItemSubClassWeapon)proto.GetSubClass())
+                {
+                    case ItemSubClassWeapon.Axe2:
+                    case ItemSubClassWeapon.Mace2:
+                    case ItemSubClassWeapon.Sword2:
+                    case ItemSubClassWeapon.Staff:
+                    case ItemSubClassWeapon.Polearm:
+                        return ItemTransmogrificationWeaponCategory.Melee2H;
+                    case ItemSubClassWeapon.Bow:
+                    case ItemSubClassWeapon.Gun:
+                    case ItemSubClassWeapon.Crossbow:
+                        return ItemTransmogrificationWeaponCategory.Ranged;
+                    case ItemSubClassWeapon.Axe:
+                    case ItemSubClassWeapon.Mace:
+                    case ItemSubClassWeapon.Sword:
+                    case ItemSubClassWeapon.Warglaives:
+                        return ItemTransmogrificationWeaponCategory.AxeMaceSword1H;
+                    case ItemSubClassWeapon.Dagger:
+                        return ItemTransmogrificationWeaponCategory.Dagger;
+                    case ItemSubClassWeapon.Fist:
+                        return ItemTransmogrificationWeaponCategory.Fist;
+                    default:
+                        break;
+                }
+
+            return ItemTransmogrificationWeaponCategory.Invalid;
+        }
+
+        private uint GetBuyPrice(Player owner, out bool standardPrice)
+        {
+            return GetBuyPrice(GetTemplate(), (uint)GetQuality(), GetItemLevel(owner), out standardPrice);
+        }
+
+        private static uint GetBuyPrice(ItemTemplate proto, uint quality, uint itemLevel, out bool standardPrice)
+        {
+            standardPrice = true;
+
+            if (proto.HasFlag(ItemFlags2.OverrideGoldCost))
+                return proto.GetBuyPrice();
+
+            var qualityPrice = CliDB.ImportPriceQualityStorage.LookupByKey(quality + 1);
+
+            if (qualityPrice == null)
+                return 0;
+
+            var basePrice = CliDB.ItemPriceBaseStorage.LookupByKey(proto.GetBaseItemLevel());
+
+            if (basePrice == null)
+                return 0;
+
+            float qualityFactor = qualityPrice.Data;
+            float baseFactor;
+
+            var inventoryType = proto.GetInventoryType();
+
+            if (inventoryType == InventoryType.Weapon ||
+                inventoryType == InventoryType.Weapon2Hand ||
+                inventoryType == InventoryType.WeaponMainhand ||
+                inventoryType == InventoryType.WeaponOffhand ||
+                inventoryType == InventoryType.Ranged ||
+                inventoryType == InventoryType.Thrown ||
+                inventoryType == InventoryType.RangedRight)
+                baseFactor = basePrice.Weapon;
+            else
+                baseFactor = basePrice.Armor;
+
+            if (inventoryType == InventoryType.Robe)
+                inventoryType = InventoryType.Chest;
+
+            if (proto.GetClass() == ItemClass.Gem &&
+                (ItemSubClassGem)proto.GetSubClass() == ItemSubClassGem.ArtifactRelic)
+            {
+                inventoryType = InventoryType.Weapon;
+                baseFactor = basePrice.Weapon / 3.0f;
+            }
+
+
+            float typeFactor = 0.0f;
+            sbyte weapType = -1;
+
+            switch (inventoryType)
+            {
+                case InventoryType.Head:
+                case InventoryType.Neck:
+                case InventoryType.Shoulders:
+                case InventoryType.Chest:
+                case InventoryType.Waist:
+                case InventoryType.Legs:
+                case InventoryType.Feet:
+                case InventoryType.Wrists:
+                case InventoryType.Hands:
+                case InventoryType.Finger:
+                case InventoryType.Trinket:
+                case InventoryType.Cloak:
+                case InventoryType.Holdable:
+                    {
+                        var armorPrice = CliDB.ImportPriceArmorStorage.LookupByKey(inventoryType);
+
+                        if (armorPrice == null)
+                            return 0;
+
+                        switch ((ItemSubClassArmor)proto.GetSubClass())
+                        {
+                            case ItemSubClassArmor.Miscellaneous:
+                            case ItemSubClassArmor.Cloth:
+                                typeFactor = armorPrice.ClothModifier;
+
+                                break;
+                            case ItemSubClassArmor.Leather:
+                                typeFactor = armorPrice.LeatherModifier;
+
+                                break;
+                            case ItemSubClassArmor.Mail:
+                                typeFactor = armorPrice.ChainModifier;
+
+                                break;
+                            case ItemSubClassArmor.Plate:
+                                typeFactor = armorPrice.PlateModifier;
+
+                                break;
+                            default:
+                                typeFactor = 1.0f;
+
+                                break;
+                        }
+
+                        break;
+                    }
+                case InventoryType.Shield:
+                    {
+                        var shieldPrice = CliDB.ImportPriceShieldStorage.LookupByKey(2); // it only has two rows, it's unclear which is the one used
+
+                        if (shieldPrice == null)
+                            return 0;
+
+                        typeFactor = shieldPrice.Data;
+
+                        break;
+                    }
+                case InventoryType.WeaponMainhand:
+                    weapType = 0;
+
+                    break;
+                case InventoryType.WeaponOffhand:
+                    weapType = 1;
+
+                    break;
+                case InventoryType.Weapon:
+                    weapType = 2;
+
+                    break;
+                case InventoryType.Weapon2Hand:
+                    weapType = 3;
+
+                    break;
+                case InventoryType.Ranged:
+                case InventoryType.RangedRight:
+                case InventoryType.Relic:
+                    weapType = 4;
+
+                    break;
+                default:
+                    return proto.GetBuyPrice();
+            }
+
+            if (weapType != -1)
+            {
+                var weaponPrice = CliDB.ImportPriceWeaponStorage.LookupByKey(weapType + 1);
+
+                if (weaponPrice == null)
+                    return 0;
+
+                typeFactor = weaponPrice.Data;
+            }
+
+            standardPrice = false;
+
+            return (uint)(proto.GetPriceVariance() * typeFactor * baseFactor * qualityFactor * proto.GetPriceRandomValue());
+        }
+
+        private void AddArtifactPower(ArtifactPowerData artifactPower)
+        {
+            int index = _artifactPowerIdToIndex.Count;
+            _artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
+
+            ArtifactPower powerField = new();
+            powerField.ArtifactPowerId = (ushort)artifactPower.ArtifactPowerId;
+            powerField.PurchasedRank = artifactPower.PurchasedRank;
+            powerField.CurrentRankWithBonus = artifactPower.CurrentRankWithBonus;
+
+            AddDynamicUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers), powerField);
+        }
+
+        private void ApplyArtifactPowerEnchantmentBonuses(EnchantmentSlot slot, uint enchantId, bool apply, Player owner)
+        {
+            SpellItemEnchantmentRecord enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
+
+            if (enchant != null)
+                for (uint i = 0; i < ItemConst.MaxItemEnchantmentEffects; ++i)
+                    switch (enchant.Effect[i])
+                    {
+                        case ItemEnchantmentType.ArtifactPowerBonusRankByType:
+                            {
+                                for (int artifactPowerIndex = 0; artifactPowerIndex < _itemData.ArtifactPowers.Size(); ++artifactPowerIndex)
+                                {
+                                    ArtifactPower artifactPower = _itemData.ArtifactPowers[artifactPowerIndex];
+
+                                    if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).Label == enchant.EffectArg[i])
+                                    {
+                                        byte newRank = artifactPower.CurrentRankWithBonus;
+
+                                        if (apply)
+                                            newRank += (byte)enchant.EffectPointsMin[i];
+                                        else
+                                            newRank -= (byte)enchant.EffectPointsMin[i];
+
+                                        artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
+                                        SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
+
+                                        if (IsEquipped())
+                                        {
+                                            ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
+
+                                            if (artifactPowerRank != null)
+                                                owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
+                                        }
+                                    }
+                                }
+                            }
+
+                            break;
+                        case ItemEnchantmentType.ArtifactPowerBonusRankByID:
+                            {
+                                ushort artifactPowerIndex = _artifactPowerIdToIndex.LookupByKey(enchant.EffectArg[i]);
+
+                                if (artifactPowerIndex != 0)
+                                {
+                                    byte newRank = _itemData.ArtifactPowers[artifactPowerIndex].CurrentRankWithBonus;
+
+                                    if (apply)
+                                        newRank += (byte)enchant.EffectPointsMin[i];
+                                    else
+                                        newRank -= (byte)enchant.EffectPointsMin[i];
+
+                                    ArtifactPower artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
+                                    SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
+
+                                    if (IsEquipped())
+                                    {
+                                        ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(_itemData.ArtifactPowers[artifactPowerIndex].ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
+
+                                        if (artifactPowerRank != null)
+                                            owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
+                                    }
+                                }
+                            }
+
+                            break;
+                        case ItemEnchantmentType.ArtifactPowerBonusRankPicker:
+                            if (slot >= EnchantmentSlot.Sock1 &&
+                                slot <= EnchantmentSlot.Sock3 &&
+                                _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1] != -1)
+                            {
+                                ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectArg[i]);
+
+                                if (artifactPowerPicker != null)
+                                {
+                                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
+
+                                    if (playerCondition == null ||
+                                        ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
+                                        for (int artifactPowerIndex = 0; artifactPowerIndex < _itemData.ArtifactPowers.Size(); ++artifactPowerIndex)
+                                        {
+                                            ArtifactPower artifactPower = _itemData.ArtifactPowers[artifactPowerIndex];
+
+                                            if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).Label == _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1])
+                                            {
+                                                byte newRank = artifactPower.CurrentRankWithBonus;
+
+                                                if (apply)
+                                                    newRank += (byte)enchant.EffectPointsMin[i];
+                                                else
+                                                    newRank -= (byte)enchant.EffectPointsMin[i];
+
+                                                artifactPower = Values.ModifyValue(_itemData).ModifyValue(_itemData.ArtifactPowers, artifactPowerIndex);
+                                                SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
+
+                                                if (IsEquipped())
+                                                {
+                                                    ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(newRank != 0 ? newRank - 1 : 0));
+
+                                                    if (artifactPowerRank != null)
+                                                        owner.ApplyArtifactPowerRank(this, artifactPowerRank, newRank != 0);
+                                                }
+                                            }
+                                        }
+                                }
+                            }
+
+                            break;
+                        default:
+                            break;
+                    }
+        }
+
+        private void SetExpiration(uint expiration)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(_itemData).ModifyValue(_itemData.Expiration), expiration);
+        }
+
+        private bool IsInBag()
+        {
+            return _container != null;
         }
 
         #region Fields

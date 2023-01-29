@@ -17,6 +17,189 @@ namespace Game.Chat
     [CommandGroup("gobject")]
     internal class GameObjectCommands
     {
+        [CommandGroup("add")]
+        private class AddCommands
+        {
+            [Command("", RBACPermissions.CommandGobjectAdd)]
+            private static bool HandleGameObjectAddCommand(CommandHandler handler, uint objectId, int? spawnTimeSecs)
+            {
+                if (objectId == 0)
+                    return false;
+
+                GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(objectId);
+
+                if (objectInfo == null)
+                {
+                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, objectId);
+
+                    return false;
+                }
+
+                if (objectInfo.displayId != 0 &&
+                    !CliDB.GameObjectDisplayInfoStorage.ContainsKey(objectInfo.displayId))
+                {
+                    // report to DB errors log as in loading case
+                    Log.outError(LogFilter.Sql, "Gameobject (Entry {0} GoType: {1}) have invalid displayId ({2}), not spawned.", objectId, objectInfo.type, objectInfo.displayId);
+                    handler.SendSysMessage(CypherStrings.GameobjectHaveInvalidData, objectId);
+
+                    return false;
+                }
+
+                Player player = handler.GetPlayer();
+                Map map = player.GetMap();
+
+                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
+
+                if (!obj)
+                    return false;
+
+                PhasingHandler.InheritPhaseShift(obj, player);
+
+                if (spawnTimeSecs.HasValue)
+                    obj.SetRespawnTime(spawnTimeSecs.Value);
+
+                // fill the gameobject _data and save to the db
+                obj.SaveToDB(map.GetId(),
+                             new List<Difficulty>()
+                             {
+                                 map.GetDifficultyID()
+                             });
+
+                ulong spawnId = obj.GetSpawnId();
+
+                // this will generate a new Guid if the object is in an instance
+                obj = GameObject.CreateGameObjectFromDB(spawnId, map);
+
+                if (!obj)
+                    return false;
+
+                // TODO: is it really necessary to add both the real and DB table Guid here ?
+                Global.ObjectMgr.AddGameObjectToGrid(Global.ObjectMgr.GetGameObjectData(spawnId));
+                handler.SendSysMessage(CypherStrings.GameobjectAdd, objectId, objectInfo.name, spawnId, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+
+                return true;
+            }
+
+            [Command("temp", RBACPermissions.CommandGobjectAddTemp)]
+            private static bool HandleGameObjectAddTempCommand(CommandHandler handler, uint objectId, ulong? spawntime)
+            {
+                Player player = handler.GetPlayer();
+                TimeSpan spawntm = TimeSpan.FromSeconds(spawntime.GetValueOrDefault(300));
+
+                Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
+
+                if (Global.ObjectMgr.GetGameObjectTemplate(objectId) == null)
+                {
+                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, objectId);
+
+                    return false;
+                }
+
+                player.SummonGameObject(objectId, player, rotation, spawntm);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("set")]
+        private class SetCommands
+        {
+            [Command("phase", RBACPermissions.CommandGobjectSetPhase)]
+            private static bool HandleGameObjectSetPhaseCommand(CommandHandler handler, ulong guidLow, uint phaseId)
+            {
+                if (guidLow == 0)
+                    return false;
+
+                GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+
+                if (!obj)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
+
+                    return false;
+                }
+
+                if (phaseId == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
+
+                    return false;
+                }
+
+                PhasingHandler.AddPhase(obj, phaseId, true);
+                obj.SaveToDB();
+
+                return true;
+            }
+
+            [Command("State", RBACPermissions.CommandGobjectSetState)]
+            private static bool HandleGameObjectSetStateCommand(CommandHandler handler, ulong guidLow, int objectType, uint? objectState)
+            {
+                if (guidLow == 0)
+                    return false;
+
+                GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+
+                if (!obj)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
+
+                    return false;
+                }
+
+                if (objectType < 0)
+                {
+                    if (objectType == -1)
+                        obj.SendGameObjectDespawn();
+                    else if (objectType == -2)
+                        return false;
+
+                    return true;
+                }
+
+                if (objectState == 0)
+                    return false;
+
+                switch (objectType)
+                {
+                    case 0:
+                        obj.SetGoState((GameObjectState)objectState);
+
+                        break;
+                    case 1:
+                        obj.SetGoType((GameObjectTypes)objectState);
+
+                        break;
+                    case 2:
+                        obj.SetGoArtKit(objectState.Value);
+
+                        break;
+                    case 3:
+                        obj.SetGoAnimProgress(objectState.Value);
+
+                        break;
+                    case 4:
+                        obj.SendCustomAnim(objectState.Value);
+
+                        break;
+                    case 5:
+                        if (objectState < 0 ||
+                            objectState > (uint)GameObjectDestructibleState.Rebuilding)
+                            return false;
+
+                        obj.SetDestructibleState((GameObjectDestructibleState)objectState);
+
+                        break;
+                    default:
+                        break;
+                }
+
+                handler.SendSysMessage("Set gobject Type {0} State {1}", objectType, objectState);
+
+                return true;
+            }
+        }
+
         [Command("activate", RBACPermissions.CommandGobjectActivate)]
         private static bool HandleGameObjectActivateCommand(CommandHandler handler, ulong guidLow)
         {
@@ -518,189 +701,6 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.CommandTurnobjmessage, obj.GetSpawnId(), obj.GetGoInfo().name, obj.GetGUID().ToString(), obj.GetOrientation());
 
             return true;
-        }
-
-        [CommandGroup("add")]
-        private class AddCommands
-        {
-            [Command("", RBACPermissions.CommandGobjectAdd)]
-            private static bool HandleGameObjectAddCommand(CommandHandler handler, uint objectId, int? spawnTimeSecs)
-            {
-                if (objectId == 0)
-                    return false;
-
-                GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(objectId);
-
-                if (objectInfo == null)
-                {
-                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, objectId);
-
-                    return false;
-                }
-
-                if (objectInfo.displayId != 0 &&
-                    !CliDB.GameObjectDisplayInfoStorage.ContainsKey(objectInfo.displayId))
-                {
-                    // report to DB errors log as in loading case
-                    Log.outError(LogFilter.Sql, "Gameobject (Entry {0} GoType: {1}) have invalid displayId ({2}), not spawned.", objectId, objectInfo.type, objectInfo.displayId);
-                    handler.SendSysMessage(CypherStrings.GameobjectHaveInvalidData, objectId);
-
-                    return false;
-                }
-
-                Player player = handler.GetPlayer();
-                Map map = player.GetMap();
-
-                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
-
-                if (!obj)
-                    return false;
-
-                PhasingHandler.InheritPhaseShift(obj, player);
-
-                if (spawnTimeSecs.HasValue)
-                    obj.SetRespawnTime(spawnTimeSecs.Value);
-
-                // fill the gameobject _data and save to the db
-                obj.SaveToDB(map.GetId(),
-                             new List<Difficulty>()
-                             {
-                                 map.GetDifficultyID()
-                             });
-
-                ulong spawnId = obj.GetSpawnId();
-
-                // this will generate a new Guid if the object is in an instance
-                obj = GameObject.CreateGameObjectFromDB(spawnId, map);
-
-                if (!obj)
-                    return false;
-
-                // TODO: is it really necessary to add both the real and DB table Guid here ?
-                Global.ObjectMgr.AddGameObjectToGrid(Global.ObjectMgr.GetGameObjectData(spawnId));
-                handler.SendSysMessage(CypherStrings.GameobjectAdd, objectId, objectInfo.name, spawnId, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
-
-                return true;
-            }
-
-            [Command("temp", RBACPermissions.CommandGobjectAddTemp)]
-            private static bool HandleGameObjectAddTempCommand(CommandHandler handler, uint objectId, ulong? spawntime)
-            {
-                Player player = handler.GetPlayer();
-                TimeSpan spawntm = TimeSpan.FromSeconds(spawntime.GetValueOrDefault(300));
-
-                Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
-
-                if (Global.ObjectMgr.GetGameObjectTemplate(objectId) == null)
-                {
-                    handler.SendSysMessage(CypherStrings.GameobjectNotExist, objectId);
-
-                    return false;
-                }
-
-                player.SummonGameObject(objectId, player, rotation, spawntm);
-
-                return true;
-            }
-        }
-
-        [CommandGroup("set")]
-        private class SetCommands
-        {
-            [Command("phase", RBACPermissions.CommandGobjectSetPhase)]
-            private static bool HandleGameObjectSetPhaseCommand(CommandHandler handler, ulong guidLow, uint phaseId)
-            {
-                if (guidLow == 0)
-                    return false;
-
-                GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-
-                if (!obj)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
-
-                    return false;
-                }
-
-                if (phaseId == 0)
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-
-                    return false;
-                }
-
-                PhasingHandler.AddPhase(obj, phaseId, true);
-                obj.SaveToDB();
-
-                return true;
-            }
-
-            [Command("State", RBACPermissions.CommandGobjectSetState)]
-            private static bool HandleGameObjectSetStateCommand(CommandHandler handler, ulong guidLow, int objectType, uint? objectState)
-            {
-                if (guidLow == 0)
-                    return false;
-
-                GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-
-                if (!obj)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
-
-                    return false;
-                }
-
-                if (objectType < 0)
-                {
-                    if (objectType == -1)
-                        obj.SendGameObjectDespawn();
-                    else if (objectType == -2)
-                        return false;
-
-                    return true;
-                }
-
-                if (objectState == 0)
-                    return false;
-
-                switch (objectType)
-                {
-                    case 0:
-                        obj.SetGoState((GameObjectState)objectState);
-
-                        break;
-                    case 1:
-                        obj.SetGoType((GameObjectTypes)objectState);
-
-                        break;
-                    case 2:
-                        obj.SetGoArtKit(objectState.Value);
-
-                        break;
-                    case 3:
-                        obj.SetGoAnimProgress(objectState.Value);
-
-                        break;
-                    case 4:
-                        obj.SendCustomAnim(objectState.Value);
-
-                        break;
-                    case 5:
-                        if (objectState < 0 ||
-                            objectState > (uint)GameObjectDestructibleState.Rebuilding)
-                            return false;
-
-                        obj.SetDestructibleState((GameObjectDestructibleState)objectState);
-
-                        break;
-                    default:
-                        break;
-                }
-
-                handler.SendSysMessage("Set gobject Type {0} State {1}", objectType, objectState);
-
-                return true;
-            }
         }
     }
 }

@@ -64,6 +64,11 @@ namespace Framework.GameMath
                    (osPoint.Z <= 1);
         }
 
+        public bool isFinite()
+        {
+            return float.IsFinite(_volume);
+        }
+
         private Vector3 Corner(int i)
         {
             switch (i)
@@ -77,11 +82,6 @@ namespace Framework.GameMath
                 case 6: return _center + (0.5f * (-_edgeVector[0] + _edgeVector[1] + _edgeVector[2]));
                 default: return _center + (0.5f * (_edgeVector[0] + _edgeVector[1] + _edgeVector[2])); //case 7
             }
-        }
-
-        public bool isFinite()
-        {
-            return float.IsFinite(_volume);
         }
     }
 }

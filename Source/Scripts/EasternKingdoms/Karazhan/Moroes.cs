@@ -88,12 +88,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             Initialize();
         }
 
-        private void Initialize()
-        {
-            Enrage = false;
-            InVanish = false;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -189,6 +183,33 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Garrote);
         }
 
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!Enrage &&
+                HealthBelowPct(30))
+            {
+                DoCast(me, SpellIds.Frenzy);
+                Enrage = true;
+                _scheduler.CancelGroup(MiscConst.GroupNonEnrage);
+            }
+
+            _scheduler.Update(diff,
+                              () =>
+                              {
+                                  if (!InVanish)
+                                      DoMeleeAttackIfReady();
+                              });
+        }
+
+        private void Initialize()
+        {
+            Enrage = false;
+            InVanish = false;
+        }
+
         private void SpawnAdds()
         {
             DeSpawnAdds();
@@ -260,27 +281,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                     }
                 }
         }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (!Enrage &&
-                HealthBelowPct(30))
-            {
-                DoCast(me, SpellIds.Frenzy);
-                Enrage = true;
-                _scheduler.CancelGroup(MiscConst.GroupNonEnrage);
-            }
-
-            _scheduler.Update(diff,
-                              () =>
-                              {
-                                  if (!InVanish)
-                                      DoMeleeAttackIfReady();
-                              });
-        }
     }
 
     internal class boss_moroes_guest : ScriptedAI
@@ -350,13 +350,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             Initialize();
         }
 
-        private void Initialize()
-        {
-            ManaBurn_Timer = 7000;
-            MindFlay_Timer = 1000;
-            ShadowWordPain_Timer = 6000;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -413,6 +406,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 ShadowWordPain_Timer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            ManaBurn_Timer = 7000;
+            MindFlay_Timer = 1000;
+            ShadowWordPain_Timer = 6000;
+        }
     }
 
     [Script]
@@ -427,13 +427,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public boss_baron_rafe_dreuger(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            HammerOfJustice_Timer = 1000;
-            SealOfCommand_Timer = 7000;
-            JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
         }
 
         public override void Reset()
@@ -481,6 +474,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 HammerOfJustice_Timer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            HammerOfJustice_Timer = 1000;
+            SealOfCommand_Timer = 7000;
+            JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
+        }
     }
 
     [Script]
@@ -496,14 +496,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public boss_lady_catriona_von_indi(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            DispelMagic_Timer = 11000;
-            GreaterHeal_Timer = 1500;
-            HolyFire_Timer = 5000;
-            PowerWordShield_Timer = 1000;
         }
 
         public override void Reset()
@@ -568,6 +560,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 DispelMagic_Timer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            DispelMagic_Timer = 11000;
+            GreaterHeal_Timer = 1500;
+            HolyFire_Timer = 5000;
+            PowerWordShield_Timer = 1000;
+        }
     }
 
     [Script]
@@ -583,14 +583,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public boss_lady_keira_berrybuck(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            Cleanse_Timer = 13000;
-            GreaterBless_Timer = 1000;
-            HolyLight_Timer = 7000;
-            DivineShield_Timer = 31000;
         }
 
         public override void Reset()
@@ -657,6 +649,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 Cleanse_Timer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            Cleanse_Timer = 13000;
+            GreaterBless_Timer = 1000;
+            HolyLight_Timer = 7000;
+            DivineShield_Timer = 31000;
+        }
     }
 
     [Script]
@@ -671,13 +671,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public boss_lord_robin_daris(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            Hamstring_Timer = 7000;
-            MortalStrike_Timer = 10000;
-            WhirlWind_Timer = 21000;
         }
 
         public override void Reset()
@@ -724,6 +717,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                 WhirlWind_Timer -= diff;
             }
         }
+
+        private void Initialize()
+        {
+            Hamstring_Timer = 7000;
+            MortalStrike_Timer = 10000;
+            WhirlWind_Timer = 21000;
+        }
     }
 
     [Script]
@@ -739,14 +739,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         public boss_lord_crispin_ference(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            Disarm_Timer = 6000;
-            HeroicStrike_Timer = 10000;
-            ShieldBash_Timer = 8000;
-            ShieldWall_Timer = 4000;
         }
 
         public override void Reset()
@@ -802,6 +794,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 ShieldWall_Timer -= diff;
             }
+        }
+
+        private void Initialize()
+        {
+            Disarm_Timer = 6000;
+            HeroicStrike_Timer = 10000;
+            ShieldBash_Timer = 8000;
+            ShieldWall_Timer = 4000;
         }
     }
 }

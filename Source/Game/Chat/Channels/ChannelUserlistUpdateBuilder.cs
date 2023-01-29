@@ -10,9 +10,8 @@ namespace Game.Chat
 {
     internal class ChannelUserlistUpdateBuilder : MessageBuilder
     {
-        private ObjectGuid _guid;
-
         private readonly Channel _source;
+        private ObjectGuid _guid;
 
         public ChannelUserlistUpdateBuilder(Channel source, ObjectGuid guid)
         {

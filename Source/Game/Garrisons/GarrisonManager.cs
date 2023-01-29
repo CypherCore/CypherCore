@@ -14,8 +14,6 @@ namespace Game.Garrisons
     public class GarrisonManager : Singleton<GarrisonManager>
     {
         private readonly Dictionary<uint, FinalizeGarrisonPlotGOInfo> _finalizePlotGOInfo = new();
-
-        private ulong _followerDbIdGenerator = 1;
         private readonly Dictionary<ulong, uint> _garrisonBuildingPlotInstances = new();
         private readonly MultiMap<uint, uint> _garrisonBuildingsByPlot = new();
         private readonly MultiMap<uint, uint> _garrisonBuildingsByType = new();
@@ -48,6 +46,8 @@ namespace Game.Garrisons
                 2, 3
             } // Legendary
 		};
+
+        private ulong _followerDbIdGenerator = 1;
 
         private GarrisonManager()
         {
@@ -546,13 +546,13 @@ namespace Game.Garrisons
 
     public class FinalizeGarrisonPlotGOInfo
     {
-        public FactionInfo[] factionInfo = new FactionInfo[2];
-
         public struct FactionInfo
         {
             public uint GameObjectId;
             public Position Pos;
             public ushort AnimKitId;
         }
+
+        public FactionInfo[] factionInfo = new FactionInfo[2];
     }
 }

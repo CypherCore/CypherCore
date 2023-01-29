@@ -156,34 +156,6 @@ namespace Game
             _initialized = true;
         }
 
-        private static byte GetCheckPacketBaseSize(WardenCheckType type)
-        {
-            return type switch
-            {
-                WardenCheckType.Driver => 1,
-                WardenCheckType.LuaEval => (byte)(1 + _luaEvalPrefix.Length - 1 + _luaEvalMidfix.Length - 1 + 4 + _luaEvalPostfix.Length - 1),
-                WardenCheckType.Mpq => 1,
-                WardenCheckType.PageA => 4 + 1,
-                WardenCheckType.PageB => 4 + 1,
-                WardenCheckType.Module => 4 + 20,
-                WardenCheckType.Mem => 1 + 4 + 1,
-                _ => 0
-            };
-        }
-
-        private static ushort GetCheckPacketSize(WardenCheck check)
-        {
-            int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check Type
-
-            if (!check.Str.IsEmpty())
-                size += (check.Str.Length + 1); // 1 byte string length
-
-            if (!check.Data.Empty())
-                size += check.Data.Length;
-
-            return (ushort)size;
-        }
-
         public override void RequestChecks()
         {
             Log.outDebug(LogFilter.Warden, $"Request _data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() && !_session.PlayerLoading()}");
@@ -500,6 +472,34 @@ namespace Game
             // Set hold off timer, minimum timer should at least be 1 second
             uint holdOff = WorldConfig.GetUIntValue(WorldCfg.WardenClientCheckHoldoff);
             _checkTimer = (holdOff < 1 ? 1 : holdOff) * Time.InMilliseconds;
+        }
+
+        private static byte GetCheckPacketBaseSize(WardenCheckType type)
+        {
+            return type switch
+            {
+                WardenCheckType.Driver => 1,
+                WardenCheckType.LuaEval => (byte)(1 + _luaEvalPrefix.Length - 1 + _luaEvalMidfix.Length - 1 + 4 + _luaEvalPostfix.Length - 1),
+                WardenCheckType.Mpq => 1,
+                WardenCheckType.PageA => 4 + 1,
+                WardenCheckType.PageB => 4 + 1,
+                WardenCheckType.Module => 4 + 20,
+                WardenCheckType.Mem => 1 + 4 + 1,
+                _ => 0
+            };
+        }
+
+        private static ushort GetCheckPacketSize(WardenCheck check)
+        {
+            int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check Type
+
+            if (!check.Str.IsEmpty())
+                size += (check.Str.Length + 1); // 1 byte string length
+
+            if (!check.Data.Empty())
+                size += check.Data.Length;
+
+            return (ushort)size;
         }
     }
 

@@ -170,9 +170,9 @@ namespace Game.Collision
                         data.LiquidInfoData = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
 
                 data.AreaInfoData = new AreaAndLiquidData.AreaInfo(intersectionCallBack.GetHitModel().GetNameSetId(),
-                                                               intersectionCallBack.GetLocationInfo().RootId,
-                                                               (int)intersectionCallBack.GetLocationInfo().HitModel.GetWmoID(),
-                                                               intersectionCallBack.GetLocationInfo().HitModel.GetMogpFlags());
+                                                                   intersectionCallBack.GetLocationInfo().RootId,
+                                                                   (int)intersectionCallBack.GetLocationInfo().HitModel.GetWmoID(),
+                                                                   intersectionCallBack.GetLocationInfo().HitModel.GetMogpFlags());
             }
 
             return data;

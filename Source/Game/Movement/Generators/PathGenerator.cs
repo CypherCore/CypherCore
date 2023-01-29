@@ -11,20 +11,19 @@ namespace Game.Movement
 {
     public class PathGenerator
     {
-        private Vector3 _actualEndPosition;
-        private Vector3 _endPosition;
-
         private readonly Detour.dtQueryFilter _filter = new();
-        private bool _forceDestination;
         private readonly Detour.dtNavMesh _navMesh;
         private readonly Detour.dtNavMeshQuery _navMeshQuery;
-        private Vector3[] _pathPoints;
 
         private readonly ulong[] _pathPolyRefs = new ulong[74];
+        private readonly WorldObject _source;
+        private Vector3 _actualEndPosition;
+        private Vector3 _endPosition;
+        private bool _forceDestination;
+        private Vector3[] _pathPoints;
         private uint _pointPathLimit;
 
         private uint _polyLength;
-        private readonly WorldObject _source;
         private Vector3 _startPosition;
         private bool _useRaycast; // use raycast if true for a straight line path
         private bool _useStraightPath;
@@ -93,6 +92,121 @@ namespace Game.Movement
             BuildPolyPath(start, dest);
 
             return true;
+        }
+
+        public void ShortenPathUntilDist(Position pos, float dist)
+        {
+            ShortenPathUntilDist(new Vector3(pos.X, pos.Y, pos.Z), dist);
+        }
+
+        public void ShortenPathUntilDist(Vector3 target, float dist)
+        {
+            if (GetPathType() == PathType.Blank ||
+                _pathPoints.Length < 2)
+            {
+                Log.outError(LogFilter.Maps, "PathGenerator.ReducePathLengthByDist called before path was successfully built");
+
+                return;
+            }
+
+            float distSq = dist * dist;
+
+            // the first point of the path must be outside the specified range
+            // (this should have really been checked by the caller...)
+            if ((_pathPoints[0] - target).LengthSquared() < distSq)
+                return;
+
+            // check if we even need to do anything
+            if ((_pathPoints[^1] - target).LengthSquared() >= distSq)
+                return;
+
+            int i = _pathPoints.Length - 1;
+            float x;
+            float y;
+            float z;
+            float collisionHeight = _source.GetCollisionHeight();
+
+            // find the first i s.t.:
+            //  - _pathPoints[i] is still too close
+            //  - _pathPoints[i-1] is too far away
+            // => the end point is somewhere on the line between the two
+            while (true)
+            {
+                // we know that pathPoints[i] is too close already (from the previous iteration)
+                if ((_pathPoints[i - 1] - target).LengthSquared() >= distSq)
+                    break; // bingo!
+
+                // check if the shortened path is still in LoS with the Target
+                _source.GetHitSpherePointFor(new Position(_pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight), out x, out y, out z);
+
+                if (!_source.GetMap().IsInLineOfSight(_source.GetPhaseShift(), x, y, z, _pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight, LineOfSightChecks.All, ModelIgnoreFlags.Nothing))
+                {
+                    // whenver we find a point that is not in LoS anymore, simply use last valid path
+                    Array.Resize(ref _pathPoints, i + 1);
+
+                    return;
+                }
+
+                if (--i == 0)
+                {
+                    // no point found that fulfills the condition
+                    _pathPoints[0] = _pathPoints[1];
+                    Array.Resize(ref _pathPoints, 2);
+
+                    return;
+                }
+            }
+
+            // ok, _pathPoints[i] is too close, _pathPoints[i-1] is not, so our Target point is somewhere between the two...
+            //   ... settle for a guesstimate since i'm not confident in doing trig on every chase motion tick...
+            // (@todo review this)
+            _pathPoints[i] += (_pathPoints[i - 1] - _pathPoints[i]).direction() * (dist - (_pathPoints[i] - target).Length());
+            Array.Resize(ref _pathPoints, i + 1);
+        }
+
+        public bool IsInvalidDestinationZ(WorldObject target)
+        {
+            return (target.GetPositionZ() - GetActualEndPosition().Z) > 5.0f;
+        }
+
+        public Vector3 GetStartPosition()
+        {
+            return _startPosition;
+        }
+
+        public Vector3 GetEndPosition()
+        {
+            return _endPosition;
+        }
+
+        public Vector3 GetActualEndPosition()
+        {
+            return _actualEndPosition;
+        }
+
+        public Vector3[] GetPath()
+        {
+            return _pathPoints;
+        }
+
+        public PathType GetPathType()
+        {
+            return pathType;
+        }
+
+        public void SetUseStraightPath(bool useStraightPath)
+        {
+            _useStraightPath = useStraightPath;
+        }
+
+        public void SetPathLengthLimit(float distance)
+        {
+            _pointPathLimit = Math.Min((uint)(distance / 4.0f), 74);
+        }
+
+        public void SetUseRaycast(bool useRaycast)
+        {
+            _useRaycast = useRaycast;
         }
 
         private ulong GetPathPolyByPosition(ulong[] polyPath, uint polyPathSize, float[] point, ref float distance)
@@ -778,9 +892,9 @@ namespace Game.Movement
                 return false;
 
             Detour.dtVcopy(steerPos, 0, steerPath, (int)ns * 3);
-            steerPos[1] = startPos[1]; // keep Z value
+            steerPos[1]  = startPos[1]; // keep Z value
             steerPosFlag = (Detour.dtStraightPathFlags)steerPathFlags[ns];
-            steerPosRef = steerPathPolys[ns];
+            steerPosRef  = steerPathPolys[ns];
 
             return true;
         }
@@ -825,7 +939,7 @@ namespace Game.Movement
                 if (!GetSteerTarget(iterPos, targetPos, 0.3f, polys, npolys, out float[] steerPos, out Detour.dtStraightPathFlags steerPosFlag, out ulong steerPosRef))
                     break;
 
-                bool endOfPath = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_END);
+                bool endOfPath         = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_END);
                 bool offMeshConnection = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
 
                 // Find movement delta.
@@ -1042,81 +1156,6 @@ namespace Game.Movement
             return (p1 - p2).LengthSquared();
         }
 
-        public void ShortenPathUntilDist(Position pos, float dist)
-        {
-            ShortenPathUntilDist(new Vector3(pos.X, pos.Y, pos.Z), dist);
-        }
-
-        public void ShortenPathUntilDist(Vector3 target, float dist)
-        {
-            if (GetPathType() == PathType.Blank ||
-                _pathPoints.Length < 2)
-            {
-                Log.outError(LogFilter.Maps, "PathGenerator.ReducePathLengthByDist called before path was successfully built");
-
-                return;
-            }
-
-            float distSq = dist * dist;
-
-            // the first point of the path must be outside the specified range
-            // (this should have really been checked by the caller...)
-            if ((_pathPoints[0] - target).LengthSquared() < distSq)
-                return;
-
-            // check if we even need to do anything
-            if ((_pathPoints[^1] - target).LengthSquared() >= distSq)
-                return;
-
-            int i = _pathPoints.Length - 1;
-            float x;
-            float y;
-            float z;
-            float collisionHeight = _source.GetCollisionHeight();
-
-            // find the first i s.t.:
-            //  - _pathPoints[i] is still too close
-            //  - _pathPoints[i-1] is too far away
-            // => the end point is somewhere on the line between the two
-            while (true)
-            {
-                // we know that pathPoints[i] is too close already (from the previous iteration)
-                if ((_pathPoints[i - 1] - target).LengthSquared() >= distSq)
-                    break; // bingo!
-
-                // check if the shortened path is still in LoS with the Target
-                _source.GetHitSpherePointFor(new Position(_pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight), out x, out y, out z);
-
-                if (!_source.GetMap().IsInLineOfSight(_source.GetPhaseShift(), x, y, z, _pathPoints[i - 1].X, _pathPoints[i - 1].Y, _pathPoints[i - 1].Z + collisionHeight, LineOfSightChecks.All, ModelIgnoreFlags.Nothing))
-                {
-                    // whenver we find a point that is not in LoS anymore, simply use last valid path
-                    Array.Resize(ref _pathPoints, i + 1);
-
-                    return;
-                }
-
-                if (--i == 0)
-                {
-                    // no point found that fulfills the condition
-                    _pathPoints[0] = _pathPoints[1];
-                    Array.Resize(ref _pathPoints, 2);
-
-                    return;
-                }
-            }
-
-            // ok, _pathPoints[i] is too close, _pathPoints[i-1] is not, so our Target point is somewhere between the two...
-            //   ... settle for a guesstimate since i'm not confident in doing trig on every chase motion tick...
-            // (@todo review this)
-            _pathPoints[i] += (_pathPoints[i - 1] - _pathPoints[i]).direction() * (dist - (_pathPoints[i] - target).Length());
-            Array.Resize(ref _pathPoints, i + 1);
-        }
-
-        public bool IsInvalidDestinationZ(WorldObject target)
-        {
-            return (target.GetPositionZ() - GetActualEndPosition().Z) > 5.0f;
-        }
-
         private void AddFarFromPolyFlags(bool startFarFromPoly, bool endFarFromPoly)
         {
             if (startFarFromPoly)
@@ -1162,31 +1201,6 @@ namespace Game.Movement
             return (dx * dx + dz * dz) < r * r && Math.Abs(dy) < h;
         }
 
-        public Vector3 GetStartPosition()
-        {
-            return _startPosition;
-        }
-
-        public Vector3 GetEndPosition()
-        {
-            return _endPosition;
-        }
-
-        public Vector3 GetActualEndPosition()
-        {
-            return _actualEndPosition;
-        }
-
-        public Vector3[] GetPath()
-        {
-            return _pathPoints;
-        }
-
-        public PathType GetPathType()
-        {
-            return pathType;
-        }
-
         private void SetStartPosition(Vector3 point)
         {
             _startPosition = point;
@@ -1201,21 +1215,6 @@ namespace Game.Movement
         private void SetActualEndPosition(Vector3 point)
         {
             _actualEndPosition = point;
-        }
-
-        public void SetUseStraightPath(bool useStraightPath)
-        {
-            _useStraightPath = useStraightPath;
-        }
-
-        public void SetPathLengthLimit(float distance)
-        {
-            _pointPathLimit = Math.Min((uint)(distance / 4.0f), 74);
-        }
-
-        public void SetUseRaycast(bool useRaycast)
-        {
-            _useRaycast = useRaycast;
         }
     }
 

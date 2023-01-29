@@ -92,35 +92,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
             }
         }
 
-        private void SelectNearestCrystal()
-        {
-            Creature crystal = me.FindNearestCreature(CreatureIds.FelCrystal, 250.0f);
-
-            if (crystal)
-            {
-                Talk(TextIds.SayEnergy);
-                Talk(TextIds.EmoteCrystal);
-
-                DoCast(crystal, SpellIds.FelCrystalDummy);
-                CrystalGUID = crystal.GetGUID();
-
-                float x, y, z;
-                crystal.GetClosePoint(out x, out y, out z, me.GetCombatReach(), SharedConst.ContactDistance);
-
-                Events.SetPhase(PhaseIds.Drain);
-                me.SetWalk(false);
-                me.GetMotionMaster().MovePoint(1, x, y, z);
-            }
-        }
-
-        private void ShatterRemainingCrystals()
-        {
-            List<Creature> crystals = me.GetCreatureListWithEntryInGrid(CreatureIds.FelCrystal, 250.0f);
-
-            foreach (Creature crystal in crystals)
-                crystal.KillSelf();
-        }
-
         public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayAggro);
@@ -251,6 +222,35 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
                 }
 
             DoMeleeAttackIfReady();
+        }
+
+        private void SelectNearestCrystal()
+        {
+            Creature crystal = me.FindNearestCreature(CreatureIds.FelCrystal, 250.0f);
+
+            if (crystal)
+            {
+                Talk(TextIds.SayEnergy);
+                Talk(TextIds.EmoteCrystal);
+
+                DoCast(crystal, SpellIds.FelCrystalDummy);
+                CrystalGUID = crystal.GetGUID();
+
+                float x, y, z;
+                crystal.GetClosePoint(out x, out y, out z, me.GetCombatReach(), SharedConst.ContactDistance);
+
+                Events.SetPhase(PhaseIds.Drain);
+                me.SetWalk(false);
+                me.GetMotionMaster().MovePoint(1, x, y, z);
+            }
+        }
+
+        private void ShatterRemainingCrystals()
+        {
+            List<Creature> crystals = me.GetCreatureListWithEntryInGrid(CreatureIds.FelCrystal, 250.0f);
+
+            foreach (Creature crystal in crystals)
+                crystal.KillSelf();
         }
     }
 

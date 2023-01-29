@@ -13,7 +13,28 @@ namespace Game.Entities
 {
     public class AzeriteItem : Item
     {
-        public AzeriteItemData AzeriteItemData { get; set; }
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly AzeriteItemData _azeriteItemMask = new();
+            private readonly ItemData _itemMask = new();
+            private readonly ObjectFieldData _objectMask = new();
+            private readonly AzeriteItem _owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(AzeriteItem owner)
+            {
+                _owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(_owner.GetMapId());
+
+                _owner.BuildValuesUpdateForPlayerWithMask(udata, _objectMask.GetUpdateMask(), _itemMask.GetUpdateMask(), _azeriteItemMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
 
         public AzeriteItem()
         {
@@ -24,6 +45,8 @@ namespace Game.Entities
 
             SetUpdateFieldValue(Values.ModifyValue(AzeriteItemData).ModifyValue(AzeriteItemData.DEBUGknowledgeWeek), -1);
         }
+
+        public AzeriteItemData AzeriteItemData { get; set; }
 
         public override bool Create(ulong guidlow, uint itemId, ItemContext context, Player owner)
         {
@@ -222,30 +245,6 @@ namespace Game.Entities
                 level = AzeriteItemData.Level;
 
             return level;
-        }
-
-        private uint GetCurrentKnowledgeLevel()
-        {
-            // Count weeks from 14.01.2020
-            DateTime now = GameTime.GetDateAndTime();
-            DateTime beginDate = new(2020, 1, 14);
-            uint knowledge = 0;
-
-            while (beginDate < now && knowledge < PlayerConst.MaxAzeriteItemKnowledgeLevel)
-            {
-                ++knowledge;
-                beginDate.AddDays(7);
-            }
-
-            return knowledge;
-        }
-
-        private ulong CalcTotalXPToNextLevel(uint level, uint knowledgeLevel)
-        {
-            AzeriteLevelInfoRecord levelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(level);
-            ulong totalXp = levelInfo.BaseExperienceToNextLevel * (ulong)CliDB.AzeriteKnowledgeMultiplierStorage.LookupByKey(knowledgeLevel).Multiplier;
-
-            return Math.Max(totalXp, levelInfo.MinimumExperienceToNextLevel);
         }
 
         public void GiveXP(ulong xp)
@@ -483,6 +482,36 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
+        public override void ClearUpdateMask(bool remove)
+        {
+            Values.ClearChangesMask(AzeriteItemData);
+            base.ClearUpdateMask(remove);
+        }
+
+        private uint GetCurrentKnowledgeLevel()
+        {
+            // Count weeks from 14.01.2020
+            DateTime now = GameTime.GetDateAndTime();
+            DateTime beginDate = new(2020, 1, 14);
+            uint knowledge = 0;
+
+            while (beginDate < now && knowledge < PlayerConst.MaxAzeriteItemKnowledgeLevel)
+            {
+                ++knowledge;
+                beginDate.AddDays(7);
+            }
+
+            return knowledge;
+        }
+
+        private ulong CalcTotalXPToNextLevel(uint level, uint knowledgeLevel)
+        {
+            AzeriteLevelInfoRecord levelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(level);
+            ulong totalXp = levelInfo.BaseExperienceToNextLevel * (ulong)CliDB.AzeriteKnowledgeMultiplierStorage.LookupByKey(knowledgeLevel).Multiplier;
+
+            return Math.Max(totalXp, levelInfo.MinimumExperienceToNextLevel);
+        }
+
         private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteItemMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
@@ -522,12 +551,6 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
-        {
-            Values.ClearChangesMask(AzeriteItemData);
-            base.ClearUpdateMask(remove);
-        }
-
         private void UnlockDefaultMilestones()
         {
             bool hasPreviousMilestone = true;
@@ -552,29 +575,6 @@ namespace Game.Entities
                 {
                     hasPreviousMilestone = false;
                 }
-            }
-        }
-
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            private readonly AzeriteItemData _azeriteItemMask = new();
-            private readonly ItemData _itemMask = new();
-            private readonly ObjectFieldData _objectMask = new();
-            private readonly AzeriteItem _owner;
-
-            public ValuesUpdateForPlayerWithMaskSender(AzeriteItem owner)
-            {
-                _owner = owner;
-            }
-
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(_owner.GetMapId());
-
-                _owner.BuildValuesUpdateForPlayerWithMask(udata, _objectMask.GetUpdateMask(), _itemMask.GetUpdateMask(), _azeriteItemMask.GetUpdateMask(), player);
-
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
             }
         }
     }

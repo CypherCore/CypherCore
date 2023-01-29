@@ -53,15 +53,6 @@ namespace Scripts.EasternKingdoms.Gnomeregan
 
     internal class instance_gnomeregan : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_gnomeregan() : base(nameof(instance_gnomeregan), 90)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_gnomeregan_InstanceMapScript(map);
-        }
-
         private class instance_gnomeregan_InstanceMapScript : InstanceScript
         {
             private ObjectGuid uiBlastmasterEmiShortfuseGUID;
@@ -137,6 +128,15 @@ namespace Scripts.EasternKingdoms.Gnomeregan
 
                 return ObjectGuid.Empty;
             }
+        }
+
+        public instance_gnomeregan() : base(nameof(instance_gnomeregan), 90)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_gnomeregan_InstanceMapScript(map);
         }
     }
 }

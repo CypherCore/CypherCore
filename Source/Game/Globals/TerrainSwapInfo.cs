@@ -7,9 +7,6 @@ namespace Game
 {
     public class TerrainSwapInfo
     {
-        public uint Id { get; set; }
-        public List<uint> UiMapPhaseIDs { get; set; } = new();
-
         public TerrainSwapInfo()
         {
         }
@@ -18,5 +15,8 @@ namespace Game
         {
             Id = id;
         }
+
+        public uint Id { get; set; }
+        public List<uint> UiMapPhaseIDs { get; set; } = new();
     }
 }

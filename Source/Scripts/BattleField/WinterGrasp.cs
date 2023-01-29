@@ -15,13 +15,6 @@ namespace Game.BattleFields
 {
     internal class BattlefieldWG : BattleField
     {
-        private bool _isRelicInteractible;
-        private uint _tenacityStack;
-
-        private int _tenacityTeam;
-
-        private ObjectGuid _titansRelicGUID;
-
         private readonly List<ObjectGuid>[] _vehicles = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
         private readonly List<BfWGGameObjectBuilding> BuildingsInZone = new();
         private readonly List<ObjectGuid> CanonList = new();
@@ -29,6 +22,12 @@ namespace Game.BattleFields
         private readonly List<ObjectGuid>[] DefenderPortalList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
 
         private readonly List<WGWorkshop> Workshops = new();
+        private bool _isRelicInteractible;
+        private uint _tenacityStack;
+
+        private int _tenacityTeam;
+
+        private ObjectGuid _titansRelicGUID;
 
         public BattlefieldWG(Map map) : base(map)
         {
@@ -447,33 +446,6 @@ namespace Game.BattleFields
             SendWarning(WintergraspText.StartGrouping);
         }
 
-        private uint GetSpiritGraveyardId(uint areaId)
-        {
-            switch ((AreaId)areaId)
-            {
-                case AreaId.WintergraspFortress:
-                    return WGGraveyardId.Keep;
-                case AreaId.TheSunkenRing:
-                    return WGGraveyardId.WorkshopNE;
-                case AreaId.TheBrokenTemplate:
-                    return WGGraveyardId.WorkshopNW;
-                case AreaId.WestparkWorkshop:
-                    return WGGraveyardId.WorkshopSW;
-                case AreaId.EastparkWorkshop:
-                    return WGGraveyardId.WorkshopSE;
-                case AreaId.Wintergrasp:
-                    return WGGraveyardId.Alliance;
-                case AreaId.TheChilledQuagmire:
-                    return WGGraveyardId.Horde;
-                default:
-                    Log.outError(LogFilter.Battlefield, "BattlefieldWG.GetSpiritGraveyardId: Unexpected Area Id {0}", areaId);
-
-                    break;
-            }
-
-            return 0;
-        }
-
         public override void OnCreatureCreate(Creature creature)
         {
             // Accessing to db spawned creatures
@@ -610,24 +582,6 @@ namespace Game.BattleFields
             // @todo Recent PvP activity worldstate
         }
 
-        private bool FindAndRemoveVehicleFromList(Unit vehicle)
-        {
-            for (byte i = 0; i < SharedConst.PvpTeamsCount; ++i)
-                if (_vehicles[i].Contains(vehicle.GetGUID()))
-                {
-                    _vehicles[i].Remove(vehicle.GetGUID());
-
-                    if (i == TeamId.Horde)
-                        UpdateData(WGData.VehicleH, -1);
-                    else
-                        UpdateData(WGData.VehicleA, -1);
-
-                    return true;
-                }
-
-            return false;
-        }
-
         public override void OnUnitDeath(Unit unit)
         {
             if (IsWarTime())
@@ -648,61 +602,6 @@ namespace Game.BattleFields
                     if (player.GetDistance2d(unitKilled) < 40.0f)
                         PromotePlayer(player);
             }
-        }
-
-        // Update rank for player
-        private void PromotePlayer(Player killer)
-        {
-            if (!IsActive)
-                return;
-
-            // Updating rank of player
-            Aura aur = killer.GetAura(WGSpells.Recruit);
-
-            if (aur != null)
-            {
-                if (aur.GetStackAmount() >= 5)
-                {
-                    killer.RemoveAura(WGSpells.Recruit);
-                    killer.CastSpell(killer, WGSpells.Corporal, true);
-                    Creature stalker = GetCreature(StalkerGuid);
-
-                    if (stalker)
-                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
-                }
-                else
-                {
-                    killer.CastSpell(killer, WGSpells.Recruit, true);
-                }
-            }
-            else if ((aur = killer.GetAura(WGSpells.Corporal)) != null)
-            {
-                if (aur.GetStackAmount() >= 5)
-                {
-                    killer.RemoveAura(WGSpells.Corporal);
-                    killer.CastSpell(killer, WGSpells.Lieutenant, true);
-                    Creature stalker = GetCreature(StalkerGuid);
-
-                    if (stalker)
-                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
-                }
-                else
-                {
-                    killer.CastSpell(killer, WGSpells.Corporal, true);
-                }
-            }
-        }
-
-        private void RemoveAurasFromPlayer(Player player)
-        {
-            player.RemoveAurasDueToSpell(WGSpells.Recruit);
-            player.RemoveAurasDueToSpell(WGSpells.Corporal);
-            player.RemoveAurasDueToSpell(WGSpells.Lieutenant);
-            player.RemoveAurasDueToSpell(WGSpells.TowerControl);
-            player.RemoveAurasDueToSpell(WGSpells.SpiritualImmunity);
-            player.RemoveAurasDueToSpell(WGSpells.Tenacity);
-            player.RemoveAurasDueToSpell(WGSpells.EssenceOfWintergrasp);
-            player.RemoveAurasDueToSpell(WGSpells.WintergraspRestrictedFlightArea);
         }
 
         public override void OnPlayerJoinWar(Player player)
@@ -917,6 +816,117 @@ namespace Game.BattleFields
                 UpdateData(WGData.DamagedTowerDef, 1);
         }
 
+        public GameObject GetRelic()
+        {
+            return GetGameObject(_titansRelicGUID);
+        }
+
+        // Define if player can interact with the relic
+        public void SetRelicInteractible(bool allow)
+        {
+            _isRelicInteractible = allow;
+        }
+
+        private uint GetSpiritGraveyardId(uint areaId)
+        {
+            switch ((AreaId)areaId)
+            {
+                case AreaId.WintergraspFortress:
+                    return WGGraveyardId.Keep;
+                case AreaId.TheSunkenRing:
+                    return WGGraveyardId.WorkshopNE;
+                case AreaId.TheBrokenTemplate:
+                    return WGGraveyardId.WorkshopNW;
+                case AreaId.WestparkWorkshop:
+                    return WGGraveyardId.WorkshopSW;
+                case AreaId.EastparkWorkshop:
+                    return WGGraveyardId.WorkshopSE;
+                case AreaId.Wintergrasp:
+                    return WGGraveyardId.Alliance;
+                case AreaId.TheChilledQuagmire:
+                    return WGGraveyardId.Horde;
+                default:
+                    Log.outError(LogFilter.Battlefield, "BattlefieldWG.GetSpiritGraveyardId: Unexpected Area Id {0}", areaId);
+
+                    break;
+            }
+
+            return 0;
+        }
+
+        private bool FindAndRemoveVehicleFromList(Unit vehicle)
+        {
+            for (byte i = 0; i < SharedConst.PvpTeamsCount; ++i)
+                if (_vehicles[i].Contains(vehicle.GetGUID()))
+                {
+                    _vehicles[i].Remove(vehicle.GetGUID());
+
+                    if (i == TeamId.Horde)
+                        UpdateData(WGData.VehicleH, -1);
+                    else
+                        UpdateData(WGData.VehicleA, -1);
+
+                    return true;
+                }
+
+            return false;
+        }
+
+        // Update rank for player
+        private void PromotePlayer(Player killer)
+        {
+            if (!IsActive)
+                return;
+
+            // Updating rank of player
+            Aura aur = killer.GetAura(WGSpells.Recruit);
+
+            if (aur != null)
+            {
+                if (aur.GetStackAmount() >= 5)
+                {
+                    killer.RemoveAura(WGSpells.Recruit);
+                    killer.CastSpell(killer, WGSpells.Corporal, true);
+                    Creature stalker = GetCreature(StalkerGuid);
+
+                    if (stalker)
+                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
+                }
+                else
+                {
+                    killer.CastSpell(killer, WGSpells.Recruit, true);
+                }
+            }
+            else if ((aur = killer.GetAura(WGSpells.Corporal)) != null)
+            {
+                if (aur.GetStackAmount() >= 5)
+                {
+                    killer.RemoveAura(WGSpells.Corporal);
+                    killer.CastSpell(killer, WGSpells.Lieutenant, true);
+                    Creature stalker = GetCreature(StalkerGuid);
+
+                    if (stalker)
+                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
+                }
+                else
+                {
+                    killer.CastSpell(killer, WGSpells.Corporal, true);
+                }
+            }
+        }
+
+        private void RemoveAurasFromPlayer(Player player)
+        {
+            player.RemoveAurasDueToSpell(WGSpells.Recruit);
+            player.RemoveAurasDueToSpell(WGSpells.Corporal);
+            player.RemoveAurasDueToSpell(WGSpells.Lieutenant);
+            player.RemoveAurasDueToSpell(WGSpells.TowerControl);
+            player.RemoveAurasDueToSpell(WGSpells.SpiritualImmunity);
+            player.RemoveAurasDueToSpell(WGSpells.Tenacity);
+            player.RemoveAurasDueToSpell(WGSpells.EssenceOfWintergrasp);
+            player.RemoveAurasDueToSpell(WGSpells.WintergraspRestrictedFlightArea);
+        }
+
         // Update vehicle Count WorldState to player
         private void UpdateVehicleCountWG()
         {
@@ -1030,11 +1040,6 @@ namespace Game.BattleFields
             }
         }
 
-        public GameObject GetRelic()
-        {
-            return GetGameObject(_titansRelicGUID);
-        }
-
         // Define relic object
         private void SetRelic(ObjectGuid relicGUID)
         {
@@ -1046,32 +1051,16 @@ namespace Game.BattleFields
         {
             return _isRelicInteractible;
         }
-
-        // Define if player can interact with the relic
-        public void SetRelicInteractible(bool allow)
-        {
-            _isRelicInteractible = allow;
-        }
     }
 
     internal class BfWGGameObjectBuilding
     {
-        // Linked gameobject
-        private ObjectGuid _buildGUID;
-
         // Creature associations
         private readonly List<ObjectGuid>[] _CreatureBottomList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
         private readonly List<ObjectGuid>[] _CreatureTopList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
 
         // GameObject associations
         private readonly List<ObjectGuid>[] _GameObjectList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
-
-        private WGGameObjectState _state;
-
-        private StaticWintergraspTowerInfo _staticTowerInfo;
-
-        // the team that controls this point
-        private uint _teamControl;
         private readonly List<ObjectGuid> _TowerCannonBottomList = new();
         private readonly List<ObjectGuid> _TurretTopList = new();
 
@@ -1079,7 +1068,18 @@ namespace Game.BattleFields
 
         // WG object
         private readonly BattlefieldWG _wg;
+
         private readonly uint _worldState;
+
+        // Linked gameobject
+        private ObjectGuid _buildGUID;
+
+        private WGGameObjectState _state;
+
+        private StaticWintergraspTowerInfo _staticTowerInfo;
+
+        // the team that controls this point
+        private uint _teamControl;
 
         public BfWGGameObjectBuilding(BattlefieldWG WG, WGGameObjectBuildingType type, uint worldState)
         {
@@ -1443,57 +1443,6 @@ namespace Game.BattleFields
             }
         }
 
-        private void UpdateCreatureAndGo()
-        {
-            foreach (var guid in _CreatureTopList[_wg.GetDefenderTeam()])
-            {
-                Creature creature = _wg.GetCreature(guid);
-
-                if (creature)
-                    _wg.HideNpc(creature);
-            }
-
-            foreach (var guid in _CreatureTopList[_wg.GetAttackerTeam()])
-            {
-                Creature creature = _wg.GetCreature(guid);
-
-                if (creature)
-                    _wg.ShowNpc(creature, true);
-            }
-
-            foreach (var guid in _CreatureBottomList[_wg.GetDefenderTeam()])
-            {
-                Creature creature = _wg.GetCreature(guid);
-
-                if (creature)
-                    _wg.HideNpc(creature);
-            }
-
-            foreach (var guid in _CreatureBottomList[_wg.GetAttackerTeam()])
-            {
-                Creature creature = _wg.GetCreature(guid);
-
-                if (creature)
-                    _wg.ShowNpc(creature, true);
-            }
-
-            foreach (var guid in _GameObjectList[_wg.GetDefenderTeam()])
-            {
-                GameObject obj = _wg.GetGameObject(guid);
-
-                if (obj)
-                    obj.SetRespawnTime(Time.Day);
-            }
-
-            foreach (var guid in _GameObjectList[_wg.GetAttackerTeam()])
-            {
-                GameObject obj = _wg.GetGameObject(guid);
-
-                if (obj)
-                    obj.SetRespawnTime(0);
-            }
-        }
-
         public void UpdateTurretAttack(bool disable)
         {
             foreach (var guid in _TowerCannonBottomList)
@@ -1579,17 +1528,68 @@ namespace Game.BattleFields
         {
             return _buildGUID;
         }
+
+        private void UpdateCreatureAndGo()
+        {
+            foreach (var guid in _CreatureTopList[_wg.GetDefenderTeam()])
+            {
+                Creature creature = _wg.GetCreature(guid);
+
+                if (creature)
+                    _wg.HideNpc(creature);
+            }
+
+            foreach (var guid in _CreatureTopList[_wg.GetAttackerTeam()])
+            {
+                Creature creature = _wg.GetCreature(guid);
+
+                if (creature)
+                    _wg.ShowNpc(creature, true);
+            }
+
+            foreach (var guid in _CreatureBottomList[_wg.GetDefenderTeam()])
+            {
+                Creature creature = _wg.GetCreature(guid);
+
+                if (creature)
+                    _wg.HideNpc(creature);
+            }
+
+            foreach (var guid in _CreatureBottomList[_wg.GetAttackerTeam()])
+            {
+                Creature creature = _wg.GetCreature(guid);
+
+                if (creature)
+                    _wg.ShowNpc(creature, true);
+            }
+
+            foreach (var guid in _GameObjectList[_wg.GetDefenderTeam()])
+            {
+                GameObject obj = _wg.GetGameObject(guid);
+
+                if (obj)
+                    obj.SetRespawnTime(Time.Day);
+            }
+
+            foreach (var guid in _GameObjectList[_wg.GetAttackerTeam()])
+            {
+                GameObject obj = _wg.GetGameObject(guid);
+
+                if (obj)
+                    obj.SetRespawnTime(0);
+            }
+        }
     }
 
     internal class WGWorkshop
     {
-        //ObjectGuid _buildGUID;
-        private WGGameObjectState _state; // For worldstate
-
         private readonly StaticWintergraspWorkshopInfo _staticInfo;
-        private uint _teamControl; // Team witch control the workshop
 
         private readonly BattlefieldWG _wg; // Pointer to wintergrasp
+
+        //ObjectGuid _buildGUID;
+        private WGGameObjectState _state; // For worldstate
+        private uint _teamControl;        // Team witch control the workshop
 
         public WGWorkshop(BattlefieldWG wg, byte type)
         {

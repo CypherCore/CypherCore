@@ -13,16 +13,16 @@ namespace Game.Entities
 {
     public class KillRewarder
     {
-        private uint _count;
-        private float _groupRate;
         private readonly bool _isBattleground;
-        private bool _isFullXP;
         private readonly bool _isPvP;
         private readonly Player[] _killers;
+        private readonly Unit _victim;
+        private uint _count;
+        private float _groupRate;
+        private bool _isFullXP;
         private byte _maxLevel;
         private Player _maxNotGrayMember;
         private uint _sumLevel;
-        private readonly Unit _victim;
         private uint _xp;
 
         public KillRewarder(Player[] killers, Unit victim, bool isBattleground)

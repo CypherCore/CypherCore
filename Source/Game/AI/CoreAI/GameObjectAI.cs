@@ -10,10 +10,9 @@ namespace Game.AI
 {
     public class GameObjectAI
     {
+        public GameObject me;
         protected EventMap _events;
         protected TaskScheduler _scheduler;
-
-        public GameObject me;
 
         public GameObjectAI(GameObject go)
         {

@@ -101,11 +101,6 @@ namespace Game.Entities
             return GridDefines.IsValidMapCoord(X, Y, Z, Orientation);
         }
 
-        private float ToRelativeAngle(float absAngle)
-        {
-            return NormalizeOrientation(absAngle - Orientation);
-        }
-
         public float GetRelativeAngle(Position pos)
         {
             return ToRelativeAngle(GetAbsoluteAngle(pos));
@@ -353,6 +348,11 @@ namespace Game.Entities
         public static implicit operator Vector3(Position position)
         {
             return new Vector3(position.X, position.Y, position.Z);
+        }
+
+        private float ToRelativeAngle(float absAngle)
+        {
+            return NormalizeOrientation(absAngle - Orientation);
         }
     }
 }

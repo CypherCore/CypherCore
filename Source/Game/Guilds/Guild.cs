@@ -176,19 +176,6 @@ namespace Game.Guilds
                 }
         }
 
-        private void OnPlayerStatusChange(Player player, GuildMemberFlags flag, bool state)
-        {
-            Member member = GetMember(player.GetGUID());
-
-            if (member != null)
-            {
-                if (state)
-                    member.AddFlag(flag);
-                else
-                    member.RemoveFlag(flag);
-            }
-        }
-
         public bool SetName(string name)
         {
             if (_name == name ||
@@ -1261,86 +1248,6 @@ namespace Game.Guilds
             BroadcastPacket(statusChange);
         }
 
-        private void SendEventBankMoneyChanged()
-        {
-            GuildEventBankMoneyChanged eventPacket = new();
-            eventPacket.Money = GetBankMoney();
-            BroadcastPacket(eventPacket);
-        }
-
-        private void SendEventMOTD(WorldSession session, bool broadcast = false)
-        {
-            GuildEventMotd eventPacket = new();
-            eventPacket.MotdText = GetMOTD();
-
-            if (broadcast)
-            {
-                BroadcastPacket(eventPacket);
-            }
-            else
-            {
-                session.SendPacket(eventPacket);
-                Log.outDebug(LogFilter.Guild, "SMSG_GUILD_EVENT_MOTD [{0}] ", session.GetPlayerInfo());
-            }
-        }
-
-        private void SendEventNewLeader(Member newLeader, Member oldLeader, bool isSelfPromoted = false)
-        {
-            GuildEventNewLeader eventPacket = new();
-            eventPacket.SelfPromoted = isSelfPromoted;
-
-            if (newLeader != null)
-            {
-                eventPacket.NewLeaderGUID = newLeader.GetGUID();
-                eventPacket.NewLeaderName = newLeader.GetName();
-                eventPacket.NewLeaderVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-            }
-
-            if (oldLeader != null)
-            {
-                eventPacket.OldLeaderGUID = oldLeader.GetGUID();
-                eventPacket.OldLeaderName = oldLeader.GetName();
-                eventPacket.OldLeaderVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-            }
-
-            BroadcastPacket(eventPacket);
-        }
-
-        private void SendEventPlayerLeft(Player leaver, Player remover = null, bool isRemoved = false)
-        {
-            GuildEventPlayerLeft eventPacket = new();
-            eventPacket.Removed = isRemoved;
-            eventPacket.LeaverGUID = leaver.GetGUID();
-            eventPacket.LeaverName = leaver.GetName();
-            eventPacket.LeaverVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-
-            if (isRemoved && remover)
-            {
-                eventPacket.RemoverGUID = remover.GetGUID();
-                eventPacket.RemoverName = remover.GetName();
-                eventPacket.RemoverVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-            }
-
-            BroadcastPacket(eventPacket);
-        }
-
-        private void SendEventPresenceChanged(WorldSession session, bool loggedOn, bool broadcast = false)
-        {
-            Player player = session.GetPlayer();
-
-            GuildEventPresenceChange eventPacket = new();
-            eventPacket.Guid = player.GetGUID();
-            eventPacket.Name = player.GetName();
-            eventPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-            eventPacket.LoggedOn = loggedOn;
-            eventPacket.Mobile = false;
-
-            if (broadcast)
-                BroadcastPacket(eventPacket);
-            else
-                session.SendPacket(eventPacket);
-        }
-
         public bool LoadFromDB(SQLFields fields)
         {
             _id = fields.Read<uint>(0);
@@ -1960,6 +1867,324 @@ namespace Game.Guilds
             }
         }
 
+        public void SendBankList(WorldSession session, byte tabId, bool fullUpdate)
+        {
+            Member member = GetMember(session.GetPlayer().GetGUID());
+
+            if (member == null) // Shouldn't happen, just in case
+                return;
+
+            GuildBankQueryResults packet = new();
+
+            packet.Money = _bankMoney;
+            packet.WithdrawalsRemaining = _GetMemberRemainingSlots(member, tabId);
+            packet.Tab = tabId;
+            packet.FullUpdate = fullUpdate;
+
+            // TabInfo
+            if (fullUpdate)
+                for (byte i = 0; i < _GetPurchasedTabsSize(); ++i)
+                {
+                    GuildBankTabInfo tabInfo;
+                    tabInfo.TabIndex = i;
+                    tabInfo.Name = _bankTabs[i].GetName();
+                    tabInfo.Icon = _bankTabs[i].GetIcon();
+                    packet.TabInfo.Add(tabInfo);
+                }
+
+            if (fullUpdate && _MemberHasTabRights(session.GetPlayer().GetGUID(), tabId, GuildBankRights.ViewTab))
+            {
+                BankTab tab = GetBankTab(tabId);
+
+                if (tab != null)
+                    for (byte slotId = 0; slotId < GuildConst.MaxBankSlots; ++slotId)
+                    {
+                        Item tabItem = tab.GetItem(slotId);
+
+                        if (tabItem)
+                        {
+                            GuildBankItemInfo itemInfo = new();
+
+                            itemInfo.Slot = slotId;
+                            itemInfo.Item.ItemID = tabItem.GetEntry();
+                            itemInfo.Count = (int)tabItem.GetCount();
+                            itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
+                            itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Perm);
+                            itemInfo.OnUseEnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Use);
+                            itemInfo.Flags = tabItem._itemData.DynamicFlags;
+
+                            byte i = 0;
+
+                            foreach (SocketedGem gemData in tabItem._itemData.Gems)
+                            {
+                                if (gemData.ItemId != 0)
+                                {
+                                    ItemGemData gem = new();
+                                    gem.Slot = i;
+                                    gem.Item = new ItemInstance(gemData);
+                                    itemInfo.SocketEnchant.Add(gem);
+                                }
+
+                                ++i;
+                            }
+
+                            itemInfo.Locked = false;
+
+                            packet.ItemInfo.Add(itemInfo);
+                        }
+                    }
+            }
+
+            session.SendPacket(packet);
+        }
+
+        public void ResetTimes(bool weekly)
+        {
+            foreach (var member in _members.Values)
+            {
+                member.ResetValues(weekly);
+                Player player = member.FindPlayer();
+
+                // tells the client to request bank withdrawal limit
+                player?.SendPacket(new GuildMemberDailyReset());
+            }
+        }
+
+        public void AddGuildNews(GuildNews type, ObjectGuid guid, uint flags, uint value)
+        {
+            SQLTransaction trans = new();
+            NewsLogEntry news = _newsLog.AddEvent(trans, new NewsLogEntry(_id, _newsLog.GetNextGUID(), type, guid, flags, value));
+            DB.Characters.CommitTransaction(trans);
+
+            GuildNewsPkt newsPacket = new();
+            news.WritePacket(newsPacket);
+            BroadcastPacket(newsPacket);
+        }
+
+        public void UpdateCriteria(CriteriaType type, ulong miscValue1, ulong miscValue2, ulong miscValue3, WorldObject refe, Player player)
+        {
+            GetAchievementMgr().UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, player);
+        }
+
+        public void HandleNewsSetSticky(WorldSession session, uint newsId, bool sticky)
+        {
+            var newsLog = _newsLog.GetGuildLog().Find(p => p.GetGUID() == newsId);
+
+            if (newsLog == null)
+            {
+                Log.outDebug(LogFilter.Guild, "HandleNewsSetSticky: [{0}] requested unknown newsId {1} - Sticky: {2}", session.GetPlayerInfo(), newsId, sticky);
+
+                return;
+            }
+
+            newsLog.SetSticky(sticky);
+
+            GuildNewsPkt newsPacket = new();
+            newsLog.WritePacket(newsPacket);
+            session.SendPacket(newsPacket);
+        }
+
+        public ulong GetId()
+        {
+            return _id;
+        }
+
+        public ObjectGuid GetGUID()
+        {
+            return ObjectGuid.Create(HighGuid.Guild, _id);
+        }
+
+        public ObjectGuid GetLeaderGUID()
+        {
+            return _leaderGuid;
+        }
+
+        public string GetName()
+        {
+            return _name;
+        }
+
+        public string GetMOTD()
+        {
+            return _motd;
+        }
+
+        public string GetInfo()
+        {
+            return _info;
+        }
+
+        public long GetCreatedDate()
+        {
+            return _createdDate;
+        }
+
+        public ulong GetBankMoney()
+        {
+            return _bankMoney;
+        }
+
+        public void BroadcastWorker(IDoWork<Player> _do, Player except = null)
+        {
+            foreach (var member in _members.Values)
+            {
+                Player player = member.FindPlayer();
+
+                if (player != null)
+                    if (player != except)
+                        _do.Invoke(player);
+            }
+        }
+
+        public int GetMembersCount()
+        {
+            return _members.Count;
+        }
+
+        public GuildAchievementMgr GetAchievementMgr()
+        {
+            return _achievementSys;
+        }
+
+        // Pre-6.x guild leveling
+        public byte GetLevel()
+        {
+            return GuildConst.OldMaxLevel;
+        }
+
+        public EmblemInfo GetEmblemInfo()
+        {
+            return _emblemInfo;
+        }
+
+        public Member GetMember(ObjectGuid guid)
+        {
+            return _members.LookupByKey(guid);
+        }
+
+        public Member GetMember(string name)
+        {
+            foreach (var member in _members.Values)
+                if (member.GetName() == name)
+                    return member;
+
+            return null;
+        }
+
+        public static void SendCommandResult(WorldSession session, GuildCommandType type, GuildCommandError errCode, string param = "")
+        {
+            GuildCommandResult resultPacket = new();
+            resultPacket.Command = type;
+            resultPacket.Result = errCode;
+            resultPacket.Name = param;
+            session.SendPacket(resultPacket);
+        }
+
+        public static void SendSaveEmblemResult(WorldSession session, GuildEmblemError errCode)
+        {
+            PlayerSaveGuildEmblem saveResponse = new();
+            saveResponse.Error = errCode;
+            session.SendPacket(saveResponse);
+        }
+
+        public static implicit operator bool(Guild guild)
+        {
+            return guild != null;
+        }
+
+        private void OnPlayerStatusChange(Player player, GuildMemberFlags flag, bool state)
+        {
+            Member member = GetMember(player.GetGUID());
+
+            if (member != null)
+            {
+                if (state)
+                    member.AddFlag(flag);
+                else
+                    member.RemoveFlag(flag);
+            }
+        }
+
+        private void SendEventBankMoneyChanged()
+        {
+            GuildEventBankMoneyChanged eventPacket = new();
+            eventPacket.Money = GetBankMoney();
+            BroadcastPacket(eventPacket);
+        }
+
+        private void SendEventMOTD(WorldSession session, bool broadcast = false)
+        {
+            GuildEventMotd eventPacket = new();
+            eventPacket.MotdText = GetMOTD();
+
+            if (broadcast)
+            {
+                BroadcastPacket(eventPacket);
+            }
+            else
+            {
+                session.SendPacket(eventPacket);
+                Log.outDebug(LogFilter.Guild, "SMSG_GUILD_EVENT_MOTD [{0}] ", session.GetPlayerInfo());
+            }
+        }
+
+        private void SendEventNewLeader(Member newLeader, Member oldLeader, bool isSelfPromoted = false)
+        {
+            GuildEventNewLeader eventPacket = new();
+            eventPacket.SelfPromoted = isSelfPromoted;
+
+            if (newLeader != null)
+            {
+                eventPacket.NewLeaderGUID = newLeader.GetGUID();
+                eventPacket.NewLeaderName = newLeader.GetName();
+                eventPacket.NewLeaderVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            }
+
+            if (oldLeader != null)
+            {
+                eventPacket.OldLeaderGUID = oldLeader.GetGUID();
+                eventPacket.OldLeaderName = oldLeader.GetName();
+                eventPacket.OldLeaderVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            }
+
+            BroadcastPacket(eventPacket);
+        }
+
+        private void SendEventPlayerLeft(Player leaver, Player remover = null, bool isRemoved = false)
+        {
+            GuildEventPlayerLeft eventPacket = new();
+            eventPacket.Removed = isRemoved;
+            eventPacket.LeaverGUID = leaver.GetGUID();
+            eventPacket.LeaverName = leaver.GetName();
+            eventPacket.LeaverVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+
+            if (isRemoved && remover)
+            {
+                eventPacket.RemoverGUID = remover.GetGUID();
+                eventPacket.RemoverName = remover.GetName();
+                eventPacket.RemoverVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            }
+
+            BroadcastPacket(eventPacket);
+        }
+
+        private void SendEventPresenceChanged(WorldSession session, bool loggedOn, bool broadcast = false)
+        {
+            Player player = session.GetPlayer();
+
+            GuildEventPresenceChange eventPacket = new();
+            eventPacket.Guid = player.GetGUID();
+            eventPacket.Name = player.GetName();
+            eventPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            eventPacket.LoggedOn = loggedOn;
+            eventPacket.Mobile = false;
+
+            if (broadcast)
+                BroadcastPacket(eventPacket);
+            else
+                session.SendPacket(eventPacket);
+        }
+
         private RankInfo GetRankInfo(GuildRankId rankId)
         {
             return _ranks.Find(rank => rank.GetId() == rankId);
@@ -2511,77 +2736,6 @@ namespace Game.Guilds
             }
         }
 
-        public void SendBankList(WorldSession session, byte tabId, bool fullUpdate)
-        {
-            Member member = GetMember(session.GetPlayer().GetGUID());
-
-            if (member == null) // Shouldn't happen, just in case
-                return;
-
-            GuildBankQueryResults packet = new();
-
-            packet.Money = _bankMoney;
-            packet.WithdrawalsRemaining = _GetMemberRemainingSlots(member, tabId);
-            packet.Tab = tabId;
-            packet.FullUpdate = fullUpdate;
-
-            // TabInfo
-            if (fullUpdate)
-                for (byte i = 0; i < _GetPurchasedTabsSize(); ++i)
-                {
-                    GuildBankTabInfo tabInfo;
-                    tabInfo.TabIndex = i;
-                    tabInfo.Name = _bankTabs[i].GetName();
-                    tabInfo.Icon = _bankTabs[i].GetIcon();
-                    packet.TabInfo.Add(tabInfo);
-                }
-
-            if (fullUpdate && _MemberHasTabRights(session.GetPlayer().GetGUID(), tabId, GuildBankRights.ViewTab))
-            {
-                BankTab tab = GetBankTab(tabId);
-
-                if (tab != null)
-                    for (byte slotId = 0; slotId < GuildConst.MaxBankSlots; ++slotId)
-                    {
-                        Item tabItem = tab.GetItem(slotId);
-
-                        if (tabItem)
-                        {
-                            GuildBankItemInfo itemInfo = new();
-
-                            itemInfo.Slot = slotId;
-                            itemInfo.Item.ItemID = tabItem.GetEntry();
-                            itemInfo.Count = (int)tabItem.GetCount();
-                            itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
-                            itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Perm);
-                            itemInfo.OnUseEnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Use);
-                            itemInfo.Flags = tabItem._itemData.DynamicFlags;
-
-                            byte i = 0;
-
-                            foreach (SocketedGem gemData in tabItem._itemData.Gems)
-                            {
-                                if (gemData.ItemId != 0)
-                                {
-                                    ItemGemData gem = new();
-                                    gem.Slot = i;
-                                    gem.Item = new ItemInstance(gemData);
-                                    itemInfo.SocketEnchant.Add(gem);
-                                }
-
-                                ++i;
-                            }
-
-                            itemInfo.Locked = false;
-
-                            packet.ItemInfo.Add(itemInfo);
-                        }
-                    }
-            }
-
-            session.SendPacket(packet);
-        }
-
         private void SendGuildRanksUpdate(ObjectGuid setterGuid, ObjectGuid targetGuid, GuildRankId rank)
         {
             Member member = GetMember(targetGuid);
@@ -2599,128 +2753,9 @@ namespace Game.Guilds
             Log.outDebug(LogFilter.Network, "SMSG_GUILD_RANKS_UPDATE [Broadcast] Target: {0}, Issuer: {1}, RankId: {2}", targetGuid.ToString(), setterGuid.ToString(), rank);
         }
 
-        public void ResetTimes(bool weekly)
-        {
-            foreach (var member in _members.Values)
-            {
-                member.ResetValues(weekly);
-                Player player = member.FindPlayer();
-
-                // tells the client to request bank withdrawal limit
-                player?.SendPacket(new GuildMemberDailyReset());
-            }
-        }
-
-        public void AddGuildNews(GuildNews type, ObjectGuid guid, uint flags, uint value)
-        {
-            SQLTransaction trans = new();
-            NewsLogEntry news = _newsLog.AddEvent(trans, new NewsLogEntry(_id, _newsLog.GetNextGUID(), type, guid, flags, value));
-            DB.Characters.CommitTransaction(trans);
-
-            GuildNewsPkt newsPacket = new();
-            news.WritePacket(newsPacket);
-            BroadcastPacket(newsPacket);
-        }
-
         private bool HasAchieved(uint achievementId)
         {
             return GetAchievementMgr().HasAchieved(achievementId);
-        }
-
-        public void UpdateCriteria(CriteriaType type, ulong miscValue1, ulong miscValue2, ulong miscValue3, WorldObject refe, Player player)
-        {
-            GetAchievementMgr().UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, player);
-        }
-
-        public void HandleNewsSetSticky(WorldSession session, uint newsId, bool sticky)
-        {
-            var newsLog = _newsLog.GetGuildLog().Find(p => p.GetGUID() == newsId);
-
-            if (newsLog == null)
-            {
-                Log.outDebug(LogFilter.Guild, "HandleNewsSetSticky: [{0}] requested unknown newsId {1} - Sticky: {2}", session.GetPlayerInfo(), newsId, sticky);
-
-                return;
-            }
-
-            newsLog.SetSticky(sticky);
-
-            GuildNewsPkt newsPacket = new();
-            newsLog.WritePacket(newsPacket);
-            session.SendPacket(newsPacket);
-        }
-
-        public ulong GetId()
-        {
-            return _id;
-        }
-
-        public ObjectGuid GetGUID()
-        {
-            return ObjectGuid.Create(HighGuid.Guild, _id);
-        }
-
-        public ObjectGuid GetLeaderGUID()
-        {
-            return _leaderGuid;
-        }
-
-        public string GetName()
-        {
-            return _name;
-        }
-
-        public string GetMOTD()
-        {
-            return _motd;
-        }
-
-        public string GetInfo()
-        {
-            return _info;
-        }
-
-        public long GetCreatedDate()
-        {
-            return _createdDate;
-        }
-
-        public ulong GetBankMoney()
-        {
-            return _bankMoney;
-        }
-
-        public void BroadcastWorker(IDoWork<Player> _do, Player except = null)
-        {
-            foreach (var member in _members.Values)
-            {
-                Player player = member.FindPlayer();
-
-                if (player != null)
-                    if (player != except)
-                        _do.Invoke(player);
-            }
-        }
-
-        public int GetMembersCount()
-        {
-            return _members.Count;
-        }
-
-        public GuildAchievementMgr GetAchievementMgr()
-        {
-            return _achievementSys;
-        }
-
-        // Pre-6.x guild leveling
-        public byte GetLevel()
-        {
-            return GuildConst.OldMaxLevel;
-        }
-
-        public EmblemInfo GetEmblemInfo()
-        {
-            return _emblemInfo;
         }
 
         private byte _GetRanksSize()
@@ -2763,20 +2798,6 @@ namespace Game.Guilds
             return tabId < _bankTabs.Count ? _bankTabs[tabId] : null;
         }
 
-        public Member GetMember(ObjectGuid guid)
-        {
-            return _members.LookupByKey(guid);
-        }
-
-        public Member GetMember(string name)
-        {
-            foreach (var member in _members.Values)
-                if (member.GetName() == name)
-                    return member;
-
-            return null;
-        }
-
         private void _DeleteMemberFromDB(SQLTransaction trans, ulong lowguid)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER);
@@ -2797,27 +2818,6 @@ namespace Game.Guilds
                 case 5: return 5000;
                 default: return 0;
             }
-        }
-
-        public static void SendCommandResult(WorldSession session, GuildCommandType type, GuildCommandError errCode, string param = "")
-        {
-            GuildCommandResult resultPacket = new();
-            resultPacket.Command = type;
-            resultPacket.Result = errCode;
-            resultPacket.Name = param;
-            session.SendPacket(resultPacket);
-        }
-
-        public static void SendSaveEmblemResult(WorldSession session, GuildEmblemError errCode)
-        {
-            PlayerSaveGuildEmblem saveResponse = new();
-            saveResponse.Error = errCode;
-            session.SendPacket(saveResponse);
-        }
-
-        public static implicit operator bool(Guild guild)
-        {
-            return guild != null;
         }
 
         #region Fields
@@ -3398,11 +3398,6 @@ namespace Game.Guilds
                     eventType == GuildBankEventLogTypes.CashFlowDeposit;
             }
 
-            private bool IsMoneyEvent()
-            {
-                return IsMoneyEvent(_eventType);
-            }
-
             public override void SaveToDB(SQLTransaction trans)
             {
                 byte index = 0;
@@ -3459,15 +3454,19 @@ namespace Game.Guilds
 
                 packet.Entry.Add(bankLogEntry);
             }
+
+            private bool IsMoneyEvent()
+            {
+                return IsMoneyEvent(_eventType);
+            }
         }
 
         public class NewsLogEntry : LogEntry
         {
-            private int _flags;
-            private ObjectGuid _playerGuid;
-
             private readonly GuildNews _type;
             private readonly uint _value;
+            private int _flags;
+            private ObjectGuid _playerGuid;
 
             public NewsLogEntry(ulong guildId, uint guid, GuildNews type, ObjectGuid playerGuid, uint flags, uint value)
                 : base(guildId, guid)
@@ -3620,10 +3619,10 @@ namespace Game.Guilds
 
         public class RankInfo
         {
-            private uint _bankMoneyPerDay;
             private readonly GuildBankRightsAndSlots[] _bankTabRightsAndSlots = new GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
 
             private readonly ulong _guildId;
+            private uint _bankMoneyPerDay;
             private string _name;
             private GuildRankId _rankId;
             private GuildRankOrder _rankOrder;
@@ -3813,10 +3812,10 @@ namespace Game.Guilds
         public class BankTab
         {
             private readonly ulong _guildId;
-            private string _icon;
             private readonly Item[] _items = new Item[GuildConst.MaxBankSlots];
-            private string _name;
             private readonly byte _tabId;
+            private string _icon;
+            private string _name;
             private string _text;
 
             public BankTab(ulong guildId, byte tabId)
@@ -4475,6 +4474,60 @@ namespace Game.Guilds
                                    _pGuild.GetId());
             }
 
+            public override InventoryResult CanStore(Item pItem, bool swap)
+            {
+                Log.outDebug(LogFilter.Guild,
+                             "GUILD STORAGE: CanStore() tab = {0}, Slot = {1}, Item = {2}, Count = {3}",
+                             _container,
+                             _slotId,
+                             pItem.GetEntry(),
+                             pItem.GetCount());
+
+                uint count = pItem.GetCount();
+
+                // Soulbound items cannot be moved
+                if (pItem.IsSoulBound())
+                    return InventoryResult.DropBoundItem;
+
+                // Make sure destination bank tab exists
+                if (_container >= _pGuild._GetPurchasedTabsSize())
+                    return InventoryResult.WrongBagType;
+
+                // Slot explicitely specified. Check it.
+                if (_slotId != ItemConst.NullSlot)
+                {
+                    Item pItemDest = _pGuild._GetItem(_container, _slotId);
+
+                    // Ignore swapped Item (this Slot will be empty after move)
+                    if ((pItemDest == pItem) || swap)
+                        pItemDest = null;
+
+                    if (!_ReserveSpace(_slotId, pItem, pItemDest, ref count))
+                        return InventoryResult.CantStack;
+
+                    if (count == 0)
+                        return InventoryResult.Ok;
+                }
+
+                // Slot was not specified or it has not enough space for all the items in stack
+                // Search for stacks to merge with
+                if (pItem.GetMaxStackCount() > 1)
+                {
+                    CanStoreItemInTab(pItem, _slotId, true, ref count);
+
+                    if (count == 0)
+                        return InventoryResult.Ok;
+                }
+
+                // Search free Slot for Item
+                CanStoreItemInTab(pItem, _slotId, false, ref count);
+
+                if (count == 0)
+                    return InventoryResult.Ok;
+
+                return InventoryResult.BankFull;
+            }
+
             private Item _StoreItem(SQLTransaction trans, BankTab pTab, Item pItem, ItemPosCount pos, bool clone)
             {
                 byte slotId = (byte)pos.Pos;
@@ -4556,60 +4609,6 @@ namespace Game.Guilds
 
                     _ReserveSpace(slotId, pItem, pItemDest, ref count);
                 }
-            }
-
-            public override InventoryResult CanStore(Item pItem, bool swap)
-            {
-                Log.outDebug(LogFilter.Guild,
-                             "GUILD STORAGE: CanStore() tab = {0}, Slot = {1}, Item = {2}, Count = {3}",
-                             _container,
-                             _slotId,
-                             pItem.GetEntry(),
-                             pItem.GetCount());
-
-                uint count = pItem.GetCount();
-
-                // Soulbound items cannot be moved
-                if (pItem.IsSoulBound())
-                    return InventoryResult.DropBoundItem;
-
-                // Make sure destination bank tab exists
-                if (_container >= _pGuild._GetPurchasedTabsSize())
-                    return InventoryResult.WrongBagType;
-
-                // Slot explicitely specified. Check it.
-                if (_slotId != ItemConst.NullSlot)
-                {
-                    Item pItemDest = _pGuild._GetItem(_container, _slotId);
-
-                    // Ignore swapped Item (this Slot will be empty after move)
-                    if ((pItemDest == pItem) || swap)
-                        pItemDest = null;
-
-                    if (!_ReserveSpace(_slotId, pItem, pItemDest, ref count))
-                        return InventoryResult.CantStack;
-
-                    if (count == 0)
-                        return InventoryResult.Ok;
-                }
-
-                // Slot was not specified or it has not enough space for all the items in stack
-                // Search for stacks to merge with
-                if (pItem.GetMaxStackCount() > 1)
-                {
-                    CanStoreItemInTab(pItem, _slotId, true, ref count);
-
-                    if (count == 0)
-                        return InventoryResult.Ok;
-                }
-
-                // Search free Slot for Item
-                CanStoreItemInTab(pItem, _slotId, false, ref count);
-
-                if (count == 0)
-                    return InventoryResult.Ok;
-
-                return InventoryResult.BankFull;
             }
         }
 

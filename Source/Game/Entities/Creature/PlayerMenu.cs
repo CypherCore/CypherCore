@@ -501,11 +501,6 @@ public class PlayerMenu
         return _interactionData;
     }
 
-    private bool IsEmpty()
-    {
-        return _gossipMenu.IsEmpty() && _questMenu.IsEmpty();
-    }
-
     public uint GetGossipOptionSender(uint selection)
     {
         return _gossipMenu.GetMenuItemSender(selection);
@@ -519,5 +514,10 @@ public class PlayerMenu
     public bool IsGossipOptionCoded(uint selection)
     {
         return _gossipMenu.IsMenuItemCoded(selection);
+    }
+
+    private bool IsEmpty()
+    {
+        return _gossipMenu.IsEmpty() && _questMenu.IsEmpty();
     }
 }

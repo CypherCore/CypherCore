@@ -11,11 +11,11 @@ namespace Game.Movement
 {
     public class Spline<T>
     {
+        public EvaluationMode _mode;
         private static readonly Matrix4x4 s_catmullRomCoeffs = new(-0.5f, 1.5f, -1.5f, 0.5f, 1.0f, -2.5f, 2.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
 
         private static readonly Matrix4x4 s_Bezier3Coeffs = new(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
         private bool _cyclic;
-        public EvaluationMode _mode;
         private int index_hi;
 
         private int index_lo;
@@ -79,50 +79,6 @@ namespace Game.Movement
             u = (float)(length_ - Length(index)) / (float)Length(index, index + 1);
         }
 
-        private int ComputeIndexInBounds(T length_)
-        {
-            // Temporary disabled: causes infinite loop with t = 1.f
-            /*
-			    index_type hi = index_hi;
-			    index_type lo = index_lo;
-
-			    index_type i = lo + (float)(hi - lo) * t;
-
-			    while ((lengths[i] > length) || (lengths[i + 1] <= length))
-			    {
-			        if (lengths[i] > length)
-			            hi = i - 1; // too big
-			        else if (lengths[i + 1] <= length)
-			            lo = i + 1; // too small
-
-			        i = (hi + lo) / 2;
-			    }*/
-
-            int i = index_lo;
-            int N = index_hi;
-
-            while (i + 1 < N && (dynamic)lengths[i + 1] < length_)
-                ++i;
-
-            return i;
-        }
-
-        private void C_Evaluate(Span<Vector3> vertice, float t, Matrix4x4 matr, out Vector3 result)
-        {
-            Vector4 tvec = new(t * t * t, t * t, t, 1.0f);
-            Vector4 weights = Vector4.Transform(tvec, matr);
-
-            result = vertice[0] * weights.X + vertice[1] * weights.Y + vertice[2] * weights.Z + vertice[3] * weights.W;
-        }
-
-        private void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4x4 matr, out Vector3 result)
-        {
-            Vector4 tvec = new(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
-            Vector4 weights = Vector4.Transform(tvec, matr);
-
-            result = vertice[0] * weights.X + vertice[1] * weights.Y + vertice[2] * weights.Z + vertice[3] * weights.W;
-        }
-
         public dynamic Length()
         {
             if (lengths.Length == 0)
@@ -182,6 +138,50 @@ namespace Game.Movement
         public bool Empty()
         {
             return index_lo == index_hi;
+        }
+
+        private int ComputeIndexInBounds(T length_)
+        {
+            // Temporary disabled: causes infinite loop with t = 1.f
+            /*
+			    index_type hi = index_hi;
+			    index_type lo = index_lo;
+
+			    index_type i = lo + (float)(hi - lo) * t;
+
+			    while ((lengths[i] > length) || (lengths[i + 1] <= length))
+			    {
+			        if (lengths[i] > length)
+			            hi = i - 1; // too big
+			        else if (lengths[i + 1] <= length)
+			            lo = i + 1; // too small
+
+			        i = (hi + lo) / 2;
+			    }*/
+
+            int i = index_lo;
+            int N = index_hi;
+
+            while (i + 1 < N && (dynamic)lengths[i + 1] < length_)
+                ++i;
+
+            return i;
+        }
+
+        private void C_Evaluate(Span<Vector3> vertice, float t, Matrix4x4 matr, out Vector3 result)
+        {
+            Vector4 tvec = new(t * t * t, t * t, t, 1.0f);
+            Vector4 weights = Vector4.Transform(tvec, matr);
+
+            result = vertice[0] * weights.X + vertice[1] * weights.Y + vertice[2] * weights.Z + vertice[3] * weights.W;
+        }
+
+        private void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4x4 matr, out Vector3 result)
+        {
+            Vector4 tvec = new(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
+            Vector4 weights = Vector4.Transform(tvec, matr);
+
+            result = vertice[0] * weights.X + vertice[1] * weights.Y + vertice[2] * weights.Z + vertice[3] * weights.W;
         }
 
         #region Evaluate

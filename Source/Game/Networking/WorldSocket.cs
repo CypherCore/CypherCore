@@ -38,28 +38,28 @@ namespace Game.Networking
         };
 
         private static readonly int HeaderSize = 16;
+        private readonly byte[] _encryptKey;
+
+        private readonly SocketBuffer _headerBuffer;
+        private readonly SocketBuffer _packetBuffer;
+        private readonly WorldCrypt _worldCrypt;
+
+        private readonly object _worldSessionLock = new();
 
         private ZLib.z_stream _compressionStream;
 
         private ConnectionType _connectType;
-        private readonly byte[] _encryptKey;
-
-        private readonly SocketBuffer _headerBuffer;
         private string _ipCountry;
         private ulong _key;
 
         private long _LastPingTime;
         private uint _OverSpeedPings;
-        private readonly SocketBuffer _packetBuffer;
 
         private AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
 
         private byte[] _serverChallenge;
         private byte[] _sessionKey;
-        private readonly WorldCrypt _worldCrypt;
         private WorldSession _worldSession;
-
-        private readonly object _worldSessionLock = new();
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -93,6 +93,177 @@ namespace Game.Networking
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().Address.GetAddressBytes(), 0));
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
+        }
+
+        public override void ReadHandler(SocketAsyncEventArgs args)
+        {
+            if (!IsOpen())
+                return;
+
+            int currentReadIndex = 0;
+
+            while (currentReadIndex < args.BytesTransferred)
+            {
+                if (_headerBuffer.GetRemainingSpace() > 0)
+                {
+                    // need to receive the header
+                    int readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
+                    _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
+                    currentReadIndex += readHeaderSize;
+
+                    if (_headerBuffer.GetRemainingSpace() > 0)
+                        break; // Couldn't receive the whole header this Time.
+
+                    // We just received nice new header
+                    if (!ReadHeader())
+                    {
+                        CloseSocket();
+
+                        return;
+                    }
+                }
+
+                // We have full read header, now check the _data payload
+                if (_packetBuffer.GetRemainingSpace() > 0)
+                {
+                    // need more _data in the payload
+                    int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
+                    _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
+                    currentReadIndex += readDataSize;
+
+                    if (_packetBuffer.GetRemainingSpace() > 0)
+                        break; // Couldn't receive the whole _data this Time.
+                }
+
+                // just received fresh new payload
+                ReadDataHandlerResult result = ReadData();
+                _headerBuffer.Reset();
+
+                if (result != ReadDataHandlerResult.Ok)
+                {
+                    if (result != ReadDataHandlerResult.WaitingForQuery)
+                        CloseSocket();
+
+                    return;
+                }
+            }
+
+            AsyncRead();
+        }
+
+        public void SendPacket(ServerPacket packet)
+        {
+            if (!IsOpen())
+                return;
+
+            packet.LogPacket(_worldSession);
+            packet.WritePacketData();
+
+            var data = packet.GetData();
+            ServerOpcodes opcode = packet.GetOpcode();
+            PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
+
+            ByteBuffer buffer = new();
+
+            int packetSize = data.Length;
+
+            if (packetSize > 0x400 &&
+                _worldCrypt.IsInitialized)
+            {
+                buffer.WriteInt32(packetSize + 2);
+                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
+
+                byte[] compressedData;
+                uint compressedSize = CompressPacket(data, opcode, out compressedData);
+                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize));
+                buffer.WriteBytes(compressedData, compressedSize);
+
+                packetSize = (int)(compressedSize + 12);
+                opcode = ServerOpcodes.CompressedPacket;
+
+                data = buffer.GetData();
+            }
+
+            buffer = new ByteBuffer();
+            buffer.WriteUInt16((ushort)opcode);
+            buffer.WriteBytes(data);
+            packetSize += 2 /*opcode*/;
+
+            data = buffer.GetData();
+
+            PacketHeader header = new();
+            header.Size = packetSize;
+            _worldCrypt.Encrypt(ref data, ref header.Tag);
+
+            ByteBuffer byteBuffer = new();
+            header.Write(byteBuffer);
+            byteBuffer.WriteBytes(data);
+
+            AsyncWrite(byteBuffer.GetData());
+        }
+
+        public void SetWorldSession(WorldSession session)
+        {
+            lock (_worldSessionLock)
+            {
+                _worldSession = session;
+            }
+        }
+
+        public uint CompressPacket(byte[] data, ServerOpcodes opcode, out byte[] outData)
+        {
+            byte[] uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
+
+            uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
+            outData = new byte[bufferSize];
+
+            _compressionStream.next_out = 0;
+            _compressionStream.avail_out = bufferSize;
+            _compressionStream.out_buf = outData;
+
+            _compressionStream.next_in = 0;
+            _compressionStream.avail_in = (uint)uncompressedData.Length;
+            _compressionStream.in_buf = uncompressedData;
+
+            int z_res = ZLib.deflate(_compressionStream, 2);
+
+            if (z_res != 0)
+            {
+                Log.outError(LogFilter.Network, "Can't compress packet _data (zlib: deflate) Error code: {0} msg: {1}", z_res, _compressionStream.msg);
+
+                return 0;
+            }
+
+            return bufferSize - _compressionStream.avail_out;
+        }
+
+        public override bool Update()
+        {
+            if (!base.Update())
+                return false;
+
+            _queryProcessor.ProcessReadyCallbacks();
+
+            return true;
+        }
+
+        public override void OnClose()
+        {
+            lock (_worldSessionLock)
+            {
+                _worldSession = null;
+            }
+
+            base.OnClose();
+        }
+
+        public void SendAuthResponseError(BattlenetRpcErrorCode code)
+        {
+            AuthResponse response = new();
+            response.SuccessInfo = null;
+            response.WaitInfo = null;
+            response.Result = code;
+            SendPacket(response);
         }
 
         private void CheckIpCallback(SQLResult result)
@@ -192,62 +363,6 @@ namespace Game.Networking
 
                     return;
                 }
-        }
-
-        public override void ReadHandler(SocketAsyncEventArgs args)
-        {
-            if (!IsOpen())
-                return;
-
-            int currentReadIndex = 0;
-
-            while (currentReadIndex < args.BytesTransferred)
-            {
-                if (_headerBuffer.GetRemainingSpace() > 0)
-                {
-                    // need to receive the header
-                    int readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
-                    _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
-                    currentReadIndex += readHeaderSize;
-
-                    if (_headerBuffer.GetRemainingSpace() > 0)
-                        break; // Couldn't receive the whole header this Time.
-
-                    // We just received nice new header
-                    if (!ReadHeader())
-                    {
-                        CloseSocket();
-
-                        return;
-                    }
-                }
-
-                // We have full read header, now check the _data payload
-                if (_packetBuffer.GetRemainingSpace() > 0)
-                {
-                    // need more _data in the payload
-                    int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
-                    _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
-                    currentReadIndex += readDataSize;
-
-                    if (_packetBuffer.GetRemainingSpace() > 0)
-                        break; // Couldn't receive the whole _data this Time.
-                }
-
-                // just received fresh new payload
-                ReadDataHandlerResult result = ReadData();
-                _headerBuffer.Reset();
-
-                if (result != ReadDataHandlerResult.Ok)
-                {
-                    if (result != ReadDataHandlerResult.WaitingForQuery)
-                        CloseSocket();
-
-                    return;
-                }
-            }
-
-            AsyncRead();
         }
 
         private bool ReadHeader()
@@ -389,112 +504,6 @@ namespace Game.Networking
             }
 
             return ReadDataHandlerResult.Ok;
-        }
-
-        public void SendPacket(ServerPacket packet)
-        {
-            if (!IsOpen())
-                return;
-
-            packet.LogPacket(_worldSession);
-            packet.WritePacketData();
-
-            var data = packet.GetData();
-            ServerOpcodes opcode = packet.GetOpcode();
-            PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
-
-            ByteBuffer buffer = new();
-
-            int packetSize = data.Length;
-
-            if (packetSize > 0x400 &&
-                _worldCrypt.IsInitialized)
-            {
-                buffer.WriteInt32(packetSize + 2);
-                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
-
-                byte[] compressedData;
-                uint compressedSize = CompressPacket(data, opcode, out compressedData);
-                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize));
-                buffer.WriteBytes(compressedData, compressedSize);
-
-                packetSize = (int)(compressedSize + 12);
-                opcode = ServerOpcodes.CompressedPacket;
-
-                data = buffer.GetData();
-            }
-
-            buffer = new ByteBuffer();
-            buffer.WriteUInt16((ushort)opcode);
-            buffer.WriteBytes(data);
-            packetSize += 2 /*opcode*/;
-
-            data = buffer.GetData();
-
-            PacketHeader header = new();
-            header.Size = packetSize;
-            _worldCrypt.Encrypt(ref data, ref header.Tag);
-
-            ByteBuffer byteBuffer = new();
-            header.Write(byteBuffer);
-            byteBuffer.WriteBytes(data);
-
-            AsyncWrite(byteBuffer.GetData());
-        }
-
-        public void SetWorldSession(WorldSession session)
-        {
-            lock (_worldSessionLock)
-            {
-                _worldSession = session;
-            }
-        }
-
-        public uint CompressPacket(byte[] data, ServerOpcodes opcode, out byte[] outData)
-        {
-            byte[] uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
-
-            uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
-            outData = new byte[bufferSize];
-
-            _compressionStream.next_out = 0;
-            _compressionStream.avail_out = bufferSize;
-            _compressionStream.out_buf = outData;
-
-            _compressionStream.next_in = 0;
-            _compressionStream.avail_in = (uint)uncompressedData.Length;
-            _compressionStream.in_buf = uncompressedData;
-
-            int z_res = ZLib.deflate(_compressionStream, 2);
-
-            if (z_res != 0)
-            {
-                Log.outError(LogFilter.Network, "Can't compress packet _data (zlib: deflate) Error code: {0} msg: {1}", z_res, _compressionStream.msg);
-
-                return 0;
-            }
-
-            return bufferSize - _compressionStream.avail_out;
-        }
-
-        public override bool Update()
-        {
-            if (!base.Update())
-                return false;
-
-            _queryProcessor.ProcessReadyCallbacks();
-
-            return true;
-        }
-
-        public override void OnClose()
-        {
-            lock (_worldSessionLock)
-            {
-                _worldSession = null;
-            }
-
-            base.OnClose();
         }
 
         private void HandleSendAuthSession()
@@ -868,15 +877,6 @@ namespace Game.Networking
                 Global.WorldMgr.AddInstanceSocket(this, _key);
         }
 
-        public void SendAuthResponseError(BattlenetRpcErrorCode code)
-        {
-            AuthResponse response = new();
-            response.SuccessInfo = null;
-            response.WaitInfo = null;
-            response.Result = code;
-            SendPacket(response);
-        }
-
         private bool HandlePing(Ping ping)
         {
             if (_LastPingTime == 0)
@@ -933,6 +933,29 @@ namespace Game.Networking
 
     internal class AccountInfo
     {
+        public struct BattleNet
+        {
+            public uint Id;
+            public bool IsLockedToIP;
+            public string LastIP;
+            public string LockCountry;
+            public Locale Locale;
+            public bool IsBanned;
+        }
+
+        public struct Game
+        {
+            public uint Id;
+            public byte[] SessionKey;
+            public byte Expansion;
+            public long MuteTime;
+            public string OS;
+            public uint Recruiter;
+            public bool IsRectuiter;
+            public AccountTypes Security;
+            public bool IsBanned;
+        }
+
         public BattleNet battleNet;
         public Game game;
 
@@ -968,29 +991,6 @@ namespace Game.Networking
         public bool IsBanned()
         {
             return battleNet.IsBanned || game.IsBanned;
-        }
-
-        public struct BattleNet
-        {
-            public uint Id;
-            public bool IsLockedToIP;
-            public string LastIP;
-            public string LockCountry;
-            public Locale Locale;
-            public bool IsBanned;
-        }
-
-        public struct Game
-        {
-            public uint Id;
-            public byte[] SessionKey;
-            public byte Expansion;
-            public long MuteTime;
-            public string OS;
-            public uint Recruiter;
-            public bool IsRectuiter;
-            public AccountTypes Security;
-            public bool IsBanned;
         }
     }
 

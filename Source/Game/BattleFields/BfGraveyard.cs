@@ -9,12 +9,11 @@ namespace Game.BattleFields
 {
     public class BfGraveyard
     {
-        protected BattleField Bf { get; set; }
+        private readonly List<ObjectGuid> _resurrectQueue = new();
+        private readonly ObjectGuid[] _spiritGuide = new ObjectGuid[SharedConst.PvpTeamsCount];
 
         private uint _controlTeam;
         private uint _graveyardId;
-        private readonly List<ObjectGuid> _resurrectQueue = new();
-        private readonly ObjectGuid[] _spiritGuide = new ObjectGuid[SharedConst.PvpTeamsCount];
 
         public BfGraveyard(BattleField battlefield)
         {
@@ -24,6 +23,8 @@ namespace Game.BattleFields
             _spiritGuide[0] = ObjectGuid.Empty;
             _spiritGuide[1] = ObjectGuid.Empty;
         }
+
+        protected BattleField Bf { get; set; }
 
         public void Initialize(uint startControl, uint graveyardId)
         {
@@ -122,31 +123,6 @@ namespace Game.BattleFields
             RelocateDeadPlayers();
         }
 
-        private void RelocateDeadPlayers()
-        {
-            WorldSafeLocsEntry closestGrave = null;
-
-            foreach (var guid in _resurrectQueue)
-            {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
-
-                if (!player)
-                    continue;
-
-                if (closestGrave != null)
-                {
-                    player.TeleportTo(closestGrave.Loc);
-                }
-                else
-                {
-                    closestGrave = Bf.GetClosestGraveYard(player);
-
-                    if (closestGrave != null)
-                        player.TeleportTo(closestGrave.Loc);
-                }
-            }
-        }
-
         public bool HasNpc(ObjectGuid guid)
         {
             if (_spiritGuide[TeamId.Alliance].IsEmpty() ||
@@ -175,6 +151,31 @@ namespace Game.BattleFields
         public uint GetControlTeamId()
         {
             return _controlTeam;
+        }
+
+        private void RelocateDeadPlayers()
+        {
+            WorldSafeLocsEntry closestGrave = null;
+
+            foreach (var guid in _resurrectQueue)
+            {
+                Player player = Global.ObjAccessor.FindPlayer(guid);
+
+                if (!player)
+                    continue;
+
+                if (closestGrave != null)
+                {
+                    player.TeleportTo(closestGrave.Loc);
+                }
+                else
+                {
+                    closestGrave = Bf.GetClosestGraveYard(player);
+
+                    if (closestGrave != null)
+                        player.TeleportTo(closestGrave.Loc);
+                }
+            }
         }
     }
 }

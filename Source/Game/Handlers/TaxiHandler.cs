@@ -14,21 +14,6 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.EnableTaxiNode, Processing = PacketProcessing.ThreadSafe)]
-        private void HandleEnableTaxiNodeOpcode(EnableTaxiNode enableTaxiNode)
-        {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(enableTaxiNode.Unit, NPCFlags.FlightMaster, NPCFlags2.None);
-
-            if (unit)
-                SendLearnNewTaxiNode(unit);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.TaxiNodeStatusQuery, Processing = PacketProcessing.ThreadSafe)]
-        private void HandleTaxiNodeStatusQuery(TaxiNodeStatusQuery taxiNodeStatusQuery)
-        {
-            SendTaxiStatus(taxiNodeStatusQuery.UnitGUID);
-        }
-
         public void SendTaxiStatus(ObjectGuid guid)
         {
             // cheating checks
@@ -58,31 +43,6 @@ namespace Game
                 data.Status = TaxiNodeStatus.NotEligible;
 
             SendPacket(data);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.TaxiQueryAvailableNodes, Processing = PacketProcessing.ThreadSafe)]
-        private void HandleTaxiQueryAvailableNodes(TaxiQueryAvailableNodes taxiQueryAvailableNodes)
-        {
-            // cheating checks
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(taxiQueryAvailableNodes.Unit, NPCFlags.FlightMaster, NPCFlags2.None);
-
-            if (unit == null)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleTaxiQueryAvailableNodes - {0} not found or you can't interact with him.", taxiQueryAvailableNodes.Unit.ToString());
-
-                return;
-            }
-
-            // remove fake death
-            if (GetPlayer().HasUnitState(UnitState.Died))
-                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
-
-            // unknown taxi node case
-            if (SendLearnNewTaxiNode(unit))
-                return;
-
-            // known taxi node case
-            SendTaxiMenu(unit);
         }
 
         public void SendTaxiMenu(Creature unit)
@@ -165,6 +125,53 @@ namespace Game
                 SendPacket(new NewTaxiPath());
         }
 
+        public void SendActivateTaxiReply(ActivateTaxiReply reply = ActivateTaxiReply.Ok)
+        {
+            ActivateTaxiReplyPkt data = new();
+            data.Reply = reply;
+            SendPacket(data);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.EnableTaxiNode, Processing = PacketProcessing.ThreadSafe)]
+        private void HandleEnableTaxiNodeOpcode(EnableTaxiNode enableTaxiNode)
+        {
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(enableTaxiNode.Unit, NPCFlags.FlightMaster, NPCFlags2.None);
+
+            if (unit)
+                SendLearnNewTaxiNode(unit);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TaxiNodeStatusQuery, Processing = PacketProcessing.ThreadSafe)]
+        private void HandleTaxiNodeStatusQuery(TaxiNodeStatusQuery taxiNodeStatusQuery)
+        {
+            SendTaxiStatus(taxiNodeStatusQuery.UnitGUID);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TaxiQueryAvailableNodes, Processing = PacketProcessing.ThreadSafe)]
+        private void HandleTaxiQueryAvailableNodes(TaxiQueryAvailableNodes taxiQueryAvailableNodes)
+        {
+            // cheating checks
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(taxiQueryAvailableNodes.Unit, NPCFlags.FlightMaster, NPCFlags2.None);
+
+            if (unit == null)
+            {
+                Log.outDebug(LogFilter.Network, "WORLD: HandleTaxiQueryAvailableNodes - {0} not found or you can't interact with him.", taxiQueryAvailableNodes.Unit.ToString());
+
+                return;
+            }
+
+            // remove fake death
+            if (GetPlayer().HasUnitState(UnitState.Died))
+                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+
+            // unknown taxi node case
+            if (SendLearnNewTaxiNode(unit))
+                return;
+
+            // known taxi node case
+            SendTaxiMenu(unit);
+        }
+
         [WorldPacketHandler(ClientOpcodes.ActivateTaxi, Processing = PacketProcessing.ThreadSafe)]
         private void HandleActivateTaxi(ActivateTaxi activateTaxi)
         {
@@ -227,13 +234,6 @@ namespace Game
             List<uint> nodes = new();
             TaxiPathGraph.GetCompleteNodeRoute(from, to, GetPlayer(), nodes);
             GetPlayer().ActivateTaxiPathTo(nodes, unit, 0, preferredMountDisplay);
-        }
-
-        public void SendActivateTaxiReply(ActivateTaxiReply reply = ActivateTaxiReply.Ok)
-        {
-            ActivateTaxiReplyPkt data = new();
-            data.Reply = reply;
-            SendPacket(data);
         }
 
         [WorldPacketHandler(ClientOpcodes.TaxiRequestEarlyLanding, Processing = PacketProcessing.ThreadSafe)]

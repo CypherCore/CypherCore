@@ -52,6 +52,7 @@ namespace Game.Scripting
             Register();
             CurrentScriptState = (byte)SpellScriptState.None;
         }
+
         public void _Unload()
         {
             CurrentScriptState = (byte)SpellScriptState.Unloading;
@@ -65,6 +66,7 @@ namespace Game.Scripting
             ScriptName = scriptname;
             ScriptSpellId = spellId;
         }
+
         public string _GetScriptName()
         {
             return ScriptName;
@@ -80,12 +82,15 @@ namespace Game.Scripting
         //
         // Function in which handler functions are registered, must be implemented in script
         public virtual void Register() { }
+
         // Function called on server startup, if returns false script won't be used in core
         // use for: dbc/template _data presence/correctness checks
         public virtual bool Validate(SpellInfo spellInfo) { return true; }
+
         // Function called when script is created, if returns false script will be unloaded afterwards
         // use for: initializing local script variables (DO NOT USE CONSTRUCTOR FOR THIS PURPOSE!)
         public virtual bool Load() { return true; }
+
         // Function called when script is destroyed
         // use for: deallocating memory allocated by script
         public virtual void Unload() { }
@@ -93,6 +98,10 @@ namespace Game.Scripting
 
     public class SpellScript : BaseSpellScript, ISpellScript
     {
+        private Spell m_spell;
+        private uint m_hitPreventEffectMask;
+        private uint m_hitPreventDefaultEffectMask;
+
         public bool _Load(Spell spell)
         {
             m_spell = spell;
@@ -101,33 +110,29 @@ namespace Game.Scripting
             _FinishScriptCall();
             return load;
         }
+
         public void _InitHit()
         {
             m_hitPreventEffectMask = 0;
             m_hitPreventDefaultEffectMask = 0;
         }
+
         public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & 1 << (int)effIndex); }
         public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & 1 << (int)effIndex); }
+
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
             CurrentScriptState = (byte)hookType;
         }
+
         public void _FinishScriptCall()
         {
             CurrentScriptState = (byte)SpellScriptState.None;
         }
+
         public bool IsInCheckCastHook()
         {
             return CurrentScriptState == (byte)SpellScriptHookType.CheckCast;
-        }
-
-        private bool IsAfterTargetSelectionPhase()
-        {
-            return IsInHitPhase()
-                || IsInEffectHook()
-                || CurrentScriptState == (byte)SpellScriptHookType.OnCast
-                || CurrentScriptState == (byte)SpellScriptHookType.AfterCast
-                || CurrentScriptState == (byte)SpellScriptHookType.CalcCritChance;
         }
 
         public bool IsInTargetHook()
@@ -145,21 +150,6 @@ namespace Game.Scripting
             return false;
         }
 
-        private bool IsInModifiableHook()
-        {
-            // after hit hook executed after Damage/healing is already done
-            // modifying it at this point has no effect
-            switch ((SpellScriptHookType)CurrentScriptState)
-            {
-                case SpellScriptHookType.LaunchTarget:
-                case SpellScriptHookType.EffectHitTarget:
-                case SpellScriptHookType.BeforeHit:
-                case SpellScriptHookType.Hit:
-                    return true;
-            }
-            return false;
-        }
-
         public bool IsInHitPhase()
         {
             return CurrentScriptState >= (byte)SpellScriptHookType.EffectHit && CurrentScriptState < (byte)SpellScriptHookType.AfterHit + 1;
@@ -170,10 +160,6 @@ namespace Game.Scripting
             return CurrentScriptState >= (byte)SpellScriptHookType.Launch && CurrentScriptState <= (byte)SpellScriptHookType.EffectHitTarget
                 || CurrentScriptState == (byte)SpellScriptHookType.EffectSuccessfulDispel;
         }
-
-        private Spell m_spell;
-        private uint m_hitPreventEffectMask;
-        private uint m_hitPreventDefaultEffectMask;
 
         // hooks are executed in following order, at specified event of spell:
         // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
@@ -397,6 +383,7 @@ namespace Game.Scripting
             }
             return m_spell._damage;
         }
+
         public void SetHitDamage(int damage)
         {
             if (!IsInModifiableHook())
@@ -406,7 +393,9 @@ namespace Game.Scripting
             }
             m_spell._damage = damage;
         }
+
         public void PreventHitDamage() { SetHitDamage(0); }
+
         // setter/getter for for heal done by spell to Target of spell hit
         // returns healing calculated before hit, and real dmg done after hit
         public int GetHitHeal()
@@ -418,6 +407,7 @@ namespace Game.Scripting
             }
             return m_spell._healing;
         }
+
         public void SetHitHeal(int heal)
         {
             if (!IsInModifiableHook())
@@ -428,7 +418,6 @@ namespace Game.Scripting
             m_spell._healing = heal;
         }
 
-        private void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
 
         /// <summary>
@@ -653,6 +642,32 @@ namespace Game.Scripting
 
             targets.Resize(maxTargets);
         }
+
+        private bool IsAfterTargetSelectionPhase()
+        {
+            return IsInHitPhase()
+                || IsInEffectHook()
+                || CurrentScriptState == (byte)SpellScriptHookType.OnCast
+                || CurrentScriptState == (byte)SpellScriptHookType.AfterCast
+                || CurrentScriptState == (byte)SpellScriptHookType.CalcCritChance;
+        }
+
+        private bool IsInModifiableHook()
+        {
+            // after hit hook executed after Damage/healing is already done
+            // modifying it at this point has no effect
+            switch ((SpellScriptHookType)CurrentScriptState)
+            {
+                case SpellScriptHookType.LaunchTarget:
+                case SpellScriptHookType.EffectHitTarget:
+                case SpellScriptHookType.BeforeHit:
+                case SpellScriptHookType.Hit:
+                    return true;
+            }
+            return false;
+        }
+
+        private void PreventHitHeal() { SetHitHeal(0); }
     }
 
 }

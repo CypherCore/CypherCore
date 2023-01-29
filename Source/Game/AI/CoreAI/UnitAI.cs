@@ -55,16 +55,6 @@ namespace Game.AI
                 me.GetMotionMaster().MoveChase(victim, dist);
         }
 
-        private ThreatManager GetThreatManager()
-        {
-            return me.GetThreatManager();
-        }
-
-        private void SortByDistance(List<Unit> targets, bool ascending)
-        {
-            targets.Sort(new ObjectDistanceOrderPred(me, ascending));
-        }
-
         public void DoMeleeAttackIfReady()
         {
             if (me.HasUnitState(UnitState.Casting))
@@ -669,6 +659,16 @@ namespace Game.AI
         public static AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
         {
             return _aiSpellInfo.LookupByKey((spellId, difficulty));
+        }
+
+        private ThreatManager GetThreatManager()
+        {
+            return me.GetThreatManager();
+        }
+
+        private void SortByDistance(List<Unit> targets, bool ascending)
+        {
+            targets.Sort(new ObjectDistanceOrderPred(me, ascending));
         }
     }
 }

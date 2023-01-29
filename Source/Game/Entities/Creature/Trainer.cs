@@ -12,8 +12,8 @@ namespace Game.Entities
         private readonly string[] _greeting = new string[(int)Locale.Total];
 
         private readonly uint _id;
-        private readonly List<TrainerSpell> _spells;
         private readonly Dictionary<uint, TrainerSpell> _spellMap = new();
+        private readonly List<TrainerSpell> _spells;
         private readonly TrainerType _type;
 
         public Trainer(uint id, TrainerType type, string greeting, List<TrainerSpell> spells)
@@ -127,6 +127,11 @@ namespace Game.Entities
             }
         }
 
+        public void AddGreetingLocale(Locale locale, string greeting)
+        {
+            _greeting[(int)locale] = greeting;
+        }
+
         private TrainerSpell GetSpell(uint spellId)
         {
             return _spellMap.GetValueOrDefault(spellId);
@@ -221,11 +226,6 @@ namespace Game.Entities
                 return _greeting[(int)Locale.enUS];
 
             return _greeting[(int)locale];
-        }
-
-        public void AddGreetingLocale(Locale locale, string greeting)
-        {
-            _greeting[(int)locale] = greeting;
         }
     }
 }

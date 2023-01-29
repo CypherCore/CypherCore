@@ -2,27 +2,6 @@
 {
     internal static partial class FieldOperations
     {
-        private static long load_3(byte[] data, int offset)
-        {
-            uint result;
-            result = data[offset + 0];
-            result |= (uint)data[offset + 1] << 8;
-            result |= (uint)data[offset + 2] << 16;
-
-            return (long)(ulong)result;
-        }
-
-        private static long load_4(byte[] data, int offset)
-        {
-            uint result;
-            result = data[offset + 0];
-            result |= (uint)data[offset + 1] << 8;
-            result |= (uint)data[offset + 2] << 16;
-            result |= (uint)data[offset + 3] << 24;
-
-            return (long)(ulong)result;
-        }
-
         //	Ignores top bit of h.
         internal static void fe_frombytes(out FieldElement h, byte[] data, int offset)
         {
@@ -137,6 +116,27 @@
             h.x7 = (int)h7;
             h.x8 = (int)h8;
             h.x9 = (int)h9;
+        }
+
+        private static long load_3(byte[] data, int offset)
+        {
+            uint result;
+            result = data[offset + 0];
+            result |= (uint)data[offset + 1] << 8;
+            result |= (uint)data[offset + 2] << 16;
+
+            return (long)(ulong)result;
+        }
+
+        private static long load_4(byte[] data, int offset)
+        {
+            uint result;
+            result = data[offset + 0];
+            result |= (uint)data[offset + 1] << 8;
+            result |= (uint)data[offset + 2] << 16;
+            result |= (uint)data[offset + 3] << 24;
+
+            return (long)(ulong)result;
         }
     }
 }

@@ -88,6 +88,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
             }
         }
 
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
         private void SummonAdd(Unit victim)
         {
             Creature SummonedAdd = DoSpawnCreature(8901, RandomHelper.IRand(-14, 14), RandomHelper.IRand(-14, 14), 0, 0, TempSummonType.TimedOrCorpseDespawn, TimeSpan.FromSeconds(120));
@@ -102,14 +110,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.GeneralAnger
 
             if (SummonedMedic)
                 SummonedMedic.GetAI().AttackStart(victim);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
     }
 }

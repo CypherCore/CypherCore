@@ -49,6 +49,72 @@ namespace Scripts.Pets
                 owner.CastSpell(me, SpellIds.CloneMe, true);
             }
 
+            public override void UpdateAI(uint diff)
+            {
+                Unit owner = me.GetOwner();
+
+                if (owner == null)
+                {
+                    me.DespawnOrUnsummon();
+
+                    return;
+                }
+
+                if (_fireBlastTimer != 0)
+                {
+                    if (_fireBlastTimer <= diff)
+                        _fireBlastTimer = 0;
+                    else
+                        _fireBlastTimer -= diff;
+                }
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me.HasUnitState(UnitState.Casting))
+                    return;
+
+                if (_fireBlastTimer == 0)
+                {
+                    DoCastVictim(SpellIds.MageFireBlast);
+                    _fireBlastTimer = MiscConst.TimerMirrorImageFireBlast;
+                }
+                else
+                {
+                    DoCastVictim(SpellIds.MageFrostBolt);
+                }
+            }
+
+            public override bool CanAIAttack(Unit who)
+            {
+                Unit owner = me.GetOwner();
+
+                return owner &&
+                       who.IsAlive() &&
+                       me.IsValidAttackTarget(who) &&
+                       !who.HasBreakableByDamageCrowdControlAura() &&
+                       who.IsInCombatWith(owner) &&
+                       CanAIAttack(who);
+            }
+
+            // Do not reload Creature templates on evade mode enter - prevent visual lost
+            public override void EnterEvadeMode(EvadeReason why)
+            {
+                if (me.IsInEvadeMode() ||
+                    !me.IsAlive())
+                    return;
+
+                Unit owner = me.GetCharmerOrOwner();
+
+                me.CombatStop(true);
+
+                if (owner && !me.HasUnitState(UnitState.Follow))
+                {
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle());
+                }
+            }
+
             // custom UpdateVictim implementation to handle special Target selection
             // we prioritize between things that are in combat with owner based on the owner's threat to them
             private new bool UpdateVictim()
@@ -138,72 +204,6 @@ namespace Scripts.Pets
                     AttackStartCaster(selectedTarget, CHASE_DISTANCE);
 
                 return true;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                Unit owner = me.GetOwner();
-
-                if (owner == null)
-                {
-                    me.DespawnOrUnsummon();
-
-                    return;
-                }
-
-                if (_fireBlastTimer != 0)
-                {
-                    if (_fireBlastTimer <= diff)
-                        _fireBlastTimer = 0;
-                    else
-                        _fireBlastTimer -= diff;
-                }
-
-                if (!UpdateVictim())
-                    return;
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                if (_fireBlastTimer == 0)
-                {
-                    DoCastVictim(SpellIds.MageFireBlast);
-                    _fireBlastTimer = MiscConst.TimerMirrorImageFireBlast;
-                }
-                else
-                {
-                    DoCastVictim(SpellIds.MageFrostBolt);
-                }
-            }
-
-            public override bool CanAIAttack(Unit who)
-            {
-                Unit owner = me.GetOwner();
-
-                return owner &&
-                       who.IsAlive() &&
-                       me.IsValidAttackTarget(who) &&
-                       !who.HasBreakableByDamageCrowdControlAura() &&
-                       who.IsInCombatWith(owner) &&
-                       CanAIAttack(who);
-            }
-
-            // Do not reload Creature templates on evade mode enter - prevent visual lost
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                if (me.IsInEvadeMode() ||
-                    !me.IsAlive())
-                    return;
-
-                Unit owner = me.GetCharmerOrOwner();
-
-                me.CombatStop(true);
-
-                if (owner && !me.HasUnitState(UnitState.Follow))
-                {
-                    me.GetMotionMaster().Clear();
-                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle());
-                }
             }
         }
     }

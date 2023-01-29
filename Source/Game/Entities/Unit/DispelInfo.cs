@@ -2,10 +2,9 @@
 
 public class DispelInfo
 {
-    private byte _chargesRemoved;
-
     private readonly WorldObject _dispeller;
     private readonly uint _dispellerSpell;
+    private byte _chargesRemoved;
 
     public DispelInfo(WorldObject dispeller, uint dispellerSpellId, byte chargesRemoved)
     {
@@ -19,11 +18,6 @@ public class DispelInfo
         return _dispeller;
     }
 
-    private uint GetDispellerSpellId()
-    {
-        return _dispellerSpell;
-    }
-
     public byte GetRemovedCharges()
     {
         return _chargesRemoved;
@@ -32,5 +26,10 @@ public class DispelInfo
     public void SetRemovedCharges(byte amount)
     {
         _chargesRemoved = amount;
+    }
+
+    private uint GetDispellerSpellId()
+    {
+        return _dispellerSpell;
     }
 }

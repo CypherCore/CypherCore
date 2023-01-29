@@ -9,6 +9,14 @@ namespace Game.BattleGrounds
 {
     public class BattlegroundScore
     {
+        public ObjectGuid PlayerGuid;
+
+        public BattlegroundScore(ObjectGuid playerGuid, Team team)
+        {
+            PlayerGuid = playerGuid;
+            TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
+        }
+
         public uint BonusHonor { get; set; }
         public uint DamageDone { get; set; }
         public uint Deaths { get; set; }
@@ -17,15 +25,7 @@ namespace Game.BattleGrounds
 
         // Default score, present in every Type
         public uint KillingBlows { get; set; }
-
-        public ObjectGuid PlayerGuid;
         public int TeamId { get; set; }
-
-        public BattlegroundScore(ObjectGuid playerGuid, Team team)
-        {
-            PlayerGuid = playerGuid;
-            TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
-        }
 
         public virtual void UpdateScore(ScoreType type, uint value)
         {
@@ -64,10 +64,10 @@ namespace Game.BattleGrounds
 
         public virtual void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
         {
-            playerData = new PVPMatchStatistics.PVPMatchPlayerStatistics();
+            playerData            = new PVPMatchStatistics.PVPMatchPlayerStatistics();
             playerData.PlayerGUID = PlayerGuid;
-            playerData.Kills = KillingBlows;
-            playerData.Faction = (byte)TeamId;
+            playerData.Kills      = KillingBlows;
+            playerData.Faction    = (byte)TeamId;
 
             if (HonorableKills != 0 ||
                 Deaths != 0 ||

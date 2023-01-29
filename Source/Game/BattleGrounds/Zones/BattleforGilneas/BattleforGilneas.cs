@@ -4,6 +4,5 @@
 namespace Game.BattleGrounds.Zones.BattleforGilneas
 {
     internal class BattleforGilneas
-    {
-    }
+    {}
 }

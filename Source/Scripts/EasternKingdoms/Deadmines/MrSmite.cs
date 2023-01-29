@@ -50,19 +50,6 @@ namespace Scripts.EasternKingdoms.Deadmines
             instance = creature.GetInstanceScript();
         }
 
-        private void Initialize()
-        {
-            uiTrashTimer = RandomHelper.URand(5000, 9000);
-            uiSlamTimer = 9000;
-
-            uiHealth = 0;
-
-            uiPhase = 0;
-            uiTimer = 0;
-
-            uiIsMoving = false;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -75,16 +62,6 @@ namespace Scripts.EasternKingdoms.Deadmines
 
         public override void JustEngagedWith(Unit who)
         {
-        }
-
-        private bool bCheckChances()
-        {
-            uint uiChances = RandomHelper.URand(0, 99);
-
-            if (uiChances <= 15)
-                return false;
-            else
-                return true;
         }
 
         public override void UpdateAI(uint uiDiff)
@@ -206,6 +183,29 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             uiTimer = 2000;
             uiPhase = 2;
+        }
+
+        private void Initialize()
+        {
+            uiTrashTimer = RandomHelper.URand(5000, 9000);
+            uiSlamTimer = 9000;
+
+            uiHealth = 0;
+
+            uiPhase = 0;
+            uiTimer = 0;
+
+            uiIsMoving = false;
+        }
+
+        private bool bCheckChances()
+        {
+            uint uiChances = RandomHelper.URand(0, 99);
+
+            if (uiChances <= 15)
+                return false;
+            else
+                return true;
         }
     }
 }

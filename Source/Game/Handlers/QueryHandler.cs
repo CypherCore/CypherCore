@@ -16,20 +16,6 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.QueryPlayerNames, Processing = PacketProcessing.Inplace)]
-        private void HandleQueryPlayerNames(QueryPlayerNames queryPlayerName)
-        {
-            QueryPlayerNamesResponse response = new();
-
-            foreach (ObjectGuid guid in queryPlayerName.Players)
-            {
-                BuildNameQueryData(guid, out NameCacheLookupResult nameCacheLookupResult);
-                response.Players.Add(nameCacheLookupResult);
-            }
-
-            SendPacket(response);
-        }
-
         public void BuildNameQueryData(ObjectGuid guid, out NameCacheLookupResult lookupData)
         {
             lookupData = new NameCacheLookupResult();
@@ -44,6 +30,20 @@ namespace Game
                 lookupData.Result = (byte)ResponseCodes.Success;
             else
                 lookupData.Result = (byte)ResponseCodes.Failure; // Name unknown
+        }
+
+        [WorldPacketHandler(ClientOpcodes.QueryPlayerNames, Processing = PacketProcessing.Inplace)]
+        private void HandleQueryPlayerNames(QueryPlayerNames queryPlayerName)
+        {
+            QueryPlayerNamesResponse response = new();
+
+            foreach (ObjectGuid guid in queryPlayerName.Players)
+            {
+                BuildNameQueryData(guid, out NameCacheLookupResult nameCacheLookupResult);
+                response.Players.Add(nameCacheLookupResult);
+            }
+
+            SendPacket(response);
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryTime, Processing = PacketProcessing.Inplace)]

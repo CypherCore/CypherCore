@@ -15,6 +15,8 @@ namespace Game.DataStorage
 {
     public class DB2Manager : Singleton<DB2Manager>
     {
+        private delegate bool AllowedHotfixOptionalData(byte[] data);
+
         private readonly MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>> _allowedHotfixOptionalData = new();
 
         private readonly MultiMap<uint, uint> _areaGroupMembers = new();
@@ -24,7 +26,6 @@ namespace Game.DataStorage
         private readonly Dictionary<uint, AzeriteEmpoweredItemRecord> _azeriteEmpoweredItems = new();
         private readonly Dictionary<(uint azeriteEssenceId, uint rank), AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new();
         private readonly AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
-        private List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new();
         private readonly MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
         private readonly Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         private readonly Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new();
@@ -102,6 +103,7 @@ namespace Game.DataStorage
         private readonly Dictionary<int, UiMapBounds> _uiMapBounds = new();
         private readonly List<int> _uiMapPhases = new();
         private readonly Dictionary<Tuple<short, sbyte, int>, WMOAreaTableRecord> _wmoAreaTableLookup = new();
+        private List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new();
 
         private DB2Manager()
         {
@@ -775,11 +777,11 @@ namespace Game.DataStorage
 
             do
             {
-                int id = result.Read<int>(0);
-                uint uniqueId = result.Read<uint>(1);
-                uint tableHash = result.Read<uint>(2);
-                int recordId = result.Read<int>(3);
-                HotfixRecord.Status status = (HotfixRecord.Status)result.Read<byte>(4);
+                int                 id        = result.Read<int>(0);
+                uint                uniqueId  = result.Read<uint>(1);
+                uint                tableHash = result.Read<uint>(2);
+                int                 recordId  = result.Read<int>(3);
+                HotfixRecord.Status status    = (HotfixRecord.Status)result.Read<byte>(4);
 
                 if (status == HotfixRecord.Status.Valid &&
                     !_storage.ContainsKey(tableHash))
@@ -1238,39 +1240,6 @@ namespace Game.DataStorage
             return Tuple.Create(0.0f, 0.0f);
         }
 
-        private static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<CurvePointRecord> points)
-        {
-            switch (curve.Type)
-            {
-                case 1:
-                    return points.Count < 4 ? CurveInterpolationMode.Cosine : CurveInterpolationMode.CatmullRom;
-                case 2:
-                    {
-                        switch (points.Count)
-                        {
-                            case 1:
-                                return CurveInterpolationMode.Constant;
-                            case 2:
-                                return CurveInterpolationMode.Linear;
-                            case 3:
-                                return CurveInterpolationMode.Bezier3;
-                            case 4:
-                                return CurveInterpolationMode.Bezier4;
-                            default:
-                                break;
-                        }
-
-                        return CurveInterpolationMode.Bezier;
-                    }
-                case 3:
-                    return CurveInterpolationMode.Cosine;
-                default:
-                    break;
-            }
-
-            return points.Count != 1 ? CurveInterpolationMode.Linear : CurveInterpolationMode.Constant;
-        }
-
         public float GetCurveValueAt(uint curveId, float x)
         {
             var points = _curvePoints.LookupByKey(curveId);
@@ -1420,50 +1389,6 @@ namespace Game.DataStorage
                 return emoteTextSound;
 
             return null;
-        }
-
-        private float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat)
-        {
-            if (contentTuningXExpected == null)
-                return mod;
-
-            //if (contentTuningXExpected->MinMythicPlusSeasonID)
-            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MinMythicPlusSeasonID))
-            //        if (MythicPlusSubSeason < mythicPlusSeason->SubSeason)
-            //            return mod;
-
-            //if (contentTuningXExpected->MaxMythicPlusSeasonID)
-            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MaxMythicPlusSeasonID))
-            //        if (MythicPlusSubSeason >= mythicPlusSeason->SubSeason)
-            //            return mod;
-
-            var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
-
-            switch (stat)
-            {
-                case ExpectedStatType.CreatureHealth:
-                    return mod * expectedStatMod.CreatureHealthMod;
-                case ExpectedStatType.PlayerHealth:
-                    return mod * expectedStatMod.PlayerHealthMod;
-                case ExpectedStatType.CreatureAutoAttackDps:
-                    return mod * expectedStatMod.CreatureAutoAttackDPSMod;
-                case ExpectedStatType.CreatureArmor:
-                    return mod * expectedStatMod.CreatureArmorMod;
-                case ExpectedStatType.PlayerMana:
-                    return mod * expectedStatMod.PlayerManaMod;
-                case ExpectedStatType.PlayerPrimaryStat:
-                    return mod * expectedStatMod.PlayerPrimaryStatMod;
-                case ExpectedStatType.PlayerSecondaryStat:
-                    return mod * expectedStatMod.PlayerSecondaryStatMod;
-                case ExpectedStatType.ArmorConstant:
-                    return mod * expectedStatMod.ArmorConstantMod;
-                case ExpectedStatType.CreatureSpellDamage:
-                    return mod * expectedStatMod.CreatureSpellDamageMod;
-            }
-
-            return mod;
-
-            // int32 MythicPlusSubSeason = 0;
         }
 
         public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
@@ -1648,22 +1573,6 @@ namespace Game.DataStorage
             return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
         }
 
-        private void VisitItemBonusTree(uint itemBonusTreeId, bool visitChildren, Action<ItemBonusTreeNodeRecord> visitor)
-        {
-            var bonusTreeNodeList = _itemBonusTrees.LookupByKey(itemBonusTreeId);
-
-            if (bonusTreeNodeList.Empty())
-                return;
-
-            foreach (var bonusTreeNode in bonusTreeNodeList)
-            {
-                visitor(bonusTreeNode);
-
-                if (visitChildren && bonusTreeNode.ChildItemBonusTreeID != 0)
-                    VisitItemBonusTree(bonusTreeNode.ChildItemBonusTreeID, true, visitor);
-            }
-        }
-
         public List<uint> GetDefaultItemBonusTree(uint itemId, ItemContext itemContext)
         {
             List<uint> bonusListIDs = new();
@@ -1783,48 +1692,6 @@ namespace Game.DataStorage
                                });
 
             return bonusListIDs;
-        }
-
-        private void LoadAzeriteEmpoweredItemUnlockMappings(MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappingsBySet, uint itemId)
-        {
-            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
-
-            if (itemIdRange == null)
-                return;
-
-            foreach (var itemTreeItr in itemIdRange)
-                VisitItemBonusTree(itemTreeItr,
-                                   true,
-                                   bonusTreeNode =>
-                                   {
-                                       if (bonusTreeNode.ChildItemBonusListID == 0 &&
-                                           bonusTreeNode.ChildItemLevelSelectorID != 0)
-                                       {
-                                           ItemLevelSelectorRecord selector = ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
-
-                                           if (selector == null)
-                                               return;
-
-                                           var azeriteUnlockMappings = azeriteUnlockMappingsBySet.LookupByKey(selector.AzeriteUnlockMappingSet);
-
-                                           if (azeriteUnlockMappings != null)
-                                           {
-                                               AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
-
-                                               foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in azeriteUnlockMappings)
-                                               {
-                                                   if (azeriteUnlockMapping.ItemLevel > selector.MinItemLevel ||
-                                                       (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel))
-                                                       continue;
-
-                                                   selectedAzeriteUnlockMapping = azeriteUnlockMapping;
-                                               }
-
-                                               if (selectedAzeriteUnlockMapping != null)
-                                                   _azeriteUnlockMappings[(itemId, (ItemContext)bonusTreeNode.ItemContext)] = selectedAzeriteUnlockMapping;
-                                           }
-                                       }
-                                   });
         }
 
         public ItemChildEquipmentRecord GetItemChildEquipment(uint itemId)
@@ -2346,6 +2213,248 @@ namespace Game.DataStorage
             return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
         }
 
+        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
+        {
+            return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out _, out newPos);
+        }
+
+        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
+        {
+            return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out uiMapId, out _);
+        }
+
+        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
+        {
+            uiMapId = -1;
+            newPos = new Vector2();
+
+            UiMapAssignmentRecord uiMapAssignment = FindNearestMapAssignment(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system);
+
+            if (uiMapAssignment == null)
+                return false;
+
+            uiMapId = uiMapAssignment.UiMapID;
+
+            Vector2 relativePosition = new(0.5f, 0.5f);
+            Vector2 regionSize = new(uiMapAssignment.Region[1].X - uiMapAssignment.Region[0].X, uiMapAssignment.Region[1].Y - uiMapAssignment.Region[0].Y);
+
+            if (regionSize.X > 0.0f)
+                relativePosition.X = (x - uiMapAssignment.Region[0].X) / regionSize.X;
+
+            if (regionSize.Y > 0.0f)
+                relativePosition.Y = (y - uiMapAssignment.Region[0].Y) / regionSize.Y;
+
+            // x any y are swapped
+            Vector2 uiPosition = new(((1.0f - (1.0f - relativePosition.Y)) * uiMapAssignment.UiMin.X) + ((1.0f - relativePosition.Y) * uiMapAssignment.UiMax.X), ((1.0f - (1.0f - relativePosition.X)) * uiMapAssignment.UiMin.Y) + ((1.0f - relativePosition.X) * uiMapAssignment.UiMax.Y));
+
+            if (!local)
+                uiPosition = CalculateGlobalUiMapPosition(uiMapAssignment.UiMapID, uiPosition);
+
+            newPos = uiPosition;
+
+            return true;
+        }
+
+        public bool Zone2MapCoordinates(uint areaId, ref float x, ref float y)
+        {
+            AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);
+
+            if (areaEntry == null)
+                return false;
+
+            foreach (var assignment in _uiMapAssignmentByArea[(int)UiMapSystem.World].LookupByKey(areaId))
+            {
+                if (assignment.MapID >= 0 &&
+                    assignment.MapID != areaEntry.ContinentID)
+                    continue;
+
+                float tmpY = (y - assignment.UiMax.Y) / (assignment.UiMin.Y - assignment.UiMax.Y);
+                float tmpX = (x - assignment.UiMax.X) / (assignment.UiMin.X - assignment.UiMax.X);
+                x = assignment.Region[0].X + tmpY * (assignment.Region[1].X - assignment.Region[0].X);
+                y = assignment.Region[0].Y + tmpX * (assignment.Region[1].Y - assignment.Region[0].Y);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public void Map2ZoneCoordinates(int areaId, ref float x, ref float y)
+        {
+            Vector2 zoneCoords;
+
+            if (!GetUiMapPosition(x, y, 0.0f, -1, areaId, 0, 0, UiMapSystem.World, true, out zoneCoords))
+                return;
+
+            x = zoneCoords.Y * 100.0f;
+            y = zoneCoords.X * 100.0f;
+        }
+
+        public bool IsUiMapPhase(int phaseId)
+        {
+            return _uiMapPhases.Contains(phaseId);
+        }
+
+        public WMOAreaTableRecord GetWMOAreaTable(int rootId, int adtId, int groupId)
+        {
+            var wmoAreaTable = _wmoAreaTableLookup.LookupByKey(Tuple.Create((short)rootId, (sbyte)adtId, groupId));
+
+            if (wmoAreaTable != null)
+                return wmoAreaTable;
+
+            return null;
+        }
+
+        public bool HasItemCurrencyCost(uint itemId)
+        {
+            return _itemsWithCurrencyCost.Contains(itemId);
+        }
+
+        public Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> GetMapDifficulties()
+        {
+            return _mapDifficulties;
+        }
+
+        public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
+        {
+            _storage[tableHash] = store;
+        }
+
+        private static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<CurvePointRecord> points)
+        {
+            switch (curve.Type)
+            {
+                case 1:
+                    return points.Count < 4 ? CurveInterpolationMode.Cosine : CurveInterpolationMode.CatmullRom;
+                case 2:
+                    {
+                        switch (points.Count)
+                        {
+                            case 1:
+                                return CurveInterpolationMode.Constant;
+                            case 2:
+                                return CurveInterpolationMode.Linear;
+                            case 3:
+                                return CurveInterpolationMode.Bezier3;
+                            case 4:
+                                return CurveInterpolationMode.Bezier4;
+                            default:
+                                break;
+                        }
+
+                        return CurveInterpolationMode.Bezier;
+                    }
+                case 3:
+                    return CurveInterpolationMode.Cosine;
+                default:
+                    break;
+            }
+
+            return points.Count != 1 ? CurveInterpolationMode.Linear : CurveInterpolationMode.Constant;
+        }
+
+        private float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat)
+        {
+            if (contentTuningXExpected == null)
+                return mod;
+
+            //if (contentTuningXExpected->MinMythicPlusSeasonID)
+            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MinMythicPlusSeasonID))
+            //        if (MythicPlusSubSeason < mythicPlusSeason->SubSeason)
+            //            return mod;
+
+            //if (contentTuningXExpected->MaxMythicPlusSeasonID)
+            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MaxMythicPlusSeasonID))
+            //        if (MythicPlusSubSeason >= mythicPlusSeason->SubSeason)
+            //            return mod;
+
+            var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
+
+            switch (stat)
+            {
+                case ExpectedStatType.CreatureHealth:
+                    return mod * expectedStatMod.CreatureHealthMod;
+                case ExpectedStatType.PlayerHealth:
+                    return mod * expectedStatMod.PlayerHealthMod;
+                case ExpectedStatType.CreatureAutoAttackDps:
+                    return mod * expectedStatMod.CreatureAutoAttackDPSMod;
+                case ExpectedStatType.CreatureArmor:
+                    return mod * expectedStatMod.CreatureArmorMod;
+                case ExpectedStatType.PlayerMana:
+                    return mod * expectedStatMod.PlayerManaMod;
+                case ExpectedStatType.PlayerPrimaryStat:
+                    return mod * expectedStatMod.PlayerPrimaryStatMod;
+                case ExpectedStatType.PlayerSecondaryStat:
+                    return mod * expectedStatMod.PlayerSecondaryStatMod;
+                case ExpectedStatType.ArmorConstant:
+                    return mod * expectedStatMod.ArmorConstantMod;
+                case ExpectedStatType.CreatureSpellDamage:
+                    return mod * expectedStatMod.CreatureSpellDamageMod;
+            }
+
+            return mod;
+
+            // int32 MythicPlusSubSeason = 0;
+        }
+
+        private void VisitItemBonusTree(uint itemBonusTreeId, bool visitChildren, Action<ItemBonusTreeNodeRecord> visitor)
+        {
+            var bonusTreeNodeList = _itemBonusTrees.LookupByKey(itemBonusTreeId);
+
+            if (bonusTreeNodeList.Empty())
+                return;
+
+            foreach (var bonusTreeNode in bonusTreeNodeList)
+            {
+                visitor(bonusTreeNode);
+
+                if (visitChildren && bonusTreeNode.ChildItemBonusTreeID != 0)
+                    VisitItemBonusTree(bonusTreeNode.ChildItemBonusTreeID, true, visitor);
+            }
+        }
+
+        private void LoadAzeriteEmpoweredItemUnlockMappings(MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappingsBySet, uint itemId)
+        {
+            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
+
+            if (itemIdRange == null)
+                return;
+
+            foreach (var itemTreeItr in itemIdRange)
+                VisitItemBonusTree(itemTreeItr,
+                                   true,
+                                   bonusTreeNode =>
+                                   {
+                                       if (bonusTreeNode.ChildItemBonusListID == 0 &&
+                                           bonusTreeNode.ChildItemLevelSelectorID != 0)
+                                       {
+                                           ItemLevelSelectorRecord selector = ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
+
+                                           if (selector == null)
+                                               return;
+
+                                           var azeriteUnlockMappings = azeriteUnlockMappingsBySet.LookupByKey(selector.AzeriteUnlockMappingSet);
+
+                                           if (azeriteUnlockMappings != null)
+                                           {
+                                               AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
+
+                                               foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in azeriteUnlockMappings)
+                                               {
+                                                   if (azeriteUnlockMapping.ItemLevel > selector.MinItemLevel ||
+                                                       (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel))
+                                                       continue;
+
+                                                   selectedAzeriteUnlockMapping = azeriteUnlockMapping;
+                                               }
+
+                                               if (selectedAzeriteUnlockMapping != null)
+                                                   _azeriteUnlockMappings[(itemId, (ItemContext)bonusTreeNode.ItemContext)] = selectedAzeriteUnlockMapping;
+                                           }
+                                       }
+                                   });
+        }
+
         private static bool CheckUiMapAssignmentStatus(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
         {
             status = new UiMapAssignmentStatus();
@@ -2572,115 +2681,6 @@ namespace Game.DataStorage
 
             return uiPosition;
         }
-
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out Vector2 newPos)
-        {
-            return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out _, out newPos);
-        }
-
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
-        {
-            return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out uiMapId, out _);
-        }
-
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
-        {
-            uiMapId = -1;
-            newPos = new Vector2();
-
-            UiMapAssignmentRecord uiMapAssignment = FindNearestMapAssignment(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system);
-
-            if (uiMapAssignment == null)
-                return false;
-
-            uiMapId = uiMapAssignment.UiMapID;
-
-            Vector2 relativePosition = new(0.5f, 0.5f);
-            Vector2 regionSize = new(uiMapAssignment.Region[1].X - uiMapAssignment.Region[0].X, uiMapAssignment.Region[1].Y - uiMapAssignment.Region[0].Y);
-
-            if (regionSize.X > 0.0f)
-                relativePosition.X = (x - uiMapAssignment.Region[0].X) / regionSize.X;
-
-            if (regionSize.Y > 0.0f)
-                relativePosition.Y = (y - uiMapAssignment.Region[0].Y) / regionSize.Y;
-
-            // x any y are swapped
-            Vector2 uiPosition = new(((1.0f - (1.0f - relativePosition.Y)) * uiMapAssignment.UiMin.X) + ((1.0f - relativePosition.Y) * uiMapAssignment.UiMax.X), ((1.0f - (1.0f - relativePosition.X)) * uiMapAssignment.UiMin.Y) + ((1.0f - relativePosition.X) * uiMapAssignment.UiMax.Y));
-
-            if (!local)
-                uiPosition = CalculateGlobalUiMapPosition(uiMapAssignment.UiMapID, uiPosition);
-
-            newPos = uiPosition;
-
-            return true;
-        }
-
-        public bool Zone2MapCoordinates(uint areaId, ref float x, ref float y)
-        {
-            AreaTableRecord areaEntry = AreaTableStorage.LookupByKey(areaId);
-
-            if (areaEntry == null)
-                return false;
-
-            foreach (var assignment in _uiMapAssignmentByArea[(int)UiMapSystem.World].LookupByKey(areaId))
-            {
-                if (assignment.MapID >= 0 &&
-                    assignment.MapID != areaEntry.ContinentID)
-                    continue;
-
-                float tmpY = (y - assignment.UiMax.Y) / (assignment.UiMin.Y - assignment.UiMax.Y);
-                float tmpX = (x - assignment.UiMax.X) / (assignment.UiMin.X - assignment.UiMax.X);
-                x = assignment.Region[0].X + tmpY * (assignment.Region[1].X - assignment.Region[0].X);
-                y = assignment.Region[0].Y + tmpX * (assignment.Region[1].Y - assignment.Region[0].Y);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public void Map2ZoneCoordinates(int areaId, ref float x, ref float y)
-        {
-            Vector2 zoneCoords;
-
-            if (!GetUiMapPosition(x, y, 0.0f, -1, areaId, 0, 0, UiMapSystem.World, true, out zoneCoords))
-                return;
-
-            x = zoneCoords.Y * 100.0f;
-            y = zoneCoords.X * 100.0f;
-        }
-
-        public bool IsUiMapPhase(int phaseId)
-        {
-            return _uiMapPhases.Contains(phaseId);
-        }
-
-        public WMOAreaTableRecord GetWMOAreaTable(int rootId, int adtId, int groupId)
-        {
-            var wmoAreaTable = _wmoAreaTableLookup.LookupByKey(Tuple.Create((short)rootId, (sbyte)adtId, groupId));
-
-            if (wmoAreaTable != null)
-                return wmoAreaTable;
-
-            return null;
-        }
-
-        public bool HasItemCurrencyCost(uint itemId)
-        {
-            return _itemsWithCurrencyCost.Contains(itemId);
-        }
-
-        public Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> GetMapDifficulties()
-        {
-            return _mapDifficulties;
-        }
-
-        public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
-        {
-            _storage[tableHash] = store;
-        }
-
-        private delegate bool AllowedHotfixOptionalData(byte[] data);
     }
 
     internal class UiMapBounds
@@ -2693,6 +2693,21 @@ namespace Game.DataStorage
 
     internal class UiMapAssignmentStatus
     {
+        // distances if inside
+        public class InsideStruct
+        {
+            public float DistanceToRegionBottom = float.MaxValue;
+            public float DistanceToRegionCenterSquared = float.MaxValue;
+        }
+
+        // distances if outside
+        public class OutsideStruct
+        {
+            public float DistanceToRegionBottom = float.MaxValue;
+            public float DistanceToRegionEdgeSquared = float.MaxValue;
+            public float DistanceToRegionTop = float.MaxValue;
+        }
+
         public sbyte AreaPriority;
         public InsideStruct Inside;
         public sbyte MapPriority;
@@ -2707,13 +2722,6 @@ namespace Game.DataStorage
             MapPriority = 3;
             AreaPriority = -1;
             WmoPriority = 3;
-        }
-
-        private bool IsInside()
-        {
-            return Outside.DistanceToRegionEdgeSquared < float.Epsilon &&
-                   Math.Abs(Outside.DistanceToRegionTop) < float.Epsilon &&
-                   Math.Abs(Outside.DistanceToRegionBottom) < float.Epsilon;
         }
 
         public static bool operator <(UiMapAssignmentStatus left, UiMapAssignmentStatus right)
@@ -2834,19 +2842,11 @@ namespace Game.DataStorage
             return true;
         }
 
-        // distances if inside
-        public class InsideStruct
+        private bool IsInside()
         {
-            public float DistanceToRegionBottom = float.MaxValue;
-            public float DistanceToRegionCenterSquared = float.MaxValue;
-        }
-
-        // distances if outside
-        public class OutsideStruct
-        {
-            public float DistanceToRegionBottom = float.MaxValue;
-            public float DistanceToRegionEdgeSquared = float.MaxValue;
-            public float DistanceToRegionTop = float.MaxValue;
+            return Outside.DistanceToRegionEdgeSquared < float.Epsilon &&
+                   Math.Abs(Outside.DistanceToRegionTop) < float.Epsilon &&
+                   Math.Abs(Outside.DistanceToRegionBottom) < float.Epsilon;
         }
     }
 

@@ -91,9 +91,9 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
-        private MySqlConnectionInfo _connectionInfo;
         private readonly Dictionary<T, string> _preparedQueries = new();
         private readonly ProducerConsumerQueue<ISqlOperation> _queue = new();
+        private MySqlConnectionInfo _connectionInfo;
         private DatabaseUpdater<T> _updater;
         private DatabaseWorker<T> _worker;
 
@@ -383,6 +383,35 @@ namespace Framework.Database
             }
         }
 
+        public DatabaseUpdater<T> GetUpdater()
+        {
+            return _updater;
+        }
+
+        public bool IsAutoUpdateEnabled(DatabaseTypeFlags updateMask)
+        {
+            switch (GetType().Name)
+            {
+                case "LoginDatabase":
+                    return updateMask.HasAnyFlag(DatabaseTypeFlags.Login);
+                case "CharacterDatabase":
+                    return updateMask.HasAnyFlag(DatabaseTypeFlags.Character);
+                case "WorldDatabase":
+                    return updateMask.HasAnyFlag(DatabaseTypeFlags.World);
+                case "HotfixDatabase":
+                    return updateMask.HasAnyFlag(DatabaseTypeFlags.Hotfix);
+            }
+
+            return false;
+        }
+
+        public string GetDatabaseName()
+        {
+            return _connectionInfo.Database;
+        }
+
+        public abstract void PreparedStatements();
+
         private MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "", Dictionary<int, object> parameters = null)
         {
             MySqlErrorCode code = (MySqlErrorCode)ex.Number;
@@ -417,35 +446,6 @@ namespace Framework.Database
 
             return code;
         }
-
-        public DatabaseUpdater<T> GetUpdater()
-        {
-            return _updater;
-        }
-
-        public bool IsAutoUpdateEnabled(DatabaseTypeFlags updateMask)
-        {
-            switch (GetType().Name)
-            {
-                case "LoginDatabase":
-                    return updateMask.HasAnyFlag(DatabaseTypeFlags.Login);
-                case "CharacterDatabase":
-                    return updateMask.HasAnyFlag(DatabaseTypeFlags.Character);
-                case "WorldDatabase":
-                    return updateMask.HasAnyFlag(DatabaseTypeFlags.World);
-                case "HotfixDatabase":
-                    return updateMask.HasAnyFlag(DatabaseTypeFlags.Hotfix);
-            }
-
-            return false;
-        }
-
-        public string GetDatabaseName()
-        {
-            return _connectionInfo.Database;
-        }
-
-        public abstract void PreparedStatements();
     }
 
     public static class DBExecutableUtil

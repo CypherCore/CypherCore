@@ -9,10 +9,10 @@ namespace Game.DungeonFinding
 {
     public class LfgPlayerBoot
     {
+        public ObjectGuid Victim;
         public long CancelTime { get; set; }
         public bool InProgress { get; set; }
         public string Reason { get; set; }
-        public ObjectGuid Victim;
         public Dictionary<ObjectGuid, LfgAnswer> Votes { get; set; } = new();
     }
 }

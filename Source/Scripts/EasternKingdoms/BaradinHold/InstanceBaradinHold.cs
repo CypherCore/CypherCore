@@ -41,25 +41,6 @@ namespace Scripts.EasternKingdoms.BaradinHold
     [Script]
     internal class instance_baradin_hold : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        private static readonly DoorData[] doorData =
-        {
-            new(GameObjectIds.ArgalothDoor, DataTypes.Argaloth, DoorType.Room), new(GameObjectIds.OccutharDoor, DataTypes.Occuthar, DoorType.Room), new(GameObjectIds.AlizabalDoor, DataTypes.Alizabal, DoorType.Room)
-        };
-
-        private static readonly DungeonEncounterData[] encounters =
-        {
-            new(DataTypes.Argaloth, 1033), new(DataTypes.Occuthar, 1250), new(DataTypes.Alizabal, 1332)
-        };
-
-        public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_baradin_hold_InstanceMapScript(map);
-        }
-
         private class instance_baradin_hold_InstanceMapScript : InstanceScript
         {
             private ObjectGuid AlizabalGUID;
@@ -135,6 +116,25 @@ namespace Scripts.EasternKingdoms.BaradinHold
                         break;
                 }
             }
+        }
+
+        private static readonly DoorData[] doorData =
+        {
+            new(GameObjectIds.ArgalothDoor, DataTypes.Argaloth, DoorType.Room), new(GameObjectIds.OccutharDoor, DataTypes.Occuthar, DoorType.Room), new(GameObjectIds.AlizabalDoor, DataTypes.Alizabal, DoorType.Room)
+        };
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.Argaloth, 1033), new(DataTypes.Occuthar, 1250), new(DataTypes.Alizabal, 1332)
+        };
+
+        public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_baradin_hold_InstanceMapScript(map);
         }
     }
 }

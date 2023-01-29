@@ -5,14 +5,14 @@ namespace Game.Entities;
 
 public class AreaTriggerOrbitInfo
 {
+    public Vector3? Center;
+
+    public ObjectGuid? PathTarget;
     public float BlendFromRadius { get; set; }
     public bool CanLoop { get; set; }
-    public Vector3? Center;
     public bool CounterClockwise { get; set; }
     public int ElapsedTimeForMovement { get; set; }
     public float InitialAngle { get; set; }
-
-    public ObjectGuid? PathTarget;
     public float Radius { get; set; }
     public uint StartDelay { get; set; }
     public uint TimeToTarget { get; set; }

@@ -54,6 +54,42 @@ namespace Framework.IO
 {
     public static partial class ZLib
     {
+        // ===========================================================================
+        // Function prototypes.
+
+        private enum block_state
+        {
+            need_more,      // block not completed, need more input or more output
+            block_done,     // block flush performed
+            finish_started, // finish started, need only more output at next deflate
+            finish_done     // finish done, accept no more input or output
+        }
+
+        // Compression function. Returns the block state after the call.
+        private delegate block_state compress_func(deflate_state s, int flush);
+
+        // Values for max_lazy_match, good_match and max_chain_length, depending on
+        // the desired pack level (0..9). The values given below have been tuned to
+        // exclude worst case performance for pathological files. Better values may be
+        // found for specific files.
+        private struct config
+        {
+            public ushort good_length; // reduce lazy search above this match length
+            public ushort max_lazy;    // do not perform lazy search above this match length
+            public ushort nice_length; // quit search above this match length
+            public ushort max_chain;
+            public compress_func func;
+
+            public config(ushort good_length, ushort max_lazy, ushort nice_length, ushort max_chain, compress_func func)
+            {
+                this.good_length = good_length;
+                this.max_lazy = max_lazy;
+                this.nice_length = nice_length;
+                this.max_chain = max_chain;
+                this.func = func;
+            }
+        }
+
         // If you use the zlib library in a product, an acknowledgment is welcome
         // in the documentation of your product. If for some reason you cannot
         // include such an acknowledgment, I would appreciate that you keep this
@@ -73,12 +109,12 @@ namespace Framework.IO
 
         private static readonly config[] configuration_table = new config[]
                                                                {
-			                                                       // good lazy nice chain
-			                                                       new(0, 0, 0, 0, deflate_stored),                                                                                                                                                       // store only
-			                                                       new(4, 4, 8, 4, deflate_fast),                                                                                                                                                         // max speed, no lazy matches
-			                                                       new(4, 5, 16, 8, deflate_fast), new(4, 6, 32, 32, deflate_fast), new(4, 4, 16, 16, deflate_slow),                                                                                      // lazy matches
-			                                                       new(8, 16, 32, 32, deflate_slow), new(8, 16, 128, 128, deflate_slow), new(8, 32, 128, 256, deflate_slow), new(32, 128, 258, 1024, deflate_slow), new(32, 258, 258, 4096, deflate_slow) // max compression
-		                                                       };
+                                                                   // good lazy nice chain
+                                                                   new(0, 0, 0, 0, deflate_stored),                                                                                                                                                       // store only
+                                                                   new(4, 4, 8, 4, deflate_fast),                                                                                                                                                         // max speed, no lazy matches
+                                                                   new(4, 5, 16, 8, deflate_fast), new(4, 6, 32, 32, deflate_fast), new(4, 4, 16, 16, deflate_slow),                                                                                      // lazy matches
+                                                                   new(8, 16, 32, 32, deflate_slow), new(8, 16, 128, 128, deflate_slow), new(8, 32, 128, 256, deflate_slow), new(32, 128, 258, 1024, deflate_slow), new(32, 258, 258, 4096, deflate_slow) // max compression
+                                                               };
 
         // Note: the deflate() code requires max_lazy >= MIN_MATCH and max_chain >= 4
         // For deflate_fast() (levels <= 3) good is ignored and lazy has a different
@@ -617,43 +653,6 @@ namespace Framework.IO
 
             // default settings: return tight bound for that case
             return sourceLen + (sourceLen >> 12) + (sourceLen >> 14) + (sourceLen >> 25) + 13 - 6 + wraplen;
-        }
-
-        // =========================================================================
-        // Put a short in the pending buffer. The 16-bit value is put in MSB order.
-        // IN assertion: the stream state is correct and there is enough room in
-        // pending_buf.
-        private static void putShortMSB(deflate_state s, uint b)
-        {
-            //was put_byte(s, (byte)(b >> 8));
-            s.pending_buf[s.pending++] = (byte)(b >> 8);
-            //was put_byte(s, (byte)(b & 0xff));
-            s.pending_buf[s.pending++] = (byte)(b & 0xff);
-        }
-
-        // =========================================================================
-        // Flush as much pending output as possible. All deflate() output goes
-        // through this function so some applications may wish to modify it
-        // to avoid allocating a large strm.next_out buffer and copying into it.
-        // (See also read_buf()).
-        private static void flush_pending(z_stream strm)
-        {
-            deflate_state s = (deflate_state)strm.state;
-            uint len = s.pending;
-
-            if (len > strm.avail_out) len = strm.avail_out;
-
-            if (len == 0) return;
-
-            //was memcpy(strm.next_out, s.pending_out, len);
-            Array.Copy(s.pending_buf, s.pending_out, strm.out_buf, strm.next_out, len);
-
-            strm.next_out += (int)len;
-            s.pending_out += (int)len;
-            strm.total_out += len;
-            strm.avail_out -= len;
-            s.pending -= len;
-            if (s.pending == 0) s.pending_out = 0;
         }
 
         #region deflate
@@ -1239,6 +1238,43 @@ namespace Framework.IO
             ds.bl_desc.dyn_tree = ds.bl_tree;
 
             return Z_OK;
+        }
+
+        // =========================================================================
+        // Put a short in the pending buffer. The 16-bit value is put in MSB order.
+        // IN assertion: the stream state is correct and there is enough room in
+        // pending_buf.
+        private static void putShortMSB(deflate_state s, uint b)
+        {
+            //was put_byte(s, (byte)(b >> 8));
+            s.pending_buf[s.pending++] = (byte)(b >> 8);
+            //was put_byte(s, (byte)(b & 0xff));
+            s.pending_buf[s.pending++] = (byte)(b & 0xff);
+        }
+
+        // =========================================================================
+        // Flush as much pending output as possible. All deflate() output goes
+        // through this function so some applications may wish to modify it
+        // to avoid allocating a large strm.next_out buffer and copying into it.
+        // (See also read_buf()).
+        private static void flush_pending(z_stream strm)
+        {
+            deflate_state s = (deflate_state)strm.state;
+            uint len = s.pending;
+
+            if (len > strm.avail_out) len = strm.avail_out;
+
+            if (len == 0) return;
+
+            //was memcpy(strm.next_out, s.pending_out, len);
+            Array.Copy(s.pending_buf, s.pending_out, strm.out_buf, strm.next_out, len);
+
+            strm.next_out += (int)len;
+            s.pending_out += (int)len;
+            strm.total_out += len;
+            strm.avail_out -= len;
+            s.pending -= len;
+            if (s.pending == 0) s.pending_out = 0;
         }
 
         // ===========================================================================
@@ -2240,42 +2276,6 @@ namespace Framework.IO
             if (s.strm.avail_out == 0) return flush == Z_FINISH ? block_state.finish_started : block_state.need_more;
 
             return flush == Z_FINISH ? block_state.finish_done : block_state.block_done;
-        }
-
-        // ===========================================================================
-        // Function prototypes.
-
-        private enum block_state
-        {
-            need_more,      // block not completed, need more input or more output
-            block_done,     // block flush performed
-            finish_started, // finish started, need only more output at next deflate
-            finish_done     // finish done, accept no more input or output
-        }
-
-        // Compression function. Returns the block state after the call.
-        private delegate block_state compress_func(deflate_state s, int flush);
-
-        // Values for max_lazy_match, good_match and max_chain_length, depending on
-        // the desired pack level (0..9). The values given below have been tuned to
-        // exclude worst case performance for pathological files. Better values may be
-        // found for specific files.
-        private struct config
-        {
-            public ushort good_length; // reduce lazy search above this match length
-            public ushort max_lazy;    // do not perform lazy search above this match length
-            public ushort nice_length; // quit search above this match length
-            public ushort max_chain;
-            public compress_func func;
-
-            public config(ushort good_length, ushort max_lazy, ushort nice_length, ushort max_chain, compress_func func)
-            {
-                this.good_length = good_length;
-                this.max_lazy = max_lazy;
-                this.nice_length = nice_length;
-                this.max_chain = max_chain;
-                this.func = func;
-            }
         }
 
         #region deflate.h

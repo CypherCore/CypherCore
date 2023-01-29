@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		h = f + g
 		Can overlap h with f or g.
 
@@ -13,8 +13,8 @@
 		Postconditions:
 		   |h| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
 		*/
-        //void fe_add(fe h,const fe f,const fe g)
-        internal static void fe_add(out FieldElement h, ref FieldElement f, ref FieldElement g)
+	    //void fe_add(fe h,const fe f,const fe g)
+	    internal static void fe_add(out FieldElement h, ref FieldElement f, ref FieldElement g)
         {
             int f0 = f.x0;
             int f1 = f.x1;

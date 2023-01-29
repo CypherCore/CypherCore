@@ -15,6 +15,251 @@ namespace Game.Chat
     [CommandGroup("character")]
     internal class CharacterCommands
     {
+        [CommandGroup("deleted")]
+        private class DeletedCommands
+        {
+            private struct DeletedInfo
+            {
+                public ObjectGuid guid;    // the GUID from the character
+                public string name;        // the character Name
+                public uint accountId;     // the account Id
+                public string accountName; // the account Name
+                public long deleteDate;    // the date at which the character has been deleted
+            }
+
+            [Command("delete", RBACPermissions.CommandCharacterDeletedDelete, true)]
+            private static bool HandleCharacterDeletedDeleteCommand(CommandHandler handler, string needle)
+            {
+                List<DeletedInfo> foundList = new();
+
+                if (!GetDeletedCharacterInfoList(foundList, needle))
+                    return false;
+
+                if (foundList.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListEmpty);
+
+                    return false;
+                }
+
+                handler.SendSysMessage(CypherStrings.CharacterDeletedDelete);
+                HandleCharacterDeletedListHelper(foundList, handler);
+
+                // Call the appropriate function to delete them (current account for deleted characters is 0)
+                foreach (var info in foundList)
+                    Player.DeleteFromDB(info.guid, 0, false, true);
+
+                return true;
+            }
+
+            [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
+            private static bool HandleCharacterDeletedListCommand(CommandHandler handler, [OptionalArg] string needle)
+            {
+                List<DeletedInfo> foundList = new();
+
+                if (!GetDeletedCharacterInfoList(foundList, needle))
+                    return false;
+
+                // if no characters have been found, output a warning
+                if (foundList.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListEmpty);
+
+                    return false;
+                }
+
+                HandleCharacterDeletedListHelper(foundList, handler);
+
+                return true;
+            }
+
+            [Command("restore", RBACPermissions.CommandCharacterDeletedRestore, true)]
+            private static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, [OptionalArg] string newCharName, AccountIdentifier newAccount)
+            {
+                List<DeletedInfo> foundList = new();
+
+                if (!GetDeletedCharacterInfoList(foundList, needle))
+                    return false;
+
+                if (foundList.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListEmpty);
+
+                    return false;
+                }
+
+                handler.SendSysMessage(CypherStrings.CharacterDeletedRestore);
+                HandleCharacterDeletedListHelper(foundList, handler);
+
+                if (newCharName.IsEmpty())
+                {
+                    // Drop not existed account cases
+                    foreach (var info in foundList)
+                        HandleCharacterDeletedRestoreHelper(info, handler);
+
+                    return true;
+                }
+
+                if (foundList.Count == 1)
+                {
+                    DeletedInfo delInfo = foundList[0];
+
+                    // update Name
+                    delInfo.name = newCharName;
+
+                    // if new account provided update deleted info
+                    if (newAccount != null)
+                    {
+                        delInfo.accountId = newAccount.GetID();
+                        delInfo.accountName = newAccount.GetName();
+                    }
+
+                    HandleCharacterDeletedRestoreHelper(delInfo, handler);
+
+                    return true;
+                }
+
+                handler.SendSysMessage(CypherStrings.CharacterDeletedErrRename);
+
+                return false;
+            }
+
+            [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
+            private static bool HandleCharacterDeletedOldCommand(CommandHandler handler, ushort? days)
+            {
+                int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
+
+                if (days.HasValue)
+                    keepDays = days.Value;
+                else if (keepDays <= 0) // config option value 0 -> disabled and can't be used
+                    return false;
+
+                Player.DeleteOldCharacters(keepDays);
+
+                return true;
+            }
+
+            private static bool GetDeletedCharacterInfoList(List<DeletedInfo> foundList, string searchString)
+            {
+                SQLResult result;
+                PreparedStatement stmt;
+
+                if (!searchString.IsEmpty())
+                {
+                    // search by GUID
+                    if (searchString.IsNumber())
+                    {
+                        if (!ulong.TryParse(searchString, out ulong guid))
+                            return false;
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
+                        stmt.AddValue(0, guid);
+                        result = DB.Characters.Query(stmt);
+                    }
+                    // search by Name
+                    else
+                    {
+                        if (!ObjectManager.NormalizePlayerName(ref searchString))
+                            return false;
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_NAME);
+                        stmt.AddValue(0, searchString);
+                        result = DB.Characters.Query(stmt);
+                    }
+                }
+                else
+                {
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO);
+                    result = DB.Characters.Query(stmt);
+                }
+
+                if (!result.IsEmpty())
+                    do
+                    {
+                        DeletedInfo info;
+
+                        info.guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
+                        info.name = result.Read<string>(1);
+                        info.accountId = result.Read<uint>(2);
+
+                        // account Name will be empty for not existed account
+                        Global.AccountMgr.GetName(info.accountId, out info.accountName);
+                        info.deleteDate = result.Read<long>(3);
+                        foundList.Add(info);
+                    } while (result.NextRow());
+
+                return true;
+            }
+
+            private static void HandleCharacterDeletedListHelper(List<DeletedInfo> foundList, CommandHandler handler)
+            {
+                if (handler.GetSession() == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListHeader);
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
+                }
+
+                foreach (var info in foundList)
+                {
+                    string dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
+
+                    if (!handler.GetSession())
+                        handler.SendSysMessage(CypherStrings.CharacterDeletedListLineConsole,
+                                               info.guid.ToString(),
+                                               info.name,
+                                               info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
+                                               info.accountId,
+                                               dateStr);
+                    else
+                        handler.SendSysMessage(CypherStrings.CharacterDeletedListLineChat,
+                                               info.guid.ToString(),
+                                               info.name,
+                                               info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
+                                               info.accountId,
+                                               dateStr);
+                }
+
+                if (!handler.GetSession())
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
+            }
+
+            private static void HandleCharacterDeletedRestoreHelper(DeletedInfo delInfo, CommandHandler handler)
+            {
+                if (delInfo.accountName.IsEmpty()) // account not exist
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipAccount, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
+
+                    return;
+                }
+
+                // check character Count
+                uint charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
+
+                if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
+
+                    return;
+                }
+
+                if (!Global.CharacterCacheStorage.GetCharacterGuidByName(delInfo.name).IsEmpty())
+                {
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipName, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
+
+                    return;
+                }
+
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_RESTORE_DELETE_INFO);
+                stmt.AddValue(0, delInfo.name);
+                stmt.AddValue(1, delInfo.accountId);
+                stmt.AddValue(2, delInfo.guid.GetCounter());
+                DB.Characters.Execute(stmt);
+
+                Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(delInfo.guid, false, delInfo.name);
+            }
+        }
+
         [Command("titles", RBACPermissions.CommandCharacterTitles, true)]
         private static bool HandleCharacterTitlesCommand(CommandHandler handler, PlayerIdentifier player)
         {
@@ -523,251 +768,6 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, handler.PlayerLink(player.GetName()), newlevel);
 
             return true;
-        }
-
-        [CommandGroup("deleted")]
-        private class DeletedCommands
-        {
-            [Command("delete", RBACPermissions.CommandCharacterDeletedDelete, true)]
-            private static bool HandleCharacterDeletedDeleteCommand(CommandHandler handler, string needle)
-            {
-                List<DeletedInfo> foundList = new();
-
-                if (!GetDeletedCharacterInfoList(foundList, needle))
-                    return false;
-
-                if (foundList.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListEmpty);
-
-                    return false;
-                }
-
-                handler.SendSysMessage(CypherStrings.CharacterDeletedDelete);
-                HandleCharacterDeletedListHelper(foundList, handler);
-
-                // Call the appropriate function to delete them (current account for deleted characters is 0)
-                foreach (var info in foundList)
-                    Player.DeleteFromDB(info.guid, 0, false, true);
-
-                return true;
-            }
-
-            [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
-            private static bool HandleCharacterDeletedListCommand(CommandHandler handler, [OptionalArg] string needle)
-            {
-                List<DeletedInfo> foundList = new();
-
-                if (!GetDeletedCharacterInfoList(foundList, needle))
-                    return false;
-
-                // if no characters have been found, output a warning
-                if (foundList.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListEmpty);
-
-                    return false;
-                }
-
-                HandleCharacterDeletedListHelper(foundList, handler);
-
-                return true;
-            }
-
-            [Command("restore", RBACPermissions.CommandCharacterDeletedRestore, true)]
-            private static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, [OptionalArg] string newCharName, AccountIdentifier newAccount)
-            {
-                List<DeletedInfo> foundList = new();
-
-                if (!GetDeletedCharacterInfoList(foundList, needle))
-                    return false;
-
-                if (foundList.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListEmpty);
-
-                    return false;
-                }
-
-                handler.SendSysMessage(CypherStrings.CharacterDeletedRestore);
-                HandleCharacterDeletedListHelper(foundList, handler);
-
-                if (newCharName.IsEmpty())
-                {
-                    // Drop not existed account cases
-                    foreach (var info in foundList)
-                        HandleCharacterDeletedRestoreHelper(info, handler);
-
-                    return true;
-                }
-
-                if (foundList.Count == 1)
-                {
-                    DeletedInfo delInfo = foundList[0];
-
-                    // update Name
-                    delInfo.name = newCharName;
-
-                    // if new account provided update deleted info
-                    if (newAccount != null)
-                    {
-                        delInfo.accountId = newAccount.GetID();
-                        delInfo.accountName = newAccount.GetName();
-                    }
-
-                    HandleCharacterDeletedRestoreHelper(delInfo, handler);
-
-                    return true;
-                }
-
-                handler.SendSysMessage(CypherStrings.CharacterDeletedErrRename);
-
-                return false;
-            }
-
-            [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
-            private static bool HandleCharacterDeletedOldCommand(CommandHandler handler, ushort? days)
-            {
-                int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
-
-                if (days.HasValue)
-                    keepDays = days.Value;
-                else if (keepDays <= 0) // config option value 0 -> disabled and can't be used
-                    return false;
-
-                Player.DeleteOldCharacters(keepDays);
-
-                return true;
-            }
-
-            private static bool GetDeletedCharacterInfoList(List<DeletedInfo> foundList, string searchString)
-            {
-                SQLResult result;
-                PreparedStatement stmt;
-
-                if (!searchString.IsEmpty())
-                {
-                    // search by GUID
-                    if (searchString.IsNumber())
-                    {
-                        if (!ulong.TryParse(searchString, out ulong guid))
-                            return false;
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
-                        stmt.AddValue(0, guid);
-                        result = DB.Characters.Query(stmt);
-                    }
-                    // search by Name
-                    else
-                    {
-                        if (!ObjectManager.NormalizePlayerName(ref searchString))
-                            return false;
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_NAME);
-                        stmt.AddValue(0, searchString);
-                        result = DB.Characters.Query(stmt);
-                    }
-                }
-                else
-                {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO);
-                    result = DB.Characters.Query(stmt);
-                }
-
-                if (!result.IsEmpty())
-                    do
-                    {
-                        DeletedInfo info;
-
-                        info.guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-                        info.name = result.Read<string>(1);
-                        info.accountId = result.Read<uint>(2);
-
-                        // account Name will be empty for not existed account
-                        Global.AccountMgr.GetName(info.accountId, out info.accountName);
-                        info.deleteDate = result.Read<long>(3);
-                        foundList.Add(info);
-                    } while (result.NextRow());
-
-                return true;
-            }
-
-            private static void HandleCharacterDeletedListHelper(List<DeletedInfo> foundList, CommandHandler handler)
-            {
-                if (handler.GetSession() == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListHeader);
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
-                }
-
-                foreach (var info in foundList)
-                {
-                    string dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
-
-                    if (!handler.GetSession())
-                        handler.SendSysMessage(CypherStrings.CharacterDeletedListLineConsole,
-                                               info.guid.ToString(),
-                                               info.name,
-                                               info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
-                                               info.accountId,
-                                               dateStr);
-                    else
-                        handler.SendSysMessage(CypherStrings.CharacterDeletedListLineChat,
-                                               info.guid.ToString(),
-                                               info.name,
-                                               info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
-                                               info.accountId,
-                                               dateStr);
-                }
-
-                if (!handler.GetSession())
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedListBar);
-            }
-
-            private static void HandleCharacterDeletedRestoreHelper(DeletedInfo delInfo, CommandHandler handler)
-            {
-                if (delInfo.accountName.IsEmpty()) // account not exist
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipAccount, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
-
-                    return;
-                }
-
-                // check character Count
-                uint charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
-
-                if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
-
-                    return;
-                }
-
-                if (!Global.CharacterCacheStorage.GetCharacterGuidByName(delInfo.name).IsEmpty())
-                {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipName, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
-
-                    return;
-                }
-
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_RESTORE_DELETE_INFO);
-                stmt.AddValue(0, delInfo.name);
-                stmt.AddValue(1, delInfo.accountId);
-                stmt.AddValue(2, delInfo.guid.GetCounter());
-                DB.Characters.Execute(stmt);
-
-                Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(delInfo.guid, false, delInfo.name);
-            }
-
-            private struct DeletedInfo
-            {
-                public ObjectGuid guid;    // the GUID from the character
-                public string name;        // the character Name
-                public uint accountId;     // the account Id
-                public string accountName; // the account Name
-                public long deleteDate;    // the date at which the character has been deleted
-            }
         }
     }
 

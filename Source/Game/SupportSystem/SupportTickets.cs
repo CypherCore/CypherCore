@@ -68,11 +68,6 @@ namespace Game.SupportSystem
             return !_closedBy.IsEmpty();
         }
 
-        private bool IsFromPlayer(ObjectGuid guid)
-        {
-            return guid == _playerGuid;
-        }
-
         public bool IsAssigned()
         {
             return !_assignedTo.IsEmpty();
@@ -134,11 +129,6 @@ namespace Game.SupportSystem
             return "";
         }
 
-        private string GetComment()
-        {
-            return _comment;
-        }
-
         public virtual void SetAssignedTo(ObjectGuid guid, bool IsAdmin = false)
         {
             _assignedTo = guid;
@@ -175,6 +165,16 @@ namespace Game.SupportSystem
 
         public virtual void DeleteFromDB()
         {
+        }
+
+        private bool IsFromPlayer(ObjectGuid guid)
+        {
+            return guid == _playerGuid;
+        }
+
+        private string GetComment()
+        {
+            return _comment;
         }
     }
 
@@ -274,11 +274,6 @@ namespace Game.SupportSystem
             return ss.ToString();
         }
 
-        private string GetNote()
-        {
-            return _note;
-        }
-
         public void SetFacing(float facing)
         {
             _facing = facing;
@@ -287,6 +282,11 @@ namespace Game.SupportSystem
         public void SetNote(string note)
         {
             _note = note;
+        }
+
+        private string GetNote()
+        {
+            return _note;
         }
     }
 
@@ -436,31 +436,6 @@ namespace Game.SupportSystem
             return ss.ToString();
         }
 
-        private ObjectGuid GetTargetCharacterGuid()
-        {
-            return _targetCharacterGuid;
-        }
-
-        private ReportType GetReportType()
-        {
-            return _reportType;
-        }
-
-        private ReportMajorCategory GetMajorCategory()
-        {
-            return _majorCategory;
-        }
-
-        private ReportMinorCategory GetMinorCategoryFlags()
-        {
-            return _minorCategoryFlags;
-        }
-
-        private string GetNote()
-        {
-            return _note;
-        }
-
         public void SetFacing(float facing)
         {
             _facing = facing;
@@ -494,6 +469,31 @@ namespace Game.SupportSystem
         public void SetNote(string note)
         {
             _note = note;
+        }
+
+        private ObjectGuid GetTargetCharacterGuid()
+        {
+            return _targetCharacterGuid;
+        }
+
+        private ReportType GetReportType()
+        {
+            return _reportType;
+        }
+
+        private ReportMajorCategory GetMajorCategory()
+        {
+            return _majorCategory;
+        }
+
+        private ReportMinorCategory GetMinorCategoryFlags()
+        {
+            return _minorCategoryFlags;
+        }
+
+        private string GetNote()
+        {
+            return _note;
         }
     }
 
@@ -593,11 +593,6 @@ namespace Game.SupportSystem
             return ss.ToString();
         }
 
-        private string GetNote()
-        {
-            return _note;
-        }
-
         public void SetNote(string note)
         {
             _note = note;
@@ -606,6 +601,11 @@ namespace Game.SupportSystem
         public void SetFacing(float facing)
         {
             _facing = facing;
+        }
+
+        private string GetNote()
+        {
+            return _note;
         }
     }
 }

@@ -7,10 +7,56 @@ namespace Game.Entities
 {
     public class MovementInfo
     {
+        public struct TransportInfo
+        {
+            public void Reset()
+            {
+                Guid = ObjectGuid.Empty;
+                Pos = new Position();
+                Seat = -1;
+                Time = 0;
+                PrevTime = 0;
+                VehicleId = 0;
+            }
+
+            public ObjectGuid Guid;
+            public Position Pos;
+            public sbyte Seat;
+            public uint Time;
+            public uint PrevTime;
+            public uint VehicleId;
+        }
+
+        public struct MovementInertia
+        {
+            public int Id;
+            public Position Force;
+            public uint Lifetime;
+        }
+
+        public struct JumpInfo
+        {
+            public void Reset()
+            {
+                FallTime = 0;
+                Zspeed = SinAngle = CosAngle = XYspeed = 0.0f;
+            }
+
+            public uint FallTime;
+            public float Zspeed;
+            public float SinAngle;
+            public float CosAngle;
+            public float XYspeed;
+        }
+
+        // advflying
+        public struct AdvanFlying
+        {
+            public float ForwardVelocity;
+            public float UpVelocity;
+        }
+
         public AdvanFlying? AdvFlying;
-        private MovementFlag Flags { get; set; }
-        private MovementFlag2 Flags2 { get; set; }
-        private MovementFlags3 Flags3 { get; set; }
         public MovementInertia? Inertia;
         public JumpInfo Jump;
         public TransportInfo Transport;
@@ -27,6 +73,10 @@ namespace Game.Entities
             Transport.Reset();
             Jump.Reset();
         }
+
+        private MovementFlag Flags { get; set; }
+        private MovementFlag2 Flags2 { get; set; }
+        private MovementFlags3 Flags3 { get; set; }
 
         public ObjectGuid Guid { get; set; }
         public Position Pos { get; set; }
@@ -122,55 +172,6 @@ namespace Game.Entities
         public void ResetJump()
         {
             Jump.Reset();
-        }
-
-        public struct TransportInfo
-        {
-            public void Reset()
-            {
-                Guid = ObjectGuid.Empty;
-                Pos = new Position();
-                Seat = -1;
-                Time = 0;
-                PrevTime = 0;
-                VehicleId = 0;
-            }
-
-            public ObjectGuid Guid;
-            public Position Pos;
-            public sbyte Seat;
-            public uint Time;
-            public uint PrevTime;
-            public uint VehicleId;
-        }
-
-        public struct MovementInertia
-        {
-            public int Id;
-            public Position Force;
-            public uint Lifetime;
-        }
-
-        public struct JumpInfo
-        {
-            public void Reset()
-            {
-                FallTime = 0;
-                Zspeed = SinAngle = CosAngle = XYspeed = 0.0f;
-            }
-
-            public uint FallTime;
-            public float Zspeed;
-            public float SinAngle;
-            public float CosAngle;
-            public float XYspeed;
-        }
-
-        // advflying
-        public struct AdvanFlying
-        {
-            public float ForwardVelocity;
-            public float UpVelocity;
         }
     }
 }

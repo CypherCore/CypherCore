@@ -10,11 +10,11 @@ namespace Game.Movement
     internal class GenericMovementGenerator : MovementGenerator
     {
         private readonly uint _arrivalSpellId;
-        private ObjectGuid _arrivalSpellTargetGuid;
         private readonly TimeTracker _duration;
         private readonly uint _pointId;
         private readonly Action<MoveSplineInit> _splineInit;
         private readonly MovementGeneratorType _type;
+        private ObjectGuid _arrivalSpellTargetGuid;
 
         public GenericMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, uint id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
         {
@@ -89,6 +89,11 @@ namespace Game.Movement
                 MovementInform(owner);
         }
 
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return _type;
+        }
+
         private void MovementInform(Unit owner)
         {
             if (_arrivalSpellId != 0)
@@ -99,11 +104,6 @@ namespace Game.Movement
             if (creature != null &&
                 creature.GetAI() != null)
                 creature.GetAI().MovementInform(_type, _pointId);
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return _type;
         }
     }
 }

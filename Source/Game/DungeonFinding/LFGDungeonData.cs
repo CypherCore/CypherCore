@@ -9,17 +9,6 @@ namespace Game.DungeonFinding
 {
     public class LFGDungeonData
     {
-        public uint ContentTuningId { get; set; }
-        public Difficulty Difficulty { get; set; }
-        public uint Expansion { get; set; }
-        public uint Group { get; set; }
-
-        public uint Id { get; set; }
-        public uint Map { get; set; }
-        public string Name { get; set; }
-        public ushort RequiredItemLevel { get; set; }
-        public bool Seasonal { get; set; }
-        public LfgType Type { get; set; }
         public float X, Y, Z, O;
 
         public LFGDungeonData(LFGDungeonsRecord dbc)
@@ -34,6 +23,18 @@ namespace Game.DungeonFinding
             Difficulty = dbc.DifficultyID;
             Seasonal = dbc.Flags[0].HasAnyFlag(LfgFlags.Seasonal);
         }
+
+        public uint ContentTuningId { get; set; }
+        public Difficulty Difficulty { get; set; }
+        public uint Expansion { get; set; }
+        public uint Group { get; set; }
+
+        public uint Id { get; set; }
+        public uint Map { get; set; }
+        public string Name { get; set; }
+        public ushort RequiredItemLevel { get; set; }
+        public bool Seasonal { get; set; }
+        public LfgType Type { get; set; }
 
         // Helpers
         public uint Entry()

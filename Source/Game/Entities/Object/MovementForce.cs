@@ -12,8 +12,8 @@ namespace Game.Entities
     {
         public Vector3 Direction;
         public ObjectGuid ID;
-        public float Magnitude { get; set; }
         public Vector3 Origin;
+        public float Magnitude { get; set; }
         public uint TransportID { get; set; }
         public MovementForceType Type { get; set; }
         public int Unused910 { get; set; }

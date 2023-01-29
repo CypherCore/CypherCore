@@ -4,6 +4,5 @@
 namespace Game.BattleGrounds.Zones.DeepwindGorge
 {
     internal class DeepwindGorge
-    {
-    }
+    {}
 }

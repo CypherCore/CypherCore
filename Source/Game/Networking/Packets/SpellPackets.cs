@@ -89,6 +89,18 @@ namespace Game.Networking.Packets
 
     public class SpellCategoryCooldown : ServerPacket
     {
+        public class CategoryCooldownInfo
+        {
+            public uint Category;   // SpellCategory Id
+            public int ModCooldown; // Reduced Cooldown in ms
+
+            public CategoryCooldownInfo(uint category, int cooldown)
+            {
+                Category = category;
+                ModCooldown = cooldown;
+            }
+        }
+
         public List<CategoryCooldownInfo> CategoryCooldowns = new();
 
         public SpellCategoryCooldown() : base(ServerOpcodes.CategoryCooldown, ConnectionType.Instance)
@@ -103,18 +115,6 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteUInt32(cooldown.Category);
                 _worldPacket.WriteInt32(cooldown.ModCooldown);
-            }
-        }
-
-        public class CategoryCooldownInfo
-        {
-            public uint Category;   // SpellCategory Id
-            public int ModCooldown; // Reduced Cooldown in ms
-
-            public CategoryCooldownInfo(uint category, int cooldown)
-            {
-                Category = category;
-                ModCooldown = cooldown;
             }
         }
     }
@@ -1342,11 +1342,11 @@ namespace Game.Networking.Packets
 
     public class SpellCastLogData
     {
+        private readonly List<SpellLogPowerData> PowerData = new();
         private uint Armor;
         private int AttackPower;
 
         private long Health;
-        private readonly List<SpellLogPowerData> PowerData = new();
         private int SpellPower;
 
         public void Initialize(Unit unit)
@@ -1433,6 +1433,60 @@ namespace Game.Networking.Packets
         public ContentTuningType TuningType;
         public int Unused927;
 
+        public bool GenerateDataForUnits(Unit attacker, Unit target)
+        {
+            Player playerAttacker = attacker.ToPlayer();
+            Creature creatureAttacker = attacker.ToCreature();
+
+            if (playerAttacker)
+            {
+                Player playerTarget = target.ToPlayer();
+                Creature creatureTarget = target.ToCreature();
+
+                if (playerTarget)
+                    return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
+                else if (creatureTarget)
+                    if (creatureTarget.HasScalableLevels())
+                        return GenerateDataPlayerToCreature(playerAttacker, creatureTarget);
+            }
+            else if (creatureAttacker)
+            {
+                Player playerTarget = target.ToPlayer();
+                Creature creatureTarget = target.ToCreature();
+
+                if (playerTarget)
+                {
+                    if (creatureAttacker.HasScalableLevels())
+                        return GenerateDataCreatureToPlayer(creatureAttacker, playerTarget);
+                }
+                else if (creatureTarget)
+                {
+                    if (creatureAttacker.HasScalableLevels() ||
+                        creatureTarget.HasScalableLevels())
+                        return GenerateDataCreatureToCreature(creatureAttacker, creatureTarget);
+                }
+            }
+
+            return false;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteFloat(PlayerItemLevel);
+            data.WriteFloat(TargetItemLevel);
+            data.WriteInt16(PlayerLevelDelta);
+            data.WriteUInt16(ScalingHealthItemLevelCurveID);
+            data.WriteUInt8(TargetLevel);
+            data.WriteUInt8(Expansion);
+            data.WriteInt8(TargetScalingLevelDelta);
+            data.WriteUInt32((uint)Flags);
+            data.WriteUInt32(PlayerContentTuningID);
+            data.WriteUInt32(TargetContentTuningID);
+            data.WriteInt32(Unused927);
+            data.WriteBits(TuningType, 4);
+            data.FlushBits();
+        }
+
         private bool GenerateDataPlayerToPlayer(Player attacker, Player target)
         {
             return false;
@@ -1488,60 +1542,6 @@ namespace Game.Networking.Packets
 
             return true;
         }
-
-        public bool GenerateDataForUnits(Unit attacker, Unit target)
-        {
-            Player playerAttacker = attacker.ToPlayer();
-            Creature creatureAttacker = attacker.ToCreature();
-
-            if (playerAttacker)
-            {
-                Player playerTarget = target.ToPlayer();
-                Creature creatureTarget = target.ToCreature();
-
-                if (playerTarget)
-                    return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
-                else if (creatureTarget)
-                    if (creatureTarget.HasScalableLevels())
-                        return GenerateDataPlayerToCreature(playerAttacker, creatureTarget);
-            }
-            else if (creatureAttacker)
-            {
-                Player playerTarget = target.ToPlayer();
-                Creature creatureTarget = target.ToCreature();
-
-                if (playerTarget)
-                {
-                    if (creatureAttacker.HasScalableLevels())
-                        return GenerateDataCreatureToPlayer(creatureAttacker, playerTarget);
-                }
-                else if (creatureTarget)
-                {
-                    if (creatureAttacker.HasScalableLevels() ||
-                        creatureTarget.HasScalableLevels())
-                        return GenerateDataCreatureToCreature(creatureAttacker, creatureTarget);
-                }
-            }
-
-            return false;
-        }
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteFloat(PlayerItemLevel);
-            data.WriteFloat(TargetItemLevel);
-            data.WriteInt16(PlayerLevelDelta);
-            data.WriteUInt16(ScalingHealthItemLevelCurveID);
-            data.WriteUInt8(TargetLevel);
-            data.WriteUInt8(Expansion);
-            data.WriteInt8(TargetScalingLevelDelta);
-            data.WriteUInt32((uint)Flags);
-            data.WriteUInt32(PlayerContentTuningID);
-            data.WriteUInt32(TargetContentTuningID);
-            data.WriteInt32(Unused927);
-            data.WriteBits(TuningType, 4);
-            data.FlushBits();
-        }
     }
 
     public struct SpellCastVisual
@@ -1585,7 +1585,6 @@ namespace Game.Networking.Packets
         public ObjectGuid CastID;
         public ushort CastLevel = 1;
         public ObjectGuid? CastUnit;
-        private readonly ContentTuningParams ContentTuning;
         public int ContentTuningID;
         public int? Duration;
         public List<float> EstimatedPoints = new();
@@ -1593,8 +1592,9 @@ namespace Game.Networking.Packets
         public List<float> Points = new();
         public int? Remaining;
         public int SpellID;
-        private readonly float? TimeMod;
         public SpellCastVisual Visual;
+        private readonly ContentTuningParams ContentTuning;
+        private readonly float? TimeMod;
 
         public void Write(WorldPacket data)
         {

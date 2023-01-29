@@ -8,10 +8,7 @@ namespace Game.DungeonFinding
 {
     public class LfgProposalPlayer
     {
-        public LfgAnswer Accept { get; set; }
         public ObjectGuid Group;
-
-        public LfgRoles Role { get; set; }
 
         public LfgProposalPlayer()
         {
@@ -19,5 +16,9 @@ namespace Game.DungeonFinding
             Accept = LfgAnswer.Pending;
             Group = ObjectGuid.Empty;
         }
+
+        public LfgAnswer Accept { get; set; }
+
+        public LfgRoles Role { get; set; }
     }
 }

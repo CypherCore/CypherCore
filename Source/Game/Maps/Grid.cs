@@ -9,11 +9,11 @@ namespace Game.Maps
 {
     public class GridInfo
     {
+        private readonly PeriodicTimer vis_Update;
         private TimeTracker i_timer;
 
         private ushort i_unloadActiveLockCount; // lock from active object spawn points (prevent clone loading)
         private bool i_unloadExplicitLock;      // explicit manual lock or config setting
-        private readonly PeriodicTimer vis_Update;
 
         public GridInfo()
         {
@@ -56,11 +56,6 @@ namespace Game.Maps
             if (i_unloadActiveLockCount != 0) --i_unloadActiveLockCount;
         }
 
-        private void SetTimer(TimeTracker pTimer)
-        {
-            i_timer = pTimer;
-        }
-
         public void ResetTimeTracker(long interval)
         {
             i_timer.Reset((uint)interval);
@@ -75,17 +70,22 @@ namespace Game.Maps
         {
             return vis_Update;
         }
+
+        private void SetTimer(TimeTracker pTimer)
+        {
+            i_timer = pTimer;
+        }
     }
 
     public class Grid
     {
-        private uint gridId;
         private readonly GridInfo gridInfo;
-        private bool gridObjectDataLoaded;
-        private GridState gridState;
         private readonly uint gridX;
         private readonly uint gridY;
         private readonly GridCell[][] i_cells = new GridCell[MapConst.MaxCells][];
+        private uint gridId;
+        private bool gridObjectDataLoaded;
+        private GridState gridState;
 
         public Grid(uint id, uint x, uint y, long expiry, bool unload = true)
         {
@@ -117,11 +117,6 @@ namespace Game.Maps
         public uint GetGridId()
         {
             return gridId;
-        }
-
-        private void SetGridId(uint id)
-        {
-            gridId = id;
         }
 
         public GridState GetGridState()
@@ -157,11 +152,6 @@ namespace Game.Maps
         public GridInfo GetGridInfoRef()
         {
             return gridInfo;
-        }
-
-        private TimeTracker GetTimeTracker()
-        {
-            return gridInfo.GetTimeTracker();
         }
 
         public bool GetUnloadLock()
@@ -279,6 +269,16 @@ namespace Game.Maps
                     count += i_cells[x][y].GetWorldObjectCountInGrid<T>();
 
             return count;
+        }
+
+        private void SetGridId(uint id)
+        {
+            gridId = id;
+        }
+
+        private TimeTracker GetTimeTracker()
+        {
+            return gridInfo.GetTimeTracker();
         }
     }
 

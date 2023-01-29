@@ -9,11 +9,11 @@ namespace Game
 {
     internal class AuctionsResultBuilder<T>
     {
-        private bool _hasMoreResults;
         private readonly List<T> _items = new();
         private readonly AuctionHouseResultLimits _maxResults;
         private readonly uint _offset;
         private readonly IComparer<T> _sorter;
+        private bool _hasMoreResults;
 
         public AuctionsResultBuilder(uint offset, IComparer<T> sorter, AuctionHouseResultLimits maxResults)
         {

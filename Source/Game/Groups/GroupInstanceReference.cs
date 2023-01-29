@@ -8,11 +8,6 @@ namespace Game.Groups
 {
     public class GroupInstanceReference : Reference<Group, InstanceMap>
     {
-        ~GroupInstanceReference()
-        {
-            Unlink();
-        }
-
         public new GroupInstanceReference Next()
         {
             return (GroupInstanceReference)base.Next();
@@ -21,6 +16,11 @@ namespace Game.Groups
         public override void TargetObjectBuildLink()
         {
             GetTarget().LinkOwnedInstance(this);
+        }
+
+        ~GroupInstanceReference()
+        {
+            Unlink();
         }
     }
 

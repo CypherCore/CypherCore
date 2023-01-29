@@ -8,9 +8,9 @@ namespace Game
 {
     internal class SHA1Randx
     {
-        private byte[] o0 = new byte[20];
         private readonly byte[] o1 = new byte[20];
         private readonly byte[] o2 = new byte[20];
+        private byte[] o0 = new byte[20];
 
         private SHA1 sh;
         private uint taken;

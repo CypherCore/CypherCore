@@ -11,6 +11,52 @@ namespace Game
 {
     public class AuctionsBucketData
     {
+        public class Sorter : IComparer<AuctionsBucketData>
+        {
+            private readonly Locale _locale;
+            private readonly int _sortCount;
+            private readonly AuctionSortDef[] _sorts;
+
+            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
+            {
+                _locale = locale;
+                _sorts = sorts;
+                _sortCount = sortCount;
+            }
+
+            public int Compare(AuctionsBucketData left, AuctionsBucketData right)
+            {
+                for (var i = 0; i < _sortCount; ++i)
+                {
+                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
+
+                    if (ordering != 0)
+                        return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
+                }
+
+                return left.Key != right.Key ? 1 : 0;
+            }
+
+            private long CompareColumns(AuctionHouseSortOrder column, AuctionsBucketData left, AuctionsBucketData right)
+            {
+                switch (column)
+                {
+                    case AuctionHouseSortOrder.Price:
+                    case AuctionHouseSortOrder.Bid:
+                    case AuctionHouseSortOrder.Buyout:
+                        return (long)(left.MinPrice - right.MinPrice);
+                    case AuctionHouseSortOrder.Name:
+                        return left.FullName[(int)_locale].CompareTo(right.FullName[(int)_locale]);
+                    case AuctionHouseSortOrder.Level:
+                        return left.SortLevel - right.SortLevel;
+                    default:
+                        break;
+                }
+
+                return 0;
+            }
+        }
+
         public List<AuctionPosting> Auctions { get; set; } = new();
         public string[] FullName { get; set; } = new string[(int)Locale.Total];
         public byte InventoryType { get; set; }
@@ -67,52 +113,6 @@ namespace Game
                     if (!player.GetSession().GetCollectionMgr().HasItemAppearance(appearance.Id).PermAppearance)
                         bucketInfo.ContainsOnlyCollectedAppearances = false;
                 }
-        }
-
-        public class Sorter : IComparer<AuctionsBucketData>
-        {
-            private readonly Locale _locale;
-            private readonly int _sortCount;
-            private readonly AuctionSortDef[] _sorts;
-
-            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
-            {
-                _locale = locale;
-                _sorts = sorts;
-                _sortCount = sortCount;
-            }
-
-            public int Compare(AuctionsBucketData left, AuctionsBucketData right)
-            {
-                for (var i = 0; i < _sortCount; ++i)
-                {
-                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
-
-                    if (ordering != 0)
-                        return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
-                }
-
-                return left.Key != right.Key ? 1 : 0;
-            }
-
-            private long CompareColumns(AuctionHouseSortOrder column, AuctionsBucketData left, AuctionsBucketData right)
-            {
-                switch (column)
-                {
-                    case AuctionHouseSortOrder.Price:
-                    case AuctionHouseSortOrder.Bid:
-                    case AuctionHouseSortOrder.Buyout:
-                        return (long)(left.MinPrice - right.MinPrice);
-                    case AuctionHouseSortOrder.Name:
-                        return left.FullName[(int)_locale].CompareTo(right.FullName[(int)_locale]);
-                    case AuctionHouseSortOrder.Level:
-                        return left.SortLevel - right.SortLevel;
-                    default:
-                        break;
-                }
-
-                return 0;
-            }
         }
     }
 }

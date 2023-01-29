@@ -5,8 +5,8 @@ namespace Game.Entities
 {
     public class ResurrectionData
     {
-        public uint Aura { get; set; }
         public ObjectGuid GUID;
+        public uint Aura { get; set; }
         public uint Health { get; set; }
         public WorldLocation Location { get; set; } = new();
         public uint Mana { get; set; }

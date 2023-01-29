@@ -9,9 +9,10 @@ namespace Game.Scripting
 {
     public class ScriptRegistry
     {
+        private readonly Dictionary<uint, IScriptObject> _scriptMap = new();
+
         // Counter used for code-only scripts.
         private uint _scriptIdCounter;
-        private readonly Dictionary<uint, IScriptObject> _scriptMap = new();
 
         public void AddScript(IScriptObject script)
         {

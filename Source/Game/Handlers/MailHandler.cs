@@ -18,6 +18,15 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendShowMailBox(ObjectGuid guid)
+        {
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = guid;
+            npcInteraction.InteractionType = PlayerInteractionType.MailInfo;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
+        }
+
         private bool CanOpenMailBox(ObjectGuid guid)
         {
             if (guid == GetPlayer().GetGUID())
@@ -790,15 +799,6 @@ namespace Game
             }
 
             SendPacket(result);
-        }
-
-        public void SendShowMailBox(ObjectGuid guid)
-        {
-            NPCInteractionOpenResult npcInteraction = new();
-            npcInteraction.Npc = guid;
-            npcInteraction.InteractionType = PlayerInteractionType.MailInfo;
-            npcInteraction.Success = true;
-            SendPacket(npcInteraction);
         }
     }
 }

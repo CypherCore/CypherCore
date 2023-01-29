@@ -59,22 +59,6 @@ public class Log
         outInfo(LogFilter.Server, "https://github.com/CypherCore/CypherCore \r\n");
     }
 
-    private static bool ShouldLog(LogFilter type, LogLevel level)
-    {
-        // Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
-        if (level < lowestLogLevel)
-            return false;
-
-        Logger logger = GetLoggerByType(type);
-
-        if (logger == null)
-            return false;
-
-        LogLevel logLevel = logger.getLogLevel();
-
-        return logLevel != LogLevel.Disabled && logLevel <= level;
-    }
-
     public static void outLog(LogFilter type, LogLevel level, string text, params object[] args)
     {
         if (!ShouldLog(type, level))
@@ -150,6 +134,64 @@ public class Log
 
         Logger logger = GetLoggerByType(LogFilter.Commands);
         logger.write(msg);
+    }
+
+    public static bool SetLogLevel(string name, int newLeveli, bool isLogger = true)
+    {
+        if (newLeveli < 0)
+            return false;
+
+        LogLevel newLevel = (LogLevel)newLeveli;
+
+        if (isLogger)
+        {
+            foreach (var logger in loggers.Values)
+                if (logger.getName() == name)
+                {
+                    logger.setLogLevel(newLevel);
+
+                    if (newLevel != LogLevel.Disabled &&
+                        newLevel < lowestLogLevel)
+                        lowestLogLevel = newLevel;
+
+                    return true;
+                }
+
+            return false;
+        }
+        else
+        {
+            Appender appender = GetAppenderByName(name);
+
+            if (appender == null)
+                return false;
+
+            appender.setLogLevel(newLevel);
+        }
+
+        return true;
+    }
+
+    public static void SetRealmId(uint id)
+    {
+        foreach (var appender in appenders.Values)
+            appender.setRealmId(id);
+    }
+
+    private static bool ShouldLog(LogFilter type, LogLevel level)
+    {
+        // Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
+        if (level < lowestLogLevel)
+            return false;
+
+        Logger logger = GetLoggerByType(type);
+
+        if (logger == null)
+            return false;
+
+        LogLevel logLevel = logger.getLogLevel();
+
+        return logLevel != LogLevel.Disabled && logLevel <= level;
     }
 
     private static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
@@ -328,48 +370,6 @@ public class Log
             return null;
 
         return GetLoggerByType(parentLogger);
-    }
-
-    public static bool SetLogLevel(string name, int newLeveli, bool isLogger = true)
-    {
-        if (newLeveli < 0)
-            return false;
-
-        LogLevel newLevel = (LogLevel)newLeveli;
-
-        if (isLogger)
-        {
-            foreach (var logger in loggers.Values)
-                if (logger.getName() == name)
-                {
-                    logger.setLogLevel(newLevel);
-
-                    if (newLevel != LogLevel.Disabled &&
-                        newLevel < lowestLogLevel)
-                        lowestLogLevel = newLevel;
-
-                    return true;
-                }
-
-            return false;
-        }
-        else
-        {
-            Appender appender = GetAppenderByName(name);
-
-            if (appender == null)
-                return false;
-
-            appender.setLogLevel(newLevel);
-        }
-
-        return true;
-    }
-
-    public static void SetRealmId(uint id)
-    {
-        foreach (var appender in appenders.Values)
-            appender.setRealmId(id);
     }
 }
 

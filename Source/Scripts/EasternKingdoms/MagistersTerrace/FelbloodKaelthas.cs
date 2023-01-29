@@ -97,12 +97,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _gravityLapseTargetCount = 0;
-            _firstGravityLapse = true;
-        }
-
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
@@ -358,13 +352,19 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
             _scheduler.Update(diff);
         }
+
+        private void Initialize()
+        {
+            _gravityLapseTargetCount = 0;
+            _firstGravityLapse = true;
+        }
     }
 
     [Script]
     internal class npc_felblood_kaelthas_phoenix : ScriptedAI
     {
-        private ObjectGuid _eggGUID;
         private readonly InstanceScript _instance;
+        private ObjectGuid _eggGUID;
 
         private bool _isInEgg;
 
@@ -372,12 +372,6 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
         {
             _instance = creature.GetInstanceScript();
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            me.SetReactState(ReactStates.Passive);
-            _isInEgg = false;
         }
 
         public override void IsSummonedBy(WorldObject summoner)
@@ -464,6 +458,12 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
+
+        private void Initialize()
+        {
+            me.SetReactState(ReactStates.Passive);
+            _isInEgg = false;
+        }
     }
 
     [Script] // 44191 - Flame Strike
@@ -476,17 +476,17 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
             return ValidateSpellInfo(SpellIds.FlameStrikeDamage);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
 
             if (target)
                 target.CastSpell(target, SpellIds.FlameStrikeDamage);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 }

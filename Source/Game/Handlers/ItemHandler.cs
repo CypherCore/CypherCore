@@ -15,6 +15,29 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
+        {
+            EnchantmentLog packet = new();
+            packet.Owner = owner;
+            packet.Caster = caster;
+            packet.ItemGUID = itemGuid;
+            packet.ItemID = itemId;
+            packet.Enchantment = enchantId;
+            packet.EnchantSlot = enchantSlot;
+
+            GetPlayer().SendMessageToSet(packet, true);
+        }
+
+        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint slot, uint Duration)
+        {
+            ItemEnchantTimeUpdate data = new();
+            data.ItemGuid = Itemguid;
+            data.DurationLeft = Duration;
+            data.Slot = slot;
+            data.OwnerGuid = Playerguid;
+            SendPacket(data);
+        }
+
         [WorldPacketHandler(ClientOpcodes.SplitItem, Processing = PacketProcessing.Inplace)]
         private void HandleSplitItem(SplitItem splitItem)
         {
@@ -708,29 +731,6 @@ namespace Game
 
             GetPlayer().RemoveItem(packet.ContainerSlotA, packet.SlotA, true);
             GetPlayer().StoreItem(dest, item, true);
-        }
-
-        public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
-        {
-            EnchantmentLog packet = new();
-            packet.Owner = owner;
-            packet.Caster = caster;
-            packet.ItemGUID = itemGuid;
-            packet.ItemID = itemId;
-            packet.Enchantment = enchantId;
-            packet.EnchantSlot = enchantSlot;
-
-            GetPlayer().SendMessageToSet(packet, true);
-        }
-
-        public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint slot, uint Duration)
-        {
-            ItemEnchantTimeUpdate data = new();
-            data.ItemGuid = Itemguid;
-            data.DurationLeft = Duration;
-            data.Slot = slot;
-            data.OwnerGuid = Playerguid;
-            SendPacket(data);
         }
 
         [WorldPacketHandler(ClientOpcodes.WrapItem)]

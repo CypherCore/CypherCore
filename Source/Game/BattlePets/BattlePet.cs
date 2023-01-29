@@ -12,10 +12,9 @@ namespace Game.BattlePets
 {
     public class BattlePet
     {
+        public BattlePetStruct PacketInfo;
         public DeclinedName DeclinedName { get; set; }
         public long NameTimestamp { get; set; }
-
-        public BattlePetStruct PacketInfo;
         public BattlePetSaveInfo SaveInfo { get; set; }
 
         public void CalculateStats()

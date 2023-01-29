@@ -7,11 +7,6 @@ namespace Game.Collision
 {
     public class AreaAndLiquidData
     {
-        public AreaInfo? AreaInfoData;
-
-        public float FloorZ = MapConst.VMAPInvalidHeightValue;
-        public LiquidInfo? LiquidInfoData;
-
         public struct AreaInfo
         {
             public int AdtId;
@@ -39,5 +34,10 @@ namespace Game.Collision
                 Level = level;
             }
         }
+
+        public AreaInfo? AreaInfoData;
+
+        public float FloorZ = MapConst.VMAPInvalidHeightValue;
+        public LiquidInfo? LiquidInfoData;
     }
 }

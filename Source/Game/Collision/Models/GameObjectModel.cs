@@ -22,48 +22,6 @@ namespace Game.Collision
         private bool _isWmo;
         private GameObjectModelOwnerBase _owner;
 
-        private bool Initialize(GameObjectModelOwnerBase modelOwner)
-        {
-            var modelData = StaticModelList.Models.LookupByKey(modelOwner.GetDisplayId());
-
-            if (modelData == null)
-                return false;
-
-            AxisAlignedBox mdl_box = new(modelData.Bound);
-
-            // ignore models with no bounds
-            if (mdl_box == AxisAlignedBox.Zero())
-            {
-                Log.outError(LogFilter.Server, "GameObject model {0} has zero bounds, loading skipped", modelData.Name);
-
-                return false;
-            }
-
-            _iModel = Global.VMapMgr.AcquireModelInstance(modelData.Name);
-
-            if (_iModel == null)
-                return false;
-
-            _iPos = modelOwner.GetPosition();
-            _iScale = modelOwner.GetScale();
-            _iInvScale = 1.0f / _iScale;
-
-            Matrix4x4 iRotation = modelOwner.GetRotation().ToMatrix();
-            iRotation.Inverse(out _iInvRot);
-            // transform bounding box:
-            mdl_box = new AxisAlignedBox(mdl_box.Lo * _iScale, mdl_box.Hi * _iScale);
-            AxisAlignedBox rotated_bounds = new();
-
-            for (int i = 0; i < 8; ++i)
-                rotated_bounds.merge(iRotation.Multiply(mdl_box.corner(i)));
-
-            _iBound = rotated_bounds + _iPos;
-            _owner = modelOwner;
-            _isWmo = modelData.IsWmo;
-
-            return true;
-        }
-
         public static GameObjectModel Create(GameObjectModelOwnerBase modelOwner)
         {
             GameObjectModel mdl = new();
@@ -240,11 +198,6 @@ namespace Game.Collision
             _collisionEnabled = enable;
         }
 
-        private bool IsCollisionEnabled()
-        {
-            return _collisionEnabled;
-        }
-
         public bool IsMapObject()
         {
             return _isWmo;
@@ -304,6 +257,53 @@ namespace Game.Collision
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObject models in {1} ms", StaticModelList.Models.Count, Time.GetMSTimeDiffToNow(oldMSTime));
 
             return true;
+        }
+
+        private bool Initialize(GameObjectModelOwnerBase modelOwner)
+        {
+            var modelData = StaticModelList.Models.LookupByKey(modelOwner.GetDisplayId());
+
+            if (modelData == null)
+                return false;
+
+            AxisAlignedBox mdl_box = new(modelData.Bound);
+
+            // ignore models with no bounds
+            if (mdl_box == AxisAlignedBox.Zero())
+            {
+                Log.outError(LogFilter.Server, "GameObject model {0} has zero bounds, loading skipped", modelData.Name);
+
+                return false;
+            }
+
+            _iModel = Global.VMapMgr.AcquireModelInstance(modelData.Name);
+
+            if (_iModel == null)
+                return false;
+
+            _iPos = modelOwner.GetPosition();
+            _iScale = modelOwner.GetScale();
+            _iInvScale = 1.0f / _iScale;
+
+            Matrix4x4 iRotation = modelOwner.GetRotation().ToMatrix();
+            iRotation.Inverse(out _iInvRot);
+            // transform bounding box:
+            mdl_box = new AxisAlignedBox(mdl_box.Lo * _iScale, mdl_box.Hi * _iScale);
+            AxisAlignedBox rotated_bounds = new();
+
+            for (int i = 0; i < 8; ++i)
+                rotated_bounds.merge(iRotation.Multiply(mdl_box.corner(i)));
+
+            _iBound = rotated_bounds + _iPos;
+            _owner = modelOwner;
+            _isWmo = modelData.IsWmo;
+
+            return true;
+        }
+
+        private bool IsCollisionEnabled()
+        {
+            return _collisionEnabled;
         }
     }
 }

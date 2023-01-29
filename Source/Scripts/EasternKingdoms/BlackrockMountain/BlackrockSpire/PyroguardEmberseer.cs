@@ -200,6 +200,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             }
         }
 
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
         private void UpdateRunes(GameObjectState state)
         {
             // update all runes
@@ -237,16 +247,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
 
             if (rune7)
                 rune7.SetGoState(state);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            _scheduler.Update(diff);
-
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
         }
     }
 

@@ -7,9 +7,9 @@ namespace Game.Entities
 {
     public class PlayerCurrency
     {
+        public PlayerCurrencyState State;
         public byte Flags { get; set; }
         public uint Quantity { get; set; }
-        public PlayerCurrencyState State;
         public uint TrackedQuantity { get; set; }
         public uint WeeklyQuantity { get; set; }
     }

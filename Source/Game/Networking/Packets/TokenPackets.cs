@@ -22,10 +22,19 @@ namespace Game.Networking.Packets
 
     internal class CommerceTokenGetLogResponse : ServerPacket
     {
-        private readonly List<AuctionableTokenInfo> AuctionableTokenAuctionableList = new();
+        private struct AuctionableTokenInfo
+        {
+            public ulong UnkInt1;
+            public long UnkInt2;
+            public uint Owner;
+            public ulong BuyoutPrice;
+            public uint DurationLeft;
+        }
+
         public TokenResult Result;
 
         public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
+        private readonly List<AuctionableTokenInfo> AuctionableTokenAuctionableList = new();
 
         public CommerceTokenGetLogResponse() : base(ServerOpcodes.CommerceTokenGetLogResponse, ConnectionType.Instance)
         {
@@ -45,15 +54,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.Owner);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.DurationLeft);
             }
-        }
-
-        private struct AuctionableTokenInfo
-        {
-            public ulong UnkInt1;
-            public long UnkInt2;
-            public uint Owner;
-            public ulong BuyoutPrice;
-            public uint DurationLeft;
         }
     }
 

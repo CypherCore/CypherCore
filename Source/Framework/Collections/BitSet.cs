@@ -7,6 +7,65 @@ namespace System.Collections
 {
     public class BitSet : ICollection, ICloneable
     {
+        [Serializable]
+        private class BitArrayEnumeratorSimple : IEnumerator, ICloneable
+        {
+            private readonly BitSet _bitarray;
+            private readonly int _version;
+            private bool _currentElement;
+            private int _index;
+
+            internal BitArrayEnumeratorSimple(BitSet bitarray)
+            {
+                _bitarray = bitarray;
+                _index = -1;
+                _version = bitarray._version;
+            }
+
+            public object Clone()
+            {
+                return MemberwiseClone();
+            }
+
+            public bool MoveNext()
+            {
+                //if (version != bitarray._version) throw new InvalidOperationException(Environment.GetResourceString(ResId.InvalidOperation_EnumFailedVersion));
+                if (_index < (_bitarray.Count - 1))
+                {
+                    _index++;
+                    _currentElement = _bitarray.Get(_index);
+
+                    return true;
+                }
+                else
+                {
+                    _index = _bitarray.Count;
+                }
+
+                return false;
+            }
+
+            public virtual object Current
+            {
+                get
+                {
+                    if (_index == -1)
+                        throw new InvalidOperationException();
+
+                    if (_index >= _bitarray.Count)
+                        throw new InvalidOperationException();
+
+                    return _currentElement;
+                }
+            }
+
+            public void Reset()
+            {
+                //if (version != bitarray._version) throw new InvalidOperationException(Environment.GetResourceString(ResId.InvalidOperation_EnumFailedVersion));
+                _index = -1;
+            }
+        }
+
         // XPerY=n means that n Xs can be stored in 1 Y. 
         private const int BitsPerInt32 = 32;
         private const int BytesPerInt32 = 4;
@@ -299,65 +358,6 @@ namespace System.Collections
             Cypher.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
 
             return n > 0 ? (((n - 1) / div) + 1) : 0;
-        }
-
-        [Serializable]
-        private class BitArrayEnumeratorSimple : IEnumerator, ICloneable
-        {
-            private readonly BitSet _bitarray;
-            private bool _currentElement;
-            private int _index;
-            private readonly int _version;
-
-            internal BitArrayEnumeratorSimple(BitSet bitarray)
-            {
-                _bitarray = bitarray;
-                _index = -1;
-                _version = bitarray._version;
-            }
-
-            public object Clone()
-            {
-                return MemberwiseClone();
-            }
-
-            public bool MoveNext()
-            {
-                //if (version != bitarray._version) throw new InvalidOperationException(Environment.GetResourceString(ResId.InvalidOperation_EnumFailedVersion));
-                if (_index < (_bitarray.Count - 1))
-                {
-                    _index++;
-                    _currentElement = _bitarray.Get(_index);
-
-                    return true;
-                }
-                else
-                {
-                    _index = _bitarray.Count;
-                }
-
-                return false;
-            }
-
-            public virtual object Current
-            {
-                get
-                {
-                    if (_index == -1)
-                        throw new InvalidOperationException();
-
-                    if (_index >= _bitarray.Count)
-                        throw new InvalidOperationException();
-
-                    return _currentElement;
-                }
-            }
-
-            public void Reset()
-            {
-                //if (version != bitarray._version) throw new InvalidOperationException(Environment.GetResourceString(ResId.InvalidOperation_EnumFailedVersion));
-                _index = -1;
-            }
         }
     }
 }

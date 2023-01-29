@@ -19,6 +19,17 @@ namespace Game.Groups
 {
     public class Group
     {
+        private readonly List<Player> _invitees = new();
+        private readonly TimeTracker _leaderOfflineTimer = new();
+
+        // Raid markers
+        private readonly RaidMarker[] _markers = new RaidMarker[MapConst.RaidMarkersCount];
+        private readonly GroupRefManager _memberMgr = new();
+
+        private readonly List<MemberSlot> _memberSlots = new();
+        private readonly GroupInstanceRefManager _ownedInstancesMgr = new();
+        private readonly Dictionary<uint, Tuple<ObjectGuid, uint>> _recentInstances = new();
+        private readonly ObjectGuid[] _targetIcons = new ObjectGuid[MapConst.TargetIconsCount];
         private uint _activeMarkers;
         private BattleField _bfGroup;
         private Battleground _bgGroup;
@@ -27,32 +38,21 @@ namespace Game.Groups
         private GroupCategory _groupCategory;
         private GroupFlags _groupFlags;
         private ObjectGuid _guid;
-        private readonly List<Player> _invitees = new();
         private bool _isLeaderOffline;
         private byte _leaderFactionGroup;
         private ObjectGuid _leaderGuid;
         private string _leaderName;
-        private readonly TimeTracker _leaderOfflineTimer = new();
         private Difficulty _legacyRaidDifficulty;
         private ObjectGuid _looterGuid;
         private LootMethod _lootMethod;
         private ItemQuality _lootThreshold;
-
-        // Raid markers
-        private readonly RaidMarker[] _markers = new RaidMarker[MapConst.RaidMarkersCount];
         private ObjectGuid _masterLooterGuid;
-        private readonly GroupRefManager _memberMgr = new();
-
-        private readonly List<MemberSlot> _memberSlots = new();
-        private readonly GroupInstanceRefManager _ownedInstancesMgr = new();
         private Difficulty _raidDifficulty;
 
         // Ready Check
         private bool _readyCheckStarted;
         private TimeSpan _readyCheckTimer;
-        private readonly Dictionary<uint, Tuple<ObjectGuid, uint>> _recentInstances = new();
         private byte[] _subGroupsCounts;
-        private readonly ObjectGuid[] _targetIcons = new ObjectGuid[MapConst.TargetIconsCount];
 
         public Group()
         {
@@ -79,46 +79,6 @@ namespace Game.Groups
             }
 
             UpdateReadyCheck(diff);
-        }
-
-        private void SelectNewPartyOrRaidLeader()
-        {
-            Player newLeader = null;
-
-            // Attempt to give leadership to main assistant first
-            if (IsRaidGroup())
-                foreach (var memberSlot in _memberSlots)
-                    if (memberSlot.Flags.HasFlag(GroupMemberFlags.Assistant))
-                    {
-                        Player player = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
-
-                        if (player != null)
-                        {
-                            newLeader = player;
-
-                            break;
-                        }
-                    }
-
-            // If there aren't assistants in raid, or if the group is not a raid, pick the first available member
-            if (!newLeader)
-                foreach (var memberSlot in _memberSlots)
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
-
-                    if (player != null)
-                    {
-                        newLeader = player;
-
-                        break;
-                    }
-                }
-
-            if (newLeader)
-            {
-                ChangeLeader(newLeader.GetGUID());
-                SendUpdate();
-            }
         }
 
         public bool Create(Player leader)
@@ -979,18 +939,6 @@ namespace Game.Groups
             player.SendPacket(partyUpdate);
         }
 
-        private void SendUpdateDestroyGroupToPlayer(Player player)
-        {
-            PartyUpdate partyUpdate = new();
-            partyUpdate.PartyFlags = GroupFlags.Destroyed;
-            partyUpdate.PartyIndex = (byte)_groupCategory;
-            partyUpdate.PartyType = GroupType.None;
-            partyUpdate.PartyGUID = _guid;
-            partyUpdate.MyIndex = -1;
-            partyUpdate.SequenceNum = player.NextGroupUpdateSequenceNumber(_groupCategory);
-            player.SendPacket(partyUpdate);
-        }
-
         public void UpdatePlayerOutOfRange(Player player)
         {
             if (!player ||
@@ -1043,31 +991,6 @@ namespace Game.Groups
                     (group == -1 || refe.GetSubGroup() == group))
                     player.SendPacket(packet);
             }
-        }
-
-        private bool _setMembersGroup(ObjectGuid guid, byte group)
-        {
-            var slot = _getMemberSlot(guid);
-
-            if (slot == null)
-                return false;
-
-            slot.Group = group;
-
-            SubGroupCounterIncrease(group);
-
-            if (!IsBGGroup() &&
-                !IsBFGroup())
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP);
-
-                stmt.AddValue(0, group);
-                stmt.AddValue(1, guid.GetCounter());
-
-                DB.Characters.Execute(stmt);
-            }
-
-            return true;
         }
 
         public bool SameSubGroup(Player member1, Player member2)
@@ -1527,14 +1450,6 @@ namespace Game.Groups
             _ownedInstancesMgr.InsertLast(refe);
         }
 
-        private void _homebindIfInstance(Player player)
-        {
-            if (player &&
-                !player.IsGameMaster() &&
-                CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon())
-                player.InstanceValid = false;
-        }
-
         public void BroadcastGroupUpdate()
         {
             // FG: HACK: Force Flags update on group leave - for values update hack
@@ -1594,17 +1509,6 @@ namespace Game.Groups
             return slot.Roles;
         }
 
-        private void UpdateReadyCheck(uint diff)
-        {
-            if (!_readyCheckStarted)
-                return;
-
-            _readyCheckTimer -= TimeSpan.FromMilliseconds(diff);
-
-            if (_readyCheckTimer <= TimeSpan.Zero)
-                EndReadyCheck();
-        }
-
         public void StartReadyCheck(ObjectGuid starterGuid, sbyte partyIndex, TimeSpan duration)
         {
             if (_readyCheckStarted)
@@ -1630,31 +1534,6 @@ namespace Game.Groups
             BroadcastPacket(readyCheckStarted, false);
         }
 
-        private void EndReadyCheck()
-        {
-            if (!_readyCheckStarted)
-                return;
-
-            _readyCheckStarted = false;
-            _readyCheckTimer = TimeSpan.Zero;
-
-            ResetMemberReadyChecked();
-
-            ReadyCheckCompleted readyCheckCompleted = new();
-            readyCheckCompleted.PartyIndex = 0;
-            readyCheckCompleted.PartyGUID = _guid;
-            BroadcastPacket(readyCheckCompleted, false);
-        }
-
-        private bool IsReadyCheckCompleted()
-        {
-            foreach (var member in _memberSlots)
-                if (!member.ReadyChecked)
-                    return false;
-
-            return true;
-        }
-
         public void SetMemberReadyCheck(ObjectGuid guid, bool ready)
         {
             if (!_readyCheckStarted)
@@ -1664,43 +1543,6 @@ namespace Game.Groups
 
             if (slot != null)
                 SetMemberReadyCheck(slot, ready);
-        }
-
-        private void SetMemberReadyCheck(MemberSlot slot, bool ready)
-        {
-            ReadyCheckResponse response = new();
-            response.PartyGUID = _guid;
-            response.Player = slot.Guid;
-            response.IsReady = ready;
-            BroadcastPacket(response, false);
-
-            SetMemberReadyChecked(slot);
-        }
-
-        private void SetOfflineMembersReadyChecked()
-        {
-            foreach (MemberSlot member in _memberSlots)
-            {
-                Player player = Global.ObjAccessor.FindConnectedPlayer(member.Guid);
-
-                if (!player ||
-                    !player.GetSession())
-                    SetMemberReadyCheck(member, false);
-            }
-        }
-
-        private void SetMemberReadyChecked(MemberSlot slot)
-        {
-            slot.ReadyChecked = true;
-
-            if (IsReadyCheckCompleted())
-                EndReadyCheck();
-        }
-
-        private void ResetMemberReadyChecked()
-        {
-            foreach (MemberSlot member in _memberSlots)
-                member.ReadyChecked = false;
         }
 
         public void AddRaidMarker(byte markerId, uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
@@ -1790,11 +1632,6 @@ namespace Game.Groups
         public ulong GetLowGUID()
         {
             return _guid.GetCounter();
-        }
-
-        private string GetLeaderName()
-        {
-            return _leaderName;
         }
 
         public LootMethod GetLootMethod()
@@ -1949,69 +1786,11 @@ namespace Game.Groups
             _memberMgr.InsertFirst(pRef);
         }
 
-        private void DelinkMember(ObjectGuid guid)
-        {
-            GroupReference refe = _memberMgr.GetFirst();
-
-            while (refe != null)
-            {
-                GroupReference nextRef = refe.Next();
-
-                if (refe.GetSource().GetGUID() == guid)
-                {
-                    refe.Unlink();
-
-                    break;
-                }
-
-                refe = nextRef;
-            }
-        }
-
-        private void _initRaidSubGroupsCounter()
-        {
-            // Sub group counters initialization
-            if (_subGroupsCounts == null)
-                _subGroupsCounts = new byte[MapConst.MaxRaidSubGroups];
-
-            foreach (var memberSlot in _memberSlots)
-                ++_subGroupsCounts[memberSlot.Group];
-        }
-
-        private MemberSlot _getMemberSlot(ObjectGuid guid)
-        {
-            foreach (var member in _memberSlots)
-                if (member.Guid == guid)
-                    return member;
-
-            return null;
-        }
-
-        private void SubGroupCounterIncrease(byte subgroup)
-        {
-            if (_subGroupsCounts != null)
-                ++_subGroupsCounts[subgroup];
-        }
-
-        private void SubGroupCounterDecrease(byte subgroup)
-        {
-            if (_subGroupsCounts != null)
-                --_subGroupsCounts[subgroup];
-        }
-
         public void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag)
         {
             foreach (var member in _memberSlots)
                 if (member.Flags.HasAnyFlag(flag))
                     member.Flags &= ~flag;
-        }
-
-        private void ToggleGroupMemberFlag(MemberSlot slot, GroupMemberFlags flag, bool apply)
-        {
-            if (apply)
-                slot.Flags |= flag;
-            else
-                slot.Flags &= ~flag;
         }
 
         public void StartLeaderOfflineTimer()
@@ -2073,11 +1852,6 @@ namespace Game.Groups
             return _groupFlags;
         }
 
-        private bool IsReadyCheckStarted()
-        {
-            return _readyCheckStarted;
-        }
-
         public void BroadcastWorker(Action<Player> worker)
         {
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
@@ -2108,6 +1882,232 @@ namespace Game.Groups
         public static implicit operator bool(Group group)
         {
             return group != null;
+        }
+
+        private void SelectNewPartyOrRaidLeader()
+        {
+            Player newLeader = null;
+
+            // Attempt to give leadership to main assistant first
+            if (IsRaidGroup())
+                foreach (var memberSlot in _memberSlots)
+                    if (memberSlot.Flags.HasFlag(GroupMemberFlags.Assistant))
+                    {
+                        Player player = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
+
+                        if (player != null)
+                        {
+                            newLeader = player;
+
+                            break;
+                        }
+                    }
+
+            // If there aren't assistants in raid, or if the group is not a raid, pick the first available member
+            if (!newLeader)
+                foreach (var memberSlot in _memberSlots)
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(memberSlot.Guid);
+
+                    if (player != null)
+                    {
+                        newLeader = player;
+
+                        break;
+                    }
+                }
+
+            if (newLeader)
+            {
+                ChangeLeader(newLeader.GetGUID());
+                SendUpdate();
+            }
+        }
+
+        private void SendUpdateDestroyGroupToPlayer(Player player)
+        {
+            PartyUpdate partyUpdate = new();
+            partyUpdate.PartyFlags = GroupFlags.Destroyed;
+            partyUpdate.PartyIndex = (byte)_groupCategory;
+            partyUpdate.PartyType = GroupType.None;
+            partyUpdate.PartyGUID = _guid;
+            partyUpdate.MyIndex = -1;
+            partyUpdate.SequenceNum = player.NextGroupUpdateSequenceNumber(_groupCategory);
+            player.SendPacket(partyUpdate);
+        }
+
+        private bool _setMembersGroup(ObjectGuid guid, byte group)
+        {
+            var slot = _getMemberSlot(guid);
+
+            if (slot == null)
+                return false;
+
+            slot.Group = group;
+
+            SubGroupCounterIncrease(group);
+
+            if (!IsBGGroup() &&
+                !IsBFGroup())
+            {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_SUBGROUP);
+
+                stmt.AddValue(0, group);
+                stmt.AddValue(1, guid.GetCounter());
+
+                DB.Characters.Execute(stmt);
+            }
+
+            return true;
+        }
+
+        private void _homebindIfInstance(Player player)
+        {
+            if (player &&
+                !player.IsGameMaster() &&
+                CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon())
+                player.InstanceValid = false;
+        }
+
+        private void UpdateReadyCheck(uint diff)
+        {
+            if (!_readyCheckStarted)
+                return;
+
+            _readyCheckTimer -= TimeSpan.FromMilliseconds(diff);
+
+            if (_readyCheckTimer <= TimeSpan.Zero)
+                EndReadyCheck();
+        }
+
+        private void EndReadyCheck()
+        {
+            if (!_readyCheckStarted)
+                return;
+
+            _readyCheckStarted = false;
+            _readyCheckTimer = TimeSpan.Zero;
+
+            ResetMemberReadyChecked();
+
+            ReadyCheckCompleted readyCheckCompleted = new();
+            readyCheckCompleted.PartyIndex = 0;
+            readyCheckCompleted.PartyGUID = _guid;
+            BroadcastPacket(readyCheckCompleted, false);
+        }
+
+        private bool IsReadyCheckCompleted()
+        {
+            foreach (var member in _memberSlots)
+                if (!member.ReadyChecked)
+                    return false;
+
+            return true;
+        }
+
+        private void SetMemberReadyCheck(MemberSlot slot, bool ready)
+        {
+            ReadyCheckResponse response = new();
+            response.PartyGUID = _guid;
+            response.Player = slot.Guid;
+            response.IsReady = ready;
+            BroadcastPacket(response, false);
+
+            SetMemberReadyChecked(slot);
+        }
+
+        private void SetOfflineMembersReadyChecked()
+        {
+            foreach (MemberSlot member in _memberSlots)
+            {
+                Player player = Global.ObjAccessor.FindConnectedPlayer(member.Guid);
+
+                if (!player ||
+                    !player.GetSession())
+                    SetMemberReadyCheck(member, false);
+            }
+        }
+
+        private void SetMemberReadyChecked(MemberSlot slot)
+        {
+            slot.ReadyChecked = true;
+
+            if (IsReadyCheckCompleted())
+                EndReadyCheck();
+        }
+
+        private void ResetMemberReadyChecked()
+        {
+            foreach (MemberSlot member in _memberSlots)
+                member.ReadyChecked = false;
+        }
+
+        private string GetLeaderName()
+        {
+            return _leaderName;
+        }
+
+        private void DelinkMember(ObjectGuid guid)
+        {
+            GroupReference refe = _memberMgr.GetFirst();
+
+            while (refe != null)
+            {
+                GroupReference nextRef = refe.Next();
+
+                if (refe.GetSource().GetGUID() == guid)
+                {
+                    refe.Unlink();
+
+                    break;
+                }
+
+                refe = nextRef;
+            }
+        }
+
+        private void _initRaidSubGroupsCounter()
+        {
+            // Sub group counters initialization
+            if (_subGroupsCounts == null)
+                _subGroupsCounts = new byte[MapConst.MaxRaidSubGroups];
+
+            foreach (var memberSlot in _memberSlots)
+                ++_subGroupsCounts[memberSlot.Group];
+        }
+
+        private MemberSlot _getMemberSlot(ObjectGuid guid)
+        {
+            foreach (var member in _memberSlots)
+                if (member.Guid == guid)
+                    return member;
+
+            return null;
+        }
+
+        private void SubGroupCounterIncrease(byte subgroup)
+        {
+            if (_subGroupsCounts != null)
+                ++_subGroupsCounts[subgroup];
+        }
+
+        private void SubGroupCounterDecrease(byte subgroup)
+        {
+            if (_subGroupsCounts != null)
+                --_subGroupsCounts[subgroup];
+        }
+
+        private void ToggleGroupMemberFlag(MemberSlot slot, GroupMemberFlags flag, bool apply)
+        {
+            if (apply)
+                slot.Flags |= flag;
+            else
+                slot.Flags &= ~flag;
+        }
+
+        private bool IsReadyCheckStarted()
+        {
+            return _readyCheckStarted;
         }
     }
 }

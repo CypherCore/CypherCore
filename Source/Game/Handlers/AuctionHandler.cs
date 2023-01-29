@@ -15,6 +15,55 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendAuctionHello(ObjectGuid guid, Creature unit)
+        {
+            if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq))
+            {
+                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.AuctionReq), WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq));
+
+                return;
+            }
+
+            AuctionHouseRecord ahEntry = Global.AuctionHouseMgr.GetAuctionHouseEntry(unit.GetFaction());
+
+            if (ahEntry == null)
+                return;
+
+            AuctionHelloResponse auctionHelloResponse = new();
+            auctionHelloResponse.Guid = guid;
+            auctionHelloResponse.OpenForBusiness = true;
+            SendPacket(auctionHelloResponse);
+        }
+
+        public void SendAuctionCommandResult(uint auctionId, AuctionCommand command, AuctionResult errorCode, TimeSpan delayForNextAction, InventoryResult bagError = 0)
+        {
+            AuctionCommandResult auctionCommandResult = new();
+            auctionCommandResult.AuctionID = auctionId;
+            auctionCommandResult.Command = (int)command;
+            auctionCommandResult.ErrorCode = (int)errorCode;
+            auctionCommandResult.BagResult = (int)bagError;
+            auctionCommandResult.DesiredDelay = (uint)delayForNextAction.TotalSeconds;
+            SendPacket(auctionCommandResult);
+        }
+
+        public void SendAuctionClosedNotification(AuctionPosting auction, float mailDelay, bool sold)
+        {
+            AuctionClosedNotification packet = new();
+            packet.Info.Initialize(auction);
+            packet.ProceedsMailDelay = mailDelay;
+            packet.Sold = sold;
+            SendPacket(packet);
+        }
+
+        public void SendAuctionOwnerBidNotification(AuctionPosting auction)
+        {
+            AuctionOwnerBidNotification packet = new();
+            packet.Info.Initialize(auction);
+            packet.Bidder = auction.Bidder;
+            packet.MinIncrement = auction.CalculateMinIncrement();
+            SendPacket(packet);
+        }
+
         [WorldPacketHandler(ClientOpcodes.AuctionBrowseQuery)]
         private void HandleAuctionBrowseQuery(AuctionBrowseQuery browseQuery)
         {
@@ -1139,55 +1188,6 @@ namespace Game
             commodityQuoteResult.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
 
             SendPacket(commodityQuoteResult);
-        }
-
-        public void SendAuctionHello(ObjectGuid guid, Creature unit)
-        {
-            if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq))
-            {
-                SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.AuctionReq), WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq));
-
-                return;
-            }
-
-            AuctionHouseRecord ahEntry = Global.AuctionHouseMgr.GetAuctionHouseEntry(unit.GetFaction());
-
-            if (ahEntry == null)
-                return;
-
-            AuctionHelloResponse auctionHelloResponse = new();
-            auctionHelloResponse.Guid = guid;
-            auctionHelloResponse.OpenForBusiness = true;
-            SendPacket(auctionHelloResponse);
-        }
-
-        public void SendAuctionCommandResult(uint auctionId, AuctionCommand command, AuctionResult errorCode, TimeSpan delayForNextAction, InventoryResult bagError = 0)
-        {
-            AuctionCommandResult auctionCommandResult = new();
-            auctionCommandResult.AuctionID = auctionId;
-            auctionCommandResult.Command = (int)command;
-            auctionCommandResult.ErrorCode = (int)errorCode;
-            auctionCommandResult.BagResult = (int)bagError;
-            auctionCommandResult.DesiredDelay = (uint)delayForNextAction.TotalSeconds;
-            SendPacket(auctionCommandResult);
-        }
-
-        public void SendAuctionClosedNotification(AuctionPosting auction, float mailDelay, bool sold)
-        {
-            AuctionClosedNotification packet = new();
-            packet.Info.Initialize(auction);
-            packet.ProceedsMailDelay = mailDelay;
-            packet.Sold = sold;
-            SendPacket(packet);
-        }
-
-        public void SendAuctionOwnerBidNotification(AuctionPosting auction)
-        {
-            AuctionOwnerBidNotification packet = new();
-            packet.Info.Initialize(auction);
-            packet.Bidder = auction.Bidder;
-            packet.MinIncrement = auction.CalculateMinIncrement();
-            SendPacket(packet);
         }
     }
 }

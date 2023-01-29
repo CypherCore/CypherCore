@@ -65,14 +65,14 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.BloodthirstHeal);
         }
 
-        private void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 3, SpellEffectName.Dummy, SpellScriptHookType.EffectHit));
+        }
+
+        private void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, true);
         }
     }
 
@@ -86,6 +86,11 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ChargeEffect, SpellIds.ChargeEffectBlazingTrail);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             uint spellId = SpellIds.ChargeEffect;
@@ -95,17 +100,17 @@ namespace Scripts.Spells.Warrior
 
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 126661 - Warrior Charge Drop Fire Periodic
     internal class spell_warr_charge_drop_fire_periodic : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
+        }
 
         private void DropFireVisual(AuraEffect aurEff)
         {
@@ -118,11 +123,6 @@ namespace Scripts.Spells.Warrior
                     Vector4 loc = GetTarget().MoveSpline.ComputePosition(timeOffset);
                     GetTarget().SendPlaySpellVisual(new Position(loc.X, loc.Y, loc.Z), 0.0f, Misc.SpellVisualBlazingCharge, 0, 0, 1.0f, true);
                 }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -137,6 +137,11 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ChargePauseRageDecay, SpellIds.ChargeRootEffect, SpellIds.ChargeSlowEffect);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleCharge, 0, SpellEffectName.Charge, SpellScriptHookType.LaunchTarget));
+        }
+
         private void HandleCharge(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -144,11 +149,6 @@ namespace Scripts.Spells.Warrior
             caster.CastSpell(caster, SpellIds.ChargePauseRageDecay, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
             caster.CastSpell(target, SpellIds.ChargeRootEffect, true);
             caster.CastSpell(target, SpellIds.ChargeSlowEffect, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleCharge, 0, SpellEffectName.Charge, SpellScriptHookType.LaunchTarget));
         }
     }
 
@@ -241,6 +241,11 @@ namespace Scripts.Spells.Warrior
                                      SpellIds.Taunt);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(AfterJump, 1, SpellEffectName.JumpDest, SpellScriptHookType.EffectHit));
+        }
+
         private void AfterJump(uint effIndex)
         {
             if (GetCaster().HasAura(SpellIds.GlyphOfHeroicLeap))
@@ -248,11 +253,6 @@ namespace Scripts.Spells.Warrior
 
             if (GetCaster().HasAura(SpellIds.ImprovedHeroicLeap))
                 GetCaster().GetSpellHistory().ResetCooldown(SpellIds.Taunt, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(AfterJump, 1, SpellEffectName.JumpDest, SpellScriptHookType.EffectHit));
         }
     }
 
@@ -278,15 +278,15 @@ namespace Scripts.Spells.Warrior
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void FilterTargets(List<WorldObject> unitList)
-        {
-            unitList.Remove(GetExplTargetWorldObject());
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaEnemy));
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 2, Targets.UnitSrcAreaEnemy));
+        }
+
+        private void FilterTargets(List<WorldObject> unitList)
+        {
+            unitList.Remove(GetExplTargetWorldObject());
         }
     }
 
@@ -321,17 +321,17 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.MortalWounds);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit target = GetHitUnit();
 
             if (target)
                 GetCaster().CastSpell(target, SpellIds.MortalWounds, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -350,17 +350,17 @@ namespace Scripts.Spells.Warrior
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleScript(uint effIndex)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
 
             GetCaster().CastSpell(GetHitUnit(), SpellIds.RallyingCry, args);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -413,14 +413,14 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.StormBoltStun);
         }
 
-        private void HandleOnHit(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.StormBoltStun, true);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleOnHit, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleOnHit(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.StormBoltStun, true);
         }
     }
 
@@ -435,6 +435,11 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ColossusSmash);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply)); // correct?
+        }
+
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Remove cooldown on Colossus Smash
@@ -442,11 +447,6 @@ namespace Scripts.Spells.Warrior
 
             if (player)
                 player.GetSpellHistory().ResetCooldown(SpellIds.ColossusSmash, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply)); // correct?
         }
     }
 
@@ -510,6 +510,11 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.TraumaEffect);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             Unit target = eventInfo.GetActionTarget();
@@ -518,11 +523,6 @@ namespace Scripts.Spells.Warrior
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, damage);
             GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -555,6 +555,11 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.ImpendingVictory);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleOnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleOnProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             if (procInfo.GetActor().GetTypeId() == TypeId.Player &&
@@ -562,11 +567,6 @@ namespace Scripts.Spells.Warrior
                 PreventDefaultAction();
 
             procInfo.GetActor().GetSpellHistory().ResetCooldown(SpellIds.ImpendingVictory, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleOnProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 

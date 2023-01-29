@@ -4,6 +4,5 @@
 namespace Game.BattleGrounds.Zones.TwinPeaks
 {
     internal class TwinPeaks
-    {
-    }
+    {}
 }

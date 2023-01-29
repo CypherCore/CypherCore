@@ -121,8 +121,6 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
 
         private readonly BannerTimer[] _bannerTimers = new BannerTimer[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];
         private readonly uint[] _honorScoreTics = new uint[SharedConst.PvpTeamsCount];
-        private uint _honorTics;
-        private bool _isInformedNearVictory;
         private readonly uint[] _lastTick = new uint[SharedConst.PvpTeamsCount];
 
         /// <summary>
@@ -138,6 +136,8 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
         private readonly uint[] _nodeTimers = new uint[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];
         private readonly ABNodeStatus[] _prevNodes = new ABNodeStatus[ABBattlegroundNodes.DYNAMIC_NODES_COUNT];
         private readonly uint[] _reputationScoreTics = new uint[SharedConst.PvpTeamsCount];
+        private uint _honorTics;
+        private bool _isInformedNearVictory;
         private uint _reputationTics;
 
         public BgArathiBasin(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
@@ -392,164 +392,6 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
 
                     break;
             }
-        }
-
-        private void _CreateBanner(byte node, ABNodeStatus type, int teamIndex, bool delay)
-        {
-            // Just put it into the queue
-            if (delay)
-            {
-                _bannerTimers[node].Timer = 2000;
-                _bannerTimers[node].Type = (byte)type;
-                _bannerTimers[node].TeamIndex = (byte)teamIndex;
-
-                return;
-            }
-
-            int obj = node * 8 + (byte)type + teamIndex;
-
-            SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
-
-            // handle aura with banner
-            if (type == 0)
-                return;
-
-            obj = node * 8 + (type == ABNodeStatus.Occupied ? 5 + teamIndex : 7);
-            SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
-        }
-
-        private void _DelBanner(byte node, ABNodeStatus type, byte teamIndex)
-        {
-            int obj = node * 8 + (byte)type + teamIndex;
-            SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
-
-            // handle aura with banner
-            if (type == 0)
-                return;
-
-            obj = node * 8 + (type == ABNodeStatus.Occupied ? 5 + teamIndex : 7);
-            SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
-        }
-
-        private void _SendNodeUpdate(byte node)
-        {
-            // Send node owner State update to refresh map icons on client
-            int[] idPlusArray =
-            {
-                0, 2, 3, 0, 1
-            };
-
-            int[] statePlusArray =
-            {
-                0, 2, 0, 2, 0
-            };
-
-            if (_prevNodes[node] != 0)
-                UpdateWorldState(NodeStates[node] + idPlusArray[(int)_prevNodes[node]], 0);
-            else
-                UpdateWorldState(NodeIcons[node], 0);
-
-            UpdateWorldState(NodeStates[node] + idPlusArray[(byte)_nodes[node]], 1);
-
-            switch (node)
-            {
-                case ABBattlegroundNodes.NODE_STABLES:
-                    UpdateWorldState(ABWorldStates.STABLES_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
-                    UpdateWorldState(ABWorldStates.STABLES_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
-                    UpdateWorldState(ABWorldStates.STABLES_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
-
-                    break;
-                case ABBattlegroundNodes.NODE_BLACKSMITH:
-                    UpdateWorldState(ABWorldStates.BLACKSMITH_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
-                    UpdateWorldState(ABWorldStates.BLACKSMITH_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
-                    UpdateWorldState(ABWorldStates.BLACKSMITH_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
-
-                    break;
-                case ABBattlegroundNodes.NODE_FARM:
-                    UpdateWorldState(ABWorldStates.FARM_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
-                    UpdateWorldState(ABWorldStates.FARM_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
-                    UpdateWorldState(ABWorldStates.FARM_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
-
-                    break;
-                case ABBattlegroundNodes.NODE_LUMBER_MILL:
-                    UpdateWorldState(ABWorldStates.LUMBER_MILL_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
-                    UpdateWorldState(ABWorldStates.LUMBER_MILL_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
-                    UpdateWorldState(ABWorldStates.LUMBER_MILL_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
-
-                    break;
-                case ABBattlegroundNodes.NODE_GOLD_MINE:
-                    UpdateWorldState(ABWorldStates.GOLD_MINE_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
-                    UpdateWorldState(ABWorldStates.GOLD_MINE_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
-                    UpdateWorldState(ABWorldStates.GOLD_MINE_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
-
-                    break;
-                default:
-                    break;
-            }
-
-            // How many bases each team owns
-            byte ally = 0, horde = 0;
-
-            for (byte i = 0; i < ABBattlegroundNodes.DYNAMIC_NODES_COUNT; ++i)
-                if (_nodes[i] == ABNodeStatus.AllyOccupied)
-                    ++ally;
-                else if (_nodes[i] == ABNodeStatus.HordeOccupied)
-                    ++horde;
-
-            UpdateWorldState(ABWorldStates.OCCUPIED_BASES_ALLY, ally);
-            UpdateWorldState(ABWorldStates.OCCUPIED_BASES_HORDE, horde);
-        }
-
-        private void _NodeOccupied(byte node, Team team)
-        {
-            if (!AddSpiritGuide(node, SpiritGuidePos[node], GetTeamIndexByTeamId(team)))
-                Log.outError(LogFilter.Battleground, "Failed to spawn spirit guide! point: {0}, team: {1}, ", node, team);
-
-            if (node >= ABBattlegroundNodes.DYNAMIC_NODES_COUNT) //only dynamic nodes, no start points
-                return;
-
-            byte capturedNodes = 0;
-
-            for (byte i = 0; i < ABBattlegroundNodes.DYNAMIC_NODES_COUNT; ++i)
-                if (_nodes[i] == ABNodeStatus.Occupied + GetTeamIndexByTeamId(team) &&
-                    _nodeTimers[i] == 0)
-                    ++capturedNodes;
-
-            if (capturedNodes >= 5)
-                CastSpellOnTeam(BattlegroundConst.AbQuestReward5Bases, team);
-
-            if (capturedNodes >= 4)
-                CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
-
-            Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
-
-            if (!trigger)
-                trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
-
-            //add bonus honor aura trigger creature when node is accupied
-            //cast bonus aura (+50% honor in 25yards)
-            //aura should only apply to players who have accupied the node, set correct faction for trigger
-            if (trigger)
-            {
-                trigger.SetFaction(team == Team.Alliance ? 84u : 83u);
-                trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
-            }
-        }
-
-        private void _NodeDeOccupied(byte node)
-        {
-            //only dynamic nodes, no start points
-            if (node >= ABBattlegroundNodes.DYNAMIC_NODES_COUNT)
-                return;
-
-            //remove bonus honor aura trigger creature when node is lost
-            DelCreature(node + 7); //null checks are in DelCreature! 0-6 spirit guides
-
-            RelocateDeadPlayers(BgCreatures[node]);
-
-            DelCreature(node);
-
-            // buff object isn't despawned
         }
 
         //Invoked if a player used a banner as a gameobject
@@ -869,6 +711,164 @@ namespace Game.BattleGrounds.Zones.ArathiBasin
             }
 
             return true;
+        }
+
+        private void _CreateBanner(byte node, ABNodeStatus type, int teamIndex, bool delay)
+        {
+            // Just put it into the queue
+            if (delay)
+            {
+                _bannerTimers[node].Timer = 2000;
+                _bannerTimers[node].Type = (byte)type;
+                _bannerTimers[node].TeamIndex = (byte)teamIndex;
+
+                return;
+            }
+
+            int obj = node * 8 + (byte)type + teamIndex;
+
+            SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
+
+            // handle aura with banner
+            if (type == 0)
+                return;
+
+            obj = node * 8 + (type == ABNodeStatus.Occupied ? 5 + teamIndex : 7);
+            SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
+        }
+
+        private void _DelBanner(byte node, ABNodeStatus type, byte teamIndex)
+        {
+            int obj = node * 8 + (byte)type + teamIndex;
+            SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
+
+            // handle aura with banner
+            if (type == 0)
+                return;
+
+            obj = node * 8 + (type == ABNodeStatus.Occupied ? 5 + teamIndex : 7);
+            SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
+        }
+
+        private void _SendNodeUpdate(byte node)
+        {
+            // Send node owner State update to refresh map icons on client
+            int[] idPlusArray =
+            {
+                0, 2, 3, 0, 1
+            };
+
+            int[] statePlusArray =
+            {
+                0, 2, 0, 2, 0
+            };
+
+            if (_prevNodes[node] != 0)
+                UpdateWorldState(NodeStates[node] + idPlusArray[(int)_prevNodes[node]], 0);
+            else
+                UpdateWorldState(NodeIcons[node], 0);
+
+            UpdateWorldState(NodeStates[node] + idPlusArray[(byte)_nodes[node]], 1);
+
+            switch (node)
+            {
+                case ABBattlegroundNodes.NODE_STABLES:
+                    UpdateWorldState(ABWorldStates.STABLES_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
+                    UpdateWorldState(ABWorldStates.STABLES_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
+                    UpdateWorldState(ABWorldStates.STABLES_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
+
+                    break;
+                case ABBattlegroundNodes.NODE_BLACKSMITH:
+                    UpdateWorldState(ABWorldStates.BLACKSMITH_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
+                    UpdateWorldState(ABWorldStates.BLACKSMITH_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
+                    UpdateWorldState(ABWorldStates.BLACKSMITH_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
+
+                    break;
+                case ABBattlegroundNodes.NODE_FARM:
+                    UpdateWorldState(ABWorldStates.FARM_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
+                    UpdateWorldState(ABWorldStates.FARM_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
+                    UpdateWorldState(ABWorldStates.FARM_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
+
+                    break;
+                case ABBattlegroundNodes.NODE_LUMBER_MILL:
+                    UpdateWorldState(ABWorldStates.LUMBER_MILL_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
+                    UpdateWorldState(ABWorldStates.LUMBER_MILL_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
+                    UpdateWorldState(ABWorldStates.LUMBER_MILL_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
+
+                    break;
+                case ABBattlegroundNodes.NODE_GOLD_MINE:
+                    UpdateWorldState(ABWorldStates.GOLD_MINE_ICON_NEW, (int)_nodes[node] + statePlusArray[(int)_nodes[node]]);
+                    UpdateWorldState(ABWorldStates.GOLD_MINE_HORDE_CONTROL_STATE, _nodes[node] == ABNodeStatus.HordeOccupied ? 2 : _nodes[node] == ABNodeStatus.HordeContested ? 1 : 0);
+                    UpdateWorldState(ABWorldStates.GOLD_MINE_ALLIANCE_CONTROL_STATE, _nodes[node] == ABNodeStatus.AllyOccupied ? 2 : _nodes[node] == ABNodeStatus.AllyContested ? 1 : 0);
+
+                    break;
+                default:
+                    break;
+            }
+
+            // How many bases each team owns
+            byte ally = 0, horde = 0;
+
+            for (byte i = 0; i < ABBattlegroundNodes.DYNAMIC_NODES_COUNT; ++i)
+                if (_nodes[i] == ABNodeStatus.AllyOccupied)
+                    ++ally;
+                else if (_nodes[i] == ABNodeStatus.HordeOccupied)
+                    ++horde;
+
+            UpdateWorldState(ABWorldStates.OCCUPIED_BASES_ALLY, ally);
+            UpdateWorldState(ABWorldStates.OCCUPIED_BASES_HORDE, horde);
+        }
+
+        private void _NodeOccupied(byte node, Team team)
+        {
+            if (!AddSpiritGuide(node, SpiritGuidePos[node], GetTeamIndexByTeamId(team)))
+                Log.outError(LogFilter.Battleground, "Failed to spawn spirit guide! point: {0}, team: {1}, ", node, team);
+
+            if (node >= ABBattlegroundNodes.DYNAMIC_NODES_COUNT) //only dynamic nodes, no start points
+                return;
+
+            byte capturedNodes = 0;
+
+            for (byte i = 0; i < ABBattlegroundNodes.DYNAMIC_NODES_COUNT; ++i)
+                if (_nodes[i] == ABNodeStatus.Occupied + GetTeamIndexByTeamId(team) &&
+                    _nodeTimers[i] == 0)
+                    ++capturedNodes;
+
+            if (capturedNodes >= 5)
+                CastSpellOnTeam(BattlegroundConst.AbQuestReward5Bases, team);
+
+            if (capturedNodes >= 4)
+                CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
+
+            Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
+
+            if (!trigger)
+                trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
+
+            //add bonus honor aura trigger creature when node is accupied
+            //cast bonus aura (+50% honor in 25yards)
+            //aura should only apply to players who have accupied the node, set correct faction for trigger
+            if (trigger)
+            {
+                trigger.SetFaction(team == Team.Alliance ? 84u : 83u);
+                trigger.CastSpell(trigger, BattlegroundConst.SpellHonorableDefender25y, false);
+            }
+        }
+
+        private void _NodeDeOccupied(byte node)
+        {
+            //only dynamic nodes, no start points
+            if (node >= ABBattlegroundNodes.DYNAMIC_NODES_COUNT)
+                return;
+
+            //remove bonus honor aura trigger creature when node is lost
+            DelCreature(node + 7); //null checks are in DelCreature! 0-6 spirit guides
+
+            RelocateDeadPlayers(BgCreatures[node]);
+
+            DelCreature(node);
+
+            // buff object isn't despawned
         }
     }
 

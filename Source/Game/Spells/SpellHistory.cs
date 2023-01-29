@@ -14,6 +14,28 @@ namespace Game.Spells
 {
     public class SpellHistory
     {
+        public class CooldownEntry
+        {
+            public DateTime CategoryEnd;
+            public uint CategoryId;
+            public DateTime CooldownEnd;
+            public uint ItemId;
+            public bool OnHold;
+            public uint SpellId;
+        }
+
+        public struct ChargeEntry
+        {
+            public ChargeEntry(DateTime startTime, TimeSpan rechargeTime)
+            {
+                RechargeStart = startTime;
+                RechargeEnd = startTime + rechargeTime;
+            }
+
+            public DateTime RechargeStart;
+            public DateTime RechargeEnd;
+        }
+
         private readonly MultiMap<uint, ChargeEntry> _categoryCharges = new();
         private readonly Dictionary<uint, CooldownEntry> _categoryCooldowns = new();
         private readonly Dictionary<uint, DateTime> _globalCooldowns = new();
@@ -545,41 +567,6 @@ namespace Game.Spells
             ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
         }
 
-        private void ModifySpellCooldown(CooldownEntry cooldownEntry, TimeSpan cooldownMod, bool withoutCategoryCooldown)
-        {
-            DateTime now = GameTime.GetSystemTime();
-
-            cooldownEntry.CooldownEnd += cooldownMod;
-
-            if (cooldownEntry.CategoryId != 0)
-            {
-                if (!withoutCategoryCooldown)
-                    cooldownEntry.CategoryEnd += cooldownMod;
-
-                // Because category cooldown existence is tied to regular cooldown, we cannot allow a situation where regular cooldown is shorter than category
-                if (cooldownEntry.CooldownEnd < cooldownEntry.CategoryEnd)
-                    cooldownEntry.CooldownEnd = cooldownEntry.CategoryEnd;
-            }
-
-            Player playerOwner = GetPlayerOwner();
-
-            if (playerOwner)
-            {
-                ModifyCooldown modifyCooldown = new();
-                modifyCooldown.IsPet = _owner != playerOwner;
-                modifyCooldown.SpellID = cooldownEntry.SpellId;
-                modifyCooldown.DeltaTime = (int)cooldownMod.TotalMilliseconds;
-                modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
-                playerOwner.SendPacket(modifyCooldown);
-            }
-
-            if (cooldownEntry.CooldownEnd <= now)
-            {
-                _categoryCooldowns.Remove(cooldownEntry.CategoryId);
-                _spellCooldowns.Remove(cooldownEntry.SpellId);
-            }
-        }
-
         public void ModifyCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID());
@@ -849,34 +836,6 @@ namespace Game.Spells
             return false;
         }
 
-        private void ModifyChargeRecoveryTime(uint chargeCategoryId, TimeSpan cooldownMod)
-        {
-            var chargeCategoryEntry = CliDB.SpellCategoryStorage.LookupByKey(chargeCategoryId);
-
-            if (chargeCategoryEntry == null)
-                return;
-
-            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
-
-            if (chargeList == null ||
-                chargeList.Empty())
-                return;
-
-            var now = GameTime.GetSystemTime();
-
-            for (var i = 0; i < chargeList.Count; ++i)
-            {
-                var entry = chargeList[i];
-                entry.RechargeStart += cooldownMod;
-                entry.RechargeEnd += cooldownMod;
-            }
-
-            while (!chargeList.Empty() && chargeList[0].RechargeEnd < now)
-                chargeList.RemoveAt(0);
-
-            SendSetSpellCharges(chargeCategoryId, chargeList);
-        }
-
         public void RestoreCharge(uint chargeCategoryId)
         {
             var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
@@ -1010,6 +969,120 @@ namespace Game.Spells
             }
         }
 
+        public void SaveCooldownStateBeforeDuel()
+        {
+            _spellCooldownsBeforeDuel = _spellCooldowns;
+        }
+
+        public void RestoreCooldownStateAfterDuel()
+        {
+            Player player = _owner.ToPlayer();
+
+            if (player)
+            {
+                // add all profession CDs created while in Duel (if any)
+                foreach (var c in _spellCooldowns)
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(c.Key, Difficulty.None);
+
+                    if (spellInfo.RecoveryTime > 10 * Time.Minute * Time.InMilliseconds ||
+                        spellInfo.CategoryRecoveryTime > 10 * Time.Minute * Time.InMilliseconds)
+                        _spellCooldownsBeforeDuel[c.Key] = _spellCooldowns[c.Key];
+                }
+
+                // check for spell with onHold active before and during the Duel
+                foreach (var pair in _spellCooldownsBeforeDuel)
+                    if (!pair.Value.OnHold &&
+                        _spellCooldowns.ContainsKey(pair.Key) &&
+                        !_spellCooldowns[pair.Key].OnHold)
+                        _spellCooldowns[pair.Key] = _spellCooldownsBeforeDuel[pair.Key];
+
+                // update the client: restore old cooldowns
+                SpellCooldownPkt spellCooldown = new();
+                spellCooldown.Caster = _owner.GetGUID();
+                spellCooldown.Flags = SpellCooldownFlags.IncludeEventCooldowns;
+
+                foreach (var c in _spellCooldowns)
+                {
+                    DateTime now = GameTime.GetSystemTime();
+                    uint cooldownDuration = c.Value.CooldownEnd > now ? (uint)(c.Value.CooldownEnd - now).TotalMilliseconds : 0;
+
+                    // cooldownDuration must be between 0 and 10 minutes in order to avoid any visual bugs
+                    if (cooldownDuration <= 0 ||
+                        cooldownDuration > 10 * Time.Minute * Time.InMilliseconds ||
+                        c.Value.OnHold)
+                        continue;
+
+                    spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(c.Key, cooldownDuration));
+                }
+
+                player.SendPacket(spellCooldown);
+            }
+        }
+
+        private void ModifySpellCooldown(CooldownEntry cooldownEntry, TimeSpan cooldownMod, bool withoutCategoryCooldown)
+        {
+            DateTime now = GameTime.GetSystemTime();
+
+            cooldownEntry.CooldownEnd += cooldownMod;
+
+            if (cooldownEntry.CategoryId != 0)
+            {
+                if (!withoutCategoryCooldown)
+                    cooldownEntry.CategoryEnd += cooldownMod;
+
+                // Because category cooldown existence is tied to regular cooldown, we cannot allow a situation where regular cooldown is shorter than category
+                if (cooldownEntry.CooldownEnd < cooldownEntry.CategoryEnd)
+                    cooldownEntry.CooldownEnd = cooldownEntry.CategoryEnd;
+            }
+
+            Player playerOwner = GetPlayerOwner();
+
+            if (playerOwner)
+            {
+                ModifyCooldown modifyCooldown = new();
+                modifyCooldown.IsPet = _owner != playerOwner;
+                modifyCooldown.SpellID = cooldownEntry.SpellId;
+                modifyCooldown.DeltaTime = (int)cooldownMod.TotalMilliseconds;
+                modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
+                playerOwner.SendPacket(modifyCooldown);
+            }
+
+            if (cooldownEntry.CooldownEnd <= now)
+            {
+                _categoryCooldowns.Remove(cooldownEntry.CategoryId);
+                _spellCooldowns.Remove(cooldownEntry.SpellId);
+            }
+        }
+
+        private void ModifyChargeRecoveryTime(uint chargeCategoryId, TimeSpan cooldownMod)
+        {
+            var chargeCategoryEntry = CliDB.SpellCategoryStorage.LookupByKey(chargeCategoryId);
+
+            if (chargeCategoryEntry == null)
+                return;
+
+            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
+
+            if (chargeList == null ||
+                chargeList.Empty())
+                return;
+
+            var now = GameTime.GetSystemTime();
+
+            for (var i = 0; i < chargeList.Count; ++i)
+            {
+                var entry = chargeList[i];
+                entry.RechargeStart += cooldownMod;
+                entry.RechargeEnd += cooldownMod;
+            }
+
+            while (!chargeList.Empty() && chargeList[0].RechargeEnd < now)
+                chargeList.RemoveAt(0);
+
+            SendSetSpellCharges(chargeCategoryId, chargeList);
+        }
+
         private void SendSetSpellCharges(uint chargeCategoryId, List<ChargeEntry> chargeCollection)
         {
             Player player = GetPlayerOwner();
@@ -1069,79 +1142,6 @@ namespace Game.Spells
             cooldown = tmpCooldown;
             categoryId = tmpCategoryId;
             categoryCooldown = tmpCategoryCooldown;
-        }
-
-        public void SaveCooldownStateBeforeDuel()
-        {
-            _spellCooldownsBeforeDuel = _spellCooldowns;
-        }
-
-        public void RestoreCooldownStateAfterDuel()
-        {
-            Player player = _owner.ToPlayer();
-
-            if (player)
-            {
-                // add all profession CDs created while in Duel (if any)
-                foreach (var c in _spellCooldowns)
-                {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(c.Key, Difficulty.None);
-
-                    if (spellInfo.RecoveryTime > 10 * Time.Minute * Time.InMilliseconds ||
-                        spellInfo.CategoryRecoveryTime > 10 * Time.Minute * Time.InMilliseconds)
-                        _spellCooldownsBeforeDuel[c.Key] = _spellCooldowns[c.Key];
-                }
-
-                // check for spell with onHold active before and during the Duel
-                foreach (var pair in _spellCooldownsBeforeDuel)
-                    if (!pair.Value.OnHold &&
-                        _spellCooldowns.ContainsKey(pair.Key) &&
-                        !_spellCooldowns[pair.Key].OnHold)
-                        _spellCooldowns[pair.Key] = _spellCooldownsBeforeDuel[pair.Key];
-
-                // update the client: restore old cooldowns
-                SpellCooldownPkt spellCooldown = new();
-                spellCooldown.Caster = _owner.GetGUID();
-                spellCooldown.Flags = SpellCooldownFlags.IncludeEventCooldowns;
-
-                foreach (var c in _spellCooldowns)
-                {
-                    DateTime now = GameTime.GetSystemTime();
-                    uint cooldownDuration = c.Value.CooldownEnd > now ? (uint)(c.Value.CooldownEnd - now).TotalMilliseconds : 0;
-
-                    // cooldownDuration must be between 0 and 10 minutes in order to avoid any visual bugs
-                    if (cooldownDuration <= 0 ||
-                        cooldownDuration > 10 * Time.Minute * Time.InMilliseconds ||
-                        c.Value.OnHold)
-                        continue;
-
-                    spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(c.Key, cooldownDuration));
-                }
-
-                player.SendPacket(spellCooldown);
-            }
-        }
-
-        public class CooldownEntry
-        {
-            public DateTime CategoryEnd;
-            public uint CategoryId;
-            public DateTime CooldownEnd;
-            public uint ItemId;
-            public bool OnHold;
-            public uint SpellId;
-        }
-
-        public struct ChargeEntry
-        {
-            public ChargeEntry(DateTime startTime, TimeSpan rechargeTime)
-            {
-                RechargeStart = startTime;
-                RechargeEnd = startTime + rechargeTime;
-            }
-
-            public DateTime RechargeStart;
-            public DateTime RechargeEnd;
         }
     }
 }

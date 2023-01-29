@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		h = f - g
 		Can overlap h with f or g.
 
@@ -14,7 +14,7 @@
 		   |h| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
 		*/
 
-        internal static void fe_sub(out FieldElement h, ref FieldElement f, ref FieldElement g)
+	    internal static void fe_sub(out FieldElement h, ref FieldElement f, ref FieldElement g)
         {
             int f0 = f.x0;
             int f1 = f.x1;

@@ -16,10 +16,10 @@ namespace Game.Movement
         private readonly byte _chainSize;
 
         private readonly uint _id;
+        private readonly bool _walk;
         private uint _msToNext;
         private byte _nextFirstWP; // only used for resuming
         private byte _nextIndex;
-        private readonly bool _walk;
 
         public SplineChainMovementGenerator(uint id, List<SplineChainLink> chain, bool walk = false)
         {
@@ -186,6 +186,16 @@ namespace Game.Movement
             }
         }
 
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.SplineChain;
+        }
+
+        public uint GetId()
+        {
+            return _id;
+        }
+
         private uint SendPathSpline(Unit owner, float velocity, Span<Vector3> path)
         {
             int nodeCount = path.Length;
@@ -239,16 +249,6 @@ namespace Game.Movement
             }
 
             return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)owner.MoveSpline.CurrentSplineIdx(), _msToNext);
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.SplineChain;
-        }
-
-        public uint GetId()
-        {
-            return _id;
         }
     }
 }

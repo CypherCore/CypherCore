@@ -8,11 +8,6 @@ namespace Game.DungeonFinding
 {
     public class LfgUpdateData
     {
-        public List<uint> Dungeons { get; set; } = new();
-        public LfgState State { get; set; }
-
-        public LfgUpdateType UpdateType { get; set; }
-
         public LfgUpdateData(LfgUpdateType _type = LfgUpdateType.Default)
         {
             UpdateType = _type;
@@ -32,5 +27,10 @@ namespace Game.DungeonFinding
             State = _state;
             Dungeons = _dungeons;
         }
+
+        public List<uint> Dungeons { get; set; } = new();
+        public LfgState State { get; set; }
+
+        public LfgUpdateType UpdateType { get; set; }
     }
 }

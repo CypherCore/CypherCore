@@ -4,9 +4,9 @@ namespace Game.Entities
 {
     public class RestMgr
     {
-        private uint _innAreaTriggerId;
         private readonly Player _player;
         private readonly float[] _restBonus = new float[(int)RestTypes.Max];
+        private uint _innAreaTriggerId;
         private RestFlag _restFlagMask;
         private long _restTime;
 

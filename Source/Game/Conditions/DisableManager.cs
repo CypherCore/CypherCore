@@ -13,6 +13,13 @@ namespace Game
 {
     public class DisableManager : Singleton<DisableManager>
     {
+        public class DisableData
+        {
+            public ushort Flags { get; set; }
+            public List<uint> Param0 { get; set; } = new();
+            public List<uint> Param1 { get; set; } = new();
+        }
+
         private readonly Dictionary<DisableType, Dictionary<uint, DisableData>> _disableMap = new();
 
         private DisableManager()
@@ -460,13 +467,6 @@ namespace Game
         public bool IsPathfindingEnabled(uint mapId)
         {
             return WorldConfig.GetBoolValue(WorldCfg.EnableMmaps) && !Global.DisableMgr.IsDisabledFor(DisableType.MMAP, mapId, null);
-        }
-
-        public class DisableData
-        {
-            public ushort Flags { get; set; }
-            public List<uint> Param0 { get; set; } = new();
-            public List<uint> Param1 { get; set; } = new();
         }
     }
 }

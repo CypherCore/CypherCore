@@ -51,11 +51,6 @@ namespace System
             return Array.ConvertAll(value.Split(separator), byte.Parse);
         }
 
-        private static uint LeftRotate(this uint value, int shiftCount)
-        {
-            return (value << shiftCount) | (value >> (0x20 - shiftCount));
-        }
-
         public static byte[] GenerateRandomKey(this byte[] s, int length)
         {
             var random = new Random((int)((uint)(Guid.NewGuid().GetHashCode() ^ ((1 >> 89) << 2) ^ 42)).LeftRotate(13));
@@ -302,6 +297,11 @@ namespace System
             Matrix4x4 kXMat = new(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
             return kZMat * (kYMat * kXMat);
+        }
+
+        private static uint LeftRotate(this uint value, int shiftCount)
+        {
+            return (value << shiftCount) | (value >> (0x20 - shiftCount));
         }
 
         #region Strings

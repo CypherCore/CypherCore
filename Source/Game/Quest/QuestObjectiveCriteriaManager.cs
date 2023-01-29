@@ -211,18 +211,6 @@ namespace Game
             }
         }
 
-        private void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
-        {
-            if (HasCompletedObjective(questObjective))
-                return;
-
-            _owner.KillCreditCriteriaTreeObjective(questObjective);
-
-            Log.outInfo(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.Id}). {GetOwnerInfo()}");
-
-            _completedObjectives.Add(questObjective.Id);
-        }
-
         public bool HasCompletedObjective(QuestObjective questObjective)
         {
             return _completedObjectives.Contains(questObjective.Id);
@@ -332,6 +320,18 @@ namespace Game
         public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
         {
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
+        }
+
+        private void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
+        {
+            if (HasCompletedObjective(questObjective))
+                return;
+
+            _owner.KillCreditCriteriaTreeObjective(questObjective);
+
+            Log.outInfo(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.Id}). {GetOwnerInfo()}");
+
+            _completedObjectives.Add(questObjective.Id);
         }
     }
 }

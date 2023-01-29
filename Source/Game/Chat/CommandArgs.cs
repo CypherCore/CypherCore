@@ -23,55 +23,6 @@ namespace Game.Chat
                 return new ChatCommandResult(args);
         }
 
-        private static ChatCommandResult TryConsumeTo(dynamic[] tuple, int offset, ParameterInfo[] parameterInfos, CommandHandler handler, string args)
-        {
-            var optionalArgAttribute = parameterInfos[offset].GetCustomAttribute<OptionalArgAttribute>(true);
-
-            if (optionalArgAttribute != null ||
-                (parameterInfos[offset].ParameterType.IsGenericType && parameterInfos[offset].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>)))
-            {
-                // try with the argument
-                Type myArg = Nullable.GetUnderlyingType(parameterInfos[offset].ParameterType) ?? parameterInfos[offset].ParameterType;
-
-                ChatCommandResult result1 = TryConsume(out tuple[offset], myArg, handler, args);
-
-                if (result1.IsSuccessful())
-                    if ((result1 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, result1)).IsSuccessful())
-                        return result1;
-
-                // try again omitting the argument
-                tuple[offset] = default;
-                ChatCommandResult result2 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, args);
-
-                if (result2.IsSuccessful())
-                    return result2;
-
-                if (result1.HasErrorMessage() &&
-                    result2.HasErrorMessage())
-                    return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} \"{result2.GetErrorMessage()}\"\n{handler.GetCypherString(CypherStrings.CmdparserOr)} \"{result1.GetErrorMessage()}\"");
-                else if (result1.HasErrorMessage())
-                    return result1;
-                else
-                    return result2;
-            }
-            else
-            {
-                ChatCommandResult next;
-
-                var variantArgAttribute = parameterInfos[offset].GetCustomAttribute<VariantArgAttribute>(true);
-
-                if (variantArgAttribute != null)
-                    next = TryConsumeVariant(out tuple[offset], variantArgAttribute.Types, handler, args);
-                else
-                    next = TryConsume(out tuple[offset], parameterInfos[offset].ParameterType, handler, args);
-
-                if (next.IsSuccessful())
-                    return ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, next);
-                else
-                    return next;
-            }
-        }
-
         public static ChatCommandResult TryConsume(out dynamic val, Type type, CommandHandler handler, string args)
         {
             val = default;
@@ -339,6 +290,55 @@ namespace Game.Chat
                 return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} {result.GetErrorMessage()}");
 
             return result;
+        }
+
+        private static ChatCommandResult TryConsumeTo(dynamic[] tuple, int offset, ParameterInfo[] parameterInfos, CommandHandler handler, string args)
+        {
+            var optionalArgAttribute = parameterInfos[offset].GetCustomAttribute<OptionalArgAttribute>(true);
+
+            if (optionalArgAttribute != null ||
+                (parameterInfos[offset].ParameterType.IsGenericType && parameterInfos[offset].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>)))
+            {
+                // try with the argument
+                Type myArg = Nullable.GetUnderlyingType(parameterInfos[offset].ParameterType) ?? parameterInfos[offset].ParameterType;
+
+                ChatCommandResult result1 = TryConsume(out tuple[offset], myArg, handler, args);
+
+                if (result1.IsSuccessful())
+                    if ((result1 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, result1)).IsSuccessful())
+                        return result1;
+
+                // try again omitting the argument
+                tuple[offset] = default;
+                ChatCommandResult result2 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, args);
+
+                if (result2.IsSuccessful())
+                    return result2;
+
+                if (result1.HasErrorMessage() &&
+                    result2.HasErrorMessage())
+                    return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} \"{result2.GetErrorMessage()}\"\n{handler.GetCypherString(CypherStrings.CmdparserOr)} \"{result1.GetErrorMessage()}\"");
+                else if (result1.HasErrorMessage())
+                    return result1;
+                else
+                    return result2;
+            }
+            else
+            {
+                ChatCommandResult next;
+
+                var variantArgAttribute = parameterInfos[offset].GetCustomAttribute<VariantArgAttribute>(true);
+
+                if (variantArgAttribute != null)
+                    next = TryConsumeVariant(out tuple[offset], variantArgAttribute.Types, handler, args);
+                else
+                    next = TryConsume(out tuple[offset], parameterInfos[offset].ParameterType, handler, args);
+
+                if (next.IsSuccessful())
+                    return ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, next);
+                else
+                    return next;
+            }
         }
 
         private static ChatCommandResult TryAtIndex(out dynamic val, Type[] types, int index, CommandHandler handler, string args)

@@ -11,9 +11,6 @@ namespace Game.Achievements
 {
     public class AchievementManager : CriteriaHandler
     {
-        protected uint _achievementPoints;
-        protected Dictionary<uint, CompletedAchievementData> _completedAchievements = new();
-
         public Func<KeyValuePair<uint, CompletedAchievementData>, AchievementRecord> VisibleAchievementCheck = value =>
                                                                                                                {
                                                                                                                    AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(value.Key);
@@ -24,6 +21,9 @@ namespace Game.Achievements
 
                                                                                                                    return null;
                                                                                                                };
+
+        protected uint _achievementPoints;
+        protected Dictionary<uint, CompletedAchievementData> _completedAchievements = new();
 
         /// <summary>
         ///  called at player login. The player might have fulfilled some achievements when the Achievement system wasn't working yet
@@ -167,6 +167,15 @@ namespace Game.Achievements
                     CompletedAchievement(refAchievement, referencePlayer);
         }
 
+        public override bool RequiredAchievementSatisfied(uint achievementId)
+        {
+            return HasAchieved(achievementId);
+        }
+
+        public virtual void CompletedAchievement(AchievementRecord entry, Player referencePlayer)
+        {
+        }
+
         private bool IsCompletedAchievement(AchievementRecord entry)
         {
             // counter can never complete
@@ -200,15 +209,6 @@ namespace Game.Achievements
             }
 
             return IsCompletedCriteriaTree(tree);
-        }
-
-        public override bool RequiredAchievementSatisfied(uint achievementId)
-        {
-            return HasAchieved(achievementId);
-        }
-
-        public virtual void CompletedAchievement(AchievementRecord entry, Player referencePlayer)
-        {
         }
     }
 }

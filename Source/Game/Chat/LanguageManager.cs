@@ -92,11 +92,6 @@ namespace Game.Chat
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_wordsMap.Count} word groups from {wordsNum} words in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        private List<string> FindWordGroup(uint language, uint wordLen)
-        {
-            return _wordsMap.LookupByKey(Tuple.Create(language, (byte)wordLen));
-        }
-
         public string Translate(string msg, uint language, Locale locale)
         {
             string textToTranslate = "";
@@ -176,6 +171,11 @@ namespace Game.Chat
                     return false;
 
             return true;
+        }
+
+        private List<string> FindWordGroup(uint language, uint wordLen)
+        {
+            return _wordsMap.LookupByKey(Tuple.Create(language, (byte)wordLen));
         }
 
         private void StripHyperlinks(string source, ref string dest)

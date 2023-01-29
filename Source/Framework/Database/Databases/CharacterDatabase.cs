@@ -5,7 +5,7 @@ namespace Framework.Database
 {
     public class CharacterDatabase : MySqlBase<CharStatements>
     {
-        public override void PreparedStatements()
+	    public override void PreparedStatements()
         {
             const string SelectItemInstanceContent = "ii.guid, ii.itemEntry, ii.creatorGuid, ii.giftCreatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.enchantments, ii.randomBonusListId, " +
                                                      "ii.durability, ii.playedTime, ii.text, ii.battlePetSpeciesId, ii.battlePetBreedData, ii.battlePetLevel, ii.battlePetDisplayId, ii.context, ii.bonusListIDs, " +

@@ -14,15 +14,27 @@ namespace Game.Movement
 {
     public class FlightPathMovementGenerator : MovementGeneratorMedium<Player>
     {
-        private int _currentNode;
+        private class TaxiNodeChangeInfo
+        {
+            public long Cost;
 
-        private float _endGridX; //! X coord of last node location
-        private float _endGridY; //! Y coord of last node location
-        private uint _endMapId;  //! map Id of last node location
+            public uint PathIndex;
+
+            public TaxiNodeChangeInfo(uint pathIndex, long cost)
+            {
+                PathIndex = pathIndex;
+                Cost = cost;
+            }
+        }
 
         private readonly List<TaxiPathNodeRecord> _path = new();
         private readonly List<TaxiNodeChangeInfo> _pointsForPathSwitch = new(); //! node indexes and costs where TaxiPath changes
-        private uint _preloadTargetNode;                               //! node index where preloading starts
+        private int _currentNode;
+
+        private float _endGridX;         //! X coord of last node location
+        private float _endGridY;         //! Y coord of last node location
+        private uint _endMapId;          //! map Id of last node location
+        private uint _preloadTargetNode; //! node index where preloading starts
 
         public FlightPathMovementGenerator()
         {
@@ -165,25 +177,6 @@ namespace Game.Movement
             owner.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
         }
 
-        private uint GetPathAtMapEnd()
-        {
-            if (_currentNode >= _path.Count)
-                return (uint)_path.Count;
-
-            uint curMapId = _path[_currentNode].ContinentID;
-
-            for (int i = _currentNode; i < _path.Count; ++i)
-                if (_path[i].ContinentID != curMapId)
-                    return (uint)i;
-
-            return (uint)_path.Count;
-        }
-
-        private bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
-        {
-            return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
-        }
-
         public void LoadPath(Player player, uint startNode = 0)
         {
             _path.Clear();
@@ -249,6 +242,61 @@ namespace Game.Movement
                 }
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"Current Node: {GetCurrentNode()}\n{base.GetDebugInfo()}\nStart Path Id: {GetPathId(0)} Path Size: {_path.Count} HasArrived: {HasArrived()} End Grid X: {_endGridX} " +
+                   $"End Grid Y: {_endGridY} End Map Id: {_endMapId} Preloaded Target Node: {_preloadTargetNode}";
+        }
+
+        public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
+        {
+            var node = _path[_currentNode];
+            x = node.Loc.X;
+            y = node.Loc.Y;
+            z = node.Loc.Z;
+
+            return true;
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Flight;
+        }
+
+        public List<TaxiPathNodeRecord> GetPath()
+        {
+            return _path;
+        }
+
+        public void SkipCurrentNode()
+        {
+            ++_currentNode;
+        }
+
+        public uint GetCurrentNode()
+        {
+            return (uint)_currentNode;
+        }
+
+        private uint GetPathAtMapEnd()
+        {
+            if (_currentNode >= _path.Count)
+                return (uint)_path.Count;
+
+            uint curMapId = _path[_currentNode].ContinentID;
+
+            for (int i = _currentNode; i < _path.Count; ++i)
+                if (_path[i].ContinentID != curMapId)
+                    return (uint)i;
+
+            return (uint)_path.Count;
+        }
+
+        private bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
+        {
+            return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
+        }
+
         private void DoEventIfAny(Player owner, TaxiPathNodeRecord node, bool departure)
         {
             Cypher.Assert(node != null, owner.GetDebugInfo());
@@ -304,58 +352,9 @@ namespace Game.Movement
             return _path[index].PathID;
         }
 
-        public override string GetDebugInfo()
-        {
-            return $"Current Node: {GetCurrentNode()}\n{base.GetDebugInfo()}\nStart Path Id: {GetPathId(0)} Path Size: {_path.Count} HasArrived: {HasArrived()} End Grid X: {_endGridX} " +
-                   $"End Grid Y: {_endGridY} End Map Id: {_endMapId} Preloaded Target Node: {_preloadTargetNode}";
-        }
-
-        public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
-        {
-            var node = _path[_currentNode];
-            x = node.Loc.X;
-            y = node.Loc.Y;
-            z = node.Loc.Z;
-
-            return true;
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Flight;
-        }
-
-        public List<TaxiPathNodeRecord> GetPath()
-        {
-            return _path;
-        }
-
         private bool HasArrived()
         {
             return _currentNode >= _path.Count;
-        }
-
-        public void SkipCurrentNode()
-        {
-            ++_currentNode;
-        }
-
-        public uint GetCurrentNode()
-        {
-            return (uint)_currentNode;
-        }
-
-        private class TaxiNodeChangeInfo
-        {
-            public long Cost;
-
-            public uint PathIndex;
-
-            public TaxiNodeChangeInfo(uint pathIndex, long cost)
-            {
-                PathIndex = pathIndex;
-                Cost = cost;
-            }
         }
     }
 }

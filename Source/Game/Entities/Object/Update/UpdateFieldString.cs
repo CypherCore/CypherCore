@@ -5,16 +5,16 @@ namespace Game.Entities
 {
     public class UpdateFieldString : IUpdateField<string>
     {
-        public string Value { get; set; }
-        public int Bit { get; set; }
-        public int BlockBit { get; set; }
-
         public UpdateFieldString(int blockBit, int bit)
         {
             BlockBit = blockBit;
             Bit = bit;
             Value = "";
         }
+
+        public string Value { get; set; }
+        public int Bit { get; set; }
+        public int BlockBit { get; set; }
 
         public void SetValue(string value)
         {

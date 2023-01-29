@@ -8,17 +8,17 @@ namespace Game.Entities
 {
     public class TradeData
     {
+        private readonly ObjectGuid[] _items = new ObjectGuid[(int)TradeSlots.Count];
+
+        private readonly Player _player;
+        private readonly Player _trader;
         private bool _accepted;
         private bool _acceptProccess;
         private uint _clientStateIndex;
-        private readonly ObjectGuid[] _items = new ObjectGuid[(int)TradeSlots.Count];
         private ulong _money;
-
-        private readonly Player _player;
         private uint _serverStateIndex;
         private uint _spell;
         private ObjectGuid _spellCastItem;
-        private readonly Player _trader;
 
         public TradeData(Player player, Player trader)
         {
@@ -136,14 +136,6 @@ namespace Game.Entities
             Update(true);
         }
 
-        private void Update(bool forTarget = true)
-        {
-            if (forTarget)
-                _trader.GetSession().SendUpdateTrade(true); // player State for trader
-            else
-                _player.GetSession().SendUpdateTrade(false); // player State for player
-        }
-
         public void SetAccepted(bool state, bool crosssend = false)
         {
             _accepted = state;
@@ -208,6 +200,14 @@ namespace Game.Entities
         public void UpdateServerStateIndex()
         {
             _serverStateIndex = RandomHelper.Rand32();
+        }
+
+        private void Update(bool forTarget = true)
+        {
+            if (forTarget)
+                _trader.GetSession().SendUpdateTrade(true); // player State for trader
+            else
+                _player.GetSession().SendUpdateTrade(false); // player State for player
         }
     }
 }

@@ -698,24 +698,6 @@ namespace Game.Networking.Packets
 
     public class PVPMatchStatistics
     {
-        public sbyte[] PlayerCount = new sbyte[2];
-        public RatingData Ratings;
-        public List<PVPMatchPlayerStatistics> Statistics = new();
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteBit(Ratings != null);
-            data.WriteInt32(Statistics.Count);
-
-            foreach (var count in PlayerCount)
-                data.WriteInt8(count);
-
-            Ratings?.Write(data);
-
-            foreach (var player in Statistics)
-                player.Write(data);
-        }
-
         public class RatingData
         {
             public uint[] Postmatch = new uint[2];
@@ -833,6 +815,24 @@ namespace Game.Networking.Packets
                 if (MmrChange.HasValue)
                     data.WriteInt32(MmrChange.Value);
             }
+        }
+
+        public sbyte[] PlayerCount = new sbyte[2];
+        public RatingData Ratings;
+        public List<PVPMatchPlayerStatistics> Statistics = new();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(Ratings != null);
+            data.WriteInt32(Statistics.Count);
+
+            foreach (var count in PlayerCount)
+                data.WriteInt8(count);
+
+            Ratings?.Write(data);
+
+            foreach (var player in Statistics)
+                player.Write(data);
         }
     }
 

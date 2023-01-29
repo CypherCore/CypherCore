@@ -15,7 +15,6 @@ namespace Game.Entities
     public class CollectionMgr
     {
         private static readonly Dictionary<uint, uint> FactionSpecificMounts = new();
-        private BitSet _appearances;
         private readonly Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new();
         private readonly Dictionary<uint, HeirloomData> _heirlooms = new();
         private readonly Dictionary<uint, MountStatusFlags> _mounts = new();
@@ -23,7 +22,6 @@ namespace Game.Entities
         private readonly WorldSession _owner;
         private readonly MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
         private readonly Dictionary<uint, ToyFlags> _toys = new();
-        private BitSet _transmogIllusions;
 
         private readonly uint[] PlayerClassByArmorSubclass =
         {
@@ -40,6 +38,9 @@ namespace Game.Entities
 			1 << ((int)Class.Deathknight - 1),                                                                                                     //ITEM_SUBCLASS_ARMOR_SIGIL
 			(1 << ((int)Class.Paladin - 1)) | (1 << ((int)Class.Deathknight - 1)) | (1 << ((int)Class.Shaman - 1)) | (1 << ((int)Class.Druid - 1)) //ITEM_SUBCLASS_ARMOR_RELIC
 		};
+
+        private BitSet _appearances;
+        private BitSet _transmogIllusions;
 
         public CollectionMgr(WorldSession owner)
         {
@@ -132,16 +133,6 @@ namespace Game.Entities
             }
         }
 
-        private bool UpdateAccountToys(uint itemId, bool isFavourite, bool hasFanfare)
-        {
-            if (_toys.ContainsKey(itemId))
-                return false;
-
-            _toys.Add(itemId, GetToyFlags(isFavourite, hasFanfare));
-
-            return true;
-        }
-
         public void ToySetFavorite(uint itemId, bool favorite)
         {
             if (!_toys.ContainsKey(itemId))
@@ -159,19 +150,6 @@ namespace Game.Entities
                 return;
 
             _toys[itemId] &= ~ToyFlags.HasFanfare;
-        }
-
-        private ToyFlags GetToyFlags(bool isFavourite, bool hasFanfare)
-        {
-            ToyFlags flags = ToyFlags.None;
-
-            if (isFavourite)
-                flags |= ToyFlags.Favorite;
-
-            if (hasFanfare)
-                flags |= ToyFlags.HasFanfare;
-
-            return flags;
         }
 
         public void OnItemAdded(Item item)
@@ -223,16 +201,6 @@ namespace Game.Entities
                 stmt.AddValue(2, (uint)heirloom.Value.flags);
                 trans.Append(stmt);
             }
-        }
-
-        private bool UpdateAccountHeirlooms(uint itemId, HeirloomPlayerFlags flags)
-        {
-            if (_heirlooms.ContainsKey(itemId))
-                return false;
-
-            _heirlooms.Add(itemId, new HeirloomData(flags, 0));
-
-            return true;
         }
 
         public uint GetHeirloomBonus(uint itemId)
@@ -454,19 +422,6 @@ namespace Game.Entities
             SendSingleMountUpdate(spellId, _mounts[spellId]);
         }
 
-        private void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
-        {
-            Player player = _owner.GetPlayer();
-
-            if (!player)
-                return;
-
-            AccountMountUpdate mountUpdate = new();
-            mountUpdate.IsFullUpdate = false;
-            mountUpdate.Mounts.Add(spellId, mountStatusFlags);
-            player.SendPacket(mountUpdate);
-        }
-
         public void LoadItemAppearances()
         {
             Player owner = _owner.GetPlayer();
@@ -606,6 +561,271 @@ namespace Game.Entities
                 return;
 
             AddItemAppearance(itemModifiedAppearance);
+        }
+
+        public void RemoveTemporaryAppearance(Item item)
+        {
+            ItemModifiedAppearanceRecord itemModifiedAppearance = item.GetItemModifiedAppearance();
+
+            if (itemModifiedAppearance == null)
+                return;
+
+            var guid = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
+
+            if (guid.Empty())
+                return;
+
+            guid.Remove(item.GetGUID());
+
+            if (guid.Empty())
+            {
+                _owner.GetPlayer().RemoveConditionalTransmog(itemModifiedAppearance.Id);
+                _temporaryAppearances.Remove(itemModifiedAppearance.Id);
+            }
+        }
+
+        public (bool PermAppearance, bool TempAppearance) HasItemAppearance(uint itemModifiedAppearanceId)
+        {
+            if (itemModifiedAppearanceId < _appearances.Count &&
+                _appearances.Get((int)itemModifiedAppearanceId))
+                return (true, false);
+
+            if (_temporaryAppearances.ContainsKey(itemModifiedAppearanceId))
+                return (true, true);
+
+            return (false, false);
+        }
+
+        public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(uint itemModifiedAppearanceId)
+        {
+            return _temporaryAppearances.LookupByKey(itemModifiedAppearanceId);
+        }
+
+        public List<uint> GetAppearanceIds()
+        {
+            List<uint> appearances = new();
+
+            foreach (int id in _appearances)
+                appearances.Add((uint)CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
+
+            return appearances;
+        }
+
+        public void SetAppearanceIsFavorite(uint itemModifiedAppearanceId, bool apply)
+        {
+            var apperanceState = _favoriteAppearances.LookupByKey(itemModifiedAppearanceId);
+
+            if (apply)
+            {
+                if (!_favoriteAppearances.ContainsKey(itemModifiedAppearanceId))
+                    _favoriteAppearances[itemModifiedAppearanceId] = FavoriteAppearanceState.New;
+                else if (apperanceState == FavoriteAppearanceState.Removed)
+                    apperanceState = FavoriteAppearanceState.Unchanged;
+                else
+                    return;
+            }
+            else if (_favoriteAppearances.ContainsKey(itemModifiedAppearanceId))
+            {
+                if (apperanceState == FavoriteAppearanceState.New)
+                    _favoriteAppearances.Remove(itemModifiedAppearanceId);
+                else
+                    apperanceState = FavoriteAppearanceState.Removed;
+            }
+            else
+            {
+                return;
+            }
+
+            _favoriteAppearances[itemModifiedAppearanceId] = apperanceState;
+
+            AccountTransmogUpdate accountTransmogUpdate = new();
+            accountTransmogUpdate.IsFullUpdate = false;
+            accountTransmogUpdate.IsSetFavorite = apply;
+            accountTransmogUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
+
+            _owner.SendPacket(accountTransmogUpdate);
+        }
+
+        public void SendFavoriteAppearances()
+        {
+            AccountTransmogUpdate accountTransmogUpdate = new();
+            accountTransmogUpdate.IsFullUpdate = true;
+
+            foreach (var pair in _favoriteAppearances)
+                if (pair.Value != FavoriteAppearanceState.Removed)
+                    accountTransmogUpdate.FavoriteAppearances.Add(pair.Key);
+
+            _owner.SendPacket(accountTransmogUpdate);
+        }
+
+        public void AddTransmogSet(uint transmogSetId)
+        {
+            var items = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
+
+            if (items.Empty())
+                return;
+
+            foreach (TransmogSetItemRecord item in items)
+            {
+                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(item.ItemModifiedAppearanceID);
+
+                if (itemModifiedAppearance == null)
+                    continue;
+
+                AddItemAppearance(itemModifiedAppearance);
+            }
+        }
+
+        public void LoadTransmogIllusions()
+        {
+            Player owner = _owner.GetPlayer();
+
+            foreach (var blockValue in _transmogIllusions.ToBlockRange())
+                owner.AddIllusionBlock(blockValue);
+        }
+
+        public void LoadAccountTransmogIllusions(SQLResult knownTransmogIllusions)
+        {
+            uint[] blocks = new uint[7];
+
+            if (!knownTransmogIllusions.IsEmpty())
+                do
+                {
+                    ushort blobIndex = knownTransmogIllusions.Read<ushort>(0);
+
+                    if (blobIndex >= blocks.Length)
+                        Array.Resize(ref blocks, blobIndex + 1);
+
+                    blocks[blobIndex] = knownTransmogIllusions.Read<uint>(1);
+                } while (knownTransmogIllusions.NextRow());
+
+            _transmogIllusions = new BitSet(blocks);
+
+            // Static illusions known by every player
+            ushort[] defaultIllusions =
+            {
+                3,  // Lifestealing
+				13, // Crusader
+				22, // Striking
+				23, // Agility
+				34, // Hide Weapon Enchant
+				43, // Beastslayer
+				44  // Titanguard
+			};
+
+            foreach (ushort illusionId in defaultIllusions)
+                _transmogIllusions.Set(illusionId, true);
+        }
+
+        public void SaveAccountTransmogIllusions(SQLTransaction trans)
+        {
+            ushort blockIndex = 0;
+
+            foreach (var blockValue in _transmogIllusions.ToBlockRange())
+            {
+                if (blockValue != 0) // this table is only appended/bits are set (never cleared) so don't save empty blocks
+                {
+                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS);
+                    stmt.AddValue(0, _owner.GetBattlenetAccountId());
+                    stmt.AddValue(1, blockIndex);
+                    stmt.AddValue(2, blockValue);
+                    trans.Append(stmt);
+                }
+
+                ++blockIndex;
+            }
+        }
+
+        public void AddTransmogIllusion(uint transmogIllusionId)
+        {
+            Player owner = _owner.GetPlayer();
+
+            if (_transmogIllusions.Count <= transmogIllusionId)
+            {
+                uint numBlocks = (uint)(_transmogIllusions.Count << 2);
+                _transmogIllusions.Length = (int)transmogIllusionId + 1;
+                numBlocks = (uint)(_transmogIllusions.Count << 2) - numBlocks;
+
+                while (numBlocks-- != 0)
+                    owner.AddIllusionBlock(0);
+            }
+
+            _transmogIllusions.Set((int)transmogIllusionId, true);
+            uint blockIndex = transmogIllusionId / 32;
+            uint bitIndex = transmogIllusionId % 32;
+
+            owner.AddIllusionFlag((int)blockIndex, (uint)(1 << (int)bitIndex));
+        }
+
+        public bool HasTransmogIllusion(uint transmogIllusionId)
+        {
+            return transmogIllusionId < _transmogIllusions.Count && _transmogIllusions.Get((int)transmogIllusionId);
+        }
+
+        public bool HasToy(uint itemId)
+        {
+            return _toys.ContainsKey(itemId);
+        }
+
+        public Dictionary<uint, ToyFlags> GetAccountToys()
+        {
+            return _toys;
+        }
+
+        public Dictionary<uint, HeirloomData> GetAccountHeirlooms()
+        {
+            return _heirlooms;
+        }
+
+        public Dictionary<uint, MountStatusFlags> GetAccountMounts()
+        {
+            return _mounts;
+        }
+
+        private bool UpdateAccountToys(uint itemId, bool isFavourite, bool hasFanfare)
+        {
+            if (_toys.ContainsKey(itemId))
+                return false;
+
+            _toys.Add(itemId, GetToyFlags(isFavourite, hasFanfare));
+
+            return true;
+        }
+
+        private ToyFlags GetToyFlags(bool isFavourite, bool hasFanfare)
+        {
+            ToyFlags flags = ToyFlags.None;
+
+            if (isFavourite)
+                flags |= ToyFlags.Favorite;
+
+            if (hasFanfare)
+                flags |= ToyFlags.HasFanfare;
+
+            return flags;
+        }
+
+        private bool UpdateAccountHeirlooms(uint itemId, HeirloomPlayerFlags flags)
+        {
+            if (_heirlooms.ContainsKey(itemId))
+                return false;
+
+            _heirlooms.Add(itemId, new HeirloomData(flags, 0));
+
+            return true;
+        }
+
+        private void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
+        {
+            Player player = _owner.GetPlayer();
+
+            if (!player)
+                return;
+
+            AccountMountUpdate mountUpdate = new();
+            mountUpdate.IsFullUpdate = false;
+            mountUpdate.Mounts.Add(spellId, mountStatusFlags);
+            player.SendPacket(mountUpdate);
         }
 
         private bool CanAddAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
@@ -755,119 +975,6 @@ namespace Game.Entities
             itemsWithAppearance.Add(itemGuid);
         }
 
-        public void RemoveTemporaryAppearance(Item item)
-        {
-            ItemModifiedAppearanceRecord itemModifiedAppearance = item.GetItemModifiedAppearance();
-
-            if (itemModifiedAppearance == null)
-                return;
-
-            var guid = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
-
-            if (guid.Empty())
-                return;
-
-            guid.Remove(item.GetGUID());
-
-            if (guid.Empty())
-            {
-                _owner.GetPlayer().RemoveConditionalTransmog(itemModifiedAppearance.Id);
-                _temporaryAppearances.Remove(itemModifiedAppearance.Id);
-            }
-        }
-
-        public (bool PermAppearance, bool TempAppearance) HasItemAppearance(uint itemModifiedAppearanceId)
-        {
-            if (itemModifiedAppearanceId < _appearances.Count &&
-                _appearances.Get((int)itemModifiedAppearanceId))
-                return (true, false);
-
-            if (_temporaryAppearances.ContainsKey(itemModifiedAppearanceId))
-                return (true, true);
-
-            return (false, false);
-        }
-
-        public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(uint itemModifiedAppearanceId)
-        {
-            return _temporaryAppearances.LookupByKey(itemModifiedAppearanceId);
-        }
-
-        public List<uint> GetAppearanceIds()
-        {
-            List<uint> appearances = new();
-
-            foreach (int id in _appearances)
-                appearances.Add((uint)CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
-
-            return appearances;
-        }
-
-        public void SetAppearanceIsFavorite(uint itemModifiedAppearanceId, bool apply)
-        {
-            var apperanceState = _favoriteAppearances.LookupByKey(itemModifiedAppearanceId);
-
-            if (apply)
-            {
-                if (!_favoriteAppearances.ContainsKey(itemModifiedAppearanceId))
-                    _favoriteAppearances[itemModifiedAppearanceId] = FavoriteAppearanceState.New;
-                else if (apperanceState == FavoriteAppearanceState.Removed)
-                    apperanceState = FavoriteAppearanceState.Unchanged;
-                else
-                    return;
-            }
-            else if (_favoriteAppearances.ContainsKey(itemModifiedAppearanceId))
-            {
-                if (apperanceState == FavoriteAppearanceState.New)
-                    _favoriteAppearances.Remove(itemModifiedAppearanceId);
-                else
-                    apperanceState = FavoriteAppearanceState.Removed;
-            }
-            else
-            {
-                return;
-            }
-
-            _favoriteAppearances[itemModifiedAppearanceId] = apperanceState;
-
-            AccountTransmogUpdate accountTransmogUpdate = new();
-            accountTransmogUpdate.IsFullUpdate = false;
-            accountTransmogUpdate.IsSetFavorite = apply;
-            accountTransmogUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
-
-            _owner.SendPacket(accountTransmogUpdate);
-        }
-
-        public void SendFavoriteAppearances()
-        {
-            AccountTransmogUpdate accountTransmogUpdate = new();
-            accountTransmogUpdate.IsFullUpdate = true;
-
-            foreach (var pair in _favoriteAppearances)
-                if (pair.Value != FavoriteAppearanceState.Removed)
-                    accountTransmogUpdate.FavoriteAppearances.Add(pair.Key);
-
-            _owner.SendPacket(accountTransmogUpdate);
-        }
-
-        public void AddTransmogSet(uint transmogSetId)
-        {
-            var items = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
-
-            if (items.Empty())
-                return;
-
-            foreach (TransmogSetItemRecord item in items)
-            {
-                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(item.ItemModifiedAppearanceID);
-
-                if (itemModifiedAppearance == null)
-                    continue;
-
-                AddItemAppearance(itemModifiedAppearance);
-            }
-        }
-
         private bool IsSetCompleted(uint transmogSetId)
         {
             var transmogSetItems = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
@@ -904,112 +1011,6 @@ namespace Game.Entities
             }
 
             return !knownPieces.Contains(0);
-        }
-
-        public void LoadTransmogIllusions()
-        {
-            Player owner = _owner.GetPlayer();
-
-            foreach (var blockValue in _transmogIllusions.ToBlockRange())
-                owner.AddIllusionBlock(blockValue);
-        }
-
-        public void LoadAccountTransmogIllusions(SQLResult knownTransmogIllusions)
-        {
-            uint[] blocks = new uint[7];
-
-            if (!knownTransmogIllusions.IsEmpty())
-                do
-                {
-                    ushort blobIndex = knownTransmogIllusions.Read<ushort>(0);
-
-                    if (blobIndex >= blocks.Length)
-                        Array.Resize(ref blocks, blobIndex + 1);
-
-                    blocks[blobIndex] = knownTransmogIllusions.Read<uint>(1);
-                } while (knownTransmogIllusions.NextRow());
-
-            _transmogIllusions = new BitSet(blocks);
-
-            // Static illusions known by every player
-            ushort[] defaultIllusions =
-            {
-                3,  // Lifestealing
-				13, // Crusader
-				22, // Striking
-				23, // Agility
-				34, // Hide Weapon Enchant
-				43, // Beastslayer
-				44  // Titanguard
-			};
-
-            foreach (ushort illusionId in defaultIllusions)
-                _transmogIllusions.Set(illusionId, true);
-        }
-
-        public void SaveAccountTransmogIllusions(SQLTransaction trans)
-        {
-            ushort blockIndex = 0;
-
-            foreach (var blockValue in _transmogIllusions.ToBlockRange())
-            {
-                if (blockValue != 0) // this table is only appended/bits are set (never cleared) so don't save empty blocks
-                {
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS);
-                    stmt.AddValue(0, _owner.GetBattlenetAccountId());
-                    stmt.AddValue(1, blockIndex);
-                    stmt.AddValue(2, blockValue);
-                    trans.Append(stmt);
-                }
-
-                ++blockIndex;
-            }
-        }
-
-        public void AddTransmogIllusion(uint transmogIllusionId)
-        {
-            Player owner = _owner.GetPlayer();
-
-            if (_transmogIllusions.Count <= transmogIllusionId)
-            {
-                uint numBlocks = (uint)(_transmogIllusions.Count << 2);
-                _transmogIllusions.Length = (int)transmogIllusionId + 1;
-                numBlocks = (uint)(_transmogIllusions.Count << 2) - numBlocks;
-
-                while (numBlocks-- != 0)
-                    owner.AddIllusionBlock(0);
-            }
-
-            _transmogIllusions.Set((int)transmogIllusionId, true);
-            uint blockIndex = transmogIllusionId / 32;
-            uint bitIndex = transmogIllusionId % 32;
-
-            owner.AddIllusionFlag((int)blockIndex, (uint)(1 << (int)bitIndex));
-        }
-
-        public bool HasTransmogIllusion(uint transmogIllusionId)
-        {
-            return transmogIllusionId < _transmogIllusions.Count && _transmogIllusions.Get((int)transmogIllusionId);
-        }
-
-        public bool HasToy(uint itemId)
-        {
-            return _toys.ContainsKey(itemId);
-        }
-
-        public Dictionary<uint, ToyFlags> GetAccountToys()
-        {
-            return _toys;
-        }
-
-        public Dictionary<uint, HeirloomData> GetAccountHeirlooms()
-        {
-            return _heirlooms;
-        }
-
-        public Dictionary<uint, MountStatusFlags> GetAccountMounts()
-        {
-            return _mounts;
         }
     }
 

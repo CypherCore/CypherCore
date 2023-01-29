@@ -9,6 +9,13 @@ namespace Game.Entities
     // Holder for Battlegrounddata
     public class BGData
     {
+        public BGData()
+        {
+            TypeID = BattlegroundTypeId.None;
+            ClearTaxiPath();
+            JoinPos = new WorldLocation();
+        }
+
         public byte AfkReportedCount { get; set; }
         public long AfkReportedTimer { get; set; }
 
@@ -25,13 +32,6 @@ namespace Game.Entities
 
         public uint MountSpell { get; set; }
         public uint[] TaxiPath { get; set; } = new uint[2];
-
-        public BGData()
-        {
-            TypeID = BattlegroundTypeId.None;
-            ClearTaxiPath();
-            JoinPos = new WorldLocation();
-        }
 
         public void ClearTaxiPath()
         {

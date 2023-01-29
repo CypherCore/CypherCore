@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		h = f * f
 		Can overlap h with f.
 
@@ -13,10 +13,10 @@
 		   |h| bounded by 1.01*2^25,1.01*2^24,1.01*2^25,1.01*2^24,etc.
 		*/
 
-        /*
+	    /*
 		See fe_mul.c for discussion of implementation strategy.
 		*/
-        internal static void fe_sq(out FieldElement h, ref FieldElement f)
+	    internal static void fe_sq(out FieldElement h, ref FieldElement f)
         {
             int f0 = f.x0;
             int f1 = f.x1;

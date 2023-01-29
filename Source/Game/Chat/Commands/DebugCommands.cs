@@ -21,6 +21,314 @@ namespace Game.Chat
     [CommandGroup("debug")]
     internal class DebugCommands
     {
+        [CommandGroup("asan")]
+        private class DebugAsanCommands
+        {
+            [Command("memoryleak", RBACPermissions.CommandDebug, true)]
+            private static bool HandleDebugMemoryLeak(CommandHandler handler)
+            {
+                return true;
+            }
+
+            [Command("outofbounds", RBACPermissions.CommandDebug, true)]
+            private static bool HandleDebugOutOfBounds(CommandHandler handler)
+            {
+                return true;
+            }
+        }
+
+        [CommandGroup("play")]
+        private class DebugPlayCommands
+        {
+            [Command("cinematic", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugPlayCinematicCommand(CommandHandler handler, uint cinematicId)
+            {
+                CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(cinematicId);
+
+                if (cineSeq == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CinematicNotExist, cinematicId);
+
+                    return false;
+                }
+
+                // Dump camera locations
+                var list = M2Storage.GetFlyByCameras(cineSeq.Camera[0]);
+
+                if (list != null)
+                {
+                    handler.SendSysMessage("Waypoints for sequence {0}, camera {1}", cinematicId, cineSeq.Camera[0]);
+                    uint count = 1;
+
+                    foreach (FlyByCamera cam in list)
+                    {
+                        handler.SendSysMessage("{0} - {1}ms [{2}, {3}, {4}] Facing {5} ({6} degrees)", count, cam.timeStamp, cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W, cam.locations.W * (180 / Math.PI));
+                        count++;
+                    }
+
+                    handler.SendSysMessage("{0} waypoints dumped", list.Count);
+                }
+
+                handler.GetPlayer().SendCinematicStart(cinematicId);
+
+                return true;
+            }
+
+            [Command("movie", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugPlayMovieCommand(CommandHandler handler, uint movieId)
+            {
+                if (!CliDB.MovieStorage.ContainsKey(movieId))
+                {
+                    handler.SendSysMessage(CypherStrings.MovieNotExist, movieId);
+
+                    return false;
+                }
+
+                handler.GetPlayer().SendMovieStart(movieId);
+
+                return true;
+            }
+
+            [Command("music", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugPlayMusicCommand(CommandHandler handler, uint musicId)
+            {
+                if (!CliDB.SoundKitStorage.ContainsKey(musicId))
+                {
+                    handler.SendSysMessage(CypherStrings.SoundNotExist, musicId);
+
+                    return false;
+                }
+
+                Player player = handler.GetPlayer();
+
+                player.PlayDirectMusic(musicId, player);
+
+                handler.SendSysMessage(CypherStrings.YouHearSound, musicId);
+
+                return true;
+            }
+
+            [Command("sound", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugPlaySoundCommand(CommandHandler handler, uint soundId, uint broadcastTextId)
+            {
+                if (!CliDB.SoundKitStorage.ContainsKey(soundId))
+                {
+                    handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
+
+                    return false;
+                }
+
+                Player player = handler.GetPlayer();
+
+                Unit unit = handler.GetSelectedUnit();
+
+                if (!unit)
+                {
+                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+
+                    return false;
+                }
+
+                if (!player.GetTarget().IsEmpty())
+                    unit.PlayDistanceSound(soundId, player);
+                else
+                    unit.PlayDirectSound(soundId, player, broadcastTextId);
+
+                handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("pvp")]
+        private class DebugPvpCommands
+        {
+            [Command("warmode", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugWarModeFactionBalanceCommand(CommandHandler handler, string command, int rewardValue = 0)
+            {
+                // USAGE: .debug pvp fb <alliance|horde|neutral|off> [pct]
+                // neutral     Sets faction balance off.
+                // alliance    Set faction balance to alliance.
+                // horde       Set faction balance to horde.
+                // off         Reset the faction balance and use the calculated value of it
+                switch (command.ToLower())
+                {
+                    default: // workaround for Variant of only ExactSequences not being supported
+                        handler.SendSysMessage(CypherStrings.BadValue);
+
+                        return false;
+                    case "alliance":
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Alliance, rewardValue);
+
+                        break;
+                    case "horde":
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Horde, rewardValue);
+
+                        break;
+                    case "neutral":
+                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Neutral);
+
+                        break;
+                    case "off":
+                        Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
+
+                        break;
+                }
+
+                return true;
+            }
+        }
+
+        [CommandGroup("send")]
+        private class DebugSendCommands
+        {
+            [Command("buyerror", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendBuyErrorCommand(CommandHandler handler, BuyResult error)
+            {
+                handler.GetPlayer().SendBuyError(error, null, 0);
+
+                return true;
+            }
+
+            [Command("channelnotify", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendChannelNotifyCommand(CommandHandler handler, ChatNotify type)
+            {
+                ChannelNotify packet = new();
+                packet.Type = type;
+                packet.Channel = "test";
+                handler.GetSession().SendPacket(packet);
+
+                return true;
+            }
+
+            [Command("chatmessage", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendChatMsgCommand(CommandHandler handler, ChatMsg type)
+            {
+                ChatPkt data = new();
+                data.Initialize(type, Language.Universal, handler.GetPlayer(), handler.GetPlayer(), "testtest", 0, "chan");
+                handler.GetSession().SendPacket(data);
+
+                return true;
+            }
+
+            [Command("equiperror", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendEquipErrorCommand(CommandHandler handler, InventoryResult error)
+            {
+                handler.GetPlayer().SendEquipError(error);
+
+                return true;
+            }
+
+            [Command("largepacket", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendLargePacketCommand(CommandHandler handler)
+            {
+                StringBuilder ss = new();
+
+                while (ss.Length < 128000)
+                    ss.Append("This is a dummy string to push the packet's size beyond 128000 bytes. ");
+
+                handler.SendSysMessage(ss.ToString());
+
+                return true;
+            }
+
+            [Command("opcode", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendOpcodeCommand(CommandHandler handler)
+            {
+                handler.SendSysMessage(CypherStrings.CmdInvalid);
+
+                return true;
+            }
+
+            [Command("playerchoice", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendPlayerChoiceCommand(CommandHandler handler, int choiceId)
+            {
+                Player player = handler.GetPlayer();
+                player.SendPlayerChoice(player.GetGUID(), choiceId);
+
+                return true;
+            }
+
+            [Command("qpartymsg", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendQuestPartyMsgCommand(CommandHandler handler, QuestPushReason msg)
+            {
+                handler.GetPlayer().SendPushToPartyResponse(handler.GetPlayer(), msg);
+
+                return true;
+            }
+
+            [Command("qinvalidmsg", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendQuestInvalidMsgCommand(CommandHandler handler, QuestFailedReasons msg)
+            {
+                handler.GetPlayer().SendCanTakeQuestResponse(msg);
+
+                return true;
+            }
+
+            [Command("sellerror", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendSellErrorCommand(CommandHandler handler, SellResult error)
+            {
+                handler.GetPlayer().SendSellError(error, null, ObjectGuid.Empty);
+
+                return true;
+            }
+
+            [Command("setphaseshift", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendSetPhaseShiftCommand(CommandHandler handler, uint phaseId, uint visibleMapId, uint uiMapPhaseId)
+            {
+                PhaseShift phaseShift = new();
+
+                if (phaseId != 0)
+                    phaseShift.AddPhase(phaseId, PhaseFlags.None, null);
+
+                if (visibleMapId != 0)
+                    phaseShift.AddVisibleMapId(visibleMapId, null);
+
+                if (uiMapPhaseId != 0)
+                    phaseShift.AddUiMapPhaseId(uiMapPhaseId);
+
+                PhasingHandler.SendToPlayer(handler.GetPlayer(), phaseShift);
+
+                return true;
+            }
+
+            [Command("spellfail", RBACPermissions.CommandDebug)]
+            private static bool HandleDebugSendSpellFailCommand(CommandHandler handler, SpellCastResult result, int? failArg1, int? failArg2)
+            {
+                CastFailed castFailed = new();
+                castFailed.CastID = ObjectGuid.Empty;
+                castFailed.SpellID = 133;
+                castFailed.Reason = result;
+                castFailed.FailedArg1 = failArg1.GetValueOrDefault(-1);
+                castFailed.FailedArg2 = failArg2.GetValueOrDefault(-1);
+                handler.GetSession().SendPacket(castFailed);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("warden")]
+        private class DebugWardenCommands
+        {
+            [Command("Force", RBACPermissions.CommandDebug, true)]
+            private static bool HandleDebugWardenForce(CommandHandler handler, ushort[] checkIds)
+            {
+                /*if (checkIds.Empty())
+				    return false;
+
+				Warden  warden = handler.GetSession().GetWarden();
+				if (warden == null)
+				{
+				    handler.SendSysMessage("Warden system is not enabled");
+				    return true;
+				}
+
+				size_t const nQueued = warden->DEBUG_ForceSpecificChecks(checkIds);
+				handler->PSendSysMessage("%zu/%zu checks queued for your Warden, they should be sent over the next few minutes (depending on settings)", nQueued, checkIds.size());*/
+                return true;
+            }
+        }
+
         [Command("anim", RBACPermissions.CommandDebug)]
         private static bool HandleDebugAnimCommand(CommandHandler handler, Emote emote)
         {
@@ -1324,314 +1632,6 @@ namespace Game.Chat
         private static void HandleDebugGuidLimitsMap(CommandHandler handler, Map map)
         {
             handler.SendSysMessage($"Map Id: {map.GetId()} Name: '{map.GetMapName()}' Instance Id: {map.GetInstanceId()} Highest Guid Creature: {map.GenerateLowGuid(HighGuid.Creature)} GameObject: {map.GetMaxLowGuid(HighGuid.GameObject)}");
-        }
-
-        [CommandGroup("asan")]
-        private class DebugAsanCommands
-        {
-            [Command("memoryleak", RBACPermissions.CommandDebug, true)]
-            private static bool HandleDebugMemoryLeak(CommandHandler handler)
-            {
-                return true;
-            }
-
-            [Command("outofbounds", RBACPermissions.CommandDebug, true)]
-            private static bool HandleDebugOutOfBounds(CommandHandler handler)
-            {
-                return true;
-            }
-        }
-
-        [CommandGroup("play")]
-        private class DebugPlayCommands
-        {
-            [Command("cinematic", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugPlayCinematicCommand(CommandHandler handler, uint cinematicId)
-            {
-                CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(cinematicId);
-
-                if (cineSeq == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CinematicNotExist, cinematicId);
-
-                    return false;
-                }
-
-                // Dump camera locations
-                var list = M2Storage.GetFlyByCameras(cineSeq.Camera[0]);
-
-                if (list != null)
-                {
-                    handler.SendSysMessage("Waypoints for sequence {0}, camera {1}", cinematicId, cineSeq.Camera[0]);
-                    uint count = 1;
-
-                    foreach (FlyByCamera cam in list)
-                    {
-                        handler.SendSysMessage("{0} - {1}ms [{2}, {3}, {4}] Facing {5} ({6} degrees)", count, cam.timeStamp, cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W, cam.locations.W * (180 / Math.PI));
-                        count++;
-                    }
-
-                    handler.SendSysMessage("{0} waypoints dumped", list.Count);
-                }
-
-                handler.GetPlayer().SendCinematicStart(cinematicId);
-
-                return true;
-            }
-
-            [Command("movie", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugPlayMovieCommand(CommandHandler handler, uint movieId)
-            {
-                if (!CliDB.MovieStorage.ContainsKey(movieId))
-                {
-                    handler.SendSysMessage(CypherStrings.MovieNotExist, movieId);
-
-                    return false;
-                }
-
-                handler.GetPlayer().SendMovieStart(movieId);
-
-                return true;
-            }
-
-            [Command("music", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugPlayMusicCommand(CommandHandler handler, uint musicId)
-            {
-                if (!CliDB.SoundKitStorage.ContainsKey(musicId))
-                {
-                    handler.SendSysMessage(CypherStrings.SoundNotExist, musicId);
-
-                    return false;
-                }
-
-                Player player = handler.GetPlayer();
-
-                player.PlayDirectMusic(musicId, player);
-
-                handler.SendSysMessage(CypherStrings.YouHearSound, musicId);
-
-                return true;
-            }
-
-            [Command("sound", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugPlaySoundCommand(CommandHandler handler, uint soundId, uint broadcastTextId)
-            {
-                if (!CliDB.SoundKitStorage.ContainsKey(soundId))
-                {
-                    handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
-
-                    return false;
-                }
-
-                Player player = handler.GetPlayer();
-
-                Unit unit = handler.GetSelectedUnit();
-
-                if (!unit)
-                {
-                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
-                    return false;
-                }
-
-                if (!player.GetTarget().IsEmpty())
-                    unit.PlayDistanceSound(soundId, player);
-                else
-                    unit.PlayDirectSound(soundId, player, broadcastTextId);
-
-                handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
-
-                return true;
-            }
-        }
-
-        [CommandGroup("pvp")]
-        private class DebugPvpCommands
-        {
-            [Command("warmode", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugWarModeFactionBalanceCommand(CommandHandler handler, string command, int rewardValue = 0)
-            {
-                // USAGE: .debug pvp fb <alliance|horde|neutral|off> [pct]
-                // neutral     Sets faction balance off.
-                // alliance    Set faction balance to alliance.
-                // horde       Set faction balance to horde.
-                // off         Reset the faction balance and use the calculated value of it
-                switch (command.ToLower())
-                {
-                    default: // workaround for Variant of only ExactSequences not being supported
-                        handler.SendSysMessage(CypherStrings.BadValue);
-
-                        return false;
-                    case "alliance":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Alliance, rewardValue);
-
-                        break;
-                    case "horde":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Horde, rewardValue);
-
-                        break;
-                    case "neutral":
-                        Global.WorldMgr.SetForcedWarModeFactionBalanceState(TeamId.Neutral);
-
-                        break;
-                    case "off":
-                        Global.WorldMgr.DisableForcedWarModeFactionBalanceState();
-
-                        break;
-                }
-
-                return true;
-            }
-        }
-
-        [CommandGroup("send")]
-        private class DebugSendCommands
-        {
-            [Command("buyerror", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendBuyErrorCommand(CommandHandler handler, BuyResult error)
-            {
-                handler.GetPlayer().SendBuyError(error, null, 0);
-
-                return true;
-            }
-
-            [Command("channelnotify", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendChannelNotifyCommand(CommandHandler handler, ChatNotify type)
-            {
-                ChannelNotify packet = new();
-                packet.Type = type;
-                packet.Channel = "test";
-                handler.GetSession().SendPacket(packet);
-
-                return true;
-            }
-
-            [Command("chatmessage", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendChatMsgCommand(CommandHandler handler, ChatMsg type)
-            {
-                ChatPkt data = new();
-                data.Initialize(type, Language.Universal, handler.GetPlayer(), handler.GetPlayer(), "testtest", 0, "chan");
-                handler.GetSession().SendPacket(data);
-
-                return true;
-            }
-
-            [Command("equiperror", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendEquipErrorCommand(CommandHandler handler, InventoryResult error)
-            {
-                handler.GetPlayer().SendEquipError(error);
-
-                return true;
-            }
-
-            [Command("largepacket", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendLargePacketCommand(CommandHandler handler)
-            {
-                StringBuilder ss = new();
-
-                while (ss.Length < 128000)
-                    ss.Append("This is a dummy string to push the packet's size beyond 128000 bytes. ");
-
-                handler.SendSysMessage(ss.ToString());
-
-                return true;
-            }
-
-            [Command("opcode", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendOpcodeCommand(CommandHandler handler)
-            {
-                handler.SendSysMessage(CypherStrings.CmdInvalid);
-
-                return true;
-            }
-
-            [Command("playerchoice", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendPlayerChoiceCommand(CommandHandler handler, int choiceId)
-            {
-                Player player = handler.GetPlayer();
-                player.SendPlayerChoice(player.GetGUID(), choiceId);
-
-                return true;
-            }
-
-            [Command("qpartymsg", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendQuestPartyMsgCommand(CommandHandler handler, QuestPushReason msg)
-            {
-                handler.GetPlayer().SendPushToPartyResponse(handler.GetPlayer(), msg);
-
-                return true;
-            }
-
-            [Command("qinvalidmsg", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendQuestInvalidMsgCommand(CommandHandler handler, QuestFailedReasons msg)
-            {
-                handler.GetPlayer().SendCanTakeQuestResponse(msg);
-
-                return true;
-            }
-
-            [Command("sellerror", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendSellErrorCommand(CommandHandler handler, SellResult error)
-            {
-                handler.GetPlayer().SendSellError(error, null, ObjectGuid.Empty);
-
-                return true;
-            }
-
-            [Command("setphaseshift", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendSetPhaseShiftCommand(CommandHandler handler, uint phaseId, uint visibleMapId, uint uiMapPhaseId)
-            {
-                PhaseShift phaseShift = new();
-
-                if (phaseId != 0)
-                    phaseShift.AddPhase(phaseId, PhaseFlags.None, null);
-
-                if (visibleMapId != 0)
-                    phaseShift.AddVisibleMapId(visibleMapId, null);
-
-                if (uiMapPhaseId != 0)
-                    phaseShift.AddUiMapPhaseId(uiMapPhaseId);
-
-                PhasingHandler.SendToPlayer(handler.GetPlayer(), phaseShift);
-
-                return true;
-            }
-
-            [Command("spellfail", RBACPermissions.CommandDebug)]
-            private static bool HandleDebugSendSpellFailCommand(CommandHandler handler, SpellCastResult result, int? failArg1, int? failArg2)
-            {
-                CastFailed castFailed = new();
-                castFailed.CastID = ObjectGuid.Empty;
-                castFailed.SpellID = 133;
-                castFailed.Reason = result;
-                castFailed.FailedArg1 = failArg1.GetValueOrDefault(-1);
-                castFailed.FailedArg2 = failArg2.GetValueOrDefault(-1);
-                handler.GetSession().SendPacket(castFailed);
-
-                return true;
-            }
-        }
-
-        [CommandGroup("warden")]
-        private class DebugWardenCommands
-        {
-            [Command("Force", RBACPermissions.CommandDebug, true)]
-            private static bool HandleDebugWardenForce(CommandHandler handler, ushort[] checkIds)
-            {
-                /*if (checkIds.Empty())
-				    return false;
-
-				Warden  warden = handler.GetSession().GetWarden();
-				if (warden == null)
-				{
-				    handler.SendSysMessage("Warden system is not enabled");
-				    return true;
-				}
-
-				size_t const nQueued = warden->DEBUG_ForceSpecificChecks(checkIds);
-				handler->PSendSysMessage("%zu/%zu checks queued for your Warden, they should be sent over the next few minutes (depending on settings)", nQueued, checkIds.size());*/
-                return true;
-            }
         }
     }
 }

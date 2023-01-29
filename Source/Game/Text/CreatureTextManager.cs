@@ -294,126 +294,6 @@ namespace Game
             }
         }
 
-        private void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)
-        {
-            float dist = GetRangeForChatType(msgType);
-
-            switch (msgType)
-            {
-                case ChatMsg.MonsterParty:
-                    if (!whisperTarget)
-                        return;
-
-                    Player whisperPlayer = whisperTarget.ToPlayer();
-
-                    if (whisperPlayer)
-                    {
-                        Group group = whisperPlayer.GetGroup();
-
-                        if (group)
-                            group.BroadcastWorker(player => player.SendPacket(data));
-                    }
-
-                    return;
-                case ChatMsg.MonsterWhisper:
-                case ChatMsg.RaidBossWhisper:
-                    {
-                        if (range == CreatureTextRange.Normal) //ignores team and gmOnly
-                        {
-                            if (!whisperTarget ||
-                                !whisperTarget.IsTypeId(TypeId.Player))
-                                return;
-
-                            whisperTarget.ToPlayer().SendPacket(data);
-
-                            return;
-                        }
-
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            switch (range)
-            {
-                case CreatureTextRange.Area:
-                    {
-                        uint areaId = source.GetAreaId();
-                        var players = source.GetMap().GetPlayers();
-
-                        foreach (var pl in players)
-                            if (pl.GetAreaId() == areaId &&
-                                (team == 0 || pl.GetEffectiveTeam() == team) &&
-                                (!gmOnly || pl.IsGameMaster()))
-                                pl.SendPacket(data);
-
-                        return;
-                    }
-                case CreatureTextRange.Zone:
-                    {
-                        uint zoneId = source.GetZoneId();
-                        var players = source.GetMap().GetPlayers();
-
-                        foreach (var pl in players)
-                            if (pl.GetZoneId() == zoneId &&
-                                (team == 0 || pl.GetEffectiveTeam() == team) &&
-                                (!gmOnly || pl.IsGameMaster()))
-                                pl.SendPacket(data);
-
-                        return;
-                    }
-                case CreatureTextRange.Map:
-                    {
-                        var players = source.GetMap().GetPlayers();
-
-                        foreach (var pl in players)
-                            if ((team == 0 || pl.GetEffectiveTeam() == team) &&
-                                (!gmOnly || pl.IsGameMaster()))
-                                pl.SendPacket(data);
-
-                        return;
-                    }
-                case CreatureTextRange.World:
-                    {
-                        var smap = Global.WorldMgr.GetAllSessions();
-
-                        foreach (var session in smap)
-                        {
-                            Player player = session.GetPlayer();
-
-                            if (player != null)
-                                if ((team == 0 || player.GetTeam() == team) &&
-                                    (!gmOnly || player.IsGameMaster()))
-                                    player.SendPacket(data);
-                        }
-
-                        return;
-                    }
-                case CreatureTextRange.Personal:
-                    if (whisperTarget == null ||
-                        !whisperTarget.IsPlayer())
-                        return;
-
-                    whisperTarget.ToPlayer().SendPacket(data);
-
-                    return;
-                case CreatureTextRange.Normal:
-                default:
-                    break;
-            }
-
-            source.SendMessageToSetInRange(data, dist, true);
-        }
-
-        private void SendEmote(Unit source, Emote emote)
-        {
-            if (!source)
-                return;
-
-            source.HandleEmoteCommand(emote);
-        }
-
         public bool TextExist(uint sourceEntry, byte textGroup)
         {
             if (sourceEntry == 0)
@@ -588,6 +468,126 @@ namespace Game
             float dist = GetRangeForChatType(msgType);
             var worker = new PlayerDistWorker(source, dist, localizer);
             Cell.VisitWorldObjects(source, worker, dist);
+        }
+
+        private void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)
+        {
+            float dist = GetRangeForChatType(msgType);
+
+            switch (msgType)
+            {
+                case ChatMsg.MonsterParty:
+                    if (!whisperTarget)
+                        return;
+
+                    Player whisperPlayer = whisperTarget.ToPlayer();
+
+                    if (whisperPlayer)
+                    {
+                        Group group = whisperPlayer.GetGroup();
+
+                        if (group)
+                            group.BroadcastWorker(player => player.SendPacket(data));
+                    }
+
+                    return;
+                case ChatMsg.MonsterWhisper:
+                case ChatMsg.RaidBossWhisper:
+                    {
+                        if (range == CreatureTextRange.Normal) //ignores team and gmOnly
+                        {
+                            if (!whisperTarget ||
+                                !whisperTarget.IsTypeId(TypeId.Player))
+                                return;
+
+                            whisperTarget.ToPlayer().SendPacket(data);
+
+                            return;
+                        }
+
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            switch (range)
+            {
+                case CreatureTextRange.Area:
+                    {
+                        uint areaId = source.GetAreaId();
+                        var players = source.GetMap().GetPlayers();
+
+                        foreach (var pl in players)
+                            if (pl.GetAreaId() == areaId &&
+                                (team == 0 || pl.GetEffectiveTeam() == team) &&
+                                (!gmOnly || pl.IsGameMaster()))
+                                pl.SendPacket(data);
+
+                        return;
+                    }
+                case CreatureTextRange.Zone:
+                    {
+                        uint zoneId = source.GetZoneId();
+                        var players = source.GetMap().GetPlayers();
+
+                        foreach (var pl in players)
+                            if (pl.GetZoneId() == zoneId &&
+                                (team == 0 || pl.GetEffectiveTeam() == team) &&
+                                (!gmOnly || pl.IsGameMaster()))
+                                pl.SendPacket(data);
+
+                        return;
+                    }
+                case CreatureTextRange.Map:
+                    {
+                        var players = source.GetMap().GetPlayers();
+
+                        foreach (var pl in players)
+                            if ((team == 0 || pl.GetEffectiveTeam() == team) &&
+                                (!gmOnly || pl.IsGameMaster()))
+                                pl.SendPacket(data);
+
+                        return;
+                    }
+                case CreatureTextRange.World:
+                    {
+                        var smap = Global.WorldMgr.GetAllSessions();
+
+                        foreach (var session in smap)
+                        {
+                            Player player = session.GetPlayer();
+
+                            if (player != null)
+                                if ((team == 0 || player.GetTeam() == team) &&
+                                    (!gmOnly || player.IsGameMaster()))
+                                    player.SendPacket(data);
+                        }
+
+                        return;
+                    }
+                case CreatureTextRange.Personal:
+                    if (whisperTarget == null ||
+                        !whisperTarget.IsPlayer())
+                        return;
+
+                    whisperTarget.ToPlayer().SendPacket(data);
+
+                    return;
+                case CreatureTextRange.Normal:
+                default:
+                    break;
+            }
+
+            source.SendMessageToSetInRange(data, dist, true);
+        }
+
+        private void SendEmote(Unit source, Emote emote)
+        {
+            if (!source)
+                return;
+
+            source.HandleEmoteCommand(emote);
         }
     }
 

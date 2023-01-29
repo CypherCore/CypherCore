@@ -21,11 +21,6 @@ namespace Framework.Database
             NextRow();
         }
 
-        ~SQLResult()
-        {
-            _reader = null;
-        }
-
         public T Read<T>(int column)
         {
             if (_reader.IsDBNull(column))
@@ -150,6 +145,11 @@ namespace Framework.Database
             _reader.Close();
 
             return false;
+        }
+
+        ~SQLResult()
+        {
+            _reader = null;
         }
     }
 

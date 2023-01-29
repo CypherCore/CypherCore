@@ -2,7 +2,7 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		h = f * 121666
 		Can overlap h with f.
 
@@ -13,7 +13,7 @@
 		   |h| bounded by 1.1*2^25,1.1*2^24,1.1*2^25,1.1*2^24,etc.
 		*/
 
-        public static void fe_mul121666(out FieldElement h, ref FieldElement f)
+	    public static void fe_mul121666(out FieldElement h, ref FieldElement f)
         {
             int f0 = f.x0;
             int f1 = f.x1;

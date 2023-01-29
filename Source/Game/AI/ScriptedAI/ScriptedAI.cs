@@ -14,8 +14,8 @@ namespace Game.AI
     public class ScriptedAI : CreatureAI
     {
         private readonly Difficulty _difficulty;
-        private bool _isCombatMovementAllowed;
         private readonly bool _isHeroic;
+        private bool _isCombatMovementAllowed;
 
         public ScriptedAI(Creature creature) : base(creature)
         {
@@ -179,71 +179,6 @@ namespace Game.AI
                 who = me;
 
             return who.GetThreatManager().GetThreat(victim);
-        }
-
-        /// <summary>
-        ///  Stops combat, ignoring restrictions, for the given creature
-        /// </summary>
-        /// <param Name="who"></param>
-        /// <param Name="reset"></param>
-        private void ForceCombatStop(Creature who, bool reset = true)
-        {
-            if (who == null ||
-                !who.IsInCombat())
-                return;
-
-            who.CombatStop(true);
-            who.DoNotReacquireSpellFocusTarget();
-            who.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
-
-            if (reset)
-            {
-                who.LoadCreaturesAddon();
-                who.SetTappedBy(null);
-                who.ResetPlayerDamageReq();
-                who.SetLastDamagedTime(0);
-                who.SetCannotReachTarget(false);
-            }
-        }
-
-        /// <summary>
-        ///  Stops combat, ignoring restrictions, for the found creatures
-        /// </summary>
-        /// <param Name="entry"></param>
-        /// <param Name="maxSearchRange"></param>
-        /// <param Name="samePhase"></param>
-        /// <param Name="reset"></param>
-        private void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
-        {
-            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
-
-            List<Creature> creatures = new();
-            AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
-            CreatureListSearcher searcher = new(me, creatures, check);
-
-            if (!samePhase)
-                PhasingHandler.SetAlwaysVisible(me, true, false);
-
-            Cell.VisitGridObjects(me, searcher, maxSearchRange);
-
-            if (!samePhase)
-                PhasingHandler.SetAlwaysVisible(me, false, false);
-
-            foreach (Creature creature in creatures)
-                ForceCombatStop(creature, reset);
-        }
-
-        /// <summary>
-        ///  Stops combat, ignoring restrictions, for the found creatures
-        /// </summary>
-        /// <param Name="creatureEntries"></param>
-        /// <param Name="maxSearchRange"></param>
-        /// <param Name="samePhase"></param>
-        /// <param Name="reset"></param>
-        private void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
-        {
-            foreach (var entry in creatureEntries)
-                ForceCombatStopForCreatureEntry(entry, maxSearchRange, samePhase, reset);
         }
 
         //Spawns a creature relative to me
@@ -530,6 +465,71 @@ namespace Game.AI
                 Difficulty.Raid10HC => heroic10,
                 _ => heroic25
             };
+        }
+
+        /// <summary>
+        ///  Stops combat, ignoring restrictions, for the given creature
+        /// </summary>
+        /// <param Name="who"></param>
+        /// <param Name="reset"></param>
+        private void ForceCombatStop(Creature who, bool reset = true)
+        {
+            if (who == null ||
+                !who.IsInCombat())
+                return;
+
+            who.CombatStop(true);
+            who.DoNotReacquireSpellFocusTarget();
+            who.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+            if (reset)
+            {
+                who.LoadCreaturesAddon();
+                who.SetTappedBy(null);
+                who.ResetPlayerDamageReq();
+                who.SetLastDamagedTime(0);
+                who.SetCannotReachTarget(false);
+            }
+        }
+
+        /// <summary>
+        ///  Stops combat, ignoring restrictions, for the found creatures
+        /// </summary>
+        /// <param Name="entry"></param>
+        /// <param Name="maxSearchRange"></param>
+        /// <param Name="samePhase"></param>
+        /// <param Name="reset"></param>
+        private void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        {
+            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
+
+            List<Creature> creatures = new();
+            AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
+            CreatureListSearcher searcher = new(me, creatures, check);
+
+            if (!samePhase)
+                PhasingHandler.SetAlwaysVisible(me, true, false);
+
+            Cell.VisitGridObjects(me, searcher, maxSearchRange);
+
+            if (!samePhase)
+                PhasingHandler.SetAlwaysVisible(me, false, false);
+
+            foreach (Creature creature in creatures)
+                ForceCombatStop(creature, reset);
+        }
+
+        /// <summary>
+        ///  Stops combat, ignoring restrictions, for the found creatures
+        /// </summary>
+        /// <param Name="creatureEntries"></param>
+        /// <param Name="maxSearchRange"></param>
+        /// <param Name="samePhase"></param>
+        /// <param Name="reset"></param>
+        private void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        {
+            foreach (var entry in creatureEntries)
+                ForceCombatStopForCreatureEntry(entry, maxSearchRange, samePhase, reset);
         }
     }
 }

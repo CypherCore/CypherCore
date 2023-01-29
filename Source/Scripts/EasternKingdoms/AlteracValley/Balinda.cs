@@ -36,20 +36,14 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
     [Script]
     internal class boss_balinda : ScriptedAI
     {
-        private bool HasCastIceblock;
         private readonly SummonList summons;
+        private bool HasCastIceblock;
         private ObjectGuid WaterElementalGUID;
 
         public boss_balinda(Creature creature) : base(creature)
         {
             summons = new SummonList(me);
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            WaterElementalGUID.Clear();
-            HasCastIceblock = false;
         }
 
         public override void Reset()
@@ -160,6 +154,12 @@ namespace Scripts.EasternKingdoms.AlteracValley.Balinda
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void Initialize()
+        {
+            WaterElementalGUID.Clear();
+            HasCastIceblock = false;
         }
     }
 }

@@ -7,7 +7,6 @@ namespace Game.Scripting.Interfaces.IPlayer
     public interface IPlayerOnDuelEnd : IScriptObject
     {
         void OnDuelEnd(Player winner, Player loser, DuelCompleteType type);
-
     }
 }
 

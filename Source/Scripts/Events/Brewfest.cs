@@ -86,6 +86,13 @@ namespace Scripts.Events.Brewfest
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectRemove));
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
         private void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
@@ -135,13 +142,6 @@ namespace Scripts.Events.Brewfest
         {
             GetTarget().RemoveAuraFromStack(GetId());
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask, AuraScriptHookType.EffectRemove));
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
-        }
     }
 
     // 43310 - Ram Level - Neutral
@@ -152,6 +152,11 @@ namespace Scripts.Events.Brewfest
     internal class spell_brewfest_ram : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
+        }
 
         private void OnPeriodic(AuraEffect aurEff)
         {
@@ -207,17 +212,17 @@ namespace Scripts.Events.Brewfest
                     break;
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
-        }
     }
 
     [Script] // 43052 - Ram Fatigue
     internal class spell_brewfest_ram_fatigue : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
+        }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
@@ -234,11 +239,6 @@ namespace Scripts.Events.Brewfest
                 target.CastSpell(target, SpellIds.ExhaustedRam, true);
             }
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask, AuraScriptHookType.EffectApply));
-        }
     }
 
     [Script] // 43450 - Brewfest - apple trap - friendly DND
@@ -246,14 +246,14 @@ namespace Scripts.Events.Brewfest
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAura(SpellIds.RamFatigue);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+        }
+
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.RamFatigue);
         }
     }
 
@@ -262,15 +262,15 @@ namespace Scripts.Events.Brewfest
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
             target.CastSpell(target, SpellIds.RamLevelNeutral, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
     }
 
@@ -279,6 +279,11 @@ namespace Scripts.Events.Brewfest
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleForceCast(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
@@ -286,17 +291,17 @@ namespace Scripts.Events.Brewfest
             // triggered spell is cast as "triggered", reagents are not consumed
             GetHitUnit().CastSpell((Unit)null, GetEffectInfo().TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost));
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 43755 - Brewfest - Daily - Relay Race - Player - Increase Mount Duration - DND
     internal class spell_brewfest_relay_race_turn_in : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleDummy(uint effIndex)
         {
@@ -310,11 +315,6 @@ namespace Scripts.Events.Brewfest
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.RelayRaceTurnIn, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 43876 - Dismount Ram
@@ -322,14 +322,14 @@ namespace Scripts.Events.Brewfest
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
-        private void HandleScript(uint effIndex)
-        {
-            GetCaster().RemoveAura(SpellIds.RentalRacingRam);
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
+        {
+            GetCaster().RemoveAura(SpellIds.RentalRacingRam);
         }
     }
 
@@ -345,6 +345,11 @@ namespace Scripts.Events.Brewfest
         public override bool Load()
         {
             return GetUnitOwner().IsTypeId(TypeId.Player);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
         }
 
         private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -372,11 +377,6 @@ namespace Scripts.Events.Brewfest
             if (BroadcastTextId != 0)
                 target.Talk(BroadcastTextId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-        }
     }
 
     [Script]
@@ -387,6 +387,11 @@ namespace Scripts.Events.Brewfest
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.MountRam100, SpellIds.MountRam60, SpellIds.MountKodo100, SpellIds.MountKodo60);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -420,11 +425,6 @@ namespace Scripts.Events.Brewfest
 
                 caster.CastSpell(caster, spell_id, true);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

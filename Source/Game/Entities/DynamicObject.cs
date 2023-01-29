@@ -12,11 +12,32 @@ namespace Game.Entities
 {
     public class DynamicObject : WorldObject
     {
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly DynamicObjectData DynamicObjectMask = new();
+            private readonly ObjectFieldData ObjectMask = new();
+            private readonly DynamicObject Owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(DynamicObject owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), DynamicObjectMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
+
+        private readonly DynamicObjectData _dynamicObjectData;
         private Aura _aura;
         private Unit _caster;
         private int _duration; // for non-aura dynobjects
-
-        private readonly DynamicObjectData _dynamicObjectData;
         private bool _isViewpoint;
         private Aura _removedAura;
 
@@ -170,14 +191,6 @@ namespace Game.Entities
                 AddObjectToRemoveList();
         }
 
-        private int GetDuration()
-        {
-            if (_aura == null)
-                return _duration;
-            else
-                return _aura.GetDuration();
-        }
-
         public void SetDuration(int newDuration)
         {
             if (_aura == null)
@@ -197,16 +210,6 @@ namespace Game.Entities
             _aura = aura;
         }
 
-        private void RemoveAura()
-        {
-            Cypher.Assert(_aura != null && _removedAura == null);
-            _removedAura = _aura;
-            _aura = null;
-
-            if (!_removedAura.IsRemoved())
-                _removedAura._Remove(AuraRemoveMode.Default);
-        }
-
         public void SetCasterViewpoint()
         {
             Player caster = _caster.ToPlayer();
@@ -218,38 +221,11 @@ namespace Game.Entities
             }
         }
 
-        private void RemoveCasterViewpoint()
-        {
-            Player caster = _caster.ToPlayer();
-
-            if (caster != null)
-            {
-                caster.SetViewpoint(this, false);
-                _isViewpoint = false;
-            }
-        }
-
         public override uint GetFaction()
         {
             Cypher.Assert(_caster != null);
 
             return _caster.GetFaction();
-        }
-
-        private void BindToCaster()
-        {
-            Cypher.Assert(_caster == null);
-            _caster = Global.ObjAccessor.GetUnit(this, GetCasterGUID());
-            Cypher.Assert(_caster != null);
-            Cypher.Assert(_caster.GetMap() == GetMap());
-            _caster._RegisterDynObject(this);
-        }
-
-        private void UnbindFromCaster()
-        {
-            Cypher.Assert(_caster != null);
-            _caster._UnregisterDynObject(this);
-            _caster = null;
         }
 
         public SpellInfo GetSpellInfo()
@@ -287,34 +263,6 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
-        {
-            UpdateMask valuesMask = new((int)TypeId.Max);
-
-            if (requestedObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Object);
-
-            if (requestedDynamicObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.DynamicObject);
-
-            WorldPacket buffer = new();
-            buffer.WriteUInt32(valuesMask.GetBlock(0));
-
-            if (valuesMask[(int)TypeId.Object])
-                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
-
-            if (valuesMask[(int)TypeId.DynamicObject])
-                _dynamicObjectData.WriteUpdate(buffer, requestedDynamicObjectMask, true, this, target);
-
-            WorldPacket buffer1 = new();
-            buffer1.WriteUInt8((byte)UpdateType.Values);
-            buffer1.WritePackedGuid(GetGUID());
-            buffer1.WriteUInt32(buffer.GetSize());
-            buffer1.WriteBytes(buffer.GetData());
-
-            data.AddUpdateBlock(buffer1);
-        }
-
         public override void ClearUpdateMask(bool remove)
         {
             Values.ClearChangesMask(_dynamicObjectData);
@@ -346,26 +294,77 @@ namespace Game.Entities
             return _dynamicObjectData.Radius;
         }
 
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        private int GetDuration()
         {
-            private readonly DynamicObjectData DynamicObjectMask = new();
-            private readonly ObjectFieldData ObjectMask = new();
-            private readonly DynamicObject Owner;
+            if (_aura == null)
+                return _duration;
+            else
+                return _aura.GetDuration();
+        }
 
-            public ValuesUpdateForPlayerWithMaskSender(DynamicObject owner)
+        private void RemoveAura()
+        {
+            Cypher.Assert(_aura != null && _removedAura == null);
+            _removedAura = _aura;
+            _aura = null;
+
+            if (!_removedAura.IsRemoved())
+                _removedAura._Remove(AuraRemoveMode.Default);
+        }
+
+        private void RemoveCasterViewpoint()
+        {
+            Player caster = _caster.ToPlayer();
+
+            if (caster != null)
             {
-                Owner = owner;
+                caster.SetViewpoint(this, false);
+                _isViewpoint = false;
             }
+        }
 
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
+        private void BindToCaster()
+        {
+            Cypher.Assert(_caster == null);
+            _caster = Global.ObjAccessor.GetUnit(this, GetCasterGUID());
+            Cypher.Assert(_caster != null);
+            Cypher.Assert(_caster.GetMap() == GetMap());
+            _caster._RegisterDynObject(this);
+        }
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), DynamicObjectMask.GetUpdateMask(), player);
+        private void UnbindFromCaster()
+        {
+            Cypher.Assert(_caster != null);
+            _caster._UnregisterDynObject(this);
+            _caster = null;
+        }
 
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
+        {
+            UpdateMask valuesMask = new((int)TypeId.Max);
+
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            if (requestedDynamicObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.DynamicObject);
+
+            WorldPacket buffer = new();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.DynamicObject])
+                _dynamicObjectData.WriteUpdate(buffer, requestedDynamicObjectMask, true, this, target);
+
+            WorldPacket buffer1 = new();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
         }
     }
 }

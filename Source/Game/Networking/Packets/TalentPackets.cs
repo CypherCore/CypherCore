@@ -9,6 +9,20 @@ namespace Game.Networking.Packets
 {
     internal class UpdateTalentData : ServerPacket
     {
+        public class TalentGroupInfo
+        {
+            public List<PvPTalent> PvPTalents = new();
+            public uint SpecID;
+            public List<ushort> TalentIDs = new();
+        }
+
+        public class TalentInfoUpdate
+        {
+            public byte ActiveGroup;
+            public uint PrimarySpecialization;
+            public List<TalentGroupInfo> TalentGroups = new();
+        }
+
         public TalentInfoUpdate Info = new();
 
         public UpdateTalentData() : base(ServerOpcodes.UpdateTalentData, ConnectionType.Instance)
@@ -33,20 +47,6 @@ namespace Game.Networking.Packets
                 foreach (PvPTalent talent in talentGroupInfo.PvPTalents)
                     talent.Write(_worldPacket);
             }
-        }
-
-        public class TalentGroupInfo
-        {
-            public List<PvPTalent> PvPTalents = new();
-            public uint SpecID;
-            public List<ushort> TalentIDs = new();
-        }
-
-        public class TalentInfoUpdate
-        {
-            public byte ActiveGroup;
-            public uint PrimarySpecialization;
-            public List<TalentGroupInfo> TalentGroups = new();
         }
     }
 

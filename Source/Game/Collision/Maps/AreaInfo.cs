@@ -5,6 +5,11 @@ namespace Game.Collision
 {
     public class AreaInfo
     {
+        public AreaInfo()
+        {
+            Ground_Z = float.NegativeInfinity;
+        }
+
         public int AdtId { get; set; }
         public uint Flags { get; set; }
         public float Ground_Z { get; set; }
@@ -12,10 +17,5 @@ namespace Game.Collision
 
         public bool Result { get; set; }
         public int RootId { get; set; }
-
-        public AreaInfo()
-        {
-            Ground_Z = float.NegativeInfinity;
-        }
     }
 }

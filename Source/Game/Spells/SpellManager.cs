@@ -294,11 +294,6 @@ namespace Game.Entities
             return mSpellLearnSpells.LookupByKey(spell_id);
         }
 
-        private bool IsSpellLearnSpell(uint spell_id)
-        {
-            return mSpellLearnSpells.ContainsKey(spell_id);
-        }
-
         public bool IsSpellLearnToSpell(uint spell_id1, uint spell_id2)
         {
             var bounds = GetSpellLearnSpellMapBounds(spell_id1);
@@ -331,38 +326,10 @@ namespace Game.Entities
             return false;
         }
 
-        private List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
-        {
-            return mSpellGroupSpell.LookupByKey(group_id);
-        }
-
         public void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells)
         {
             List<SpellGroup> usedGroups = new();
             GetSetOfSpellsInSpellGroup(group_id, out foundSpells, ref usedGroups);
-        }
-
-        private void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells, ref List<SpellGroup> usedGroups)
-        {
-            foundSpells = new List<int>();
-
-            if (usedGroups.Find(p => p == group_id) == 0)
-                return;
-
-            usedGroups.Add(group_id);
-
-            var groupSpell = GetSpellGroupSpellMapBounds(group_id);
-
-            foreach (var group in groupSpell)
-                if (group < 0)
-                {
-                    SpellGroup currGroup = (SpellGroup)Math.Abs(group);
-                    GetSetOfSpellsInSpellGroup(currGroup, out foundSpells, ref usedGroups);
-                }
-                else
-                {
-                    foundSpells.Add(group);
-                }
         }
 
         public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, int amount, Dictionary<SpellGroup, int> groups)
@@ -673,11 +640,6 @@ namespace Game.Entities
             return null;
         }
 
-        private List<SpellInfo> _GetSpellInfo(uint spellId)
-        {
-            return mSpellInfoMap.LookupByKey(spellId);
-        }
-
         public void ForEachSpellInfo(Action<SpellInfo> callback)
         {
             foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
@@ -688,112 +650,6 @@ namespace Game.Entities
         {
             foreach (SpellInfo spellInfo in _GetSpellInfo(spellId))
                 callback(spellInfo);
-        }
-
-        private void UnloadSpellInfoChains()
-        {
-            foreach (var pair in mSpellChains)
-                foreach (SpellInfo spellInfo in _GetSpellInfo(pair.Key))
-                    spellInfo.ChainEntry = null;
-
-            mSpellChains.Clear();
-        }
-
-        private bool IsTriggerAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.Dummy:
-                case AuraType.PeriodicDummy:
-                case AuraType.ModConfuse:
-                case AuraType.ModThreat:
-                case AuraType.ModStun:
-                case AuraType.ModDamageDone:
-                case AuraType.ModDamageTaken:
-                case AuraType.ModResistance:
-                case AuraType.ModStealth:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.Transform:
-                case AuraType.ReflectSpells:
-                case AuraType.DamageImmunity:
-                case AuraType.ProcTriggerSpell:
-                case AuraType.ProcTriggerDamage:
-                case AuraType.ModCastingSpeedNotStack:
-                case AuraType.SchoolAbsorb:
-                case AuraType.ModPowerCostSchoolPct:
-                case AuraType.ModPowerCostSchool:
-                case AuraType.ReflectSpellsSchool:
-                case AuraType.MechanicImmunity:
-                case AuraType.ModDamagePercentTaken:
-                case AuraType.SpellMagnet:
-                case AuraType.ModAttackPower:
-                case AuraType.ModPowerRegenPercent:
-                case AuraType.InterceptMeleeRangedAttacks:
-                case AuraType.OverrideClassScripts:
-                case AuraType.ModMechanicResistance:
-                case AuraType.MeleeAttackPowerAttackerBonus:
-                case AuraType.ModMeleeHaste:
-                case AuraType.ModMeleeHaste3:
-                case AuraType.ModAttackerMeleeHitChance:
-                case AuraType.ProcTriggerSpellWithValue:
-                case AuraType.ModSchoolMaskDamageFromCaster:
-                case AuraType.ModSpellDamageFromCaster:
-                case AuraType.AbilityIgnoreAurastate:
-                case AuraType.ModInvisibility:
-                case AuraType.ForceReaction:
-                case AuraType.ModTaunt:
-                case AuraType.ModDetaunt:
-                case AuraType.ModDamagePercentDone:
-                case AuraType.ModAttackPowerPct:
-                case AuraType.ModHitChance:
-                case AuraType.ModWeaponCritPercent:
-                case AuraType.ModBlockPercent:
-                case AuraType.ModRoot2:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsAlwaysTriggeredAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.OverrideClassScripts:
-                case AuraType.ModStealth:
-                case AuraType.ModConfuse:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.ModStun:
-                case AuraType.Transform:
-                case AuraType.ModInvisibility:
-                case AuraType.SpellMagnet:
-                case AuraType.SchoolAbsorb:
-                case AuraType.ModRoot2:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private ProcFlagsSpellType GetSpellTypeMask(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.ModStealth:
-                    return ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
-                case AuraType.ModConfuse:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.ModRoot2:
-                case AuraType.ModStun:
-                case AuraType.Transform:
-                case AuraType.ModInvisibility:
-                    return ProcFlagsSpellType.Damage;
-                default:
-                    return ProcFlagsSpellType.MaskAll;
-            }
         }
 
         // SpellInfo object management
@@ -909,6 +765,150 @@ namespace Game.Entities
         public uint GetModelForTotem(uint spellId, Race race)
         {
             return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
+        }
+
+        private bool IsSpellLearnSpell(uint spell_id)
+        {
+            return mSpellLearnSpells.ContainsKey(spell_id);
+        }
+
+        private List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
+        {
+            return mSpellGroupSpell.LookupByKey(group_id);
+        }
+
+        private void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells, ref List<SpellGroup> usedGroups)
+        {
+            foundSpells = new List<int>();
+
+            if (usedGroups.Find(p => p == group_id) == 0)
+                return;
+
+            usedGroups.Add(group_id);
+
+            var groupSpell = GetSpellGroupSpellMapBounds(group_id);
+
+            foreach (var group in groupSpell)
+                if (group < 0)
+                {
+                    SpellGroup currGroup = (SpellGroup)Math.Abs(group);
+                    GetSetOfSpellsInSpellGroup(currGroup, out foundSpells, ref usedGroups);
+                }
+                else
+                {
+                    foundSpells.Add(group);
+                }
+        }
+
+        private List<SpellInfo> _GetSpellInfo(uint spellId)
+        {
+            return mSpellInfoMap.LookupByKey(spellId);
+        }
+
+        private void UnloadSpellInfoChains()
+        {
+            foreach (var pair in mSpellChains)
+                foreach (SpellInfo spellInfo in _GetSpellInfo(pair.Key))
+                    spellInfo.ChainEntry = null;
+
+            mSpellChains.Clear();
+        }
+
+        private bool IsTriggerAura(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.Dummy:
+                case AuraType.PeriodicDummy:
+                case AuraType.ModConfuse:
+                case AuraType.ModThreat:
+                case AuraType.ModStun:
+                case AuraType.ModDamageDone:
+                case AuraType.ModDamageTaken:
+                case AuraType.ModResistance:
+                case AuraType.ModStealth:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.Transform:
+                case AuraType.ReflectSpells:
+                case AuraType.DamageImmunity:
+                case AuraType.ProcTriggerSpell:
+                case AuraType.ProcTriggerDamage:
+                case AuraType.ModCastingSpeedNotStack:
+                case AuraType.SchoolAbsorb:
+                case AuraType.ModPowerCostSchoolPct:
+                case AuraType.ModPowerCostSchool:
+                case AuraType.ReflectSpellsSchool:
+                case AuraType.MechanicImmunity:
+                case AuraType.ModDamagePercentTaken:
+                case AuraType.SpellMagnet:
+                case AuraType.ModAttackPower:
+                case AuraType.ModPowerRegenPercent:
+                case AuraType.InterceptMeleeRangedAttacks:
+                case AuraType.OverrideClassScripts:
+                case AuraType.ModMechanicResistance:
+                case AuraType.MeleeAttackPowerAttackerBonus:
+                case AuraType.ModMeleeHaste:
+                case AuraType.ModMeleeHaste3:
+                case AuraType.ModAttackerMeleeHitChance:
+                case AuraType.ProcTriggerSpellWithValue:
+                case AuraType.ModSchoolMaskDamageFromCaster:
+                case AuraType.ModSpellDamageFromCaster:
+                case AuraType.AbilityIgnoreAurastate:
+                case AuraType.ModInvisibility:
+                case AuraType.ForceReaction:
+                case AuraType.ModTaunt:
+                case AuraType.ModDetaunt:
+                case AuraType.ModDamagePercentDone:
+                case AuraType.ModAttackPowerPct:
+                case AuraType.ModHitChance:
+                case AuraType.ModWeaponCritPercent:
+                case AuraType.ModBlockPercent:
+                case AuraType.ModRoot2:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool IsAlwaysTriggeredAura(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.OverrideClassScripts:
+                case AuraType.ModStealth:
+                case AuraType.ModConfuse:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.ModStun:
+                case AuraType.Transform:
+                case AuraType.ModInvisibility:
+                case AuraType.SpellMagnet:
+                case AuraType.SchoolAbsorb:
+                case AuraType.ModRoot2:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private ProcFlagsSpellType GetSpellTypeMask(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.ModStealth:
+                    return ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
+                case AuraType.ModConfuse:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.ModRoot2:
+                case AuraType.ModStun:
+                case AuraType.Transform:
+                case AuraType.ModInvisibility:
+                    return ProcFlagsSpellType.Damage;
+                default:
+                    return ProcFlagsSpellType.MaskAll;
+            }
         }
 
         #region Loads

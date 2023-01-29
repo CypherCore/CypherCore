@@ -7,14 +7,14 @@ namespace Game.Collision
 {
     public class AreaInfoCallback : WorkerCallback
     {
-        public AreaInfo AInfo { get; set; } = new();
-
         private readonly ModelInstance[] _prims;
 
         public AreaInfoCallback(ModelInstance[] val)
         {
             _prims = val;
         }
+
+        public AreaInfo AInfo { get; set; } = new();
 
         public override void Invoke(Vector3 point, uint entry)
         {

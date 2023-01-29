@@ -34,9 +34,9 @@ namespace Game.Scripting
         private readonly MultiMap<Tuple<uint, ushort>, SplineChainLink> _mSplineChainsMap = new(); // spline chains
 
         private readonly Dictionary<Type, List<IScriptObject>> _scriptByType = new();
-        private uint _scriptCount;
         private readonly Dictionary<Type, ScriptRegistry> _scriptStorage = new();
         private readonly Dictionary<uint, WaypointPath> _waypointStore = new();
+        private uint _scriptCount;
 
         private ScriptManager()
         {

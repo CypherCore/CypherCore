@@ -19,15 +19,6 @@ public partial class Detour
 
 public partial class Detour
 {
-    public enum dtNodeFlags
-    {
-        DT_NODE_OPEN = 0x01,
-        DT_NODE_CLOSED = 0x02,
-        DT_NODE_PARENT_DETACHED = 0x04 // parent of the node is not adjacent. Found using raycast.
-    };
-
-    public const ushort DT_NULL_IDX = ushort.MaxValue; //(dtNodeIndex)~0;
-
     public class dtNode
     {
         public float cost;                 //< Cost from previous node to current node.
@@ -71,8 +62,8 @@ public partial class Detour
         private readonly int _hashSize;
         private readonly int _maxNodes;
         private readonly ushort[] _next;
-        private int _nodeCount;
         private readonly dtNode[] _nodes;
+        private int _nodeCount;
 
         //////////////////////////////////////////////////////////////////////////////////////////
         public dtNodePool(int maxNodes, int hashSize)
@@ -308,4 +299,13 @@ public partial class Detour
             bubbleUp(i, node);
         }
     }
+
+    public enum dtNodeFlags
+    {
+        DT_NODE_OPEN = 0x01,
+        DT_NODE_CLOSED = 0x02,
+        DT_NODE_PARENT_DETACHED = 0x04 // parent of the node is not adjacent. Found using raycast.
+    };
+
+    public const ushort DT_NULL_IDX = ushort.MaxValue; //(dtNodeIndex)~0;
 }

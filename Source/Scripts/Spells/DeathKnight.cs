@@ -124,6 +124,13 @@ namespace Scripts.Spells.DeathKnight
             return true;
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
+            Effects.Add(new EffectAbsorbHandler(Trigger, 0, false, AuraScriptHookType.EffectAfterAbsorb));
+            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             amount = (int)MathFunctions.CalculatePct(maxHealth, absorbPct);
@@ -151,13 +158,6 @@ namespace Scripts.Spells.DeathKnight
                 args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount()));
                 GetTarget().CastSpell((Unit)null, SpellIds.VolatileShieldingDamage, args);
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-            Effects.Add(new EffectAbsorbHandler(Trigger, 0, false, AuraScriptHookType.EffectAfterAbsorb));
-            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
     }
 
@@ -225,6 +225,11 @@ namespace Scripts.Spells.DeathKnight
             return true;
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         // This is a port of the old switch hack in Unit.cpp, it's not correct
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
@@ -265,11 +270,6 @@ namespace Scripts.Spells.DeathKnight
             Unit.DealDamage(drw, drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 43265 - Death and Decay
@@ -297,17 +297,17 @@ namespace Scripts.Spells.DeathKnight
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
+        }
+
         private void HandleDummyTick(AuraEffect aurEff)
         {
             Unit caster = GetCaster();
 
             if (caster)
                 caster.CastSpell(GetTarget(), SpellIds.DeathAndDecayDamage, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
     }
 
@@ -321,6 +321,11 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.DeathCoilDamage, SpellIds.Unholy, SpellIds.UnholyVigor);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
@@ -329,11 +334,6 @@ namespace Scripts.Spells.DeathKnight
 
             if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
                 caster.CastSpell(caster, SpellIds.UnholyVigor, new CastSpellExtraArgs(unholyAura));
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -411,17 +411,17 @@ namespace Scripts.Spells.DeathKnight
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
+        }
+
         private void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             Unit caster = GetCaster();
 
             if (caster)
                 amount = (int)caster.CountPctFromMaxHealth(amount);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(HandleCalcAmount, 1, AuraType.SchoolHealAbsorb));
         }
     }
 
@@ -521,14 +521,14 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.FesteringWound);
         }
 
-        private void HandleScriptEffect(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValue()));
-        }
-
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScriptEffect(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValue()));
         }
     }
 
@@ -540,6 +540,12 @@ namespace Scripts.Spells.DeathKnight
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && spellInfo.GetEffects().Count > 2;
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(Suicide, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDamage(uint effIndex)
@@ -555,18 +561,17 @@ namespace Scripts.Spells.DeathKnight
                 // Corpse Explosion (Suicide)
                 unitTarget.CastSpell(unitTarget, SpellIds.CorpseExplosionTriggered, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
-            SpellEffects.Add(new EffectHandler(Suicide, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 69961 - Glyph of Scourge Strike
     internal class spell_dk_glyph_of_scourge_strike_script : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
 
         private void HandleScriptEffect(uint effIndex)
         {
@@ -598,11 +603,6 @@ namespace Scripts.Spells.DeathKnight
                 }
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 206940 - Mark of Blood
@@ -615,6 +615,11 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.MarkOfBloodHeal);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -622,11 +627,6 @@ namespace Scripts.Spells.DeathKnight
 
             if (caster)
                 caster.CastSpell(eventInfo.GetProcTarget(), SpellIds.MarkOfBloodHeal, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -640,15 +640,15 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.NecrosisEffect);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.NecrosisEffect, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -739,6 +739,11 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.RaiseDeadSummon, SpellIds.SludgeBelcher, SpellIds.SludgeBelcherSummon);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             uint spellId = SpellIds.RaiseDeadSummon;
@@ -747,11 +752,6 @@ namespace Scripts.Spells.DeathKnight
                 spellId = SpellIds.SludgeBelcherSummon;
 
             GetCaster().CastSpell((Unit)null, spellId, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -765,6 +765,11 @@ namespace Scripts.Spells.DeathKnight
             return spellInfo.GetEffects().Count > 1 && ValidateSpellInfo(SpellIds.FrostScythe);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+
         private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             float chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
@@ -774,11 +779,6 @@ namespace Scripts.Spells.DeathKnight
 
             return RandomHelper.randChance(chance);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.ProcTriggerSpell));
-        }
     }
 
     [Script] // 55233 - Vampiric Blood
@@ -786,14 +786,14 @@ namespace Scripts.Spells.DeathKnight
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            amount = (int)GetUnitOwner().CountPctFromMaxHealth(amount);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.ModIncreaseHealth2));
+        }
+
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            amount = (int)GetUnitOwner().CountPctFromMaxHealth(amount);
         }
     }
 }

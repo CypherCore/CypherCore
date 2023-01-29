@@ -11,12 +11,12 @@ namespace Game.Accounts
     public class RBACData
     {
         private readonly List<uint> _deniedPerms = new();  // Denied permissions
-        private List<uint> _globalPerms = new();  // Calculated permissions
         private readonly List<uint> _grantedPerms = new(); // Granted permissions
         private readonly uint _id;                         // Account Id
         private readonly string _name;                     // Account Name
         private readonly int _realmId;                     // RealmId Affected
-        private byte _secLevel;                   // Account SecurityLevel
+        private List<uint> _globalPerms = new();           // Calculated permissions
+        private byte _secLevel;                            // Account SecurityLevel
 
         public RBACData(uint id, string name, int realmId, byte secLevel = 255)
         {
@@ -168,16 +168,6 @@ namespace Game.Accounts
             return RBACCommandResult.OK;
         }
 
-        private void SavePermission(uint permission, bool granted, int realmId)
-        {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, permission);
-            stmt.AddValue(2, granted);
-            stmt.AddValue(3, realmId);
-            DB.Login.Execute(stmt);
-        }
-
         public RBACCommandResult RevokePermission(uint permissionId, int realmId = 0)
         {
             // Check if it's present in any list
@@ -275,6 +265,68 @@ namespace Game.Accounts
             CalculateNewPermissions();
         }
 
+        public void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
+        {
+            foreach (var id in permsFrom)
+                permsTo.Add(id);
+        }
+
+        // Gets the Name of the Object
+        public string GetName()
+        {
+            return _name;
+        }
+
+        // Gets the Id of the Object
+        public uint GetId()
+        {
+            return _id;
+        }
+
+        public bool HasPermission(RBACPermissions permission)
+        {
+            return _globalPerms.Contains((uint)permission);
+        }
+
+        // Returns all the granted permissions (after computation)
+        public List<uint> GetPermissions()
+        {
+            return _globalPerms;
+        }
+
+        // Returns all the granted permissions
+        public List<uint> GetGrantedPermissions()
+        {
+            return _grantedPerms;
+        }
+
+        // Returns all the denied permissions
+        public List<uint> GetDeniedPermissions()
+        {
+            return _deniedPerms;
+        }
+
+        public void SetSecurityLevel(byte id)
+        {
+            _secLevel = id;
+            LoadFromDB();
+        }
+
+        public byte GetSecurityLevel()
+        {
+            return _secLevel;
+        }
+
+        private void SavePermission(uint permission, bool granted, int realmId)
+        {
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, permission);
+            stmt.AddValue(2, granted);
+            stmt.AddValue(3, realmId);
+            DB.Login.Execute(stmt);
+        }
+
         private void CalculateNewPermissions()
         {
             Log.outDebug(LogFilter.Rbac, "RBACData.CalculateNewPermissions [Id: {0} Name: {1}]", GetId(), GetName());
@@ -285,12 +337,6 @@ namespace Game.Accounts
             List<uint> revoked = GetDeniedPermissions();
             ExpandPermissions(revoked);
             RemovePermissions(_globalPerms, revoked);
-        }
-
-        public void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
-        {
-            foreach (var id in permsFrom)
-                permsTo.Add(id);
         }
 
         /// <summary>
@@ -339,52 +385,6 @@ namespace Game.Accounts
             _grantedPerms.Clear();
             _deniedPerms.Clear();
             _globalPerms.Clear();
-        }
-
-        // Gets the Name of the Object
-        public string GetName()
-        {
-            return _name;
-        }
-
-        // Gets the Id of the Object
-        public uint GetId()
-        {
-            return _id;
-        }
-
-        public bool HasPermission(RBACPermissions permission)
-        {
-            return _globalPerms.Contains((uint)permission);
-        }
-
-        // Returns all the granted permissions (after computation)
-        public List<uint> GetPermissions()
-        {
-            return _globalPerms;
-        }
-
-        // Returns all the granted permissions
-        public List<uint> GetGrantedPermissions()
-        {
-            return _grantedPerms;
-        }
-
-        // Returns all the denied permissions
-        public List<uint> GetDeniedPermissions()
-        {
-            return _deniedPerms;
-        }
-
-        public void SetSecurityLevel(byte id)
-        {
-            _secLevel = id;
-            LoadFromDB();
-        }
-
-        public byte GetSecurityLevel()
-        {
-            return _secLevel;
         }
 
         private int GetRealmId()

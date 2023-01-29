@@ -2,13 +2,6 @@
 
 public class CreatureModel
 {
-    public static CreatureModel DefaultInvisibleModel { get; set; } = new(11686, 1.0f, 1.0f);
-    public static CreatureModel DefaultVisibleModel { get; set; } = new(17519, 1.0f, 1.0f);
-
-    public uint CreatureDisplayID { get; set; }
-    public float DisplayScale { get; set; }
-    public float Probability { get; set; }
-
     public CreatureModel()
     {
     }
@@ -19,4 +12,11 @@ public class CreatureModel
         DisplayScale = displayScale;
         Probability = probability;
     }
+
+    public static CreatureModel DefaultInvisibleModel { get; set; } = new(11686, 1.0f, 1.0f);
+    public static CreatureModel DefaultVisibleModel { get; set; } = new(17519, 1.0f, 1.0f);
+
+    public uint CreatureDisplayID { get; set; }
+    public float DisplayScale { get; set; }
+    public float Probability { get; set; }
 }

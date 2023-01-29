@@ -12,8 +12,19 @@ namespace Game.Entities
     public class ItemTemplate
     {
         protected ItemRecord BasicData;
-        public List<ItemEffectRecord> Effects { get; set; } = new();
         protected ItemSparseRecord ExtendedData;
+
+        public ItemTemplate(ItemRecord item, ItemSparseRecord sparse)
+        {
+            BasicData = item;
+            ExtendedData = sparse;
+
+            Specializations[0] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
+            Specializations[1] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
+            Specializations[2] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
+        }
+
+        public List<ItemEffectRecord> Effects { get; set; } = new();
         public ItemFlagsCustom FlagsCu { get; set; }
         public uint FoodType { get; set; }
         public uint ItemSpecClassMask { get; set; }
@@ -27,16 +38,6 @@ namespace Game.Entities
         public uint ScriptId { get; set; }
         public BitSet[] Specializations { get; set; } = new BitSet[3];
         public float SpellPPMRate { get; set; }
-
-        public ItemTemplate(ItemRecord item, ItemSparseRecord sparse)
-        {
-            BasicData = item;
-            ExtendedData = sparse;
-
-            Specializations[0] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
-            Specializations[1] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
-            Specializations[2] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
-        }
 
         public string GetName(Locale locale = SharedConst.DefaultLocale)
         {

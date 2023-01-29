@@ -5,6 +5,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
 using Framework.Collections;
@@ -22,6 +24,7 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
+using Google.Protobuf;
 
 namespace Game
 {
@@ -371,11 +374,6 @@ namespace Game
             _recvQueue.Enqueue(packet);
         }
 
-        private void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
-        {
-            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
-        }
-
         public void SendPacket(ServerPacket packet)
         {
             if (packet == null)
@@ -475,7 +473,7 @@ namespace Game
 
         public void SendConnectToInstance(ConnectToSerial serial)
         {
-            var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(System.Net.IPAddress.Parse(GetRemoteAddress()));
+            var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(IPAddress.Parse(GetRemoteAddress()));
 
             _instanceConnectKey.AccountId = GetAccountId();
             _instanceConnectKey.connectionType = ConnectionType.Instance;
@@ -487,7 +485,7 @@ namespace Game
             connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
             connectTo.Con = (byte)ConnectionType.Instance;
 
-            if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            if (instanceAddress.AddressFamily == AddressFamily.InterNetwork)
             {
                 connectTo.Payload.Where.IPv4 = instanceAddress.Address.GetAddressBytes();
                 connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv4;
@@ -499,6 +497,249 @@ namespace Game
             }
 
             SendPacket(connectTo);
+        }
+
+        public void SendTutorialsData()
+        {
+            TutorialFlags packet = new();
+            Array.Copy(tutorials, packet.TutorialData, SharedConst.MaxAccountTutorialValues);
+            SendPacket(packet);
+        }
+
+        public bool CanSpeak()
+        {
+            return _muteTime <= GameTime.GetGameTime();
+        }
+
+        public bool DisallowHyperlinksAndMaybeKick(string str)
+        {
+            if (!str.Contains('|'))
+                return true;
+
+            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) sent a message which illegally contained a hyperlink:\n{str}");
+
+            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+                KickPlayer("WorldSession::DisallowHyperlinksAndMaybeKick Illegal chat link");
+
+            return false;
+        }
+
+        public void SendNotification(CypherStrings str, params object[] args)
+        {
+            SendNotification(Global.ObjectMgr.GetCypherString(str), args);
+        }
+
+        public void SendNotification(string str, params object[] args)
+        {
+            string message = string.Format(str, args);
+            if (!string.IsNullOrEmpty(message))
+            {
+                SendPacket(new PrintNotification(message));
+            }
+        }
+
+        public void SetPlayer(Player pl)
+        {
+            _player = pl;
+
+            if (_player)
+                _GUIDLow = _player.GetGUID().GetCounter();
+        }
+
+        public string GetPlayerName()
+        {
+            return _player != null ? _player.GetName() : "Unknown";
+        }
+
+        public string GetPlayerInfo()
+        {
+            StringBuilder ss = new();
+            ss.Append("[Player: ");
+            if (!_playerLoading.IsEmpty())
+                ss.AppendFormat("Logging in: {0}, ", _playerLoading.ToString());
+            else if (_player)
+                ss.AppendFormat("{0} {1}, ", _player.GetName(), _player.GetGUID().ToString());
+
+            ss.AppendFormat("Account: {0}]", GetAccountId());
+            return ss.ToString();
+        }
+
+        public bool PlayerLoading() { return !_playerLoading.IsEmpty(); }
+        public bool PlayerLogout() { return _playerLogout; }
+        public bool PlayerLogoutWithSave() { return _playerLogout && _playerSave; }
+        public bool PlayerRecentlyLoggedOut() { return _playerRecentlyLogout; }
+
+        public bool PlayerDisconnected()
+        {
+            return !(_Socket[(int)ConnectionType.Realm] != null && _Socket[(int)ConnectionType.Realm].IsOpen() &&
+                _Socket[(int)ConnectionType.Instance] != null && _Socket[(int)ConnectionType.Instance].IsOpen());
+        }
+
+        public AccountTypes GetSecurity() { return _security; }
+        public uint GetAccountId() { return _accountId; }
+        public ObjectGuid GetAccountGUID() { return ObjectGuid.Create(HighGuid.WowAccount, GetAccountId()); }
+        public string GetAccountName() { return _accountName; }
+        public uint GetBattlenetAccountId() { return _battlenetAccountId; }
+        public ObjectGuid GetBattlenetAccountGUID() { return ObjectGuid.Create(HighGuid.BNetAccount, GetBattlenetAccountId()); }
+
+        public Player GetPlayer() { return _player; }
+
+        public string GetRemoteAddress() { return _Address; }
+
+        public Expansion GetAccountExpansion() { return _accountExpansion; }
+        public Expansion GetExpansion() { return _expansion; }
+        public string GetOS() { return _os; }
+        public void SetInQueue(bool state) { _inQueue = state; }
+
+        public bool IsLogingOut() { return _logoutTime != 0 || _playerLogout; }
+
+        public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
+
+        public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
+
+        public SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
+        {
+            return (SQLQueryHolderCallback<R>)_queryHolderProcessor.AddCallback(callback);
+        }
+
+        public bool CanAccessAlliedRaces()
+        {
+            if (ConfigMgr.GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false))
+                return true;
+            else
+                return GetAccountExpansion() >= Expansion.BattleForAzeroth;
+        }
+
+        public void LoadPermissions()
+        {
+            uint id = GetAccountId();
+            AccountTypes secLevel = GetSecurity();
+
+            Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
+                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
+
+            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
+            _RBACData.LoadFromDB();
+        }
+
+        public QueryCallback LoadPermissionsAsync()
+        {
+            uint id = GetAccountId();
+            AccountTypes secLevel = GetSecurity();
+
+            Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
+                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
+
+            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
+            return _RBACData.LoadFromDBAsync();
+        }
+
+        public void InitializeSession()
+        {
+            AccountInfoQueryHolderPerRealm realmHolder = new();
+            realmHolder.Initialize(GetAccountId(), GetBattlenetAccountId());
+
+            AccountInfoQueryHolder holder = new();
+            holder.Initialize(GetAccountId(), GetBattlenetAccountId());
+
+            AccountInfoQueryHolderPerRealm characterHolder = null;
+            AccountInfoQueryHolder loginHolder = null;
+
+            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(realmHolder)).AfterComplete(result =>
+            {
+                characterHolder = (AccountInfoQueryHolderPerRealm)result;
+                if (loginHolder != null && characterHolder != null)
+                    InitializeSessionCallback(loginHolder, characterHolder);
+            });
+
+            AddQueryHolderCallback(DB.Login.DelayQueryHolder(holder)).AfterComplete(result =>
+            {
+                loginHolder = (AccountInfoQueryHolder)result;
+                if (loginHolder != null && characterHolder != null)
+                    InitializeSessionCallback(loginHolder, characterHolder);
+            });
+        }
+
+        public RBACData GetRBACData()
+        {
+            return _RBACData;
+        }
+
+        public bool HasPermission(RBACPermissions permission)
+        {
+            if (_RBACData == null)
+                LoadPermissions();
+
+            bool hasPermission = _RBACData.HasPermission(permission);
+            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+
+            return hasPermission;
+        }
+
+        public void InvalidateRBACData()
+        {
+            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+            _RBACData = null;
+        }
+
+        public void ResetTimeSync()
+        {
+            _timeSyncNextCounter = 0;
+            _pendingTimeSyncRequests.Clear();
+        }
+
+        public void SendTimeSync()
+        {
+            TimeSyncRequest timeSyncRequest = new();
+            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
+            SendPacket(timeSyncRequest);
+
+            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
+
+            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
+            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
+            _timeSyncNextCounter++;
+        }
+
+        public Locale GetSessionDbcLocale() { return _sessionDbcLocale; }
+        public Locale GetSessionDbLocaleIndex() { return _sessionDbLocaleIndex; }
+
+        public uint GetLatency() { return _latency; }
+        public void SetLatency(uint latency) { _latency = latency; }
+
+        public void ResetTimeOutTime(bool onlyActive)
+        {
+            if (GetPlayer())
+                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
+            else if (!onlyActive)
+                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
+        }
+
+        public uint GetRecruiterId() { return recruiterId; }
+        public bool IsARecruiter() { return isRecruiter; }
+
+        // Packets cooldown
+        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
+        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
+
+        // Battle Pets
+        public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
+        public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
+
+        // Battlenet
+        public Array<byte> GetRealmListSecret() { return _realmListSecret; }
+        public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
+
+        public static implicit operator bool(WorldSession session)
+        {
+            return session != null;
+        }
+
+        private void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
+        {
+            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
         }
 
         private void LoadAccountData(SQLResult result, AccountDataTypes mask)
@@ -564,18 +805,6 @@ namespace Game
             _accountData[(int)type].Data = data;
         }
 
-        public void SendTutorialsData()
-        {
-            TutorialFlags packet = new();
-            Array.Copy(tutorials, packet.TutorialData, SharedConst.MaxAccountTutorialValues);
-            SendPacket(packet);
-        }
-
-        public bool CanSpeak()
-        {
-            return _muteTime <= GameTime.GetGameTime();
-        }
-
         private bool ValidateHyperlinksAndMaybeKick(string str)
         {
             if (Hyperlink.CheckAllLinks(str))
@@ -589,59 +818,6 @@ namespace Game
             return false;
         }
 
-        public bool DisallowHyperlinksAndMaybeKick(string str)
-        {
-            if (!str.Contains('|'))
-                return true;
-
-            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} ({GetPlayer().GetGUID()}) sent a message which illegally contained a hyperlink:\n{str}");
-
-            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
-                KickPlayer("WorldSession::DisallowHyperlinksAndMaybeKick Illegal chat link");
-
-            return false;
-        }
-
-        public void SendNotification(CypherStrings str, params object[] args)
-        {
-            SendNotification(Global.ObjectMgr.GetCypherString(str), args);
-        }
-
-        public void SendNotification(string str, params object[] args)
-        {
-            string message = string.Format(str, args);
-            if (!string.IsNullOrEmpty(message))
-            {
-                SendPacket(new PrintNotification(message));
-            }
-        }
-
-        public void SetPlayer(Player pl)
-        {
-            _player = pl;
-
-            if (_player)
-                _GUIDLow = _player.GetGUID().GetCounter();
-        }
-
-        public string GetPlayerName()
-        {
-            return _player != null ? _player.GetName() : "Unknown";
-        }
-
-        public string GetPlayerInfo()
-        {
-            StringBuilder ss = new();
-            ss.Append("[Player: ");
-            if (!_playerLoading.IsEmpty())
-                ss.AppendFormat("Logging in: {0}, ", _playerLoading.ToString());
-            else if (_player)
-                ss.AppendFormat("{0} {1}, ", _player.GetName(), _player.GetGUID().ToString());
-
-            ss.AppendFormat("Account: {0}]", GetAccountId());
-            return ss.ToString();
-        }
-
         private void HandleWardenData(WardenData packet)
         {
             if (_warden == null || packet.Data.GetSize() == 0)
@@ -650,39 +826,7 @@ namespace Game
             _warden.HandleData(packet.Data);
         }
 
-        public bool PlayerLoading() { return !_playerLoading.IsEmpty(); }
-        public bool PlayerLogout() { return _playerLogout; }
-        public bool PlayerLogoutWithSave() { return _playerLogout && _playerSave; }
-        public bool PlayerRecentlyLoggedOut() { return _playerRecentlyLogout; }
-        public bool PlayerDisconnected()
-        {
-            return !(_Socket[(int)ConnectionType.Realm] != null && _Socket[(int)ConnectionType.Realm].IsOpen() &&
-                _Socket[(int)ConnectionType.Instance] != null && _Socket[(int)ConnectionType.Instance].IsOpen());
-        }
-
-        public AccountTypes GetSecurity() { return _security; }
-        public uint GetAccountId() { return _accountId; }
-        public ObjectGuid GetAccountGUID() { return ObjectGuid.Create(HighGuid.WowAccount, GetAccountId()); }
-        public string GetAccountName() { return _accountName; }
-        public uint GetBattlenetAccountId() { return _battlenetAccountId; }
-        public ObjectGuid GetBattlenetAccountGUID() { return ObjectGuid.Create(HighGuid.BNetAccount, GetBattlenetAccountId()); }
-
-        public Player GetPlayer() { return _player; }
-
         private void SetSecurity(AccountTypes security) { _security = security; }
-
-        public string GetRemoteAddress() { return _Address; }
-
-        public Expansion GetAccountExpansion() { return _accountExpansion; }
-        public Expansion GetExpansion() { return _expansion; }
-        public string GetOS() { return _os; }
-        public void SetInQueue(bool state) { _inQueue = state; }
-
-        public bool IsLogingOut() { return _logoutTime != 0 || _playerLogout; }
-
-        public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
-
-        public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
 
         private void SetLogoutStartTime(long requestTime)
         {
@@ -706,19 +850,6 @@ namespace Game
             return _transactionCallbacks.AddCallback(callback);
         }
 
-        public SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
-        {
-            return (SQLQueryHolderCallback<R>)_queryHolderProcessor.AddCallback(callback);
-        }
-
-        public bool CanAccessAlliedRaces()
-        {
-            if (ConfigMgr.GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false))
-                return true;
-            else
-                return GetAccountExpansion() >= Expansion.BattleForAzeroth;
-        }
-
         private void InitWarden(BigInteger k)
         {
             if (_os == "Win")
@@ -734,56 +865,6 @@ namespace Game
             {
                 // Not implemented
             }
-        }
-
-        public void LoadPermissions()
-        {
-            uint id = GetAccountId();
-            AccountTypes secLevel = GetSecurity();
-
-            Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
-                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
-
-            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
-            _RBACData.LoadFromDB();
-        }
-
-        public QueryCallback LoadPermissionsAsync()
-        {
-            uint id = GetAccountId();
-            AccountTypes secLevel = GetSecurity();
-
-            Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
-                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
-
-            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
-            return _RBACData.LoadFromDBAsync();
-        }
-
-        public void InitializeSession()
-        {
-            AccountInfoQueryHolderPerRealm realmHolder = new();
-            realmHolder.Initialize(GetAccountId(), GetBattlenetAccountId());
-
-            AccountInfoQueryHolder holder = new();
-            holder.Initialize(GetAccountId(), GetBattlenetAccountId());
-
-            AccountInfoQueryHolderPerRealm characterHolder = null;
-            AccountInfoQueryHolder loginHolder = null;
-
-            AddQueryHolderCallback(DB.Characters.DelayQueryHolder(realmHolder)).AfterComplete(result =>
-            {
-                characterHolder = (AccountInfoQueryHolderPerRealm)result;
-                if (loginHolder != null && characterHolder != null)
-                    InitializeSessionCallback(loginHolder, characterHolder);
-            });
-
-            AddQueryHolderCallback(DB.Login.DelayQueryHolder(holder)).AfterComplete(result =>
-            {
-                loginHolder = (AccountInfoQueryHolder)result;
-                if (loginHolder != null && characterHolder != null)
-                    InitializeSessionCallback(loginHolder, characterHolder);
-            });
         }
 
         private void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
@@ -828,30 +909,6 @@ namespace Game
             _battlePetMgr.LoadFromDB(holder.GetResult(AccountInfoQueryLoad.BattlePets), holder.GetResult(AccountInfoQueryLoad.BattlePetSlot));
         }
 
-        public RBACData GetRBACData()
-        {
-            return _RBACData;
-        }
-
-        public bool HasPermission(RBACPermissions permission)
-        {
-            if (_RBACData == null)
-                LoadPermissions();
-
-            bool hasPermission = _RBACData.HasPermission(permission);
-            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
-
-            return hasPermission;
-        }
-
-        public void InvalidateRBACData()
-        {
-            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
-            _RBACData = null;
-        }
-
         private AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
 
         private uint GetTutorialInt(byte index) { return tutorials[index]; }
@@ -863,25 +920,6 @@ namespace Game
                 tutorials[index] = value;
                 tutorialsChanged |= TutorialsFlag.Changed;
             }
-        }
-
-        public void ResetTimeSync()
-        {
-            _timeSyncNextCounter = 0;
-            _pendingTimeSyncRequests.Clear();
-        }
-
-        public void SendTimeSync()
-        {
-            TimeSyncRequest timeSyncRequest = new();
-            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
-            SendPacket(timeSyncRequest);
-
-            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
-
-            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
-            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
-            _timeSyncNextCounter++;
         }
 
         private uint AdjustClientMovementTime(uint time)
@@ -896,47 +934,15 @@ namespace Game
                 return (uint)movementTime;
         }
 
-        public Locale GetSessionDbcLocale() { return _sessionDbcLocale; }
-        public Locale GetSessionDbLocaleIndex() { return _sessionDbLocaleIndex; }
-
-        public uint GetLatency() { return _latency; }
-        public void SetLatency(uint latency) { _latency = latency; }
-        public void ResetTimeOutTime(bool onlyActive)
-        {
-            if (GetPlayer())
-                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
-            else if (!onlyActive)
-                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
-        }
-
         private bool IsConnectionIdle()
         {
             return _timeOutTime < GameTime.GetGameTime() && !_inQueue;
         }
 
-        public uint GetRecruiterId() { return recruiterId; }
-        public bool IsARecruiter() { return isRecruiter; }
-
-        // Packets cooldown
-        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
-        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
-
-        // Battle Pets
-        public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
-        public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
-
-        // Battlenet
-        public Array<byte> GetRealmListSecret() { return _realmListSecret; }
-
         private void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
-        public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
-
-        public static implicit operator bool(WorldSession session)
-        {
-            return session != null;
-        }
 
         #region Fields
+
         private readonly List<ObjectGuid> _legitCharacters = new();
         private ulong _GUIDLow;
         private Player _player;
@@ -956,8 +962,8 @@ namespace Game
 
         private long _logoutTime;
         private bool _inQueue;
-        private ObjectGuid _playerLoading;                               // code processed in LoginPlayer
-        private bool _playerLogout;                                // code processed in LogoutPlayer
+        private ObjectGuid _playerLoading; // code processed in LoginPlayer
+        private bool _playerLogout;        // code processed in LogoutPlayer
         private bool _playerRecentlyLogout;
         private bool _playerSave;
         private readonly Locale _sessionDbcLocale;
@@ -968,7 +974,7 @@ namespace Game
         private TutorialsFlag tutorialsChanged;
         private Array<byte> _realmListSecret = new(32);
         private readonly Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
-        private readonly Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new();
+        private readonly Dictionary<uint, Action<CodedInputStream>> _battlenetResponseCallbacks = new();
         private uint _battlenetRequestToken;
         private readonly List<string> _registeredAddonPrefixes = new();
         private bool _filterAddonMessages;
@@ -993,6 +999,7 @@ namespace Game
         private readonly AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         private readonly AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
         private readonly AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
+
         #endregion
     }
 
@@ -1016,11 +1023,23 @@ namespace Game
 
     public class DosProtection
     {
+        private enum Policy
+        {
+            Log,
+            Kick,
+            Ban,
+        }
+
+        private readonly Policy _policy;
+        private readonly WorldSession Session;
+        private readonly Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
+
         public DosProtection(WorldSession s)
         {
             Session = s;
             _policy = (Policy)WorldConfig.GetIntValue(WorldCfg.PacketSpoofPolicy);
         }
+
         //todo fix me
         public bool EvaluateOpcode(WorldPacket packet, long time)
         {
@@ -1073,17 +1092,6 @@ namespace Game
                     return false;
             }
             return true;
-        }
-
-        private readonly Policy _policy;
-        private readonly WorldSession Session;
-        private readonly Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
-
-        private enum Policy
-        {
-            Log,
-            Kick,
-            Ban,
         }
     }
 

@@ -7,11 +7,6 @@ namespace Game
 {
     public class PlayerChoiceResponseRewardItem
     {
-        public List<uint> BonusListIDs { get; set; } = new();
-
-        public uint Id { get; set; }
-        public int Quantity { get; set; }
-
         public PlayerChoiceResponseRewardItem()
         {
         }
@@ -22,5 +17,10 @@ namespace Game
             BonusListIDs = bonusListIDs;
             Quantity = quantity;
         }
+
+        public List<uint> BonusListIDs { get; set; } = new();
+
+        public uint Id { get; set; }
+        public int Quantity { get; set; }
     }
 }

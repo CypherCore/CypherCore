@@ -12,6 +12,15 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendAzeriteRespecNPC(ObjectGuid npc)
+        {
+            NPCInteractionOpenResult npcInteraction = new();
+            npcInteraction.Npc = npc;
+            npcInteraction.InteractionType = PlayerInteractionType.AzeriteRespec;
+            npcInteraction.Success = true;
+            SendPacket(npcInteraction);
+        }
+
         [WorldPacketHandler(ClientOpcodes.AzeriteEssenceUnlockMilestone, Processing = PacketProcessing.Inplace)]
         private void HandleAzeriteEssenceUnlockMilestone(AzeriteEssenceUnlockMilestone azeriteEssenceUnlockMilestone)
         {
@@ -271,15 +280,6 @@ namespace Game
             }
 
             azeriteEmpoweredItem.SetState(ItemUpdateState.Changed, _player);
-        }
-
-        public void SendAzeriteRespecNPC(ObjectGuid npc)
-        {
-            NPCInteractionOpenResult npcInteraction = new();
-            npcInteraction.Npc = npc;
-            npcInteraction.InteractionType = PlayerInteractionType.AzeriteRespec;
-            npcInteraction.Success = true;
-            SendPacket(npcInteraction);
         }
     }
 }

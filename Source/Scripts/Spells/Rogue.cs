@@ -69,6 +69,11 @@ namespace Scripts.Spells.Rogue
             return spellInfo.GetEffects().Count > 3;
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleHitDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleHitDamage(uint effIndex)
         {
             Unit hitUnit = GetHitUnit();
@@ -84,11 +89,6 @@ namespace Scripts.Spells.Rogue
                 float newDamage = MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
                 SetHitDamage((int)newDamage);
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleHitDamage, 1, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -273,6 +273,12 @@ namespace Scripts.Spells.Rogue
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+            SpellEffects.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Empty() ||
@@ -291,12 +297,6 @@ namespace Scripts.Spells.Rogue
                 script?.AddTarget(GetHitUnit());
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-            SpellEffects.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
@@ -308,6 +308,18 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.KillingSpreeTeleport, SpellIds.KillingSpreeWeaponDmg, SpellIds.KillingSpreeDmgBuff);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        public void AddTarget(Unit target)
+        {
+            _targets.Add(target.GetGUID());
         }
 
         private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -339,18 +351,6 @@ namespace Scripts.Spells.Rogue
         private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.KillingSpreeDmgBuff);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
-            Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
-
-        public void AddTarget(Unit target)
-        {
-            _targets.Add(target.GetGUID());
         }
     }
 
@@ -410,6 +410,11 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(Spells);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             int? spentCP = procInfo.GetProcSpell()?.GetPowerTypeCostAmount(PowerType.ComboPoints);
@@ -423,11 +428,6 @@ namespace Scripts.Spells.Rogue
                 foreach (uint spellId in Spells)
                     history.ModifyCooldown(spellId, TimeSpan.FromSeconds(cdExtra), true);
             }
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -444,6 +444,11 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(Spells);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
 
         private void HandleDummy(uint effIndex)
@@ -483,11 +488,6 @@ namespace Scripts.Spells.Rogue
                 GetCaster().CastSpell(GetCaster(), spellId, args);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 1943 - Rupture
@@ -498,6 +498,12 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VenomousWounds);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDummy));
+            Effects.Add(new EffectApplyHandler(OnEffectRemoved, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
         }
 
         private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -552,18 +558,17 @@ namespace Scripts.Spells.Rogue
             int extraAmount = (int)((float)cost.Amount * pct);
             caster.ModifyPower(PowerType.Energy, extraAmount);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDummy));
-            Effects.Add(new EffectApplyHandler(OnEffectRemoved, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
-        }
     }
 
     [Script] // 14161 - Ruthlessness
     internal class spell_rog_ruthlessness : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
 
         private void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
@@ -574,11 +579,6 @@ namespace Scripts.Spells.Rogue
             if (cost.HasValue)
                 if (RandomHelper.randChance(aurEff.GetSpellEffectInfo().PointsPerResource * (cost.Value)))
                     target.ModifyPower(PowerType.ComboPoints, 1);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -647,6 +647,11 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.T52pSetBonus);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleDummy(uint effIndex)
         {
             int damagePerCombo = GetHitDamage();
@@ -664,11 +669,6 @@ namespace Scripts.Spells.Rogue
 
             SetHitDamage(finalDamage);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 1784 - Stealth
@@ -679,6 +679,12 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MasterOfSubtletyPassive, SpellIds.MasterOfSubtletyDamagePercent, SpellIds.Sanctuary, SpellIds.ShadowFocus, SpellIds.ShadowFocusEffect, SpellIds.StealthStealthAura, SpellIds.StealthShapeshiftAura);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
+            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
 
         private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -727,12 +733,6 @@ namespace Scripts.Spells.Rogue
             target.RemoveAurasDueToSpell(SpellIds.StealthStealthAura);
             target.RemoveAurasDueToSpell(SpellIds.StealthShapeshiftAura);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterApply));
-            Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-        }
     }
 
     [Script] // 212283 - Symbols of Death
@@ -745,15 +745,15 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.SymbolsOfDeathRank2, SpellIds.SymbolsOfDeathCritAura);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleEffectHitTarget(uint effIndex)
         {
             if (GetCaster().HasAura(SpellIds.SymbolsOfDeathRank2))
                 GetCaster().CastSpell(GetCaster(), SpellIds.SymbolsOfDeathCritAura, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -765,6 +765,11 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VanishAura, SpellIds.StealthShapeshiftAura);
+        }
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell, SpellScriptHookType.LaunchTarget));
         }
 
         private void OnLaunchTarget(uint effIndex)
@@ -784,11 +789,6 @@ namespace Scripts.Spells.Rogue
             target.CastSpell(target, SpellIds.VanishAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             target.CastSpell(target, SpellIds.StealthShapeshiftAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(OnLaunchTarget, 1, SpellEffectName.TriggerSpell, SpellScriptHookType.LaunchTarget));
-        }
     }
 
     [Script] // 11327 - Vanish
@@ -801,14 +801,14 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.Stealth);
         }
 
-        private void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().CastSpell(GetTarget(), SpellIds.Stealth, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectRemove));
+        }
+
+        private void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.Stealth, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
     }
 
@@ -821,6 +821,17 @@ namespace Scripts.Spells.Rogue
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TricksOfTheTradeProc);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
+        public void SetRedirectTarget(ObjectGuid guid)
+        {
+            _redirectTarget = guid;
         }
 
         private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -840,17 +851,6 @@ namespace Scripts.Spells.Rogue
                 rogue.CastSpell(rogue, SpellIds.TricksOfTheTradeProc, new CastSpellExtraArgs(aurEff));
 
             Remove(AuraRemoveMode.Default);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
-
-        public void SetRedirectTarget(ObjectGuid guid)
-        {
-            _redirectTarget = guid;
         }
     }
 
@@ -883,14 +883,14 @@ namespace Scripts.Spells.Rogue
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
-        private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.TricksOfTheTrade);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.TricksOfTheTrade);
         }
     }
 
@@ -905,17 +905,17 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.HonorAmongThievesEnergize);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
             Unit target = GetTarget();
             target.CastSpell(target, SpellIds.HonorAmongThievesEnergize, new CastSpellExtraArgs(aurEff));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 
@@ -924,6 +924,11 @@ namespace Scripts.Spells.Rogue
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void CalculateDamage(uint effIndex)
         {
             int damagePerCombo = GetHitDamage();
@@ -940,11 +945,6 @@ namespace Scripts.Spells.Rogue
                 finalDamage *= c.Amount;
 
             SetHitDamage(finalDamage);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
     }
 
@@ -953,6 +953,11 @@ namespace Scripts.Spells.Rogue
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void CalculateDamage(uint effIndex)
         {
             int damagePerCombo = GetHitDamage();
@@ -970,11 +975,6 @@ namespace Scripts.Spells.Rogue
 
             SetHitDamage(finalDamage);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(CalculateDamage, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 79134 - Venomous Wounds - SPELL_ROGUE_VENOMOUS_WOUNDS
@@ -982,15 +982,15 @@ namespace Scripts.Spells.Rogue
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
 
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
         private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int extraEnergy = aurEff.GetAmount();
             GetTarget().ModifyPower(PowerType.Energy, extraEnergy);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
     }
 }

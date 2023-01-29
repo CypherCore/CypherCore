@@ -26,6 +26,115 @@ namespace Game.Spells
 {
     public partial class Spell
     {
+        public void DoCreateItem(uint itemId, ItemContext context = 0, List<uint> bonusListIds = null)
+        {
+            if (unitTarget == null ||
+                !unitTarget.IsTypeId(TypeId.Player))
+                return;
+
+            Player player = unitTarget.ToPlayer();
+
+            uint newitemid = itemId;
+            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(newitemid);
+
+            if (pProto == null)
+            {
+                player.SendEquipError(InventoryResult.ItemNotFound);
+
+                return;
+            }
+
+            uint num_to_add = (uint)damage;
+
+            if (num_to_add < 1)
+                num_to_add = 1;
+
+            if (num_to_add > pProto.GetMaxStackSize())
+                num_to_add = pProto.GetMaxStackSize();
+
+            // this is bad, should be done using spell_loot_template (and conditions)
+
+            // the chance of getting a perfect result
+            float perfectCreateChance = 0.0f;
+            // the resulting perfect Item if successful
+            uint perfectItemType = itemId;
+
+            // get perfection capability and chance
+            if (SkillPerfectItems.CanCreatePerfectItem(player, _spellInfo.Id, ref perfectCreateChance, ref perfectItemType))
+                if (RandomHelper.randChance(perfectCreateChance)) // if the roll succeeds...
+                    newitemid = perfectItemType;                  // the perfect Item replaces the regular one
+
+            // init items_count to 1, since 1 Item will be created regardless of specialization
+            int items_count = 1;
+            // the chance to create additional items
+            float additionalCreateChance = 0.0f;
+            // the maximum number of created additional items
+            byte additionalMaxNum = 0;
+
+            // get the chance and maximum number for creating extra items
+            if (SkillExtraItems.CanCreateExtraItems(player, _spellInfo.Id, ref additionalCreateChance, ref additionalMaxNum))
+                // roll with this chance till we roll not to create or we create the max num
+                while (RandomHelper.randChance(additionalCreateChance) && items_count <= additionalMaxNum)
+                    ++items_count;
+
+            // really will be created more items
+            num_to_add *= (uint)items_count;
+
+            // can the player store the new Item?
+            List<ItemPosCount> dest = new();
+            uint no_space;
+            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, newitemid, num_to_add, out no_space);
+
+            if (msg != InventoryResult.Ok)
+            {
+                // convert to possible store amount
+                if (msg == InventoryResult.InvFull ||
+                    msg == InventoryResult.ItemMaxCount)
+                {
+                    num_to_add -= no_space;
+                }
+                else
+                {
+                    // if not created by another reason from full inventory or unique items amount limitation
+                    player.SendEquipError(msg, null, null, newitemid);
+
+                    return;
+                }
+            }
+
+            if (num_to_add != 0)
+            {
+                // create the new Item and store it
+                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(newitemid), null, context, bonusListIds);
+
+                // was it successful? return error if not
+                if (pItem == null)
+                {
+                    player.SendEquipError(InventoryResult.ItemNotFound);
+
+                    return;
+                }
+
+                // set the "Crafted by ..." property of the Item
+                if (pItem.GetTemplate().HasSignature())
+                    pItem.SetCreator(player.GetGUID());
+
+                // send info to the client
+                player.SendNewItem(pItem, num_to_add, true, true);
+
+                if (pItem.GetQuality() > ItemQuality.Epic ||
+                    (pItem.GetQuality() == ItemQuality.Epic && pItem.GetItemLevel(player) >= GuildConst.MinNewsItemLevel))
+                {
+                    Guild guild = player.GetGuild();
+
+                    guild?.AddGuildNews(GuildNews.ItemCrafted, player.GetGUID(), 0, pProto.GetId());
+                }
+
+                // we succeeded in creating at least one Item, so a levelup is possible
+                player.UpdateCraftSkill(_spellInfo);
+            }
+        }
+
         [SpellEffectHandler(SpellEffectName.None)]
         [SpellEffectHandler(SpellEffectName.Portal)]
         [SpellEffectHandler(SpellEffectName.BindSight)]
@@ -1019,115 +1128,6 @@ namespace Game.Spells
             }
         }
 
-        public void DoCreateItem(uint itemId, ItemContext context = 0, List<uint> bonusListIds = null)
-        {
-            if (unitTarget == null ||
-                !unitTarget.IsTypeId(TypeId.Player))
-                return;
-
-            Player player = unitTarget.ToPlayer();
-
-            uint newitemid = itemId;
-            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(newitemid);
-
-            if (pProto == null)
-            {
-                player.SendEquipError(InventoryResult.ItemNotFound);
-
-                return;
-            }
-
-            uint num_to_add = (uint)damage;
-
-            if (num_to_add < 1)
-                num_to_add = 1;
-
-            if (num_to_add > pProto.GetMaxStackSize())
-                num_to_add = pProto.GetMaxStackSize();
-
-            // this is bad, should be done using spell_loot_template (and conditions)
-
-            // the chance of getting a perfect result
-            float perfectCreateChance = 0.0f;
-            // the resulting perfect Item if successful
-            uint perfectItemType = itemId;
-
-            // get perfection capability and chance
-            if (SkillPerfectItems.CanCreatePerfectItem(player, _spellInfo.Id, ref perfectCreateChance, ref perfectItemType))
-                if (RandomHelper.randChance(perfectCreateChance)) // if the roll succeeds...
-                    newitemid = perfectItemType;                  // the perfect Item replaces the regular one
-
-            // init items_count to 1, since 1 Item will be created regardless of specialization
-            int items_count = 1;
-            // the chance to create additional items
-            float additionalCreateChance = 0.0f;
-            // the maximum number of created additional items
-            byte additionalMaxNum = 0;
-
-            // get the chance and maximum number for creating extra items
-            if (SkillExtraItems.CanCreateExtraItems(player, _spellInfo.Id, ref additionalCreateChance, ref additionalMaxNum))
-                // roll with this chance till we roll not to create or we create the max num
-                while (RandomHelper.randChance(additionalCreateChance) && items_count <= additionalMaxNum)
-                    ++items_count;
-
-            // really will be created more items
-            num_to_add *= (uint)items_count;
-
-            // can the player store the new Item?
-            List<ItemPosCount> dest = new();
-            uint no_space;
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, newitemid, num_to_add, out no_space);
-
-            if (msg != InventoryResult.Ok)
-            {
-                // convert to possible store amount
-                if (msg == InventoryResult.InvFull ||
-                    msg == InventoryResult.ItemMaxCount)
-                {
-                    num_to_add -= no_space;
-                }
-                else
-                {
-                    // if not created by another reason from full inventory or unique items amount limitation
-                    player.SendEquipError(msg, null, null, newitemid);
-
-                    return;
-                }
-            }
-
-            if (num_to_add != 0)
-            {
-                // create the new Item and store it
-                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(newitemid), null, context, bonusListIds);
-
-                // was it successful? return error if not
-                if (pItem == null)
-                {
-                    player.SendEquipError(InventoryResult.ItemNotFound);
-
-                    return;
-                }
-
-                // set the "Crafted by ..." property of the Item
-                if (pItem.GetTemplate().HasSignature())
-                    pItem.SetCreator(player.GetGUID());
-
-                // send info to the client
-                player.SendNewItem(pItem, num_to_add, true, true);
-
-                if (pItem.GetQuality() > ItemQuality.Epic ||
-                    (pItem.GetQuality() == ItemQuality.Epic && pItem.GetItemLevel(player) >= GuildConst.MinNewsItemLevel))
-                {
-                    Guild guild = player.GetGuild();
-
-                    guild?.AddGuildNews(GuildNews.ItemCrafted, player.GetGUID(), 0, pProto.GetId());
-                }
-
-                // we succeeded in creating at least one Item, so a levelup is possible
-                player.UpdateCraftSkill(_spellInfo);
-            }
-        }
-
         [SpellEffectHandler(SpellEffectName.CreateItem)]
         private void EffectCreateItem()
         {
@@ -2067,11 +2067,11 @@ namespace Game.Spells
                 // Generate extra money for pick pocket loot
                 uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
                 uint b = RandomHelper.URand(0, player.GetLevel() / 2);
-                creature.Loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+                creature.Loot.Gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
             }
             else if (creature.Loot != null)
             {
-                if (creature.Loot.loot_type == LootType.Pickpocketing &&
+                if (creature.Loot.Loot_type == LootType.Pickpocketing &&
                     creature.Loot.IsLooted())
                     player.SendLootError(creature.Loot.GetGUID(), creature.GetGUID(), LootError.AlreadPickPocketed);
 

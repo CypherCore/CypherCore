@@ -175,13 +175,13 @@ namespace Game.Collision
 
     public class GroupModel : IModel
     {
+        private readonly BoundingIntervalHierarchy meshTree = new();
+        private readonly List<MeshTriangle> triangles = new();
+        private readonly List<Vector3> vertices = new();
         private AxisAlignedBox iBound;
         private uint iGroupWMOID;
         private WmoLiquid iLiquid;
         private uint iMogpFlags;
-        private readonly BoundingIntervalHierarchy meshTree = new();
-        private readonly List<MeshTriangle> triangles = new();
-        private readonly List<Vector3> vertices = new();
 
         public GroupModel()
         {

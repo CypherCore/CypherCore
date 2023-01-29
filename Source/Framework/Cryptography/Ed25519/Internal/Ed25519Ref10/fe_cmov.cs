@@ -2,15 +2,15 @@
 {
     internal static partial class FieldOperations
     {
-        /*
+	    /*
 		Replace (f,g) with (g,g) if b == 1;
 		replace (f,g) with (f,g) if b == 0.
 
 		Preconditions: b in {0,1}.
 		*/
 
-        //void fe_cmov(fe f,const fe g,unsigned int b)
-        internal static void fe_cmov(ref FieldElement f, ref FieldElement g, int b)
+	    //void fe_cmov(fe f,const fe g,unsigned int b)
+	    internal static void fe_cmov(ref FieldElement f, ref FieldElement g, int b)
         {
             int f0 = f.x0;
             int f1 = f.x1;

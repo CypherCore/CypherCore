@@ -10,6 +10,110 @@ namespace Game.Chat.Commands
     [CommandGroup("bnetaccount")]
     internal class BNetAccountCommands
     {
+        [CommandGroup("lock")]
+        private class AccountLockCommands
+        {
+            [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
+            private static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
+            {
+                /*if (State)
+				{
+				    if (IpLocationRecord const* location = sIPLocation->GetLocationRecord(handler->GetSession()->GetRemoteAddress()))
+			{
+				        LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_ACCOUNT_LOCK_CONTRY);
+				        stmt->setString(0, location->CountryCode);
+				        stmt->setUInt32(1, handler->GetSession()->GetBattlenetAccountId());
+				        LoginDatabase.Execute(stmt);
+				        handler->PSendSysMessage(LANG_COMMAND_ACCLOCKLOCKED);
+				    }
+			else
+				    {
+				        handler->PSendSysMessage("IP2Location] No information");
+				        TC_LOG_DEBUG("server.bnetserver", "IP2Location] No information");
+				    }
+				}
+				else
+				{
+				    LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_ACCOUNT_LOCK_CONTRY);
+				    stmt->setString(0, "00");
+				    stmt->setUInt32(1, handler->GetSession()->GetBattlenetAccountId());
+				    LoginDatabase.Execute(stmt);
+				    handler->PSendSysMessage(LANG_COMMAND_ACCLOCKUNLOCKED);
+				}
+				*/
+                return true;
+            }
+
+            [Command("ip", RBACPermissions.CommandBnetAccountLockIp, true)]
+            private static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
+            {
+                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
+
+                if (state)
+                {
+                    stmt.AddValue(0, true); // locked
+                    handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
+                }
+                else
+                {
+                    stmt.AddValue(0, false); // unlocked
+                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
+                }
+
+                stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
+
+                DB.Login.Execute(stmt);
+
+                return true;
+            }
+        }
+
+        [CommandGroup("set")]
+        private class AccountSetCommands
+        {
+            [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]
+            private static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string passwordConfirmation)
+            {
+                uint targetAccountId = Global.BNetAccountMgr.GetId(accountName);
+
+                if (targetAccountId == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+
+                    return false;
+                }
+
+                if (password != passwordConfirmation)
+                {
+                    handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
+
+                    return false;
+                }
+
+                AccountOpResult result = Global.BNetAccountMgr.ChangePassword(targetAccountId, password);
+
+                switch (result)
+                {
+                    case AccountOpResult.Ok:
+                        handler.SendSysMessage(CypherStrings.CommandPassword);
+
+                        break;
+                    case AccountOpResult.NameNotExist:
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+
+                        return false;
+                    case AccountOpResult.PassTooLong:
+                        handler.SendSysMessage(CypherStrings.PasswordTooLong);
+
+                        return false;
+                    default:
+                        break;
+                }
+
+                return true;
+            }
+        }
+
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
         private static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, bool? createGameAccount)
         {
@@ -262,110 +366,6 @@ namespace Game.Chat.Commands
             }
 
             return true;
-        }
-
-        [CommandGroup("lock")]
-        private class AccountLockCommands
-        {
-            [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
-            private static bool HandleAccountLockCountryCommand(CommandHandler handler, bool state)
-            {
-                /*if (State)
-				{
-				    if (IpLocationRecord const* location = sIPLocation->GetLocationRecord(handler->GetSession()->GetRemoteAddress()))
-			{
-				        LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_ACCOUNT_LOCK_CONTRY);
-				        stmt->setString(0, location->CountryCode);
-				        stmt->setUInt32(1, handler->GetSession()->GetBattlenetAccountId());
-				        LoginDatabase.Execute(stmt);
-				        handler->PSendSysMessage(LANG_COMMAND_ACCLOCKLOCKED);
-				    }
-			else
-				    {
-				        handler->PSendSysMessage("IP2Location] No information");
-				        TC_LOG_DEBUG("server.bnetserver", "IP2Location] No information");
-				    }
-				}
-				else
-				{
-				    LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_BNET_ACCOUNT_LOCK_CONTRY);
-				    stmt->setString(0, "00");
-				    stmt->setUInt32(1, handler->GetSession()->GetBattlenetAccountId());
-				    LoginDatabase.Execute(stmt);
-				    handler->PSendSysMessage(LANG_COMMAND_ACCLOCKUNLOCKED);
-				}
-				*/
-                return true;
-            }
-
-            [Command("ip", RBACPermissions.CommandBnetAccountLockIp, true)]
-            private static bool HandleAccountLockIpCommand(CommandHandler handler, bool state)
-            {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
-
-                if (state)
-                {
-                    stmt.AddValue(0, true); // locked
-                    handler.SendSysMessage(CypherStrings.CommandAcclocklocked);
-                }
-                else
-                {
-                    stmt.AddValue(0, false); // unlocked
-                    handler.SendSysMessage(CypherStrings.CommandAcclockunlocked);
-                }
-
-                stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
-
-                DB.Login.Execute(stmt);
-
-                return true;
-            }
-        }
-
-        [CommandGroup("set")]
-        private class AccountSetCommands
-        {
-            [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]
-            private static bool HandleAccountSetPasswordCommand(CommandHandler handler, string accountName, string password, string passwordConfirmation)
-            {
-                uint targetAccountId = Global.BNetAccountMgr.GetId(accountName);
-
-                if (targetAccountId == 0)
-                {
-                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-
-                    return false;
-                }
-
-                if (password != passwordConfirmation)
-                {
-                    handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
-
-                    return false;
-                }
-
-                AccountOpResult result = Global.BNetAccountMgr.ChangePassword(targetAccountId, password);
-
-                switch (result)
-                {
-                    case AccountOpResult.Ok:
-                        handler.SendSysMessage(CypherStrings.CommandPassword);
-
-                        break;
-                    case AccountOpResult.NameNotExist:
-                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-
-                        return false;
-                    case AccountOpResult.PassTooLong:
-                        handler.SendSysMessage(CypherStrings.PasswordTooLong);
-
-                        return false;
-                    default:
-                        break;
-                }
-
-                return true;
-            }
         }
     }
 }

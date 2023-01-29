@@ -8,8 +8,8 @@ namespace Game.Arenas
 {
     public class ArenaTeamMember
     {
-        public byte Class { get; set; }
         public ObjectGuid Guid;
+        public byte Class { get; set; }
         public ushort MatchMakerRating { get; set; }
         public string Name { get; set; }
         public ushort PersonalRating { get; set; }

@@ -164,6 +164,27 @@ namespace Game.Networking.Packets
 
     public class QueryPageTextResponse : ServerPacket
     {
+        public struct PageTextInfo
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt32(Id);
+                data.WriteUInt32(NextPageID);
+                data.WriteInt32(PlayerConditionID);
+                data.WriteUInt8(Flags);
+                data.WriteBits(Text.GetByteCount(), 12);
+                data.FlushBits();
+
+                data.WriteString(Text);
+            }
+
+            public uint Id;
+            public uint NextPageID;
+            public int PlayerConditionID;
+            public byte Flags;
+            public string Text;
+        }
+
         public bool Allow;
         public List<PageTextInfo> Pages = new();
 
@@ -186,27 +207,6 @@ namespace Game.Networking.Packets
                 foreach (PageTextInfo pageText in Pages)
                     pageText.Write(_worldPacket);
             }
-        }
-
-        public struct PageTextInfo
-        {
-            public void Write(WorldPacket data)
-            {
-                data.WriteUInt32(Id);
-                data.WriteUInt32(NextPageID);
-                data.WriteInt32(PlayerConditionID);
-                data.WriteUInt8(Flags);
-                data.WriteBits(Text.GetByteCount(), 12);
-                data.FlushBits();
-
-                data.WriteString(Text);
-            }
-
-            public uint Id;
-            public uint NextPageID;
-            public int PlayerConditionID;
-            public byte Flags;
-            public string Text;
         }
     }
 

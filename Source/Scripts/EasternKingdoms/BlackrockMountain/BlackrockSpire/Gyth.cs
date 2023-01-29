@@ -36,11 +36,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
             Initialize();
         }
 
-        private void Initialize()
-        {
-            SummonedRend = false;
-        }
-
         public override void Reset()
         {
             Initialize();
@@ -135,6 +130,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
             }
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void Initialize()
+        {
+            SummonedRend = false;
         }
     }
 }

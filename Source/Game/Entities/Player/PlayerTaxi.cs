@@ -13,9 +13,9 @@ namespace Game.Entities
 {
     public class PlayerTaxi
     {
-        private uint _flightMasterFactionId;
-        private readonly List<uint> _TaxiDestinations = new();
         public byte[] _taximask;
+        private readonly List<uint> _TaxiDestinations = new();
+        private uint _flightMasterFactionId;
 
         public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
         {
@@ -257,12 +257,6 @@ namespace Game.Entities
             _TaxiDestinations.Add(dest);
         }
 
-        private void SetTaxiDestination(List<uint> nodes)
-        {
-            _TaxiDestinations.Clear();
-            _TaxiDestinations.AddRange(nodes);
-        }
-
         public uint GetTaxiSource()
         {
             return _TaxiDestinations.Empty() ? 0 : _TaxiDestinations[0];
@@ -288,6 +282,12 @@ namespace Game.Entities
         public bool Empty()
         {
             return _TaxiDestinations.Empty();
+        }
+
+        private void SetTaxiDestination(List<uint> nodes)
+        {
+            _TaxiDestinations.Clear();
+            _TaxiDestinations.AddRange(nodes);
         }
     }
 }

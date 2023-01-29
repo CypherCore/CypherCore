@@ -8,8 +8,8 @@ namespace Game.Collision
 {
     public class DynamicTreeIntersectionCallback : WorkerCallback
     {
-        private bool _didHit;
         private readonly PhaseShift _phaseShift;
+        private bool _didHit;
 
         public DynamicTreeIntersectionCallback(PhaseShift phaseShift)
         {

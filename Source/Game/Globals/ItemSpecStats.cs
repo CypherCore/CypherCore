@@ -10,11 +10,6 @@ namespace Game
 {
     internal class ItemSpecStats
     {
-        public uint ItemSpecStatCount { get; set; }
-        public ItemSpecStat[] ItemSpecStatTypes { get; set; } = new ItemSpecStat[ItemConst.MaxStats];
-
-        public uint ItemType { get; set; }
-
         public ItemSpecStats(ItemRecord item, ItemSparseRecord sparse)
         {
             if (item.ClassID == ItemClass.Weapon)
@@ -189,6 +184,11 @@ namespace Game
                 if (sparse.StatModifierBonusStat[i] != -1)
                     AddModStat(sparse.StatModifierBonusStat[i]);
         }
+
+        public uint ItemSpecStatCount { get; set; }
+        public ItemSpecStat[] ItemSpecStatTypes { get; set; } = new ItemSpecStat[ItemConst.MaxStats];
+
+        public uint ItemType { get; set; }
 
         private void AddStat(ItemSpecStat statType)
         {

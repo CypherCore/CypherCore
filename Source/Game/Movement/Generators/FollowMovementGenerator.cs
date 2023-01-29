@@ -13,13 +13,13 @@ namespace Game.Movement
         private static readonly float FOLLOW_RANGE_TOLERANCE = 1.0f;
 
         private readonly AbstractFollower _abstractFollower;
-        private ChaseAngle _angle;
 
         private readonly TimeTracker _checkTimer;
-        private Position _lastTargetPosition;
-        private PathGenerator _path;
 
         private readonly float _range;
+        private ChaseAngle _angle;
+        private Position _lastTargetPosition;
+        private PathGenerator _path;
 
         public FollowMovementGenerator(Unit target, float range, ChaseAngle angle)
         {
@@ -191,20 +191,6 @@ namespace Game.Movement
             }
         }
 
-        private void UpdatePetSpeed(Unit owner)
-        {
-            Pet oPet = owner.ToPet();
-
-            if (oPet != null)
-                if (!_abstractFollower.GetTarget() ||
-                    _abstractFollower.GetTarget().GetGUID() == owner.GetOwnerGUID())
-                {
-                    oPet.UpdateSpeed(UnitMoveType.Run);
-                    oPet.UpdateSpeed(UnitMoveType.Walk);
-                    oPet.UpdateSpeed(UnitMoveType.Swim);
-                }
-        }
-
         public Unit GetTarget()
         {
             return _abstractFollower.GetTarget();
@@ -219,6 +205,20 @@ namespace Game.Movement
         public override void UnitSpeedChanged()
         {
             _lastTargetPosition = null;
+        }
+
+        private void UpdatePetSpeed(Unit owner)
+        {
+            Pet oPet = owner.ToPet();
+
+            if (oPet != null)
+                if (!_abstractFollower.GetTarget() ||
+                    _abstractFollower.GetTarget().GetGUID() == owner.GetOwnerGUID())
+                {
+                    oPet.UpdateSpeed(UnitMoveType.Run);
+                    oPet.UpdateSpeed(UnitMoveType.Walk);
+                    oPet.UpdateSpeed(UnitMoveType.Swim);
+                }
         }
 
         private static bool PositionOkay(Unit owner, Unit target, float range, ChaseAngle? angle = null)

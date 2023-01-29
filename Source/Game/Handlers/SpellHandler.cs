@@ -220,12 +220,12 @@ namespace Game
                     Loot loot = new(player.GetMap(), item.GetGUID(), LootType.Item, null);
                     item.loot = loot;
                     loot.GenerateMoneyLoot(item.GetTemplate().MinMoneyLoot, item.GetTemplate().MaxMoneyLoot);
-                    loot.FillLoot(item.GetEntry(), LootStorage.Items, player, true, loot.gold != 0);
+                    loot.FillLoot(item.GetEntry(), LootStorage.Items, player, true, loot.Gold != 0);
 
                     // Force save the loot and money items that were just rolled
                     //  Also saves the container Item ID in Loot struct (not to DB)
-                    if (loot.gold > 0 ||
-                        loot.unlootedCount > 0)
+                    if (loot.Gold > 0 ||
+                        loot.UnlootedCount > 0)
                         Global.LootItemStorage.AddNewStoredLoot(item.GetGUID().GetCounter(), loot, player);
                 }
 

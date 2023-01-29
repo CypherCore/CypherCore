@@ -81,12 +81,12 @@ namespace Game
 
     public class Weather
     {
-        private float _intensity;
         private readonly IntervalTimer _timer = new();
-        private WeatherType _type;
         private readonly WeatherData _weatherChances;
 
         private readonly uint _zone;
+        private float _intensity;
+        private WeatherType _type;
 
         public Weather(uint zoneId, WeatherData weatherChances)
         {

@@ -18,16 +18,38 @@ namespace Game.Entities
 {
     public class AreaTrigger : WorldObject
     {
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly AreaTriggerFieldData AreaTriggerMask = new();
+            private readonly ObjectFieldData ObjectMask = new();
+            private readonly AreaTrigger Owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(AreaTrigger owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), AreaTriggerMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject updateObject);
+                player.SendPacket(updateObject);
+            }
+        }
+
+        private readonly AreaTriggerFieldData _areaTriggerData;
+        private readonly List<ObjectGuid> _insideUnits = new();
+        private readonly Spline<int> _spline;
         private AreaTriggerAI _ai;
 
         private AreaTriggerCreateProperties _areaTriggerCreateProperties;
-
-        private readonly AreaTriggerFieldData _areaTriggerData;
         private AreaTriggerTemplate _areaTriggerTemplate;
 
         private AuraEffect _aurEff;
         private int _duration;
-        private readonly List<ObjectGuid> _insideUnits = new();
         private bool _isRemoved;
         private int _lastSplineIndex;
         private float _maxSearchRadius;
@@ -44,7 +66,6 @@ namespace Game.Entities
         private AreaTriggerShapeInfo _shape;
 
         private ulong _spawnId;
-        private readonly Spline<int> _spline;
 
         private ObjectGuid _targetGuid;
         private Vector3 _targetRollPitchYaw;
@@ -105,6 +126,357 @@ namespace Game.Entities
 
                 GetMap().GetObjectsStore().Remove(GetGUID());
             }
+        }
+
+        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId = default, AuraEffect aurEff = null)
+        {
+            AreaTrigger at = new();
+
+            if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spell, pos, duration, spellVisual, castId, aurEff))
+                return null;
+
+            return at;
+        }
+
+        public static ObjectGuid CreateNewMovementForceId(Map map, uint areaTriggerId)
+        {
+            return ObjectGuid.Create(HighGuid.AreaTrigger, map.GetId(), areaTriggerId, map.GenerateLowGuid(HighGuid.AreaTrigger));
+        }
+
+        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
+        {
+            _spawnId = spawnId;
+
+            AreaTriggerSpawn position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
+
+            if (position == null)
+                return false;
+
+            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.TriggerId);
+
+            if (areaTriggerTemplate == null)
+                return false;
+
+            return CreateServer(map, areaTriggerTemplate, position);
+        }
+
+        public override void Update(uint diff)
+        {
+            base.Update(diff);
+            _timeSinceCreated += diff;
+
+            if (!IsServerSide())
+            {
+                // "If" order matter here, Orbit > Attached > Splines
+                if (HasOrbit())
+                {
+                    UpdateOrbitPosition(diff);
+                }
+                else if (GetTemplate() != null &&
+                         GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+                {
+                    Unit target = GetTarget();
+
+                    if (target)
+                        GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
+                }
+                else
+                {
+                    UpdateSplinePosition(diff);
+                }
+
+                if (GetDuration() != -1)
+                {
+                    if (GetDuration() > diff)
+                    {
+                        _UpdateDuration((int)(_duration - diff));
+                    }
+                    else
+                    {
+                        Remove(); // expired
+
+                        return;
+                    }
+                }
+            }
+
+            _ai.OnUpdate(diff);
+
+            UpdateTargetList();
+        }
+
+        public void Remove()
+        {
+            if (IsInWorld)
+                AddObjectToRemoveList();
+        }
+
+        public void SetDuration(int newDuration)
+        {
+            _duration = newDuration;
+            _totalDuration = newDuration;
+
+            // negative duration (permanent areatrigger) sent as 0
+            SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.Duration), (uint)Math.Max(newDuration, 0));
+        }
+
+        public AreaTriggerTemplate GetTemplate()
+        {
+            return _areaTriggerTemplate;
+        }
+
+        public uint GetScriptId()
+        {
+            if (_spawnId != 0)
+                return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId).ScriptId;
+
+            if (GetCreateProperties() != null)
+                return GetCreateProperties().ScriptId;
+
+            return 0;
+        }
+
+        public Unit GetCaster()
+        {
+            return Global.ObjAccessor.GetUnit(this, GetCasterGuid());
+        }
+
+        public override uint GetFaction()
+        {
+            Unit caster = GetCaster();
+
+            if (caster)
+                return caster.GetFaction();
+
+            return 0;
+        }
+
+        public void UpdateShape()
+        {
+            if (_shape.IsPolygon())
+                UpdatePolygonOrientation();
+        }
+
+        public void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
+        {
+            if (splinePoints.Count < 2)
+                return;
+
+            _movementTime = 0;
+
+            _spline.InitSpline(splinePoints.ToArray(), splinePoints.Count, EvaluationMode.Linear);
+            _spline.InitLengths();
+
+            // should be sent in object create packets only
+            DoWithSuppressingObjectUpdates(() =>
+                                           {
+                                               SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.TimeToTarget), timeToTarget);
+                                               _areaTriggerData.ClearChanged(_areaTriggerData.TimeToTarget);
+                                           });
+
+            if (IsInWorld)
+            {
+                if (_reachedDestination)
+                {
+                    AreaTriggerRePath reshapeDest = new();
+                    reshapeDest.TriggerGUID = GetGUID();
+                    SendMessageToSet(reshapeDest, true);
+                }
+
+                AreaTriggerRePath reshape = new();
+                reshape.TriggerGUID = GetGUID();
+                reshape.AreaTriggerSpline = new AreaTriggerSplineInfo();
+                reshape.AreaTriggerSpline.ElapsedTimeForMovement = GetElapsedTimeForMovement();
+                reshape.AreaTriggerSpline.TimeToTarget = timeToTarget;
+                reshape.AreaTriggerSpline.Points = splinePoints;
+                SendMessageToSet(reshape, true);
+            }
+
+            _reachedDestination = false;
+        }
+
+        public bool HasOrbit()
+        {
+            return _orbitInfo != null;
+        }
+
+        public override void BuildValuesCreate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new();
+
+            buffer.WriteUInt8((byte)flags);
+            ObjectData.WriteCreate(buffer, flags, this, target);
+            _areaTriggerData.WriteCreate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
+
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new();
+
+            buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
+
+            if (Values.HasChanged(TypeId.Object))
+                ObjectData.WriteUpdate(buffer, flags, this, target);
+
+            if (Values.HasChanged(TypeId.AreaTrigger))
+                _areaTriggerData.WriteUpdate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
+
+        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
+        {
+            UpdateMask valuesMask = new((int)TypeId.Max);
+
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            if (requestedAreaTriggerMask.IsAnySet())
+                valuesMask.Set((int)TypeId.AreaTrigger);
+
+            WorldPacket buffer = new();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.AreaTrigger])
+                _areaTriggerData.WriteUpdate(buffer, requestedAreaTriggerMask, true, this, target);
+
+            WorldPacket buffer1 = new();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
+        }
+
+        public override void ClearUpdateMask(bool remove)
+        {
+            Values.ClearChangesMask(_areaTriggerData);
+            base.ClearUpdateMask(remove);
+        }
+
+        public T GetAI<T>() where T : AreaTriggerAI
+        {
+            return (T)_ai;
+        }
+
+        public bool IsServerSide()
+        {
+            return _areaTriggerTemplate.Id.IsServerSide;
+        }
+
+        public override bool IsNeverVisibleFor(WorldObject seer)
+        {
+            return base.IsNeverVisibleFor(seer) || IsServerSide();
+        }
+
+        public bool IsRemoved()
+        {
+            return _isRemoved;
+        }
+
+        public uint GetSpellId()
+        {
+            return _areaTriggerData.SpellID;
+        }
+
+        public AuraEffect GetAuraEffect()
+        {
+            return _aurEff;
+        }
+
+        public uint GetTimeSinceCreated()
+        {
+            return _timeSinceCreated;
+        }
+
+        public uint GetTimeToTarget()
+        {
+            return _areaTriggerData.TimeToTarget;
+        }
+
+        public uint GetTimeToTargetScale()
+        {
+            return _areaTriggerData.TimeToTargetScale;
+        }
+
+        public int GetDuration()
+        {
+            return _duration;
+        }
+
+        public int GetTotalDuration()
+        {
+            return _totalDuration;
+        }
+
+        public void Delay(int delaytime)
+        {
+            SetDuration(GetDuration() - delaytime);
+        }
+
+        public List<ObjectGuid> GetInsideUnits()
+        {
+            return _insideUnits;
+        }
+
+        public AreaTriggerCreateProperties GetCreateProperties()
+        {
+            return _areaTriggerCreateProperties;
+        }
+
+        public override ObjectGuid GetOwnerGUID()
+        {
+            return GetCasterGuid();
+        }
+
+        public ObjectGuid GetCasterGuid()
+        {
+            return _areaTriggerData.Caster;
+        }
+
+        public AreaTriggerShapeInfo GetShape()
+        {
+            return _shape;
+        }
+
+        public Vector3 GetRollPitchYaw()
+        {
+            return _rollPitchYaw;
+        }
+
+        public Vector3 GetTargetRollPitchYaw()
+        {
+            return _targetRollPitchYaw;
+        }
+
+        public bool HasSplines()
+        {
+            return !_spline.Empty();
+        }
+
+        public Spline<int> GetSpline()
+        {
+            return _spline;
+        }
+
+        public uint GetElapsedTimeForMovement()
+        {
+            return GetTimeSinceCreated();
+        } // @todo: research the right value, in sniffs both timers are nearly identical
+
+        public AreaTriggerOrbitInfo GetCircularMovementInfo()
+        {
+            return _orbitInfo;
         }
 
         private bool Create(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId, AuraEffect aurEff)
@@ -263,38 +635,6 @@ namespace Game.Entities
             return true;
         }
 
-        public static AreaTrigger CreateAreaTrigger(uint areaTriggerCreatePropertiesId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId = default, AuraEffect aurEff = null)
-        {
-            AreaTrigger at = new();
-
-            if (!at.Create(areaTriggerCreatePropertiesId, caster, target, spell, pos, duration, spellVisual, castId, aurEff))
-                return null;
-
-            return at;
-        }
-
-        public static ObjectGuid CreateNewMovementForceId(Map map, uint areaTriggerId)
-        {
-            return ObjectGuid.Create(HighGuid.AreaTrigger, map.GetId(), areaTriggerId, map.GenerateLowGuid(HighGuid.AreaTrigger));
-        }
-
-        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
-        {
-            _spawnId = spawnId;
-
-            AreaTriggerSpawn position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
-
-            if (position == null)
-                return false;
-
-            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.TriggerId);
-
-            if (areaTriggerTemplate == null)
-                return false;
-
-            return CreateServer(map, areaTriggerTemplate, position);
-        }
-
         private bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerSpawn position)
         {
             SetMap(map);
@@ -330,66 +670,6 @@ namespace Game.Entities
             _ai.OnCreate();
 
             return true;
-        }
-
-        public override void Update(uint diff)
-        {
-            base.Update(diff);
-            _timeSinceCreated += diff;
-
-            if (!IsServerSide())
-            {
-                // "If" order matter here, Orbit > Attached > Splines
-                if (HasOrbit())
-                {
-                    UpdateOrbitPosition(diff);
-                }
-                else if (GetTemplate() != null &&
-                         GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
-                {
-                    Unit target = GetTarget();
-
-                    if (target)
-                        GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
-                }
-                else
-                {
-                    UpdateSplinePosition(diff);
-                }
-
-                if (GetDuration() != -1)
-                {
-                    if (GetDuration() > diff)
-                    {
-                        _UpdateDuration((int)(_duration - diff));
-                    }
-                    else
-                    {
-                        Remove(); // expired
-
-                        return;
-                    }
-                }
-            }
-
-            _ai.OnUpdate(diff);
-
-            UpdateTargetList();
-        }
-
-        public void Remove()
-        {
-            if (IsInWorld)
-                AddObjectToRemoveList();
-        }
-
-        public void SetDuration(int newDuration)
-        {
-            _duration = newDuration;
-            _totalDuration = newDuration;
-
-            // negative duration (permanent areatrigger) sent as 0
-            SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.Duration), (uint)Math.Max(newDuration, 0));
         }
 
         private void _UpdateDuration(int newDuration)
@@ -605,40 +885,9 @@ namespace Game.Entities
             }
         }
 
-        public AreaTriggerTemplate GetTemplate()
-        {
-            return _areaTriggerTemplate;
-        }
-
-        public uint GetScriptId()
-        {
-            if (_spawnId != 0)
-                return Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(_spawnId).ScriptId;
-
-            if (GetCreateProperties() != null)
-                return GetCreateProperties().ScriptId;
-
-            return 0;
-        }
-
-        public Unit GetCaster()
-        {
-            return Global.ObjAccessor.GetUnit(this, GetCasterGuid());
-        }
-
         private Unit GetTarget()
         {
             return Global.ObjAccessor.GetUnit(this, _targetGuid);
-        }
-
-        public override uint GetFaction()
-        {
-            Unit caster = GetCaster();
-
-            if (caster)
-                return caster.GetFaction();
-
-            return 0;
         }
 
         private void UpdatePolygonOrientation()
@@ -727,12 +976,6 @@ namespace Game.Entities
             }
 
             return locatedInPolygon;
-        }
-
-        public void UpdateShape()
-        {
-            if (_shape.IsPolygon())
-                UpdatePolygonOrientation();
         }
 
         private bool UnitFitToActionRequirement(Unit unit, Unit caster, AreaTriggerAction action)
@@ -827,44 +1070,6 @@ namespace Game.Entities
             InitSplines(rotatedPoints, timeToTarget);
         }
 
-        public void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
-        {
-            if (splinePoints.Count < 2)
-                return;
-
-            _movementTime = 0;
-
-            _spline.InitSpline(splinePoints.ToArray(), splinePoints.Count, EvaluationMode.Linear);
-            _spline.InitLengths();
-
-            // should be sent in object create packets only
-            DoWithSuppressingObjectUpdates(() =>
-                                           {
-                                               SetUpdateFieldValue(Values.ModifyValue(_areaTriggerData).ModifyValue(_areaTriggerData.TimeToTarget), timeToTarget);
-                                               _areaTriggerData.ClearChanged(_areaTriggerData.TimeToTarget);
-                                           });
-
-            if (IsInWorld)
-            {
-                if (_reachedDestination)
-                {
-                    AreaTriggerRePath reshapeDest = new();
-                    reshapeDest.TriggerGUID = GetGUID();
-                    SendMessageToSet(reshapeDest, true);
-                }
-
-                AreaTriggerRePath reshape = new();
-                reshape.TriggerGUID = GetGUID();
-                reshape.AreaTriggerSpline = new AreaTriggerSplineInfo();
-                reshape.AreaTriggerSpline.ElapsedTimeForMovement = GetElapsedTimeForMovement();
-                reshape.AreaTriggerSpline.TimeToTarget = timeToTarget;
-                reshape.AreaTriggerSpline.Points = splinePoints;
-                SendMessageToSet(reshape, true);
-            }
-
-            _reachedDestination = false;
-        }
-
         private void InitOrbit(AreaTriggerOrbitInfo orbit, uint timeToTarget)
         {
             // Circular movement requires either a center position or an attached unit
@@ -890,11 +1095,6 @@ namespace Game.Entities
 
                 SendMessageToSet(reshape, true);
             }
-        }
-
-        public bool HasOrbit()
-        {
-            return _orbitInfo != null;
         }
 
         private Position GetOrbitCenterPosition()
@@ -1055,85 +1255,6 @@ namespace Game.Entities
             _ai = null;
         }
 
-        public override void BuildValuesCreate(WorldPacket data, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
-
-            buffer.WriteUInt8((byte)flags);
-            ObjectData.WriteCreate(buffer, flags, this, target);
-            _areaTriggerData.WriteCreate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
-        }
-
-        public override void BuildValuesUpdate(WorldPacket data, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
-
-            buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
-
-            if (Values.HasChanged(TypeId.Object))
-                ObjectData.WriteUpdate(buffer, flags, this, target);
-
-            if (Values.HasChanged(TypeId.AreaTrigger))
-                _areaTriggerData.WriteUpdate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
-        }
-
-        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
-        {
-            UpdateMask valuesMask = new((int)TypeId.Max);
-
-            if (requestedObjectMask.IsAnySet())
-                valuesMask.Set((int)TypeId.Object);
-
-            if (requestedAreaTriggerMask.IsAnySet())
-                valuesMask.Set((int)TypeId.AreaTrigger);
-
-            WorldPacket buffer = new();
-            buffer.WriteUInt32(valuesMask.GetBlock(0));
-
-            if (valuesMask[(int)TypeId.Object])
-                ObjectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
-
-            if (valuesMask[(int)TypeId.AreaTrigger])
-                _areaTriggerData.WriteUpdate(buffer, requestedAreaTriggerMask, true, this, target);
-
-            WorldPacket buffer1 = new();
-            buffer1.WriteUInt8((byte)UpdateType.Values);
-            buffer1.WritePackedGuid(GetGUID());
-            buffer1.WriteUInt32(buffer.GetSize());
-            buffer1.WriteBytes(buffer.GetData());
-
-            data.AddUpdateBlock(buffer1);
-        }
-
-        public override void ClearUpdateMask(bool remove)
-        {
-            Values.ClearChangesMask(_areaTriggerData);
-            base.ClearUpdateMask(remove);
-        }
-
-        public T GetAI<T>() where T : AreaTriggerAI
-        {
-            return (T)_ai;
-        }
-
-        public bool IsServerSide()
-        {
-            return _areaTriggerTemplate.Id.IsServerSide;
-        }
-
-        public override bool IsNeverVisibleFor(WorldObject seer)
-        {
-            return base.IsNeverVisibleFor(seer) || IsServerSide();
-        }
-
         [Conditional("DEBUG")]
         private void DebugVisualizePosition()
         {
@@ -1149,131 +1270,9 @@ namespace Game.Entities
             }
         }
 
-        public bool IsRemoved()
-        {
-            return _isRemoved;
-        }
-
-        public uint GetSpellId()
-        {
-            return _areaTriggerData.SpellID;
-        }
-
-        public AuraEffect GetAuraEffect()
-        {
-            return _aurEff;
-        }
-
-        public uint GetTimeSinceCreated()
-        {
-            return _timeSinceCreated;
-        }
-
-        public uint GetTimeToTarget()
-        {
-            return _areaTriggerData.TimeToTarget;
-        }
-
-        public uint GetTimeToTargetScale()
-        {
-            return _areaTriggerData.TimeToTargetScale;
-        }
-
-        public int GetDuration()
-        {
-            return _duration;
-        }
-
-        public int GetTotalDuration()
-        {
-            return _totalDuration;
-        }
-
-        public void Delay(int delaytime)
-        {
-            SetDuration(GetDuration() - delaytime);
-        }
-
-        public List<ObjectGuid> GetInsideUnits()
-        {
-            return _insideUnits;
-        }
-
-        public AreaTriggerCreateProperties GetCreateProperties()
-        {
-            return _areaTriggerCreateProperties;
-        }
-
-        public override ObjectGuid GetOwnerGUID()
-        {
-            return GetCasterGuid();
-        }
-
-        public ObjectGuid GetCasterGuid()
-        {
-            return _areaTriggerData.Caster;
-        }
-
-        public AreaTriggerShapeInfo GetShape()
-        {
-            return _shape;
-        }
-
         private float GetMaxSearchRadius()
         {
             return _maxSearchRadius;
-        }
-
-        public Vector3 GetRollPitchYaw()
-        {
-            return _rollPitchYaw;
-        }
-
-        public Vector3 GetTargetRollPitchYaw()
-        {
-            return _targetRollPitchYaw;
-        }
-
-        public bool HasSplines()
-        {
-            return !_spline.Empty();
-        }
-
-        public Spline<int> GetSpline()
-        {
-            return _spline;
-        }
-
-        public uint GetElapsedTimeForMovement()
-        {
-            return GetTimeSinceCreated();
-        } // @todo: research the right value, in sniffs both timers are nearly identical
-
-        public AreaTriggerOrbitInfo GetCircularMovementInfo()
-        {
-            return _orbitInfo;
-        }
-
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            private readonly AreaTriggerFieldData AreaTriggerMask = new();
-            private readonly ObjectFieldData ObjectMask = new();
-            private readonly AreaTrigger Owner;
-
-            public ValuesUpdateForPlayerWithMaskSender(AreaTrigger owner)
-            {
-                Owner = owner;
-            }
-
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
-
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), AreaTriggerMask.GetUpdateMask(), player);
-
-                udata.BuildPacket(out UpdateObject updateObject);
-                player.SendPacket(updateObject);
-            }
         }
     }
 }

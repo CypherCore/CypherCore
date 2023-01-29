@@ -204,8 +204,6 @@ namespace Game.Networking.Packets
     {
         private readonly uint AreaID;
         private readonly Class ClassID;
-
-        private ObjectGuid Guid;
         private readonly uint Level;
         private readonly bool Mobile;
         private readonly uint NativeRealmAddr;
@@ -213,6 +211,8 @@ namespace Game.Networking.Packets
         private readonly FriendStatus Status;
         private readonly SocialFlag TypeFlags;
         private readonly uint VirtualRealmAddr;
+
+        private ObjectGuid Guid;
         private ObjectGuid WowAccountGuid;
 
         public ContactInfo(ObjectGuid guid, FriendInfo friendInfo)

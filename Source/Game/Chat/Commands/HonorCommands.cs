@@ -9,27 +9,6 @@ namespace Game.Chat.Commands
     [CommandGroup("honor")]
     internal class HonorCommands
     {
-        [Command("update", RBACPermissions.CommandHonorUpdate)]
-        private static bool HandleHonorUpdateCommand(CommandHandler handler)
-        {
-            Player target = handler.GetSelectedPlayer();
-
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-
-                return false;
-            }
-
-            // check online security
-            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                return false;
-
-            target.UpdateHonorFields();
-
-            return true;
-        }
-
         [CommandGroup("add")]
         private class HonorAddCommands
         {
@@ -77,6 +56,27 @@ namespace Game.Chat.Commands
 
                 return true;
             }
+        }
+
+        [Command("update", RBACPermissions.CommandHonorUpdate)]
+        private static bool HandleHonorUpdateCommand(CommandHandler handler)
+        {
+            Player target = handler.GetSelectedPlayer();
+
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+
+                return false;
+            }
+
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
+
+            target.UpdateHonorFields();
+
+            return true;
         }
     }
 }

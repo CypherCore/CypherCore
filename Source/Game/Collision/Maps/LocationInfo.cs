@@ -5,15 +5,15 @@ namespace Game.Collision
 {
     public class LocationInfo
     {
+        public LocationInfo()
+        {
+            Ground_Z = float.NegativeInfinity;
+        }
+
         public float Ground_Z { get; set; }
         public ModelInstance HitInstance { get; set; }
         public GroupModel HitModel { get; set; }
 
         public int RootId { get; set; }
-
-        public LocationInfo()
-        {
-            Ground_Z = float.NegativeInfinity;
-        }
     }
 }

@@ -8,12 +8,8 @@ namespace Game.Combat
 {
     public class CombatReference
     {
-        public bool IsPvP { get; set; }
-
         private bool _suppressFirst;
         private bool _suppressSecond;
-        public Unit First { get; set; }
-        public Unit Second { get; set; }
 
         public CombatReference(Unit a, Unit b, bool pvp = false)
         {
@@ -21,6 +17,10 @@ namespace Game.Combat
             Second = b;
             IsPvP = pvp;
         }
+
+        public bool IsPvP { get; set; }
+        public Unit First { get; set; }
+        public Unit Second { get; set; }
 
         public void EndCombat()
         {

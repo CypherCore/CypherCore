@@ -117,8 +117,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Broodlord
     [Script]
     internal class go_suppression_device : GameObjectAI
     {
-        private bool _active;
         private readonly InstanceScript _instance;
+        private bool _active;
 
         public go_suppression_device(GameObject go) : base(go)
         {

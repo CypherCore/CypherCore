@@ -10,6 +10,20 @@ namespace Game.Networking.Packets
 {
     public class ChannelListResponse : ServerPacket
     {
+        public struct ChannelPlayer
+        {
+            public ChannelPlayer(ObjectGuid guid, uint realm, ChannelMemberFlags flags)
+            {
+                Guid = guid;
+                VirtualRealmAddress = realm;
+                Flags = flags;
+            }
+
+            public ObjectGuid Guid; // Player Guid
+            public uint VirtualRealmAddress;
+            public ChannelMemberFlags Flags;
+        }
+
         public string Channel; // Channel Name
         public ChannelFlags ChannelFlags;
         public bool Display;
@@ -35,20 +49,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(player.VirtualRealmAddress);
                 _worldPacket.WriteUInt8((byte)player.Flags);
             }
-        }
-
-        public struct ChannelPlayer
-        {
-            public ChannelPlayer(ObjectGuid guid, uint realm, ChannelMemberFlags flags)
-            {
-                Guid = guid;
-                VirtualRealmAddress = realm;
-                Flags = flags;
-            }
-
-            public ObjectGuid Guid; // Player Guid
-            public uint VirtualRealmAddress;
-            public ChannelMemberFlags Flags;
         }
     }
 

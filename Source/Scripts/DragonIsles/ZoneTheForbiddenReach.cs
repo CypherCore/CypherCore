@@ -48,6 +48,11 @@ namespace Scripts.DragonIsles
             return ValidateSpellInfo(SpellIds.DracthyrMovieRoom01, SpellIds.DracthyrMovieRoom02, SpellIds.DracthyrMovieRoom03, SpellIds.DracthyrMovieRoom04);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void HandleTeleport(uint effIndex)
         {
             var room = MiscConst.LoginRoomData[RandomHelper.URand(0, 3)];
@@ -58,11 +63,6 @@ namespace Scripts.DragonIsles
             GetHitDest().Relocate(room.Item2);
 
             GetCaster().CastSpell(GetHitUnit(), room.Item1, true);
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleTeleport, 0, SpellEffectName.TeleportUnits, SpellScriptHookType.EffectHitTarget));
         }
     }
 

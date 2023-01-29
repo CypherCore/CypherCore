@@ -13,21 +13,6 @@ namespace Framework.Collections
             INext = IPrev = null;
         }
 
-        ~LinkedListElement()
-        {
-            Delink();
-        }
-
-        private bool HasNext()
-        {
-            return (INext != null && INext.INext != null);
-        }
-
-        private bool HasPrev()
-        {
-            return (IPrev != null && IPrev.IPrev != null);
-        }
-
         public bool IsInList()
         {
             return (INext != null && IPrev != null);
@@ -68,6 +53,21 @@ namespace Framework.Collections
             pElem.INext = INext;
             INext.IPrev = pElem;
             INext = pElem;
+        }
+
+        private bool HasNext()
+        {
+            return (INext != null && INext.INext != null);
+        }
+
+        private bool HasPrev()
+        {
+            return (IPrev != null && IPrev.IPrev != null);
+        }
+
+        ~LinkedListElement()
+        {
+            Delink();
         }
     }
 

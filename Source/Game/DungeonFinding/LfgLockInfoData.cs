@@ -7,16 +7,16 @@ namespace Game.DungeonFinding
 {
     public class LfgLockInfoData
     {
-        public float CurrentItemLevel { get; set; }
-
-        public LfgLockStatusType LockStatus { get; set; }
-        public ushort RequiredItemLevel { get; set; }
-
         public LfgLockInfoData(LfgLockStatusType _lockStatus = 0, ushort _requiredItemLevel = 0, float _currentItemLevel = 0)
         {
             LockStatus = _lockStatus;
             RequiredItemLevel = _requiredItemLevel;
             CurrentItemLevel = _currentItemLevel;
         }
+
+        public float CurrentItemLevel { get; set; }
+
+        public LfgLockStatusType LockStatus { get; set; }
+        public ushort RequiredItemLevel { get; set; }
     }
 }

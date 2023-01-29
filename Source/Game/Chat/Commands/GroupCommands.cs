@@ -17,6 +17,75 @@ namespace Game.Chat
     [CommandGroup("group")]
     internal class GroupCommands
     {
+        [CommandGroup("set")]
+        private class GroupSetCommands
+        {
+            [Command("assistant", RBACPermissions.CommandGroupAssistant)]
+            private static bool HandleGroupSetAssistantCommand(CommandHandler handler, string name)
+            {
+                return GroupFlagCommand(name, handler, GroupMemberFlags.Assistant);
+            }
+
+            [Command("leader", RBACPermissions.CommandGroupLeader)]
+            private static bool HandleGroupSetLeaderCommand(CommandHandler handler, string name)
+            {
+                return HandleGroupLeaderCommand(handler, name);
+            }
+
+            [Command("mainassist", RBACPermissions.CommandGroupMainassist)]
+            private static bool HandleGroupSetMainAssistCommand(CommandHandler handler, string name)
+            {
+                return GroupFlagCommand(name, handler, GroupMemberFlags.MainAssist);
+            }
+
+            [Command("maintank", RBACPermissions.CommandGroupMaintank)]
+            private static bool HandleGroupSetMainTankCommand(CommandHandler handler, string name)
+            {
+                return GroupFlagCommand(name, handler, GroupMemberFlags.MainTank);
+            }
+
+            private static bool GroupFlagCommand(string name, CommandHandler handler, GroupMemberFlags flag)
+            {
+                if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
+                    return false;
+
+                if (!group)
+                {
+                    handler.SendSysMessage(CypherStrings.NotInGroup, player.GetName());
+
+                    return false;
+                }
+
+                if (!group.IsRaidGroup())
+                {
+                    handler.SendSysMessage(CypherStrings.GroupNotInRaidGroup, player.GetName());
+
+                    return false;
+                }
+
+                if (flag == GroupMemberFlags.Assistant &&
+                    group.IsLeader(guid))
+                {
+                    handler.SendSysMessage(CypherStrings.LeaderCannotBeAssistant, player.GetName());
+
+                    return false;
+                }
+
+                if (group.GetMemberFlags(guid).HasAnyFlag(flag))
+                {
+                    group.SetGroupMemberFlag(guid, false, flag);
+                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "no longer", flag);
+                }
+                else
+                {
+                    group.SetGroupMemberFlag(guid, true, flag);
+                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "now", flag);
+                }
+
+                return true;
+            }
+        }
+
         [Command("disband", RBACPermissions.CommandGroupDisband)]
         private static bool HandleGroupDisbandCommand(CommandHandler handler, string name)
         {
@@ -447,75 +516,6 @@ namespace Game.Chat
             }
 
             return true;
-        }
-
-        [CommandGroup("set")]
-        private class GroupSetCommands
-        {
-            [Command("assistant", RBACPermissions.CommandGroupAssistant)]
-            private static bool HandleGroupSetAssistantCommand(CommandHandler handler, string name)
-            {
-                return GroupFlagCommand(name, handler, GroupMemberFlags.Assistant);
-            }
-
-            [Command("leader", RBACPermissions.CommandGroupLeader)]
-            private static bool HandleGroupSetLeaderCommand(CommandHandler handler, string name)
-            {
-                return HandleGroupLeaderCommand(handler, name);
-            }
-
-            [Command("mainassist", RBACPermissions.CommandGroupMainassist)]
-            private static bool HandleGroupSetMainAssistCommand(CommandHandler handler, string name)
-            {
-                return GroupFlagCommand(name, handler, GroupMemberFlags.MainAssist);
-            }
-
-            [Command("maintank", RBACPermissions.CommandGroupMaintank)]
-            private static bool HandleGroupSetMainTankCommand(CommandHandler handler, string name)
-            {
-                return GroupFlagCommand(name, handler, GroupMemberFlags.MainTank);
-            }
-
-            private static bool GroupFlagCommand(string name, CommandHandler handler, GroupMemberFlags flag)
-            {
-                if (!handler.GetPlayerGroupAndGUIDByName(name, out Player player, out Group group, out ObjectGuid guid))
-                    return false;
-
-                if (!group)
-                {
-                    handler.SendSysMessage(CypherStrings.NotInGroup, player.GetName());
-
-                    return false;
-                }
-
-                if (!group.IsRaidGroup())
-                {
-                    handler.SendSysMessage(CypherStrings.GroupNotInRaidGroup, player.GetName());
-
-                    return false;
-                }
-
-                if (flag == GroupMemberFlags.Assistant &&
-                    group.IsLeader(guid))
-                {
-                    handler.SendSysMessage(CypherStrings.LeaderCannotBeAssistant, player.GetName());
-
-                    return false;
-                }
-
-                if (group.GetMemberFlags(guid).HasAnyFlag(flag))
-                {
-                    group.SetGroupMemberFlag(guid, false, flag);
-                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "no longer", flag);
-                }
-                else
-                {
-                    group.SetGroupMemberFlag(guid, true, flag);
-                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "now", flag);
-                }
-
-                return true;
-            }
         }
     }
 }

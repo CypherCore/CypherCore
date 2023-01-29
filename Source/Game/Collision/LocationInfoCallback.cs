@@ -10,7 +10,6 @@ namespace Game.Collision
         private readonly LocationInfo _locInfo;
 
         private readonly ModelInstance[] _prims;
-        public bool Result { get; set; }
 
         public LocationInfoCallback(ModelInstance[] val, LocationInfo info)
         {
@@ -18,6 +17,8 @@ namespace Game.Collision
             _locInfo = info;
             Result = false;
         }
+
+        public bool Result { get; set; }
 
         public override void Invoke(Vector3 point, uint entry)
         {

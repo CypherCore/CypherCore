@@ -232,6 +232,23 @@ namespace Game
             return rate;
         }
 
+        public static uint ConquestRatingCalculator(uint rate)
+        {
+            if (rate <= 1500)
+                return 1350; // Default conquest points
+            else if (rate > 3000)
+                rate = 3000;
+
+            // http://www.arenajunkies.com/topic/179536-conquest-point-cap-vs-personal-rating-chart/page__st__60#entry3085246
+            return (uint)(1.4326 * ((1511.26 / (1 + 1639.28 / Math.Exp(0.00412 * rate))) + 850.15));
+        }
+
+        public static uint BgConquestRatingCalculator(uint rate)
+        {
+            // WowWiki: Battlegroundratings receive a bonus of 22.2% to the cap they generate
+            return (uint)((ConquestRatingCalculator(rate) * 1.222f) + 0.5f);
+        }
+
         private static Expansion GetExpansionForLevel(uint level)
         {
             if (level < 60)
@@ -248,23 +265,6 @@ namespace Game
                 return Expansion.WarlordsOfDraenor;
             else
                 return Expansion.Legion;
-        }
-
-        public static uint ConquestRatingCalculator(uint rate)
-        {
-            if (rate <= 1500)
-                return 1350; // Default conquest points
-            else if (rate > 3000)
-                rate = 3000;
-
-            // http://www.arenajunkies.com/topic/179536-conquest-point-cap-vs-personal-rating-chart/page__st__60#entry3085246
-            return (uint)(1.4326 * ((1511.26 / (1 + 1639.28 / Math.Exp(0.00412 * rate))) + 850.15));
-        }
-
-        public static uint BgConquestRatingCalculator(uint rate)
-        {
-            // WowWiki: Battlegroundratings receive a bonus of 22.2% to the cap they generate
-            return (uint)((ConquestRatingCalculator(rate) * 1.222f) + 0.5f);
         }
     }
 }

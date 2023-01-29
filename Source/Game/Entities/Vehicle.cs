@@ -29,10 +29,8 @@ namespace Game.Entities
         private readonly Unit _me;
 
         private readonly List<VehicleJoinEvent> _pendingJoinEvents = new();
-        private Status _status;             //< Internal variable for sanity checks
         private readonly VehicleRecord _vehicleInfo; //< DBC _data for vehicle
-        public Dictionary<sbyte, VehicleSeat> Seats { get; set; } = new();
-        public uint UsableSeatNum { get; set; } //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display Flags
+        private Status _status;                      //< Internal variable for sanity checks
 
         public Vehicle(Unit unit, VehicleRecord vehInfo, uint creatureEntry)
         {
@@ -68,6 +66,9 @@ namespace Game.Entities
 
             InitMovementInfoForBase();
         }
+
+        public Dictionary<sbyte, VehicleSeat> Seats { get; set; } = new();
+        public uint UsableSeatNum { get; set; } //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display Flags
 
         public void Dispose()
         {
@@ -246,66 +247,6 @@ namespace Game.Entities
             Global.ScriptMgr.RunScript<IVehicleOnReset>(p => p.OnReset(this), GetBase().ToCreature().GetScriptId());
         }
 
-        private void ApplyAllImmunities()
-        {
-            // This couldn't be done in DB, because some spells have MECHANIC_NONE
-
-            // Vehicles should be immune on Knockback ...
-            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
-            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBackDest, true);
-
-            // Mechanical units & vehicles ( which are not Bosses, they have own immunities in DB ) should be also immune on healing ( exceptions in switch below )
-            if (_me.IsTypeId(TypeId.Unit) &&
-                _me.ToCreature().GetCreatureTemplate().CreatureType == CreatureType.Mechanical &&
-                !_me.ToCreature().IsWorldBoss())
-            {
-                // Heal & dispel ...
-                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.Heal, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.HealPct, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.Dispel, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.PeriodicHeal, true);
-
-                // ... Shield & Immunity grant spells ...
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolImmunity, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModUnattackable, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolAbsorb, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Banish, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
-
-                // ... Resistance, Split Damage, Change Stats ...
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SplitDamagePct, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModResistance, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModStat, true);
-                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDamagePercentTaken, true);
-            }
-
-            // Different immunities for vehicles goes below
-            switch (GetVehicleInfo().Id)
-            {
-                // code below prevents a bug with movable cannons
-                case 160: // Strand of the Ancients
-                case 244: // Wintergrasp
-                case 452: // Isle of Conquest
-                case 510: // Isle of Conquest
-                case 543: // Isle of Conquest
-                    _me.SetControlled(true, UnitState.Root);
-                    // why we need to apply this? we can simple add immunities to slow mechanic in DB
-                    _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDecreaseSpeed, true);
-
-                    break;
-                case 335:                                                                                // Salvaged Chopper
-                case 336:                                                                                // Salvaged Siege Engine
-                case 338:                                                                                // Salvaged Demolisher
-                    _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDamagePercentTaken, false); // Battering Ram
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public void RemoveAllPassengers()
         {
             Log.outDebug(LogFilter.Vehicle, "Vehicle.RemoveAllPassengers. Entry: {0}, GuidLow: {1}", _creatureEntry, _me.GetGUID().ToString());
@@ -398,37 +339,6 @@ namespace Game.Entities
                     return pair.Value.SeatAddon;
 
             return null;
-        }
-
-        private void InstallAccessory(uint entry, sbyte seatId, bool minion, byte type, uint summonTime)
-        {
-            // @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
-
-            if (_status == Status.UnInstalling)
-            {
-                Log.outError(LogFilter.Vehicle,
-                             "Vehicle ({0}, Entry: {1}) attempts to install accessory (Entry: {2}) on Seat {3} with STATUS_UNINSTALLING! " +
-                             "Check Uninstall/PassengerBoarded script hooks for errors.",
-                             _me.GetGUID().ToString(),
-                             GetCreatureEntry(),
-                             entry,
-                             seatId);
-
-                return;
-            }
-
-            Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on Seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
-
-            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
-            Cypher.Assert(accessory);
-
-            if (minion)
-                accessory.AddUnitTypeMask(UnitTypeMask.Accessory);
-
-            _me.HandleSpellClick(accessory, seatId);
-
-            // If for some reason adding accessory to vehicle fails it will unsummon in
-            // @VehicleJoinEvent.Abort
         }
 
         public bool AddVehiclePassenger(Unit unit, sbyte seatId)
@@ -559,26 +469,6 @@ namespace Game.Entities
             return false;
         }
 
-        private void InitMovementInfoForBase()
-        {
-            VehicleFlags vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
-
-            if (vehicleFlags.HasAnyFlag(VehicleFlags.NoStrafe))
-                _me.AddUnitMovementFlag2(MovementFlag2.NoStrafe);
-
-            if (vehicleFlags.HasAnyFlag(VehicleFlags.NoJumping))
-                _me.AddUnitMovementFlag2(MovementFlag2.NoJumping);
-
-            if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedturning))
-                _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
-
-            if (vehicleFlags.HasAnyFlag(VehicleFlags.AllowPitching))
-                _me.AddUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
-
-            if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedpitching))
-                _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
-        }
-
         public VehicleSeatRecord GetSeatForPassenger(Unit passenger)
         {
             foreach (var pair in Seats)
@@ -586,15 +476,6 @@ namespace Game.Entities
                     return pair.Value.SeatInfo;
 
             return null;
-        }
-
-        private KeyValuePair<sbyte, VehicleSeat> GetSeatKeyValuePairForPassenger(Unit passenger)
-        {
-            foreach (var pair in Seats)
-                if (pair.Value.Passenger.Guid == passenger.GetGUID())
-                    return pair;
-
-            return Seats.Last();
         }
 
         public byte GetAvailableSeatCount()
@@ -649,19 +530,6 @@ namespace Game.Entities
             }
         }
 
-        private bool HasPendingEventForSeat(sbyte seatId)
-        {
-            for (var i = 0; i < _pendingJoinEvents.Count; ++i)
-            {
-                var joinEvent = _pendingJoinEvents[i];
-
-                if (joinEvent.Seat.Key == seatId)
-                    return true;
-            }
-
-            return false;
-        }
-
         public TimeSpan GetDespawnDelay()
         {
             VehicleTemplate vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
@@ -714,6 +582,139 @@ namespace Game.Entities
         public static implicit operator bool(Vehicle vehicle)
         {
             return vehicle != null;
+        }
+
+        private void ApplyAllImmunities()
+        {
+            // This couldn't be done in DB, because some spells have MECHANIC_NONE
+
+            // Vehicles should be immune on Knockback ...
+            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
+            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBackDest, true);
+
+            // Mechanical units & vehicles ( which are not Bosses, they have own immunities in DB ) should be also immune on healing ( exceptions in switch below )
+            if (_me.IsTypeId(TypeId.Unit) &&
+                _me.ToCreature().GetCreatureTemplate().CreatureType == CreatureType.Mechanical &&
+                !_me.ToCreature().IsWorldBoss())
+            {
+                // Heal & dispel ...
+                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.Heal, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.HealPct, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.Dispel, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.PeriodicHeal, true);
+
+                // ... Shield & Immunity grant spells ...
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolImmunity, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModUnattackable, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolAbsorb, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Banish, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
+
+                // ... Resistance, Split Damage, Change Stats ...
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SplitDamagePct, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModResistance, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModStat, true);
+                _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDamagePercentTaken, true);
+            }
+
+            // Different immunities for vehicles goes below
+            switch (GetVehicleInfo().Id)
+            {
+                // code below prevents a bug with movable cannons
+                case 160: // Strand of the Ancients
+                case 244: // Wintergrasp
+                case 452: // Isle of Conquest
+                case 510: // Isle of Conquest
+                case 543: // Isle of Conquest
+                    _me.SetControlled(true, UnitState.Root);
+                    // why we need to apply this? we can simple add immunities to slow mechanic in DB
+                    _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDecreaseSpeed, true);
+
+                    break;
+                case 335:                                                                                // Salvaged Chopper
+                case 336:                                                                                // Salvaged Siege Engine
+                case 338:                                                                                // Salvaged Demolisher
+                    _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDamagePercentTaken, false); // Battering Ram
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void InstallAccessory(uint entry, sbyte seatId, bool minion, byte type, uint summonTime)
+        {
+            // @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
+
+            if (_status == Status.UnInstalling)
+            {
+                Log.outError(LogFilter.Vehicle,
+                             "Vehicle ({0}, Entry: {1}) attempts to install accessory (Entry: {2}) on Seat {3} with STATUS_UNINSTALLING! " +
+                             "Check Uninstall/PassengerBoarded script hooks for errors.",
+                             _me.GetGUID().ToString(),
+                             GetCreatureEntry(),
+                             entry,
+                             seatId);
+
+                return;
+            }
+
+            Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on Seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
+
+            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, TimeSpan.FromMilliseconds(summonTime));
+            Cypher.Assert(accessory);
+
+            if (minion)
+                accessory.AddUnitTypeMask(UnitTypeMask.Accessory);
+
+            _me.HandleSpellClick(accessory, seatId);
+
+            // If for some reason adding accessory to vehicle fails it will unsummon in
+            // @VehicleJoinEvent.Abort
+        }
+
+        private void InitMovementInfoForBase()
+        {
+            VehicleFlags vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
+
+            if (vehicleFlags.HasAnyFlag(VehicleFlags.NoStrafe))
+                _me.AddUnitMovementFlag2(MovementFlag2.NoStrafe);
+
+            if (vehicleFlags.HasAnyFlag(VehicleFlags.NoJumping))
+                _me.AddUnitMovementFlag2(MovementFlag2.NoJumping);
+
+            if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedturning))
+                _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
+
+            if (vehicleFlags.HasAnyFlag(VehicleFlags.AllowPitching))
+                _me.AddUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
+
+            if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedpitching))
+                _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+        }
+
+        private KeyValuePair<sbyte, VehicleSeat> GetSeatKeyValuePairForPassenger(Unit passenger)
+        {
+            foreach (var pair in Seats)
+                if (pair.Value.Passenger.Guid == passenger.GetGUID())
+                    return pair;
+
+            return Seats.Last();
+        }
+
+        private bool HasPendingEventForSeat(sbyte seatId)
+        {
+            for (var i = 0; i < _pendingJoinEvents.Count; ++i)
+            {
+                var joinEvent = _pendingJoinEvents[i];
+
+                if (joinEvent.Seat.Key == seatId)
+                    return true;
+            }
+
+            return false;
         }
     }
 

@@ -20,6 +20,6 @@ public class CalcDamageInfo
     public WeaponAttackType AttackType { get; set; }
     public ProcFlagsInit ProcAttacker { get; set; }
     public ProcFlagsInit ProcVictim { get; set; }
-    public uint CleanDamage { get; set; }           // Used only for rage calculation
+    public uint CleanDamage { get; set; } // Used only for rage calculation
     public MeleeHitOutcome HitOutCome { get; set; } // TODO: remove this field (need use TargetState)
 }

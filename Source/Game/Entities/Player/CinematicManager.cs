@@ -17,13 +17,12 @@ namespace Game.Entities
 
         public uint _cinematicDiff;
         public uint _cinematicLength;
-        private TempSummon _CinematicObject;
         public uint _lastCinematicCheck;
-
         private readonly Position _remoteSightPosition;
 
         // Remote location information
         private readonly Player player;
+        private TempSummon _CinematicObject;
 
         public CinematicManager(Player playerref)
         {

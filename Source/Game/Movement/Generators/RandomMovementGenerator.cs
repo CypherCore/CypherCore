@@ -9,9 +9,9 @@ namespace Game.Movement
 {
     public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
     {
+        private readonly TimeTracker _timer;
         private PathGenerator _path;
         private Position _reference;
-        private readonly TimeTracker _timer;
         private float _wanderDistance;
         private uint _wanderSteps;
 
@@ -130,6 +130,16 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.Paused);
         }
 
+        public override void UnitSpeedChanged()
+        {
+            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Random;
+        }
+
         private void SetRandomLocation(Creature owner)
         {
             if (owner == null)
@@ -217,16 +227,6 @@ namespace Game.Movement
 
             // Call for creature group update
             owner.SignalFormationMovement();
-        }
-
-        public override void UnitSpeedChanged()
-        {
-            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Random;
         }
     }
 }

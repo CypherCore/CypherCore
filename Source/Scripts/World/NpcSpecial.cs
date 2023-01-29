@@ -399,39 +399,13 @@ namespace Scripts.World.NpcSpecial
     [Script]
     internal class npc_air_force_bots : NullCreatureAI
     {
-        private ObjectGuid _myGuard;
         private readonly AirForceSpawn _spawn;
         private readonly List<ObjectGuid> _toAttack = new();
+        private ObjectGuid _myGuard;
 
         public npc_air_force_bots(Creature creature) : base(creature)
         {
             _spawn = FindSpawnFor(creature.GetEntry());
-        }
-
-        private static AirForceSpawn FindSpawnFor(uint entry)
-        {
-            foreach (AirForceSpawn spawn in Misc.AirforceSpawns)
-                if (spawn.myEntry == entry)
-                {
-                    Cypher.Assert(Global.ObjectMgr.GetCreatureTemplate(spawn.otherEntry) != null, $"Invalid creature entry {spawn.otherEntry} in 'npc_air_force_bots' script");
-
-                    return spawn;
-                }
-
-            Cypher.Assert(false, $"Unhandled creature with entry {entry} is assigned 'npc_air_force_bots' script");
-
-            return null;
-        }
-
-        private Creature GetOrSummonGuard()
-        {
-            Creature guard = ObjectAccessor.GetCreature(me, _myGuard);
-
-            if (guard == null &&
-                (guard = me.SummonCreature(_spawn.otherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5))))
-                _myGuard = guard.GetGUID();
-
-            return guard;
         }
 
         public override void UpdateAI(uint diff)
@@ -497,6 +471,32 @@ namespace Scripts.World.NpcSpecial
 
             _toAttack.Add(who.GetGUID());
         }
+
+        private static AirForceSpawn FindSpawnFor(uint entry)
+        {
+            foreach (AirForceSpawn spawn in Misc.AirforceSpawns)
+                if (spawn.myEntry == entry)
+                {
+                    Cypher.Assert(Global.ObjectMgr.GetCreatureTemplate(spawn.otherEntry) != null, $"Invalid creature entry {spawn.otherEntry} in 'npc_air_force_bots' script");
+
+                    return spawn;
+                }
+
+            Cypher.Assert(false, $"Unhandled creature with entry {entry} is assigned 'npc_air_force_bots' script");
+
+            return null;
+        }
+
+        private Creature GetOrSummonGuard()
+        {
+            Creature guard = ObjectAccessor.GetCreature(me, _myGuard);
+
+            if (guard == null &&
+                (guard = me.SummonCreature(_spawn.otherEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromMinutes(5))))
+                _myGuard = guard.GetGUID();
+
+            return guard;
+        }
     }
 
     [Script]
@@ -507,11 +507,6 @@ namespace Scripts.World.NpcSpecial
         public npc_chicken_cluck(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            ResetFlagTimer = 120000;
         }
 
         public override void Reset()
@@ -582,6 +577,11 @@ namespace Scripts.World.NpcSpecial
         {
             if (quest.Id == QuestConst.Cluck)
                 Reset();
+        }
+
+        private void Initialize()
+        {
+            ResetFlagTimer = 120000;
         }
     }
 
@@ -661,21 +661,6 @@ namespace Scripts.World.NpcSpecial
             _targetTimer = 3000;
         }
 
-        private ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
-        {
-            List<Creature> targets = me.GetCreatureListWithEntryInGrid(CreatureIds.TorchTossingTargetBunny, 60.0f);
-            targets.RemoveAll(creature => creature.GetGUID() == lastTargetGUID);
-
-            if (!targets.Empty())
-            {
-                _lastTargetGUID = targets.SelectRandom().GetGUID();
-
-                return _lastTargetGUID;
-            }
-
-            return ObjectGuid.Empty;
-        }
-
         public override void UpdateAI(uint diff)
         {
             if (_targetTimer < diff)
@@ -692,6 +677,21 @@ namespace Scripts.World.NpcSpecial
                 _targetTimer -= diff;
             }
         }
+
+        private ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
+        {
+            List<Creature> targets = me.GetCreatureListWithEntryInGrid(CreatureIds.TorchTossingTargetBunny, 60.0f);
+            targets.RemoveAll(creature => creature.GetGUID() == lastTargetGUID);
+
+            if (!targets.Empty())
+            {
+                _lastTargetGUID = targets.SelectRandom().GetGUID();
+
+                return _lastTargetGUID;
+            }
+
+            return ObjectGuid.Empty;
+        }
     }
 
     [Script]
@@ -702,12 +702,6 @@ namespace Scripts.World.NpcSpecial
         public npc_midsummer_bunny_pole(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            _scheduler.CancelAll();
-            running = false;
         }
 
         public override void Reset()
@@ -761,6 +755,20 @@ namespace Scripts.World.NpcSpecial
             //events.ScheduleEvent(EVENT_CAST_RED_FIRE_RING, 1);
         }
 
+        public override void UpdateAI(uint diff)
+        {
+            if (!running)
+                return;
+
+            _scheduler.Update(diff);
+        }
+
+        private void Initialize()
+        {
+            _scheduler.CancelAll();
+            running = false;
+        }
+
         private bool checkNearbyPlayers()
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
@@ -771,14 +779,6 @@ namespace Scripts.World.NpcSpecial
 
             return players.Empty();
         }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!running)
-                return;
-
-            _scheduler.Update(diff);
-        }
     }
 
     [Script]
@@ -786,10 +786,10 @@ namespace Scripts.World.NpcSpecial
     {
         private readonly List<Position> Coordinates = new();
 
+        private readonly List<ObjectGuid> Patients = new();
+
         private bool Event;
         private uint PatientDiedCount;
-
-        private readonly List<ObjectGuid> Patients = new();
         private uint PatientSavedCount;
 
         private ObjectGuid PlayerGUID;
@@ -800,21 +800,6 @@ namespace Scripts.World.NpcSpecial
         public npc_doctor(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            PlayerGUID.Clear();
-
-            SummonPatientTimer = 10000;
-            SummonPatientCount = 0;
-            PatientDiedCount = 0;
-            PatientSavedCount = 0;
-
-            Patients.Clear();
-            Coordinates.Clear();
-
-            Event = false;
         }
 
         public override void Reset()
@@ -982,6 +967,21 @@ namespace Scripts.World.NpcSpecial
                 (quest.Id == 6622))
                 BeginEvent(player);
         }
+
+        private void Initialize()
+        {
+            PlayerGUID.Clear();
+
+            SummonPatientTimer = 10000;
+            SummonPatientCount = 0;
+            PatientDiedCount = 0;
+            PatientSavedCount = 0;
+
+            Patients.Clear();
+            Coordinates.Clear();
+
+            Event = false;
+        }
     }
 
     [Script]
@@ -994,12 +994,6 @@ namespace Scripts.World.NpcSpecial
         public npc_injured_patient(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            DoctorGUID.Clear();
-            Coord = null;
         }
 
         public override void Reset()
@@ -1116,16 +1110,22 @@ namespace Scripts.World.NpcSpecial
                 }
             }
         }
+
+        private void Initialize()
+        {
+            DoctorGUID.Clear();
+            Coord = null;
+        }
     }
 
     [Script]
     internal class npc_garments_of_quests : EscortAI
     {
+        private readonly uint quest;
         private bool CanRun;
         private ObjectGuid CasterGUID;
 
         private bool IsHealed;
-        private readonly uint quest;
 
         private uint RunAwayTimer;
 
@@ -1160,14 +1160,6 @@ namespace Scripts.World.NpcSpecial
             }
 
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            IsHealed = false;
-            CanRun = false;
-
-            RunAwayTimer = 5000;
         }
 
         public override void Reset()
@@ -1271,6 +1263,14 @@ namespace Scripts.World.NpcSpecial
             }
 
             base.UpdateAI(diff);
+        }
+
+        private void Initialize()
+        {
+            IsHealed = false;
+            CanRun = false;
+
+            RunAwayTimer = 5000;
         }
     }
 
@@ -1499,11 +1499,6 @@ namespace Scripts.World.NpcSpecial
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _showUnderground = RandomHelper.URand(0, 100) == 0; // Guessed value, it is really rare though
-        }
-
         public override void InitializeAI()
         {
             Initialize();
@@ -1572,6 +1567,11 @@ namespace Scripts.World.NpcSpecial
 
             return true;
         }
+
+        private void Initialize()
+        {
+            _showUnderground = RandomHelper.URand(0, 100) == 0; // Guessed value, it is really rare though
+        }
     }
 
     [Script]
@@ -1587,15 +1587,6 @@ namespace Scripts.World.NpcSpecial
         public npc_spring_rabbit(Creature creature) : base(creature)
         {
             Initialize();
-        }
-
-        private void Initialize()
-        {
-            inLove = false;
-            rabbitGUID.Clear();
-            jumpTimer = RandomHelper.URand(5000, 10000);
-            bunnyTimer = RandomHelper.URand(10000, 20000);
-            searchTimer = RandomHelper.URand(5000, 10000);
         }
 
         public override void Reset()
@@ -1676,6 +1667,15 @@ namespace Scripts.World.NpcSpecial
                 }
             }
         }
+
+        private void Initialize()
+        {
+            inLove = false;
+            rabbitGUID.Clear();
+            jumpTimer = RandomHelper.URand(5000, 10000);
+            bunnyTimer = RandomHelper.URand(10000, 20000);
+            searchTimer = RandomHelper.URand(5000, 10000);
+        }
     }
 
     [Script]
@@ -1734,19 +1734,6 @@ namespace Scripts.World.NpcSpecial
             _isSearching = true;
             _nextAction = 0;
             _timer = 1 * Time.InMilliseconds;
-        }
-
-        private GameObject VerifyTarget()
-        {
-            GameObject target = ObjectAccessor.GetGameObject(me, _target);
-
-            if (target)
-                return target;
-
-            me.HandleEmoteCommand(Emote.OneshotRude);
-            me.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
-
-            return null;
         }
 
         public override void UpdateAI(uint diff)
@@ -1857,6 +1844,19 @@ namespace Scripts.World.NpcSpecial
                 _nextAction = TrainWrecker.EventDoJump;
             else if (id == TrainWrecker.MoveidJump)
                 _nextAction = TrainWrecker.EventDoFacing;
+        }
+
+        private GameObject VerifyTarget()
+        {
+            GameObject target = ObjectAccessor.GetGameObject(me, _target);
+
+            if (target)
+                return target;
+
+            me.HandleEmoteCommand(Emote.OneshotRude);
+            me.DespawnOrUnsummon(TimeSpan.FromSeconds(3));
+
+            return null;
         }
     }
 
@@ -1969,23 +1969,23 @@ namespace Scripts.World.NpcSpecial
     internal class npc_bountiful_table : PassiveAI
     {
         private readonly Dictionary<uint, uint> ChairSpells = new()
-                                                     {
-                                                         {
-                                                             CreatureIds.TheCranberryChair, SpellIds.CranberryServer
-                                                         },
-                                                         {
-                                                             CreatureIds.ThePieChair, SpellIds.PieServer
-                                                         },
-                                                         {
-                                                             CreatureIds.TheStuffingChair, SpellIds.StuffingServer
-                                                         },
-                                                         {
-                                                             CreatureIds.TheTurkeyChair, SpellIds.TurkeyServer
-                                                         },
-                                                         {
-                                                             CreatureIds.TheSweetPotatoChair, SpellIds.SweetPotatoesServer
-                                                         }
-                                                     };
+                                                              {
+                                                                  {
+                                                                      CreatureIds.TheCranberryChair, SpellIds.CranberryServer
+                                                                  },
+                                                                  {
+                                                                      CreatureIds.ThePieChair, SpellIds.PieServer
+                                                                  },
+                                                                  {
+                                                                      CreatureIds.TheStuffingChair, SpellIds.StuffingServer
+                                                                  },
+                                                                  {
+                                                                      CreatureIds.TheTurkeyChair, SpellIds.TurkeyServer
+                                                                  },
+                                                                  {
+                                                                      CreatureIds.TheSweetPotatoChair, SpellIds.SweetPotatoesServer
+                                                                  }
+                                                              };
 
         public npc_bountiful_table(Creature creature) : base(creature)
         {

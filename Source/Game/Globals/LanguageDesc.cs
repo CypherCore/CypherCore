@@ -5,9 +5,6 @@ namespace Game
 {
     public class LanguageDesc
     {
-        public uint SkillId { get; set; }
-        public uint SpellId { get; set; }
-
         public LanguageDesc()
         {
         }
@@ -17,6 +14,9 @@ namespace Game
             SpellId = spellId;
             SkillId = skillId;
         }
+
+        public uint SkillId { get; set; }
+        public uint SpellId { get; set; }
 
         public override int GetHashCode()
         {

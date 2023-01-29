@@ -9,9 +9,9 @@ namespace Game.Entities
 {
     public class AreaTriggerTemplate
     {
+        public AreaTriggerId Id;
         public List<AreaTriggerAction> Actions { get; set; } = new();
         public AreaTriggerFlags Flags { get; set; }
-        public AreaTriggerId Id;
 
         public bool HasFlag(AreaTriggerFlags flag)
         {

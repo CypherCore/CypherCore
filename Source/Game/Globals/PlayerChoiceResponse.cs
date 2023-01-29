@@ -5,6 +5,7 @@ namespace Game
 {
     public class PlayerChoiceResponse
     {
+        public PlayerChoiceResponseMawPower? MawPower;
         public string Answer { get; set; }
         public string ButtonTooltip { get; set; }
         public int ChoiceArtFileId { get; set; }
@@ -14,7 +15,6 @@ namespace Game
         public int Flags { get; set; }
         public byte GroupID { get; set; }
         public string Header { get; set; }
-        public PlayerChoiceResponseMawPower? MawPower;
         public int ResponseId { get; set; }
         public ushort ResponseIdentifier { get; set; }
         public PlayerChoiceResponseReward Reward { get; set; }

@@ -7,13 +7,6 @@ namespace Game.Entities
 {
     public class VehicleSeatAddon
     {
-        public VehicleExitParameters ExitParameter { get; set; }
-        public float ExitParameterO { get; set; }
-        public float ExitParameterX { get; set; }
-        public float ExitParameterY { get; set; }
-        public float ExitParameterZ { get; set; }
-        public float SeatOrientationOffset { get; set; }
-
         public VehicleSeatAddon(float orientatonOffset, float exitX, float exitY, float exitZ, float exitO, byte param)
         {
             SeatOrientationOffset = orientatonOffset;
@@ -23,5 +16,12 @@ namespace Game.Entities
             ExitParameterO = exitO;
             ExitParameter = (VehicleExitParameters)param;
         }
+
+        public VehicleExitParameters ExitParameter { get; set; }
+        public float ExitParameterO { get; set; }
+        public float ExitParameterX { get; set; }
+        public float ExitParameterY { get; set; }
+        public float ExitParameterZ { get; set; }
+        public float SeatOrientationOffset { get; set; }
     }
 }

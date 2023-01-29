@@ -9,6 +9,12 @@ namespace Game.Networking.Packets
 {
     internal class ArtifactAddPower : ClientPacket
     {
+        public struct ArtifactPowerChoice
+        {
+            public uint ArtifactPowerID;
+            public byte Rank;
+        }
+
         public ObjectGuid ArtifactGUID;
         public ObjectGuid ForgeGUID;
         public Array<ArtifactPowerChoice> PowerChoices = new(1);
@@ -31,12 +37,6 @@ namespace Game.Networking.Packets
                 artifactPowerChoice.Rank = _worldPacket.ReadUInt8();
                 PowerChoices[i] = artifactPowerChoice;
             }
-        }
-
-        public struct ArtifactPowerChoice
-        {
-            public uint ArtifactPowerID;
-            public byte Rank;
         }
     }
 

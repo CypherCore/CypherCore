@@ -76,6 +76,12 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 			22632  //ItemAtieshDruid,
 		};
 
+        private readonly ObjectGuid[] FlameWreathTarget = new ObjectGuid[3];
+        private readonly float[] FWTargPosX = new float[3];
+        private readonly float[] FWTargPosY = new float[3];
+
+        private readonly InstanceScript instance;
+
         private uint ArcaneCooldown;
         private uint BerserkTimer;
         private uint CloseDoorTimer; // Don't close the door right on aggro in case some people are still entering.
@@ -89,14 +95,9 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
         private bool ElementalsSpawned;
         private uint FireCooldown;
         private uint FlameWreathCheckTime;
-        private readonly ObjectGuid[] FlameWreathTarget = new ObjectGuid[3];
 
         private uint FlameWreathTimer;
         private uint FrostCooldown;
-        private readonly float[] FWTargPosX = new float[3];
-        private readonly float[] FWTargPosY = new float[3];
-
-        private readonly InstanceScript instance;
 
         private SuperSpell LastSuperSpell;
         private uint NormalCastTimer;
@@ -109,31 +110,6 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
         {
             Initialize();
             instance = creature.GetInstanceScript();
-        }
-
-        private void Initialize()
-        {
-            SecondarySpellTimer = 5000;
-            NormalCastTimer = 0;
-            SuperCastTimer = 35000;
-            BerserkTimer = 720000;
-            CloseDoorTimer = 15000;
-
-            LastSuperSpell = (SuperSpell)(RandomHelper.Rand32() % 3);
-
-            FlameWreathTimer = 0;
-            FlameWreathCheckTime = 0;
-
-            CurrentNormalSpell = 0;
-            ArcaneCooldown = 0;
-            FireCooldown = 0;
-            FrostCooldown = 0;
-
-            DrinkInterruptTimer = 10000;
-
-            ElementalsSpawned = false;
-            Drinking = false;
-            DrinkInturrupted = false;
         }
 
         public override void Reset()
@@ -164,36 +140,6 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
             instance.SetBossState(DataTypes.Aran, EncounterState.InProgress);
             instance.HandleGameObject(instance.GetGuidData(DataTypes.GoLibraryDoor), false);
-        }
-
-        private void FlameWreathEffect()
-        {
-            List<Unit> targets = new();
-
-            //store the threat list in a different container
-            foreach (var refe in me.GetThreatManager().GetSortedThreatList())
-            {
-                Unit target = refe.GetVictim();
-
-                if (refe.GetVictim().IsPlayer() &&
-                    refe.GetVictim().IsAlive())
-                    targets.Add(target);
-            }
-
-            //cut down to size if we have more than 3 targets
-            targets.RandomResize(3);
-
-            uint i = 0;
-
-            foreach (var unit in targets)
-                if (unit)
-                {
-                    FlameWreathTarget[i] = unit.GetGUID();
-                    FWTargPosX[i] = unit.GetPositionX();
-                    FWTargPosY[i] = unit.GetPositionY();
-                    DoCast(unit, SpellIds.FlameWreath, new CastSpellExtraArgs(true));
-                    ++i;
-                }
         }
 
         public override void UpdateAI(uint diff)
@@ -582,6 +528,61 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
 
                 break;
             }
+        }
+
+        private void Initialize()
+        {
+            SecondarySpellTimer = 5000;
+            NormalCastTimer = 0;
+            SuperCastTimer = 35000;
+            BerserkTimer = 720000;
+            CloseDoorTimer = 15000;
+
+            LastSuperSpell = (SuperSpell)(RandomHelper.Rand32() % 3);
+
+            FlameWreathTimer = 0;
+            FlameWreathCheckTime = 0;
+
+            CurrentNormalSpell = 0;
+            ArcaneCooldown = 0;
+            FireCooldown = 0;
+            FrostCooldown = 0;
+
+            DrinkInterruptTimer = 10000;
+
+            ElementalsSpawned = false;
+            Drinking = false;
+            DrinkInturrupted = false;
+        }
+
+        private void FlameWreathEffect()
+        {
+            List<Unit> targets = new();
+
+            //store the threat list in a different container
+            foreach (var refe in me.GetThreatManager().GetSortedThreatList())
+            {
+                Unit target = refe.GetVictim();
+
+                if (refe.GetVictim().IsPlayer() &&
+                    refe.GetVictim().IsAlive())
+                    targets.Add(target);
+            }
+
+            //cut down to size if we have more than 3 targets
+            targets.RandomResize(3);
+
+            uint i = 0;
+
+            foreach (var unit in targets)
+                if (unit)
+                {
+                    FlameWreathTarget[i] = unit.GetGUID();
+                    FWTargPosX[i] = unit.GetPositionX();
+                    FWTargPosY[i] = unit.GetPositionY();
+                    DoCast(unit, SpellIds.FlameWreath, new CastSpellExtraArgs(true));
+                    ++i;
+                }
         }
 
         private bool PlayerHasWeaponEquipped(Player player, uint itemEntry)

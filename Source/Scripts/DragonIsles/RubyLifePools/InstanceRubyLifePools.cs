@@ -33,6 +33,18 @@ namespace Scripts.DragonIsles.RubyLifePools
     [Script]
     internal class instance_ruby_life_pools : InstanceMapScript, IInstanceMapGetInstanceScript
     {
+        private class instance_ruby_life_pools_InstanceMapScript : InstanceScript
+        {
+            public instance_ruby_life_pools_InstanceMapScript(InstanceMap map) : base(map)
+            {
+                SetHeaders("RLP");
+                SetBossNumber(3);
+                LoadObjectData(creatureData, null);
+                LoadDoorData(doorData);
+                LoadDungeonEncounterData(encounters);
+            }
+        }
+
         public static ObjectData[] creatureData =
         {
             new(CreatureIds.MelidrussaChillworn, DataTypes.MelidrussaChillworn), new(CreatureIds.KokiaBlazehoof, DataTypes.KokiaBlazehoof), new(CreatureIds.Kyrakka, DataTypes.KyrakkaAndErkhartStormvein)
@@ -55,18 +67,6 @@ namespace Scripts.DragonIsles.RubyLifePools
         public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_ruby_life_pools_InstanceMapScript(map);
-        }
-
-        private class instance_ruby_life_pools_InstanceMapScript : InstanceScript
-        {
-            public instance_ruby_life_pools_InstanceMapScript(InstanceMap map) : base(map)
-            {
-                SetHeaders("RLP");
-                SetBossNumber(3);
-                LoadObjectData(creatureData, null);
-                LoadDoorData(doorData);
-                LoadDungeonEncounterData(encounters);
-            }
         }
     }
 }

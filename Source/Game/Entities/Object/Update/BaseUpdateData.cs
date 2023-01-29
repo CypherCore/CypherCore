@@ -9,10 +9,6 @@ namespace Game.Entities
 {
     public abstract class BaseUpdateData<T> : IHasChangesMask
     {
-        public int BlockBit { get; set; }
-        public UpdateMask ChangesMask { get; set; }
-        public int Bit { get; set; }
-
         public BaseUpdateData(int blockBit, TypeId bit, int changeMask)
         {
             BlockBit = blockBit;
@@ -24,6 +20,10 @@ namespace Game.Entities
         {
             ChangesMask = new UpdateMask(changeMask);
         }
+
+        public int BlockBit { get; set; }
+        public UpdateMask ChangesMask { get; set; }
+        public int Bit { get; set; }
 
         public abstract void ClearChangesMask();
 

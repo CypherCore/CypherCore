@@ -120,21 +120,6 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetTransport(guid);
     }
 
-    private static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
-    {
-        return u.GetMap().GetDynamicObject(guid);
-    }
-
-    private static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
-    {
-        return u.GetMap().GetAreaTrigger(guid);
-    }
-
-    private static SceneObject GetSceneObject(WorldObject u, ObjectGuid guid)
-    {
-        return u.GetMap().GetSceneObject(guid);
-    }
-
     public static Conversation GetConversation(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetConversation(guid);
@@ -263,5 +248,20 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
             PlayerNameMapHolder.Remove(obj);
             _players.Remove(obj.GetGUID());
         }
+    }
+
+    private static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
+    {
+        return u.GetMap().GetDynamicObject(guid);
+    }
+
+    private static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
+    {
+        return u.GetMap().GetAreaTrigger(guid);
+    }
+
+    private static SceneObject GetSceneObject(WorldObject u, ObjectGuid guid)
+    {
+        return u.GetMap().GetSceneObject(guid);
     }
 }

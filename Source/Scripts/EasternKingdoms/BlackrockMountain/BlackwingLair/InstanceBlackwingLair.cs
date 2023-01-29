@@ -107,26 +107,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
     [Script]
     internal class instance_blackwing_lair : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        private static readonly DungeonEncounterData[] encounters =
-        {
-            new(DataTypes.RazorgoreTheUntamed, 610), new(DataTypes.VaelastrazTheCorrupt, 611), new(DataTypes.BroodlordLashlayer, 612), new(DataTypes.Firemaw, 613), new(DataTypes.Ebonroc, 614), new(DataTypes.Flamegor, 615), new(DataTypes.Chromaggus, 616), new(DataTypes.Nefarian, 617)
-        };
-
-        public instance_blackwing_lair() : base(nameof(instance_blackwing_lair), 469)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_blackwing_lair_InstanceMapScript(map);
-        }
-
         private class instance_blackwing_lair_InstanceMapScript : InstanceScript
         {
+            private readonly List<ObjectGuid> EggList = new();
+
             // Razorgore
             private byte EggCount;
             private uint EggEvent;
-            private readonly List<ObjectGuid> EggList = new();
 
             public instance_blackwing_lair_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -370,6 +357,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair
                                           }
                                       });
             }
+        }
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.RazorgoreTheUntamed, 610), new(DataTypes.VaelastrazTheCorrupt, 611), new(DataTypes.BroodlordLashlayer, 612), new(DataTypes.Firemaw, 613), new(DataTypes.Ebonroc, 614), new(DataTypes.Flamegor, 615), new(DataTypes.Chromaggus, 616), new(DataTypes.Nefarian, 617)
+        };
+
+        public instance_blackwing_lair() : base(nameof(instance_blackwing_lair), 469)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_blackwing_lair_InstanceMapScript(map);
         }
     }
 }

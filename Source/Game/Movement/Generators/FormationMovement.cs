@@ -11,15 +11,15 @@ namespace Game.Movement
     {
         private static readonly uint FORMATION_MOVEMENT_INTERVAL = 1200; // sniffed (3 batch update cycles)
         private readonly AbstractFollower _abstractFollower;
+        private readonly TimeTracker _nextMoveTimer = new();
+        private readonly uint _point1;
+        private readonly uint _point2;
+        private readonly float _range;
         private float _angle;
         private bool _hasPredictedDestination;
 
         private Position _lastLeaderPosition;
         private uint _lastLeaderSplineID;
-        private readonly TimeTracker _nextMoveTimer = new();
-        private readonly uint _point1;
-        private readonly uint _point2;
-        private readonly float _range;
 
         public FormationMovementGenerator(Unit leader, float range, float angle, uint point1, uint point2)
         {
@@ -155,6 +155,33 @@ namespace Game.Movement
             return true;
         }
 
+        public override void DoDeactivate(Creature owner)
+        {
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.FollowFormationMove);
+        }
+
+        public override void DoFinalize(Creature owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+
+            if (active)
+                owner.ClearUnitState(UnitState.FollowFormationMove);
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
+                MovementInform(owner);
+        }
+
+        public override void UnitSpeedChanged()
+        {
+            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Formation;
+        }
+
         private void LaunchMovement(Creature owner, Unit target)
         {
             float relativeAngle = 0.0f;
@@ -215,33 +242,6 @@ namespace Game.Movement
             _lastLeaderPosition = new Position(target.GetPosition());
             owner.AddUnitState(UnitState.FollowFormationMove);
             RemoveFlag(MovementGeneratorFlags.Interrupted);
-        }
-
-        public override void DoDeactivate(Creature owner)
-        {
-            AddFlag(MovementGeneratorFlags.Deactivated);
-            owner.ClearUnitState(UnitState.FollowFormationMove);
-        }
-
-        public override void DoFinalize(Creature owner, bool active, bool movementInform)
-        {
-            AddFlag(MovementGeneratorFlags.Finalized);
-
-            if (active)
-                owner.ClearUnitState(UnitState.FollowFormationMove);
-
-            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
-                MovementInform(owner);
-        }
-
-        public override void UnitSpeedChanged()
-        {
-            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Formation;
         }
 
         private void MovementInform(Creature owner)

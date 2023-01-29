@@ -9,9 +9,9 @@ namespace Game.Movement
 {
     public class ConfusedMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
+        private readonly TimeTracker _timer;
         private PathGenerator _path;
         private Position _reference;
-        private readonly TimeTracker _timer;
 
         public ConfusedMovementGenerator()
         {

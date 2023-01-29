@@ -101,6 +101,39 @@ namespace Game.Networking.Packets
 
     internal class AuthResponse : ServerPacket
     {
+        public class AuthSuccessInfo
+        {
+            public struct GameTime
+            {
+                public uint BillingPlan;
+                public uint TimeRemain;
+                public uint Unknown735;
+                public bool InGameRoom;
+            }
+
+            public byte AccountExpansionLevel; // the current expansion of this account, the possible values are in @ref Expansions
+            public byte ActiveExpansionLevel;  // the current server expansion, the possible values are in @ref Expansions
+
+            public List<RaceClassAvailability> AvailableClasses; // the minimum AccountExpansion required to select the classes
+            public uint CurrencyID;                              // this is probably used for the ingame shop. @todo implement
+            public long? ExpansionTrialExpiration;               // expansion trial expiration unix timestamp
+            public bool ForceCharacterTemplate;                  // forces the client to always use a character template when creating a new character. @see Templates. @todo implement
+
+            public GameTime GameTimeInfo;
+
+            public bool IsExpansionTrial;
+            public ushort? NumPlayersAlliance;                // number of alliance players in this realm. @todo implement
+            public ushort? NumPlayersHorde;                   // number of horde players in this realm. @todo implement
+            public List<CharacterTemplate> Templates = new(); // list of pre-made character templates. @todo implement
+            public long Time;
+            public uint TimeRested;             // affects the return value of the GetBillingTimeRested() client API call, it is the number of seconds you have left until the experience points and loot you receive from creatures and quests is reduced. It is only used in the Asia region in retail, it's not implemented in TC and will probably never be.
+            public uint TimeSecondsUntilPCKick; // @todo research
+
+            public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region. @todo implement
+
+            public List<VirtualRealmInfo> VirtualRealms = new(); // list of realms connected to this one (inclusive) @todo implement
+        }
+
         public BattlenetRpcErrorCode Result; // the result of the authentication process, possible values are @ref BattlenetRpcErrorCode
 
         public AuthSuccessInfo SuccessInfo; // contains the packet _data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
@@ -197,39 +230,6 @@ namespace Game.Networking.Packets
             if (WaitInfo.HasValue)
                 WaitInfo.Value.Write(_worldPacket);
         }
-
-        public class AuthSuccessInfo
-        {
-            public byte AccountExpansionLevel; // the current expansion of this account, the possible values are in @ref Expansions
-            public byte ActiveExpansionLevel;  // the current server expansion, the possible values are in @ref Expansions
-
-            public List<RaceClassAvailability> AvailableClasses; // the minimum AccountExpansion required to select the classes
-            public uint CurrencyID;                              // this is probably used for the ingame shop. @todo implement
-            public long? ExpansionTrialExpiration;               // expansion trial expiration unix timestamp
-            public bool ForceCharacterTemplate;                  // forces the client to always use a character template when creating a new character. @see Templates. @todo implement
-
-            public GameTime GameTimeInfo;
-
-            public bool IsExpansionTrial;
-            public ushort? NumPlayersAlliance;                // number of alliance players in this realm. @todo implement
-            public ushort? NumPlayersHorde;                   // number of horde players in this realm. @todo implement
-            public List<CharacterTemplate> Templates = new(); // list of pre-made character templates. @todo implement
-            public long Time;
-            public uint TimeRested;             // affects the return value of the GetBillingTimeRested() client API call, it is the number of seconds you have left until the experience points and loot you receive from creatures and quests is reduced. It is only used in the Asia region in retail, it's not implemented in TC and will probably never be.
-            public uint TimeSecondsUntilPCKick; // @todo research
-
-            public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region. @todo implement
-
-            public List<VirtualRealmInfo> VirtualRealms = new(); // list of realms connected to this one (inclusive) @todo implement
-
-            public struct GameTime
-            {
-                public uint BillingPlan;
-                public uint TimeRemain;
-                public uint Unknown735;
-                public bool InGameRoom;
-            }
-        }
     }
 
     internal class WaitQueueUpdate : ServerPacket
@@ -259,6 +259,22 @@ namespace Game.Networking.Packets
 
     internal class ConnectTo : ServerPacket
     {
+        public class ConnectPayload
+        {
+            public ushort Port;
+            public byte[] Signature = new byte[256];
+            public SocketAddress Where;
+        }
+
+        public struct SocketAddress
+        {
+            public AddressType Type;
+
+            public byte[] IPv4;
+            public byte[] IPv6;
+            public string NameSocket;
+        }
+
         public enum AddressType
         {
             IPv4 = 1,
@@ -314,22 +330,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(Con);
             _worldPacket.WriteUInt64(Key);
         }
-
-        public class ConnectPayload
-        {
-            public ushort Port;
-            public byte[] Signature = new byte[256];
-            public SocketAddress Where;
-        }
-
-        public struct SocketAddress
-        {
-            public AddressType Type;
-
-            public byte[] IPv4;
-            public byte[] IPv6;
-            public string NameSocket;
-        }
     }
 
     internal class AuthContinuedSession : ClientPacket
@@ -366,9 +366,8 @@ namespace Game.Networking.Packets
 
     internal class ConnectToFailed : ClientPacket
     {
-        private byte Con;
-
         public ConnectToSerial Serial;
+        private byte Con;
 
         public ConnectToFailed(WorldPacket packet) : base(packet)
         {

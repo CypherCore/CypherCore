@@ -12,10 +12,11 @@ namespace Game.SupportSystem
 {
     public class SupportManager : Singleton<SupportManager>
     {
-        private bool _bugSystemStatus;
         private readonly Dictionary<uint, BugTicket> _bugTicketList = new();
-        private bool _complaintSystemStatus;
         private readonly Dictionary<uint, ComplaintTicket> _complaintTicketList = new();
+        private readonly Dictionary<uint, SuggestionTicket> _suggestionTicketList = new();
+        private bool _bugSystemStatus;
+        private bool _complaintSystemStatus;
         private uint _lastBugId;
         private ulong _lastChange;
         private uint _lastComplaintId;
@@ -24,7 +25,6 @@ namespace Game.SupportSystem
         private uint _openComplaintTicketCount;
         private uint _openSuggestionTicketCount;
         private bool _suggestionSystemStatus;
-        private readonly Dictionary<uint, SuggestionTicket> _suggestionTicketList = new();
 
         private bool _supportSystemStatus;
         private bool _ticketSystemStatus;
@@ -381,16 +381,6 @@ namespace Game.SupportSystem
             }
         }
 
-        private long GetAge(ulong t)
-        {
-            return (GameTime.GetGameTime() - (long)t) / Time.Day;
-        }
-
-        private IEnumerable<KeyValuePair<uint, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
-        {
-            return _complaintTicketList.Where(ticket => ticket.Value.GetPlayerGuid() == playerGuid);
-        }
-
         public bool GetSupportSystemStatus()
         {
             return _supportSystemStatus;
@@ -464,6 +454,16 @@ namespace Game.SupportSystem
         public uint GenerateSuggestionId()
         {
             return ++_lastSuggestionId;
+        }
+
+        private long GetAge(ulong t)
+        {
+            return (GameTime.GetGameTime() - (long)t) / Time.Day;
+        }
+
+        private IEnumerable<KeyValuePair<uint, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
+        {
+            return _complaintTicketList.Where(ticket => ticket.Value.GetPlayerGuid() == playerGuid);
         }
     }
 }

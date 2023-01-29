@@ -96,8 +96,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Magmus
     [Script]
     internal class npc_ironhand_guardian : ScriptedAI
     {
-        private bool _active;
         private readonly InstanceScript _instance;
+        private bool _active;
 
         public npc_ironhand_guardian(Creature creature) : base(creature)
         {

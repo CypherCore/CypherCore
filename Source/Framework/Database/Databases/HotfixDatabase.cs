@@ -5,7 +5,7 @@ namespace Framework.Database
 {
     public class HotfixDatabase : MySqlBase<HotfixStatements>
     {
-        public override void PreparedStatements()
+	    public override void PreparedStatements()
         {
             // Achievement.db2
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT,

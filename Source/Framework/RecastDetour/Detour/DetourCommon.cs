@@ -502,16 +502,6 @@ public static partial class Detour
         return true;
     }
 
-    /// Swaps the values of the two parameters.
-    /// @param[in,out]	a	Value A
-    /// @param[in,out]	b	Value B
-    private static void dtSwap<T>(ref T lhs, ref T rhs)
-    {
-        T temp = lhs;
-        lhs = rhs;
-        rhs = temp;
-    }
-
     /// Returns the square of the value.
     /// @param[in]		a	The value.
     /// @return The square of the value.
@@ -1138,5 +1128,15 @@ public static partial class Detour
     {
         for (int i = 0; i < array.Length; ++i)
             array[i] = new T();
+    }
+
+    /// Swaps the values of the two parameters.
+    /// @param[in,out]	a	Value A
+    /// @param[in,out]	b	Value B
+    private static void dtSwap<T>(ref T lhs, ref T rhs)
+    {
+        T temp = lhs;
+        lhs = rhs;
+        rhs = temp;
     }
 }

@@ -11,14 +11,14 @@ namespace Game.Movement
 {
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        private int _currentNode;
         private readonly bool _loadedFromDB;
 
         private readonly TimeTracker _nextMoveTime;
+        private readonly bool _repeating;
+        private int _currentNode;
 
         private WaypointPath _path;
         private uint _pathId;
-        private readonly bool _repeating;
 
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true)
         {
@@ -241,6 +241,21 @@ namespace Game.Movement
             }
         }
 
+        public override string GetDebugInfo()
+        {
+            return $"Current Node: {_currentNode}\n{base.GetDebugInfo()}";
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Waypoint;
+        }
+
+        public override void UnitSpeedChanged()
+        {
+            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
+        }
+
         private void MovementInform(Creature owner)
         {
             CreatureAI ai = owner.GetAI();
@@ -421,11 +436,6 @@ namespace Game.Movement
             return true;
         }
 
-        public override string GetDebugInfo()
-        {
-            return $"Current Node: {_currentNode}\n{base.GetDebugInfo()}";
-        }
-
         private bool UpdateTimer(uint diff)
         {
             _nextMoveTime.Update(diff);
@@ -438,16 +448,6 @@ namespace Game.Movement
             }
 
             return false;
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Waypoint;
-        }
-
-        public override void UnitSpeedChanged()
-        {
-            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
         }
     }
 }

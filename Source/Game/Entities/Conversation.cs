@@ -16,14 +16,36 @@ namespace Game.Entities
 {
     public class Conversation : WorldObject
     {
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly ConversationData ConversationMask = new();
+            private readonly ObjectFieldData ObjectMask = new();
+            private readonly Conversation Owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(Conversation owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ConversationMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
+
         private readonly ConversationData _conversationData;
-        private ObjectGuid _creatorGuid;
-        private TimeSpan _duration;
         private readonly TimeSpan[] _lastLineEndTimes = new TimeSpan[(int)Locale.Total];
 
         private readonly Dictionary<(Locale locale, uint lineId), TimeSpan> _lineStartTimes = new();
 
         private readonly Position _stationaryPosition = new();
+        private ObjectGuid _creatorGuid;
+        private TimeSpan _duration;
         private uint _textureKitId;
 
         public Conversation() : base(false)
@@ -102,6 +124,119 @@ namespace Game.Entities
                 return null;
 
             return conversation;
+        }
+
+        public void AddActor(int actorId, uint actorIdx, ObjectGuid actorGuid)
+        {
+            ConversationActorField actorField = Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
+            SetUpdateFieldValue(ref actorField.CreatureID, 0u);
+            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, 0u);
+            SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
+            SetUpdateFieldValue(ref actorField.Id, actorId);
+            SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObject);
+            SetUpdateFieldValue(ref actorField.NoActorObject, 0u);
+        }
+
+        public void AddActor(int actorId, uint actorIdx, ConversationActorType type, uint creatureId, uint creatureDisplayInfoId)
+        {
+            ConversationActorField actorField = Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
+            SetUpdateFieldValue(ref actorField.CreatureID, creatureId);
+            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, creatureDisplayInfoId);
+            SetUpdateFieldValue(ref actorField.ActorGUID, ObjectGuid.Empty);
+            SetUpdateFieldValue(ref actorField.Id, actorId);
+            SetUpdateFieldValue(ref actorField.Type, type);
+            SetUpdateFieldValue(ref actorField.NoActorObject, type == ConversationActorType.WorldObject ? 1 : 0u);
+        }
+
+        public TimeSpan GetLineStartTime(Locale locale, int lineId)
+        {
+            return _lineStartTimes.LookupByKey((locale, lineId));
+        }
+
+        public TimeSpan GetLastLineEndTime(Locale locale)
+        {
+            return _lastLineEndTimes[(int)locale];
+        }
+
+        public uint GetScriptId()
+        {
+            return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
+        }
+
+        public override void BuildValuesCreate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new();
+
+            ObjectData.WriteCreate(buffer, flags, this, target);
+            _conversationData.WriteCreate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteUInt8((byte)flags);
+            data.WriteBytes(buffer);
+        }
+
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new();
+
+            buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
+
+            if (Values.HasChanged(TypeId.Object))
+                ObjectData.WriteUpdate(buffer, flags, this, target);
+
+            if (Values.HasChanged(TypeId.Conversation))
+                _conversationData.WriteUpdate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
+
+        public override void ClearUpdateMask(bool remove)
+        {
+            Values.ClearChangesMask(_conversationData);
+            base.ClearUpdateMask(remove);
+        }
+
+        public uint GetTextureKitId()
+        {
+            return _textureKitId;
+        }
+
+        public ObjectGuid GetCreatorGuid()
+        {
+            return _creatorGuid;
+        }
+
+        public override ObjectGuid GetOwnerGUID()
+        {
+            return GetCreatorGuid();
+        }
+
+        public override uint GetFaction()
+        {
+            return 0;
+        }
+
+        public override float GetStationaryX()
+        {
+            return _stationaryPosition.GetPositionX();
+        }
+
+        public override float GetStationaryY()
+        {
+            return _stationaryPosition.GetPositionY();
+        }
+
+        public override float GetStationaryZ()
+        {
+            return _stationaryPosition.GetPositionZ();
+        }
+
+        public override float GetStationaryO()
+        {
+            return _stationaryPosition.GetOrientation();
         }
 
         private void Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
@@ -199,73 +334,6 @@ namespace Game.Entities
             return true;
         }
 
-        public void AddActor(int actorId, uint actorIdx, ObjectGuid actorGuid)
-        {
-            ConversationActorField actorField = Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
-            SetUpdateFieldValue(ref actorField.CreatureID, 0u);
-            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, 0u);
-            SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
-            SetUpdateFieldValue(ref actorField.Id, actorId);
-            SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObject);
-            SetUpdateFieldValue(ref actorField.NoActorObject, 0u);
-        }
-
-        public void AddActor(int actorId, uint actorIdx, ConversationActorType type, uint creatureId, uint creatureDisplayInfoId)
-        {
-            ConversationActorField actorField = Values.ModifyValue(_conversationData).ModifyValue(_conversationData.Actors, (int)actorIdx);
-            SetUpdateFieldValue(ref actorField.CreatureID, creatureId);
-            SetUpdateFieldValue(ref actorField.CreatureDisplayInfoID, creatureDisplayInfoId);
-            SetUpdateFieldValue(ref actorField.ActorGUID, ObjectGuid.Empty);
-            SetUpdateFieldValue(ref actorField.Id, actorId);
-            SetUpdateFieldValue(ref actorField.Type, type);
-            SetUpdateFieldValue(ref actorField.NoActorObject, type == ConversationActorType.WorldObject ? 1 : 0u);
-        }
-
-        public TimeSpan GetLineStartTime(Locale locale, int lineId)
-        {
-            return _lineStartTimes.LookupByKey((locale, lineId));
-        }
-
-        public TimeSpan GetLastLineEndTime(Locale locale)
-        {
-            return _lastLineEndTimes[(int)locale];
-        }
-
-        public uint GetScriptId()
-        {
-            return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
-        }
-
-        public override void BuildValuesCreate(WorldPacket data, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
-
-            ObjectData.WriteCreate(buffer, flags, this, target);
-            _conversationData.WriteCreate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteUInt8((byte)flags);
-            data.WriteBytes(buffer);
-        }
-
-        public override void BuildValuesUpdate(WorldPacket data, Player target)
-        {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
-
-            buffer.WriteUInt32(Values.GetChangedObjectTypeMask());
-
-            if (Values.HasChanged(TypeId.Object))
-                ObjectData.WriteUpdate(buffer, flags, this, target);
-
-            if (Values.HasChanged(TypeId.Conversation))
-                _conversationData.WriteUpdate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
-        }
-
         private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
         {
             UpdateMask valuesMask = new((int)TypeId.Max);
@@ -294,91 +362,23 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
-        {
-            Values.ClearChangesMask(_conversationData);
-            base.ClearUpdateMask(remove);
-        }
-
         private TimeSpan GetDuration()
         {
             return _duration;
-        }
-
-        public uint GetTextureKitId()
-        {
-            return _textureKitId;
-        }
-
-        public ObjectGuid GetCreatorGuid()
-        {
-            return _creatorGuid;
-        }
-
-        public override ObjectGuid GetOwnerGUID()
-        {
-            return GetCreatorGuid();
-        }
-
-        public override uint GetFaction()
-        {
-            return 0;
-        }
-
-        public override float GetStationaryX()
-        {
-            return _stationaryPosition.GetPositionX();
-        }
-
-        public override float GetStationaryY()
-        {
-            return _stationaryPosition.GetPositionY();
-        }
-
-        public override float GetStationaryZ()
-        {
-            return _stationaryPosition.GetPositionZ();
-        }
-
-        public override float GetStationaryO()
-        {
-            return _stationaryPosition.GetOrientation();
         }
 
         private void RelocateStationaryPosition(Position pos)
         {
             _stationaryPosition.Relocate(pos);
         }
-
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            private readonly ConversationData ConversationMask = new();
-            private readonly ObjectFieldData ObjectMask = new();
-            private readonly Conversation Owner;
-
-            public ValuesUpdateForPlayerWithMaskSender(Conversation owner)
-            {
-                Owner = owner;
-            }
-
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
-
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ConversationMask.GetUpdateMask(), player);
-
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
-        }
     }
 
     internal class ConversationActorFillVisitor
     {
-        private ConversationActorTemplate _actor;
         private readonly Conversation _conversation;
         private readonly Unit _creator;
         private readonly Map _map;
+        private ConversationActorTemplate _actor;
 
         public ConversationActorFillVisitor(Conversation conversation, Unit creator, Map map, ConversationActorTemplate actor)
         {

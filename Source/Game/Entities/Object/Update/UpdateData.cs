@@ -10,11 +10,11 @@ namespace Game.Entities
 {
     public class UpdateData
     {
-        private uint _blockCount;
         private readonly ByteBuffer _data = new();
         private readonly List<ObjectGuid> _destroyGUIDs = new();
-        private uint _mapId;
         private readonly List<ObjectGuid> _outOfRangeGUIDs = new();
+        private uint _blockCount;
+        private uint _mapId;
 
         public UpdateData(uint mapId)
         {

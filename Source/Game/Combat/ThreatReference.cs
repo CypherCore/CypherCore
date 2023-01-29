@@ -9,13 +9,10 @@ namespace Game.Combat
 {
     public class ThreatReference : IComparable<ThreatReference>
     {
-        private float _baseAmount;
-        public ThreatManager Mgr { get; set; }
         private readonly Creature _owner;
-        private TauntState _taunted;
         private readonly Unit _victim;
-        public OnlineState Online { get; set; }
-        public int TempModifier { get; set; } // Temporary effects (Auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
+        private float _baseAmount;
+        private TauntState _taunted;
 
         public ThreatReference(ThreatManager mgr, Unit victim)
         {
@@ -24,6 +21,10 @@ namespace Game.Combat
             _victim = victim;
             Online = OnlineState.Offline;
         }
+
+        public ThreatManager Mgr { get; set; }
+        public OnlineState Online { get; set; }
+        public int TempModifier { get; set; } // Temporary effects (Auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
 
         public int CompareTo(ThreatReference other)
         {

@@ -216,36 +216,6 @@ namespace Game.Networking.Packets
 
     public class TradeUpdated : ServerPacket
     {
-        public uint ClientStateIndex;
-        public int CurrencyQuantity;
-        public int CurrencyType;
-        public uint CurrentStateIndex;
-
-        public ulong Gold;
-        public uint Id;
-        public List<TradeItem> Items = new();
-        public int ProposedEnchantment;
-        public byte WhichPlayer;
-
-        public TradeUpdated() : base(ServerOpcodes.TradeUpdated, ConnectionType.Instance)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt8(WhichPlayer);
-            _worldPacket.WriteUInt32(Id);
-            _worldPacket.WriteUInt32(ClientStateIndex);
-            _worldPacket.WriteUInt32(CurrentStateIndex);
-            _worldPacket.WriteUInt64(Gold);
-            _worldPacket.WriteInt32(CurrencyType);
-            _worldPacket.WriteInt32(CurrencyQuantity);
-            _worldPacket.WriteInt32(ProposedEnchantment);
-            _worldPacket.WriteInt32(Items.Count);
-
-            Items.ForEach(item => item.Write(_worldPacket));
-        }
-
         public class UnwrappedTradeItem
         {
             public int Charges;
@@ -296,6 +266,36 @@ namespace Game.Networking.Packets
 
                 Unwrapped?.Write(data);
             }
+        }
+
+        public uint ClientStateIndex;
+        public int CurrencyQuantity;
+        public int CurrencyType;
+        public uint CurrentStateIndex;
+
+        public ulong Gold;
+        public uint Id;
+        public List<TradeItem> Items = new();
+        public int ProposedEnchantment;
+        public byte WhichPlayer;
+
+        public TradeUpdated() : base(ServerOpcodes.TradeUpdated, ConnectionType.Instance)
+        {
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(WhichPlayer);
+            _worldPacket.WriteUInt32(Id);
+            _worldPacket.WriteUInt32(ClientStateIndex);
+            _worldPacket.WriteUInt32(CurrentStateIndex);
+            _worldPacket.WriteUInt64(Gold);
+            _worldPacket.WriteInt32(CurrencyType);
+            _worldPacket.WriteInt32(CurrencyQuantity);
+            _worldPacket.WriteInt32(ProposedEnchantment);
+            _worldPacket.WriteInt32(Items.Count);
+
+            Items.ForEach(item => item.Write(_worldPacket));
         }
     }
 }

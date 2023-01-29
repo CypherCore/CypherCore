@@ -24,60 +24,33 @@ namespace Game.Networking.Packets
 
     public class EnumCharactersResult : ServerPacket
     {
-        public List<CharacterInfo> Characters = new(); // all characters on the list
-        public uint? DisabledClassesMask = new();
-        public bool IsAlliedRacesCreationAllowed;
-        public bool IsDeletedCharacters;           // used for character undelete list
-        public bool IsNewPlayer;                   // forbids hero classes and allied races
-        public bool IsNewPlayerRestricted;         // forbids using level boost and class trials
-        public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
-        public bool IsTrialAccountRestricted;
-
-        public int MaxCharacterLevel = 1;
-        public List<RaceLimitDisableInfo> RaceLimitDisables = new();
-        public List<RaceUnlock> RaceUnlockData = new(); //
-
-        public bool Success;
-        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
-
-        public EnumCharactersResult() : base(ServerOpcodes.EnumCharactersResult)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBit(Success);
-            _worldPacket.WriteBit(IsDeletedCharacters);
-            _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
-            _worldPacket.WriteBit(IsNewPlayerRestricted);
-            _worldPacket.WriteBit(IsNewPlayer);
-            _worldPacket.WriteBit(IsTrialAccountRestricted);
-            _worldPacket.WriteBit(DisabledClassesMask.HasValue);
-            _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
-            _worldPacket.WriteInt32(Characters.Count);
-            _worldPacket.WriteInt32(MaxCharacterLevel);
-            _worldPacket.WriteInt32(RaceUnlockData.Count);
-            _worldPacket.WriteInt32(UnlockedConditionalAppearances.Count);
-            _worldPacket.WriteInt32(RaceLimitDisables.Count);
-
-            if (DisabledClassesMask.HasValue)
-                _worldPacket.WriteUInt32(DisabledClassesMask.Value);
-
-            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
-                unlockedConditionalAppearance.Write(_worldPacket);
-
-            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
-                raceLimitDisableInfo.Write(_worldPacket);
-
-            foreach (CharacterInfo charInfo in Characters)
-                charInfo.Write(_worldPacket);
-
-            foreach (RaceUnlock raceUnlock in RaceUnlockData)
-                raceUnlock.Write(_worldPacket);
-        }
-
         public class CharacterInfo
         {
+            public struct VisualItemInfo
+            {
+                public void Write(WorldPacket data)
+                {
+                    data.WriteUInt32(DisplayId);
+                    data.WriteUInt32(DisplayEnchantId);
+                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
+                    data.WriteUInt8(InvType);
+                    data.WriteUInt8(Subclass);
+                }
+
+                public uint DisplayId;
+                public uint DisplayEnchantId;
+                public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value
+                public byte InvType;
+                public byte Subclass;
+            }
+
+            public struct PetInfo
+            {
+                public uint CreatureDisplayId; // PetCreatureDisplayID
+                public uint Level;             // PetExperienceLevel
+                public uint CreatureFamily;    // PetCreatureFamilyID
+            }
+
             public bool BoostInProgress; // @todo
             public Class ClassId;
             public Array<ChrCustomizationChoice> Customizations = new(72);
@@ -260,31 +233,6 @@ namespace Game.Networking.Packets
 
                 data.WriteString(Name);
             }
-
-            public struct VisualItemInfo
-            {
-                public void Write(WorldPacket data)
-                {
-                    data.WriteUInt32(DisplayId);
-                    data.WriteUInt32(DisplayEnchantId);
-                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
-                    data.WriteUInt8(InvType);
-                    data.WriteUInt8(Subclass);
-                }
-
-                public uint DisplayId;
-                public uint DisplayEnchantId;
-                public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value
-                public byte InvType;
-                public byte Subclass;
-            }
-
-            public struct PetInfo
-            {
-                public uint CreatureDisplayId; // PetCreatureDisplayID
-                public uint Level;             // PetExperienceLevel
-                public uint CreatureFamily;    // PetCreatureFamilyID
-            }
         }
 
         public struct RaceUnlock
@@ -332,6 +280,58 @@ namespace Game.Networking.Packets
                 data.WriteInt32(RaceID);
                 data.WriteInt32(BlockReason);
             }
+        }
+
+        public List<CharacterInfo> Characters = new(); // all characters on the list
+        public uint? DisabledClassesMask = new();
+        public bool IsAlliedRacesCreationAllowed;
+        public bool IsDeletedCharacters;           // used for character undelete list
+        public bool IsNewPlayer;                   // forbids hero classes and allied races
+        public bool IsNewPlayerRestricted;         // forbids using level boost and class trials
+        public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
+        public bool IsTrialAccountRestricted;
+
+        public int MaxCharacterLevel = 1;
+        public List<RaceLimitDisableInfo> RaceLimitDisables = new();
+        public List<RaceUnlock> RaceUnlockData = new(); //
+
+        public bool Success;
+        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
+
+        public EnumCharactersResult() : base(ServerOpcodes.EnumCharactersResult)
+        {
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(Success);
+            _worldPacket.WriteBit(IsDeletedCharacters);
+            _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
+            _worldPacket.WriteBit(IsNewPlayerRestricted);
+            _worldPacket.WriteBit(IsNewPlayer);
+            _worldPacket.WriteBit(IsTrialAccountRestricted);
+            _worldPacket.WriteBit(DisabledClassesMask.HasValue);
+            _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
+            _worldPacket.WriteInt32(Characters.Count);
+            _worldPacket.WriteInt32(MaxCharacterLevel);
+            _worldPacket.WriteInt32(RaceUnlockData.Count);
+            _worldPacket.WriteInt32(UnlockedConditionalAppearances.Count);
+            _worldPacket.WriteInt32(RaceLimitDisables.Count);
+
+            if (DisabledClassesMask.HasValue)
+                _worldPacket.WriteUInt32(DisabledClassesMask.Value);
+
+            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
+                unlockedConditionalAppearance.Write(_worldPacket);
+
+            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
+                raceLimitDisableInfo.Write(_worldPacket);
+
+            foreach (CharacterInfo charInfo in Characters)
+                charInfo.Write(_worldPacket);
+
+            foreach (RaceUnlock raceUnlock in RaceUnlockData)
+                raceUnlock.Write(_worldPacket);
         }
     }
 
@@ -557,6 +557,14 @@ namespace Game.Networking.Packets
 
     public class CharFactionChangeResult : ServerPacket
     {
+        public class CharFactionChangeDisplayInfo
+        {
+            public Array<ChrCustomizationChoice> Customizations = new(72);
+            public string Name;
+            public byte RaceID;
+            public byte SexID;
+        }
+
         public CharFactionChangeDisplayInfo Display;
         public ObjectGuid Guid;
 
@@ -587,14 +595,6 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
                 }
             }
-        }
-
-        public class CharFactionChangeDisplayInfo
-        {
-            public Array<ChrCustomizationChoice> Customizations = new(72);
-            public string Name;
-            public byte RaceID;
-            public byte SexID;
         }
     }
 
@@ -635,6 +635,12 @@ namespace Game.Networking.Packets
 
     public class ReorderCharacters : ClientPacket
     {
+        public struct ReorderInfo
+        {
+            public ObjectGuid PlayerGUID;
+            public byte NewPosition;
+        }
+
         public ReorderInfo[] Entries = new ReorderInfo[200];
 
         public ReorderCharacters(WorldPacket packet) : base(packet)
@@ -652,12 +658,6 @@ namespace Game.Networking.Packets
                 reorderInfo.NewPosition = _worldPacket.ReadUInt8();
                 Entries[i] = reorderInfo;
             }
-        }
-
-        public struct ReorderInfo
-        {
-            public ObjectGuid PlayerGUID;
-            public byte NewPosition;
         }
     }
 
@@ -1101,10 +1101,10 @@ namespace Game.Networking.Packets
 
     internal class CharCustomizeSuccess : ServerPacket
     {
-        private ObjectGuid CharGUID;
         private readonly string CharName = "";
         private readonly Array<ChrCustomizationChoice> Customizations = new(72);
         private readonly byte SexID;
+        private ObjectGuid CharGUID;
 
         public CharCustomizeSuccess(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomizeSuccess)
         {

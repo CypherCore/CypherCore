@@ -39,11 +39,6 @@ namespace Game.BlackMarket
             return (uint)(_secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate()));
         }
 
-        private long GetExpirationTime()
-        {
-            return GameTime.GetGameTime() + GetSecondsRemaining();
-        }
-
         public bool IsCompleted()
         {
             return GetSecondsRemaining() <= 0;
@@ -164,29 +159,14 @@ namespace Game.BlackMarket
             return _currentBid;
         }
 
-        private void SetCurrentBid(ulong bid)
-        {
-            _currentBid = bid;
-        }
-
         public uint GetNumBids()
         {
             return _numBids;
         }
 
-        private void SetNumBids(uint numBids)
-        {
-            _numBids = numBids;
-        }
-
         public ulong GetBidder()
         {
             return _bidder;
-        }
-
-        private void SetBidder(ulong bidder)
-        {
-            _bidder = bidder;
         }
 
         public ulong GetMinIncrement()
@@ -202,6 +182,26 @@ namespace Game.BlackMarket
         public bool GetMailSent()
         {
             return _mailSent;
+        }
+
+        private long GetExpirationTime()
+        {
+            return GameTime.GetGameTime() + GetSecondsRemaining();
+        }
+
+        private void SetCurrentBid(ulong bid)
+        {
+            _currentBid = bid;
+        }
+
+        private void SetNumBids(uint numBids)
+        {
+            _numBids = numBids;
+        }
+
+        private void SetBidder(ulong bidder)
+        {
+            _bidder = bidder;
         }
     }
 }

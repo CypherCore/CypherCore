@@ -4,8 +4,7 @@
 namespace Game.BattleGrounds.Zones.IsleofConquest
 {
     internal class IsleofConquest
-    {
-    }
+    {}
 
     public struct ICCreatures
     {

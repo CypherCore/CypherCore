@@ -129,74 +129,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             }
         }
 
-        private void SetupGroundPhase()
-        {
-            phase = NightbanePhases.Ground;
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(0),
-                                TimeSpan.FromSeconds(15),
-                                MiscConst.GroupGround,
-                                task =>
-                                {
-                                    DoCastVictim(SpellIds.Cleave);
-                                    task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(15));
-                                });
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(4),
-                                TimeSpan.FromSeconds(23),
-                                MiscConst.GroupGround,
-                                task =>
-                                {
-                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-
-                                    if (target)
-                                        if (!me.HasInArc(MathF.PI, target))
-                                            DoCast(target, SpellIds.TailSweep);
-
-                                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
-                                });
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(48), MiscConst.GroupGround, task => { DoCastAOE(SpellIds.BellowingRoar); });
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(12),
-                                TimeSpan.FromSeconds(18),
-                                MiscConst.GroupGround,
-                                task =>
-                                {
-                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-
-                                    if (target)
-                                        DoCast(target, SpellIds.CharredEarth);
-
-                                    task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(21));
-                                });
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(26),
-                                TimeSpan.FromSeconds(30),
-                                MiscConst.GroupGround,
-                                task =>
-                                {
-                                    DoCastVictim(SpellIds.SmolderingBreath);
-                                    task.Repeat(TimeSpan.FromSeconds(28), TimeSpan.FromSeconds(40));
-                                });
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(82),
-                                MiscConst.GroupGround,
-                                task =>
-                                {
-                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-
-                                    if (target)
-                                        DoCast(target, SpellIds.DistractingAsh);
-                                });
-        }
-
-        private void HandleTerraceDoors(bool open)
-        {
-            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
-            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
-        }
-
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
@@ -343,6 +275,83 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             }
         }
 
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() &&
+                phase != NightbanePhases.Intro)
+                return;
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void SetupGroundPhase()
+        {
+            phase = NightbanePhases.Ground;
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(0),
+                                TimeSpan.FromSeconds(15),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Cleave);
+                                    task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(15));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(4),
+                                TimeSpan.FromSeconds(23),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        if (!me.HasInArc(MathF.PI, target))
+                                            DoCast(target, SpellIds.TailSweep);
+
+                                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(48), MiscConst.GroupGround, task => { DoCastAOE(SpellIds.BellowingRoar); });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(12),
+                                TimeSpan.FromSeconds(18),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.CharredEarth);
+
+                                    task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(21));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(26),
+                                TimeSpan.FromSeconds(30),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.SmolderingBreath);
+                                    task.Repeat(TimeSpan.FromSeconds(28), TimeSpan.FromSeconds(40));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(82),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.DistractingAsh);
+                                });
+        }
+
+        private void HandleTerraceDoors(bool open)
+        {
+            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
+            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
+        }
+
         private void StartPhaseFly()
         {
             ++_flyCount;
@@ -361,15 +370,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             else
                 me.GetMotionMaster().MovePoint(PointIds.PhaseTwoFly, MiscConst.FlyPosition, true);
         }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim() &&
-                phase != NightbanePhases.Intro)
-                return;
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
     }
 
     [Script] // 37098 - Rain of Bones
@@ -382,15 +382,15 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             return ValidateSpellInfo(SpellIds.SummonSkeleton);
         }
 
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
+        }
+
         private void OnTrigger(AuraEffect aurEff)
         {
             if (aurEff.GetTickNumber() % 5 == 0)
                 GetTarget().CastSpell(GetTarget(), SpellIds.SummonSkeleton, true);
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
         }
     }
 

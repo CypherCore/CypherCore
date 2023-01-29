@@ -15,6 +15,17 @@ namespace Game
 {
     public partial class WorldSession
     {
+        public void SendCalendarRaidLockoutAdded(InstanceLock instanceLock)
+        {
+            CalendarRaidLockoutAdded calendarRaidLockoutAdded = new();
+            calendarRaidLockoutAdded.InstanceID = instanceLock.GetInstanceId();
+            calendarRaidLockoutAdded.ServerTime = (uint)GameTime.GetGameTime();
+            calendarRaidLockoutAdded.MapID = (int)instanceLock.GetMapId();
+            calendarRaidLockoutAdded.DifficultyID = instanceLock.GetDifficultyId();
+            calendarRaidLockoutAdded.TimeRemaining = (int)(instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds;
+            SendPacket(calendarRaidLockoutAdded);
+        }
+
         [WorldPacketHandler(ClientOpcodes.CalendarGet)]
         private void HandleCalendarGetCalendar(CalendarGetCalendar calendarGetCalendar)
         {
@@ -623,17 +634,6 @@ namespace Game
             calendarRaidLockoutUpdated.OldTimeRemaining = (int)Math.Max((expiryTimes.Item1 - GameTime.GetSystemTime()).TotalSeconds, 0);
             calendarRaidLockoutUpdated.NewTimeRemaining = (int)Math.Max((expiryTimes.Item2 - GameTime.GetSystemTime()).TotalSeconds, 0);
             SendPacket(calendarRaidLockoutUpdated);
-        }
-
-        public void SendCalendarRaidLockoutAdded(InstanceLock instanceLock)
-        {
-            CalendarRaidLockoutAdded calendarRaidLockoutAdded = new();
-            calendarRaidLockoutAdded.InstanceID = instanceLock.GetInstanceId();
-            calendarRaidLockoutAdded.ServerTime = (uint)GameTime.GetGameTime();
-            calendarRaidLockoutAdded.MapID = (int)instanceLock.GetMapId();
-            calendarRaidLockoutAdded.DifficultyID = instanceLock.GetDifficultyId();
-            calendarRaidLockoutAdded.TimeRemaining = (int)(instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds;
-            SendPacket(calendarRaidLockoutAdded);
         }
 
         private void SendCalendarRaidLockoutRemoved(InstanceLock instanceLock)

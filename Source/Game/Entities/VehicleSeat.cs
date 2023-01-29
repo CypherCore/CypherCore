@@ -8,9 +8,6 @@ namespace Game.Entities
     public class VehicleSeat
     {
         public PassengerInfo Passenger;
-        public VehicleSeatAddon SeatAddon { get; set; }
-
-        public VehicleSeatRecord SeatInfo { get; set; }
 
         public VehicleSeat(VehicleSeatRecord seatInfo, VehicleSeatAddon seatAddon)
         {
@@ -18,6 +15,10 @@ namespace Game.Entities
             SeatAddon = seatAddon;
             Passenger.Reset();
         }
+
+        public VehicleSeatAddon SeatAddon { get; set; }
+
+        public VehicleSeatRecord SeatInfo { get; set; }
 
         public bool IsEmpty()
         {

@@ -19,17 +19,17 @@ namespace Game.Chat
 
     public class ChatPacketSender : IDoWork<Player>
     {
+        public ChatPkt TranslatedPacket;
+
+        // caches
+        public ChatPkt UntranslatedPacket;
         private readonly uint AchievementId;
         private readonly Language Language;
         private readonly Locale Locale;
         private readonly WorldObject Receiver;
         private readonly WorldObject Sender;
         private readonly string Text;
-        public ChatPkt TranslatedPacket;
         private readonly ChatMsg Type;
-
-        // caches
-        public ChatPkt UntranslatedPacket;
 
         public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS)
         {

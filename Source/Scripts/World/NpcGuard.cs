@@ -64,36 +64,6 @@ namespace Scripts.World.NpcGuard
                                 });
         }
 
-        private void DoReplyToTextEmote(TextEmotes emote)
-        {
-            switch (emote)
-            {
-                case TextEmotes.Kiss:
-                    me.HandleEmoteCommand(Emote.OneshotBow);
-
-                    break;
-                case TextEmotes.Wave:
-                    me.HandleEmoteCommand(Emote.OneshotWave);
-
-                    break;
-                case TextEmotes.Salute:
-                    me.HandleEmoteCommand(Emote.OneshotSalute);
-
-                    break;
-                case TextEmotes.Shy:
-                    me.HandleEmoteCommand(Emote.OneshotFlex);
-
-                    break;
-                case TextEmotes.Rude:
-                case TextEmotes.Chicken:
-                    me.HandleEmoteCommand(Emote.OneshotPoint);
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public override void ReceiveEmote(Player player, TextEmotes textEmote)
         {
             switch (me.GetEntry())
@@ -191,6 +161,36 @@ namespace Scripts.World.NpcGuard
                 return;
 
             _combatScheduler.Update(diff);
+        }
+
+        private void DoReplyToTextEmote(TextEmotes emote)
+        {
+            switch (emote)
+            {
+                case TextEmotes.Kiss:
+                    me.HandleEmoteCommand(Emote.OneshotBow);
+
+                    break;
+                case TextEmotes.Wave:
+                    me.HandleEmoteCommand(Emote.OneshotWave);
+
+                    break;
+                case TextEmotes.Salute:
+                    me.HandleEmoteCommand(Emote.OneshotSalute);
+
+                    break;
+                case TextEmotes.Shy:
+                    me.HandleEmoteCommand(Emote.OneshotFlex);
+
+                    break;
+                case TextEmotes.Rude:
+                case TextEmotes.Chicken:
+                    me.HandleEmoteCommand(Emote.OneshotPoint);
+
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

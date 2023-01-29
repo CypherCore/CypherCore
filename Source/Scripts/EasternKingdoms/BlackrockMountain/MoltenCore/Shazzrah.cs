@@ -124,6 +124,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
             return ValidateSpellInfo(SpellIds.ShazzrahGate);
         }
 
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
         private void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Empty())
@@ -146,12 +152,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Shazzrah
                 if (creature)
                     creature.GetAI().AttackStart(target); // Attack the Target which caster will teleport to.
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

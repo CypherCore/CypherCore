@@ -96,17 +96,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 
     internal class instance_blackrock_depths : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_blackrock_depths() : base(nameof(instance_blackrock_depths), 230)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_blackrock_depths_InstanceMapScript(map);
-        }
-
         private class instance_blackrock_depths_InstanceMapScript : InstanceScript
         {
+            private readonly ObjectGuid[] TombBossGUIDs = new ObjectGuid[MiscConst.TombOfSevenBossNum];
             private uint BarAleCount;
             private ObjectGuid CorenGUID;
             private ObjectGuid EmperorGUID;
@@ -136,7 +128,6 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             private ObjectGuid MagmusGUID;
             private ObjectGuid MoiraGUID;
             private ObjectGuid PhalanxGUID;
-            private readonly ObjectGuid[] TombBossGUIDs = new ObjectGuid[MiscConst.TombOfSevenBossNum];
             private uint TombEventCounter;
             private ObjectGuid TombEventStarterGUID;
             private uint TombTimer;
@@ -432,6 +423,42 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 return ObjectGuid.Empty;
             }
 
+            public override void Update(uint diff)
+            {
+                if (!TombEventStarterGUID.IsEmpty() &&
+                    GhostKillCount < MiscConst.TombOfSevenBossNum)
+                {
+                    if (TombTimer <= diff)
+                    {
+                        TombTimer = MiscConst.TimerTombOfTheSeven;
+
+                        if (TombEventCounter < MiscConst.TombOfSevenBossNum)
+                        {
+                            TombOfSevenEvent();
+                            ++TombEventCounter;
+                        }
+
+                        // Check Killed bosses
+                        for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
+                        {
+                            Creature boss = instance.GetCreature(TombBossGUIDs[i]);
+
+                            if (boss)
+                                if (!boss.IsAlive())
+                                    GhostKillCount = i + 1u;
+                        }
+                    }
+                    else
+                    {
+                        TombTimer -= diff;
+                    }
+                }
+
+                if (GhostKillCount >= MiscConst.TombOfSevenBossNum &&
+                    !TombEventStarterGUID.IsEmpty())
+                    TombOfSevenEnd();
+            }
+
             private void TombOfSevenEvent()
             {
                 if (GhostKillCount < MiscConst.TombOfSevenBossNum &&
@@ -491,42 +518,15 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 TombEventStarterGUID.Clear();
                 SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.Done);
             }
+        }
 
-            public override void Update(uint diff)
-            {
-                if (!TombEventStarterGUID.IsEmpty() &&
-                    GhostKillCount < MiscConst.TombOfSevenBossNum)
-                {
-                    if (TombTimer <= diff)
-                    {
-                        TombTimer = MiscConst.TimerTombOfTheSeven;
+        public instance_blackrock_depths() : base(nameof(instance_blackrock_depths), 230)
+        {
+        }
 
-                        if (TombEventCounter < MiscConst.TombOfSevenBossNum)
-                        {
-                            TombOfSevenEvent();
-                            ++TombEventCounter;
-                        }
-
-                        // Check Killed bosses
-                        for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
-                        {
-                            Creature boss = instance.GetCreature(TombBossGUIDs[i]);
-
-                            if (boss)
-                                if (!boss.IsAlive())
-                                    GhostKillCount = i + 1u;
-                        }
-                    }
-                    else
-                    {
-                        TombTimer -= diff;
-                    }
-                }
-
-                if (GhostKillCount >= MiscConst.TombOfSevenBossNum &&
-                    !TombEventStarterGUID.IsEmpty())
-                    TombOfSevenEnd();
-            }
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_blackrock_depths_InstanceMapScript(map);
         }
     }
 }

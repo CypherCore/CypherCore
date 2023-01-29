@@ -15,11 +15,6 @@ namespace Game.Groups
             iSubGroup = 0;
         }
 
-        ~GroupReference()
-        {
-            Unlink();
-        }
-
         public override void TargetObjectBuildLink()
         {
             GetTarget().LinkMember(this);
@@ -38,6 +33,11 @@ namespace Game.Groups
         public void SetSubGroup(byte pSubGroup)
         {
             iSubGroup = pSubGroup;
+        }
+
+        ~GroupReference()
+        {
+            Unlink();
         }
     }
 

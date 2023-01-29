@@ -311,6 +311,7 @@ namespace Framework.Constants
             CascLocaleBit.enUS, CascLocaleBit.koKR, CascLocaleBit.frFR, CascLocaleBit.deDE, CascLocaleBit.zhCN, CascLocaleBit.zhTW, CascLocaleBit.esES, CascLocaleBit.esMX, CascLocaleBit.ruRU, CascLocaleBit.None, CascLocaleBit.ptBR, CascLocaleBit.itIT
         };
 
+
         //Todo move these else where
         /// <summary>
         ///  Method Const
@@ -413,6 +414,42 @@ namespace Framework.Constants
             return locale < Locale.Total && locale != Locale.None;
         }
 
+        public static long GetMaskForRace(Race raceId)
+        {
+            int raceBit = GetRaceBit(raceId);
+
+            return raceBit >= 0 && raceBit < sizeof(long) * 8 ? (1L << raceBit) : 0;
+        }
+
+        public static bool IsActivePetSlot(PetSaveMode slot)
+        {
+            return slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot;
+        }
+
+        public static bool IsStabledPetSlot(PetSaveMode slot)
+        {
+            return slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot;
+        }
+
+        public static LootType GetLootTypeForClient(LootType lootType)
+        {
+            switch (lootType)
+            {
+                case LootType.Prospecting:
+                case LootType.Milling:
+                    return LootType.Disenchanting;
+                case LootType.Insignia:
+                    return LootType.Skinning;
+                case LootType.Fishinghole:
+                case LootType.FishingJunk:
+                    return LootType.Fishing;
+                default:
+                    break;
+            }
+
+            return lootType;
+        }
+
         private static int GetRaceBit(Race raceId)
         {
             switch (raceId)
@@ -454,42 +491,6 @@ namespace Framework.Constants
                 default:
                     return -1;
             }
-        }
-
-        public static long GetMaskForRace(Race raceId)
-        {
-            int raceBit = GetRaceBit(raceId);
-
-            return raceBit >= 0 && raceBit < sizeof(long) * 8 ? (1L << raceBit) : 0;
-        }
-
-        public static bool IsActivePetSlot(PetSaveMode slot)
-        {
-            return slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot;
-        }
-
-        public static bool IsStabledPetSlot(PetSaveMode slot)
-        {
-            return slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot;
-        }
-
-        public static LootType GetLootTypeForClient(LootType lootType)
-        {
-            switch (lootType)
-            {
-                case LootType.Prospecting:
-                case LootType.Milling:
-                    return LootType.Disenchanting;
-                case LootType.Insignia:
-                    return LootType.Skinning;
-                case LootType.Fishinghole:
-                case LootType.FishingJunk:
-                    return LootType.Fishing;
-                default:
-                    break;
-            }
-
-            return lootType;
         }
     }
 

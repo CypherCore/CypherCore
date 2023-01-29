@@ -9,13 +9,14 @@ namespace Game.Entities
 {
     public class GameObjectData : SpawnData
     {
-        public uint Animprogress { get; set; }
-        public uint ArtKit { get; set; }
-        public GameObjectState GoState { get; set; }
         public Quaternion Rotation;
 
         public GameObjectData() : base(SpawnObjectType.GameObject)
         {
         }
+
+        public uint Animprogress { get; set; }
+        public uint ArtKit { get; set; }
+        public GameObjectState GoState { get; set; }
     }
 }

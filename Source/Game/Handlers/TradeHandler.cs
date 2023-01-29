@@ -21,16 +21,6 @@ namespace Game
             SendPacket(info);
         }
 
-        [WorldPacketHandler(ClientOpcodes.IgnoreTrade)]
-        private void HandleIgnoreTradeOpcode(IgnoreTrade packet)
-        {
-        }
-
-        [WorldPacketHandler(ClientOpcodes.BusyTrade)]
-        private void HandleBusyTradeOpcode(BusyTrade packet)
-        {
-        }
-
         public void SendUpdateTrade(bool trader_data = true)
         {
             TradeData view_trade = trader_data ? GetPlayer().GetTradeData().GetTraderData() : GetPlayer().GetTradeData();
@@ -88,6 +78,27 @@ namespace Game
             }
 
             SendPacket(tradeUpdated);
+        }
+
+        public void SendCancelTrade()
+        {
+            if (PlayerRecentlyLoggedOut() ||
+                PlayerLogout())
+                return;
+
+            TradeStatusPkt info = new();
+            info.Status = TradeStatus.Cancelled;
+            SendTradeStatus(info);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.IgnoreTrade)]
+        private void HandleIgnoreTradeOpcode(IgnoreTrade packet)
+        {
+        }
+
+        [WorldPacketHandler(ClientOpcodes.BusyTrade)]
+        private void HandleBusyTradeOpcode(BusyTrade packet)
+        {
         }
 
         private void MoveItems(Item[] myItems, Item[] hisItems)
@@ -587,17 +598,6 @@ namespace Game
 
             TradeStatusPkt info = new();
             my_trade.GetTrader().GetSession().SendTradeStatus(info);
-            SendTradeStatus(info);
-        }
-
-        public void SendCancelTrade()
-        {
-            if (PlayerRecentlyLoggedOut() ||
-                PlayerLogout())
-                return;
-
-            TradeStatusPkt info = new();
-            info.Status = TradeStatus.Cancelled;
             SendTradeStatus(info);
         }
 

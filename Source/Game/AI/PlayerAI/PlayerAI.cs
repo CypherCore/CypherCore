@@ -12,7 +12,7 @@ namespace Game.AI
 
     public class PlayerAI : UnitAI
     {
-        public enum SpellTarget
+	    public enum SpellTarget
         {
             None,
             Victim,
@@ -20,12 +20,13 @@ namespace Game.AI
             Self
         }
 
-        private readonly bool _isSelfHealer;
-        private bool _isSelfRangedAttacker;
-        private readonly uint _selfSpec;
-        protected new Player me;
+	    protected new Player me;
 
-        public PlayerAI(Player player) : base(player)
+	    private readonly bool _isSelfHealer;
+	    private readonly uint _selfSpec;
+	    private bool _isSelfRangedAttacker;
+
+	    public PlayerAI(Player player) : base(player)
         {
             me = player;
             _selfSpec = player.GetPrimarySpecialization();
@@ -33,7 +34,157 @@ namespace Game.AI
             _isSelfRangedAttacker = IsPlayerRangedAttacker(player);
         }
 
-        private bool IsPlayerHealer(Player who)
+	    public Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
+        {
+            Unit pTarget = null;
+
+            switch (target)
+            {
+                case SpellTarget.None:
+                    break;
+                case SpellTarget.Victim:
+                    pTarget = me.GetVictim();
+
+                    if (!pTarget)
+                        return null;
+
+                    break;
+                case SpellTarget.Charmer:
+                    pTarget = me.GetCharmer();
+
+                    if (!pTarget)
+                        return null;
+
+                    break;
+                case SpellTarget.Self:
+                    pTarget = me;
+
+                    break;
+            }
+
+            return VerifySpellCast(spellId, pTarget);
+        }
+
+	    public Tuple<Spell, Unit> SelectSpellCast(List<Tuple<Tuple<Spell, Unit>, uint>> spells)
+        {
+            if (spells.Empty())
+                return null;
+
+            uint totalWeights = 0;
+
+            foreach (var wSpell in spells)
+                totalWeights += wSpell.Item2;
+
+            Tuple<Spell, Unit> selected = null;
+            uint randNum = RandomHelper.URand(0, totalWeights - 1);
+
+            foreach (var wSpell in spells)
+            {
+                if (selected != null)
+                    //delete wSpell.first.first;
+                    continue;
+
+                if (randNum < wSpell.Item2)
+                    selected = wSpell.Item1;
+                else
+                    randNum -= wSpell.Item2;
+                //delete wSpell.first.first;
+            }
+
+            spells.Clear();
+
+            return selected;
+        }
+
+	    public void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
+        {
+            Tuple<Spell, Unit> spell = VerifySpellCast(spellId, target);
+
+            if (spell != null)
+                spells.Add(Tuple.Create(spell, weight));
+        }
+
+	    public void DoCastAtTarget(Tuple<Spell, Unit> spell)
+        {
+            SpellCastTargets targets = new();
+            targets.SetUnitTarget(spell.Item2);
+            spell.Item1.Prepare(targets);
+        }
+
+	    public void DoAutoAttackIfReady()
+        {
+            if (IsRangedAttacker())
+                DoRangedAttackIfReady();
+            else
+                DoMeleeAttackIfReady();
+        }
+
+	    public void CancelAllShapeshifts()
+        {
+            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
+            List<Aura> removableShapeshifts = new();
+
+            foreach (AuraEffect auraEff in shapeshiftAuras)
+            {
+                Aura aura = auraEff.GetBase();
+
+                if (aura == null)
+                    continue;
+
+                SpellInfo auraInfo = aura.GetSpellInfo();
+
+                if (auraInfo == null)
+                    continue;
+
+                if (auraInfo.HasAttribute(SpellAttr0.NoAuraCancel))
+                    continue;
+
+                if (!auraInfo.IsPositive() ||
+                    auraInfo.IsPassive())
+                    continue;
+
+                removableShapeshifts.Add(aura);
+            }
+
+            foreach (Aura aura in removableShapeshifts)
+                me.RemoveOwnedAura(aura, AuraRemoveMode.Cancel);
+        }
+
+	    public Creature GetCharmer()
+        {
+            if (me.GetCharmerGUID().IsCreature())
+                return ObjectAccessor.GetCreature(me, me.GetCharmerGUID());
+
+            return null;
+        }
+
+	    // helper functions to determine player info
+	    public bool IsHealer(Player who = null)
+        {
+            return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
+        }
+
+	    public bool IsRangedAttacker(Player who = null)
+        {
+            return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who);
+        }
+
+	    public uint GetSpec(Player who = null)
+        {
+            return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization();
+        }
+
+	    public void SetIsRangedAttacker(bool state)
+        {
+            _isSelfRangedAttacker = state;
+        } // this allows overriding of the default ranged Attacker detection
+
+	    public virtual Unit SelectAttackTarget()
+        {
+            return me.GetCharmer() ? me.GetCharmer().GetVictim() : null;
+        }
+
+	    private bool IsPlayerHealer(Player who)
         {
             if (!who)
                 return false;
@@ -49,7 +200,7 @@ namespace Game.AI
             };
         }
 
-        private bool IsPlayerRangedAttacker(Player who)
+	    private bool IsPlayerRangedAttacker(Player who)
         {
             if (!who)
                 return false;
@@ -87,7 +238,7 @@ namespace Game.AI
             }
         }
 
-        private Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
+	    private Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
         {
             // Find highest spell rank that we know
             uint knownRank, nextRank;
@@ -129,84 +280,7 @@ namespace Game.AI
             return null;
         }
 
-        public Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
-        {
-            Unit pTarget = null;
-
-            switch (target)
-            {
-                case SpellTarget.None:
-                    break;
-                case SpellTarget.Victim:
-                    pTarget = me.GetVictim();
-
-                    if (!pTarget)
-                        return null;
-
-                    break;
-                case SpellTarget.Charmer:
-                    pTarget = me.GetCharmer();
-
-                    if (!pTarget)
-                        return null;
-
-                    break;
-                case SpellTarget.Self:
-                    pTarget = me;
-
-                    break;
-            }
-
-            return VerifySpellCast(spellId, pTarget);
-        }
-
-        public Tuple<Spell, Unit> SelectSpellCast(List<Tuple<Tuple<Spell, Unit>, uint>> spells)
-        {
-            if (spells.Empty())
-                return null;
-
-            uint totalWeights = 0;
-
-            foreach (var wSpell in spells)
-                totalWeights += wSpell.Item2;
-
-            Tuple<Spell, Unit> selected = null;
-            uint randNum = RandomHelper.URand(0, totalWeights - 1);
-
-            foreach (var wSpell in spells)
-            {
-                if (selected != null)
-                    //delete wSpell.first.first;
-                    continue;
-
-                if (randNum < wSpell.Item2)
-                    selected = wSpell.Item1;
-                else
-                    randNum -= wSpell.Item2;
-                //delete wSpell.first.first;
-            }
-
-            spells.Clear();
-
-            return selected;
-        }
-
-        public void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
-        {
-            Tuple<Spell, Unit> spell = VerifySpellCast(spellId, target);
-
-            if (spell != null)
-                spells.Add(Tuple.Create(spell, weight));
-        }
-
-        public void DoCastAtTarget(Tuple<Spell, Unit> spell)
-        {
-            SpellCastTargets targets = new();
-            targets.SetUnitTarget(spell.Item2);
-            spell.Item1.Prepare(targets);
-        }
-
-        private void DoRangedAttackIfReady()
+	    private void DoRangedAttackIfReady()
         {
             if (me.HasUnitState(UnitState.Casting))
                 return;
@@ -262,98 +336,25 @@ namespace Game.AI
 
             me.ResetAttackTimer(WeaponAttackType.RangedAttack);
         }
-
-        public void DoAutoAttackIfReady()
-        {
-            if (IsRangedAttacker())
-                DoRangedAttackIfReady();
-            else
-                DoMeleeAttackIfReady();
-        }
-
-        public void CancelAllShapeshifts()
-        {
-            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
-            List<Aura> removableShapeshifts = new();
-
-            foreach (AuraEffect auraEff in shapeshiftAuras)
-            {
-                Aura aura = auraEff.GetBase();
-
-                if (aura == null)
-                    continue;
-
-                SpellInfo auraInfo = aura.GetSpellInfo();
-
-                if (auraInfo == null)
-                    continue;
-
-                if (auraInfo.HasAttribute(SpellAttr0.NoAuraCancel))
-                    continue;
-
-                if (!auraInfo.IsPositive() ||
-                    auraInfo.IsPassive())
-                    continue;
-
-                removableShapeshifts.Add(aura);
-            }
-
-            foreach (Aura aura in removableShapeshifts)
-                me.RemoveOwnedAura(aura, AuraRemoveMode.Cancel);
-        }
-
-        public Creature GetCharmer()
-        {
-            if (me.GetCharmerGUID().IsCreature())
-                return ObjectAccessor.GetCreature(me, me.GetCharmerGUID());
-
-            return null;
-        }
-
-        // helper functions to determine player info
-        public bool IsHealer(Player who = null)
-        {
-            return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
-        }
-
-        public bool IsRangedAttacker(Player who = null)
-        {
-            return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who);
-        }
-
-        public uint GetSpec(Player who = null)
-        {
-            return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization();
-        }
-
-        public void SetIsRangedAttacker(bool state)
-        {
-            _isSelfRangedAttacker = state;
-        } // this allows overriding of the default ranged Attacker detection
-
-        public virtual Unit SelectAttackTarget()
-        {
-            return me.GetCharmer() ? me.GetCharmer().GetVictim() : null;
-        }
     }
 
     internal class SimpleCharmedPlayerAI : PlayerAI
     {
-        private const float CASTER_CHASE_DISTANCE = 28.0f;
+	    private const float CASTER_CHASE_DISTANCE = 28.0f;
 
-        private uint _castCheckTimer;
-        private bool _chaseCloser;
-        private bool _forceFacing;
-        private bool _isFollowing;
+	    private uint _castCheckTimer;
+	    private bool _chaseCloser;
+	    private bool _forceFacing;
+	    private bool _isFollowing;
 
-        public SimpleCharmedPlayerAI(Player player) : base(player)
+	    public SimpleCharmedPlayerAI(Player player) : base(player)
         {
             _castCheckTimer = 2500;
             _chaseCloser = false;
             _forceFacing = true;
         }
 
-        public override bool CanAIAttack(Unit who)
+	    public override bool CanAIAttack(Unit who)
         {
             if (!me.IsValidAttackTarget(who) ||
                 who.HasBreakableByDamageCrowdControlAura())
@@ -368,7 +369,7 @@ namespace Game.AI
             return base.CanAIAttack(who);
         }
 
-        public override Unit SelectAttackTarget()
+	    public override Unit SelectAttackTarget()
         {
             Unit charmer = me.GetCharmer();
 
@@ -385,7 +386,159 @@ namespace Game.AI
             return null;
         }
 
-        private Tuple<Spell, Unit> SelectAppropriateCastForSpec()
+	    public override void UpdateAI(uint diff)
+        {
+            Creature charmer = GetCharmer();
+
+            if (!charmer)
+                return;
+
+            //kill self if charm aura has infinite duration
+            if (charmer.IsInEvadeMode())
+            {
+                var auras = me.GetAuraEffectsByType(AuraType.ModCharm);
+
+                foreach (var effect in auras)
+                    if (effect.GetCasterGUID() == charmer.GetGUID() &&
+                        effect.GetBase().IsPermanent())
+                    {
+                        me.KillSelf();
+
+                        return;
+                    }
+            }
+
+            if (charmer.IsEngaged())
+            {
+                Unit target = me.GetVictim();
+
+                if (!target ||
+                    !CanAIAttack(target))
+                {
+                    target = SelectAttackTarget();
+
+                    if (!target ||
+                        !CanAIAttack(target))
+                    {
+                        if (!_isFollowing)
+                        {
+                            _isFollowing = true;
+                            me.AttackStop();
+                            me.CastStop();
+
+                            if (me.HasUnitState(UnitState.Chase))
+                                me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+
+                            me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+                        }
+
+                        return;
+                    }
+
+                    _isFollowing = false;
+
+                    if (IsRangedAttacker())
+                    {
+                        _chaseCloser = !me.IsWithinLOSInMap(target);
+
+                        if (_chaseCloser)
+                            AttackStart(target);
+                        else
+                            AttackStartCaster(target, CASTER_CHASE_DISTANCE);
+                    }
+                    else
+                    {
+                        AttackStart(target);
+                    }
+
+                    _forceFacing = true;
+                }
+
+                if (me.IsStopped() &&
+                    !me.HasUnitState(UnitState.CannotTurn))
+                {
+                    float targetAngle = me.GetAbsoluteAngle(target);
+
+                    if (_forceFacing || Math.Abs(me.GetOrientation() - targetAngle) > 0.4f)
+                    {
+                        me.SetFacingTo(targetAngle);
+                        _forceFacing = false;
+                    }
+                }
+
+                if (_castCheckTimer <= diff)
+                {
+                    if (me.HasUnitState(UnitState.Casting))
+                    {
+                        _castCheckTimer = 0;
+                    }
+                    else
+                    {
+                        if (IsRangedAttacker()) // chase to zero if the Target isn't in line of sight
+                        {
+                            bool inLOS = me.IsWithinLOSInMap(target);
+
+                            if (_chaseCloser != !inLOS)
+                            {
+                                _chaseCloser = !inLOS;
+
+                                if (_chaseCloser)
+                                    AttackStart(target);
+                                else
+                                    AttackStartCaster(target, CASTER_CHASE_DISTANCE);
+                            }
+                        }
+
+                        Tuple<Spell, Unit> shouldCast = SelectAppropriateCastForSpec();
+
+                        if (shouldCast != null)
+                            DoCastAtTarget(shouldCast);
+
+                        _castCheckTimer = 500;
+                    }
+                }
+                else
+                {
+                    _castCheckTimer -= diff;
+                }
+
+                DoAutoAttackIfReady();
+            }
+            else if (!_isFollowing)
+            {
+                _isFollowing = true;
+                me.AttackStop();
+                me.CastStop();
+
+                if (me.HasUnitState(UnitState.Chase))
+                    me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
+
+                me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+            }
+        }
+
+	    public override void OnCharmed(bool isNew)
+        {
+            if (me.IsCharmed())
+            {
+                me.CastStop();
+                me.AttackStop();
+
+                if (me.GetMotionMaster().Size() <= 1)                           // if there is no current movement (we dont want to erase/overwrite any existing stuff)
+                    me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // Force re-sync of current position for all clients
+            }
+            else
+            {
+                me.CastStop();
+                me.AttackStop();
+
+                me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+            }
+
+            base.OnCharmed(isNew);
+        }
+
+	    private Tuple<Spell, Unit> SelectAppropriateCastForSpec()
         {
             List<Tuple<Tuple<Spell, Unit>, uint>> spells = new();
 
@@ -910,158 +1063,6 @@ namespace Game.AI
 			}
 			*/
             return SelectSpellCast(spells);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            Creature charmer = GetCharmer();
-
-            if (!charmer)
-                return;
-
-            //kill self if charm aura has infinite duration
-            if (charmer.IsInEvadeMode())
-            {
-                var auras = me.GetAuraEffectsByType(AuraType.ModCharm);
-
-                foreach (var effect in auras)
-                    if (effect.GetCasterGUID() == charmer.GetGUID() &&
-                        effect.GetBase().IsPermanent())
-                    {
-                        me.KillSelf();
-
-                        return;
-                    }
-            }
-
-            if (charmer.IsEngaged())
-            {
-                Unit target = me.GetVictim();
-
-                if (!target ||
-                    !CanAIAttack(target))
-                {
-                    target = SelectAttackTarget();
-
-                    if (!target ||
-                        !CanAIAttack(target))
-                    {
-                        if (!_isFollowing)
-                        {
-                            _isFollowing = true;
-                            me.AttackStop();
-                            me.CastStop();
-
-                            if (me.HasUnitState(UnitState.Chase))
-                                me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
-
-                            me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
-                        }
-
-                        return;
-                    }
-
-                    _isFollowing = false;
-
-                    if (IsRangedAttacker())
-                    {
-                        _chaseCloser = !me.IsWithinLOSInMap(target);
-
-                        if (_chaseCloser)
-                            AttackStart(target);
-                        else
-                            AttackStartCaster(target, CASTER_CHASE_DISTANCE);
-                    }
-                    else
-                    {
-                        AttackStart(target);
-                    }
-
-                    _forceFacing = true;
-                }
-
-                if (me.IsStopped() &&
-                    !me.HasUnitState(UnitState.CannotTurn))
-                {
-                    float targetAngle = me.GetAbsoluteAngle(target);
-
-                    if (_forceFacing || Math.Abs(me.GetOrientation() - targetAngle) > 0.4f)
-                    {
-                        me.SetFacingTo(targetAngle);
-                        _forceFacing = false;
-                    }
-                }
-
-                if (_castCheckTimer <= diff)
-                {
-                    if (me.HasUnitState(UnitState.Casting))
-                    {
-                        _castCheckTimer = 0;
-                    }
-                    else
-                    {
-                        if (IsRangedAttacker()) // chase to zero if the Target isn't in line of sight
-                        {
-                            bool inLOS = me.IsWithinLOSInMap(target);
-
-                            if (_chaseCloser != !inLOS)
-                            {
-                                _chaseCloser = !inLOS;
-
-                                if (_chaseCloser)
-                                    AttackStart(target);
-                                else
-                                    AttackStartCaster(target, CASTER_CHASE_DISTANCE);
-                            }
-                        }
-
-                        Tuple<Spell, Unit> shouldCast = SelectAppropriateCastForSpec();
-
-                        if (shouldCast != null)
-                            DoCastAtTarget(shouldCast);
-
-                        _castCheckTimer = 500;
-                    }
-                }
-                else
-                {
-                    _castCheckTimer -= diff;
-                }
-
-                DoAutoAttackIfReady();
-            }
-            else if (!_isFollowing)
-            {
-                _isFollowing = true;
-                me.AttackStop();
-                me.CastStop();
-
-                if (me.HasUnitState(UnitState.Chase))
-                    me.GetMotionMaster().Remove(MovementGeneratorType.Chase);
-
-                me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
-            }
-        }
-
-        public override void OnCharmed(bool isNew)
-        {
-            if (me.IsCharmed())
-            {
-                me.CastStop();
-                me.AttackStop();
-
-                if (me.GetMotionMaster().Size() <= 1)                           // if there is no current movement (we dont want to erase/overwrite any existing stuff)
-                    me.GetMotionMaster().MovePoint(0, me.GetPosition(), false); // Force re-sync of current position for all clients
-            }
-            else
-            {
-                me.CastStop();
-                me.AttackStop();
-
-                me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
-            }
-
-            base.OnCharmed(isNew);
         }
     }
 }

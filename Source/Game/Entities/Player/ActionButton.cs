@@ -7,7 +7,6 @@ namespace Game.Entities
 {
     public class ActionButton
     {
-        public ulong PackedData { get; set; }
         public ActionButtonUpdateState UState;
 
         public ActionButton()
@@ -15,6 +14,8 @@ namespace Game.Entities
             PackedData = 0;
             UState = ActionButtonUpdateState.New;
         }
+
+        public ulong PackedData { get; set; }
 
         public ActionButtonType GetButtonType()
         {

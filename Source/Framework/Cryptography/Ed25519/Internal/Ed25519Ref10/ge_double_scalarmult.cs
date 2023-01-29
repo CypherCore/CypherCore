@@ -2,44 +2,6 @@
 {
     internal static partial class GroupOperations
     {
-        private static void slide(sbyte[] r, byte[] a)
-        {
-            for (int i = 0; i < 256; ++i)
-                r[i] = (sbyte)(1 & (a[i >> 3] >> (i & 7)));
-
-            for (int i = 0; i < 256; ++i)
-                if (r[i] != 0)
-                    for (int b = 1; b <= 6 && (i + b) < 256; ++b)
-                        if (r[i + b] != 0)
-                        {
-                            if (r[i] + (r[i + b] << b) <= 15)
-                            {
-                                r[i] += (sbyte)(r[i + b] << b);
-                                r[i + b] = 0;
-                            }
-                            else if (r[i] - (r[i + b] << b) >= -15)
-                            {
-                                r[i] -= (sbyte)(r[i + b] << b);
-
-                                for (int k = i + b; k < 256; ++k)
-                                {
-                                    if (r[k] == 0)
-                                    {
-                                        r[k] = 1;
-
-                                        break;
-                                    }
-
-                                    r[k] = 0;
-                                }
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-        }
-
         /*
 		r = a * A + b * B
 		where a = a[0]+256*a[1]+...+256^31 a[31].
@@ -122,6 +84,44 @@
 
                 ge_p1p1_to_p2(out r, ref t);
             }
+        }
+
+        private static void slide(sbyte[] r, byte[] a)
+        {
+            for (int i = 0; i < 256; ++i)
+                r[i] = (sbyte)(1 & (a[i >> 3] >> (i & 7)));
+
+            for (int i = 0; i < 256; ++i)
+                if (r[i] != 0)
+                    for (int b = 1; b <= 6 && (i + b) < 256; ++b)
+                        if (r[i + b] != 0)
+                        {
+                            if (r[i] + (r[i + b] << b) <= 15)
+                            {
+                                r[i] += (sbyte)(r[i + b] << b);
+                                r[i + b] = 0;
+                            }
+                            else if (r[i] - (r[i + b] << b) >= -15)
+                            {
+                                r[i] -= (sbyte)(r[i + b] << b);
+
+                                for (int k = i + b; k < 256; ++k)
+                                {
+                                    if (r[k] == 0)
+                                    {
+                                        r[k] = 1;
+
+                                        break;
+                                    }
+
+                                    r[k] = 0;
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
         }
     }
 }

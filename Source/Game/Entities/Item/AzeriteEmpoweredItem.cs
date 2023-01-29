@@ -13,6 +13,29 @@ namespace Game.Entities
 {
     public class AzeriteEmpoweredItem : Item
     {
+        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            private readonly AzeriteEmpoweredItemData AzeriteEmpoweredItemMask = new();
+            private readonly ItemData ItemMask = new();
+            private readonly ObjectFieldData ObjectMask = new();
+            private readonly AzeriteEmpoweredItem Owner;
+
+            public ValuesUpdateForPlayerWithMaskSender(AzeriteEmpoweredItem owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), AzeriteEmpoweredItemMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
+
         private readonly AzeriteEmpoweredItemData _azeriteEmpoweredItemData;
         private List<AzeritePowerSetMemberRecord> _azeritePowers;
         private int _maxTier;
@@ -129,17 +152,6 @@ namespace Game.Entities
             _bonusData.AddBonusList(CliDB.AzeritePowerStorage.LookupByKey(azeritePowerId).ItemBonusListID);
         }
 
-        private void ClearSelectedAzeritePowers()
-        {
-            for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
-                SetUpdateFieldValue(ref Values.ModifyValue(_azeriteEmpoweredItemData).ModifyValue(_azeriteEmpoweredItemData.Selections, i), 0);
-
-            _bonusData = new BonusData(GetTemplate());
-
-            foreach (uint bonusListID in GetBonusListIDs())
-                _bonusData.AddBonusList(bonusListID);
-        }
-
         public long GetRespecCost()
         {
             Player owner = GetOwner();
@@ -183,6 +195,33 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
+        public override void ClearUpdateMask(bool remove)
+        {
+            Values.ClearChangesMask(_azeriteEmpoweredItemData);
+            base.ClearUpdateMask(remove);
+        }
+
+        public int GetMaxAzeritePowerTier()
+        {
+            return _maxTier;
+        }
+
+        public uint GetSelectedAzeritePower(int tier)
+        {
+            return (uint)_azeriteEmpoweredItemData.Selections[tier];
+        }
+
+        private void ClearSelectedAzeritePowers()
+        {
+            for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
+                SetUpdateFieldValue(ref Values.ModifyValue(_azeriteEmpoweredItemData).ModifyValue(_azeriteEmpoweredItemData.Selections, i), 0);
+
+            _bonusData = new BonusData(GetTemplate());
+
+            foreach (uint bonusListID in GetBonusListIDs())
+                _bonusData.AddBonusList(bonusListID);
+        }
+
         private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteEmpoweredItemMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
@@ -220,51 +259,12 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
-        {
-            Values.ClearChangesMask(_azeriteEmpoweredItemData);
-            base.ClearUpdateMask(remove);
-        }
-
         private void InitAzeritePowerData()
         {
             _azeritePowers = Global.DB2Mgr.GetAzeritePowers(GetEntry());
 
             if (_azeritePowers != null)
                 _maxTier = _azeritePowers.Aggregate((a1, a2) => a1.Tier < a2.Tier ? a2 : a1).Tier;
-        }
-
-        public int GetMaxAzeritePowerTier()
-        {
-            return _maxTier;
-        }
-
-        public uint GetSelectedAzeritePower(int tier)
-        {
-            return (uint)_azeriteEmpoweredItemData.Selections[tier];
-        }
-
-        private class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            private readonly AzeriteEmpoweredItemData AzeriteEmpoweredItemMask = new();
-            private readonly ItemData ItemMask = new();
-            private readonly ObjectFieldData ObjectMask = new();
-            private readonly AzeriteEmpoweredItem Owner;
-
-            public ValuesUpdateForPlayerWithMaskSender(AzeriteEmpoweredItem owner)
-            {
-                Owner = owner;
-            }
-
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
-
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), AzeriteEmpoweredItemMask.GetUpdateMask(), player);
-
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
         }
     }
 }

@@ -27,6 +27,20 @@ namespace Game.Scenarios
                 SendScenarioState(player);
         }
 
+        public override string GetOwnerInfo()
+        {
+            return $"Instance ID {_map.GetInstanceId()}";
+        }
+
+        public override void SendPacket(ServerPacket data)
+        {
+            //Hack  todo fix me
+            if (_map == null)
+                return;
+
+            _map.SendToPlayers(data);
+        }
+
         private void LoadInstanceData()
         {
             InstanceScript instanceScript = _map.GetInstanceScript();
@@ -105,20 +119,6 @@ namespace Game.Scenarios
                 if (IsCompletedCriteriaTree(tree))
                     SetStepState(step, ScenarioStepState.Done);
             }
-        }
-
-        public override string GetOwnerInfo()
-        {
-            return $"Instance ID {_map.GetInstanceId()}";
-        }
-
-        public override void SendPacket(ServerPacket data)
-        {
-            //Hack  todo fix me
-            if (_map == null)
-                return;
-
-            _map.SendToPlayers(data);
         }
     }
 }

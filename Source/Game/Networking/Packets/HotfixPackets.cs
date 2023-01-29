@@ -10,6 +10,16 @@ namespace Game.Networking.Packets
 {
     internal class DBQueryBulk : ClientPacket
     {
+        public struct DBQueryRecord
+        {
+            public DBQueryRecord(uint recordId)
+            {
+                RecordID = recordId;
+            }
+
+            public uint RecordID;
+        }
+
         public List<DBQueryRecord> Queries = new();
 
         public uint TableHash;
@@ -26,16 +36,6 @@ namespace Game.Networking.Packets
 
             for (uint i = 0; i < count; ++i)
                 Queries.Add(new DBQueryRecord(_worldPacket.ReadUInt32()));
-        }
-
-        public struct DBQueryRecord
-        {
-            public DBQueryRecord(uint recordId)
-            {
-                RecordID = recordId;
-            }
-
-            public uint RecordID;
         }
     }
 
@@ -109,6 +109,20 @@ namespace Game.Networking.Packets
 
     internal class HotfixConnect : ServerPacket
     {
+        public class HotfixData
+        {
+            public HotfixRecord Record = new();
+            public uint Size;
+
+            public void Write(WorldPacket data)
+            {
+                Record.Write(data);
+                data.WriteUInt32(Size);
+                data.WriteBits((byte)Record.HotfixStatus, 3);
+                data.FlushBits();
+            }
+        }
+
         public ByteBuffer HotfixContent = new();
 
         public List<HotfixData> Hotfixes = new();
@@ -126,20 +140,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteUInt32(HotfixContent.GetSize());
             _worldPacket.WriteBytes(HotfixContent);
-        }
-
-        public class HotfixData
-        {
-            public HotfixRecord Record = new();
-            public uint Size;
-
-            public void Write(WorldPacket data)
-            {
-                Record.Write(data);
-                data.WriteUInt32(Size);
-                data.WriteBits((byte)Record.HotfixStatus, 3);
-                data.FlushBits();
-            }
         }
     }
 }

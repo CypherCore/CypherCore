@@ -168,165 +168,10 @@ namespace Game.Maps
             obj.SetCurrentCell(null);
         }
 
-        private void SwitchGridContainers(WorldObject obj, bool on)
-        {
-            if (obj.IsPermanentWorldObject())
-                return;
-
-            CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
-
-            if (!p.IsCoordValid())
-            {
-                Log.outError(LogFilter.Maps,
-                             "Map.SwitchGridContainers: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]",
-                             obj.GetGUID(),
-                             obj.GetPositionX(),
-                             obj.GetPositionY(),
-                             p.X_coord,
-                             p.Y_coord);
-
-                return;
-            }
-
-            var cell = new Cell(p);
-
-            if (!IsGridLoaded(new GridCoord(cell.GetGridX(), cell.GetGridY())))
-                return;
-
-            Log.outDebug(LogFilter.Maps, "Switch object {0} from grid[{1}, {2}] {3}", obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), on);
-            Grid ngrid = GetGrid(cell.GetGridX(), cell.GetGridY());
-            Cypher.Assert(ngrid != null);
-
-            RemoveFromGrid(obj, cell);
-
-            GridCell gridCell = ngrid.GetGridCell(cell.GetCellX(), cell.GetCellY());
-
-            if (on)
-            {
-                gridCell.AddWorldObject(obj);
-                AddWorldObject(obj);
-            }
-            else
-            {
-                gridCell.AddGridObject(obj);
-                RemoveWorldObject(obj);
-            }
-
-            obj.SetCurrentCell(cell);
-            obj.ToCreature().IsTempWorldObject = on;
-        }
-
-        private void DeleteFromWorld(Player player)
-        {
-            Global.ObjAccessor.RemoveObject(player);
-            RemoveUpdateObject(player); // @todo I do not know why we need this, it should be removed in ~Object anyway
-            player.Dispose();
-        }
-
-        private void DeleteFromWorld(WorldObject obj)
-        {
-            obj.Dispose();
-        }
-
-        private void EnsureGridCreated(GridCoord p)
-        {
-            if (GetGrid(p.X_coord, p.Y_coord) == null)
-            {
-                Log.outDebug(LogFilter.Maps,
-                             "Creating grid[{0}, {1}] for map {2} instance {3}",
-                             p.X_coord,
-                             p.Y_coord,
-                             GetId(),
-                             i_InstanceId);
-
-                var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
-                grid.SetGridState(GridState.Idle);
-                SetGrid(grid, p.X_coord, p.Y_coord);
-
-                //z coord
-                int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
-                int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
-
-                _terrain.LoadMapAndVMap(gx, gy);
-            }
-        }
-
-        private void EnsureGridLoadedForActiveObject(Cell cell, WorldObject obj)
-        {
-            EnsureGridLoaded(cell);
-            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
-
-            if (obj.IsPlayer())
-                GetMultiPersonalPhaseTracker().LoadGrid(obj.GetPhaseShift(), grid, this, cell);
-
-            // refresh grid State & timer
-            if (grid.GetGridState() != GridState.Active)
-            {
-                Log.outDebug(LogFilter.Maps,
-                             "Active object {0} triggers loading of grid [{1}, {2}] on map {3}",
-                             obj.GetGUID(),
-                             cell.GetGridX(),
-                             cell.GetGridY(),
-                             GetId());
-
-                ResetGridExpiry(grid, 0.1f);
-                grid.SetGridState(GridState.Active);
-            }
-        }
-
-        private bool EnsureGridLoaded(Cell cell)
-        {
-            EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
-            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
-
-            if (!IsGridObjectDataLoaded(cell.GetGridX(), cell.GetGridY()))
-            {
-                Log.outDebug(LogFilter.Maps,
-                             "Loading grid[{0}, {1}] for map {2} instance {3}",
-                             cell.GetGridX(),
-                             cell.GetGridY(),
-                             GetId(),
-                             i_InstanceId);
-
-                SetGridObjectDataLoaded(true, cell.GetGridX(), cell.GetGridY());
-
-                LoadGridObjects(grid, cell);
-
-                Balance();
-
-                return true;
-            }
-
-            return false;
-        }
-
         public virtual void LoadGridObjects(Grid grid, Cell cell)
         {
             ObjectGridLoader loader = new(grid, this, cell);
             loader.LoadN();
-        }
-
-        private void GridMarkNoUnload(uint x, uint y)
-        {
-            // First make sure this grid is loaded
-            float gX = (((float)x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
-            float gY = (((float)y - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
-            Cell cell = new(gX, gY);
-            EnsureGridLoaded(cell);
-
-            // Mark as don't unload
-            var grid = GetGrid(x, y);
-            grid.SetUnloadExplicitLock(true);
-        }
-
-        private void GridUnmarkNoUnload(uint x, uint y)
-        {
-            // If grid is loaded, clear unload lock
-            if (IsGridLoaded(new GridCoord(x, y)))
-            {
-                var grid = GetGrid(x, y);
-                grid.SetUnloadExplicitLock(false);
-            }
         }
 
         public void LoadGrid(float x, float y)
@@ -438,15 +283,6 @@ namespace Game.Maps
 
                 player.SendPacket(updateWorldState);
             }
-        }
-
-        private void InitializeObject(WorldObject obj)
-        {
-            if (!obj.IsTypeId(TypeId.Unit) ||
-                !obj.IsTypeId(TypeId.GameObject))
-                return;
-
-            obj.MoveState = ObjectCellMoveState.None;
         }
 
         public bool AddToMap(WorldObject obj)
@@ -562,36 +398,6 @@ namespace Game.Maps
         public bool IsGridLoaded(GridCoord p)
         {
             return (GetGrid(p.X_coord, p.Y_coord) != null && IsGridObjectDataLoaded(p.X_coord, p.Y_coord));
-        }
-
-        private void VisitNearbyCellsOf(WorldObject obj, Visitor gridVisitor, Visitor worldVisitor)
-        {
-            // Check for valid position
-            if (!obj.IsPositionValid())
-                return;
-
-            // Update mobs/objects in ALL visible cells around object!
-            CellArea area = Cell.CalculateCellArea(obj.GetPositionX(), obj.GetPositionY(), obj.GetGridActivationRange());
-
-            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
-            {
-                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
-                {
-                    // marked cells are those that have been visited
-                    // don't visit the same cell twice
-                    uint cell_id = (y * MapConst.TotalCellsPerMap) + x;
-
-                    if (IsCellMarked(cell_id))
-                        continue;
-
-                    MarkCell(cell_id);
-                    var pair = new CellCoord(x, y);
-                    var cell = new Cell(pair);
-                    cell.SetNoCreate();
-                    Visit(cell, gridVisitor);
-                    Visit(cell, worldVisitor);
-                }
-            }
         }
 
         public void UpdatePlayerZoneStats(uint oldZone, uint newZone)
@@ -781,104 +587,6 @@ namespace Game.Maps
             OnMapUpdate(this, diff);
         }
 
-        private void ProcessRelocationNotifies(uint diff)
-        {
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
-            {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
-                {
-                    Grid grid = GetGrid(x, y);
-
-                    if (grid == null)
-                        continue;
-
-                    if (grid.GetGridState() != GridState.Active)
-                        continue;
-
-                    grid.GetGridInfoRef().GetRelocationTimer().TUpdate((int)diff);
-
-                    if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
-                        continue;
-
-                    uint gx = grid.GetX();
-                    uint gy = grid.GetY();
-
-                    var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
-                    var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells, cell_min.Y_coord + MapConst.MaxCells);
-
-                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
-                    {
-                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
-                        {
-                            uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
-
-                            if (!IsCellMarked(cell_id))
-                                continue;
-
-                            var pair = new CellCoord(xx, yy);
-                            var cell = new Cell(pair);
-                            cell.SetNoCreate();
-
-                            var cell_relocation = new DelayedUnitRelocation(cell, pair, this, SharedConst.MaxVisibilityDistance);
-                            var grid_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllGrid);
-                            var world_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllWorld);
-
-                            Visit(cell, grid_object_relocation);
-                            Visit(cell, world_object_relocation);
-                        }
-                    }
-                }
-            }
-
-            var reset = new ResetNotifier();
-            var grid_notifier = new Visitor(reset, GridMapTypeMask.AllGrid);
-            var world_notifier = new Visitor(reset, GridMapTypeMask.AllWorld);
-
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
-            {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
-                {
-                    Grid grid = GetGrid(x, y);
-
-                    if (grid == null)
-                        continue;
-
-                    if (grid.GetGridState() != GridState.Active)
-                        continue;
-
-                    if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
-                        continue;
-
-                    grid.GetGridInfoRef().GetRelocationTimer().TReset((int)diff, _VisibilityNotifyPeriod);
-
-                    uint gx = grid.GetX();
-                    uint gy = grid.GetY();
-
-                    var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
-
-                    var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
-                                                 cell_min.Y_coord + MapConst.MaxCells);
-
-                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
-                    {
-                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
-                        {
-                            uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
-
-                            if (!IsCellMarked(cell_id))
-                                continue;
-
-                            var pair = new CellCoord(xx, yy);
-                            var cell = new Cell(pair);
-                            cell.SetNoCreate();
-                            Visit(cell, grid_notifier);
-                            Visit(cell, world_notifier);
-                        }
-                    }
-                }
-            }
-        }
-
         public virtual void RemovePlayerFromMap(Player player, bool remove)
         {
             // Before leaving map, update zone/area for Stats
@@ -961,22 +669,6 @@ namespace Game.Maps
 
             if (remove)
                 DeleteFromWorld(obj);
-        }
-
-        private bool CheckGridIntegrity<T>(T obj, bool moved) where T : WorldObject
-        {
-            Cell cur_cell = obj.GetCurrentCell();
-            Cell xy_cell = new(obj.GetPositionX(), obj.GetPositionY());
-
-            if (xy_cell != cur_cell)
-            {
-                //$"grid[{GetGridX()}, {GetGridY()}]cell[{GetCellX()}, {GetCellY()}]";
-                Log.outDebug(LogFilter.Maps, $"{obj.GetTypeId()} ({obj.GetGUID()}) X: {obj.GetPositionX()} Y: {obj.GetPositionY()} ({(moved ? "final" : "original")}) is in {cur_cell} instead of {xy_cell}");
-
-                return true; // not crash at error, just output error in debug mode
-            }
-
-            return true;
         }
 
         public void PlayerRelocation(Player player, float x, float y, float z, float orientation)
@@ -1160,6 +852,2344 @@ namespace Game.Maps
             }
 
             Cypher.Assert(CheckGridIntegrity(at, true));
+        }
+
+        public bool CreatureRespawnRelocation(Creature c, bool diffGridOnly)
+        {
+            var pos = c.GetRespawnPosition();
+            var resp_cell = new Cell(pos.X, pos.Y);
+
+            //creature will be unloaded with grid
+            if (diffGridOnly && !c.GetCurrentCell().DiffGrid(resp_cell))
+                return true;
+
+            c.CombatStop();
+            c.GetMotionMaster().Clear();
+
+            // teleport it to respawn point (like normal respawn if player see)
+            if (CreatureCellRelocation(c, resp_cell))
+            {
+                c.Relocate(pos.X, pos.Y, pos.Z, pos.Orientation);
+                c.GetMotionMaster().Initialize(); // prevent possible problems with default move generators
+                c.UpdatePositionData();
+                c.UpdateObjectVisibility(false);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool GameObjectRespawnRelocation(GameObject go, bool diffGridOnly)
+        {
+            float resp_x, resp_y, resp_z, resp_o;
+            go.GetRespawnPosition(out resp_x, out resp_y, out resp_z, out resp_o);
+            var resp_cell = new Cell(resp_x, resp_y);
+
+            //GameObject will be unloaded with grid
+            if (diffGridOnly && !go.GetCurrentCell().DiffGrid(resp_cell))
+                return true;
+
+            Log.outDebug(LogFilter.Maps,
+                         "GameObject (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to respawn grid[{4}, {5}].",
+                         go.GetGUID().ToString(),
+                         go.GetEntry(),
+                         go.GetCurrentCell().GetGridX(),
+                         go.GetCurrentCell().GetGridY(),
+                         resp_cell.GetGridX(),
+                         resp_cell.GetGridY());
+
+            // teleport it to respawn point (like normal respawn if player see)
+            if (GameObjectCellRelocation(go, resp_cell))
+            {
+                go.Relocate(resp_x, resp_y, resp_z, resp_o);
+                go.UpdatePositionData();
+                go.UpdateObjectVisibility(false);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool UnloadGrid(Grid grid, bool unloadAll)
+        {
+            uint x = grid.GetX();
+            uint y = grid.GetY();
+
+            if (!unloadAll)
+            {
+                //pets, possessed creatures (must be active), Transport passengers
+                if (grid.GetWorldObjectCountInNGrid<Creature>() != 0)
+                    return false;
+
+                if (ActiveObjectsNearGrid(grid))
+                    return false;
+            }
+
+            Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2}", x, y, GetId());
+
+            if (!unloadAll)
+            {
+                // Finish creature moves, remove and delete all creatures with delayed remove before moving to respawn grids
+                // Must know real mob position before move
+                MoveAllCreaturesInMoveList();
+                MoveAllGameObjectsInMoveList();
+                MoveAllAreaTriggersInMoveList();
+
+                // move creatures to respawn grids if this is diff.grid or to remove list
+                ObjectGridEvacuator worker = new();
+                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
+                grid.VisitAllGrids(visitor);
+
+                // Finish creature moves, remove and delete all creatures with delayed remove before unload
+                MoveAllCreaturesInMoveList();
+                MoveAllGameObjectsInMoveList();
+                MoveAllAreaTriggersInMoveList();
+            }
+
+            {
+                ObjectGridCleaner worker = new();
+                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
+                grid.VisitAllGrids(visitor);
+            }
+
+            RemoveAllObjectsInRemoveList();
+
+            // After removing all objects from the map, purge empty tracked phases
+            GetMultiPersonalPhaseTracker().UnloadGrid(grid);
+
+            {
+                ObjectGridUnloader worker = new();
+                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
+                grid.VisitAllGrids(visitor);
+            }
+
+            Cypher.Assert(i_objectsToRemove.Empty());
+            SetGrid(null, x, y);
+
+            int gx = (int)((MapConst.MaxGrids - 1) - x);
+            int gy = (int)((MapConst.MaxGrids - 1) - y);
+
+            _terrain.UnloadMap(gx, gy);
+
+            Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
+
+            return true;
+        }
+
+        public virtual void RemoveAllPlayers()
+        {
+            if (HavePlayers())
+                foreach (Player pl in _activePlayers)
+                    if (!pl.IsBeingTeleportedFar())
+                    {
+                        // this is happening for bg
+                        Log.outError(LogFilter.Maps, $"Map.UnloadAll: player {pl.GetName()} is still in map {GetId()} during unload, this should not happen!");
+                        pl.TeleportTo(pl.GetHomebind());
+                    }
+        }
+
+        public void UnloadAll()
+        {
+            // clear all delayed moves, useless anyway do this moves before map unload.
+            creaturesToMove.Clear();
+            _gameObjectsToMove.Clear();
+
+            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            {
+                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                {
+                    var grid = GetGrid(x, y);
+
+                    if (grid == null)
+                        continue;
+
+                    UnloadGrid(grid, true); // deletes the grid and removes it from the GridRefManager
+                }
+            }
+
+            for (var i = 0; i < _transports.Count; ++i)
+                RemoveFromMap(_transports[i], true);
+
+            _transports.Clear();
+
+            foreach (var corpse in _corpsesByCell.Values.ToList())
+            {
+                corpse.RemoveFromWorld();
+                corpse.ResetMap();
+                corpse.Dispose();
+            }
+
+            _corpsesByCell.Clear();
+            _corpsesByPlayer.Clear();
+            _corpseBones.Clear();
+        }
+
+        public static bool IsInWMOInterior(uint mogpFlags)
+        {
+            return (mogpFlags & 0x2000) != 0;
+        }
+
+        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
+        {
+            _terrain.GetFullTerrainStatusForPosition(phaseShift, GetId(), x, y, z, data, reqLiquidType, collisionHeight, _dynamicTree);
+        }
+
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
+        {
+            return _terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, null, collisionHeight);
+        }
+
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
+        {
+            return _terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, data, collisionHeight);
+        }
+
+        public uint GetAreaId(PhaseShift phaseShift, Position pos)
+        {
+            return _terrain.GetAreaId(phaseShift, GetId(), pos.X, pos.Y, pos.Z, _dynamicTree);
+        }
+
+        public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
+        {
+            return _terrain.GetAreaId(phaseShift, GetId(), x, y, z, _dynamicTree);
+        }
+
+        public uint GetZoneId(PhaseShift phaseShift, Position pos)
+        {
+            return _terrain.GetZoneId(phaseShift, GetId(), pos.X, pos.Y, pos.Z, _dynamicTree);
+        }
+
+        public uint GetZoneId(PhaseShift phaseShift, float x, float y, float z)
+        {
+            return _terrain.GetZoneId(phaseShift, GetId(), x, y, z, _dynamicTree);
+        }
+
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos)
+        {
+            _terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, pos.X, pos.Y, pos.Z, _dynamicTree);
+        }
+
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, float x, float y, float z)
+        {
+            _terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, x, y, z, _dynamicTree);
+        }
+
+        public float GetHeight(PhaseShift phaseShift, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
+        {
+            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), GetGameObjectFloor(phaseShift, x, y, z, maxSearchDist));
+        }
+
+        public float GetHeight(PhaseShift phaseShift, Position pos, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
+        {
+            return GetHeight(phaseShift, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist);
+        }
+
+        public float GetMinHeight(PhaseShift phaseShift, float x, float y)
+        {
+            return _terrain.GetMinHeight(phaseShift, GetId(), x, y);
+        }
+
+        public float GetGridHeight(PhaseShift phaseShift, float x, float y)
+        {
+            return _terrain.GetGridHeight(phaseShift, GetId(), x, y);
+        }
+
+        public float GetStaticHeight(PhaseShift phaseShift, float x, float y, float z, bool checkVMap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
+        {
+            return _terrain.GetStaticHeight(phaseShift, GetId(), x, y, z, checkVMap, maxSearchDist);
+        }
+
+        public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
+        {
+            return _terrain.GetWaterLevel(phaseShift, GetId(), x, y);
+        }
+
+        public bool IsInWater(PhaseShift phaseShift, float x, float y, float z, LiquidData data)
+        {
+            return _terrain.IsInWater(phaseShift, GetId(), x, y, z, data);
+        }
+
+        public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
+        {
+            return _terrain.IsUnderWater(phaseShift, GetId(), x, y, z);
+        }
+
+        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, float collisionHeight = MapConst.DefaultCollesionHeight)
+        {
+            float ground = 0;
+
+            return _terrain.GetWaterOrGroundLevel(phaseShift, GetId(), x, y, z, ref ground, false, collisionHeight, _dynamicTree);
+        }
+
+        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false, float collisionHeight = MapConst.DefaultCollesionHeight)
+        {
+            return _terrain.GetWaterOrGroundLevel(phaseShift, GetId(), x, y, z, ref ground, swim, collisionHeight, _dynamicTree);
+        }
+
+        public bool IsInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, LineOfSightChecks checks, ModelIgnoreFlags ignoreFlags)
+        {
+            if (checks.HasAnyFlag(LineOfSightChecks.Vmap) &&
+                !Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, GetId(), _terrain, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags))
+                return false;
+
+            if (WorldConfig.GetBoolValue(WorldCfg.CheckGobjectLos) &&
+                checks.HasAnyFlag(LineOfSightChecks.Gobject) &&
+                !_dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift))
+                return false;
+
+            return true;
+        }
+
+        public bool GetObjectHitPos(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
+        {
+            var startPos = new Vector3(x1, y1, z1);
+            var dstPos = new Vector3(x2, y2, z2);
+
+            var resultPos = new Vector3();
+            bool result = _dynamicTree.GetObjectHitPos(startPos, dstPos, ref resultPos, modifyDist, phaseShift);
+
+            rx = resultPos.X;
+            ry = resultPos.Y;
+            rz = resultPos.Z;
+
+            return result;
+        }
+
+        public static TransferAbortParams PlayerCannotEnter(uint mapid, Player player)
+        {
+            var entry = CliDB.MapStorage.LookupByKey(mapid);
+
+            if (entry == null)
+                return new TransferAbortParams(TransferAbortReason.MapNotAllowed);
+
+            if (!entry.IsDungeon())
+                return null;
+
+            Difficulty targetDifficulty = player.GetDifficultyID(entry);
+            // Get the highest available difficulty if current setting is higher than the instance allows
+            var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref targetDifficulty);
+
+            if (mapDiff == null)
+                return new TransferAbortParams(TransferAbortReason.Difficulty);
+
+            //Bypass checks for GMs
+            if (player.IsGameMaster())
+                return null;
+
+            //Other requirements
+            {
+                TransferAbortParams abortParams = new();
+
+                if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, abortParams, true))
+                    return abortParams;
+            }
+
+            Group group = player.GetGroup();
+
+            if (entry.IsRaid() &&
+                (int)entry.Expansion() >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
+                if ((!group || !group.IsRaidGroup()) &&
+                    !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
+                    return new TransferAbortParams(TransferAbortReason.NeedGroup);
+
+            if (entry.Instanceable())
+            {
+                //Get instance where player's group is bound & its map
+                uint instanceIdToCheck = Global.MapMgr.FindInstanceIdForPlayer(mapid, player);
+                Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
+
+                if (boundMap != null)
+                {
+                    TransferAbortParams denyReason = boundMap.CannotEnter(player);
+
+                    if (denyReason != null)
+                        return denyReason;
+                }
+
+                // players are only allowed to enter 10 instances per hour
+                if (!entry.GetFlags2().HasFlag(MapFlags2.IgnoreInstanceFarmLimit) &&
+                    entry.IsDungeon() &&
+                    !player.CheckInstanceCount(instanceIdToCheck) &&
+                    !player.IsDead())
+                    return new TransferAbortParams(TransferAbortReason.TooManyInstances);
+            }
+
+            return null;
+        }
+
+        public string GetMapName()
+        {
+            return i_mapRecord.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
+        }
+
+        public void SendInitSelf(Player player)
+        {
+            var data = new UpdateData(player.GetMapId());
+
+            // attach to player _data current Transport _data
+            Transport transport = player.GetTransport<Transport>();
+
+            if (transport != null)
+            {
+                transport.BuildCreateUpdateBlockForPlayer(data, player);
+                player.VisibleTransports.Add(transport.GetGUID());
+            }
+
+            player.BuildCreateUpdateBlockForPlayer(data, player);
+
+            // build other passengers at Transport also (they always visible and marked as visible and will not send at visibility update at add to map
+            if (transport != null)
+                foreach (WorldObject passenger in transport.GetPassengers())
+                    if (player != passenger &&
+                        player.HaveAtClient(passenger))
+                        passenger.BuildCreateUpdateBlockForPlayer(data, player);
+
+            UpdateObject packet;
+            data.BuildPacket(out packet);
+            player.SendPacket(packet);
+        }
+
+        public void SendUpdateTransportVisibility(Player player)
+        {
+            // Hack to send out transports
+            UpdateData transData = new(player.GetMapId());
+
+            foreach (var transport in _transports)
+            {
+                if (!transport.IsInWorld)
+                    continue;
+
+                var hasTransport = player.VisibleTransports.Contains(transport.GetGUID());
+
+                if (player.InSamePhase(transport))
+                {
+                    if (!hasTransport)
+                    {
+                        transport.BuildCreateUpdateBlockForPlayer(transData, player);
+                        player.VisibleTransports.Add(transport.GetGUID());
+                    }
+                }
+                else
+                {
+                    transport.BuildOutOfRangeUpdateBlock(transData);
+                    player.VisibleTransports.Remove(transport.GetGUID());
+                }
+            }
+
+            UpdateObject packet;
+            transData.BuildPacket(out packet);
+            player.SendPacket(packet);
+        }
+
+        public void Respawn(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
+        {
+            RespawnInfo info = GetRespawnInfo(type, spawnId);
+
+            if (info != null)
+                Respawn(info, dbTrans);
+        }
+
+        public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
+        {
+            if (info.respawnTime <= GameTime.GetGameTime())
+                return;
+
+            info.respawnTime = GameTime.GetGameTime();
+            SaveRespawnInfoDB(info, dbTrans);
+        }
+
+        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
+        {
+            RespawnInfo info = GetRespawnInfo(type, spawnId);
+
+            if (info != null)
+                DeleteRespawnInfo(info, dbTrans);
+            // Some callers might need to make sure the database doesn't contain any respawn Time
+            else if (alwaysDeleteFromDB)
+                DeleteRespawnInfoFromDB(type, spawnId, dbTrans);
+        }
+
+        public void GetRespawnInfo(List<RespawnInfo> respawnData, SpawnObjectTypeMask types)
+        {
+            if ((types & SpawnObjectTypeMask.Creature) != 0)
+                PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId);
+
+            if ((types & SpawnObjectTypeMask.GameObject) != 0)
+                PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
+        }
+
+        public RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
+        {
+            var map = GetRespawnMapForType(type);
+
+            if (map == null)
+                return null;
+
+            var respawnInfo = map.LookupByKey(spawnId);
+
+            if (respawnInfo == null)
+                return null;
+
+            return respawnInfo;
+        }
+
+        public void ApplyDynamicModeRespawnScaling(WorldObject obj, ulong spawnId, ref uint respawnDelay, uint mode)
+        {
+            Cypher.Assert(mode == 1);
+            Cypher.Assert(obj.GetMap() == this);
+
+            if (IsBattlegroundOrArena())
+                return;
+
+            SpawnObjectType type;
+
+            switch (obj.GetTypeId())
+            {
+                case TypeId.Unit:
+                    type = SpawnObjectType.Creature;
+
+                    break;
+                case TypeId.GameObject:
+                    type = SpawnObjectType.GameObject;
+
+                    break;
+                default:
+                    return;
+            }
+
+            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
+
+            if (data == null)
+                return;
+
+            if (!data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.DynamicSpawnRate))
+                return;
+
+            if (!_zonePlayerCountMap.ContainsKey(obj.GetZoneId()))
+                return;
+
+            uint playerCount = _zonePlayerCountMap[obj.GetZoneId()];
+
+            if (playerCount == 0)
+                return;
+
+            double adjustFactor = WorldConfig.GetFloatValue(type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicRateGameobject : WorldCfg.RespawnDynamicRateCreature) / playerCount;
+
+            if (adjustFactor >= 1.0) // nothing to do here
+                return;
+
+            uint timeMinimum = WorldConfig.GetUIntValue(type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicMinimumGameObject : WorldCfg.RespawnDynamicMinimumCreature);
+
+            if (respawnDelay <= timeMinimum)
+                return;
+
+            respawnDelay = (uint)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
+        }
+
+        public bool ShouldBeSpawnedOnGridLoad<T>(ulong spawnId)
+        {
+            return ShouldBeSpawnedOnGridLoad(SpawnData.TypeFor<T>(), spawnId);
+        }
+
+        public bool SpawnGroupSpawn(uint groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
+        {
+            var groupData = GetSpawnGroupData(groupId);
+
+            if (groupData == null ||
+                groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
+            {
+                Log.outError(LogFilter.Maps, $"Tried to spawn non-existing (or system) spawn group {groupId}. on map {GetId()} Blocked.");
+
+                return false;
+            }
+
+            SetSpawnGroupActive(groupId, true); // start processing respawns for the group
+
+            List<SpawnData> toSpawn = new();
+
+            foreach (var data in Global.ObjectMgr.GetSpawnMetadataForGroup(groupId))
+            {
+                Cypher.Assert(groupData.mapId == data.MapId);
+
+                var respawnMap = GetRespawnMapForType(data.type);
+
+                if (respawnMap == null)
+                    continue;
+
+                if (force || ignoreRespawn)
+                    RemoveRespawnTime(data.type, data.SpawnId);
+
+                bool hasRespawnTimer = respawnMap.ContainsKey(data.SpawnId);
+
+                if (SpawnMetadata.TypeHasData(data.type))
+                {
+                    // has a respawn timer
+                    if (hasRespawnTimer)
+                        continue;
+
+                    // has a spawn already active
+                    if (!force)
+                    {
+                        WorldObject obj = GetWorldObjectBySpawnId(data.type, data.SpawnId);
+
+                        if (obj != null)
+                            if ((data.type != SpawnObjectType.Creature) ||
+                                obj.ToCreature().IsAlive())
+                                continue;
+                    }
+
+                    toSpawn.Add(data.ToSpawnData());
+                }
+            }
+
+            foreach (SpawnData data in toSpawn)
+            {
+                // don't spawn if the current map difficulty is not used by the spawn
+                if (!data.SpawnDifficulties.Contains(GetDifficultyID()))
+                    continue;
+
+                // don't spawn if the grid isn't loaded (will be handled in grid loader)
+                if (!IsGridLoaded(data.SpawnPoint))
+                    continue;
+
+                // now do the actual (re)spawn
+                switch (data.type)
+                {
+                    case SpawnObjectType.Creature:
+                        {
+                            Creature creature = new();
+
+                            if (!creature.LoadFromDB(data.SpawnId, this, true, force))
+                                creature.Dispose();
+                            else spawnedObjects?.Add(creature);
+
+                            break;
+                        }
+                    case SpawnObjectType.GameObject:
+                        {
+                            GameObject gameobject = new();
+
+                            if (!gameobject.LoadFromDB(data.SpawnId, this, true))
+                                gameobject.Dispose();
+                            else spawnedObjects?.Add(gameobject);
+
+                            break;
+                        }
+                    case SpawnObjectType.AreaTrigger:
+                        {
+                            AreaTrigger areaTrigger = new();
+
+                            if (!areaTrigger.LoadFromDB(data.SpawnId, this, true, false))
+                                areaTrigger.Dispose();
+                            else spawnedObjects?.Add(areaTrigger);
+
+                            break;
+                        }
+                    default:
+                        Cypher.Assert(false, $"Invalid spawn Type {data.type} with spawnId {data.SpawnId}");
+
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes = false)
+        {
+            return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
+        }
+
+        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes, out int count)
+        {
+            count = 0;
+            SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
+
+            if (groupData == null ||
+                groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
+            {
+                Log.outError(LogFilter.Maps, $"Tried to despawn non-existing (or system) spawn group {groupId} on map {GetId()}. Blocked.");
+
+                return false;
+            }
+
+            foreach (var data in Global.ObjectMgr.GetSpawnMetadataForGroup(groupId))
+            {
+                Cypher.Assert(groupData.mapId == data.MapId);
+
+                if (deleteRespawnTimes)
+                    RemoveRespawnTime(data.type, data.SpawnId);
+
+                count += DespawnAll(data.type, data.SpawnId);
+            }
+
+            SetSpawnGroupActive(groupId, false); // stop processing respawns for the group, too
+
+            return true;
+        }
+
+        public void SetSpawnGroupActive(uint groupId, bool state)
+        {
+            SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
+
+            if (data == null ||
+                data.flags.HasAnyFlag(SpawnGroupFlags.System))
+            {
+                Log.outError(LogFilter.Maps, $"Tried to set non-existing (or system) spawn group {groupId} to {(state ? "active" : "inactive")} on map {GetId()}. Blocked.");
+
+                return;
+            }
+
+            if (state != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn)) // toggled
+                _toggledSpawnGroupIds.Add(groupId);
+            else
+                _toggledSpawnGroupIds.Remove(groupId);
+        }
+
+        // Disable the spawn group, which prevents any creatures in the group from respawning until re-enabled
+        // This will not affect any already-present creatures in the group
+        public void SetSpawnGroupInactive(uint groupId)
+        {
+            SetSpawnGroupActive(groupId, false);
+        }
+
+        public bool IsSpawnGroupActive(uint groupId)
+        {
+            SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
+
+            if (data == null)
+            {
+                Log.outError(LogFilter.Maps, $"Tried to query State of non-existing spawn group {groupId} on map {GetId()}.");
+
+                return false;
+            }
+
+            if (data.flags.HasAnyFlag(SpawnGroupFlags.System))
+                return true;
+
+            // either manual spawn group and toggled, or not manual spawn group and not toggled...
+            return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
+        }
+
+        public void UpdateSpawnGroupConditions()
+        {
+            var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
+
+            foreach (uint spawnGroupId in spawnGroups)
+            {
+                SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
+
+                if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.ManualSpawn))
+                    continue;
+
+                bool isActive = IsSpawnGroupActive(spawnGroupId);
+                bool shouldBeActive = Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
+
+                if (isActive == shouldBeActive)
+                    continue;
+
+                if (shouldBeActive)
+                    SpawnGroupSpawn(spawnGroupId);
+                else if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
+                    SpawnGroupDespawn(spawnGroupId, true);
+                else
+                    SetSpawnGroupInactive(spawnGroupId);
+            }
+        }
+
+        public void AddFarSpellCallback(FarSpellCallback callback)
+        {
+            _farSpellCallbacks.Enqueue(new FarSpellCallback(callback));
+        }
+
+        public virtual void DelayedUpdate(uint diff)
+        {
+            while (_farSpellCallbacks.TryDequeue(out FarSpellCallback callback))
+                callback(this);
+
+            RemoveAllObjectsInRemoveList();
+
+            // Don't unload grids if it's Battleground, since we may have manually added GOs, creatures, those doesn't load from DB at grid re-load !
+            // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
+            if (!IsBattlegroundOrArena())
+                for (uint x = 0; x < MapConst.MaxGrids; ++x)
+                {
+                    for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                    {
+                        Grid grid = GetGrid(x, y);
+
+                        grid?.Update(this, diff);
+                    }
+                }
+        }
+
+        public void AddObjectToRemoveList(WorldObject obj)
+        {
+            Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
+
+            obj.SetDestroyedObject(true);
+            obj.CleanupsBeforeDelete(false); // remove or simplify at least cross referenced links
+
+            i_objectsToRemove.Add(obj);
+        }
+
+        public void AddObjectToSwitchList(WorldObject obj, bool on)
+        {
+            Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
+
+            // i_objectsToSwitch is iterated only in Map::RemoveAllObjectsInRemoveList() and it uses
+            // the contained objects only if GetTypeId() == TYPEID_UNIT , so we can return in all other cases
+            if (!obj.IsTypeId(TypeId.Unit))
+                return;
+
+            if (!i_objectsToSwitch.ContainsKey(obj))
+                i_objectsToSwitch.Add(obj, on);
+            else if (i_objectsToSwitch[obj] != on)
+                i_objectsToSwitch.Remove(obj);
+            else
+                Cypher.Assert(false);
+        }
+
+        public uint GetPlayersCountExceptGMs()
+        {
+            uint count = 0;
+
+            foreach (Player pl in _activePlayers)
+                if (!pl.IsGameMaster())
+                    ++count;
+
+            return count;
+        }
+
+        public void SendToPlayers(ServerPacket data)
+        {
+            foreach (Player pl in _activePlayers)
+                pl.SendPacket(data);
+        }
+
+        public bool ActiveObjectsNearGrid(Grid grid)
+        {
+            var cell_min = new CellCoord(grid.GetX() * MapConst.MaxCells,
+                                         grid.GetY() * MapConst.MaxCells);
+
+            var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
+                                         cell_min.Y_coord + MapConst.MaxCells);
+
+            //we must find visible range in cells so we unload only non-visible cells...
+            float viewDist = GetVisibilityRange();
+            uint cell_range = (uint)Math.Ceiling(viewDist / MapConst.SizeofCells) + 1;
+
+            cell_min.Dec_x(cell_range);
+            cell_min.Dec_y(cell_range);
+            cell_max.Inc_x(cell_range);
+            cell_max.Inc_y(cell_range);
+
+            foreach (Player pl in _activePlayers)
+            {
+                CellCoord p = GridDefines.ComputeCellCoord(pl.GetPositionX(), pl.GetPositionY());
+
+                if ((cell_min.X_coord <= p.X_coord && p.X_coord <= cell_max.X_coord) &&
+                    (cell_min.Y_coord <= p.Y_coord && p.Y_coord <= cell_max.Y_coord))
+                    return true;
+            }
+
+            foreach (WorldObject obj in _activeNonPlayers)
+            {
+                CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
+
+                if ((cell_min.X_coord <= p.X_coord && p.X_coord <= cell_max.X_coord) &&
+                    (cell_min.Y_coord <= p.Y_coord && p.Y_coord <= cell_max.Y_coord))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void AddToActive(WorldObject obj)
+        {
+            AddToActiveHelper(obj);
+
+            Position respawnLocation = null;
+
+            switch (obj.GetTypeId())
+            {
+                case TypeId.Unit:
+                    Creature creature = obj.ToCreature();
+
+                    if (creature != null &&
+                        !creature.IsPet() &&
+                        creature.GetSpawnId() != 0)
+                    {
+                        respawnLocation = creature.GetRespawnPosition();
+                    }
+
+                    break;
+                case TypeId.GameObject:
+                    GameObject gameObject = obj.ToGameObject();
+                    ;
+
+                    if (gameObject != null &&
+                        gameObject.GetSpawnId() != 0)
+                    {
+                        respawnLocation = new Position();
+                        gameObject.GetRespawnPosition(out respawnLocation.X, out respawnLocation.Y, out respawnLocation.Z, out _);
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            if (respawnLocation != null)
+            {
+                GridCoord p = GridDefines.ComputeGridCoord(respawnLocation.GetPositionX(), respawnLocation.GetPositionY());
+
+                if (GetGrid(p.X_coord, p.Y_coord) != null)
+                {
+                    GetGrid(p.X_coord, p.Y_coord).IncUnloadActiveLock();
+                }
+                else
+                {
+                    GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
+                    Log.outError(LogFilter.Maps, $"Active object {obj.GetGUID()} added to grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
+                }
+            }
+        }
+
+        public void RemoveFromActive(WorldObject obj)
+        {
+            RemoveFromActiveHelper(obj);
+
+            Position respawnLocation = null;
+
+            switch (obj.GetTypeId())
+            {
+                case TypeId.Unit:
+                    Creature creature = obj.ToCreature();
+
+                    if (creature != null &&
+                        !creature.IsPet() &&
+                        creature.GetSpawnId() != 0)
+                    {
+                        respawnLocation = creature.GetRespawnPosition();
+                    }
+
+                    break;
+                case TypeId.GameObject:
+                    GameObject gameObject = obj.ToGameObject();
+
+                    if (gameObject != null &&
+                        gameObject.GetSpawnId() != 0)
+                    {
+                        respawnLocation = new Position();
+                        gameObject.GetRespawnPosition(out respawnLocation.X, out respawnLocation.Y, out respawnLocation.Z, out _);
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            if (respawnLocation != null)
+            {
+                GridCoord p = GridDefines.ComputeGridCoord(respawnLocation.GetPositionX(), respawnLocation.GetPositionY());
+
+                if (GetGrid(p.X_coord, p.Y_coord) != null)
+                {
+                    GetGrid(p.X_coord, p.Y_coord).DecUnloadActiveLock();
+                }
+                else
+                {
+                    GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
+                    Log.outDebug(LogFilter.Maps, $"Active object {obj.GetGUID()} removed from grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
+                }
+            }
+        }
+
+        public void SaveRespawnTime(SpawnObjectType type, ulong spawnId, uint entry, long respawnTime, uint gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
+        {
+            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
+
+            if (data == null)
+            {
+                Log.outError(LogFilter.Maps, $"Map {GetId()} attempt to save respawn Time for nonexistant spawnid ({type},{spawnId}).");
+
+                return;
+            }
+
+            if (respawnTime == 0)
+            {
+                // Delete only
+                RemoveRespawnTime(data.type, data.SpawnId, dbTrans);
+
+                return;
+            }
+
+            RespawnInfo ri = new();
+            ri.type = data.type;
+            ri.spawnId = data.SpawnId;
+            ri.entry = entry;
+            ri.respawnTime = respawnTime;
+            ri.gridId = gridId;
+            bool success = AddRespawnInfo(ri);
+
+            if (startup)
+            {
+                if (!success)
+                    Log.outError(LogFilter.Maps, $"Attempt to load saved respawn {respawnTime} for ({type},{spawnId}) failed - duplicate respawn? Skipped.");
+            }
+            else if (success)
+            {
+                SaveRespawnInfoDB(ri, dbTrans);
+            }
+        }
+
+        public void SaveRespawnInfoDB(RespawnInfo info, SQLTransaction dbTrans = null)
+        {
+            if (Instanceable())
+                return;
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_RESPAWN);
+            stmt.AddValue(0, (ushort)info.type);
+            stmt.AddValue(1, info.spawnId);
+            stmt.AddValue(2, info.respawnTime);
+            stmt.AddValue(3, GetId());
+            stmt.AddValue(4, GetInstanceId());
+            DB.Characters.ExecuteOrAppend(dbTrans, stmt);
+        }
+
+        public void LoadRespawnTimes()
+        {
+            if (Instanceable())
+                return;
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_RESPAWNS);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+            SQLResult result = DB.Characters.Query(stmt);
+
+            if (!result.IsEmpty())
+                do
+                {
+                    SpawnObjectType type = (SpawnObjectType)result.Read<ushort>(0);
+                    var spawnId = result.Read<ulong>(1);
+                    var respawnTime = result.Read<long>(2);
+
+                    if (SpawnMetadata.TypeHasData(type))
+                    {
+                        SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
+
+                        if (data != null)
+                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GridDefines.ComputeGridCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId(), null, true);
+                        else
+                            Log.outError(LogFilter.Maps, $"Loading saved respawn Time of {respawnTime} for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
+                    }
+                    else
+                    {
+                        Log.outError(LogFilter.Maps, $"Loading saved respawn Time of {respawnTime} for spawnid ({type},{spawnId}) - invalid spawn Type, ignoring");
+                    }
+                } while (result.NextRow());
+        }
+
+        public void DeleteRespawnTimes()
+        {
+            UnloadAllRespawnInfos();
+            DeleteRespawnTimesInDB();
+        }
+
+        public void DeleteRespawnTimesInDB()
+        {
+            if (Instanceable())
+                return;
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_RESPAWNS);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+            DB.Characters.Execute(stmt);
+        }
+
+        public long GetLinkedRespawnTime(ObjectGuid guid)
+        {
+            ObjectGuid linkedGuid = Global.ObjectMgr.GetLinkedRespawnGuid(guid);
+
+            switch (linkedGuid.GetHigh())
+            {
+                case HighGuid.Creature:
+                    return GetCreatureRespawnTime(linkedGuid.GetCounter());
+                case HighGuid.GameObject:
+                    return GetGORespawnTime(linkedGuid.GetCounter());
+                default:
+                    break;
+            }
+
+            return 0L;
+        }
+
+        public void LoadCorpseData()
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSES);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+
+            //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
+            // SELECT X, Y, Z, orientation, mapId, displayId, itemCache, race, class, Gender, Flags, dynFlags, Time, corpseType, InstanceId, Guid FROM corpse WHERE mapId = ? AND InstanceId = ?
+            SQLResult result = DB.Characters.Query(stmt);
+
+            if (result.IsEmpty())
+                return;
+
+            MultiMap<ulong, uint> phases = new();
+            MultiMap<ulong, ChrCustomizationChoice> customizations = new();
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+
+            //        0          1
+            // SELECT OwnerGuid, PhaseId FROM corpse_phases cp LEFT JOIN corpse c ON cp.OwnerGuid = c.Guid WHERE c.mapId = ? AND c.InstanceId = ?
+            SQLResult phaseResult = DB.Characters.Query(stmt);
+
+            if (!phaseResult.IsEmpty())
+                do
+                {
+                    ulong guid = phaseResult.Read<ulong>(0);
+                    uint phaseId = phaseResult.Read<uint>(1);
+
+                    phases.Add(guid, phaseId);
+                } while (phaseResult.NextRow());
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_CUSTOMIZATIONS);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+
+            //        0             1                            2
+            // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.Guid WHERE c.mapId = ? AND c.InstanceId = ?
+            SQLResult customizationResult = DB.Characters.Query(stmt);
+
+            if (!customizationResult.IsEmpty())
+                do
+                {
+                    ulong guid = customizationResult.Read<ulong>(0);
+
+                    ChrCustomizationChoice choice = new();
+                    choice.ChrCustomizationOptionID = customizationResult.Read<uint>(1);
+                    choice.ChrCustomizationChoiceID = customizationResult.Read<uint>(2);
+                    customizations.Add(guid, choice);
+                } while (customizationResult.NextRow());
+
+            do
+            {
+                CorpseType type = (CorpseType)result.Read<byte>(13);
+                ulong guid = result.Read<ulong>(15);
+
+                if (type >= CorpseType.Max ||
+                    type == CorpseType.Bones)
+                {
+                    Log.outError(LogFilter.Maps, "Corpse (Guid: {0}) have wrong corpse Type ({1}), not loading.", guid, type);
+
+                    continue;
+                }
+
+                Corpse corpse = new(type);
+
+                if (!corpse.LoadCorpseFromDB(GenerateLowGuid(HighGuid.Corpse), result.GetFields()))
+                    continue;
+
+                foreach (var phaseId in phases[guid])
+                    PhasingHandler.AddPhase(corpse, phaseId, false);
+
+                corpse.SetCustomizations(customizations[guid]);
+
+                AddCorpse(corpse);
+            } while (result.NextRow());
+        }
+
+        public void DeleteCorpseData()
+        {
+            // DELETE cp, c FROM corpse_phases cp INNER JOIN corpse c ON cp.OwnerGuid = c.Guid WHERE c.mapId = ? AND c.InstanceId = ?
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSES_FROM_MAP);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+            DB.Characters.Execute(stmt);
+        }
+
+        public void AddCorpse(Corpse corpse)
+        {
+            corpse.SetMap(this);
+
+            _corpsesByCell.Add(corpse.GetCellCoord().GetId(), corpse);
+
+            if (corpse.GetCorpseType() != CorpseType.Bones)
+                _corpsesByPlayer[corpse.GetOwnerGUID()] = corpse;
+            else
+                _corpseBones.Add(corpse);
+        }
+
+        public Corpse ConvertCorpseToBones(ObjectGuid ownerGuid, bool insignia = false)
+        {
+            Corpse corpse = GetCorpseByPlayer(ownerGuid);
+
+            if (!corpse)
+                return null;
+
+            RemoveCorpse(corpse);
+
+            // remove corpse from DB
+            SQLTransaction trans = new();
+            corpse.DeleteFromDB(trans);
+            DB.Characters.CommitTransaction(trans);
+
+            Corpse bones = null;
+
+            // create the bones only if the map and the grid is loaded at the corpse's location
+            // ignore bones creating option in case insignia
+            if ((insignia ||
+                 (IsBattlegroundOrArena() ? WorldConfig.GetBoolValue(WorldCfg.DeathBonesBgOrArena) : WorldConfig.GetBoolValue(WorldCfg.DeathBonesWorld))) &&
+                !IsRemovalGrid(corpse.GetPositionX(), corpse.GetPositionY()))
+            {
+                // Create bones, don't change Corpse
+                bones = new Corpse();
+                bones.Create(corpse.GetGUID().GetCounter(), this);
+
+                bones.ReplaceAllCorpseDynamicFlags((CorpseDynFlags)(byte)corpse.CorpseData.DynamicFlags);
+                bones.SetOwnerGUID(corpse.CorpseData.Owner);
+                bones.SetPartyGUID(corpse.CorpseData.PartyGUID);
+                bones.SetGuildGUID(corpse.CorpseData.GuildGUID);
+                bones.SetDisplayId(corpse.CorpseData.DisplayID);
+                bones.SetRace(corpse.CorpseData.RaceID);
+                bones.SetSex(corpse.CorpseData.Sex);
+                bones.SetClass(corpse.CorpseData.Class);
+                bones.SetCustomizations(corpse.CorpseData.Customizations);
+                bones.ReplaceAllFlags((CorpseFlags)(corpse.CorpseData.Flags | (uint)CorpseFlags.Bones));
+                bones.SetFactionTemplate(corpse.CorpseData.FactionTemplate);
+
+                for (int i = 0; i < EquipmentSlot.End; ++i)
+                    bones.SetItem((uint)i, corpse.CorpseData.Items[i]);
+
+                bones.SetCellCoord(corpse.GetCellCoord());
+                bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());
+
+                PhasingHandler.InheritPhaseShift(bones, corpse);
+
+                AddCorpse(bones);
+
+                bones.UpdatePositionData();
+                bones.SetZoneScript();
+
+                // add bones in grid store if grid loaded where corpse placed
+                AddToMap(bones);
+            }
+
+            // all references to the corpse should be removed at this point
+            corpse.Dispose();
+
+            return bones;
+        }
+
+        public void RemoveOldCorpses()
+        {
+            long now = GameTime.GetGameTime();
+
+            List<ObjectGuid> corpses = new();
+
+            foreach (var p in _corpsesByPlayer)
+                if (p.Value.IsExpired(now))
+                    corpses.Add(p.Key);
+
+            foreach (ObjectGuid ownerGuid in corpses)
+                ConvertCorpseToBones(ownerGuid);
+
+            List<Corpse> expiredBones = new();
+
+            foreach (Corpse bones in _corpseBones)
+                if (bones.IsExpired(now))
+                    expiredBones.Add(bones);
+
+            foreach (Corpse bones in expiredBones)
+            {
+                RemoveCorpse(bones);
+                bones.Dispose();
+            }
+        }
+
+        public void SendZoneDynamicInfo(uint zoneId, Player player)
+        {
+            var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
+
+            if (zoneInfo == null)
+                return;
+
+            uint music = zoneInfo.MusicId;
+
+            if (music != 0)
+                player.SendPacket(new PlayMusic(music));
+
+            SendZoneWeather(zoneInfo, player);
+
+            foreach (var lightOverride in zoneInfo.LightOverrides)
+            {
+                OverrideLight overrideLight = new();
+                overrideLight.AreaLightID = lightOverride.AreaLightId;
+                overrideLight.OverrideLightID = lightOverride.OverrideLightId;
+                overrideLight.TransitionMilliseconds = lightOverride.TransitionMilliseconds;
+                player.SendPacket(overrideLight);
+            }
+        }
+
+        public void SendZoneWeather(uint zoneId, Player player)
+        {
+            if (!player.HasAuraType(AuraType.ForceWeather))
+            {
+                var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
+
+                if (zoneInfo == null)
+                    return;
+
+                SendZoneWeather(zoneInfo, player);
+            }
+        }
+
+        public void SetZoneMusic(uint zoneId, uint musicId)
+        {
+            if (!_zoneDynamicInfo.ContainsKey(zoneId))
+                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
+
+            _zoneDynamicInfo[zoneId].MusicId = musicId;
+
+            var players = GetPlayers();
+
+            if (!players.Empty())
+            {
+                PlayMusic playMusic = new(musicId);
+
+                foreach (var player in players)
+                    if (player.GetZoneId() == zoneId &&
+                        !player.HasAuraType(AuraType.ForceWeather))
+                        player.SendPacket(playMusic);
+            }
+        }
+
+        public Weather GetOrGenerateZoneDefaultWeather(uint zoneId)
+        {
+            WeatherData weatherData = Global.WeatherMgr.GetWeatherData(zoneId);
+
+            if (weatherData == null)
+                return null;
+
+            if (!_zoneDynamicInfo.ContainsKey(zoneId))
+                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
+
+            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
+
+            if (info.DefaultWeather == null)
+            {
+                info.DefaultWeather = new Weather(zoneId, weatherData);
+                info.DefaultWeather.ReGenerate();
+                info.DefaultWeather.UpdateWeather();
+            }
+
+            return info.DefaultWeather;
+        }
+
+        public WeatherState GetZoneWeather(uint zoneId)
+        {
+            ZoneDynamicInfo zoneDynamicInfo = _zoneDynamicInfo.LookupByKey(zoneId);
+
+            if (zoneDynamicInfo != null)
+            {
+                if (zoneDynamicInfo.WeatherId != 0)
+                    return zoneDynamicInfo.WeatherId;
+
+                if (zoneDynamicInfo.DefaultWeather != null)
+                    return zoneDynamicInfo.DefaultWeather.GetWeatherState();
+            }
+
+            return WeatherState.Fine;
+        }
+
+        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float intensity)
+        {
+            if (!_zoneDynamicInfo.ContainsKey(zoneId))
+                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
+
+            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
+            info.WeatherId = weatherId;
+            info.Intensity = intensity;
+
+            var players = GetPlayers();
+
+            if (!players.Empty())
+            {
+                WeatherPkt weather = new(weatherId, intensity);
+
+                foreach (var player in players)
+                    if (player.GetZoneId() == zoneId)
+                        player.SendPacket(weather);
+            }
+        }
+
+        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, TimeSpan transitionTime)
+        {
+            if (!_zoneDynamicInfo.ContainsKey(zoneId))
+                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
+
+            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
+            // client can support only one override for each light (zone independent)
+            info.LightOverrides.RemoveAll(lightOverride => lightOverride.AreaLightId == areaLightId);
+
+            // set new override (if any)
+            if (overrideLightId != 0)
+            {
+                ZoneDynamicInfo.LightOverride lightOverride = new();
+                lightOverride.AreaLightId = areaLightId;
+                lightOverride.OverrideLightId = overrideLightId;
+                lightOverride.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+                info.LightOverrides.Add(lightOverride);
+            }
+
+            var players = GetPlayers();
+
+            if (!players.Empty())
+            {
+                OverrideLight overrideLight = new();
+                overrideLight.AreaLightID = areaLightId;
+                overrideLight.OverrideLightID = overrideLightId;
+                overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+
+                foreach (var player in players)
+                    if (player.GetZoneId() == zoneId)
+                        player.SendPacket(overrideLight);
+            }
+        }
+
+        public void UpdateAreaDependentAuras()
+        {
+            var players = GetPlayers();
+
+            foreach (var player in players)
+                if (player)
+                    if (player.IsInWorld)
+                    {
+                        player.UpdateAreaDependentAuras(player.GetAreaId());
+                        player.UpdateZoneDependentAuras(player.GetZoneId());
+                    }
+        }
+
+        public virtual string GetDebugInfo()
+        {
+            return $"Id: {GetId()} InstanceId: {GetInstanceId()} Difficulty: {GetDifficultyID()} HasPlayers: {HavePlayers()}";
+        }
+
+        public MapRecord GetEntry()
+        {
+            return i_mapRecord;
+        }
+
+        public bool CanUnload(uint diff)
+        {
+            if (_unloadTimer == 0)
+                return false;
+
+            if (_unloadTimer <= diff)
+                return true;
+
+            _unloadTimer -= diff;
+
+            return false;
+        }
+
+        public float GetVisibilityRange()
+        {
+            return _VisibleDistance;
+        }
+
+        public bool IsRemovalGrid(float x, float y)
+        {
+            GridCoord p = GridDefines.ComputeGridCoord(x, y);
+
+            return GetGrid(p.X_coord, p.Y_coord) == null ||
+                   GetGrid(p.X_coord, p.Y_coord).GetGridState() == GridState.Removal;
+        }
+
+        public bool IsRemovalGrid(Position pos)
+        {
+            return IsRemovalGrid(pos.GetPositionX(), pos.GetPositionY());
+        }
+
+        public void ResetGridExpiry(Grid grid, float factor = 1)
+        {
+            grid.ResetTimeTracker((long)(i_gridExpiry * factor));
+        }
+
+        public long GetGridExpiry()
+        {
+            return i_gridExpiry;
+        }
+
+        public TerrainInfo GetTerrain()
+        {
+            return _terrain;
+        }
+
+        public uint GetInstanceId()
+        {
+            return i_InstanceId;
+        }
+
+        public virtual TransferAbortParams CannotEnter(Player player)
+        {
+            return null;
+        }
+
+        public Difficulty GetDifficultyID()
+        {
+            return i_spawnMode;
+        }
+
+        public MapDifficultyRecord GetMapDifficulty()
+        {
+            return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
+        }
+
+        public ItemContext GetDifficultyLootItemContext()
+        {
+            MapDifficultyRecord mapDifficulty = GetMapDifficulty();
+
+            if (mapDifficulty != null &&
+                mapDifficulty.ItemContext != 0)
+                return (ItemContext)mapDifficulty.ItemContext;
+
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
+
+            if (difficulty != null)
+                return (ItemContext)difficulty.ItemContext;
+
+            return ItemContext.None;
+        }
+
+        public uint GetId()
+        {
+            return i_mapRecord.Id;
+        }
+
+        public bool Instanceable()
+        {
+            return i_mapRecord != null && i_mapRecord.Instanceable();
+        }
+
+        public bool IsDungeon()
+        {
+            return i_mapRecord != null && i_mapRecord.IsDungeon();
+        }
+
+        public bool IsNonRaidDungeon()
+        {
+            return i_mapRecord != null && i_mapRecord.IsNonRaidDungeon();
+        }
+
+        public bool IsRaid()
+        {
+            return i_mapRecord != null && i_mapRecord.IsRaid();
+        }
+
+        public bool IsHeroic()
+        {
+            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
+
+            if (difficulty != null)
+                return difficulty.Flags.HasAnyFlag(DifficultyFlags.Heroic);
+
+            return false;
+        }
+
+        public bool Is25ManRaid()
+        {
+            // since 25man difficulties are 1 and 3, we can check them like that
+            return IsRaid() && (i_spawnMode == Difficulty.Raid25N || i_spawnMode == Difficulty.Raid25HC);
+        }
+
+        public bool IsBattleground()
+        {
+            return i_mapRecord != null && i_mapRecord.IsBattleground();
+        }
+
+        public bool IsBattleArena()
+        {
+            return i_mapRecord != null && i_mapRecord.IsBattleArena();
+        }
+
+        public bool IsBattlegroundOrArena()
+        {
+            return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena();
+        }
+
+        public bool IsScenario()
+        {
+            return i_mapRecord != null && i_mapRecord.IsScenario();
+        }
+
+        public bool IsGarrison()
+        {
+            return i_mapRecord != null && i_mapRecord.IsGarrison();
+        }
+
+        public bool HavePlayers()
+        {
+            return !_activePlayers.Empty();
+        }
+
+        public void AddWorldObject(WorldObject obj)
+        {
+            i_worldObjects.Add(obj);
+        }
+
+        public void RemoveWorldObject(WorldObject obj)
+        {
+            i_worldObjects.Remove(obj);
+        }
+
+        public void DoOnPlayers(Action<Player> action)
+        {
+            foreach (var player in GetPlayers())
+                action(player);
+        }
+
+        public List<Player> GetPlayers()
+        {
+            return _activePlayers;
+        }
+
+        public int GetActiveNonPlayersCount()
+        {
+            return _activeNonPlayers.Count;
+        }
+
+        public Dictionary<ObjectGuid, WorldObject> GetObjectsStore()
+        {
+            return _objectsStore;
+        }
+
+        public MultiMap<ulong, Creature> GetCreatureBySpawnIdStore()
+        {
+            return _creatureBySpawnIdStore;
+        }
+
+        public MultiMap<ulong, GameObject> GetGameObjectBySpawnIdStore()
+        {
+            return _gameobjectBySpawnIdStore;
+        }
+
+        public MultiMap<ulong, AreaTrigger> GetAreaTriggerBySpawnIdStore()
+        {
+            return _areaTriggerBySpawnIdStore;
+        }
+
+        public List<Corpse> GetCorpsesInCell(uint cellId)
+        {
+            return _corpsesByCell.LookupByKey(cellId);
+        }
+
+        public Corpse GetCorpseByPlayer(ObjectGuid ownerGuid)
+        {
+            return _corpsesByPlayer.LookupByKey(ownerGuid);
+        }
+
+        public InstanceMap ToInstanceMap()
+        {
+            return IsDungeon() ? (this as InstanceMap) : null;
+        }
+
+        public BattlegroundMap ToBattlegroundMap()
+        {
+            return IsBattlegroundOrArena() ? (this as BattlegroundMap) : null;
+        }
+
+        public void Balance()
+        {
+            _dynamicTree.Balance();
+        }
+
+        public void RemoveGameObjectModel(GameObjectModel model)
+        {
+            _dynamicTree.Remove(model);
+        }
+
+        public void InsertGameObjectModel(GameObjectModel model)
+        {
+            _dynamicTree.Insert(model);
+        }
+
+        public bool ContainsGameObjectModel(GameObjectModel model)
+        {
+            return _dynamicTree.Contains(model);
+        }
+
+        public float GetGameObjectFloor(PhaseShift phaseShift, float x, float y, float z, float maxSearchDist = MapConst.DefaultHeightSearch)
+        {
+            return _dynamicTree.GetHeight(x, y, z, maxSearchDist, phaseShift);
+        }
+
+        public virtual uint GetOwnerGuildId(Team team = Team.Other)
+        {
+            return 0;
+        }
+
+        public long GetRespawnTime(SpawnObjectType type, ulong spawnId)
+        {
+            var map = GetRespawnMapForType(type);
+
+            if (map != null)
+            {
+                var respawnInfo = map.LookupByKey(spawnId);
+
+                return (respawnInfo == null) ? 0 : respawnInfo.respawnTime;
+            }
+
+            return 0;
+        }
+
+        public long GetCreatureRespawnTime(ulong spawnId)
+        {
+            return GetRespawnTime(SpawnObjectType.Creature, spawnId);
+        }
+
+        public long GetGORespawnTime(ulong spawnId)
+        {
+            return GetRespawnTime(SpawnObjectType.GameObject, spawnId);
+        }
+
+        public AreaTrigger GetAreaTrigger(ObjectGuid guid)
+        {
+            if (!guid.IsAreaTrigger())
+                return null;
+
+            return (AreaTrigger)_objectsStore.LookupByKey(guid);
+        }
+
+        public SceneObject GetSceneObject(ObjectGuid guid)
+        {
+            return _objectsStore.LookupByKey(guid) as SceneObject;
+        }
+
+        public Conversation GetConversation(ObjectGuid guid)
+        {
+            return (Conversation)_objectsStore.LookupByKey(guid);
+        }
+
+        public Player GetPlayer(ObjectGuid guid)
+        {
+            return Global.ObjAccessor.GetPlayer(this, guid);
+        }
+
+        public Corpse GetCorpse(ObjectGuid guid)
+        {
+            if (!guid.IsCorpse())
+                return null;
+
+            return (Corpse)_objectsStore.LookupByKey(guid);
+        }
+
+        public Creature GetCreature(ObjectGuid guid)
+        {
+            if (!guid.IsCreatureOrVehicle())
+                return null;
+
+            return (Creature)_objectsStore.LookupByKey(guid);
+        }
+
+        public DynamicObject GetDynamicObject(ObjectGuid guid)
+        {
+            if (!guid.IsDynamicObject())
+                return null;
+
+            return (DynamicObject)_objectsStore.LookupByKey(guid);
+        }
+
+        public GameObject GetGameObject(ObjectGuid guid)
+        {
+            if (!guid.IsAnyTypeGameObject())
+                return null;
+
+            return (GameObject)_objectsStore.LookupByKey(guid);
+        }
+
+        public Pet GetPet(ObjectGuid guid)
+        {
+            if (!guid.IsPet())
+                return null;
+
+            return (Pet)_objectsStore.LookupByKey(guid);
+        }
+
+        public Transport GetTransport(ObjectGuid guid)
+        {
+            if (!guid.IsMOTransport())
+                return null;
+
+            GameObject go = GetGameObject(guid);
+
+            return go ? go.ToTransport() : null;
+        }
+
+        public Creature GetCreatureBySpawnId(ulong spawnId)
+        {
+            var bounds = GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+
+            if (bounds.Empty())
+                return null;
+
+            var foundCreature = bounds.Find(creature => creature.IsAlive());
+
+            return foundCreature != null ? foundCreature : bounds[0];
+        }
+
+        public GameObject GetGameObjectBySpawnId(ulong spawnId)
+        {
+            var bounds = GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
+
+            if (bounds.Empty())
+                return null;
+
+            var foundGameObject = bounds.Find(gameobject => gameobject.IsSpawned());
+
+            return foundGameObject != null ? foundGameObject : bounds[0];
+        }
+
+        public AreaTrigger GetAreaTriggerBySpawnId(ulong spawnId)
+        {
+            var bounds = GetAreaTriggerBySpawnIdStore().LookupByKey(spawnId);
+
+            if (bounds.Empty())
+                return null;
+
+            return bounds.FirstOrDefault();
+        }
+
+        public WorldObject GetWorldObjectBySpawnId(SpawnObjectType type, ulong spawnId)
+        {
+            switch (type)
+            {
+                case SpawnObjectType.Creature:
+                    return GetCreatureBySpawnId(spawnId);
+                case SpawnObjectType.GameObject:
+                    return GetGameObjectBySpawnId(spawnId);
+                case SpawnObjectType.AreaTrigger:
+                    return GetAreaTriggerBySpawnId(spawnId);
+                default:
+                    return null;
+            }
+        }
+
+        public void Visit(Cell cell, Visitor visitor)
+        {
+            uint x = cell.GetGridX();
+            uint y = cell.GetGridY();
+            uint cell_x = cell.GetCellX();
+            uint cell_y = cell.GetCellY();
+
+            if (!cell.NoCreate() ||
+                IsGridLoaded(new GridCoord(x, y)))
+            {
+                EnsureGridLoaded(cell);
+                GetGrid(x, y).VisitGrid(cell_x, cell_y, visitor);
+            }
+        }
+
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
+        {
+            var mask = UnitTypeMask.Summon;
+
+            if (properties != null)
+                switch (properties.Control)
+                {
+                    case SummonCategory.Pet:
+                        mask = UnitTypeMask.Guardian;
+
+                        break;
+                    case SummonCategory.Puppet:
+                        mask = UnitTypeMask.Puppet;
+
+                        break;
+                    case SummonCategory.Vehicle:
+                        mask = UnitTypeMask.Minion;
+
+                        break;
+                    case SummonCategory.Wild:
+                    case SummonCategory.Ally:
+                    case SummonCategory.Unk:
+                        {
+                            switch (properties.Title)
+                            {
+                                case SummonTitle.Minion:
+                                case SummonTitle.Guardian:
+                                case SummonTitle.Runeblade:
+                                    mask = UnitTypeMask.Guardian;
+
+                                    break;
+                                case SummonTitle.Totem:
+                                case SummonTitle.LightWell:
+                                    mask = UnitTypeMask.Totem;
+
+                                    break;
+                                case SummonTitle.Vehicle:
+                                case SummonTitle.Mount:
+                                    mask = UnitTypeMask.Summon;
+
+                                    break;
+                                case SummonTitle.Companion:
+                                    mask = UnitTypeMask.Minion;
+
+                                    break;
+                                default:
+                                    if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                                        mask = UnitTypeMask.Guardian;
+
+                                    break;
+                            }
+
+                            break;
+                        }
+                    default:
+                        return null;
+                }
+
+            Unit summonerUnit = summoner?.ToUnit();
+
+            TempSummon summon;
+
+            switch (mask)
+            {
+                case UnitTypeMask.Summon:
+                    summon = new TempSummon(properties, summonerUnit, false);
+
+                    break;
+                case UnitTypeMask.Guardian:
+                    summon = new Guardian(properties, summonerUnit, false);
+
+                    break;
+                case UnitTypeMask.Puppet:
+                    summon = new Puppet(properties, summonerUnit);
+
+                    break;
+                case UnitTypeMask.Totem:
+                    summon = new Totem(properties, summonerUnit);
+
+                    break;
+                case UnitTypeMask.Minion:
+                    summon = new Minion(properties, summonerUnit, false);
+
+                    break;
+                default:
+                    return null;
+            }
+
+            if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos, null, vehId, true))
+                return null;
+
+            ITransport transport = summoner?.GetTransport();
+
+            if (transport != null)
+            {
+                pos.GetPosition(out float x, out float y, out float z, out float o);
+                transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+                summon.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
+
+                // This object must be added to Transport before adding to map for the client to properly display it
+                transport.AddPassenger(summon);
+            }
+
+            // Set the summon to the summoner's phase
+            if (summoner != null &&
+                !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+                PhasingHandler.InheritPhaseShift(summon, summoner);
+
+            summon.SetCreatedBySpell(spellId);
+            summon.SetHomePosition(pos);
+            summon.InitStats(duration);
+            summon.SetPrivateObjectOwner(privateObjectOwner);
+
+            if (smoothPhasingInfo != null)
+            {
+                if (summoner != null &&
+                    smoothPhasingInfo.ReplaceObject.HasValue)
+                {
+                    WorldObject replacedObject = Global.ObjAccessor.GetWorldObject(summoner, smoothPhasingInfo.ReplaceObject.Value);
+
+                    if (replacedObject != null)
+                    {
+                        SmoothPhasingInfo originalSmoothPhasingInfo = smoothPhasingInfo;
+                        originalSmoothPhasingInfo.ReplaceObject = summon.GetGUID();
+                        replacedObject.GetOrCreateSmoothPhasing().SetViewerDependentInfo(privateObjectOwner, originalSmoothPhasingInfo);
+
+                        summon.SetDemonCreatorGUID(privateObjectOwner);
+                    }
+                }
+
+                summon.GetOrCreateSmoothPhasing().SetSingleInfo(smoothPhasingInfo);
+            }
+
+            if (!AddToMap(summon.ToCreature()))
+            {
+                // Returning false will cause the object to be deleted - remove from Transport
+                transport?.RemovePassenger(summon);
+
+                summon.Dispose();
+
+                return null;
+            }
+
+            summon.InitSummon();
+
+            // call MoveInLineOfSight for nearby creatures
+            AIRelocationNotifier notifier = new(summon);
+            Cell.VisitAllObjects(summon, notifier, GetVisibilityRange());
+
+            return summon;
+        }
+
+        public ulong GenerateLowGuid(HighGuid high)
+        {
+            return GetGuidSequenceGenerator(high).Generate();
+        }
+
+        public ulong GetMaxLowGuid(HighGuid high)
+        {
+            return GetGuidSequenceGenerator(high).GetNextAfterMaxUsed();
+        }
+
+        public void AddUpdateObject(WorldObject obj)
+        {
+            _updateObjects.Add(obj);
+        }
+
+        public void RemoveUpdateObject(WorldObject obj)
+        {
+            _updateObjects.Remove(obj);
+        }
+
+        public static implicit operator bool(Map map)
+        {
+            return map != null;
+        }
+
+        public MultiPersonalPhaseTracker GetMultiPersonalPhaseTracker()
+        {
+            return _multiPersonalPhaseTracker;
+        }
+
+        public SpawnedPoolData GetPoolData()
+        {
+            return _poolData;
+        }
+
+        private void SwitchGridContainers(WorldObject obj, bool on)
+        {
+            if (obj.IsPermanentWorldObject())
+                return;
+
+            CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
+
+            if (!p.IsCoordValid())
+            {
+                Log.outError(LogFilter.Maps,
+                             "Map.SwitchGridContainers: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]",
+                             obj.GetGUID(),
+                             obj.GetPositionX(),
+                             obj.GetPositionY(),
+                             p.X_coord,
+                             p.Y_coord);
+
+                return;
+            }
+
+            var cell = new Cell(p);
+
+            if (!IsGridLoaded(new GridCoord(cell.GetGridX(), cell.GetGridY())))
+                return;
+
+            Log.outDebug(LogFilter.Maps, "Switch object {0} from grid[{1}, {2}] {3}", obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), on);
+            Grid ngrid = GetGrid(cell.GetGridX(), cell.GetGridY());
+            Cypher.Assert(ngrid != null);
+
+            RemoveFromGrid(obj, cell);
+
+            GridCell gridCell = ngrid.GetGridCell(cell.GetCellX(), cell.GetCellY());
+
+            if (on)
+            {
+                gridCell.AddWorldObject(obj);
+                AddWorldObject(obj);
+            }
+            else
+            {
+                gridCell.AddGridObject(obj);
+                RemoveWorldObject(obj);
+            }
+
+            obj.SetCurrentCell(cell);
+            obj.ToCreature().IsTempWorldObject = on;
+        }
+
+        private void DeleteFromWorld(Player player)
+        {
+            Global.ObjAccessor.RemoveObject(player);
+            RemoveUpdateObject(player); // @todo I do not know why we need this, it should be removed in ~Object anyway
+            player.Dispose();
+        }
+
+        private void DeleteFromWorld(WorldObject obj)
+        {
+            obj.Dispose();
+        }
+
+        private void EnsureGridCreated(GridCoord p)
+        {
+            if (GetGrid(p.X_coord, p.Y_coord) == null)
+            {
+                Log.outDebug(LogFilter.Maps,
+                             "Creating grid[{0}, {1}] for map {2} instance {3}",
+                             p.X_coord,
+                             p.Y_coord,
+                             GetId(),
+                             i_InstanceId);
+
+                var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
+                grid.SetGridState(GridState.Idle);
+                SetGrid(grid, p.X_coord, p.Y_coord);
+
+                //z coord
+                int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
+                int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
+
+                _terrain.LoadMapAndVMap(gx, gy);
+            }
+        }
+
+        private void EnsureGridLoadedForActiveObject(Cell cell, WorldObject obj)
+        {
+            EnsureGridLoaded(cell);
+            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
+
+            if (obj.IsPlayer())
+                GetMultiPersonalPhaseTracker().LoadGrid(obj.GetPhaseShift(), grid, this, cell);
+
+            // refresh grid State & timer
+            if (grid.GetGridState() != GridState.Active)
+            {
+                Log.outDebug(LogFilter.Maps,
+                             "Active object {0} triggers loading of grid [{1}, {2}] on map {3}",
+                             obj.GetGUID(),
+                             cell.GetGridX(),
+                             cell.GetGridY(),
+                             GetId());
+
+                ResetGridExpiry(grid, 0.1f);
+                grid.SetGridState(GridState.Active);
+            }
+        }
+
+        private bool EnsureGridLoaded(Cell cell)
+        {
+            EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
+            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
+
+            if (!IsGridObjectDataLoaded(cell.GetGridX(), cell.GetGridY()))
+            {
+                Log.outDebug(LogFilter.Maps,
+                             "Loading grid[{0}, {1}] for map {2} instance {3}",
+                             cell.GetGridX(),
+                             cell.GetGridY(),
+                             GetId(),
+                             i_InstanceId);
+
+                SetGridObjectDataLoaded(true, cell.GetGridX(), cell.GetGridY());
+
+                LoadGridObjects(grid, cell);
+
+                Balance();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private void GridMarkNoUnload(uint x, uint y)
+        {
+            // First make sure this grid is loaded
+            float gX = (((float)x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
+            float gY = (((float)y - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
+            Cell cell = new(gX, gY);
+            EnsureGridLoaded(cell);
+
+            // Mark as don't unload
+            var grid = GetGrid(x, y);
+            grid.SetUnloadExplicitLock(true);
+        }
+
+        private void GridUnmarkNoUnload(uint x, uint y)
+        {
+            // If grid is loaded, clear unload lock
+            if (IsGridLoaded(new GridCoord(x, y)))
+            {
+                var grid = GetGrid(x, y);
+                grid.SetUnloadExplicitLock(false);
+            }
+        }
+
+        private void InitializeObject(WorldObject obj)
+        {
+            if (!obj.IsTypeId(TypeId.Unit) ||
+                !obj.IsTypeId(TypeId.GameObject))
+                return;
+
+            obj.MoveState = ObjectCellMoveState.None;
+        }
+
+        private void VisitNearbyCellsOf(WorldObject obj, Visitor gridVisitor, Visitor worldVisitor)
+        {
+            // Check for valid position
+            if (!obj.IsPositionValid())
+                return;
+
+            // Update mobs/objects in ALL visible cells around object!
+            CellArea area = Cell.CalculateCellArea(obj.GetPositionX(), obj.GetPositionY(), obj.GetGridActivationRange());
+
+            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
+            {
+                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
+                {
+                    // marked cells are those that have been visited
+                    // don't visit the same cell twice
+                    uint cell_id = (y * MapConst.TotalCellsPerMap) + x;
+
+                    if (IsCellMarked(cell_id))
+                        continue;
+
+                    MarkCell(cell_id);
+                    var pair = new CellCoord(x, y);
+                    var cell = new Cell(pair);
+                    cell.SetNoCreate();
+                    Visit(cell, gridVisitor);
+                    Visit(cell, worldVisitor);
+                }
+            }
+        }
+
+        private void ProcessRelocationNotifies(uint diff)
+        {
+            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            {
+                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                {
+                    Grid grid = GetGrid(x, y);
+
+                    if (grid == null)
+                        continue;
+
+                    if (grid.GetGridState() != GridState.Active)
+                        continue;
+
+                    grid.GetGridInfoRef().GetRelocationTimer().TUpdate((int)diff);
+
+                    if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
+                        continue;
+
+                    uint gx = grid.GetX();
+                    uint gy = grid.GetY();
+
+                    var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
+                    var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells, cell_min.Y_coord + MapConst.MaxCells);
+
+                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
+                    {
+                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
+                        {
+                            uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
+
+                            if (!IsCellMarked(cell_id))
+                                continue;
+
+                            var pair = new CellCoord(xx, yy);
+                            var cell = new Cell(pair);
+                            cell.SetNoCreate();
+
+                            var cell_relocation = new DelayedUnitRelocation(cell, pair, this, SharedConst.MaxVisibilityDistance);
+                            var grid_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllGrid);
+                            var world_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllWorld);
+
+                            Visit(cell, grid_object_relocation);
+                            Visit(cell, world_object_relocation);
+                        }
+                    }
+                }
+            }
+
+            var reset = new ResetNotifier();
+            var grid_notifier = new Visitor(reset, GridMapTypeMask.AllGrid);
+            var world_notifier = new Visitor(reset, GridMapTypeMask.AllWorld);
+
+            for (uint x = 0; x < MapConst.MaxGrids; ++x)
+            {
+                for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                {
+                    Grid grid = GetGrid(x, y);
+
+                    if (grid == null)
+                        continue;
+
+                    if (grid.GetGridState() != GridState.Active)
+                        continue;
+
+                    if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
+                        continue;
+
+                    grid.GetGridInfoRef().GetRelocationTimer().TReset((int)diff, _VisibilityNotifyPeriod);
+
+                    uint gx = grid.GetX();
+                    uint gy = grid.GetY();
+
+                    var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
+
+                    var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
+                                                 cell_min.Y_coord + MapConst.MaxCells);
+
+                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
+                    {
+                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
+                        {
+                            uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
+
+                            if (!IsCellMarked(cell_id))
+                                continue;
+
+                            var pair = new CellCoord(xx, yy);
+                            var cell = new Cell(pair);
+                            cell.SetNoCreate();
+                            Visit(cell, grid_notifier);
+                            Visit(cell, world_notifier);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool CheckGridIntegrity<T>(T obj, bool moved) where T : WorldObject
+        {
+            Cell cur_cell = obj.GetCurrentCell();
+            Cell xy_cell = new(obj.GetPositionX(), obj.GetPositionY());
+
+            if (xy_cell != cur_cell)
+            {
+                //$"grid[{GetGridX()}, {GetGridY()}]cell[{GetCellX()}, {GetCellY()}]";
+                Log.outDebug(LogFilter.Maps, $"{obj.GetTypeId()} ({obj.GetGUID()}) X: {obj.GetPositionX()} Y: {obj.GetPositionY()} ({(moved ? "final" : "original")}) is in {cur_cell} instead of {xy_cell}");
+
+                return true; // not crash at error, just output error in debug mode
+            }
+
+            return true;
         }
 
         private void AddCreatureToMoveList(Creature c, float x, float y, float z, float ang)
@@ -1512,406 +3542,9 @@ namespace Game.Maps
             return MapObjectCellRelocation(at, new_cell);
         }
 
-        public bool CreatureRespawnRelocation(Creature c, bool diffGridOnly)
-        {
-            var pos = c.GetRespawnPosition();
-            var resp_cell = new Cell(pos.X, pos.Y);
-
-            //creature will be unloaded with grid
-            if (diffGridOnly && !c.GetCurrentCell().DiffGrid(resp_cell))
-                return true;
-
-            c.CombatStop();
-            c.GetMotionMaster().Clear();
-
-            // teleport it to respawn point (like normal respawn if player see)
-            if (CreatureCellRelocation(c, resp_cell))
-            {
-                c.Relocate(pos.X, pos.Y, pos.Z, pos.Orientation);
-                c.GetMotionMaster().Initialize(); // prevent possible problems with default move generators
-                c.UpdatePositionData();
-                c.UpdateObjectVisibility(false);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool GameObjectRespawnRelocation(GameObject go, bool diffGridOnly)
-        {
-            float resp_x, resp_y, resp_z, resp_o;
-            go.GetRespawnPosition(out resp_x, out resp_y, out resp_z, out resp_o);
-            var resp_cell = new Cell(resp_x, resp_y);
-
-            //GameObject will be unloaded with grid
-            if (diffGridOnly && !go.GetCurrentCell().DiffGrid(resp_cell))
-                return true;
-
-            Log.outDebug(LogFilter.Maps,
-                         "GameObject (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to respawn grid[{4}, {5}].",
-                         go.GetGUID().ToString(),
-                         go.GetEntry(),
-                         go.GetCurrentCell().GetGridX(),
-                         go.GetCurrentCell().GetGridY(),
-                         resp_cell.GetGridX(),
-                         resp_cell.GetGridY());
-
-            // teleport it to respawn point (like normal respawn if player see)
-            if (GameObjectCellRelocation(go, resp_cell))
-            {
-                go.Relocate(resp_x, resp_y, resp_z, resp_o);
-                go.UpdatePositionData();
-                go.UpdateObjectVisibility(false);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool UnloadGrid(Grid grid, bool unloadAll)
-        {
-            uint x = grid.GetX();
-            uint y = grid.GetY();
-
-            if (!unloadAll)
-            {
-                //pets, possessed creatures (must be active), Transport passengers
-                if (grid.GetWorldObjectCountInNGrid<Creature>() != 0)
-                    return false;
-
-                if (ActiveObjectsNearGrid(grid))
-                    return false;
-            }
-
-            Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2}", x, y, GetId());
-
-            if (!unloadAll)
-            {
-                // Finish creature moves, remove and delete all creatures with delayed remove before moving to respawn grids
-                // Must know real mob position before move
-                MoveAllCreaturesInMoveList();
-                MoveAllGameObjectsInMoveList();
-                MoveAllAreaTriggersInMoveList();
-
-                // move creatures to respawn grids if this is diff.grid or to remove list
-                ObjectGridEvacuator worker = new();
-                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                grid.VisitAllGrids(visitor);
-
-                // Finish creature moves, remove and delete all creatures with delayed remove before unload
-                MoveAllCreaturesInMoveList();
-                MoveAllGameObjectsInMoveList();
-                MoveAllAreaTriggersInMoveList();
-            }
-
-            {
-                ObjectGridCleaner worker = new();
-                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                grid.VisitAllGrids(visitor);
-            }
-
-            RemoveAllObjectsInRemoveList();
-
-            // After removing all objects from the map, purge empty tracked phases
-            GetMultiPersonalPhaseTracker().UnloadGrid(grid);
-
-            {
-                ObjectGridUnloader worker = new();
-                var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
-                grid.VisitAllGrids(visitor);
-            }
-
-            Cypher.Assert(i_objectsToRemove.Empty());
-            SetGrid(null, x, y);
-
-            int gx = (int)((MapConst.MaxGrids - 1) - x);
-            int gy = (int)((MapConst.MaxGrids - 1) - y);
-
-            _terrain.UnloadMap(gx, gy);
-
-            Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
-
-            return true;
-        }
-
-        public virtual void RemoveAllPlayers()
-        {
-            if (HavePlayers())
-                foreach (Player pl in _activePlayers)
-                    if (!pl.IsBeingTeleportedFar())
-                    {
-                        // this is happening for bg
-                        Log.outError(LogFilter.Maps, $"Map.UnloadAll: player {pl.GetName()} is still in map {GetId()} during unload, this should not happen!");
-                        pl.TeleportTo(pl.GetHomebind());
-                    }
-        }
-
-        public void UnloadAll()
-        {
-            // clear all delayed moves, useless anyway do this moves before map unload.
-            creaturesToMove.Clear();
-            _gameObjectsToMove.Clear();
-
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
-            {
-                for (uint y = 0; y < MapConst.MaxGrids; ++y)
-                {
-                    var grid = GetGrid(x, y);
-
-                    if (grid == null)
-                        continue;
-
-                    UnloadGrid(grid, true); // deletes the grid and removes it from the GridRefManager
-                }
-            }
-
-            for (var i = 0; i < _transports.Count; ++i)
-                RemoveFromMap(_transports[i], true);
-
-            _transports.Clear();
-
-            foreach (var corpse in _corpsesByCell.Values.ToList())
-            {
-                corpse.RemoveFromWorld();
-                corpse.ResetMap();
-                corpse.Dispose();
-            }
-
-            _corpsesByCell.Clear();
-            _corpsesByPlayer.Clear();
-            _corpseBones.Clear();
-        }
-
-        public static bool IsInWMOInterior(uint mogpFlags)
-        {
-            return (mogpFlags & 0x2000) != 0;
-        }
-
-        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
-        {
-            _terrain.GetFullTerrainStatusForPosition(phaseShift, GetId(), x, y, z, data, reqLiquidType, collisionHeight, _dynamicTree);
-        }
-
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
-        {
-            return _terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, null, collisionHeight);
-        }
-
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
-        {
-            return _terrain.GetLiquidStatus(phaseShift, GetId(), x, y, z, reqLiquidType, data, collisionHeight);
-        }
-
         private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint mogpflags, out int adtId, out int rootId, out int groupId)
         {
             return _terrain.GetAreaInfo(phaseShift, GetId(), x, y, z, out mogpflags, out adtId, out rootId, out groupId, _dynamicTree);
-        }
-
-        public uint GetAreaId(PhaseShift phaseShift, Position pos)
-        {
-            return _terrain.GetAreaId(phaseShift, GetId(), pos.X, pos.Y, pos.Z, _dynamicTree);
-        }
-
-        public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
-        {
-            return _terrain.GetAreaId(phaseShift, GetId(), x, y, z, _dynamicTree);
-        }
-
-        public uint GetZoneId(PhaseShift phaseShift, Position pos)
-        {
-            return _terrain.GetZoneId(phaseShift, GetId(), pos.X, pos.Y, pos.Z, _dynamicTree);
-        }
-
-        public uint GetZoneId(PhaseShift phaseShift, float x, float y, float z)
-        {
-            return _terrain.GetZoneId(phaseShift, GetId(), x, y, z, _dynamicTree);
-        }
-
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos)
-        {
-            _terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, pos.X, pos.Y, pos.Z, _dynamicTree);
-        }
-
-        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, float x, float y, float z)
-        {
-            _terrain.GetZoneAndAreaId(phaseShift, GetId(), out zoneid, out areaid, x, y, z, _dynamicTree);
-        }
-
-        public float GetHeight(PhaseShift phaseShift, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
-        {
-            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), GetGameObjectFloor(phaseShift, x, y, z, maxSearchDist));
-        }
-
-        public float GetHeight(PhaseShift phaseShift, Position pos, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
-        {
-            return GetHeight(phaseShift, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist);
-        }
-
-        public float GetMinHeight(PhaseShift phaseShift, float x, float y)
-        {
-            return _terrain.GetMinHeight(phaseShift, GetId(), x, y);
-        }
-
-        public float GetGridHeight(PhaseShift phaseShift, float x, float y)
-        {
-            return _terrain.GetGridHeight(phaseShift, GetId(), x, y);
-        }
-
-        public float GetStaticHeight(PhaseShift phaseShift, float x, float y, float z, bool checkVMap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
-        {
-            return _terrain.GetStaticHeight(phaseShift, GetId(), x, y, z, checkVMap, maxSearchDist);
-        }
-
-        public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
-        {
-            return _terrain.GetWaterLevel(phaseShift, GetId(), x, y);
-        }
-
-        public bool IsInWater(PhaseShift phaseShift, float x, float y, float z, LiquidData data)
-        {
-            return _terrain.IsInWater(phaseShift, GetId(), x, y, z, data);
-        }
-
-        public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
-        {
-            return _terrain.IsUnderWater(phaseShift, GetId(), x, y, z);
-        }
-
-        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, float collisionHeight = MapConst.DefaultCollesionHeight)
-        {
-            float ground = 0;
-
-            return _terrain.GetWaterOrGroundLevel(phaseShift, GetId(), x, y, z, ref ground, false, collisionHeight, _dynamicTree);
-        }
-
-        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false, float collisionHeight = MapConst.DefaultCollesionHeight)
-        {
-            return _terrain.GetWaterOrGroundLevel(phaseShift, GetId(), x, y, z, ref ground, swim, collisionHeight, _dynamicTree);
-        }
-
-        public bool IsInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, LineOfSightChecks checks, ModelIgnoreFlags ignoreFlags)
-        {
-            if (checks.HasAnyFlag(LineOfSightChecks.Vmap) &&
-                !Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, GetId(), _terrain, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags))
-                return false;
-
-            if (WorldConfig.GetBoolValue(WorldCfg.CheckGobjectLos) &&
-                checks.HasAnyFlag(LineOfSightChecks.Gobject) &&
-                !_dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift))
-                return false;
-
-            return true;
-        }
-
-        public bool GetObjectHitPos(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
-        {
-            var startPos = new Vector3(x1, y1, z1);
-            var dstPos = new Vector3(x2, y2, z2);
-
-            var resultPos = new Vector3();
-            bool result = _dynamicTree.GetObjectHitPos(startPos, dstPos, ref resultPos, modifyDist, phaseShift);
-
-            rx = resultPos.X;
-            ry = resultPos.Y;
-            rz = resultPos.Z;
-
-            return result;
-        }
-
-        public static TransferAbortParams PlayerCannotEnter(uint mapid, Player player)
-        {
-            var entry = CliDB.MapStorage.LookupByKey(mapid);
-
-            if (entry == null)
-                return new TransferAbortParams(TransferAbortReason.MapNotAllowed);
-
-            if (!entry.IsDungeon())
-                return null;
-
-            Difficulty targetDifficulty = player.GetDifficultyID(entry);
-            // Get the highest available difficulty if current setting is higher than the instance allows
-            var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref targetDifficulty);
-
-            if (mapDiff == null)
-                return new TransferAbortParams(TransferAbortReason.Difficulty);
-
-            //Bypass checks for GMs
-            if (player.IsGameMaster())
-                return null;
-
-            //Other requirements
-            {
-                TransferAbortParams abortParams = new();
-
-                if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, abortParams, true))
-                    return abortParams;
-            }
-
-            Group group = player.GetGroup();
-
-            if (entry.IsRaid() &&
-                (int)entry.Expansion() >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
-                if ((!group || !group.IsRaidGroup()) &&
-                    !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
-                    return new TransferAbortParams(TransferAbortReason.NeedGroup);
-
-            if (entry.Instanceable())
-            {
-                //Get instance where player's group is bound & its map
-                uint instanceIdToCheck = Global.MapMgr.FindInstanceIdForPlayer(mapid, player);
-                Map boundMap = Global.MapMgr.FindMap(mapid, instanceIdToCheck);
-
-                if (boundMap != null)
-                {
-                    TransferAbortParams denyReason = boundMap.CannotEnter(player);
-
-                    if (denyReason != null)
-                        return denyReason;
-                }
-
-                // players are only allowed to enter 10 instances per hour
-                if (!entry.GetFlags2().HasFlag(MapFlags2.IgnoreInstanceFarmLimit) &&
-                    entry.IsDungeon() &&
-                    !player.CheckInstanceCount(instanceIdToCheck) &&
-                    !player.IsDead())
-                    return new TransferAbortParams(TransferAbortReason.TooManyInstances);
-            }
-
-            return null;
-        }
-
-        public string GetMapName()
-        {
-            return i_mapRecord.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
-        }
-
-        public void SendInitSelf(Player player)
-        {
-            var data = new UpdateData(player.GetMapId());
-
-            // attach to player _data current Transport _data
-            Transport transport = player.GetTransport<Transport>();
-
-            if (transport != null)
-            {
-                transport.BuildCreateUpdateBlockForPlayer(data, player);
-                player.VisibleTransports.Add(transport.GetGUID());
-            }
-
-            player.BuildCreateUpdateBlockForPlayer(data, player);
-
-            // build other passengers at Transport also (they always visible and marked as visible and will not send at visibility update at add to map
-            if (transport != null)
-                foreach (WorldObject passenger in transport.GetPassengers())
-                    if (player != passenger &&
-                        player.HaveAtClient(passenger))
-                        passenger.BuildCreateUpdateBlockForPlayer(data, player);
-
-            UpdateObject packet;
-            data.BuildPacket(out packet);
-            player.SendPacket(packet);
         }
 
         private void SendInitTransports(Player player)
@@ -1943,38 +3576,6 @@ namespace Game.Maps
                     transport.BuildOutOfRangeUpdateBlock(transData);
                     player.VisibleTransports.Remove(transport.GetGUID());
                 }
-
-            UpdateObject packet;
-            transData.BuildPacket(out packet);
-            player.SendPacket(packet);
-        }
-
-        public void SendUpdateTransportVisibility(Player player)
-        {
-            // Hack to send out transports
-            UpdateData transData = new(player.GetMapId());
-
-            foreach (var transport in _transports)
-            {
-                if (!transport.IsInWorld)
-                    continue;
-
-                var hasTransport = player.VisibleTransports.Contains(transport.GetGUID());
-
-                if (player.InSamePhase(transport))
-                {
-                    if (!hasTransport)
-                    {
-                        transport.BuildCreateUpdateBlockForPlayer(transData, player);
-                        player.VisibleTransports.Add(transport.GetGUID());
-                    }
-                }
-                else
-                {
-                    transport.BuildOutOfRangeUpdateBlock(transData);
-                    player.VisibleTransports.Remove(transport.GetGUID());
-                }
-            }
 
             UpdateObject packet;
             transData.BuildPacket(out packet);
@@ -2101,34 +3702,6 @@ namespace Game.Maps
             return true;
         }
 
-        public void Respawn(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null)
-        {
-            RespawnInfo info = GetRespawnInfo(type, spawnId);
-
-            if (info != null)
-                Respawn(info, dbTrans);
-        }
-
-        public void Respawn(RespawnInfo info, SQLTransaction dbTrans = null)
-        {
-            if (info.respawnTime <= GameTime.GetGameTime())
-                return;
-
-            info.respawnTime = GameTime.GetGameTime();
-            SaveRespawnInfoDB(info, dbTrans);
-        }
-
-        public void RemoveRespawnTime(SpawnObjectType type, ulong spawnId, SQLTransaction dbTrans = null, bool alwaysDeleteFromDB = false)
-        {
-            RespawnInfo info = GetRespawnInfo(type, spawnId);
-
-            if (info != null)
-                DeleteRespawnInfo(info, dbTrans);
-            // Some callers might need to make sure the database doesn't contain any respawn Time
-            else if (alwaysDeleteFromDB)
-                DeleteRespawnInfoFromDB(type, spawnId, dbTrans);
-        }
-
         private int DespawnAll(SpawnObjectType type, ulong spawnId)
         {
             List<WorldObject> toUnload = new();
@@ -2200,30 +3773,6 @@ namespace Game.Maps
         {
             foreach (var pair in map)
                 data.Add(pair.Value);
-        }
-
-        public void GetRespawnInfo(List<RespawnInfo> respawnData, SpawnObjectTypeMask types)
-        {
-            if ((types & SpawnObjectTypeMask.Creature) != 0)
-                PushRespawnInfoFrom(respawnData, _creatureRespawnTimesBySpawnId);
-
-            if ((types & SpawnObjectTypeMask.GameObject) != 0)
-                PushRespawnInfoFrom(respawnData, _gameObjectRespawnTimesBySpawnId);
-        }
-
-        public RespawnInfo GetRespawnInfo(SpawnObjectType type, ulong spawnId)
-        {
-            var map = GetRespawnMapForType(type);
-
-            if (map == null)
-                return null;
-
-            var respawnInfo = map.LookupByKey(spawnId);
-
-            if (respawnInfo == null)
-                return null;
-
-            return respawnInfo;
         }
 
         private Dictionary<ulong, RespawnInfo> GetRespawnMapForType(SpawnObjectType type)
@@ -2374,64 +3923,6 @@ namespace Game.Maps
             }
         }
 
-        public void ApplyDynamicModeRespawnScaling(WorldObject obj, ulong spawnId, ref uint respawnDelay, uint mode)
-        {
-            Cypher.Assert(mode == 1);
-            Cypher.Assert(obj.GetMap() == this);
-
-            if (IsBattlegroundOrArena())
-                return;
-
-            SpawnObjectType type;
-
-            switch (obj.GetTypeId())
-            {
-                case TypeId.Unit:
-                    type = SpawnObjectType.Creature;
-
-                    break;
-                case TypeId.GameObject:
-                    type = SpawnObjectType.GameObject;
-
-                    break;
-                default:
-                    return;
-            }
-
-            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
-
-            if (data == null)
-                return;
-
-            if (!data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.DynamicSpawnRate))
-                return;
-
-            if (!_zonePlayerCountMap.ContainsKey(obj.GetZoneId()))
-                return;
-
-            uint playerCount = _zonePlayerCountMap[obj.GetZoneId()];
-
-            if (playerCount == 0)
-                return;
-
-            double adjustFactor = WorldConfig.GetFloatValue(type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicRateGameobject : WorldCfg.RespawnDynamicRateCreature) / playerCount;
-
-            if (adjustFactor >= 1.0) // nothing to do here
-                return;
-
-            uint timeMinimum = WorldConfig.GetUIntValue(type == SpawnObjectType.GameObject ? WorldCfg.RespawnDynamicMinimumGameObject : WorldCfg.RespawnDynamicMinimumCreature);
-
-            if (respawnDelay <= timeMinimum)
-                return;
-
-            respawnDelay = (uint)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
-        }
-
-        public bool ShouldBeSpawnedOnGridLoad<T>(ulong spawnId)
-        {
-            return ShouldBeSpawnedOnGridLoad(SpawnData.TypeFor<T>(), spawnId);
-        }
-
         private bool ShouldBeSpawnedOnGridLoad(SpawnObjectType type, ulong spawnId)
         {
             Cypher.Assert(SpawnMetadata.TypeHasData(type));
@@ -2464,265 +3955,6 @@ namespace Game.Maps
                 return data;
 
             return null;
-        }
-
-        public bool SpawnGroupSpawn(uint groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
-        {
-            var groupData = GetSpawnGroupData(groupId);
-
-            if (groupData == null ||
-                groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
-            {
-                Log.outError(LogFilter.Maps, $"Tried to spawn non-existing (or system) spawn group {groupId}. on map {GetId()} Blocked.");
-
-                return false;
-            }
-
-            SetSpawnGroupActive(groupId, true); // start processing respawns for the group
-
-            List<SpawnData> toSpawn = new();
-
-            foreach (var data in Global.ObjectMgr.GetSpawnMetadataForGroup(groupId))
-            {
-                Cypher.Assert(groupData.mapId == data.MapId);
-
-                var respawnMap = GetRespawnMapForType(data.type);
-
-                if (respawnMap == null)
-                    continue;
-
-                if (force || ignoreRespawn)
-                    RemoveRespawnTime(data.type, data.SpawnId);
-
-                bool hasRespawnTimer = respawnMap.ContainsKey(data.SpawnId);
-
-                if (SpawnMetadata.TypeHasData(data.type))
-                {
-                    // has a respawn timer
-                    if (hasRespawnTimer)
-                        continue;
-
-                    // has a spawn already active
-                    if (!force)
-                    {
-                        WorldObject obj = GetWorldObjectBySpawnId(data.type, data.SpawnId);
-
-                        if (obj != null)
-                            if ((data.type != SpawnObjectType.Creature) ||
-                                obj.ToCreature().IsAlive())
-                                continue;
-                    }
-
-                    toSpawn.Add(data.ToSpawnData());
-                }
-            }
-
-            foreach (SpawnData data in toSpawn)
-            {
-                // don't spawn if the current map difficulty is not used by the spawn
-                if (!data.SpawnDifficulties.Contains(GetDifficultyID()))
-                    continue;
-
-                // don't spawn if the grid isn't loaded (will be handled in grid loader)
-                if (!IsGridLoaded(data.SpawnPoint))
-                    continue;
-
-                // now do the actual (re)spawn
-                switch (data.type)
-                {
-                    case SpawnObjectType.Creature:
-                        {
-                            Creature creature = new();
-
-                            if (!creature.LoadFromDB(data.SpawnId, this, true, force))
-                                creature.Dispose();
-                            else spawnedObjects?.Add(creature);
-
-                            break;
-                        }
-                    case SpawnObjectType.GameObject:
-                        {
-                            GameObject gameobject = new();
-
-                            if (!gameobject.LoadFromDB(data.SpawnId, this, true))
-                                gameobject.Dispose();
-                            else spawnedObjects?.Add(gameobject);
-
-                            break;
-                        }
-                    case SpawnObjectType.AreaTrigger:
-                        {
-                            AreaTrigger areaTrigger = new();
-
-                            if (!areaTrigger.LoadFromDB(data.SpawnId, this, true, false))
-                                areaTrigger.Dispose();
-                            else spawnedObjects?.Add(areaTrigger);
-
-                            break;
-                        }
-                    default:
-                        Cypher.Assert(false, $"Invalid spawn Type {data.type} with spawnId {data.SpawnId}");
-
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes = false)
-        {
-            return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
-        }
-
-        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes, out int count)
-        {
-            count = 0;
-            SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
-
-            if (groupData == null ||
-                groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
-            {
-                Log.outError(LogFilter.Maps, $"Tried to despawn non-existing (or system) spawn group {groupId} on map {GetId()}. Blocked.");
-
-                return false;
-            }
-
-            foreach (var data in Global.ObjectMgr.GetSpawnMetadataForGroup(groupId))
-            {
-                Cypher.Assert(groupData.mapId == data.MapId);
-
-                if (deleteRespawnTimes)
-                    RemoveRespawnTime(data.type, data.SpawnId);
-
-                count += DespawnAll(data.type, data.SpawnId);
-            }
-
-            SetSpawnGroupActive(groupId, false); // stop processing respawns for the group, too
-
-            return true;
-        }
-
-        public void SetSpawnGroupActive(uint groupId, bool state)
-        {
-            SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
-
-            if (data == null ||
-                data.flags.HasAnyFlag(SpawnGroupFlags.System))
-            {
-                Log.outError(LogFilter.Maps, $"Tried to set non-existing (or system) spawn group {groupId} to {(state ? "active" : "inactive")} on map {GetId()}. Blocked.");
-
-                return;
-            }
-
-            if (state != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn)) // toggled
-                _toggledSpawnGroupIds.Add(groupId);
-            else
-                _toggledSpawnGroupIds.Remove(groupId);
-        }
-
-        // Disable the spawn group, which prevents any creatures in the group from respawning until re-enabled
-        // This will not affect any already-present creatures in the group
-        public void SetSpawnGroupInactive(uint groupId)
-        {
-            SetSpawnGroupActive(groupId, false);
-        }
-
-        public bool IsSpawnGroupActive(uint groupId)
-        {
-            SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
-
-            if (data == null)
-            {
-                Log.outError(LogFilter.Maps, $"Tried to query State of non-existing spawn group {groupId} on map {GetId()}.");
-
-                return false;
-            }
-
-            if (data.flags.HasAnyFlag(SpawnGroupFlags.System))
-                return true;
-
-            // either manual spawn group and toggled, or not manual spawn group and not toggled...
-            return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
-        }
-
-        public void UpdateSpawnGroupConditions()
-        {
-            var spawnGroups = Global.ObjectMgr.GetSpawnGroupsForMap(GetId());
-
-            foreach (uint spawnGroupId in spawnGroups)
-            {
-                SpawnGroupTemplateData spawnGroupTemplate = GetSpawnGroupData(spawnGroupId);
-
-                if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.ManualSpawn))
-                    continue;
-
-                bool isActive = IsSpawnGroupActive(spawnGroupId);
-                bool shouldBeActive = Global.ConditionMgr.IsMapMeetingNotGroupedConditions(ConditionSourceType.SpawnGroup, spawnGroupId, this);
-
-                if (isActive == shouldBeActive)
-                    continue;
-
-                if (shouldBeActive)
-                    SpawnGroupSpawn(spawnGroupId);
-                else if (spawnGroupTemplate.flags.HasFlag(SpawnGroupFlags.DespawnOnConditionFailure))
-                    SpawnGroupDespawn(spawnGroupId, true);
-                else
-                    SetSpawnGroupInactive(spawnGroupId);
-            }
-        }
-
-        public void AddFarSpellCallback(FarSpellCallback callback)
-        {
-            _farSpellCallbacks.Enqueue(new FarSpellCallback(callback));
-        }
-
-        public virtual void DelayedUpdate(uint diff)
-        {
-            while (_farSpellCallbacks.TryDequeue(out FarSpellCallback callback))
-                callback(this);
-
-            RemoveAllObjectsInRemoveList();
-
-            // Don't unload grids if it's Battleground, since we may have manually added GOs, creatures, those doesn't load from DB at grid re-load !
-            // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
-            if (!IsBattlegroundOrArena())
-                for (uint x = 0; x < MapConst.MaxGrids; ++x)
-                {
-                    for (uint y = 0; y < MapConst.MaxGrids; ++y)
-                    {
-                        Grid grid = GetGrid(x, y);
-
-                        grid?.Update(this, diff);
-                    }
-                }
-        }
-
-        public void AddObjectToRemoveList(WorldObject obj)
-        {
-            Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
-
-            obj.SetDestroyedObject(true);
-            obj.CleanupsBeforeDelete(false); // remove or simplify at least cross referenced links
-
-            i_objectsToRemove.Add(obj);
-        }
-
-        public void AddObjectToSwitchList(WorldObject obj, bool on)
-        {
-            Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
-
-            // i_objectsToSwitch is iterated only in Map::RemoveAllObjectsInRemoveList() and it uses
-            // the contained objects only if GetTypeId() == TYPEID_UNIT , so we can return in all other cases
-            if (!obj.IsTypeId(TypeId.Unit))
-                return;
-
-            if (!i_objectsToSwitch.ContainsKey(obj))
-                i_objectsToSwitch.Add(obj, on);
-            else if (i_objectsToSwitch[obj] != on)
-                i_objectsToSwitch.Remove(obj);
-            else
-                Cypher.Assert(false);
         }
 
         private void RemoveAllObjectsInRemoveList()
@@ -2802,389 +4034,14 @@ namespace Game.Maps
             }
         }
 
-        public uint GetPlayersCountExceptGMs()
-        {
-            uint count = 0;
-
-            foreach (Player pl in _activePlayers)
-                if (!pl.IsGameMaster())
-                    ++count;
-
-            return count;
-        }
-
-        public void SendToPlayers(ServerPacket data)
-        {
-            foreach (Player pl in _activePlayers)
-                pl.SendPacket(data);
-        }
-
-        public bool ActiveObjectsNearGrid(Grid grid)
-        {
-            var cell_min = new CellCoord(grid.GetX() * MapConst.MaxCells,
-                                         grid.GetY() * MapConst.MaxCells);
-
-            var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
-                                         cell_min.Y_coord + MapConst.MaxCells);
-
-            //we must find visible range in cells so we unload only non-visible cells...
-            float viewDist = GetVisibilityRange();
-            uint cell_range = (uint)Math.Ceiling(viewDist / MapConst.SizeofCells) + 1;
-
-            cell_min.Dec_x(cell_range);
-            cell_min.Dec_y(cell_range);
-            cell_max.Inc_x(cell_range);
-            cell_max.Inc_y(cell_range);
-
-            foreach (Player pl in _activePlayers)
-            {
-                CellCoord p = GridDefines.ComputeCellCoord(pl.GetPositionX(), pl.GetPositionY());
-
-                if ((cell_min.X_coord <= p.X_coord && p.X_coord <= cell_max.X_coord) &&
-                    (cell_min.Y_coord <= p.Y_coord && p.Y_coord <= cell_max.Y_coord))
-                    return true;
-            }
-
-            foreach (WorldObject obj in _activeNonPlayers)
-            {
-                CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
-
-                if ((cell_min.X_coord <= p.X_coord && p.X_coord <= cell_max.X_coord) &&
-                    (cell_min.Y_coord <= p.Y_coord && p.Y_coord <= cell_max.Y_coord))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public void AddToActive(WorldObject obj)
-        {
-            AddToActiveHelper(obj);
-
-            Position respawnLocation = null;
-
-            switch (obj.GetTypeId())
-            {
-                case TypeId.Unit:
-                    Creature creature = obj.ToCreature();
-
-                    if (creature != null &&
-                        !creature.IsPet() &&
-                        creature.GetSpawnId() != 0)
-                    {
-                        respawnLocation = creature.GetRespawnPosition();
-                    }
-
-                    break;
-                case TypeId.GameObject:
-                    GameObject gameObject = obj.ToGameObject();
-                    ;
-
-                    if (gameObject != null &&
-                        gameObject.GetSpawnId() != 0)
-                    {
-                        respawnLocation = new Position();
-                        gameObject.GetRespawnPosition(out respawnLocation.X, out respawnLocation.Y, out respawnLocation.Z, out _);
-                    }
-
-                    break;
-                default:
-                    break;
-            }
-
-            if (respawnLocation != null)
-            {
-                GridCoord p = GridDefines.ComputeGridCoord(respawnLocation.GetPositionX(), respawnLocation.GetPositionY());
-
-                if (GetGrid(p.X_coord, p.Y_coord) != null)
-                {
-                    GetGrid(p.X_coord, p.Y_coord).IncUnloadActiveLock();
-                }
-                else
-                {
-                    GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
-                    Log.outError(LogFilter.Maps, $"Active object {obj.GetGUID()} added to grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
-                }
-            }
-        }
-
         private void AddToActiveHelper(WorldObject obj)
         {
             _activeNonPlayers.Add(obj);
         }
 
-        public void RemoveFromActive(WorldObject obj)
-        {
-            RemoveFromActiveHelper(obj);
-
-            Position respawnLocation = null;
-
-            switch (obj.GetTypeId())
-            {
-                case TypeId.Unit:
-                    Creature creature = obj.ToCreature();
-
-                    if (creature != null &&
-                        !creature.IsPet() &&
-                        creature.GetSpawnId() != 0)
-                    {
-                        respawnLocation = creature.GetRespawnPosition();
-                    }
-
-                    break;
-                case TypeId.GameObject:
-                    GameObject gameObject = obj.ToGameObject();
-
-                    if (gameObject != null &&
-                        gameObject.GetSpawnId() != 0)
-                    {
-                        respawnLocation = new Position();
-                        gameObject.GetRespawnPosition(out respawnLocation.X, out respawnLocation.Y, out respawnLocation.Z, out _);
-                    }
-
-                    break;
-                default:
-                    break;
-            }
-
-            if (respawnLocation != null)
-            {
-                GridCoord p = GridDefines.ComputeGridCoord(respawnLocation.GetPositionX(), respawnLocation.GetPositionY());
-
-                if (GetGrid(p.X_coord, p.Y_coord) != null)
-                {
-                    GetGrid(p.X_coord, p.Y_coord).DecUnloadActiveLock();
-                }
-                else
-                {
-                    GridCoord p2 = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
-                    Log.outDebug(LogFilter.Maps, $"Active object {obj.GetGUID()} removed from grid[{p.X_coord}, {p.Y_coord}] but spawn grid[{p2.X_coord}, {p2.Y_coord}] was not loaded.");
-                }
-            }
-        }
-
         private void RemoveFromActiveHelper(WorldObject obj)
         {
             _activeNonPlayers.Remove(obj);
-        }
-
-        public void SaveRespawnTime(SpawnObjectType type, ulong spawnId, uint entry, long respawnTime, uint gridId = 0, SQLTransaction dbTrans = null, bool startup = false)
-        {
-            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(type, spawnId);
-
-            if (data == null)
-            {
-                Log.outError(LogFilter.Maps, $"Map {GetId()} attempt to save respawn Time for nonexistant spawnid ({type},{spawnId}).");
-
-                return;
-            }
-
-            if (respawnTime == 0)
-            {
-                // Delete only
-                RemoveRespawnTime(data.type, data.SpawnId, dbTrans);
-
-                return;
-            }
-
-            RespawnInfo ri = new();
-            ri.type = data.type;
-            ri.spawnId = data.SpawnId;
-            ri.entry = entry;
-            ri.respawnTime = respawnTime;
-            ri.gridId = gridId;
-            bool success = AddRespawnInfo(ri);
-
-            if (startup)
-            {
-                if (!success)
-                    Log.outError(LogFilter.Maps, $"Attempt to load saved respawn {respawnTime} for ({type},{spawnId}) failed - duplicate respawn? Skipped.");
-            }
-            else if (success)
-            {
-                SaveRespawnInfoDB(ri, dbTrans);
-            }
-        }
-
-        public void SaveRespawnInfoDB(RespawnInfo info, SQLTransaction dbTrans = null)
-        {
-            if (Instanceable())
-                return;
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_RESPAWN);
-            stmt.AddValue(0, (ushort)info.type);
-            stmt.AddValue(1, info.spawnId);
-            stmt.AddValue(2, info.respawnTime);
-            stmt.AddValue(3, GetId());
-            stmt.AddValue(4, GetInstanceId());
-            DB.Characters.ExecuteOrAppend(dbTrans, stmt);
-        }
-
-        public void LoadRespawnTimes()
-        {
-            if (Instanceable())
-                return;
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_RESPAWNS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-            SQLResult result = DB.Characters.Query(stmt);
-
-            if (!result.IsEmpty())
-                do
-                {
-                    SpawnObjectType type = (SpawnObjectType)result.Read<ushort>(0);
-                    var spawnId = result.Read<ulong>(1);
-                    var respawnTime = result.Read<long>(2);
-
-                    if (SpawnMetadata.TypeHasData(type))
-                    {
-                        SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
-
-                        if (data != null)
-                            SaveRespawnTime(type, spawnId, data.Id, respawnTime, GridDefines.ComputeGridCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId(), null, true);
-                        else
-                            Log.outError(LogFilter.Maps, $"Loading saved respawn Time of {respawnTime} for spawnid ({type},{spawnId}) - spawn does not exist, ignoring");
-                    }
-                    else
-                    {
-                        Log.outError(LogFilter.Maps, $"Loading saved respawn Time of {respawnTime} for spawnid ({type},{spawnId}) - invalid spawn Type, ignoring");
-                    }
-                } while (result.NextRow());
-        }
-
-        public void DeleteRespawnTimes()
-        {
-            UnloadAllRespawnInfos();
-            DeleteRespawnTimesInDB();
-        }
-
-        public void DeleteRespawnTimesInDB()
-        {
-            if (Instanceable())
-                return;
-
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_RESPAWNS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-            DB.Characters.Execute(stmt);
-        }
-
-        public long GetLinkedRespawnTime(ObjectGuid guid)
-        {
-            ObjectGuid linkedGuid = Global.ObjectMgr.GetLinkedRespawnGuid(guid);
-
-            switch (linkedGuid.GetHigh())
-            {
-                case HighGuid.Creature:
-                    return GetCreatureRespawnTime(linkedGuid.GetCounter());
-                case HighGuid.GameObject:
-                    return GetGORespawnTime(linkedGuid.GetCounter());
-                default:
-                    break;
-            }
-
-            return 0L;
-        }
-
-        public void LoadCorpseData()
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSES);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-
-            //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
-            // SELECT X, Y, Z, orientation, mapId, displayId, itemCache, race, class, Gender, Flags, dynFlags, Time, corpseType, InstanceId, Guid FROM corpse WHERE mapId = ? AND InstanceId = ?
-            SQLResult result = DB.Characters.Query(stmt);
-
-            if (result.IsEmpty())
-                return;
-
-            MultiMap<ulong, uint> phases = new();
-            MultiMap<ulong, ChrCustomizationChoice> customizations = new();
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-
-            //        0          1
-            // SELECT OwnerGuid, PhaseId FROM corpse_phases cp LEFT JOIN corpse c ON cp.OwnerGuid = c.Guid WHERE c.mapId = ? AND c.InstanceId = ?
-            SQLResult phaseResult = DB.Characters.Query(stmt);
-
-            if (!phaseResult.IsEmpty())
-                do
-                {
-                    ulong guid = phaseResult.Read<ulong>(0);
-                    uint phaseId = phaseResult.Read<uint>(1);
-
-                    phases.Add(guid, phaseId);
-                } while (phaseResult.NextRow());
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_CUSTOMIZATIONS);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-
-            //        0             1                            2
-            // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.Guid WHERE c.mapId = ? AND c.InstanceId = ?
-            SQLResult customizationResult = DB.Characters.Query(stmt);
-
-            if (!customizationResult.IsEmpty())
-                do
-                {
-                    ulong guid = customizationResult.Read<ulong>(0);
-
-                    ChrCustomizationChoice choice = new();
-                    choice.ChrCustomizationOptionID = customizationResult.Read<uint>(1);
-                    choice.ChrCustomizationChoiceID = customizationResult.Read<uint>(2);
-                    customizations.Add(guid, choice);
-                } while (customizationResult.NextRow());
-
-            do
-            {
-                CorpseType type = (CorpseType)result.Read<byte>(13);
-                ulong guid = result.Read<ulong>(15);
-
-                if (type >= CorpseType.Max ||
-                    type == CorpseType.Bones)
-                {
-                    Log.outError(LogFilter.Maps, "Corpse (Guid: {0}) have wrong corpse Type ({1}), not loading.", guid, type);
-
-                    continue;
-                }
-
-                Corpse corpse = new(type);
-
-                if (!corpse.LoadCorpseFromDB(GenerateLowGuid(HighGuid.Corpse), result.GetFields()))
-                    continue;
-
-                foreach (var phaseId in phases[guid])
-                    PhasingHandler.AddPhase(corpse, phaseId, false);
-
-                corpse.SetCustomizations(customizations[guid]);
-
-                AddCorpse(corpse);
-            } while (result.NextRow());
-        }
-
-        public void DeleteCorpseData()
-        {
-            // DELETE cp, c FROM corpse_phases cp INNER JOIN corpse c ON cp.OwnerGuid = c.Guid WHERE c.mapId = ? AND c.InstanceId = ?
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSES_FROM_MAP);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
-            DB.Characters.Execute(stmt);
-        }
-
-        public void AddCorpse(Corpse corpse)
-        {
-            corpse.SetMap(this);
-
-            _corpsesByCell.Add(corpse.GetCellCoord().GetId(), corpse);
-
-            if (corpse.GetCorpseType() != CorpseType.Bones)
-                _corpsesByPlayer[corpse.GetOwnerGUID()] = corpse;
-            else
-                _corpseBones.Add(corpse);
         }
 
         private void RemoveCorpse(Corpse corpse)
@@ -3211,130 +4068,6 @@ namespace Game.Maps
                 _corpseBones.Remove(corpse);
         }
 
-        public Corpse ConvertCorpseToBones(ObjectGuid ownerGuid, bool insignia = false)
-        {
-            Corpse corpse = GetCorpseByPlayer(ownerGuid);
-
-            if (!corpse)
-                return null;
-
-            RemoveCorpse(corpse);
-
-            // remove corpse from DB
-            SQLTransaction trans = new();
-            corpse.DeleteFromDB(trans);
-            DB.Characters.CommitTransaction(trans);
-
-            Corpse bones = null;
-
-            // create the bones only if the map and the grid is loaded at the corpse's location
-            // ignore bones creating option in case insignia
-            if ((insignia ||
-                 (IsBattlegroundOrArena() ? WorldConfig.GetBoolValue(WorldCfg.DeathBonesBgOrArena) : WorldConfig.GetBoolValue(WorldCfg.DeathBonesWorld))) &&
-                !IsRemovalGrid(corpse.GetPositionX(), corpse.GetPositionY()))
-            {
-                // Create bones, don't change Corpse
-                bones = new Corpse();
-                bones.Create(corpse.GetGUID().GetCounter(), this);
-
-                bones.ReplaceAllCorpseDynamicFlags((CorpseDynFlags)(byte)corpse.CorpseData.DynamicFlags);
-                bones.SetOwnerGUID(corpse.CorpseData.Owner);
-                bones.SetPartyGUID(corpse.CorpseData.PartyGUID);
-                bones.SetGuildGUID(corpse.CorpseData.GuildGUID);
-                bones.SetDisplayId(corpse.CorpseData.DisplayID);
-                bones.SetRace(corpse.CorpseData.RaceID);
-                bones.SetSex(corpse.CorpseData.Sex);
-                bones.SetClass(corpse.CorpseData.Class);
-                bones.SetCustomizations(corpse.CorpseData.Customizations);
-                bones.ReplaceAllFlags((CorpseFlags)(corpse.CorpseData.Flags | (uint)CorpseFlags.Bones));
-                bones.SetFactionTemplate(corpse.CorpseData.FactionTemplate);
-
-                for (int i = 0; i < EquipmentSlot.End; ++i)
-                    bones.SetItem((uint)i, corpse.CorpseData.Items[i]);
-
-                bones.SetCellCoord(corpse.GetCellCoord());
-                bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());
-
-                PhasingHandler.InheritPhaseShift(bones, corpse);
-
-                AddCorpse(bones);
-
-                bones.UpdatePositionData();
-                bones.SetZoneScript();
-
-                // add bones in grid store if grid loaded where corpse placed
-                AddToMap(bones);
-            }
-
-            // all references to the corpse should be removed at this point
-            corpse.Dispose();
-
-            return bones;
-        }
-
-        public void RemoveOldCorpses()
-        {
-            long now = GameTime.GetGameTime();
-
-            List<ObjectGuid> corpses = new();
-
-            foreach (var p in _corpsesByPlayer)
-                if (p.Value.IsExpired(now))
-                    corpses.Add(p.Key);
-
-            foreach (ObjectGuid ownerGuid in corpses)
-                ConvertCorpseToBones(ownerGuid);
-
-            List<Corpse> expiredBones = new();
-
-            foreach (Corpse bones in _corpseBones)
-                if (bones.IsExpired(now))
-                    expiredBones.Add(bones);
-
-            foreach (Corpse bones in expiredBones)
-            {
-                RemoveCorpse(bones);
-                bones.Dispose();
-            }
-        }
-
-        public void SendZoneDynamicInfo(uint zoneId, Player player)
-        {
-            var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
-
-            if (zoneInfo == null)
-                return;
-
-            uint music = zoneInfo.MusicId;
-
-            if (music != 0)
-                player.SendPacket(new PlayMusic(music));
-
-            SendZoneWeather(zoneInfo, player);
-
-            foreach (var lightOverride in zoneInfo.LightOverrides)
-            {
-                OverrideLight overrideLight = new();
-                overrideLight.AreaLightID = lightOverride.AreaLightId;
-                overrideLight.OverrideLightID = lightOverride.OverrideLightId;
-                overrideLight.TransitionMilliseconds = lightOverride.TransitionMilliseconds;
-                player.SendPacket(overrideLight);
-            }
-        }
-
-        public void SendZoneWeather(uint zoneId, Player player)
-        {
-            if (!player.HasAuraType(AuraType.ForceWeather))
-            {
-                var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
-
-                if (zoneInfo == null)
-                    return;
-
-                SendZoneWeather(zoneInfo, player);
-            }
-        }
-
         private void SendZoneWeather(ZoneDynamicInfo zoneDynamicInfo, Player player)
         {
             WeatherState weatherId = zoneDynamicInfo.WeatherId;
@@ -3354,173 +4087,6 @@ namespace Game.Maps
             }
         }
 
-        public void SetZoneMusic(uint zoneId, uint musicId)
-        {
-            if (!_zoneDynamicInfo.ContainsKey(zoneId))
-                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
-
-            _zoneDynamicInfo[zoneId].MusicId = musicId;
-
-            var players = GetPlayers();
-
-            if (!players.Empty())
-            {
-                PlayMusic playMusic = new(musicId);
-
-                foreach (var player in players)
-                    if (player.GetZoneId() == zoneId &&
-                        !player.HasAuraType(AuraType.ForceWeather))
-                        player.SendPacket(playMusic);
-            }
-        }
-
-        public Weather GetOrGenerateZoneDefaultWeather(uint zoneId)
-        {
-            WeatherData weatherData = Global.WeatherMgr.GetWeatherData(zoneId);
-
-            if (weatherData == null)
-                return null;
-
-            if (!_zoneDynamicInfo.ContainsKey(zoneId))
-                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
-
-            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
-
-            if (info.DefaultWeather == null)
-            {
-                info.DefaultWeather = new Weather(zoneId, weatherData);
-                info.DefaultWeather.ReGenerate();
-                info.DefaultWeather.UpdateWeather();
-            }
-
-            return info.DefaultWeather;
-        }
-
-        public WeatherState GetZoneWeather(uint zoneId)
-        {
-            ZoneDynamicInfo zoneDynamicInfo = _zoneDynamicInfo.LookupByKey(zoneId);
-
-            if (zoneDynamicInfo != null)
-            {
-                if (zoneDynamicInfo.WeatherId != 0)
-                    return zoneDynamicInfo.WeatherId;
-
-                if (zoneDynamicInfo.DefaultWeather != null)
-                    return zoneDynamicInfo.DefaultWeather.GetWeatherState();
-            }
-
-            return WeatherState.Fine;
-        }
-
-        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float intensity)
-        {
-            if (!_zoneDynamicInfo.ContainsKey(zoneId))
-                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
-
-            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
-            info.WeatherId = weatherId;
-            info.Intensity = intensity;
-
-            var players = GetPlayers();
-
-            if (!players.Empty())
-            {
-                WeatherPkt weather = new(weatherId, intensity);
-
-                foreach (var player in players)
-                    if (player.GetZoneId() == zoneId)
-                        player.SendPacket(weather);
-            }
-        }
-
-        public void SetZoneOverrideLight(uint zoneId, uint areaLightId, uint overrideLightId, TimeSpan transitionTime)
-        {
-            if (!_zoneDynamicInfo.ContainsKey(zoneId))
-                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
-
-            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
-            // client can support only one override for each light (zone independent)
-            info.LightOverrides.RemoveAll(lightOverride => lightOverride.AreaLightId == areaLightId);
-
-            // set new override (if any)
-            if (overrideLightId != 0)
-            {
-                ZoneDynamicInfo.LightOverride lightOverride = new();
-                lightOverride.AreaLightId = areaLightId;
-                lightOverride.OverrideLightId = overrideLightId;
-                lightOverride.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
-                info.LightOverrides.Add(lightOverride);
-            }
-
-            var players = GetPlayers();
-
-            if (!players.Empty())
-            {
-                OverrideLight overrideLight = new();
-                overrideLight.AreaLightID = areaLightId;
-                overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
-
-                foreach (var player in players)
-                    if (player.GetZoneId() == zoneId)
-                        player.SendPacket(overrideLight);
-            }
-        }
-
-        public void UpdateAreaDependentAuras()
-        {
-            var players = GetPlayers();
-
-            foreach (var player in players)
-                if (player)
-                    if (player.IsInWorld)
-                    {
-                        player.UpdateAreaDependentAuras(player.GetAreaId());
-                        player.UpdateZoneDependentAuras(player.GetZoneId());
-                    }
-        }
-
-        public virtual string GetDebugInfo()
-        {
-            return $"Id: {GetId()} InstanceId: {GetInstanceId()} Difficulty: {GetDifficultyID()} HasPlayers: {HavePlayers()}";
-        }
-
-        public MapRecord GetEntry()
-        {
-            return i_mapRecord;
-        }
-
-        public bool CanUnload(uint diff)
-        {
-            if (_unloadTimer == 0)
-                return false;
-
-            if (_unloadTimer <= diff)
-                return true;
-
-            _unloadTimer -= diff;
-
-            return false;
-        }
-
-        public float GetVisibilityRange()
-        {
-            return _VisibleDistance;
-        }
-
-        public bool IsRemovalGrid(float x, float y)
-        {
-            GridCoord p = GridDefines.ComputeGridCoord(x, y);
-
-            return GetGrid(p.X_coord, p.Y_coord) == null ||
-                   GetGrid(p.X_coord, p.Y_coord).GetGridState() == GridState.Removal;
-        }
-
-        public bool IsRemovalGrid(Position pos)
-        {
-            return IsRemovalGrid(pos.GetPositionX(), pos.GetPositionY());
-        }
-
         private bool GetUnloadLock(GridCoord p)
         {
             return GetGrid(p.X_coord, p.Y_coord).GetUnloadLock();
@@ -3529,123 +4095,6 @@ namespace Game.Maps
         private void SetUnloadLock(GridCoord p, bool on)
         {
             GetGrid(p.X_coord, p.Y_coord).SetUnloadExplicitLock(on);
-        }
-
-        public void ResetGridExpiry(Grid grid, float factor = 1)
-        {
-            grid.ResetTimeTracker((long)(i_gridExpiry * factor));
-        }
-
-        public long GetGridExpiry()
-        {
-            return i_gridExpiry;
-        }
-
-        public TerrainInfo GetTerrain()
-        {
-            return _terrain;
-        }
-
-        public uint GetInstanceId()
-        {
-            return i_InstanceId;
-        }
-
-        public virtual TransferAbortParams CannotEnter(Player player)
-        {
-            return null;
-        }
-
-        public Difficulty GetDifficultyID()
-        {
-            return i_spawnMode;
-        }
-
-        public MapDifficultyRecord GetMapDifficulty()
-        {
-            return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
-        }
-
-        public ItemContext GetDifficultyLootItemContext()
-        {
-            MapDifficultyRecord mapDifficulty = GetMapDifficulty();
-
-            if (mapDifficulty != null &&
-                mapDifficulty.ItemContext != 0)
-                return (ItemContext)mapDifficulty.ItemContext;
-
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
-
-            if (difficulty != null)
-                return (ItemContext)difficulty.ItemContext;
-
-            return ItemContext.None;
-        }
-
-        public uint GetId()
-        {
-            return i_mapRecord.Id;
-        }
-
-        public bool Instanceable()
-        {
-            return i_mapRecord != null && i_mapRecord.Instanceable();
-        }
-
-        public bool IsDungeon()
-        {
-            return i_mapRecord != null && i_mapRecord.IsDungeon();
-        }
-
-        public bool IsNonRaidDungeon()
-        {
-            return i_mapRecord != null && i_mapRecord.IsNonRaidDungeon();
-        }
-
-        public bool IsRaid()
-        {
-            return i_mapRecord != null && i_mapRecord.IsRaid();
-        }
-
-        public bool IsHeroic()
-        {
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(i_spawnMode);
-
-            if (difficulty != null)
-                return difficulty.Flags.HasAnyFlag(DifficultyFlags.Heroic);
-
-            return false;
-        }
-
-        public bool Is25ManRaid()
-        {
-            // since 25man difficulties are 1 and 3, we can check them like that
-            return IsRaid() && (i_spawnMode == Difficulty.Raid25N || i_spawnMode == Difficulty.Raid25HC);
-        }
-
-        public bool IsBattleground()
-        {
-            return i_mapRecord != null && i_mapRecord.IsBattleground();
-        }
-
-        public bool IsBattleArena()
-        {
-            return i_mapRecord != null && i_mapRecord.IsBattleArena();
-        }
-
-        public bool IsBattlegroundOrArena()
-        {
-            return i_mapRecord != null && i_mapRecord.IsBattlegroundOrArena();
-        }
-
-        public bool IsScenario()
-        {
-            return i_mapRecord != null && i_mapRecord.IsScenario();
-        }
-
-        public bool IsGarrison()
-        {
-            return i_mapRecord != null && i_mapRecord.IsGarrison();
         }
 
         private bool GetEntrancePos(out uint mapid, out float x, out float y)
@@ -3675,131 +4124,6 @@ namespace Game.Maps
             marked_cells.Set((int)pCellId, true);
         }
 
-        public bool HavePlayers()
-        {
-            return !_activePlayers.Empty();
-        }
-
-        public void AddWorldObject(WorldObject obj)
-        {
-            i_worldObjects.Add(obj);
-        }
-
-        public void RemoveWorldObject(WorldObject obj)
-        {
-            i_worldObjects.Remove(obj);
-        }
-
-        public void DoOnPlayers(Action<Player> action)
-        {
-            foreach (var player in GetPlayers())
-                action(player);
-        }
-
-        public List<Player> GetPlayers()
-        {
-            return _activePlayers;
-        }
-
-        public int GetActiveNonPlayersCount()
-        {
-            return _activeNonPlayers.Count;
-        }
-
-        public Dictionary<ObjectGuid, WorldObject> GetObjectsStore()
-        {
-            return _objectsStore;
-        }
-
-        public MultiMap<ulong, Creature> GetCreatureBySpawnIdStore()
-        {
-            return _creatureBySpawnIdStore;
-        }
-
-        public MultiMap<ulong, GameObject> GetGameObjectBySpawnIdStore()
-        {
-            return _gameobjectBySpawnIdStore;
-        }
-
-        public MultiMap<ulong, AreaTrigger> GetAreaTriggerBySpawnIdStore()
-        {
-            return _areaTriggerBySpawnIdStore;
-        }
-
-        public List<Corpse> GetCorpsesInCell(uint cellId)
-        {
-            return _corpsesByCell.LookupByKey(cellId);
-        }
-
-        public Corpse GetCorpseByPlayer(ObjectGuid ownerGuid)
-        {
-            return _corpsesByPlayer.LookupByKey(ownerGuid);
-        }
-
-        public InstanceMap ToInstanceMap()
-        {
-            return IsDungeon() ? (this as InstanceMap) : null;
-        }
-
-        public BattlegroundMap ToBattlegroundMap()
-        {
-            return IsBattlegroundOrArena() ? (this as BattlegroundMap) : null;
-        }
-
-        public void Balance()
-        {
-            _dynamicTree.Balance();
-        }
-
-        public void RemoveGameObjectModel(GameObjectModel model)
-        {
-            _dynamicTree.Remove(model);
-        }
-
-        public void InsertGameObjectModel(GameObjectModel model)
-        {
-            _dynamicTree.Insert(model);
-        }
-
-        public bool ContainsGameObjectModel(GameObjectModel model)
-        {
-            return _dynamicTree.Contains(model);
-        }
-
-        public float GetGameObjectFloor(PhaseShift phaseShift, float x, float y, float z, float maxSearchDist = MapConst.DefaultHeightSearch)
-        {
-            return _dynamicTree.GetHeight(x, y, z, maxSearchDist, phaseShift);
-        }
-
-        public virtual uint GetOwnerGuildId(Team team = Team.Other)
-        {
-            return 0;
-        }
-
-        public long GetRespawnTime(SpawnObjectType type, ulong spawnId)
-        {
-            var map = GetRespawnMapForType(type);
-
-            if (map != null)
-            {
-                var respawnInfo = map.LookupByKey(spawnId);
-
-                return (respawnInfo == null) ? 0 : respawnInfo.respawnTime;
-            }
-
-            return 0;
-        }
-
-        public long GetCreatureRespawnTime(ulong spawnId)
-        {
-            return GetRespawnTime(SpawnObjectType.Creature, spawnId);
-        }
-
-        public long GetGORespawnTime(ulong spawnId)
-        {
-            return GetRespawnTime(SpawnObjectType.GameObject, spawnId);
-        }
-
         private void SetTimer(uint t)
         {
             i_gridExpiry = t < MapConst.MinGridDelay ? MapConst.MinGridDelay : t;
@@ -3824,336 +4148,12 @@ namespace Game.Maps
             GetGrid(x, y).SetGridObjectDataLoaded(pLoaded);
         }
 
-        public AreaTrigger GetAreaTrigger(ObjectGuid guid)
-        {
-            if (!guid.IsAreaTrigger())
-                return null;
-
-            return (AreaTrigger)_objectsStore.LookupByKey(guid);
-        }
-
-        public SceneObject GetSceneObject(ObjectGuid guid)
-        {
-            return _objectsStore.LookupByKey(guid) as SceneObject;
-        }
-
-        public Conversation GetConversation(ObjectGuid guid)
-        {
-            return (Conversation)_objectsStore.LookupByKey(guid);
-        }
-
-        public Player GetPlayer(ObjectGuid guid)
-        {
-            return Global.ObjAccessor.GetPlayer(this, guid);
-        }
-
-        public Corpse GetCorpse(ObjectGuid guid)
-        {
-            if (!guid.IsCorpse())
-                return null;
-
-            return (Corpse)_objectsStore.LookupByKey(guid);
-        }
-
-        public Creature GetCreature(ObjectGuid guid)
-        {
-            if (!guid.IsCreatureOrVehicle())
-                return null;
-
-            return (Creature)_objectsStore.LookupByKey(guid);
-        }
-
-        public DynamicObject GetDynamicObject(ObjectGuid guid)
-        {
-            if (!guid.IsDynamicObject())
-                return null;
-
-            return (DynamicObject)_objectsStore.LookupByKey(guid);
-        }
-
-        public GameObject GetGameObject(ObjectGuid guid)
-        {
-            if (!guid.IsAnyTypeGameObject())
-                return null;
-
-            return (GameObject)_objectsStore.LookupByKey(guid);
-        }
-
-        public Pet GetPet(ObjectGuid guid)
-        {
-            if (!guid.IsPet())
-                return null;
-
-            return (Pet)_objectsStore.LookupByKey(guid);
-        }
-
-        public Transport GetTransport(ObjectGuid guid)
-        {
-            if (!guid.IsMOTransport())
-                return null;
-
-            GameObject go = GetGameObject(guid);
-
-            return go ? go.ToTransport() : null;
-        }
-
-        public Creature GetCreatureBySpawnId(ulong spawnId)
-        {
-            var bounds = GetCreatureBySpawnIdStore().LookupByKey(spawnId);
-
-            if (bounds.Empty())
-                return null;
-
-            var foundCreature = bounds.Find(creature => creature.IsAlive());
-
-            return foundCreature != null ? foundCreature : bounds[0];
-        }
-
-        public GameObject GetGameObjectBySpawnId(ulong spawnId)
-        {
-            var bounds = GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
-
-            if (bounds.Empty())
-                return null;
-
-            var foundGameObject = bounds.Find(gameobject => gameobject.IsSpawned());
-
-            return foundGameObject != null ? foundGameObject : bounds[0];
-        }
-
-        public AreaTrigger GetAreaTriggerBySpawnId(ulong spawnId)
-        {
-            var bounds = GetAreaTriggerBySpawnIdStore().LookupByKey(spawnId);
-
-            if (bounds.Empty())
-                return null;
-
-            return bounds.FirstOrDefault();
-        }
-
-        public WorldObject GetWorldObjectBySpawnId(SpawnObjectType type, ulong spawnId)
-        {
-            switch (type)
-            {
-                case SpawnObjectType.Creature:
-                    return GetCreatureBySpawnId(spawnId);
-                case SpawnObjectType.GameObject:
-                    return GetGameObjectBySpawnId(spawnId);
-                case SpawnObjectType.AreaTrigger:
-                    return GetAreaTriggerBySpawnId(spawnId);
-                default:
-                    return null;
-            }
-        }
-
-        public void Visit(Cell cell, Visitor visitor)
-        {
-            uint x = cell.GetGridX();
-            uint y = cell.GetGridY();
-            uint cell_x = cell.GetCellX();
-            uint cell_y = cell.GetCellY();
-
-            if (!cell.NoCreate() ||
-                IsGridLoaded(new GridCoord(x, y)))
-            {
-                EnsureGridLoaded(cell);
-                GetGrid(x, y).VisitGrid(cell_x, cell_y, visitor);
-            }
-        }
-
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
-        {
-            var mask = UnitTypeMask.Summon;
-
-            if (properties != null)
-                switch (properties.Control)
-                {
-                    case SummonCategory.Pet:
-                        mask = UnitTypeMask.Guardian;
-
-                        break;
-                    case SummonCategory.Puppet:
-                        mask = UnitTypeMask.Puppet;
-
-                        break;
-                    case SummonCategory.Vehicle:
-                        mask = UnitTypeMask.Minion;
-
-                        break;
-                    case SummonCategory.Wild:
-                    case SummonCategory.Ally:
-                    case SummonCategory.Unk:
-                        {
-                            switch (properties.Title)
-                            {
-                                case SummonTitle.Minion:
-                                case SummonTitle.Guardian:
-                                case SummonTitle.Runeblade:
-                                    mask = UnitTypeMask.Guardian;
-
-                                    break;
-                                case SummonTitle.Totem:
-                                case SummonTitle.LightWell:
-                                    mask = UnitTypeMask.Totem;
-
-                                    break;
-                                case SummonTitle.Vehicle:
-                                case SummonTitle.Mount:
-                                    mask = UnitTypeMask.Summon;
-
-                                    break;
-                                case SummonTitle.Companion:
-                                    mask = UnitTypeMask.Minion;
-
-                                    break;
-                                default:
-                                    if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
-                                        mask = UnitTypeMask.Guardian;
-
-                                    break;
-                            }
-
-                            break;
-                        }
-                    default:
-                        return null;
-                }
-
-            Unit summonerUnit = summoner?.ToUnit();
-
-            TempSummon summon;
-
-            switch (mask)
-            {
-                case UnitTypeMask.Summon:
-                    summon = new TempSummon(properties, summonerUnit, false);
-
-                    break;
-                case UnitTypeMask.Guardian:
-                    summon = new Guardian(properties, summonerUnit, false);
-
-                    break;
-                case UnitTypeMask.Puppet:
-                    summon = new Puppet(properties, summonerUnit);
-
-                    break;
-                case UnitTypeMask.Totem:
-                    summon = new Totem(properties, summonerUnit);
-
-                    break;
-                case UnitTypeMask.Minion:
-                    summon = new Minion(properties, summonerUnit, false);
-
-                    break;
-                default:
-                    return null;
-            }
-
-            if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos, null, vehId, true))
-                return null;
-
-            ITransport transport = summoner?.GetTransport();
-
-            if (transport != null)
-            {
-                pos.GetPosition(out float x, out float y, out float z, out float o);
-                transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-                summon.MovementInfo.Transport.Pos.Relocate(x, y, z, o);
-
-                // This object must be added to Transport before adding to map for the client to properly display it
-                transport.AddPassenger(summon);
-            }
-
-            // Set the summon to the summoner's phase
-            if (summoner != null &&
-                !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
-                PhasingHandler.InheritPhaseShift(summon, summoner);
-
-            summon.SetCreatedBySpell(spellId);
-            summon.SetHomePosition(pos);
-            summon.InitStats(duration);
-            summon.SetPrivateObjectOwner(privateObjectOwner);
-
-            if (smoothPhasingInfo != null)
-            {
-                if (summoner != null &&
-                    smoothPhasingInfo.ReplaceObject.HasValue)
-                {
-                    WorldObject replacedObject = Global.ObjAccessor.GetWorldObject(summoner, smoothPhasingInfo.ReplaceObject.Value);
-
-                    if (replacedObject != null)
-                    {
-                        SmoothPhasingInfo originalSmoothPhasingInfo = smoothPhasingInfo;
-                        originalSmoothPhasingInfo.ReplaceObject = summon.GetGUID();
-                        replacedObject.GetOrCreateSmoothPhasing().SetViewerDependentInfo(privateObjectOwner, originalSmoothPhasingInfo);
-
-                        summon.SetDemonCreatorGUID(privateObjectOwner);
-                    }
-                }
-
-                summon.GetOrCreateSmoothPhasing().SetSingleInfo(smoothPhasingInfo);
-            }
-
-            if (!AddToMap(summon.ToCreature()))
-            {
-                // Returning false will cause the object to be deleted - remove from Transport
-                transport?.RemovePassenger(summon);
-
-                summon.Dispose();
-
-                return null;
-            }
-
-            summon.InitSummon();
-
-            // call MoveInLineOfSight for nearby creatures
-            AIRelocationNotifier notifier = new(summon);
-            Cell.VisitAllObjects(summon, notifier, GetVisibilityRange());
-
-            return summon;
-        }
-
-        public ulong GenerateLowGuid(HighGuid high)
-        {
-            return GetGuidSequenceGenerator(high).Generate();
-        }
-
-        public ulong GetMaxLowGuid(HighGuid high)
-        {
-            return GetGuidSequenceGenerator(high).GetNextAfterMaxUsed();
-        }
-
         private ObjectGuidGenerator GetGuidSequenceGenerator(HighGuid high)
         {
             if (!_guidGenerators.ContainsKey(high))
                 _guidGenerators[high] = new ObjectGuidGenerator(high);
 
             return _guidGenerators[high];
-        }
-
-        public void AddUpdateObject(WorldObject obj)
-        {
-            _updateObjects.Add(obj);
-        }
-
-        public void RemoveUpdateObject(WorldObject obj)
-        {
-            _updateObjects.Remove(obj);
-        }
-
-        public static implicit operator bool(Map map)
-        {
-            return map != null;
-        }
-
-        public MultiPersonalPhaseTracker GetMultiPersonalPhaseTracker()
-        {
-            return _multiPersonalPhaseTracker;
-        }
-
-        public SpawnedPoolData GetPoolData()
-        {
-            return _poolData;
         }
 
         #region Script Updates
@@ -5512,10 +5512,10 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        private InstanceScript i_data;
-        private DateTime? i_instanceExpireEvent;
         private readonly InstanceLock i_instanceLock;
         private readonly GroupInstanceReference i_owningGroupRef = new();
+        private InstanceScript i_data;
+        private DateTime? i_instanceExpireEvent;
         private InstanceScenario i_scenario;
         private uint i_script_id;
 
@@ -5538,11 +5538,6 @@ namespace Game.Maps
                 i_instanceLock.SetInUse(true);
                 i_instanceExpireEvent = i_instanceLock.GetExpiryTime(); // ignore extension State for reset event (will ask players to accept extended save on expiration)
             }
-        }
-
-        ~InstanceMap()
-        {
-            i_instanceLock?.SetInUse(false);
         }
 
         public override void InitVisibilityDistance()
@@ -5997,6 +5992,11 @@ namespace Game.Maps
         {
             return i_instanceLock;
         }
+
+        ~InstanceMap()
+        {
+            i_instanceLock?.SetInUse(false);
+        }
     }
 
     public class BattlegroundMap : Map
@@ -6100,29 +6100,22 @@ namespace Game.Maps
 
     public class ZoneDynamicInfo
     {
-        public Weather DefaultWeather;
-        public float Intensity;
-        public List<LightOverride> LightOverrides = new();
-        public uint MusicId;
-        public WeatherState WeatherId;
-
         public struct LightOverride
         {
             public uint AreaLightId;
             public uint OverrideLightId;
             public uint TransitionMilliseconds;
         }
+
+        public Weather DefaultWeather;
+        public float Intensity;
+        public List<LightOverride> LightOverrides = new();
+        public uint MusicId;
+        public WeatherState WeatherId;
     }
 
     public class PositionFullTerrainStatus
     {
-        public uint AreaId;
-        public AreaInfo? areaInfo;
-        public float FloorZ;
-        public LiquidData LiquidInfo;
-        public ZLiquidStatus LiquidStatus;
-        public bool outdoors = true;
-
         public struct AreaInfo
         {
             public int AdtId;
@@ -6138,6 +6131,13 @@ namespace Game.Maps
                 MogpFlags = flags;
             }
         }
+
+        public uint AreaId;
+        public AreaInfo? areaInfo;
+        public float FloorZ;
+        public LiquidData LiquidInfo;
+        public ZLiquidStatus LiquidStatus;
+        public bool outdoors = true;
     }
 
     public class RespawnInfo

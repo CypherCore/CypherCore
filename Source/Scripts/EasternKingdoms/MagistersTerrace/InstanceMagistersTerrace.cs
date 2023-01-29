@@ -98,24 +98,10 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
     [Script]
     internal class instance_magisters_terrace : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        private static readonly DungeonEncounterData[] encounters =
-        {
-            new(DataTypes.SelinFireheart, 1897), new(DataTypes.Vexallus, 1898), new(DataTypes.PriestessDelrissa, 1895), new(DataTypes.KaelthasSunstrider, 1894)
-        };
-
-        public instance_magisters_terrace() : base(nameof(instance_magisters_terrace), 585)
-        {
-        }
-
-        public InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_magisters_terrace_InstanceMapScript(map);
-        }
-
         private class instance_magisters_terrace_InstanceMapScript : InstanceScript
         {
-            private byte _delrissaDeathCount;
             private readonly List<ObjectGuid> _kaelthasPreTrashGUIDs = new();
+            private byte _delrissaDeathCount;
 
             public instance_magisters_terrace_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -275,6 +261,20 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
 
                 return true;
             }
+        }
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.SelinFireheart, 1897), new(DataTypes.Vexallus, 1898), new(DataTypes.PriestessDelrissa, 1895), new(DataTypes.KaelthasSunstrider, 1894)
+        };
+
+        public instance_magisters_terrace() : base(nameof(instance_magisters_terrace), 585)
+        {
+        }
+
+        public InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_magisters_terrace_InstanceMapScript(map);
         }
     }
 }

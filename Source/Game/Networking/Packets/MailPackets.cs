@@ -60,6 +60,24 @@ namespace Game.Networking.Packets
 
     public class SendMail : ClientPacket
     {
+        public class StructSendMail
+        {
+            public struct MailAttachment
+            {
+                public byte AttachPosition;
+                public ObjectGuid ItemGUID;
+            }
+
+            public List<MailAttachment> Attachments = new();
+            public string Body;
+            public long Cod;
+            public ObjectGuid Mailbox;
+            public long SendMoney;
+            public int StationeryID;
+            public string Subject;
+            public string Target;
+        }
+
         public StructSendMail Info;
 
         public SendMail(WorldPacket packet) : base(packet)
@@ -93,24 +111,6 @@ namespace Game.Networking.Packets
                 };
 
                 Info.Attachments.Add(att);
-            }
-        }
-
-        public class StructSendMail
-        {
-            public List<MailAttachment> Attachments = new();
-            public string Body;
-            public long Cod;
-            public ObjectGuid Mailbox;
-            public long SendMoney;
-            public int StationeryID;
-            public string Subject;
-            public string Target;
-
-            public struct MailAttachment
-            {
-                public byte AttachPosition;
-                public ObjectGuid ItemGUID;
             }
         }
     }
@@ -239,30 +239,6 @@ namespace Game.Networking.Packets
 
     public class MailQueryNextTimeResult : ServerPacket
     {
-        public List<MailNextTimeEntry> Next;
-
-        public float NextMailTime;
-
-        public MailQueryNextTimeResult() : base(ServerOpcodes.MailQueryNextTimeResult)
-        {
-            Next = new List<MailNextTimeEntry>();
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteFloat(NextMailTime);
-            _worldPacket.WriteInt32(Next.Count);
-
-            foreach (var entry in Next)
-            {
-                _worldPacket.WritePackedGuid(entry.SenderGuid);
-                _worldPacket.WriteFloat(entry.TimeLeft);
-                _worldPacket.WriteInt32(entry.AltSenderID);
-                _worldPacket.WriteInt8(entry.AltSenderType);
-                _worldPacket.WriteInt32(entry.StationeryID);
-            }
-        }
-
         public class MailNextTimeEntry
         {
             public int AltSenderID;
@@ -294,6 +270,30 @@ namespace Game.Networking.Packets
                 StationeryID = (int)mail.stationery;
             }
         }
+
+        public List<MailNextTimeEntry> Next;
+
+        public float NextMailTime;
+
+        public MailQueryNextTimeResult() : base(ServerOpcodes.MailQueryNextTimeResult)
+        {
+            Next = new List<MailNextTimeEntry>();
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteFloat(NextMailTime);
+            _worldPacket.WriteInt32(Next.Count);
+
+            foreach (var entry in Next)
+            {
+                _worldPacket.WritePackedGuid(entry.SenderGuid);
+                _worldPacket.WriteFloat(entry.TimeLeft);
+                _worldPacket.WriteInt32(entry.AltSenderID);
+                _worldPacket.WriteInt8(entry.AltSenderType);
+                _worldPacket.WriteInt32(entry.StationeryID);
+            }
+        }
     }
 
     public class NotifyReceivedMail : ServerPacket
@@ -317,13 +317,13 @@ namespace Game.Networking.Packets
         public int Charges;
         public uint Count;
         public uint Durability;
-        private readonly List<ItemEnchantData> Enchants = new();
-        private readonly List<ItemGemData> Gems = new();
         public ItemInstance Item;
         public uint MaxDurability;
 
         public byte Position;
         public bool Unlocked;
+        private readonly List<ItemEnchantData> Enchants = new();
+        private readonly List<ItemGemData> Gems = new();
 
         public MailAttachedItem(Item item, byte pos)
         {
