@@ -1212,8 +1212,9 @@ namespace Game.Entities
 					}
 				}
 			}
-
-			SocketedGem gemField = Values.ModifyValue(_itemData).ModifyValue(_itemData.Gems, slot);
+            Values.ModifyValue(_itemData).ModifyValue(_itemData.Gems, slot);
+            SocketedGem gemField = new SocketedGem();
+            _itemData.Gems[slot] = gemField;
 			SetUpdateFieldValue(gemField.ModifyValue(gemField.ItemId), gem.ItemId);
 			SetUpdateFieldValue(gemField.ModifyValue(gemField.Context), gem.Context);
 

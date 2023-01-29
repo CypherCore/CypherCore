@@ -918,7 +918,8 @@ namespace Game
 				if (gem)
 				{
 					gems[i]            = gem;
-					gemData[i].ItemId  = gem.GetEntry();
+                    gemData[i] = new ItemDynamicFieldGems();
+                    gemData[i].ItemId  = gem.GetEntry();
 					gemData[i].Context = (byte)gem._itemData.Context;
 
 					for (int b = 0; b < gem.GetBonusListIDs().Count && b < 16; ++b)
