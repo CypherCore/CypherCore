@@ -33,19 +33,19 @@ namespace Game.Chat
             bool active = activeEvents.Contains(eventId);
             string activeStr = active ? Global.ObjectMgr.GetCypherString(CypherStrings.Active) : "";
 
-            string startTimeStr = Time.UnixTimeToDateTime(eventData.start).ToLongDateString();
-            string endTimeStr = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
+            string startTimeStr = Time.UnixTimeToDateTime(eventData.Start).ToLongDateString();
+            string endTimeStr = Time.UnixTimeToDateTime(eventData.End).ToLongDateString();
 
             uint delay = Global.GameEventMgr.NextCheck(eventId);
             long nextTime = GameTime.GetGameTime() + delay;
-            string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(GameTime.GetGameTime() + delay).ToShortTimeString() : "-";
+            string nextStr = nextTime >= eventData.Start && nextTime < eventData.End ? Time.UnixTimeToDateTime(GameTime.GetGameTime() + delay).ToShortTimeString() : "-";
 
-            string occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
-            string lengthStr = Time.secsToTimeString(eventData.length * Time.Minute);
+            string occurenceStr = Time.secsToTimeString(eventData.Occurence * Time.Minute);
+            string lengthStr = Time.secsToTimeString(eventData.Length * Time.Minute);
 
             handler.SendSysMessage(CypherStrings.EventInfo,
                                    eventId,
-                                   eventData.description,
+                                   eventData.Description,
                                    activeStr,
                                    startTimeStr,
                                    endTimeStr,
@@ -71,9 +71,9 @@ namespace Game.Chat
                 GameEventData eventData = events[eventId];
 
                 if (handler.GetSession() != null)
-                    handler.SendSysMessage(CypherStrings.EventEntryListChat, eventId, eventId, eventData.description, active);
+                    handler.SendSysMessage(CypherStrings.EventEntryListChat, eventId, eventId, eventData.Description, active);
                 else
-                    handler.SendSysMessage(CypherStrings.EventEntryListConsole, eventId, eventData.description, active);
+                    handler.SendSysMessage(CypherStrings.EventEntryListConsole, eventId, eventData.Description, active);
 
                 ++counter;
             }

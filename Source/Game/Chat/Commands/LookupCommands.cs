@@ -174,7 +174,7 @@ namespace Game.Chat
             {
                 GameEventData eventData = events[id];
 
-                string descr = eventData.description;
+                string descr = eventData.Description;
 
                 if (string.IsNullOrEmpty(descr))
                     continue;
@@ -192,9 +192,9 @@ namespace Game.Chat
                     string active = activeEvents.Contains(id) ? handler.GetCypherString(CypherStrings.Active) : "";
 
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.EventEntryListChat, id, id, eventData.description, active);
+                        handler.SendSysMessage(CypherStrings.EventEntryListChat, id, id, eventData.Description, active);
                     else
-                        handler.SendSysMessage(CypherStrings.EventEntryListConsole, id, eventData.description, active);
+                        handler.SendSysMessage(CypherStrings.EventEntryListConsole, id, eventData.Description, active);
 
                     if (!found)
                         found = true;

@@ -372,7 +372,7 @@ namespace Game.Entities
                         var activeEventsList = Global.GameEventMgr.GetActiveEventList();
 
                         foreach (var id in activeEventsList)
-                            if (events[id].holiday_id == proto.GetHolidayID())
+                            if (events[id].Holiday_id == proto.GetHolidayID())
                             {
                                 remove = false;
 
