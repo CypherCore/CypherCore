@@ -128,7 +128,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 		public override void EnterEvadeMode(EvadeReason why)
 		{
 			_EnterEvadeMode();
-			summons.DespawnAll();
+			Summons.DespawnAll();
 			_DespawnAtEvade(TimeSpan.FromSeconds(10));
 		}
 
@@ -149,14 +149,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 				                                        introTask2 =>
 				                                        {
 					                                        EntryCheckPredicate pred = new(CreatureIds.Antagonist);
-					                                        summons.DoAction(ActionIds.AntagonistSay1, pred);
+					                                        Summons.DoAction(ActionIds.AntagonistSay1, pred);
 
 					                                        introTask2.Schedule(TimeSpan.FromSeconds(3),
 					                                                            introlTask3 =>
 					                                                            {
 						                                                            Talk(TextIds.SayIntro2);
 						                                                            EntryCheckPredicate pred = new(CreatureIds.Antagonist);
-						                                                            summons.DoAction(ActionIds.AntagonistSay2, pred);
+						                                                            Summons.DoAction(ActionIds.AntagonistSay2, pred);
 					                                                            });
 				                                        });
 			                    });
@@ -175,7 +175,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 				DoZoneInCombat();
 
 				EntryCheckPredicate pred = new(CreatureIds.Antagonist);
-				summons.DoAction(ActionIds.AntagonistHostile, pred);
+				Summons.DoAction(ActionIds.AntagonistHostile, pred);
 
 				_scheduler.Schedule(TimeSpan.FromSeconds(15),
 				                    task =>

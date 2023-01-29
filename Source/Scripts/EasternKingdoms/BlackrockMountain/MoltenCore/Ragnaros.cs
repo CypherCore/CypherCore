@@ -142,7 +142,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 							                      break;
 						                      case EventIds.Intro4:
 							                      Talk(TextIds.SayArrival5Rag);
-							                      Creature executus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.MajordomoExecutus));
+							                      Creature executus = ObjectAccessor.GetCreature(me, Instance.GetGuidData(DataTypes.MajordomoExecutus));
 
 							                      if (executus)
 								                      Unit.Kill(me, executus);
@@ -162,7 +162,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 			}
 			else
 			{
-				if (_isBanished && ((_emergeTimer <= diff) || (instance.GetData(MCMiscConst.DataRagnarosAdds)) > 8))
+				if (_isBanished && ((_emergeTimer <= diff) || (Instance.GetData(MCMiscConst.DataRagnarosAdds)) > 8))
 				{
 					//Become unbanished again
 					me.SetReactState(ReactStates.Aggressive);
@@ -175,7 +175,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 					if (target)
 						AttackStart(target);
 
-					instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
+					Instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
 
 					//DoCast(me, SpellRagemerge); //"phase spells" didnt worked correctly so Ive commented them and wrote solution witch doesnt need core support
 					_isBanished = false;
@@ -264,7 +264,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
 								                      me.SetUnitFlag(UnitFlags.Uninteractible);
 								                      me.SetEmoteState(Emote.StateSubmerged);
 								                      me.HandleEmoteCommand(Emote.OneshotSubmerge);
-								                      instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
+								                      Instance.SetData(MCMiscConst.DataRagnarosAdds, 0);
 
 								                      if (!_hasSubmergedOnce)
 								                      {

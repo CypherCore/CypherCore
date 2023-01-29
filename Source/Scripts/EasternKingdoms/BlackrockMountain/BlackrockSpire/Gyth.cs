@@ -45,9 +45,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
 		{
 			Initialize();
 
-			if (instance.GetBossState(DataTypes.Gyth) == EncounterState.InProgress)
+			if (Instance.GetBossState(DataTypes.Gyth) == EncounterState.InProgress)
 			{
-				instance.SetBossState(DataTypes.Gyth, EncounterState.Done);
+				Instance.SetBossState(DataTypes.Gyth, EncounterState.Done);
 				me.DespawnOrUnsummon();
 			}
 		}
@@ -93,7 +93,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.Gyth
 
 		public override void JustDied(Unit killer)
 		{
-			instance.SetBossState(DataTypes.Gyth, EncounterState.Done);
+			Instance.SetBossState(DataTypes.Gyth, EncounterState.Done);
 		}
 
 		public override void SetData(uint type, uint data)

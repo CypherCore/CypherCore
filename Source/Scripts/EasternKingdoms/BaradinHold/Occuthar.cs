@@ -57,7 +57,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 		public override void JustEngagedWith(Unit who)
 		{
 			base.JustEngagedWith(who);
-			instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
 			Events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(8));
 			Events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
 			Events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(30));
@@ -67,19 +67,19 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 		public override void EnterEvadeMode(EvadeReason why)
 		{
 			base.EnterEvadeMode(why);
-			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
 			_DespawnAtEvade();
 		}
 
 		public override void JustDied(Unit killer)
 		{
 			_JustDied();
-			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
 		}
 
 		public override void JustSummoned(Creature summon)
 		{
-			summons.Summon(summon);
+			Summons.Summon(summon);
 
 			if (summon.GetEntry() == CreatureIds.FocusFireDummy)
 			{

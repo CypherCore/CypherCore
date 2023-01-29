@@ -67,7 +67,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
 			_Reset();
 
 			Initialize();
-			instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
+			Instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
 		}
 
 		public override void JustDied(Unit killer)
@@ -75,7 +75,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.Razorgore
 			_JustDied();
 			Talk(TextIds.SayDeath);
 
-			instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
+			Instance.SetData(BWLMisc.DataEggEvent, (uint)EncounterState.NotStarted);
 		}
 
 		private void DoChangePhase()

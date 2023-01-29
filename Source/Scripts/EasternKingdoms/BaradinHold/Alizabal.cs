@@ -97,7 +97,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
 		{
 			base.JustEngagedWith(who);
 			Talk(TextIds.SayAggro);
-			instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
 			Events.ScheduleEvent(EventIds.RandomCast, TimeSpan.FromSeconds(10));
 		}
 
@@ -105,7 +105,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
 		{
 			_JustDied();
 			Talk(TextIds.SayDeath);
-			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
 		}
 
 		public override void KilledUnit(Unit who)
@@ -116,7 +116,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
 
 		public override void EnterEvadeMode(EvadeReason why)
 		{
-			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
 			me.GetMotionMaster().MoveTargetedHome();
 			_DespawnAtEvade();
 		}

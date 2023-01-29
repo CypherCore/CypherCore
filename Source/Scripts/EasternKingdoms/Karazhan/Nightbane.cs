@@ -92,7 +92,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 			_flyCount = 0;
 			me.SetDisableGravity(true);
 			HandleTerraceDoors(true);
-			GameObject urn = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.GoBlackenedUrn));
+			GameObject urn = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(DataTypes.GoBlackenedUrn));
 
 			if (urn)
 				urn.RemoveFlag(GameObjectFlags.InUse);
@@ -193,8 +193,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 
 		private void HandleTerraceDoors(bool open)
 		{
-			instance.HandleGameObject(instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
-			instance.HandleGameObject(instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
+			Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
+			Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
 		}
 
 		public override void JustEngagedWith(Unit who)

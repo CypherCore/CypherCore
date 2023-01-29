@@ -167,14 +167,14 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 		public override void JustDied(Unit killer)
 		{
 			// No _JustDied() here because otherwise we would reset the events which will trigger the death sequence twice.
-			instance.SetBossState(DataTypes.KaelthasSunstrider, EncounterState.Done);
+			Instance.SetBossState(DataTypes.KaelthasSunstrider, EncounterState.Done);
 		}
 
 		public override void EnterEvadeMode(EvadeReason why)
 		{
 			DoCastAOE(SpellIds.ClearFlight, new CastSpellExtraArgs(true));
 			_EnterEvadeMode();
-			summons.DespawnAll();
+			Summons.DespawnAll();
 			_DespawnAtEvade();
 		}
 
@@ -188,7 +188,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 				me.SetReactState(ReactStates.Passive);
 				me.InterruptNonMeleeSpells(true);
 				me.RemoveAurasDueToSpell(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
-				summons.DespawnAll();
+				Summons.DespawnAll();
 				DoCastAOE(SpellIds.ClearFlight);
 				Talk(TextIds.SayDeath);
 
@@ -245,7 +245,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 								                                                                    Talk(TextIds.SayPowerFeedback);
 								                                                                    DoCastAOE(SpellIds.ClearFlight);
 								                                                                    DoCastSelf(DungeonMode(SpellIds.PowerFeedback, SpellIds.HPowerFeedback));
-								                                                                    summons.DespawnEntry(CreatureIds.ArcaneSphere);
+								                                                                    Summons.DespawnEntry(CreatureIds.ArcaneSphere);
 								                                                                    task.Repeat(TimeSpan.FromSeconds(11));
 							                                                                    });
 						                                                });
@@ -329,7 +329,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.FelbloodKaelthas
 
 		public override void JustSummoned(Creature summon)
 		{
-			summons.Summon(summon);
+			Summons.Summon(summon);
 
 			switch (summon.GetEntry())
 			{

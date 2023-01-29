@@ -504,7 +504,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
 		{
 			if (canDespawn && DespawnTimer <= diff)
 			{
-				instance.SetBossState(DataTypes.Nefarian, EncounterState.Fail);
+				Instance.SetBossState(DataTypes.Nefarian, EncounterState.Fail);
 
 				List<Creature> constructList = me.GetCreatureListWithEntryInGrid(CreatureIds.BoneConstruct, 500.0f);
 

@@ -182,7 +182,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			base.JustEngagedWith(who);
 			Talk(TextIds.SayAggro);
 			DoCastSelf(SpellIds.Melee);
-			instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
 			Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
 			Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
 		}
@@ -191,7 +191,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 		{
 			Talk(TextIds.SayDisengage);
 			_EnterEvadeMode();
-			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
 			Events.Reset();
 			CleanupEncounter();
 			_DespawnAtEvade(TimeSpan.FromSeconds(30));
@@ -208,7 +208,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			_JustDied();
 			Talk(TextIds.SayDeath);
 			CleanupEncounter();
-			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+			Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
 		}
 
 		public override void OnSpellCast(SpellInfo spell)
@@ -249,20 +249,20 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 				Talk(TextIds.SayApocalypseDrive);
 				me.SetUnitFlag(UnitFlags.Uninteractible);
 
-				Creature decimator = instance.GetCreature(DataTypes.Decimator);
+				Creature decimator = Instance.GetCreature(DataTypes.Decimator);
 
 				if (decimator)
 				{
-					instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
+					Instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
 					decimator.SetUnitFlag(UnitFlags.InCombat);
 					decimator.RemoveUnitFlag(UnitFlags.Uninteractible);
 				}
 
-				Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
+				Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
 
 				if (annihilator)
 				{
-					instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
+					Instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
 					annihilator.SetUnitFlag(UnitFlags.InCombat);
 					annihilator.RemoveUnitFlag(UnitFlags.Uninteractible);
 				}
@@ -273,7 +273,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
 		public override void JustSummoned(Creature summon)
 		{
-			summons.Summon(summon);
+			Summons.Summon(summon);
 
 			switch (summon.GetEntry())
 			{
@@ -419,37 +419,37 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
 		private void CleanupEncounter()
 		{
-			Creature decimator = instance.GetCreature(DataTypes.Decimator);
+			Creature decimator = Instance.GetCreature(DataTypes.Decimator);
 
 			if (decimator)
-				instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
+				Instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
 
-			Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
+			Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
 
 			if (annihilator)
-				instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
+				Instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
 
-			instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.DecimationWarning);
-			instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentWarning);
-			instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentPeriodic);
-			summons.DespawnAll();
+			Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.DecimationWarning);
+			Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentWarning);
+			Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentPeriodic);
+			Summons.DespawnAll();
 		}
 
 		private void HideCannons()
 		{
-			Creature decimator = instance.GetCreature(DataTypes.Decimator);
+			Creature decimator = Instance.GetCreature(DataTypes.Decimator);
 
 			if (decimator)
 			{
-				instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
+				Instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
 				decimator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
 			}
 
-			Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
+			Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
 
 			if (annihilator)
 			{
-				instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
+				Instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
 				annihilator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
 			}
 		}

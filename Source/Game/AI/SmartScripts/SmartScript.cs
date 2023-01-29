@@ -88,9 +88,9 @@ namespace Game.AI
 					holder.RunOnce = false;
 				}
 
-				if (holder.Priority != SmartScriptHolder.DefaultPriority)
+				if (holder.Priority != SmartScriptHolder.DEFAULT_PRIORITY)
 				{
-					holder.Priority       = SmartScriptHolder.DefaultPriority;
+					holder.Priority       = SmartScriptHolder.DEFAULT_PRIORITY;
 					_eventSortingRequired = true;
 				}
 			}
@@ -4364,14 +4364,14 @@ namespace Game.AI
 					}
 				}
 
-				if (e.Priority != SmartScriptHolder.DefaultPriority)
+				if (e.Priority != SmartScriptHolder.DEFAULT_PRIORITY)
 					// Reset priority to default one only if the event hasn't been rescheduled again to next loop
 					if (e.Timer > 1)
 					{
 						// Re-sort events if this was moved to the top of the queue
 						_eventSortingRequired = true;
 						// Reset priority to default one
-						e.Priority = SmartScriptHolder.DefaultPriority;
+						e.Priority = SmartScriptHolder.DEFAULT_PRIORITY;
 					}
 			}
 			else
@@ -4496,7 +4496,7 @@ namespace Game.AI
 			e.Timer = 1;
 
 			// Change priority only if it's set to default, otherwise keep the current order of events
-			if (e.Priority == SmartScriptHolder.DefaultPriority)
+			if (e.Priority == SmartScriptHolder.DEFAULT_PRIORITY)
 			{
 				e.Priority            = _currentPriority++;
 				_eventSortingRequired = true;
