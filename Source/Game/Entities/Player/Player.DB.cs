@@ -3450,11 +3450,11 @@ namespace Game.Entities
             if (check)                   // in case of special event when creating map...
                 if (areaTrigger != null) // ... if we have an areatrigger, then relocate to new map/coordinates.
                 {
-                    Relocate(areaTrigger.target_X, areaTrigger.target_Y, areaTrigger.target_Z, GetOrientation());
+                    Relocate(areaTrigger.Target_X, areaTrigger.Target_Y, areaTrigger.Target_Z, GetOrientation());
 
-                    if (mapId != areaTrigger.target_mapId)
+                    if (mapId != areaTrigger.Target_mapId)
                     {
-                        mapId = areaTrigger.target_mapId;
+                        mapId = areaTrigger.Target_mapId;
                         map = Global.MapMgr.CreateMap(mapId, this);
                     }
                 }

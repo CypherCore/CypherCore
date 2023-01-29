@@ -3345,7 +3345,7 @@ namespace Game.Entities
 
                     foreach (var spellClickInfo in clickBounds)
                     {
-                        List<Condition> conds = Global.ConditionMgr.GetConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.spellId);
+                        List<Condition> conds = Global.ConditionMgr.GetConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.SpellId);
 
                         if (conds != null)
                         {

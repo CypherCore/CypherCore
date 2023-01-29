@@ -887,23 +887,23 @@ namespace Game.Maps
             uint dungeonId = 0;
 
             foreach (var encounter in encounters)
-                if (encounter.creditType == type &&
-                    encounter.creditEntry == creditEntry)
+                if (encounter.CreditType == type &&
+                    encounter.CreditEntry == creditEntry)
                 {
-                    completedEncounters |= (1u << encounter.dbcEntry.Bit);
+                    completedEncounters |= (1u << encounter.DbcEntry.Bit);
 
-                    if (encounter.dbcEntry.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
+                    if (encounter.DbcEntry.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)encounter.DbcEntry.CompleteWorldStateID, 1);
 
-                    if (encounter.lastEncounterDungeon != 0)
+                    if (encounter.LastEncounterDungeon != 0)
                     {
-                        dungeonId = encounter.lastEncounterDungeon;
+                        dungeonId = encounter.LastEncounterDungeon;
 
                         Log.outDebug(LogFilter.Lfg,
                                      "UpdateEncounterState: Instance {0} (InstanceId {1}) completed encounter {2}. Credit Dungeon: {3}",
                                      instance.GetMapName(),
                                      instance.GetInstanceId(),
-                                     encounter.dbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()],
+                                     encounter.DbcEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()],
                                      dungeonId);
 
                         break;
@@ -937,9 +937,9 @@ namespace Game.Maps
 
             if (encounters != null)
                 foreach (DungeonEncounter encounter in encounters)
-                    if ((completedEncounters & (1 << encounter.dbcEntry.Bit)) != 0 &&
-                        encounter.dbcEntry.CompleteWorldStateID != 0)
-                        DoUpdateWorldState((uint)encounter.dbcEntry.CompleteWorldStateID, 1);
+                    if ((completedEncounters & (1 << encounter.DbcEntry.Bit)) != 0 &&
+                        encounter.DbcEntry.CompleteWorldStateID != 0)
+                        DoUpdateWorldState((uint)encounter.DbcEntry.CompleteWorldStateID, 1);
         }
 
         private void UpdatePhasing()

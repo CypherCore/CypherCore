@@ -576,11 +576,11 @@ namespace Game.Entities
             foreach (var cell in cells)
             {
                 // Creatures on Transport
-                foreach (var npc in cell.Value.creatures)
+                foreach (var npc in cell.Value.Creatures)
                     CreateNPCPassenger(npc, Global.ObjectMgr.GetCreatureData(npc));
 
                 // GameObjects on Transport
-                foreach (var go in cell.Value.gameobjects)
+                foreach (var go in cell.Value.Gameobjects)
                     CreateGOPassenger(go, Global.ObjectMgr.GetGameObjectData(go));
             }
         }

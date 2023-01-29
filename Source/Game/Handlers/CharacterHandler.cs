@@ -975,7 +975,7 @@ namespace Game
                 var at = Global.ObjectMgr.GetGoBackTrigger(pCurrChar.GetMapId());
 
                 if (at != null)
-                    pCurrChar.TeleportTo(at.target_mapId, at.target_X, at.target_Y, at.target_Z, pCurrChar.Orientation);
+                    pCurrChar.TeleportTo(at.Target_mapId, at.Target_X, at.Target_Y, at.Target_Z, pCurrChar.Orientation);
                 else
                     pCurrChar.TeleportTo(pCurrChar.GetHomebind());
             }
@@ -2678,8 +2678,8 @@ namespace Game
             {
                 var gYard = range[(int)i];
 
-                if (gYard.team == 0 ||
-                    gYard.team == team)
+                if (gYard.Team == 0 ||
+                    gYard.Team == team)
                     graveyardIds.Add(i);
             }
 

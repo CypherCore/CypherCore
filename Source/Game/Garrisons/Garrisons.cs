@@ -801,7 +801,7 @@ namespace Game.Garrisons
                     go.GetGoInfo().GarrisonBuilding.SpawnMap != 0)
                     foreach (var cellGuids in Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().GarrisonBuilding.SpawnMap, map.GetDifficultyID()))
                     {
-                        foreach (var spawnId in cellGuids.Value.creatures)
+                        foreach (var spawnId in cellGuids.Value.Creatures)
                         {
                             Creature spawn = BuildingSpawnHelper<Creature>(go, spawnId, map);
 
@@ -809,7 +809,7 @@ namespace Game.Garrisons
                                 BuildingInfo.Spawns.Add(spawn.GetGUID());
                         }
 
-                        foreach (var spawnId in cellGuids.Value.gameobjects)
+                        foreach (var spawnId in cellGuids.Value.Gameobjects)
                         {
                             GameObject spawn = BuildingSpawnHelper<GameObject>(go, spawnId, map);
 

@@ -116,14 +116,14 @@ namespace Game.Entities
 
             if (pInfo != null) // exist in DB
             {
-                SetCreateHealth(pInfo.health);
-                SetCreateMana(pInfo.mana);
+                SetCreateHealth(pInfo.Health);
+                SetCreateMana(pInfo.Mana);
 
-                if (pInfo.armor > 0)
-                    SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, pInfo.armor);
+                if (pInfo.Armor > 0)
+                    SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, pInfo.Armor);
 
                 for (byte stat = 0; stat < (int)Stats.Max; ++stat)
-                    SetCreateStat((Stats)stat, pInfo.stats[stat]);
+                    SetCreateStat((Stats)stat, pInfo.Stats[stat]);
             }
             else // not exist in DB, use some default fake _data
             {

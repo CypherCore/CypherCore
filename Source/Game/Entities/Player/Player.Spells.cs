@@ -278,7 +278,7 @@ namespace Game.Entities
                 if (!spellClickInfo.IsFitToRequirements(this, creature))
                     return false;
 
-                if (Global.ConditionMgr.IsObjectMeetingSpellClickConditions(creature.GetEntry(), spellClickInfo.spellId, this, creature))
+                if (Global.ConditionMgr.IsObjectMeetingSpellClickConditions(creature.GetEntry(), spellClickInfo.SpellId, this, creature))
                     return true;
             }
 

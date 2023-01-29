@@ -2822,14 +2822,14 @@ namespace Game.Entities
                     continue;
 
                 //! Check database conditions
-                if (!Global.ConditionMgr.IsObjectMeetingSpellClickConditions(spellClickEntry, clickInfo.spellId, clicker, this))
+                if (!Global.ConditionMgr.IsObjectMeetingSpellClickConditions(spellClickEntry, clickInfo.SpellId, clicker, this))
                     continue;
 
-                Unit caster = Convert.ToBoolean(clickInfo.castFlags & (byte)SpellClickCastFlags.CasterClicker) ? clicker : this;
-                Unit target = Convert.ToBoolean(clickInfo.castFlags & (byte)SpellClickCastFlags.TargetClicker) ? clicker : this;
-                ObjectGuid origCasterGUID = Convert.ToBoolean(clickInfo.castFlags & (byte)SpellClickCastFlags.OrigCasterOwner) ? GetOwnerGUID() : clicker.GetGUID();
+                Unit caster = Convert.ToBoolean(clickInfo.CastFlags & (byte)SpellClickCastFlags.CasterClicker) ? clicker : this;
+                Unit target = Convert.ToBoolean(clickInfo.CastFlags & (byte)SpellClickCastFlags.TargetClicker) ? clicker : this;
+                ObjectGuid origCasterGUID = Convert.ToBoolean(clickInfo.CastFlags & (byte)SpellClickCastFlags.OrigCasterOwner) ? GetOwnerGUID() : clicker.GetGUID();
 
-                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(clickInfo.spellId, caster.GetMap().GetDifficultyID());
+                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(clickInfo.SpellId, caster.GetMap().GetDifficultyID());
                 // if (!spellEntry) should be checked at npc_spellclick load
 
                 if (seatId > -1)
@@ -2851,7 +2851,7 @@ namespace Game.Entities
 
                     if (!valid)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} specified in npc_spellclick_spells is not a valid vehicle enter aura!", clickInfo.spellId);
+                        Log.outError(LogFilter.Sql, "Spell {0} specified in npc_spellclick_spells is not a valid vehicle enter aura!", clickInfo.SpellId);
 
                         continue;
                     }
@@ -2861,7 +2861,7 @@ namespace Game.Entities
                         CastSpellExtraArgs args = new(flags);
                         args.OriginalCaster = origCasterGUID;
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, seatId + 1);
-                        caster.CastSpell(target, clickInfo.spellId, args);
+                        caster.CastSpell(target, clickInfo.SpellId, args);
                     }
                     else // This can happen during Player._LoadAuras
                     {

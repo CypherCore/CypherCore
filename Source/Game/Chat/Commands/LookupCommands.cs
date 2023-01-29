@@ -593,7 +593,7 @@ namespace Game.Chat
 
             foreach (var tele in Global.ObjectMgr.gameTeleStorage)
             {
-                if (!tele.Value.name.Like(namePart))
+                if (!tele.Value.Name.Like(namePart))
                     continue;
 
                 if (maxResults != 0 &&
@@ -605,9 +605,9 @@ namespace Game.Chat
                 }
 
                 if (handler.GetPlayer() != null)
-                    reply.AppendFormat("  |cffffffff|Htele:{0}|h[{1}]|h|r\n", tele.Key, tele.Value.name);
+                    reply.AppendFormat("  |cffffffff|Htele:{0}|h[{1}]|h|r\n", tele.Key, tele.Value.Name);
                 else
-                    reply.AppendFormat("  {0} : {1}\n", tele.Key, tele.Value.name);
+                    reply.AppendFormat("  {0} : {1}\n", tele.Key, tele.Value.Name);
             }
 
             if (reply.Capacity == 0)

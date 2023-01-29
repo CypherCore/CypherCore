@@ -1270,7 +1270,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                team = (Team)data.team;
+                team = (Team)data.Team;
 
                 string team_name = handler.GetCypherString(CypherStrings.CommandGraveyardNoteam);
 

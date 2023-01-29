@@ -5,12 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Framework.Collections;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -27,12 +25,12 @@ namespace Game
 {
     public sealed class ObjectManager : Singleton<ObjectManager>
     {
-        private static readonly float[] qualityMultipliers = new float[]
+        private static readonly float[] _qualityMultipliers = new float[]
                                                     {
                                                         0.92f, 0.92f, 0.92f, 1.11f, 1.32f, 1.61f, 0.0f, 0.0f
                                                     };
 
-        private static readonly float[] armorMultipliers = new float[]
+        private static readonly float[] _armorMultipliers = new float[]
                                                   {
                                                       0.00f, // INVTYPE_NON_EQUIP
 			                                          0.60f, // INVTYPE_HEAD
@@ -71,7 +69,7 @@ namespace Game
 			                                          0.00f  // INVTYPE_EQUIPABLE_SPELL_MOBILITY
 		                                          };
 
-        private static readonly float[] weaponMultipliers = new float[]
+        private static readonly float[] _weaponMultipliers = new float[]
                                                    {
                                                        0.91f, // ITEM_SUBCLASS_WEAPON_AXE
 			                                           1.00f, // ITEM_SUBCLASS_WEAPON_AXE2
@@ -1147,25 +1145,25 @@ namespace Game
 
             foreach (var data in range)
             {
-                WorldSafeLocsEntry entry = GetWorldSafeLoc(data.safeLocId);
+                WorldSafeLocsEntry entry = GetWorldSafeLoc(data.SafeLocId);
 
                 if (entry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc Id) {0}, skipped.", data.safeLocId);
+                    Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc Id) {0}, skipped.", data.SafeLocId);
 
                     continue;
                 }
 
                 // skip enemy faction graveyard
                 // team == 0 case can be at call from .neargrave
-                if (data.team != 0 &&
+                if (data.Team != 0 &&
                     team != 0 &&
-                    data.team != (uint)team)
+                    data.Team != (uint)team)
                     continue;
 
                 if (conditionObject)
                 {
-                    if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
+                    if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.SafeLocId, conditionSource))
                         continue;
 
                     if (entry.Loc.GetMapId() == mapEntry.ParentMapID &&
@@ -1243,7 +1241,7 @@ namespace Game
             var range = GraveYardStorage.LookupByKey(zoneId);
 
             foreach (var data in range)
-                if (data.safeLocId == id)
+                if (data.SafeLocId == id)
                     return data;
 
             return null;
@@ -1266,8 +1264,8 @@ namespace Game
 
             // add link to loaded _data
             GraveYardData data = new();
-            data.safeLocId = id;
-            data.team = (uint)team;
+            data.SafeLocId = id;
+            data.Team = (uint)team;
 
             GraveYardStorage.Add(zoneId, data);
 
@@ -1303,14 +1301,14 @@ namespace Game
             foreach (var data in range)
             {
                 // skip not matching safezone Id
-                if (data.safeLocId != id)
+                if (data.SafeLocId != id)
                     continue;
 
                 // skip enemy faction graveyard at same map (normal area, city, or Battleground)
                 // team == 0 case can be at call from .neargrave
-                if (data.team != 0 &&
+                if (data.Team != 0 &&
                     team != 0 &&
-                    data.team != (uint)team)
+                    data.Team != (uint)team)
                     continue;
 
                 found = true;
@@ -5912,10 +5910,10 @@ namespace Game
                 if (inventoryType > InventoryType.Robe)
                     return 0;
 
-                return 5 * (uint)(Math.Round(25.0f * qualityMultipliers[(int)quality] * armorMultipliers[(int)inventoryType] * levelPenalty));
+                return 5 * (uint)(Math.Round(25.0f * _qualityMultipliers[(int)quality] * _armorMultipliers[(int)inventoryType] * levelPenalty));
             }
 
-            return 5 * (uint)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass] * levelPenalty));
+            return 5 * (uint)(Math.Round(18.0f * _qualityMultipliers[(int)quality] * _weaponMultipliers[itemSubClass] * levelPenalty));
         }
 
         public void LoadItemTemplateAddon()
@@ -6251,18 +6249,18 @@ namespace Game
 
                 GameTele gt = new();
 
-                gt.posX = result.Read<float>(1);
-                gt.posY = result.Read<float>(2);
-                gt.posZ = result.Read<float>(3);
-                gt.orientation = result.Read<float>(4);
-                gt.mapId = result.Read<uint>(5);
-                gt.name = result.Read<string>(6);
+                gt.PosX = result.Read<float>(1);
+                gt.PosY = result.Read<float>(2);
+                gt.PosZ = result.Read<float>(3);
+                gt.Orientation = result.Read<float>(4);
+                gt.MapId = result.Read<uint>(5);
+                gt.Name = result.Read<string>(6);
 
-                gt.nameLow = gt.name.ToLowerInvariant();
+                gt.NameLow = gt.Name.ToLowerInvariant();
 
-                if (!GridDefines.IsValidMapCoord(gt.mapId, gt.posX, gt.posY, gt.posZ, gt.orientation))
+                if (!GridDefines.IsValidMapCoord(gt.MapId, gt.PosX, gt.PosY, gt.PosZ, gt.Orientation))
                 {
-                    Log.outError(LogFilter.Sql, "Wrong position for Id {0} (Name: {1}) in `game_tele` table, ignoring.", id, gt.name);
+                    Log.outError(LogFilter.Sql, "Wrong position for Id {0} (Name: {1}) in `game_tele` table, ignoring.", id, gt.Name);
 
                     continue;
                 }
@@ -6309,11 +6307,11 @@ namespace Game
                 }
 
                 AreaTriggerStruct at = new();
-                at.target_mapId = portLoc.Loc.GetMapId();
-                at.target_X = portLoc.Loc.GetPositionX();
-                at.target_Y = portLoc.Loc.GetPositionY();
-                at.target_Z = portLoc.Loc.GetPositionZ();
-                at.target_Orientation = portLoc.Loc.GetOrientation();
+                at.Target_mapId = portLoc.Loc.GetMapId();
+                at.Target_X = portLoc.Loc.GetPositionX();
+                at.Target_Y = portLoc.Loc.GetPositionY();
+                at.Target_Z = portLoc.Loc.GetPositionZ();
+                at.Target_Orientation = portLoc.Loc.GetOrientation();
                 at.PortLocId = portLoc.Id;
 
                 AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(Trigger_ID);
@@ -6838,10 +6836,10 @@ namespace Game
             GameTele alt = null;
 
             foreach (var (_, tele) in gameTeleStorage)
-                if (tele.nameLow == name)
+                if (tele.NameLow == name)
                     return tele;
                 else if (alt == null &&
-                         tele.nameLow.Contains(name))
+                         tele.NameLow.Contains(name))
                     alt = tele;
 
             return alt;
@@ -6852,7 +6850,7 @@ namespace Game
             name = name.ToLower();
 
             foreach (var (_, tele) in gameTeleStorage)
-                if (tele.nameLow == name)
+                if (tele.NameLow == name)
                     return tele;
 
             return null;
@@ -6875,12 +6873,12 @@ namespace Game
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.INS_GAME_TELE);
 
             stmt.AddValue(0, newId);
-            stmt.AddValue(1, tele.posX);
-            stmt.AddValue(2, tele.posY);
-            stmt.AddValue(3, tele.posZ);
-            stmt.AddValue(4, tele.orientation);
-            stmt.AddValue(5, tele.mapId);
-            stmt.AddValue(6, tele.name);
+            stmt.AddValue(1, tele.PosX);
+            stmt.AddValue(2, tele.PosY);
+            stmt.AddValue(3, tele.PosZ);
+            stmt.AddValue(4, tele.Orientation);
+            stmt.AddValue(5, tele.MapId);
+            stmt.AddValue(6, tele.Name);
 
             DB.World.Execute(stmt);
 
@@ -6892,10 +6890,10 @@ namespace Game
             name = name.ToLowerInvariant();
 
             foreach (var pair in gameTeleStorage.ToList())
-                if (pair.Value.nameLow == name)
+                if (pair.Value.NameLow == name)
                 {
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAME_TELE);
-                    stmt.AddValue(0, pair.Value.name);
+                    stmt.AddValue(0, pair.Value.Name);
                     DB.World.Execute(stmt);
 
                     gameTeleStorage.Remove(pair.Key);
@@ -7888,12 +7886,12 @@ namespace Game
                     pInfoMapEntry = new PetLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
                 PetLevelInfo pLevelInfo = new();
-                pLevelInfo.health = result.Read<uint>(2);
-                pLevelInfo.mana = result.Read<uint>(3);
-                pLevelInfo.armor = result.Read<uint>(9);
+                pLevelInfo.Health = result.Read<uint>(2);
+                pLevelInfo.Mana = result.Read<uint>(3);
+                pLevelInfo.Armor = result.Read<uint>(9);
 
                 for (int i = 0; i < (int)Stats.Max; i++)
-                    pLevelInfo.stats[i] = result.Read<uint>(i + 4);
+                    pLevelInfo.Stats[i] = result.Read<uint>(i + 4);
 
                 pInfoMapEntry[currentlevel - 1] = pLevelInfo;
 
@@ -7907,7 +7905,7 @@ namespace Game
 
                 // fatal error if no level 1 _data
                 if (pInfo == null ||
-                    pInfo[0].health == 0)
+                    pInfo[0].Health == 0)
                 {
                     Log.outError(LogFilter.Sql, "Creature {0} does not have pet Stats _data for Level 1!", map.Key);
                     Global.WorldMgr.StopNow();
@@ -7915,7 +7913,7 @@ namespace Game
 
                 // fill level gaps
                 for (byte level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
-                    if (pInfo[level].health == 0)
+                    if (pInfo[level].Health == 0)
                     {
                         Log.outError(LogFilter.Sql, "Creature {0} has no _data for Level {1} pet Stats _data, using _data of Level {2}.", map.Key, level + 1, level);
                         pInfo[level] = pInfo[level - 1];
@@ -9959,9 +9957,9 @@ namespace Game
 
                 byte castFlags = result.Read<byte>(2);
                 SpellClickInfo info = new();
-                info.spellId = spellid;
-                info.castFlags = castFlags;
-                info.userType = userType;
+                info.SpellId = spellid;
+                info.CastFlags = castFlags;
+                info.UserType = userType;
                 _spellClickInfoStorage.Add(npc_entry, info);
 
                 ++count;
@@ -11866,7 +11864,7 @@ namespace Game
                 return null;
 
             foreach (var mailReward in mailList)
-                if (Convert.ToBoolean(mailReward.raceMask & raceMask))
+                if (Convert.ToBoolean(mailReward.RaceMask & raceMask))
                     return mailReward;
 
             return null;
@@ -12266,7 +12264,7 @@ namespace Game
             uint entrance_map = parentId.GetValueOrDefault((uint)mapEntry.CorpseMapID);
 
             foreach (var pair in _areaTriggerStorage)
-                if (pair.Value.target_mapId == entrance_map)
+                if (pair.Value.Target_mapId == entrance_map)
                 {
                     AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(pair.Key);
 
@@ -12281,7 +12279,7 @@ namespace Game
         public AreaTriggerStruct GetMapEntranceTrigger(uint Map)
         {
             foreach (var pair in _areaTriggerStorage)
-                if (pair.Value.target_mapId == Map)
+                if (pair.Value.Target_mapId == Map)
                 {
                     AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(pair.Key);
 
@@ -12694,1175 +12692,5 @@ namespace Game
         private readonly Dictionary<uint, uint> _baseXPTable = new();
 
         #endregion
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct ScriptInfo
-    {
-        [FieldOffset(0)] public ScriptsType type;
-
-        [FieldOffset(4)] public uint id;
-
-        [FieldOffset(8)] public uint delay;
-
-        [FieldOffset(12)] public ScriptCommands command;
-
-        [FieldOffset(16)] public raw Raw;
-
-        [FieldOffset(16)] public talk Talk;
-
-        [FieldOffset(16)] public emote Emote;
-
-        [FieldOffset(16)] public fieldset FieldSet;
-
-        [FieldOffset(16)] public moveto MoveTo;
-
-        [FieldOffset(16)] public flagtoggle FlagToggle;
-
-        [FieldOffset(16)] public teleportto TeleportTo;
-
-        [FieldOffset(16)] public questexplored QuestExplored;
-
-        [FieldOffset(16)] public killcredit KillCredit;
-
-        [FieldOffset(16)] public respawngameobject RespawnGameObject;
-
-        [FieldOffset(16)] public tempsummoncreature TempSummonCreature;
-
-        [FieldOffset(16)] public toggledoor ToggleDoor;
-
-        [FieldOffset(16)] public removeaura RemoveAura;
-
-        [FieldOffset(16)] public castspell CastSpell;
-
-        [FieldOffset(16)] public playsound PlaySound;
-
-        [FieldOffset(16)] public createitem CreateItem;
-
-        [FieldOffset(16)] public despawnself DespawnSelf;
-
-        [FieldOffset(16)] public loadpath LoadPath;
-
-        [FieldOffset(16)] public callscript CallScript;
-
-        [FieldOffset(16)] public kill Kill;
-
-        [FieldOffset(16)] public orientation Orientation;
-
-        [FieldOffset(16)] public equip Equip;
-
-        [FieldOffset(16)] public model Model;
-
-        [FieldOffset(16)] public playmovie PlayMovie;
-
-        [FieldOffset(16)] public movement Movement;
-
-        [FieldOffset(16)] public playanimkit PlayAnimKit;
-
-        public string GetDebugInfo()
-        {
-            return $"{command} ('{Global.ObjectMgr.GetScriptsTableNameByType(type)}' script Id: {id})";
-        }
-
-        #region Structs
-
-        public unsafe struct raw
-        {
-            public fixed uint nData[3];
-            public fixed float fData[4];
-        }
-
-        public struct talk // TALK (0)
-        {
-            public ChatMsg ChatType;   // datalong
-            public eScriptFlags Flags; // datalong2
-            public int TextID;         // dataint
-        }
-
-        public struct emote // EMOTE (1)
-        {
-            public uint EmoteID;       // datalong
-            public eScriptFlags Flags; // datalong2
-        }
-
-        public struct fieldset // FIELDSET (2)
-        {
-            public uint FieldID;    // datalong
-            public uint FieldValue; // datalong2
-        }
-
-        public struct moveto // MOVETO (3)
-        {
-            public uint Unused1;    // datalong
-            public uint TravelTime; // datalong2
-            public int Unused2;     // dataint
-
-            public float DestX;
-            public float DestY;
-            public float DestZ;
-        }
-
-        public struct flagtoggle // FLAGSET (4)
-                                 // FLAGREMOVE (5)
-        {
-            public uint FieldID;    // datalong
-            public uint FieldValue; // datalong2
-        }
-
-        public struct teleportto // TELEPORTTO (6)
-        {
-            public uint MapID;         // datalong
-            public eScriptFlags Flags; // datalong2
-            public int Unused1;        // dataint
-
-            public float DestX;
-            public float DestY;
-            public float DestZ;
-            public float Orientation;
-        }
-
-        public struct questexplored // QUESTEXPLORED (7)
-        {
-            public uint QuestID;  // datalong
-            public uint Distance; // datalong2
-        }
-
-        public struct killcredit // KILLCREDIT (8)
-        {
-            public uint CreatureEntry; // datalong
-            public eScriptFlags Flags; // datalong2
-        }
-
-        public struct respawngameobject // RESPAWNGAMEOBJECT (9)
-        {
-            public uint GOGuid;       // datalong
-            public uint DespawnDelay; // datalong2
-        }
-
-        public struct tempsummoncreature // TEMPSUMMONCREATURE (10)
-        {
-            public uint CreatureEntry; // datalong
-            public uint DespawnDelay;  // datalong2
-            public int Unused1;        // dataint
-
-            public float PosX;
-            public float PosY;
-            public float PosZ;
-            public float Orientation;
-        }
-
-        public struct toggledoor // CLOSEDOOR (12)
-                                 // OPENDOOR (11)
-        {
-            public uint GOGuid;     // datalong
-            public uint ResetDelay; // datalong2
-        }
-
-        // ACTIVATEOBJECT (13)
-
-        public struct removeaura // REMOVEAURA (14)
-        {
-            public uint SpellID;       // datalong
-            public eScriptFlags Flags; // datalong2
-        }
-
-        public struct castspell // CASTSPELL (15)
-        {
-            public uint SpellID;       // datalong
-            public eScriptFlags Flags; // datalong2
-            public int CreatureEntry;  // dataint
-
-            public float SearchRadius;
-        }
-
-        public struct playsound // PLAYSOUND (16)
-        {
-            public uint SoundID;       // datalong
-            public eScriptFlags Flags; // datalong2
-        }
-
-        public struct createitem // CREATEITEM (17)
-        {
-            public uint ItemEntry; // datalong
-            public uint Amount;    // datalong2
-        }
-
-        public struct despawnself // DESPAWNSELF (18)
-        {
-            public uint DespawnDelay; // datalong
-        }
-
-        public struct loadpath // LOADPATH (20)
-        {
-            public uint PathID;       // datalong
-            public uint IsRepeatable; // datalong2
-        }
-
-        public struct callscript // CALLSCRIPTTOUNIT (21)
-        {
-            public uint CreatureEntry; // datalong
-            public uint ScriptID;      // datalong2
-            public uint ScriptType;    // dataint
-        }
-
-        public struct kill // KILL (22)
-        {
-            public uint Unused1;     // datalong
-            public uint Unused2;     // datalong2
-            public int RemoveCorpse; // dataint
-        }
-
-        public struct orientation // ORIENTATION (30)
-        {
-            public eScriptFlags Flags; // datalong
-            public uint Unused1;       // datalong2
-            public int Unused2;        // dataint
-
-            public float Unused3;
-            public float Unused4;
-            public float Unused5;
-            public float _Orientation;
-        }
-
-        public struct equip // EQUIP (31)
-        {
-            public uint EquipmentID; // datalong
-        }
-
-        public struct model // MODEL (32)
-        {
-            public uint ModelID; // datalong
-        }
-
-        // CLOSEGOSSIP (33)
-
-        public struct playmovie // PLAYMOVIE (34)
-        {
-            public uint MovieID; // datalong
-        }
-
-        public struct movement // SCRIPT_COMMAND_MOVEMENT (35)
-        {
-            public uint MovementType;     // datalong
-            public uint MovementDistance; // datalong2
-            public int Path;              // dataint
-        }
-
-        public struct playanimkit // SCRIPT_COMMAND_PLAY_ANIMKIT (36)
-        {
-            public uint AnimKitID; // datalong
-        }
-
-        #endregion
-    }
-
-    public class CellObjectGuids
-    {
-        public SortedSet<ulong> creatures = new();
-        public SortedSet<ulong> gameobjects = new();
-
-        public void AddSpawn(SpawnData data)
-        {
-            switch (data.type)
-            {
-                case SpawnObjectType.Creature:
-                    creatures.Add(data.SpawnId);
-
-                    break;
-                case SpawnObjectType.GameObject:
-                    gameobjects.Add(data.SpawnId);
-
-                    break;
-            }
-        }
-
-        public void RemoveSpawn(SpawnData data)
-        {
-            switch (data.type)
-            {
-                case SpawnObjectType.Creature:
-                    creatures.Remove(data.SpawnId);
-
-                    break;
-                case SpawnObjectType.GameObject:
-                    gameobjects.Remove(data.SpawnId);
-
-                    break;
-            }
-        }
-    }
-
-    public class GameTele
-    {
-        public uint mapId;
-        public string name;
-        public string nameLow;
-        public float orientation;
-        public float posX;
-        public float posY;
-        public float posZ;
-    }
-
-    public class PetLevelInfo
-    {
-        public uint armor;
-        public uint health;
-        public uint mana;
-
-        public uint[] stats = new uint[(int)Stats.Max];
-
-        public PetLevelInfo()
-        {
-            health = 0;
-            mana = 0;
-        }
-    }
-
-    public struct InstanceSpawnGroupInfo
-    {
-        public byte BossStateId;
-        public byte BossStates;
-        public uint SpawnGroupId;
-        public InstanceSpawnGroupFlags Flags;
-    }
-
-    public class SpellClickInfo
-    {
-        public byte castFlags;
-        public uint spellId;
-        public SpellClickUserTypes userType;
-
-        // helpers
-        public bool IsFitToRequirements(Unit clicker, Unit clickee)
-        {
-            Player playerClicker = clicker.ToPlayer();
-
-            if (playerClicker == null)
-                return true;
-
-            Unit summoner = null;
-
-            // Check summoners for party
-            if (clickee.IsSummon())
-                summoner = clickee.ToTempSummon().GetSummonerUnit();
-
-            if (summoner == null)
-                summoner = clickee;
-
-            // This only applies to players
-            switch (userType)
-            {
-                case SpellClickUserTypes.Friend:
-                    if (!playerClicker.IsFriendlyTo(summoner))
-                        return false;
-
-                    break;
-                case SpellClickUserTypes.Raid:
-                    if (!playerClicker.IsInRaidWith(summoner))
-                        return false;
-
-                    break;
-                case SpellClickUserTypes.Party:
-                    if (!playerClicker.IsInPartyWith(summoner))
-                        return false;
-
-                    break;
-                default:
-                    break;
-            }
-
-            return true;
-        }
-    }
-
-    public class WorldSafeLocsEntry
-    {
-        public uint Id;
-        public WorldLocation Loc;
-    }
-
-    public class GraveYardData
-    {
-        public uint safeLocId;
-        public uint team;
-    }
-
-    public class QuestPOIBlobData
-    {
-        public bool AlwaysAllowMergingBlobs;
-        public int BlobIndex;
-        public int Flags;
-        public int MapID;
-        public int NavigationPlayerConditionID;
-        public int ObjectiveIndex;
-        public int PlayerConditionID;
-        public List<QuestPOIBlobPoint> Points;
-        public int Priority;
-        public int QuestObjectID;
-        public int QuestObjectiveID;
-        public int SpawnTrackingID;
-        public int UiMapID;
-        public int WorldEffectID;
-
-        public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags,
-                                int worldEffectID, int playerConditionID, int navigationPlayerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> points, bool alwaysAllowMergingBlobs)
-        {
-            BlobIndex = blobIndex;
-            ObjectiveIndex = objectiveIndex;
-            QuestObjectiveID = questObjectiveID;
-            QuestObjectID = questObjectID;
-            MapID = mapID;
-            UiMapID = uiMapID;
-            Priority = priority;
-            Flags = flags;
-            WorldEffectID = worldEffectID;
-            PlayerConditionID = playerConditionID;
-            NavigationPlayerConditionID = navigationPlayerConditionID;
-            SpawnTrackingID = spawnTrackingID;
-            Points = points;
-            AlwaysAllowMergingBlobs = alwaysAllowMergingBlobs;
-        }
-    }
-
-    public class QuestPOIBlobPoint
-    {
-        public int X;
-        public int Y;
-        public int Z;
-
-        public QuestPOIBlobPoint(int x, int y, int z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
-    }
-
-    public class QuestPOIData
-    {
-        public List<QuestPOIBlobData> Blobs;
-        public ByteBuffer QueryDataBuffer;
-        public uint QuestID;
-
-        public QuestPOIData(uint questId)
-        {
-            QuestID = questId;
-            Blobs = new List<QuestPOIBlobData>();
-            QueryDataBuffer = new ByteBuffer();
-        }
-
-        public void InitializeQueryData()
-        {
-            Write(QueryDataBuffer);
-        }
-
-        public void Write(ByteBuffer data)
-        {
-            data.WriteUInt32(QuestID);
-            data.WriteInt32(Blobs.Count);
-
-            foreach (QuestPOIBlobData questPOIBlobData in Blobs)
-            {
-                data.WriteInt32(questPOIBlobData.BlobIndex);
-                data.WriteInt32(questPOIBlobData.ObjectiveIndex);
-                data.WriteInt32(questPOIBlobData.QuestObjectiveID);
-                data.WriteInt32(questPOIBlobData.QuestObjectID);
-                data.WriteInt32(questPOIBlobData.MapID);
-                data.WriteInt32(questPOIBlobData.UiMapID);
-                data.WriteInt32(questPOIBlobData.Priority);
-                data.WriteInt32(questPOIBlobData.Flags);
-                data.WriteInt32(questPOIBlobData.WorldEffectID);
-                data.WriteInt32(questPOIBlobData.PlayerConditionID);
-                data.WriteInt32(questPOIBlobData.NavigationPlayerConditionID);
-                data.WriteInt32(questPOIBlobData.SpawnTrackingID);
-                data.WriteInt32(questPOIBlobData.Points.Count);
-
-                foreach (QuestPOIBlobPoint questPOIBlobPoint in questPOIBlobData.Points)
-                {
-                    data.WriteInt16((short)questPOIBlobPoint.X);
-                    data.WriteInt16((short)questPOIBlobPoint.Y);
-                    data.WriteInt16((short)questPOIBlobPoint.Z);
-                }
-
-                data.WriteBit(questPOIBlobData.AlwaysAllowMergingBlobs);
-                data.FlushBits();
-            }
-        }
-    }
-
-    public class AreaTriggerStruct
-    {
-        public uint PortLocId;
-        public uint target_mapId;
-        public float target_Orientation;
-        public float target_X;
-        public float target_Y;
-        public float target_Z;
-    }
-
-    public class DungeonEncounter
-    {
-        public uint creditEntry;
-        public EncounterCreditType creditType;
-
-        public DungeonEncounterRecord dbcEntry;
-        public uint lastEncounterDungeon;
-
-        public DungeonEncounter(DungeonEncounterRecord _dbcEntry, EncounterCreditType _creditType, uint _creditEntry, uint _lastEncounterDungeon)
-        {
-            dbcEntry = _dbcEntry;
-            creditType = _creditType;
-            creditEntry = _creditEntry;
-            lastEncounterDungeon = _lastEncounterDungeon;
-        }
-    }
-
-    public class MailLevelReward
-    {
-        public uint mailTemplateId;
-
-        public ulong raceMask;
-        public uint senderEntry;
-
-        public MailLevelReward(ulong _raceMask = 0, uint _mailTemplateId = 0, uint _senderEntry = 0)
-        {
-            raceMask = _raceMask;
-            mailTemplateId = _mailTemplateId;
-            senderEntry = _senderEntry;
-        }
-    }
-
-    public class PageText
-    {
-        public byte Flags;
-        public uint NextPageID;
-        public int PlayerConditionID;
-        public string Text;
-    }
-
-    public struct ExtendedPlayerName
-    {
-        public ExtendedPlayerName(string name, string realmName)
-        {
-            Name = name;
-            Realm = realmName;
-        }
-
-        public string Name;
-        public string Realm;
-    }
-
-    public class LanguageDesc
-    {
-        public uint SkillId;
-        public uint SpellId;
-
-        public LanguageDesc()
-        {
-        }
-
-        public LanguageDesc(uint spellId, uint skillId)
-        {
-            SpellId = spellId;
-            SkillId = skillId;
-        }
-
-        public override int GetHashCode()
-        {
-            return SpellId.GetHashCode() ^ SkillId.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is LanguageDesc)
-                return (LanguageDesc)obj == this;
-
-            return false;
-        }
-
-        public static bool operator ==(LanguageDesc left, LanguageDesc right)
-        {
-            return left.SpellId == right.SpellId && left.SkillId == right.SkillId;
-        }
-
-        public static bool operator !=(LanguageDesc left, LanguageDesc right)
-        {
-            return !(left == right);
-        }
-    }
-
-    internal class ItemSpecStats
-    {
-        public uint ItemSpecStatCount;
-        public ItemSpecStat[] ItemSpecStatTypes = new ItemSpecStat[ItemConst.MaxStats];
-
-        public uint ItemType;
-
-        public ItemSpecStats(ItemRecord item, ItemSparseRecord sparse)
-        {
-            if (item.ClassID == ItemClass.Weapon)
-            {
-                ItemType = 5;
-
-                switch ((ItemSubClassWeapon)item.SubclassID)
-                {
-                    case ItemSubClassWeapon.Axe:
-                        AddStat(ItemSpecStat.OneHandedAxe);
-
-                        break;
-                    case ItemSubClassWeapon.Axe2:
-                        AddStat(ItemSpecStat.TwoHandedAxe);
-
-                        break;
-                    case ItemSubClassWeapon.Bow:
-                        AddStat(ItemSpecStat.Bow);
-
-                        break;
-                    case ItemSubClassWeapon.Gun:
-                        AddStat(ItemSpecStat.Gun);
-
-                        break;
-                    case ItemSubClassWeapon.Mace:
-                        AddStat(ItemSpecStat.OneHandedMace);
-
-                        break;
-                    case ItemSubClassWeapon.Mace2:
-                        AddStat(ItemSpecStat.TwoHandedMace);
-
-                        break;
-                    case ItemSubClassWeapon.Polearm:
-                        AddStat(ItemSpecStat.Polearm);
-
-                        break;
-                    case ItemSubClassWeapon.Sword:
-                        AddStat(ItemSpecStat.OneHandedSword);
-
-                        break;
-                    case ItemSubClassWeapon.Sword2:
-                        AddStat(ItemSpecStat.TwoHandedSword);
-
-                        break;
-                    case ItemSubClassWeapon.Warglaives:
-                        AddStat(ItemSpecStat.Warglaives);
-
-                        break;
-                    case ItemSubClassWeapon.Staff:
-                        AddStat(ItemSpecStat.Staff);
-
-                        break;
-                    case ItemSubClassWeapon.Fist:
-                        AddStat(ItemSpecStat.FistWeapon);
-
-                        break;
-                    case ItemSubClassWeapon.Dagger:
-                        AddStat(ItemSpecStat.Dagger);
-
-                        break;
-                    case ItemSubClassWeapon.Thrown:
-                        AddStat(ItemSpecStat.Thrown);
-
-                        break;
-                    case ItemSubClassWeapon.Crossbow:
-                        AddStat(ItemSpecStat.Crossbow);
-
-                        break;
-                    case ItemSubClassWeapon.Wand:
-                        AddStat(ItemSpecStat.Wand);
-
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else if (item.ClassID == ItemClass.Armor)
-            {
-                switch ((ItemSubClassArmor)item.SubclassID)
-                {
-                    case ItemSubClassArmor.Cloth:
-                        if (sparse.inventoryType != InventoryType.Cloak)
-                        {
-                            ItemType = 1;
-
-                            break;
-                        }
-
-                        ItemType = 0;
-                        AddStat(ItemSpecStat.Cloak);
-
-                        break;
-                    case ItemSubClassArmor.Leather:
-                        ItemType = 2;
-
-                        break;
-                    case ItemSubClassArmor.Mail:
-                        ItemType = 3;
-
-                        break;
-                    case ItemSubClassArmor.Plate:
-                        ItemType = 4;
-
-                        break;
-                    default:
-                        if (item.SubclassID == (int)ItemSubClassArmor.Shield)
-                        {
-                            ItemType = 6;
-                            AddStat(ItemSpecStat.Shield);
-                        }
-                        else if (item.SubclassID > (int)ItemSubClassArmor.Shield &&
-                                 item.SubclassID <= (int)ItemSubClassArmor.Relic)
-                        {
-                            ItemType = 6;
-                            AddStat(ItemSpecStat.Relic);
-                        }
-                        else
-                        {
-                            ItemType = 0;
-                        }
-
-                        break;
-                }
-            }
-            else if (item.ClassID == ItemClass.Gem)
-            {
-                ItemType = 7;
-                GemPropertiesRecord gem = CliDB.GemPropertiesStorage.LookupByKey(sparse.GemProperties);
-
-                if (gem != null)
-                {
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicIron))
-                        AddStat(ItemSpecStat.RelicIron);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicBlood))
-                        AddStat(ItemSpecStat.RelicBlood);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicShadow))
-                        AddStat(ItemSpecStat.RelicShadow);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicFel))
-                        AddStat(ItemSpecStat.RelicFel);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicArcane))
-                        AddStat(ItemSpecStat.RelicArcane);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicFrost))
-                        AddStat(ItemSpecStat.RelicFrost);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicFire))
-                        AddStat(ItemSpecStat.RelicFire);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicWater))
-                        AddStat(ItemSpecStat.RelicWater);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicLife))
-                        AddStat(ItemSpecStat.RelicLife);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicWind))
-                        AddStat(ItemSpecStat.RelicWind);
-
-                    if (gem.Type.HasAnyFlag(SocketColor.RelicHoly))
-                        AddStat(ItemSpecStat.RelicHoly);
-                }
-            }
-            else
-            {
-                ItemType = 0;
-            }
-
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                if (sparse.StatModifierBonusStat[i] != -1)
-                    AddModStat(sparse.StatModifierBonusStat[i]);
-        }
-
-        private void AddStat(ItemSpecStat statType)
-        {
-            if (ItemSpecStatCount >= ItemConst.MaxStats)
-                return;
-
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                if (ItemSpecStatTypes[i] == statType)
-                    return;
-
-            ItemSpecStatTypes[ItemSpecStatCount++] = statType;
-        }
-
-        private void AddModStat(int itemStatType)
-        {
-            switch ((ItemModType)itemStatType)
-            {
-                case ItemModType.Agility:
-                    AddStat(ItemSpecStat.Agility);
-
-                    break;
-                case ItemModType.Strength:
-                    AddStat(ItemSpecStat.Strength);
-
-                    break;
-                case ItemModType.Intellect:
-                    AddStat(ItemSpecStat.Intellect);
-
-                    break;
-                case ItemModType.DodgeRating:
-                    AddStat(ItemSpecStat.Dodge);
-
-                    break;
-                case ItemModType.ParryRating:
-                    AddStat(ItemSpecStat.Parry);
-
-                    break;
-                case ItemModType.CritMeleeRating:
-                case ItemModType.CritRangedRating:
-                case ItemModType.CritSpellRating:
-                case ItemModType.CritRating:
-                    AddStat(ItemSpecStat.Crit);
-
-                    break;
-                case ItemModType.HasteRating:
-                    AddStat(ItemSpecStat.Haste);
-
-                    break;
-                case ItemModType.HitRating:
-                    AddStat(ItemSpecStat.Hit);
-
-                    break;
-                case ItemModType.ExtraArmor:
-                    AddStat(ItemSpecStat.BonusArmor);
-
-                    break;
-                case ItemModType.AgiStrInt:
-                    AddStat(ItemSpecStat.Agility);
-                    AddStat(ItemSpecStat.Strength);
-                    AddStat(ItemSpecStat.Intellect);
-
-                    break;
-                case ItemModType.AgiStr:
-                    AddStat(ItemSpecStat.Agility);
-                    AddStat(ItemSpecStat.Strength);
-
-                    break;
-                case ItemModType.AgiInt:
-                    AddStat(ItemSpecStat.Agility);
-                    AddStat(ItemSpecStat.Intellect);
-
-                    break;
-                case ItemModType.StrInt:
-                    AddStat(ItemSpecStat.Strength);
-                    AddStat(ItemSpecStat.Intellect);
-
-                    break;
-            }
-        }
-    }
-
-    public class SkillTiersEntry
-    {
-        public uint Id;
-        public uint[] Value = new uint[SkillConst.MaxSkillStep];
-    }
-
-    public class TerrainSwapInfo
-    {
-        public uint Id;
-        public List<uint> UiMapPhaseIDs = new();
-
-        public TerrainSwapInfo()
-        {
-        }
-
-        public TerrainSwapInfo(uint id)
-        {
-            Id = id;
-        }
-    }
-
-    public class PhaseInfoStruct
-    {
-        public List<uint> Areas = new();
-
-        public uint Id;
-
-        public PhaseInfoStruct(uint id)
-        {
-            Id = id;
-        }
-
-        public bool IsAllowedInArea(uint areaId)
-        {
-            return Areas.Any(areaToCheck => Global.DB2Mgr.IsInArea(areaId, areaToCheck));
-        }
-    }
-
-    public class PhaseAreaInfo
-    {
-        public List<Condition> Conditions = new();
-
-        public PhaseInfoStruct PhaseInfo;
-        public List<uint> SubAreaExclusions = new();
-
-        public PhaseAreaInfo(PhaseInfoStruct phaseInfo)
-        {
-            PhaseInfo = phaseInfo;
-        }
-    }
-
-    public class SceneTemplate
-    {
-        public bool Encrypted;
-        public SceneFlags PlaybackFlags;
-        public uint SceneId;
-        public uint ScenePackageId;
-        public uint ScriptId;
-    }
-
-    public class DefaultCreatureBaseStats : CreatureBaseStats
-    {
-        public DefaultCreatureBaseStats()
-        {
-            BaseMana = 0;
-            AttackPower = 0;
-            RangedAttackPower = 0;
-        }
-    }
-
-    public class GossipMenuItemsLocale
-    {
-        public StringArray BoxText = new((int)Locale.Total);
-        public StringArray OptionText = new((int)Locale.Total);
-    }
-
-    public class PlayerChoiceLocale
-    {
-        public StringArray Question = new((int)Locale.Total);
-        public Dictionary<int /*ResponseId*/, PlayerChoiceResponseLocale> Responses = new();
-    }
-
-    public class PlayerChoiceResponseLocale
-    {
-        public StringArray Answer = new((int)Locale.Total);
-        public StringArray ButtonTooltip = new((int)Locale.Total);
-        public StringArray Confirmation = new((int)Locale.Total);
-        public StringArray Description = new((int)Locale.Total);
-        public StringArray Header = new((int)Locale.Total);
-        public StringArray SubHeader = new((int)Locale.Total);
-    }
-
-    public class PlayerChoiceResponseRewardItem
-    {
-        public List<uint> BonusListIDs = new();
-
-        public uint Id;
-        public int Quantity;
-
-        public PlayerChoiceResponseRewardItem()
-        {
-        }
-
-        public PlayerChoiceResponseRewardItem(uint id, List<uint> bonusListIDs, int quantity)
-        {
-            Id = id;
-            BonusListIDs = bonusListIDs;
-            Quantity = quantity;
-        }
-    }
-
-    public class PlayerChoiceResponseRewardEntry
-    {
-        public uint Id;
-        public int Quantity;
-
-        public PlayerChoiceResponseRewardEntry(uint id, int quantity)
-        {
-            Id = id;
-            Quantity = quantity;
-        }
-    }
-
-    public class PlayerChoiceResponseReward
-    {
-        public uint ArenaPointCount;
-        public List<PlayerChoiceResponseRewardEntry> Currency = new();
-        public List<PlayerChoiceResponseRewardEntry> Faction = new();
-        public uint HonorPointCount;
-        public List<PlayerChoiceResponseRewardItem> ItemChoices = new();
-
-        public List<PlayerChoiceResponseRewardItem> Items = new();
-        public ulong Money;
-        public int PackageId;
-        public int SkillLineId;
-        public uint SkillPointCount;
-        public int TitleId;
-        public uint Xp;
-    }
-
-    public struct PlayerChoiceResponseMawPower
-    {
-        public int TypeArtFileID;
-        public int? Rarity;
-        public uint? RarityColor;
-        public int SpellID;
-        public int MaxStacks;
-    }
-
-    public class PlayerChoiceResponse
-    {
-        public string Answer;
-        public string ButtonTooltip;
-        public int ChoiceArtFileId;
-        public string Confirmation;
-        public string Description;
-        public int Flags;
-        public byte GroupID;
-        public string Header;
-        public PlayerChoiceResponseMawPower? MawPower;
-        public int ResponseId;
-        public ushort ResponseIdentifier;
-        public PlayerChoiceResponseReward Reward;
-        public uint? RewardQuestID;
-        public uint SoundKitID;
-        public string SubHeader;
-        public uint UiTextureAtlasElementID;
-        public int UiTextureKitID;
-        public uint WidgetSetID;
-    }
-
-    public class PlayerChoice
-    {
-        public int ChoiceId;
-        public uint CloseSoundKitId;
-        public long Duration;
-        public bool HideWarboardHeader;
-        public bool KeepOpenAfterChoice;
-        public string PendingChoiceText;
-        public string Question;
-        public List<PlayerChoiceResponse> Responses = new();
-        public uint SoundKitId;
-        public int UiTextureKitId;
-
-        public PlayerChoiceResponse GetResponse(int responseId)
-        {
-            return Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
-        }
-
-        public PlayerChoiceResponse GetResponseByIdentifier(int responseIdentifier)
-        {
-            return Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseIdentifier == responseIdentifier);
-        }
-    }
-
-    public class ClassAvailability
-    {
-        public byte AccountExpansionLevel;
-        public byte ActiveExpansionLevel;
-        public byte ClassID;
-        public byte MinActiveExpansionLevel;
-    }
-
-    public class RaceClassAvailability
-    {
-        public List<ClassAvailability> Classes = new();
-        public byte RaceID;
-    }
-
-    public class RaceUnlockRequirement
-    {
-        public uint AchievementId;
-        public byte Expansion;
-    }
-
-    public class QuestRelationResult : List<uint>
-    {
-        private readonly bool _onlyActive;
-
-        public QuestRelationResult()
-        {
-        }
-
-        public QuestRelationResult(List<uint> range, bool onlyActive) : base(range)
-        {
-            _onlyActive = onlyActive;
-        }
-
-        public bool HasQuest(uint questId)
-        {
-            return Contains(questId) && (!_onlyActive || Quest.IsTakingQuestEnabled(questId));
-        }
-    }
-
-    internal class ScriptNameContainer
-    {
-        private readonly List<Entry> IndexToName = new();
-        private readonly Dictionary<string, Entry> NameToIndex = new();
-
-        public ScriptNameContainer()
-        {
-            // We insert an empty placeholder here so we can use the
-            // script Id 0 as dummy for "no script found".
-            uint id = Insert("", false);
-
-            Cypher.Assert(id == 0);
-        }
-
-        public uint Insert(string scriptName, bool isScriptNameBound)
-        {
-            Entry entry = new((uint)NameToIndex.Count, isScriptNameBound, scriptName);
-            var result = NameToIndex.TryAdd(scriptName, entry);
-
-            if (result)
-            {
-                Cypher.Assert(NameToIndex.Count <= int.MaxValue);
-                IndexToName.Add(entry);
-            }
-
-            return NameToIndex[scriptName].Id;
-        }
-
-        public int GetSize()
-        {
-            return IndexToName.Count;
-        }
-
-        public Entry Find(uint index)
-        {
-            return index < IndexToName.Count ? IndexToName[(int)index] : null;
-        }
-
-        public Entry Find(string name)
-        {
-            // assume "" is the first element
-            if (name.IsEmpty())
-                return null;
-
-            return NameToIndex.LookupByKey(name);
-        }
-
-        public List<string> GetAllDBScriptNames()
-        {
-            List<string> scriptNames = new();
-
-            foreach (var (name, entry) in NameToIndex)
-                if (entry.IsScriptDatabaseBound)
-                    scriptNames.Add(name);
-
-            return scriptNames;
-        }
-
-        public class Entry
-        {
-            public uint Id;
-            public bool IsScriptDatabaseBound;
-            public string Name;
-
-            public Entry(uint id, bool isScriptDatabaseBound, string name)
-            {
-                Id = id;
-                IsScriptDatabaseBound = isScriptDatabaseBound;
-                Name = name;
-            }
-        }
-    }
-
-    public class InstanceTemplate
-    {
-        public uint Parent;
-        public uint ScriptId;
     }
 }

@@ -34,10 +34,10 @@ namespace Game.Chat
                 return false;
             }
 
-            var map = CliDB.MapStorage.LookupByKey(tele.mapId);
+            var map = CliDB.MapStorage.LookupByKey(tele.MapId);
 
             if (map == null ||
-                (map.IsBattlegroundOrArena() && (player.GetMapId() != tele.mapId || !player.IsGameMaster())))
+                (map.IsBattlegroundOrArena() && (player.GetMapId() != tele.MapId || !player.IsGameMaster())))
             {
                 handler.SendSysMessage(CypherStrings.CannotTeleToBg);
 
@@ -50,7 +50,7 @@ namespace Game.Chat
             else
                 player.SaveRecallPosition(); // save only in non-flight case
 
-            player.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
+            player.TeleportTo(tele.MapId, tele.PosX, tele.PosY, tele.PosZ, tele.Orientation);
 
             return true;
         }
@@ -71,13 +71,13 @@ namespace Game.Chat
             }
 
             GameTele tele = new();
-            tele.posX = player.GetPositionX();
-            tele.posY = player.GetPositionY();
-            tele.posZ = player.GetPositionZ();
-            tele.orientation = player.GetOrientation();
-            tele.mapId = player.GetMapId();
-            tele.name = name;
-            tele.nameLow = name.ToLowerInvariant();
+            tele.PosX = player.GetPositionX();
+            tele.PosY = player.GetPositionY();
+            tele.PosZ = player.GetPositionZ();
+            tele.Orientation = player.GetOrientation();
+            tele.MapId = player.GetMapId();
+            tele.Name = name;
+            tele.NameLow = name.ToLowerInvariant();
 
             if (Global.ObjectMgr.AddGameTele(tele))
             {
@@ -103,7 +103,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Global.ObjectMgr.DeleteGameTele(tele.name);
+            Global.ObjectMgr.DeleteGameTele(tele.Name);
             handler.SendSysMessage(CypherStrings.CommandTpDeleted);
 
             return true;
@@ -132,7 +132,7 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            MapRecord map = CliDB.MapStorage.LookupByKey(tele.mapId);
+            MapRecord map = CliDB.MapStorage.LookupByKey(tele.MapId);
 
             if (map == null ||
                 map.IsBattlegroundOrArena())
@@ -174,7 +174,7 @@ namespace Game.Chat
                     continue;
                 }
 
-                handler.SendSysMessage(CypherStrings.TeleportingTo, plNameLink, "", tele.name);
+                handler.SendSysMessage(CypherStrings.TeleportingTo, plNameLink, "", tele.Name);
 
                 if (handler.NeedReportToTarget(player))
                     player.SendSysMessage(CypherStrings.TeleportedToBy, nameLink);
@@ -185,7 +185,7 @@ namespace Game.Chat
                 else
                     player.SaveRecallPosition(); // save only in non-flight case
 
-                player.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
+                player.TeleportTo(tele.MapId, tele.PosX, tele.PosY, tele.PosZ, tele.Orientation);
             }
 
             return true;
@@ -289,7 +289,7 @@ namespace Game.Chat
                 // Id, or string, or [Name] Shift-click form |color|Htele:Id|h[Name]|h|r
                 GameTele tele = where as GameTele;
 
-                return DoNameTeleport(handler, player, tele.mapId, new Position(tele.posX, tele.posY, tele.posZ, tele.orientation), tele.name);
+                return DoNameTeleport(handler, player, tele.MapId, new Position(tele.PosX, tele.PosY, tele.PosZ, tele.Orientation), tele.Name);
             }
 
             [CommandGroup("npc")]

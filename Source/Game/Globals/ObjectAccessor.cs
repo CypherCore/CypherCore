@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using Game;
 using Game.Entities;
 using Game.Maps;
 
@@ -264,28 +263,5 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
             PlayerNameMapHolder.Remove(obj);
             _players.Remove(obj.GetGUID());
         }
-    }
-}
-
-internal class PlayerNameMapHolder
-{
-    private static readonly Dictionary<string, Player> _playerNameMap = new();
-
-    public static void Insert(Player p)
-    {
-        _playerNameMap[p.GetName()] = p;
-    }
-
-    public static void Remove(Player p)
-    {
-        _playerNameMap.Remove(p.GetName());
-    }
-
-    public static Player Find(string name)
-    {
-        if (!ObjectManager.NormalizePlayerName(ref name))
-            return null;
-
-        return _playerNameMap.LookupByKey(name);
     }
 }

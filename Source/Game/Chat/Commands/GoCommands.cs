@@ -285,7 +285,7 @@ namespace Game.Chat.Commands
 
             if (exit != null)
             {
-                if (player.TeleportTo(exit.target_mapId, exit.target_X, exit.target_Y, exit.target_Z, exit.target_Orientation + MathF.PI))
+                if (player.TeleportTo(exit.Target_mapId, exit.Target_X, exit.Target_Y, exit.Target_Z, exit.Target_Orientation + MathF.PI))
                 {
                     handler.SendSysMessage(CypherStrings.CommandWentToInstanceGate, mapName, mapId);
 
@@ -293,7 +293,7 @@ namespace Game.Chat.Commands
                 }
                 else
                 {
-                    uint parentMapId = exit.target_mapId;
+                    uint parentMapId = exit.Target_mapId;
                     string parentMapName = CliDB.MapStorage.LookupByKey(parentMapId).MapName[handler.GetSessionDbcLocale()];
                     handler.SendSysMessage(CypherStrings.CommandGoInstanceGateFailed, mapName, mapId, parentMapName, parentMapId);
                 }
@@ -308,7 +308,7 @@ namespace Game.Chat.Commands
 
             if (entrance != null)
             {
-                if (player.TeleportTo(entrance.target_mapId, entrance.target_X, entrance.target_Y, entrance.target_Z, entrance.target_Orientation))
+                if (player.TeleportTo(entrance.Target_mapId, entrance.Target_X, entrance.Target_Y, entrance.Target_Z, entrance.Target_Orientation))
                 {
                     handler.SendSysMessage(CypherStrings.CommandWentToInstanceStart, mapName, mapId);
 

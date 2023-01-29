@@ -5686,7 +5686,7 @@ namespace Game.Entities
             {
                 //- TODO: Poor design of mail system
                 SQLTransaction trans = new();
-                new MailDraft(mailReward.mailTemplateId).SendMailTo(trans, this, new MailSender(MailMessageType.Creature, mailReward.senderEntry));
+                new MailDraft(mailReward.MailTemplateId).SendMailTo(trans, this, new MailSender(MailMessageType.Creature, mailReward.SenderEntry));
                 DB.Characters.CommitTransaction(trans);
             }
 

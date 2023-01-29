@@ -257,11 +257,11 @@ namespace Game.DungeonFinding
                         continue;
                     }
 
-                    dungeon.Map = at.target_mapId;
-                    dungeon.X = at.target_X;
-                    dungeon.Y = at.target_Y;
-                    dungeon.Z = at.target_Z;
-                    dungeon.O = at.target_Orientation;
+                    dungeon.Map = at.Target_mapId;
+                    dungeon.X = at.Target_X;
+                    dungeon.Y = at.Target_Y;
+                    dungeon.Z = at.Target_Z;
+                    dungeon.O = at.Target_Orientation;
                 }
 
                 if (dungeon.Type != LfgType.Random)

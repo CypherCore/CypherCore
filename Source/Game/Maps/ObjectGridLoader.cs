@@ -126,7 +126,7 @@ namespace Game.Maps
             if (cellguids == null)
                 return;
 
-            LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
+            LoadHelper<GameObject>(cellguids.Gameobjects, cellCoord, ref i_gameObjects, i_map);
         }
 
         public override void Visit(IList<Creature> objs)
@@ -137,7 +137,7 @@ namespace Game.Maps
             if (cellguids == null)
                 return;
 
-            LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
+            LoadHelper<Creature>(cellguids.Creatures, cellCoord, ref i_creatures, i_map);
         }
 
         public override void Visit(IList<AreaTrigger> objs)
@@ -169,7 +169,7 @@ namespace Game.Maps
             CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
 
             if (cell_guids != null)
-                LoadHelper<GameObject>(cell_guids.gameobjects, cellCoord, ref i_gameObjects, i_map, _phaseId, _phaseOwner);
+                LoadHelper<GameObject>(cell_guids.Gameobjects, cellCoord, ref i_gameObjects, i_map, _phaseId, _phaseOwner);
         }
 
         public override void Visit(IList<Creature> objs)
@@ -178,7 +178,7 @@ namespace Game.Maps
             CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
 
             if (cell_guids != null)
-                LoadHelper<Creature>(cell_guids.creatures, cellCoord, ref i_creatures, i_map, _phaseId, _phaseOwner);
+                LoadHelper<Creature>(cell_guids.Creatures, cellCoord, ref i_creatures, i_map, _phaseId, _phaseOwner);
         }
 
         public void Load(uint phaseId)
