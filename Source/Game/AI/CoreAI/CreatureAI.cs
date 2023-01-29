@@ -18,19 +18,19 @@ namespace Game.AI
 	{
 		private List<AreaBoundary> _boundary = new();
 
-		protected EventMap _events = new();
-		protected InstanceScript _instanceScript;
+		protected readonly EventMap Events = new();
+		protected InstanceScript InstanceScript;
 		private bool _isEngaged;
-		private bool _moveInLOSLocked;
+		private bool _moveInLosLocked;
 		private bool _negateBoundary;
-		protected TaskScheduler _scheduler = new();
+		protected readonly TaskScheduler _scheduler = new();
 
 		protected new Creature me;
 
 		public CreatureAI(Creature _creature) : base(_creature)
 		{
 			me               = _creature;
-			_moveInLOSLocked = false;
+			_moveInLosLocked = false;
 		}
 
 		public TaskScheduler Scheduler => _scheduler;
@@ -98,12 +98,12 @@ namespace Game.AI
 
 		public virtual void MoveInLineOfSight_Safe(Unit who)
 		{
-			if (_moveInLOSLocked)
+			if (_moveInLosLocked)
 				return;
 
-			_moveInLOSLocked = true;
+			_moveInLosLocked = true;
 			MoveInLineOfSight(who);
-			_moveInLOSLocked = false;
+			_moveInLosLocked = false;
 		}
 
 		public virtual void MoveInLineOfSight(Unit who)
@@ -714,42 +714,5 @@ namespace Game.AI
 		{
 			return _isEngaged;
 		}
-	}
-
-	public class AISpellInfoType
-	{
-		public AICondition condition;
-		public TimeSpan cooldown;
-		public byte Effects; // set of enum SelectEffect
-		public float maxRange;
-		public TimeSpan realCooldown;
-
-		public AITarget target;
-
-		public byte Targets; // set of enum SelectTarget
-
-		public AISpellInfoType()
-		{
-			target    = AITarget.Self;
-			condition = AICondition.Combat;
-			cooldown  = TimeSpan.FromMilliseconds(SharedConst.AIDefaultCooldown);
-		}
-	}
-
-	public enum AITarget
-	{
-		Self,
-		Victim,
-		Enemy,
-		Ally,
-		Buff,
-		Debuff
-	}
-
-	public enum AICondition
-	{
-		Aggro,
-		Combat,
-		Die
 	}
 }

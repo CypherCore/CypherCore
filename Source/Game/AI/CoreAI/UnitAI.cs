@@ -302,7 +302,7 @@ namespace Game.AI
 			AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
 
 			if (info != null)
-				aiTargetType = info.target;
+				aiTargetType = info.Target;
 
 			switch (aiTargetType)
 			{
@@ -439,15 +439,15 @@ namespace Game.AI
 				                                 AISpellInfoType AIInfo = new();
 
 				                                 if (spellInfo.HasAttribute(SpellAttr0.AllowCastWhileDead))
-					                                 AIInfo.condition = AICondition.Die;
+					                                 AIInfo.Condition = AICondition.Die;
 				                                 else if (spellInfo.IsPassive() ||
 				                                          spellInfo.GetDuration() == -1)
-					                                 AIInfo.condition = AICondition.Aggro;
+					                                 AIInfo.Condition = AICondition.Aggro;
 				                                 else
-					                                 AIInfo.condition = AICondition.Combat;
+					                                 AIInfo.Condition = AICondition.Combat;
 
-				                                 if (AIInfo.cooldown.TotalMilliseconds < spellInfo.RecoveryTime)
-					                                 AIInfo.cooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
+				                                 if (AIInfo.Cooldown.TotalMilliseconds < spellInfo.RecoveryTime)
+					                                 AIInfo.Cooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
 
 				                                 if (spellInfo.GetMaxRange(false) != 0)
 					                                 foreach (var spellEffectInfo in spellInfo.GetEffects())
@@ -457,32 +457,32 @@ namespace Game.AI
 						                                 if (targetType == Targets.UnitTargetEnemy ||
 						                                     targetType == Targets.DestTargetEnemy)
 						                                 {
-							                                 if (AIInfo.target < AITarget.Victim)
-								                                 AIInfo.target = AITarget.Victim;
+							                                 if (AIInfo.Target < AITarget.Victim)
+								                                 AIInfo.Target = AITarget.Victim;
 						                                 }
 						                                 else if (targetType == Targets.UnitDestAreaEnemy)
 						                                 {
-							                                 if (AIInfo.target < AITarget.Enemy)
-								                                 AIInfo.target = AITarget.Enemy;
+							                                 if (AIInfo.Target < AITarget.Enemy)
+								                                 AIInfo.Target = AITarget.Enemy;
 						                                 }
 
 						                                 if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
 						                                 {
 							                                 if (targetType == Targets.UnitTargetEnemy)
 							                                 {
-								                                 if (AIInfo.target < AITarget.Debuff)
-									                                 AIInfo.target = AITarget.Debuff;
+								                                 if (AIInfo.Target < AITarget.Debuff)
+									                                 AIInfo.Target = AITarget.Debuff;
 							                                 }
 							                                 else if (spellInfo.IsPositive())
 							                                 {
-								                                 if (AIInfo.target < AITarget.Buff)
-									                                 AIInfo.target = AITarget.Buff;
+								                                 if (AIInfo.Target < AITarget.Buff)
+									                                 AIInfo.Target = AITarget.Buff;
 							                                 }
 						                                 }
 					                                 }
 
-				                                 AIInfo.realCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime + spellInfo.StartRecoveryTime);
-				                                 AIInfo.maxRange     = spellInfo.GetMaxRange(false) * 3 / 4;
+				                                 AIInfo.RealCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime + spellInfo.StartRecoveryTime);
+				                                 AIInfo.MaxRange     = spellInfo.GetMaxRange(false) * 3 / 4;
 
 				                                 AIInfo.Effects = 0;
 				                                 AIInfo.Targets = 0;

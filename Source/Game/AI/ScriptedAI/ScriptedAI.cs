@@ -559,7 +559,7 @@ namespace Game.AI
 
 			me.SetCombatPulseDelay(0);
 			me.ResetLootMode();
-			_events.Reset();
+			Events.Reset();
 			summons.DespawnAll();
 			_scheduler.CancelAll();
 
@@ -570,7 +570,7 @@ namespace Game.AI
 
 		public void _JustDied()
 		{
-			_events.Reset();
+			Events.Reset();
 			summons.DespawnAll();
 			_scheduler.CancelAll();
 
@@ -655,13 +655,13 @@ namespace Game.AI
 			if (!UpdateVictim())
 				return;
 
-			_events.Update(diff);
+			Events.Update(diff);
 
 			if (me.HasUnitState(UnitState.Casting))
 				return;
 
 
-			_events.ExecuteEvents(eventId =>
+			Events.ExecuteEvents(eventId =>
 			                      {
 				                      ExecuteEvent(eventId);
 
@@ -763,13 +763,13 @@ namespace Game.AI
 			if (!me.IsAlive())
 				return;
 
-			_events.Reset();
+			Events.Reset();
 			summons.DespawnAll();
 		}
 
 		private void _JustDied()
 		{
-			_events.Reset();
+			Events.Reset();
 			summons.DespawnAll();
 		}
 
@@ -800,12 +800,12 @@ namespace Game.AI
 			if (!UpdateVictim())
 				return;
 
-			_events.Update(diff);
+			Events.Update(diff);
 
 			if (me.HasUnitState(UnitState.Casting))
 				return;
 
-			_events.ExecuteEvents(eventId =>
+			Events.ExecuteEvents(eventId =>
 			                      {
 				                      ExecuteEvent(eventId);
 

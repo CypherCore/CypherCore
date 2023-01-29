@@ -183,8 +183,8 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			Talk(TextIds.SayAggro);
 			DoCastSelf(SpellIds.Melee);
 			instance.SendEncounterUnit(EncounterFrameType.Engage, me);
-			_events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
-			_events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
+			Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
+			Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
 		}
 
 		public override void EnterEvadeMode(EvadeReason why)
@@ -192,7 +192,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			Talk(TextIds.SayDisengage);
 			_EnterEvadeMode();
 			instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-			_events.Reset();
+			Events.Reset();
 			CleanupEncounter();
 			_DespawnAtEvade(TimeSpan.FromSeconds(30));
 		}
@@ -217,9 +217,9 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			{
 				case SpellIds.ApocalypseDriveFinalDamage:
 					if (_apocalypseDriveCount < MiscConst.MaxApocalypseDriveCount)
-						_events.Reset();
+						Events.Reset();
 
-					_events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
+					Events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
 					HideCannons();
 					me.RemoveUnitFlag(UnitFlags.Uninteractible);
 
@@ -237,11 +237,11 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 				me.SetReactState(ReactStates.Passive);
 				me.InterruptNonMeleeSpells(true);
 				me.SetFacingTo(me.GetHomePosition().GetOrientation());
-				_events.Reset();
+				Events.Reset();
 
 				if (GetDifficulty() == Difficulty.MythicRaid ||
 				    GetDifficulty() == Difficulty.HeroicRaid)
-					_events.ScheduleEvent(EventIds.SurgingFel, TimeSpan.FromSeconds(8));
+					Events.ScheduleEvent(EventIds.SurgingFel, TimeSpan.FromSeconds(8));
 
 				DoCastSelf(SpellIds.ApocalypseDrive);
 				DoCastSelf(SpellIds.ApocalypseDriveFinalDamage);
@@ -312,10 +312,10 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 						_searingBarrageSpellId = SpellIds.SearingBarrageDecimator;
 
 					if (_apocalypseDriveCount < MiscConst.MaxApocalypseDriveCount)
-						_events.Reset();
+						Events.Reset();
 
-					_events.ScheduleEvent(EventIds.SearingBarrage, TimeSpan.FromSeconds(3.5));
-					_events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
+					Events.ScheduleEvent(EventIds.SearingBarrage, TimeSpan.FromSeconds(3.5));
+					Events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
 					_castEradication = true;
 
 					if (summon.GetEntry() == CreatureIds.Decimator)
@@ -351,13 +351,13 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 			if (!UpdateVictim())
 				return;
 
-			_events.Update(diff);
+			Events.Update(diff);
 
 			if (me.HasUnitState(UnitState.Casting) &&
 			    !me.HasAura(SpellIds.ApocalypseDrive))
 				return;
 
-			_events.ExecuteEvents(eventId =>
+			Events.ExecuteEvents(eventId =>
 			                      {
 				                      switch (eventId)
 				                      {
@@ -374,13 +374,13 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 						                      }
 
 						                      me.SetReactState(ReactStates.Aggressive);
-						                      _events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(20));
-						                      _events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(18));
+						                      Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(20));
+						                      Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(18));
 
 						                      break;
 					                      case EventIds.FelBombardment:
 						                      DoCastAOE(SpellIds.FelBombardmentSelector);
-						                      _events.Repeat(TimeSpan.FromSeconds(20));
+						                      Events.Repeat(TimeSpan.FromSeconds(20));
 
 						                      break;
 					                      case EventIds.SearingBarrage:
@@ -389,7 +389,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 						                      break;
 					                      case EventIds.CannonChooser:
 						                      DoCastSelf(SpellIds.CannonChooser);
-						                      _events.Repeat(TimeSpan.FromSeconds(16));
+						                      Events.Repeat(TimeSpan.FromSeconds(16));
 
 						                      break;
 					                      case EventIds.SurgingFel:
@@ -401,7 +401,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 						                      if (dummy)
 							                      dummy.CastSpell(dummy, SpellIds.SurgingFelAreaTrigger);
 
-						                      _events.Repeat(TimeSpan.FromSeconds(8));
+						                      Events.Repeat(TimeSpan.FromSeconds(8));
 
 						                      break;
 					                      }

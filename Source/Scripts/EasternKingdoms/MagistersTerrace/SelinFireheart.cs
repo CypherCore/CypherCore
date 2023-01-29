@@ -81,8 +81,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 			switch (action)
 			{
 				case MiscConst.ActionSwitchPhase:
-					_events.SetPhase(PhaseIds.Normal);
-					_events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
+					Events.SetPhase(PhaseIds.Normal);
+					Events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
 					AttackStart(me.GetVictim());
 					me.GetMotionMaster().MoveChase(me.GetVictim());
 
@@ -107,7 +107,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 				float x, y, z;
 				crystal.GetClosePoint(out x, out y, out z, me.GetCombatReach(), SharedConst.ContactDistance);
 
-				_events.SetPhase(PhaseIds.Drain);
+				Events.SetPhase(PhaseIds.Drain);
 				me.SetWalk(false);
 				me.GetMotionMaster().MovePoint(1, x, y, z);
 			}
@@ -126,8 +126,8 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 			Talk(TextIds.SayAggro);
 			base.JustEngagedWith(who);
 
-			_events.SetPhase(PhaseIds.Normal);
-			_events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromMilliseconds(2100), 0, PhaseIds.Normal);
+			Events.SetPhase(PhaseIds.Normal);
+			Events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromMilliseconds(2100), 0, PhaseIds.Normal);
 		}
 
 		public override void KilledUnit(Unit victim)
@@ -148,7 +148,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 				{
 					CrystalChosen.RemoveUnitFlag(UnitFlags.Uninteractible);
 					CrystalChosen.CastSpell(me, SpellIds.ManaRage, true);
-					_events.ScheduleEvent(EventIds.Empower, TimeSpan.FromSeconds(10), PhaseIds.Drain);
+					Events.ScheduleEvent(EventIds.Empower, TimeSpan.FromSeconds(10), PhaseIds.Drain);
 				}
 			}
 		}
@@ -166,18 +166,18 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 			if (!UpdateVictim())
 				return;
 
-			_events.Update(diff);
+			Events.Update(diff);
 
 			if (me.HasUnitState(UnitState.Casting))
 				return;
 
-			_events.ExecuteEvents(eventId =>
+			Events.ExecuteEvents(eventId =>
 			                      {
 				                      switch (eventId)
 				                      {
 					                      case EventIds.FelExplosion:
 						                      DoCastAOE(SpellIds.FelExplosion);
-						                      _events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
+						                      Events.ScheduleEvent(EventIds.FelExplosion, TimeSpan.FromSeconds(2), 0, PhaseIds.Normal);
 
 						                      break;
 					                      case EventIds.DrainCrystal:
@@ -192,7 +192,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 						                      if (target != null)
 							                      DoCast(target, SpellIds.DrainMana);
 
-						                      _events.ScheduleEvent(EventIds.DrainMana, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
+						                      Events.ScheduleEvent(EventIds.DrainMana, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
 
 						                      break;
 					                      }
@@ -203,7 +203,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 						                      if (target != null)
 							                      DoCast(target, SpellIds.DrainLife);
 
-						                      _events.ScheduleEvent(EventIds.DrainLife, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
+						                      Events.ScheduleEvent(EventIds.DrainLife, TimeSpan.FromSeconds(10), 0, PhaseIds.Normal);
 
 						                      break;
 					                      }
@@ -232,21 +232,21 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.SelinFireheart
 			                      });
 
 			if (me.GetPowerPct(PowerType.Mana) < 10.0f)
-				if (_events.IsInPhase(PhaseIds.Normal) &&
+				if (Events.IsInPhase(PhaseIds.Normal) &&
 				    !_scheduledEvents)
 				{
 					_scheduledEvents = true;
 					TimeSpan timer = RandomHelper.RandTime(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(7));
-					_events.ScheduleEvent(EventIds.DrainLife, timer, 0, PhaseIds.Normal);
+					Events.ScheduleEvent(EventIds.DrainLife, timer, 0, PhaseIds.Normal);
 
 					if (IsHeroic())
 					{
-						_events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), 0, PhaseIds.Normal);
-						_events.ScheduleEvent(EventIds.DrainMana, timer + TimeSpan.FromSeconds(5), 0, PhaseIds.Normal);
+						Events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), 0, PhaseIds.Normal);
+						Events.ScheduleEvent(EventIds.DrainMana, timer + TimeSpan.FromSeconds(5), 0, PhaseIds.Normal);
 					}
 					else
 					{
-						_events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), 0, PhaseIds.Normal);
+						Events.ScheduleEvent(EventIds.DrainCrystal, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), 0, PhaseIds.Normal);
 					}
 				}
 
