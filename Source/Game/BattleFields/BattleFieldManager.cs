@@ -12,17 +12,17 @@ namespace Game.BattleFields
 {
 	public class BattleFieldManager : Singleton<BattleFieldManager>
 	{
-		private static uint[] BattlefieldIdToMapId =
+		private static readonly uint[] _battlefieldIdToMapId =
 		{
 			0, 571, 732
 		};
 
-		private static uint[] BattlefieldIdToZoneId =
+		private static readonly uint[] _battlefieldIdToZoneId =
 		{
 			0, 4197, 5095
 		}; // imitate World_PVP_Area.db2
 
-		private static uint[] BattlefieldIdToScriptId =
+		private static readonly uint[] _battlefieldIdToScriptId =
 		{
 			0, 0, 0
 		};
@@ -61,7 +61,7 @@ namespace Game.BattleFields
 						continue;
 					}
 
-					BattlefieldIdToScriptId[(int)typeId] = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
+					_battlefieldIdToScriptId[(int)typeId] = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
 					++count;
 				} while (result.NextRow());
 
@@ -72,13 +72,13 @@ namespace Game.BattleFields
 		{
 			for (uint i = 0; i < (int)BattleFieldTypes.Max; ++i)
 			{
-				if (BattlefieldIdToScriptId[i] == 0)
+				if (_battlefieldIdToScriptId[i] == 0)
 					continue;
 
-				if (BattlefieldIdToMapId[i] != map.GetId())
+				if (_battlefieldIdToMapId[i] != map.GetId())
 					continue;
 
-				BattleField bf = Global.ScriptMgr.RunScriptRet<IBattlefieldGetBattlefield, BattleField>(p => p.GetBattlefield(map), BattlefieldIdToScriptId[i], null);
+				BattleField bf = Global.ScriptMgr.RunScriptRet<IBattlefieldGetBattlefield, BattleField>(p => p.GetBattlefield(map), _battlefieldIdToScriptId[i], null);
 
 				if (bf == null)
 					continue;
@@ -137,7 +137,7 @@ namespace Game.BattleFields
 
 		public bool IsWorldPvpArea(uint zoneId)
 		{
-			return BattlefieldIdToZoneId.Contains(zoneId);
+			return _battlefieldIdToZoneId.Contains(zoneId);
 		}
 
 		public BattleField GetBattlefieldToZoneId(Map map, uint zoneId)
