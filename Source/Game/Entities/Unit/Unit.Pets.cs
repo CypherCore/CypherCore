@@ -157,7 +157,7 @@ namespace Game.Entities
                     if (GetMinionGUID().IsEmpty())
                         SetMinionGUID(minion.GetGUID());
 
-                var properties = minion._Properties;
+                var properties = minion.Properties;
 
                 if (properties != null &&
                     properties.Title == SummonTitle.Companion)
@@ -214,8 +214,8 @@ namespace Game.Entities
 
                 Controlled.Remove(minion);
 
-                if (minion._Properties != null &&
-                    minion._Properties.Title == SummonTitle.Companion)
+                if (minion.Properties != null &&
+                    minion.Properties.Title == SummonTitle.Companion)
                     if (GetCritterGUID() == minion.GetGUID())
                         SetCritterGUID(ObjectGuid.Empty);
 

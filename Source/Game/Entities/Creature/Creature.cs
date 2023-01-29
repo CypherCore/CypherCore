@@ -544,7 +544,7 @@ namespace Game.Entities
 
                     Loot?.Update();
 
-                    foreach (var (playerOwner, loot) in PersonalLoot)
+                    foreach (var (playerOwner, loot) in _personalLoot)
                         loot.Update();
 
                     if (CorpseRemoveTime <= GameTime.GetGameTime())
@@ -1340,10 +1340,10 @@ namespace Game.Entities
 
         public override Loot GetLootForPlayer(Player player)
         {
-            if (PersonalLoot.Empty())
+            if (_personalLoot.Empty())
                 return Loot;
 
-            var loot = PersonalLoot.LookupByKey(player.GetGUID());
+            var loot = _personalLoot.LookupByKey(player.GetGUID());
 
             if (loot != null)
                 return loot;
@@ -1357,7 +1357,7 @@ namespace Game.Entities
                 !Loot.IsLooted())
                 return false;
 
-            foreach (var (_, loot) in PersonalLoot)
+            foreach (var (_, loot) in _personalLoot)
                 if (!loot.IsLooted())
                     return false;
 
@@ -2813,7 +2813,7 @@ namespace Game.Entities
                     Loot.IsLooted())
                     return true;
 
-                foreach (var (_, loot) in PersonalLoot)
+                foreach (var (_, loot) in _personalLoot)
                     if (loot.loot_type != LootType.Skinning ||
                         !loot.IsLooted())
                         return false;

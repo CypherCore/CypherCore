@@ -1845,7 +1845,7 @@ namespace Game.Entities
 
             foreach (var tempSummonData in data)
             {
-                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, TimeSpan.FromMilliseconds(tempSummonData.time));
+                TempSummon summon = SummonCreature(tempSummonData.Entry, tempSummonData.Pos, tempSummonData.Type, TimeSpan.FromMilliseconds(tempSummonData.Time));
 
                 if (summon)
                     list.Add(summon);
@@ -2480,10 +2480,10 @@ namespace Game.Entities
                 TempSummon tempSummon = me.ToTempSummon();
 
                 if (tempSummon == null ||
-                    tempSummon._Properties == null)
+                    tempSummon.Properties == null)
                     return false;
 
-                if (tempSummon._Properties.GetFlags().HasFlag(SummonPropertiesFlags.AttackableBySummoner) &&
+                if (tempSummon.Properties.GetFlags().HasFlag(SummonPropertiesFlags.AttackableBySummoner) &&
                     targetGuid == tempSummon.GetSummonerGUID())
                     return true;
 

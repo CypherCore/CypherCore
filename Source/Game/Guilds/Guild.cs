@@ -4204,7 +4204,7 @@ namespace Game.Guilds
             public void CopySlots(List<byte> ids)
             {
                 foreach (var item in _vec)
-                    ids.Add((byte)item.pos);
+                    ids.Add((byte)item.Pos);
             }
 
             public void SendEquipError(InventoryResult result, Item item)
@@ -4477,8 +4477,8 @@ namespace Game.Guilds
 
             private Item _StoreItem(SQLTransaction trans, BankTab pTab, Item pItem, ItemPosCount pos, bool clone)
             {
-                byte slotId = (byte)pos.pos;
-                uint count = pos.count;
+                byte slotId = (byte)pos.Pos;
+                uint count = pos.Count;
                 Item pItemDest = pTab.GetItem(slotId);
 
                 if (pItemDest != null)

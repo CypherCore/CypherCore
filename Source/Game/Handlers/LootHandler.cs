@@ -287,7 +287,7 @@ namespace Game
 
                 if (loot.IsLooted())
                 {
-                    corpse.loot = null;
+                    corpse.Loot = null;
                     corpse.RemoveCorpseDynamicFlag(CorpseDynFlags.Lootable);
                 }
             }

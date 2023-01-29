@@ -16,9 +16,9 @@ namespace Game.Entities
 {
     public class Pet : Guardian
     {
-        private const int PetFocusRegenInterval = 4 * Time.InMilliseconds;
-        private const int HappinessLevelSize = 333000;
-        private const float PetXPFactor = 0.05f;
+        private const int PET_FOCUS_REGEN_INTERVAL = 4 * Time.InMilliseconds;
+        private const int HAPPINESS_LEVEL_SIZE = 333000;
+        private const float PET_XP_FACTOR = 0.05f;
         private readonly List<uint> _autospells = new();
 
         private DeclinedName _declinedname;
@@ -29,9 +29,9 @@ namespace Game.Entities
         private ushort _petSpecialization;
 
         private PetType _petType;
-        public bool _removed;
+        public bool Removed { get; set; }
 
-        public Dictionary<uint, PetSpell> _spells = new();
+        public Dictionary<uint, PetSpell> PetSpells { get; set; } = new();
 
         public Pet(Player owner, PetType type = PetType.Max) : base(null, owner, true)
         {
@@ -51,7 +51,7 @@ namespace Game.Entities
             }
 
             SetName("Pet");
-            _focusRegenTimer = PetFocusRegenInterval;
+            _focusRegenTimer = PET_FOCUS_REGEN_INTERVAL;
         }
 
         public override void Dispose()
@@ -387,7 +387,7 @@ namespace Game.Entities
                                         return;
 
                                     // passing previous checks ensure that 'this' is still valid
-                                    if (_removed)
+                                    if (Removed)
                                         return;
 
                                     uint timediff = (uint)(GameTime.GetGameTime() - lastSaveTime);
@@ -628,7 +628,7 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            if (_removed) // pet already removed, just wait in remove queue, no updates
+            if (Removed) // pet already removed, just wait in remove queue, no updates
                 return;
 
             if (_loading)
@@ -696,14 +696,14 @@ namespace Game.Entities
                                 {
                                     case PowerType.Focus:
                                         Regenerate(PowerType.Focus);
-                                        _focusRegenTimer += PetFocusRegenInterval - diff;
+                                        _focusRegenTimer += PET_FOCUS_REGEN_INTERVAL - diff;
 
                                         if (_focusRegenTimer == 0)
                                             ++_focusRegenTimer;
 
                                         // Reset if large diff (lag) causes focus to get 'stuck'
-                                        if (_focusRegenTimer > PetFocusRegenInterval)
-                                            _focusRegenTimer = PetFocusRegenInterval;
+                                        if (_focusRegenTimer > PET_FOCUS_REGEN_INTERVAL)
+                                            _focusRegenTimer = PET_FOCUS_REGEN_INTERVAL;
 
                                         break;
                                     default:
@@ -774,7 +774,7 @@ namespace Game.Entities
             if (GetPetType() == PetType.Hunter)
             {
                 SetPetExperience(0);
-                SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel((uint)level) * PetXPFactor));
+                SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel((uint)level) * PET_XP_FACTOR));
             }
 
             InitStatsForLevel((uint)level);
@@ -846,7 +846,7 @@ namespace Game.Entities
 
             SetPetNameTimestamp(0);
             SetPetExperience(0);
-            SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
+            SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PET_XP_FACTOR));
             ReplaceAllNpcFlags(NPCFlags.None);
             ReplaceAllNpcFlags2(NPCFlags2.None);
 
@@ -894,15 +894,15 @@ namespace Game.Entities
 
         private void _SaveSpells(SQLTransaction trans)
         {
-            foreach (var pair in _spells.ToList())
+            foreach (var pair in PetSpells.ToList())
             {
                 // prevent saving family passives to DB
-                if (pair.Value.type == PetSpellType.Family)
+                if (pair.Value.Type == PetSpellType.Family)
                     continue;
 
                 PreparedStatement stmt;
 
-                switch (pair.Value.state)
+                switch (pair.Value.State)
                 {
                     case PetSpellState.Removed:
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_SPELL_BY_SPELL);
@@ -910,7 +910,7 @@ namespace Game.Entities
                         stmt.AddValue(1, pair.Key);
                         trans.Append(stmt);
 
-                        _spells.Remove(pair.Key);
+                        PetSpells.Remove(pair.Key);
 
                         continue;
                     case PetSpellState.Changed:
@@ -922,7 +922,7 @@ namespace Game.Entities
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                         stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, (byte)pair.Value.active);
+                        stmt.AddValue(2, (byte)pair.Value.Active);
                         trans.Append(stmt);
 
                         break;
@@ -930,7 +930,7 @@ namespace Game.Entities
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                         stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, (byte)pair.Value.active);
+                        stmt.AddValue(2, (byte)pair.Value.Active);
                         trans.Append(stmt);
 
                         break;
@@ -938,7 +938,7 @@ namespace Game.Entities
                         continue;
                 }
 
-                pair.Value.state = PetSpellState.Unchanged;
+                pair.Value.State = PetSpellState.Unchanged;
             }
         }
 
@@ -1137,21 +1137,21 @@ namespace Game.Entities
                 return false;
             }
 
-            var petSpell = _spells.LookupByKey(spellId);
+            var petSpell = PetSpells.LookupByKey(spellId);
 
             if (petSpell != null)
             {
-                if (petSpell.state == PetSpellState.Removed)
+                if (petSpell.State == PetSpellState.Removed)
                 {
                     state = PetSpellState.Changed;
                 }
                 else
                 {
                     if (state == PetSpellState.Unchanged &&
-                        petSpell.state != PetSpellState.Unchanged)
+                        petSpell.State != PetSpellState.Unchanged)
                     {
                         // can be in case spell loading but learned at some previous spell loading
-                        petSpell.state = PetSpellState.Unchanged;
+                        petSpell.State = PetSpellState.Unchanged;
 
                         if (active == ActiveStates.Enabled)
                             ToggleAutocast(spellInfo, true);
@@ -1164,26 +1164,26 @@ namespace Game.Entities
             }
 
             PetSpell newspell = new();
-            newspell.state = state;
-            newspell.type = type;
+            newspell.State = state;
+            newspell.Type = type;
 
             if (active == ActiveStates.Decide) // active was not used before, so we save it's autocast/passive State here
             {
                 if (spellInfo.IsAutocastable())
-                    newspell.active = ActiveStates.Disabled;
+                    newspell.Active = ActiveStates.Disabled;
                 else
-                    newspell.active = ActiveStates.Passive;
+                    newspell.Active = ActiveStates.Passive;
             }
             else
             {
-                newspell.active = active;
+                newspell.Active = active;
             }
 
             // talent: unlearn all other talent ranks (high and low)
             if (spellInfo.IsRanked())
-                foreach (var pair in _spells)
+                foreach (var pair in PetSpells)
                 {
-                    if (pair.Value.state == PetSpellState.Removed)
+                    if (pair.Value.State == PetSpellState.Removed)
                         continue;
 
                     SpellInfo oldRankSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
@@ -1196,9 +1196,9 @@ namespace Game.Entities
                         // replace by new high rank
                         if (spellInfo.IsHighRankOf(oldRankSpellInfo))
                         {
-                            newspell.active = pair.Value.active;
+                            newspell.Active = pair.Value.Active;
 
-                            if (newspell.active == ActiveStates.Enabled)
+                            if (newspell.Active == ActiveStates.Enabled)
                                 ToggleAutocast(oldRankSpellInfo, false);
 
                             UnlearnSpell(pair.Key, false, false);
@@ -1213,7 +1213,7 @@ namespace Game.Entities
                     }
                 }
 
-            _spells[spellId] = newspell;
+            PetSpells[spellId] = newspell;
 
             if (spellInfo.IsPassive() &&
                 (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState)))
@@ -1221,7 +1221,7 @@ namespace Game.Entities
             else
                 GetCharmInfo().AddSpellToActionBar(spellInfo);
 
-            if (newspell.active == ActiveStates.Enabled)
+            if (newspell.Active == ActiveStates.Enabled)
                 ToggleAutocast(spellInfo, true);
 
             return true;
@@ -1330,18 +1330,18 @@ namespace Game.Entities
 
         public bool RemoveSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
         {
-            var petSpell = _spells.LookupByKey(spellId);
+            var petSpell = PetSpells.LookupByKey(spellId);
 
             if (petSpell == null)
                 return false;
 
-            if (petSpell.state == PetSpellState.Removed)
+            if (petSpell.State == PetSpellState.Removed)
                 return false;
 
-            if (petSpell.state == PetSpellState.New)
-                _spells.Remove(spellId);
+            if (petSpell.State == PetSpellState.New)
+                PetSpells.Remove(spellId);
             else
-                petSpell.state = PetSpellState.Removed;
+                petSpell.State = PetSpellState.Removed;
 
             RemoveAurasDueToSpell(spellId);
 
@@ -1400,7 +1400,7 @@ namespace Game.Entities
         public void InitPetCreateSpells()
         {
             GetCharmInfo().InitPetActionBar();
-            _spells.Clear();
+            PetSpells.Clear();
 
             LearnPetPassives();
             InitLevelupSpellsForLevel();
@@ -1413,7 +1413,7 @@ namespace Game.Entities
             if (!spellInfo.IsAutocastable())
                 return;
 
-            var petSpell = _spells.LookupByKey(spellInfo.Id);
+            var petSpell = PetSpells.LookupByKey(spellInfo.Id);
 
             if (petSpell == null)
                 return;
@@ -1426,12 +1426,12 @@ namespace Game.Entities
                 {
                     _autospells.Add(spellInfo.Id);
 
-                    if (petSpell.active != ActiveStates.Enabled)
+                    if (petSpell.Active != ActiveStates.Enabled)
                     {
-                        petSpell.active = ActiveStates.Enabled;
+                        petSpell.Active = ActiveStates.Enabled;
 
-                        if (petSpell.state != PetSpellState.New)
-                            petSpell.state = PetSpellState.Changed;
+                        if (petSpell.State != PetSpellState.New)
+                            petSpell.State = PetSpellState.Changed;
                     }
                 }
             }
@@ -1441,12 +1441,12 @@ namespace Game.Entities
                 {
                     _autospells.Remove(spellInfo.Id);
 
-                    if (petSpell.active != ActiveStates.Disabled)
+                    if (petSpell.Active != ActiveStates.Disabled)
                     {
-                        petSpell.active = ActiveStates.Disabled;
+                        petSpell.Active = ActiveStates.Disabled;
 
-                        if (petSpell.state != PetSpellState.New)
-                            petSpell.state = PetSpellState.Changed;
+                        if (petSpell.State != PetSpellState.New)
+                            petSpell.State = PetSpellState.Changed;
                     }
                 }
             }
@@ -1500,9 +1500,9 @@ namespace Game.Entities
 
         public override bool HasSpell(uint spell)
         {
-            var petSpell = _spells.LookupByKey(spell);
+            var petSpell = PetSpells.LookupByKey(spell);
 
-            return petSpell != null && petSpell.state != PetSpellState.Removed;
+            return petSpell != null && petSpell.State != PetSpellState.Removed;
         }
 
         // Get all passive spells in our skill line
@@ -1822,131 +1822,6 @@ namespace Game.Entities
         public DeclinedName GetDeclinedNames()
         {
             return _declinedname;
-        }
-    }
-
-    public class PetSpell
-    {
-        public ActiveStates active;
-        public PetSpellState state;
-        public PetSpellType type;
-    }
-
-    public class PetStable
-    {
-        private static readonly uint UnslottedPetIndexMask = 0x80000000;
-        public PetInfo[] ActivePets = new PetInfo[SharedConst.MaxActivePets]; // PET_SAVE_FIRST_ACTIVE_SLOT - PET_SAVE_LAST_ACTIVE_SLOT
-
-        public uint? CurrentPetIndex;                                          // index into ActivePets or UnslottedPets if highest bit is set
-        public PetInfo[] StabledPets = new PetInfo[SharedConst.MaxPetStables]; // PET_SAVE_FIRST_STABLE_SLOT - PET_SAVE_LAST_STABLE_SLOT
-        public List<PetInfo> UnslottedPets = new();                            // PET_SAVE_NOT_IN_SLOT
-
-        public PetInfo GetCurrentPet()
-        {
-            if (!CurrentPetIndex.HasValue)
-                return null;
-
-            uint? activePetIndex = GetCurrentActivePetIndex();
-
-            if (activePetIndex.HasValue)
-                return ActivePets[activePetIndex.Value] != null ? ActivePets[activePetIndex.Value] : null;
-
-            uint? unslottedPetIndex = GetCurrentUnslottedPetIndex();
-
-            if (unslottedPetIndex.HasValue)
-                return unslottedPetIndex < UnslottedPets.Count ? UnslottedPets[(int)unslottedPetIndex.Value] : null;
-
-            return null;
-        }
-
-        public uint? GetCurrentActivePetIndex()
-        {
-            return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) == 0) ? CurrentPetIndex : null;
-        }
-
-        public void SetCurrentActivePetIndex(uint index)
-        {
-            CurrentPetIndex = index;
-        }
-
-        private uint? GetCurrentUnslottedPetIndex()
-        {
-            return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) != 0) ? (CurrentPetIndex & ~UnslottedPetIndexMask) : null;
-        }
-
-        public void SetCurrentUnslottedPetIndex(uint index)
-        {
-            CurrentPetIndex = index | UnslottedPetIndexMask;
-        }
-
-        public class PetInfo
-        {
-            public string ActionBar;
-            public uint CreatedBySpellId;
-            public uint CreatureId;
-            public uint DisplayId;
-            public uint Experience;
-            public uint Health;
-            public uint LastSaveTime;
-            public byte Level = 0;
-            public uint Mana;
-            public string Name;
-            public uint PetNumber;
-            public ReactStates ReactState;
-            public ushort SpecializationId;
-            public PetType Type = PetType.Max;
-            public bool WasRenamed;
-        }
-    }
-
-    public enum ActiveStates
-    {
-        Passive = 0x01,  // 0x01 - passive
-        Disabled = 0x81, // 0x80 - castable
-        Enabled = 0xC1,  // 0x40 | 0x80 - auto cast + castable
-        Command = 0x07,  // 0x01 | 0x02 | 0x04
-        Reaction = 0x06, // 0x02 | 0x04
-        Decide = 0x00    // custom
-    }
-
-    internal enum PetLoginQueryLoad
-    {
-        DeclinedNames,
-        Auras,
-        AuraEffects,
-        Spells,
-        Cooldowns,
-        Charges
-    }
-
-    internal class PetLoadQueryHolder : SQLQueryHolder<PetLoginQueryLoad>
-    {
-        public PetLoadQueryHolder(ulong ownerGuid, uint petNumber)
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_DECLINED_NAME);
-            stmt.AddValue(0, ownerGuid);
-            stmt.AddValue(1, petNumber);
-            SetQuery(PetLoginQueryLoad.DeclinedNames, stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA);
-            stmt.AddValue(0, petNumber);
-            SetQuery(PetLoginQueryLoad.Auras, stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
-            stmt.AddValue(0, petNumber);
-            SetQuery(PetLoginQueryLoad.AuraEffects, stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
-            stmt.AddValue(0, petNumber);
-            SetQuery(PetLoginQueryLoad.Spells, stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
-            stmt.AddValue(0, petNumber);
-            SetQuery(PetLoginQueryLoad.Cooldowns, stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_CHARGES);
-            stmt.AddValue(0, petNumber);
-            SetQuery(PetLoginQueryLoad.Charges, stmt);
         }
     }
 }

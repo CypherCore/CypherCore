@@ -38,7 +38,7 @@ namespace Game
             }
 
             if (dest.Count == 1 &&
-                dest[0].pos == item.GetPos())
+                dest[0].Pos == item.GetPos())
             {
                 GetPlayer().SendEquipError(InventoryResult.CantSwap, item);
 
@@ -212,7 +212,7 @@ namespace Game
                 }
 
                 if (dest.Count == 1 &&
-                    dest[0].pos == item.GetPos())
+                    dest[0].Pos == item.GetPos())
                 {
                     _player.SendEquipError(InventoryResult.CantSwap, item);
 
@@ -259,7 +259,7 @@ namespace Game
             }
 
             if (dest.Count == 1 &&
-                dest[0].pos == item.GetPos())
+                dest[0].Pos == item.GetPos())
             {
                 _player.SendEquipError(InventoryResult.CantSwap, item);
 

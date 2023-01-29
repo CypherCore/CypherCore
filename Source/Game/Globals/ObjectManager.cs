@@ -5246,10 +5246,10 @@ namespace Game
                 data.Id = entry;
                 data.MapId = result.Read<ushort>(2);
                 data.SpawnPoint = new Position(result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
-                data.rotation.X = result.Read<float>(7);
-                data.rotation.Y = result.Read<float>(8);
-                data.rotation.Z = result.Read<float>(9);
-                data.rotation.W = result.Read<float>(10);
+                data.Rotation.X = result.Read<float>(7);
+                data.Rotation.Y = result.Read<float>(8);
+                data.Rotation.Z = result.Read<float>(9);
+                data.Rotation.W = result.Read<float>(10);
                 data.spawntimesecs = result.Read<int>(11);
                 data.spawnGroupData = IsTransportMap(data.MapId) ? GetLegacySpawnGroup() : GetDefaultSpawnGroup(); // Transport spawns default to compatibility group
 
@@ -5266,8 +5266,8 @@ namespace Game
                     gInfo.IsDespawnAtAction())
                     Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with `spawntimesecs` (0) value, but the gameobejct is marked as despawnable at Action.", guid, data.Id);
 
-                data.animprogress = result.Read<uint>(12);
-                data.artKit = 0;
+                data.Animprogress = result.Read<uint>(12);
+                data.ArtKit = 0;
 
                 uint gostate = result.Read<uint>(13);
 
@@ -5280,7 +5280,7 @@ namespace Game
                         continue;
                     }
 
-                data.goState = (GameObjectState)gostate;
+                data.GoState = (GameObjectState)gostate;
 
                 data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "gameobject", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
 
@@ -5356,34 +5356,34 @@ namespace Game
 
                 data.ScriptId = GetScriptId(result.Read<string>(21));
 
-                if (data.rotation.X < -1.0f ||
-                    data.rotation.X > 1.0f)
+                if (data.Rotation.X < -1.0f ||
+                    data.Rotation.X > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationX ({2}) value, skip", guid, data.Id, data.rotation.X);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationX ({2}) value, skip", guid, data.Id, data.Rotation.X);
 
                     continue;
                 }
 
-                if (data.rotation.Y < -1.0f ||
-                    data.rotation.Y > 1.0f)
+                if (data.Rotation.Y < -1.0f ||
+                    data.Rotation.Y > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationY ({2}) value, skip", guid, data.Id, data.rotation.Y);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationY ({2}) value, skip", guid, data.Id, data.Rotation.Y);
 
                     continue;
                 }
 
-                if (data.rotation.Z < -1.0f ||
-                    data.rotation.Z > 1.0f)
+                if (data.Rotation.Z < -1.0f ||
+                    data.Rotation.Z > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationZ ({2}) value, skip", guid, data.Id, data.rotation.Z);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationZ ({2}) value, skip", guid, data.Id, data.Rotation.Z);
 
                     continue;
                 }
 
-                if (data.rotation.W < -1.0f ||
-                    data.rotation.W > 1.0f)
+                if (data.Rotation.W < -1.0f ||
+                    data.Rotation.W > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationW ({2}) value, skip", guid, data.Id, data.rotation.W);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationW ({2}) value, skip", guid, data.Id, data.Rotation.W);
 
                     continue;
                 }
@@ -5395,10 +5395,10 @@ namespace Game
                     continue;
                 }
 
-                if (!(Math.Abs(Quaternion.Dot(data.rotation, data.rotation) - 1) < 1e-5))
+                if (!(Math.Abs(Quaternion.Dot(data.Rotation, data.Rotation) - 1) < 1e-5))
                 {
                     Log.outError(LogFilter.Sql, $"Table `gameobject` has gameobject (GUID: {guid} Entry: {data.Id}) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only");
-                    data.rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(data.SpawnPoint.GetOrientation(), 0f, 0f));
+                    data.Rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(data.SpawnPoint.GetOrientation(), 0f, 0f));
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
@@ -5457,23 +5457,23 @@ namespace Game
 
                 GameObjectAddon gameObjectAddon = new();
                 gameObjectAddon.ParentRotation = new Quaternion(result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
-                gameObjectAddon.invisibilityType = (InvisibilityType)result.Read<byte>(5);
-                gameObjectAddon.invisibilityValue = result.Read<uint>(6);
+                gameObjectAddon.InvisibilityType = (InvisibilityType)result.Read<byte>(5);
+                gameObjectAddon.InvisibilityValue = result.Read<uint>(6);
                 gameObjectAddon.WorldEffectID = result.Read<uint>(7);
                 gameObjectAddon.AIAnimKitID = result.Read<uint>(8);
 
-                if (gameObjectAddon.invisibilityType >= InvisibilityType.Max)
+                if (gameObjectAddon.InvisibilityType >= InvisibilityType.Max)
                 {
                     Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid InvisibilityType in `gameobject_addon`, disabled invisibility");
-                    gameObjectAddon.invisibilityType = InvisibilityType.General;
-                    gameObjectAddon.invisibilityValue = 0;
+                    gameObjectAddon.InvisibilityType = InvisibilityType.General;
+                    gameObjectAddon.InvisibilityValue = 0;
                 }
 
-                if (gameObjectAddon.invisibilityType != 0 &&
-                    gameObjectAddon.invisibilityValue == 0)
+                if (gameObjectAddon.InvisibilityType != 0 &&
+                    gameObjectAddon.InvisibilityValue == 0)
                 {
                     Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has InvisibilityType set but has no InvisibilityValue in `gameobject_addon`, set to 1");
-                    gameObjectAddon.invisibilityValue = 1;
+                    gameObjectAddon.InvisibilityValue = 1;
                 }
 
                 if (!(Math.Abs(Quaternion.Dot(gameObjectAddon.ParentRotation, gameObjectAddon.ParentRotation) - 1) < 1e-5))
@@ -10957,16 +10957,16 @@ namespace Game
                 }
 
                 TempSummonData data = new();
-                data.entry = result.Read<uint>(3);
+                data.Entry = result.Read<uint>(3);
 
-                if (GetCreatureTemplate(data.entry) == null)
+                if (GetCreatureTemplate(data.Entry) == null)
                 {
                     Log.outError(LogFilter.Sql,
                                  "Table `creature_summon_groups` has creature in group [Summoner ID: {0}, Summoner Type: {1}, Group ID: {2}] with non existing creature entry {3}, skipped.",
                                  summonerId,
                                  summonerType,
                                  group,
-                                 data.entry);
+                                 data.Entry);
 
                     continue;
                 }
@@ -10976,24 +10976,24 @@ namespace Game
                 float posZ = result.Read<float>(6);
                 float orientation = result.Read<float>(7);
 
-                data.pos = new Position(posX, posY, posZ, orientation);
+                data.Pos = new Position(posX, posY, posZ, orientation);
 
-                data.type = (TempSummonType)result.Read<byte>(8);
+                data.Type = (TempSummonType)result.Read<byte>(8);
 
-                if (data.type > TempSummonType.ManualDespawn)
+                if (data.Type > TempSummonType.ManualDespawn)
                 {
                     Log.outError(LogFilter.Sql,
                                  "Table `creature_summon_groups` has unhandled temp summon Type {0} in group [Summoner ID: {1}, Summoner Type: {2}, Group ID: {3}] for creature entry {4}, skipped.",
-                                 data.type,
+                                 data.Type,
                                  summonerId,
                                  summonerType,
                                  group,
-                                 data.entry);
+                                 data.Entry);
 
                     continue;
                 }
 
-                data.time = result.Read<uint>(9);
+                data.Time = result.Read<uint>(9);
 
                 Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
                 _tempSummonDataStorage.Add(key, data);

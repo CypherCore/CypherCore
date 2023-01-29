@@ -39,7 +39,7 @@ namespace Game.Entities
         private SpellSchoolMask _meleeDamageSchoolMask;
         private sbyte _originalEquipmentId; // can be -1
 
-        internal Dictionary<ObjectGuid, Loot> PersonalLoot = new();
+        internal Dictionary<ObjectGuid, Loot> _personalLoot = new();
 
         // Timers
         private long _pickpocketLootRestore;

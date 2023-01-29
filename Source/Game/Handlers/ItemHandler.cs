@@ -698,7 +698,7 @@ namespace Game
 
             // no-op: placed in same Slot
             if (dest.Count == 1 &&
-                dest[0].pos == src)
+                dest[0].Pos == src)
             {
                 // just remove grey Item State
                 GetPlayer().SendEquipError(InventoryResult.InternalBagError, item);

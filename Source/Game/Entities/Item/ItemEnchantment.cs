@@ -164,10 +164,4 @@ namespace Game.Entities
             return 0;
         }
     }
-
-    public class RandomBonusListIds
-    {
-        public List<uint> BonusListIDs = new();
-        public List<double> Chances = new();
-    }
 }

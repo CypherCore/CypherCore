@@ -183,7 +183,7 @@ namespace Game.Chat
 
             if (spawnData != null)
             {
-                spawnData.rotation.toEulerAnglesZYX(out float yaw, out float pitch, out float roll);
+                spawnData.Rotation.toEulerAnglesZYX(out float yaw, out float pitch, out float roll);
                 handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, spawnData.SpawnId, spawnData.SpawnPoint.GetPositionX(), spawnData.SpawnPoint.GetPositionY(), spawnData.SpawnPoint.GetPositionZ());
                 handler.SendSysMessage(CypherStrings.SpawninfoRotation, yaw, pitch, roll);
             }

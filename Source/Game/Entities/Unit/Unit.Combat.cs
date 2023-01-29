@@ -881,7 +881,7 @@ namespace Game.Entities
                     {
                         if (dungeonEncounter != null)
                         {
-                            creature.PersonalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id,
+                            creature._personalLoot = LootManager.GenerateDungeonEncounterPersonalLoot(dungeonEncounter.Id,
                                                                                                       creature.GetCreatureTemplate().LootId,
                                                                                                       LootStorage.Creature,
                                                                                                       LootType.Corpse,
@@ -910,7 +910,7 @@ namespace Game.Entities
                             if (group)
                                 loot.NotifyLootList(creature.GetMap());
 
-                            creature.PersonalLoot[looter.GetGUID()] = loot; // trash mob loot is personal, generated with round robin rules
+                            creature._personalLoot[looter.GetGUID()] = loot; // trash mob loot is personal, generated with round robin rules
 
                             // Update round robin looter only if the creature had loot
                             if (!loot.IsLooted())
@@ -935,7 +935,7 @@ namespace Game.Entities
                             if (creature.GetLootMode() > 0)
                                 loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
 
-                            creature.PersonalLoot[tapper.GetGUID()] = loot;
+                            creature._personalLoot[tapper.GetGUID()] = loot;
                         }
                     }
                 }

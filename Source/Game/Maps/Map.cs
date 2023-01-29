@@ -3237,20 +3237,20 @@ namespace Game.Maps
                 bones = new Corpse();
                 bones.Create(corpse.GetGUID().GetCounter(), this);
 
-                bones.ReplaceAllCorpseDynamicFlags((CorpseDynFlags)(byte)corpse._corpseData.DynamicFlags);
-                bones.SetOwnerGUID(corpse._corpseData.Owner);
-                bones.SetPartyGUID(corpse._corpseData.PartyGUID);
-                bones.SetGuildGUID(corpse._corpseData.GuildGUID);
-                bones.SetDisplayId(corpse._corpseData.DisplayID);
-                bones.SetRace(corpse._corpseData.RaceID);
-                bones.SetSex(corpse._corpseData.Sex);
-                bones.SetClass(corpse._corpseData.Class);
-                bones.SetCustomizations(corpse._corpseData.Customizations);
-                bones.ReplaceAllFlags((CorpseFlags)(corpse._corpseData.Flags | (uint)CorpseFlags.Bones));
-                bones.SetFactionTemplate(corpse._corpseData.FactionTemplate);
+                bones.ReplaceAllCorpseDynamicFlags((CorpseDynFlags)(byte)corpse.CorpseData.DynamicFlags);
+                bones.SetOwnerGUID(corpse.CorpseData.Owner);
+                bones.SetPartyGUID(corpse.CorpseData.PartyGUID);
+                bones.SetGuildGUID(corpse.CorpseData.GuildGUID);
+                bones.SetDisplayId(corpse.CorpseData.DisplayID);
+                bones.SetRace(corpse.CorpseData.RaceID);
+                bones.SetSex(corpse.CorpseData.Sex);
+                bones.SetClass(corpse.CorpseData.Class);
+                bones.SetCustomizations(corpse.CorpseData.Customizations);
+                bones.ReplaceAllFlags((CorpseFlags)(corpse.CorpseData.Flags | (uint)CorpseFlags.Bones));
+                bones.SetFactionTemplate(corpse.CorpseData.FactionTemplate);
 
                 for (int i = 0; i < EquipmentSlot.End; ++i)
-                    bones.SetItem((uint)i, corpse._corpseData.Items[i]);
+                    bones.SetItem((uint)i, corpse.CorpseData.Items[i]);
 
                 bones.SetCellCoord(corpse.GetCellCoord());
                 bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());

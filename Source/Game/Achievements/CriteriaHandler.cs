@@ -3702,7 +3702,7 @@ namespace Game.Achievements
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
 
                             if (azeriteItem != null)
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem._azeriteItemData.UnlockedEssences)
+                                foreach (UnlockedAzeriteEssence essence in azeriteItem.AzeriteItemData.UnlockedEssences)
                                     if (essence.AzeriteEssenceID == reqValue &&
                                         essence.Rank < secondaryAsset)
                                         return true;
@@ -3719,7 +3719,7 @@ namespace Game.Achievements
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
 
                             if (azeriteItem != null)
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem._azeriteItemData.UnlockedEssences)
+                                foreach (UnlockedAzeriteEssence essence in azeriteItem.AzeriteItemData.UnlockedEssences)
                                     if (essence.AzeriteEssenceID == reqValue &&
                                         essence.Rank == secondaryAsset)
                                         return true;
@@ -3736,7 +3736,7 @@ namespace Game.Achievements
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
 
                             if (azeriteItem != null)
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem._azeriteItemData.UnlockedEssences)
+                                foreach (UnlockedAzeriteEssence essence in azeriteItem.AzeriteItemData.UnlockedEssences)
                                     if (essence.AzeriteEssenceID == reqValue &&
                                         essence.Rank > secondaryAsset)
                                         return true;
@@ -3789,7 +3789,7 @@ namespace Game.Achievements
                                 SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
 
                                 if (selectedEssences != null)
-                                    foreach (UnlockedAzeriteEssence essence in azeriteItem._azeriteItemData.UnlockedEssences)
+                                    foreach (UnlockedAzeriteEssence essence in azeriteItem.AzeriteItemData.UnlockedEssences)
                                         if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] &&
                                             essence.Rank < secondaryAsset)
                                             return true;
@@ -3811,7 +3811,7 @@ namespace Game.Achievements
                                 SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
 
                                 if (selectedEssences != null)
-                                    foreach (UnlockedAzeriteEssence essence in azeriteItem._azeriteItemData.UnlockedEssences)
+                                    foreach (UnlockedAzeriteEssence essence in azeriteItem.AzeriteItemData.UnlockedEssences)
                                         if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] &&
                                             essence.Rank > secondaryAsset)
                                             return true;

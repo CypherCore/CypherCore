@@ -2475,7 +2475,7 @@ namespace Game.Chat
             if (player == playerTarget)
                 foreach (var posCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(posCount.pos);
+                    Item item1 = player.GetItemByPos(posCount.Pos);
 
                     if (item1)
                         item1.SetBinding(false);
@@ -2737,7 +2737,7 @@ namespace Game.Chat
             if (player == playerTarget)
                 foreach (var itemPostCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(itemPostCount.pos);
+                    Item item1 = player.GetItemByPos(itemPostCount.Pos);
 
                     item1?.SetBinding(false);
                 }

@@ -4934,7 +4934,7 @@ namespace Game.Entities
             {
                 Log.outDebug(LogFilter.Pet, "RemovePet {0}, {1}, {2}", pet.GetEntry(), mode, returnreagent);
 
-                if (pet._removed)
+                if (pet.Removed)
                     return;
             }
 
@@ -4993,7 +4993,7 @@ namespace Game.Entities
             SetMinion(pet, false);
 
             pet.AddObjectToRemoveList();
-            pet._removed = true;
+            pet.Removed = true;
 
             if (pet.IsControlled())
             {

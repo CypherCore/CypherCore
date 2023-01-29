@@ -1341,8 +1341,8 @@ namespace Game.Entities
             for (var i = 0; i < dest.Count; i++)
             {
                 var itemPosCount = dest[i];
-                ushort pos = itemPosCount.pos;
-                uint count = itemPosCount.count;
+                ushort pos = itemPosCount.Pos;
+                uint count = itemPosCount.Count;
 
                 if (i == dest.Count - 1)
                 {
@@ -1407,7 +1407,7 @@ namespace Game.Entities
             uint count = 0;
 
             foreach (var itemPosCount in pos)
-                count += itemPosCount.count;
+                count += itemPosCount.Count;
 
             Item item = Item.CreateItem(itemId, count, context, this);
 
@@ -6080,7 +6080,7 @@ namespace Game.Entities
             if (azeriteItem != null)
             {
                 // milestone powers
-                foreach (uint azeriteItemMilestonePowerId in azeriteItem._azeriteItemData.UnlockedEssenceMilestones)
+                foreach (uint azeriteItemMilestonePowerId in azeriteItem.AzeriteItemData.UnlockedEssenceMilestones)
                     ApplyAzeriteItemMilestonePower(azeriteItem, CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteItemMilestonePowerId), apply);
 
                 // essences
@@ -6970,7 +6970,7 @@ namespace Game.Entities
             // Now we must make bones lootable, and send player loot
             bones.SetCorpseDynamicFlag(CorpseDynFlags.Lootable);
 
-            bones.loot = new Loot(GetMap(), bones.GetGUID(), LootType.Insignia, looterPlr.GetGroup());
+            bones.Loot = new Loot(GetMap(), bones.GetGUID(), LootType.Insignia, looterPlr.GetGroup());
 
             // For AV Achievement
             Battleground bg = GetBattleground();
@@ -6978,19 +6978,19 @@ namespace Game.Entities
             if (bg != null)
             {
                 if (bg.GetTypeID(true) == BattlegroundTypeId.AV)
-                    bones.loot.FillLoot(1, LootStorage.Creature, this, true);
+                    bones.Loot.FillLoot(1, LootStorage.Creature, this, true);
             }
             // For wintergrasp Quests
             else if (GetZoneId() == (uint)AreaId.Wintergrasp)
             {
-                bones.loot.FillLoot(1, LootStorage.Creature, this, true);
+                bones.Loot.FillLoot(1, LootStorage.Creature, this, true);
             }
 
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-            bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow((float)GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
-            bones.lootRecipient = looterPlr;
-            looterPlr.SendLoot(bones.loot);
+            bones.Loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow((float)GetLevel() / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
+            bones.LootRecipient = looterPlr;
+            looterPlr.SendLoot(bones.Loot);
         }
 
         public void SendLootRelease(ObjectGuid guid)

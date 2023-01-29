@@ -3912,9 +3912,9 @@ namespace Game.Entities
                     {
                         Pet pet = ToPet();
 
-                        foreach (var spell in pet._spells)
+                        foreach (var spell in pet.PetSpells)
                         {
-                            if (spell.Value.state == PetSpellState.Removed)
+                            if (spell.Value.State == PetSpellState.Removed)
                                 continue;
 
                             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell.Key, Difficulty.None);

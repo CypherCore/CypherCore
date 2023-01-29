@@ -767,8 +767,8 @@ namespace Game.Spells
             {
                 Pet petOwner = _owner.ToPet();
 
-                foreach (var p in petOwner._spells)
-                    if (p.Value.state != PetSpellState.Removed)
+                foreach (var p in petOwner.PetSpells)
+                    if (p.Value.State != PetSpellState.Removed)
                         knownSpells.Add(p.Key);
             }
             else

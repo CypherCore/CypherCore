@@ -3880,7 +3880,7 @@ namespace Game.Spells
             creature.SetUnitFlag3(UnitFlags3.AlreadySkinned);
             creature.SetDynamicFlag(UnitDynFlags.Lootable);
             Loot loot = new(creature.GetMap(), creature.GetGUID(), LootType.Skinning, null);
-            creature.PersonalLoot[player.GetGUID()] = loot;
+            creature._personalLoot[player.GetGUID()] = loot;
             loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, player, true);
             player.SendLoot(loot);
 

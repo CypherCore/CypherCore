@@ -249,12 +249,12 @@ namespace Game.Entities
 
             if (pet.IsPermanentPetFor(this))
                 // spells loop
-                foreach (var pair in pet._spells)
+                foreach (var pair in pet.PetSpells)
                 {
-                    if (pair.Value.state == PetSpellState.Removed)
+                    if (pair.Value.State == PetSpellState.Removed)
                         continue;
 
-                    petSpellsPacket.Actions.Add(UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(pair.Key, (uint)pair.Value.active));
+                    petSpellsPacket.Actions.Add(UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(pair.Key, (uint)pair.Value.Active));
                 }
 
             // Cooldowns

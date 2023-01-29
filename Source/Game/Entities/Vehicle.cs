@@ -31,8 +31,8 @@ namespace Game.Entities
         private readonly List<VehicleJoinEvent> _pendingJoinEvents = new();
         private Status _status;             //< Internal variable for sanity checks
         private readonly VehicleRecord _vehicleInfo; //< DBC _data for vehicle
-        public Dictionary<sbyte, VehicleSeat> Seats = new();
-        public uint UsableSeatNum; //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display Flags
+        public Dictionary<sbyte, VehicleSeat> Seats { get; set; } = new();
+        public uint UsableSeatNum { get; set; } //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display Flags
 
         public Vehicle(Unit unit, VehicleRecord vehInfo, uint creatureEntry)
         {
@@ -895,83 +895,6 @@ namespace Game.Entities
             if (Passenger.IsInWorld &&
                 Passenger.HasUnitTypeMask(UnitTypeMask.Accessory))
                 Passenger.ToCreature().DespawnOrUnsummon();
-        }
-    }
-
-    public struct PassengerInfo
-    {
-        public ObjectGuid Guid;
-        public bool IsUninteractible;
-        public bool IsGravityDisabled;
-
-        public void Reset()
-        {
-            Guid = ObjectGuid.Empty;
-            IsUninteractible = false;
-            IsGravityDisabled = false;
-        }
-    }
-
-    public class VehicleSeat
-    {
-        public PassengerInfo Passenger;
-        public VehicleSeatAddon SeatAddon;
-
-        public VehicleSeatRecord SeatInfo;
-
-        public VehicleSeat(VehicleSeatRecord seatInfo, VehicleSeatAddon seatAddon)
-        {
-            SeatInfo = seatInfo;
-            SeatAddon = seatAddon;
-            Passenger.Reset();
-        }
-
-        public bool IsEmpty()
-        {
-            return Passenger.Guid.IsEmpty();
-        }
-    }
-
-    public struct VehicleAccessory
-    {
-        public VehicleAccessory(uint entry, sbyte seatId, bool isMinion, byte summonType, uint summonTime)
-        {
-            AccessoryEntry = entry;
-            IsMinion = isMinion;
-            SummonTime = summonTime;
-            SeatId = seatId;
-            SummonedType = summonType;
-        }
-
-        public uint AccessoryEntry;
-        public bool IsMinion;
-        public uint SummonTime;
-        public sbyte SeatId;
-        public byte SummonedType;
-    }
-
-    public class VehicleTemplate
-    {
-        public TimeSpan DespawnDelay;
-    }
-
-    public class VehicleSeatAddon
-    {
-        public VehicleExitParameters ExitParameter;
-        public float ExitParameterO;
-        public float ExitParameterX;
-        public float ExitParameterY;
-        public float ExitParameterZ;
-        public float SeatOrientationOffset;
-
-        public VehicleSeatAddon(float orientatonOffset, float exitX, float exitY, float exitZ, float exitO, byte param)
-        {
-            SeatOrientationOffset = orientatonOffset;
-            ExitParameterX = exitX;
-            ExitParameterY = exitY;
-            ExitParameterZ = exitZ;
-            ExitParameterO = exitO;
-            ExitParameter = (VehicleExitParameters)param;
         }
     }
 }

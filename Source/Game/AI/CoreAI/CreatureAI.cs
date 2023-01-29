@@ -198,7 +198,7 @@ namespace Game.AI
                 if (summon != null)
                     // Only apply this to specific types of summons
                     if (!summon.GetVehicle() &&
-                        ShouldFollowOnSpawn(summon._Properties) &&
+                        ShouldFollowOnSpawn(summon.Properties) &&
                         summon.CanFollowOwner())
                     {
                         Unit owner = summon.GetCharmerOrOwner();
