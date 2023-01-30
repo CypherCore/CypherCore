@@ -64,7 +64,7 @@ namespace Game.Chat
 
                     foreach (FlyByCamera cam in list)
                     {
-                        handler.SendSysMessage("{0} - {1}ms [{2}, {3}, {4}] Facing {5} ({6} degrees)", count, cam.timeStamp, cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W, cam.locations.W * (180 / Math.PI));
+                        handler.SendSysMessage("{0} - {1}ms [{2}, {3}, {4}] Facing {5} ({6} degrees)", count, cam.TimeStamp, cam.Locations.X, cam.Locations.Y, cam.Locations.Z, cam.Locations.W, cam.Locations.W * (180 / Math.PI));
                         count++;
                     }
 

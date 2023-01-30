@@ -75,27 +75,4 @@ namespace Game.DataStorage
             return storage;
         }
     }
-
-    public class GameTable<T> where T : new()
-    {
-        private List<T> _data = new();
-
-        public T GetRow(uint row)
-        {
-            if (row >= _data.Count)
-                return default;
-
-            return _data[(int)row];
-        }
-
-        public int GetTableRowCount()
-        {
-            return _data.Count;
-        }
-
-        public void SetData(List<T> data)
-        {
-            _data = data;
-        }
-    }
 }

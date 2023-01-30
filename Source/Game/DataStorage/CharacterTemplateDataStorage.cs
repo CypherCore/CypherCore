@@ -91,25 +91,4 @@ namespace Game.DataStorage
             return _characterTemplateStore.LookupByKey(templateId);
         }
     }
-
-    public struct CharacterTemplateClass
-    {
-        public CharacterTemplateClass(FactionMasks factionGroup, byte classID)
-        {
-            FactionGroup = factionGroup;
-            ClassID = classID;
-        }
-
-        public FactionMasks FactionGroup;
-        public byte ClassID;
-    }
-
-    public class CharacterTemplate
-    {
-        public List<CharacterTemplateClass> Classes;
-        public string Description;
-        public byte Level;
-        public string Name;
-        public uint TemplateSetId;
-    }
 }

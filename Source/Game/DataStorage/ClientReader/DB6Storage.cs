@@ -14,16 +14,6 @@ using Framework.IO;
 
 namespace Game.DataStorage
 {
-    public interface IDB2Storage
-    {
-        bool HasRecord(uint id);
-
-        void WriteRecord(uint id, Locale locale, ByteBuffer buffer);
-
-        void EraseRecord(uint id);
-
-        string GetName();
-    }
 
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()

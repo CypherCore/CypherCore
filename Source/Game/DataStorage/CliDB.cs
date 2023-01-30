@@ -12,6 +12,367 @@ namespace Game.DataStorage
 {
     public class CliDB
     {
+        #region Main Collections
+
+        public static DB6Storage<AchievementRecord> AchievementStorage { get; set; }
+        public static DB6Storage<AchievementCategoryRecord> AchievementCategoryStorage { get; set; }
+        public static DB6Storage<AdventureJournalRecord> AdventureJournalStorage { get; set; }
+        public static DB6Storage<AdventureMapPOIRecord> AdventureMapPOIStorage { get; set; }
+        public static DB6Storage<AnimationDataRecord> AnimationDataStorage { get; set; }
+        public static DB6Storage<AnimKitRecord> AnimKitStorage { get; set; }
+        public static DB6Storage<AreaGroupMemberRecord> AreaGroupMemberStorage { get; set; }
+        public static DB6Storage<AreaTableRecord> AreaTableStorage { get; set; }
+        public static DB6Storage<AreaTriggerRecord> AreaTriggerStorage { get; set; }
+        public static DB6Storage<ArmorLocationRecord> ArmorLocationStorage { get; set; }
+        public static DB6Storage<ArtifactRecord> ArtifactStorage { get; set; }
+        public static DB6Storage<ArtifactAppearanceRecord> ArtifactAppearanceStorage { get; set; }
+        public static DB6Storage<ArtifactAppearanceSetRecord> ArtifactAppearanceSetStorage { get; set; }
+        public static DB6Storage<ArtifactCategoryRecord> ArtifactCategoryStorage { get; set; }
+        public static DB6Storage<ArtifactPowerRecord> ArtifactPowerStorage { get; set; }
+        public static DB6Storage<ArtifactPowerLinkRecord> ArtifactPowerLinkStorage { get; set; }
+        public static DB6Storage<ArtifactPowerPickerRecord> ArtifactPowerPickerStorage { get; set; }
+
+        public static DB6Storage<ArtifactPowerRankRecord> ArtifactPowerRankStorage { get; set; }
+
+        //public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage { get; set; }
+        public static DB6Storage<ArtifactTierRecord> ArtifactTierStorage { get; set; }
+        public static DB6Storage<ArtifactUnlockRecord> ArtifactUnlockStorage { get; set; }
+        public static DB6Storage<AuctionHouseRecord> AuctionHouseStorage { get; set; }
+        public static DB6Storage<AzeriteEmpoweredItemRecord> AzeriteEmpoweredItemStorage { get; set; }
+        public static DB6Storage<AzeriteEssenceRecord> AzeriteEssenceStorage { get; set; }
+        public static DB6Storage<AzeriteEssencePowerRecord> AzeriteEssencePowerStorage { get; set; }
+        public static DB6Storage<AzeriteItemRecord> AzeriteItemStorage { get; set; }
+        public static DB6Storage<AzeriteItemMilestonePowerRecord> AzeriteItemMilestonePowerStorage { get; set; }
+        public static DB6Storage<AzeriteKnowledgeMultiplierRecord> AzeriteKnowledgeMultiplierStorage { get; set; }
+        public static DB6Storage<AzeriteLevelInfoRecord> AzeriteLevelInfoStorage { get; set; }
+        public static DB6Storage<AzeritePowerRecord> AzeritePowerStorage { get; set; }
+        public static DB6Storage<AzeritePowerSetMemberRecord> AzeritePowerSetMemberStorage { get; set; }
+        public static DB6Storage<AzeriteTierUnlockRecord> AzeriteTierUnlockStorage { get; set; }
+        public static DB6Storage<AzeriteTierUnlockSetRecord> AzeriteTierUnlockSetStorage { get; set; }
+        public static DB6Storage<AzeriteUnlockMappingRecord> AzeriteUnlockMappingStorage { get; set; }
+        public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage { get; set; }
+        public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage { get; set; }
+        public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage { get; set; }
+        public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage { get; set; }
+        public static DB6Storage<BattlePetBreedStateRecord> BattlePetBreedStateStorage { get; set; }
+        public static DB6Storage<BattlePetSpeciesRecord> BattlePetSpeciesStorage { get; set; }
+        public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage { get; set; }
+        public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage { get; set; }
+        public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage { get; set; }
+        public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage { get; set; }
+        public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage { get; set; }
+        public static DB6Storage<CharTitlesRecord> CharTitlesStorage { get; set; }
+        public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage { get; set; }
+        public static DB6Storage<CharacterLoadoutItemRecord> CharacterLoadoutItemStorage { get; set; }
+        public static DB6Storage<ChatChannelsRecord> ChatChannelsStorage { get; set; }
+        public static DB6Storage<ChrClassUIDisplayRecord> ChrClassUIDisplayStorage { get; set; }
+        public static DB6Storage<ChrClassesRecord> ChrClassesStorage { get; set; }
+        public static DB6Storage<ChrClassesXPowerTypesRecord> ChrClassesXPowerTypesStorage { get; set; }
+        public static DB6Storage<ChrCustomizationChoiceRecord> ChrCustomizationChoiceStorage { get; set; }
+        public static DB6Storage<ChrCustomizationDisplayInfoRecord> ChrCustomizationDisplayInfoStorage { get; set; }
+        public static DB6Storage<ChrCustomizationElementRecord> ChrCustomizationElementStorage { get; set; }
+        public static DB6Storage<ChrCustomizationReqRecord> ChrCustomizationReqStorage { get; set; }
+        public static DB6Storage<ChrCustomizationReqChoiceRecord> ChrCustomizationReqChoiceStorage { get; set; }
+        public static DB6Storage<ChrModelRecord> ChrModelStorage { get; set; }
+        public static DB6Storage<ChrRaceXChrModelRecord> ChrRaceXChrModelStorage { get; set; }
+        public static DB6Storage<ChrCustomizationOptionRecord> ChrCustomizationOptionStorage { get; set; }
+        public static DB6Storage<ChrRacesRecord> ChrRacesStorage { get; set; }
+        public static DB6Storage<ChrSpecializationRecord> ChrSpecializationStorage { get; set; }
+        public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage { get; set; }
+        public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage { get; set; }
+        public static DB6Storage<ContentTuningRecord> ContentTuningStorage { get; set; }
+        public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage { get; set; }
+        public static DB6Storage<ConversationLineRecord> ConversationLineStorage { get; set; }
+        public static DB6Storage<CorruptionEffectsRecord> CorruptionEffectsStorage { get; set; }
+        public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage { get; set; }
+        public static DB6Storage<CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage { get; set; }
+        public static DB6Storage<CreatureFamilyRecord> CreatureFamilyStorage { get; set; }
+        public static DB6Storage<CreatureModelDataRecord> CreatureModelDataStorage { get; set; }
+        public static DB6Storage<CreatureTypeRecord> CreatureTypeStorage { get; set; }
+        public static DB6Storage<CriteriaRecord> CriteriaStorage { get; set; }
+        public static DB6Storage<CriteriaTreeRecord> CriteriaTreeStorage { get; set; }
+        public static DB6Storage<CurrencyContainerRecord> CurrencyContainerStorage { get; set; }
+        public static DB6Storage<CurrencyTypesRecord> CurrencyTypesStorage { get; set; }
+        public static DB6Storage<CurveRecord> CurveStorage { get; set; }
+        public static DB6Storage<CurvePointRecord> CurvePointStorage { get; set; }
+        public static DB6Storage<DestructibleModelDataRecord> DestructibleModelDataStorage { get; set; }
+        public static DB6Storage<DifficultyRecord> DifficultyStorage { get; set; }
+        public static DB6Storage<DungeonEncounterRecord> DungeonEncounterStorage { get; set; }
+        public static DB6Storage<DurabilityCostsRecord> DurabilityCostsStorage { get; set; }
+        public static DB6Storage<DurabilityQualityRecord> DurabilityQualityStorage { get; set; }
+        public static DB6Storage<EmotesRecord> EmotesStorage { get; set; }
+        public static DB6Storage<EmotesTextRecord> EmotesTextStorage { get; set; }
+        public static DB6Storage<EmotesTextSoundRecord> EmotesTextSoundStorage { get; set; }
+        public static DB6Storage<ExpectedStatRecord> ExpectedStatStorage { get; set; }
+        public static DB6Storage<ExpectedStatModRecord> ExpectedStatModStorage { get; set; }
+        public static DB6Storage<FactionRecord> FactionStorage { get; set; }
+        public static DB6Storage<FactionTemplateRecord> FactionTemplateStorage { get; set; }
+        public static DB6Storage<FriendshipRepReactionRecord> FriendshipRepReactionStorage { get; set; }
+        public static DB6Storage<FriendshipReputationRecord> FriendshipReputationStorage { get; set; }
+        public static DB6Storage<GameObjectArtKitRecord> GameObjectArtKitStorage { get; set; }
+        public static DB6Storage<GameObjectDisplayInfoRecord> GameObjectDisplayInfoStorage { get; set; }
+        public static DB6Storage<GameObjectsRecord> GameObjectsStorage { get; set; }
+        public static DB6Storage<GarrAbilityRecord> GarrAbilityStorage { get; set; }
+        public static DB6Storage<GarrBuildingRecord> GarrBuildingStorage { get; set; }
+        public static DB6Storage<GarrBuildingPlotInstRecord> GarrBuildingPlotInstStorage { get; set; }
+        public static DB6Storage<GarrClassSpecRecord> GarrClassSpecStorage { get; set; }
+        public static DB6Storage<GarrFollowerRecord> GarrFollowerStorage { get; set; }
+        public static DB6Storage<GarrFollowerXAbilityRecord> GarrFollowerXAbilityStorage { get; set; }
+        public static DB6Storage<GarrMissionRecord> GarrMissionStorage { get; set; }
+        public static DB6Storage<GarrPlotBuildingRecord> GarrPlotBuildingStorage { get; set; }
+        public static DB6Storage<GarrPlotRecord> GarrPlotStorage { get; set; }
+        public static DB6Storage<GarrPlotInstanceRecord> GarrPlotInstanceStorage { get; set; }
+        public static DB6Storage<GarrSiteLevelRecord> GarrSiteLevelStorage { get; set; }
+        public static DB6Storage<GarrSiteLevelPlotInstRecord> GarrSiteLevelPlotInstStorage { get; set; }
+        public static DB6Storage<GarrTalentTreeRecord> GarrTalentTreeStorage { get; set; }
+        public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage { get; set; }
+        public static DB6Storage<GlobalCurveRecord> GlobalCurveStorage { get; set; }
+        public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage { get; set; }
+        public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage { get; set; }
+        public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage { get; set; }
+        public static DB6Storage<GossipNPCOptionRecord> GossipNPCOptionStorage { get; set; }
+        public static DB6Storage<GuildColorBackgroundRecord> GuildColorBackgroundStorage { get; set; }
+        public static DB6Storage<GuildColorBorderRecord> GuildColorBorderStorage { get; set; }
+        public static DB6Storage<GuildColorEmblemRecord> GuildColorEmblemStorage { get; set; }
+        public static DB6Storage<GuildPerkSpellsRecord> GuildPerkSpellsStorage { get; set; }
+        public static DB6Storage<HeirloomRecord> HeirloomStorage { get; set; }
+        public static DB6Storage<HolidaysRecord> HolidaysStorage { get; set; }
+        public static DB6Storage<ImportPriceArmorRecord> ImportPriceArmorStorage { get; set; }
+        public static DB6Storage<ImportPriceQualityRecord> ImportPriceQualityStorage { get; set; }
+        public static DB6Storage<ImportPriceShieldRecord> ImportPriceShieldStorage { get; set; }
+        public static DB6Storage<ImportPriceWeaponRecord> ImportPriceWeaponStorage { get; set; }
+        public static DB6Storage<ItemAppearanceRecord> ItemAppearanceStorage { get; set; }
+        public static DB6Storage<ItemArmorQualityRecord> ItemArmorQualityStorage { get; set; }
+        public static DB6Storage<ItemArmorShieldRecord> ItemArmorShieldStorage { get; set; }
+
+        public static DB6Storage<ItemArmorTotalRecord> ItemArmorTotalStorage { get; set; }
+
+        //public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage { get; set; }
+        public static DB6Storage<ItemBonusRecord> ItemBonusStorage { get; set; }
+        public static DB6Storage<ItemBonusListLevelDeltaRecord> ItemBonusListLevelDeltaStorage { get; set; }
+        public static DB6Storage<ItemBonusTreeNodeRecord> ItemBonusTreeNodeStorage { get; set; }
+        public static DB6Storage<ItemClassRecord> ItemClassStorage { get; set; }
+        public static DB6Storage<ItemChildEquipmentRecord> ItemChildEquipmentStorage { get; set; }
+        public static DB6Storage<ItemCurrencyCostRecord> ItemCurrencyCostStorage { get; set; }
+        public static DB6Storage<ItemDamageRecord> ItemDamageAmmoStorage { get; set; }
+        public static DB6Storage<ItemDamageRecord> ItemDamageOneHandStorage { get; set; }
+        public static DB6Storage<ItemDamageRecord> ItemDamageOneHandCasterStorage { get; set; }
+        public static DB6Storage<ItemDamageRecord> ItemDamageTwoHandStorage { get; set; }
+        public static DB6Storage<ItemDamageRecord> ItemDamageTwoHandCasterStorage { get; set; }
+        public static DB6Storage<ItemDisenchantLootRecord> ItemDisenchantLootStorage { get; set; }
+        public static DB6Storage<ItemEffectRecord> ItemEffectStorage { get; set; }
+        public static DB6Storage<ItemRecord> ItemStorage { get; set; }
+        public static DB6Storage<ItemExtendedCostRecord> ItemExtendedCostStorage { get; set; }
+        public static DB6Storage<ItemLevelSelectorRecord> ItemLevelSelectorStorage { get; set; }
+        public static DB6Storage<ItemLevelSelectorQualityRecord> ItemLevelSelectorQualityStorage { get; set; }
+        public static DB6Storage<ItemLevelSelectorQualitySetRecord> ItemLevelSelectorQualitySetStorage { get; set; }
+        public static DB6Storage<ItemLimitCategoryRecord> ItemLimitCategoryStorage { get; set; }
+        public static DB6Storage<ItemLimitCategoryConditionRecord> ItemLimitCategoryConditionStorage { get; set; }
+        public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage { get; set; }
+        public static DB6Storage<ItemModifiedAppearanceExtraRecord> ItemModifiedAppearanceExtraStorage { get; set; }
+        public static DB6Storage<ItemNameDescriptionRecord> ItemNameDescriptionStorage { get; set; }
+        public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage { get; set; }
+        public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage { get; set; }
+        public static DB6Storage<ItemSetRecord> ItemSetStorage { get; set; }
+        public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage { get; set; }
+        public static DB6Storage<ItemSparseRecord> ItemSparseStorage { get; set; }
+        public static DB6Storage<ItemSpecRecord> ItemSpecStorage { get; set; }
+        public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage { get; set; }
+        public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage { get; set; }
+        public static DB6Storage<ItemXItemEffectRecord> ItemXItemEffectStorage { get; set; }
+        public static DB6Storage<JournalEncounterRecord> JournalEncounterStorage { get; set; }
+        public static DB6Storage<JournalEncounterSectionRecord> JournalEncounterSectionStorage { get; set; }
+        public static DB6Storage<JournalInstanceRecord> JournalInstanceStorage { get; set; }
+
+        public static DB6Storage<JournalTierRecord> JournalTierStorage { get; set; }
+
+        //public static DB6Storage<KeyChainRecord> KeyChainStorage { get; set; }
+        public static DB6Storage<KeystoneAffixRecord> KeystoneAffixStorage { get; set; }
+        public static DB6Storage<LanguageWordsRecord> LanguageWordsStorage { get; set; }
+        public static DB6Storage<LanguagesRecord> LanguagesStorage { get; set; }
+        public static DB6Storage<LFGDungeonsRecord> LFGDungeonsStorage { get; set; }
+        public static DB6Storage<LightRecord> LightStorage { get; set; }
+        public static DB6Storage<LiquidTypeRecord> LiquidTypeStorage { get; set; }
+        public static DB6Storage<LockRecord> LockStorage { get; set; }
+        public static DB6Storage<MailTemplateRecord> MailTemplateStorage { get; set; }
+        public static DB6Storage<MapRecord> MapStorage { get; set; }
+        public static DB6Storage<MapChallengeModeRecord> MapChallengeModeStorage { get; set; }
+        public static DB6Storage<MapDifficultyRecord> MapDifficultyStorage { get; set; }
+        public static DB6Storage<MapDifficultyXConditionRecord> MapDifficultyXConditionStorage { get; set; }
+        public static DB6Storage<MawPowerRecord> MawPowerStorage { get; set; }
+        public static DB6Storage<ModifierTreeRecord> ModifierTreeStorage { get; set; }
+        public static DB6Storage<MountCapabilityRecord> MountCapabilityStorage { get; set; }
+        public static DB6Storage<MountRecord> MountStorage { get; set; }
+        public static DB6Storage<MountTypeXCapabilityRecord> MountTypeXCapabilityStorage { get; set; }
+        public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage { get; set; }
+        public static DB6Storage<MovieRecord> MovieStorage { get; set; }
+        public static DB6Storage<NameGenRecord> NameGenStorage { get; set; }
+        public static DB6Storage<NamesProfanityRecord> NamesProfanityStorage { get; set; }
+        public static DB6Storage<NamesReservedRecord> NamesReservedStorage { get; set; }
+        public static DB6Storage<NamesReservedLocaleRecord> NamesReservedLocaleStorage { get; set; }
+        public static DB6Storage<NumTalentsAtLevelRecord> NumTalentsAtLevelStorage { get; set; }
+        public static DB6Storage<OverrideSpellDataRecord> OverrideSpellDataStorage { get; set; }
+        public static DB6Storage<ParagonReputationRecord> ParagonReputationStorage { get; set; }
+        public static DB6Storage<PhaseRecord> PhaseStorage { get; set; }
+        public static DB6Storage<PhaseXPhaseGroupRecord> PhaseXPhaseGroupStorage { get; set; }
+        public static DB6Storage<PlayerConditionRecord> PlayerConditionStorage { get; set; }
+        public static DB6Storage<PowerDisplayRecord> PowerDisplayStorage { get; set; }
+        public static DB6Storage<PowerTypeRecord> PowerTypeStorage { get; set; }
+        public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage { get; set; }
+        public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage { get; set; }
+        public static DB6Storage<PvpItemRecord> PvpItemStorage { get; set; }
+        public static DB6Storage<PvpTalentRecord> PvpTalentStorage { get; set; }
+        public static DB6Storage<PvpTalentCategoryRecord> PvpTalentCategoryStorage { get; set; }
+        public static DB6Storage<PvpTalentSlotUnlockRecord> PvpTalentSlotUnlockStorage { get; set; }
+        public static DB6Storage<PvpTierRecord> PvpTierStorage { get; set; }
+        public static DB6Storage<QuestFactionRewardRecord> QuestFactionRewardStorage { get; set; }
+        public static DB6Storage<QuestInfoRecord> QuestInfoStorage { get; set; }
+        public static DB6Storage<QuestLineXQuestRecord> QuestLineXQuestStorage { get; set; }
+        public static DB6Storage<QuestMoneyRewardRecord> QuestMoneyRewardStorage { get; set; }
+        public static DB6Storage<QuestPackageItemRecord> QuestPackageItemStorage { get; set; }
+        public static DB6Storage<QuestSortRecord> QuestSortStorage { get; set; }
+        public static DB6Storage<QuestV2Record> QuestV2Storage { get; set; }
+        public static DB6Storage<QuestXPRecord> QuestXPStorage { get; set; }
+        public static DB6Storage<RandPropPointsRecord> RandPropPointsStorage { get; set; }
+        public static DB6Storage<RewardPackRecord> RewardPackStorage { get; set; }
+        public static DB6Storage<RewardPackXCurrencyTypeRecord> RewardPackXCurrencyTypeStorage { get; set; }
+        public static DB6Storage<RewardPackXItemRecord> RewardPackXItemStorage { get; set; }
+        public static DB6Storage<ScenarioRecord> ScenarioStorage { get; set; }
+        public static DB6Storage<ScenarioStepRecord> ScenarioStepStorage { get; set; }
+        public static DB6Storage<SceneScriptRecord> SceneScriptStorage { get; set; }
+        public static DB6Storage<SceneScriptGlobalTextRecord> SceneScriptGlobalTextStorage { get; set; }
+        public static DB6Storage<SceneScriptPackageRecord> SceneScriptPackageStorage { get; set; }
+        public static DB6Storage<SceneScriptTextRecord> SceneScriptTextStorage { get; set; }
+        public static DB6Storage<SkillLineRecord> SkillLineStorage { get; set; }
+        public static DB6Storage<SkillLineAbilityRecord> SkillLineAbilityStorage { get; set; }
+        public static DB6Storage<SkillLineXTraitTreeRecord> SkillLineXTraitTreeStorage { get; set; }
+        public static DB6Storage<SkillRaceClassInfoRecord> SkillRaceClassInfoStorage { get; set; }
+        public static DB6Storage<SoulbindConduitRankRecord> SoulbindConduitRankStorage { get; set; }
+        public static DB6Storage<SoundKitRecord> SoundKitStorage { get; set; }
+        public static DB6Storage<SpecializationSpellsRecord> SpecializationSpellsStorage { get; set; }
+        public static DB6Storage<SpecSetMemberRecord> SpecSetMemberStorage { get; set; }
+        public static DB6Storage<SpellAuraOptionsRecord> SpellAuraOptionsStorage { get; set; }
+        public static DB6Storage<SpellAuraRestrictionsRecord> SpellAuraRestrictionsStorage { get; set; }
+        public static DB6Storage<SpellCastTimesRecord> SpellCastTimesStorage { get; set; }
+        public static DB6Storage<SpellCastingRequirementsRecord> SpellCastingRequirementsStorage { get; set; }
+        public static DB6Storage<SpellCategoriesRecord> SpellCategoriesStorage { get; set; }
+        public static DB6Storage<SpellCategoryRecord> SpellCategoryStorage { get; set; }
+        public static DB6Storage<SpellClassOptionsRecord> SpellClassOptionsStorage { get; set; }
+        public static DB6Storage<SpellCooldownsRecord> SpellCooldownsStorage { get; set; }
+        public static DB6Storage<SpellDurationRecord> SpellDurationStorage { get; set; }
+        public static DB6Storage<SpellEffectRecord> SpellEffectStorage { get; set; }
+        public static DB6Storage<SpellEquippedItemsRecord> SpellEquippedItemsStorage { get; set; }
+        public static DB6Storage<SpellFocusObjectRecord> SpellFocusObjectStorage { get; set; }
+        public static DB6Storage<SpellInterruptsRecord> SpellInterruptsStorage { get; set; }
+        public static DB6Storage<SpellItemEnchantmentRecord> SpellItemEnchantmentStorage { get; set; }
+        public static DB6Storage<SpellItemEnchantmentConditionRecord> SpellItemEnchantmentConditionStorage { get; set; }
+        public static DB6Storage<SpellLabelRecord> SpellLabelStorage { get; set; }
+        public static DB6Storage<SpellLearnSpellRecord> SpellLearnSpellStorage { get; set; }
+        public static DB6Storage<SpellLevelsRecord> SpellLevelsStorage { get; set; }
+        public static DB6Storage<SpellMiscRecord> SpellMiscStorage { get; set; }
+        public static DB6Storage<SpellNameRecord> SpellNameStorage { get; set; }
+        public static DB6Storage<SpellPowerRecord> SpellPowerStorage { get; set; }
+        public static DB6Storage<SpellPowerDifficultyRecord> SpellPowerDifficultyStorage { get; set; }
+        public static DB6Storage<SpellProcsPerMinuteRecord> SpellProcsPerMinuteStorage { get; set; }
+        public static DB6Storage<SpellProcsPerMinuteModRecord> SpellProcsPerMinuteModStorage { get; set; }
+        public static DB6Storage<SpellRadiusRecord> SpellRadiusStorage { get; set; }
+        public static DB6Storage<SpellRangeRecord> SpellRangeStorage { get; set; }
+        public static DB6Storage<SpellReagentsRecord> SpellReagentsStorage { get; set; }
+        public static DB6Storage<SpellReagentsCurrencyRecord> SpellReagentsCurrencyStorage { get; set; }
+        public static DB6Storage<SpellScalingRecord> SpellScalingStorage { get; set; }
+        public static DB6Storage<SpellShapeshiftRecord> SpellShapeshiftStorage { get; set; }
+        public static DB6Storage<SpellShapeshiftFormRecord> SpellShapeshiftFormStorage { get; set; }
+        public static DB6Storage<SpellTargetRestrictionsRecord> SpellTargetRestrictionsStorage { get; set; }
+        public static DB6Storage<SpellTotemsRecord> SpellTotemsStorage { get; set; }
+        public static DB6Storage<SpellVisualRecord> SpellVisualStorage { get; set; }
+        public static DB6Storage<SpellVisualEffectNameRecord> SpellVisualEffectNameStorage { get; set; }
+        public static DB6Storage<SpellVisualMissileRecord> SpellVisualMissileStorage { get; set; }
+        public static DB6Storage<SpellVisualKitRecord> SpellVisualKitStorage { get; set; }
+        public static DB6Storage<SpellXSpellVisualRecord> SpellXSpellVisualStorage { get; set; }
+        public static DB6Storage<SummonPropertiesRecord> SummonPropertiesStorage { get; set; }
+        public static DB6Storage<TactKeyRecord> TactKeyStorage { get; set; }
+        public static DB6Storage<TalentRecord> TalentStorage { get; set; }
+        public static DB6Storage<TaxiNodesRecord> TaxiNodesStorage { get; set; }
+        public static DB6Storage<TaxiPathRecord> TaxiPathStorage { get; set; }
+        public static DB6Storage<TaxiPathNodeRecord> TaxiPathNodeStorage { get; set; }
+        public static DB6Storage<TotemCategoryRecord> TotemCategoryStorage { get; set; }
+        public static DB6Storage<ToyRecord> ToyStorage { get; set; }
+        public static DB6Storage<TraitCondRecord> TraitCondStorage { get; set; }
+        public static DB6Storage<TraitCostRecord> TraitCostStorage { get; set; }
+        public static DB6Storage<TraitCurrencyRecord> TraitCurrencyStorage { get; set; }
+        public static DB6Storage<TraitCurrencySourceRecord> TraitCurrencySourceStorage { get; set; }
+        public static DB6Storage<TraitDefinitionRecord> TraitDefinitionStorage { get; set; }
+        public static DB6Storage<TraitDefinitionEffectPointsRecord> TraitDefinitionEffectPointsStorage { get; set; }
+        public static DB6Storage<TraitEdgeRecord> TraitEdgeStorage { get; set; }
+        public static DB6Storage<TraitNodeRecord> TraitNodeStorage { get; set; }
+        public static DB6Storage<TraitNodeEntryRecord> TraitNodeEntryStorage { get; set; }
+        public static DB6Storage<TraitNodeEntryXTraitCondRecord> TraitNodeEntryXTraitCondStorage { get; set; }
+        public static DB6Storage<TraitNodeEntryXTraitCostRecord> TraitNodeEntryXTraitCostStorage { get; set; }
+        public static DB6Storage<TraitNodeGroupRecord> TraitNodeGroupStorage { get; set; }
+        public static DB6Storage<TraitNodeGroupXTraitCondRecord> TraitNodeGroupXTraitCondStorage { get; set; }
+        public static DB6Storage<TraitNodeGroupXTraitCostRecord> TraitNodeGroupXTraitCostStorage { get; set; }
+        public static DB6Storage<TraitNodeGroupXTraitNodeRecord> TraitNodeGroupXTraitNodeStorage { get; set; }
+        public static DB6Storage<TraitNodeXTraitCondRecord> TraitNodeXTraitCondStorage { get; set; }
+        public static DB6Storage<TraitNodeXTraitCostRecord> TraitNodeXTraitCostStorage { get; set; }
+        public static DB6Storage<TraitNodeXTraitNodeEntryRecord> TraitNodeXTraitNodeEntryStorage { get; set; }
+        public static DB6Storage<TraitTreeRecord> TraitTreeStorage { get; set; }
+        public static DB6Storage<TraitTreeLoadoutRecord> TraitTreeLoadoutStorage { get; set; }
+        public static DB6Storage<TraitTreeLoadoutEntryRecord> TraitTreeLoadoutEntryStorage { get; set; }
+        public static DB6Storage<TraitTreeXTraitCostRecord> TraitTreeXTraitCostStorage { get; set; }
+        public static DB6Storage<TraitTreeXTraitCurrencyRecord> TraitTreeXTraitCurrencyStorage { get; set; }
+        public static DB6Storage<TransmogHolidayRecord> TransmogHolidayStorage { get; set; }
+        public static DB6Storage<TransmogIllusionRecord> TransmogIllusionStorage { get; set; }
+        public static DB6Storage<TransmogSetRecord> TransmogSetStorage { get; set; }
+        public static DB6Storage<TransmogSetGroupRecord> TransmogSetGroupStorage { get; set; }
+        public static DB6Storage<TransmogSetItemRecord> TransmogSetItemStorage { get; set; }
+        public static DB6Storage<TransportAnimationRecord> TransportAnimationStorage { get; set; }
+        public static DB6Storage<TransportRotationRecord> TransportRotationStorage { get; set; }
+        public static DB6Storage<UiMapRecord> UiMapStorage { get; set; }
+        public static DB6Storage<UiMapAssignmentRecord> UiMapAssignmentStorage { get; set; }
+        public static DB6Storage<UiMapLinkRecord> UiMapLinkStorage { get; set; }
+        public static DB6Storage<UiMapXMapArtRecord> UiMapXMapArtStorage { get; set; }
+        public static DB6Storage<UISplashScreenRecord> UISplashScreenStorage { get; set; }
+        public static DB6Storage<UnitConditionRecord> UnitConditionStorage { get; set; }
+        public static DB6Storage<UnitPowerBarRecord> UnitPowerBarStorage { get; set; }
+        public static DB6Storage<VehicleRecord> VehicleStorage { get; set; }
+        public static DB6Storage<VehicleSeatRecord> VehicleSeatStorage { get; set; }
+        public static DB6Storage<WMOAreaTableRecord> WMOAreaTableStorage { get; set; }
+        public static DB6Storage<WorldEffectRecord> WorldEffectStorage { get; set; }
+        public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage { get; set; }
+        public static DB6Storage<WorldStateExpressionRecord> WorldStateExpressionStorage { get; set; }
+        public static DB6Storage<CharBaseInfo> CharBaseInfoStorage { get; set; }
+
+        #endregion
+
+        #region GameTables
+
+        public static GameTable<GtArtifactKnowledgeMultiplierRecord> ArtifactKnowledgeMultiplierGameTable { get; set; }
+        public static GameTable<GtArtifactLevelXPRecord> ArtifactLevelXPGameTable { get; set; }
+        public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable { get; set; }
+        public static GameTable<GtBaseMPRecord> BaseMPGameTable { get; set; }
+        public static GameTable<GtBattlePetXPRecord> BattlePetXPGameTable { get; set; }
+        public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable { get; set; }
+        public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable { get; set; }
+        public static GameTable<GtHpPerStaRecord> HpPerStaGameTable { get; set; }
+        public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable { get; set; }
+        public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable { get; set; }
+        public static GameTable<GtSpellScalingRecord> SpellScalingGameTable { get; set; }
+        public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable { get; set; }
+        public static GameTable<GtXpRecord> XpGameTable { get; set; }
+
+        #endregion
+
+        #region Taxi Collections
+
+        public static byte[] TaxiNodesMask { get; set; }
+        public static byte[] OldContinentsNodesMask { get; set; }
+        public static byte[] HordeTaxiNodesMask { get; set; }
+        public static byte[] AllianceTaxiNodesMask { get; set; }
+        public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource { get; set; } = new();
+        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath { get; set; } = new();
+
+        #endregion
+
         public static BitSet LoadStores(string dataPath, Locale defaultLocale)
         {
             uint oldMSTime = Time.GetMSTime();
@@ -468,366 +829,7 @@ namespace Game.DataStorage
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables _data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        #region Main Collections
-
-        public static DB6Storage<AchievementRecord> AchievementStorage;
-        public static DB6Storage<AchievementCategoryRecord> AchievementCategoryStorage;
-        public static DB6Storage<AdventureJournalRecord> AdventureJournalStorage;
-        public static DB6Storage<AdventureMapPOIRecord> AdventureMapPOIStorage;
-        public static DB6Storage<AnimationDataRecord> AnimationDataStorage;
-        public static DB6Storage<AnimKitRecord> AnimKitStorage;
-        public static DB6Storage<AreaGroupMemberRecord> AreaGroupMemberStorage;
-        public static DB6Storage<AreaTableRecord> AreaTableStorage;
-        public static DB6Storage<AreaTriggerRecord> AreaTriggerStorage;
-        public static DB6Storage<ArmorLocationRecord> ArmorLocationStorage;
-        public static DB6Storage<ArtifactRecord> ArtifactStorage;
-        public static DB6Storage<ArtifactAppearanceRecord> ArtifactAppearanceStorage;
-        public static DB6Storage<ArtifactAppearanceSetRecord> ArtifactAppearanceSetStorage;
-        public static DB6Storage<ArtifactCategoryRecord> ArtifactCategoryStorage;
-        public static DB6Storage<ArtifactPowerRecord> ArtifactPowerStorage;
-        public static DB6Storage<ArtifactPowerLinkRecord> ArtifactPowerLinkStorage;
-        public static DB6Storage<ArtifactPowerPickerRecord> ArtifactPowerPickerStorage;
-
-        public static DB6Storage<ArtifactPowerRankRecord> ArtifactPowerRankStorage;
-
-        //public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
-        public static DB6Storage<ArtifactTierRecord> ArtifactTierStorage;
-        public static DB6Storage<ArtifactUnlockRecord> ArtifactUnlockStorage;
-        public static DB6Storage<AuctionHouseRecord> AuctionHouseStorage;
-        public static DB6Storage<AzeriteEmpoweredItemRecord> AzeriteEmpoweredItemStorage;
-        public static DB6Storage<AzeriteEssenceRecord> AzeriteEssenceStorage;
-        public static DB6Storage<AzeriteEssencePowerRecord> AzeriteEssencePowerStorage;
-        public static DB6Storage<AzeriteItemRecord> AzeriteItemStorage;
-        public static DB6Storage<AzeriteItemMilestonePowerRecord> AzeriteItemMilestonePowerStorage;
-        public static DB6Storage<AzeriteKnowledgeMultiplierRecord> AzeriteKnowledgeMultiplierStorage;
-        public static DB6Storage<AzeriteLevelInfoRecord> AzeriteLevelInfoStorage;
-        public static DB6Storage<AzeritePowerRecord> AzeritePowerStorage;
-        public static DB6Storage<AzeritePowerSetMemberRecord> AzeritePowerSetMemberStorage;
-        public static DB6Storage<AzeriteTierUnlockRecord> AzeriteTierUnlockStorage;
-        public static DB6Storage<AzeriteTierUnlockSetRecord> AzeriteTierUnlockSetStorage;
-        public static DB6Storage<AzeriteUnlockMappingRecord> AzeriteUnlockMappingStorage;
-        public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
-        public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage;
-        public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
-        public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage;
-        public static DB6Storage<BattlePetBreedStateRecord> BattlePetBreedStateStorage;
-        public static DB6Storage<BattlePetSpeciesRecord> BattlePetSpeciesStorage;
-        public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
-        public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
-        public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
-        public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage;
-        public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
-        public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
-        public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage;
-        public static DB6Storage<CharacterLoadoutItemRecord> CharacterLoadoutItemStorage;
-        public static DB6Storage<ChatChannelsRecord> ChatChannelsStorage;
-        public static DB6Storage<ChrClassUIDisplayRecord> ChrClassUIDisplayStorage;
-        public static DB6Storage<ChrClassesRecord> ChrClassesStorage;
-        public static DB6Storage<ChrClassesXPowerTypesRecord> ChrClassesXPowerTypesStorage;
-        public static DB6Storage<ChrCustomizationChoiceRecord> ChrCustomizationChoiceStorage;
-        public static DB6Storage<ChrCustomizationDisplayInfoRecord> ChrCustomizationDisplayInfoStorage;
-        public static DB6Storage<ChrCustomizationElementRecord> ChrCustomizationElementStorage;
-        public static DB6Storage<ChrCustomizationReqRecord> ChrCustomizationReqStorage;
-        public static DB6Storage<ChrCustomizationReqChoiceRecord> ChrCustomizationReqChoiceStorage;
-        public static DB6Storage<ChrModelRecord> ChrModelStorage;
-        public static DB6Storage<ChrRaceXChrModelRecord> ChrRaceXChrModelStorage;
-        public static DB6Storage<ChrCustomizationOptionRecord> ChrCustomizationOptionStorage;
-        public static DB6Storage<ChrRacesRecord> ChrRacesStorage;
-        public static DB6Storage<ChrSpecializationRecord> ChrSpecializationStorage;
-        public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage;
-        public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage;
-        public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
-        public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage;
-        public static DB6Storage<ConversationLineRecord> ConversationLineStorage;
-        public static DB6Storage<CorruptionEffectsRecord> CorruptionEffectsStorage;
-        public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
-        public static DB6Storage<CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage;
-        public static DB6Storage<CreatureFamilyRecord> CreatureFamilyStorage;
-        public static DB6Storage<CreatureModelDataRecord> CreatureModelDataStorage;
-        public static DB6Storage<CreatureTypeRecord> CreatureTypeStorage;
-        public static DB6Storage<CriteriaRecord> CriteriaStorage;
-        public static DB6Storage<CriteriaTreeRecord> CriteriaTreeStorage;
-        public static DB6Storage<CurrencyContainerRecord> CurrencyContainerStorage;
-        public static DB6Storage<CurrencyTypesRecord> CurrencyTypesStorage;
-        public static DB6Storage<CurveRecord> CurveStorage;
-        public static DB6Storage<CurvePointRecord> CurvePointStorage;
-        public static DB6Storage<DestructibleModelDataRecord> DestructibleModelDataStorage;
-        public static DB6Storage<DifficultyRecord> DifficultyStorage;
-        public static DB6Storage<DungeonEncounterRecord> DungeonEncounterStorage;
-        public static DB6Storage<DurabilityCostsRecord> DurabilityCostsStorage;
-        public static DB6Storage<DurabilityQualityRecord> DurabilityQualityStorage;
-        public static DB6Storage<EmotesRecord> EmotesStorage;
-        public static DB6Storage<EmotesTextRecord> EmotesTextStorage;
-        public static DB6Storage<EmotesTextSoundRecord> EmotesTextSoundStorage;
-        public static DB6Storage<ExpectedStatRecord> ExpectedStatStorage;
-        public static DB6Storage<ExpectedStatModRecord> ExpectedStatModStorage;
-        public static DB6Storage<FactionRecord> FactionStorage;
-        public static DB6Storage<FactionTemplateRecord> FactionTemplateStorage;
-        public static DB6Storage<FriendshipRepReactionRecord> FriendshipRepReactionStorage;
-        public static DB6Storage<FriendshipReputationRecord> FriendshipReputationStorage;
-        public static DB6Storage<GameObjectArtKitRecord> GameObjectArtKitStorage;
-        public static DB6Storage<GameObjectDisplayInfoRecord> GameObjectDisplayInfoStorage;
-        public static DB6Storage<GameObjectsRecord> GameObjectsStorage;
-        public static DB6Storage<GarrAbilityRecord> GarrAbilityStorage;
-        public static DB6Storage<GarrBuildingRecord> GarrBuildingStorage;
-        public static DB6Storage<GarrBuildingPlotInstRecord> GarrBuildingPlotInstStorage;
-        public static DB6Storage<GarrClassSpecRecord> GarrClassSpecStorage;
-        public static DB6Storage<GarrFollowerRecord> GarrFollowerStorage;
-        public static DB6Storage<GarrFollowerXAbilityRecord> GarrFollowerXAbilityStorage;
-        public static DB6Storage<GarrMissionRecord> GarrMissionStorage;
-        public static DB6Storage<GarrPlotBuildingRecord> GarrPlotBuildingStorage;
-        public static DB6Storage<GarrPlotRecord> GarrPlotStorage;
-        public static DB6Storage<GarrPlotInstanceRecord> GarrPlotInstanceStorage;
-        public static DB6Storage<GarrSiteLevelRecord> GarrSiteLevelStorage;
-        public static DB6Storage<GarrSiteLevelPlotInstRecord> GarrSiteLevelPlotInstStorage;
-        public static DB6Storage<GarrTalentTreeRecord> GarrTalentTreeStorage;
-        public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage;
-        public static DB6Storage<GlobalCurveRecord> GlobalCurveStorage;
-        public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
-        public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
-        public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
-        public static DB6Storage<GossipNPCOptionRecord> GossipNPCOptionStorage;
-        public static DB6Storage<GuildColorBackgroundRecord> GuildColorBackgroundStorage;
-        public static DB6Storage<GuildColorBorderRecord> GuildColorBorderStorage;
-        public static DB6Storage<GuildColorEmblemRecord> GuildColorEmblemStorage;
-        public static DB6Storage<GuildPerkSpellsRecord> GuildPerkSpellsStorage;
-        public static DB6Storage<HeirloomRecord> HeirloomStorage;
-        public static DB6Storage<HolidaysRecord> HolidaysStorage;
-        public static DB6Storage<ImportPriceArmorRecord> ImportPriceArmorStorage;
-        public static DB6Storage<ImportPriceQualityRecord> ImportPriceQualityStorage;
-        public static DB6Storage<ImportPriceShieldRecord> ImportPriceShieldStorage;
-        public static DB6Storage<ImportPriceWeaponRecord> ImportPriceWeaponStorage;
-        public static DB6Storage<ItemAppearanceRecord> ItemAppearanceStorage;
-        public static DB6Storage<ItemArmorQualityRecord> ItemArmorQualityStorage;
-        public static DB6Storage<ItemArmorShieldRecord> ItemArmorShieldStorage;
-
-        public static DB6Storage<ItemArmorTotalRecord> ItemArmorTotalStorage;
-
-        //public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
-        public static DB6Storage<ItemBonusRecord> ItemBonusStorage;
-        public static DB6Storage<ItemBonusListLevelDeltaRecord> ItemBonusListLevelDeltaStorage;
-        public static DB6Storage<ItemBonusTreeNodeRecord> ItemBonusTreeNodeStorage;
-        public static DB6Storage<ItemClassRecord> ItemClassStorage;
-        public static DB6Storage<ItemChildEquipmentRecord> ItemChildEquipmentStorage;
-        public static DB6Storage<ItemCurrencyCostRecord> ItemCurrencyCostStorage;
-        public static DB6Storage<ItemDamageRecord> ItemDamageAmmoStorage;
-        public static DB6Storage<ItemDamageRecord> ItemDamageOneHandStorage;
-        public static DB6Storage<ItemDamageRecord> ItemDamageOneHandCasterStorage;
-        public static DB6Storage<ItemDamageRecord> ItemDamageTwoHandStorage;
-        public static DB6Storage<ItemDamageRecord> ItemDamageTwoHandCasterStorage;
-        public static DB6Storage<ItemDisenchantLootRecord> ItemDisenchantLootStorage;
-        public static DB6Storage<ItemEffectRecord> ItemEffectStorage;
-        public static DB6Storage<ItemRecord> ItemStorage;
-        public static DB6Storage<ItemExtendedCostRecord> ItemExtendedCostStorage;
-        public static DB6Storage<ItemLevelSelectorRecord> ItemLevelSelectorStorage;
-        public static DB6Storage<ItemLevelSelectorQualityRecord> ItemLevelSelectorQualityStorage;
-        public static DB6Storage<ItemLevelSelectorQualitySetRecord> ItemLevelSelectorQualitySetStorage;
-        public static DB6Storage<ItemLimitCategoryRecord> ItemLimitCategoryStorage;
-        public static DB6Storage<ItemLimitCategoryConditionRecord> ItemLimitCategoryConditionStorage;
-        public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage;
-        public static DB6Storage<ItemModifiedAppearanceExtraRecord> ItemModifiedAppearanceExtraStorage;
-        public static DB6Storage<ItemNameDescriptionRecord> ItemNameDescriptionStorage;
-        public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
-        public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage;
-        public static DB6Storage<ItemSetRecord> ItemSetStorage;
-        public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage;
-        public static DB6Storage<ItemSparseRecord> ItemSparseStorage;
-        public static DB6Storage<ItemSpecRecord> ItemSpecStorage;
-        public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage;
-        public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage;
-        public static DB6Storage<ItemXItemEffectRecord> ItemXItemEffectStorage;
-        public static DB6Storage<JournalEncounterRecord> JournalEncounterStorage;
-        public static DB6Storage<JournalEncounterSectionRecord> JournalEncounterSectionStorage;
-        public static DB6Storage<JournalInstanceRecord> JournalInstanceStorage;
-
-        public static DB6Storage<JournalTierRecord> JournalTierStorage;
-
-        //public static DB6Storage<KeyChainRecord> KeyChainStorage;
-        public static DB6Storage<KeystoneAffixRecord> KeystoneAffixStorage;
-        public static DB6Storage<LanguageWordsRecord> LanguageWordsStorage;
-        public static DB6Storage<LanguagesRecord> LanguagesStorage;
-        public static DB6Storage<LFGDungeonsRecord> LFGDungeonsStorage;
-        public static DB6Storage<LightRecord> LightStorage;
-        public static DB6Storage<LiquidTypeRecord> LiquidTypeStorage;
-        public static DB6Storage<LockRecord> LockStorage;
-        public static DB6Storage<MailTemplateRecord> MailTemplateStorage;
-        public static DB6Storage<MapRecord> MapStorage;
-        public static DB6Storage<MapChallengeModeRecord> MapChallengeModeStorage;
-        public static DB6Storage<MapDifficultyRecord> MapDifficultyStorage;
-        public static DB6Storage<MapDifficultyXConditionRecord> MapDifficultyXConditionStorage;
-        public static DB6Storage<MawPowerRecord> MawPowerStorage;
-        public static DB6Storage<ModifierTreeRecord> ModifierTreeStorage;
-        public static DB6Storage<MountCapabilityRecord> MountCapabilityStorage;
-        public static DB6Storage<MountRecord> MountStorage;
-        public static DB6Storage<MountTypeXCapabilityRecord> MountTypeXCapabilityStorage;
-        public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;
-        public static DB6Storage<MovieRecord> MovieStorage;
-        public static DB6Storage<NameGenRecord> NameGenStorage;
-        public static DB6Storage<NamesProfanityRecord> NamesProfanityStorage;
-        public static DB6Storage<NamesReservedRecord> NamesReservedStorage;
-        public static DB6Storage<NamesReservedLocaleRecord> NamesReservedLocaleStorage;
-        public static DB6Storage<NumTalentsAtLevelRecord> NumTalentsAtLevelStorage;
-        public static DB6Storage<OverrideSpellDataRecord> OverrideSpellDataStorage;
-        public static DB6Storage<ParagonReputationRecord> ParagonReputationStorage;
-        public static DB6Storage<PhaseRecord> PhaseStorage;
-        public static DB6Storage<PhaseXPhaseGroupRecord> PhaseXPhaseGroupStorage;
-        public static DB6Storage<PlayerConditionRecord> PlayerConditionStorage;
-        public static DB6Storage<PowerDisplayRecord> PowerDisplayStorage;
-        public static DB6Storage<PowerTypeRecord> PowerTypeStorage;
-        public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
-        public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage;
-        public static DB6Storage<PvpItemRecord> PvpItemStorage;
-        public static DB6Storage<PvpTalentRecord> PvpTalentStorage;
-        public static DB6Storage<PvpTalentCategoryRecord> PvpTalentCategoryStorage;
-        public static DB6Storage<PvpTalentSlotUnlockRecord> PvpTalentSlotUnlockStorage;
-        public static DB6Storage<PvpTierRecord> PvpTierStorage;
-        public static DB6Storage<QuestFactionRewardRecord> QuestFactionRewardStorage;
-        public static DB6Storage<QuestInfoRecord> QuestInfoStorage;
-        public static DB6Storage<QuestLineXQuestRecord> QuestLineXQuestStorage;
-        public static DB6Storage<QuestMoneyRewardRecord> QuestMoneyRewardStorage;
-        public static DB6Storage<QuestPackageItemRecord> QuestPackageItemStorage;
-        public static DB6Storage<QuestSortRecord> QuestSortStorage;
-        public static DB6Storage<QuestV2Record> QuestV2Storage;
-        public static DB6Storage<QuestXPRecord> QuestXPStorage;
-        public static DB6Storage<RandPropPointsRecord> RandPropPointsStorage;
-        public static DB6Storage<RewardPackRecord> RewardPackStorage;
-        public static DB6Storage<RewardPackXCurrencyTypeRecord> RewardPackXCurrencyTypeStorage;
-        public static DB6Storage<RewardPackXItemRecord> RewardPackXItemStorage;
-        public static DB6Storage<ScenarioRecord> ScenarioStorage;
-        public static DB6Storage<ScenarioStepRecord> ScenarioStepStorage;
-        public static DB6Storage<SceneScriptRecord> SceneScriptStorage;
-        public static DB6Storage<SceneScriptGlobalTextRecord> SceneScriptGlobalTextStorage;
-        public static DB6Storage<SceneScriptPackageRecord> SceneScriptPackageStorage;
-        public static DB6Storage<SceneScriptTextRecord> SceneScriptTextStorage;
-        public static DB6Storage<SkillLineRecord> SkillLineStorage;
-        public static DB6Storage<SkillLineAbilityRecord> SkillLineAbilityStorage;
-        public static DB6Storage<SkillLineXTraitTreeRecord> SkillLineXTraitTreeStorage;
-        public static DB6Storage<SkillRaceClassInfoRecord> SkillRaceClassInfoStorage;
-        public static DB6Storage<SoulbindConduitRankRecord> SoulbindConduitRankStorage;
-        public static DB6Storage<SoundKitRecord> SoundKitStorage;
-        public static DB6Storage<SpecializationSpellsRecord> SpecializationSpellsStorage;
-        public static DB6Storage<SpecSetMemberRecord> SpecSetMemberStorage;
-        public static DB6Storage<SpellAuraOptionsRecord> SpellAuraOptionsStorage;
-        public static DB6Storage<SpellAuraRestrictionsRecord> SpellAuraRestrictionsStorage;
-        public static DB6Storage<SpellCastTimesRecord> SpellCastTimesStorage;
-        public static DB6Storage<SpellCastingRequirementsRecord> SpellCastingRequirementsStorage;
-        public static DB6Storage<SpellCategoriesRecord> SpellCategoriesStorage;
-        public static DB6Storage<SpellCategoryRecord> SpellCategoryStorage;
-        public static DB6Storage<SpellClassOptionsRecord> SpellClassOptionsStorage;
-        public static DB6Storage<SpellCooldownsRecord> SpellCooldownsStorage;
-        public static DB6Storage<SpellDurationRecord> SpellDurationStorage;
-        public static DB6Storage<SpellEffectRecord> SpellEffectStorage;
-        public static DB6Storage<SpellEquippedItemsRecord> SpellEquippedItemsStorage;
-        public static DB6Storage<SpellFocusObjectRecord> SpellFocusObjectStorage;
-        public static DB6Storage<SpellInterruptsRecord> SpellInterruptsStorage;
-        public static DB6Storage<SpellItemEnchantmentRecord> SpellItemEnchantmentStorage;
-        public static DB6Storage<SpellItemEnchantmentConditionRecord> SpellItemEnchantmentConditionStorage;
-        public static DB6Storage<SpellLabelRecord> SpellLabelStorage;
-        public static DB6Storage<SpellLearnSpellRecord> SpellLearnSpellStorage;
-        public static DB6Storage<SpellLevelsRecord> SpellLevelsStorage;
-        public static DB6Storage<SpellMiscRecord> SpellMiscStorage;
-        public static DB6Storage<SpellNameRecord> SpellNameStorage;
-        public static DB6Storage<SpellPowerRecord> SpellPowerStorage;
-        public static DB6Storage<SpellPowerDifficultyRecord> SpellPowerDifficultyStorage;
-        public static DB6Storage<SpellProcsPerMinuteRecord> SpellProcsPerMinuteStorage;
-        public static DB6Storage<SpellProcsPerMinuteModRecord> SpellProcsPerMinuteModStorage;
-        public static DB6Storage<SpellRadiusRecord> SpellRadiusStorage;
-        public static DB6Storage<SpellRangeRecord> SpellRangeStorage;
-        public static DB6Storage<SpellReagentsRecord> SpellReagentsStorage;
-        public static DB6Storage<SpellReagentsCurrencyRecord> SpellReagentsCurrencyStorage;
-        public static DB6Storage<SpellScalingRecord> SpellScalingStorage;
-        public static DB6Storage<SpellShapeshiftRecord> SpellShapeshiftStorage;
-        public static DB6Storage<SpellShapeshiftFormRecord> SpellShapeshiftFormStorage;
-        public static DB6Storage<SpellTargetRestrictionsRecord> SpellTargetRestrictionsStorage;
-        public static DB6Storage<SpellTotemsRecord> SpellTotemsStorage;
-        public static DB6Storage<SpellVisualRecord> SpellVisualStorage;
-        public static DB6Storage<SpellVisualEffectNameRecord> SpellVisualEffectNameStorage;
-        public static DB6Storage<SpellVisualMissileRecord> SpellVisualMissileStorage;
-        public static DB6Storage<SpellVisualKitRecord> SpellVisualKitStorage;
-        public static DB6Storage<SpellXSpellVisualRecord> SpellXSpellVisualStorage;
-        public static DB6Storage<SummonPropertiesRecord> SummonPropertiesStorage;
-        public static DB6Storage<TactKeyRecord> TactKeyStorage;
-        public static DB6Storage<TalentRecord> TalentStorage;
-        public static DB6Storage<TaxiNodesRecord> TaxiNodesStorage;
-        public static DB6Storage<TaxiPathRecord> TaxiPathStorage;
-        public static DB6Storage<TaxiPathNodeRecord> TaxiPathNodeStorage;
-        public static DB6Storage<TotemCategoryRecord> TotemCategoryStorage;
-        public static DB6Storage<ToyRecord> ToyStorage;
-        public static DB6Storage<TraitCondRecord> TraitCondStorage;
-        public static DB6Storage<TraitCostRecord> TraitCostStorage;
-        public static DB6Storage<TraitCurrencyRecord> TraitCurrencyStorage;
-        public static DB6Storage<TraitCurrencySourceRecord> TraitCurrencySourceStorage;
-        public static DB6Storage<TraitDefinitionRecord> TraitDefinitionStorage;
-        public static DB6Storage<TraitDefinitionEffectPointsRecord> TraitDefinitionEffectPointsStorage;
-        public static DB6Storage<TraitEdgeRecord> TraitEdgeStorage;
-        public static DB6Storage<TraitNodeRecord> TraitNodeStorage;
-        public static DB6Storage<TraitNodeEntryRecord> TraitNodeEntryStorage;
-        public static DB6Storage<TraitNodeEntryXTraitCondRecord> TraitNodeEntryXTraitCondStorage;
-        public static DB6Storage<TraitNodeEntryXTraitCostRecord> TraitNodeEntryXTraitCostStorage;
-        public static DB6Storage<TraitNodeGroupRecord> TraitNodeGroupStorage;
-        public static DB6Storage<TraitNodeGroupXTraitCondRecord> TraitNodeGroupXTraitCondStorage;
-        public static DB6Storage<TraitNodeGroupXTraitCostRecord> TraitNodeGroupXTraitCostStorage;
-        public static DB6Storage<TraitNodeGroupXTraitNodeRecord> TraitNodeGroupXTraitNodeStorage;
-        public static DB6Storage<TraitNodeXTraitCondRecord> TraitNodeXTraitCondStorage;
-        public static DB6Storage<TraitNodeXTraitCostRecord> TraitNodeXTraitCostStorage;
-        public static DB6Storage<TraitNodeXTraitNodeEntryRecord> TraitNodeXTraitNodeEntryStorage;
-        public static DB6Storage<TraitTreeRecord> TraitTreeStorage;
-        public static DB6Storage<TraitTreeLoadoutRecord> TraitTreeLoadoutStorage;
-        public static DB6Storage<TraitTreeLoadoutEntryRecord> TraitTreeLoadoutEntryStorage;
-        public static DB6Storage<TraitTreeXTraitCostRecord> TraitTreeXTraitCostStorage;
-        public static DB6Storage<TraitTreeXTraitCurrencyRecord> TraitTreeXTraitCurrencyStorage;
-        public static DB6Storage<TransmogHolidayRecord> TransmogHolidayStorage;
-        public static DB6Storage<TransmogIllusionRecord> TransmogIllusionStorage;
-        public static DB6Storage<TransmogSetRecord> TransmogSetStorage;
-        public static DB6Storage<TransmogSetGroupRecord> TransmogSetGroupStorage;
-        public static DB6Storage<TransmogSetItemRecord> TransmogSetItemStorage;
-        public static DB6Storage<TransportAnimationRecord> TransportAnimationStorage;
-        public static DB6Storage<TransportRotationRecord> TransportRotationStorage;
-        public static DB6Storage<UiMapRecord> UiMapStorage;
-        public static DB6Storage<UiMapAssignmentRecord> UiMapAssignmentStorage;
-        public static DB6Storage<UiMapLinkRecord> UiMapLinkStorage;
-        public static DB6Storage<UiMapXMapArtRecord> UiMapXMapArtStorage;
-        public static DB6Storage<UISplashScreenRecord> UISplashScreenStorage;
-        public static DB6Storage<UnitConditionRecord> UnitConditionStorage;
-        public static DB6Storage<UnitPowerBarRecord> UnitPowerBarStorage;
-        public static DB6Storage<VehicleRecord> VehicleStorage;
-        public static DB6Storage<VehicleSeatRecord> VehicleSeatStorage;
-        public static DB6Storage<WMOAreaTableRecord> WMOAreaTableStorage;
-        public static DB6Storage<WorldEffectRecord> WorldEffectStorage;
-        public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;
-        public static DB6Storage<WorldStateExpressionRecord> WorldStateExpressionStorage;
-        public static DB6Storage<CharBaseInfo> CharBaseInfoStorage;
-
-        #endregion
-
-        #region GameTables
-
-        public static GameTable<GtArtifactKnowledgeMultiplierRecord> ArtifactKnowledgeMultiplierGameTable;
-        public static GameTable<GtArtifactLevelXPRecord> ArtifactLevelXPGameTable;
-        public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
-        public static GameTable<GtBaseMPRecord> BaseMPGameTable;
-        public static GameTable<GtBattlePetXPRecord> BattlePetXPGameTable;
-        public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable;
-        public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable;
-        public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
-        public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
-        public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
-        public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
-        public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
-        public static GameTable<GtXpRecord> XpGameTable;
-
-        #endregion
-
-        #region Taxi Collections
-
-        public static byte[] TaxiNodesMask;
-        public static byte[] OldContinentsNodesMask;
-        public static byte[] HordeTaxiNodesMask;
-        public static byte[] AllianceTaxiNodesMask;
-        public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
-        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
-
-        #endregion
+ 
 
         #region Helper Methods
 
