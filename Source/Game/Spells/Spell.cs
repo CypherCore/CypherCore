@@ -23,6 +23,7 @@ using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Spells
 {
@@ -4128,9 +4129,9 @@ namespace Game.Spells
                         if (_spellInfo.HasEffect(SpellEffectName.TeleportUnits) ||
                             _spellInfo.HasEffect(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen) ||
                             _spellInfo.HasEffect(SpellEffectName.Bind))
-                            dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation, st.target_mapId);
-                        else if (st.target_mapId == _caster.GetMapId())
-                            dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation);
+                            dest = new SpellDestination(st.Target_X, st.Target_Y, st.Target_Z, st.Target_Orientation, st.Target_mapId);
+                        else if (st.Target_mapId == _caster.GetMapId())
+                            dest = new SpellDestination(st.Target_X, st.Target_Y, st.Target_Z, st.Target_Orientation);
                     }
                     else
                     {
@@ -7062,10 +7063,10 @@ namespace Game.Spells
 
             if (threatEntry != null)
             {
-                if (threatEntry.apPctMod != 0.0f)
-                    threat += threatEntry.apPctMod * unitCaster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
+                if (threatEntry.ApPctMod != 0.0f)
+                    threat += threatEntry.ApPctMod * unitCaster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
 
-                threat += threatEntry.flatMod;
+                threat += threatEntry.FlatMod;
             }
             else if (!_spellInfo.HasAttribute(SpellCustomAttributes.NoInitialThreat))
             {

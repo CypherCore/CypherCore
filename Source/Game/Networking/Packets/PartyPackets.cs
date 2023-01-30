@@ -8,6 +8,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Networking.Packets
 {

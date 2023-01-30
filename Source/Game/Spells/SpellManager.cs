@@ -8,12 +8,11 @@ using System.Reflection;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
-using Game.BattleFields;
-using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.DataStorage;
 using Game.Movement;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -1302,23 +1301,23 @@ namespace Game.Entities
                 uint effIndex = result.Read<byte>(1);
 
                 SpellTargetPosition st = new();
-                st.target_mapId = result.Read<uint>(2);
-                st.target_X = result.Read<float>(3);
-                st.target_Y = result.Read<float>(4);
-                st.target_Z = result.Read<float>(5);
+                st.Target_mapId = result.Read<uint>(2);
+                st.Target_X = result.Read<float>(3);
+                st.Target_Y = result.Read<float>(4);
+                st.Target_Z = result.Read<float>(5);
 
-                var mapEntry = CliDB.MapStorage.LookupByKey(st.target_mapId);
+                var mapEntry = CliDB.MapStorage.LookupByKey(st.Target_mapId);
 
                 if (mapEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.target_mapId);
+                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.Target_mapId);
 
                     continue;
                 }
 
-                if (st.target_X == 0 &&
-                    st.target_Y == 0 &&
-                    st.target_Z == 0)
+                if (st.Target_X == 0 &&
+                    st.Target_Y == 0 &&
+                    st.Target_Z == 0)
                 {
                     Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) Target coordinates not provided.", spellId, effIndex);
 
@@ -1343,9 +1342,9 @@ namespace Game.Entities
 
                 // Target facing is in degrees for 6484 & 9268... (blizz sucks)
                 if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * Math.PI)
-                    st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * (float)Math.PI / 180;
+                    st.Target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * (float)Math.PI / 180;
                 else
-                    st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
+                    st.Target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
 
                 if (spellInfo.GetEffect(effIndex).TargetA.GetTarget() == Targets.DestDb ||
                     spellInfo.GetEffect(effIndex).TargetB.GetTarget() == Targets.DestDb)
@@ -1955,9 +1954,9 @@ namespace Game.Entities
                 }
 
                 SpellThreatEntry ste = new();
-                ste.flatMod = result.Read<int>(1);
-                ste.pctMod = result.Read<float>(2);
-                ste.apPctMod = result.Read<float>(3);
+                ste.FlatMod = result.Read<int>(1);
+                ste.PctMod = result.Read<float>(2);
+                ste.ApPctMod = result.Read<float>(3);
 
                 mSpellThreatMap[entry] = ste;
                 count++;
@@ -2259,7 +2258,7 @@ namespace Game.Entities
                             PetDefaultSpellsEntry petDefSpells = new();
 
                             for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                                petDefSpells.spellid[j] = cInfo.Spells[j];
+                                petDefSpells.Spellid[j] = cInfo.Spells[j];
 
                             if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                             {
@@ -2277,7 +2276,7 @@ namespace Game.Entities
             bool have_spell = false;
 
             for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                if (petDefSpells.spellid[j] != 0)
+                if (petDefSpells.Spellid[j] != 0)
                 {
                     have_spell = true;
 
@@ -2293,13 +2292,13 @@ namespace Game.Entities
             if (levelupSpells != null)
                 for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
                 {
-                    if (petDefSpells.spellid[j] == 0)
+                    if (petDefSpells.Spellid[j] == 0)
                         continue;
 
                     foreach (var pair in levelupSpells)
-                        if (pair.Value == petDefSpells.spellid[j])
+                        if (pair.Value == petDefSpells.Spellid[j])
                         {
-                            petDefSpells.spellid[j] = 0;
+                            petDefSpells.Spellid[j] = 0;
 
                             break;
                         }
@@ -2309,7 +2308,7 @@ namespace Game.Entities
             have_spell = false;
 
             for (byte j = 0; j < SharedConst.MaxCreatureSpellDataSlots; ++j)
-                if (petDefSpells.spellid[j] != 0)
+                if (petDefSpells.Spellid[j] != 0)
                 {
                     have_spell = true;
 
@@ -2346,22 +2345,22 @@ namespace Game.Entities
                 uint spell = result.Read<uint>(0);
 
                 SpellArea spellArea = new();
-                spellArea.spellId = spell;
-                spellArea.areaId = result.Read<uint>(1);
-                spellArea.questStart = result.Read<uint>(2);
-                spellArea.questStartStatus = result.Read<uint>(3);
-                spellArea.questEndStatus = result.Read<uint>(4);
-                spellArea.questEnd = result.Read<uint>(5);
-                spellArea.auraSpell = result.Read<int>(6);
-                spellArea.raceMask = result.Read<ulong>(7);
-                spellArea.gender = (Gender)result.Read<uint>(8);
-                spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
+                spellArea.SpellId = spell;
+                spellArea.AreaId = result.Read<uint>(1);
+                spellArea.QuestStart = result.Read<uint>(2);
+                spellArea.QuestStartStatus = result.Read<uint>(3);
+                spellArea.QuestEndStatus = result.Read<uint>(4);
+                spellArea.QuestEnd = result.Read<uint>(5);
+                spellArea.AuraSpell = result.Read<int>(6);
+                spellArea.RaceMask = result.Read<ulong>(7);
+                spellArea.Gender = (Gender)result.Read<uint>(8);
+                spellArea.Flags = (SpellAreaFlag)result.Read<byte>(9);
 
                 SpellInfo spellInfo = GetSpellInfo(spell, Difficulty.None);
 
                 if (spellInfo != null)
                 {
-                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
+                    if (spellArea.Flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                         spellInfo.Attributes |= SpellAttr0.NoAuraCancel;
                 }
                 else
@@ -2373,26 +2372,26 @@ namespace Game.Entities
 
                 {
                     bool ok = true;
-                    var sa_bounds = GetSpellAreaMapBounds(spellArea.spellId);
+                    var sa_bounds = GetSpellAreaMapBounds(spellArea.SpellId);
 
                     foreach (var bound in sa_bounds)
                     {
-                        if (spellArea.spellId != bound.spellId)
+                        if (spellArea.SpellId != bound.SpellId)
                             continue;
 
-                        if (spellArea.areaId != bound.areaId)
+                        if (spellArea.AreaId != bound.AreaId)
                             continue;
 
-                        if (spellArea.questStart != bound.questStart)
+                        if (spellArea.QuestStart != bound.QuestStart)
                             continue;
 
-                        if (spellArea.auraSpell != bound.auraSpell)
+                        if (spellArea.AuraSpell != bound.AuraSpell)
                             continue;
 
-                        if ((spellArea.raceMask & bound.raceMask) == 0)
+                        if ((spellArea.RaceMask & bound.RaceMask) == 0)
                             continue;
 
-                        if (spellArea.gender != bound.gender)
+                        if (spellArea.Gender != bound.Gender)
                             continue;
 
                         // duplicate by requirements
@@ -2409,58 +2408,58 @@ namespace Game.Entities
                     }
                 }
 
-                if (spellArea.areaId != 0 &&
-                    !CliDB.AreaTableStorage.ContainsKey(spellArea.areaId))
+                if (spellArea.AreaId != 0 &&
+                    !CliDB.AreaTableStorage.ContainsKey(spellArea.AreaId))
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong area ({1}) requirement", spell, spellArea.areaId);
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong area ({1}) requirement", spell, spellArea.AreaId);
 
                     continue;
                 }
 
-                if (spellArea.questStart != 0 &&
-                    Global.ObjectMgr.GetQuestTemplate(spellArea.questStart) == null)
+                if (spellArea.QuestStart != 0 &&
+                    Global.ObjectMgr.GetQuestTemplate(spellArea.QuestStart) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong start quest ({1}) requirement", spell, spellArea.questStart);
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong start quest ({1}) requirement", spell, spellArea.QuestStart);
 
                     continue;
                 }
 
-                if (spellArea.questEnd != 0)
-                    if (Global.ObjectMgr.GetQuestTemplate(spellArea.questEnd) == null)
+                if (spellArea.QuestEnd != 0)
+                    if (Global.ObjectMgr.GetQuestTemplate(spellArea.QuestEnd) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong end quest ({1}) requirement", spell, spellArea.questEnd);
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong end quest ({1}) requirement", spell, spellArea.QuestEnd);
 
                         continue;
                     }
 
-                if (spellArea.auraSpell != 0)
+                if (spellArea.AuraSpell != 0)
                 {
-                    SpellInfo info = GetSpellInfo((uint)Math.Abs(spellArea.auraSpell), Difficulty.None);
+                    SpellInfo info = GetSpellInfo((uint)Math.Abs(spellArea.AuraSpell), Difficulty.None);
 
                     if (info == null)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong aura spell ({1}) requirement", spell, Math.Abs(spellArea.auraSpell));
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong aura spell ({1}) requirement", spell, Math.Abs(spellArea.AuraSpell));
 
                         continue;
                     }
 
-                    if (Math.Abs(spellArea.auraSpell) == spellArea.spellId)
+                    if (Math.Abs(spellArea.AuraSpell) == spellArea.SpellId)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement for itself", spell, Math.Abs(spellArea.auraSpell));
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement for itself", spell, Math.Abs(spellArea.AuraSpell));
 
                         continue;
                     }
 
                     // not allow autocast chains by auraSpell field (but allow use as alternative if not present)
-                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                        spellArea.auraSpell > 0)
+                    if (spellArea.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                        spellArea.AuraSpell > 0)
                     {
                         bool chain = false;
-                        var saBound = GetSpellAreaForAuraMapBounds(spellArea.spellId);
+                        var saBound = GetSpellAreaForAuraMapBounds(spellArea.SpellId);
 
                         foreach (var bound in saBound)
-                            if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                                bound.auraSpell > 0)
+                            if (bound.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                                bound.AuraSpell > 0)
                             {
                                 chain = true;
 
@@ -2469,16 +2468,16 @@ namespace Game.Entities
 
                         if (chain)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.auraSpell);
+                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.AuraSpell);
 
                             continue;
                         }
 
-                        var saBound2 = GetSpellAreaMapBounds((uint)spellArea.auraSpell);
+                        var saBound2 = GetSpellAreaMapBounds((uint)spellArea.AuraSpell);
 
                         foreach (var bound in saBound2)
-                            if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                                bound.auraSpell > 0)
+                            if (bound.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                                bound.AuraSpell > 0)
                             {
                                 chain = true;
 
@@ -2487,26 +2486,26 @@ namespace Game.Entities
 
                         if (chain)
                         {
-                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.auraSpell);
+                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have aura spell ({1}) requirement that itself autocast from aura", spell, spellArea.AuraSpell);
 
                             continue;
                         }
                     }
                 }
 
-                if (spellArea.raceMask != 0 &&
-                    (spellArea.raceMask & SharedConst.RaceMaskAllPlayable) == 0)
+                if (spellArea.RaceMask != 0 &&
+                    (spellArea.RaceMask & SharedConst.RaceMaskAllPlayable) == 0)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.RaceMask);
 
                     continue;
                 }
 
-                if (spellArea.gender != Gender.None &&
-                    spellArea.gender != Gender.Female &&
-                    spellArea.gender != Gender.Male)
+                if (spellArea.Gender != Gender.None &&
+                    spellArea.Gender != Gender.Female &&
+                    spellArea.Gender != Gender.Male)
                 {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong Gender ({1}) requirement", spell, spellArea.gender);
+                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong Gender ({1}) requirement", spell, spellArea.Gender);
 
                     continue;
                 }
@@ -2515,34 +2514,34 @@ namespace Game.Entities
                 var sa = mSpellAreaMap[spell];
 
                 // for search by current zone/subzone at zone/subzone change
-                if (spellArea.areaId != 0)
-                    mSpellAreaForAreaMap.AddRange(spellArea.areaId, sa);
+                if (spellArea.AreaId != 0)
+                    mSpellAreaForAreaMap.AddRange(spellArea.AreaId, sa);
 
                 // for search at quest update checks
-                if (spellArea.questStart != 0 ||
-                    spellArea.questEnd != 0)
+                if (spellArea.QuestStart != 0 ||
+                    spellArea.QuestEnd != 0)
                 {
-                    if (spellArea.questStart == spellArea.questEnd)
+                    if (spellArea.QuestStart == spellArea.QuestEnd)
                     {
-                        mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
+                        mSpellAreaForQuestMap.AddRange(spellArea.QuestStart, sa);
                     }
                     else
                     {
-                        if (spellArea.questStart != 0)
-                            mSpellAreaForQuestMap.AddRange(spellArea.questStart, sa);
+                        if (spellArea.QuestStart != 0)
+                            mSpellAreaForQuestMap.AddRange(spellArea.QuestStart, sa);
 
-                        if (spellArea.questEnd != 0)
-                            mSpellAreaForQuestMap.AddRange(spellArea.questEnd, sa);
+                        if (spellArea.QuestEnd != 0)
+                            mSpellAreaForQuestMap.AddRange(spellArea.QuestEnd, sa);
                     }
                 }
 
                 // for search at quest start/reward
-                if (spellArea.questEnd != 0)
-                    mSpellAreaForQuestEndMap.AddRange(spellArea.questEnd, sa);
+                if (spellArea.QuestEnd != 0)
+                    mSpellAreaForQuestEndMap.AddRange(spellArea.QuestEnd, sa);
 
                 // for search at aura apply
-                if (spellArea.auraSpell != 0)
-                    mSpellAreaForAuraMap.AddRange((uint)Math.Abs(spellArea.auraSpell), sa);
+                if (spellArea.AuraSpell != 0)
+                    mSpellAreaForAuraMap.AddRange((uint)Math.Abs(spellArea.AuraSpell), sa);
 
                 ++count;
             } while (result.NextRow());
@@ -5227,290 +5226,5 @@ namespace Game.Entities
         public MultiMap<uint, uint> PetFamilySpellsStorage = new();
 
         #endregion
-    }
-
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class AuraEffectHandlerAttribute : Attribute
-    {
-        public AuraEffectHandlerAttribute(AuraType type)
-        {
-            AuraType = type;
-        }
-
-        public AuraType AuraType { get; set; }
-    }
-
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class SpellEffectHandlerAttribute : Attribute
-    {
-        public SpellEffectHandlerAttribute(SpellEffectName effectName)
-        {
-            EffectName = effectName;
-        }
-
-        public SpellEffectName EffectName { get; set; }
-    }
-
-    public class SpellInfoLoadHelper
-    {
-        public SpellAuraOptionsRecord AuraOptions;
-        public SpellAuraRestrictionsRecord AuraRestrictions;
-        public SpellCastingRequirementsRecord CastingRequirements;
-        public SpellCategoriesRecord Categories;
-        public SpellClassOptionsRecord ClassOptions;
-        public SpellCooldownsRecord Cooldowns;
-        public SpellEffectRecord[] Effects = new SpellEffectRecord[SpellConst.MaxEffects];
-        public SpellEquippedItemsRecord EquippedItems;
-        public SpellInterruptsRecord Interrupts;
-        public List<SpellLabelRecord> Labels = new();
-        public SpellLevelsRecord Levels;
-        public SpellMiscRecord Misc;
-        public SpellPowerRecord[] Powers = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
-        public SpellReagentsRecord Reagents;
-        public List<SpellReagentsCurrencyRecord> ReagentsCurrency = new();
-        public SpellScalingRecord Scaling;
-        public SpellShapeshiftRecord Shapeshift;
-        public SpellTargetRestrictionsRecord TargetRestrictions;
-        public SpellTotemsRecord Totems;
-        public List<SpellXSpellVisualRecord> Visuals = new(); // only to group visuals when parsing sSpellXSpellVisualStore, not for loading
-    }
-
-    public class SpellThreatEntry
-    {
-        public float apPctMod; // Pct of AP that is added as Threat - default: 0.0f
-        public int flatMod;    // flat threat-value for this Spell  - default: 0
-        public float pctMod;   // threat-Multiplier for this Spell  - default: 1.0f
-    }
-
-    public class SpellProcEntry
-    {
-        public SpellSchoolMask SchoolMask { get; set; }             // if nonzero - bitmask for matching proc condition based on spell's school
-        public SpellFamilyNames SpellFamilyName { get; set; }       // if nonzero - for matching proc condition based on candidate spell's SpellFamilyName
-        public FlagArray128 SpellFamilyMask { get; set; } = new(4); // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
-        public ProcFlagsInit ProcFlags { get; set; }                // if nonzero - owerwrite procFlags field for given Spell.dbc entry, bitmask for matching proc condition, see enum ProcFlags
-        public ProcFlagsSpellType SpellTypeMask { get; set; }       // if nonzero - bitmask for matching proc condition based on candidate spell's Damage/heal effects, see enum ProcFlagsSpellType
-        public ProcFlagsSpellPhase SpellPhaseMask { get; set; }     // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase
-        public ProcFlagsHit HitMask { get; set; }                   // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
-        public ProcAttributes AttributesMask { get; set; }          // bitmask, see ProcAttributes
-        public uint DisableEffectsMask { get; set; }                // bitmask
-        public float ProcsPerMinute { get; set; }                   // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
-        public float Chance { get; set; }                           // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines chance of proc to occur, not used if ProcsPerMinute set
-        public uint Cooldown { get; set; }                          // if nonzero - cooldown in secs for aura proc, applied to aura
-        public uint Charges { get; set; }                           // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
-    }
-
-    internal struct ServersideSpellName
-    {
-        public SpellNameRecord Name;
-
-        public ServersideSpellName(uint id, string name)
-        {
-            Name = new SpellNameRecord();
-            Name.Name = new LocalizedString();
-
-            Name.Id = id;
-
-            for (Locale i = 0; i < Locale.Total; ++i)
-                Name.Name[i] = name;
-        }
-    }
-
-
-    public class PetDefaultSpellsEntry
-    {
-        public uint[] spellid = new uint[4];
-    }
-
-    public class SpellArea
-    {
-        public uint areaId;           // zone/subzone/or 0 is not limited to zone
-        public int auraSpell;         // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
-        public SpellAreaFlag flags;   // if SPELL_AREA_FLAG_AUTOCAST then auto applied at area enter, in other case just allowed to cast || if SPELL_AREA_FLAG_AUTOREMOVE then auto removed inside area (will allways be removed on leaved even without flag)
-        public Gender gender;         // can be applied only to Gender
-        public uint questEnd;         // quest end (quest must not be rewarded for spell apply)
-        public uint questEndStatus;   // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
-        public uint questStart;       // quest start (quest must be active or rewarded for spell apply)
-        public uint questStartStatus; // QuestStatus that quest_start must have in order to keep the spell
-        public ulong raceMask;        // can be applied only to races
-        public uint spellId;
-
-        // helpers
-        public bool IsFitToRequirements(Player player, uint newZone, uint newArea)
-        {
-            if (gender != Gender.None) // not in expected Gender
-                if (player == null ||
-                    gender != player.GetNativeGender())
-                    return false;
-
-            if (raceMask != 0) // not in expected race
-                if (player == null ||
-                    !Convert.ToBoolean(raceMask & (ulong)SharedConst.GetMaskForRace(player.GetRace())))
-                    return false;
-
-            if (areaId != 0) // not in expected zone
-                if (newZone != areaId &&
-                    newArea != areaId)
-                    return false;
-
-            if (questStart != 0) // not in expected required quest State
-                if (player == null ||
-                    (((1 << (int)player.GetQuestStatus(questStart)) & questStartStatus) == 0))
-                    return false;
-
-            if (questEnd != 0) // not in expected forbidden quest State
-                if (player == null ||
-                    (((1 << (int)player.GetQuestStatus(questEnd)) & questEndStatus) == 0))
-                    return false;
-
-            if (auraSpell != 0) // not have expected aura
-                if (player == null ||
-                    (auraSpell > 0 && !player.HasAura((uint)auraSpell)) ||
-                    (auraSpell < 0 && player.HasAura((uint)-auraSpell)))
-                    return false;
-
-            if (player)
-            {
-                Battleground bg = player.GetBattleground();
-
-                if (bg)
-                    return bg.IsSpellAllowed(spellId, player);
-            }
-
-            // Extra conditions -- leaving the possibility add extra conditions...
-            switch (spellId)
-            {
-                case 91604: // No fly Zone - Wintergrasp
-                    {
-                        if (!player)
-                            return false;
-
-                        BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-
-                        if (Bf == null ||
-                            Bf.CanFlyIn() ||
-                            (!player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !player.HasAuraType(AuraType.Fly)))
-                            return false;
-
-                        break;
-                    }
-                case 56618: // Horde Controls Factory Phase Shift
-                case 56617: // Alliance Controls Factory Phase Shift
-                    {
-                        if (!player)
-                            return false;
-
-                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-
-                        if (bf == null ||
-                            bf.GetTypeId() != (int)BattleFieldTypes.WinterGrasp)
-                            return false;
-
-                        // team that controls the workshop in the specified area
-                        uint team = bf.GetData(newArea);
-
-                        if (team == TeamId.Horde)
-                            return spellId == 56618;
-                        else if (team == TeamId.Alliance)
-                            return spellId == 56617;
-
-                        break;
-                    }
-                case 57940: // Essence of Wintergrasp - Northrend
-                case 58045: // Essence of Wintergrasp - Wintergrasp
-                    {
-                        if (!player)
-                            return false;
-
-                        BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
-
-                        if (battlefieldWG != null)
-                            return battlefieldWG.IsEnabled() && (player.GetTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
-
-                        break;
-                    }
-                case 74411: // Battleground- Dampening
-                    {
-                        if (!player)
-                            return false;
-
-                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-
-                        if (bf != null)
-                            return bf.IsWarTime();
-
-                        break;
-                    }
-            }
-
-            return true;
-        }
-    }
-
-    public class PetAura
-    {
-        private readonly Dictionary<uint, uint> auras = new();
-        private readonly int damage;
-        private readonly bool removeOnChangePet;
-
-        public PetAura()
-        {
-            removeOnChangePet = false;
-            damage = 0;
-        }
-
-        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, int _damage)
-        {
-            removeOnChangePet = _removeOnChangePet;
-            damage = _damage;
-
-            auras[petEntry] = aura;
-        }
-
-        public uint GetAura(uint petEntry)
-        {
-            var auraId = auras.LookupByKey(petEntry);
-
-            if (auraId != 0)
-                return auraId;
-
-            auraId = auras.LookupByKey(0);
-
-            if (auraId != 0)
-                return auraId;
-
-            return 0;
-        }
-
-        public void AddAura(uint petEntry, uint aura)
-        {
-            auras[petEntry] = aura;
-        }
-
-        public bool IsRemovedOnChangePet()
-        {
-            return removeOnChangePet;
-        }
-
-        public int GetDamage()
-        {
-            return damage;
-        }
-    }
-
-    public class SpellEnchantProcEntry
-    {
-        public EnchantProcAttributes AttributesMask; // bitmask, see EnchantProcAttributes
-        public float Chance;                         // if nonzero - overwrite SpellItemEnchantment value
-        public uint HitMask;                         // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
-        public float ProcsPerMinute;                 // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
-    }
-
-    public class SpellTargetPosition
-    {
-        public uint target_mapId;
-        public float target_Orientation;
-        public float target_X;
-        public float target_Y;
-        public float target_Z;
     }
 }

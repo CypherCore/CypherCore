@@ -8,390 +8,14 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Maps;
-using Game.Maps.Notifiers;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Spells
 {
-    public enum AuraObjectType
-    {
-        Unit,
-        DynObj
-    }
-
-    public enum AuraRemoveMode
-    {
-        None = 0,
-        Default = 1, // scripted remove, remove by stack with aura with different ids and sc aura remove
-        Interrupt,
-        Cancel,
-        EnemySpell, // dispel and Absorb aura destroy
-        Expire,     // aura duration has ended
-        Death
-    }
-
-    [Flags]
-    public enum AuraFlags
-    {
-        None = 0x00,
-        NoCaster = 0x01,
-        Positive = 0x02,
-        Duration = 0x04,
-        Scalable = 0x08,
-        Negative = 0x10,
-        Unk20 = 0x20,
-        Unk40 = 0x40,
-        Unk80 = 0x80,
-        MawPower = 0x100
-    }
-
-    public class AuraApplication
-    {
-        private readonly Aura _base;
-        private readonly byte _slot;                 // Aura Slot on unit
-        private readonly Unit _target;
-        private uint _effectMask;
-        private uint _effectsToApply; // Used only at spell hit to determine which effect should be applied
-        private AuraFlags _flags;     // Aura info flag
-        private bool _needClientUpdate;
-        private AuraRemoveMode _removeMode; // Store info for know remove aura reason
-
-        public AuraApplication(Unit target, Unit caster, Aura aura, uint effMask)
-        {
-            _target = target;
-            _base = aura;
-            _removeMode = AuraRemoveMode.None;
-            _slot = SpellConst.MaxAuras;
-            _flags = AuraFlags.None;
-            _effectsToApply = effMask;
-            _needClientUpdate = false;
-
-            Cypher.Assert(GetTarget() != null && GetBase() != null);
-
-            // Try find Slot for aura
-            byte slot = 0;
-
-            // Lookup for Auras already applied from spell
-            foreach (AuraApplication visibleAura in GetTarget().GetVisibleAuras())
-            {
-                if (slot < visibleAura.GetSlot())
-                    break;
-
-                ++slot;
-            }
-
-            // Register Visible Aura
-            if (slot < SpellConst.MaxAuras)
-            {
-                _slot = slot;
-                GetTarget().SetVisibleAura(this);
-                _needClientUpdate = true;
-                Log.outDebug(LogFilter.Spells, "Aura: {0} Effect: {1} put to unit visible Auras Slot: {2}", GetBase().GetId(), GetEffectMask(), slot);
-            }
-            else
-            {
-                Log.outError(LogFilter.Spells, "Aura: {0} Effect: {1} could not find empty unit visible Slot", GetBase().GetId(), GetEffectMask());
-            }
-
-
-            _InitFlags(caster, effMask);
-        }
-
-        public void _Remove()
-        {
-            // update for out of range group members
-            if (GetSlot() < SpellConst.MaxAuras)
-            {
-                GetTarget().RemoveVisibleAura(this);
-                ClientUpdate(true);
-            }
-        }
-
-        public void _HandleEffect(uint effIndex, bool apply)
-        {
-            AuraEffect aurEff = GetBase().GetEffect(effIndex);
-
-            if (aurEff == null)
-            {
-                Log.outError(LogFilter.Spells, "Aura {0} has no effect at effectIndex {1} but _HandleEffect was called", GetBase().GetSpellInfo().Id, effIndex);
-
-                return;
-            }
-
-            Cypher.Assert(aurEff != null);
-            Cypher.Assert(HasEffect(effIndex) == (!apply));
-            Cypher.Assert(Convert.ToBoolean((1 << (int)effIndex) & _effectsToApply));
-            Log.outDebug(LogFilter.Spells, "AuraApplication._HandleEffect: {0}, apply: {1}: amount: {2}", aurEff.GetAuraType(), apply, aurEff.GetAmount());
-
-            if (apply)
-            {
-                Cypher.Assert(!Convert.ToBoolean(_effectMask & (1 << (int)effIndex)));
-                _effectMask |= (uint)(1 << (int)effIndex);
-                aurEff.HandleEffect(this, AuraEffectHandleModes.Real, true);
-            }
-            else
-            {
-                Cypher.Assert(Convert.ToBoolean(_effectMask & (1 << (int)effIndex)));
-                _effectMask &= ~(uint)(1 << (int)effIndex);
-                aurEff.HandleEffect(this, AuraEffectHandleModes.Real, false);
-            }
-
-            SetNeedClientUpdate();
-        }
-
-        public void UpdateApplyEffectMask(uint newEffMask, bool canHandleNewEffects)
-        {
-            if (_effectsToApply == newEffMask)
-                return;
-
-            uint removeEffMask = (_effectsToApply ^ newEffMask) & (~newEffMask);
-            uint addEffMask = (_effectsToApply ^ newEffMask) & (~_effectsToApply);
-
-            // quick check, removes application completely
-            if (removeEffMask == _effectsToApply &&
-                addEffMask == 0)
-            {
-                _target._UnapplyAura(this, AuraRemoveMode.Default);
-
-                return;
-            }
-
-            // update real effects only if they were applied already
-            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
-                if (HasEffect(i) &&
-                    (removeEffMask & (1 << (int)i)) != 0)
-                    _HandleEffect(i, false);
-
-            _effectsToApply = newEffMask;
-
-            if (canHandleNewEffects)
-                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
-                    if ((addEffMask & (1 << (int)i)) != 0)
-                        _HandleEffect(i, true);
-        }
-
-        public void SetNeedClientUpdate()
-        {
-            if (_needClientUpdate || GetRemoveMode() != AuraRemoveMode.None)
-                return;
-
-            _needClientUpdate = true;
-            _target.SetVisibleAuraUpdate(this);
-        }
-
-        public void BuildUpdatePacket(ref AuraInfo auraInfo, bool remove)
-        {
-            Cypher.Assert(_target.HasVisibleAura(this) != remove);
-
-            auraInfo.Slot = GetSlot();
-
-            if (remove)
-                return;
-
-            auraInfo.AuraData = new AuraDataInfo();
-
-            Aura aura = GetBase();
-
-            AuraDataInfo auraData = auraInfo.AuraData;
-            auraData.CastID = aura.GetCastId();
-            auraData.SpellID = (int)aura.GetId();
-            auraData.Visual = aura.GetSpellVisual();
-            auraData.Flags = GetFlags();
-
-            if (aura.GetAuraType() != AuraObjectType.DynObj &&
-                aura.GetMaxDuration() > 0 &&
-                !aura.GetSpellInfo().HasAttribute(SpellAttr5.DoNotDisplayDuration))
-                auraData.Flags |= AuraFlags.Duration;
-
-            auraData.ActiveFlags = GetEffectMask();
-
-            if (!aura.GetSpellInfo().HasAttribute(SpellAttr11.ScalesWithItemLevel))
-                auraData.CastLevel = aura.GetCasterLevel();
-            else
-                auraData.CastLevel = (ushort)aura.GetCastItemLevel();
-
-            // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
-            // stack amount has priority over charges (checked on retail with spell 50262)
-            auraData.Applications = aura.IsUsingStacks() ? aura.GetStackAmount() : aura.GetCharges();
-
-            if (!aura.GetCasterGUID().IsUnit())
-                auraData.CastUnit = ObjectGuid.Empty; // optional _data is filled in, but cast unit contains empty Guid in packet
-            else if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
-                auraData.CastUnit = aura.GetCasterGUID();
-
-            if (auraData.Flags.HasFlag(AuraFlags.Duration))
-            {
-                auraData.Duration = aura.GetMaxDuration();
-                auraData.Remaining = aura.GetDuration();
-            }
-
-            if (auraData.Flags.HasFlag(AuraFlags.Scalable))
-            {
-                bool hasEstimatedAmounts = false;
-
-                foreach (AuraEffect effect in GetBase().GetAuraEffects())
-                    if (effect != null &&
-                        HasEffect(effect.GetEffIndex())) // Not all of aura's effects have to be applied on every Target
-                    {
-                        auraData.Points.Add(effect.GetAmount());
-
-                        if (effect.GetEstimatedAmount().HasValue)
-                            hasEstimatedAmounts = true;
-                    }
-
-                if (hasEstimatedAmounts)
-                    // When sending EstimatedPoints all effects (at least up to the last one that uses GetEstimatedAmount) must have proper value in packet
-                    foreach (AuraEffect effect in GetBase().GetAuraEffects())
-                        if (effect != null &&
-                            HasEffect(effect.GetEffIndex())) // Not all of aura's effects have to be applied on every Target
-                            auraData.EstimatedPoints.Add(effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount()));
-            }
-        }
-
-        public void ClientUpdate(bool remove = false)
-        {
-            _needClientUpdate = false;
-
-            AuraUpdate update = new();
-            update.UpdateAll = false;
-            update.UnitGUID = GetTarget().GetGUID();
-
-            AuraInfo auraInfo = new();
-            BuildUpdatePacket(ref auraInfo, remove);
-            update.Auras.Add(auraInfo);
-
-            _target.SendMessageToSet(update, true);
-        }
-
-        public string GetDebugInfo()
-        {
-            return $"Base: {(GetBase() != null ? GetBase().GetDebugInfo() : "NULL")}\nTarget: {(GetTarget() != null ? GetTarget().GetDebugInfo() : "NULL")}";
-        }
-
-        public Unit GetTarget()
-        {
-            return _target;
-        }
-
-        public Aura GetBase()
-        {
-            return _base;
-        }
-
-        public byte GetSlot()
-        {
-            return _slot;
-        }
-
-        public AuraFlags GetFlags()
-        {
-            return _flags;
-        }
-
-        public uint GetEffectMask()
-        {
-            return _effectMask;
-        }
-
-        public bool HasEffect(uint effect)
-        {
-            Cypher.Assert(effect < SpellConst.MaxEffects);
-
-            return Convert.ToBoolean(_effectMask & (1 << (int)effect));
-        }
-
-        public bool IsPositive()
-        {
-            return _flags.HasAnyFlag(AuraFlags.Positive);
-        }
-
-        public uint GetEffectsToApply()
-        {
-            return _effectsToApply;
-        }
-
-        public void SetRemoveMode(AuraRemoveMode mode)
-        {
-            _removeMode = mode;
-        }
-
-        public AuraRemoveMode GetRemoveMode()
-        {
-            return _removeMode;
-        }
-
-        public bool HasRemoveMode()
-        {
-            return _removeMode != 0;
-        }
-
-        public bool IsNeedClientUpdate()
-        {
-            return _needClientUpdate;
-        }
-
-        private void _InitFlags(Unit caster, uint effMask)
-        {
-            // mark as selfcasted if needed
-            _flags |= (GetBase().GetCasterGUID() == GetTarget().GetGUID()) ? AuraFlags.NoCaster : AuraFlags.None;
-
-            // aura is casted by self or an enemy
-            // one negative effect and we know aura is negative
-            if (IsSelfcasted() ||
-                caster == null ||
-                !caster.IsFriendlyTo(GetTarget()))
-            {
-                bool negativeFound = false;
-
-                foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
-                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 &&
-                        !GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
-                    {
-                        negativeFound = true;
-
-                        break;
-                    }
-
-                _flags |= negativeFound ? AuraFlags.Negative : AuraFlags.Positive;
-            }
-            // aura is casted by friend
-            // one positive effect and we know aura is positive
-            else
-            {
-                bool positiveFound = false;
-
-                foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
-                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 &&
-                        GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
-                    {
-                        positiveFound = true;
-
-                        break;
-                    }
-
-                _flags |= positiveFound ? AuraFlags.Positive : AuraFlags.Negative;
-            }
-
-            bool effectNeedsAmount(AuraEffect effect)
-            {
-                return effect != null && (GetEffectsToApply() & (1 << (int)effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
-            }
-
-            if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) ||
-                GetBase().GetAuraEffects().Any(effectNeedsAmount))
-                _flags |= AuraFlags.Scalable;
-        }
-
-        private bool IsSelfcasted()
-        {
-            return _flags.HasAnyFlag(AuraFlags.NoCaster);
-        }
-    }
-
     public class Aura
     {
         private const int UPDATE_TARGET_MAP_INTERVAL = 500;
@@ -400,19 +24,56 @@ namespace Game.Spells
         private static readonly List<(IAuraScript, IAuraEffectHandler)> _dummyAuraEffects = new();
         private readonly Dictionary<Type, List<IAuraScript>> _auraScriptsByType = new();
         private readonly Dictionary<uint, Dictionary<AuraScriptHookType, List<(IAuraScript, IAuraEffectHandler)>>> _effectHandlers = new();
+        private List<AuraScript> _loadedScripts = new();
+        private readonly SpellInfo _spellInfo;
+        private readonly Difficulty _castDifficulty;
+        private ObjectGuid _castId;
+        private ObjectGuid _casterGuid;
+        private ObjectGuid _castItemGuid;
+        private uint _castItemId;
+        private int _castItemLevel;
+        private SpellCastVisual _spellVisual;
+        private readonly long _applyTime;
+        private readonly WorldObject _owner;
+
+        private int _maxDuration;                                       // Max aura duration
+        private int _duration;                                          // Current Time
+        private int _timeCla;                                           // Timer for power per sec calcultion
+        private readonly List<SpellPowerRecord> _periodicCosts = new(); // Periodic costs
+        private int _updateTargetMapInterval;                           // Timer for UpdateTargetMapOfEffect
+
+        private readonly uint _casterLevel; // Aura level (store caster level for correct show level dep amount)
+        private byte _procCharges;          // Aura charges (0 for infinite)
+        private byte _stackAmount;          // Aura stack amount
+
+        //might need to be arrays still
+        private AuraEffect[] _effects;
+        private readonly Dictionary<ObjectGuid, AuraApplication> _applications = new();
+
+        private bool _isRemoved;
+        private bool _isSingleTarget; // true if it's a single Target spell and registered at caster - can change at spell steal for example
+        private bool _isUsingCharges;
+
+        private ChargeDropEvent _dropEvent;
+
+        private DateTime _procCooldown;
+        private DateTime _lastProcAttemptTime;
+        private DateTime _lastProcSuccessTime;
+
+        private readonly List<AuraApplication> _removedApplications = new();
 
         public Aura(AuraCreateInfo createInfo)
         {
-            _spellInfo = createInfo._spellInfo;
-            _castDifficulty = createInfo._castDifficulty;
-            _castId = createInfo._castId;
+            _spellInfo = createInfo.SpellInfo;
+            _castDifficulty = createInfo.CastDifficulty;
+            _castId = createInfo.CastId;
             _casterGuid = createInfo.CasterGUID;
             _castItemGuid = createInfo.CastItemGUID;
             _castItemId = createInfo.CastItemId;
             _castItemLevel = createInfo.CastItemLevel;
-            _spellVisual = new SpellCastVisual(createInfo.Caster ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId(), 0);
+            _spellVisual = new SpellCastVisual(createInfo.Caster ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo.SpellInfo) : createInfo.SpellInfo.GetSpellXSpellVisualId(), 0);
             _applyTime = GameTime.GetGameTime();
-            _owner = createInfo._owner;
+            _owner = createInfo.Owner;
             _timeCla = 0;
             _updateTargetMapInterval = 0;
             _casterLevel = createInfo.Caster ? createInfo.Caster.GetLevel() : _spellInfo.SpellLevel;
@@ -1255,13 +916,13 @@ namespace Game.Spells
 
                 foreach (var spellArea in saBounds)
                     // some Auras remove at aura remove
-                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) &&
+                    if (spellArea.Flags.HasAnyFlag(SpellAreaFlag.AutoRemove) &&
                         !spellArea.IsFitToRequirements((Player)target, zone, area))
-                        target.RemoveAurasDueToSpell(spellArea.spellId);
+                        target.RemoveAurasDueToSpell(spellArea.SpellId);
                     // some Auras applied at aura apply
-                    else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
-                        if (!target.HasAura(spellArea.spellId))
-                            target.CastSpell(target, spellArea.spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
+                    else if (spellArea.Flags.HasAnyFlag(SpellAreaFlag.AutoCast))
+                        if (!target.HasAura(spellArea.SpellId))
+                            target.CastSpell(target, spellArea.SpellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
             }
 
             // handle spell_linked_spell table
@@ -2267,13 +1928,13 @@ namespace Game.Spells
 
             createInfo.IsRefresh = false;
 
-            createInfo._auraEffectMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), createInfo.GetAuraEffectMask(), createInfo.GetOwner());
-            createInfo._targetEffectMask &= createInfo._auraEffectMask;
+            createInfo.AuraEffectMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), createInfo.GetAuraEffectMask(), createInfo.GetOwner());
+            createInfo.TargetEffectMask &= createInfo.AuraEffectMask;
 
-            uint effMask = createInfo._auraEffectMask;
+            uint effMask = createInfo.AuraEffectMask;
 
-            if (createInfo._targetEffectMask != 0)
-                effMask = createInfo._targetEffectMask;
+            if (createInfo.TargetEffectMask != 0)
+                effMask = createInfo.TargetEffectMask;
 
             if (effMask == 0)
                 return null;
@@ -2310,10 +1971,10 @@ namespace Game.Spells
 
         public static Aura TryCreate(AuraCreateInfo createInfo)
         {
-            uint effMask = createInfo._auraEffectMask;
+            uint effMask = createInfo.AuraEffectMask;
 
-            if (createInfo._targetEffectMask != 0)
-                effMask = createInfo._targetEffectMask;
+            if (createInfo.TargetEffectMask != 0)
+                effMask = createInfo.TargetEffectMask;
 
             effMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), effMask, createInfo.GetOwner());
 
@@ -2330,10 +1991,10 @@ namespace Game.Spells
             {
                 if (createInfo.CasterGUID.IsUnit())
                 {
-                    if (createInfo._owner.GetGUID() == createInfo.CasterGUID)
-                        createInfo.Caster = createInfo._owner.ToUnit();
+                    if (createInfo.Owner.GetGUID() == createInfo.CasterGUID)
+                        createInfo.Caster = createInfo.Owner.ToUnit();
                     else
-                        createInfo.Caster = Global.ObjAccessor.GetUnit(createInfo._owner, createInfo.CasterGUID);
+                        createInfo.Caster = Global.ObjAccessor.GetUnit(createInfo.Owner, createInfo.CasterGUID);
                 }
             }
             else if (createInfo.Caster != null)
@@ -2363,10 +2024,10 @@ namespace Game.Spells
                         return null;
 
                     // add owner
-                    uint effMask = createInfo._auraEffectMask;
+                    uint effMask = createInfo.AuraEffectMask;
 
-                    if (createInfo._targetEffectMask != 0)
-                        effMask = createInfo._targetEffectMask;
+                    if (createInfo.TargetEffectMask != 0)
+                        effMask = createInfo.TargetEffectMask;
 
                     effMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), effMask, createInfo.GetOwner());
                     Cypher.Assert(effMask != 0);
@@ -2376,8 +2037,8 @@ namespace Game.Spells
 
                     break;
                 case TypeId.DynamicObject:
-                    createInfo._auraEffectMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), createInfo._auraEffectMask, createInfo.GetOwner());
-                    Cypher.Assert(createInfo._auraEffectMask != 0);
+                    createInfo.AuraEffectMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), createInfo.AuraEffectMask, createInfo.GetOwner());
+                    Cypher.Assert(createInfo.AuraEffectMask != 0);
 
                     aura = new DynObjAura(createInfo);
 
@@ -3051,465 +2712,6 @@ namespace Game.Spells
 
         #endregion
 
-        #region Fields
 
-        private List<AuraScript> _loadedScripts = new();
-        private readonly SpellInfo _spellInfo;
-        private readonly Difficulty _castDifficulty;
-        private ObjectGuid _castId;
-        private ObjectGuid _casterGuid;
-        private ObjectGuid _castItemGuid;
-        private uint _castItemId;
-        private int _castItemLevel;
-        private SpellCastVisual _spellVisual;
-        private readonly long _applyTime;
-        private readonly WorldObject _owner;
-
-        private int _maxDuration;                                       // Max aura duration
-        private int _duration;                                          // Current Time
-        private int _timeCla;                                           // Timer for power per sec calcultion
-        private readonly List<SpellPowerRecord> _periodicCosts = new(); // Periodic costs
-        private int _updateTargetMapInterval;                           // Timer for UpdateTargetMapOfEffect
-
-        private readonly uint _casterLevel; // Aura level (store caster level for correct show level dep amount)
-        private byte _procCharges;          // Aura charges (0 for infinite)
-        private byte _stackAmount;          // Aura stack amount
-
-        //might need to be arrays still
-        private AuraEffect[] _effects;
-        private readonly Dictionary<ObjectGuid, AuraApplication> _applications = new();
-
-        private bool _isRemoved;
-        private bool _isSingleTarget; // true if it's a single Target spell and registered at caster - can change at spell steal for example
-        private bool _isUsingCharges;
-
-        private ChargeDropEvent _dropEvent;
-
-        private DateTime _procCooldown;
-        private DateTime _lastProcAttemptTime;
-        private DateTime _lastProcSuccessTime;
-
-        private readonly List<AuraApplication> _removedApplications = new();
-
-        #endregion
-    }
-
-    public class UnitAura : Aura
-    {
-        private readonly Dictionary<ObjectGuid, uint> _staticApplications = new(); // non-area Auras
-        private DiminishingGroup _AuraDRGroup;                                     // Diminishing
-
-        public UnitAura(AuraCreateInfo createInfo) : base(createInfo)
-        {
-            _AuraDRGroup = DiminishingGroup.None;
-            LoadScripts();
-            _InitEffects(createInfo._auraEffectMask, createInfo.Caster, createInfo.BaseAmount);
-            GetUnitOwner()._AddAura(this, createInfo.Caster);
-        }
-
-        public override void _ApplyForTarget(Unit target, Unit caster, AuraApplication aurApp)
-        {
-            base._ApplyForTarget(target, caster, aurApp);
-
-            // register aura diminishing on apply
-            if (_AuraDRGroup != DiminishingGroup.None)
-                target.ApplyDiminishingAura(_AuraDRGroup, true);
-        }
-
-        public override void _UnapplyForTarget(Unit target, Unit caster, AuraApplication aurApp)
-        {
-            base._UnapplyForTarget(target, caster, aurApp);
-
-            // unregister aura diminishing (and store last Time)
-            if (_AuraDRGroup != DiminishingGroup.None)
-                target.ApplyDiminishingAura(_AuraDRGroup, false);
-        }
-
-        public override void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default)
-        {
-            if (IsRemoved())
-                return;
-
-            GetUnitOwner().RemoveOwnedAura(this, removeMode);
-        }
-
-        public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
-        {
-            Unit refe = caster;
-
-            if (refe == null)
-                refe = GetUnitOwner();
-
-            // add non area aura targets
-            // static applications go through spell system first, so we assume they meet conditions
-            foreach (var targetPair in _staticApplications)
-            {
-                Unit target = Global.ObjAccessor.GetUnit(GetUnitOwner(), targetPair.Key);
-
-                if (target == null &&
-                    targetPair.Key == GetUnitOwner().GetGUID())
-                    target = GetUnitOwner();
-
-                if (target)
-                    targets.Add(target, targetPair.Value);
-            }
-
-            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
-            {
-                if (!HasEffect(spellEffectInfo.EffectIndex))
-                    continue;
-
-                // area Auras only
-                if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
-                    continue;
-
-                // skip area update if owner is not in world!
-                if (!GetUnitOwner().IsInWorld)
-                    continue;
-
-                if (GetUnitOwner().HasUnitState(UnitState.Isolated))
-                    continue;
-
-                List<Unit> units = new();
-                var condList = spellEffectInfo.ImplicitTargetConditions;
-
-                float radius = spellEffectInfo.CalcRadius(refe);
-                float extraSearchRadius = 0.0f;
-
-                SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
-
-                switch (spellEffectInfo.Effect)
-                {
-                    case SpellEffectName.ApplyAreaAuraParty:
-                    case SpellEffectName.ApplyAreaAuraPartyNonrandom:
-                        selectionType = SpellTargetCheckTypes.Party;
-
-                        break;
-                    case SpellEffectName.ApplyAreaAuraRaid:
-                        selectionType = SpellTargetCheckTypes.Raid;
-
-                        break;
-                    case SpellEffectName.ApplyAreaAuraFriend:
-                        selectionType = SpellTargetCheckTypes.Ally;
-
-                        break;
-                    case SpellEffectName.ApplyAreaAuraEnemy:
-                        selectionType = SpellTargetCheckTypes.Enemy;
-                        extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
-
-                        break;
-                    case SpellEffectName.ApplyAreaAuraPet:
-                        if (condList == null ||
-                            Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                            units.Add(GetUnitOwner());
-
-                        goto case SpellEffectName.ApplyAreaAuraOwner;
-                    /* fallthrough */
-                    case SpellEffectName.ApplyAreaAuraOwner:
-                        {
-                            Unit owner = GetUnitOwner().GetCharmerOrOwner();
-
-                            if (owner != null)
-                                if (GetUnitOwner().IsWithinDistInMap(owner, radius))
-                                    if (condList == null ||
-                                        Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
-                                        units.Add(owner);
-
-                            break;
-                        }
-                    case SpellEffectName.ApplyAuraOnPet:
-                        {
-                            Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
-
-                            if (pet != null)
-                                if (condList == null ||
-                                    Global.ConditionMgr.IsObjectMeetToConditions(pet, refe, condList))
-                                    units.Add(pet);
-
-                            break;
-                        }
-                    case SpellEffectName.ApplyAreaAuraSummons:
-                        {
-                            if (condList == null ||
-                                Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                                units.Add(GetUnitOwner());
-
-                            selectionType = SpellTargetCheckTypes.Summoned;
-
-                            break;
-                        }
-                }
-
-                if (selectionType != SpellTargetCheckTypes.Default)
-                {
-                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                    UnitListSearcher searcher = new(GetUnitOwner(), units, check);
-                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius + extraSearchRadius);
-
-                    // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for Auras it is not acceptable
-                    units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
-                }
-
-                foreach (Unit unit in units)
-                {
-                    if (!targets.ContainsKey(unit))
-                        targets[unit] = 0;
-
-                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
-                }
-            }
-        }
-
-        public void AddStaticApplication(Unit target, uint effMask)
-        {
-            // only valid for non-area Auras
-            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
-                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 &&
-                    !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
-                    effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
-
-            if (effMask == 0)
-                return;
-
-            if (!_staticApplications.ContainsKey(target.GetGUID()))
-                _staticApplications[target.GetGUID()] = 0;
-
-            _staticApplications[target.GetGUID()] |= effMask;
-        }
-
-        // Allow Apply Aura Handler to modify and access _AuraDRGroup
-        public void SetDiminishGroup(DiminishingGroup group)
-        {
-            _AuraDRGroup = group;
-        }
-
-        public DiminishingGroup GetDiminishGroup()
-        {
-            return _AuraDRGroup;
-        }
-    }
-
-    public class DynObjAura : Aura
-    {
-        public DynObjAura(AuraCreateInfo createInfo) : base(createInfo)
-        {
-            LoadScripts();
-            Cypher.Assert(GetDynobjOwner() != null);
-            Cypher.Assert(GetDynobjOwner().IsInWorld);
-            Cypher.Assert(GetDynobjOwner().GetMap() == createInfo.Caster.GetMap());
-            _InitEffects(createInfo._auraEffectMask, createInfo.Caster, createInfo.BaseAmount);
-            GetDynobjOwner().SetAura(this);
-        }
-
-        public override void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default)
-        {
-            if (IsRemoved())
-                return;
-
-            _Remove(removeMode);
-        }
-
-        public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
-        {
-            Unit dynObjOwnerCaster = GetDynobjOwner().GetCaster();
-            float radius = GetDynobjOwner().GetRadius();
-
-            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
-            {
-                if (!HasEffect(spellEffectInfo.EffectIndex))
-                    continue;
-
-                // we can't use effect Type like area Auras to determine check Type, check targets
-                SpellTargetCheckTypes selectionType = spellEffectInfo.TargetA.GetCheckType();
-
-                if (spellEffectInfo.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)
-                    selectionType = spellEffectInfo.TargetB.GetCheckType();
-
-                List<Unit> targetList = new();
-                var condList = spellEffectInfo.ImplicitTargetConditions;
-
-                WorldObjectSpellAreaTargetCheck check = new(radius, GetDynobjOwner(), dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                UnitListSearcher searcher = new(GetDynobjOwner(), targetList, check);
-                Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
-
-                // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for Auras it is not acceptable
-                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));
-
-                foreach (var unit in targetList)
-                {
-                    if (!targets.ContainsKey(unit))
-                        targets[unit] = 0;
-
-                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
-                }
-            }
-        }
-    }
-
-    public class ChargeDropEvent : BasicEvent
-    {
-        private readonly Aura _base;
-        private readonly AuraRemoveMode _mode;
-
-        public ChargeDropEvent(Aura aura, AuraRemoveMode mode)
-        {
-            _base = aura;
-            _mode = mode;
-        }
-
-        public override bool Execute(ulong e_time, uint p_time)
-        {
-            // _base is always valid (look in Aura._Remove())
-            _base.ModChargesDelayed(-1, _mode);
-
-            return true;
-        }
-    }
-
-    public class AuraKey : IEquatable<AuraKey>
-    {
-        public ObjectGuid Caster;
-        public uint EffectMask;
-        public ObjectGuid Item;
-        public uint SpellId;
-
-        public AuraKey(ObjectGuid caster, ObjectGuid item, uint spellId, uint effectMask)
-        {
-            Caster = caster;
-            Item = item;
-            SpellId = spellId;
-            EffectMask = effectMask;
-        }
-
-        public bool Equals(AuraKey other)
-        {
-            return other.Caster == Caster && other.Item == Item && other.SpellId == SpellId && other.EffectMask == EffectMask;
-        }
-
-        public static bool operator ==(AuraKey first, AuraKey other)
-        {
-            if (ReferenceEquals(first, other))
-                return true;
-
-            if (first is null ||
-                other is null)
-                return false;
-
-            return first.Equals(other);
-        }
-
-        public static bool operator !=(AuraKey first, AuraKey other)
-        {
-            return !(first == other);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj != null && obj is AuraKey && Equals((AuraKey)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return new
-            {
-                Caster,
-                Item,
-                SpellId,
-                EffectMask
-            }.GetHashCode();
-        }
-    }
-
-    public class AuraLoadEffectInfo
-    {
-        public int[] Amounts = new int[SpellConst.MaxEffects];
-        public int[] BaseAmounts = new int[SpellConst.MaxEffects];
-    }
-
-    public class AuraCreateInfo
-    {
-        public int[] BaseAmount;
-        public Unit Caster;
-        public ObjectGuid CasterGUID;
-        public ObjectGuid CastItemGUID;
-        public uint CastItemId = 0;
-        public int CastItemLevel = -1;
-        public bool IsRefresh;
-        public bool ResetPeriodicTimer = true;
-        internal uint _auraEffectMask;
-        internal Difficulty _castDifficulty;
-
-        internal ObjectGuid _castId;
-        internal WorldObject _owner;
-        internal SpellInfo _spellInfo;
-
-        internal uint _targetEffectMask;
-
-        public AuraCreateInfo(ObjectGuid castId, SpellInfo spellInfo, Difficulty castDifficulty, uint auraEffMask, WorldObject owner)
-        {
-            _castId = castId;
-            _spellInfo = spellInfo;
-            _castDifficulty = castDifficulty;
-            _auraEffectMask = auraEffMask;
-            _owner = owner;
-
-            Cypher.Assert(spellInfo != null);
-            Cypher.Assert(auraEffMask != 0);
-            Cypher.Assert(owner != null);
-
-            Cypher.Assert(auraEffMask <= SpellConst.MaxEffectMask);
-        }
-
-        public void SetCasterGUID(ObjectGuid guid)
-        {
-            CasterGUID = guid;
-        }
-
-        public void SetCaster(Unit caster)
-        {
-            Caster = caster;
-        }
-
-        public void SetBaseAmount(int[] bp)
-        {
-            BaseAmount = bp;
-        }
-
-        public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel)
-        {
-            CastItemGUID = guid;
-            CastItemId = itemId;
-            CastItemLevel = itemLevel;
-        }
-
-        public void SetPeriodicReset(bool reset)
-        {
-            ResetPeriodicTimer = reset;
-        }
-
-        public void SetOwnerEffectMask(uint effMask)
-        {
-            _targetEffectMask = effMask;
-        }
-
-        public void SetAuraEffectMask(uint effMask)
-        {
-            _auraEffectMask = effMask;
-        }
-
-        public SpellInfo GetSpellInfo()
-        {
-            return _spellInfo;
-        }
-
-        public uint GetAuraEffectMask()
-        {
-            return _auraEffectMask;
-        }
-
-        public WorldObject GetOwner()
-        {
-            return _owner;
-        }
     }
 }

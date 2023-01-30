@@ -24,6 +24,7 @@ using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.IQuest;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Spells
 {
@@ -6388,85 +6389,6 @@ namespace Game.Spells
                 return;
 
             target.UpdateTraitConfig(_customArg as TraitConfigPacket, damage, false);
-        }
-    }
-
-    public class DispelableAura
-    {
-        private readonly Aura _aura;
-        private readonly int _chance;
-        private byte _charges;
-
-        public DispelableAura(Aura aura, int dispelChance, byte dispelCharges)
-        {
-            _aura = aura;
-            _chance = dispelChance;
-            _charges = dispelCharges;
-        }
-
-        public bool RollDispel()
-        {
-            return RandomHelper.randChance(_chance);
-        }
-
-        public Aura GetAura()
-        {
-            return _aura;
-        }
-
-        public byte GetDispelCharges()
-        {
-            return _charges;
-        }
-
-        public void IncrementCharges()
-        {
-            ++_charges;
-        }
-
-        public bool DecrementCharge(byte charges)
-        {
-            if (_charges == 0)
-                return false;
-
-            _charges -= charges;
-
-            return _charges > 0;
-        }
-    }
-
-    internal class DelayedSpellTeleportEvent : BasicEvent
-    {
-        private readonly TeleportToOptions _options;
-        private readonly uint _spellId;
-        private readonly Unit _target;
-        private readonly WorldLocation _targetDest;
-
-        public DelayedSpellTeleportEvent(Unit target, WorldLocation targetDest, TeleportToOptions options, uint spellId)
-        {
-            _target = target;
-            _targetDest = targetDest;
-            _options = options;
-            _spellId = spellId;
-        }
-
-        public override bool Execute(ulong e_time, uint p_time)
-        {
-            if (_targetDest.GetMapId() == _target.GetMapId())
-            {
-                _target.NearTeleportTo(_targetDest, (_options & TeleportToOptions.Spell) != 0);
-            }
-            else
-            {
-                Player player = _target.ToPlayer();
-
-                if (player != null)
-                    player.TeleportTo(_targetDest, _options);
-                else
-                    Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - spellId {_spellId} attempted to teleport creature to a different map.");
-            }
-
-            return true;
         }
     }
 }

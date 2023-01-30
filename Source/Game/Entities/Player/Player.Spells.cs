@@ -10,6 +10,7 @@ using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -1549,10 +1550,10 @@ namespace Game.Entities
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newZone);
 
             foreach (var spell in saBounds)
-                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
                     spell.IsFitToRequirements(this, newZone, 0))
-                    if (!HasAura(spell.spellId))
-                        CastSpell(this, spell.spellId, true);
+                    if (!HasAura(spell.SpellId))
+                        CastSpell(this, spell.SpellId, true);
         }
 
         public void UpdateAreaDependentAuras(uint newArea)
@@ -1567,10 +1568,10 @@ namespace Game.Entities
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newArea);
 
             foreach (var spell in saBounds)
-                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
                     spell.IsFitToRequirements(this, _zoneUpdateId, newArea))
-                    if (!HasAura(spell.spellId))
-                        CastSpell(this, spell.spellId, true);
+                    if (!HasAura(spell.SpellId))
+                        CastSpell(this, spell.SpellId, true);
         }
 
         public void ApplyModToSpell(SpellModifier mod, Spell spell)

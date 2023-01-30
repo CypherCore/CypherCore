@@ -12,7 +12,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
-using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game
 {

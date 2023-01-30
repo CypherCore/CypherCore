@@ -12,6 +12,7 @@ using Game.BattleGrounds;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -4098,7 +4099,7 @@ namespace Game.Entities
                         else
                             bp = spellEffectInfo.BasePoints;
 
-                        auraEff._baseAmount = bp;
+                        auraEff.BaseAmount = bp;
                     }
 
                     // correct cast Item Guid if needed

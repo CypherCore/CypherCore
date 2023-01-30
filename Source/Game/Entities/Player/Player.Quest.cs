@@ -3271,12 +3271,12 @@ namespace Game.Entities
                 GetZoneAndAreaId(out uint zone, out uint area);
 
                 foreach (var spell in saBounds)
-                    if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) &&
+                    if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoRemove) &&
                         !spell.IsFitToRequirements(this, zone, area))
-                        aurasToRemove.Add(spell.spellId);
-                    else if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
-                             !spell.flags.HasAnyFlag(SpellAreaFlag.IgnoreAutocastOnQuestStatusChange))
-                        aurasToCast.Add(spell.spellId);
+                        aurasToRemove.Add(spell.SpellId);
+                    else if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                             !spell.Flags.HasAnyFlag(SpellAreaFlag.IgnoreAutocastOnQuestStatusChange))
+                        aurasToCast.Add(spell.SpellId);
 
                 // Auras matching the requirements will be inside the aurasToCast container.
                 // Auras not matching the requirements may prevent using Auras matching the requirements.

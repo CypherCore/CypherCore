@@ -9,6 +9,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
 {
