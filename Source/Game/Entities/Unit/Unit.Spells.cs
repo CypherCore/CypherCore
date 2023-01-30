@@ -201,7 +201,7 @@ namespace Game.Entities
             Player modOwner = GetSpellModOwner();
 
             if (modOwner)
-                MathFunctions.AddPct(ref DoneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
+                DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
 
             float maxModDamagePercentSchool = 0.0f;
             Player thisPlayer = ToPlayer();
@@ -235,9 +235,9 @@ namespace Game.Entities
 
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
             if (spellEffectInfo.Mechanic != 0)
-                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
+                DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
             else if (spellProto.Mechanic != 0)
-                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
+                DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
             // Custom scripted Damage
             switch (spellProto.SpellFamilyName)
@@ -257,7 +257,7 @@ namespace Game.Entities
                         uint count = victim.GetDoTsByCaster(GetOwnerGUID());
 
                         if (count != 0)
-                            MathFunctions.AddPct(ref DoneTotalMod, 30 * count);
+                            DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, 30 * count);
                     }
 
                     // Drain Soul - increased Damage for targets under 20% HP
@@ -296,7 +296,7 @@ namespace Game.Entities
 
             if (cheatDeath != null)
                 if (cheatDeath.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
-                    MathFunctions.AddPct(ref TakenTotalMod, cheatDeath.GetAmount());
+                    TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, cheatDeath.GetAmount());
 
             // Spells with SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS should only benefit from mechanic Damage mod Auras.
             if (!spellProto.HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
@@ -308,7 +308,7 @@ namespace Game.Entities
                 {
                     // only 50% of SPELL_AURA_MOD_VERSATILITY for Damage reduction
                     float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
-                    MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
+                    TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
                 }
 
                 // from positive and negative SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
@@ -341,7 +341,7 @@ namespace Game.Entities
                     if ((aurEff.GetMiscValue() & (int)spellProto.GetSchoolMask()) == 0)
                         continue;
 
-                    MathFunctions.AddPct(ref damageReduction, -aurEff.GetAmount());
+                    damageReduction = MathFunctions.AddPct(damageReduction, -aurEff.GetAmount());
                 }
 
                 TakenTotalMod = 1.0f - damageReduction;
@@ -578,7 +578,7 @@ namespace Game.Entities
 
             foreach (AuraEffect healingDonePctVsTargetHealth in GetAuraEffectsByType(AuraType.ModHealingDonePctVersusTargetHealth))
                 if (healingDonePctVsTargetHealth.IsAffectingSpell(spellProto))
-                    MathFunctions.AddPct(ref DoneTotalMod, MathFunctions.CalculatePct((float)healingDonePctVsTargetHealth.GetAmount(), healthPctDiff));
+                    DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, MathFunctions.CalculatePct((float)healingDonePctVsTargetHealth.GetAmount(), healthPctDiff));
 
             return DoneTotalMod;
         }
@@ -591,12 +591,12 @@ namespace Game.Entities
             float minval = GetMaxNegativeAuraModifier(AuraType.ModHealingPct);
 
             if (minval != 0)
-                MathFunctions.AddPct(ref TakenTotalMod, minval);
+                TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, minval);
 
             float maxval = GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
 
             if (maxval != 0)
-                MathFunctions.AddPct(ref TakenTotalMod, maxval);
+                TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, maxval);
 
             // Nourish cast
             if (spellProto.SpellFamilyName == SpellFamilyNames.Druid &&
@@ -612,12 +612,12 @@ namespace Game.Entities
                 float minval_hot = (float)GetMaxNegativeAuraModifier(AuraType.ModHotPct);
 
                 if (minval_hot != 0)
-                    MathFunctions.AddPct(ref TakenTotalMod, minval_hot);
+                    TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, minval_hot);
 
                 float maxval_hot = (float)GetMaxPositiveAuraModifier(AuraType.ModHotPct);
 
                 if (maxval_hot != 0)
-                    MathFunctions.AddPct(ref TakenTotalMod, maxval_hot);
+                    TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, maxval_hot);
             }
 
             if (caster)
@@ -1133,7 +1133,7 @@ namespace Game.Entities
                 if (spell == null)
                     continue;
 
-                if (spell._spellInfo.Id == spell_id)
+                if (spell.SpellInfo.Id == spell_id)
                     return spell;
             }
 
@@ -1625,7 +1625,7 @@ namespace Game.Entities
         {
             for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
                 if (GetCurrentSpell(i) != null &&
-                    GetCurrentSpell(i)._spellInfo.Id != except_spellid)
+                    GetCurrentSpell(i).SpellInfo.Id != except_spellid)
                     InterruptSpell(i, false);
         }
 
@@ -1663,10 +1663,10 @@ namespace Game.Entities
                         // autorepeat breaking
                         if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                             // break autorepeat if not Auto Shot
-                            if (CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id != 75)
+                            if (CurrentSpells[CurrentSpellTypes.AutoRepeat].SpellInfo.Id != 75)
                                 InterruptSpell(CurrentSpellTypes.AutoRepeat);
 
-                        if (pSpell._spellInfo.CalcCastTime() > 0)
+                        if (pSpell.SpellInfo.CalcCastTime() > 0)
                             AddUnitState(UnitState.Casting);
 
                         break;
@@ -1679,7 +1679,7 @@ namespace Game.Entities
 
                         // it also does break autorepeat if not Auto Shot
                         if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-                            CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id != 75)
+                            CurrentSpells[CurrentSpellTypes.AutoRepeat].SpellInfo.Id != 75)
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
 
                         AddUnitState(UnitState.Casting);
@@ -1693,7 +1693,7 @@ namespace Game.Entities
                             GetCurrentSpell(CSpellType).SetState(SpellState.Finished);
 
                         // only Auto Shoot does not break anything
-                        if (pSpell._spellInfo.Id != 75)
+                        if (pSpell.SpellInfo.Id != 75)
                         {
                             // generic autorepeats break generic non-delayed and channeled non-delayed spells
                             InterruptSpell(CurrentSpellTypes.Generic, false);
@@ -1714,7 +1714,7 @@ namespace Game.Entities
             CurrentSpells[CSpellType] = pSpell;
             pSpell.SetReferencedFromCurrent(true);
 
-            pSpell._selfContainer = CurrentSpells[pSpell.GetCurrentContainer()];
+            pSpell.SelfContainer = CurrentSpells[pSpell.GetCurrentContainer()];
         }
 
         public bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true)
@@ -1731,7 +1731,7 @@ namespace Game.Entities
                 if (!skipInstant ||
                     currentSpell.GetCastTime() != 0)
                     if (!isAutoshoot ||
-                        !currentSpell._spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
+                        !currentSpell.SpellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                         return true;
 
             currentSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
@@ -1741,7 +1741,7 @@ namespace Game.Entities
                 currentSpell &&
                 (currentSpell.GetState() != SpellState.Finished))
                 if (!isAutoshoot ||
-                    !currentSpell._spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
+                    !currentSpell.SpellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                     return true;
 
             currentSpell = GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
@@ -1764,9 +1764,9 @@ namespace Game.Entities
                 crit_mod += (caster.GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellProto.GetSchoolMask()) - 1.0f) * 100;
 
                 if (crit_bonus != 0)
-                    MathFunctions.AddPct(ref crit_bonus, (int)crit_mod);
+                    crit_bonus = MathFunctions.AddPct(crit_bonus, (int)crit_mod);
 
-                MathFunctions.AddPct(ref crit_bonus, victim.GetTotalAuraModifier(AuraType.ModCriticalDamageTakenFromCaster, aurEff => { return aurEff.GetCasterGUID() == caster.GetGUID(); }));
+                crit_bonus = MathFunctions.AddPct(crit_bonus, victim.GetTotalAuraModifier(AuraType.ModCriticalDamageTakenFromCaster, aurEff => { return aurEff.GetCasterGUID() == caster.GetGUID(); }));
 
                 crit_bonus -= (int)damage;
 
@@ -1993,7 +1993,7 @@ namespace Game.Entities
                                 float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
 
                                 if (critPctDamageMod != 0)
-                                    MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
+                                    damage = MathFunctions.AddPct(damage, (int)critPctDamageMod);
                             }
 
                             // Spell weapon based Damage CAN BE crit & Blocked at same Time
@@ -2443,17 +2443,17 @@ namespace Game.Entities
         {
             // generic spells are interrupted if they are not finished or delayed
             if (GetCurrentSpell(CurrentSpellTypes.Generic) != null &&
-                (spell_id == 0 || CurrentSpells[CurrentSpellTypes.Generic]._spellInfo.Id == spell_id))
+                (spell_id == 0 || CurrentSpells[CurrentSpellTypes.Generic].SpellInfo.Id == spell_id))
                 InterruptSpell(CurrentSpellTypes.Generic, withDelayed, withInstant);
 
             // autorepeat spells are interrupted if they are not finished or delayed
             if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-                (spell_id == 0 || CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo.Id == spell_id))
+                (spell_id == 0 || CurrentSpells[CurrentSpellTypes.AutoRepeat].SpellInfo.Id == spell_id))
                 InterruptSpell(CurrentSpellTypes.AutoRepeat, withDelayed, withInstant);
 
             // channeled spells are interrupted if they are not finished, even if they are delayed
             if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null &&
-                (spell_id == 0 || CurrentSpells[CurrentSpellTypes.Channeled]._spellInfo.Id == spell_id))
+                (spell_id == 0 || CurrentSpells[CurrentSpellTypes.Channeled].SpellInfo.Id == spell_id))
                 InterruptSpell(CurrentSpellTypes.Channeled, true, true);
         }
 
@@ -2509,8 +2509,8 @@ namespace Game.Entities
             if (spell != null)
                 if (spell.GetState() == SpellState.Casting)
                 {
-                    _interruptMask |= spell._spellInfo.ChannelInterruptFlags;
-                    _interruptMask2 |= spell._spellInfo.ChannelInterruptFlags2;
+                    _interruptMask |= spell.SpellInfo.ChannelInterruptFlags;
+                    _interruptMask2 |= spell.SpellInfo.ChannelInterruptFlags2;
                 }
         }
 
@@ -4260,11 +4260,11 @@ namespace Game.Entities
                     // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
                     // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the Multiplier as usual
                     if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, aurEff.GetAmount(), sameEffectSpellGroup))
-                        MathFunctions.AddPct(ref multiplier, aurEff.GetAmount());
+                        multiplier = MathFunctions.AddPct(multiplier, aurEff.GetAmount());
 
             // Add the highest of the Same Effect Stack Rule SpellGroups to the Multiplier
             foreach (var pair in sameEffectSpellGroup)
-                MathFunctions.AddPct(ref multiplier, pair.Value);
+                multiplier = MathFunctions.AddPct(multiplier, pair.Value);
 
             return multiplier;
         }
@@ -4582,7 +4582,7 @@ namespace Game.Entities
                         List<AuraApplication> modAuras = new();
 
                         foreach (var itr in modOwner.GetAppliedAuras())
-                            if (spell._appliedMods.Contains(itr.Value.GetBase()))
+                            if (spell.AppliedMods.Contains(itr.Value.GetBase()))
                                 modAuras.Add(itr.Value);
 
                         modOwner.GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, modAuras, myProcEventInfo);

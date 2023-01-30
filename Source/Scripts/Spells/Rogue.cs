@@ -87,7 +87,7 @@ namespace Scripts.Spells.Rogue
             if (hitUnit.IsInBack(caster))
             {
                 float currDamage = (float)GetHitDamage();
-                float newDamage = MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
+                float newDamage = MathFunctions.AddPct(currDamage, (float)GetEffectInfo(3).CalcValue(caster));
                 SetHitDamage((int)newDamage);
             }
         }

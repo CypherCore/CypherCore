@@ -495,7 +495,7 @@ namespace Scripts.Spells.Mage
 
         private void EffectHit(uint effIndex)
         {
-            GetCaster().Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell()._castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+            GetCaster().Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().CastId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
         }
     }
 
@@ -516,7 +516,7 @@ namespace Scripts.Spells.Mage
 
         private void HandleEffectHitTarget(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitDest(), SpellIds.CometStormDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(GetSpell()._originalCastId));
+            GetCaster().CastSpell(GetHitDest(), SpellIds.CometStormDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(GetSpell().OriginalCastId));
         }
     }
 
@@ -1253,7 +1253,7 @@ namespace Scripts.Spells.Mage
             if (GetExplTargetUnit() == GetHitUnit())
             {
                 int damage = GetHitDamage();
-                MathFunctions.AddPct(ref damage, GetEffectInfo(0).CalcValue());
+                damage = MathFunctions.AddPct(damage, GetEffectInfo(0).CalcValue());
                 SetHitDamage(damage);
             }
         }

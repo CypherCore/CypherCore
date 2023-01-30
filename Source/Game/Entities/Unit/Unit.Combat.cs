@@ -33,8 +33,8 @@ namespace Game.Entities
 
             if (spell != null)
                 if (spell.GetState() == SpellState.Preparing &&
-                    spell._spellInfo.HasAttribute(SpellAttr0.NotInCombatOnlyPeaceful) &&
-                    spell._spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat))
+                    spell.SpellInfo.HasAttribute(SpellAttr0.NotInCombatOnlyPeaceful) &&
+                    spell.SpellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat))
                     InterruptNonMeleeSpells(false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
@@ -1530,7 +1530,7 @@ namespace Game.Entities
                     float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.DamageSchoolMask) - 1.0f) * 100;
 
                     if (mod != 0)
-                        MathFunctions.AddPct(ref damageInfo.Damage, mod);
+                        damageInfo.Damage = MathFunctions.AddPct(damageInfo.Damage, mod);
 
                     damageInfo.OriginalDamage = damageInfo.Damage;
 

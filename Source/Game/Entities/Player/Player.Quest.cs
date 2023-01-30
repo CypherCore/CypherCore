@@ -968,7 +968,7 @@ namespace Game.Entities
             var ModXPPctAuras = GetAuraEffectsByType(AuraType.ModXpQuestPct);
 
             foreach (var eff in ModXPPctAuras)
-                MathFunctions.AddPct(ref XP, eff.GetAmount());
+                XP = MathFunctions.AddPct(XP, eff.GetAmount());
 
             return XP;
         }

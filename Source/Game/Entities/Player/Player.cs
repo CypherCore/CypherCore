@@ -5473,7 +5473,7 @@ namespace Game.Entities
                 return;
             }
 
-            MathFunctions.AddPct(ref _auraBasePctMod[(int)modGroup], pct);
+            _auraBasePctMod[(int)modGroup] = MathFunctions.AddPct(_auraBasePctMod[(int)modGroup], pct);
             UpdateBaseModGroup(modGroup);
         }
 
@@ -5665,7 +5665,7 @@ namespace Game.Entities
                 Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
 
                 if (spell != null)
-                    if (spell._spellInfo.Id != spellid)
+                    if (spell.SpellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Generic, false);
 
                 InterruptSpell(CurrentSpellTypes.AutoRepeat, false);
@@ -5673,7 +5673,7 @@ namespace Game.Entities
                 spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
 
                 if (spell != null)
-                    if (spell._spellInfo.Id != spellid)
+                    if (spell.SpellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Channeled, true);
             }
 
@@ -7468,7 +7468,7 @@ namespace Game.Entities
                 }
                 else if (HasAuraType(AuraType.ModRegenDuringCombat))
                 {
-                    MathFunctions.ApplyPct(ref addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
+                    addValue = MathFunctions.CalculatePct(addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
                 }
 
                 if (!IsStandState())

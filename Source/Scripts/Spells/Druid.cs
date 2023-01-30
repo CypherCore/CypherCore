@@ -1617,7 +1617,7 @@ namespace Scripts.Spells.Druid
 
             reduction *= (aurEff.GetTickNumber() - 1);
 
-            MathFunctions.AddPct(ref damage, 6.0f - reduction);
+            damage = MathFunctions.AddPct(damage, 6.0f - reduction);
             aurEff.SetAmount((int)damage);
         }
     }

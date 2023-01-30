@@ -1424,7 +1424,7 @@ namespace Game.Spells
                         !spell.GetSpellInfo().HasAttribute(SpellAttr3.NotAProc))
                         return 0;
 
-                if (spell._CastItem != null &&
+                if (spell.CastItem != null &&
                     procEntry.AttributesMask.HasFlag(ProcAttributes.CantProcFromItemCast))
                     return 0;
 
@@ -1458,7 +1458,7 @@ namespace Game.Spells
                     Spell eventSpell = eventInfo.GetProcSpell();
 
                     if (eventSpell != null)
-                        if (!eventSpell._appliedMods.Contains(this))
+                        if (!eventSpell.AppliedMods.Contains(this))
                             return 0;
                 }
             }

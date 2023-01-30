@@ -152,7 +152,7 @@ namespace Game.Entities
                     honor_f /= groupsize;
 
                 // apply honor Multiplier from aura (not stacking-get highest)
-                MathFunctions.AddPct(ref honor_f, GetMaxPositiveAuraModifier(AuraType.ModHonorGainPct));
+                honor_f = MathFunctions.AddPct(honor_f, GetMaxPositiveAuraModifier(AuraType.ModHonorGainPct));
                 honor_f += _restMgr.GetRestBonusFor(RestTypes.Honor, (uint)honor_f);
             }
 

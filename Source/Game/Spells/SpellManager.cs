@@ -198,7 +198,7 @@ namespace Game.Entities
             var node = GetSpellChainNode(spell_id);
 
             if (node != null)
-                return node.first.Id;
+                return node.First.Id;
 
             return spell_id;
         }
@@ -208,7 +208,7 @@ namespace Game.Entities
             var node = GetSpellChainNode(spell_id);
 
             if (node != null)
-                return node.last.Id;
+                return node.Last.Id;
 
             return spell_id;
         }
@@ -218,8 +218,8 @@ namespace Game.Entities
             var node = GetSpellChainNode(spell_id);
 
             if (node != null)
-                if (node.next != null)
-                    return node.next.Id;
+                if (node.Next != null)
+                    return node.Next.Id;
 
             return 0;
         }
@@ -229,8 +229,8 @@ namespace Game.Entities
             var node = GetSpellChainNode(spell_id);
 
             if (node != null)
-                if (node.prev != null)
-                    return node.prev.Id;
+                if (node.Prev != null)
+                    return node.Prev.Id;
 
             return 0;
         }
@@ -240,7 +240,7 @@ namespace Game.Entities
             var node = GetSpellChainNode(spell_id);
 
             if (node != null)
-                return node.rank;
+                return node.Rank;
 
             return 0;
         }
@@ -251,8 +251,8 @@ namespace Game.Entities
 
             if (node != null)
             {
-                if (rank != node.rank)
-                    return GetSpellWithRank(node.rank < rank ? node.next.Id : node.prev.Id, rank, strict);
+                if (rank != node.Rank)
+                    return GetSpellWithRank(node.Rank < rank ? node.Next.Id : node.Prev.Id, rank, strict);
             }
             else if (strict && rank > 1)
             {
@@ -944,11 +944,11 @@ namespace Game.Entities
                 if (!mSpellChains.ContainsKey(pair.Key))
                     mSpellChains[pair.Key] = new SpellChainNode();
 
-                mSpellChains[pair.Key].first = first;
-                mSpellChains[pair.Key].prev = null;
-                mSpellChains[pair.Key].next = next;
-                mSpellChains[pair.Key].last = next;
-                mSpellChains[pair.Key].rank = 1;
+                mSpellChains[pair.Key].First = first;
+                mSpellChains[pair.Key].Prev = null;
+                mSpellChains[pair.Key].Next = next;
+                mSpellChains[pair.Key].Last = next;
+                mSpellChains[pair.Key].Rank = 1;
 
                 foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Key))
                     difficultyInfo.ChainEntry = mSpellChains[pair.Key];
@@ -956,11 +956,11 @@ namespace Game.Entities
                 if (!mSpellChains.ContainsKey(pair.Value))
                     mSpellChains[pair.Value] = new SpellChainNode();
 
-                mSpellChains[pair.Value].first = first;
-                mSpellChains[pair.Value].prev = first;
-                mSpellChains[pair.Value].next = null;
-                mSpellChains[pair.Value].last = next;
-                mSpellChains[pair.Value].rank = 2;
+                mSpellChains[pair.Value].First = first;
+                mSpellChains[pair.Value].Prev = first;
+                mSpellChains[pair.Value].Next = null;
+                mSpellChains[pair.Value].Last = next;
+                mSpellChains[pair.Value].Rank = 2;
 
                 foreach (SpellInfo difficultyInfo in _GetSpellInfo(pair.Value))
                     difficultyInfo.ChainEntry = mSpellChains[pair.Value];
@@ -979,16 +979,16 @@ namespace Game.Entities
                     if (!mSpellChains.ContainsKey(nextPair.Key))
                         mSpellChains[nextPair.Key] = new SpellChainNode();
 
-                    mSpellChains[nextPair.Key].next = last;
+                    mSpellChains[nextPair.Key].Next = last;
 
                     if (!mSpellChains.ContainsKey(nextPair.Value))
                         mSpellChains[nextPair.Value] = new SpellChainNode();
 
-                    mSpellChains[nextPair.Value].first = first;
-                    mSpellChains[nextPair.Value].prev = prev;
-                    mSpellChains[nextPair.Value].next = null;
-                    mSpellChains[nextPair.Value].last = last;
-                    mSpellChains[nextPair.Value].rank = rank++;
+                    mSpellChains[nextPair.Value].First = first;
+                    mSpellChains[nextPair.Value].Prev = prev;
+                    mSpellChains[nextPair.Value].Next = null;
+                    mSpellChains[nextPair.Value].Last = last;
+                    mSpellChains[nextPair.Value].Rank = rank++;
 
                     foreach (SpellInfo difficultyInfo in _GetSpellInfo(nextPair.Value))
                         difficultyInfo.ChainEntry = mSpellChains[nextPair.Value];
@@ -996,8 +996,8 @@ namespace Game.Entities
                     // fill 'last'
                     do
                     {
-                        mSpellChains[prev.Id].last = last;
-                        prev = mSpellChains[prev.Id].prev;
+                        mSpellChains[prev.Id].Last = last;
+                        prev = mSpellChains[prev.Id].Prev;
                     } while (prev != null);
 
                     nextPair = chains.Find(nextPair.Value);
@@ -1091,22 +1091,22 @@ namespace Game.Entities
                     switch (spellEffectInfo.Effect)
                     {
                         case SpellEffectName.Skill:
-                            dbc_node.skill = (SkillType)spellEffectInfo.MiscValue;
-                            dbc_node.step = (ushort)spellEffectInfo.CalcValue();
+                            dbc_node.Skill = (SkillType)spellEffectInfo.MiscValue;
+                            dbc_node.Step = (ushort)spellEffectInfo.CalcValue();
 
-                            if (dbc_node.skill != SkillType.Riding)
-                                dbc_node.value = 1;
+                            if (dbc_node.Skill != SkillType.Riding)
+                                dbc_node.Value = 1;
                             else
-                                dbc_node.value = (ushort)(dbc_node.step * 75);
+                                dbc_node.Value = (ushort)(dbc_node.Step * 75);
 
-                            dbc_node.maxvalue = (ushort)(dbc_node.step * 75);
+                            dbc_node.Maxvalue = (ushort)(dbc_node.Step * 75);
 
                             break;
                         case SpellEffectName.DualWield:
-                            dbc_node.skill = SkillType.DualWield;
-                            dbc_node.step = 1;
-                            dbc_node.value = 1;
-                            dbc_node.maxvalue = 1;
+                            dbc_node.Skill = SkillType.DualWield;
+                            dbc_node.Step = 1;
+                            dbc_node.Value = 1;
+                            dbc_node.Maxvalue = 1;
 
                             break;
                         default:

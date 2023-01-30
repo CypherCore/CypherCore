@@ -662,22 +662,22 @@ namespace Game.Spells
             if (!IsAffectedBySpellMods())
                 return false;
 
-            SpellInfo affectSpell = Global.SpellMgr.GetSpellInfo(mod.spellId, Difficulty);
+            SpellInfo affectSpell = Global.SpellMgr.GetSpellInfo(mod.SpellId, Difficulty);
 
             if (affectSpell == null)
                 return false;
 
-            switch (mod.type)
+            switch (mod.Type)
             {
                 case SpellModType.Flat:
                 case SpellModType.Pct:
                     // TEMP: dont use IsAffected - !familyName and !familyFlags are not valid options for spell mods
                     // TODO: investigate if the !familyName and !familyFlags conditions are even valid for all other (nonmod) uses of SpellInfo::IsAffected
-                    return affectSpell.SpellFamilyName == SpellFamilyName && (mod as SpellModifierByClassMask).mask & SpellFamilyFlags;
+                    return affectSpell.SpellFamilyName == SpellFamilyName && (mod as SpellModifierByClassMask).Mask & SpellFamilyFlags;
                 case SpellModType.LabelFlat:
-                    return HasLabel((uint)(mod as SpellFlatModifierByLabel).value.LabelID);
+                    return HasLabel((uint)(mod as SpellFlatModifierByLabel).Value.LabelID);
                 case SpellModType.LabelPct:
-                    return HasLabel((uint)(mod as SpellPctModifierByLabel).value.LabelID);
+                    return HasLabel((uint)(mod as SpellPctModifierByLabel).Value.LabelID);
                 default:
                     break;
             }
@@ -2783,7 +2783,7 @@ namespace Game.Spells
             if (ChainEntry == null)
                 return 1;
 
-            return ChainEntry.rank;
+            return ChainEntry.Rank;
         }
 
         public SpellInfo GetFirstRankSpell()
@@ -2791,7 +2791,7 @@ namespace Game.Spells
             if (ChainEntry == null)
                 return this;
 
-            return ChainEntry.first;
+            return ChainEntry.First;
         }
 
         public SpellInfo GetNextRankSpell()
@@ -2799,7 +2799,7 @@ namespace Game.Spells
             if (ChainEntry == null)
                 return null;
 
-            return ChainEntry.next;
+            return ChainEntry.Next;
         }
 
         public SpellInfo GetAuraRankForLevel(uint level)
@@ -2859,8 +2859,8 @@ namespace Game.Spells
         {
             if (ChainEntry != null &&
                 spellInfo.ChainEntry != null)
-                if (ChainEntry.first == spellInfo.ChainEntry.first)
-                    if (ChainEntry.rank > spellInfo.ChainEntry.rank)
+                if (ChainEntry.First == spellInfo.ChainEntry.First)
+                    if (ChainEntry.Rank > spellInfo.ChainEntry.Rank)
                         return true;
 
             return false;
@@ -3865,7 +3865,7 @@ namespace Game.Spells
             if (ChainEntry == null)
                 return null;
 
-            return ChainEntry.last;
+            return ChainEntry.Last;
         }
 
         private SpellInfo GetPrevRankSpell()
@@ -3873,7 +3873,7 @@ namespace Game.Spells
             if (ChainEntry == null)
                 return null;
 
-            return ChainEntry.prev;
+            return ChainEntry.Prev;
         }
 
         private bool _isPositiveEffectImpl(SpellInfo spellInfo, SpellEffectInfo effect, List<Tuple<SpellInfo, uint>> visited)

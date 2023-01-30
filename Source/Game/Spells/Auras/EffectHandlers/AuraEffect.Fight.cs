@@ -48,7 +48,7 @@ namespace Game.Spells.Auras.EffectHandlers
 
                     for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
                         if (unit.GetCurrentSpell(i) != null &&
-                            unit.GetCurrentSpell(i)._targets.GetUnitTargetGUID() == target.GetGUID())
+                            unit.GetCurrentSpell(i).Targets.GetUnitTargetGUID() == target.GetGUID())
                             unit.InterruptSpell(i, false);
                 }
 
@@ -240,7 +240,7 @@ namespace Game.Spells.Auras.EffectHandlers
                     Spell spell = target.GetCurrentSpell(i);
 
                     if (spell != null)
-                        if (spell._spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
+                        if (spell.SpellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                             // Stop spells on prepare or casting State
                             target.InterruptSpell(i, false);
                 }
@@ -325,7 +325,7 @@ namespace Game.Spells.Auras.EffectHandlers
                     Spell spell = target.GetCurrentSpell(i);
 
                     if (spell)
-                        if (spell._spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
+                        if (spell.SpellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
                             // Stop spells on prepare or casting State
                             target.InterruptSpell(i, false);
                 }

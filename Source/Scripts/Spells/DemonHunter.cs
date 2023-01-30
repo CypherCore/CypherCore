@@ -273,7 +273,7 @@ namespace Scripts.Spells.DemonHunter
 
                 if (script != null)
                     if (GetHitUnit().GetGUID() == script.GetFirstTarget())
-                        MathFunctions.AddPct(ref damage, aurEff.GetAmount());
+                        damage = MathFunctions.AddPct(damage, aurEff.GetAmount());
             }
 
             SetHitDamage(damage);

@@ -396,8 +396,8 @@ namespace Game
                 Spell autoRepeatSpell = caster.GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
 
                 if (autoRepeatSpell != null)
-                    if (autoRepeatSpell._spellInfo == spellInfo &&
-                        autoRepeatSpell._targets.GetUnitTargetGUID() == targets.GetUnitTargetGUID())
+                    if (autoRepeatSpell.SpellInfo == spellInfo &&
+                        autoRepeatSpell.Targets.GetUnitTargetGUID() == targets.GetUnitTargetGUID())
                         return;
             }
 
@@ -418,12 +418,12 @@ namespace Game
 
             SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = cast.Cast.CastID;
-            spellPrepare.ServerCastID = spell._castId;
+            spellPrepare.ServerCastID = spell.CastId;
             SendPacket(spellPrepare);
 
-            spell._fromClient = true;
-            spell._misc.Data0 = cast.Cast.Misc[0];
-            spell._misc.Data1 = cast.Cast.Misc[1];
+            spell.FromClient = true;
+            spell.Misc.Data0 = cast.Cast.Misc[0];
+            spell.Misc.Data1 = cast.Cast.Misc[1];
             spell.Prepare(targets);
         }
 
@@ -728,12 +728,12 @@ namespace Game
             Spell spell = caster.FindCurrentSpellBySpellId(packet.SpellID);
 
             if (spell == null ||
-                !spell._targets.HasDst())
+                !spell.Targets.HasDst())
                 return;
 
-            Position pos = spell._targets.GetDstPos();
+            Position pos = spell.Targets.GetDstPos();
             pos.Relocate(packet.CollisionPos);
-            spell._targets.ModDst(pos);
+            spell.Targets.ModDst(pos);
 
             // we changed dest, recalculate flight Time
             spell.RecalculateDelayMomentForDst();
@@ -752,22 +752,22 @@ namespace Game
             Spell spell = caster ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
 
             if (!spell ||
-                spell._spellInfo.Id != packet.SpellID ||
-                spell._castId != packet.CastID ||
-                !spell._targets.HasDst() ||
-                !spell._targets.HasSrc())
+                spell.SpellInfo.Id != packet.SpellID ||
+                spell.CastId != packet.CastID ||
+                !spell.Targets.HasDst() ||
+                !spell.Targets.HasSrc())
                 return;
 
-            Position pos = spell._targets.GetSrcPos();
+            Position pos = spell.Targets.GetSrcPos();
             pos.Relocate(packet.FirePos);
-            spell._targets.ModSrc(pos);
+            spell.Targets.ModSrc(pos);
 
-            pos = spell._targets.GetDstPos();
+            pos = spell.Targets.GetDstPos();
             pos.Relocate(packet.ImpactPos);
-            spell._targets.ModDst(pos);
+            spell.Targets.ModDst(pos);
 
-            spell._targets.SetPitch(packet.Pitch);
-            spell._targets.SetSpeed(packet.Speed);
+            spell.Targets.SetPitch(packet.Pitch);
+            spell.Targets.SetSpeed(packet.Speed);
 
             if (packet.Status != null)
                 GetPlayer().ValidateMovementInfo(packet.Status);
