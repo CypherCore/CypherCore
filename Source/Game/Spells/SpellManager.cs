@@ -562,9 +562,9 @@ namespace Game.Entities
             return false;
         }
 
-        public List<int> GetSpellLinked(int spell_id)
+        public List<int> GetSpellLinked(SpellLinkedType type, uint spellId)
         {
-            return mSpellLinkedMap.LookupByKey(spell_id);
+            return mSpellLinkedMap.LookupByKey((type, spellId));
         }
 
         public MultiMap<uint, uint> GetPetLevelupSpellList(CreatureFamily petFamily)
@@ -1730,7 +1730,7 @@ namespace Game.Entities
             {
                 int trigger = result.Read<int>(0);
                 int effect = result.Read<int>(1);
-                int type = result.Read<int>(2);
+                SpellLinkedType type = (SpellLinkedType)result.Read<byte>(2);
 
                 SpellInfo spellInfo = GetSpellInfo((uint)Math.Abs(trigger), Difficulty.None);
                 if (spellInfo == null)
@@ -1754,14 +1754,32 @@ namespace Game.Entities
                     continue;
                 }
 
-                if (type != 0) //we will find a better way when more types are needed
+                if (type < SpellLinkedType.Cast || type > SpellLinkedType.Remove)
                 {
-                    if (trigger > 0)
-                        trigger += 200000 * type;
-                    else
-                        trigger -= 200000 * type;
+                    Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` has invalid link type {type}, skipped.");
+                    continue;
                 }
-                mSpellLinkedMap.Add(trigger, effect);
+
+                if (trigger < 0)
+                {
+                    if (type != SpellLinkedType.Cast)
+                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger} listed in `spell_linked_spell` has invalid link type {type}, changed to 0.");
+
+                    trigger = -trigger;
+                    type = SpellLinkedType.Remove;
+                }
+
+
+                if (type != SpellLinkedType.Aura)
+                {
+                    if (trigger == effect)
+                    {
+                        Log.outError(LogFilter.Sql, $"The spell trigger {trigger}, effect {effect} listed in `spell_linked_spell` triggers itself (infinite loop), skipped.");
+                        continue;
+                    }
+                }
+
+                mSpellLinkedMap.Add((type, (uint)trigger), effect);
 
                 ++count;
             } while (result.NextRow());
@@ -4729,7 +4747,7 @@ namespace Game.Entities
         Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new();
         Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new();
         Dictionary<uint, PetAura> mSpellPetAuraMap = new();
-        MultiMap<int, int> mSpellLinkedMap = new();
+        MultiMap<(SpellLinkedType, uint), int> mSpellLinkedMap = new();
         Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new();
         MultiMap<uint, SpellArea> mSpellAreaMap = new();
         MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new();

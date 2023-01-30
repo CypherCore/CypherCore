@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BaradinHold
 {
@@ -37,7 +39,7 @@ namespace Scripts.EasternKingdoms.BaradinHold
     }
 
     [Script]
-    class instance_baradin_hold : InstanceMapScript
+    class instance_baradin_hold : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         static DoorData[] doorData =
         {
@@ -127,7 +129,7 @@ namespace Scripts.EasternKingdoms.BaradinHold
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_baradin_hold_InstanceMapScript(map);
         }

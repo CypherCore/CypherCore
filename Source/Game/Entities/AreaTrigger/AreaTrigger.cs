@@ -8,10 +8,12 @@ using Game.Maps;
 using Game.Movement;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IAreaTriggerEntity;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using static Game.AI.SmartEvent;
 
 namespace Game.Entities
 {
@@ -965,7 +967,7 @@ namespace Game.Entities
         void AI_Initialize()
         {
             AI_Destroy();
-            AreaTriggerAI ai = Global.ScriptMgr.GetAreaTriggerAI(this);
+            AreaTriggerAI ai = Global.ScriptMgr.RunScriptRet<IAreaTriggerEntityGetAI, AreaTriggerAI>(p => p.GetAI(this), GetScriptId(), null);
             if (ai == null)
                 ai = new NullAreaTriggerAI(this);
 

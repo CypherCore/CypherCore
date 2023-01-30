@@ -5,6 +5,8 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces.IMap;
 using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
@@ -75,7 +77,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
     }
 
     [Script]
-    class instance_molten_core : InstanceMapScript
+    class instance_molten_core : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         static DungeonEncounterData[] encounters =
         {
@@ -238,7 +240,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_molten_core_InstanceMapScript(map);
         }

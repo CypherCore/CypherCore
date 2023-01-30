@@ -15,6 +15,8 @@ using Game.Loots;
 using Game.Maps;
 using Game.Movement;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -302,6 +304,8 @@ namespace Game.Spells
 
             m_caster.m_Events.AddEventAtOffset(() =>
             {
+                targets.Update(caster); // refresh pointers stored in targets
+
                 // original caster guid only for GO cast
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.SetOriginalCaster(originalCaster);
@@ -2900,7 +2904,7 @@ namespace Game.Spells
             caster.SetDuelArbiter(go.GetGUID());
             target.SetDuelArbiter(go.GetGUID());
 
-            Global.ScriptMgr.OnPlayerDuelRequest(target, caster);
+            Global.ScriptMgr.ForEach<IPlayerOnDuelRequest>(p => p.OnDuelRequest(target, caster));
         }
 
         [SpellEffectHandler(SpellEffectName.Stuck)]
@@ -3701,8 +3705,8 @@ namespace Game.Spells
             player.RemoveActiveQuest(quest_id, false);
             player.RemoveRewardedQuest(quest_id);
 
-            Global.ScriptMgr.OnQuestStatusChange(player, quest_id);
-            Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
+            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(player, quest_id));
+            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
         }
 
         [SpellEffectHandler(SpellEffectName.SendTaxi)]
@@ -4727,7 +4731,7 @@ namespace Game.Spells
             if (!CliDB.CurrencyTypesStorage.ContainsKey(effectInfo.MiscValue))
                 return;
 
-            unitTarget.ToPlayer().ModifyCurrency((CurrencyTypes)effectInfo.MiscValue, damage);
+            unitTarget.ToPlayer().ModifyCurrency((uint)effectInfo.MiscValue, damage);
         }
 
         [SpellEffectHandler(SpellEffectName.CastButton)]

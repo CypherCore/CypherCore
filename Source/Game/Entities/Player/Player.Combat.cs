@@ -9,6 +9,8 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using Game.Maps;
+using Game.AI;
+using Game.Scripting.Interfaces.IPlayer;
 
 namespace Game.Entities
 {
@@ -373,7 +375,7 @@ namespace Game.Entities
         {
             if (duel != null && duel.State == DuelState.Countdown && duel.StartTime <= currTime)
             {
-                Global.ScriptMgr.OnPlayerDuelStart(this, duel.Opponent);
+                Global.ScriptMgr.ForEach<IPlayerOnDuelStart>(p => p.OnDuelStart(this, duel.Opponent));
 
                 SetDuelTeam(1);
                 duel.Opponent.SetDuelTeam(2);
@@ -450,7 +452,8 @@ namespace Game.Entities
             opponent.DisablePvpRules();
             DisablePvpRules();
 
-            Global.ScriptMgr.OnPlayerDuelEnd(opponent, this, type);
+            Global.ScriptMgr.ForEach<IPlayerOnDuelEnd>(p => p.OnDuelEnd(type == DuelCompleteType.Won ? this : opponent, 
+                                                                        type == DuelCompleteType.Won ? opponent : this, type));
 
             switch (type)
             {

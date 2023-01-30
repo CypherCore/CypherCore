@@ -153,7 +153,7 @@ namespace Framework.Constants
         Unk21 = 0x200000,
         DontFadeOut = 0x400000,
         Unk23 = 0x800000,
-        Unk24 = 0x1000000,
+        ForceHideNameplate = 0x1000000,
         Unk25 = 0x2000000,
         Unk26 = 0x4000000,
         Unk27 = 0x8000000,
@@ -168,7 +168,7 @@ namespace Framework.Constants
                                                                    Unk12 | /* FakeDead | */ /* NoFacingOnInteractAndFastFacingChase | */ /* UntargetableFromUi | */
                                                                    /* NoFacingOnInteractWhileFakeDead | */ AlreadySkinned | /* SuppressAllNpcSounds | */ /* SuppressNpcSounds | */
                                                                    Unk20 | Unk21 | /* DontFadeOut | */ Unk23 |
-                                                                   Unk24 | Unk25 | Unk26 | Unk27 |
+                                                                   ForceHideNameplate | Unk25 | Unk26 | Unk27 |
                                                                    Unk28 | Unk29 | Unk30 | Unk31), // Skip
         Allowed = (0xffffffff & ~Disallowed) // Skip
     }
@@ -433,6 +433,15 @@ namespace Framework.Constants
         NoPath,           // the creature was unable to reach its target for over 5 seconds
         SequenceBreak,    // this is a boss and the pre-requisite encounters for engaging it are not defeated yet
         Other
+    }
+
+    public enum SelectTargetMethod
+    {
+        Random = 0,  // just pick a random target
+        MaxThreat,   // prefer targets higher in the threat list
+        MinThreat,   // prefer targets lower in the threat list
+        MaxDistance, // prefer targets further from us
+        MinDistance  // prefer targets closer to us
     }
 
     [Flags]

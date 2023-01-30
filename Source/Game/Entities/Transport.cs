@@ -2,9 +2,12 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.AI;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.ITransport;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -210,7 +213,7 @@ namespace Game.Entities
             else if (!AIM_Initialize())
                 Log.outError(LogFilter.Transport, "Could not initialize GameObjectAI for Transport");
 
-            Global.ScriptMgr.OnTransportUpdate(this, diff);
+            Global.ScriptMgr.RunScript<ITransportOnUpdate>(p => p.OnUpdate(this, diff), GetScriptId());
 
             _positionChangeTimer.Update(diff);
 
@@ -328,7 +331,7 @@ namespace Game.Entities
 
                 Player player = passenger.ToPlayer();
                 if (player)
-                    Global.ScriptMgr.OnAddPassenger(this, player);
+                    Global.ScriptMgr.RunScript<ITransportOnAddPassenger>(p => p.OnAddPassenger(this, player), GetScriptId());
             }
         }
 
@@ -343,7 +346,7 @@ namespace Game.Entities
                 Player plr = passenger.ToPlayer();
                 if (plr != null)
                 {
-                    Global.ScriptMgr.OnRemovePassenger(this, plr);
+                    Global.ScriptMgr.RunScript<ITransportOnRemovePassenger>(p => p.OnRemovePassenger(this, plr), GetScriptId());
                     plr.SetFallInformation(0, plr.GetPositionZ());
                 }
             }
@@ -390,7 +393,7 @@ namespace Game.Entities
                 return null;
 
             _staticPassengers.Add(creature);
-            Global.ScriptMgr.OnAddCreaturePassenger(this, creature);
+            Global.ScriptMgr.RunScript<ITransportOnAddCreaturePassenger>(p => p.OnAddCreaturePassenger(this, creature), GetScriptId());
             return creature;
         }
 
@@ -562,7 +565,7 @@ namespace Game.Entities
 
         public void UpdatePosition(float x, float y, float z, float o)
         {
-            Global.ScriptMgr.OnRelocate(this, GetMapId(), x, y, z);
+            Global.ScriptMgr.RunScript<ITransportOnRelocate>(p => p.OnRelocate(this, GetMapId(), x, y, z), GetScriptId());
 
             bool newActive = GetMap().IsGridLoaded(x, y);
             Cell oldCell = new(GetPositionX(), GetPositionY());

@@ -331,6 +331,6 @@ namespace Framework.Dynamic
         /// - Bit 24 - 31: Phase
         /// - Pattern: 0xPPGGEEEE
         /// </summary>
-        SortedMultiMap<TimeSpan, uint> _eventMap = new();
+        MultiMap<TimeSpan, uint> _eventMap = new();
     }
 }

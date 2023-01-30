@@ -7,6 +7,7 @@ using Game.BattleGrounds.Zones;
 using Game.Entities;
 using Game.Scripting;
 using Game.DataStorage;
+using Game.Scripting.Interfaces.IAchievement;
 
 namespace Scripts.World.Achievements
 {
@@ -38,7 +39,7 @@ namespace Scripts.World.Achievements
     [Script("achievement_arena_2v2_kills", ArenaTypes.Team2v2)]
     [Script("achievement_arena_3v3_kills", ArenaTypes.Team3v3)]
     [Script("achievement_arena_5v5_kills", ArenaTypes.Team5v5)]
-    class achievement_arena_kills : AchievementCriteriaScript
+    class achievement_arena_kills : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
         ArenaTypes _arenaType;
 
@@ -47,7 +48,7 @@ namespace Scripts.World.Achievements
             _arenaType = arenaType;
         }
 
-        public override bool OnCheck(Player source, Unit target)
+        public bool OnCheck(Player source, Unit target)
         {
             // this checks GetBattleground() for Null already
             if (!source.InArena())
@@ -58,11 +59,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_tilted : AchievementCriteriaScript
+    class achievement_tilted : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
         public achievement_tilted() : base("achievement_tilted") { }
 
-        public override bool OnCheck(Player player, Unit target)
+        public bool OnCheck(Player player, Unit target)
         {
             if (!player)
                 return false;
@@ -79,11 +80,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_flirt_with_disaster_perf_check : AchievementCriteriaScript
+    class achievement_flirt_with_disaster_perf_check : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
         public achievement_flirt_with_disaster_perf_check() : base("achievement_flirt_with_disaster_perf_check") { }
 
-        public override bool OnCheck(Player player, Unit target)
+        public bool OnCheck(Player player, Unit target)
         {
             if (!player)
                 return false;
@@ -96,22 +97,22 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_killed_exp_or_honor_target : AchievementCriteriaScript
+    class achievement_killed_exp_or_honor_target : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
         public achievement_killed_exp_or_honor_target() : base("achievement_killed_exp_or_honor_target") { }
 
-        public override bool OnCheck(Player player, Unit target)
+        public bool OnCheck(Player player, Unit target)
         {
             return target && player.IsHonorOrXPTarget(target);
         }
     }
 
     [Script] // 7433 - Newbie
-    class achievement_newbie : AchievementScript
+    class achievement_newbie : ScriptObjectAutoAddDBBound, IAchievementOnCompleted
     {
         public achievement_newbie() : base("achievement_newbie") { }
 
-        public override void OnCompleted(Player player, AchievementRecord achievement)
+        public void OnCompleted(Player player, AchievementRecord achievement)
         {
             player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
             // TODO: Unlock trap
@@ -119,11 +120,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script] // 6566 - Just a Pup
-    class achievement_just_a_pup : AchievementScript
+    class achievement_just_a_pup : ScriptObjectAutoAddDBBound, IAchievementOnCompleted
     {
         public achievement_just_a_pup() : base("achievement_just_a_pup") { }
 
-        public override void OnCompleted(Player player, AchievementRecord achievement)
+        public void OnCompleted(Player player, AchievementRecord achievement)
         {
             player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot2);
         }

@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -64,11 +65,11 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_only_for_flight : ItemScript
+    class item_only_for_flight : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_only_for_flight() : base("item_only_for_flight") { }
 
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
+        public bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
             uint itemId = item.GetEntry();
             bool disabled = false;
@@ -102,11 +103,11 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_gor_dreks_ointment : ItemScript
+    class item_gor_dreks_ointment : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_gor_dreks_ointment() : base("item_gor_dreks_ointment") { }
 
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
+        public bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
             if (targets.GetUnitTarget() && targets.GetUnitTarget().IsTypeId(TypeId.Unit) &&
                 targets.GetUnitTarget().GetEntry() == 20748 && !targets.GetUnitTarget().HasAura(32578))
@@ -118,11 +119,11 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_mysterious_egg : ItemScript
+    class item_mysterious_egg : ScriptObjectAutoAddDBBound, IItemOnExpire
     {
         public item_mysterious_egg() : base("item_mysterious_egg") { }
 
-        public override bool OnExpire(Player player, ItemTemplate pItemProto)
+        public bool OnExpire(Player player, ItemTemplate pItemProto)
         {
             List<ItemPosCount> dest = new();
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
@@ -134,11 +135,11 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_disgusting_jar : ItemScript
+    class item_disgusting_jar : ScriptObjectAutoAddDBBound, IItemOnExpire
     {
         public item_disgusting_jar() : base("item_disgusting_jar") { }
 
-        public override bool OnExpire(Player player, ItemTemplate pItemProto)
+        public bool OnExpire(Player player, ItemTemplate pItemProto)
         {
             List<ItemPosCount> dest = new();
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
@@ -150,11 +151,11 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_petrov_cluster_bombs : ItemScript
+    class item_petrov_cluster_bombs : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }
 
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
+        public bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
             if (player.GetZoneId() != Misc.ZoneIdHowling)
                 return false;
@@ -173,11 +174,11 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_captured_frog : ItemScript
+    class item_captured_frog : ScriptObjectAutoAddDBBound, IItemOnUse
     {
         public item_captured_frog() : base("item_captured_frog") { }
 
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
+        public bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
             if (player.GetQuestStatus(QuestIds.ThePerfectSpies) == QuestStatus.Incomplete)
             {
@@ -194,11 +195,11 @@ namespace Scripts.World.ItemScripts
 
     [Script] // Only used currently for
     // 19169: Nightfall
-    class item_generic_limit_chance_above_60 : ItemScript
+    class item_generic_limit_chance_above_60 : ScriptObjectAutoAddDBBound, IItemOnCastItemCombatSpell
     {
         public item_generic_limit_chance_above_60() : base("item_generic_limit_chance_above_60") { }
 
-        public override bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
+        public bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
         {
             // spell proc chance gets severely reduced on victims > 60 (formula unknown)
             if (victim.GetLevel() > 60)

@@ -1179,6 +1179,11 @@ namespace Scripts.Spells.Shaman
 
             caster.m_Events.AddEventAtOffset(() =>
             {
+                if (targets.Targets == null)
+                    return;
+
+                targets.Targets.Update(caster);
+
                 CastSpellExtraArgs args = new();
                 args.OriginalCastId = originalCastId;
                 caster.CastSpell(targets, overloadSpellId, args);

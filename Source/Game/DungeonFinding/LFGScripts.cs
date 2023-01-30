@@ -7,15 +7,17 @@ using Game.Groups;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IGroup;
+using Game.Scripting.Interfaces.IPlayer;
 
 namespace Game.DungeonFinding
 {
-    class LFGPlayerScript : PlayerScript
+    class LFGPlayerScript : ScriptObjectAutoAdd, IPlayerOnLogout, IPlayerOnLogin, IPlayerOnMapChanged
     {
         public LFGPlayerScript() : base("LFGPlayerScript") { }
 
         // Player Hooks
-        public override void OnLogout(Player player)
+        public void OnLogout(Player player)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -26,7 +28,7 @@ namespace Game.DungeonFinding
                 Global.LFGMgr.LeaveLfg(player.GetGUID(), true);
         }
 
-        public override void OnLogin(Player player)
+        public void OnLogin(Player player)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -50,7 +52,7 @@ namespace Game.DungeonFinding
             // @todo - Restore LfgPlayerData and send proper status to player if it was in a group
         }
 
-        public override void OnMapChanged(Player player)
+        public void OnMapChanged(Player player)
         {
             Map map = player.GetMap();
 
@@ -99,12 +101,12 @@ namespace Game.DungeonFinding
         }
     }
 
-    class LFGGroupScript : GroupScript
+    class LFGGroupScript : ScriptObjectAutoAdd, IGroupOnAddMember, IGroupOnRemoveMember, IGroupOnDisband, IGroupOnChangeLeader, IGroupOnInviteMember
     {
         public LFGGroupScript() : base("LFGGroupScript") { }
 
         // Group Hooks
-        public override void OnAddMember(Group group, ObjectGuid guid)
+        public void OnAddMember(Group group, ObjectGuid guid)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -134,7 +136,7 @@ namespace Game.DungeonFinding
             Global.LFGMgr.AddPlayerToGroup(gguid, guid);
         }
 
-        public override void OnRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason)
+        public void OnRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -193,7 +195,7 @@ namespace Game.DungeonFinding
             }
         }
 
-        public override void OnDisband(Group group)
+        public void OnDisband(Group group)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -204,7 +206,7 @@ namespace Game.DungeonFinding
             Global.LFGMgr.RemoveGroupData(gguid);
         }
 
-        public override void OnChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid)
+        public void OnChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
@@ -215,7 +217,7 @@ namespace Game.DungeonFinding
             Global.LFGMgr.SetLeader(gguid, newLeaderGuid);
         }
 
-        public override void OnInviteMember(Group group, ObjectGuid guid)
+        public void OnInviteMember(Group group, ObjectGuid guid)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;

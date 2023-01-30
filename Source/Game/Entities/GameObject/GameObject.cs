@@ -393,6 +393,8 @@ namespace Game.Entities
         {
             m_Events.Update(diff);
 
+            base.Update(diff);
+
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
             else if (!AIM_Initialize())
@@ -1295,7 +1297,7 @@ namespace Game.Entities
             if (base.IsNeverVisibleFor(seer))
                 return true;
 
-            if (GetGoType() == GameObjectTypes.SpellFocus && GetGoInfo().SpellFocus.serverOnly == 1)
+            if (GetGoInfo().GetServerOnly() != 0)
                 return true;
 
             if (GetDisplayId() == 0)

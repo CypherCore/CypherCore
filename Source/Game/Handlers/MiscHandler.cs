@@ -12,9 +12,12 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting.Interfaces.IConversation;
+using Game.Scripting.Interfaces.IPlayer;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Game.AI.SmartAction;
 
 namespace Game
 {
@@ -143,7 +146,7 @@ namespace Game
                 return;
 
             _player.SetMovie(0);
-            Global.ScriptMgr.OnMovieComplete(_player, movie);
+            Global.ScriptMgr.ForEach<IPlayerOnMovieComplete>(p => p.OnMovieComplete(_player, movie));
         }
 
         [WorldPacketHandler(ClientOpcodes.ViolenceLevel, Processing = PacketProcessing.Inplace, Status = SessionStatus.Authed)]
@@ -458,9 +461,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ConversationLineStarted)]
         void HandleConversationLineStarted(ConversationLineStarted conversationLineStarted)
         {
-            Conversation convo = ObjectAccessor.GetConversation(_player, conversationLineStarted.ConversationGUID);
+            Entities.Conversation convo = ObjectAccessor.GetConversation(_player, conversationLineStarted.ConversationGUID);
             if (convo != null)
-                Global.ScriptMgr.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player);
+                Global.ScriptMgr.RunScript<IConversationOnConversationLineStarted>(script => script.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player), convo.GetScriptId());
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestLatestSplashScreen)]

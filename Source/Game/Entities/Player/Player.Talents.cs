@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -546,7 +547,7 @@ namespace Game.Entities
 
         public bool ResetTalents(bool noCost = false)
         {
-            Global.ScriptMgr.OnPlayerTalentsReset(this, noCost);
+            Global.ScriptMgr.ForEach<IPlayerOnTalentsReset>(p => p.OnTalentsReset(this, noCost));
 
             // not need after this call
             if (HasAtLoginFlag(AtLoginFlags.ResetTalents))
@@ -1043,7 +1044,7 @@ namespace Game.Entities
                             ModifyMoney(-amount);
                             break;
                         case TraitCurrencyType.CurrencyTypesBased:
-                            ModifyCurrency((CurrencyTypes)traitCurrency.CurrencyTypesID, -amount);
+                            ModifyCurrency((uint)traitCurrency.CurrencyTypesID, -amount);
                             break;
                         default:
                             break;

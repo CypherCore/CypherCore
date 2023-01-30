@@ -9,6 +9,7 @@ using Game.Guilds;
 using Game.Loots;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,9 +105,9 @@ namespace Game
             user.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ItemUse);
 
             SpellCastTargets targets = new(user, packet.Cast);
-
+            
             // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
-            if (!Global.ScriptMgr.OnItemUse(user, item, targets, packet.Cast.CastID))
+            if (!Global.ScriptMgr.RunScriptRet<IItemOnUse>(p => p.OnUse(user, item, targets, packet.Cast.CastID), item.GetScriptId()))
             {
                 // no script or script not process request by self
                 user.CastItemUseSpell(item, targets, packet.Cast.CastID, packet.Cast.Misc);

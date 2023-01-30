@@ -8,6 +8,7 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.ICreature;
 using Game.Spells;
 using Scripts.Spells.Warlock;
 using static Game.AI.SmartAction;
@@ -18,7 +19,7 @@ namespace Scripts.Pets
     {
         [Script]
         // Doomguard - 11859, Terrorguard - 59000
-        public class npc_warlock_doomguard : CreatureScript
+        public class npc_warlock_doomguard : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warlock_doomguard() : base("npc_warlock_doomguard")
             {
@@ -26,7 +27,7 @@ namespace Scripts.Pets
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public override CreatureAI GetAI(Creature creature)
+            public CreatureAI GetAI(Creature creature)
             {
                 return new npc_warlock_doomguardAI(creature);
             }
@@ -94,7 +95,7 @@ namespace Scripts.Pets
         }
 
         [Script]
-        public class npc_warl_demonic_gateway : CreatureScript
+        public class npc_warl_demonic_gateway : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warl_demonic_gateway() : base("npc_warl_demonic_gateway")
             {
@@ -102,7 +103,7 @@ namespace Scripts.Pets
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public override CreatureAI GetAI(Creature creature)
+            public  CreatureAI GetAI(Creature creature)
             {
                 return new npc_warl_demonic_gatewayAI(creature);
             }
@@ -214,7 +215,7 @@ namespace Scripts.Pets
 
         // Dreadstalker - 98035
         [Script]
-        public class npc_warlock_dreadstalker : CreatureScript
+        public class npc_warlock_dreadstalker : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warlock_dreadstalker() : base("npc_warlock_dreadstalker")
             {
@@ -266,7 +267,7 @@ namespace Scripts.Pets
 
         [Script]
         // Darkglare - 103673
-        public class npc_pet_warlock_darkglare : CreatureScript
+        public class npc_pet_warlock_darkglare : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_pet_warlock_darkglare() : base("npc_pet_warlock_darkglare")
             {
@@ -278,7 +279,7 @@ namespace Scripts.Pets
                 {
                 }
 
-                public override void UpdateAI(uint UnnamedParameter)
+                public void UpdateAI(uint UnnamedParameter)
                 {
                     Unit owner = me.GetOwner();
                     if (owner == null)
@@ -297,14 +298,14 @@ namespace Scripts.Pets
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const override
-            public override CreatureAI GetAI(Creature creature)
+            public CreatureAI GetAI(Creature creature)
             {
                 return new npc_pet_warlock_darkglare_PetAI(creature);
             }
         }
 
         [Script]
-        public class npc_warlock_infernal : CreatureScript
+        public class npc_warlock_infernal : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warlock_infernal() : base("npc_warlock_infernal")
             {
@@ -384,7 +385,7 @@ namespace Scripts.Pets
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public override CreatureAI GetAI(Creature creature)
+            public CreatureAI GetAI(Creature creature)
             {
                 return new npc_warlock_infernalAI(creature);
             }
@@ -392,13 +393,13 @@ namespace Scripts.Pets
 
         // 107024 - Fel Lord
         [Script]
-        public class npc_warl_fel_lord : CreatureScript
+        public class npc_warl_fel_lord : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
             public npc_warl_fel_lord() : base("npc_warl_fel_lord")
             {
             }
 
-            public override CreatureAI GetAI(Creature creature)
+            public CreatureAI GetAI(Creature creature)
             {
                 return new npc_warl_fel_lordAI(creature);
             }

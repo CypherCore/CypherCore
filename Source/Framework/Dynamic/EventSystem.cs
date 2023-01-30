@@ -109,10 +109,10 @@ namespace Framework.Dynamic
             return TimeSpan.FromMilliseconds(m_time) + t_offset;
         }
 
-        public SortedMultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
+        public MultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
 
         ulong m_time;
-        SortedMultiMap<ulong, BasicEvent> m_events = new();
+        MultiMap<ulong, BasicEvent> m_events = new();
     }
 
     public class BasicEvent

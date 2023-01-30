@@ -6,6 +6,9 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces.IAreaTrigger;
+using Game.Scripting.Interfaces.IMap;
 using System;
 using System.Collections.Generic;
 
@@ -138,7 +141,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class instance_blackrock_spire : InstanceMapScript
+    class instance_blackrock_spire : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         public instance_blackrock_spire() : base(nameof(instance_blackrock_spire), 229) { }
 
@@ -623,18 +626,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
             List<ObjectGuid> _incarceratorList = new();
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_blackrock_spireMapScript(map);
         }
     }
 
     [Script]
-    class at_dragonspire_hall : AreaTriggerScript
+    class at_dragonspire_hall : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public at_dragonspire_hall() : base("at_dragonspire_hall") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player && player.IsAlive())
             {
@@ -651,11 +654,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class at_blackrock_stadium : AreaTriggerScript
+    class at_blackrock_stadium : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public at_blackrock_stadium() : base("at_blackrock_stadium") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player && player.IsAlive())
             {
@@ -676,11 +679,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class at_nearby_scarshield_infiltrator : AreaTriggerScript
+    class at_nearby_scarshield_infiltrator : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public at_nearby_scarshield_infiltrator() : base("at_nearby_scarshield_infiltrator") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord at)
+        public bool OnTrigger(Player player, AreaTriggerRecord at)
         {
             if (player.IsAlive())
             {

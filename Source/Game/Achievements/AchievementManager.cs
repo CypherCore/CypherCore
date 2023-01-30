@@ -13,6 +13,8 @@ using Game.Mails;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IAchievement;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -527,8 +529,7 @@ namespace Game.Achievements
             UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
             UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
 
-            Global.ScriptMgr.OnAchievementCompleted(referencePlayer, achievement);
-
+            Global.ScriptMgr.RunScript<IAchievementOnCompleted>(p => p.OnCompleted(referencePlayer, achievement), Global.AchievementMgr.GetAchievementScriptId(achievement.Id));
             // reward items and titles if any
             AchievementReward reward = Global.AchievementMgr.GetAchievementReward(achievement);
 
@@ -1010,7 +1011,7 @@ namespace Game.Achievements
             UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
             UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
 
-            Global.ScriptMgr.OnAchievementCompleted(referencePlayer, achievement);
+            Global.ScriptMgr.RunScript<IAchievementOnCompleted>(p => p.OnCompleted(referencePlayer, achievement), Global.AchievementMgr.GetAchievementScriptId(achievement.Id));
         }
 
         public override void SendCriteriaUpdate(Criteria entry, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)

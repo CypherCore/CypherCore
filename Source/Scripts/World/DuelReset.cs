@@ -5,13 +5,14 @@ using Framework.Constants;
 using Game;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 
 namespace Scripts.World.DuelReset
 {
     [Script]
-    class DuelResetScript : PlayerScript
+    class DuelResetScript : ScriptObjectAutoAdd, IPlayerOnDuelStart, IPlayerOnDuelEnd
     {
         bool _resetCooldowns;
         bool _resetHealthMana;
@@ -23,7 +24,7 @@ namespace Scripts.World.DuelReset
         }
 
         // Called when a duel starts (after 3s countdown)
-        public override void OnDuelStart(Player player1, Player player2)
+        public void OnDuelStart(Player player1, Player player2)
         {
             // Cooldowns reset
             if (_resetCooldowns)
@@ -49,7 +50,7 @@ namespace Scripts.World.DuelReset
         }
 
         // Called when a duel ends
-        public override void OnDuelEnd(Player winner, Player loser, DuelCompleteType type)
+        public void OnDuelEnd(Player winner, Player loser, DuelCompleteType type)
         {
             // do not reset anything if DuelInterrupted or DuelFled
             if (type == DuelCompleteType.Won)

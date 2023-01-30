@@ -9,6 +9,8 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
+using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 
 namespace Game
 {
@@ -19,7 +21,7 @@ namespace Game
         {
             QuestGiverStatus questStatus = QuestGiverStatus.None;
 
-            var questgiver = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+            var questgiver = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
             if (!questgiver)
             {
                 Log.outInfo(LogFilter.Network, "Error in CMSG_QUESTGIVER_STATUS_QUERY, called for non-existing questgiver {0}", packet.QuestGiverGUID.ToString());
@@ -30,10 +32,10 @@ namespace Game
             {
                 case TypeId.Unit:
                     if (!questgiver.ToCreature().IsHostileTo(GetPlayer()))// do not show quest status to enemies
-                        questStatus = GetPlayer().GetQuestDialogStatus(questgiver);
+                        questStatus = _player.GetQuestDialogStatus(questgiver);
                     break;
                 case TypeId.GameObject:
-                    questStatus = GetPlayer().GetQuestDialogStatus(questgiver);
+                    questStatus = _player.GetQuestDialogStatus(questgiver);
                     break;
                 default:
                     Log.outError(LogFilter.Network, "QuestGiver called for unexpected type {0}", questgiver.GetTypeId());
@@ -41,13 +43,13 @@ namespace Game
             }
 
             //inform client about status of quest
-            GetPlayer().PlayerTalkClass.SendQuestGiverStatus(questStatus, packet.QuestGiverGUID);
+            _player.PlayerTalkClass.SendQuestGiverStatus(questStatus, packet.QuestGiverGUID);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverHello, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverHello(QuestGiverHello packet)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver, NPCFlags2.None);
+            Creature creature = _player.GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleQuestgiverHello - {0} not found or you can't interact with him.", packet.QuestGiverGUID.ToString());
@@ -55,8 +57,8 @@ namespace Game
             }
 
             // remove fake death
-            if (GetPlayer().HasUnitState(UnitState.Died))
-                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+            if (_player.HasUnitState(UnitState.Died))
+                _player.RemoveAurasByType(AuraType.FeignDeath);
 
             // Stop the npc if moving
             uint pause = creature.GetMovementTemplate().GetInteractionPauseTimer();
@@ -68,8 +70,8 @@ namespace Game
             if (creature.GetAI().OnGossipHello(_player))
                 return;
 
-            GetPlayer().PrepareGossipMenu(creature, creature.GetCreatureTemplate().GossipMenuId, true);
-            GetPlayer().SendPreparedGossip(creature);
+            _player.PrepareGossipMenu(creature, creature.GetCreatureTemplate().GossipMenuId, true);
+            _player.SendPreparedGossip(creature);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverAcceptQuest, Processing = PacketProcessing.Inplace)]
@@ -83,8 +85,8 @@ namespace Game
 
             var CLOSE_GOSSIP_CLEAR_SHARING_INFO = new System.Action(() =>
             {
-                GetPlayer().PlayerTalkClass.SendCloseGossip();
-                GetPlayer().ClearQuestSharingInfo();
+                _player.PlayerTalkClass.SendCloseGossip();
+                _player.ClearQuestSharingInfo();
             });
 
             // no or incorrect quest giver
@@ -128,7 +130,7 @@ namespace Game
             if (quest != null)
             {
                 // prevent cheating
-                if (!GetPlayer().CanTakeQuest(quest, true))
+                if (!_player.CanTakeQuest(quest, true))
                 {
                     CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
@@ -186,26 +188,26 @@ namespace Game
         void HandleQuestgiverQueryQuest(QuestGiverQueryQuest packet)
         {
             // Verify that the guid is valid and is a questgiver or involved in the requested quest
-            var obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, (TypeMask.Unit | TypeMask.GameObject | TypeMask.Item));
+            var obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, (TypeMask.Unit | TypeMask.GameObject | TypeMask.Item));
             if (!obj || (!obj.HasQuest(packet.QuestID) && !obj.HasInvolvedQuest(packet.QuestID)))
             {
-                GetPlayer().PlayerTalkClass.SendCloseGossip();
+                _player.PlayerTalkClass.SendCloseGossip();
                 return;
             }
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
             if (quest != null)
             {
-                if (!GetPlayer().CanTakeQuest(quest, true))
+                if (!_player.CanTakeQuest(quest, true))
                     return;
 
-                if (quest.IsAutoAccept() && GetPlayer().CanAddQuest(quest, true))
-                    GetPlayer().AddQuestAndCheckCompletion(quest, obj);
+                if (quest.IsAutoAccept() && _player.CanAddQuest(quest, true))
+                    _player.AddQuestAndCheckCompletion(quest, obj);
 
                 if (quest.IsAutoComplete())
-                    GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, obj.GetGUID(), GetPlayer().CanCompleteQuest(quest.Id), true);
+                    _player.PlayerTalkClass.SendQuestGiverRequestItems(quest, obj.GetGUID(), _player.CanCompleteQuest(quest.Id), true);
                 else
-                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true, false);
+                    _player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true, false);
             }
         }
 
@@ -238,7 +240,7 @@ namespace Game
                         ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(packet.Choice.Item.ItemID);
                         if (rewardProto == null)
                         {
-                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
+                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", _player.GetName(), _player.GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
                             return;
                         }
 
@@ -289,7 +291,7 @@ namespace Game
 
                         if (!itemValid)
                         {
-                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
+                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", _player.GetName(), _player.GetGUID().ToString(), packet.Choice.Item.ItemID, packet.QuestID);
                             return;
                         }
                         break;
@@ -321,32 +323,32 @@ namespace Game
             WorldObject obj = GetPlayer();
             if (!quest.HasFlag(QuestFlags.AutoComplete))
             {
-                obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+                obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
                 if (!obj || !obj.HasInvolvedQuest(packet.QuestID))
                     return;
 
                 // some kind of WPE protection
-                if (!GetPlayer().CanInteractWithQuestGiver(obj))
+                if (!_player.CanInteractWithQuestGiver(obj))
                     return;
             }
 
-            if ((!GetPlayer().CanSeeStartQuest(quest) && GetPlayer().GetQuestStatus(packet.QuestID) == QuestStatus.None) ||
-                (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete && !quest.IsAutoComplete()))
+            if ((!_player.CanSeeStartQuest(quest) && _player.GetQuestStatus(packet.QuestID) == QuestStatus.None) ||
+                (_player.GetQuestStatus(packet.QuestID) != QuestStatus.Complete && !quest.IsAutoComplete()))
             {
                 Log.outError(LogFilter.Network, "Error in QuestStatus.Complete: player {0} ({1}) tried to complete quest {2}, but is not allowed to do so (possible packet-hacking or high latency)",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.QuestID);
+                    _player.GetName(), _player.GetGUID().ToString(), packet.QuestID);
                 return;
             }
 
-            if (GetPlayer().CanRewardQuest(quest, true)) // First, check if player is allowed to turn the quest in (all objectives completed). If not, we send players to the offer reward screen
+            if (_player.CanRewardQuest(quest, true)) // First, check if player is allowed to turn the quest in (all objectives completed). If not, we send players to the offer reward screen
             {
-                if (GetPlayer().CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
+                if (_player.CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
                 {
                     Battleground bg = _player.GetBattleground();
                     if (bg != null)
                         bg.HandleQuestComplete(packet.QuestID, _player);
 
-                    GetPlayer().RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
+                    _player.RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
 
                     switch (obj.GetTypeId())
                     {
@@ -401,29 +403,29 @@ namespace Game
                 }
             }
             else
-                GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
+                _player.PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverRequestReward, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverRequestReward(QuestGiverRequestReward packet)
         {
-            WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+            WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
             if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
                 return;
 
             // some kind of WPE protection
-            if (!GetPlayer().CanInteractWithQuestGiver(obj))
+            if (!_player.CanInteractWithQuestGiver(obj))
                 return;
 
-            if (GetPlayer().CanCompleteQuest(packet.QuestID))
-                GetPlayer().CompleteQuest(packet.QuestID);
+            if (_player.CanCompleteQuest(packet.QuestID))
+                _player.CompleteQuest(packet.QuestID);
 
-            if (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
+            if (_player.GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
                 return;
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
             if (quest != null)
-                GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
+                _player.PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestLogRemoveQuest, Processing = PacketProcessing.Inplace)]
@@ -431,10 +433,10 @@ namespace Game
         {
             if (packet.Entry < SharedConst.MaxQuestLogSize)
             {
-                uint questId = GetPlayer().GetQuestSlotQuestId(packet.Entry);
+                uint questId = _player.GetQuestSlotQuestId(packet.Entry);
                 if (questId != 0)
                 {
-                    if (!GetPlayer().TakeQuestSourceItem(questId, true))
+                    if (!_player.TakeQuestSourceItem(questId, true))
                         return;                                     // can't un-equip some items, reject quest cancel
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -443,30 +445,30 @@ namespace Game
                     if (quest != null)
                     {
                         if (quest.LimitTime != 0)
-                            GetPlayer().RemoveTimedQuest(questId);
+                            _player.RemoveTimedQuest(questId);
 
                         if (quest.HasFlag(QuestFlags.Pvp))
                         {
-                            GetPlayer().pvpInfo.IsHostile = GetPlayer().pvpInfo.IsInHostileArea || GetPlayer().HasPvPForcingQuest();
-                            GetPlayer().UpdatePvPState();
+                            _player.pvpInfo.IsHostile = _player.pvpInfo.IsInHostileArea || _player.HasPvPForcingQuest();
+                            _player.UpdatePvPState();
                         }
                     }
 
-                    GetPlayer().SetQuestSlot(packet.Entry, 0);
-                    GetPlayer().TakeQuestSourceItem(questId, true); // remove quest src item from player
-                    GetPlayer().AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements. 
-                    GetPlayer().RemoveActiveQuest(questId);
-                    GetPlayer().RemoveCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);
+                    _player.SetQuestSlot(packet.Entry, 0);
+                    _player.TakeQuestSourceItem(questId, true); // remove quest src item from player
+                    _player.AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements. 
+                    _player.RemoveActiveQuest(questId);
+                    _player.RemoveCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);
 
-                    Log.outInfo(LogFilter.Network, "Player {0} abandoned quest {1}", GetPlayer().GetGUID().ToString(), questId);
+                    Log.outInfo(LogFilter.Network, "Player {0} abandoned quest {1}", _player.GetGUID().ToString(), questId);
 
-                    Global.ScriptMgr.OnQuestStatusChange(_player, questId);
+                    Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(_player, questId));
 
                     if (quest != null)
-                        Global.ScriptMgr.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None);
+                        Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None), quest.ScriptId);
                 }
 
-                GetPlayer().UpdateCriteria(CriteriaType.AbandonAnyQuest, 1);
+                _player.UpdateCriteria(CriteriaType.AbandonAnyQuest, 1);
             }
         }
 
@@ -479,29 +481,29 @@ namespace Game
                 if (!quest.HasFlag(QuestFlags.PartyAccept))
                     return;
 
-                Player originalPlayer = Global.ObjAccessor.FindPlayer(GetPlayer().GetPlayerSharingQuest());
+                Player originalPlayer = Global.ObjAccessor.FindPlayer(_player.GetPlayerSharingQuest());
                 if (originalPlayer == null)
                     return;
 
-                if (!GetPlayer().IsInSameRaidWith(originalPlayer))
+                if (!_player.IsInSameRaidWith(originalPlayer))
                     return;
 
                 if (!originalPlayer.IsActiveQuest(packet.QuestID))
                     return;
 
-                if (!GetPlayer().CanTakeQuest(quest, true))
+                if (!_player.CanTakeQuest(quest, true))
                     return;
 
-                if (GetPlayer().CanAddQuest(quest, true))
+                if (_player.CanAddQuest(quest, true))
                 {
-                    GetPlayer().AddQuestAndCheckCompletion(quest, null);                // NULL, this prevent DB script from duplicate running
+                    _player.AddQuestAndCheckCompletion(quest, null);                // NULL, this prevent DB script from duplicate running
 
                     if (quest.SourceSpellID > 0)
                         _player.CastSpell(_player, quest.SourceSpellID, true);
                 }
             }
 
-            GetPlayer().ClearQuestSharingInfo();
+            _player.ClearQuestSharingInfo();
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverCompleteQuest, Processing = PacketProcessing.Inplace)]
@@ -520,7 +522,7 @@ namespace Game
             if (autoCompleteMode)
                 obj = GetPlayer();
             else
-                obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+                obj = Global.ObjAccessor.GetObjectByTypeMask(_player, packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
 
             if (!obj)
                 return;
@@ -531,36 +533,36 @@ namespace Game
                     return;
 
                 // some kind of WPE protection
-                if (!GetPlayer().CanInteractWithQuestGiver(obj))
+                if (!_player.CanInteractWithQuestGiver(obj))
                     return;
             }
             else
             {
                 // Do not allow completing quests on other players.
-                if (packet.QuestGiverGUID != GetPlayer().GetGUID())
+                if (packet.QuestGiverGUID != _player.GetGUID())
                     return;
             }
 
-            if (!GetPlayer().CanSeeStartQuest(quest) && GetPlayer().GetQuestStatus(packet.QuestID) == QuestStatus.None)
+            if (!_player.CanSeeStartQuest(quest) && _player.GetQuestStatus(packet.QuestID) == QuestStatus.None)
             {
                 Log.outError(LogFilter.Network, "Possible hacking attempt: Player {0} ({1}) tried to complete quest [entry: {2}] without being in possession of the quest!",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.QuestID);
+                    _player.GetName(), _player.GetGUID().ToString(), packet.QuestID);
                 return;
             }
 
-            if (GetPlayer().GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
+            if (_player.GetQuestStatus(packet.QuestID) != QuestStatus.Complete)
             {
                 if (quest.IsRepeatable())
-                    GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, GetPlayer().CanCompleteRepeatableQuest(quest), false);
+                    _player.PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, _player.CanCompleteRepeatableQuest(quest), false);
                 else
-                    GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, GetPlayer().CanRewardQuest(quest, false), false);
+                    _player.PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, _player.CanRewardQuest(quest, false), false);
             }
             else
             {
                 if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))                  // some items required
-                    GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, GetPlayer().CanRewardQuest(quest, false), false);
+                    _player.PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, _player.CanRewardQuest(quest, false), false);
                 else                                            // no items required
-                    GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
+                    _player.PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
             }
         }
 
@@ -574,7 +576,7 @@ namespace Game
             if (quest == null)
                 return;
 
-            Global.ScriptMgr.OnQuestAcknowledgeAutoAccept(_player, quest);
+            Global.ScriptMgr.RunScript<IQuestOnAckAutoAccept>(script => script.OnAcknowledgeAutoAccept(_player, quest), quest.ScriptId);
         }
 
         [WorldPacketHandler(ClientOpcodes.PushQuestToParty)]
@@ -736,7 +738,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestPushResult)]
         void HandleQuestPushResult(QuestPushResult packet)
         {
-            if (!GetPlayer().GetPlayerSharingQuest().IsEmpty())
+            if (!_player.GetPlayerSharingQuest().IsEmpty())
             {
                 if (_player.GetPlayerSharingQuest() == packet.SenderGUID)
                 {
@@ -785,8 +787,8 @@ namespace Game
                 Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {choiceResponse.ResponseIdentifier} (possible packet-hacking detected)");
                 return;
             }
-
-            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseIdentifier);
+           
+            Global.ScriptMgr.ForEach<IPlayerOnPlayerChoiceResponse>(p => p.OnPlayerChoiceResponse(_player, (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseIdentifier));
 
             if (playerChoiceResponse.Reward != null)
             {
@@ -820,7 +822,7 @@ namespace Game
                 }
 
                 foreach (PlayerChoiceResponseRewardEntry currency in reward.Currency)
-                    _player.ModifyCurrency((CurrencyTypes)currency.Id, currency.Quantity);
+                    _player.ModifyCurrency(currency.Id, currency.Quantity);
 
                 foreach (PlayerChoiceResponseRewardEntry faction in reward.Faction)
                     _player.GetReputationMgr().ModifyReputation(CliDB.FactionStorage.LookupByKey(faction.Id), faction.Quantity);

@@ -6,10 +6,12 @@ using Game.DataStorage;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IConversation;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Game.AI.SmartAction;
 
 namespace Game.Entities
 {
@@ -116,8 +118,7 @@ namespace Game.Entities
 
             foreach (var actor in conversationTemplate.Actors)
                 new ConversationActorFillVisitor(this, creator, map, actor).Invoke(actor);
-
-            Global.ScriptMgr.OnConversationCreate(this, creator);
+            Global.ScriptMgr.RunScript<IConversationOnConversationCreate>(script => script.OnConversationCreate(this, creator), GetScriptId());
 
             List<ConversationLine> lines = new();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
@@ -159,7 +160,7 @@ namespace Game.Entities
             // conversations are despawned 5-20s after LastLineEndTime
             _duration += TimeSpan.FromSeconds(10);
 
-            Global.ScriptMgr.OnConversationCreate(this, creator);
+            Global.ScriptMgr.RunScript<IConversationOnConversationCreate>(script => script.OnConversationCreate(this, creator), GetScriptId());
         }
 
         bool Start()

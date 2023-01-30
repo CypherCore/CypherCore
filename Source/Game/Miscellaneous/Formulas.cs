@@ -5,6 +5,7 @@ using Framework.Configuration;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Scripting.Interfaces.IFormula;
 using System;
 
 namespace Game
@@ -14,7 +15,7 @@ namespace Game
         public static float HKHonorAtLevelF(uint level, float multiplier = 1.0f)
         {
             float honor = multiplier * level * 1.55f;
-            Global.ScriptMgr.OnHonorCalculation(honor, level, multiplier);
+            Global.ScriptMgr.ForEach<IFormulaOnHonorCalculation>(p => p.OnHonorCalculation(honor, level, multiplier));
             return honor;
         }
 
@@ -40,7 +41,7 @@ namespace Game
             else
                 level = pl_level - 10;
 
-            Global.ScriptMgr.OnGrayLevelCalculation(level, pl_level);
+            Global.ScriptMgr.ForEach<IFormulaOnGrayLevelCalculation>(p => p.OnGrayLevelCalculation(level, pl_level));
             return level;
         }
 
@@ -59,7 +60,7 @@ namespace Game
             else
                 color = XPColorChar.Gray;
 
-            Global.ScriptMgr.OnColorCodeCalculation(color, pl_level, mob_level);
+            Global.ScriptMgr.ForEach<IFormulaOnColorCodeCaclculation>(p => p.OnColorCodeCalculation(color, pl_level, mob_level));
             return color;
         }
 
@@ -92,7 +93,7 @@ namespace Game
             else
                 diff = 17;
 
-            Global.ScriptMgr.OnZeroDifferenceCalculation(diff, pl_level);
+            Global.ScriptMgr.ForEach<IFormulaOnZeroDifference>(p => p.OnZeroDifferenceCalculation(diff, pl_level));
             return diff;
         }
 
@@ -130,7 +131,7 @@ namespace Game
                 baseGain = Math.Max(baseGainMin, baseGain);
             }
 
-            Global.ScriptMgr.OnBaseGainCalculation(baseGain, pl_level, mob_level);
+            Global.ScriptMgr.ForEach<IFormulaOnBaseGainCalculation>(p => p.OnBaseGainCalculation(baseGain, pl_level, mob_level));
             return baseGain;
         }
 
@@ -169,7 +170,7 @@ namespace Game
                 gain = (uint)(gain * xpMod);
             }
 
-            Global.ScriptMgr.OnGainCalculation(gain, player, u);
+            Global.ScriptMgr.ForEach<IFormulaOnGainCalculation>(p => p.OnGainCalculation(gain, player, u));
             return gain;
         }
 
@@ -205,7 +206,7 @@ namespace Game
                 }
             }
 
-            Global.ScriptMgr.OnGroupRateCalculation(rate, count, isRaid);
+            Global.ScriptMgr.ForEach<IFormulaOnGroupRateCaclulation>(p => p.OnGroupRateCalculation(rate, count, isRaid));
             return rate;
         }
 

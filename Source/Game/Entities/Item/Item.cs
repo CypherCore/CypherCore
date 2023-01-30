@@ -8,12 +8,15 @@ using Game.DataStorage;
 using Game.Loots;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
+using static Game.AI.SmartAction;
 
 namespace Game.Entities
 {
@@ -114,10 +117,11 @@ namespace Game.Entities
                 return;
 
             Log.outDebug(LogFilter.Player, "Item.UpdateDuration Item (Entry: {0} Duration {1} Diff {2})", GetEntry(), duration, diff);
-
             if (duration <= diff)
             {
-                Global.ScriptMgr.OnItemExpire(owner, GetTemplate());
+                var itemTemplate = GetTemplate();
+                Global.ScriptMgr.RunScriptRet<IItemOnExpire>(p => p.OnExpire(owner, itemTemplate), itemTemplate.ScriptId);
+
                 owner.DestroyItem(GetBagSlot(), GetSlot(), true);
                 return;
             }

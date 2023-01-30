@@ -7,6 +7,7 @@ using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,7 +208,8 @@ namespace Game.Entities
             UpdateZoneDependentAuras(newZone);
 
             // call enter script hooks after everyting else has processed
-            Global.ScriptMgr.OnPlayerUpdateZone(this, newZone, newArea);
+            Global.ScriptMgr.ForEach<IPlayerOnUpdateZone>(p => p.OnUpdateZone(this, newZone, newArea));
+
             if (oldZone != newZone)
             {
                 Global.OutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);

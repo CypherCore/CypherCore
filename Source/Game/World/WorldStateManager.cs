@@ -7,6 +7,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IWorldState;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -212,7 +213,7 @@ namespace Game
                 _realmWorldStateValues[worldStateId] = value;
 
                 if (worldStateTemplate != null)
-                    Global.ScriptMgr.OnWorldStateValueChange(worldStateTemplate, oldValue, value, null);
+                    Global.ScriptMgr.RunScript<IWorldStateOnValueChange>(script => script.OnValueChange(worldStateTemplate.Id, oldValue, value, null), worldStateTemplate.ScriptId);
 
                 // Broadcast update to all players on the server
                 UpdateWorldState updateWorldState = new();

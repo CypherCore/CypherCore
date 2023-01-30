@@ -11,10 +11,14 @@ using Game.Mails;
 using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IItem;
+using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IQuest;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -704,9 +708,9 @@ namespace Game.Entities
                 case TypeId.Container:
                 case TypeId.AzeriteItem:
                 case TypeId.AzeriteEmpoweredItem:
-                {
+                    {
                     Item item = (Item)questGiver;
-                    Global.ScriptMgr.OnQuestAccept(this, item, quest);
+                    Global.ScriptMgr.RunScriptRet<IItemOnQuestAccept>(p => p.OnQuestAccept(this, item, quest), item.GetScriptId());
 
                     // There are two cases where the source item is not destroyed when the quest is accepted:
                     // - It is required to finish the quest, and is an unique item
@@ -825,8 +829,8 @@ namespace Game.Entities
 
             SendQuestUpdate(questId);
 
-            Global.ScriptMgr.OnQuestStatusChange(this, questId);
-            Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
+            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
+            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status), quest.ScriptId);
         }
 
         public void CompleteQuest(uint quest_id)
@@ -968,7 +972,7 @@ namespace Game.Entities
                         DestroyItemCount((uint)obj.ObjectID, (uint)obj.Amount, true);
                         break;
                     case QuestObjectiveType.Currency:
-                        ModifyCurrency((CurrencyTypes)obj.ObjectID, -obj.Amount, false, true);
+                        ModifyCurrency((uint)obj.ObjectID, -obj.Amount, false, true);
                         break;
                 }
             }
@@ -1036,7 +1040,7 @@ namespace Game.Entities
                     {
                         for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == rewardId)
-                                ModifyCurrency((CurrencyTypes)quest.RewardChoiceItemId[i], (int)quest.RewardChoiceItemCount[i]);
+                                ModifyCurrency(quest.RewardChoiceItemId[i], (int)quest.RewardChoiceItemCount[i]);
                     }
                     break;
             }
@@ -1044,7 +1048,7 @@ namespace Game.Entities
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 if (quest.RewardCurrencyId[i] != 0)
-                    ModifyCurrency((CurrencyTypes)quest.RewardCurrencyId[i], (int)quest.RewardCurrencyCount[i]);
+                    ModifyCurrency(quest.RewardCurrencyId[i], (int)quest.RewardCurrencyCount[i]);
             }
 
             uint skill = quest.RewardSkillId;
@@ -1188,8 +1192,8 @@ namespace Game.Entities
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            Global.ScriptMgr.OnQuestStatusChange(this, questId);
-            Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
+            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
+            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded), quest.ScriptId);
         }
 
         public void SetRewardedQuest(uint quest_id)
@@ -1824,8 +1828,8 @@ namespace Game.Entities
                 if (!quest.IsAutoComplete())
                     m_QuestStatusSave[questId] = QuestSaveType.Default;
 
-                Global.ScriptMgr.OnQuestStatusChange(this, questId);
-                Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, status);
+                Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
+                Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, status), quest.ScriptId);
             }
 
             if (update)
@@ -2574,7 +2578,7 @@ namespace Game.Entities
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
             if (quest != null)
-                Global.ScriptMgr.OnQuestObjectiveChange(this, quest, objective, oldData, data);
+                Global.ScriptMgr.RunScript<IQuestOnQuestObjectiveChange>(script => script.OnQuestObjectiveChange(this, quest, objective, oldData, data), quest.ScriptId);
 
             // Add to save
             m_QuestStatusSave[objective.QuestID] = QuestSaveType.Default;

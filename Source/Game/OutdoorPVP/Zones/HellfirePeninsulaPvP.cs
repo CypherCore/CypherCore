@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IOutdoorPvP;
 
 namespace Game.PvP
 {
@@ -286,11 +287,11 @@ namespace Game.PvP
     }
 
     [Script]
-    class OutdoorPvP_hellfire_peninsula : OutdoorPvPScript
+    class OutdoorPvP_hellfire_peninsula : ScriptObjectAutoAddDBBound, IOutdoorPvPGetOutdoorPvP
     {
         public OutdoorPvP_hellfire_peninsula() : base("outdoorpvp_hp") { }
 
-        public override OutdoorPvP GetOutdoorPvP(Map map)
+        public OutdoorPvP GetOutdoorPvP(Map map)
         {
             return new HellfirePeninsulaPvP(map);
         }

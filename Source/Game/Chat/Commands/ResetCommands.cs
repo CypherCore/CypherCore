@@ -7,6 +7,7 @@ using Framework.IO;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Scripting.Interfaces.IPlayer;
 using System.Collections.Generic;
 
 namespace Game.Chat
@@ -108,7 +109,7 @@ namespace Game.Chat
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
-            Global.ScriptMgr.OnPlayerLevelChanged(target, oldLevel);
+            Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(target, oldLevel));
 
             return true;
         }

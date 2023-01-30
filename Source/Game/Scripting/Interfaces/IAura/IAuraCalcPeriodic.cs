@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Framework.Constants;
 using Game.Spells;
 
-namespace Game.Scripting.Interfaces.Aura
+namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAuraCalcPeriodic : IAuraEffectHandler
     {

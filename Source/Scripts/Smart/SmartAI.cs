@@ -7,15 +7,19 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.DataStorage;
+using Game.Scripting.Interfaces.IAreaTrigger;
+using Game.Scripting.Interfaces.IAreaTriggerEntity;
+using Game.Scripting.Interfaces.IScene;
+using Game.Scripting.Interfaces.IQuest;
 
 namespace Scripts.Smart
 {
     [Script]
-    class SmartTrigger : AreaTriggerScript
+    class SmartTrigger : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public SmartTrigger() : base("SmartTrigger") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
             if (!player.IsAlive())
                 return false;
@@ -29,43 +33,43 @@ namespace Scripts.Smart
     }
 
     [Script]
-    class SmartAreaTriggerEntityScript : AreaTriggerEntityScript
+    class SmartAreaTriggerEntityScript : ScriptObjectAutoAddDBBound, IAreaTriggerEntityGetAI
     {
         public SmartAreaTriggerEntityScript() : base("SmartAreaTriggerAI") { }
 
-        public override AreaTriggerAI GetAI(AreaTrigger areaTrigger)
+        public AreaTriggerAI GetAI(AreaTrigger areaTrigger)
         {
             return new SmartAreaTriggerAI(areaTrigger);
         }
     }
 
     [Script]
-    class SmartScene : SceneScript
+    class SmartScene : ScriptObjectAutoAddDBBound, ISceneOnSceneStart, ISceneOnSceneTrigger, ISceneOnSceneChancel, ISceneOnSceneComplete
     {
         public SmartScene() : base("SmartScene") { }
 
-        public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
-        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
-        public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
-        public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, sceneTemplate);
@@ -74,12 +78,12 @@ namespace Scripts.Smart
     }
 
     [Script]
-    class SmartQuest : QuestScript
+    class SmartQuest : ScriptObjectAutoAddDBBound, IQuestOnQuestStatusChange, IQuestOnQuestObjectiveChange
     {
         public SmartQuest() : base("SmartQuest") { }
 
         // Called when a quest status change
-        public override void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
+        public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
             SmartScript smartScript = new();
             smartScript.OnInitialize(null, null, null, quest);
@@ -104,7 +108,7 @@ namespace Scripts.Smart
         }
 
         // Called when a quest objective data change
-        public override void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
+        public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
             ushort slot = player.FindQuestSlot(quest.Id);
             if (slot < SharedConst.MaxQuestLogSize && player.IsQuestObjectiveComplete(slot, quest, objective))

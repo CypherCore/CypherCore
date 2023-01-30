@@ -3,25 +3,28 @@
 
 namespace System.Collections.Generic
 {
-    public interface IMultiMap<TKey, TValue>
+    public interface IMultiMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
-        void AddRange(TKey key, IEnumerable<TValue> valueList);
-        List<TValue> this[TKey key] { get; set;}
-        bool Remove(TKey key, TValue value);
-        void Add(TKey key, TValue value);
-        bool ContainsKey(TKey key);
+        List<TValue> this[TKey key] { get; set; }
 
-        ICollection<TKey> Keys {get;}
-        bool Remove(TKey key);
-        ICollection<TValue> Values{get;}
+        int Count { get; }
+        ICollection<TKey> Keys { get; }
+        IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList { get; }
+        ICollection<TValue> Values { get; }
 
         void Add(KeyValuePair<TKey, TValue> item);
+        void Add(TKey key, TValue value);
+        void AddRange(TKey key, IEnumerable<TValue> valueList);
         void Clear();
+        bool Contains(KeyValuePair<TKey, TValue> item);
         bool Contains(TKey key, TValue item);
+        bool ContainsKey(TKey key);
         void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex);
-        int Count {get;}
-        bool Remove(KeyValuePair<TKey, TValue> item);
-
+        List<TValue> LookupByKey(object key);
         List<TValue> LookupByKey(TKey key);
+        bool Remove(KeyValuePair<TKey, TValue> item);
+        bool Remove(TKey key);
+        bool Remove(TKey key, TValue value);
+        bool Empty();
     }
 }

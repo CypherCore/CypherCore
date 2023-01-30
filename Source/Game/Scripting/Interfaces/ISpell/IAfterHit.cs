@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Game.Scripting.Interfaces.Spell
+namespace Game.Scripting.Interfaces.ISpell
 {
     public interface IAfterHit : ISpellScript
     {

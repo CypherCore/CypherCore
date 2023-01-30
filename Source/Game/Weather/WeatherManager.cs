@@ -4,6 +4,8 @@
 using Framework.Database;
 using Game.Entities;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IWeather;
 using System.Collections.Generic;
 
 namespace Game
@@ -109,7 +111,7 @@ namespace Game
                 }
             }
 
-            Global.ScriptMgr.OnWeatherUpdate(this, diff);
+            Global.ScriptMgr.RunScript<IWeatherOnUpdate>(p => p.OnUpdate(this, diff), GetScriptId());
             return true;
         }
 
@@ -311,7 +313,7 @@ namespace Game
             }
             Log.outInfo(LogFilter.Server, "Change the weather of zone {0} to {1}.", m_zone, wthstr);
 
-            Global.ScriptMgr.OnWeatherChange(this, state, m_intensity);
+            Global.ScriptMgr.RunScript<IWeatherOnChange>(p => p.OnChange(this, state, m_intensity), GetScriptId());
             return true;
         }
 

@@ -23,10 +23,12 @@ using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -543,7 +545,7 @@ namespace Game.Entities
                 if (diff >= m_nextSave)
                 {
                     // m_nextSave reset in SaveToDB call
-                    Global.ScriptMgr.OnPlayerSave(this);
+                    Global.ScriptMgr.ForEach<IPlayerOnSave>(p => p.OnSave(this));
                     SaveToDB();
                     Log.outDebug(LogFilter.Player, "Player '{0}' (GUID: {1}) saved", GetName(), GetGUID().ToString());
                 }
@@ -1108,6 +1110,7 @@ namespace Game.Entities
                 _currencyStorage[(uint)id] = cur;
             }
         }
+
         public uint GetCurrency(uint id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
@@ -1116,7 +1119,8 @@ namespace Game.Entities
 
             return playerCurrency.Quantity;
         }
-        public void ModifyCurrency(CurrencyTypes id, int count, bool printLog = true, bool ignoreMultipliers = false)
+
+        public void ModifyCurrency(uint id, int count, bool printLog = true, bool ignoreMultipliers = false)
         {
             if (count == 0)
                 return;
@@ -1137,7 +1141,7 @@ namespace Game.Entities
                 return;
             }
 
-            if (id == CurrencyTypes.Azerite)
+            if (id == (uint)CurrencyTypes.Azerite)
             {
                 if (count > 0)
                 {
@@ -1161,7 +1165,7 @@ namespace Game.Entities
                 cur.WeeklyQuantity = 0;
                 cur.TrackedQuantity = 0;
                 cur.Flags = 0;
-                _currencyStorage[(uint)id] = cur;
+                _currencyStorage[id] = cur;
                 playerCurrency = _currencyStorage.LookupByKey(id);
             }
             else
@@ -1213,19 +1217,19 @@ namespace Game.Entities
                 if (playerCurrency.state != PlayerCurrencyState.New)
                     playerCurrency.state = PlayerCurrencyState.Changed;
 
-                CurrencyChanged((uint)id, count);
+                CurrencyChanged(id, count);
 
                 playerCurrency.Quantity = (uint)newTotalCount;
                 playerCurrency.WeeklyQuantity = (uint)newWeekCount;
                 playerCurrency.TrackedQuantity = (uint)newTrackedCount;
 
                 if (count > 0)
-                    UpdateCriteria(CriteriaType.CurrencyGained, (uint)id, (uint)count);
+                    UpdateCriteria(CriteriaType.CurrencyGained, id, (uint)count);
 
-                _currencyStorage[(uint)id] = playerCurrency;
+                _currencyStorage[id] = playerCurrency;
 
                 SetCurrency packet = new();
-                packet.Type = (uint)id;
+                packet.Type = id;
                 packet.Quantity = newTotalCount;
                 packet.SuppressChatLog = !printLog;
                 packet.WeeklyQuantity = newWeekCount;
@@ -1236,6 +1240,7 @@ namespace Game.Entities
                 SendPacket(packet);
             }
         }
+
         public bool HasCurrency(uint id, uint count)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
@@ -3653,7 +3658,7 @@ namespace Game.Entities
             StopMirrorTimers();                                     //disable timers(bars)
 
             // OnPlayerRepop hook
-            Global.ScriptMgr.OnPlayerRepop(this);
+            Global.ScriptMgr.ForEach<IPlayerOnPlayerRepop>(p => p.OnPlayerRepop(this));
         }
 
         public void StopMirrorTimers()
@@ -4749,7 +4754,7 @@ namespace Game.Entities
             if (amount == 0)
                 return true;
 
-            Global.ScriptMgr.OnPlayerMoneyChanged(this, amount);
+            Global.ScriptMgr.ForEach<IPlayerOnMoneyChanged>(p => p.OnMoneyChanged(this, amount));
 
             if (amount < 0)
                 SetMoney((ulong)(GetMoney() > (ulong)-amount ? (long)GetMoney() + amount : 0));
@@ -4932,7 +4937,7 @@ namespace Game.Entities
 
             PushQuests();
 
-            Global.ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
+            Global.ScriptMgr.ForEach<IPlayerOnLevelChanged>(p => p.OnLevelChanged(this, (byte)oldLevel));
         }
 
         public bool CanParry()
@@ -5750,13 +5755,13 @@ namespace Game.Entities
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
-        void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only)
+        void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only, bool required3dDist = false)
         {
             if (self)
                 SendPacket(data);
 
             PacketSenderRef sender = new(data);
-            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only);
+            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only, null, required3dDist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -6013,7 +6018,7 @@ namespace Game.Entities
             localizer.Invoke(this);
 
             // Send to players
-            MessageDistDeliverer<LocalizedDo> notifier = new(this, localizer, range);
+            MessageDistDeliverer<LocalizedDo> notifier = new(this, localizer, range, false, null, true);
             Cell.VisitWorldObjects(this, notifier, range);
         }
 
@@ -6039,7 +6044,7 @@ namespace Game.Entities
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
-            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat));
+            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
         }
         public override void TextEmote(uint textId, WorldObject target = null, bool isBossEmote = false)
         {
@@ -6206,10 +6211,9 @@ namespace Game.Entities
 
             if (victim != null && victim.IsTypeId(TypeId.Unit) && !victim.ToCreature().HasLootRecipient())
                 return;
-
             uint level = GetLevel();
 
-            Global.ScriptMgr.OnGivePlayerXP(this, xp, victim);
+            Global.ScriptMgr.ForEach<IPlayerOnGiveXP>(p => p.OnGiveXP(this, ref xp, victim));
 
             // XP to money conversion processed in Player.RewardQuest
             if (IsMaxLevel())

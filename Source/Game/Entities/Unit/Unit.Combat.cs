@@ -12,6 +12,9 @@ using Game.Loots;
 using Game.Maps;
 using Game.Networking.Packets;
 using Game.PvP;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -974,12 +977,12 @@ namespace Game.Entities
                 {
                     Player killedPlr = victim.ToPlayer();
                     if (killedPlr != null)
-                        Global.ScriptMgr.OnPVPKill(killerPlr, killedPlr);
+                        Global.ScriptMgr.ForEach<IPlayerOnPVPKill>(p => p.OnPVPKill(killerPlr, killedPlr));
                     else
                     {
                         Creature killedCre = victim.ToCreature();
                         if (killedCre != null)
-                            Global.ScriptMgr.OnCreatureKill(killerPlr, killedCre);
+                            Global.ScriptMgr.ForEach<IPlayerOnCreatureKill>(p => p.OnCreatureKill(killerPlr, killedCre));
                     }
                 }
                 else
@@ -989,7 +992,7 @@ namespace Game.Entities
                     {
                         Player killed = victim.ToPlayer();
                         if (killed != null)
-                            Global.ScriptMgr.OnPlayerKilledByCreature(killerCre, killed);
+                            Global.ScriptMgr.ForEach<IPlayerOnPlayerKilledByCreature>(p => p.OnPlayerKilledByCreature(killerCre, killed));
                     }
                 }
             }
@@ -1076,7 +1079,9 @@ namespace Game.Entities
             damage = damageInfo.Target.MeleeDamageBonusTaken(this, damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
-            Global.ScriptMgr.ModifyMeleeDamage(damageInfo.Target, damageInfo.Attacker, ref damage);
+            var t = damageInfo.Target;
+            var a = damageInfo.Attacker;
+            Global.ScriptMgr.ForEach<IUnitModifyMeleeDamage>(p => p.ModifyMeleeDamage(t, a, ref damage));
 
             // Calculate armor reduction
             if (IsDamageReducedByArmor((SpellSchoolMask)damageInfo.DamageSchoolMask))

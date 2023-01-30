@@ -4,6 +4,8 @@
 using Framework.Constants;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
 {
@@ -28,7 +30,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
     }
 
     [Script]
-    class instance_blackrock_caverns : InstanceMapScript
+    class instance_blackrock_caverns : InstanceMapScript, IInstanceMapGetInstanceScript
     {
         static ObjectData[] creatureData =
         {
@@ -77,7 +79,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
             }
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
+        public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_blackrock_caverns_InstanceMapScript(map);
         }

@@ -7,7 +7,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
 
-namespace Game.Scripting.Interfaces.Aura
+namespace Game.Scripting.Interfaces.IAura
 {
     public interface IAuraSplitHandler : IAuraEffectHandler
     {

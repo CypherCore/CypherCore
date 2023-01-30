@@ -4,11 +4,12 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IConversation;
 
 namespace Scripts.World
 {
     [Script]
-    class conversation_allied_race_dk_defender_of_azeroth : ConversationScript
+    class conversation_allied_race_dk_defender_of_azeroth : ScriptObjectAutoAddDBBound, IConversationOnConversationCreate, IConversationOnConversationLineStarted
     {
         const uint NpcTalkToYourCommanderCredit = 161709;
         const uint NpcListenToYourCommanderCredit = 163027;
@@ -16,14 +17,14 @@ namespace Scripts.World
 
         public conversation_allied_race_dk_defender_of_azeroth() : base("conversation_allied_race_dk_defender_of_azeroth") { }
 
-        public override void OnConversationCreate(Conversation conversation, Unit creator)
+        public void OnConversationCreate(Conversation conversation, Unit creator)
         {
             Player player = creator.ToPlayer();
             if (player != null)
                 player.KilledMonsterCredit(NpcTalkToYourCommanderCredit);
         }
 
-        public override void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
+        public void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
         {
             if (lineId != ConversationLinePlayer)
                 return;

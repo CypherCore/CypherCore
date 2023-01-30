@@ -4,6 +4,7 @@
 using Game;
 using Game.Entities;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IScene;
 
 namespace Scripts.World.SceneScripts
 {
@@ -13,12 +14,12 @@ namespace Scripts.World.SceneScripts
     }
 
     [Script]
-    class scene_deathwing_simulator : SceneScript
+    class scene_deathwing_simulator : ScriptObjectAutoAddDBBound, ISceneOnSceneTrigger
     {
         public scene_deathwing_simulator() : base("scene_deathwing_simulator") { }
 
         // Called when a player receive trigger from scene
-        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
+        public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             if (triggerName == "Burn Player")
                 player.CastSpell(player, SpellIds.DeathwingSimulator, true); // Deathwing Simulator Burn player

@@ -8,6 +8,7 @@ using Game.Scripting;
 using System.Collections.Generic;
 using Game.AI;
 using System;
+using Game.Scripting.Interfaces.IAreaTrigger;
 
 namespace Scripts.World.Areatriggers
 {
@@ -125,11 +126,11 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_coilfang_waterfall : AreaTriggerScript
+    class AreaTrigger_at_coilfang_waterfall : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public AreaTrigger_at_coilfang_waterfall() : base("at_coilfang_waterfall") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             GameObject go = player.FindNearestGameObject(GameObjectIds.CoilfangWaterfall, 35.0f);
             if (go)
@@ -141,11 +142,11 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_legion_teleporter : AreaTriggerScript
+    class AreaTrigger_at_legion_teleporter : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public AreaTrigger_at_legion_teleporter() : base("at_legion_teleporter") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player.IsAlive() && !player.IsInCombat())
             {
@@ -168,11 +169,11 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_scent_larkorwi : AreaTriggerScript
+    class AreaTrigger_at_scent_larkorwi : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public AreaTrigger_at_scent_larkorwi() : base("at_scent_larkorwi") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsDead() && player.GetQuestStatus(QuestIds.ScentOfLarkorwi) == QuestStatus.Incomplete)
             {
@@ -185,11 +186,11 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_sholazar_waygate : AreaTriggerScript
+    class AreaTrigger_at_sholazar_waygate : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public AreaTrigger_at_sholazar_waygate() : base("at_sholazar_waygate") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsDead() && (player.GetQuestStatus(QuestIds.MeetingAGreatOne) != QuestStatus.None ||
                 (player.GetQuestStatus(QuestIds.TheMakersOverlook) == QuestStatus.Rewarded && player.GetQuestStatus(QuestIds.TheMakersPerch) == QuestStatus.Rewarded)))
@@ -211,11 +212,11 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_nats_landing : AreaTriggerScript
+    class AreaTrigger_at_nats_landing : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public AreaTrigger_at_nats_landing() : base("at_nats_landing") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsAlive() || !player.HasAura(SpellIds.FishPaste))
                 return false;
@@ -236,7 +237,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_brewfest : AreaTriggerScript
+    class AreaTrigger_at_brewfest : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         Dictionary<uint, long> _triggerTimes;
 
@@ -250,7 +251,7 @@ namespace Scripts.World.Areatriggers
             };
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             uint triggerId = areaTrigger.Id;
             // Second trigger happened too early after first, skip for now
@@ -279,7 +280,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_area_52_entrance : AreaTriggerScript
+    class AreaTrigger_at_area_52_entrance : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         Dictionary<uint, long> _triggerTimes;
 
@@ -294,7 +295,7 @@ namespace Scripts.World.Areatriggers
             };
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             float x = 0.0f, y = 0.0f, z = 0.0f;
 
@@ -336,7 +337,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_frostgrips_hollow : AreaTriggerScript
+    class AreaTrigger_at_frostgrips_hollow : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         ObjectGuid stormforgedMonitorGUID;
         ObjectGuid stormforgedEradictorGUID;
@@ -347,7 +348,7 @@ namespace Scripts.World.Areatriggers
             stormforgedEradictorGUID.Clear();
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player.GetQuestStatus(QuestIds.TheLonesomeWatcher) != QuestStatus.Incomplete)
                 return false;

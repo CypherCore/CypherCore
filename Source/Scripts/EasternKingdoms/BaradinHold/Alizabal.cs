@@ -10,6 +10,7 @@ using Game.AI;
 using Game.DataStorage;
 using Game.Maps;
 using System;
+using Game.Scripting.Interfaces.IAreaTrigger;
 
 namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
 {
@@ -53,11 +54,11 @@ namespace Scripts.EasternKingdoms.BaradinHold.Alizabal
     }
 
     [Script]
-    class at_alizabal_intro : AreaTriggerScript
+    class at_alizabal_intro : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
         public at_alizabal_intro() : base("at_alizabal_intro") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
+        public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             InstanceScript instance = player.GetInstanceScript();
             if (instance != null)

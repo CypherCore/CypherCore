@@ -16,12 +16,14 @@ using Game.Movement;
 using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Scripting.Interfaces.ISpell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using static Game.AI.SmartEvent;
 
 namespace Game.Spells
 {
@@ -2316,7 +2318,7 @@ namespace Game.Spells
 
             // trigger linked auras remove/apply
             // @todo remove/cleanup this, as this table is not documented and people are doing stupid things with it
-            var spellTriggered = Global.SpellMgr.GetSpellLinked((int)m_spellInfo.Id + (int)SpellLinkedType.Hit);
+            var spellTriggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Hit, m_spellInfo.Id);
             if (spellTriggered != null)
             {
                 foreach (var id in spellTriggered)
@@ -2673,7 +2675,7 @@ namespace Game.Spells
             {
                 // now that we've done the basic check, now run the scripts
                 // should be done before the spell is actually executed
-                Global.ScriptMgr.OnPlayerSpellCast(playerCaster, this, skipCheck);
+                Global.ScriptMgr.ForEach<IPlayerOnSpellCast>(p => p.OnSpellCast(playerCaster, this, skipCheck));
 
                 // As of 3.0.2 pets begin attacking their owner's target immediately
                 // Let any pets know we've attacked something. Check DmgClass for harmful spells only
@@ -2898,7 +2900,7 @@ namespace Game.Spells
 
             CallScriptAfterCastHandlers();
 
-            var spell_triggered = Global.SpellMgr.GetSpellLinked((int)m_spellInfo.Id);
+            var spell_triggered = Global.SpellMgr.GetSpellLinked(SpellLinkedType.Cast, m_spellInfo.Id);
             if (spell_triggered != null)
             {
                 foreach (var spellId in spell_triggered)
@@ -4505,7 +4507,7 @@ namespace Game.Spells
             }
 
             foreach (var reagentsCurrency in m_spellInfo.ReagentsCurrency)
-                p_caster.ModifyCurrency((CurrencyTypes)reagentsCurrency.CurrencyTypesID, -reagentsCurrency.CurrencyCount, false, true);
+                p_caster.ModifyCurrency(reagentsCurrency.CurrencyTypesID, -reagentsCurrency.CurrencyCount, false, true);
         }
 
         void HandleThreatSpells()

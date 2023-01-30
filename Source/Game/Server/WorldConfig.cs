@@ -3,6 +3,7 @@
 
 using Framework.Configuration;
 using Framework.Constants;
+using Game.Scripting.Interfaces.IWorld;
 using System;
 using System.Collections.Generic;
 
@@ -1027,7 +1028,7 @@ namespace Game
 
             // call ScriptMgr if we're reloading the configuration
             if (reload)
-                Global.ScriptMgr.OnConfigLoad(reload);
+                Global.ScriptMgr.ForEach<IWorldOnConfigLoad>(p => p.OnConfigLoad(reload));
         }
 
         public static uint GetUIntValue(WorldCfg confi)

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Framework.Constants;
 
-namespace Game.Scripting.Interfaces.Spell
+namespace Game.Scripting.Interfaces.ISpell
 {
     public interface ISpellEffect
     {

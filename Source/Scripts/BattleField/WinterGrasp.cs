@@ -7,6 +7,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.Scripting.Interfaces.IBattlefield;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -1558,11 +1559,11 @@ namespace Game.BattleFields
     }
 
     [Script]
-    class Battlefield_wintergrasp : BattlefieldScript
+    class Battlefield_wintergrasp : ScriptObjectAutoAddDBBound, IBattlefieldGetBattlefield
     {
         public Battlefield_wintergrasp() : base("battlefield_wg") { }
 
-        public override BattleField GetBattlefield(Map map)
+        public BattleField GetBattlefield(Map map)
         {
             return new BattlefieldWG(map);
         }

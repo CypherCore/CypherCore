@@ -7,11 +7,14 @@ using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
+using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IGuild;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Guilds
 {
@@ -78,7 +81,7 @@ namespace Game.Guilds
                 if (leader != null)
                     SendEventNewLeader(leader, null);
 
-                Global.ScriptMgr.OnGuildCreate(this, pLeader, name);
+                Global.ScriptMgr.ForEach<IGuildOnCreate>(p => p.OnCreate(this, pLeader, name));
             }
 
             return ret;
@@ -86,7 +89,7 @@ namespace Game.Guilds
 
         public void Disband()
         {
-            Global.ScriptMgr.OnGuildDisband(this);
+            Global.ScriptMgr.ForEach<IGuildOnDisband>(p => p.OnDisband(this));
 
             BroadcastPacket(new GuildEventDisbanded());
 
@@ -338,7 +341,7 @@ namespace Game.Guilds
             {
                 m_motd = motd;
 
-                Global.ScriptMgr.OnGuildMOTDChanged(this, motd);
+                Global.ScriptMgr.ForEach<IGuildOnMOTDChanged>(p => p.OnMOTDChanged(this, motd));
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_MOTD);
                 stmt.AddValue(0, motd);
@@ -359,7 +362,7 @@ namespace Game.Guilds
             {
                 m_info = info;
 
-                Global.ScriptMgr.OnGuildInfoChanged(this, info);
+                Global.ScriptMgr.ForEach<IGuildOnInfoChanged>(p => p.OnInfoChanged(this, info));
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_INFO);
                 stmt.AddValue(0, info);
@@ -887,7 +890,7 @@ namespace Game.Guilds
             Player player = session.GetPlayer();
 
             // Call script after validation and before money transfer.
-            Global.ScriptMgr.OnGuildMemberDepositMoney(this, player, amount);
+            Global.ScriptMgr.ForEach<IGuildOnMemberDepositMoney>(p => p.OnMemberDepositMoney(this, player, amount));
 
             if (m_bankMoney > GuildConst.MoneyLimit - amount)
             {
@@ -937,7 +940,7 @@ namespace Game.Guilds
                 return false;
 
             // Call script after validation and before money transfer.
-            Global.ScriptMgr.OnGuildMemberWitdrawMoney(this, player, amount, repair);
+            Global.ScriptMgr.ForEach<IGuildOnMemberWithDrawMoney>(p => p.OnMemberWitdrawMoney(this, player, amount, repair));
 
             SQLTransaction trans = new();
             // Add money to player (if required)
@@ -1666,7 +1669,7 @@ namespace Game.Guilds
             BroadcastPacket(joinNotificationPacket);
 
             // Call scripts if member was succesfully added (and stored to database)
-            Global.ScriptMgr.OnGuildAddMember(this, player, (byte)rankId);
+            Global.ScriptMgr.ForEach<IGuildOnAddMember>(p => p.OnAddMember(this, player, (byte)rankId));
 
             return true;
         }
@@ -1705,7 +1708,7 @@ namespace Game.Guilds
                 }
             }
             // Call script on remove before member is actually removed from guild (and database)
-            Global.ScriptMgr.OnGuildRemoveMember(this, player, isDisbanding, isKicked);
+            Global.ScriptMgr.ForEach<IGuildOnRemoveMember>(p => p.OnRemoveMember(this, player, isDisbanding, isKicked));
 
             m_members.Remove(guid);
 
@@ -2061,7 +2064,7 @@ namespace Game.Guilds
             m_eventLog.AddEvent(trans, new EventLogEntry(m_id, m_eventLog.GetNextGUID(), eventType, playerGuid1, playerGuid2, newRank));
             DB.Characters.CommitTransaction(trans);
 
-            Global.ScriptMgr.OnGuildEvent(this, (byte)eventType, playerGuid1, playerGuid2, newRank);
+            Global.ScriptMgr.ForEach<IGuildOnEvent>(p => p.OnEvent(this, (byte)eventType, playerGuid1, playerGuid2, newRank));
         }
 
         void _LogBankEvent(SQLTransaction trans, GuildBankEventLogTypes eventType, byte tabId, ulong lowguid, uint itemOrMoney, ushort itemStackCount = 0, byte destTabId = 0)
@@ -2082,7 +2085,7 @@ namespace Game.Guilds
             var pLog = m_bankEventLog[tabId];
             pLog.AddEvent(trans, new BankEventLogEntry(m_id, pLog.GetNextGUID(), eventType, dbTabId, lowguid, itemOrMoney, itemStackCount, destTabId));
 
-            Global.ScriptMgr.OnGuildBankEvent(this, (byte)eventType, tabId, lowguid, itemOrMoney, itemStackCount, destTabId);
+            Global.ScriptMgr.ForEach<IGuildOnBankEvent>(p => p.OnBankEvent(this, (byte)eventType, tabId, lowguid, itemOrMoney, itemStackCount, destTabId));
         }
 
         Item _GetItem(byte tabId, byte slotId)
@@ -3636,9 +3639,9 @@ namespace Game.Guilds
             {
                 Cypher.Assert(pFrom.GetItem() != null);
 
-                Global.ScriptMgr.OnGuildItemMove(m_pGuild, m_pPlayer, pFrom.GetItem(),
+                Global.ScriptMgr.ForEach<IGuildOnItemMove>(p => p.OnItemMove(m_pGuild, m_pPlayer, pFrom.GetItem(),
                      pFrom.IsBank(), pFrom.GetContainer(), pFrom.GetSlotId(),
-                     IsBank(), GetContainer(), GetSlotId());
+                     IsBank(), GetContainer(), GetSlotId()));
             }
 
             public void CopySlots(List<byte> ids)

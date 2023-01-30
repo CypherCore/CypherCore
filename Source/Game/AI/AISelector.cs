@@ -4,6 +4,9 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Movement;
+using Game.Scripting;
+using Game.Scripting.Interfaces.ICreature;
+using Game.Scripting.Interfaces.IGameObject;
 
 namespace Game.AI
 {
@@ -15,7 +18,7 @@ namespace Game.AI
                 return new PetAI(creature);
 
             //scriptname in db
-            CreatureAI scriptedAI = Global.ScriptMgr.GetCreatureAI(creature);
+            CreatureAI scriptedAI = Global.ScriptMgr.RunScriptRet<ICreatureGetAI, CreatureAI>(p => p.GetAI(creature), creature.GetScriptId());
             if (scriptedAI != null)
                 return scriptedAI;
 
@@ -102,7 +105,7 @@ namespace Game.AI
         public static GameObjectAI SelectGameObjectAI(GameObject go)
         {
             // scriptname in db
-            GameObjectAI scriptedAI = Global.ScriptMgr.GetGameObjectAI(go);
+            GameObjectAI scriptedAI = Global.ScriptMgr.RunScriptRet<IGameObjectGetAI, GameObjectAI>(p => p.GetAI(go), go.GetScriptId());
             if (scriptedAI != null)
                 return scriptedAI;
 

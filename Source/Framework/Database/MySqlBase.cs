@@ -1,11 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Configuration;
 using Framework.Threading;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -286,7 +288,7 @@ namespace Framework.Database
 
             // Invokes a mysql process which doesn't leak credentials to logs
             Process process = new();
-            process.StartInfo = new(DBUpdaterUtil.GetMySQLExecutable());
+            process.StartInfo = new(DBExecutableUtil.GetMySQLExecutable());
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -294,9 +296,11 @@ namespace Framework.Database
             process.StartInfo.Arguments = args;
 
             process.Start();
+
+            process.WaitForExit();
+
             Log.outInfo(LogFilter.SqlUpdates, process.StandardOutput.ReadToEnd());
             Log.outError(LogFilter.SqlUpdates, process.StandardError.ReadToEnd());
-            process.WaitForExit();
 
             if (process.ExitCode != 0)
             {
@@ -420,5 +424,29 @@ namespace Framework.Database
         }
 
         public abstract void PreparedStatements();
+    }
+
+    public static class DBExecutableUtil
+    {
+        static string mysqlExecutablePath;
+
+        public static string GetMySQLExecutable()
+        {
+            return mysqlExecutablePath;
+        }
+
+        public static bool CheckExecutable()
+        {
+            string mysqlExePath = ConfigMgr.GetDefaultValue("MySQLExecutable", "");
+            if (mysqlExePath.IsEmpty() || !File.Exists(mysqlExePath))
+            {
+                Log.outFatal(LogFilter.SqlUpdates, $"Didn't find any executable MySQL binary at \'{mysqlExePath}\' or in path, correct the path in the *.conf (\"MySQLExecutable\").");
+                return false;
+            }
+
+            // Correct the path to the cli
+            mysqlExecutablePath = mysqlExePath;
+            return true;
+        }
     }
 }

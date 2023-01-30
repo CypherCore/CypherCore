@@ -6,6 +6,7 @@ using Game;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
+using Game.Scripting.Interfaces.IScene;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 using System;
@@ -67,16 +68,16 @@ namespace Scripts.DragonIsles
     }
 
     [Script] // 3730 - Dracthyr Evoker Intro (Post Movie)
-    class scene_dracthyr_evoker_intro : SceneScript
+    class scene_dracthyr_evoker_intro : ScriptObjectAutoAddDBBound, ISceneOnSceneChancel, ISceneOnSceneComplete
     {
         public scene_dracthyr_evoker_intro() : base("scene_dracthyr_evoker_intro") { }
 
-        public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             player.CastSpell(player, SpellIds.Stasis1, true);
         }
 
-        public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
+        public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             player.CastSpell(player, SpellIds.Stasis1, true);
         }

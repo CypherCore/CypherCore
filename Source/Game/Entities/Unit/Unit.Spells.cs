@@ -6,6 +6,8 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.BattleGrounds;
 using Game.Networking.Packets;
+using Game.Scripting;
+using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1839,7 +1841,7 @@ namespace Game.Entities
 
             // Hook for OnHeal Event
             uint tempGain = (uint)gain;
-            Global.ScriptMgr.OnHeal(healer, victim, ref tempGain);
+            Global.ScriptMgr.ForEach<IUnitOnHeal>(p => p.OnHeal(healer, victim, ref tempGain));
             gain = (int)tempGain;
 
             Unit unit = healer;
@@ -2031,8 +2033,8 @@ namespace Game.Entities
             }
 
             // Script Hook For CalculateSpellDamageTaken -- Allow scripts to change the Damage post class mitigation calculations
-            Global.ScriptMgr.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage, spellInfo);
-
+            Global.ScriptMgr.ForEach<IUnitModifySpellDamageTaken>(p => p.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage, spellInfo));
+            
             // Calculate absorb resist
             if (damage < 0)
                 damage = 0;
@@ -2469,13 +2471,18 @@ namespace Game.Entities
 
         // Auras
         public List<Aura> GetSingleCastAuras() { return m_scAuras; }
-        public List<KeyValuePair<uint, Aura>> GetOwnedAuras()
+        public IEnumerable<KeyValuePair<uint, Aura>> GetOwnedAuras()
         {
             return m_ownedAuras.KeyValueList;
         }
-        public List<KeyValuePair<uint, AuraApplication>> GetAppliedAuras()
+        public IEnumerable<KeyValuePair<uint, AuraApplication>> GetAppliedAuras()
         {
             return m_appliedAuras.KeyValueList;
+        }
+
+        public int GetAppliedAurasCount()
+        {
+            return m_appliedAuras.Count;
         }
 
         public Aura AddAura(uint spellId, Unit target)
@@ -2928,6 +2935,7 @@ namespace Game.Entities
 
         public void RemoveAurasWithMechanic(ulong mechanicMaskToRemove, AuraRemoveMode removeMode = AuraRemoveMode.Default, uint exceptSpellId = 0, bool withEffectMechanics = false)
         {
+            List<Aura> aurasToUpdateTargets = new();
             RemoveAppliedAuras(aurApp =>
             {
                 Aura aura = aurApp.GetBase();
@@ -2943,9 +2951,18 @@ namespace Game.Entities
                     return true;
 
                 // effect mechanic matches required mask for removal - don't remove, only update targets
-                aura.UpdateTargetMap(aura.GetCaster());
+                aurasToUpdateTargets.Add(aura);
                 return false;
             }, removeMode);
+
+            foreach (Aura aura in aurasToUpdateTargets)
+            {
+                aura.UpdateTargetMap(aura.GetCaster());
+
+                // Fully remove the aura if all effects were removed
+                if (!aura.IsPassive() && aura.GetOwner() == this && aura.GetApplicationOfTarget(GetGUID()) == null)
+                    aura.Remove(removeMode);
+            }
         }
         public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer, int stolenCharges = 1)
         {

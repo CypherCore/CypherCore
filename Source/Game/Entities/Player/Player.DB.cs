@@ -14,6 +14,7 @@ using Game.Guilds;
 using Game.Mails;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -3581,7 +3582,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, $"Player::SaveToDB: The value of player {GetName()} at save: ");
 
             if (!create)
-                Global.ScriptMgr.OnPlayerSave(this);
+                Global.ScriptMgr.ForEach<IPlayerOnSave>(p => p.OnSave(this));
 
             PreparedStatement stmt;
             byte index = 0;

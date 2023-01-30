@@ -6,6 +6,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Scenarios;
+using Game.Scripting;
+using Game.Scripting.Interfaces.ICondition;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -444,7 +446,7 @@ namespace Game.Conditions
             if (!condMeets)
                 sourceInfo.mLastFailedCondition = this;
 
-            return condMeets && Global.ScriptMgr.OnConditionCheck(this, sourceInfo); // Returns true by default.;
+            return condMeets && Global.ScriptMgr.RunScriptRet<IConditionCheck>(p => p.OnConditionCheck(this, sourceInfo), ScriptId, true); // Returns true by default.;
         }
 
         public GridMapTypeMask GetSearcherTypeMaskForCondition()
