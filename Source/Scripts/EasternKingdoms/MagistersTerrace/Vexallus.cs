@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
 {
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SayAggro = 0;
         public const uint SayEnergy = 1;
@@ -19,15 +19,15 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
         public const uint EmoteDischargeEnergy = 4;
     }
 
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint ChainLightning = 44318;
         public const uint Overload = 44353;
         public const uint ArcaneShock = 44319;
 
-        public const uint SummonPureEnergy = 44322; // mod scale -10
+        public const uint SummonPureEnergy = 44322;   // mod scale -10
         public const uint HSummonPureEnergy1 = 46154; // mod scale -5
-        public const uint HSummonPureEnergy2 = 46159;  // mod scale -5
+        public const uint HSummonPureEnergy2 = 46159; // mod scale -5
 
         // NpcPureEnergy
         public const uint EnergyBolt = 46156;
@@ -35,17 +35,17 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
         public const uint PureEnergyPassive = 44326;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint IntervalModifier = 15;
         public const uint IntervalSwitch = 6;
     }
 
     [Script]
-    class boss_vexallus : BossAI
+    internal class boss_vexallus : BossAI
     {
-        uint _intervalHealthAmount;
-        bool _enraged;
+        private bool _enraged;
+        private uint _intervalHealthAmount;
 
         public boss_vexallus(Creature creature) : base(creature, DataTypes.Vexallus)
         {
@@ -70,29 +70,37 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             Talk(TextIds.SayAggro);
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
-                    DoCast(target, SpellIds.ChainLightning);
-                task.Repeat();
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 20.0f, true);
-                if (target)
-                    DoCast(target, SpellIds.ArcaneShock);
-                task.Repeat(TimeSpan.FromSeconds(8));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.ChainLightning);
+
+                                    task.Repeat();
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(5),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 20.0f, true);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.ArcaneShock);
+
+                                    task.Repeat(TimeSpan.FromSeconds(8));
+                                });
         }
 
         public override void JustSummoned(Creature summoned)
         {
             Unit temp = SelectTarget(SelectTargetMethod.Random, 0);
+
             if (temp)
                 summoned.GetMotionMaster().MoveFollow(temp, 0, 0);
 
-            summons.Summon(summoned);
+            Summons.Summon(summoned);
         }
 
         public override void DamageTaken(Unit who, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
@@ -108,15 +116,20 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
                 {
                     _enraged = true;
                     _scheduler.CancelAll();
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1.2), task =>
-                    {
-                        DoCastVictim(SpellIds.Overload);
-                        task.Repeat(TimeSpan.FromSeconds(2));
-                    });
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(1.2),
+                                        task =>
+                                        {
+                                            DoCastVictim(SpellIds.Overload);
+                                            task.Repeat(TimeSpan.FromSeconds(2));
+                                        });
+
                     return;
                 }
                 else
+                {
                     ++_intervalHealthAmount;
+                }
 
                 Talk(TextIds.SayEnergy);
                 Talk(TextIds.EmoteDischargeEnergy);
@@ -127,7 +140,9 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
                     DoCast(me, SpellIds.HSummonPureEnergy2);
                 }
                 else
+                {
                     DoCast(me, SpellIds.SummonPureEnergy);
+                }
             }
         }
 
@@ -141,7 +156,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
     }
 
     [Script]
-    class npc_pure_energy : ScriptedAI
+    internal class npc_pure_energy : ScriptedAI
     {
         public npc_pure_energy(Creature creature) : base(creature)
         {
@@ -152,6 +167,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
         {
             if (killer)
                 killer.CastSpell(killer, SpellIds.EnergyFeedback, true);
+
             me.RemoveAurasDueToSpell(SpellIds.PureEnergyPassive);
         }
     }

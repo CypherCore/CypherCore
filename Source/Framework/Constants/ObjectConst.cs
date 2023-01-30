@@ -48,7 +48,7 @@ namespace Framework.Constants
         Player = 2,
         Item = 3,
         WorldTransaction = 4,
-        StaticDoor = 5,   //NYI
+        StaticDoor = 5, //NYI
         Transport = 6,
         Conversation = 7,
         Creature = 8,
@@ -63,7 +63,7 @@ namespace Framework.Constants
         Scenario = 17,
         AIGroup = 18,
         DynamicDoor = 19,
-        ClientActor = 20,  //NYI
+        ClientActor = 20, //NYI
         Vignette = 21,
         CallForHelp = 22,
         AIResource = 23,
@@ -75,17 +75,17 @@ namespace Framework.Constants
         WowAccount = 29,
         BNetAccount = 30,
         GMTask = 31,
-        MobileSession = 32,  //NYI
+        MobileSession = 32, //NYI
         RaidGroup = 33,
         Spell = 34,
         Mail = 35,
-        WebObj = 36,  //NYI
-        LFGObject = 37,  //NYI
-        LFGList = 38,  //NYI
+        WebObj = 36,    //NYI
+        LFGObject = 37, //NYI
+        LFGList = 38,   //NYI
         UserRouter = 39,
         PVPQueueGroup = 40,
         UserClient = 41,
-        PetBattle = 42,  //NYI
+        PetBattle = 42, //NYI
         UniqUserClient = 43,
         BattlePet = 44,
         CommerceObj = 45,
@@ -110,14 +110,14 @@ namespace Framework.Constants
 
     public enum TempSummonType
     {
-        TimedOrDeadDespawn = 1,             // despawns after a specified time OR when the creature disappears
-        TimedOrCorpseDespawn = 2,             // despawns after a specified time OR when the creature dies
-        TimedDespawn = 3,             // despawns after a specified time
-        TimedDespawnOutOfCombat = 4,             // despawns after a specified time after the creature is out of combat
-        CorpseDespawn = 5,             // despawns instantly after death
-        CorpseTimedDespawn = 6,             // despawns after a specified time after death
+        TimedOrDeadDespawn = 1,      // despawns after a specified time OR when the creature disappears
+        TimedOrCorpseDespawn = 2,    // despawns after a specified time OR when the creature dies
+        TimedDespawn = 3,            // despawns after a specified time
+        TimedDespawnOutOfCombat = 4, // despawns after a specified time after the creature is out of combat
+        CorpseDespawn = 5,           // despawns instantly after death
+        CorpseTimedDespawn = 6,      // despawns after a specified time after death
         DeadDespawn = 7,             // despawns when the creature disappears
-        ManualDespawn = 8              // despawns when UnSummon() is called
+        ManualDespawn = 8            // despawns when UnSummon() is called
     }
 
     public enum SummonCategory
@@ -127,8 +127,9 @@ namespace Framework.Constants
         Pet = 2,
         Puppet = 3,
         Vehicle = 4,
-        Unk = 5  // as of patch 3.3.5a only Bone Spike in Icecrown Citadel
-        // uses this category
+
+        Unk = 5 // as of patch 3.3.5a only Bone Spike in Icecrown Citadel
+                // uses this category
     }
 
     public enum SummonTitle
@@ -141,9 +142,9 @@ namespace Framework.Constants
         Companion = 5,
         Runeblade = 6,
         Construct = 7,
-        Opponent = 8,    // Related to phases and DK prequest line (3.3.5a)
+        Opponent = 8, // Related to phases and DK prequest line (3.3.5a)
         Vehicle = 9,
-        Mount = 10,   // Oculus and Argent Tournament vehicles (3.3.5a)
+        Mount = 10, // Oculus and Argent Tournament vehicles (3.3.5a)
         LightWell = 11,
         Butler = 12,
         Aka = 13,
@@ -246,7 +247,7 @@ namespace Framework.Constants
     public enum ServerSideVisibilityType
     {
         GM = 0,
-        Ghost = 1,
+        Ghost = 1
     }
 
     public enum SessionFlags

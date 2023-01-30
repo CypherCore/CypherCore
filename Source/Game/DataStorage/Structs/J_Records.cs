@@ -7,52 +7,52 @@ namespace Game.DataStorage
 {
     public sealed class JournalEncounterRecord
     {
-        public LocalizedString Name;
         public LocalizedString Description;
-        public Vector2 Map;
+        public sbyte DifficultyMask;
+        public ushort DungeonEncounterID;
+        public ushort FirstSectionID;
+        public int Flags;
         public uint Id;
         public ushort JournalInstanceID;
-        public ushort DungeonEncounterID;
-        public uint OrderIndex;
-        public ushort FirstSectionID;
-        public ushort UiMapID;
+        public Vector2 Map;
         public uint MapDisplayConditionID;
-        public int Flags;
-        public sbyte DifficultyMask;
+        public LocalizedString Name;
+        public uint OrderIndex;
+        public ushort UiMapID;
     }
 
     public sealed class JournalEncounterSectionRecord
     {
-        public uint Id;
-        public LocalizedString Title;
         public LocalizedString BodyText;
+        public sbyte DifficultyMask;
+        public ushort FirstChildSectionID;
+        public int Flags;
+        public uint IconCreatureDisplayInfoID;
+        public int IconFileDataID;
+        public int IconFlags;
+        public uint Id;
         public ushort JournalEncounterID;
+        public ushort NextSiblingSectionID;
         public byte OrderIndex;
         public ushort ParentSectionID;
-        public ushort FirstChildSectionID;
-        public ushort NextSiblingSectionID;
-        public byte Type;
-        public uint IconCreatureDisplayInfoID;
-        public int UiModelSceneID;
         public int SpellID;
-        public int IconFileDataID;
-        public int Flags;
-        public int IconFlags;
-        public sbyte DifficultyMask;
+        public LocalizedString Title;
+        public byte Type;
+        public int UiModelSceneID;
     }
 
     public sealed class JournalInstanceRecord
     {
-        public uint Id;
-        public LocalizedString Name;
-        public LocalizedString Description;
-        public ushort MapID;
+        public ushort AreaID;
         public int BackgroundFileDataID;
         public int ButtonFileDataID;
         public int ButtonSmallFileDataID;
-        public int LoreFileDataID;
+        public LocalizedString Description;
         public int Flags;
-        public ushort AreaID;
+        public uint Id;
+        public int LoreFileDataID;
+        public ushort MapID;
+        public LocalizedString Name;
     }
 
     public sealed class JournalTierRecord

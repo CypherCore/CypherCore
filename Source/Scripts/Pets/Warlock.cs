@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
@@ -11,7 +8,6 @@ using Game.Scripting;
 using Game.Scripting.Interfaces.ICreature;
 using Game.Spells;
 using Scripts.Spells.Warlock;
-using static Game.AI.SmartAction;
 
 namespace Scripts.Pets
 {
@@ -21,25 +17,14 @@ namespace Scripts.Pets
         // Doomguard - 11859, Terrorguard - 59000
         public class npc_warlock_doomguard : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warlock_doomguard() : base("npc_warlock_doomguard")
-            {
-            }
-
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warlock_doomguardAI(creature);
-            }
-
             public class npc_warlock_doomguardAI : ScriptedAI
             {
+                public EventMap events = new();
+                public float maxDistance;
+
                 public npc_warlock_doomguardAI(Creature creature) : base(creature)
                 {
                 }
-
-                public EventMap events = new EventMap();
-                public float maxDistance;
 
                 public override void Reset()
                 {
@@ -59,18 +44,19 @@ namespace Scripts.Pets
                 {
                     UpdateVictim();
                     Unit owner = me.GetOwner();
+
                     if (me.GetOwner())
                     {
                         Unit victim = owner.GetVictim();
+
                         if (owner.GetVictim())
-                        {
                             me.Attack(victim, false);
-                        }
                     }
 
                     events.Update(diff);
 
                     uint eventId = events.ExecuteEvent();
+
                     while (eventId != 0)
                     {
                         switch (eventId)
@@ -80,11 +66,14 @@ namespace Scripts.Pets
                                 {
                                     me.SetControlled(false, UnitState.Root);
                                     events.ScheduleEvent(eventId, TimeSpan.FromSeconds(1));
+
                                     return;
                                 }
+
                                 me.SetControlled(true, UnitState.Root);
                                 me.CastSpell(me.GetVictim(), SpellIds.PET_DOOMBOLT, new CastSpellExtraArgs(TriggerCastFlags.None).SetOriginalCaster(me.GetOwnerGUID()));
                                 events.ScheduleEvent(eventId, TimeSpan.FromSeconds(3));
+
                                 break;
                         }
 
@@ -92,30 +81,30 @@ namespace Scripts.Pets
                     }
                 }
             }
-        }
 
-        [Script]
-        public class npc_warl_demonic_gateway : ScriptObjectAutoAddDBBound, ICreatureGetAI
-        {
-            public npc_warl_demonic_gateway() : base("npc_warl_demonic_gateway")
+            public npc_warlock_doomguard() : base("npc_warlock_doomguard")
             {
             }
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
-            public  CreatureAI GetAI(Creature creature)
+            public CreatureAI GetAI(Creature creature)
             {
-                return new npc_warl_demonic_gatewayAI(creature);
+                return new npc_warlock_doomguardAI(creature);
             }
+        }
 
+        [Script]
+        public class npc_warl_demonic_gateway : ScriptObjectAutoAddDBBound, ICreatureGetAI
+        {
             public class npc_warl_demonic_gatewayAI : CreatureAI
             {
+                public EventMap events = new();
+                public bool firstTick = true;
+
                 public npc_warl_demonic_gatewayAI(Creature creature) : base(creature)
                 {
                 }
-
-                public EventMap events = new EventMap();
-                public bool firstTick = true;
 
                 public override void UpdateAI(uint UnnamedParameter)
                 {
@@ -137,79 +126,85 @@ namespace Scripts.Pets
                 {
                     if (clicker.IsPlayer())
                     {
-                        // don't allow using the gateway while having specific auras
-                        uint[] aurasToCheck = { 121164, 121175, 121176, 121177 }; // Orbs of Power @ Temple of Kotmogu
-                        foreach (var auraToCheck in aurasToCheck)
+                        // don't allow using the gateway while having specific Auras
+                        uint[] aurasToCheck =
                         {
+                            121164, 121175, 121176, 121177
+                        }; // Orbs of Power @ Temple of Kotmogu
+
+                        foreach (var auraToCheck in aurasToCheck)
                             if (clicker.HasAura(auraToCheck))
-                            {
                                 return;
-                            }
-                        }
 
                         TeleportTarget(clicker, true);
                     }
+
                     return;
                 }
 
                 public void TeleportTarget(Unit target, bool allowAnywhere)
                 {
                     Unit owner = me.GetOwner();
-                    if (owner == null)
-                    {
-                        return;
-                    }
 
-                    // only if target stepped through the portal
-                    if (!allowAnywhere && me.GetDistance2d(target) > 1.0f)
-                    {
+                    if (owner == null)
                         return;
-                    }
-                    // check if target wasn't recently teleported
+
+                    // only if Target stepped through the portal
+                    if (!allowAnywhere &&
+                        me.GetDistance2d(target) > 1.0f)
+                        return;
+
+                    // check if Target wasn't recently teleported
                     if (target.HasAura(SpellIds.DEMONIC_GATEWAY_DEBUFF))
-                    {
                         return;
-                    }
+
                     // only if in same party
                     if (!target.IsInRaidWith(owner))
-                    {
                         return;
-                    }
+
                     // not allowed while CC'ed
                     if (!target.CanFreeMove())
-                    {
                         return;
-                    }
 
                     uint otherGateway = me.GetEntry() == SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN ? SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_PURPLE : SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN;
                     uint teleportSpell = me.GetEntry() == SpellIds.NPC_WARLOCK_DEMONIC_GATEWAY_GREEN ? SpellIds.DEMONIC_GATEWAY_JUMP_GREEN : SpellIds.DEMONIC_GATEWAY_JUMP_PURPLE;
-                     
+
                     var gateways = me.GetCreatureListWithEntryInGrid(otherGateway, 100.0f);
+
                     foreach (var gateway in gateways)
                     {
                         if (gateway.GetOwnerGUID() != me.GetOwnerGUID())
-                        {
                             continue;
-                        }
 
                         target.CastSpell(gateway, teleportSpell, true);
+
                         if (target.HasAura(SpellIds.PLANESWALKER))
-                        {
                             target.CastSpell(target, SpellIds.PLANESWALKER_BUFF, true);
-                        }
+
                         // Item - Warlock PvP Set 4P Bonus: "Your allies can use your Demonic Gateway again 15 sec sooner"
                         int amount = owner.GetAuraEffect(SpellIds.PVP_4P_BONUS, 0).GetAmount();
+
                         if (amount > 0)
                         {
                             Aura aura = target.GetAura(SpellIds.DEMONIC_GATEWAY_DEBUFF);
-                            if (aura != null)
-                            {
-                                aura.SetDuration(aura.GetDuration() - amount * Time.InMilliseconds);
-                            }
+
+                            aura?.SetDuration(aura.GetDuration() - amount * Time.InMilliseconds);
                         }
+
                         break;
                     }
                 }
+            }
+
+            public npc_warl_demonic_gateway() : base("npc_warl_demonic_gateway")
+            {
+            }
+
+            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
+            //ORIGINAL LINE: CreatureAI* GetAI(Creature* creature) const
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warl_demonic_gatewayAI(creature);
             }
         }
 
@@ -217,41 +212,31 @@ namespace Scripts.Pets
         [Script]
         public class npc_warlock_dreadstalker : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warlock_dreadstalker() : base("npc_warlock_dreadstalker")
-            {
-            }
-
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warlock_dreadstalkerAI(creature);
-            }
-
             public class npc_warlock_dreadstalkerAI : ScriptedAI
             {
+                public bool firstTick = true;
+
                 public npc_warlock_dreadstalkerAI(Creature creature) : base(creature)
                 {
                 }
-
-                public bool firstTick = true;
 
                 public override void UpdateAI(uint UnnamedParameter)
                 {
                     if (firstTick)
                     {
                         Unit owner = me.GetOwner();
-                        if (!me.GetOwner() || !me.GetOwner().ToPlayer())
-                        {
+
+                        if (!me.GetOwner() ||
+                            !me.GetOwner().ToPlayer())
                             return;
-                        }
 
                         me.SetMaxHealth(owner.CountPctFromMaxHealth(40));
                         me.SetHealth(me.GetMaxHealth());
 
                         Unit target = owner.ToPlayer().GetSelectedUnit();
+
                         if (owner.ToPlayer().GetSelectedUnit())
-                        {
                             me.CastSpell(target, SpellIds.DREADSTALKER_CHARGE, true);
-                        }
 
                         firstTick = false;
 
@@ -262,6 +247,15 @@ namespace Scripts.Pets
                     DoMeleeAttackIfReady();
                 }
             }
+
+            public npc_warlock_dreadstalker() : base("npc_warlock_dreadstalker")
+            {
+            }
+
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warlock_dreadstalkerAI(creature);
+            }
         }
 
 
@@ -269,10 +263,6 @@ namespace Scripts.Pets
         // Darkglare - 103673
         public class npc_pet_warlock_darkglare : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_pet_warlock_darkglare() : base("npc_pet_warlock_darkglare")
-            {
-            }
-
             public class npc_pet_warlock_darkglare_PetAI : PetAI
             {
                 public npc_pet_warlock_darkglare_PetAI(Creature creature) : base(creature)
@@ -282,18 +272,22 @@ namespace Scripts.Pets
                 public void UpdateAI(uint UnnamedParameter)
                 {
                     Unit owner = me.GetOwner();
+
                     if (owner == null)
-                    {
                         return;
-                    }
 
                     var target = me.GetAttackerForHelper();
+
                     if (target != null)
                     {
                         target.RemoveAura(SpellIds.DOOM, owner.GetGUID());
                         me.CastSpell(target, SpellIds.EYE_LASER, new CastSpellExtraArgs(TriggerCastFlags.None).SetOriginalCaster(owner.GetGUID()));
                     }
                 }
+            }
+
+            public npc_pet_warlock_darkglare() : base("npc_pet_warlock_darkglare")
+            {
             }
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
@@ -307,30 +301,28 @@ namespace Scripts.Pets
         [Script]
         public class npc_warlock_infernal : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warlock_infernal() : base("npc_warlock_infernal")
-            {
-            }
-
             public class npc_warlock_infernalAI : ScriptedAI
             {
+                public Position spawnPos = new();
+
                 public npc_warlock_infernalAI(Creature c) : base(c)
                 {
                 }
-
-                public Position spawnPos = new Position();
 
                 public override void Reset()
                 {
                     spawnPos = me.GetPosition();
 
-                    // if we leave default state (ASSIST) it will passively be controlled by warlock
+                    // if we leave default State (ASSIST) it will passively be controlled by warlock
                     me.SetReactState(ReactStates.Passive);
 
-                    // melee damage
+                    // melee Damage
                     Unit owner = me.GetOwner();
+
                     if (me.GetOwner())
                     {
                         Player player = owner.ToPlayer();
+
                         if (owner.ToPlayer())
                         {
                             bool isLordSummon = me.GetEntry() == 108452;
@@ -344,17 +336,20 @@ namespace Scripts.Pets
 
 
                             if (isLordSummon)
-                            {
                                 return;
-                            }
 
-                            if (player.HasAura(SpellIds.LORD_OF_THE_FLAMES) && !player.HasAura(SpellIds.LORD_OF_THE_FLAMES_CD))
+                            if (player.HasAura(SpellIds.LORD_OF_THE_FLAMES) &&
+                                !player.HasAura(SpellIds.LORD_OF_THE_FLAMES_CD))
                             {
-                                List<float> angleOffsets = new List<float>() { (float)Math.PI / 2.0f, (float)Math.PI, 3.0f * (float)Math.PI / 2.0f };
+                                List<float> angleOffsets = new()
+                                                           {
+                                                               (float)Math.PI / 2.0f,
+                                                               (float)Math.PI,
+                                                               3.0f * (float)Math.PI / 2.0f
+                                                           };
+
                                 for (uint i = 0; i < 3; ++i)
-                                {
                                     player.CastSpell(me, SpellIds.LORD_OF_THE_FLAMES_SUMMON, true);
-                                }
 
                                 player.CastSpell(player, SpellIds.LORD_OF_THE_FLAMES_CD, true);
                             }
@@ -365,22 +360,23 @@ namespace Scripts.Pets
                 public override void UpdateAI(uint UnnamedParameter)
                 {
                     if (!me.HasAura(SpellIds.IMMOLATION))
-                    {
                         DoCast(SpellIds.IMMOLATION);
-                    }
 
-                    // "The Infernal deals strong area of effect damage, and will be drawn to attack targets near the impact point"
+                    // "The Infernal deals strong area of effect Damage, and will be drawn to attack targets near the impact point"
                     if (!me.GetVictim())
                     {
                         Unit preferredTarget = me.GetAttackerForHelper();
+
                         if (preferredTarget != null)
-                        {
                             me.GetAI().AttackStart(preferredTarget);
-                        }
                     }
 
                     DoMeleeAttackIfReady();
                 }
+            }
+
+            public npc_warlock_infernal() : base("npc_warlock_infernal")
+            {
             }
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
@@ -395,15 +391,6 @@ namespace Scripts.Pets
         [Script]
         public class npc_warl_fel_lord : ScriptObjectAutoAddDBBound, ICreatureGetAI
         {
-            public npc_warl_fel_lord() : base("npc_warl_fel_lord")
-            {
-            }
-
-            public CreatureAI GetAI(Creature creature)
-            {
-                return new npc_warl_fel_lordAI(creature);
-            }
-
             public class npc_warl_fel_lordAI : CreatureAI
             {
                 public npc_warl_fel_lordAI(Creature creature) : base(creature)
@@ -413,10 +400,9 @@ namespace Scripts.Pets
                 public override void Reset()
                 {
                     Unit owner = me.GetOwner();
+
                     if (owner == null)
-                    {
                         return;
-                    }
 
                     me.SetMaxHealth(owner.GetMaxHealth());
                     me.SetHealth(me.GetMaxHealth());
@@ -426,12 +412,19 @@ namespace Scripts.Pets
                 public override void UpdateAI(uint UnnamedParameter)
                 {
                     if (me.HasUnitState(UnitState.Casting))
-                    {
                         return;
-                    }
 
                     me.CastSpell(me, SpellIds.FEL_LORD_CLEAVE, false);
                 }
+            }
+
+            public npc_warl_fel_lord() : base("npc_warl_fel_lord")
+            {
+            }
+
+            public CreatureAI GetAI(Creature creature)
+            {
+                return new npc_warl_fel_lordAI(creature);
             }
         }
 
@@ -440,9 +433,12 @@ namespace Scripts.Pets
         [Script]
         public class npc_pet_warlock_wild_imp : PetAI
         {
+            private ObjectGuid _targetGUID = new();
+
             public npc_pet_warlock_wild_imp(Creature creature) : base(creature)
             {
                 Unit owner = me.GetOwner();
+
                 if (me.GetOwner())
                 {
                     me.SetLevel(owner.GetLevel());
@@ -454,27 +450,27 @@ namespace Scripts.Pets
             public override void UpdateAI(uint UnnamedParameter)
             {
                 Unit owner = me.GetOwner();
+
                 if (owner == null)
-                {
                     return;
-                }
 
                 Unit target = GetTarget();
                 ObjectGuid newtargetGUID = owner.GetTarget();
-                if (newtargetGUID.IsEmpty() || newtargetGUID == _targetGUID)
+
+                if (newtargetGUID.IsEmpty() ||
+                    newtargetGUID == _targetGUID)
                 {
                     CastSpellOnTarget(owner, target);
+
                     return;
                 }
 
                 Unit newTarget = ObjectAccessor.Instance.GetUnit(me, newtargetGUID);
+
                 if (ObjectAccessor.Instance.GetUnit(me, newtargetGUID))
-                {
-                    if (target != newTarget && me.IsValidAttackTarget(newTarget))
-                    {
+                    if (target != newTarget &&
+                        me.IsValidAttackTarget(newTarget))
                         target = newTarget;
-                    }
-                }
 
                 CastSpellOnTarget(owner, target);
             }
@@ -486,14 +482,15 @@ namespace Scripts.Pets
 
             private void CastSpellOnTarget(Unit owner, Unit target)
             {
-                if (target != null && me.IsValidAttackTarget(target) && !me.HasUnitState(UnitState.Casting) && !me.VariableStorage.GetValue("controlled", false))
+                if (target != null &&
+                    me.IsValidAttackTarget(target) &&
+                    !me.HasUnitState(UnitState.Casting) &&
+                    !me.VariableStorage.GetValue("controlled", false))
                 {
                     _targetGUID = target.GetGUID();
                     var result = me.CastSpell(target, SpellIds.FEL_FIREBOLT, new CastSpellExtraArgs(TriggerCastFlags.IgnorePowerAndReagentCost).SetOriginalCaster(owner.GetGUID()));
                 }
             }
-
-            private ObjectGuid _targetGUID = new ObjectGuid();
         }
     }
 }

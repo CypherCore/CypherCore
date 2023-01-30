@@ -3,7 +3,6 @@
 
 using Game.Entities;
 using Game.Maps;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IMap
 {

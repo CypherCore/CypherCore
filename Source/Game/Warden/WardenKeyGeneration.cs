@@ -1,13 +1,20 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Security.Cryptography;
 using System;
+using System.Security.Cryptography;
 
 namespace Game
 {
-    class SHA1Randx
+    internal class SHA1Randx
     {
+        private readonly byte[] o1 = new byte[20];
+        private readonly byte[] o2 = new byte[20];
+        private byte[] o0 = new byte[20];
+
+        private SHA1 sh;
+        private uint taken;
+
         public SHA1Randx(byte[] buff)
         {
             int halfSize = buff.Length / 2;
@@ -35,7 +42,7 @@ namespace Game
         }
 
 
-        void FillUp()
+        private void FillUp()
         {
             sh = SHA1.Create();
             sh.ComputeHash(o1, 0, 20);
@@ -44,12 +51,5 @@ namespace Game
 
             taken = 0;
         }
-
-        SHA1 sh;
-        uint taken;
-        byte[] o0 = new byte[20];
-        byte[] o1 = new byte[20];
-        byte[] o2 = new byte[20];
     }
-
 }

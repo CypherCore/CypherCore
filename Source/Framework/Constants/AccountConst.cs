@@ -63,7 +63,7 @@ namespace Framework.Constants
         SkipCheckCharacterCreationClassmask = 15,
         SkipCheckCharacterCreationRacemask = 16,
         SkipCheckCharacterCreationReservedname = 17,
-        SkipCheckCharacterCreationDeathKnight = 18,  // Deprecated Since Draenor Don'T Reuse
+        SkipCheckCharacterCreationDeathKnight = 18, // Deprecated Since Draenor Don'T Reuse
         SkipCheckChatChannelReq = 19,
         SkipCheckDisableMap = 20,
         SkipCheckMoreTalentsThanAllowed = 21,
@@ -117,6 +117,7 @@ namespace Framework.Constants
         CommandBnetAccountLockCountry = 209,
         CommandBnetAccountLockIp = 210,
         CommandBnetAccountPassword = 211,
+
         // 212 previously used, do not reuse
         CommandBnetAccountSetPassword = 213,
         CommandBnetAccountLink = 214,
@@ -135,8 +136,10 @@ namespace Framework.Constants
         CommandAccountSetAddon = 227,
         CommandAccountSetSecLevel = 228,
         CommandAccountSetPassword = 229,
+
         // 230 previously used, do not reuse
         CommandAchievementAdd = 231,
+
         // 232 previously used, do not reuse
         CommandArenaCaptain = 233,
         CommandArenaCreate = 234,
@@ -144,24 +147,29 @@ namespace Framework.Constants
         CommandArenaInfo = 236,
         CommandArenaLookup = 237,
         CommandArenaRename = 238,
+
         // 239 previously used, do not reuse
         CommandBanAccount = 240,
         CommandBanCharacter = 241,
         CommandBanIp = 242,
         CommandBanPlayeraccount = 243,
+
         // 244 previously used, do not reuse
         CommandBaninfoAccount = 245,
         CommandBaninfoCharacter = 246,
         CommandBaninfoIp = 247,
+
         // 248 previously used, do not reuse
         CommandBanlistAccount = 249,
         CommandBanlistCharacter = 250,
         CommandBanlistIp = 251,
+
         // 252 previously used, do not reuse
         CommandUnbanAccount = 253,
         CommandUnbanCharacter = 254,
         CommandUnbanIp = 255,
         CommandUnbanPlayeraccount = 256,
+
         // 257 previously used, do not reuse
         CommandBfStart = 258,
         CommandBfStop = 259,
@@ -169,6 +177,7 @@ namespace Framework.Constants
         CommandBfTimer = 261,
         CommandBfEnable = 262,
         CommandAccountEmail = 263,
+
         // 264 previously used, do not reuse
         CommandAccountSetSecEmail = 265,
         CommandAccountSetSecRegmail = 266,
@@ -178,10 +187,12 @@ namespace Framework.Constants
         CommandCastSelf = 270,
         CommandCastTarget = 271,
         CommandCastDest = 272,
+
         // 273 previously used, do not reuse
         CommandCharacterCustomize = 274,
         CommandCharacterChangefaction = 275,
         CommandCharacterChangerace = 276,
+
         // 277 previously used, do not reuse
         CommandCharacterDeletedDelete = 278,
         CommandCharacterDeletedList = 279,
@@ -193,9 +204,11 @@ namespace Framework.Constants
         CommandCharacterReputation = 285,
         CommandCharacterTitles = 286,
         CommandLevelup = 287,
+
         // 288 previously used, do not reuse
         CommandPdumpLoad = 289,
         CommandPdumpWrite = 290,
+
         // 291 previously used, do not reuse
         CommandCheatCasttime = 292,
         CommandCheatCooldown = 293,
@@ -206,12 +219,15 @@ namespace Framework.Constants
         CommandCheatTaxi = 298,
         CommandCheatWaterwalk = 299,
         CommandDebug = 300,
+
         // 301-342 previously used, do not reuse
         CommandDeserterBgAdd = 343,
         CommandDeserterBgRemove = 344,
+
         // 345 previously used, do not reuse
         CommandDeserterInstanceAdd = 346,
         CommandDeserterInstanceRemove = 347,
+
         // 348-349 previously used, do not reuse
         CommandDisableAddCriteria = 350,
         CommandDisableAddBattleground = 351,
@@ -221,6 +237,7 @@ namespace Framework.Constants
         CommandDisableAddQuest = 355,
         CommandDisableAddSpell = 356,
         CommandDisableAddVmap = 357,
+
         // 358 previously used, do not reuse
         CommandDisableRemoveCriteria = 359,
         CommandDisableRemoveBattleground = 360,
@@ -245,6 +262,7 @@ namespace Framework.Constants
         CommandAccount2FaSetup = 379,
         CommandAccount2FaRemove = 380,
         CommandAccountSet2Fa = 381,
+
         //                                                       = 382, // DEPRECATED: DON'T REUSE
         //                                                       = 383, // DEPRECATED: DON'T REUSE
         //                                                       = 384, // DEPRECATED: DON'T REUSE
@@ -258,11 +276,13 @@ namespace Framework.Constants
         CommandGobjectInfo = 392,
         CommandGobjectMove = 393,
         CommandGobjectNear = 394,
+
         // 395 previously used, do not reuse
         CommandGobjectSetPhase = 396,
         CommandGobjectSetState = 397,
         CommandGobjectTarget = 398,
         CommandGobjectTurn = 399,
+
         // 400 previously used, do not reuse
         CommandGuild = 401,
         CommandGuildCreate = 402,
@@ -271,16 +291,20 @@ namespace Framework.Constants
         CommandGuildUninvite = 405,
         CommandGuildRank = 406,
         CommandGuildRename = 407,
+
         // 408 previously used, do not reuse
         CommandHonorAdd = 409,
         CommandHonorAddKill = 410,
         CommandHonorUpdate = 411,
+
         // 412 previously used, do not reuse
         CommandInstanceListbinds = 413,
         CommandInstanceUnbind = 414,
         CommandInstanceStats = 415,
+
         // 416 previously used, do not reuse
         CommandLearn = 417,
+
         // 418 previously used, do not reuse
         CommandLearnAllMy = 419,
         CommandLearnAllMyClass = 420,
@@ -293,12 +317,14 @@ namespace Framework.Constants
         CommandLearnAllLang = 427,
         CommandLearnAllRecipes = 428,
         CommandUnlearn = 429,
+
         // 430 previously used, do not reuse
         CommandLfgPlayer = 431,
         CommandLfgGroup = 432,
         CommandLfgQueue = 433,
         CommandLfgClean = 434,
         CommandLfgOptions = 435,
+
         // 436 previously used, do not reuse
         CommandListCreature = 437,
         CommandListItem = 438,
@@ -433,6 +459,7 @@ namespace Framework.Constants
         CommandModifySpell = 567,
         CommandModifyStandstate = 568,
         CommandModifyTalentpoints = 569,
+
         // 570 previously used, do not reuse
         CommandNpcAdd = 571,
         CommandNpcAddFormation = 572,
@@ -491,6 +518,7 @@ namespace Framework.Constants
         CommandReloadAreatriggerTeleport = 625,
         CommandReloadAuctions = 626,
         CommandReloadAutobroadcast = 627,
+
         // 628 previously used, do not reuse
         CommandReloadConditions = 629,
         CommandReloadConfig = 630,
@@ -568,6 +596,7 @@ namespace Framework.Constants
         CommandReloadSpellThreats = 702,
         CommandReloadSpellGroupStackRules = 703,
         CommandReloadCypherString = 704,
+
         // 705 previously used, do not reuse
         CommandReloadWaypointScripts = 706,
         CommandReloadWaypointData = 707,
@@ -606,28 +635,30 @@ namespace Framework.Constants
         CommandTeleName = 740,
         CommandTeleGroup = 741,
         CommandTicket = 742,
-        CommandTicketAssign = 743, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketClose = 744, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketClosedlist = 745, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketComment = 746, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketComplete = 747, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketDelete = 748, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketEscalate = 749, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketAssign = 743,        // Deprecated Since Draenor Don'T Reuse
+        CommandTicketClose = 744,         // Deprecated Since Draenor Don'T Reuse
+        CommandTicketClosedlist = 745,    // Deprecated Since Draenor Don'T Reuse
+        CommandTicketComment = 746,       // Deprecated Since Draenor Don'T Reuse
+        CommandTicketComplete = 747,      // Deprecated Since Draenor Don'T Reuse
+        CommandTicketDelete = 748,        // Deprecated Since Draenor Don'T Reuse
+        CommandTicketEscalate = 749,      // Deprecated Since Draenor Don'T Reuse
         CommandTicketEscalatedlist = 750, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketList = 751, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketOnlinelist = 752, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketList = 751,          // Deprecated Since Draenor Don'T Reuse
+        CommandTicketOnlinelist = 752,    // Deprecated Since Draenor Don'T Reuse
         CommandTicketReset = 753,
-        CommandTicketResponse = 754, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketResponseAppend = 755, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketResponse = 754,         // Deprecated Since Draenor Don'T Reuse
+        CommandTicketResponseAppend = 755,   // Deprecated Since Draenor Don'T Reuse
         CommandTicketResponseAppendln = 756, // Deprecated Since Draenor Don'T Reuse
         CommandTicketTogglesystem = 757,
         CommandTicketUnassign = 758, // Deprecated Since Draenor Don'T Reuse
-        CommandTicketViewid = 759, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketViewid = 759,   // Deprecated Since Draenor Don'T Reuse
         CommandTicketViewname = 760, // Deprecated Since Draenor Don'T Reuse
+
         // 761 previously used, do not reuse
         CommandTitlesAdd = 762,
         CommandTitlesCurrent = 763,
         CommandTitlesRemove = 764,
+
         // 765 previously used, do not reuse
         CommandTitlesSetMask = 766,
         CommandWp = 767,
@@ -639,8 +670,10 @@ namespace Framework.Constants
         CommandWpReload = 773,
         CommandWpShow = 774,
         CommandModifyCurrency = 775,
+
         // 776 previously used, do not reuse
         CommandMailbox = 777,
+
         // 778 previously used, do not reuse
         CommandAhbotItems = 779,
         CommandAhbotItemsGray = 780,
@@ -662,6 +695,7 @@ namespace Framework.Constants
         CommandInstanceGetBossState = 796,
         CommandPvpstats = 797,
         CommandModifyXp = 798,
+
         //                                                       = 799, // DEPRECATED: DON'T REUSE
         //                                                       = 800, // DEPRECATED: DON'T REUSE
         //                                                       = 801, // DEPRECATED: DON'T REUSE
@@ -697,6 +731,7 @@ namespace Framework.Constants
         CommandTicketResetBug = 831,
         CommandTicketResetComplaint = 832,
         CommandTicketResetSuggestion = 833,
+
         //                                                       = 834, // DEPRECATED: DON'T REUSE
         // 835-836 previously used, do not reuse
         CommandNpcEvade = 837,
@@ -714,8 +749,10 @@ namespace Framework.Constants
         CommandListScenes = 849,
         CommandReloadSceneTemplate = 850,
         CommandReloadAreatriggerTemplate = 851,
+
         // 852 previously used, do not reuse
         CommandReloadConversationTemplate = 853,
+
         // 854-855 previously used, do not reuse
         CommandNpcSpawngroup = 856,
         CommandNpcDespawngroup = 857,
@@ -730,19 +767,23 @@ namespace Framework.Constants
         CommandListSpawnpoints = 866,
         CommandReloadQuestGreetingLocale = 867, // Reserved
         CommandModifyPower = 868,
+
         // 869 previously used, do not reuse
         // 870-871 previously used, do not reuse
         CommandServerDebug = 872,
         CommandReloadCreatureMovementOverride = 873,
+
         // 874 previously used, do not reuse
         CommandLookupMapId = 875,
         CommandLookupItemId = 876,
         CommandLookupQuestId = 877,
+
         // 878-879 previously used, do not reuse
         CommandPdumpCopy = 880,
         CommandReloadVehicleTemplate = 881,
         CommandReloadSpellScriptNames = 882,
         CommandQuestObjectiveComplete = 883,
+
         // Custom Permissions 1000+
         Max
     }

@@ -8,10 +8,15 @@ namespace Framework.IO
 {
     public sealed class StringArguments
     {
+        private readonly string activestring;
+        private int activeposition;
+        private string Current;
+
         public StringArguments(string args)
         {
             if (!args.IsEmpty())
                 activestring = args.TrimStart(' ');
+
             activeposition = -1;
         }
 
@@ -21,6 +26,8 @@ namespace Framework.IO
             activeposition = args.activeposition;
             Current = args.Current;
         }
+
+        public char this[int index] => activestring[index];
 
         public bool Empty()
         {
@@ -48,12 +55,22 @@ namespace Framework.IO
                 return false;
 
             bool value;
+
             if (bool.TryParse(Current, out value))
                 return value;
-            
-            if ((Current == "1") || Current.Equals("y", StringComparison.OrdinalIgnoreCase) || Current.Equals("on", StringComparison.OrdinalIgnoreCase) || Current.Equals("yes", StringComparison.OrdinalIgnoreCase) || Current.Equals("true", StringComparison.OrdinalIgnoreCase))
-                    return true;
-            if ((Current == "0") || Current.Equals("n", StringComparison.OrdinalIgnoreCase) || Current.Equals("off", StringComparison.OrdinalIgnoreCase) || Current.Equals("no", StringComparison.OrdinalIgnoreCase) || Current.Equals("false", StringComparison.OrdinalIgnoreCase))
+
+            if ((Current == "1") ||
+                Current.Equals("y", StringComparison.OrdinalIgnoreCase) ||
+                Current.Equals("on", StringComparison.OrdinalIgnoreCase) ||
+                Current.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                Current.Equals("true", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if ((Current == "0") ||
+                Current.Equals("n", StringComparison.OrdinalIgnoreCase) ||
+                Current.Equals("off", StringComparison.OrdinalIgnoreCase) ||
+                Current.Equals("no", StringComparison.OrdinalIgnoreCase) ||
+                Current.Equals("false", StringComparison.OrdinalIgnoreCase))
                 return false;
 
             return false;
@@ -65,6 +82,7 @@ namespace Framework.IO
                 return default;
 
             char value;
+
             if (char.TryParse(Current, out value))
                 return value;
 
@@ -77,6 +95,7 @@ namespace Framework.IO
                 return default;
 
             byte value;
+
             if (byte.TryParse(Current, out value))
                 return value;
 
@@ -89,6 +108,7 @@ namespace Framework.IO
                 return default;
 
             sbyte value;
+
             if (sbyte.TryParse(Current, out value))
                 return value;
 
@@ -101,6 +121,7 @@ namespace Framework.IO
                 return default;
 
             ushort value;
+
             if (ushort.TryParse(Current, out value))
                 return value;
 
@@ -113,6 +134,7 @@ namespace Framework.IO
                 return default;
 
             short value;
+
             if (short.TryParse(Current, out value))
                 return value;
 
@@ -125,6 +147,7 @@ namespace Framework.IO
                 return default;
 
             uint value;
+
             if (uint.TryParse(Current, out value))
                 return value;
 
@@ -137,6 +160,7 @@ namespace Framework.IO
                 return default;
 
             int value;
+
             if (int.TryParse(Current, out value))
                 return value;
 
@@ -149,6 +173,7 @@ namespace Framework.IO
                 return default;
 
             ulong value;
+
             if (ulong.TryParse(Current, out value))
                 return value;
 
@@ -161,6 +186,7 @@ namespace Framework.IO
                 return default;
 
             long value;
+
             if (long.TryParse(Current, out value))
                 return value;
 
@@ -173,6 +199,7 @@ namespace Framework.IO
                 return default;
 
             float value;
+
             if (float.TryParse(Current, out value))
                 return value;
 
@@ -185,6 +212,7 @@ namespace Framework.IO
                 return default;
 
             double value;
+
             if (double.TryParse(Current, out value))
                 return value;
 
@@ -197,6 +225,7 @@ namespace Framework.IO
                 return default;
 
             decimal value;
+
             if (decimal.TryParse(Current, out value))
                 return value;
 
@@ -205,13 +234,8 @@ namespace Framework.IO
 
         public void AlignToNextChar()
         {
-            while (activeposition < activestring.Length && activestring[activeposition] != ' ')            
-                activeposition++;            
-        }
-
-        public char this[int index]
-        {
-            get { return activestring[index]; }
+            while (activeposition < activestring.Length && activestring[activeposition] != ' ')
+                activeposition++;
         }
 
         public string GetString()
@@ -240,7 +264,7 @@ namespace Framework.IO
             activeposition = currentPosition;
         }
 
-        bool MoveNext(string delimiters)
+        private bool MoveNext(string delimiters)
         {
             //the stringtotokenize was never set:
             if (activestring == null)
@@ -252,10 +276,9 @@ namespace Framework.IO
 
             //bypass delimiters:
             activeposition++;
+
             while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) > -1)
-            {
                 activeposition++;
-            }
 
             //only delimiters were left, so return null:
             if (activeposition == activestring.Length)
@@ -270,19 +293,17 @@ namespace Framework.IO
                 activeposition++;
             } while (activeposition < activestring.Length && delimiters.IndexOf(activestring[activeposition]) == -1);
 
-            Current = activestring.Substring(startingposition, activeposition - startingposition);
+            Current = activestring[startingposition..activeposition];
+
             return true;
         }
 
-        bool Match(string pattern, out Match m)
+        private bool Match(string pattern, out Match m)
         {
             Regex r = new(pattern);
             m = r.Match(activestring);
+
             return m.Success;
         }
-
-        private string activestring;
-        private int activeposition;
-        private string Current;
     }
 }

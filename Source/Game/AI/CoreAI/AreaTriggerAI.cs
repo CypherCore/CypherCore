@@ -15,32 +15,43 @@ namespace Game.AI
         }
 
         // Called when the AreaTrigger has just been initialized, just before added to map
-        public virtual void OnInitialize() { }
+        public virtual void OnInitialize()
+        {
+        }
 
         // Called when the AreaTrigger has just been created
-        public virtual void OnCreate() { }
+        public virtual void OnCreate()
+        {
+        }
 
         // Called on each AreaTrigger update
-        public virtual void OnUpdate(uint diff) { }
+        public virtual void OnUpdate(uint diff)
+        {
+        }
 
         // Called when the AreaTrigger reach splineIndex
-        public virtual void OnSplineIndexReached(int splineIndex) { }
+        public virtual void OnSplineIndexReached(int splineIndex)
+        {
+        }
 
         // Called when the AreaTrigger reach its destination
-        public virtual void OnDestinationReached() { }
+        public virtual void OnDestinationReached()
+        {
+        }
 
         // Called when an unit enter the AreaTrigger
-        public virtual void OnUnitEnter(Unit unit) { }
+        public virtual void OnUnitEnter(Unit unit)
+        {
+        }
 
         // Called when an unit exit the AreaTrigger, or when the AreaTrigger is removed
-        public virtual void OnUnitExit(Unit unit) { }
+        public virtual void OnUnitExit(Unit unit)
+        {
+        }
 
         // Called when the AreaTrigger is removed
-        public virtual void OnRemove() { }
-    }
-
-    class NullAreaTriggerAI : AreaTriggerAI
-    {
-        public NullAreaTriggerAI(AreaTrigger areaTrigger) : base(areaTrigger) { }
+        public virtual void OnRemove()
+        {
+        }
     }
 }

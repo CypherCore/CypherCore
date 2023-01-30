@@ -1,60 +1,77 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Framework.Constants;
+using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class DismissCritter : ClientPacket
+    internal class DismissCritter : ClientPacket
     {
-        public DismissCritter(WorldPacket packet) : base(packet) { }
+        public ObjectGuid CritterGUID;
+
+        public DismissCritter(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             CritterGUID = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid CritterGUID;
     }
 
-    class RequestPetInfo : ClientPacket
+    internal class RequestPetInfo : ClientPacket
     {
-        public RequestPetInfo(WorldPacket packet) : base(packet) { }
+        public RequestPetInfo(WorldPacket packet) : base(packet)
+        {
+        }
 
-        public override void Read() { }
+        public override void Read()
+        {
+        }
     }
 
-    class PetAbandon : ClientPacket
+    internal class PetAbandon : ClientPacket
     {
-        public PetAbandon(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Pet;
+
+        public PetAbandon(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Pet = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid Pet;
     }
 
-    class PetStopAttack : ClientPacket
+    internal class PetStopAttack : ClientPacket
     {
-        public PetStopAttack(WorldPacket packet) : base(packet) { }
+        public ObjectGuid PetGUID;
+
+        public PetStopAttack(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             PetGUID = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid PetGUID;
     }
 
-    class PetSpellAutocast : ClientPacket
+    internal class PetSpellAutocast : ClientPacket
     {
-        public PetSpellAutocast(WorldPacket packet) : base(packet) { }
+        public bool AutocastEnabled;
+
+        public ObjectGuid PetGUID;
+        public uint SpellID;
+
+        public PetSpellAutocast(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -62,15 +79,27 @@ namespace Game.Networking.Packets
             SpellID = _worldPacket.ReadUInt32();
             AutocastEnabled = _worldPacket.HasBit();
         }
-
-        public ObjectGuid PetGUID;
-        public uint SpellID;
-        public bool AutocastEnabled;
     }
 
     public class PetSpells : ServerPacket
     {
-        public PetSpells() : base(ServerOpcodes.PetSpellsMessage, ConnectionType.Instance) { }
+        public uint[] ActionButtons = new uint[10];
+
+        public List<uint> Actions = new();
+        public CommandStates CommandState;
+        public List<PetSpellCooldown> Cooldowns = new();
+        public ushort CreatureFamily;
+        public byte Flag;
+
+        public ObjectGuid PetGUID;
+        public ReactStates ReactState;
+        public ushort Specialization;
+        public List<PetSpellHistory> SpellHistory = new();
+        public uint TimeLimit;
+
+        public PetSpells() : base(ServerOpcodes.PetSpellsMessage, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -108,31 +137,24 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt8(history.ConsumedCharges);
             }
         }
-
-        public ObjectGuid PetGUID;
-        public ushort CreatureFamily;
-        public ushort Specialization;
-        public uint TimeLimit;
-        public ReactStates ReactState;
-        public CommandStates CommandState;
-        public byte Flag;
-
-        public uint[] ActionButtons = new uint[10];
-
-        public List<uint> Actions = new();
-        public List<PetSpellCooldown> Cooldowns = new();
-        public List<PetSpellHistory> SpellHistory = new();
     }
 
-    class PetStableList : ServerPacket
+    internal class PetStableList : ServerPacket
     {
-        public PetStableList() : base(ServerOpcodes.PetStableList, ConnectionType.Instance) { }
+        public List<PetStableInfo> Pets = new();
+
+        public ObjectGuid StableMaster;
+
+        public PetStableList() : base(ServerOpcodes.PetStableList, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(StableMaster);
 
             _worldPacket.WriteInt32(Pets.Count);
+
             foreach (PetStableInfo pet in Pets)
             {
                 _worldPacket.WriteUInt32(pet.PetSlot);
@@ -145,54 +167,64 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteString(pet.PetName);
             }
         }
-
-        public ObjectGuid StableMaster;
-        public List<PetStableInfo> Pets = new();
     }
 
-    class PetStableResult : ServerPacket
+    internal class PetStableResult : ServerPacket
     {
-        public PetStableResult() : base(ServerOpcodes.PetStableResult, ConnectionType.Instance) { }
+        public StableResult Result;
+
+        public PetStableResult() : base(ServerOpcodes.PetStableResult, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8((byte)Result);
         }
-
-        public StableResult Result;
     }
 
-    class PetLearnedSpells : ServerPacket
+    internal class PetLearnedSpells : ServerPacket
     {
-        public PetLearnedSpells() : base(ServerOpcodes.PetLearnedSpells, ConnectionType.Instance) { }
+        public List<uint> Spells = new();
+
+        public PetLearnedSpells() : base(ServerOpcodes.PetLearnedSpells, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Spells.Count);
+
             foreach (uint spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
-
-        public List<uint> Spells = new();
     }
 
-    class PetUnlearnedSpells : ServerPacket
+    internal class PetUnlearnedSpells : ServerPacket
     {
-        public PetUnlearnedSpells() : base(ServerOpcodes.PetUnlearnedSpells, ConnectionType.Instance) { }
+        public List<uint> Spells = new();
+
+        public PetUnlearnedSpells() : base(ServerOpcodes.PetUnlearnedSpells, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Spells.Count);
+
             foreach (uint spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
-
-        public List<uint> Spells = new();
     }
 
-    class PetNameInvalid : ServerPacket
+    internal class PetNameInvalid : ServerPacket
     {
-        public PetNameInvalid() : base(ServerOpcodes.PetNameInvalid) { }
+        public PetRenameData RenameData;
+        public PetNameInvalidReason Result;
+
+        public PetNameInvalid() : base(ServerOpcodes.PetNameInvalid)
+        {
+        }
 
         public override void Write()
         {
@@ -207,22 +239,23 @@ namespace Game.Networking.Packets
             if (RenameData.HasDeclinedNames)
             {
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    _worldPacket.WriteBits(RenameData.DeclinedNames.name[i].GetByteCount(), 7);
+                    _worldPacket.WriteBits(RenameData.DeclinedNames.Name[i].GetByteCount(), 7);
 
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    _worldPacket.WriteString(RenameData.DeclinedNames.name[i]);
+                    _worldPacket.WriteString(RenameData.DeclinedNames.Name[i]);
             }
 
             _worldPacket.WriteString(RenameData.NewName);
         }
-
-        public PetRenameData RenameData;
-        public PetNameInvalidReason Result;
     }
 
-    class PetRename : ClientPacket
+    internal class PetRename : ClientPacket
     {
-        public PetRename(WorldPacket packet) : base(packet) { }
+        public PetRenameData RenameData;
+
+        public PetRename(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -232,26 +265,34 @@ namespace Game.Networking.Packets
             uint nameLen = _worldPacket.ReadBits<uint>(8);
 
             RenameData.HasDeclinedNames = _worldPacket.HasBit();
+
             if (RenameData.HasDeclinedNames)
             {
                 RenameData.DeclinedNames = new DeclinedName();
                 uint[] count = new uint[SharedConst.MaxDeclinedNameCases];
+
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                     count[i] = _worldPacket.ReadBits<uint>(7);
 
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                    RenameData.DeclinedNames.name[i] = _worldPacket.ReadString(count[i]);
+                    RenameData.DeclinedNames.Name[i] = _worldPacket.ReadString(count[i]);
             }
 
             RenameData.NewName = _worldPacket.ReadString(nameLen);
         }
-
-        public PetRenameData RenameData;
     }
 
-    class PetAction : ClientPacket
+    internal class PetAction : ClientPacket
     {
-        public PetAction(WorldPacket packet) : base(packet) { }
+        public uint Action;
+        public Vector3 ActionPosition;
+
+        public ObjectGuid PetGUID;
+        public ObjectGuid TargetGUID;
+
+        public PetAction(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -262,16 +303,18 @@ namespace Game.Networking.Packets
 
             ActionPosition = _worldPacket.ReadVector3();
         }
-
-        public ObjectGuid PetGUID;
-        public uint Action;
-        public ObjectGuid TargetGUID;
-        public Vector3 ActionPosition;
     }
 
-    class PetSetAction : ClientPacket
+    internal class PetSetAction : ClientPacket
     {
-        public PetSetAction(WorldPacket packet) : base(packet) { }
+        public uint Action;
+        public uint Index;
+
+        public ObjectGuid PetGUID;
+
+        public PetSetAction(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -280,109 +323,119 @@ namespace Game.Networking.Packets
             Index = _worldPacket.ReadUInt32();
             Action = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid PetGUID;
-        public uint Index;
-        public uint Action;
     }
 
-    class CancelModSpeedNoControlAuras : ClientPacket
+    internal class CancelModSpeedNoControlAuras : ClientPacket
     {
         public ObjectGuid TargetGUID;
 
-        public CancelModSpeedNoControlAuras(WorldPacket packet) : base(packet) { }
+        public CancelModSpeedNoControlAuras(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
     }
-    
-    class PetCancelAura : ClientPacket
+
+    internal class PetCancelAura : ClientPacket
     {
-        public PetCancelAura(WorldPacket packet) : base(packet) { }
+        public ObjectGuid PetGUID;
+        public uint SpellID;
+
+        public PetCancelAura(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             PetGUID = _worldPacket.ReadPackedGuid();
             SpellID = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid PetGUID;
-        public uint SpellID;
     }
 
-    class SetPetSpecialization : ServerPacket
+    internal class SetPetSpecialization : ServerPacket
     {
-        public SetPetSpecialization() : base(ServerOpcodes.SetPetSpecialization) { }
+        public ushort SpecID;
+
+        public SetPetSpecialization() : base(ServerOpcodes.SetPetSpecialization)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteUInt16(SpecID);
         }
-
-        public ushort SpecID;
     }
 
-    class PetActionFeedbackPacket : ServerPacket
+    internal class PetActionFeedbackPacket : ServerPacket
     {
-        public PetActionFeedbackPacket() : base(ServerOpcodes.PetStableResult) { }
+        public PetActionFeedback Response;
+
+        public uint SpellID;
+
+        public PetActionFeedbackPacket() : base(ServerOpcodes.PetStableResult)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt8((byte)Response);
         }
-
-        public uint SpellID;
-        public PetActionFeedback Response;
     }
 
-    class PetActionSound : ServerPacket
+    internal class PetActionSound : ServerPacket
     {
-        public PetActionSound() : base(ServerOpcodes.PetStableResult) { }
+        public PetTalk Action;
+
+        public ObjectGuid UnitGUID;
+
+        public PetActionSound() : base(ServerOpcodes.PetStableResult)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WriteUInt32((uint)Action);
         }
-
-        public ObjectGuid UnitGUID;
-        public PetTalk Action;
     }
 
-    class PetTameFailure : ServerPacket
+    internal class PetTameFailure : ServerPacket
     {
-        public PetTameFailure() : base(ServerOpcodes.PetTameFailure) { }
+        public byte Result;
+
+        public PetTameFailure() : base(ServerOpcodes.PetTameFailure)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8(Result);
         }
-
-        public byte Result;
     }
-    
+
     //Structs
     public class PetSpellCooldown
     {
-        public uint SpellID;
-        public uint Duration;
-        public uint CategoryDuration;
-        public float ModRate = 1.0f;
         public ushort Category;
+        public uint CategoryDuration;
+        public uint Duration;
+        public float ModRate = 1.0f;
+        public uint SpellID;
     }
 
     public class PetSpellHistory
     {
         public uint CategoryID;
-        public uint RecoveryTime;
         public float ChargeModRate = 1.0f;
         public sbyte ConsumedCharges;
+        public uint RecoveryTime;
     }
 
-    struct PetStableInfo
+    internal struct PetStableInfo
     {
         public uint PetSlot;
         public uint PetNumber;
@@ -393,7 +446,7 @@ namespace Game.Networking.Packets
         public string PetName;
     }
 
-    struct PetRenameData
+    internal struct PetRenameData
     {
         public ObjectGuid PetGUID;
         public int PetNumber;

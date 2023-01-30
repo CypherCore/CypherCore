@@ -6,9 +6,20 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class PlayScene : ServerPacket
+    internal class PlayScene : ServerPacket
     {
-        public PlayScene() : base(ServerOpcodes.PlayScene, ConnectionType.Instance) { }
+        public bool Encrypted;
+        public Position Location;
+        public uint PlaybackFlags;
+
+        public uint SceneID;
+        public uint SceneInstanceID;
+        public uint SceneScriptPackageID;
+        public ObjectGuid TransportGUID;
+
+        public PlayScene() : base(ServerOpcodes.PlayScene, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -21,31 +32,31 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Encrypted);
             _worldPacket.FlushBits();
         }
-
-        public uint SceneID;
-        public uint PlaybackFlags;
-        public uint SceneInstanceID;
-        public uint SceneScriptPackageID;
-        public ObjectGuid TransportGUID;
-        public Position Location;
-        public bool Encrypted;
     }
 
-    class CancelScene : ServerPacket
+    internal class CancelScene : ServerPacket
     {
-        public CancelScene() : base(ServerOpcodes.CancelScene, ConnectionType.Instance) { }
+        public uint SceneInstanceID;
+
+        public CancelScene() : base(ServerOpcodes.CancelScene, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(SceneInstanceID);
         }
-
-        public uint SceneInstanceID;
     }
 
-    class SceneTriggerEvent : ClientPacket
+    internal class SceneTriggerEvent : ClientPacket
     {
-        public SceneTriggerEvent(WorldPacket packet) : base(packet) { }
+        public string _Event;
+
+        public uint SceneInstanceID;
+
+        public SceneTriggerEvent(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -53,32 +64,33 @@ namespace Game.Networking.Packets
             SceneInstanceID = _worldPacket.ReadUInt32();
             _Event = _worldPacket.ReadString(len);
         }
-
-        public uint SceneInstanceID;
-        public string _Event;
     }
 
-    class ScenePlaybackComplete : ClientPacket
+    internal class ScenePlaybackComplete : ClientPacket
     {
-        public ScenePlaybackComplete(WorldPacket packet) : base(packet) { }
+        public uint SceneInstanceID;
+
+        public ScenePlaybackComplete(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             SceneInstanceID = _worldPacket.ReadUInt32();
         }
-
-        public uint SceneInstanceID;
     }
 
-    class ScenePlaybackCanceled : ClientPacket
+    internal class ScenePlaybackCanceled : ClientPacket
     {
-        public ScenePlaybackCanceled(WorldPacket packet) : base(packet) { }
+        public uint SceneInstanceID;
+
+        public ScenePlaybackCanceled(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             SceneInstanceID = _worldPacket.ReadUInt32();
         }
-
-        public uint SceneInstanceID;
     }
 }

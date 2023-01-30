@@ -18,8 +18,8 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Returns the entry in this list at the given index, or the default value of the element
-        /// type if the index was out of bounds.
+        ///  Returns the entry in this list at the given index, or the default value of the element
+        ///  type if the index was out of bounds.
         /// </summary>
         /// <typeparam name="T">The type of the elements in the list.</typeparam>
         /// <param name="list">The list to retrieve from.</param>
@@ -31,8 +31,8 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Returns the entry in this dictionary at the given key, or the default value of the key
-        /// if none.
+        ///  Returns the entry in this dictionary at the given key, or the default value of the key
+        ///  if none.
         /// </summary>
         /// <typeparam name="TKey">The key type.</typeparam>
         /// <typeparam name="TValue">The value type.</typeparam>
@@ -43,13 +43,17 @@ namespace System.Collections.Generic
         {
             TValue val;
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+
             return dict.TryGetValue(newkey, out val) ? val : default;
         }
+
         public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
             TValue val;
+
             return dict.TryGetValue(key, out val) ? val : default;
         }
+
         public static KeyValuePair<TKey, TValue> Find<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
             if (!dict.ContainsKey(key))
@@ -61,6 +65,7 @@ namespace System.Collections.Generic
         public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
         {
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+
             return dict.ContainsKey(newkey);
         }
 
@@ -79,21 +84,20 @@ namespace System.Collections.Generic
             //
             // Swaps elements in an array. Doesn't need to return a reference.
             //
-            T temp = array[position1]; // Copy the first position's element
+            T temp = array[position1];           // Copy the first position's element
             array[position1] = array[position2]; // Assign to the second element
-            array[position2] = temp; // Assign to the first element
+            array[position2] = temp;             // Assign to the first element
         }
 
         public static void Resize<T>(this List<T> list, uint size)
         {
             int cur = list.Count;
+
             if (size < cur)
                 list.RemoveRange((int)size, cur - (int)size);
             else
-            {
                 for (var i = list.Count; i < size; ++i)
                     list.Add(default);
-            }
         }
 
         public static void RandomResize<T>(this IList<T> list, uint size)
@@ -112,6 +116,7 @@ namespace System.Collections.Generic
             for (var i = 0; i < list.Count; ++i)
             {
                 var obj = list[i];
+
                 if (!predicate(obj))
                     list.Remove(obj);
             }
@@ -137,14 +142,18 @@ namespace System.Collections.Generic
             float itemWeightIndex = (float)RandomHelper.NextDouble() * totalWeight;
             float currentWeightIndex = 0;
 
-            foreach (var item in from weightedItem in sequence select new { Value = weightedItem, Weight = weightSelector(weightedItem) })
+            foreach (var item in from weightedItem in sequence
+                                 select new
+                                 {
+                                     Value = weightedItem,
+                                     Weight = weightSelector(weightedItem)
+                                 })
             {
                 currentWeightIndex += item.Weight;
 
                 // If we've hit or passed the weight we are after for this item then it's the one we want....
                 if (currentWeightIndex >= itemWeightIndex)
                     return item.Value;
-
             }
 
             return default;
@@ -159,6 +168,7 @@ namespace System.Collections.Generic
         {
             uint[] blockValues = new uint[array.Length / 32 + 1];
             array.CopyTo(blockValues, 0);
+
             return blockValues;
         }
 
@@ -171,6 +181,17 @@ namespace System.Collections.Generic
         {
             while (list.Count <= index)
                 list.Add(defaultValue);
+        }
+
+        public static void AddToDictList<T, L>(this Dictionary<T, List<L>> dict, T key, L item)
+        {
+            if (!dict.TryGetValue(key, out var list))
+            {
+                list = new List<L>();
+                dict.Add(key, list);
+            }
+
+            list.Add(item);
         }
     }
 

@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnInfoChanged : IScriptObject
     {
-        void OnInfoChanged(Guilds.Guild guild, string newInfo);
+        void OnInfoChanged(Guild guild, string newInfo);
     }
 }

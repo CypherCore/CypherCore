@@ -4,12 +4,11 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IGroup
 {
     public interface IGroupOnRemoveMember : IScriptObject
     {
-        void OnRemoveMember(Groups.Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason);
+        void OnRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason);
     }
 }

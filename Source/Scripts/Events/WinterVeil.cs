@@ -11,7 +11,7 @@ using Game.Spells;
 
 namespace Scripts.Events.WinterVeil
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         //Mistletoe
         public const uint CreateMistletoe = 26206;
@@ -33,53 +33,61 @@ namespace Scripts.Events.WinterVeil
     }
 
     [Script] // 26218 - Mistletoe
-    class spell_winter_veil_mistletoe : SpellScript, IHasSpellEffects
+    internal class spell_winter_veil_mistletoe : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.CreateMistletoe, SpellIds.CreateHolly, SpellIds.CreateSnowflakes);
-        }
-
-        void HandleScript(uint effIndex)
-        {
-            Player target = GetHitPlayer();
-            if (target)
-            {
-                uint spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
-                GetCaster().CastSpell(target, spellId, true);
-            }
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleScript(uint effIndex)
+        {
+            Player target = GetHitPlayer();
+
+            if (target)
+            {
+                uint spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
+                GetCaster().CastSpell(target, spellId, true);
+            }
+        }
     }
 
     [Script] // 26275 - PX-238 Winter Wondervolt TRAP
-    class spell_winter_veil_px_238_winter_wondervolt : SpellScript, IHasSpellEffects
+    internal class spell_winter_veil_px_238_winter_wondervolt : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        static uint[] spells =
+        private static readonly uint[] spells =
         {
-            SpellIds.Px238WinterWondervoltTransform1,
-            SpellIds.Px238WinterWondervoltTransform2,
-            SpellIds.Px238WinterWondervoltTransform3,
-            SpellIds.Px238WinterWondervoltTransform4
+            SpellIds.Px238WinterWondervoltTransform1, SpellIds.Px238WinterWondervoltTransform2, SpellIds.Px238WinterWondervoltTransform3, SpellIds.Px238WinterWondervoltTransform4
         };
+
+        public List<ISpellEffect> SpellEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Px238WinterWondervoltTransform1, SpellIds.Px238WinterWondervoltTransform2,
-                SpellIds.Px238WinterWondervoltTransform3, SpellIds.Px238WinterWondervoltTransform4);
+            return ValidateSpellInfo(SpellIds.Px238WinterWondervoltTransform1,
+                                     SpellIds.Px238WinterWondervoltTransform2,
+                                     SpellIds.Px238WinterWondervoltTransform3,
+                                     SpellIds.Px238WinterWondervoltTransform4);
         }
 
-        void HandleScript(uint effIndex)
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
             Unit target = GetHitUnit();
+
             if (target)
             {
                 for (byte i = 0; i < 4; ++i)
@@ -89,32 +97,34 @@ namespace Scripts.Events.WinterVeil
                 target.CastSpell(target, spells[RandomHelper.URand(0, 3)], true);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script]
-    class spell_item_reindeer_transformation : SpellScript, IHasSpellEffects
+    internal class spell_item_reindeer_transformation : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.FlyingReindeer310, SpellIds.FlyingReindeer280, SpellIds.FlyingReindeer60, SpellIds.Reindeer100, SpellIds.Reindeer60);
         }
 
-        void HandleDummy(uint effIndex)
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
+
             if (caster.HasAuraType(AuraType.Mounted))
             {
                 float flyspeed = caster.GetSpeedRate(UnitMoveType.Flight);
                 float speed = caster.GetSpeedRate(UnitMoveType.Run);
 
                 caster.RemoveAurasByType(AuraType.Mounted);
-                //5 different spells used depending on mounted speed and if mount can fly or not
+                //5 different spells used depending on mounted speed and if Mount can fly or not
 
                 if (flyspeed >= 4.1f)
                     // Flying Reindeer
@@ -132,11 +142,6 @@ namespace Scripts.Events.WinterVeil
                     // Reindeer
                     caster.CastSpell(caster, SpellIds.Reindeer60, true); //60% ground Reindeer
             }
-        }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
     }
 }

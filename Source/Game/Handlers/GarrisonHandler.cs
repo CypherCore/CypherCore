@@ -11,49 +11,49 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.GetGarrisonInfo)]
-        void HandleGetGarrisonInfo(GetGarrisonInfo getGarrisonInfo)
+        private void HandleGetGarrisonInfo(GetGarrisonInfo getGarrisonInfo)
         {
             Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.SendInfo();
+
+            garrison?.SendInfo();
         }
 
         [WorldPacketHandler(ClientOpcodes.GarrisonPurchaseBuilding)]
-        void HandleGarrisonPurchaseBuilding(GarrisonPurchaseBuilding garrisonPurchaseBuilding)
+        private void HandleGarrisonPurchaseBuilding(GarrisonPurchaseBuilding garrisonPurchaseBuilding)
         {
             if (!_player.GetNPCIfCanInteractWith(garrisonPurchaseBuilding.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
                 return;
 
             Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.PlaceBuilding(garrisonPurchaseBuilding.PlotInstanceID, garrisonPurchaseBuilding.BuildingID);
+
+            garrison?.PlaceBuilding(garrisonPurchaseBuilding.PlotInstanceID, garrisonPurchaseBuilding.BuildingID);
         }
 
         [WorldPacketHandler(ClientOpcodes.GarrisonCancelConstruction)]
-        void HandleGarrisonCancelConstruction(GarrisonCancelConstruction garrisonCancelConstruction)
+        private void HandleGarrisonCancelConstruction(GarrisonCancelConstruction garrisonCancelConstruction)
         {
             if (!_player.GetNPCIfCanInteractWith(garrisonCancelConstruction.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
                 return;
 
             Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.CancelBuildingConstruction(garrisonCancelConstruction.PlotInstanceID);
+
+            garrison?.CancelBuildingConstruction(garrisonCancelConstruction.PlotInstanceID);
         }
 
         [WorldPacketHandler(ClientOpcodes.GarrisonRequestBlueprintAndSpecializationData)]
-        void HandleGarrisonRequestBlueprintAndSpecializationData(GarrisonRequestBlueprintAndSpecializationData garrisonRequestBlueprintAndSpecializationData)
+        private void HandleGarrisonRequestBlueprintAndSpecializationData(GarrisonRequestBlueprintAndSpecializationData garrisonRequestBlueprintAndSpecializationData)
         {
             Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.SendBlueprintAndSpecializationData();
+
+            garrison?.SendBlueprintAndSpecializationData();
         }
 
         [WorldPacketHandler(ClientOpcodes.GarrisonGetMapData)]
-        void HandleGarrisonGetMapData(GarrisonGetMapData garrisonGetMapData)
+        private void HandleGarrisonGetMapData(GarrisonGetMapData garrisonGetMapData)
         {
             Garrison garrison = _player.GetGarrison();
-            if (garrison != null)
-                garrison.SendMapData(_player);
+
+            garrison?.SendMapData(_player);
         }
     }
 }

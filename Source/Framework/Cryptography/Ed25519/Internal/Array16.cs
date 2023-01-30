@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Framework.Cryptography.Ed25519.Internal
+﻿namespace Framework.Cryptography.Ed25519.Internal
 {
     // Array16<UInt32> Salsa20 state
     // Array16<UInt64> SHA-512 block

@@ -3,7 +3,6 @@
 
 using Game.Maps;
 using Game.PvP;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IOutdoorPvP
 {

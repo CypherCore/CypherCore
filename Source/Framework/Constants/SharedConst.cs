@@ -8,9 +8,10 @@ namespace Framework.Constants
     public class SharedConst
     {
         /// <summary>
-        /// CliDB Const
+        ///  CliDB Const
         /// </summary>
         public const int GTMaxLevel = 100; // All Gt* DBC store data for 100 levels, some by 100 per class/race
+
         public const int GTMaxRating = 32; // gtOCTClassCombatRatingScalar.dbc stores data for 32 ratings, look at MAX_COMBAT_RATING for real used amount
         public const int ReputationCap = 42000;
         public const int ReputationBottom = -42000;
@@ -33,9 +34,10 @@ namespace Framework.Constants
         public const int AchivementCategoryPetBattles = 15117;
 
         /// <summary>
-        /// BattlePets Const
+        ///  BattlePets Const
         /// </summary>
         public const int DefaultMaxBattlePetsPerSpecies = 3;
+
         public const int BattlePetCageItemId = 82800;
         public const int SpellVisualUncagePet = 222;
 
@@ -45,9 +47,10 @@ namespace Framework.Constants
         public const int MaxBattlePetLevel = 25;
 
         /// <summary>
-        /// Lfg Const
+        ///  Lfg Const
         /// </summary>
         public const uint LFGTimeRolecheck = 45;
+
         public const uint LFGTimeBoot = 120;
         public const uint LFGTimeProposal = 45;
         public const uint LFGQueueUpdateInterval = 15 * Time.InMilliseconds;
@@ -61,33 +64,37 @@ namespace Framework.Constants
         public const int LFGDPSNeeded = 3;
 
         /// <summary>
-        /// Loot Const
+        ///  Loot Const
         /// </summary>
         public const int MaxNRLootItems = 18;
+
         public const int PlayerCorpseLootEntry = 1;
 
         /// <summary>
-        /// Movement Const
+        ///  Movement Const
         /// </summary>
         public const double gravity = 19.29110527038574;
+
         public const float terminalVelocity = 60.148003f;
         public const float terminalSafefallVelocity = 7.0f;
         public const float terminal_length = (float)((terminalVelocity * terminalVelocity) / (2.0f * gravity));
         public const float terminal_safeFall_length = (float)((terminalSafefallVelocity * terminalSafefallVelocity) / (2.0f * gravity));
-        public const float terminal_fallTime = (float)(terminalVelocity / gravity); // the time that needed to reach terminalVelocity
+        public const float terminal_fallTime = (float)(terminalVelocity / gravity);                  // the time that needed to reach terminalVelocity
         public const float terminal_safeFall_fallTime = (float)(terminalSafefallVelocity / gravity); // the time that needed to reach terminalVelocity with safefall
 
         /// <summary>
-        /// Vehicle Const
+        ///  Vehicle Const
         /// </summary>
         public const int MaxSpellVehicle = 6;
+
         public const int VehicleSpellRideHardcoded = 46598;
         public const int VehicleSpellParachute = 45472;
 
         /// <summary>
-        /// Quest Const
+        ///  Quest Const
         /// </summary>
         public const int MaxQuestLogSize = 25;
+
         public const int MaxQuestCounts = 24;
 
         public const int QuestItemDropCount = 4;
@@ -100,17 +107,19 @@ namespace Framework.Constants
         public const int QuestRewardDisplaySpellCount = 3;
 
         /// <summary>
-        /// Smart AI Const
+        ///  Smart AI Const
         /// </summary>
         public const int SmartEventParamCount = 4;
+
         public const int SmartActionParamCount = 7;
         public const uint SmartSummonCounter = 0xFFFFFF;
         public const uint SmartEscortTargets = 0xFFFFFF;
 
         /// <summary>
-        /// BGs / Arena Const
+        ///  BGs / Arena Const
         /// </summary>
         public const int PvpTeamsCount = 2;
+
         public const uint CountOfPlayersToAverageWaitTime = 10;
         public const uint MaxPlayerBGQueues = 2;
         public const uint BGAwardArenaPointsMinLevel = 71;
@@ -118,18 +127,20 @@ namespace Framework.Constants
         public const int MaxArenaSlot = 3;
 
         /// <summary>
-        /// Void Storage Const
+        ///  Void Storage Const
         /// </summary>
         public const uint VoidStorageUnlockCost = 100 * MoneyConstants.Gold;
+
         public const uint VoidStorageStoreItemCost = 10 * MoneyConstants.Gold;
         public const uint VoidStorageMaxDeposit = 9;
         public const uint VoidStorageMaxWithdraw = 9;
         public const byte VoidStorageMaxSlot = 160;
 
         /// <summary>
-        /// Calendar Const
+        ///  Calendar Const
         /// </summary>
         public const uint CalendarMaxEvents = 30;
+
         public const uint CalendarMaxGuildEvents = 100;
         public const uint CalendarMaxInvites = 100;
         public const uint CalendarCreateEventCooldown = 5;
@@ -137,33 +148,36 @@ namespace Framework.Constants
         public const uint CalendarDefaultResponseTime = 946684800; // 01/01/2000 00:00:00
 
         /// <summary>
-        /// Misc Const
+        ///  Misc Const
         /// </summary>
         public const Locale DefaultLocale = Locale.enUS;
+
         public const int MaxAccountTutorialValues = 8;
         public const int MinAuctionTime = (12 * Time.Hour);
         public const int MaxConditionTargets = 3;
 
         /// <summary>
-        /// Unit Const
+        ///  Unit Const
         /// </summary>
         public const float BaseMinDamage = 1.0f;
+
         public const float BaseMaxDamage = 2.0f;
         public const int BaseAttackTime = 2000;
         public const int MaxSummonSlot = 7;
         public const int MaxTotemSlot = 5;
         public const int MaxGameObjectSlot = 4;
-        public const float MaxAggroRadius = 45.0f;  // yards
+        public const float MaxAggroRadius = 45.0f; // yards
         public const int MaxAggroResetTime = 10;
         public const int MaxVehicleSeats = 8;
         public const int AttackDisplayDelay = 200;
-        public const float MaxPlayerStealthDetectRange = 30.0f;               // max distance for detection targets by player
+        public const float MaxPlayerStealthDetectRange = 30.0f; // max distance for detection targets by player
         public const int MaxEquipmentItems = 3;
 
         /// <summary>
-        /// Creature Const
+        ///  Creature Const
         /// </summary>
-        public const int MaxGossipMenuItems = 64;                            // client supported items unknown, but provided number must be enough
+        public const int MaxGossipMenuItems = 64; // client supported items unknown, but provided number must be enough
+
         public const int DefaultGossipMessage = 0xFFFFFF;
         public const int MaxGossipTextEmotes = 3;
         public const int MaxNpcTextOptions = 8;
@@ -189,21 +203,24 @@ namespace Framework.Constants
         public const uint CreatureTappersSoftCap = 5;
 
         /// <summary>
-        /// GameObject Const
+        ///  GameObject Const
         /// </summary>
         public const int MaxGOData = 35;
+
         public const uint MaxTransportStopFrames = 9;
 
         /// <summary>
-        /// AreaTrigger Const
+        ///  AreaTrigger Const
         /// </summary>
         public const int MaxAreatriggerEntityData = 8;
+
         public const int MaxAreatriggerScale = 7;
 
         /// <summary>
-        /// Pet Const
+        ///  Pet Const
         /// </summary>
         public const int MaxActivePets = 5;
+
         public const int MaxPetStables = 200;
         public const uint CallPetSpellId = 883;
         public const float PetFollowDist = 1.0f;
@@ -218,28 +235,29 @@ namespace Framework.Constants
         public const int ActionBarIndexMax = (ActionBarIndexEnd - ActionBarIndexStart);
 
         /// <summary>
-        /// Object Const
+        ///  Object Const
         /// </summary>
-        public const float DefaultPlayerBoundingRadius = 0.388999998569489f;      // player size, also currently used (correctly?) for any non Unit world objects
+        public const float DefaultPlayerBoundingRadius = 0.388999998569489f; // player size, also currently used (correctly?) for any non Unit world objects
+
         public const float AttackDistance = 5.0f;
         public const float DefaultPlayerCombatReach = 1.5f;
         public const float MinMeleeReach = 2.0f;
         public const float NominalMeleeRange = 5.0f;
         public const float MeleeRange = NominalMeleeRange - MinMeleeReach * 2; //center to center for players
-        public const float ExtraCellSearchRadius = 40.0f; // We need in some cases increase search radius. Allow to find creatures with huge combat reach in a different nearby cell.
+        public const float ExtraCellSearchRadius = 40.0f;                      // We need in some cases increase search radius. Allow to find creatures with huge combat reach in a different nearby cell.
         public const float InspectDistance = 28.0f;
         public const float ContactDistance = 0.5f;
         public const float InteractionDistance = 5.0f;
-        public const float MaxVisibilityDistance = MapConst.SizeofGrids;        // max distance for visible objects
+        public const float MaxVisibilityDistance = MapConst.SizeofGrids; // max distance for visible objects
         public const float SightRangeUnit = 50.0f;
         public const float VisibilityDistanceGigantic = 400.0f;
         public const float VisibilityDistanceLarge = 200.0f;
         public const float VisibilityDistanceNormal = 100.0f;
         public const float VisibilityDistanceSmall = 50.0f;
         public const float VisibilityDistanceTiny = 25.0f;
-        public const float DefaultVisibilityDistance = VisibilityDistanceNormal;  // default visible distance, 100 yards on continents
-        public const float DefaultVisibilityInstance = 170.0f;                    // default visible distance in instances, 170 yards
-        public const float DefaultVisibilityBGAreans = 533.0f;                    // default visible distance in BG/Arenas, roughly 533 yards
+        public const float DefaultVisibilityDistance = VisibilityDistanceNormal; // default visible distance, 100 yards on continents
+        public const float DefaultVisibilityInstance = 170.0f;                   // default visible distance in instances, 170 yards
+        public const float DefaultVisibilityBGAreans = 533.0f;                   // default visible distance in BG/Arenas, roughly 533 yards
         public const int DefaultVisibilityNotifyPeriod = 1000;
 
         public const int WorldTrigger = 12999;
@@ -248,63 +266,55 @@ namespace Framework.Constants
 
         public static float[] baseMoveSpeed =
         {
-            2.5f,                  // MOVE_WALK
-            7.0f,                  // MOVE_RUN
-            4.5f,                  // MOVE_RUN_BACK
-            4.722222f,             // MOVE_SWIM
-            2.5f,                  // MOVE_SWIM_BACK
-            3.141594f,             // MOVE_TURN_RATE
-            7.0f,                  // MOVE_FLIGHT
-            4.5f,                  // MOVE_FLIGHT_BACK
-            3.14f                  // MOVE_PITCH_RATE
-        };
+            2.5f,      // MOVE_WALK
+			7.0f,      // MOVE_RUN
+			4.5f,      // MOVE_RUN_BACK
+			4.722222f, // MOVE_SWIM
+			2.5f,      // MOVE_SWIM_BACK
+			3.141594f, // MOVE_TURN_RATE
+			7.0f,      // MOVE_FLIGHT
+			4.5f,      // MOVE_FLIGHT_BACK
+			3.14f      // MOVE_PITCH_RATE
+		};
 
         public static float[] playerBaseMoveSpeed =
         {
-            2.5f,                  // MOVE_WALK
-            7.0f,                  // MOVE_RUN
-            4.5f,                  // MOVE_RUN_BACK
-            4.722222f,             // MOVE_SWIM
-            2.5f,                  // MOVE_SWIM_BACK
-            3.141594f,             // MOVE_TURN_RATE
-            7.0f,                  // MOVE_FLIGHT
-            4.5f,                  // MOVE_FLIGHT_BACK
-            3.14f                  // MOVE_PITCH_RATE
-        };
+            2.5f,      // MOVE_WALK
+			7.0f,      // MOVE_RUN
+			4.5f,      // MOVE_RUN_BACK
+			4.722222f, // MOVE_SWIM
+			2.5f,      // MOVE_SWIM_BACK
+			3.141594f, // MOVE_TURN_RATE
+			7.0f,      // MOVE_FLIGHT
+			4.5f,      // MOVE_FLIGHT_BACK
+			3.14f      // MOVE_PITCH_RATE
+		};
 
         public static float[] VisibilityDistances =
         {
-            DefaultVisibilityDistance,
-            VisibilityDistanceTiny,
-            VisibilityDistanceSmall,
-            VisibilityDistanceLarge,
-            VisibilityDistanceGigantic,
-            MaxVisibilityDistance
+            DefaultVisibilityDistance, VisibilityDistanceTiny, VisibilityDistanceSmall, VisibilityDistanceLarge, VisibilityDistanceGigantic, MaxVisibilityDistance
         };
 
-        static int[] raceBits =
+        private static readonly int[] raceBits =
         {
-            0, 0, 1, 2, 3, 4, 5, 6, 7, 8,
-            9, 10, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, 21, -1, 23, 24, 25, 26, 27, 28,
-            29, 30, 31, -1, 11, 12, 13, 14
+            0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, -1, 23, 24, 25, 26, 27, 28, 29, 30, 31, -1, 11, 12, 13, 14
         };
 
-        public static ulong RaceMaskAllPlayable = (ulong)(GetMaskForRace(Race.Human) | GetMaskForRace(Race.Orc) | GetMaskForRace(Race.Dwarf) | GetMaskForRace(Race.NightElf) | GetMaskForRace(Race.Undead)
-            | GetMaskForRace(Race.Tauren) | GetMaskForRace(Race.Gnome) | GetMaskForRace(Race.Troll) | GetMaskForRace(Race.BloodElf) | GetMaskForRace(Race.Draenei)
-            | GetMaskForRace(Race.Goblin) | GetMaskForRace(Race.Worgen) | GetMaskForRace(Race.PandarenNeutral) | GetMaskForRace(Race.PandarenAlliance) | GetMaskForRace(Race.PandarenHorde)
-            | GetMaskForRace(Race.Nightborne) | GetMaskForRace(Race.HighmountainTauren) | GetMaskForRace(Race.VoidElf) | GetMaskForRace(Race.LightforgedDraenei) | GetMaskForRace(Race.ZandalariTroll)
-            | GetMaskForRace(Race.KulTiran) | GetMaskForRace(Race.DarkIronDwarf) | GetMaskForRace(Race.Vulpera) | GetMaskForRace(Race.MagharOrc) | GetMaskForRace(Race.MechaGnome) | GetMaskForRace(Race.DracthyrAlliance) | GetMaskForRace(Race.DracthyrHorde));
+        public static ulong RaceMaskAllPlayable = (ulong)(GetMaskForRace(Race.Human) | GetMaskForRace(Race.Orc) | GetMaskForRace(Race.Dwarf) | GetMaskForRace(Race.NightElf) | GetMaskForRace(Race.Undead) | GetMaskForRace(Race.Tauren) | GetMaskForRace(Race.Gnome) | GetMaskForRace(Race.Troll) | GetMaskForRace(Race.BloodElf) | GetMaskForRace(Race.Draenei) | GetMaskForRace(Race.Goblin) | GetMaskForRace(Race.Worgen) | GetMaskForRace(Race.PandarenNeutral) | GetMaskForRace(Race.PandarenAlliance) | GetMaskForRace(Race.PandarenHorde) | GetMaskForRace(Race.Nightborne) | GetMaskForRace(Race.HighmountainTauren) | GetMaskForRace(Race.VoidElf) | GetMaskForRace(Race.LightforgedDraenei) | GetMaskForRace(Race.ZandalariTroll) | GetMaskForRace(Race.KulTiran) | GetMaskForRace(Race.DarkIronDwarf) | GetMaskForRace(Race.Vulpera) | GetMaskForRace(Race.MagharOrc) | GetMaskForRace(Race.MechaGnome) | GetMaskForRace(Race.DracthyrAlliance) | GetMaskForRace(Race.DracthyrHorde));
 
-        public static ulong RaceMaskAlliance = (ulong)(GetMaskForRace(Race.Human) | GetMaskForRace(Race.Dwarf) | GetMaskForRace(Race.NightElf) | GetMaskForRace(Race.Gnome)
-            | GetMaskForRace(Race.Draenei) | GetMaskForRace(Race.Worgen) | GetMaskForRace(Race.PandarenAlliance) | GetMaskForRace(Race.VoidElf) | GetMaskForRace(Race.LightforgedDraenei)
-            | GetMaskForRace(Race.KulTiran) | GetMaskForRace(Race.DarkIronDwarf) | GetMaskForRace(Race.MechaGnome) | GetMaskForRace(Race.DracthyrAlliance));
+        public static ulong RaceMaskAlliance = (ulong)(GetMaskForRace(Race.Human) | GetMaskForRace(Race.Dwarf) | GetMaskForRace(Race.NightElf) | GetMaskForRace(Race.Gnome) | GetMaskForRace(Race.Draenei) | GetMaskForRace(Race.Worgen) | GetMaskForRace(Race.PandarenAlliance) | GetMaskForRace(Race.VoidElf) | GetMaskForRace(Race.LightforgedDraenei) | GetMaskForRace(Race.KulTiran) | GetMaskForRace(Race.DarkIronDwarf) | GetMaskForRace(Race.MechaGnome) | GetMaskForRace(Race.DracthyrAlliance));
 
         public static ulong RaceMaskHorde = RaceMaskAllPlayable & ~RaceMaskAlliance;
 
+        public static CascLocaleBit[] WowLocaleToCascLocaleBit =
+        {
+            CascLocaleBit.enUS, CascLocaleBit.koKR, CascLocaleBit.frFR, CascLocaleBit.deDE, CascLocaleBit.zhCN, CascLocaleBit.zhTW, CascLocaleBit.esES, CascLocaleBit.esMX, CascLocaleBit.ruRU, CascLocaleBit.None, CascLocaleBit.ptBR, CascLocaleBit.itIT
+        };
+
+
         //Todo move these else where
         /// <summary>
-        /// Method Const
+        ///  Method Const
         /// </summary>
         public static SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
         {
@@ -314,6 +324,7 @@ namespace Framework.Constants
 
             return SpellSchools.Normal;
         }
+
         public static SkillType SkillByQuestSort(int sort)
         {
             switch ((QuestSort)sort)
@@ -341,8 +352,10 @@ namespace Framework.Constants
                 case QuestSort.Archaeology:
                     return SkillType.Archaeology;
             }
+
             return SkillType.None;
         }
+
         public static SkillType SkillByLockType(LockType locktype)
         {
             switch (locktype)
@@ -392,6 +405,7 @@ namespace Framework.Constants
                 case LockType.KulTiranMining:
                     return SkillType.KulTiranMining;
             }
+
             return SkillType.None;
         }
 
@@ -400,23 +414,43 @@ namespace Framework.Constants
             return locale < Locale.Total && locale != Locale.None;
         }
 
-        public static CascLocaleBit[] WowLocaleToCascLocaleBit =
+        public static long GetMaskForRace(Race raceId)
         {
-            CascLocaleBit.enUS,
-            CascLocaleBit.koKR,
-            CascLocaleBit.frFR,
-            CascLocaleBit.deDE,
-            CascLocaleBit.zhCN,
-            CascLocaleBit.zhTW,
-            CascLocaleBit.esES,
-            CascLocaleBit.esMX,
-            CascLocaleBit.ruRU,
-            CascLocaleBit.None,
-            CascLocaleBit.ptBR,
-            CascLocaleBit.itIT
-        };
+            int raceBit = GetRaceBit(raceId);
 
-        static int GetRaceBit(Race raceId)
+            return raceBit >= 0 && raceBit < sizeof(long) * 8 ? (1L << raceBit) : 0;
+        }
+
+        public static bool IsActivePetSlot(PetSaveMode slot)
+        {
+            return slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot;
+        }
+
+        public static bool IsStabledPetSlot(PetSaveMode slot)
+        {
+            return slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot;
+        }
+
+        public static LootType GetLootTypeForClient(LootType lootType)
+        {
+            switch (lootType)
+            {
+                case LootType.Prospecting:
+                case LootType.Milling:
+                    return LootType.Disenchanting;
+                case LootType.Insignia:
+                    return LootType.Skinning;
+                case LootType.Fishinghole:
+                case LootType.FishingJunk:
+                    return LootType.Fishing;
+                default:
+                    break;
+            }
+
+            return lootType;
+        }
+
+        private static int GetRaceBit(Race raceId)
         {
             switch (raceId)
             {
@@ -457,40 +491,6 @@ namespace Framework.Constants
                 default:
                     return -1;
             }
-        }
-        
-        public static long GetMaskForRace(Race raceId)
-        {
-            int raceBit = GetRaceBit(raceId);
-            return raceBit >= 0 && raceBit < sizeof(long) * 8 ? (1L << raceBit) : 0;
-        }
-
-        public static bool IsActivePetSlot(PetSaveMode slot)
-        {
-            return slot >= PetSaveMode.FirstActiveSlot && slot < PetSaveMode.LastActiveSlot;
-        }
-
-        public static bool IsStabledPetSlot(PetSaveMode slot)
-        {
-            return slot >= PetSaveMode.FirstStableSlot && slot < PetSaveMode.LastStableSlot;
-        }
-
-        public static LootType GetLootTypeForClient(LootType lootType)
-        {
-            switch (lootType)
-            {
-                case LootType.Prospecting:
-                case LootType.Milling:
-                    return LootType.Disenchanting;
-                case LootType.Insignia:
-                    return LootType.Skinning;
-                case LootType.Fishinghole:
-                case LootType.FishingJunk:
-                    return LootType.Fishing;
-                default:
-                    break;
-            }
-            return lootType;
         }
     }
 
@@ -550,6 +550,7 @@ namespace Framework.Constants
         Green,
         Gray
     }
+
     public enum ContentLevels
     {
         Content_1_60 = 0,
@@ -570,27 +571,29 @@ namespace Framework.Constants
     {
         Horde = 67,
         Alliance = 469,
+
         //TEAM_STEAMWHEEDLE_CARTEL = 169,                       // not used in code
         //TEAM_ALLIANCE_FORCES     = 891,
         //TEAM_HORDE_FORCES        = 892,
         //TEAM_SANCTUARY           = 936,
         //TEAM_OUTLAND             = 980,
-        Other = 0                            // if ReputationListId > 0 && Flags != FACTION_FLAG_TEAM_HEADER
+        Other = 0 // if ReputationListId > 0 && Flags != FACTION_FLAG_TEAM_HEADER
     }
 
     public enum FactionMasks : byte
     {
-        Player = 1,                              // any player
-        Alliance = 2,                              // player or creature from alliance team
-        Horde = 4,                              // player or creature from horde team
-        Monster = 8                               // aggressive creature from monster team
-        // if none flags set then non-aggressive creature
+        Player = 1,   // any player
+        Alliance = 2, // player or creature from alliance team
+        Horde = 4,    // player or creature from horde team
+
+        Monster = 8 // aggressive creature from monster team
+                    // if none flags set then non-aggressive creature
     }
 
     public enum FactionTemplateFlags
     {
-        PVP = 0x800,   // flagged for PvP
-        ContestedGuard = 0x1000,   // faction will attack players that were involved in PvP combats
+        PVP = 0x800,             // flagged for PvP
+        ContestedGuard = 0x1000, // faction will attack players that were involved in PvP combats
         HostileByDefault = 0x2000
     }
 
@@ -672,14 +675,14 @@ namespace Framework.Constants
     public enum ReputationFlags : ushort
     {
         None = 0x00,
-        Visible = 0x01,                   // makes visible in client (set or can be set at interaction with target of this faction)
-        AtWar = 0x02,                   // enable AtWar-button in client. player controlled (except opposition team always war state), Flag only set on initial creation
-        Hidden = 0x04,                   // hidden faction from reputation pane in client (player can gain reputation, but this update not sent to client)
-        Header = 0x08,                   // Display as header in UI
+        Visible = 0x01, // makes visible in client (set or can be set at interaction with target of this faction)
+        AtWar = 0x02,   // enable AtWar-button in client. player controlled (except opposition team always war state), Flag only set on initial creation
+        Hidden = 0x04,  // hidden faction from reputation pane in client (player can gain reputation, but this update not sent to client)
+        Header = 0x08,  // Display as header in UI
         Peaceful = 0x10,
-        Inactive = 0x20,                   // player controlled (CMSG_SET_FACTION_INACTIVE)
+        Inactive = 0x20, // player controlled (CMSG_SET_FACTION_INACTIVE)
         ShowPropagated = 0x40,
-        HeaderShowsBar = 0x80,                   // Header has its own reputation bar
+        HeaderShowsBar = 0x80, // Header has its own reputation bar
         CapitalCityForRaceChange = 0x100,
         Guild = 0x200,
         GarrisonInvasion = 0x400
@@ -712,9 +715,19 @@ namespace Framework.Constants
         Adventurer = 14,
         Max = 15,
 
-        ClassMaskAllPlayable = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Hunter - 1)) |
-            (1 << (Rogue - 1)) | (1 << (Priest - 1)) | (1 << (Deathknight - 1)) | (1 << (Shaman - 1)) |
-            (1 << (Mage - 1)) | (1 << (Warlock - 1)) | (1 << (Monk - 1)) | (1 << (Druid - 1)) | (1 << (DemonHunter - 1)) | (1 << (Evoker - 1))),
+        ClassMaskAllPlayable = ((1 << (Warrior - 1)) |
+                                (1 << (Paladin - 1)) |
+                                (1 << (Hunter - 1)) |
+                                (1 << (Rogue - 1)) |
+                                (1 << (Priest - 1)) |
+                                (1 << (Deathknight - 1)) |
+                                (1 << (Shaman - 1)) |
+                                (1 << (Mage - 1)) |
+                                (1 << (Warlock - 1)) |
+                                (1 << (Monk - 1)) |
+                                (1 << (Druid - 1)) |
+                                (1 << (DemonHunter - 1)) |
+                                (1 << (Evoker - 1))),
 
         ClassMaskAllCreatures = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Rogue - 1)) | (1 << (Mage - 1))),
 
@@ -735,6 +748,7 @@ namespace Framework.Constants
         Goblin = 9,
         BloodElf = 10,
         Draenei = 11,
+
         //FelOrc = 12,
         //Naga = 13,
         //Broken = 14,
@@ -746,6 +760,7 @@ namespace Framework.Constants
         //NorthrendSkeleton = 20,
         //IceTroll = 21,
         Worgen = 22,
+
         //HumanGilneas = 23,
         PandarenNeutral = 24,
         PandarenAlliance = 25,
@@ -756,6 +771,7 @@ namespace Framework.Constants
         LightforgedDraenei = 30,
         ZandalariTroll = 31,
         KulTiran = 32,
+
         //RACE_THIN_HUMAN         = 33,
         DarkIronDwarf = 34,
         Vulpera = 35,
@@ -763,6 +779,7 @@ namespace Framework.Constants
         MechaGnome = 37,
         DracthyrAlliance = 52,
         DracthyrHorde = 70,
+
         //CompanionDrake      = 71,
         //CompanionProtoDragon = 72,
         //CompanionSerpent    = 73,
@@ -790,6 +807,7 @@ namespace Framework.Constants
 
         MaxAccountExpansions
     }
+
     public enum PowerType : sbyte
     {
         Mana = 0,
@@ -802,7 +820,7 @@ namespace Framework.Constants
         SoulShards = 7,
         LunarPower = 8,
         HolyPower = 9,
-        AlternatePower = 10,           // Used in some quests
+        AlternatePower = 10, // Used in some quests
         Maelstrom = 11,
         Chi = 12,
         Insanity = 13,
@@ -814,8 +832,8 @@ namespace Framework.Constants
         Essence = 19,
         Max = 20,
 
-        All = 127,          // default for class?
-        Health = -2,    // (-2 as signed value)
+        All = 127,   // default for class?
+        Health = -2, // (-2 as signed value)
         MaxPerClass = 7
     }
 
@@ -835,11 +853,12 @@ namespace Framework.Constants
         Tradeskills = 2,
         Pets = 3
     }
+
     public enum TrainerSpellState
     {
         Known = 0,
         Available = 1,
-        Unavailable = 2,
+        Unavailable = 2
     }
 
     public enum TrainerFailReason
@@ -1019,7 +1038,7 @@ namespace Framework.Constants
         SingleVServer = 0x10000000,
         UseInstancePool = 0x20000000,
         MapUsesRaidGraphics = 0x40000000,
-        ForceCustomUIMap = 0x80000000,
+        ForceCustomUIMap = 0x80000000
     }
 
     [Flags]
@@ -1045,7 +1064,7 @@ namespace Framework.Constants
         FogOfWar = 0x20000,
         DisableSharedWeatherSystems = 0x40000,
         HonorSpellAttribute11LosHitsNocamcollide = 0x80000,
-        BelongsToLayer = 0x100000,
+        BelongsToLayer = 0x100000
     }
 
     // values based at Holidays.dbc
@@ -1186,107 +1205,107 @@ namespace Framework.Constants
         PvpBrawlDsEu = 704,
         PvpBrawlDsTwCn = 705,
         PvpBrawlDsKr = 706,
-        TombOfSargerasNormalHeroicDefault = 710,    // Tomb Of Sargeras: Kil'Jaeden Awaits!
-        TombOfSargerasNormalHeroicEu = 711,    // Tomb Of Sargeras: Kil'Jaeden Awaits!
-        TombOfSargerasNormalHeroicTwCn = 712,    // Tomb Of Sargeras: Kil'Jaeden Awaits!
-        TombOfSargerasNormalHeroicKr = 713,    // Tomb Of Sargeras: Kil'Jaeden Awaits!
-        TombOfSargerasRf1SectionDefault = 714,    // Tomb Of Sargeras: The Gates Of Hell.
-        TombOfSargerasRf1SectionEu = 715,    // Tomb Of Sargeras: The Gates Of Hell.
-        TombOfSargerasRf1SectionTwCn = 716,    // Tomb Of Sargeras: The Gates Of Hell.
-        TombOfSargerasRf1SectionKr = 717,    // Tomb Of Sargeras: The Gates Of Hell.
-        TombOfSargerasRf2SectionDefault = 718,    // Tomb Of Sargeras: Wailing Halls.
-        TombOfSargerasRf2SectionEu = 719,    // Tomb Of Sargeras: Wailing Halls.
-        TombOfSargerasRf2SectionTwCn = 720,    // Tomb Of Sargeras: Wailing Halls.
-        TombOfSargerasRf2SectionKr = 721,    // Tomb Of Sargeras: Wailing Halls.
-        TombOfSargerasRf3SectionDefault = 722,    // Tomb Of Sargeras: Chamber Of The Avatar.
-        TombOfSargerasRf3SectionEu = 723,    // Tomb Of Sargeras: Chamber Of The Avatar.
-        TombOfSargerasRf3SectionTwCn = 724,    // Tomb Of Sargeras: Chamber Of The Avatar.
-        TombOfSargerasRf3SectionKr = 725,    // Tomb Of Sargeras: Chamber Of The Avatar.
-        TombOfSargerasFinalEncounterDefault = 726,    // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
-        TombOfSargerasFinalEncounterEu = 727,    // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
+        TombOfSargerasNormalHeroicDefault = 710,   // Tomb Of Sargeras: Kil'Jaeden Awaits!
+        TombOfSargerasNormalHeroicEu = 711,        // Tomb Of Sargeras: Kil'Jaeden Awaits!
+        TombOfSargerasNormalHeroicTwCn = 712,      // Tomb Of Sargeras: Kil'Jaeden Awaits!
+        TombOfSargerasNormalHeroicKr = 713,        // Tomb Of Sargeras: Kil'Jaeden Awaits!
+        TombOfSargerasRf1SectionDefault = 714,     // Tomb Of Sargeras: The Gates Of Hell.
+        TombOfSargerasRf1SectionEu = 715,          // Tomb Of Sargeras: The Gates Of Hell.
+        TombOfSargerasRf1SectionTwCn = 716,        // Tomb Of Sargeras: The Gates Of Hell.
+        TombOfSargerasRf1SectionKr = 717,          // Tomb Of Sargeras: The Gates Of Hell.
+        TombOfSargerasRf2SectionDefault = 718,     // Tomb Of Sargeras: Wailing Halls.
+        TombOfSargerasRf2SectionEu = 719,          // Tomb Of Sargeras: Wailing Halls.
+        TombOfSargerasRf2SectionTwCn = 720,        // Tomb Of Sargeras: Wailing Halls.
+        TombOfSargerasRf2SectionKr = 721,          // Tomb Of Sargeras: Wailing Halls.
+        TombOfSargerasRf3SectionDefault = 722,     // Tomb Of Sargeras: Chamber Of The Avatar.
+        TombOfSargerasRf3SectionEu = 723,          // Tomb Of Sargeras: Chamber Of The Avatar.
+        TombOfSargerasRf3SectionTwCn = 724,        // Tomb Of Sargeras: Chamber Of The Avatar.
+        TombOfSargerasRf3SectionKr = 725,          // Tomb Of Sargeras: Chamber Of The Avatar.
+        TombOfSargerasFinalEncounterDefault = 726, // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
+        TombOfSargerasFinalEncounterEu = 727,      // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
         TombOfSargerasFinalEncounterTwCn = 728,    // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
-        TombOfSargerasFinalEncounterKr = 729,    // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
-        TombOfSargerasNormalHeroic768 = 730,    // Tomb Of Sargeras: Kil'Jaeden Awaits!
+        TombOfSargerasFinalEncounterKr = 729,      // Tomb Of Sargeras: Deceiver'S Fall. Kil'Jaeden Awaits!
+        TombOfSargerasNormalHeroic768 = 730,       // Tomb Of Sargeras: Kil'Jaeden Awaits!
         PvpBrawlDs1984 = 736,
         PvpBrawlAb1984 = 737,
-        ShadowsOfArgusWeek2UnlocksDefault = 744,    // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
-        ShadowsOfArgusWeek3UnlocksDefault = 745,    // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
-        ShadowsOfArgusWeek2UnlocksKr = 746,    // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
-        ShadowsOfArgusWeek2UnlocksEu = 747,    // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
-        ShadowsOfArgusWeek2UnlocksTwCn = 748,    // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
-        ShadowsOfArgusWeek3UnlocksTwCn = 749,    // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
-        ShadowsOfArgusWeek3UnlocksKr = 750,    // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
-        ShadowsOfArgusWeek3UnlocksEu = 751,    // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
-        AntorusBurningThroneRf2SectionTwCn = 756,    // Antorus, The Burning Throne: Forbidden Descent.
-        AntorusBurningThroneRf2SectionEu = 757,    // Antorus, The Burning Throne: Forbidden Descent.
-        AntorusBurningThroneRf2SectionKr = 758,    // Antorus, The Burning Throne: Forbidden Descent.
-        AntorusBurningThroneRf2SectionDefault = 759,    // Antorus, The Burning Throne: Forbidden Descent.
-        AntorusBurningThroneRf3SectionTwCn = 760,    // Antorus, The Burning Throne: Hope'S End.
-        AntorusBurningThroneRf3SectionEu = 761,    // Antorus, The Burning Throne: Hope'S End.
-        AntorusBurningThroneRf3SectionKr = 762,    // Antorus, The Burning Throne: Hope'S End.
-        AntorusBurningThroneRf3SectionDefault = 763,    // Antorus, The Burning Throne: Hope'S End.
+        ShadowsOfArgusWeek2UnlocksDefault = 744,       // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
+        ShadowsOfArgusWeek3UnlocksDefault = 745,       // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
+        ShadowsOfArgusWeek2UnlocksKr = 746,            // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
+        ShadowsOfArgusWeek2UnlocksEu = 747,            // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
+        ShadowsOfArgusWeek2UnlocksTwCn = 748,          // In Part 2 Of Shadows Of Argus, Finish The Story Of Krokuun And Travel To The Ruined Draenei City Of Mac'Aree. Gain Access To Invasion Points And Thwart The Burning Legion'S Plans On Other Worlds. Additional World Quests Become Available.
+        ShadowsOfArgusWeek3UnlocksTwCn = 749,          // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
+        ShadowsOfArgusWeek3UnlocksKr = 750,            // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
+        ShadowsOfArgusWeek3UnlocksEu = 751,            // In Part 3 Of Shadows Of Argus, Finish The Shadows Of Argus Storyline, Unlock All World Quests, And Venture Into The New Dungeon, The Seat Of The Triumvirate. Activate Your Netherlight Crucible On The Vindicaar To Begin Forging Relics.
+        AntorusBurningThroneRf2SectionTwCn = 756,      // Antorus, The Burning Throne: Forbidden Descent.
+        AntorusBurningThroneRf2SectionEu = 757,        // Antorus, The Burning Throne: Forbidden Descent.
+        AntorusBurningThroneRf2SectionKr = 758,        // Antorus, The Burning Throne: Forbidden Descent.
+        AntorusBurningThroneRf2SectionDefault = 759,   // Antorus, The Burning Throne: Forbidden Descent.
+        AntorusBurningThroneRf3SectionTwCn = 760,      // Antorus, The Burning Throne: Hope'S End.
+        AntorusBurningThroneRf3SectionEu = 761,        // Antorus, The Burning Throne: Hope'S End.
+        AntorusBurningThroneRf3SectionKr = 762,        // Antorus, The Burning Throne: Hope'S End.
+        AntorusBurningThroneRf3SectionDefault = 763,   // Antorus, The Burning Throne: Hope'S End.
         AntorusBurningThroneFinalSectionTwCn = 764,    // Antorus, The Burning Throne: Seat Of The Pantheon.
-        AntorusBurningThroneFinalSectionEu = 765,    // Antorus, The Burning Throne: Seat Of The Pantheon.
-        AntorusBurningThroneFinalSectionKr = 766,    // Antorus, The Burning Throne: Seat Of The Pantheon.
-        AntorusBurningThroneFinalSectionDefault = 767,    // Antorus, The Burning Throne: Seat Of The Pantheon.
-        AntorusBurningThroneRf1SectionTwCn = 768,    // Antorus, The Burning Throne: Light'S Breach.
-        AntorusBurningThroneRf1SectionEu = 769,    // Antorus, The Burning Throne: Light'S Breach.
-        AntorusBurningThroneRf1SectionKr = 770,    // Antorus, The Burning Throne: Light'S Breach.
-        AntorusBurningThroneRf1SectionDefault = 771,    // Antorus, The Burning Throne: Light'S Breach.
+        AntorusBurningThroneFinalSectionEu = 765,      // Antorus, The Burning Throne: Seat Of The Pantheon.
+        AntorusBurningThroneFinalSectionKr = 766,      // Antorus, The Burning Throne: Seat Of The Pantheon.
+        AntorusBurningThroneFinalSectionDefault = 767, // Antorus, The Burning Throne: Seat Of The Pantheon.
+        AntorusBurningThroneRf1SectionTwCn = 768,      // Antorus, The Burning Throne: Light'S Breach.
+        AntorusBurningThroneRf1SectionEu = 769,        // Antorus, The Burning Throne: Light'S Breach.
+        AntorusBurningThroneRf1SectionKr = 770,        // Antorus, The Burning Throne: Light'S Breach.
+        AntorusBurningThroneRf1SectionDefault = 771,   // Antorus, The Burning Throne: Light'S Breach.
         AntorusBurningThroneNormalHeroicTwCn = 772,    // Antorus, The Burning Throne: Argus Awaits!
-        AntorusBurningThroneNormalHeroicEu = 773,    // Antorus, The Burning Throne: Argus Awaits!
-        AntorusBurningThroneNormalHeroicKr = 774,    // Antorus, The Burning Throne: Argus Awaits!
-        AntorusBurningThroneNormalHeroicDefault = 775,    // Antorus, The Burning Throne: Argus Awaits!
-        AntorusBurningThroneNormalHeroic768 = 776,    // Antorus, The Burning Throne: Argus Awaits!
+        AntorusBurningThroneNormalHeroicEu = 773,      // Antorus, The Burning Throne: Argus Awaits!
+        AntorusBurningThroneNormalHeroicKr = 774,      // Antorus, The Burning Throne: Argus Awaits!
+        AntorusBurningThroneNormalHeroicDefault = 775, // Antorus, The Burning Throne: Argus Awaits!
+        AntorusBurningThroneNormalHeroic768 = 776,     // Antorus, The Burning Throne: Argus Awaits!
         Wow14thAnniversary = 807,
         Wow15thAnniversary = 808,
-        WarOfTheThorns = 918,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        UldirNormalHeroic768 = 920,    // Uldir: G'Huun Awaits!
-        UldirNormalHeroicDefault = 921,    // Uldir: G'Huun Awaits!
-        UldirNormalHeroicKr = 922,    // Uldir: G'Huun Awaits!
-        UldirNormalHeroicEu = 923,    // Uldir: G'Huun Awaits!
+        WarOfTheThorns = 918,           // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        UldirNormalHeroic768 = 920,     // Uldir: G'Huun Awaits!
+        UldirNormalHeroicDefault = 921, // Uldir: G'Huun Awaits!
+        UldirNormalHeroicKr = 922,      // Uldir: G'Huun Awaits!
+        UldirNormalHeroicEu = 923,      // Uldir: G'Huun Awaits!
         UldirNormalHeroicTwCn = 924,    // Uldir: G'Huun Awaits!
-        UldirRf1SectionDefault = 925,    // Uldir: Halls Of Containment.
-        UldirRf1SectionKr = 926,    // Uldir: Halls Of Containment.
-        UldirRf1SectionEu = 927,    // Uldir: Halls Of Containment.
-        UldirRf1SectionTwCn = 928,    // Uldir: Halls Of Containment.
-        UldirRf2SectionDefault = 929,    // Uldir: Crimson Descent.
-        UldirRf2SectionKr = 930,    // Uldir: Crimson Descent.
-        UldirRf2SectionEu = 931,    // Uldir: Crimson Descent.
-        UldirRf2SectionTwCn = 932,    // Uldir: Crimson Descent.
-        UldirFinalSectionDefault = 933,    // Uldir: Heart Of Corruption.
-        UldirFinalSectionKr = 934,    // Uldir: Heart Of Corruption.
-        UldirFinalSectionEu = 935,    // Uldir: Heart Of Corruption.
+        UldirRf1SectionDefault = 925,   // Uldir: Halls Of Containment.
+        UldirRf1SectionKr = 926,        // Uldir: Halls Of Containment.
+        UldirRf1SectionEu = 927,        // Uldir: Halls Of Containment.
+        UldirRf1SectionTwCn = 928,      // Uldir: Halls Of Containment.
+        UldirRf2SectionDefault = 929,   // Uldir: Crimson Descent.
+        UldirRf2SectionKr = 930,        // Uldir: Crimson Descent.
+        UldirRf2SectionEu = 931,        // Uldir: Crimson Descent.
+        UldirRf2SectionTwCn = 932,      // Uldir: Crimson Descent.
+        UldirFinalSectionDefault = 933, // Uldir: Heart Of Corruption.
+        UldirFinalSectionKr = 934,      // Uldir: Heart Of Corruption.
+        UldirFinalSectionEu = 935,      // Uldir: Heart Of Corruption.
         UldirFinalSectionTwCn = 936,    // Uldir: Heart Of Corruption.
         BattleForAzerothDungeonEventEu = 938,
         BattleForAzerothDungeonEventTwCn = 939,
         BattleForAzerothDungeonEventKr = 940,
         BattleForAzerothDungeonEventDefault = 941,
-        WarOfTheThornsEu = 956,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        WarOfTheThornsTwCn = 957,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        WarOfTheThornsKr = 958,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        WarOfTheThorns320 = 959,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        WarOfTheThornsUs = 965,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        WarOfTheThorns512 = 967,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        WarOfTheThorns128 = 973,    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
-        UldirNormalHeroic = 979,    // Uldir: G'Huun Awaits!
-        BattleOfDazaralorNormalHeroicDefault = 1025,    // Battle Of Dazar'Alor Raid
-        BattleOfDazaralorNormalHeroicKr = 1026,    // Battle Of Dazar'Alor Raid
-        BattleOfDazaralorNormalHeroicEu = 1027,    // Battle Of Dazar'Alor Raid
+        WarOfTheThornsEu = 956,                      // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        WarOfTheThornsTwCn = 957,                    // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        WarOfTheThornsKr = 958,                      // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        WarOfTheThorns320 = 959,                     // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        WarOfTheThornsUs = 965,                      // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        WarOfTheThorns512 = 967,                     // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        WarOfTheThorns128 = 973,                     // Conflict Emerges In Darkshore As The Horde And Alliance Battle For Control Over Teldrassil In This Limited Time Event!
+        UldirNormalHeroic = 979,                     // Uldir: G'Huun Awaits!
+        BattleOfDazaralorNormalHeroicDefault = 1025, // Battle Of Dazar'Alor Raid
+        BattleOfDazaralorNormalHeroicKr = 1026,      // Battle Of Dazar'Alor Raid
+        BattleOfDazaralorNormalHeroicEu = 1027,      // Battle Of Dazar'Alor Raid
         BattleOfDazaralorNormalHeroicTwCn = 1028,    // Battle Of Dazar'Alor Raid
-        BattleOfDazaralorNormalHeroic768 = 1029,    // Battle Of Dazar'Alor Raid
-        BattleOfDazaralorRf1SectionDefault = 1030,    // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
-        BattleOfDazaralorRf1SectionKr = 1031,    // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
-        BattleOfDazaralorRf1SectionEu = 1032,    // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
-        BattleOfDazaralorRf1SectionTwCn = 1033,    // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
-        BattleOfDazaralorRf2SectionDefault = 1034,    // Battle Of Dazar'Alor: Empire'S Fall.
-        BattleOfDazaralorRf2SectionKr = 1035,    // Battle Of Dazar'Alor: Empire'S Fall.
-        BattleOfDazaralorRf2SectionEu = 1036,    // Battle Of Dazar'Alor: Empire'S Fall.
-        BattleOfDazaralorRf2SectionTwCn = 1037,    // Battle Of Dazar'Alor: Empire'S Fall.
-        BattleOfDazaralorRf3SectionDefault = 1038,    // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
-        BattleOfDazaralorRf3SectionKr = 1039,    // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
-        BattleOfDazaralorRf3SectionEu = 1040,    // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
-        BattleOfDazaralorRf3SectionTwCn = 1041,    // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
+        BattleOfDazaralorNormalHeroic768 = 1029,     // Battle Of Dazar'Alor Raid
+        BattleOfDazaralorRf1SectionDefault = 1030,   // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
+        BattleOfDazaralorRf1SectionKr = 1031,        // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
+        BattleOfDazaralorRf1SectionEu = 1032,        // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
+        BattleOfDazaralorRf1SectionTwCn = 1033,      // Battle Of Dazar'Alor: Siege Of Dazar'Alor.
+        BattleOfDazaralorRf2SectionDefault = 1034,   // Battle Of Dazar'Alor: Empire'S Fall.
+        BattleOfDazaralorRf2SectionKr = 1035,        // Battle Of Dazar'Alor: Empire'S Fall.
+        BattleOfDazaralorRf2SectionEu = 1036,        // Battle Of Dazar'Alor: Empire'S Fall.
+        BattleOfDazaralorRf2SectionTwCn = 1037,      // Battle Of Dazar'Alor: Empire'S Fall.
+        BattleOfDazaralorRf3SectionDefault = 1038,   // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
+        BattleOfDazaralorRf3SectionKr = 1039,        // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
+        BattleOfDazaralorRf3SectionEu = 1040,        // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
+        BattleOfDazaralorRf3SectionTwCn = 1041,      // Battle Of Dazar'Alor: Might Of The Alliance For Alliance Players, And Victory Or Death For Horde Players.
         PvpBrawlCookingImpossibleUs = 1047,
         PvpBrawlCookingImpossibleKr = 1048,
         PvpBrawlCookingImpossibleEu = 1049,
@@ -1300,56 +1319,56 @@ namespace Framework.Constants
         TimewalkingDungeonEventWodEu = 1063,
         TimewalkingDungeonEventWodKr = 1065,
         TimewalkingDungeonEventWodTwCn = 1068,
-        CrucibleOfStormsNormalHeroicDefault = 1069,    // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
-        CrucibleOfStormsNormalHeroicKr = 1070,    // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
-        CrucibleOfStormsNormalHeroicEu = 1071,    // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
+        CrucibleOfStormsNormalHeroicDefault = 1069, // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
+        CrucibleOfStormsNormalHeroicKr = 1070,      // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
+        CrucibleOfStormsNormalHeroicEu = 1071,      // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
         CrucibleOfStormsNormalHeroicTwCn = 1072,    // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
-        CrucibleOfStormsNormalHeroic = 1073,    // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
-        CrucibleOfStormsRaidFinderDefault = 1074,    // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        CrucibleOfStormsRaidFinderEu = 1075,    // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        CrucibleOfStormsRaidFinderKr = 1076,    // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        CrucibleOfStormsRaidFinderTwCn = 1077,    // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        CrucibleOfStormsRaidFinder = 1078,    // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        TheEternalPalaceDefault = 1098,    // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
-        TheEternalPalaceKr = 1099,    // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
-        TheEternalPalaceEu = 1100,    // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
-        TheEternalPalaceTwCn = 1101,    // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
-        TheEternalPalaceRaidFinderDefault = 1102,    // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        TheEternalPalaceRaidFinderKr = 1103,    // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        TheEternalPalaceRaidFinderEu = 1104,    // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        TheEternalPalaceRaidFinderTwCn = 1105,    // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        TheEternalPalaceRf2SectionEu = 1106,    // The Eternal Palace: Depths Of The Devoted.
-        TheEternalPalaceRf2SectionTwCn = 1107,    // The Eternal Palace: Depths Of The Devoted.
-        TheEternalPalaceFinalSectionDefault = 1108,    // The Eternal Palace: The Circle Of Stars.
-        TheEternalPalaceFinalSectionKr = 1109,    // The Eternal Palace: The Circle Of Stars.
-        TheEternalPalaceFinalSectionEu = 1110,    // The Eternal Palace: The Circle Of Stars.
+        CrucibleOfStormsNormalHeroic = 1073,        // Delve Into The Chambers Beneath Stormsong Valley To Uncover The Source Of The Shadow Spreading Across The Land, Now Available On Normal Or Heroic Difficulty.
+        CrucibleOfStormsRaidFinderDefault = 1074,   // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        CrucibleOfStormsRaidFinderEu = 1075,        // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        CrucibleOfStormsRaidFinderKr = 1076,        // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        CrucibleOfStormsRaidFinderTwCn = 1077,      // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        CrucibleOfStormsRaidFinder = 1078,          // Mythic Difficulty Of The Crucible Of Storms Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        TheEternalPalaceDefault = 1098,             // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
+        TheEternalPalaceKr = 1099,                  // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
+        TheEternalPalaceEu = 1100,                  // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
+        TheEternalPalaceTwCn = 1101,                // The Dangers Of Nazjatar Were Merely Preamble. Breach The Palace Gates And Descend Into Azshara'S Deadly Domain.
+        TheEternalPalaceRaidFinderDefault = 1102,   // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        TheEternalPalaceRaidFinderKr = 1103,        // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        TheEternalPalaceRaidFinderEu = 1104,        // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        TheEternalPalaceRaidFinderTwCn = 1105,      // Mythic Difficulty Of The Eternal Palace Raid Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        TheEternalPalaceRf2SectionEu = 1106,        // The Eternal Palace: Depths Of The Devoted.
+        TheEternalPalaceRf2SectionTwCn = 1107,      // The Eternal Palace: Depths Of The Devoted.
+        TheEternalPalaceFinalSectionDefault = 1108, // The Eternal Palace: The Circle Of Stars.
+        TheEternalPalaceFinalSectionKr = 1109,      // The Eternal Palace: The Circle Of Stars.
+        TheEternalPalaceFinalSectionEu = 1110,      // The Eternal Palace: The Circle Of Stars.
         TheEternalPalaceFinalSectionTwCn = 1111,    // The Eternal Palace: The Circle Of Stars.
-        TheEternalPalaceRf2SectionKr = 1112,    // The Eternal Palace: Depths Of The Devoted.
-        TheEternalPalaceRf2SectionDefault = 1113,    // The Eternal Palace: Depths Of The Devoted.
+        TheEternalPalaceRf2SectionKr = 1112,        // The Eternal Palace: Depths Of The Devoted.
+        TheEternalPalaceRf2SectionDefault = 1113,   // The Eternal Palace: Depths Of The Devoted.
         PvpBrawlClassicAshranUs = 1120,
         PvpBrawlClassicAshranKr = 1121,
         PvpBrawlClassicAshranEu = 1122,
         PvpBrawlClassicAshran1984 = 1123,
         PvpBrawlClassicAshranTwCn = 1124,
-        NyalothaWalkingCityDefault = 1140,    // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
-        NyalothaWalkingCityKr = 1141,    // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
-        NyalothaWalkingCityEu = 1142,    // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
-        NyalothaWalkingCityTwCn = 1143,    // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
-        NyalothaWalkingCityRaidFinderDefault = 1144,    // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        NyalothaWalkingCityRaidFinderKr = 1145,    // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        NyalothaWalkingCityRaidFinderEu = 1146,    // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        NyalothaWalkingCityRaidFinderTwCn = 1147,    // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
-        NyalothaWalkingCityRf2SectionDefault = 1148,    // Ny'Alotha, The Waking City: Halls Of Devotion.
-        NyalothaWalkingCityRf2SectionKr = 1149,    // Ny'Alotha, The Waking City: Halls Of Devotion.
-        NyalothaWalkingCityRf2SectionEu = 1150,    // Ny'Alotha, The Waking City: Halls Of Devotion.
-        NyalothaWalkingCityRf2SectionTwCn = 1151,    // Ny'Alotha, The Waking City: Halls Of Devotion.
-        NyalothaWalkingCityRf3SectionDefault = 1152,    // Ny'Alotha, The Waking City: Gift Of Flesh.
-        NyalothaWalkingCityRf3SectionKr = 1153,    // Ny'Alotha, The Waking City: Gift Of Flesh.
-        NyalothaWalkingCityRf3SectionEu = 1154,    // Ny'Alotha, The Waking City: Gift Of Flesh.
-        NyalothaWalkingCityRf3SectionTwCn = 1155,    // Ny'Alotha, The Waking City: Gift Of Flesh.
-        NyalothaWalkingCityFinalSectionDefault = 1156,    // Ny'Alotha, The Waking City: The Waking Dream.
-        NyalothaWalkingCityFinalSectionKr = 1157,    // Ny'Alotha, The Waking City: The Waking Dream.
-        NyalothaWalkingCityFinalSectionEu = 1158,    // Ny'Alotha, The Waking City: The Waking Dream.
+        NyalothaWalkingCityDefault = 1140,             // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
+        NyalothaWalkingCityKr = 1141,                  // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
+        NyalothaWalkingCityEu = 1142,                  // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
+        NyalothaWalkingCityTwCn = 1143,                // Descend Into Ny'Alotha, The Waking City And Face N'Zoth In His Own Realm.
+        NyalothaWalkingCityRaidFinderDefault = 1144,   // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        NyalothaWalkingCityRaidFinderKr = 1145,        // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        NyalothaWalkingCityRaidFinderEu = 1146,        // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        NyalothaWalkingCityRaidFinderTwCn = 1147,      // Mythic Difficulty Of Ny'Alotha, The Waking City Awaits The Boldest Of Adventurers, And Players May Now Use The Raid Finder To Access The Raid.
+        NyalothaWalkingCityRf2SectionDefault = 1148,   // Ny'Alotha, The Waking City: Halls Of Devotion.
+        NyalothaWalkingCityRf2SectionKr = 1149,        // Ny'Alotha, The Waking City: Halls Of Devotion.
+        NyalothaWalkingCityRf2SectionEu = 1150,        // Ny'Alotha, The Waking City: Halls Of Devotion.
+        NyalothaWalkingCityRf2SectionTwCn = 1151,      // Ny'Alotha, The Waking City: Halls Of Devotion.
+        NyalothaWalkingCityRf3SectionDefault = 1152,   // Ny'Alotha, The Waking City: Gift Of Flesh.
+        NyalothaWalkingCityRf3SectionKr = 1153,        // Ny'Alotha, The Waking City: Gift Of Flesh.
+        NyalothaWalkingCityRf3SectionEu = 1154,        // Ny'Alotha, The Waking City: Gift Of Flesh.
+        NyalothaWalkingCityRf3SectionTwCn = 1155,      // Ny'Alotha, The Waking City: Gift Of Flesh.
+        NyalothaWalkingCityFinalSectionDefault = 1156, // Ny'Alotha, The Waking City: The Waking Dream.
+        NyalothaWalkingCityFinalSectionKr = 1157,      // Ny'Alotha, The Waking City: The Waking Dream.
+        NyalothaWalkingCityFinalSectionEu = 1158,      // Ny'Alotha, The Waking City: The Waking Dream.
         NyalothaWalkingCityFinalSectionTwCn = 1159,    // Ny'Alotha, The Waking City: The Waking Dream.
         PvpBrawlTh1984 = 1166,
         PvpBrawlThKr = 1167,
@@ -1357,25 +1376,25 @@ namespace Framework.Constants
         PvpBrawlThEu = 1169,
         PvpBrawlThUs = 1170,
         Wow16thAnniversary = 1181,
-        CastleNathriaDefault = 1194,    // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
-        CastleNathriaRf1SectionDefault = 1195,    // Castle Nathria: The Leeching Vaults.
-        CastleNathriaRf2SectionDefault = 1196,    // Castle Nathria: Reliquary Of Opulence.
-        CastleNathriaRf3SectionDefault = 1197,    // Castle Nathria: Blood From Stone.
-        CastleNathriaEu = 1198,    // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
-        CastleNathriaRf1SectionEu = 1199,    // Castle Nathria: The Leeching Vaults.
-        CastleNathriaRf2SectionEu = 1200,    // Castle Nathria: Reliquary Of Opulence.
-        CastleNathriaRf3SectionEu = 1201,    // Castle Nathria: Blood From Stone.
-        CastleNathriaKr = 1202,    // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
-        CastleNathriaRf1SectionKr = 1203,    // Castle Nathria: The Leeching Vaults.
-        CastleNathriaRf2SectionKr = 1204,    // Castle Nathria: Reliquary Of Opulence.
-        CastleNathriaRf3SectionKr = 1205,    // Castle Nathria: Blood From Stone.
-        CastleNathriaTwCn = 1206,    // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
-        CastleNathriaRf1SectionTwCn = 1207,    // Castle Nathria: The Leeching Vaults.
-        CastleNathriaRf2SectionTwCn = 1208,    // Castle Nathria: Reliquary Of Opulence.
-        CastleNathriaRf3SectionTwCn = 1209,    // Castle Nathria: Blood From Stone.
-        CastleNathriaFinalSectionDefault = 1210,    // Castle Nathria: An Audience With Arrogance.
-        CastleNathriaFinalSectionEu = 1211,    // Castle Nathria: An Audience With Arrogance.
-        CastleNathriaFinalSectionKr = 1212,    // Castle Nathria: An Audience With Arrogance.
+        CastleNathriaDefault = 1194,             // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
+        CastleNathriaRf1SectionDefault = 1195,   // Castle Nathria: The Leeching Vaults.
+        CastleNathriaRf2SectionDefault = 1196,   // Castle Nathria: Reliquary Of Opulence.
+        CastleNathriaRf3SectionDefault = 1197,   // Castle Nathria: Blood From Stone.
+        CastleNathriaEu = 1198,                  // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
+        CastleNathriaRf1SectionEu = 1199,        // Castle Nathria: The Leeching Vaults.
+        CastleNathriaRf2SectionEu = 1200,        // Castle Nathria: Reliquary Of Opulence.
+        CastleNathriaRf3SectionEu = 1201,        // Castle Nathria: Blood From Stone.
+        CastleNathriaKr = 1202,                  // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
+        CastleNathriaRf1SectionKr = 1203,        // Castle Nathria: The Leeching Vaults.
+        CastleNathriaRf2SectionKr = 1204,        // Castle Nathria: Reliquary Of Opulence.
+        CastleNathriaRf3SectionKr = 1205,        // Castle Nathria: Blood From Stone.
+        CastleNathriaTwCn = 1206,                // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
+        CastleNathriaRf1SectionTwCn = 1207,      // Castle Nathria: The Leeching Vaults.
+        CastleNathriaRf2SectionTwCn = 1208,      // Castle Nathria: Reliquary Of Opulence.
+        CastleNathriaRf3SectionTwCn = 1209,      // Castle Nathria: Blood From Stone.
+        CastleNathriaFinalSectionDefault = 1210, // Castle Nathria: An Audience With Arrogance.
+        CastleNathriaFinalSectionEu = 1211,      // Castle Nathria: An Audience With Arrogance.
+        CastleNathriaFinalSectionKr = 1212,      // Castle Nathria: An Audience With Arrogance.
         CastleNathriaFinalSectionTwCn = 1213,    // Castle Nathria: An Audience With Arrogance.
         TorghastBeastsOfProdigum = 1214,
         TorghastUnbridledDarkness = 1215,
@@ -1385,7 +1404,7 @@ namespace Framework.Constants
         ShadowlandsDungeonEventTwCn = 1219,
         ShadowlandsDungeonEventKr = 1220,
         PvpBrawlWs19842 = 1221,
-        CastleNathria32 = 1222    // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
+        CastleNathria32 = 1222 // Enter Castle Nathria And Confront Sire Denathrius In His Citadel.
     }
 
     public enum VoidTransferError
@@ -1449,38 +1468,38 @@ namespace Framework.Constants
     // Db Scripting Commands
     public enum ScriptCommands
     {
-        Talk = 0,                // Source/Target = Creature, Target = Any, Datalong = Talk Type (see ChatType enum), datalong2 & 1 = player talk (instead of creature), dataint = string_id
-        Emote = 1,                // Source/Target = Creature, Datalong = Emote Id, Datalong2 = 0: Set Emote State; > 0: Play Emote State
+        Talk = 0,  // Source/Target = Creature, Target = Any, Datalong = Talk Type (see ChatType enum), datalong2 & 1 = player talk (instead of creature), dataint = string_id
+        Emote = 1, // Source/Target = Creature, Datalong = Emote Id, Datalong2 = 0: Set Emote State; > 0: Play Emote State
         FieldSetDeprecated = 2,
-        MoveTo = 3,                // Source/Target = Creature, Datalong2 = Time To Reach, X/Y/Z = Destination
+        MoveTo = 3, // Source/Target = Creature, Datalong2 = Time To Reach, X/Y/Z = Destination
         FlagSetDeprecated = 4,
         FlagRemoveDeprecated = 5,
-        TeleportTo = 6,                // Source/Target = Creature/Player (See Datalong2), Datalong = MapId, Datalong2 = 0: Player; 1: Creature, X/Y/Z = Destination, O = Orientation
-        QuestExplored = 7,                // Target/Source = Player, Target/Source = Go/Creature, Datalong = Quest Id, Datalong2 = Distance Or 0
-        KillCredit = 8,                // Target/Source = Player, Datalong = Creature Entry, Datalong2 = 0: Personal Credit, 1: Group Credit
-        RespawnGameobject = 9,                // Source = Worldobject (Summoner), Datalong = Go Guid, Datalong2 = Despawn Delay
-        TempSummonCreature = 10,               // Source = Worldobject (Summoner), Datalong = Creature Entry, Datalong2 = Despawn Delay, X/Y/Z = Summon Position, O = Orientation
-        OpenDoor = 11,               // Source = Unit, Datalong = Go Guid, Datalong2 = Reset Delay (Min 15)
-        CloseDoor = 12,               // Source = Unit, Datalong = Go Guid, Datalong2 = Reset Delay (Min 15)
-        ActivateObject = 13,               // Source = Unit, Target = Go
-        RemoveAura = 14,               // Source (Datalong2 != 0) Or Target (Datalong2 == 0) = Unit, Datalong = Spell Id
-        CastSpell = 15,               // Source And/Or Target = Unit, Datalong2 = Cast Direction (0: S.T 1: S.S 2: T.T 3: T.S 4: S.Creature With Dataint Entry), Dataint & 1 = Triggered Flag
-        PlaySound = 16,               // Source = Worldobject, Target = None/Player, Datalong = Sound Id, Datalong2 (Bitmask: 0/1=Anyone/Player, 0/2=Without/With Distance Dependency, So 1|2 = 3 Is Target With Distance Dependency)
-        CreateItem = 17,               // Target/Source = Player, Datalong = Item Entry, Datalong2 = Amount
-        DespawnSelf = 18,               // Target/Source = Creature, Datalong = Despawn Delay
+        TeleportTo = 6,          // Source/Target = Creature/Player (See Datalong2), Datalong = MapId, Datalong2 = 0: Player; 1: Creature, X/Y/Z = Destination, O = Orientation
+        QuestExplored = 7,       // Target/Source = Player, Target/Source = Go/Creature, Datalong = Quest Id, Datalong2 = Distance Or 0
+        KillCredit = 8,          // Target/Source = Player, Datalong = Creature Entry, Datalong2 = 0: Personal Credit, 1: Group Credit
+        RespawnGameobject = 9,   // Source = Worldobject (Summoner), Datalong = Go Guid, Datalong2 = Despawn Delay
+        TempSummonCreature = 10, // Source = Worldobject (Summoner), Datalong = Creature Entry, Datalong2 = Despawn Delay, X/Y/Z = Summon Position, O = Orientation
+        OpenDoor = 11,           // Source = Unit, Datalong = Go Guid, Datalong2 = Reset Delay (Min 15)
+        CloseDoor = 12,          // Source = Unit, Datalong = Go Guid, Datalong2 = Reset Delay (Min 15)
+        ActivateObject = 13,     // Source = Unit, Target = Go
+        RemoveAura = 14,         // Source (Datalong2 != 0) Or Target (Datalong2 == 0) = Unit, Datalong = Spell Id
+        CastSpell = 15,          // Source And/Or Target = Unit, Datalong2 = Cast Direction (0: S.T 1: S.S 2: T.T 3: T.S 4: S.Creature With Dataint Entry), Dataint & 1 = Triggered Flag
+        PlaySound = 16,          // Source = Worldobject, Target = None/Player, Datalong = Sound Id, Datalong2 (Bitmask: 0/1=Anyone/Player, 0/2=Without/With Distance Dependency, So 1|2 = 3 Is Target With Distance Dependency)
+        CreateItem = 17,         // Target/Source = Player, Datalong = Item Entry, Datalong2 = Amount
+        DespawnSelf = 18,        // Target/Source = Creature, Datalong = Despawn Delay
 
-        LoadPath = 20,               // Source = Unit, Datalong = Path Id, Datalong2 = Is Repeatable
-        CallscriptToUnit = 21,               // Source = Worldobject (If Present Used As A Search Center), Datalong = Script Id, Datalong2 = Unit Lowguid, Dataint = Script Table To Use (See Scriptstype)
-        Kill = 22,               // Source/Target = Creature, Dataint = Remove Corpse Attribute
+        LoadPath = 20,         // Source = Unit, Datalong = Path Id, Datalong2 = Is Repeatable
+        CallscriptToUnit = 21, // Source = Worldobject (If Present Used As A Search Center), Datalong = Script Id, Datalong2 = Unit Lowguid, Dataint = Script Table To Use (See Scriptstype)
+        Kill = 22,             // Source/Target = Creature, Dataint = Remove Corpse Attribute
 
         // Cyphercore Only
-        Orientation = 30,               // Source = Unit, Target (Datalong > 0) = Unit, Datalong = > 0 Turn Source To Face Target, O = Orientation
-        Equip = 31,               // Soucre = Creature, Datalong = Equipment Id
-        Model = 32,               // Source = Creature, Datalong = Model Id
-        CloseGossip = 33,               // Source = Player
-        Playmovie = 34,                // Source = Player, Datalong = Movie Id
-        Movement = 35,               // Source = Creature, datalong = MovementType, datalong2 = MovementDistance (wander_distance f.ex.), dataint = pathid
-        PlayAnimkit = 36                // Source = Creature, datalong = AnimKit id
+        Orientation = 30, // Source = Unit, Target (Datalong > 0) = Unit, Datalong = > 0 Turn Source To Face Target, O = Orientation
+        Equip = 31,       // Soucre = Creature, Datalong = Equipment Id
+        Model = 32,       // Source = Creature, Datalong = Model Id
+        CloseGossip = 33, // Source = Player
+        Playmovie = 34,   // Source = Player, Datalong = Movie Id
+        Movement = 35,    // Source = Creature, datalong = MovementType, datalong2 = MovementDistance (wander_distance f.ex.), dataint = pathid
+        PlayAnimkit = 36  // Source = Creature, datalong = AnimKit id
     }
 
     // Custom values
@@ -3142,7 +3161,7 @@ namespace Framework.Constants
         WintergraspFortress = 4575,
         TheChilledQuagmire = 4589,
         WestparkWorkshop = 4611,
-        EastparkWorkshop = 4612,
+        EastparkWorkshop = 4612
     }
 
     public enum WorldStates
@@ -3220,7 +3239,7 @@ namespace Framework.Constants
         BattlefieldTbWestDestroyedNeutral = 5435,
         BattlefieldTbWestIntactAlliance = 5436,
         BattlefieldTbWestDamagedAlliance = 5437,
-        BattlefieldTbWestIntactNeutral = 5453, // Unused
+        BattlefieldTbWestIntactNeutral = 5453,  // Unused
         BattlefieldTbWestDamagedNeutral = 5454, // Unused
 
         BattlefieldTbSouthIntactHorde = 5438,
@@ -3228,7 +3247,7 @@ namespace Framework.Constants
         BattlefieldTbSouthDestroyedNeutral = 5440,
         BattlefieldTbSouthIntactAlliance = 5441,
         BattlefieldTbSouthDamagedAlliance = 5442,
-        BattlefieldTbSouthIntactNeutral = 5455, // Unused
+        BattlefieldTbSouthIntactNeutral = 5455,  // Unused
         BattlefieldTbSouthDamagedNeutral = 5456, // Unused
 
         BattlefieldTbEastIntactHorde = 5443,
@@ -3240,6 +3259,6 @@ namespace Framework.Constants
         BattlefieldTbEastDamagedNeutral = 5452,
 
         WarModeHordeBuffValue = 17042,
-        WarModeAllianceBuffValue = 17043,
+        WarModeAllianceBuffValue = 17043
     }
 }

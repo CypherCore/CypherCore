@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework.Constants;
+﻿using Framework.Constants;
 using Game.Entities;
 
 namespace Game.Scripting.Interfaces.ISpell
@@ -16,7 +11,8 @@ namespace Game.Scripting.Interfaces.ISpell
     public class ObjectTargetSelectHandler : TargetHookHandler, IObjectTargetSelectHandler
     {
         public delegate void SpellObjectTargetSelectFnType(ref WorldObject targets);
-        SpellObjectTargetSelectFnType _func;
+
+        private readonly SpellObjectTargetSelectFnType _func;
 
 
         public ObjectTargetSelectHandler(SpellObjectTargetSelectFnType func, uint effectIndex, Targets targetType, SpellScriptHookType hookType = SpellScriptHookType.ObjectTargetSelect) : base(effectIndex, targetType, false, hookType)
@@ -29,6 +25,4 @@ namespace Game.Scripting.Interfaces.ISpell
             _func(ref targets);
         }
     }
-
-
 }

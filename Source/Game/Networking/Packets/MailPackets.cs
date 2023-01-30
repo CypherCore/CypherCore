@@ -1,30 +1,37 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Dynamic;
-using Game.Entities;
-using Game.Mails;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Mails;
 
 namespace Game.Networking.Packets
 {
     public class MailGetList : ClientPacket
     {
-        public MailGetList(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Mailbox;
+
+        public MailGetList(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid Mailbox;
     }
 
     public class MailListResult : ServerPacket
     {
-        public MailListResult() : base(ServerOpcodes.MailListResult) { }
+        public List<MailListEntry> Mails = new();
+
+        public int TotalNumRecords;
+
+        public MailListResult() : base(ServerOpcodes.MailListResult)
+        {
+        }
 
         public override void Write()
         {
@@ -33,27 +40,46 @@ namespace Game.Networking.Packets
 
             Mails.ForEach(p => p.Write(_worldPacket));
         }
-
-        public int TotalNumRecords;
-        public List<MailListEntry> Mails = new();
     }
 
     public class MailCreateTextItem : ClientPacket
     {
-        public MailCreateTextItem(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Mailbox;
+        public uint MailID;
+
+        public MailCreateTextItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
             MailID = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid Mailbox;
-        public uint MailID;
     }
 
     public class SendMail : ClientPacket
     {
+        public class StructSendMail
+        {
+            public struct MailAttachment
+            {
+                public byte AttachPosition;
+                public ObjectGuid ItemGUID;
+            }
+
+            public List<MailAttachment> Attachments = new();
+            public string Body;
+            public long Cod;
+            public ObjectGuid Mailbox;
+            public long SendMoney;
+            public int StationeryID;
+            public string Subject;
+            public string Target;
+        }
+
+        public StructSendMail Info;
+
         public SendMail(WorldPacket packet) : base(packet)
         {
             Info = new StructSendMail();
@@ -87,31 +113,21 @@ namespace Game.Networking.Packets
                 Info.Attachments.Add(att);
             }
         }
-
-        public StructSendMail Info;
-
-        public class StructSendMail
-        {
-            public ObjectGuid Mailbox;
-            public int StationeryID;
-            public long SendMoney;
-            public long Cod;
-            public string Target;
-            public string Subject;
-            public string Body;
-            public List<MailAttachment> Attachments = new();
-
-            public struct MailAttachment
-            {
-                public byte AttachPosition;
-                public ObjectGuid ItemGUID;
-            }
-        }
     }
 
     public class MailCommandResult : ServerPacket
     {
-        public MailCommandResult() : base(ServerOpcodes.MailCommandResult) { }
+        public uint AttachID;
+        public uint BagResult;
+        public uint Command;
+        public uint ErrorCode;
+
+        public uint MailID;
+        public uint QtyInInventory;
+
+        public MailCommandResult() : base(ServerOpcodes.MailCommandResult)
+        {
+        }
 
         public override void Write()
         {
@@ -122,60 +138,67 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(AttachID);
             _worldPacket.WriteUInt32(QtyInInventory);
         }
-
-        public uint MailID;
-        public uint Command;
-        public uint ErrorCode;
-        public uint BagResult;
-        public uint AttachID;
-        public uint QtyInInventory;
     }
 
     public class MailReturnToSender : ClientPacket
     {
-        public MailReturnToSender(WorldPacket packet) : base(packet) { }
+        public uint MailID;
+        public ObjectGuid SenderGUID;
+
+        public MailReturnToSender(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             MailID = _worldPacket.ReadUInt32();
             SenderGUID = _worldPacket.ReadPackedGuid();
         }
-
-        public uint MailID;
-        public ObjectGuid SenderGUID;
     }
 
     public class MailMarkAsRead : ClientPacket
     {
-        public MailMarkAsRead(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Mailbox;
+        public uint MailID;
+
+        public MailMarkAsRead(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Mailbox = _worldPacket.ReadPackedGuid();
             MailID = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid Mailbox;
-        public uint MailID;
     }
 
     public class MailDelete : ClientPacket
     {
-        public MailDelete(WorldPacket packet) : base(packet) { }
+        public int DeleteReason;
+
+        public uint MailID;
+
+        public MailDelete(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             MailID = _worldPacket.ReadUInt32();
             DeleteReason = _worldPacket.ReadInt32();
         }
-
-        public uint MailID;
-        public int DeleteReason;
     }
 
     public class MailTakeItem : ClientPacket
     {
-        public MailTakeItem(WorldPacket packet) : base(packet) { }
+        public uint AttachID;
+
+        public ObjectGuid Mailbox;
+        public uint MailID;
+
+        public MailTakeItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -183,15 +206,17 @@ namespace Game.Networking.Packets
             MailID = _worldPacket.ReadUInt32();
             AttachID = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid Mailbox;
-        public uint MailID;
-        public uint AttachID;
     }
 
     public class MailTakeMoney : ClientPacket
     {
-        public MailTakeMoney(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Mailbox;
+        public uint MailID;
+        public long Money;
+
+        public MailTakeMoney(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -199,21 +224,57 @@ namespace Game.Networking.Packets
             MailID = _worldPacket.ReadUInt32();
             Money = _worldPacket.ReadInt64();
         }
-
-        public ObjectGuid Mailbox;
-        public uint MailID;
-        public long Money;
     }
 
     public class MailQueryNextMailTime : ClientPacket
     {
-        public MailQueryNextMailTime(WorldPacket packet) : base(packet) { }
+        public MailQueryNextMailTime(WorldPacket packet) : base(packet)
+        {
+        }
 
-        public override void Read() { }
+        public override void Read()
+        {
+        }
     }
 
     public class MailQueryNextTimeResult : ServerPacket
     {
+        public class MailNextTimeEntry
+        {
+            public int AltSenderID;
+            public sbyte AltSenderType;
+
+            public ObjectGuid SenderGuid;
+            public int StationeryID;
+            public float TimeLeft;
+
+            public MailNextTimeEntry(Mail mail)
+            {
+                switch (mail.MessageType)
+                {
+                    case MailMessageType.Normal:
+                        SenderGuid = ObjectGuid.Create(HighGuid.Player, mail.Sender);
+
+                        break;
+                    case MailMessageType.Auction:
+                    case MailMessageType.Creature:
+                    case MailMessageType.Gameobject:
+                    case MailMessageType.Calendar:
+                        AltSenderID = (int)mail.Sender;
+
+                        break;
+                }
+
+                TimeLeft = mail.Deliver_time - GameTime.GetGameTime();
+                AltSenderType = (sbyte)mail.MessageType;
+                StationeryID = (int)mail.Stationery;
+            }
+        }
+
+        public List<MailNextTimeEntry> Next;
+
+        public float NextMailTime;
+
         public MailQueryNextTimeResult() : base(ServerOpcodes.MailQueryNextTimeResult)
         {
             Next = new List<MailNextTimeEntry>();
@@ -233,55 +294,37 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(entry.StationeryID);
             }
         }
-
-        public float NextMailTime;
-        public List<MailNextTimeEntry> Next;
-
-        public class MailNextTimeEntry
-        {
-            public MailNextTimeEntry(Mail mail)
-            {
-                switch (mail.messageType)
-                {
-                    case MailMessageType.Normal:
-                        SenderGuid = ObjectGuid.Create(HighGuid.Player, mail.sender);
-                        break;
-                    case MailMessageType.Auction:
-                    case MailMessageType.Creature:
-                    case MailMessageType.Gameobject:
-                    case MailMessageType.Calendar:
-                        AltSenderID = (int)mail.sender;
-                        break;
-                }
-
-                TimeLeft = mail.deliver_time - GameTime.GetGameTime();
-                AltSenderType = (sbyte)mail.messageType;
-                StationeryID = (int)mail.stationery;
-            }
-
-            public ObjectGuid SenderGuid;
-            public float TimeLeft;
-            public int AltSenderID;
-            public sbyte AltSenderType;
-            public int StationeryID;
-        }
     }
 
     public class NotifyReceivedMail : ServerPacket
     {
-        public NotifyReceivedMail() : base(ServerOpcodes.NotifyReceivedMail) { }
+        public float Delay = 0.0f;
+
+        public NotifyReceivedMail() : base(ServerOpcodes.NotifyReceivedMail)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteFloat(Delay);
         }
-
-        public float Delay = 0.0f;
     }
 
     //Structs
     public class MailAttachedItem
     {
+        public int AttachID;
+        public int Charges;
+        public uint Count;
+        public uint Durability;
+        public ItemInstance Item;
+        public uint MaxDurability;
+
+        public byte Position;
+        public bool Unlocked;
+        private readonly List<ItemEnchantData> Enchants = new();
+        private readonly List<ItemGemData> Gems = new();
+
         public MailAttachedItem(Item item, byte pos)
         {
             Position = pos;
@@ -289,8 +332,8 @@ namespace Game.Networking.Packets
             Item = new ItemInstance(item);
             Count = item.GetCount();
             Charges = item.GetSpellCharges();
-            MaxDurability = item.m_itemData.MaxDurability;
-            Durability = item.m_itemData.Durability;
+            MaxDurability = item._itemData.MaxDurability;
+            Durability = item._itemData.Durability;
             Unlocked = !item.IsLocked();
 
             for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.MaxInspected; slot++)
@@ -302,7 +345,8 @@ namespace Game.Networking.Packets
             }
 
             byte i = 0;
-            foreach (SocketedGem gemData in item.m_itemData.Gems)
+
+            foreach (SocketedGem gemData in item._itemData.Gems)
             {
                 if (gemData.ItemId != 0)
                 {
@@ -311,6 +355,7 @@ namespace Game.Networking.Packets
                     gem.Item = new ItemInstance(gemData);
                     Gems.Add(gem);
                 }
+
                 ++i;
             }
         }
@@ -335,51 +380,58 @@ namespace Game.Networking.Packets
             foreach (ItemEnchantData en in Enchants)
                 en.Write(data);
         }
-
-        public byte Position;
-        public int AttachID;
-        public ItemInstance Item;
-        public uint Count;
-        public int Charges;
-        public uint MaxDurability;
-        public uint Durability;
-        public bool Unlocked;
-        List<ItemEnchantData> Enchants = new();
-        List<ItemGemData> Gems= new();
     }
 
     public class MailListEntry
     {
+        public uint? AltSenderID;
+        public List<MailAttachedItem> Attachments = new();
+        public string Body = "";
+        public ulong Cod;
+        public float DaysLeft;
+        public int Flags;
+
+        public int MailID;
+        public int MailTemplateID;
+        public ObjectGuid? SenderCharacter;
+        public byte SenderType;
+        public ulong SentMoney;
+        public int StationeryID;
+        public string Subject = "";
+
         public MailListEntry(Mail mail, Player player)
         {
-            MailID = (int)mail.messageID;
-            SenderType = (byte)mail.messageType;
+            MailID = (int)mail.MessageID;
+            SenderType = (byte)mail.MessageType;
 
-            switch (mail.messageType)
+            switch (mail.MessageType)
             {
                 case MailMessageType.Normal:
-                    SenderCharacter = ObjectGuid.Create(HighGuid.Player, mail.sender);
+                    SenderCharacter = ObjectGuid.Create(HighGuid.Player, mail.Sender);
+
                     break;
                 case MailMessageType.Creature:
                 case MailMessageType.Gameobject:
                 case MailMessageType.Auction:
                 case MailMessageType.Calendar:
-                    AltSenderID = (uint)mail.sender;
+                    AltSenderID = (uint)mail.Sender;
+
                     break;
             }
 
             Cod = mail.COD;
-            StationeryID = (int)mail.stationery;
-            SentMoney = mail.money;
-            Flags = (int)mail.checkMask;
-            DaysLeft = (float)(mail.expire_time - GameTime.GetGameTime()) / Time.Day;
-            MailTemplateID = (int)mail.mailTemplateId;
-            Subject = mail.subject;
-            Body = mail.body;
+            StationeryID = (int)mail.Stationery;
+            SentMoney = mail.Money;
+            Flags = (int)mail.CheckMask;
+            DaysLeft = (float)(mail.Expire_time - GameTime.GetGameTime()) / Time.Day;
+            MailTemplateID = (int)mail.MailTemplateId;
+            Subject = mail.Subject;
+            Body = mail.Body;
 
-            for (byte i = 0; i < mail.items.Count; i++)
+            for (byte i = 0; i < mail.Items.Count; i++)
             {
-                Item item = player.GetMItem(mail.items[i].item_guid);
+                Item item = player.GetMItem(mail.Items[i].ItemGuid);
+
                 if (item)
                     Attachments.Add(new MailAttachedItem(item, i));
             }
@@ -414,19 +466,5 @@ namespace Game.Networking.Packets
             data.WriteString(Subject);
             data.WriteString(Body);
         }
-
-        public int MailID;
-        public byte SenderType;
-        public ObjectGuid? SenderCharacter;
-        public uint? AltSenderID;
-        public ulong Cod;
-        public int StationeryID;
-        public ulong SentMoney;
-        public int Flags;
-        public float DaysLeft;
-        public int MailTemplateID;
-        public string Subject = "";
-        public string Body = "";
-        public List<MailAttachedItem> Attachments = new();
     }
 }

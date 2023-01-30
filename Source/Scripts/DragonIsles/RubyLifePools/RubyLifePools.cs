@@ -12,7 +12,7 @@ using Game.Spells;
 
 namespace Scripts.DragonIsles.RubyLifePools
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         // Flashfrost Chillweaver
         public const uint IceShield = 372749;
@@ -22,66 +22,70 @@ namespace Scripts.DragonIsles.RubyLifePools
     };
 
     // 371652 - Executed
-    class spell_ruby_life_pools_executed : AuraScript, IHasAuraEffects
+    internal class spell_ruby_life_pools_executed : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
+        }
+
+        private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
             target.SetUnitFlag3(UnitFlags3.FakeDead);
             target.SetUnitFlag2(UnitFlags2.FeignDeath);
             target.SetUnitFlag(UnitFlags.PreventEmotesFromChatText);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real, AuraScriptHookType.EffectApply));
-        }
     }
 
     // 384933 - Ice Shield
-    class spell_ruby_life_pools_ice_shield : AuraScript, IHasAuraEffects
+    internal class spell_ruby_life_pools_ice_shield : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             Aura iceShield = GetTarget()?.GetAura(SpellIds.IceShield);
             iceShield?.RefreshDuration();
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
-        }
     }
 
     // 372793 - Excavate
-    class spell_ruby_life_pools_excavate : AuraScript, IHasAuraEffects
+    internal class spell_ruby_life_pools_excavate : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        void HandleEffectPeriodic(AuraEffect aurEff)
-        {
-            GetCaster()?.CastSpell(GetTarget(), SpellIds.Excavate, true);
-        }
+        public List<IAuraEffectHandler> Effects { get; } = new();
 
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+
+        private void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            GetCaster()?.CastSpell(GetTarget(), SpellIds.Excavate, true);
         }
     }
 
     // 395029 - Storm Infusion
-    class spell_ruby_life_pools_storm_infusion : SpellScript, IHasSpellEffects
+    internal class spell_ruby_life_pools_storm_infusion : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        void SetDest(ref SpellDestination dest)
-        {
-            dest.RelocateOffset(new Position(9.0f, 0.0f, 4.0f, 0.0f));
-        }
+        public List<ISpellEffect> SpellEffects { get; } = new();
 
         public override void Register()
         {
             SpellEffects.Add(new DestinationTargetSelectHandler(SetDest, 1, Targets.DestDest));
+        }
+
+        private void SetDest(ref SpellDestination dest)
+        {
+            dest.RelocateOffset(new Position(9.0f, 0.0f, 4.0f, 0.0f));
         }
     }
 }

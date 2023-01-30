@@ -1,26 +1,79 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Guilds;
 using Game.Networking;
 using Game.Networking.Packets;
-using System.Collections.Generic;
 
 namespace Game
 {
     public partial class WorldSession
     {
+        public void SendPetitionQuery(ObjectGuid petitionGuid)
+        {
+            QueryPetitionResponse responsePacket = new();
+            responsePacket.PetitionID = (uint)petitionGuid.GetCounter(); // PetitionID (in Trinity always same as GUID_LOPART(petition Guid))
+
+            Petition petition = Global.PetitionMgr.GetPetition(petitionGuid);
+
+            if (petition == null)
+            {
+                responsePacket.Allow = false;
+                SendPacket(responsePacket);
+                Log.outDebug(LogFilter.Network, $"CMSG_PETITION_Select failed for petition ({petitionGuid})");
+
+                return;
+            }
+
+            uint reqSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
+
+            PetitionInfo petitionInfo = new();
+            petitionInfo.PetitionID = (int)petitionGuid.GetCounter();
+            petitionInfo.Petitioner = petition.ownerGuid;
+            petitionInfo.MinSignatures = reqSignatures;
+            petitionInfo.MaxSignatures = reqSignatures;
+            petitionInfo.Title = petition.PetitionName;
+
+            responsePacket.Allow = true;
+            responsePacket.Info = petitionInfo;
+
+            SendPacket(responsePacket);
+        }
+
+        public void SendPetitionShowList(ObjectGuid guid)
+        {
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
+
+            if (!creature)
+            {
+                Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionShowListOpcode - {0} not found or you can't interact with him.", guid.ToString());
+
+                return;
+            }
+
+            WorldPacket data = new(ServerOpcodes.PetitionShowList);
+            data.WritePackedGuid(guid); // npc Guid
+
+            ServerPetitionShowList packet = new();
+            packet.Unit = guid;
+            packet.Price = WorldConfig.GetUIntValue(WorldCfg.CharterCostGuild);
+            SendPacket(packet);
+        }
+
         [WorldPacketHandler(ClientOpcodes.PetitionBuy)]
-        void HandlePetitionBuy(PetitionBuy packet)
+        private void HandlePetitionBuy(PetitionBuy packet)
         {
             // prevent cheating
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner, NPCFlags2.None);
+
             if (!creature)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionBuyOpcode - {0} not found or you can't interact with him.", packet.Unit.ToString());
+
                 return;
             }
 
@@ -38,38 +91,48 @@ namespace Game
             if (Global.GuildMgr.GetGuildByName(packet.Title))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, packet.Title);
+
                 return;
             }
 
-            if (Global.ObjectMgr.IsReservedName(packet.Title) || !ObjectManager.IsValidCharterName(packet.Title))
+            if (Global.ObjectMgr.IsReservedName(packet.Title) ||
+                !ObjectManager.IsValidCharterName(packet.Title))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameInvalid, packet.Title);
+
                 return;
             }
 
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(charterItemID);
+
             if (pProto == null)
             {
                 GetPlayer().SendBuyError(BuyResult.CantFindItem, null, charterItemID);
+
                 return;
             }
 
             if (!GetPlayer().HasEnoughMoney(cost))
-            {                                                       //player hasn't got enough money
+            {
+                //player hasn't got enough money
                 GetPlayer().SendBuyError(BuyResult.NotEnoughtMoney, creature, charterItemID);
+
                 return;
             }
 
             List<ItemPosCount> dest = new();
             InventoryResult msg = GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, charterItemID, pProto.GetBuyCount());
+
             if (msg != InventoryResult.Ok)
             {
                 GetPlayer().SendEquipError(msg, null, null, charterItemID);
+
                 return;
             }
 
             GetPlayer().ModifyMoney(-cost);
             Item charter = GetPlayer().StoreNewItem(dest, charterItemID, true);
+
             if (!charter)
                 return;
 
@@ -77,10 +140,11 @@ namespace Game
             charter.SetState(ItemUpdateState.Changed, GetPlayer());
             GetPlayer().SendNewItem(charter, 1, true, false);
 
-            // a petition is invalid, if both the owner and the type matches
+            // a petition is invalid, if both the owner and the Type matches
             // we checked above, if this player is in an arenateam, so this must be
             // datacorruption
             Petition petition = Global.PetitionMgr.GetPetitionByOwner(_player.GetGUID());
+
             if (petition != null)
             {
                 // clear from petition store
@@ -93,12 +157,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetitionShowSignatures)]
-        void HandlePetitionShowSignatures(PetitionShowSignatures packet)
+        private void HandlePetitionShowSignatures(PetitionShowSignatures packet)
         {
             Petition petition = Global.PetitionMgr.GetPetition(packet.Item);
+
             if (petition == null)
             {
                 Log.outDebug(LogFilter.PlayerItems, $"Petition {packet.Item} is not found for player {GetPlayer().GetGUID().GetCounter()} {GetPlayer().GetName()}");
+
                 return;
             }
 
@@ -109,7 +175,7 @@ namespace Game
             SendPetitionSigns(petition, _player);
         }
 
-        void SendPetitionSigns(Petition petition, Player sendTo)
+        private void SendPetitionSigns(Petition petition, Player sendTo)
         {
             ServerPetitionShowSignatures signaturesPacket = new();
             signaturesPacket.Item = petition.PetitionGuid;
@@ -129,62 +195,40 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryPetition)]
-        void HandleQueryPetition(QueryPetition packet)
+        private void HandleQueryPetition(QueryPetition packet)
         {
             SendPetitionQuery(packet.ItemGUID);
         }
 
-        public void SendPetitionQuery(ObjectGuid petitionGuid)
-        {
-            QueryPetitionResponse responsePacket = new();
-            responsePacket.PetitionID = (uint)petitionGuid.GetCounter();  // PetitionID (in Trinity always same as GUID_LOPART(petition guid))
-
-            Petition petition = Global.PetitionMgr.GetPetition(petitionGuid);
-            if (petition == null)
-            {
-                responsePacket.Allow = false;
-                SendPacket(responsePacket);
-                Log.outDebug(LogFilter.Network, $"CMSG_PETITION_Select failed for petition ({petitionGuid})");
-                return;
-            }
-
-            uint reqSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
-
-            PetitionInfo petitionInfo = new();
-            petitionInfo.PetitionID = (int)petitionGuid.GetCounter();
-            petitionInfo.Petitioner = petition.ownerGuid;
-            petitionInfo.MinSignatures = reqSignatures;
-            petitionInfo.MaxSignatures = reqSignatures;
-            petitionInfo.Title = petition.PetitionName;
-
-            responsePacket.Allow = true;
-            responsePacket.Info = petitionInfo;
-
-            SendPacket(responsePacket);
-        }
-
         [WorldPacketHandler(ClientOpcodes.PetitionRenameGuild)]
-        void HandlePetitionRenameGuild(PetitionRenameGuild packet)
+        private void HandlePetitionRenameGuild(PetitionRenameGuild packet)
         {
             Item item = GetPlayer().GetItemByGuid(packet.PetitionGuid);
+
             if (!item)
                 return;
 
             Petition petition = Global.PetitionMgr.GetPetition(packet.PetitionGuid);
+
             if (petition == null)
             {
                 Log.outDebug(LogFilter.Network, $"CMSG_PETITION_QUERY failed for petition {packet.PetitionGuid}");
+
                 return;
             }
 
             if (Global.GuildMgr.GetGuildByName(packet.NewGuildName))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, packet.NewGuildName);
+
                 return;
             }
-            if (Global.ObjectMgr.IsReservedName(packet.NewGuildName) || !ObjectManager.IsValidCharterName(packet.NewGuildName))
+
+            if (Global.ObjectMgr.IsReservedName(packet.NewGuildName) ||
+                !ObjectManager.IsValidCharterName(packet.NewGuildName))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameInvalid, packet.NewGuildName);
+
                 return;
             }
 
@@ -198,12 +242,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SignPetition)]
-        void HandleSignPetition(SignPetition packet)
+        private void HandleSignPetition(SignPetition packet)
         {
             Petition petition = Global.PetitionMgr.GetPetition(packet.PetitionGUID);
+
             if (petition == null)
             {
                 Log.outError(LogFilter.Network, $"Petition {packet.PetitionGUID} is not found for player {GetPlayer().GetGUID()} {GetPlayer().GetName()}");
+
                 return;
             }
 
@@ -214,24 +260,29 @@ namespace Game
                 return;
 
             // not let enemies sign guild charter
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && GetPlayer().GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(ownerGuid))
+            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) &&
+                GetPlayer().GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(ownerGuid))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NotAllied);
+
                 return;
             }
 
             if (GetPlayer().GetGuildId() != 0)
             {
                 Guild.SendCommandResult(this, GuildCommandType.InvitePlayer, GuildCommandError.AlreadyInGuild_S, GetPlayer().GetName());
-                return;
-            }
-            if (GetPlayer().GetGuildIdInvited() != 0)
-            {
-                Guild.SendCommandResult(this, GuildCommandType.InvitePlayer, GuildCommandError.AlreadyInvitedToGuild_S, GetPlayer().GetName());
+
                 return;
             }
 
-            if (++signs > 10)                                          // client signs maximum
+            if (GetPlayer().GetGuildIdInvited() != 0)
+            {
+                Guild.SendCommandResult(this, GuildCommandType.InvitePlayer, GuildCommandError.AlreadyInvitedToGuild_S, GetPlayer().GetName());
+
+                return;
+            }
+
+            if (++signs > 10) // client signs maximum
                 return;
 
             // Client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
@@ -242,6 +293,7 @@ namespace Game
             signResult.Item = packet.PetitionGUID;
 
             bool isSigned = petition.IsPetitionSignedByAccount(GetAccountId());
+
             if (isSigned)
             {
                 signResult.Error = PetitionSigns.AlreadySigned;
@@ -251,8 +303,9 @@ namespace Game
 
                 // update for owner if online
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(ownerGuid);
-                if (owner != null)
-                    owner.GetSession().SendPacket(signResult);
+
+                owner?.GetSession().SendPacket(signResult);
+
                 return;
             }
 
@@ -264,8 +317,9 @@ namespace Game
             signResult.Error = PetitionSigns.Ok;
             SendPacket(signResult);
 
-            // update signs count on charter
+            // update signs Count on charter
             Item item = _player.GetItemByGuid(packet.PetitionGUID);
+
             if (item != null)
             {
                 item.SetPetitionNumSignatures((uint)signs);
@@ -274,56 +328,63 @@ namespace Game
 
             // update for owner if online
             Player owner1 = Global.ObjAccessor.FindPlayer(ownerGuid);
+
             if (owner1)
                 owner1.SendPacket(signResult);
         }
 
         [WorldPacketHandler(ClientOpcodes.DeclinePetition)]
-        void HandleDeclinePetition(DeclinePetition packet)
+        private void HandleDeclinePetition(DeclinePetition packet)
         {
             // Disabled because packet isn't handled by the client in any way
             /*
-            Petition petition = sPetitionMgr.GetPetition(packet.PetitionGUID);
-            if (petition == null)
-                return;
+			Petition petition = sPetitionMgr.GetPetition(packet.PetitionGUID);
+			if (petition == null)
+			    return;
 
-            // petition owner online
-            Player owner = Global.ObjAccessor.FindConnectedPlayer(petition.ownerGuid);
-            if (owner != null)                                               // petition owner online
-            {
-                PetitionDeclined packet = new PetitionDeclined();
-                packet.Decliner = _player.GetGUID();
-                owner.GetSession().SendPacket(packet);
-            }
-            */
+			// petition owner online
+			Player owner = Global.ObjAccessor.FindConnectedPlayer(petition.ownerGuid);
+			if (owner != null)                                               // petition owner online
+			{
+			    PetitionDeclined packet = new PetitionDeclined();
+			    packet.Decliner = _player.GetGUID();
+			    owner.GetSession().SendPacket(packet);
+			}
+			*/
         }
 
         [WorldPacketHandler(ClientOpcodes.OfferPetition)]
-        void HandleOfferPetition(OfferPetition packet)
+        private void HandleOfferPetition(OfferPetition packet)
         {
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetPlayer);
+
             if (!player)
                 return;
 
             Petition petition = Global.PetitionMgr.GetPetition(packet.ItemGUID);
+
             if (petition == null)
                 return;
 
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && GetPlayer().GetTeam() != player.GetTeam())
+            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) &&
+                GetPlayer().GetTeam() != player.GetTeam())
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NotAllied);
+
                 return;
             }
 
             if (player.GetGuildId() != 0)
             {
                 Guild.SendCommandResult(this, GuildCommandType.InvitePlayer, GuildCommandError.AlreadyInGuild_S, GetPlayer().GetName());
+
                 return;
             }
 
             if (player.GetGuildIdInvited() != 0)
             {
                 Guild.SendCommandResult(this, GuildCommandType.InvitePlayer, GuildCommandError.AlreadyInvitedToGuild_S, GetPlayer().GetName());
+
                 return;
             }
 
@@ -331,17 +392,20 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TurnInPetition)]
-        void HandleTurnInPetition(TurnInPetition packet)
+        private void HandleTurnInPetition(TurnInPetition packet)
         {
             // Check if player really has the required petition charter
             Item item = GetPlayer().GetItemByGuid(packet.Item);
+
             if (!item)
                 return;
 
             Petition petition = Global.PetitionMgr.GetPetition(packet.Item);
+
             if (petition == null)
             {
                 Log.outError(LogFilter.Network, "Player {0} ({1}) tried to turn in petition ({2}) that is not present in the database", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.Item.ToString());
+
                 return;
             }
 
@@ -358,13 +422,15 @@ namespace Game
             {
                 resultPacket.Result = PetitionTurns.AlreadyInGuild;
                 SendPacket(resultPacket);
+
                 return;
             }
 
-            // Check if guild name is already taken
+            // Check if guild Name is already taken
             if (Global.GuildMgr.GetGuildByName(name))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NameExists_S, name);
+
                 return;
             }
 
@@ -376,15 +442,17 @@ namespace Game
             {
                 resultPacket.Result = PetitionTurns.NeedMoreSignatures;
                 SendPacket(resultPacket);
+
                 return;
             }
             // Proceed with guild/arena team creation
 
-            // Delete charter item
+            // Delete charter Item
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
 
             // Create guild
             Guild guild = new();
+
             if (!guild.Create(GetPlayer(), name))
                 return;
 
@@ -411,27 +479,9 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetitionShowList)]
-        void HandlePetitionShowList(PetitionShowList packet)
+        private void HandlePetitionShowList(PetitionShowList packet)
         {
             SendPetitionShowList(packet.PetitionUnit);
-        }
-
-        public void SendPetitionShowList(ObjectGuid guid)
-        {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
-            if (!creature)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionShowListOpcode - {0} not found or you can't interact with him.", guid.ToString());
-                return;
-            }
-
-            WorldPacket data = new(ServerOpcodes.PetitionShowList);
-            data.WritePackedGuid(guid);                                           // npc guid
-
-            ServerPetitionShowList packet = new();
-            packet.Unit = guid;
-            packet.Price = WorldConfig.GetUIntValue(WorldCfg.CharterCostGuild);
-            SendPacket(packet);
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
+﻿namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 {
-	internal static partial class FieldOperations
-	{
-		/*
+    internal static partial class FieldOperations
+    {
+	    /*
 		h = -f
 
 		Preconditions:
@@ -13,8 +11,8 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
 		Postconditions:
 		   |h| bounded by 1.1*2^25,1.1*2^24,1.1*2^25,1.1*2^24,etc.
 		*/
-		internal static void fe_neg(out FieldElement h, ref FieldElement f)
-		{
+	    internal static void fe_neg(out FieldElement h, ref FieldElement f)
+        {
             int f0 = f.x0;
             int f1 = f.x1;
             int f2 = f.x2;
@@ -36,16 +34,16 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
             int h8 = -f8;
             int h9 = -f9;
 
-			h.x0 = h0;
-			h.x1 = h1;
-			h.x2 = h2;
-			h.x3 = h3;
-			h.x4 = h4;
-			h.x5 = h5;
-			h.x6 = h6;
-			h.x7 = h7;
-			h.x8 = h8;
-			h.x9 = h9;
-		}
-	}
+            h.x0 = h0;
+            h.x1 = h1;
+            h.x2 = h2;
+            h.x3 = h3;
+            h.x4 = h4;
+            h.x5 = h5;
+            h.x6 = h6;
+            h.x7 = h7;
+            h.x8 = h8;
+            h.x9 = h9;
+        }
+    }
 }

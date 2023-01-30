@@ -1,18 +1,19 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using System;
+using Framework.Constants;
 
 namespace Game.Chat
 {
-    class Hyperlink
+    internal class Hyperlink
     {
         public static ChatCommandResult TryParse(out dynamic value, Type type, CommandHandler handler, string arg)
         {
             value = default;
 
             HyperlinkInfo info = ParseHyperlink(arg);
+
             // invalid hyperlinks cannot be consumed
             if (info == null)
                 return default;
@@ -23,32 +24,36 @@ namespace Game.Chat
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.UInt32:
-                {
-                    if (!uint.TryParse(info.Data, out uint tempValue))
-                        return errorResult;
+                    {
+                        if (!uint.TryParse(info.Data, out uint tempValue))
+                            return errorResult;
 
-                    value = tempValue;
-                    break;
-                }
+                        value = tempValue;
+
+                        break;
+                    }
                 case TypeCode.UInt64:
-                {
-                    if (!ulong.TryParse(info.Data, out ulong tempValue))
-                        return errorResult;
+                    {
+                        if (!ulong.TryParse(info.Data, out ulong tempValue))
+                            return errorResult;
 
-                    value = tempValue;
-                    break;
-                }
+                        value = tempValue;
+
+                        break;
+                    }
                 case TypeCode.String:
-                {
-                    value = info.Data;
-                    break;
-                }
+                    {
+                        value = info.Data;
+
+                        break;
+                    }
                 default:
                     return errorResult;
             }
 
             // finally, skip any potential delimiters
             var (token, next) = info.Tail.Tokenize();
+
             if (token.IsEmpty()) /* empty token = first character is delimiter, skip past it */
                 return new ChatCommandResult(next);
             else
@@ -60,10 +65,16 @@ namespace Game.Chat
             // Step 1: Disallow all control sequences except ||, |H, |h, |c and |r
             {
                 int pos = 0;
+
                 while ((pos = str.IndexOf('|', pos)) != -1)
                 {
                     char next = str[pos + 1];
-                    if (next == 'H' || next == 'h' || next == 'c' || next == 'r' || next == '|')
+
+                    if (next == 'H' ||
+                        next == 'h' ||
+                        next == 'c' ||
+                        next == 'r' ||
+                        next == '|')
                         pos += 2;
                     else
                         return false;
@@ -78,16 +89,19 @@ namespace Game.Chat
             // - <linktext> is printable
             {
                 int pos = 0;
+
                 while ((pos = str.IndexOf('|', pos)) != -1)
                 {
                     if (str[pos + 1] == '|') // this is an escaped pipe character (||)
                     {
                         pos += 2;
+
                         continue;
                     }
 
-                    HyperlinkInfo info = ParseHyperlink(str.Substring(pos));
-                    if (info == null)// todo fix me || !ValidateLinkInfo(info))
+                    HyperlinkInfo info = ParseHyperlink(str[pos..]);
+
+                    if (info == null) // todo fix me || !ValidateLinkInfo(info))
                         return false;
 
                     // tag is fine, find the next one
@@ -99,8 +113,6 @@ namespace Game.Chat
             return true;
         }
 
-        static byte toHex(char c) { return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00); }
-
         //|color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
         public static HyperlinkInfo ParseHyperlink(string currentString)
         {
@@ -110,36 +122,42 @@ namespace Game.Chat
             int pos = 0;
 
             //color tag
-            if (currentString[pos++] != '|' || currentString[pos++] != 'c')
+            if (currentString[pos++] != '|' ||
+                currentString[pos++] != 'c')
                 return null;
 
             uint color = 0;
+
             for (byte i = 0; i < 8; ++i)
             {
                 byte hex = toHex(currentString[pos++]);
+
                 if (hex != 0)
                     color = (uint)((int)(color << 4) | (hex & 0xf));
                 else
                     return null;
             }
 
-            // link data start tag
-            if (currentString[pos++] != '|' || currentString[pos++] != 'H')
+            // link _data start tag
+            if (currentString[pos++] != '|' ||
+                currentString[pos++] != 'H')
                 return null;
 
             // link tag, find next : or |
             int tagStart = pos;
             int tagLength = 0;
+
             while (pos < currentString.Length && currentString[pos] != '|' && currentString[pos++] != ':') // we only advance pointer to one past if the last thing is : (not for |), this is intentional!
                 ++tagLength;
 
-            // ok, link data, skip to next |
+            // ok, link _data, skip to next |
             int dataStart = pos;
             int dataLength = 0;
+
             while (pos < currentString.Length && currentString[pos++] != '|')
                 ++dataLength;
 
-            // ok, next should be link data end tag...
+            // ok, next should be link _data end tag...
             if (currentString[pos++] != 'h')
                 return null;
 
@@ -150,6 +168,7 @@ namespace Game.Chat
             // skip until we hit the next ], abort on unexpected |
             int textStart = pos;
             int textLength = 0;
+
             while (pos < currentString.Length)
             {
                 if (currentString[pos] == '|')
@@ -162,33 +181,42 @@ namespace Game.Chat
             }
 
             // link end tag
-            if (currentString[pos++] != '|' || currentString[pos++] != 'h' || currentString[pos++] != '|' || currentString[pos++] != 'r')
+            if (currentString[pos++] != '|' ||
+                currentString[pos++] != 'h' ||
+                currentString[pos++] != '|' ||
+                currentString[pos++] != 'r')
                 return null;
 
             // ok, valid hyperlink, return info
-            return new HyperlinkInfo(currentString.Substring(pos), color, currentString.Substring(tagStart, tagLength), currentString.Substring(dataStart, dataLength), currentString.Substring(textStart, textLength));
+            return new HyperlinkInfo(currentString[pos..], color, currentString.Substring(tagStart, tagLength), currentString.Substring(dataStart, dataLength), currentString.Substring(textStart, textLength));
+        }
+
+        private static byte toHex(char c)
+        {
+            return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00);
         }
     }
 
-    class HyperlinkInfo
+    internal class HyperlinkInfo
     {
+        public HyperlinkColor color;
+        public string Data;
+        public string Tag;
+
+        public string Tail;
+        public string Text;
+
         public HyperlinkInfo(string t = null, uint c = 0, string tag = null, string data = null, string text = null)
         {
             Tail = t;
-            color = new(c);
+            color = new HyperlinkColor(c);
             Tag = tag;
             Data = data;
             Text = text;
         }
-
-        public string Tail;
-        public HyperlinkColor color;
-        public string Tag;
-        public string Data;
-        public string Text;
     }
 
-    struct HyperlinkColor
+    internal struct HyperlinkColor
     {
         public byte r;
         public byte g;

@@ -25,36 +25,36 @@ namespace Framework.Constants
 
     public enum MovementGeneratorType
     {
-        Idle = 0, // IdleMovement
-        Random = 1, // RandomMovement
+        Idle = 0,     // IdleMovement
+        Random = 1,   // RandomMovement
         Waypoint = 2, // WaypointMovement
 
-        MaxDB = 3, // *** this and below motion types can't be set in DB.
-        Confused = 4, // ConfusedMovementGenerator
-        Chase = 5, // TargetedMovementGenerator
-        Home = 6, // HomeMovementGenerator
-        Flight = 7, // WaypointMovementGenerator
-        Point = 8, // PointMovementGenerator
-        Fleeing = 9, // FleeingMovementGenerator
-        Distract = 10, // IdleMovementGenerator
-        Assistance = 11, // PointMovementGenerator
+        MaxDB = 3,               // *** this and below motion types can't be set in DB.
+        Confused = 4,            // ConfusedMovementGenerator
+        Chase = 5,               // TargetedMovementGenerator
+        Home = 6,                // HomeMovementGenerator
+        Flight = 7,              // WaypointMovementGenerator
+        Point = 8,               // PointMovementGenerator
+        Fleeing = 9,             // FleeingMovementGenerator
+        Distract = 10,           // IdleMovementGenerator
+        Assistance = 11,         // PointMovementGenerator
         AssistanceDistract = 12, // IdleMovementGenerator
-        TimedFleeing = 13, // FleeingMovementGenerator
+        TimedFleeing = 13,       // FleeingMovementGenerator
         Follow = 14,
         Rotate = 15,
         Effect = 16,
         SplineChain = 17, // SplineChainMovementGenerator
-        Formation = 18, // FormationMovementGenerator
+        Formation = 18,   // FormationMovementGenerator
         Max
     }
 
     public enum MotionMasterFlags
     {
         None = 0x0,
-        Update = 0x1, // Update in progress
+        Update = 0x1,                      // Update in progress
         StaticInitializationPending = 0x2, // Static movement (MOTION_SLOT_DEFAULT) hasn't been initialized
-        InitializationPending = 0x4, // MotionMaster is stalled until signaled
-        Initializing = 0x8, // MotionMaster is initializing
+        InitializationPending = 0x4,       // MotionMaster is stalled until signaled
+        Initializing = 0x8,                // MotionMaster is initializing
 
         Delayed = Update | InitializationPending
     }
@@ -123,6 +123,6 @@ namespace Framework.Constants
     public enum MovementForceType
     {
         SingleDirectional = 0, // always in a single direction
-        Gravity = 1  // pushes/pulls away from a single point
+        Gravity = 1            // pushes/pulls away from a single point
     }
 }

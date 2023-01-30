@@ -9,11 +9,11 @@ namespace Game.Scripting.BaseScripts
     {
         public BattlegroundMapScript(string name, uint mapId) : base(name, mapId)
         {
-            if (GetEntry() != null && GetEntry().IsBattleground())
+            if (GetEntry() != null &&
+                GetEntry().IsBattleground())
                 Log.outError(LogFilter.Scripts, "BattlegroundMapScript for map {0} is invalid.", mapId);
 
             Global.ScriptMgr.AddScript(this);
         }
     }
-
 }

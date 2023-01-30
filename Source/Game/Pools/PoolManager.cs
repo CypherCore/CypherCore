@@ -1,19 +1,41 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Maps;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game
 {
     public class PoolManager : Singleton<PoolManager>
     {
-        PoolManager() { }
+        public enum QuestTypes
+        {
+            None = 0,
+            Daily = 1,
+            Weekly = 2
+        }
+
+        public MultiMap<uint, uint> mQuestCreatureRelation = new();
+        public MultiMap<uint, uint> mQuestGORelation = new();
+
+        private readonly MultiMap<uint, uint> mAutoSpawnPoolsPerMap = new();
+        private readonly Dictionary<ulong, uint> mCreatureSearchMap = new();
+        private readonly Dictionary<ulong, uint> mGameobjectSearchMap = new();
+        private readonly Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new();
+        private readonly Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new();
+        private readonly Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new();
+        private readonly Dictionary<ulong, uint> mPoolSearchMap = new();
+
+        private readonly Dictionary<uint, PoolTemplateData> mPoolTemplate = new();
+
+        private PoolManager()
+        {
+        }
 
         public void Initialize()
         {
@@ -28,14 +50,17 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 SQLResult result = DB.World.Query("SELECT entry, max_limit FROM pool_template");
+
                 if (result.IsEmpty())
                 {
                     mPoolTemplate.Clear();
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 object pools. DB table `pool_template` is empty.");
+
                     return;
                 }
 
                 uint count = 0;
+
                 do
                 {
                     uint pool_id = result.Read<uint>(0);
@@ -45,8 +70,7 @@ namespace Game
                     pPoolTemplate.MapId = -1;
                     mPoolTemplate[pool_id] = pPoolTemplate;
                     ++count;
-                }
-                while (result.NextRow());
+                } while (result.NextRow());
 
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} objects pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             }
@@ -54,11 +78,12 @@ namespace Game
             // Creatures
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creatures Pooling Data...");
+
             {
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 0");
+                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE Type = 0");
 
                 if (result.IsEmpty())
                 {
@@ -67,6 +92,7 @@ namespace Game
                 else
                 {
                     uint count = 0;
+
                     do
                     {
                         ulong guid = result.Read<ulong>(0);
@@ -74,29 +100,38 @@ namespace Game
                         float chance = result.Read<float>(2);
 
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
+
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` has a non existing creature spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_creature` has a non existing creature spawn (GUID: {0}) defined for pool Id ({1}), skipped.", guid, pool_id);
+
                             continue;
                         }
+
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_creature` pool Id ({0}) is not in `pool_template`, skipped.", pool_id);
+
                             continue;
                         }
-                        if (chance < 0 || chance > 100)
+
+                        if (chance < 0 ||
+                            chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` has an invalid chance ({0}) for creature guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_creature` has an invalid chance ({0}) for creature Guid ({1}) in pool Id ({2}), skipped.", chance, guid, pool_id);
+
                             continue;
                         }
 
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
+
                         if (pPoolTemplate.MapId == -1)
                             pPoolTemplate.MapId = (int)data.MapId;
 
                         if (pPoolTemplate.MapId != data.MapId)
                         {
-                            Log.outError(LogFilter.Sql, $"`pool_creature` has creature spawns on multiple different maps for creature guid ({guid}) in pool id ({pool_id}), skipped.");
+                            Log.outError(LogFilter.Sql, $"`pool_creature` has creature spawns on multiple different maps for creature Guid ({guid}) in pool Id ({pool_id}), skipped.");
+
                             continue;
                         }
 
@@ -111,8 +146,7 @@ namespace Game
 
                         mCreatureSearchMap.Add(guid, pool_id);
                         ++count;
-                    }
-                    while (result.NextRow());
+                    } while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
                 }
@@ -121,11 +155,12 @@ namespace Game
             // Gameobjects
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Gameobject Pooling Data...");
+
             {
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 1");
+                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE Type = 1");
 
                 if (result.IsEmpty())
                 {
@@ -134,6 +169,7 @@ namespace Game
                 else
                 {
                     uint count = 0;
+
                     do
                     {
                         ulong guid = result.Read<ulong>(0);
@@ -141,41 +177,50 @@ namespace Game
                         float chance = result.Read<float>(2);
 
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
+
                         if (data == null)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a non existing gameobject spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a non existing gameobject spawn (GUID: {0}) defined for pool Id ({1}), skipped.", guid, pool_id);
+
                             continue;
                         }
 
                         GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(data.Id);
+
                         if (goinfo.type != GameObjectTypes.Chest &&
                             goinfo.type != GameObjectTypes.FishingHole &&
                             goinfo.type != GameObjectTypes.GatheringNode &&
                             goinfo.type != GameObjectTypes.Goober)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, type: {1}) defined for pool id ({2}), skipped.", guid, goinfo.type, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` has a not lootable gameobject spawn (GUID: {0}, Type: {1}) defined for pool Id ({2}), skipped.", guid, goinfo.type, pool_id);
+
                             continue;
                         }
 
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` pool Id ({0}) is not in `pool_template`, skipped.", pool_id);
+
                             continue;
                         }
 
-                        if (chance < 0 || chance > 100)
+                        if (chance < 0 ||
+                            chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid chance ({0}) for gameobject guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` has an invalid chance ({0}) for gameobject Guid ({1}) in pool Id ({2}), skipped.", chance, guid, pool_id);
+
                             continue;
                         }
 
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
+
                         if (pPoolTemplate.MapId == -1)
                             pPoolTemplate.MapId = (int)data.MapId;
 
                         if (pPoolTemplate.MapId != data.MapId)
                         {
-                            Log.outError(LogFilter.Sql, $"`pool_gameobject` has gameobject spawns on multiple different maps for gameobject guid ({guid}) in pool id ({pool_id}), skipped.");
+                            Log.outError(LogFilter.Sql, $"`pool_gameobject` has gameobject spawns on multiple different maps for gameobject Guid ({guid}) in pool Id ({pool_id}), skipped.");
+
                             continue;
                         }
 
@@ -190,8 +235,7 @@ namespace Game
 
                         mGameobjectSearchMap.Add(guid, pool_id);
                         ++count;
-                    }
-                    while (result.NextRow());
+                    } while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject in pools in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
                 }
@@ -200,11 +244,12 @@ namespace Game
             // Pool of pools
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Mother Pooling Data...");
+
             {
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                         1        2            3
-                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE type = 2");
+                SQLResult result = DB.World.Query("SELECT spawnId, poolSpawnId, chance FROM pool_members WHERE Type = 2");
 
                 if (result.IsEmpty())
                 {
@@ -213,6 +258,7 @@ namespace Game
                 else
                 {
                     uint count = 0;
+
                     do
                     {
                         uint child_pool_id = result.Read<uint>(0);
@@ -221,24 +267,33 @@ namespace Game
 
                         if (!mPoolTemplate.ContainsKey(mother_pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` mother_pool id ({0}) is not in `pool_template`, skipped.", mother_pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_pool` mother_pool Id ({0}) is not in `pool_template`, skipped.", mother_pool_id);
+
                             continue;
                         }
+
                         if (!mPoolTemplate.ContainsKey(child_pool_id))
                         {
                             Log.outError(LogFilter.Sql, "`pool_pool` included pool_id ({0}) is not in `pool_template`, skipped.", child_pool_id);
+
                             continue;
                         }
+
                         if (mother_pool_id == child_pool_id)
                         {
                             Log.outError(LogFilter.Sql, "`pool_pool` pool_id ({0}) includes itself, dead-lock detected, skipped.", child_pool_id);
+
                             continue;
                         }
-                        if (chance < 0 || chance > 100)
+
+                        if (chance < 0 ||
+                            chance > 100)
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` has an invalid chance ({0}) for pool id ({1}) in mother pool id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_pool` has an invalid chance ({0}) for pool Id ({1}) in mother pool Id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
+
                             continue;
                         }
+
                         PoolTemplateData pPoolTemplateMother = mPoolTemplate[mother_pool_id];
                         PoolObject plObject = new(child_pool_id, chance);
 
@@ -251,8 +306,7 @@ namespace Game
 
                         mPoolSearchMap.Add(child_pool_id, mother_pool_id);
                         ++count;
-                    }
-                    while (result.NextRow());
+                    } while (result.NextRow());
 
                     // Now check for circular reference
                     // All pool_ids are in pool_template
@@ -260,6 +314,7 @@ namespace Game
                     {
                         List<uint> checkedPools = new();
                         var poolItr = mPoolSearchMap.LookupByKey(id);
+
                         while (poolItr != 0)
                         {
                             if (poolData.MapId != -1)
@@ -269,25 +324,30 @@ namespace Game
 
                                 if (mPoolTemplate[poolItr].MapId != poolData.MapId)
                                 {
-                                    Log.outError(LogFilter.Sql, $"`pool_pool` has child pools on multiple maps in pool id ({poolItr}), skipped.");
+                                    Log.outError(LogFilter.Sql, $"`pool_pool` has child pools on multiple maps in pool Id ({poolItr}), skipped.");
                                     mPoolPoolGroups[poolItr].RemoveOneRelation(id);
                                     mPoolSearchMap.Remove(poolItr);
                                     --count;
+
                                     break;
                                 }
                             }
 
                             checkedPools.Add(id);
+
                             if (checkedPools.Contains(poolItr))
                             {
                                 string ss = "The pool(s) ";
+
                                 foreach (var itr in checkedPools)
                                     ss += $"{itr} ";
+
                                 ss += $"create(s) a circular reference, which can cause the server to freeze.\nRemoving the last link between mother pool {id} and child pool {poolItr}";
                                 Log.outError(LogFilter.Sql, ss);
                                 mPoolPoolGroups[poolItr].RemoveOneRelation(id);
                                 mPoolSearchMap.Remove(poolItr);
                                 --count;
+
                                 break;
                             }
 
@@ -304,19 +364,22 @@ namespace Game
                 if (IsEmpty(poolId))
                 {
                     Log.outError(LogFilter.Sql, $"Pool Id {poolId} is empty (has no creatures and no gameobects and either no child pools or child pools are all empty. The pool will not be spawned");
+
                     continue;
                 }
+
                 Cypher.Assert(templateData.MapId != -1);
             }
 
             // The initialize method will spawn all pools not in an event and not in another pool, this is why there is 2 left joins with 2 null checks
             Log.outInfo(LogFilter.ServerLoading, "Starting objects pooling system...");
+
             {
                 uint oldMSTime = Time.GetMSTime();
 
                 SQLResult result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_members.spawnId, pool_members.poolSpawnId FROM pool_template" +
-                    " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
-                    " LEFT JOIN pool_members ON pool_members.type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
+                                                  " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
+                                                  " LEFT JOIN pool_members ON pool_members.Type = 2 AND pool_template.entry = pool_members.spawnId WHERE game_event_pool.pool_entry IS NULL");
 
                 if (result.IsEmpty())
                 {
@@ -325,6 +388,7 @@ namespace Game
                 else
                 {
                     uint count = 0;
+
                     do
                     {
                         uint pool_entry = result.Read<uint>(0);
@@ -341,6 +405,7 @@ namespace Game
                                 Log.outError(LogFilter.Sql, "Pool Id {0} has no equal chance pooled entites defined and explicit chance sum is not 100. This broken pool is a child pool of Id {1} and cannot be safely removed.", pool_entry, result.Read<uint>(2));
                             else
                                 Log.outError(LogFilter.Sql, "Pool Id {0} has no equal chance pooled entites defined and explicit chance sum is not 100. The pool will not be spawned.", pool_entry);
+
                             continue;
                         }
 
@@ -350,31 +415,10 @@ namespace Game
                             mAutoSpawnPoolsPerMap.Add((uint)mPoolTemplate[pool_entry].MapId, pool_entry);
                             count++;
                         }
-                    }
-                    while (result.NextRow());
+                    } while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, "Pool handling system initialized, {0} pools will be spawned by default in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-
                 }
-            }
-        }
-
-        void SpawnPool<T>(SpawnedPoolData spawnedPoolData, uint pool_id, ulong db_guid)
-        {
-            switch (typeof(T).Name)
-            {
-                case "Creature":
-                    if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].IsEmpty())
-                        mPoolCreatureGroups[pool_id].SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, db_guid);
-                    break;
-                case "GameObject":
-                    if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].IsEmpty())
-                        mPoolGameobjectGroups[pool_id].SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, db_guid);
-                    break;
-                case "Pool":
-                    if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
-                        mPoolPoolGroups[pool_id].SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, db_guid);
-                    break;
             }
         }
 
@@ -387,25 +431,31 @@ namespace Game
 
         public void DespawnPool(SpawnedPoolData spawnedPoolData, uint pool_id, bool alwaysDeleteRespawnTime = false)
         {
-            if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].IsEmpty())
+            if (mPoolCreatureGroups.ContainsKey(pool_id) &&
+                !mPoolCreatureGroups[pool_id].IsEmpty())
                 mPoolCreatureGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
 
-            if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].IsEmpty())
+            if (mPoolGameobjectGroups.ContainsKey(pool_id) &&
+                !mPoolGameobjectGroups[pool_id].IsEmpty())
                 mPoolGameobjectGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
 
-            if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
+            if (mPoolPoolGroups.ContainsKey(pool_id) &&
+                !mPoolPoolGroups[pool_id].IsEmpty())
                 mPoolPoolGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
         }
 
         public bool IsEmpty(uint pool_id)
         {
-            if (mPoolGameobjectGroups.TryGetValue(pool_id, out PoolGroup<GameObject> gameobjectPool) && !gameobjectPool.IsEmptyDeepCheck())
+            if (mPoolGameobjectGroups.TryGetValue(pool_id, out PoolGroup<GameObject> gameobjectPool) &&
+                !gameobjectPool.IsEmptyDeepCheck())
                 return false;
 
-            if (mPoolCreatureGroups.TryGetValue(pool_id, out PoolGroup<Creature> creaturePool) && !creaturePool.IsEmptyDeepCheck())
+            if (mPoolCreatureGroups.TryGetValue(pool_id, out PoolGroup<Creature> creaturePool) &&
+                !creaturePool.IsEmptyDeepCheck())
                 return false;
 
-            if (mPoolPoolGroups.TryGetValue(pool_id, out PoolGroup<Pool> pool) && !pool.IsEmptyDeepCheck())
+            if (mPoolPoolGroups.TryGetValue(pool_id, out PoolGroup<Pool> pool) &&
+                !pool.IsEmptyDeepCheck())
                 return false;
 
             return true;
@@ -413,13 +463,16 @@ namespace Game
 
         public bool CheckPool(uint pool_id)
         {
-            if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].CheckPool())
+            if (mPoolGameobjectGroups.ContainsKey(pool_id) &&
+                !mPoolGameobjectGroups[pool_id].CheckPool())
                 return false;
 
-            if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].CheckPool())
+            if (mPoolCreatureGroups.ContainsKey(pool_id) &&
+                !mPoolCreatureGroups[pool_id].CheckPool())
                 return false;
 
-            if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].CheckPool())
+            if (mPoolPoolGroups.ContainsKey(pool_id) &&
+                !mPoolPoolGroups[pool_id].CheckPool())
                 return false;
 
             return true;
@@ -428,6 +481,7 @@ namespace Game
         public void UpdatePool<T>(SpawnedPoolData spawnedPoolData, uint pool_id, ulong db_guid_or_pool_id)
         {
             uint motherpoolid = IsPartOfAPool<Pool>(pool_id);
+
             if (motherpoolid != 0)
                 SpawnPool<Pool>(spawnedPoolData, motherpoolid, pool_id);
             else
@@ -440,9 +494,11 @@ namespace Game
             {
                 case SpawnObjectType.Creature:
                     UpdatePool<Creature>(spawnedPoolData, pool_id, spawnId);
+
                     break;
                 case SpawnObjectType.GameObject:
                     UpdatePool<GameObject>(spawnedPoolData, pool_id, spawnId);
+
                     break;
             }
         }
@@ -451,6 +507,7 @@ namespace Game
         {
             SpawnedPoolData spawnedPoolData = new(map);
             var poolIds = mAutoSpawnPoolsPerMap.LookupByKey(spawnedPoolData.GetMap().GetId());
+
             if (poolIds != null)
                 foreach (uint poolId in poolIds)
                     SpawnPool(spawnedPoolData, poolId);
@@ -462,7 +519,7 @@ namespace Game
         {
             return mPoolTemplate.LookupByKey(pool_id);
         }
-        
+
         public uint IsPartOfAPool<T>(ulong db_guid)
         {
             switch (typeof(T).Name)
@@ -474,10 +531,11 @@ namespace Game
                 case "Pool":
                     return mPoolSearchMap.LookupByKey(db_guid);
             }
+
             return 0;
         }
 
-        // Selects proper template overload to call based on passed type
+        // Selects proper template overload to call based on passed Type
         public uint IsPartOfAPool(SpawnObjectType type, ulong spawnId)
         {
             switch (type)
@@ -489,16 +547,10 @@ namespace Game
                 case SpawnObjectType.AreaTrigger:
                     return 0;
                 default:
-                    Cypher.Assert(false, $"Invalid spawn type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
+                    Cypher.Assert(false, $"Invalid spawn Type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
+
                     return 0;
             }
-        }
-
-        public enum QuestTypes
-        {
-            None = 0,
-            Daily = 1,
-            Weekly = 2
         }
 
         public bool IsSpawnedObject<T>(ulong db_guid_or_pool_id)
@@ -512,25 +564,43 @@ namespace Game
                 case "Pool":
                     return mPoolSearchMap.ContainsKey(db_guid_or_pool_id);
             }
+
             return false;
         }
 
-        public MultiMap<uint, uint> mQuestCreatureRelation = new();
-        public MultiMap<uint, uint> mQuestGORelation = new();
+        private void SpawnPool<T>(SpawnedPoolData spawnedPoolData, uint pool_id, ulong db_guid)
+        {
+            switch (typeof(T).Name)
+            {
+                case "Creature":
+                    if (mPoolCreatureGroups.ContainsKey(pool_id) &&
+                        !mPoolCreatureGroups[pool_id].IsEmpty())
+                        mPoolCreatureGroups[pool_id].SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, db_guid);
 
-        Dictionary<uint, PoolTemplateData> mPoolTemplate = new();
-        Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new();
-        Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new();
-        Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new();
-        Dictionary<ulong, uint> mCreatureSearchMap = new();
-        Dictionary<ulong, uint> mGameobjectSearchMap = new();
-        Dictionary<ulong, uint> mPoolSearchMap = new();
+                    break;
+                case "GameObject":
+                    if (mPoolGameobjectGroups.ContainsKey(pool_id) &&
+                        !mPoolGameobjectGroups[pool_id].IsEmpty())
+                        mPoolGameobjectGroups[pool_id].SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, db_guid);
 
-        MultiMap<uint, uint> mAutoSpawnPoolsPerMap = new();
+                    break;
+                case "Pool":
+                    if (mPoolPoolGroups.ContainsKey(pool_id) &&
+                        !mPoolPoolGroups[pool_id].IsEmpty())
+                        mPoolPoolGroups[pool_id].SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, db_guid);
+
+                    break;
+            }
+        }
     }
 
     public class PoolGroup<T>
     {
+        private readonly List<PoolObject> EqualChanced = new();
+        private readonly List<PoolObject> ExplicitlyChanced = new();
+
+        private uint poolId;
+
         public PoolGroup()
         {
             poolId = 0;
@@ -554,7 +624,8 @@ namespace Game
 
         public void AddEntry(PoolObject poolitem, uint maxentries)
         {
-            if (poolitem.chance != 0 && maxentries == 1)
+            if (poolitem.chance != 0 &&
+                maxentries == 1)
                 ExplicitlyChanced.Add(poolitem);
             else
                 EqualChanced.Add(poolitem);
@@ -565,89 +636,51 @@ namespace Game
             if (EqualChanced.Empty())
             {
                 float chance = 0;
+
                 for (int i = 0; i < ExplicitlyChanced.Count; ++i)
                     chance += ExplicitlyChanced[i].chance;
-                if (chance != 100 && chance != 0)
+
+                if (chance != 100 &&
+                    chance != 0)
                     return false;
             }
+
             return true;
         }
 
         public void DespawnObject(SpawnedPoolData spawns, ulong guid = 0, bool alwaysDeleteRespawnTime = false)
         {
             for (int i = 0; i < EqualChanced.Count; ++i)
-            {
                 // if spawned
                 if (spawns.IsSpawnedObject<T>(EqualChanced[i].guid))
                 {
-                    if (guid == 0 || EqualChanced[i].guid == guid)
+                    if (guid == 0 ||
+                        EqualChanced[i].guid == guid)
                     {
                         Despawn1Object(spawns, EqualChanced[i].guid, alwaysDeleteRespawnTime);
                         spawns.RemoveSpawn<T>(EqualChanced[i].guid, poolId);
                     }
                 }
                 else if (alwaysDeleteRespawnTime)
+                {
                     RemoveRespawnTimeFromDB(spawns, EqualChanced[i].guid);
-            }
+                }
 
             for (int i = 0; i < ExplicitlyChanced.Count; ++i)
-            {
                 // spawned
                 if (spawns.IsSpawnedObject<T>(ExplicitlyChanced[i].guid))
                 {
-                    if (guid == 0 || ExplicitlyChanced[i].guid == guid)
+                    if (guid == 0 ||
+                        ExplicitlyChanced[i].guid == guid)
                     {
                         Despawn1Object(spawns, ExplicitlyChanced[i].guid, alwaysDeleteRespawnTime);
                         spawns.RemoveSpawn<T>(ExplicitlyChanced[i].guid, poolId);
                     }
                 }
                 else if (alwaysDeleteRespawnTime)
+                {
                     RemoveRespawnTimeFromDB(spawns, ExplicitlyChanced[i].guid);
-            }
-        }
-
-        void Despawn1Object(SpawnedPoolData spawns, ulong guid, bool alwaysDeleteRespawnTime = false, bool saveRespawnTime = true)
-        {
-            switch (typeof(T).Name)
-            {
-                case "Creature":
-                {
-                    var creatureBounds = spawns.GetMap().GetCreatureBySpawnIdStore().LookupByKey(guid);
-                    foreach (var creature in creatureBounds)
-                    {
-                        // For dynamic spawns, save respawn time here
-                        if (saveRespawnTime && !creature.GetRespawnCompatibilityMode())
-                            creature.SaveRespawnTime();
-
-                        creature.AddObjectToRemoveList();
-                    }
-
-                    if (alwaysDeleteRespawnTime)
-                        spawns.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, guid, null, true);
-
-                    break;
                 }
-                case "GameObject":
-                {
-                    var gameobjectBounds = spawns.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
-                    foreach (var go in gameobjectBounds)
-                    {
-                        // For dynamic spawns, save respawn time here
-                        if (saveRespawnTime && !go.GetRespawnCompatibilityMode())
-                            go.SaveRespawnTime();
-
-                        go.AddObjectToRemoveList();
-                    }
-
-                    if (alwaysDeleteRespawnTime)
-                        spawns.GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, guid, null, true);
-
-                    break;
-                }
-                case "Pool":
-                    Global.PoolMgr.DespawnPool(spawns, (uint)guid, alwaysDeleteRespawnTime);
-                    break;
-            }
         }
 
         public void RemoveOneRelation(uint child_pool_id)
@@ -656,21 +689,20 @@ namespace Game
                 return;
 
             foreach (var poolObject in ExplicitlyChanced)
-            {
                 if (poolObject.guid == child_pool_id)
                 {
                     ExplicitlyChanced.Remove(poolObject);
+
                     break;
                 }
-            }
+
             foreach (var poolObject in EqualChanced)
-            {
                 if (poolObject.guid == child_pool_id)
                 {
                     EqualChanced.Remove(poolObject);
+
                     break;
                 }
-            }
         }
 
         public void SpawnObject(SpawnedPoolData spawns, uint limit, ulong triggerFrom)
@@ -678,7 +710,7 @@ namespace Game
             int count = (int)(limit - spawns.GetSpawnedObjects(poolId));
 
             // If triggered from some object respawn this object is still marked as spawned
-            // and also counted into m_SpawnedPoolAmount so we need increase count to be
+            // and also counted into _SpawnedPoolAmount so we need increase Count to be
             // spawned by 1
             if (triggerFrom != 0)
                 ++count;
@@ -696,17 +728,21 @@ namespace Game
                     foreach (PoolObject obj in ExplicitlyChanced)
                     {
                         roll -= obj.chance;
-                        // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
+
+                        // Triggering object is marked as spawned at this Time and can be also rolled (respawn case)
                         // so this need explicit check for this case
-                        if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)))
+                        if (roll < 0 &&
+                            (obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)))
                         {
                             rolledObjects.Add(obj);
+
                             break;
                         }
                     }
                 }
 
-                if (!EqualChanced.Empty() && rolledObjects.Empty())
+                if (!EqualChanced.Empty() &&
+                    rolledObjects.Empty())
                 {
                     rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)));
                     rolledObjects.RandomResize((uint)count);
@@ -714,7 +750,6 @@ namespace Game
 
                 // try to spawn rolled objects
                 foreach (PoolObject obj in rolledObjects)
-                {
                     if (obj.guid == triggerFrom)
                     {
                         ReSpawn1Object(spawns, obj);
@@ -725,54 +760,117 @@ namespace Game
                         spawns.AddSpawn<T>(obj.guid, poolId);
                         Spawn1Object(spawns, obj);
                     }
-                }
             }
 
-            // One spawn one despawn no count increase
+            // One spawn one despawn no Count increase
             if (triggerFrom != 0)
                 DespawnObject(spawns, triggerFrom);
         }
 
-        void Spawn1Object(SpawnedPoolData spawns, PoolObject obj)
+        public void SetPoolId(uint pool_id)
+        {
+            poolId = pool_id;
+        }
+
+        public bool IsEmpty()
+        {
+            return ExplicitlyChanced.Empty() && EqualChanced.Empty();
+        }
+
+        public uint GetPoolId()
+        {
+            return poolId;
+        }
+
+        private void Despawn1Object(SpawnedPoolData spawns, ulong guid, bool alwaysDeleteRespawnTime = false, bool saveRespawnTime = true)
         {
             switch (typeof(T).Name)
             {
                 case "Creature":
-                {
-                    CreatureData data = Global.ObjectMgr.GetCreatureData(obj.guid);
-                    if (data != null)
                     {
-                        // Spawn if necessary (loaded grids only)
-                        // We use spawn coords to spawn
-                        if (spawns.GetMap().IsGridLoaded(data.SpawnPoint))
-                            Creature.CreateCreatureFromDB(obj.guid, spawns.GetMap());
-                    }
-                }
-                break;
-                case "GameObject":
-                {
-                    GameObjectData data = Global.ObjectMgr.GetGameObjectData(obj.guid);
-                    if (data != null)
-                    {
-                        // Spawn if necessary (loaded grids only)
-                        // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                        if (spawns.GetMap().IsGridLoaded(data.SpawnPoint))
+                        var creatureBounds = spawns.GetMap().GetCreatureBySpawnIdStore().LookupByKey(guid);
+
+                        foreach (var creature in creatureBounds)
                         {
-                            GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, spawns.GetMap(), false);
-                            if (go && go.IsSpawnedByDefault())
-                                if (!spawns.GetMap().AddToMap(go))
-                                    go.Dispose();
+                            // For dynamic spawns, save respawn Time here
+                            if (saveRespawnTime && !creature.GetRespawnCompatibilityMode())
+                                creature.SaveRespawnTime();
+
+                            creature.AddObjectToRemoveList();
                         }
+
+                        if (alwaysDeleteRespawnTime)
+                            spawns.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, guid, null, true);
+
+                        break;
                     }
-                }
-                break;
+                case "GameObject":
+                    {
+                        var gameobjectBounds = spawns.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
+
+                        foreach (var go in gameobjectBounds)
+                        {
+                            // For dynamic spawns, save respawn Time here
+                            if (saveRespawnTime && !go.GetRespawnCompatibilityMode())
+                                go.SaveRespawnTime();
+
+                            go.AddObjectToRemoveList();
+                        }
+
+                        if (alwaysDeleteRespawnTime)
+                            spawns.GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, guid, null, true);
+
+                        break;
+                    }
                 case "Pool":
-                    Global.PoolMgr.SpawnPool(spawns, (uint)obj.guid);
+                    Global.PoolMgr.DespawnPool(spawns, (uint)guid, alwaysDeleteRespawnTime);
+
                     break;
             }
         }
 
-        void ReSpawn1Object(SpawnedPoolData spawns, PoolObject obj)
+        private void Spawn1Object(SpawnedPoolData spawns, PoolObject obj)
+        {
+            switch (typeof(T).Name)
+            {
+                case "Creature":
+                    {
+                        CreatureData data = Global.ObjectMgr.GetCreatureData(obj.guid);
+
+                        if (data != null)
+                            // Spawn if necessary (loaded grids only)
+                            // We use spawn coords to spawn
+                            if (spawns.GetMap().IsGridLoaded(data.SpawnPoint))
+                                Creature.CreateCreatureFromDB(obj.guid, spawns.GetMap());
+                    }
+
+                    break;
+                case "GameObject":
+                    {
+                        GameObjectData data = Global.ObjectMgr.GetGameObjectData(obj.guid);
+
+                        if (data != null)
+                            // Spawn if necessary (loaded grids only)
+                            // We use current coords to unspawn, not spawn coords since creature can have changed grid
+                            if (spawns.GetMap().IsGridLoaded(data.SpawnPoint))
+                            {
+                                GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, spawns.GetMap(), false);
+
+                                if (go && go.IsSpawnedByDefault())
+                                    if (!spawns.GetMap().AddToMap(go))
+                                        go.Dispose();
+                            }
+                    }
+
+                    break;
+                case "Pool":
+                    Global.PoolMgr.SpawnPool(spawns, (uint)obj.guid);
+
+                    break;
+            }
+        }
+
+        private void ReSpawn1Object(SpawnedPoolData spawns, PoolObject obj)
         {
             switch (typeof(T).Name)
             {
@@ -780,40 +878,33 @@ namespace Game
                 case "GameObject":
                     Despawn1Object(spawns, obj.guid, false, false);
                     Spawn1Object(spawns, obj);
+
                     break;
             }
         }
 
-        void RemoveRespawnTimeFromDB(SpawnedPoolData spawns, ulong guid)
+        private void RemoveRespawnTimeFromDB(SpawnedPoolData spawns, ulong guid)
         {
             switch (typeof(T).Name)
             {
                 case "Creature":
                     spawns.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, guid, null, true);
+
                     break;
                 case "GameObject":
                     spawns.GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, guid, null, true);
+
                     break;
             }
         }
-
-        public void SetPoolId(uint pool_id) { poolId = pool_id; }
-
-        public bool IsEmpty() { return ExplicitlyChanced.Empty() && EqualChanced.Empty(); }
-
-        public uint GetPoolId() { return poolId; }
-
-        uint poolId;
-        List<PoolObject> ExplicitlyChanced = new();
-        List<PoolObject> EqualChanced = new();
     }
 
     public class SpawnedPoolData
     {
-        Map mOwner;
-        List<ulong> mSpawnedCreatures = new();
-        List<ulong> mSpawnedGameobjects = new();
-        Dictionary<ulong, uint> mSpawnedPools = new();
+        private readonly Map mOwner;
+        private readonly List<ulong> mSpawnedCreatures = new();
+        private readonly List<ulong> mSpawnedGameobjects = new();
+        private readonly Dictionary<ulong, uint> mSpawnedPools = new();
 
         public SpawnedPoolData(Map owner)
         {
@@ -849,7 +940,8 @@ namespace Game
                 case SpawnObjectType.GameObject:
                     return mSpawnedGameobjects.Contains(db_guid_or_pool_id);
                 default:
-                    Log.outFatal(LogFilter.Misc, $"Invalid spawn type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
+                    Log.outFatal(LogFilter.Misc, $"Invalid spawn Type {type} passed to SpawnedPoolData::IsSpawnedObject (with spawnId {db_guid_or_pool_id})");
+
                     return false;
             }
         }
@@ -860,16 +952,20 @@ namespace Game
             {
                 case "Creature":
                     mSpawnedCreatures.Add(db_guid);
+
                     break;
                 case "GameObject":
                     mSpawnedGameobjects.Add(db_guid);
+
                     break;
                 case "Pool":
                     mSpawnedPools[db_guid] = 0;
+
                     break;
                 default:
                     return;
             }
+
             if (!mSpawnedPools.ContainsKey(pool_id))
                 mSpawnedPools[pool_id] = 0;
 
@@ -882,12 +978,15 @@ namespace Game
             {
                 case "Creature":
                     mSpawnedCreatures.Remove(db_guid);
+
                     break;
                 case "GameObject":
                     mSpawnedGameobjects.Remove(db_guid);
+
                     break;
                 case "Pool":
                     mSpawnedPools.Remove(db_guid);
+
                     break;
                 default:
                     return;
@@ -897,26 +996,31 @@ namespace Game
                 --mSpawnedPools[pool_id];
         }
 
-        public Map GetMap() { return mOwner; }
+        public Map GetMap()
+        {
+            return mOwner;
+        }
     }
 
     public class PoolObject
     {
+        public float chance;
+
+        public ulong guid;
+
         public PoolObject(ulong _guid, float _chance)
         {
             guid = _guid;
             chance = Math.Abs(_chance);
         }
-
-        public ulong guid;
-        public float chance;
     }
 
     public class PoolTemplateData
     {
-        public uint MaxLimit;
         public int MapId;
+        public uint MaxLimit;
     }
 
-    public class Pool { }                 // for Pool of Pool case
+    public class Pool
+    {} // for Pool of Pool case
 }

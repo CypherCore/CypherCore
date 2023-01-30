@@ -1,25 +1,66 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
-using System.Collections.Generic;
-using System;
 
 namespace Game.Chat.Commands
 {
     [CommandGroup("titles")]
-    class TitleCommands
+    internal class TitleCommands
     {
+        [CommandGroup("set")]
+        private class TitleSetCommands
+        {
+            //Edit Player KnownTitles
+            [Command("mask", RBACPermissions.CommandTitlesSetMask)]
+            private static bool HandleTitlesSetMaskCommand(CommandHandler handler, ulong mask)
+            {
+                Player target = handler.GetSelectedPlayer();
+
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.NoCharSelected);
+
+                    return false;
+                }
+
+                // check online security
+                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                    return false;
+
+                ulong titles2 = mask;
+
+                foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
+                    titles2 &= ~(1ul << tEntry.MaskID);
+
+                mask &= ~titles2; // remove not existed titles
+
+                target.SetKnownTitles(0, mask);
+                handler.SendSysMessage(CypherStrings.Done);
+
+                if (!target.HasTitle(target.PlayerData.PlayerTitle))
+                {
+                    target.SetChosenTitle(0);
+                    handler.SendSysMessage(CypherStrings.CurrentTitleReset, handler.GetNameLink(target));
+                }
+
+                return true;
+            }
+        }
+
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
-        static bool HandleTitlesCurrentCommand(CommandHandler handler, uint titleId)
+        private static bool HandleTitlesCurrentCommand(CommandHandler handler, uint titleId)
         {
             Player target = handler.GetSelectedPlayer();
+
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
+
                 return false;
             }
 
@@ -28,9 +69,11 @@ namespace Game.Chat.Commands
                 return false;
 
             CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(titleId);
+
             if (titleInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, titleId);
+
                 return false;
             }
 
@@ -41,16 +84,19 @@ namespace Game.Chat.Commands
             target.SetChosenTitle(titleInfo.MaskID);
 
             handler.SendSysMessage(CypherStrings.TitleCurrentRes, titleId, titleNameStr, tNameLink);
+
             return true;
         }
 
         [Command("add", RBACPermissions.CommandTitlesAdd)]
-        static bool HandleTitlesAddCommand(CommandHandler handler, uint titleId)
+        private static bool HandleTitlesAddCommand(CommandHandler handler, uint titleId)
         {
             Player target = handler.GetSelectedPlayer();
+
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
+
                 return false;
             }
 
@@ -59,9 +105,11 @@ namespace Game.Chat.Commands
                 return false;
 
             CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(titleId);
+
             if (titleInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, titleId);
+
                 return false;
             }
 
@@ -76,12 +124,14 @@ namespace Game.Chat.Commands
         }
 
         [Command("remove", RBACPermissions.CommandTitlesRemove)]
-        static bool HandleTitlesRemoveCommand(CommandHandler handler, uint titleId)
+        private static bool HandleTitlesRemoveCommand(CommandHandler handler, uint titleId)
         {
             Player target = handler.GetSelectedPlayer();
+
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
+
                 return false;
             }
 
@@ -90,9 +140,11 @@ namespace Game.Chat.Commands
                 return false;
 
             CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(titleId);
+
             if (titleInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, titleId);
+
                 return false;
             }
 
@@ -103,51 +155,13 @@ namespace Game.Chat.Commands
 
             handler.SendSysMessage(CypherStrings.TitleRemoveRes, titleId, titleNameStr, tNameLink);
 
-            if (!target.HasTitle(target.m_playerData.PlayerTitle))
+            if (!target.HasTitle(target.PlayerData.PlayerTitle))
             {
                 target.SetChosenTitle(0);
                 handler.SendSysMessage(CypherStrings.CurrentTitleReset, tNameLink);
             }
 
             return true;
-        }
-
-        [CommandGroup("set")]
-        class TitleSetCommands
-        {
-            //Edit Player KnownTitles
-            [Command("mask", RBACPermissions.CommandTitlesSetMask)]
-            static bool HandleTitlesSetMaskCommand(CommandHandler handler, ulong mask)
-            {
-                Player target = handler.GetSelectedPlayer();
-                if (!target)
-                {
-                    handler.SendSysMessage(CypherStrings.NoCharSelected);
-                    return false;
-                }
-
-                // check online security
-                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                    return false;
-
-                ulong titles2 = mask;
-
-                foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
-                    titles2 &= ~(1ul << tEntry.MaskID);
-
-                mask &= ~titles2;                                     // remove not existed titles
-
-                target.SetKnownTitles(0, mask);
-                handler.SendSysMessage(CypherStrings.Done);
-
-                if (!target.HasTitle(target.m_playerData.PlayerTitle))
-                {
-                    target.SetChosenTitle(0);
-                    handler.SendSysMessage(CypherStrings.CurrentTitleReset, handler.GetNameLink(target));
-                }
-
-                return true;
-            }
         }
     }
 }

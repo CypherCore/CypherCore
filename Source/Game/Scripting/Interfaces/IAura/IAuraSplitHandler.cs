@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework.Constants;
+﻿using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
 
@@ -17,7 +12,8 @@ namespace Game.Scripting.Interfaces.IAura
     public class EffectSplitHandler : AuraEffectHandler, IAuraSplitHandler
     {
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
-        AuraEffectSplitDelegate _fn;
+
+        private readonly AuraEffectSplitDelegate _fn;
 
         public EffectSplitHandler(AuraEffectSplitDelegate fn, uint effectIndex) : base(effectIndex, AuraType.SplitDamagePct, AuraScriptHookType.EffectSplit)
         {

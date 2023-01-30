@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
-using Game.Scripting.Interfaces;
 using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IUnit

@@ -1,13 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using Framework.Constants;
 using Framework.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections;
-using System.IO;
 
 namespace Game.DataStorage
 {
@@ -20,9 +19,11 @@ namespace Game.DataStorage
             string db2Path = dataPath + "/dbc";
 
             BitSet availableDb2Locales = new((int)Locale.Total);
+
             foreach (var dir in Directory.GetDirectories(db2Path))
             {
                 Locale locale = Path.GetFileName(dir).ToEnum<Locale>();
+
                 if (SharedConst.IsValidLocale(locale))
                     availableDb2Locales[(int)locale] = true;
             }
@@ -31,6 +32,7 @@ namespace Game.DataStorage
                 return null;
 
             uint loadedFileCount = 0;
+
             DB6Storage<T> ReadDB2<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
             {
                 return DBReader.Read<T>(availableDb2Locales, $"{db2Path}/{defaultLocale}/", fileName, preparedStatement, preparedStatementLocale, ref loadedFileCount);
@@ -364,13 +366,15 @@ namespace Game.DataStorage
             {
                 if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
                     TaxiPathSetBySource.Add(entry.FromTaxiNode, new Dictionary<uint, TaxiPathBySourceAndDestination>());
+
                 TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
             uint pathCount = TaxiPathStorage.GetNumRows();
 
-            // Calculate path nodes count
-            uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
+            // Calculate path nodes Count
+            uint[] pathLength = new uint[pathCount]; // 0 and some other indexes not used
+
             foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
                 if (pathLength[entry.PathID] < entry.NodeIndex + 1)
                     pathLength[entry.PathID] = (uint)entry.NodeIndex + 1u;
@@ -379,7 +383,7 @@ namespace Game.DataStorage
             for (uint i = 0; i < pathCount; ++i)
                 TaxiPathNodesByPath[i] = new TaxiPathNodeRecord[pathLength[i]];
 
-            // fill data
+            // fill _data
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
@@ -399,33 +403,37 @@ namespace Game.DataStorage
                 byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
 
                 TaxiNodesMask[field] |= submask;
+
                 if (node.Flags.HasAnyFlag(TaxiNodeFlags.Horde))
                     HordeTaxiNodesMask[field] |= submask;
+
                 if (node.Flags.HasAnyFlag(TaxiNodeFlags.Alliance))
                     AllianceTaxiNodesMask[field] |= submask;
 
                 int uiMapId;
+
                 if (!Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId))
                     Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId);
 
-                if (uiMapId == 985 || uiMapId == 986)
+                if (uiMapId == 985 ||
+                    uiMapId == 986)
                     OldContinentsNodesMask[field] |= submask;
             }
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(14618) ||               // last area added in 10.0.2 (46741)
-                !CharTitlesStorage.ContainsKey(749) ||                // last char title added in 10.0.2 (46741)
-                !GemPropertiesStorage.ContainsKey(4028) ||            // last gem property added in 10.0.2 (46741)
-                !ItemStorage.ContainsKey(202712) ||                   // last item added in 10.0.2 (46741)
-                !ItemExtendedCostStorage.ContainsKey(7862) ||         // last item extended cost added in 10.0.2 (46741)
-                !MapStorage.ContainsKey(2582) ||                      // last map added in 10.0.2 (46741)
-                !SpellNameStorage.ContainsKey(399311))                // last spell added in 10.0.2 (46741)
+            if (!AreaTableStorage.ContainsKey(14618) ||       // last area added in 10.0.2 (46741)
+                !CharTitlesStorage.ContainsKey(749) ||        // last char title added in 10.0.2 (46741)
+                !GemPropertiesStorage.ContainsKey(4028) ||    // last gem property added in 10.0.2 (46741)
+                !ItemStorage.ContainsKey(202712) ||           // last Item added in 10.0.2 (46741)
+                !ItemExtendedCostStorage.ContainsKey(7862) || // last Item extended cost added in 10.0.2 (46741)
+                !MapStorage.ContainsKey(2582) ||              // last map added in 10.0.2 (46741)
+                !SpellNameStorage.ContainsKey(399311))        // last spell added in 10.0.2 (46741)
             {
                 Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Environment.Exit(1);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 _data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
 
             return availableDb2Locales;
         }
@@ -437,6 +445,7 @@ namespace Game.DataStorage
             string gtPath = dataPath + "/gt/";
 
             uint loadedFileCount = 0;
+
             GameTable<T> ReadGameTable<T>(string fileName) where T : new()
             {
                 return GameTableReader.Read<T>(gtPath, fileName, ref loadedFileCount);
@@ -456,10 +465,11 @@ namespace Game.DataStorage
             StaminaMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
             XpGameTable = ReadGameTable<GtXpRecord>("xp.txt");
 
-            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables _data stores in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         #region Main Collections
+
         public static DB6Storage<AchievementRecord> AchievementStorage;
         public static DB6Storage<AchievementCategoryRecord> AchievementCategoryStorage;
         public static DB6Storage<AdventureJournalRecord> AdventureJournalStorage;
@@ -477,7 +487,9 @@ namespace Game.DataStorage
         public static DB6Storage<ArtifactPowerRecord> ArtifactPowerStorage;
         public static DB6Storage<ArtifactPowerLinkRecord> ArtifactPowerLinkStorage;
         public static DB6Storage<ArtifactPowerPickerRecord> ArtifactPowerPickerStorage;
+
         public static DB6Storage<ArtifactPowerRankRecord> ArtifactPowerRankStorage;
+
         //public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
         public static DB6Storage<ArtifactTierRecord> ArtifactTierStorage;
         public static DB6Storage<ArtifactUnlockRecord> ArtifactUnlockStorage;
@@ -588,7 +600,9 @@ namespace Game.DataStorage
         public static DB6Storage<ItemAppearanceRecord> ItemAppearanceStorage;
         public static DB6Storage<ItemArmorQualityRecord> ItemArmorQualityStorage;
         public static DB6Storage<ItemArmorShieldRecord> ItemArmorShieldStorage;
+
         public static DB6Storage<ItemArmorTotalRecord> ItemArmorTotalStorage;
+
         //public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
         public static DB6Storage<ItemBonusRecord> ItemBonusStorage;
         public static DB6Storage<ItemBonusListLevelDeltaRecord> ItemBonusListLevelDeltaStorage;
@@ -625,7 +639,9 @@ namespace Game.DataStorage
         public static DB6Storage<JournalEncounterRecord> JournalEncounterStorage;
         public static DB6Storage<JournalEncounterSectionRecord> JournalEncounterSectionStorage;
         public static DB6Storage<JournalInstanceRecord> JournalInstanceStorage;
+
         public static DB6Storage<JournalTierRecord> JournalTierStorage;
+
         //public static DB6Storage<KeyChainRecord> KeyChainStorage;
         public static DB6Storage<KeystoneAffixRecord> KeystoneAffixStorage;
         public static DB6Storage<LanguageWordsRecord> LanguageWordsStorage;
@@ -781,9 +797,11 @@ namespace Game.DataStorage
         public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;
         public static DB6Storage<WorldStateExpressionRecord> WorldStateExpressionStorage;
         public static DB6Storage<CharBaseInfo> CharBaseInfoStorage;
+
         #endregion
 
         #region GameTables
+
         public static GameTable<GtArtifactKnowledgeMultiplierRecord> ArtifactKnowledgeMultiplierGameTable;
         public static GameTable<GtArtifactLevelXPRecord> ArtifactLevelXPGameTable;
         public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
@@ -797,18 +815,22 @@ namespace Game.DataStorage
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
         public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
         public static GameTable<GtXpRecord> XpGameTable;
+
         #endregion
 
         #region Taxi Collections
+
         public static byte[] TaxiNodesMask;
         public static byte[] OldContinentsNodesMask;
         public static byte[] HordeTaxiNodesMask;
         public static byte[] AllianceTaxiNodesMask;
         public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
         public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
+
         #endregion
 
         #region Helper Methods
+
         public static float GetGameTableColumnForClass(dynamic row, Class class_)
         {
             switch (class_)
@@ -933,6 +955,7 @@ namespace Game.DataStorage
                     return row.ArmorMultiplier;
             }
         }
+
         #endregion
     }
 }

@@ -1,296 +1,305 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using System.Numerics;
+using Framework.Constants;
 
 namespace Game.DataStorage
 {
     public sealed class Cfg_RegionsRecord
     {
-        public uint Id;
-        public string Tag;
-        public ushort RegionID;
-        public uint Raidorigin;                                              // Date of first raid reset, all other resets are calculated as this date plus interval
-        public byte RegionGroupMask;
         public uint ChallengeOrigin;
+        public uint Id;
+        public uint Raidorigin; // Date of first raid reset, all other resets are calculated as this date plus interval
+        public byte RegionGroupMask;
+        public ushort RegionID;
+        public string Tag;
     }
 
     public sealed class CharTitlesRecord
     {
+        public sbyte Flags;
         public uint Id;
+        public ushort MaskID;
         public LocalizedString Name;
         public LocalizedString Name1;
-        public ushort MaskID;
-        public sbyte Flags;
     }
 
     public sealed class CharacterLoadoutRecord
     {
-        public uint Id;
-        public long RaceMask;
         public sbyte ChrClassID;
-        public int Purpose;
+        public uint Id;
         public sbyte ItemContext;
+        public int Purpose;
+        public long RaceMask;
 
-        public bool IsForNewCharacter() { return Purpose == 9; }
+        public bool IsForNewCharacter()
+        {
+            return Purpose == 9;
+        }
     }
 
     public sealed class CharacterLoadoutItemRecord
     {
-        public uint Id;
         public ushort CharacterLoadoutID;
+        public uint Id;
         public uint ItemID;
     }
 
     public sealed class ChatChannelsRecord
     {
+        public sbyte FactionGroup;
+        public ChannelDBCFlags Flags;
         public uint Id;
         public LocalizedString Name;
-        public string Shortcut;
-        public ChannelDBCFlags Flags;
-        public sbyte FactionGroup;
         public int Ruleset;
+        public string Shortcut;
     }
 
     public sealed class ChrClassUIDisplayRecord
     {
-        public uint Id;
-        public byte ChrClassesID;
         public uint AdvGuidePlayerConditionID;
+        public byte ChrClassesID;
+        public uint Id;
         public uint SplashPlayerConditionID;
     }
 
     public sealed class ChrClassesRecord
     {
-        public LocalizedString Name;
-        public string Filename;
-        public string NameMale;
-        public string NameFemale;
-        public string PetNameToken;
-        public string Description;
-        public string RoleInfoString;
-        public string DisabledString;
-        public string HyphenatedNameMale;
-        public string HyphenatedNameFemale;
-        public uint Id;
-        public uint CreateScreenFileDataID;
-        public uint SelectScreenFileDataID;
-        public uint IconFileDataID;
-        public uint LowResScreenFileDataID;
-        public int Flags;
-        public uint SpellTextureBlobFileDataID;
-        public uint RolesMask;
-        public uint ArmorTypeMask;
-        public int CharStartKitUnknown901;
-        public int MaleCharacterCreationVisualFallback;
-        public int MaleCharacterCreationIdleVisualFallback;
-        public int FemaleCharacterCreationVisualFallback;
-        public int FemaleCharacterCreationIdleVisualFallback;
-        public int CharacterCreationIdleGroundVisualFallback;
-        public int CharacterCreationGroundVisualFallback;
         public int AlteredFormCharacterCreationIdleVisualFallback;
-        public int CharacterCreationAnimLoopWaitTimeMsFallback;
-        public ushort CinematicSequenceID;
-        public ushort DefaultSpec;
-        public byte PrimaryStatPriority;
-        public PowerType DisplayPower;
-        public byte RangedAttackPowerPerAgility;
+        public uint ArmorTypeMask;
         public byte AttackPowerPerAgility;
         public byte AttackPowerPerStrength;
-        public byte SpellClassSet;
-        public byte ClassColorR;
-        public byte ClassColorG;
+        public int CharacterCreationAnimLoopWaitTimeMsFallback;
+        public int CharacterCreationGroundVisualFallback;
+        public int CharacterCreationIdleGroundVisualFallback;
+        public int CharStartKitUnknown901;
+        public ushort CinematicSequenceID;
         public byte ClassColorB;
+        public byte ClassColorG;
+        public byte ClassColorR;
+        public uint CreateScreenFileDataID;
+        public ushort DefaultSpec;
+        public string Description;
+        public string DisabledString;
+        public PowerType DisplayPower;
+        public int FemaleCharacterCreationIdleVisualFallback;
+        public int FemaleCharacterCreationVisualFallback;
+        public string Filename;
+        public int Flags;
+        public string HyphenatedNameFemale;
+        public string HyphenatedNameMale;
+        public uint IconFileDataID;
+        public uint Id;
+        public uint LowResScreenFileDataID;
+        public int MaleCharacterCreationIdleVisualFallback;
+        public int MaleCharacterCreationVisualFallback;
+        public LocalizedString Name;
+        public string NameFemale;
+        public string NameMale;
+        public string PetNameToken;
+        public byte PrimaryStatPriority;
+        public byte RangedAttackPowerPerAgility;
+        public string RoleInfoString;
+        public uint RolesMask;
+        public uint SelectScreenFileDataID;
+        public byte SpellClassSet;
+        public uint SpellTextureBlobFileDataID;
     }
 
     public sealed class ChrClassesXPowerTypesRecord
     {
+        public uint ClassID;
         public uint Id;
         public sbyte PowerType;
-        public uint ClassID;
     }
 
     public sealed class ChrCustomizationChoiceRecord
     {
-        public LocalizedString Name;
-        public uint Id;
+        public int AddedInPatch;
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationReqID;
         public int ChrCustomizationVisReqID;
-        public ushort SortOrder;
-        public ushort UiOrderIndex;
         public int Flags;
-        public int AddedInPatch;
+        public uint Id;
+        public LocalizedString Name;
+        public ushort SortOrder;
         public int[] SwatchColor = new int[2];
+        public ushort UiOrderIndex;
     }
 
     public sealed class ChrCustomizationDisplayInfoRecord
     {
+        public float BarberShopHeightOffset;
+        public float BarberShopMinCameraDistance;
+        public uint DisplayID;
         public uint Id;
         public int ShapeshiftFormID;
-        public uint DisplayID;
-        public float BarberShopMinCameraDistance;
-        public float BarberShopHeightOffset;
     }
 
     public sealed class ChrCustomizationElementRecord
     {
-        public uint Id;
-        public uint ChrCustomizationChoiceID;
-        public int RelatedChrCustomizationChoiceID;
-        public int ChrCustomizationGeosetID;
-        public int ChrCustomizationSkinnedModelID;
-        public int ChrCustomizationMaterialID;
+        public int ChrCustItemGeoModifyID;
         public int ChrCustomizationBoneSetID;
+        public uint ChrCustomizationChoiceID;
         public int ChrCustomizationCondModelID;
         public int ChrCustomizationDisplayInfoID;
-        public int ChrCustItemGeoModifyID;
+        public int ChrCustomizationGeosetID;
+        public int ChrCustomizationMaterialID;
+        public int ChrCustomizationSkinnedModelID;
         public int ChrCustomizationVoiceID;
+        public uint Id;
+        public int RelatedChrCustomizationChoiceID;
     }
 
     public sealed class ChrCustomizationOptionRecord
     {
-        public LocalizedString Name;
-        public uint Id;
-        public ushort SecondaryID;
-        public int Flags;
-        public uint ChrModelID;
-        public int SortIndex;
-        public int ChrCustomizationCategoryID;
-        public int OptionType;
+        public int AddedInPatch;
         public float BarberShopCostModifier;
+        public int ChrCustomizationCategoryID;
         public int ChrCustomizationID;
         public int ChrCustomizationReqID;
+        public uint ChrModelID;
+        public int Flags;
+        public uint Id;
+        public LocalizedString Name;
+        public int OptionType;
+        public ushort SecondaryID;
+        public int SortIndex;
         public int UiOrderIndex;
-        public int AddedInPatch;
     }
 
     public sealed class ChrCustomizationReqRecord
     {
-        public uint Id;
-        public string ReqSource;
-        public int Flags;
-        public int ClassMask;
         public int AchievementID;
-        public int QuestID;
-        public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
+        public int ClassMask;
+        public int Flags;
+        public uint Id;
         public uint ItemModifiedAppearanceID;
+        public int OverrideArchive; // -1: allow any, otherwise must match OverrideArchive cvar
+        public int QuestID;
+        public string ReqSource;
 
-        public ChrCustomizationReqFlag GetFlags() { return (ChrCustomizationReqFlag)Flags; }
+        public ChrCustomizationReqFlag GetFlags()
+        {
+            return (ChrCustomizationReqFlag)Flags;
+        }
     }
 
     public sealed class ChrCustomizationReqChoiceRecord
     {
-        public uint Id;
         public uint ChrCustomizationChoiceID;
         public uint ChrCustomizationReqID;
+        public uint Id;
     }
 
     public sealed class ChrModelRecord
     {
-        public float[] FaceCustomizationOffset = new float[3];
-        public float[] CustomizeOffset = new float[3];
-        public uint Id;
-        public sbyte Sex;
-        public uint DisplayID;
-        public int CharComponentTextureLayoutID;
-        public int Flags;
-        public int SkeletonFileDataID;
-        public int ModelFallbackChrModelID;
-        public int TextureFallbackChrModelID;
-        public int HelmVisFallbackChrModelID;
-        public float CustomizeScale;
-        public float CustomizeFacing;
-        public float CameraDistanceOffset;
-        public float BarberShopCameraOffsetScale;
         public float BarberShopCameraHeightOffsetScale; // applied after BarberShopCameraOffsetScale
+        public float BarberShopCameraOffsetScale;
         public float BarberShopCameraRotationOffset;
+        public float CameraDistanceOffset;
+        public int CharComponentTextureLayoutID;
+        public float CustomizeFacing;
+        public float[] CustomizeOffset = new float[3];
+        public float CustomizeScale;
+        public uint DisplayID;
+        public float[] FaceCustomizationOffset = new float[3];
+        public int Flags;
+        public int HelmVisFallbackChrModelID;
+        public uint Id;
+        public int ModelFallbackChrModelID;
+        public sbyte Sex;
+        public int SkeletonFileDataID;
+        public int TextureFallbackChrModelID;
     }
 
     public sealed class ChrRaceXChrModelRecord
     {
-        public uint Id;
-        public int ChrRacesID;
-        public int ChrModelID;
-        public int Sex;
         public int AllowedTransmogSlots;
+        public int ChrModelID;
+        public int ChrRacesID;
+        public uint Id;
+        public int Sex;
     }
 
     public sealed class ChrRacesRecord
     {
-        public uint Id;
-        public string ClientPrefix;
+        public int Alliance;
+        public float[] AlteredFormCustomizeOffsetFallback = new float[3];
+        public float AlteredFormCustomizeRotationFallback;
+        public int[] AlteredFormFinishVisualKitID = new int[3];
+        public int[] AlteredFormStartVisualKitID = new int[3];
+        public sbyte BaseLanguage;
+        public uint CinematicSequenceID;
         public string ClientFileString;
-        public LocalizedString Name;
-        public string NameFemale;
-        public string NameLowercase;
-        public string NameFemaleLowercase;
+        public string ClientPrefix;
+        public int CreateScreenFileDataID;
+        public sbyte CreatureType;
+        public int DefaultClassID;
+        public int FactionID;
+        public int FemaleModelFallbackRaceID;
+        public sbyte FemaleModelFallbackSex;
+        public int FemaleTextureFallbackRaceID;
+        public sbyte FemaleTextureFallbackSex;
+        public int Flags;
+        public int HelmetAnimScalingRaceID;
+        public int HeritageArmorAchievementID;
+        public uint Id;
+        public string LoreDescription;
         public string LoreName;
         public string LoreNameFemale;
         public string LoreNameLower;
         public string LoreNameLowerFemale;
-        public string LoreDescription;
+        public int LowResScreenFileDataID;
+        public int MaleModelFallbackRaceID;
+        public sbyte MaleModelFallbackSex;
+        public int MaleTextureFallbackRaceID;
+        public sbyte MaleTextureFallbackSex;
+        public LocalizedString Name;
+        public string NameFemale;
+        public string NameFemaleLowercase;
+        public string NameLowercase;
+        public int NeutralRaceID;
+        public int PlayableRaceBit;
+        public int RaceRelated;
+        public uint ResSicknessSpellID;
+        public int SelectScreenFileDataID;
         public string ShortName;
         public string ShortNameFemale;
         public string ShortNameLower;
         public string ShortNameLowerFemale;
-        public int Flags;
-        public int FactionID;
-        public uint CinematicSequenceID;
-        public uint ResSicknessSpellID;
         public int SplashSoundID;
-        public int Alliance;
-        public int RaceRelated;
-        public int UnalteredVisualRaceID;
-        public int DefaultClassID;
-        public int CreateScreenFileDataID;
-        public int SelectScreenFileDataID;
-        public int NeutralRaceID;
-        public int LowResScreenFileDataID;
-        public int[] AlteredFormStartVisualKitID = new int[3];
-        public int[] AlteredFormFinishVisualKitID = new int[3];
-        public int HeritageArmorAchievementID;
         public int StartingLevel;
-        public int UiDisplayOrder;
-        public int MaleModelFallbackRaceID;
-        public int FemaleModelFallbackRaceID;
-        public int MaleTextureFallbackRaceID;
-        public int FemaleTextureFallbackRaceID;
-        public int PlayableRaceBit;
-        public int HelmetAnimScalingRaceID;
         public int TransmogrifyDisabledSlotMask;
+        public int UiDisplayOrder;
         public int UnalteredVisualCustomizationRaceID;
-        public float[] AlteredFormCustomizeOffsetFallback = new float[3];
-        public float AlteredFormCustomizeRotationFallback;
+        public int UnalteredVisualRaceID;
+        public int Unknown1000;
         public float[] Unknown910_1 = new float[3];
         public float[] Unknown910_2 = new float[3];
-        public int Unknown1000;
-        public sbyte BaseLanguage;
-        public sbyte CreatureType;
-        public sbyte MaleModelFallbackSex;
-        public sbyte FemaleModelFallbackSex;
-        public sbyte MaleTextureFallbackSex;
-        public sbyte FemaleTextureFallbackSex;
 
-        public ChrRacesFlag GetFlags() { return (ChrRacesFlag)Flags; }
+        public ChrRacesFlag GetFlags()
+        {
+            return (ChrRacesFlag)Flags;
+        }
     }
 
     public sealed class ChrSpecializationRecord
     {
-        public LocalizedString Name;
-        public string FemaleName;
-        public string Description;
-        public uint Id;
+        public int AnimReplacements;
         public byte ClassID;
+        public string Description;
+        public string FemaleName;
+        public ChrSpecializationFlag Flags;
+        public uint Id;
+        public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
+        public LocalizedString Name;
         public byte OrderIndex;
         public sbyte PetTalentType;
-        public sbyte Role;
-        public ChrSpecializationFlag Flags;
-        public int SpellIconFileID;
         public sbyte PrimaryStatPriority;
-        public int AnimReplacements;
-        public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
+        public sbyte Role;
+        public int SpellIconFileID;
 
         public bool IsPetSpecialization()
         {
@@ -300,41 +309,45 @@ namespace Game.DataStorage
 
     public sealed class CinematicCameraRecord
     {
-        public uint Id;
-        public Vector3 Origin;                                   // Position in map used for basis for M2 co-ordinates
-        public uint SoundID;                                         // Sound ID       (voiceover for cinematic)
-        public float OriginFacing;                                     // Orientation in map used for basis for M2 co
-        public uint FileDataID;                                      // Model
         public uint ConversationID;
+        public uint FileDataID; // Model
+        public uint Id;
+        public Vector3 Origin;     // Position in map used for basis for M2 co-ordinates
+        public float OriginFacing; // Orientation in map used for basis for M2 co
+        public uint SoundID;       // Sound ID       (voiceover for cinematic)
     }
 
     public sealed class CinematicSequencesRecord
     {
+        public ushort[] Camera = new ushort[8];
         public uint Id;
         public uint SoundID;
-        public ushort[] Camera = new ushort[8];
     }
 
     public sealed class ContentTuningRecord
     {
-        public uint Id;
-        public int Flags;
         public int ExpansionID;
-        public int MinLevel;
+        public int Flags;
+        public uint Id;
         public int MaxLevel;
-        public int MinLevelType;
         public int MaxLevelType;
+        public int MinItemLevel;
+        public int MinLevel;
+        public int MinLevelType;
         public int TargetLevelDelta;
+        public int TargetLevelMax;
         public int TargetLevelMaxDelta;
         public int TargetLevelMin;
-        public int TargetLevelMax;
-        public int MinItemLevel;
 
-        public ContentTuningFlag GetFlags() { return (ContentTuningFlag)Flags; }
+        public ContentTuningFlag GetFlags()
+        {
+            return (ContentTuningFlag)Flags;
+        }
 
         public int GetScalingFactionGroup()
         {
             ContentTuningFlag flags = GetFlags();
+
             if (flags.HasFlag(ContentTuningFlag.Horde))
                 return 5;
 
@@ -347,213 +360,219 @@ namespace Game.DataStorage
 
     public sealed class ContentTuningXExpectedRecord
     {
-        public uint Id;
-        public int ExpectedStatModID;
-        public int MinMythicPlusSeasonID;
-        public int MaxMythicPlusSeasonID;
         public uint ContentTuningID;
+        public int ExpectedStatModID;
+        public uint Id;
+        public int MaxMythicPlusSeasonID;
+        public int MinMythicPlusSeasonID;
     }
 
     public sealed class ConversationLineRecord
     {
-        public uint Id;
-        public uint BroadcastTextID;
-        public uint SpellVisualKitID;
         public int AdditionalDuration;
-        public ushort NextConversationLineID;
         public ushort AnimKitID;
-        public byte SpeechType;
-        public byte StartAnimation;
+        public uint BroadcastTextID;
         public byte EndAnimation;
+        public uint Id;
+        public ushort NextConversationLineID;
+        public byte SpeechType;
+        public uint SpellVisualKitID;
+        public byte StartAnimation;
     }
 
     public sealed class CorruptionEffectsRecord
     {
+        public uint Aura;
+        public int Flags;
         public uint Id;
         public float MinCorruption;
-        public uint Aura;
         public int PlayerConditionID;
-        public int Flags;
     }
 
     public sealed class CreatureDisplayInfoRecord
     {
+        public ushort AnimReplacementSetID;
+        public byte BloodID;
+        public byte CreatureModelAlpha;
+        public sbyte CreatureModelMinLod;
+        public float CreatureModelScale;
+        public int DissolveEffectID;
+        public int DissolveOutEffectID;
+        public int ExtendedDisplayInfoID;
+        public byte Flags;
+        public sbyte Gender;
         public uint Id;
         public ushort ModelID;
-        public ushort SoundID;
-        public sbyte SizeClass;
-        public float CreatureModelScale;
-        public byte CreatureModelAlpha;
-        public byte BloodID;
-        public int ExtendedDisplayInfoID;
+        public int MountPoofSpellVisualKitID;
         public ushort NPCSoundID;
+        public ushort ObjectEffectPackageID;
         public ushort ParticleColorID;
+        public float PetInstanceScale; // scale of not own player pets inside dungeons/raids/scenarios
+        public float PlayerOverrideScale;
         public int PortraitCreatureDisplayInfoID;
         public int PortraitTextureFileDataID;
-        public ushort ObjectEffectPackageID;
-        public ushort AnimReplacementSetID;
-        public byte Flags;
+        public sbyte SizeClass;
+        public ushort SoundID;
         public int StateSpellVisualKitID;
-        public float PlayerOverrideScale;
-        public float PetInstanceScale;                                         // scale of not own player pets inside dungeons/raids/scenarios
-        public sbyte UnarmedWeaponType;
-        public int MountPoofSpellVisualKitID;
-        public int DissolveEffectID;
-        public sbyte Gender;
-        public int DissolveOutEffectID;
-        public sbyte CreatureModelMinLod;
         public int[] TextureVariationFileDataID = new int[4];
+        public sbyte UnarmedWeaponType;
     }
 
     public sealed class CreatureDisplayInfoExtraRecord
     {
-        public uint Id;
+        public int BakeMaterialResourcesID;
+        public sbyte DisplayClassID;
         public sbyte DisplayRaceID;
         public sbyte DisplaySexID;
-        public sbyte DisplayClassID;
         public sbyte Flags;
-        public int BakeMaterialResourcesID;
         public int HDBakeMaterialResourcesID;
+        public uint Id;
     }
 
     public sealed class CreatureFamilyRecord
     {
+        public int IconFileID;
         public uint Id;
-        public LocalizedString Name;
-        public float MinScale;
-        public sbyte MinScaleLevel;
         public float MaxScale;
         public sbyte MaxScaleLevel;
+        public float MinScale;
+        public sbyte MinScaleLevel;
+        public LocalizedString Name;
         public ushort PetFoodMask;
         public sbyte PetTalentType;
-        public int IconFileID;
         public short[] SkillLine = new short[2];
     }
 
     public sealed class CreatureModelDataRecord
     {
-        public uint Id;
-        public float[] GeoBox = new float[6];
-        public uint Flags;
-        public uint FileDataID;
+        public float AttachedEffectScale;
         public uint BloodID;
+        public float CollisionHeight;
+        public float CollisionWidth;
+        public uint CreatureGeosetDataID;
+        public uint DeathThudCameraEffectID;
+        public uint FileDataID;
+        public uint Flags;
+        public uint FoleyMaterialID;
+        public float FootprintParticleScale;
         public uint FootprintTextureID;
         public float FootprintTextureLength;
         public float FootprintTextureWidth;
-        public float FootprintParticleScale;
-        public uint FoleyMaterialID;
         public uint FootstepCameraEffectID;
-        public uint DeathThudCameraEffectID;
-        public uint SoundID;
-        public uint SizeClass;
-        public float CollisionWidth;
-        public float CollisionHeight;
-        public float WorldEffectScale;
-        public uint CreatureGeosetDataID;
+        public float[] GeoBox = new float[6];
         public float HoverHeight;
-        public float AttachedEffectScale;
-        public float ModelScale;
-        public float MissileCollisionRadius;
+        public uint Id;
         public float MissileCollisionPush;
+        public float MissileCollisionRadius;
         public float MissileCollisionRaise;
+        public float ModelScale;
         public float MountHeight;
         public float OverrideLootEffectScale;
         public float OverrideNameScale;
         public float OverrideSelectionRadius;
+        public uint SizeClass;
+        public uint SoundID;
         public float TamedPetBaseScale;
-        public sbyte Unknown820_1;                                              // scale related
-        public float Unknown820_2;                                             // scale related
-        public float[] Unknown820_3 = new float[2];                            // scale related
+        public sbyte Unknown820_1;                  // scale related
+        public float Unknown820_2;                  // scale related
+        public float[] Unknown820_3 = new float[2]; // scale related
+        public float WorldEffectScale;
 
-        public CreatureModelDataFlags GetFlags() { return (CreatureModelDataFlags)Flags; }
+        public CreatureModelDataFlags GetFlags()
+        {
+            return (CreatureModelDataFlags)Flags;
+        }
     }
 
     public sealed class CreatureTypeRecord
     {
+        public byte Flags;
         public uint Id;
         public string Name;
-        public byte Flags;
     }
 
     public sealed class CriteriaRecord
     {
-        public uint Id;
-        public CriteriaType Type;
         public uint Asset;
-        public uint ModifierTreeId;
-        public byte StartEvent;
-        public uint StartAsset;
-        public ushort StartTimer;
-        public byte FailEvent;
-        public uint FailAsset;
-        public byte Flags;
         public ushort EligibilityWorldStateID;
         public byte EligibilityWorldStateValue;
+        public uint FailAsset;
+        public byte FailEvent;
+        public byte Flags;
+        public uint Id;
+        public uint ModifierTreeId;
+        public uint StartAsset;
+        public byte StartEvent;
+        public ushort StartTimer;
+        public CriteriaType Type;
 
-        public CriteriaFlags GetFlags() => (CriteriaFlags)Flags;
+        public CriteriaFlags GetFlags()
+        {
+            return (CriteriaFlags)Flags;
+        }
     }
 
     public sealed class CriteriaTreeRecord
     {
-        public uint Id;
-        public string Description;
-        public uint Parent;
         public uint Amount;
-        public sbyte Operator;
         public uint CriteriaID;
-        public int OrderIndex;
+        public string Description;
         public CriteriaTreeFlags Flags;
+        public uint Id;
+        public sbyte Operator;
+        public int OrderIndex;
+        public uint Parent;
     }
 
     public sealed class CurrencyContainerRecord
     {
-        public uint Id;
-        public LocalizedString ContainerName;
         public LocalizedString ContainerDescription;
-        public int MinAmount;
-        public int MaxAmount;
         public int ContainerIconID;
+        public LocalizedString ContainerName;
         public int ContainerQuality;
-        public int OnLootSpellVisualKitID;
         public uint CurrencyTypesID;
+        public uint Id;
+        public int MaxAmount;
+        public int MinAmount;
+        public int OnLootSpellVisualKitID;
     }
 
     public sealed class CurrencyTypesRecord
     {
-        public uint Id;
-        public string Name;
-        public string Description;
-        public int CategoryID;
-        public int InventoryIconFileID;
-        public uint SpellWeight;
-        public byte SpellCategory;
-        public uint MaxQty;
-        public uint MaxEarnablePerWeek;
-        public sbyte Quality;
-        public int FactionID;
-        public int ItemGroupSoundsID;
-        public int XpQuestDifficulty;
         public int AwardConditionID;
+        public int CategoryID;
+        public string Description;
+        public int FactionID;
+        public int[] Flags = new int[2];
+        public uint Id;
+        public int InventoryIconFileID;
+        public int ItemGroupSoundsID;
+        public uint MaxEarnablePerWeek;
+        public uint MaxQty;
         public int MaxQtyWorldStateID;
+        public string Name;
+        public sbyte Quality;
         public uint RechargingAmountPerCycle;
         public uint RechargingCycleDurationMS;
-        public int[] Flags = new int[2];
+        public byte SpellCategory;
+        public uint SpellWeight;
+        public int XpQuestDifficulty;
     }
 
     public sealed class CurveRecord
     {
+        public byte Flags;
         public uint Id;
         public byte Type;
-        public byte Flags;
     }
 
     public sealed class CurvePointRecord
     {
+        public ushort CurveID;
+        public uint Id;
+        public byte OrderIndex;
         public Vector2 Pos;
         public Vector2 PreSLSquishPos;
-        public uint Id;
-        public ushort CurveID;
-        public byte OrderIndex;
     }
 
     public sealed class CharBaseInfo

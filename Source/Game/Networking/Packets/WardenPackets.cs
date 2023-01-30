@@ -12,22 +12,26 @@ namespace Game.Networking.Packets
         CmsgModuleMissing = 0,
         CmsgModuleOk = 1,
         CmsgCheatChecksResult = 2,
-        CmsgMemChecksResult = 3,        // Only Sent If Mem_Check Bytes Doesn'T Match
+        CmsgMemChecksResult = 3, // Only Sent If Mem_Check Bytes Doesn'T Match
         CmsgHashResult = 4,
-        CmsgModuleFailed = 5,        // This Is Sent When Client Failed To Load Uploaded Module Due To Cache Fail
+        CmsgModuleFailed = 5, // This Is Sent When Client Failed To Load Uploaded Module Due To Cache Fail
 
         // Server.Client
         SmsgModuleUse = 0,
         SmsgModuleCache = 1,
         SmsgCheatChecksRequest = 2,
         SmsgModuleInitialize = 3,
-        SmsgMemChecksRequest = 4,        // Byte Len; While (!Eof) { Byte Unk(1); Byte Index(++); String Module(Can Be 0); Int Offset; Byte Len; Byte[] Bytes_To_Compare[Len]; }
+        SmsgMemChecksRequest = 4, // Byte Len; While (!Eof) { Byte Unk(1); Byte Index(++); String Module(Can Be 0); Int Offset; Byte Len; Byte[] Bytes_To_Compare[Len]; }
         SmsgHashRequest = 5
     }
 
-    class WardenData : ClientPacket
+    internal class WardenData : ClientPacket
     {
-        public WardenData(WorldPacket packet) : base(packet) { }
+        public ByteBuffer Data;
+
+        public WardenData(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -36,19 +40,19 @@ namespace Game.Networking.Packets
             if (size != 0)
                 Data = new ByteBuffer(_worldPacket.ReadBytes(size));
         }
-
-        public ByteBuffer Data;
     }
 
-    class Warden3DataServer : ServerPacket
+    internal class Warden3DataServer : ServerPacket
     {
-        public Warden3DataServer() : base(ServerOpcodes.Warden3Data) { }
+        public ByteBuffer Data;
+
+        public Warden3DataServer() : base(ServerOpcodes.Warden3Data)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteBytes(Data);
         }
-
-        public ByteBuffer Data;
     }
 }

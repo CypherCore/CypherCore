@@ -1,16 +1,18 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Configuration;
 using Framework.Constants;
 using Game.Scripting.Interfaces.IWorld;
-using System;
-using System.Collections.Generic;
 
 namespace Game
 {
     public class WorldConfig : ConfigMgr
     {
+        private static readonly Dictionary<WorldCfg, object> Values = new();
+
         public static void Load(bool reload = false)
         {
             if (reload)
@@ -30,7 +32,7 @@ namespace Game
             static void SetRegenRate(WorldCfg rate, string configKey)
             {
                 Values[rate] = GetDefaultValue(configKey, 1.0f);
-                if ((float) Values[rate] < 0.0f)
+                if ((float)Values[rate] < 0.0f)
                 {
                     Log.outError(LogFilter.ServerLoading, "{0} ({1}) must be > 0. Using 1 instead.", configKey, Values[rate]);
                     Values[rate] = 1;
@@ -233,7 +235,7 @@ namespace Game
             Values[WorldCfg.MinLevelStatSave] = GetDefaultValue("PlayerSave.Stats.MinLevel", 0);
             if ((int)Values[WorldCfg.MinLevelStatSave] > SharedConst.MaxLevel)
             {
-                Log.outError(LogFilter.ServerLoading, "PlayerSave.Stats.MinLevel ({0}) must be in range 0..80. Using default, do not save character stats (0).", Values[WorldCfg.MinLevelStatSave]);
+                Log.outError(LogFilter.ServerLoading, "PlayerSave.Stats.MinLevel ({0}) must be in range 0..80. Using default, do not save character Stats (0).", Values[WorldCfg.MinLevelStatSave]);
                 Values[WorldCfg.MinLevelStatSave] = 0;
             }
 
@@ -1007,7 +1009,7 @@ namespace Game
             // Allow 5-man parties to use raid warnings
             Values[WorldCfg.ChatPartyRaidWarnings] = GetDefaultValue("PartyRaidWarnings", false);
 
-            // Allow to cache data queries
+            // Allow to cache _data queries
             Values[WorldCfg.CacheDataQueries] = GetDefaultValue("CacheDataQueries", true);
 
             // Check Invalid Position
@@ -1060,7 +1062,5 @@ namespace Game
         {
             Values[confi] = value;
         }
-
-        static Dictionary<WorldCfg, object> Values = new();
     }
 }

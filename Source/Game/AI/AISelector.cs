@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Movement;
-using Game.Scripting;
 using Game.Scripting.Interfaces.ICreature;
 using Game.Scripting.Interfaces.IGameObject;
 
@@ -19,6 +18,7 @@ namespace Game.AI
 
             //scriptname in db
             CreatureAI scriptedAI = Global.ScriptMgr.RunScriptRet<ICreatureGetAI, CreatureAI>(p => p.GetAI(creature), creature.GetScriptId());
+
             if (scriptedAI != null)
                 return scriptedAI;
 
@@ -54,33 +54,51 @@ namespace Game.AI
                     return new VehicleAI(creature);
             }
 
-            // select by NPC flags
+            // select by NPC Flags
             if (creature.IsVehicle())
+            {
                 return new VehicleAI(creature);
-            else if (creature.HasUnitTypeMask(UnitTypeMask.ControlableGuardian) && ((Guardian)creature).GetOwner().IsTypeId(TypeId.Player))
+            }
+            else if (creature.HasUnitTypeMask(UnitTypeMask.ControlableGuardian) &&
+                     ((Guardian)creature).GetOwner().IsTypeId(TypeId.Player))
+            {
                 return new PetAI(creature);
+            }
             else if (creature.HasNpcFlag(NPCFlags.SpellClick))
+            {
                 return new NullCreatureAI(creature);
+            }
             else if (creature.IsGuard())
+            {
                 return new GuardAI(creature);
+            }
             else if (creature.HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
+            {
                 return new PetAI(creature);
+            }
             else if (creature.IsTotem())
+            {
                 return new TotemAI(creature);
+            }
             else if (creature.IsTrigger())
             {
-                if (creature.m_spells[0] != 0)
+                if (creature.Spells[0] != 0)
                     return new TriggerAI(creature);
                 else
                     return new NullCreatureAI(creature);
             }
-            else if (creature.IsCritter() && !creature.HasUnitTypeMask(UnitTypeMask.Guardian))
+            else if (creature.IsCritter() &&
+                     !creature.HasUnitTypeMask(UnitTypeMask.Guardian))
+            {
                 return new CritterAI(creature);
+            }
 
-            if (!creature.IsCivilian() && !creature.IsNeutralToAll())
+            if (!creature.IsCivilian() &&
+                !creature.IsNeutralToAll())
                 return new AggressorAI(creature);
 
-            if (creature.IsCivilian() || creature.IsNeutralToAll())
+            if (creature.IsCivilian() ||
+                creature.IsNeutralToAll())
                 return new ReactorAI(creature);
 
             return new NullCreatureAI(creature);
@@ -90,7 +108,9 @@ namespace Game.AI
         {
             MovementGeneratorType type = unit.GetDefaultMovementType();
             Creature creature = unit.ToCreature();
-            if (creature != null && creature.GetPlayerMovingMe() == null)
+
+            if (creature != null &&
+                creature.GetPlayerMovingMe() == null)
                 type = creature.GetDefaultMovementType();
 
             return type switch
@@ -98,7 +118,7 @@ namespace Game.AI
                 MovementGeneratorType.Random => new RandomMovementGenerator(),
                 MovementGeneratorType.Waypoint => new WaypointMovementGenerator(),
                 MovementGeneratorType.Idle => new IdleMovementGenerator(),
-                _ => null,
+                _ => null
             };
         }
 
@@ -106,13 +126,14 @@ namespace Game.AI
         {
             // scriptname in db
             GameObjectAI scriptedAI = Global.ScriptMgr.RunScriptRet<IGameObjectGetAI, GameObjectAI>(p => p.GetAI(go), go.GetScriptId());
+
             if (scriptedAI != null)
                 return scriptedAI;
 
             return go.GetAIName() switch
             {
                 "SmartGameObjectAI" => new SmartGameObjectAI(go),
-                _ => new GameObjectAI(go),
+                _ => new GameObjectAI(go)
             };
         }
     }

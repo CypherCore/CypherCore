@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IQuest
 {

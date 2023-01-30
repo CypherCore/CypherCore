@@ -1,29 +1,32 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Dynamic;
-using Game.Entities;
-using Game.Maps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Entities;
+using Game.Maps;
+using Game.Maps.Notifiers;
 
 namespace Game
 {
-    class PersonalPhaseSpawns
+    internal class PersonalPhaseSpawns
     {
         public static TimeSpan DELETE_TIME_DEFAULT = TimeSpan.FromMinutes(1);
+        public TimeSpan? DurationRemaining;
+        public List<ushort> Grids = new();
 
         public List<WorldObject> Objects = new();
-        public List<ushort> Grids = new();
-        public TimeSpan? DurationRemaining;
 
-        public bool IsEmpty() { return Objects.Empty() && Grids.Empty(); }
+        public bool IsEmpty()
+        {
+            return Objects.Empty() && Grids.Empty();
+        }
     }
 
-    class PlayerPersonalPhasesTracker
+    internal class PlayerPersonalPhasesTracker
     {
-        Dictionary<uint, PersonalPhaseSpawns> _spawns = new();
+        private readonly Dictionary<uint, PersonalPhaseSpawns> _spawns = new();
 
         public void RegisterTrackedObject(uint phaseId, WorldObject obj)
         {
@@ -42,13 +45,15 @@ namespace Game
 
             // Loop over all our tracked phases. If any don't exist - delete them
             foreach (var (phaseId, spawns) in _spawns)
-                if (!spawns.DurationRemaining.HasValue && !phaseShift.HasPhase(phaseId))
+                if (!spawns.DurationRemaining.HasValue &&
+                    !phaseShift.HasPhase(phaseId))
                     spawns.DurationRemaining = PersonalPhaseSpawns.DELETE_TIME_DEFAULT;
 
             // loop over all owner phases. If any exist and marked for deletion - reset delete
             foreach (var phaseRef in phaseShift.GetPhases())
             {
                 PersonalPhaseSpawns spawns = _spawns.LookupByKey(phaseRef.Key);
+
                 if (spawns != null)
                     spawns.DurationRemaining = null;
             }
@@ -63,22 +68,22 @@ namespace Game
         public void Update(Map map, uint diff)
         {
             foreach (var itr in _spawns.ToList())
-            {
                 if (itr.Value.DurationRemaining.HasValue)
                 {
                     itr.Value.DurationRemaining = itr.Value.DurationRemaining.Value - TimeSpan.FromMilliseconds(diff);
+
                     if (itr.Value.DurationRemaining.Value <= TimeSpan.Zero)
                     {
                         DespawnPhase(map, itr.Value);
                         _spawns.Remove(itr.Key);
                     }
                 }
-            }
         }
 
         public bool IsGridLoadedForPhase(uint gridId, uint phaseId)
         {
             PersonalPhaseSpawns spawns = _spawns.LookupByKey(phaseId);
+
             if (spawns != null)
                 return spawns.Grids.Contains((ushort)gridId);
 
@@ -88,7 +93,7 @@ namespace Game
         public void SetGridLoadedForPhase(uint gridId, uint phaseId)
         {
             if (!_spawns.ContainsKey(phaseId))
-                _spawns[phaseId] = new();
+                _spawns[phaseId] = new PersonalPhaseSpawns();
 
             PersonalPhaseSpawns group = _spawns[phaseId];
             group.Grids.Add((ushort)gridId);
@@ -99,12 +104,18 @@ namespace Game
             foreach (var itr in _spawns.ToList())
             {
                 itr.Value.Grids.Remove((ushort)gridId);
+
                 if (itr.Value.IsEmpty())
                     _spawns.Remove(itr.Key);
             }
         }
 
-        void DespawnPhase(Map map, PersonalPhaseSpawns spawns)
+        public bool IsEmpty()
+        {
+            return _spawns.Empty();
+        }
+
+        private void DespawnPhase(Map map, PersonalPhaseSpawns spawns)
         {
             foreach (var obj in spawns.Objects)
                 map.AddObjectToRemoveList(obj);
@@ -112,13 +123,11 @@ namespace Game
             spawns.Objects.Clear();
             spawns.Grids.Clear();
         }
-
-        public bool IsEmpty() { return _spawns.Empty(); }
     }
 
     public class MultiPersonalPhaseTracker
     {
-        Dictionary<ObjectGuid, PlayerPersonalPhasesTracker> _playerData = new();
+        private readonly Dictionary<ObjectGuid, PlayerPersonalPhasesTracker> _playerData = new();
 
         public void LoadGrid(PhaseShift phaseShift, Grid grid, Map map, Cell cell)
         {
@@ -155,6 +164,7 @@ namespace Game
             foreach (var itr in _playerData.ToList())
             {
                 itr.Value.SetGridUnloaded(grid.GetGridId());
+
                 if (itr.Value.IsEmpty())
                     _playerData.Remove(itr.Key);
             }
@@ -172,15 +182,15 @@ namespace Game
         public void UnregisterTrackedObject(WorldObject obj)
         {
             PlayerPersonalPhasesTracker playerTracker = _playerData.LookupByKey(obj.GetPhaseShift().GetPersonalGuid());
-            if (playerTracker != null)
-                playerTracker.UnregisterTrackedObject(obj);
+
+            playerTracker?.UnregisterTrackedObject(obj);
         }
 
         public void OnOwnerPhaseChanged(WorldObject phaseOwner, Grid grid, Map map, Cell cell)
         {
             PlayerPersonalPhasesTracker playerTracker = _playerData.LookupByKey(phaseOwner.GetGUID());
-            if (playerTracker != null)
-                playerTracker.OnOwnerPhasesChanged(phaseOwner);
+
+            playerTracker?.OnOwnerPhasesChanged(phaseOwner);
 
             if (grid != null)
                 LoadGrid(phaseOwner.GetPhaseShift(), grid, map, cell);
@@ -189,8 +199,8 @@ namespace Game
         public void MarkAllPhasesForDeletion(ObjectGuid phaseOwner)
         {
             PlayerPersonalPhasesTracker playerTracker = _playerData.LookupByKey(phaseOwner);
-            if (playerTracker != null)
-                playerTracker.MarkAllPhasesForDeletion();
+
+            playerTracker?.MarkAllPhasesForDeletion();
         }
 
         public void Update(Map map, uint diff)
@@ -198,6 +208,7 @@ namespace Game
             foreach (var itr in _playerData.ToList())
             {
                 itr.Value.Update(map, diff);
+
                 if (itr.Value.IsEmpty())
                     _playerData.Remove(itr.Key);
             }

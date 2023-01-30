@@ -27,7 +27,7 @@ namespace Game.AI
             SetTargetLocation(owner);
         }
 
-        public override void DoReset(T owner) 
+        public override void DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
             DoInitialize(owner);
@@ -35,11 +35,14 @@ namespace Game.AI
 
         public override bool DoUpdate(T owner, uint diff)
         {
-            if (HasFlag(MovementGeneratorFlags.Interrupted) || owner.MoveSpline.Finalized())
+            if (HasFlag(MovementGeneratorFlags.Interrupted) ||
+                owner.MoveSpline.Finalized())
             {
                 AddFlag(MovementGeneratorFlags.InformEnabled);
+
                 return false;
             }
+
             return true;
         }
 
@@ -55,6 +58,7 @@ namespace Game.AI
                 return;
 
             AddFlag(MovementGeneratorFlags.Finalized);
+
             if (active)
                 owner.ClearUnitState(UnitState.RoamingMove | UnitState.Evade);
 
@@ -65,21 +69,28 @@ namespace Game.AI
 
                 owner.SetSpawnHealth();
                 owner.LoadCreaturesAddon();
+
                 if (owner.IsVehicle())
                     owner.GetVehicleKit().Reset(true);
 
                 CreatureAI ai = owner.GetAI();
-                if (ai != null)
-                    ai.JustReachedHome();
+
+                ai?.JustReachedHome();
             }
         }
 
-        void SetTargetLocation(T owner)
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Home;
+        }
+
+        private void SetTargetLocation(T owner)
         {
             // if we are ROOT/STUNNED/DISTRACTED even after aura clear, finalize on next update - otherwise we would get stuck in evade
             if (owner.HasUnitState(UnitState.Root | UnitState.Stunned | UnitState.Distracted))
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
+
                 return;
             }
 
@@ -89,25 +100,20 @@ namespace Game.AI
             Position destination = owner.GetHomePosition();
             MoveSplineInit init = new(owner);
             /*
-             * TODO: maybe this never worked, who knows, top is always this generator, so this code calls GetResetPosition on itself
-             *
-             * if (owner->GetMotionMaster()->empty() || !owner->GetMotionMaster()->top()->GetResetPosition(owner, x, y, z))
-             * {
-             *     owner->GetHomePosition(x, y, z, o);
-             *     init.SetFacing(o);
-             * }
-             */
+			 * TODO: maybe this never worked, who knows, top is always this generator, so this code calls GetResetPosition on itself
+			 *
+			 * if (owner->GetMotionMaster()->empty() || !owner->GetMotionMaster()->top()->GetResetPosition(owner, x, y, z))
+			 * {
+			 *     owner->GetHomePosition(x, y, z, o);
+			 *     init.SetFacing(o);
+			 * }
+			 */
 
-            owner.UpdateAllowedPositionZ(destination.posX, destination.posY, ref destination.posZ);
+            owner.UpdateAllowedPositionZ(destination.X, destination.Y, ref destination.Z);
             init.MoveTo(destination);
             init.SetFacing(destination.GetOrientation());
             init.SetWalk(false);
             init.Launch();
-        }
-
-        public override MovementGeneratorType GetMovementGeneratorType()
-        {
-            return MovementGeneratorType.Home;
         }
     }
 }

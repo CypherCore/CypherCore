@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Beauty
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint TerrifyingRoar = 76028; // Not yet Implemented
         public const uint BerserkerCharge = 76030;
@@ -19,16 +19,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Beauty
         public const uint Berserk = 82395; // Not yet Implemented
     }
 
-    struct SoundIds
+    internal struct SoundIds
     {
         public const uint Aggro = 18559;
         public const uint Death = 18563;
     }
 
     [Script]
-    class boss_beauty : BossAI
+    internal class boss_beauty : BossAI
     {
-        public boss_beauty(Creature creature) : base(creature, DataTypes.Beauty) { }
+        public boss_beauty(Creature creature) : base(creature, DataTypes.Beauty)
+        {
+        }
 
         public override void Reset()
         {
@@ -39,21 +41,29 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Beauty
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(10), task =>
-            {
-                DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.MagmaSpit, new CastSpellExtraArgs(true));
-                task.Repeat();
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(19), task =>
-            {
-                DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.BerserkerCharge, new CastSpellExtraArgs(true));
-                task.Repeat();
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(22), task =>
-            {
-                DoCast(me, SpellIds.Flamebreak);
-                task.Repeat();
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(7),
+                                TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.MagmaSpit, new CastSpellExtraArgs(true));
+                                    task.Repeat();
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(16),
+                                TimeSpan.FromSeconds(19),
+                                task =>
+                                {
+                                    DoCast(SelectTarget(SelectTargetMethod.Random, 0, 100, true), SpellIds.BerserkerCharge, new CastSpellExtraArgs(true));
+                                    task.Repeat();
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(18),
+                                TimeSpan.FromSeconds(22),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.Flamebreak);
+                                    task.Repeat();
+                                });
 
             DoPlaySoundToSet(me, SoundIds.Aggro);
         }
@@ -73,4 +83,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Beauty
         }
     }
 }
-

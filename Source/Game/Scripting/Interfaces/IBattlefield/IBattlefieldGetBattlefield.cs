@@ -3,7 +3,6 @@
 
 using Game.BattleFields;
 using Game.Maps;
-using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Interfaces.IBattlefield
 {

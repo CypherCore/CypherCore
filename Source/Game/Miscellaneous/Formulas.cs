@@ -1,12 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Configuration;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting.Interfaces.IFormula;
-using System;
 
 namespace Game
 {
@@ -16,6 +16,7 @@ namespace Game
         {
             float honor = multiplier * level * 1.55f;
             Global.ScriptMgr.ForEach<IFormulaOnHonorCalculation>(p => p.OnHonorCalculation(honor, level, multiplier));
+
             return honor;
         }
 
@@ -29,19 +30,26 @@ namespace Game
             uint level;
 
             if (pl_level < 7)
+            {
                 level = 0;
+            }
             else if (pl_level < 35)
             {
                 byte count = 0;
+
                 for (int i = 15; i <= pl_level; ++i)
-                    if (i % 5 == 0) ++count;
+                    if (i % 5 == 0)
+                        ++count;
 
                 level = (uint)((pl_level - 7) - (count - 1));
             }
             else
+            {
                 level = pl_level - 10;
+            }
 
             Global.ScriptMgr.ForEach<IFormulaOnGrayLevelCalculation>(p => p.OnGrayLevelCalculation(level, pl_level));
+
             return level;
         }
 
@@ -61,6 +69,7 @@ namespace Game
                 color = XPColorChar.Gray;
 
             Global.ScriptMgr.ForEach<IFormulaOnColorCodeCaclculation>(p => p.OnColorCodeCalculation(color, pl_level, mob_level));
+
             return color;
         }
 
@@ -94,6 +103,7 @@ namespace Game
                 diff = 17;
 
             Global.ScriptMgr.ForEach<IFormulaOnZeroDifference>(p => p.OnZeroDifferenceCalculation(diff, pl_level));
+
             return diff;
         }
 
@@ -107,6 +117,7 @@ namespace Game
             if (mob_level >= pl_level)
             {
                 uint nLevelDiff = mob_level - pl_level;
+
                 if (nLevelDiff > 4)
                     nLevelDiff = 4;
 
@@ -115,16 +126,20 @@ namespace Game
             else
             {
                 uint gray_level = GetGrayLevel(pl_level);
+
                 if (mob_level > gray_level)
                 {
                     uint ZD = GetZeroDifference(pl_level);
                     baseGain = (uint)Math.Round(xpMob.PerKill * ((1 - ((pl_level - mob_level) / ZD)) * (xpMob.Divisor / xpPlayer.Divisor)));
                 }
                 else
+                {
                     baseGain = 0;
+                }
             }
 
-            if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0 && pl_level != mob_level)
+            if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0 &&
+                pl_level != mob_level)
             {
                 // Use mob level instead of player level to avoid overscaling on gain in a min is enforced
                 uint baseGainMin = BaseGain(pl_level, pl_level) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
@@ -132,6 +147,7 @@ namespace Game
             }
 
             Global.ScriptMgr.ForEach<IFormulaOnBaseGainCalculation>(p => p.OnBaseGainCalculation(baseGain, pl_level, mob_level));
+
             return baseGain;
         }
 
@@ -140,7 +156,8 @@ namespace Game
             Creature creature = u.ToCreature();
             uint gain = 0;
 
-            if (!creature || creature.CanGiveExperience())
+            if (!creature ||
+                creature.CanGiveExperience())
             {
                 float xpMod = 1.0f;
 
@@ -149,7 +166,8 @@ namespace Game
                 if (gain != 0 && creature)
                 {
                     // Players get only 10% xp for killing creatures of lower expansion levels than himself
-                    if (ConfigMgr.GetDefaultValue("player.lowerExpInLowerExpansions", true) && (creature.GetCreatureTemplate().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
+                    if (ConfigMgr.GetDefaultValue("player.lowerExpInLowerExpansions", true) &&
+                        (creature.GetCreatureTemplate().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
                         gain = (uint)Math.Round(gain / 10.0f);
 
                     if (creature.IsElite())
@@ -163,14 +181,17 @@ namespace Game
 
                     xpMod *= creature.GetCreatureTemplate().ModExperience;
                 }
+
                 xpMod *= isBattleGround ? WorldConfig.GetFloatValue(WorldCfg.RateXpBgKill) : WorldConfig.GetFloatValue(WorldCfg.RateXpKill);
-                if (creature && creature.m_PlayerDamageReq != 0) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
-                    xpMod *= 1.0f - 2.0f * creature.m_PlayerDamageReq / creature.GetMaxHealth();
+
+                if (creature && creature.PlayerDamageReq != 0) // if players dealt less than 50% of the Damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
+                    xpMod *= 1.0f - 2.0f * creature.PlayerDamageReq / creature.GetMaxHealth();
 
                 gain = (uint)(gain * xpMod);
             }
 
             Global.ScriptMgr.ForEach<IFormulaOnGainCalculation>(p => p.OnGainCalculation(gain, player, u));
+
             return gain;
         }
 
@@ -179,53 +200,36 @@ namespace Game
             float rate;
 
             if (isRaid)
-            {
                 // FIXME: Must apply decrease modifiers depending on raid size.
                 // set to < 1 to, so client will display raid related strings
                 rate = 0.99f;
-            }
             else
-            {
                 switch (count)
                 {
                     case 0:
                     case 1:
                     case 2:
                         rate = 1.0f;
+
                         break;
                     case 3:
                         rate = 1.166f;
+
                         break;
                     case 4:
                         rate = 1.3f;
+
                         break;
                     case 5:
                     default:
                         rate = 1.4f;
+
                         break;
                 }
-            }
 
             Global.ScriptMgr.ForEach<IFormulaOnGroupRateCaclulation>(p => p.OnGroupRateCalculation(rate, count, isRaid));
-            return rate;
-        }
 
-        static Expansion GetExpansionForLevel(uint level)
-        {
-            if (level < 60)
-                return Expansion.Classic;
-            else if (level < 70)
-                return Expansion.BurningCrusade;
-            else if (level < 80)
-                return Expansion.WrathOfTheLichKing;
-            else if (level < 85)
-                return Expansion.Cataclysm;
-            else if (level < 90)
-                return Expansion.MistsOfPandaria;
-            else if (level < 100)
-                return Expansion.WarlordsOfDraenor;
-            else
-                return Expansion.Legion;
+            return rate;
         }
 
         public static uint ConquestRatingCalculator(uint rate)
@@ -243,6 +247,24 @@ namespace Game
         {
             // WowWiki: Battlegroundratings receive a bonus of 22.2% to the cap they generate
             return (uint)((ConquestRatingCalculator(rate) * 1.222f) + 0.5f);
+        }
+
+        private static Expansion GetExpansionForLevel(uint level)
+        {
+            if (level < 60)
+                return Expansion.Classic;
+            else if (level < 70)
+                return Expansion.BurningCrusade;
+            else if (level < 80)
+                return Expansion.WrathOfTheLichKing;
+            else if (level < 85)
+                return Expansion.Cataclysm;
+            else if (level < 90)
+                return Expansion.MistsOfPandaria;
+            else if (level < 100)
+                return Expansion.WarlordsOfDraenor;
+            else
+                return Expansion.Legion;
         }
     }
 }

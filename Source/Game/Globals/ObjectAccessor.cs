@@ -1,20 +1,21 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Game;
-using Game.Entities;
-using Game.Maps;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Maps;
 
 public class ObjectAccessor : Singleton<ObjectAccessor>
 {
-    object _lockObject = new();
+    private readonly object _lockObject = new();
 
-    Dictionary<ObjectGuid, Player> _players = new();
+    private readonly Dictionary<ObjectGuid, Player> _players = new();
 
-    ObjectAccessor() { }
+    private ObjectAccessor()
+    {
+    }
 
     public WorldObject GetWorldObject(WorldObject p, ObjectGuid guid)
     {
@@ -50,42 +51,52 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         switch (guid.GetHigh())
         {
             case HighGuid.Item:
-                if (typemask.HasAnyFlag(TypeMask.Item) && p.IsTypeId(TypeId.Player))
+                if (typemask.HasAnyFlag(TypeMask.Item) &&
+                    p.IsTypeId(TypeId.Player))
                     return ((Player)p).GetItemByGuid(guid);
+
                 break;
             case HighGuid.Player:
                 if (typemask.HasAnyFlag(TypeMask.Player))
                     return GetPlayer(p, guid);
+
                 break;
             case HighGuid.Transport:
             case HighGuid.GameObject:
                 if (typemask.HasAnyFlag(TypeMask.GameObject))
                     return GetGameObject(p, guid);
+
                 break;
             case HighGuid.Creature:
             case HighGuid.Vehicle:
                 if (typemask.HasAnyFlag(TypeMask.Unit))
                     return GetCreature(p, guid);
+
                 break;
             case HighGuid.Pet:
                 if (typemask.HasAnyFlag(TypeMask.Unit))
                     return GetPet(p, guid);
+
                 break;
             case HighGuid.DynamicObject:
                 if (typemask.HasAnyFlag(TypeMask.DynamicObject))
                     return GetDynamicObject(p, guid);
+
                 break;
             case HighGuid.AreaTrigger:
                 if (typemask.HasAnyFlag(TypeMask.AreaTrigger))
                     return GetAreaTrigger(p, guid);
+
                 break;
             case HighGuid.SceneObject:
                 if (typemask.HasAnyFlag(TypeMask.SceneObject))
                     return GetSceneObject(p, guid);
+
                 break;
             case HighGuid.Conversation:
                 if (typemask.HasAnyFlag(TypeMask.Conversation))
                     return GetConversation(p, guid);
+
                 break;
             case HighGuid.Corpse:
                 break;
@@ -109,21 +120,6 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetTransport(guid);
     }
 
-    static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
-    {
-        return u.GetMap().GetDynamicObject(guid);
-    }
-
-    static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
-    {
-        return u.GetMap().GetAreaTrigger(guid);
-    }
-
-    static SceneObject GetSceneObject(WorldObject u, ObjectGuid guid)
-    {
-        return u.GetMap().GetSceneObject(guid);
-    }
-    
     public static Conversation GetConversation(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetConversation(guid);
@@ -153,8 +149,10 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     public Player GetPlayer(Map m, ObjectGuid guid)
     {
         Player player = _players.LookupByKey(guid);
+
         if (player)
-            if (player.IsInWorld && player.GetMap() == m)
+            if (player.IsInWorld &&
+                player.GetMap() == m)
                 return player;
 
         return null;
@@ -181,27 +179,37 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     public Player FindPlayer(ObjectGuid guid)
     {
         Player player = FindConnectedPlayer(guid);
+
         return player && player.IsInWorld ? player : null;
     }
+
     public Player FindPlayerByName(string name)
     {
         Player player = PlayerNameMapHolder.Find(name);
-        if (!player || !player.IsInWorld)
+
+        if (!player ||
+            !player.IsInWorld)
             return null;
 
         return player;
     }
+
     public Player FindPlayerByLowGUID(ulong lowguid)
     {
         ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, lowguid);
+
         return FindPlayer(guid);
     }
+
     // this returns Player even if he is not in world, for example teleporting
     public Player FindConnectedPlayer(ObjectGuid guid)
     {
         lock (_lockObject)
+        {
             return _players.LookupByKey(guid);
+        }
     }
+
     public Player FindConnectedPlayerByName(string name)
     {
         return PlayerNameMapHolder.Find(name);
@@ -219,7 +227,9 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     public ICollection<Player> GetPlayers()
     {
         lock (_lockObject)
+        {
             return _players.Values;
+        }
     }
 
     public void AddObject(Player obj)
@@ -239,27 +249,19 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
             _players.Remove(obj.GetGUID());
         }
     }
-}
 
-class PlayerNameMapHolder
-{
-    public static void Insert(Player p)
+    private static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
     {
-        _playerNameMap[p.GetName()] = p;
+        return u.GetMap().GetDynamicObject(guid);
     }
 
-    public static void Remove(Player p)
+    private static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
     {
-        _playerNameMap.Remove(p.GetName());
+        return u.GetMap().GetAreaTrigger(guid);
     }
 
-    public static Player Find(string name)
+    private static SceneObject GetSceneObject(WorldObject u, ObjectGuid guid)
     {
-        if (!ObjectManager.NormalizePlayerName(ref name))
-            return null;
-
-        return _playerNameMap.LookupByKey(name);
+        return u.GetMap().GetSceneObject(guid);
     }
-
-    static Dictionary<string, Player> _playerNameMap = new();
 }

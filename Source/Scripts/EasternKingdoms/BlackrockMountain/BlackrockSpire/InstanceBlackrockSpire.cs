@@ -1,6 +1,8 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
@@ -9,12 +11,10 @@ using Game.Scripting;
 using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.IMap;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         public const uint HighlordOmokk = 0;
         public const uint ShadowHunterVoshgajin = 1;
@@ -30,7 +30,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         public const uint Gyth = 11;
         public const uint TheBeast = 12;
         public const uint GeneralDrakkisath = 13;
+
         public const uint LordValthalak = 14;
+
         // Extra
         public const uint DragonspireRoom = 15;
         public const uint HallRune1 = 16;
@@ -44,7 +46,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         public const uint BlackhandIncarcerator = 24;
     }
 
-    struct CreaturesIds
+    internal struct CreaturesIds
     {
         public const uint HighlordOmokk = 9196;
         public const uint ShadowHunterVoshgajin = 9236;
@@ -68,18 +70,21 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         public const uint ScarshieldInfiltrator = 10299;
     }
 
-    struct GameObjectsIds
+    internal struct GameObjectsIds
     {
-        public const uint WhelpSpawner = 175622; // trap spawned by public const uint  id 175124
-                                                 // Doors
-        public const uint EmberseerIn = 175244; // First door to Pyroguard Emberseer
-        public const uint Doors = 175705; // Second door to Pyroguard Emberseer
+        public const uint WhelpSpawner = 175622; // trap spawned by public const uint  Id 175124
+
+        // Doors
+        public const uint EmberseerIn = 175244;  // First door to Pyroguard Emberseer
+        public const uint Doors = 175705;        // Second door to Pyroguard Emberseer
         public const uint EmberseerOut = 175153; // Door after Pyroguard Emberseer event
         public const uint GythEntryDoor = 164726;
         public const uint GythCombatDoor = 175185;
         public const uint GythExitDoor = 175186;
         public const uint DrakkisathDoor1 = 175946;
+
         public const uint DrakkisathDoor2 = 175947;
+
         // Runes in drapublic const uint nspire hall
         public const uint HallRune1 = 175197;
         public const uint HallRune2 = 175199;
@@ -87,7 +92,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         public const uint HallRune4 = 175200;
         public const uint HallRune5 = 175198;
         public const uint HallRune6 = 175196;
+
         public const uint HallRune7 = 175194;
+
         // Runes in emberseers room
         public const uint EmberseerRune1 = 175266;
         public const uint EmberseerRune2 = 175267;
@@ -95,14 +102,16 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         public const uint EmberseerRune4 = 175269;
         public const uint EmberseerRune5 = 175270;
         public const uint EmberseerRune6 = 175271;
+
         public const uint EmberseerRune7 = 175272;
+
         // For Gyth event
         public const uint DrPortcullis = 175185;
         public const uint PortcullisActive = 164726;
         public const uint PortcullisTobossrooms = 175186;
     }
 
-    struct BRSMiscConst
+    internal struct BRSMiscConst
     {
         public const uint SpellSummonRookeryWhelp = 15745;
         public const uint EventUrokDoomhowl = 4845;
@@ -115,20 +124,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
         //uint const DragonspireRunes[7] = { GoHallRune1, GoHallRune2, GoHallRune3, GoHallRune4, GoHallRune5, GoHallRune6, GoHallRune7 }
 
-        public static uint[] DragonspireMobs = { CreaturesIds.BlackhandDreadweaver, CreaturesIds.BlackhandSummoner, CreaturesIds.BlackhandVeteran };
+        public static uint[] DragonspireMobs =
+        {
+            CreaturesIds.BlackhandDreadweaver, CreaturesIds.BlackhandSummoner, CreaturesIds.BlackhandVeteran
+        };
 
         public static DoorData[] doorData =
         {
-            new DoorData(GameObjectsIds.Doors, DataTypes.PyrogaurdEmberseer, DoorType.Passage),
-            new DoorData(GameObjectsIds.EmberseerOut, DataTypes.PyrogaurdEmberseer, DoorType.Passage),
-            new DoorData(GameObjectsIds.DrakkisathDoor1, DataTypes.GeneralDrakkisath, DoorType.Passage),
-            new DoorData(GameObjectsIds.DrakkisathDoor2, DataTypes.GeneralDrakkisath, DoorType.Passage),
-            new DoorData(GameObjectsIds.PortcullisActive, DataTypes.WarchiefRendBlackhand, DoorType.Passage),
-            new DoorData(GameObjectsIds.PortcullisTobossrooms, DataTypes.WarchiefRendBlackhand, DoorType.Passage),
+            new(GameObjectsIds.Doors, DataTypes.PyrogaurdEmberseer, DoorType.Passage), new(GameObjectsIds.EmberseerOut, DataTypes.PyrogaurdEmberseer, DoorType.Passage), new(GameObjectsIds.DrakkisathDoor1, DataTypes.GeneralDrakkisath, DoorType.Passage), new(GameObjectsIds.DrakkisathDoor2, DataTypes.GeneralDrakkisath, DoorType.Passage), new(GameObjectsIds.PortcullisActive, DataTypes.WarchiefRendBlackhand, DoorType.Passage), new(GameObjectsIds.PortcullisTobossrooms, DataTypes.WarchiefRendBlackhand, DoorType.Passage)
         };
     }
 
-    struct EventIds
+    internal struct EventIds
     {
         public const uint DargonspireRoomStore = 1;
         public const uint DargonspireRoomCheck = 2;
@@ -141,12 +148,38 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class instance_blackrock_spire : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_blackrock_spire : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_blackrock_spire() : base(nameof(instance_blackrock_spire), 229) { }
-
-        class instance_blackrock_spireMapScript : InstanceScript
+        private class instance_blackrock_spireMapScript : InstanceScript
         {
+            private readonly List<ObjectGuid> _incarceratorList = new();
+            private readonly ObjectGuid[] go_emberseerrunes = new ObjectGuid[7];
+            private readonly ObjectGuid[] go_roomrunes = new ObjectGuid[7];
+            private readonly List<ObjectGuid>[] runecreaturelist = new List<ObjectGuid>[7];
+            private ObjectGuid GeneralDrakkisath;
+            private ObjectGuid GizrultheSlavener;
+            private ObjectGuid go_blackrockaltar;
+            private ObjectGuid go_doors;
+            private ObjectGuid go_emberseerin;
+            private ObjectGuid go_emberseerout;
+            private ObjectGuid go_portcullis_active;
+            private ObjectGuid go_portcullis_tobossrooms;
+            private ObjectGuid Gyth;
+            private ObjectGuid Halycon;
+
+            private ObjectGuid HighlordOmokk;
+            private ObjectGuid LordVictorNefarius;
+            private ObjectGuid MotherSmolderweb;
+            private ObjectGuid OverlordWyrmthalak;
+            private ObjectGuid PyroguardEmberseer;
+            private ObjectGuid QuartermasterZigris;
+            private ObjectGuid ScarshieldInfiltrator;
+            private ObjectGuid ShadowHunterVoshgajin;
+            private ObjectGuid TheBeast;
+            private ObjectGuid UrokDoomhowl;
+            private ObjectGuid WarchiefRendBlackhand;
+            private ObjectGuid WarMasterVoone;
+
             public instance_blackrock_spireMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("BRSv1");
@@ -154,7 +187,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 LoadDoorData(BRSMiscConst.doorData);
 
                 for (byte i = 0; i < 7; ++i)
-                    runecreaturelist[i] = new();
+                    runecreaturelist[i] = new List<ObjectGuid>();
             }
 
             public override void OnCreatureCreate(Creature creature)
@@ -163,60 +196,80 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 {
                     case CreaturesIds.HighlordOmokk:
                         HighlordOmokk = creature.GetGUID();
+
                         break;
                     case CreaturesIds.ShadowHunterVoshgajin:
                         ShadowHunterVoshgajin = creature.GetGUID();
+
                         break;
                     case CreaturesIds.WarmasterVoone:
                         WarMasterVoone = creature.GetGUID();
+
                         break;
                     case CreaturesIds.MotherSmolderweb:
                         MotherSmolderweb = creature.GetGUID();
+
                         break;
                     case CreaturesIds.UrokDoomhowl:
                         UrokDoomhowl = creature.GetGUID();
+
                         break;
                     case CreaturesIds.QuartermasterZigris:
                         QuartermasterZigris = creature.GetGUID();
+
                         break;
                     case CreaturesIds.GizrulTheSlavener:
                         GizrultheSlavener = creature.GetGUID();
+
                         break;
                     case CreaturesIds.Halycon:
                         Halycon = creature.GetGUID();
+
                         break;
                     case CreaturesIds.OverlordWyrmthalak:
                         OverlordWyrmthalak = creature.GetGUID();
+
                         break;
                     case CreaturesIds.PyrogaurdEmberseer:
                         PyroguardEmberseer = creature.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromDays(7));
+
                         break;
                     case CreaturesIds.WarchiefRendBlackhand:
                         WarchiefRendBlackhand = creature.GetGUID();
+
                         if (GetBossState(DataTypes.Gyth) == EncounterState.Done)
                             creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromDays(7));
+
                         break;
                     case CreaturesIds.Gyth:
                         Gyth = creature.GetGUID();
+
                         break;
                     case CreaturesIds.TheBeast:
                         TheBeast = creature.GetGUID();
+
                         break;
                     case CreaturesIds.GeneralDrakkisath:
                         GeneralDrakkisath = creature.GetGUID();
+
                         break;
                     case CreaturesIds.LordVictorNefarius:
                         LordVictorNefarius = creature.GetGUID();
+
                         if (GetBossState(DataTypes.Gyth) == EncounterState.Done)
                             creature.DespawnOrUnsummon(TimeSpan.FromSeconds(0), TimeSpan.FromDays(7));
+
                         break;
                     case CreaturesIds.ScarshieldInfiltrator:
                         ScarshieldInfiltrator = creature.GetGUID();
+
                         break;
                     case CreaturesIds.BlackhandIncarcerator:
                         _incarceratorList.Add(creature.GetGUID());
+
                         break;
                 }
             }
@@ -229,101 +282,140 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 {
                     case GameObjectsIds.WhelpSpawner:
                         go.CastSpell(null, BRSMiscConst.SpellSummonRookeryWhelp);
+
                         break;
                     case GameObjectsIds.EmberseerIn:
                         go_emberseerin = go.GetGUID();
+
                         if (GetBossState(DataTypes.DragonspireRoom) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, true, go);
+
                         break;
                     case GameObjectsIds.Doors:
                         go_doors = go.GetGUID();
+
                         if (GetBossState(DataTypes.DragonspireRoom) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, true, go);
+
                         break;
                     case GameObjectsIds.EmberseerOut:
                         go_emberseerout = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, true, go);
+
                         break;
                     case GameObjectsIds.HallRune1:
                         go_roomrunes[0] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune1) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.HallRune2:
                         go_roomrunes[1] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune2) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.HallRune3:
                         go_roomrunes[2] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune3) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.HallRune4:
                         go_roomrunes[3] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune4) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.HallRune5:
                         go_roomrunes[4] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune5) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.HallRune6:
                         go_roomrunes[5] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune6) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.HallRune7:
                         go_roomrunes[6] = go.GetGUID();
+
                         if (GetBossState(DataTypes.HallRune7) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune1:
                         go_emberseerrunes[0] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune2:
                         go_emberseerrunes[1] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune3:
                         go_emberseerrunes[2] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune4:
                         go_emberseerrunes[3] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune5:
                         go_emberseerrunes[4] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune6:
                         go_emberseerrunes[5] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.EmberseerRune7:
                         go_emberseerrunes[6] = go.GetGUID();
+
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
                     case GameObjectsIds.PortcullisActive:
                         go_portcullis_active = go.GetGUID();
+
                         if (GetBossState(DataTypes.Gyth) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, true, go);
+
                         break;
                     case GameObjectsIds.PortcullisTobossrooms:
                         go_portcullis_tobossrooms = go.GetGUID();
+
                         if (GetBossState(DataTypes.Gyth) == EncounterState.Done)
                             HandleGameObject(ObjectGuid.Empty, true, go);
+
                         break;
                     default:
                         break;
@@ -367,16 +459,18 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     case BRSMiscConst.EventPyroguardEmberseer:
                         if (GetBossState(DataTypes.PyrogaurdEmberseer) == EncounterState.NotStarted)
                         {
-                            Creature Emberseer = instance.GetCreature(PyroguardEmberseer);
+                            Creature Emberseer = Instance.GetCreature(PyroguardEmberseer);
+
                             if (Emberseer)
                                 Emberseer.GetAI().SetData(1, 1);
                         }
+
                         break;
                     case BRSMiscConst.EventUrokDoomhowl:
                         if (GetBossState(CreaturesIds.UrokDoomhowl) == EncounterState.NotStarted)
                         {
-
                         }
+
                         break;
                     default:
                         break;
@@ -389,18 +483,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 {
                     case BRSMiscConst.Areatrigger:
                         if (data == BRSMiscConst.AreatriggerDragonspireHall)
-                        {
                             if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
-                                _events.ScheduleEvent(EventIds.DargonspireRoomStore, TimeSpan.FromSeconds(1));
-                        }
+                                EventMp.ScheduleEvent(EventIds.DargonspireRoomStore, TimeSpan.FromSeconds(1));
+
                         break;
                     case DataTypes.BlackhandIncarcerator:
                         foreach (var itr in _incarceratorList)
                         {
-                            Creature creature = instance.GetCreature(itr);
+                            Creature creature = Instance.GetCreature(itr);
+
                             if (creature)
                                 creature.Respawn();
                         }
+
                         break;
                     default:
                         break;
@@ -482,54 +577,58 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     default:
                         break;
                 }
+
                 return ObjectGuid.Empty;
             }
 
             public override void Update(uint diff)
             {
-                _events.Update(diff);
+                EventMp.Update(diff);
 
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case EventIds.DargonspireRoomStore:
-                            Dragonspireroomstore();
-                            _events.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
-                            break;
-                        case EventIds.DargonspireRoomCheck:
-                            Dragonspireroomcheck();
-                            if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
-                                _events.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
-                            break;
-                        default:
-                            break;
-                    }
-                });
+                EventMp.ExecuteEvents(eventId =>
+                                      {
+                                          switch (eventId)
+                                          {
+                                              case EventIds.DargonspireRoomStore:
+                                                  Dragonspireroomstore();
+                                                  EventMp.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
+
+                                                  break;
+                                              case EventIds.DargonspireRoomCheck:
+                                                  Dragonspireroomcheck();
+
+                                                  if (GetBossState(DataTypes.DragonspireRoom) != EncounterState.Done)
+                                                      EventMp.ScheduleEvent(EventIds.DargonspireRoomCheck, TimeSpan.FromSeconds(3));
+
+                                                  break;
+                                              default:
+                                                  break;
+                                          }
+                                      });
             }
 
-            void Dragonspireroomstore()
+            private void Dragonspireroomstore()
             {
                 for (byte i = 0; i < 7; ++i)
                 {
                     // Refresh the creature list
                     runecreaturelist[i].Clear();
 
-                    GameObject rune = instance.GetGameObject(go_roomrunes[i]);
+                    GameObject rune = Instance.GetGameObject(go_roomrunes[i]);
+
                     if (rune)
-                    {
                         for (byte j = 0; j < 3; ++j)
                         {
                             List<Creature> creatureList = rune.GetCreatureListWithEntryInGrid(BRSMiscConst.DragonspireMobs[j], 15.0f);
+
                             foreach (var creature in creatureList)
                                 if (creature)
                                     runecreaturelist[i].Add(creature.GetGUID());
                         }
-                    }
                 }
             }
 
-            void Dragonspireroomcheck()
+            private void Dragonspireroomcheck()
             {
                 Creature mob = null;
                 GameObject rune = null;
@@ -537,21 +636,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                 for (byte i = 0; i < 7; ++i)
                 {
                     bool _mobAlive = false;
-                    rune = instance.GetGameObject(go_roomrunes[i]);
+                    rune = Instance.GetGameObject(go_roomrunes[i]);
+
                     if (!rune)
                         continue;
 
                     if (rune.GetGoState() == GameObjectState.Active)
-                    {
                         foreach (ObjectGuid guid in runecreaturelist[i])
                         {
-                            mob = instance.GetCreature(guid);
+                            mob = Instance.GetCreature(guid);
+
                             if (mob && mob.IsAlive())
                                 _mobAlive = true;
                         }
-                    }
 
-                    if (!_mobAlive && rune.GetGoState() == GameObjectState.Active)
+                    if (!_mobAlive &&
+                        rune.GetGoState() == GameObjectState.Active)
                     {
                         HandleGameObject(ObjectGuid.Empty, false, rune);
 
@@ -559,24 +659,31 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                         {
                             case GameObjectsIds.HallRune1:
                                 SetBossState(DataTypes.HallRune1, EncounterState.Done);
+
                                 break;
                             case GameObjectsIds.HallRune2:
                                 SetBossState(DataTypes.HallRune2, EncounterState.Done);
+
                                 break;
                             case GameObjectsIds.HallRune3:
                                 SetBossState(DataTypes.HallRune3, EncounterState.Done);
+
                                 break;
                             case GameObjectsIds.HallRune4:
                                 SetBossState(DataTypes.HallRune4, EncounterState.Done);
+
                                 break;
                             case GameObjectsIds.HallRune5:
                                 SetBossState(DataTypes.HallRune5, EncounterState.Done);
+
                                 break;
                             case GameObjectsIds.HallRune6:
                                 SetBossState(DataTypes.HallRune6, EncounterState.Done);
+
                                 break;
                             case GameObjectsIds.HallRune7:
                                 SetBossState(DataTypes.HallRune7, EncounterState.Done);
+
                                 break;
                             default:
                                 break;
@@ -584,46 +691,30 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
                     }
                 }
 
-                if (GetBossState(DataTypes.HallRune1) == EncounterState.Done && GetBossState(DataTypes.HallRune2) == EncounterState.Done && GetBossState(DataTypes.HallRune3) == EncounterState.Done &&
-                    GetBossState(DataTypes.HallRune4) == EncounterState.Done && GetBossState(DataTypes.HallRune5) == EncounterState.Done && GetBossState(DataTypes.HallRune6) == EncounterState.Done &&
+                if (GetBossState(DataTypes.HallRune1) == EncounterState.Done &&
+                    GetBossState(DataTypes.HallRune2) == EncounterState.Done &&
+                    GetBossState(DataTypes.HallRune3) == EncounterState.Done &&
+                    GetBossState(DataTypes.HallRune4) == EncounterState.Done &&
+                    GetBossState(DataTypes.HallRune5) == EncounterState.Done &&
+                    GetBossState(DataTypes.HallRune6) == EncounterState.Done &&
                     GetBossState(DataTypes.HallRune7) == EncounterState.Done)
                 {
                     SetBossState(DataTypes.DragonspireRoom, EncounterState.Done);
-                    GameObject door1 = instance.GetGameObject(go_emberseerin);
+                    GameObject door1 = Instance.GetGameObject(go_emberseerin);
+
                     if (door1)
                         HandleGameObject(ObjectGuid.Empty, true, door1);
-                    GameObject door2 = instance.GetGameObject(go_doors);
+
+                    GameObject door2 = Instance.GetGameObject(go_doors);
+
                     if (door2)
                         HandleGameObject(ObjectGuid.Empty, true, door2);
                 }
             }
+        }
 
-            ObjectGuid HighlordOmokk;
-            ObjectGuid ShadowHunterVoshgajin;
-            ObjectGuid WarMasterVoone;
-            ObjectGuid MotherSmolderweb;
-            ObjectGuid UrokDoomhowl;
-            ObjectGuid QuartermasterZigris;
-            ObjectGuid GizrultheSlavener;
-            ObjectGuid Halycon;
-            ObjectGuid OverlordWyrmthalak;
-            ObjectGuid PyroguardEmberseer;
-            ObjectGuid WarchiefRendBlackhand;
-            ObjectGuid Gyth;
-            ObjectGuid LordVictorNefarius;
-            ObjectGuid TheBeast;
-            ObjectGuid GeneralDrakkisath;
-            ObjectGuid ScarshieldInfiltrator;
-            ObjectGuid go_emberseerin;
-            ObjectGuid go_doors;
-            ObjectGuid go_emberseerout;
-            ObjectGuid go_blackrockaltar;
-            ObjectGuid[] go_roomrunes = new ObjectGuid[7];
-            ObjectGuid[] go_emberseerrunes = new ObjectGuid[7];
-            List<ObjectGuid>[] runecreaturelist = new List<ObjectGuid>[7];
-            ObjectGuid go_portcullis_active;
-            ObjectGuid go_portcullis_tobossrooms;
-            List<ObjectGuid> _incarceratorList = new();
+        public instance_blackrock_spire() : base(nameof(instance_blackrock_spire), 229)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)
@@ -633,18 +724,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class at_dragonspire_hall : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
+    internal class at_dragonspire_hall : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
-        public at_dragonspire_hall() : base("at_dragonspire_hall") { }
+        public at_dragonspire_hall() : base("at_dragonspire_hall")
+        {
+        }
 
         public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player && player.IsAlive())
             {
                 InstanceScript instance = player.GetInstanceScript();
+
                 if (instance != null)
                 {
                     instance.SetData(BRSMiscConst.Areatrigger, BRSMiscConst.AreatriggerDragonspireHall);
+
                     return true;
                 }
             }
@@ -654,22 +749,27 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class at_blackrock_stadium : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
+    internal class at_blackrock_stadium : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
-        public at_blackrock_stadium() : base("at_blackrock_stadium") { }
+        public at_blackrock_stadium() : base("at_blackrock_stadium")
+        {
+        }
 
         public bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player && player.IsAlive())
             {
                 InstanceScript instance = player.GetInstanceScript();
+
                 if (instance == null)
                     return false;
 
                 Creature rend = player.FindNearestCreature(CreaturesIds.WarchiefRendBlackhand, 50.0f);
+
                 if (rend)
                 {
                     rend.GetAI().SetData(BRSMiscConst.Areatrigger, BRSMiscConst.AreatriggerBlackrockStadium);
+
                     return true;
                 }
             }
@@ -679,18 +779,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
     }
 
     [Script]
-    class at_nearby_scarshield_infiltrator : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
+    internal class at_nearby_scarshield_infiltrator : ScriptObjectAutoAddDBBound, IAreaTriggerOnTrigger
     {
-        public at_nearby_scarshield_infiltrator() : base("at_nearby_scarshield_infiltrator") { }
+        public at_nearby_scarshield_infiltrator() : base("at_nearby_scarshield_infiltrator")
+        {
+        }
 
         public bool OnTrigger(Player player, AreaTriggerRecord at)
         {
             if (player.IsAlive())
             {
                 InstanceScript instance = player.GetInstanceScript();
+
                 if (instance != null)
                 {
                     Creature infiltrator = ObjectAccessor.GetCreature(player, instance.GetGuidData(DataTypes.ScarshieldInfiltrator));
+
                     if (infiltrator)
                     {
                         if (player.GetLevel() >= 57)
@@ -707,4 +811,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
         }
     }
 }
-

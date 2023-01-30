@@ -8,31 +8,34 @@ using Game.Maps;
 
 namespace Game
 {
-    class GameEvents
+    internal class GameEvents
     {
         public static void Trigger(uint gameEventId, WorldObject source, WorldObject target)
         {
-            Cypher.Assert(source || target, "At least one of [source] or [target] must be provided");
+            Cypher.Assert(source || target, "At least one of [source] or [Target] must be provided");
 
             WorldObject refForMapAndZoneScript = source ?? target;
 
             ZoneScript zoneScript = refForMapAndZoneScript.GetZoneScript();
-            if (zoneScript == null && refForMapAndZoneScript.IsPlayer())
+
+            if (zoneScript == null &&
+                refForMapAndZoneScript.IsPlayer())
                 zoneScript = refForMapAndZoneScript.FindZoneScript();
 
-            if (zoneScript != null)
-                zoneScript.ProcessEvent(target, gameEventId, source);
+            zoneScript?.ProcessEvent(target, gameEventId, source);
 
             Map map = refForMapAndZoneScript.GetMap();
             GameObject goTarget = target?.ToGameObject();
+
             if (goTarget != null)
             {
                 GameObjectAI goAI = goTarget.GetAI();
-                if (goAI != null)
-                    goAI.EventInform(gameEventId);
+
+                goAI?.EventInform(gameEventId);
             }
 
             Player sourcePlayer = source?.ToPlayer();
+
             if (sourcePlayer != null)
                 TriggerForPlayer(gameEventId, sourcePlayer);
 
@@ -42,6 +45,7 @@ namespace Game
         public static void TriggerForPlayer(uint gameEventId, Player source)
         {
             Map map = source.GetMap();
+
             if (map.Instanceable())
             {
                 source.StartCriteriaTimer(CriteriaStartEvent.SendEvent, gameEventId);

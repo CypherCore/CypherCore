@@ -9,7 +9,6 @@ namespace Framework.Web
     [DataContract]
     public class RealmListUpdates
     {
-        [DataMember(Name = "updates")]
-        public IList<RealmListUpdate> Updates { get; set; } = new List<RealmListUpdate>();
+        [DataMember(Name = "updates")] public IList<RealmListUpdate> Updates { get; set; } = new List<RealmListUpdate>();
     }
 }

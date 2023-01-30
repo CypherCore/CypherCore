@@ -7,14 +7,13 @@ using System.Reflection;
 public class Singleton<T> where T : class
 {
     private static volatile T instance;
-    private static object syncRoot = new();
+    private static readonly object syncRoot = new();
 
     public static T Instance
     {
         get
         {
             if (instance == null)
-            {
                 lock (syncRoot)
                 {
                     if (instance == null)
@@ -23,7 +22,6 @@ public class Singleton<T> where T : class
                         instance = (T)constructorInfo.Invoke(new object[0]);
                     }
                 }
-            }
 
             return instance;
         }

@@ -27,7 +27,7 @@ namespace Game.Scripting.Interfaces
         WorldObject GetExplTargetWorldObject();
         long GetGameObjectTargetCountForEffect(uint effect);
         GameObject GetGObjCaster();
-        Spells.Aura GetHitAura(bool dynObjAura = false);
+        Aura GetHitAura(bool dynObjAura = false);
         Corpse GetHitCorpse();
         Creature GetHitCreature();
         int GetHitDamage();
@@ -39,7 +39,7 @@ namespace Game.Scripting.Interfaces
         Unit GetHitUnit();
         long GetItemTargetCountForEffect(uint effect);
         Unit GetOriginalCaster();
-        Spells.Spell GetSpell();
+        Spell GetSpell();
         SpellInfo GetSpellInfo();
         SpellValue GetSpellValue();
         SpellInfo GetTriggeringSpell();
@@ -64,7 +64,7 @@ namespace Game.Scripting.Interfaces
         void _InitHit();
         bool _IsDefaultEffectPrevented(uint effIndex);
         bool _IsEffectPrevented(uint effIndex);
-        bool _Load(Spells.Spell spell);
+        bool _Load(Spell spell);
         void _PrepareScriptCall(SpellScriptHookType hookType);
     }
 }

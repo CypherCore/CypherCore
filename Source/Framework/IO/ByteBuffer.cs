@@ -10,6 +10,11 @@ namespace Framework.IO
 {
     public class ByteBuffer : IDisposable
     {
+        private readonly BinaryReader readStream;
+        private byte _bitPosition = 8;
+        private byte BitValue;
+        private BinaryWriter writeStream;
+
         public ByteBuffer()
         {
             writeStream = new BinaryWriter(new MemoryStream());
@@ -22,71 +27,141 @@ namespace Framework.IO
 
         public void Dispose()
         {
-            if (writeStream != null)
-                writeStream.Dispose();
+            writeStream?.Dispose();
 
-            if (readStream != null)
-                readStream.Dispose();
+            readStream?.Dispose();
+        }
+
+        public bool HasUnfinishedBitPack()
+        {
+            return _bitPosition != 8;
+        }
+
+        public void FlushBits()
+        {
+            if (_bitPosition == 8)
+                return;
+
+            writeStream.Write(BitValue);
+            BitValue = 0;
+            _bitPosition = 8;
+        }
+
+        public void ResetBitPos()
+        {
+            if (_bitPosition > 7)
+                return;
+
+            _bitPosition = 8;
+            BitValue = 0;
+        }
+
+        public byte[] GetData()
+        {
+            Stream stream = GetCurrentStream();
+
+            var data = new byte[stream.Length];
+
+            long pos = stream.Position;
+            stream.Seek(0, SeekOrigin.Begin);
+
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte)stream.ReadByte();
+
+            stream.Seek(pos, SeekOrigin.Begin);
+
+            return data;
+        }
+
+        public uint GetSize()
+        {
+            return (uint)GetCurrentStream().Length;
+        }
+
+        public Stream GetCurrentStream()
+        {
+            if (writeStream != null)
+                return writeStream.BaseStream;
+            else
+                return readStream.BaseStream;
+        }
+
+        public void Clear()
+        {
+            _bitPosition = 8;
+            BitValue = 0;
+            writeStream = new BinaryWriter(new MemoryStream());
         }
 
         #region Read Methods
+
         public sbyte ReadInt8()
         {
             ResetBitPos();
+
             return readStream.ReadSByte();
         }
 
         public short ReadInt16()
         {
             ResetBitPos();
+
             return readStream.ReadInt16();
         }
 
         public int ReadInt32()
         {
             ResetBitPos();
+
             return readStream.ReadInt32();
         }
 
         public long ReadInt64()
         {
             ResetBitPos();
+
             return readStream.ReadInt64();
         }
 
         public byte ReadUInt8()
         {
             ResetBitPos();
+
             return readStream.ReadByte();
         }
 
         public ushort ReadUInt16()
         {
             ResetBitPos();
+
             return readStream.ReadUInt16();
         }
 
         public uint ReadUInt32()
         {
             ResetBitPos();
+
             return readStream.ReadUInt32();
         }
 
         public ulong ReadUInt64()
         {
             ResetBitPos();
+
             return readStream.ReadUInt64();
         }
 
         public float ReadFloat()
         {
             ResetBitPos();
+
             return readStream.ReadSingle();
         }
 
         public double ReadDouble()
         {
             ResetBitPos();
+
             return readStream.ReadDouble();
         }
 
@@ -95,7 +170,11 @@ namespace Framework.IO
             ResetBitPos();
             StringBuilder tmpString = new();
             char tmpChar = readStream.ReadChar();
-            char tmpEndChar = Convert.ToChar(Encoding.UTF8.GetString(new byte[] { 0 }));
+
+            char tmpEndChar = Convert.ToChar(Encoding.UTF8.GetString(new byte[]
+                                                                     {
+                                                                         0
+                                                                     }));
 
             while (tmpChar != tmpEndChar)
             {
@@ -112,18 +191,21 @@ namespace Framework.IO
                 return "";
 
             ResetBitPos();
+
             return Encoding.UTF8.GetString(ReadBytes(length));
         }
 
         public bool ReadBool()
         {
             ResetBitPos();
+
             return readStream.ReadBoolean();
         }
 
         public byte[] ReadBytes(uint count)
         {
             ResetBitPos();
+
             return readStream.ReadBytes((int)count);
         }
 
@@ -184,9 +266,11 @@ namespace Framework.IO
 
             return (T)Convert.ChangeType(value, typeof(T));
         }
+
         #endregion
 
         #region Write Methods
+
         public void WriteInt8(sbyte data)
         {
             FlushBits();
@@ -248,7 +332,7 @@ namespace Framework.IO
         }
 
         /// <summary>
-        /// Writes a string to the packet with a null terminated (0)
+        ///  Writes a string to the packet with a null terminated (0)
         /// </summary>
         /// <param name="str"></param>
         public void WriteCString(string str)
@@ -256,6 +340,7 @@ namespace Framework.IO
             if (string.IsNullOrEmpty(str))
             {
                 WriteUInt8(0);
+
                 return;
             }
 
@@ -333,6 +418,7 @@ namespace Framework.IO
                 _bitPosition = 8;
                 BitValue = 0;
             }
+
             return bit;
         }
 
@@ -351,70 +437,7 @@ namespace Framework.IO
         {
             WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
         }
+
         #endregion
-
-        public bool HasUnfinishedBitPack()
-        {
-            return _bitPosition != 8;
-        }
-
-        public void FlushBits()
-        {
-            if (_bitPosition == 8)
-                return;
-
-            writeStream.Write(BitValue);
-            BitValue = 0;
-            _bitPosition = 8;
-        }
-
-        public void ResetBitPos()
-        {
-            if (_bitPosition > 7)
-                return;
-
-            _bitPosition = 8;
-            BitValue = 0;
-        }
-
-        public byte[] GetData()
-        {
-            Stream stream = GetCurrentStream();
-
-            var data = new byte[stream.Length];
-
-            long pos = stream.Position;
-            stream.Seek(0, SeekOrigin.Begin);
-            for (int i = 0; i < data.Length; i++)
-                data[i] = (byte)stream.ReadByte();
-
-            stream.Seek(pos, SeekOrigin.Begin);
-            return data;
-        }
-
-        public uint GetSize()
-        {
-            return (uint)GetCurrentStream().Length;
-        }
-
-        public Stream GetCurrentStream()
-        {
-            if (writeStream != null)
-                return writeStream.BaseStream;
-            else
-                return readStream.BaseStream;
-        }
-
-        public void Clear()
-        {
-            _bitPosition = 8;
-            BitValue = 0;
-            writeStream = new BinaryWriter(new MemoryStream());
-        }
-
-        byte _bitPosition = 8;
-        byte BitValue;
-        BinaryWriter writeStream;
-        BinaryReader readStream;
     }
 }

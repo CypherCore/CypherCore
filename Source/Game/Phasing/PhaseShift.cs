@@ -3,18 +3,31 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Game.Conditions;
 using Game.Entities;
-using System.Linq;
 
 namespace Game
 {
     public class PhaseShift
     {
+        public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
+        public bool IsDbPhaseShift;
+        public ObjectGuid PersonalGuid;
+        public int PersonalReferences;
+        public Dictionary<uint, PhaseRef> Phases = new();
+        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
+        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new();
+        private int CosmeticReferences;
+        private int DefaultReferences;
+
+        private int NonCosmeticReferences;
+
         public PhaseShift()
         {
             Flags = PhaseShiftFlags.Unphased;
         }
+
         public PhaseShift(PhaseShift copy)
         {
             Flags = copy.Flags;
@@ -41,6 +54,7 @@ namespace Game
 
             var phase = Phases.LookupByKey(phaseId);
             ModifyPhasesReferences(phaseId, phase, references);
+
             if (areaConditions != null)
                 phase.AreaConditions = areaConditions;
 
@@ -50,12 +64,15 @@ namespace Game
         public bool RemovePhase(uint phaseId)
         {
             var phaseRef = Phases.LookupByKey(phaseId);
+
             if (phaseRef != null)
             {
                 ModifyPhasesReferences(phaseId, phaseRef, -1);
+
                 if (phaseRef.References == 0)
                 {
                     Phases.Remove(phaseId);
+
                     return true;
                 }
             }
@@ -69,6 +86,7 @@ namespace Game
                 return false;
 
             VisibleMapIds.Add(visibleMapId, new VisibleMapIdRef(references, visibleMapInfo));
+
             return true;
         }
 
@@ -77,9 +95,11 @@ namespace Game
             if (VisibleMapIds.ContainsKey(visibleMapId))
             {
                 var mapIdRef = VisibleMapIds[visibleMapId];
+
                 if ((--mapIdRef.References) == 0)
                 {
                     VisibleMapIds.Remove(visibleMapId);
+
                     return true;
                 }
             }
@@ -93,6 +113,7 @@ namespace Game
                 return false;
 
             UiMapPhaseIds.Add(uiMapPhaseId, new UiMapPhaseIdRef(references));
+
             return true;
         }
 
@@ -101,9 +122,11 @@ namespace Game
             if (UiMapPhaseIds.ContainsKey(uiWorldMapAreaId))
             {
                 var value = UiMapPhaseIds[uiWorldMapAreaId];
+
                 if ((--value.References) == 0)
                 {
                     UiMapPhaseIds.Remove(uiWorldMapAreaId);
+
                     return true;
                 }
             }
@@ -132,47 +155,61 @@ namespace Game
 
         public bool CanSee(PhaseShift other)
         {
-            if (Flags.HasFlag(PhaseShiftFlags.Unphased) && other.Flags.HasFlag(PhaseShiftFlags.Unphased))
+            if (Flags.HasFlag(PhaseShiftFlags.Unphased) &&
+                other.Flags.HasFlag(PhaseShiftFlags.Unphased))
                 return true;
-            if (Flags.HasFlag(PhaseShiftFlags.AlwaysVisible) || other.Flags.HasFlag(PhaseShiftFlags.AlwaysVisible))
+
+            if (Flags.HasFlag(PhaseShiftFlags.AlwaysVisible) ||
+                other.Flags.HasFlag(PhaseShiftFlags.AlwaysVisible))
                 return true;
-            if (Flags.HasFlag(PhaseShiftFlags.Inverse) && other.Flags.HasFlag(PhaseShiftFlags.Inverse))
+
+            if (Flags.HasFlag(PhaseShiftFlags.Inverse) &&
+                other.Flags.HasFlag(PhaseShiftFlags.Inverse))
                 return true;
 
             PhaseFlags excludePhasesWithFlag = PhaseFlags.None;
-            if (Flags.HasFlag(PhaseShiftFlags.NoCosmetic) && other.Flags.HasFlag(PhaseShiftFlags.NoCosmetic))
+
+            if (Flags.HasFlag(PhaseShiftFlags.NoCosmetic) &&
+                other.Flags.HasFlag(PhaseShiftFlags.NoCosmetic))
                 excludePhasesWithFlag = PhaseFlags.Cosmetic;
 
-            if (!Flags.HasFlag(PhaseShiftFlags.Inverse) && !other.Flags.HasFlag(PhaseShiftFlags.Inverse))
+            if (!Flags.HasFlag(PhaseShiftFlags.Inverse) &&
+                !other.Flags.HasFlag(PhaseShiftFlags.Inverse))
             {
                 ObjectGuid ownerGuid = PersonalGuid;
                 ObjectGuid otherPersonalGuid = other.PersonalGuid;
-                return Phases.Intersect(other.Phases, (myPhase, otherPhase) =>
-                {
-                    if (myPhase.Key != otherPhase.Key)
-                        return false;
 
-                    return !myPhase.Value.Flags.HasAnyFlag(excludePhasesWithFlag) && (!myPhase.Value.Flags.HasFlag(PhaseFlags.Personal) || ownerGuid == otherPersonalGuid);
-                }).Any();
+                return Phases.Intersect(other.Phases,
+                                        (myPhase, otherPhase) =>
+                                        {
+                                            if (myPhase.Key != otherPhase.Key)
+                                                return false;
+
+                                            return !myPhase.Value.Flags.HasAnyFlag(excludePhasesWithFlag) && (!myPhase.Value.Flags.HasFlag(PhaseFlags.Personal) || ownerGuid == otherPersonalGuid);
+                                        })
+                             .Any();
             }
 
             var checkInversePhaseShift = new Func<PhaseShift, PhaseShift, bool>((phaseShift, excludedPhaseShift) =>
-            {
-                if (phaseShift.Flags.HasFlag(PhaseShiftFlags.Unphased) && excludedPhaseShift.Flags.HasFlag(PhaseShiftFlags.InverseUnphased))
-                    return false;
+                                                                                {
+                                                                                    if (phaseShift.Flags.HasFlag(PhaseShiftFlags.Unphased) &&
+                                                                                        excludedPhaseShift.Flags.HasFlag(PhaseShiftFlags.InverseUnphased))
+                                                                                        return false;
 
-                foreach (var pair in phaseShift.Phases)
-                {
-                    if (pair.Value.Flags.HasAnyFlag(excludePhasesWithFlag))
-                        continue;
+                                                                                    foreach (var pair in phaseShift.Phases)
+                                                                                    {
+                                                                                        if (pair.Value.Flags.HasAnyFlag(excludePhasesWithFlag))
+                                                                                            continue;
 
-                    var ExcludedPhaseRef = excludedPhaseShift.Phases.LookupByKey(pair.Key);
-                    if (ExcludedPhaseRef != null || !ExcludedPhaseRef.Flags.HasAnyFlag(excludePhasesWithFlag))
-                        return false;
-                }
+                                                                                        var ExcludedPhaseRef = excludedPhaseShift.Phases.LookupByKey(pair.Key);
 
-                return true;
-            });
+                                                                                        if (ExcludedPhaseRef != null ||
+                                                                                            !ExcludedPhaseRef.Flags.HasAnyFlag(excludePhasesWithFlag))
+                                                                                            return false;
+                                                                                    }
+
+                                                                                    return true;
+                                                                                });
 
             if (other.Flags.HasFlag(PhaseShiftFlags.Inverse))
                 return checkInversePhaseShift(this, other);
@@ -210,16 +247,12 @@ namespace Game
         {
             PhaseShiftFlags unphasedFlag = !Flags.HasAnyFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.Unphased : PhaseShiftFlags.InverseUnphased;
             Flags &= ~(!Flags.HasFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.InverseUnphased : PhaseShiftFlags.Unphased);
-            if (NonCosmeticReferences != 0 && DefaultReferences == 0)
+
+            if (NonCosmeticReferences != 0 &&
+                DefaultReferences == 0)
                 Flags &= ~unphasedFlag;
             else
                 Flags |= unphasedFlag;
-        }
-
-        void UpdatePersonalGuid()
-        {
-            if (PersonalReferences == 0)
-                PersonalGuid.Clear();
         }
 
         public bool HasPersonalPhase()
@@ -230,33 +263,56 @@ namespace Game
 
             return false;
         }
-        
-        public bool HasPhase(uint phaseId) { return Phases.ContainsKey(phaseId); }
-        public Dictionary<uint, PhaseRef> GetPhases() { return Phases; }
 
-        public bool HasVisibleMapId(uint visibleMapId) { return VisibleMapIds.ContainsKey(visibleMapId); }
-        public Dictionary<uint, VisibleMapIdRef> GetVisibleMapIds() { return VisibleMapIds; }
+        public bool HasPhase(uint phaseId)
+        {
+            return Phases.ContainsKey(phaseId);
+        }
 
-        public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
-        public Dictionary<uint, UiMapPhaseIdRef> GetUiMapPhaseIds() { return UiMapPhaseIds; }
+        public Dictionary<uint, PhaseRef> GetPhases()
+        {
+            return Phases;
+        }
 
-        public ObjectGuid GetPersonalGuid() { return PersonalGuid; }
-        
-        public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
-        public ObjectGuid PersonalGuid;
-        public Dictionary<uint, PhaseRef> Phases = new();
-        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new();
-        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
+        public bool HasVisibleMapId(uint visibleMapId)
+        {
+            return VisibleMapIds.ContainsKey(visibleMapId);
+        }
 
-        int NonCosmeticReferences;
-        int CosmeticReferences;
-        public int PersonalReferences;
-        int DefaultReferences;
-        public bool IsDbPhaseShift;
+        public Dictionary<uint, VisibleMapIdRef> GetVisibleMapIds()
+        {
+            return VisibleMapIds;
+        }
+
+        public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId)
+        {
+            return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId);
+        }
+
+        public Dictionary<uint, UiMapPhaseIdRef> GetUiMapPhaseIds()
+        {
+            return UiMapPhaseIds;
+        }
+
+        public ObjectGuid GetPersonalGuid()
+        {
+            return PersonalGuid;
+        }
+
+        private void UpdatePersonalGuid()
+        {
+            if (PersonalReferences == 0)
+                PersonalGuid.Clear();
+        }
     }
 
     public class PhaseRef
     {
+        public List<Condition> AreaConditions;
+
+        public PhaseFlags Flags;
+        public int References;
+
         public PhaseRef(PhaseFlags flags, List<Condition> conditions)
         {
             Flags = flags;
@@ -264,11 +320,10 @@ namespace Game
             AreaConditions = conditions;
         }
 
-        public bool IsPersonal() { return Flags.HasFlag(PhaseFlags.Personal); }
-
-        public PhaseFlags Flags;
-        public int References;
-        public List<Condition> AreaConditions;
+        public bool IsPersonal()
+        {
+            return Flags.HasFlag(PhaseFlags.Personal);
+        }
     }
 
     public struct VisibleMapIdRef
@@ -298,11 +353,12 @@ namespace Game
     {
         None = 0x00,
         AlwaysVisible = 0x01, // Ignores all phasing, can see everything and be seen by everything
-        Inverse = 0x02, // By default having at least one shared phase for two objects means they can see each other
-                        // this flag makes objects see each other if they have at least one non-shared phase
+        Inverse = 0x02,       // By default having at least one shared phase for two objects means they can see each other
+
+        // this flag makes objects see each other if they have at least one non-shared phase
         InverseUnphased = 0x04,
         Unphased = 0x08,
-        NoCosmetic = 0x10  // This flag ignores shared cosmetic phases (two players that both have shared cosmetic phase but no other phase cannot see each other)
+        NoCosmetic = 0x10 // This flag ignores shared cosmetic phases (two players that both have shared cosmetic phase but no other phase cannot see each other)
     }
 
     [Flags]

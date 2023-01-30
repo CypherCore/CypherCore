@@ -1,16 +1,16 @@
-﻿using Game.AI;
-using Game.Scripting.BaseScripts;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Game.AI;
+using Game.Scripting.BaseScripts;
 
 namespace Game.Scripting.Activators
 {
     internal class AreaTriggerActivator : IScriptActivator
     {
-        public List<string> ScriptBaseTypes => new List<string>()
-        {
-            nameof(AreaTriggerAI)
-        };
+        public List<string> ScriptBaseTypes => new()
+                                               {
+                                                   nameof(AreaTriggerAI)
+                                               };
 
         public void Activate(Type type, string name, ScriptAttribute attribute)
         {

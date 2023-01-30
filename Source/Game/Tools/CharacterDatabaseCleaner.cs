@@ -1,18 +1,20 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Text;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Game
 {
-    class CharacterDatabaseCleaner
+    internal class CharacterDatabaseCleaner
     {
+        private delegate bool CheckFor(uint id);
+
         public static void CleanDatabase()
         {
             // config to disable
@@ -51,22 +53,24 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Cleaned character database in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        delegate bool CheckFor(uint id);
-
-        static void CheckUnique(string column, string table, CheckFor check)
+        private static void CheckUnique(string column, string table, CheckFor check)
         {
             SQLResult result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
+
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.Sql, "Table {0} is empty.", table);
+
                 return;
             }
 
             bool found = false;
             StringBuilder ss = new();
+
             do
             {
                 uint id = result.Read<uint>(0);
+
                 if (!check(id))
                 {
                     if (!found)
@@ -75,12 +79,13 @@ namespace Game
                         found = true;
                     }
                     else
+                    {
                         ss.Append(',');
+                    }
 
                     ss.Append(id);
                 }
-            }
-            while (result.NextRow());
+            } while (result.NextRow());
 
             if (found)
             {
@@ -89,53 +94,55 @@ namespace Game
             }
         }
 
-        static bool AchievementProgressCheck(uint criteria)
+        private static bool AchievementProgressCheck(uint criteria)
         {
             return Global.CriteriaMgr.GetCriteria(criteria) != null;
         }
 
-        static void CleanCharacterAchievementProgress()
+        private static void CleanCharacterAchievementProgress()
         {
             CheckUnique("criteria", "character_achievement_progress", AchievementProgressCheck);
         }
 
-        static bool SkillCheck(uint skill)
+        private static bool SkillCheck(uint skill)
         {
             return CliDB.SkillLineStorage.ContainsKey(skill);
         }
 
-        static void CleanCharacterSkills()
+        private static void CleanCharacterSkills()
         {
             CheckUnique("skill", "character_skills", SkillCheck);
         }
 
-        static bool SpellCheck(uint spell_id)
+        private static bool SpellCheck(uint spell_id)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
+
             return spellInfo != null && !spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
         }
 
-        static void CleanCharacterSpell()
+        private static void CleanCharacterSpell()
         {
             CheckUnique("spell", "character_spell", SpellCheck);
         }
 
-        static bool TalentCheck(uint talent_id)
+        private static bool TalentCheck(uint talent_id)
         {
             TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talent_id);
+
             if (talentInfo == null)
                 return false;
 
             return CliDB.ChrSpecializationStorage.ContainsKey(talentInfo.SpecID);
         }
 
-        static void CleanCharacterTalent()
+        private static void CleanCharacterTalent()
         {
             DB.Characters.DirectExecute("DELETE FROM character_talent WHERE talentGroup > {0}", PlayerConst.MaxSpecializations);
             CheckUnique("talentId", "character_talent", TalentCheck);
         }
 
-        static void CleanCharacterQuestStatus()
+        private static void CleanCharacterQuestStatus()
         {
             DB.Characters.DirectExecute("DELETE FROM character_queststatus WHERE status = 0");
         }

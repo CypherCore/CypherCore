@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnDisband : IScriptObject
     {
-        void OnDisband(Guilds.Guild guild);
+        void OnDisband(Guild guild);
     }
 }

@@ -1,17 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
-using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IMap;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
 {
-    struct CreatureIds
+    internal struct CreatureIds
     {
         public const uint Emperor = 9019;
         public const uint Phalanx = 9502;
@@ -27,7 +26,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
         public const uint Coren = 23872;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint Arena1 = 161525;
         public const uint Arena2 = 161522;
@@ -43,8 +42,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
         public const uint TombEnter = 170576;
         public const uint TombExit = 170577;
         public const uint Lyceum = 170558;
-        public const uint SfN = 174745; // Shadowforge Brazier North
-        public const uint SfS = 174744; // Shadowforge Brazier South
+        public const uint SfN = 174745;        // Shadowforge Brazier North
+        public const uint SfS = 174744;        // Shadowforge Brazier South
         public const uint GolemRoomN = 170573; // Magmus door North
         public const uint GolemRoomS = 170574; // Magmus door Soutsh
         public const uint ThroneRoom = 170575; // Throne door
@@ -52,7 +51,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
         public const uint ChestSeven = 169243;
     }
 
-    struct DataTypes
+    internal struct DataTypes
     {
         public const uint TypeRingOfLaw = 1;
         public const uint TypeVault = 2;
@@ -88,53 +87,50 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
         public const uint DataCoren = 28;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint TimerTombOfTheSeven = 15000;
         public const uint MaxEncounter = 6;
         public const uint TombOfSevenBossNum = 7;
     }
 
-    class instance_blackrock_depths : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_blackrock_depths : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_blackrock_depths() : base(nameof(instance_blackrock_depths), 230) { }
-
-        class instance_blackrock_depths_InstanceMapScript : InstanceScript
+        private class instance_blackrock_depths_InstanceMapScript : InstanceScript
         {
-            ObjectGuid EmperorGUID;
-            ObjectGuid PhalanxGUID;
-            ObjectGuid MagmusGUID;
-            ObjectGuid MoiraGUID;
-            ObjectGuid CorenGUID;
+            private readonly ObjectGuid[] TombBossGUIDs = new ObjectGuid[MiscConst.TombOfSevenBossNum];
+            private uint BarAleCount;
+            private ObjectGuid CorenGUID;
+            private ObjectGuid EmperorGUID;
+            private uint GhostKillCount;
 
-            ObjectGuid GoArena1GUID;
-            ObjectGuid GoArena2GUID;
-            ObjectGuid GoArena3GUID;
-            ObjectGuid GoArena4GUID;
-            ObjectGuid GoShadowLockGUID;
-            ObjectGuid GoShadowMechGUID;
-            ObjectGuid GoShadowGiantGUID;
-            ObjectGuid GoShadowDummyGUID;
-            ObjectGuid GoBarKegGUID;
-            ObjectGuid GoBarKegTrapGUID;
-            ObjectGuid GoBarDoorGUID;
-            ObjectGuid GoTombEnterGUID;
-            ObjectGuid GoTombExitGUID;
-            ObjectGuid GoLyceumGUID;
-            ObjectGuid GoSFSGUID;
-            ObjectGuid GoSFNGUID;
-            ObjectGuid GoGolemNGUID;
-            ObjectGuid GoGolemSGUID;
-            ObjectGuid GoThroneGUID;
-            ObjectGuid GoChestGUID;
-            ObjectGuid GoSpectralChaliceGUID;
-
-            uint BarAleCount;
-            uint GhostKillCount;
-            ObjectGuid[] TombBossGUIDs = new ObjectGuid[MiscConst.TombOfSevenBossNum];
-            ObjectGuid TombEventStarterGUID;
-            uint TombTimer;
-            uint TombEventCounter;
+            private ObjectGuid GoArena1GUID;
+            private ObjectGuid GoArena2GUID;
+            private ObjectGuid GoArena3GUID;
+            private ObjectGuid GoArena4GUID;
+            private ObjectGuid GoBarDoorGUID;
+            private ObjectGuid GoBarKegGUID;
+            private ObjectGuid GoBarKegTrapGUID;
+            private ObjectGuid GoChestGUID;
+            private ObjectGuid GoGolemNGUID;
+            private ObjectGuid GoGolemSGUID;
+            private ObjectGuid GoLyceumGUID;
+            private ObjectGuid GoSFNGUID;
+            private ObjectGuid GoSFSGUID;
+            private ObjectGuid GoShadowDummyGUID;
+            private ObjectGuid GoShadowGiantGUID;
+            private ObjectGuid GoShadowLockGUID;
+            private ObjectGuid GoShadowMechGUID;
+            private ObjectGuid GoSpectralChaliceGUID;
+            private ObjectGuid GoThroneGUID;
+            private ObjectGuid GoTombEnterGUID;
+            private ObjectGuid GoTombExitGUID;
+            private ObjectGuid MagmusGUID;
+            private ObjectGuid MoiraGUID;
+            private ObjectGuid PhalanxGUID;
+            private uint TombEventCounter;
+            private ObjectGuid TombEventStarterGUID;
+            private uint TombTimer;
 
             public instance_blackrock_depths_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -151,21 +147,56 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             {
                 switch (creature.GetEntry())
                 {
-                    case CreatureIds.Emperor: EmperorGUID = creature.GetGUID(); break;
-                    case CreatureIds.Phalanx: PhalanxGUID = creature.GetGUID(); break;
-                    case CreatureIds.Moira: MoiraGUID = creature.GetGUID(); break;
-                    case CreatureIds.Coren: CorenGUID = creature.GetGUID(); break;
-                    case CreatureIds.Doomrel: TombBossGUIDs[0] = creature.GetGUID(); break;
-                    case CreatureIds.Doperel: TombBossGUIDs[1] = creature.GetGUID(); break;
-                    case CreatureIds.Haterel: TombBossGUIDs[2] = creature.GetGUID(); break;
-                    case CreatureIds.Vilerel: TombBossGUIDs[3] = creature.GetGUID(); break;
-                    case CreatureIds.Seethrel: TombBossGUIDs[4] = creature.GetGUID(); break;
-                    case CreatureIds.Gloomrel: TombBossGUIDs[5] = creature.GetGUID(); break;
-                    case CreatureIds.Angerrel: TombBossGUIDs[6] = creature.GetGUID(); break;
+                    case CreatureIds.Emperor:
+                        EmperorGUID = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Phalanx:
+                        PhalanxGUID = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Moira:
+                        MoiraGUID = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Coren:
+                        CorenGUID = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Doomrel:
+                        TombBossGUIDs[0] = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Doperel:
+                        TombBossGUIDs[1] = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Haterel:
+                        TombBossGUIDs[2] = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Vilerel:
+                        TombBossGUIDs[3] = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Seethrel:
+                        TombBossGUIDs[4] = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Gloomrel:
+                        TombBossGUIDs[5] = creature.GetGUID();
+
+                        break;
+                    case CreatureIds.Angerrel:
+                        TombBossGUIDs[6] = creature.GetGUID();
+
+                        break;
                     case CreatureIds.Magmus:
                         MagmusGUID = creature.GetGUID();
+
                         if (!creature.IsAlive())
                             HandleGameObject(GetGuidData(DataTypes.DataThroneDoor), true); // if Magmus is dead open door to last boss
+
                         break;
                 }
             }
@@ -174,33 +205,95 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
             {
                 switch (go.GetEntry())
                 {
-                    case GameObjectIds.Arena1: GoArena1GUID = go.GetGUID(); break;
-                    case GameObjectIds.Arena2: GoArena2GUID = go.GetGUID(); break;
-                    case GameObjectIds.Arena3: GoArena3GUID = go.GetGUID(); break;
-                    case GameObjectIds.Arena4: GoArena4GUID = go.GetGUID(); break;
-                    case GameObjectIds.ShadowLock: GoShadowLockGUID = go.GetGUID(); break;
-                    case GameObjectIds.ShadowMechanism: GoShadowMechGUID = go.GetGUID(); break;
-                    case GameObjectIds.ShadowGiantDoor: GoShadowGiantGUID = go.GetGUID(); break;
-                    case GameObjectIds.ShadowDummy: GoShadowDummyGUID = go.GetGUID(); break;
-                    case GameObjectIds.BarKegShot: GoBarKegGUID = go.GetGUID(); break;
-                    case GameObjectIds.BarKegTrap: GoBarKegTrapGUID = go.GetGUID(); break;
-                    case GameObjectIds.BarDoor: GoBarDoorGUID = go.GetGUID(); break;
-                    case GameObjectIds.TombEnter: GoTombEnterGUID = go.GetGUID(); break;
+                    case GameObjectIds.Arena1:
+                        GoArena1GUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.Arena2:
+                        GoArena2GUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.Arena3:
+                        GoArena3GUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.Arena4:
+                        GoArena4GUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.ShadowLock:
+                        GoShadowLockGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.ShadowMechanism:
+                        GoShadowMechGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.ShadowGiantDoor:
+                        GoShadowGiantGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.ShadowDummy:
+                        GoShadowDummyGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.BarKegShot:
+                        GoBarKegGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.BarKegTrap:
+                        GoBarKegTrapGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.BarDoor:
+                        GoBarDoorGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.TombEnter:
+                        GoTombEnterGUID = go.GetGUID();
+
+                        break;
                     case GameObjectIds.TombExit:
                         GoTombExitGUID = go.GetGUID();
+
                         if (GhostKillCount >= MiscConst.TombOfSevenBossNum)
                             HandleGameObject(ObjectGuid.Empty, true, go);
                         else
                             HandleGameObject(ObjectGuid.Empty, false, go);
+
                         break;
-                    case GameObjectIds.Lyceum: GoLyceumGUID = go.GetGUID(); break;
-                    case GameObjectIds.SfS: GoSFSGUID = go.GetGUID(); break;
-                    case GameObjectIds.SfN: GoSFNGUID = go.GetGUID(); break;
-                    case GameObjectIds.GolemRoomN: GoGolemNGUID = go.GetGUID(); break;
-                    case GameObjectIds.GolemRoomS: GoGolemSGUID = go.GetGUID(); break;
-                    case GameObjectIds.ThroneRoom: GoThroneGUID = go.GetGUID(); break;
-                    case GameObjectIds.ChestSeven: GoChestGUID = go.GetGUID(); break;
-                    case GameObjectIds.SpectralChalice: GoSpectralChaliceGUID = go.GetGUID(); break;
+                    case GameObjectIds.Lyceum:
+                        GoLyceumGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.SfS:
+                        GoSFSGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.SfN:
+                        GoSFNGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.GolemRoomN:
+                        GoGolemNGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.GolemRoomS:
+                        GoGolemSGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.ThroneRoom:
+                        GoThroneGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.ChestSeven:
+                        GoChestGUID = go.GetGUID();
+
+                        break;
+                    case GameObjectIds.SpectralChalice:
+                        GoSpectralChaliceGUID = go.GetGUID();
+
+                        break;
                 }
             }
 
@@ -210,10 +303,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 {
                     case DataTypes.DataEvenstarter:
                         TombEventStarterGUID = data;
+
                         if (TombEventStarterGUID.IsEmpty())
-                            TombOfSevenReset();//reset
+                            TombOfSevenReset(); //reset
                         else
-                            TombOfSevenStart();//start
+                            TombOfSevenStart(); //start
+
                         break;
                 }
             }
@@ -224,27 +319,34 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                 {
                     case DataTypes.TypeRingOfLaw:
                         SetBossState(0, (EncounterState)data);
+
                         break;
                     case DataTypes.TypeVault:
                         SetBossState(1, (EncounterState)data);
+
                         break;
                     case DataTypes.TypeBar:
                         if (data == (uint)EncounterState.Special)
                             ++BarAleCount;
                         else
                             SetBossState(2, (EncounterState)data);
+
                         break;
                     case DataTypes.TypeTombOfSeven:
                         SetBossState(3, (EncounterState)data);
+
                         break;
                     case DataTypes.TypeLyceum:
                         SetBossState(4, (EncounterState)data);
+
                         break;
                     case DataTypes.TypeIronHall:
                         SetBossState(5, (EncounterState)data);
+
                         break;
                     case DataTypes.DataGhostkill:
                         GhostKillCount += data;
+
                         break;
                 }
             }
@@ -258,7 +360,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                     case DataTypes.TypeVault:
                         return (uint)GetBossState(1);
                     case DataTypes.TypeBar:
-                        if (GetBossState(2) == EncounterState.InProgress && BarAleCount == 3)
+                        if (GetBossState(2) == EncounterState.InProgress &&
+                            BarAleCount == 3)
                             return (uint)EncounterState.Special;
                         else
                             return (uint)GetBossState(2);
@@ -271,6 +374,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                     case DataTypes.DataGhostkill:
                         return GhostKillCount;
                 }
+
                 return 0;
             }
 
@@ -315,70 +419,19 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                     case DataTypes.DataGoChalice:
                         return GoSpectralChaliceGUID;
                 }
+
                 return ObjectGuid.Empty;
-            }
-
-            void TombOfSevenEvent()
-            {
-                if (GhostKillCount < MiscConst.TombOfSevenBossNum && !TombBossGUIDs[TombEventCounter].IsEmpty())
-                {
-                    Creature boss = instance.GetCreature(TombBossGUIDs[TombEventCounter]);
-                    if (boss)
-                    {
-                        boss.SetFaction((uint)FactionTemplates.DarkIronDwarves);
-                        boss.SetImmuneToPC(false);
-                        Unit target = boss.SelectNearestTarget(500);
-                        if (target)
-                            boss.GetAI().AttackStart(target);
-                    }
-                }
-            }
-
-            void TombOfSevenReset()
-            {
-                HandleGameObject(GoTombExitGUID, false);//event reseted, close exit door
-                HandleGameObject(GoTombEnterGUID, true);//event reseted, open entrance door
-                for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
-                {
-                    Creature boss = instance.GetCreature(TombBossGUIDs[i]);
-                    if (boss)
-                    {
-                        if (!boss.IsAlive())
-                            boss.Respawn();
-                        else
-                            boss.SetFaction((uint)FactionTemplates.Friendly);
-                    }
-                }
-                GhostKillCount = 0;
-                TombEventStarterGUID.Clear();
-                TombEventCounter = 0;
-                TombTimer = MiscConst.TimerTombOfTheSeven;
-                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.NotStarted);
-            }
-
-            void TombOfSevenStart()
-            {
-                HandleGameObject(GoTombExitGUID, false);//event started, close exit door
-                HandleGameObject(GoTombEnterGUID, false);//event started, close entrance door
-                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.InProgress);
-            }
-
-            void TombOfSevenEnd()
-            {
-                DoRespawnGameObject(GoChestGUID, TimeSpan.FromHours(24));
-                HandleGameObject(GoTombExitGUID, true);//event done, open exit door
-                HandleGameObject(GoTombEnterGUID, true);//event done, open entrance door
-                TombEventStarterGUID.Clear();
-                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.Done);
             }
 
             public override void Update(uint diff)
             {
-                if (!TombEventStarterGUID.IsEmpty() && GhostKillCount < MiscConst.TombOfSevenBossNum)
+                if (!TombEventStarterGUID.IsEmpty() &&
+                    GhostKillCount < MiscConst.TombOfSevenBossNum)
                 {
                     if (TombTimer <= diff)
                     {
                         TombTimer = MiscConst.TimerTombOfTheSeven;
+
                         if (TombEventCounter < MiscConst.TombOfSevenBossNum)
                         {
                             TombOfSevenEvent();
@@ -388,21 +441,87 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
                         // Check Killed bosses
                         for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
                         {
-                            Creature boss = instance.GetCreature(TombBossGUIDs[i]);
+                            Creature boss = Instance.GetCreature(TombBossGUIDs[i]);
+
                             if (boss)
-                            {
                                 if (!boss.IsAlive())
-                                {
                                     GhostKillCount = i + 1u;
-                                }
-                            }
                         }
                     }
-                    else TombTimer -= diff;
+                    else
+                    {
+                        TombTimer -= diff;
+                    }
                 }
-                if (GhostKillCount >= MiscConst.TombOfSevenBossNum && !TombEventStarterGUID.IsEmpty())
+
+                if (GhostKillCount >= MiscConst.TombOfSevenBossNum &&
+                    !TombEventStarterGUID.IsEmpty())
                     TombOfSevenEnd();
             }
+
+            private void TombOfSevenEvent()
+            {
+                if (GhostKillCount < MiscConst.TombOfSevenBossNum &&
+                    !TombBossGUIDs[TombEventCounter].IsEmpty())
+                {
+                    Creature boss = Instance.GetCreature(TombBossGUIDs[TombEventCounter]);
+
+                    if (boss)
+                    {
+                        boss.SetFaction((uint)FactionTemplates.DarkIronDwarves);
+                        boss.SetImmuneToPC(false);
+                        Unit target = boss.SelectNearestTarget(500);
+
+                        if (target)
+                            boss.GetAI().AttackStart(target);
+                    }
+                }
+            }
+
+            private void TombOfSevenReset()
+            {
+                HandleGameObject(GoTombExitGUID, false); //event reseted, close exit door
+                HandleGameObject(GoTombEnterGUID, true); //event reseted, open entrance door
+
+                for (byte i = 0; i < MiscConst.TombOfSevenBossNum; ++i)
+                {
+                    Creature boss = Instance.GetCreature(TombBossGUIDs[i]);
+
+                    if (boss)
+                    {
+                        if (!boss.IsAlive())
+                            boss.Respawn();
+                        else
+                            boss.SetFaction((uint)FactionTemplates.Friendly);
+                    }
+                }
+
+                GhostKillCount = 0;
+                TombEventStarterGUID.Clear();
+                TombEventCounter = 0;
+                TombTimer = MiscConst.TimerTombOfTheSeven;
+                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.NotStarted);
+            }
+
+            private void TombOfSevenStart()
+            {
+                HandleGameObject(GoTombExitGUID, false);  //event started, close exit door
+                HandleGameObject(GoTombEnterGUID, false); //event started, close entrance door
+                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.InProgress);
+            }
+
+            private void TombOfSevenEnd()
+            {
+                DoRespawnGameObject(GoChestGUID, TimeSpan.FromHours(24));
+                HandleGameObject(GoTombExitGUID, true);  //event done, open exit door
+                HandleGameObject(GoTombEnterGUID, true); //event done, open entrance door
+                TombEventStarterGUID.Clear();
+                SetData(DataTypes.TypeTombOfSeven, (uint)EncounterState.Done);
+            }
+        }
+
+        public instance_blackrock_depths() : base(nameof(instance_blackrock_depths), 230)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)
@@ -411,4 +530,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths
         }
     }
 }
-

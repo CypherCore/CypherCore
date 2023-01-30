@@ -9,14 +9,14 @@ using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.Gnomeregan
 {
-    struct GNOGameObjectIds
+    internal struct GNOGameObjectIds
     {
         public const uint CaveInLeft = 146085;
         public const uint CaveInRight = 146086;
         public const uint RedRocket = 103820;
     }
 
-    struct GNOCreatureIds
+    internal struct GNOCreatureIds
     {
         public const uint BlastmasterEmiShortfuse = 7998;
         public const uint CaverndeepAmbusher = 6207;
@@ -28,7 +28,7 @@ namespace Scripts.EasternKingdoms.Gnomeregan
         public const uint Mekgineer = 7800;
     }
 
-    struct DataTypes
+    internal struct DataTypes
     {
         public const uint BlastmasterEvent = 0;
         public const uint ViciousFallout = 1;
@@ -44,23 +44,20 @@ namespace Scripts.EasternKingdoms.Gnomeregan
         public const uint NpcBastmasterEmiShortfuse = 8;
     }
 
-    struct DataTypes64
+    internal struct DataTypes64
     {
         public const uint GoCaveInLeft = 0;
         public const uint GoCaveInRight = 1;
         public const uint NpcBastmasterEmiShortfuse = 2;
     }
 
-    class instance_gnomeregan : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_gnomeregan : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_gnomeregan() : base(nameof(instance_gnomeregan), 90) { }
-
-        class instance_gnomeregan_InstanceMapScript : InstanceScript
+        private class instance_gnomeregan_InstanceMapScript : InstanceScript
         {
-            ObjectGuid uiCaveInLeftGUID;
-            ObjectGuid uiCaveInRightGUID;
-
-            ObjectGuid uiBlastmasterEmiShortfuseGUID;
+            private ObjectGuid uiBlastmasterEmiShortfuseGUID;
+            private ObjectGuid uiCaveInLeftGUID;
+            private ObjectGuid uiCaveInRightGUID;
 
             public instance_gnomeregan_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -74,6 +71,7 @@ namespace Scripts.EasternKingdoms.Gnomeregan
                 {
                     case GNOCreatureIds.BlastmasterEmiShortfuse:
                         uiBlastmasterEmiShortfuseGUID = creature.GetGUID();
+
                         break;
                 }
             }
@@ -84,9 +82,11 @@ namespace Scripts.EasternKingdoms.Gnomeregan
                 {
                     case DataTypes64.GoCaveInLeft:
                         uiCaveInLeftGUID = go.GetGUID();
+
                         break;
                     case DataTypes64.GoCaveInRight:
                         uiCaveInRightGUID = go.GetGUID();
+
                         break;
                 }
             }
@@ -94,20 +94,25 @@ namespace Scripts.EasternKingdoms.Gnomeregan
             public override void OnUnitDeath(Unit unit)
             {
                 Creature creature = unit.ToCreature();
+
                 if (creature)
                     switch (creature.GetEntry())
                     {
                         case GNOCreatureIds.ViciousFallout:
                             SetBossState(DataTypes.ViciousFallout, EncounterState.Done);
+
                             break;
                         case GNOCreatureIds.Electrocutioner:
                             SetBossState(DataTypes.Electrocutioner, EncounterState.Done);
+
                             break;
                         case GNOCreatureIds.CrowdPummeler:
                             SetBossState(DataTypes.CrowdPummeler, EncounterState.Done);
+
                             break;
                         case GNOCreatureIds.Mekgineer:
                             SetBossState(DataTypes.Thermaplugg, EncounterState.Done);
+
                             break;
                     }
             }
@@ -125,10 +130,13 @@ namespace Scripts.EasternKingdoms.Gnomeregan
             }
         }
 
+        public instance_gnomeregan() : base(nameof(instance_gnomeregan), 90)
+        {
+        }
+
         public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_gnomeregan_InstanceMapScript(map);
         }
     }
 }
-

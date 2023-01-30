@@ -2,13 +2,15 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
 
 public enum TimeFormat
 {
-    FullText,       // 1 Days 2 Hours 3 Minutes 4 Seconds
-    ShortText,      // 1d 2h 3m 4s
-    Numeric         // 1:2:3:4
+    FullText,  // 1 Days 2 Hours 3 Minutes 4 Seconds
+    ShortText, // 1d 2h 3m 4s
+    Numeric    // 1:2:3:4
 }
 
 public static class Time
@@ -24,29 +26,17 @@ public static class Time
     public static readonly DateTime ApplicationStartTime = DateTime.Now;
 
     /// <summary>
-    /// Gets the current Unix time.
+    ///  Gets the current Unix time.
     /// </summary>
-    public static long UnixTime
-    {
-        get
-        {
-            return DateTimeToUnixTime(DateTime.Now);
-        }
-    }
+    public static long UnixTime => DateTimeToUnixTime(DateTime.Now);
 
     /// <summary>
-    /// Gets the current Unix time, in milliseconds.
+    ///  Gets the current Unix time, in milliseconds.
     /// </summary>
-    public static long UnixTimeMilliseconds
-    {
-        get
-        {
-            return ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds();
-        }
-    }
+    public static long UnixTimeMilliseconds => ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds();
 
     /// <summary>
-    /// Converts a TimeSpan to its equivalent representation in milliseconds (Int64).
+    ///  Converts a TimeSpan to its equivalent representation in milliseconds (Int64).
     /// </summary>
     /// <param name="span">The time span value to convert.</param>
     public static long ToMilliseconds(this TimeSpan span)
@@ -55,7 +45,7 @@ public static class Time
     }
 
     /// <summary>
-    /// Gets the system uptime.
+    ///  Gets the system uptime.
     /// </summary>
     /// <returns>the system uptime in milliseconds</returns>
     public static uint GetSystemTime()
@@ -79,12 +69,14 @@ public static class Time
     public static uint GetMSTimeDiff(uint oldMSTime, DateTime newTime)
     {
         uint newMSTime = (uint)(newTime - ApplicationStartTime).TotalMilliseconds;
+
         return GetMSTimeDiff(oldMSTime, newMSTime);
     }
 
     public static uint GetMSTimeDiffToNow(uint oldMSTime)
     {
         var newMSTime = GetMSTime();
+
         if (oldMSTime > newMSTime)
             return (0xFFFFFFFF - oldMSTime) + newMSTime;
         else
@@ -105,10 +97,12 @@ public static class Time
     {
         return DateTimeToUnixTime((DateTime.Now.Date + new TimeSpan(hours, 0, 0)));
     }
+
     public static long GetNextResetUnixTime(int days, int hours)
     {
         return DateTimeToUnixTime((DateTime.Now.Date + new TimeSpan(days, hours, 0, 0)));
     }
+
     public static long GetNextResetUnixTime(int months, int days, int hours)
     {
         return DateTimeToUnixTime((DateTime.Now.Date + new TimeSpan(months + days, hours, 0)));
@@ -152,19 +146,23 @@ public static class Time
         }
 
         StringBuilder ss = new();
+
         if (days != 0)
         {
             ss.Append(days);
+
             switch (timeFormat)
             {
                 case TimeFormat.ShortText:
                     ss.Append("d");
+
                     break;
                 case TimeFormat.FullText:
                     if (days == 1)
                         ss.Append(" Day ");
                     else
                         ss.Append(" Days ");
+
                     break;
                 default:
                     return "<Unknown time format>";
@@ -174,11 +172,12 @@ public static class Time
         if (hours != 0 || hoursOnly)
         {
             ss.Append(hours);
+
             switch (timeFormat)
             {
-
                 case TimeFormat.ShortText:
                     ss.Append("h");
+
                     break;
                 case TimeFormat.FullText:
 
@@ -186,6 +185,7 @@ public static class Time
                         ss.Append(" Hour ");
                     else
                         ss.Append(" Hours ");
+
                     break;
                 default:
                     return "<Unknown time format>";
@@ -197,35 +197,42 @@ public static class Time
             if (minutes != 0)
             {
                 ss.Append(minutes);
+
                 switch (timeFormat)
                 {
                     case TimeFormat.ShortText:
                         ss.Append("m");
+
                         break;
                     case TimeFormat.FullText:
                         if (minutes == 1)
                             ss.Append(" Minute ");
                         else
                             ss.Append(" Minutes ");
+
                         break;
                     default:
                         return "<Unknown time format>";
                 }
             }
 
-            if (secs != 0 || (days == 0 && hours == 0 && minutes == 0))
+            if (secs != 0 ||
+                (days == 0 && hours == 0 && minutes == 0))
             {
                 ss.Append(secs);
+
                 switch (timeFormat)
                 {
                     case TimeFormat.ShortText:
                         ss.Append("s");
+
                         break;
                     case TimeFormat.FullText:
                         if (secs <= 1)
                             ss.Append(" Second.");
                         else
                             ss.Append(" Seconds.");
+
                         break;
                     default:
                         return "<Unknown time format>";
@@ -243,7 +250,6 @@ public static class Time
         int multiplier;
 
         foreach (var c in timestring)
-        {
             if (char.IsDigit(c))
             {
                 buffer *= 10;
@@ -255,24 +261,28 @@ public static class Time
                 {
                     case 'd':
                         multiplier = Day;
+
                         break;
                     case 'h':
                         multiplier = Hour;
+
                         break;
                     case 'm':
                         multiplier = Minute;
+
                         break;
                     case 's':
                         multiplier = 1;
+
                         break;
                     default:
-                        return 0;                         //bad format
+                        return 0; //bad format
                 }
+
                 buffer *= multiplier;
                 secs += buffer;
                 buffer = 0;
             }
-        }
 
         return (uint)secs;
     }
@@ -289,30 +299,32 @@ public static class Time
     public static long GetUnixTimeFromPackedTime(uint packedDate)
     {
         var time = new DateTime((int)((packedDate >> 24) & 0x1F) + 2000, (int)((packedDate >> 20) & 0xF) + 1, (int)((packedDate >> 14) & 0x3F) + 1, (int)(packedDate >> 6) & 0x1F, (int)(packedDate & 0x3F), 0);
+
         return (uint)DateTimeToUnixTime(time);
     }
 
     public static uint GetPackedTimeFromUnixTime(long unixTime)
     {
         var now = UnixTimeToDateTime(unixTime);
-        return Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute);
+
+        return Convert.ToUInt32(((now.Year - 2000) << 24) | ((now.Month - 1) << 20) | ((now.Day - 1) << 14) | ((int)now.DayOfWeek << 11) | (now.Hour << 6) | now.Minute);
     }
 
     public static uint GetPackedTimeFromDateTime(DateTime now)
     {
-        return Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute);
+        return Convert.ToUInt32(((now.Year - 2000) << 24) | ((now.Month - 1) << 20) | ((now.Day - 1) << 14) | ((int)now.DayOfWeek << 11) | (now.Hour << 6) | now.Minute);
     }
 
     public static void Profile(string description, int iterations, Action func)
     {
         //Run at highest priority to minimize fluctuations caused by other processes/threads
-        System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-        System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
+        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+        Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
         // warm up 
         func();
 
-        var watch = new System.Diagnostics.Stopwatch();
+        var watch = new Stopwatch();
 
         // clean up
         GC.Collect();
@@ -320,10 +332,10 @@ public static class Time
         GC.Collect();
 
         watch.Start();
+
         for (int i = 0; i < iterations; i++)
-        {
             func();
-        }
+
         watch.Stop();
         Console.Write(description);
         Console.WriteLine(" Time Elapsed {0} ms", watch.Elapsed.TotalMilliseconds);
@@ -332,6 +344,8 @@ public static class Time
 
 public class TimeTracker
 {
+    private TimeSpan _expiryTime;
+
     public TimeTracker(uint expiry = 0)
     {
         _expiryTime = TimeSpan.FromMilliseconds(expiry);
@@ -371,15 +385,18 @@ public class TimeTracker
     {
         return _expiryTime;
     }
-
-    TimeSpan _expiryTime;
 }
 
 public class IntervalTimer
 {
+    private long _current;
+
+    private long _interval;
+
     public void Update(long diff)
     {
         _current += diff;
+
         if (_current < 0)
             _current = 0;
     }
@@ -414,13 +431,14 @@ public class IntervalTimer
     {
         return _current;
     }
-
-    long _interval;
-    long _current;
 }
 
 public class PeriodicTimer
 {
+    private int i_expireTime;
+
+    private int i_period;
+
     public PeriodicTimer(int period, int start_time)
     {
         i_period = period;
@@ -433,6 +451,7 @@ public class PeriodicTimer
             return false;
 
         i_expireTime += i_period > diff ? i_period : diff;
+
         return true;
     }
 
@@ -443,10 +462,18 @@ public class PeriodicTimer
     }
 
     // Tracker interface
-    public void TUpdate(int diff) { i_expireTime -= diff; }
-    public bool TPassed() { return i_expireTime <= 0; }
-    public void TReset(int diff, int period) { i_expireTime += period > diff ? period : diff; }
+    public void TUpdate(int diff)
+    {
+        i_expireTime -= diff;
+    }
 
-    int i_period;
-    int i_expireTime;
+    public bool TPassed()
+    {
+        return i_expireTime <= 0;
+    }
+
+    public void TReset(int diff, int period)
+    {
+        i_expireTime += period > diff ? period : diff;
+    }
 }

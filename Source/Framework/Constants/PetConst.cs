@@ -20,13 +20,13 @@ namespace Framework.Constants
 
     public enum PetSaveMode
     {
-        AsDeleted = -2,                        // not saved in fact
-        AsCurrent = -3,                        // in current slot (with player)
+        AsDeleted = -2, // not saved in fact
+        AsCurrent = -3, // in current slot (with player)
         FirstActiveSlot = 0,
         LastActiveSlot = FirstActiveSlot + SharedConst.MaxActivePets,
         FirstStableSlot = 5,
         LastStableSlot = FirstStableSlot + SharedConst.MaxPetStables, // last in DB stable slot index
-        NotInSlot = -1,                       // for avoid conflict with stable size grow will use negative value
+        NotInSlot = -1                                                // for avoid conflict with stable size grow will use negative value
     }
 
     public enum PetSpellState
@@ -96,13 +96,13 @@ namespace Framework.Constants
 
     public enum StableResult
     {
-        NotEnoughMoney = 1,                              // "you don't have enough money"
-        InvalidSlot = 3,                              // "That slot is locked"
-        StableSuccess = 8,                              // stable success
-        UnstableSuccess = 9,                              // unstable/swap success
-        BuySlotSuccess = 10,                             // buy slot success
-        CantControlExotic = 11,                             // "you are unable to control exotic creatures"
-        InternalError = 12,                             // "Internal pet error"
+        NotEnoughMoney = 1,     // "you don't have enough money"
+        InvalidSlot = 3,        // "That slot is locked"
+        StableSuccess = 8,      // stable success
+        UnstableSuccess = 9,    // unstable/swap success
+        BuySlotSuccess = 10,    // buy slot success
+        CantControlExotic = 11, // "you are unable to control exotic creatures"
+        InternalError = 12      // "Internal pet error"
     }
 
     public enum PetTameResult

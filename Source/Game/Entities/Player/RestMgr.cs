@@ -4,11 +4,11 @@ namespace Game.Entities
 {
     public class RestMgr
     {
-        Player _player;
-        long _restTime;
-        uint _innAreaTriggerId;
-        float[] _restBonus = new float[(int)RestTypes.Max];
-        RestFlag _restFlagMask;
+        private readonly Player _player;
+        private readonly float[] _restBonus = new float[(int)RestTypes.Max];
+        private uint _innAreaTriggerId;
+        private RestFlag _restFlagMask;
+        private long _restTime;
 
         public RestMgr(Player player)
         {
@@ -27,15 +27,17 @@ namespace Game.Entities
                     if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                         restBonus = 0;
 
-                    next_level_xp = _player.m_activePlayerData.NextLevelXP;
+                    next_level_xp = _player.ActivePlayerData.NextLevelXP;
                     affectedByRaF = true;
+
                     break;
                 case RestTypes.Honor:
                     // Reset restBonus (Honor only) for players with max honor level.
                     if (_player.IsMaxHonorLevel())
                         restBonus = 0;
 
-                    next_level_xp = _player.m_activePlayerData.HonorNextLevel;
+                    next_level_xp = _player.ActivePlayerData.HonorNextLevel;
+
                     break;
                 default:
                     return;
@@ -52,18 +54,21 @@ namespace Game.Entities
             uint oldBonus = (uint)(_restBonus[(int)restType]);
             _restBonus[(int)restType] = restBonus;
 
-            PlayerRestState oldRestState = (PlayerRestState)(int)_player.m_activePlayerData.RestInfo[(int)restType].StateID;
+            PlayerRestState oldRestState = (PlayerRestState)(int)_player.ActivePlayerData.RestInfo[(int)restType].StateID;
             PlayerRestState newRestState = PlayerRestState.Normal;
 
-            if (affectedByRaF && _player.GetsRecruitAFriendBonus(true) && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
+            if (affectedByRaF &&
+                _player.GetsRecruitAFriendBonus(true) &&
+                (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
                 newRestState = PlayerRestState.RAFLinked;
             else if (_restBonus[(int)restType] >= 1)
                 newRestState = PlayerRestState.Rested;
 
-            if (oldBonus == restBonus && oldRestState == newRestState)
+            if (oldBonus == restBonus &&
+                oldRestState == newRestState)
                 return;
 
-            // update data for client
+            // update _data for client
             _player.SetRestThreshold(restType, (uint)_restBonus[(int)restType]);
             _player.SetRestState(restType, newRestState);
         }
@@ -83,7 +88,8 @@ namespace Game.Entities
             RestFlag oldRestMask = _restFlagMask;
             _restFlagMask |= restFlag;
 
-            if (oldRestMask == 0 && _restFlagMask != 0) // only set flag/time on the first rest state
+            if (oldRestMask == 0 &&
+                _restFlagMask != 0) // only set flag/Time on the first rest State
             {
                 _restTime = GameTime.GetGameTime();
                 _player.SetPlayerFlag(PlayerFlags.Resting);
@@ -98,7 +104,8 @@ namespace Game.Entities
             RestFlag oldRestMask = _restFlagMask;
             _restFlagMask &= ~restFlag;
 
-            if (oldRestMask != 0 && _restFlagMask == 0) // only remove flag/time on the last rest state remove
+            if (oldRestMask != 0 &&
+                _restFlagMask == 0) // only remove flag/Time on the last rest State remove
             {
                 _restTime = 0;
                 _player.RemovePlayerFlag(PlayerFlags.Resting);
@@ -113,21 +120,30 @@ namespace Game.Entities
                 rested_bonus = xp;
 
             uint rested_loss = rested_bonus;
+
             if (restType == RestTypes.XP)
-               MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
+                MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
             SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
 
-            Log.outDebug(LogFilter.Player, "RestMgr.GetRestBonus: Player '{0}' ({1}) gain {2} xp (+{3} Rested Bonus). Rested points={4}",
-                _player.GetGUID().ToString(), _player.GetName(), xp + rested_bonus, rested_bonus, GetRestBonus(restType));
+            Log.outDebug(LogFilter.Player,
+                         "RestMgr.GetRestBonus: Player '{0}' ({1}) gain {2} xp (+{3} Rested Bonus). Rested points={4}",
+                         _player.GetGUID().ToString(),
+                         _player.GetName(),
+                         xp + rested_bonus,
+                         rested_bonus,
+                         GetRestBonus(restType));
+
             return rested_bonus;
         }
 
         public void Update(uint now)
         {
-            if (RandomHelper.randChance(3) && _restTime > 0) // freeze update
+            if (RandomHelper.randChance(3) &&
+                _restTime > 0) // freeze update
             {
                 long timeDiff = now - _restTime;
+
                 if (timeDiff >= 10)
                 {
                     _restTime = now;
@@ -150,16 +166,27 @@ namespace Game.Entities
             switch (restType)
             {
                 case RestTypes.Honor:
-                    return _player.m_activePlayerData.HonorNextLevel / 72000.0f * bubble;
+                    return _player.ActivePlayerData.HonorNextLevel / 72000.0f * bubble;
                 case RestTypes.XP:
-                    return _player.m_activePlayerData.NextLevelXP / 72000.0f * bubble;
+                    return _player.ActivePlayerData.NextLevelXP / 72000.0f * bubble;
                 default:
                     return 0.0f;
             }
         }
 
-        public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
-        public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
-        public uint GetInnTriggerId() { return _innAreaTriggerId; }
+        public float GetRestBonus(RestTypes restType)
+        {
+            return _restBonus[(int)restType];
+        }
+
+        public bool HasRestFlag(RestFlag restFlag)
+        {
+            return (_restFlagMask & restFlag) != 0;
+        }
+
+        public uint GetInnTriggerId()
+        {
+            return _innAreaTriggerId;
+        }
     }
 }

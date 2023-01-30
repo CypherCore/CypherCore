@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint ShadowBolt = 30055;
         public const uint SummonImp = 30066;
@@ -26,7 +26,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         public const uint Sacrifice = 30115;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SaySlay = 0;
         public const uint SayDeath = 1;
@@ -35,59 +35,67 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         public const uint SaySummonPortal = 4;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint NpcFiendishPortal = 17265;
         public const int ActionDespawnImps = 1;
     }
 
     [Script]
-    class boss_terestian : BossAI
+    internal class boss_terestian : BossAI
     {
-        public boss_terestian(Creature creature) : base(creature, DataTypes.Terestian) { }
+        public boss_terestian(Creature creature) : base(creature, DataTypes.Terestian)
+        {
+        }
 
         public override void Reset()
         {
             EntryCheckPredicate pred = new(MiscConst.NpcFiendishPortal);
-            summons.DoAction(MiscConst.ActionDespawnImps, pred);
+            Summons.DoAction(MiscConst.ActionDespawnImps, pred);
             _Reset();
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0);
-                if (target)
-                    DoCast(target, SpellIds.ShadowBolt);
-                task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(10));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
-            {
-                me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
-                DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
-                if (target)
-                {
-                    DoCast(target, SpellIds.Sacrifice, new CastSpellExtraArgs(true));
-                    target.CastSpell(target, SpellIds.SummonDemonchains, true);
-                    Talk(TextIds.SaySacrifice);
-                }
-                task.Repeat(TimeSpan.FromSeconds(42));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-            {
-                Talk(TextIds.SaySummonPortal);
-                DoCastAOE(SpellIds.FiendishPortal1);
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(11), task =>
-            {
-                DoCastAOE(SpellIds.FiendishPortal2, new CastSpellExtraArgs(true));
-            });
-            _scheduler.Schedule(TimeSpan.FromMinutes(10), task =>
-            {
-                DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(1),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 0);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.ShadowBolt);
+
+                                    task.Repeat(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(10));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(3),
+                                task =>
+                                {
+                                    me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
+                                    DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(30),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100.0f, true);
+
+                                    if (target)
+                                    {
+                                        DoCast(target, SpellIds.Sacrifice, new CastSpellExtraArgs(true));
+                                        target.CastSpell(target, SpellIds.SummonDemonchains, true);
+                                        Talk(TextIds.SaySacrifice);
+                                    }
+
+                                    task.Repeat(TimeSpan.FromSeconds(42));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    Talk(TextIds.SaySummonPortal);
+                                    DoCastAOE(SpellIds.FiendishPortal1);
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(11), task => { DoCastAOE(SpellIds.FiendishPortal2, new CastSpellExtraArgs(true)); });
+            _scheduler.Schedule(TimeSpan.FromMinutes(10), task => { DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true)); });
         }
 
         public override void JustEngagedWith(Unit who)
@@ -99,13 +107,12 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
             if (spellInfo.Id == SpellIds.BrokenPact)
-            {
-                _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
-                {
-                    me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
-                    DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
-                });
-            }
+                _scheduler.Schedule(TimeSpan.FromSeconds(32),
+                                    task =>
+                                    {
+                                        me.RemoveAurasDueToSpell(SpellIds.BrokenPact);
+                                        DoCastAOE(SpellIds.SummonImp, new CastSpellExtraArgs(true));
+                                    });
         }
 
         public override void KilledUnit(Unit victim)
@@ -118,7 +125,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         {
             Talk(TextIds.SayDeath);
             EntryCheckPredicate pred = new(MiscConst.NpcFiendishPortal);
-            summons.DoAction(MiscConst.ActionDespawnImps, pred);
+            Summons.DoAction(MiscConst.ActionDespawnImps, pred);
             _JustDied();
         }
 
@@ -129,17 +136,20 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
     }
 
     [Script]
-    class npc_kilrek : ScriptedAI
+    internal class npc_kilrek : ScriptedAI
     {
-        public npc_kilrek(Creature creature) : base(creature) { }
+        public npc_kilrek(Creature creature) : base(creature)
+        {
+        }
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastVictim(SpellIds.AmplifyFlames);
-                    task.Repeat(TimeSpan.FromSeconds(9));
-                });
+            _scheduler.Schedule(TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.AmplifyFlames);
+                                    task.Repeat(TimeSpan.FromSeconds(9));
+                                });
         }
 
         public override void JustDied(Unit killer)
@@ -153,19 +163,18 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
             if (!UpdateVictim())
                 return;
 
-            _scheduler.Update(diff, () =>
-            {
-                DoMeleeAttackIfReady();
-            });
+            _scheduler.Update(diff, () => { DoMeleeAttackIfReady(); });
         }
     }
 
     [Script]
-    class npc_demon_chain : PassiveAI
+    internal class npc_demon_chain : PassiveAI
     {
-        ObjectGuid _sacrificeGUID;
+        private ObjectGuid _sacrificeGUID;
 
-        public npc_demon_chain(Creature creature) : base(creature) { }
+        public npc_demon_chain(Creature creature) : base(creature)
+        {
+        }
 
         public override void IsSummonedBy(WorldObject summoner)
         {
@@ -176,28 +185,31 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         public override void JustDied(Unit killer)
         {
             Unit sacrifice = Global.ObjAccessor.GetUnit(me, _sacrificeGUID);
+
             if (sacrifice)
                 sacrifice.RemoveAurasDueToSpell(SpellIds.Sacrifice);
         }
     }
 
     [Script]
-    class npc_fiendish_portal : PassiveAI
+    internal class npc_fiendish_portal : PassiveAI
     {
-        SummonList _summons;
+        private readonly SummonList _summons;
 
         public npc_fiendish_portal(Creature creature) : base(creature)
         {
-            _summons = new(me);
+            _summons = new SummonList(me);
         }
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromMilliseconds(2400), TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastAOE(SpellIds.SummonFiendishImp, new CastSpellExtraArgs(true));
-                    task.Repeat();
-                });
+            _scheduler.Schedule(TimeSpan.FromMilliseconds(2400),
+                                TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    DoCastAOE(SpellIds.SummonFiendishImp, new CastSpellExtraArgs(true));
+                                    task.Repeat();
+                                });
         }
 
         public override void DoAction(int action)
@@ -219,17 +231,20 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
     }
 
     [Script]
-    class npc_fiendish_imp : ScriptedAI
+    internal class npc_fiendish_imp : ScriptedAI
     {
-        public npc_fiendish_imp(Creature creature) : base(creature) { }
+        public npc_fiendish_imp(Creature creature) : base(creature)
+        {
+        }
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
-            {
-                DoCastVictim(SpellIds.Firebolt);
-                task.Repeat(TimeSpan.FromMilliseconds(2400));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Firebolt);
+                                    task.Repeat(TimeSpan.FromMilliseconds(2400));
+                                });
 
             me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
         }

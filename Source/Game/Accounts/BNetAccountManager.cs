@@ -1,25 +1,29 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Database;
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Framework.Database;
 
 namespace Game
 {
     public sealed class BNetAccountManager : Singleton<BNetAccountManager>
     {
-        BNetAccountManager() { }
+        private BNetAccountManager()
+        {
+        }
 
         public AccountOpResult CreateBattlenetAccount(string email, string password, bool withGameAccount, out string gameAccountName)
         {
             gameAccountName = "";
 
-            if (email.IsEmpty() || email.Length > 320)
+            if (email.IsEmpty() ||
+                email.Length > 320)
                 return AccountOpResult.NameTooLong;
 
-            if (password.IsEmpty() || password.Length > 16)
+            if (password.IsEmpty() ||
+                password.Length > 16)
                 return AccountOpResult.PassTooLong;
 
             if (GetId(email) != 0)
@@ -45,6 +49,7 @@ namespace Game
         public AccountOpResult ChangePassword(uint accountId, string newPassword)
         {
             string username;
+
             if (!GetName(accountId, out username))
                 return AccountOpResult.NameNotExist;
 
@@ -62,6 +67,7 @@ namespace Game
         public bool CheckPassword(uint accountId, string password)
         {
             string username;
+
             if (!GetName(accountId, out username))
                 return false;
 
@@ -75,10 +81,12 @@ namespace Game
         public AccountOpResult LinkWithGameAccount(string email, string gameAccountName)
         {
             uint bnetAccountId = GetId(email);
+
             if (bnetAccountId == 0)
                 return AccountOpResult.NameNotExist;
 
             uint gameAccountId = Global.AccountMgr.GetId(gameAccountName);
+
             if (gameAccountId == 0)
                 return AccountOpResult.NameNotExist;
 
@@ -90,12 +98,14 @@ namespace Game
             stmt.AddValue(1, GetMaxIndex(bnetAccountId) + 1);
             stmt.AddValue(2, gameAccountId);
             DB.Login.Execute(stmt);
+
             return AccountOpResult.Ok;
         }
 
         public AccountOpResult UnlinkGameAccount(string gameAccountName)
         {
             uint gameAccountId = Global.AccountMgr.GetId(gameAccountName);
+
             if (gameAccountId == 0)
                 return AccountOpResult.NameNotExist;
 
@@ -107,6 +117,7 @@ namespace Game
             stmt.AddNull(1);
             stmt.AddValue(2, gameAccountId);
             DB.Login.Execute(stmt);
+
             return AccountOpResult.Ok;
         }
 
@@ -115,6 +126,7 @@ namespace Game
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_EMAIL);
             stmt.AddValue(0, username);
             SQLResult result = DB.Login.Query(stmt);
+
             if (!result.IsEmpty())
                 return result.Read<uint>(0);
 
@@ -127,9 +139,11 @@ namespace Game
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_EMAIL_BY_ID);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
+
             if (!result.IsEmpty())
             {
                 name = result.Read<string>(0);
+
                 return true;
             }
 
@@ -141,6 +155,7 @@ namespace Game
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
             stmt.AddValue(0, gameAccountId);
             SQLResult result = DB.Login.Query(stmt);
+
             if (!result.IsEmpty())
                 return result.Read<uint>(0);
 
@@ -151,6 +166,7 @@ namespace Game
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT);
             stmt.AddValue(0, gameAccountId);
+
             return DB.Login.AsyncQuery(stmt);
         }
 
@@ -159,6 +175,7 @@ namespace Game
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_MAX_ACCOUNT_INDEX);
             stmt.AddValue(0, accountId);
             SQLResult result = DB.Login.Query(stmt);
+
             if (!result.IsEmpty())
                 return result.Read<byte>(0);
 
@@ -169,6 +186,7 @@ namespace Game
         {
             SHA256 sha256 = SHA256.Create();
             var i = sha256.ComputeHash(Encoding.UTF8.GetBytes(name));
+
             return sha256.ComputeHash(Encoding.UTF8.GetBytes(i.ToHexString() + ":" + password)).ToHexString(true);
         }
     }

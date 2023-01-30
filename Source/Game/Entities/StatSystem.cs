@@ -1,13 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -15,9 +15,11 @@ namespace Game.Entities
     {
         public void HandleStatFlatModifier(UnitMods unitMod, UnitModifierFlatType modifierType, float amount, bool apply)
         {
-            if (unitMod >= UnitMods.End || modifierType >= UnitModifierFlatType.End)
+            if (unitMod >= UnitMods.End ||
+                modifierType >= UnitModifierFlatType.End)
             {
                 Log.outError(LogFilter.Unit, "ERROR in HandleStatFlatModifier(): non-existing UnitMods or wrong UnitModifierFlatType!");
+
                 return;
             }
 
@@ -29,7 +31,8 @@ namespace Game.Entities
                 case UnitModifierFlatType.Base:
                 case UnitModifierFlatType.BasePCTExcludeCreate:
                 case UnitModifierFlatType.Total:
-                    m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] += apply ? amount : -amount;
+                    AuraFlatModifiersGroup[(int)unitMod][(int)modifierType] += apply ? amount : -amount;
+
                     break;
                 default:
                     break;
@@ -40,9 +43,11 @@ namespace Game.Entities
 
         public void ApplyStatPctModifier(UnitMods unitMod, UnitModifierPctType modifierType, float pct)
         {
-            if (unitMod >= UnitMods.End || modifierType >= UnitModifierPctType.End)
+            if (unitMod >= UnitMods.End ||
+                modifierType >= UnitModifierPctType.End)
             {
                 Log.outError(LogFilter.Unit, "ERROR in ApplyStatPctModifier(): non-existing UnitMods or wrong UnitModifierPctType!");
+
                 return;
             }
 
@@ -53,7 +58,8 @@ namespace Game.Entities
             {
                 case UnitModifierPctType.Base:
                 case UnitModifierPctType.Total:
-                    MathFunctions.AddPct(ref m_auraPctModifiersGroup[(int)unitMod][(int)modifierType], pct);
+                    MathFunctions.AddPct(ref AuraPctModifiersGroup[(int)unitMod][(int)modifierType], pct);
+
                     break;
                 default:
                     break;
@@ -64,45 +70,904 @@ namespace Game.Entities
 
         public void SetStatFlatModifier(UnitMods unitMod, UnitModifierFlatType modifierType, float val)
         {
-            if (m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] == val)
+            if (AuraFlatModifiersGroup[(int)unitMod][(int)modifierType] == val)
                 return;
 
-            m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] = val;
+            AuraFlatModifiersGroup[(int)unitMod][(int)modifierType] = val;
             UpdateUnitMod(unitMod);
         }
 
         public void SetStatPctModifier(UnitMods unitMod, UnitModifierPctType modifierType, float val)
         {
-            if (m_auraPctModifiersGroup[(int)unitMod][(int)modifierType] == val)
+            if (AuraPctModifiersGroup[(int)unitMod][(int)modifierType] == val)
                 return;
 
-            m_auraPctModifiersGroup[(int)unitMod][(int)modifierType] = val;
+            AuraPctModifiersGroup[(int)unitMod][(int)modifierType] = val;
             UpdateUnitMod(unitMod);
         }
 
         public float GetFlatModifierValue(UnitMods unitMod, UnitModifierFlatType modifierType)
         {
-            if (unitMod >= UnitMods.End || modifierType >= UnitModifierFlatType.End)
+            if (unitMod >= UnitMods.End ||
+                modifierType >= UnitModifierFlatType.End)
             {
                 Log.outError(LogFilter.Unit, "attempt to access non-existing modifier value from UnitMods!");
+
                 return 0.0f;
             }
 
-            return m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType];
+            return AuraFlatModifiersGroup[(int)unitMod][(int)modifierType];
         }
 
         public float GetPctModifierValue(UnitMods unitMod, UnitModifierPctType modifierType)
         {
-            if (unitMod >= UnitMods.End || modifierType >= UnitModifierPctType.End)
+            if (unitMod >= UnitMods.End ||
+                modifierType >= UnitModifierPctType.End)
             {
                 Log.outError(LogFilter.Unit, "attempt to access non-existing modifier value from UnitMods!");
+
                 return 0.0f;
             }
 
-            return m_auraPctModifiersGroup[(int)unitMod][(int)modifierType];
+            return AuraPctModifiersGroup[(int)unitMod][(int)modifierType];
         }
 
-        void UpdateUnitMod(UnitMods unitMod)
+        // returns negative amount on power reduction
+        public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
+        {
+            int gain = 0;
+
+            if (dVal == 0)
+                return 0;
+
+            if (dVal > 0)
+                dVal *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerGainPct, (int)power);
+
+            int curPower = GetPower(power);
+
+            int val = (dVal + curPower);
+
+            if (val <= GetMinPower(power))
+            {
+                SetPower(power, GetMinPower(power), withPowerUpdate);
+
+                return -curPower;
+            }
+
+            int maxPower = GetMaxPower(power);
+
+            if (val < maxPower)
+            {
+                SetPower(power, val, withPowerUpdate);
+                gain = val - curPower;
+            }
+            else if (curPower != maxPower)
+            {
+                SetPower(power, maxPower, withPowerUpdate);
+                gain = maxPower - curPower;
+            }
+
+            return gain;
+        }
+
+        public void UpdateStatBuffMod(Stats stat)
+        {
+            float modPos = 0.0f;
+            float modNeg = 0.0f;
+            float factor = 0.0f;
+
+            UnitMods unitMod = UnitMods.StatStart + (int)stat;
+
+            // includes value from items and enchantments
+            float modValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
+
+            if (modValue > 0.0f)
+                modPos += modValue;
+            else
+                modNeg += modValue;
+
+            if (IsGuardian())
+            {
+                modValue = ((Guardian)this).GetBonusStatFromOwner(stat);
+
+                if (modValue > 0.0f)
+                    modPos += modValue;
+                else
+                    modNeg += modValue;
+            }
+
+            // SPELL_AURA_MOD_STAT_BONUS_PCT only affects BASE_VALUE
+            modPos = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+            modNeg = MathFunctions.CalculatePct(modNeg, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+
+            modPos += GetTotalAuraModifier(AuraType.ModStat,
+                                           aurEff =>
+                                           {
+                                               if ((aurEff.GetMiscValue() < 0 || aurEff.GetMiscValue() == (int)stat) &&
+                                                   aurEff.GetAmount() > 0)
+                                                   return true;
+
+                                               return false;
+                                           });
+
+            modNeg += GetTotalAuraModifier(AuraType.ModStat,
+                                           aurEff =>
+                                           {
+                                               if ((aurEff.GetMiscValue() < 0 || aurEff.GetMiscValue() == (int)stat) &&
+                                                   aurEff.GetAmount() < 0)
+                                                   return true;
+
+                                               return false;
+                                           });
+
+            factor = GetTotalAuraMultiplier(AuraType.ModPercentStat,
+                                            aurEff =>
+                                            {
+                                                if (aurEff.GetMiscValue() == -1 ||
+                                                    aurEff.GetMiscValue() == (int)stat)
+                                                    return true;
+
+                                                return false;
+                                            });
+
+            factor *= GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage,
+                                             aurEff =>
+                                             {
+                                                 if (aurEff.GetMiscValue() == -1 ||
+                                                     aurEff.GetMiscValue() == (int)stat)
+                                                     return true;
+
+                                                 return false;
+                                             });
+
+            modPos *= factor;
+            modNeg *= factor;
+
+            _floatStatPosBuff[(int)stat] = modPos;
+            _floatStatNegBuff[(int)stat] = modNeg;
+
+            UpdateStatBuffModForClient(stat);
+        }
+
+        public virtual bool UpdateStats(Stats stat)
+        {
+            return false;
+        }
+
+        public virtual bool UpdateAllStats()
+        {
+            return false;
+        }
+
+        public virtual void UpdateResistances(SpellSchools school)
+        {
+            if (school > SpellSchools.Normal)
+            {
+                UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
+                float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+                value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+
+                float baseValue = value;
+
+                value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+                value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+
+                SetResistance(school, (int)value);
+                SetBonusResistanceMod(school, (int)(value - baseValue));
+            }
+            else
+            {
+                UpdateArmor();
+            }
+        }
+
+        public virtual void UpdateArmor()
+        {
+        }
+
+        public virtual void UpdateMaxHealth()
+        {
+        }
+
+        public virtual void UpdateMaxPower(PowerType power)
+        {
+        }
+
+        public virtual void UpdateAttackPowerAndDamage(bool ranged = false)
+        {
+        }
+
+        public virtual void UpdateDamagePhysical(WeaponAttackType attType)
+        {
+            CalculateMinMaxDamage(attType, false, true, out float minDamage, out float maxDamage);
+
+            switch (attType)
+            {
+                case WeaponAttackType.BaseAttack:
+                default:
+                    SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MinDamage), minDamage);
+                    SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxDamage), maxDamage);
+
+                    break;
+                case WeaponAttackType.OffAttack:
+                    SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MinOffHandDamage), minDamage);
+                    SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxOffHandDamage), maxDamage);
+
+                    break;
+                case WeaponAttackType.RangedAttack:
+                    SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MinRangedDamage), minDamage);
+                    SetUpdateFieldStatValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxRangedDamage), maxDamage);
+
+                    break;
+            }
+        }
+
+        public virtual void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, out float minDamage, out float maxDamage)
+        {
+            minDamage = 0f;
+            maxDamage = 0f;
+        }
+
+        public void UpdateAllResistances()
+        {
+            for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
+                UpdateResistances(i);
+        }
+
+        //Stats
+        public float GetStat(Stats stat)
+        {
+            return UnitData.Stats[(int)stat];
+        }
+
+        public void SetStat(Stats stat, int val)
+        {
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.Stats, (int)stat), val);
+        }
+
+        public uint GetCreateMana()
+        {
+            return UnitData.BaseMana;
+        }
+
+        public void SetCreateMana(uint val)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.BaseMana), val);
+        }
+
+        public uint GetArmor()
+        {
+            return (uint)GetResistance(SpellSchools.Normal);
+        }
+
+        public void SetArmor(int val, int bonusVal)
+        {
+            SetResistance(SpellSchools.Normal, val);
+            SetBonusResistanceMod(SpellSchools.Normal, bonusVal);
+        }
+
+        public float GetCreateStat(Stats stat)
+        {
+            return CreateStats[(int)stat];
+        }
+
+        public void SetCreateStat(Stats stat, float val)
+        {
+            CreateStats[(int)stat] = val;
+        }
+
+        public float GetPosStat(Stats stat)
+        {
+            return UnitData.StatPosBuff[(int)stat];
+        }
+
+        public float GetNegStat(Stats stat)
+        {
+            return UnitData.StatNegBuff[(int)stat];
+        }
+
+        public int GetResistance(SpellSchools school)
+        {
+            return UnitData.Resistances[(int)school];
+        }
+
+        public int GetBonusResistanceMod(SpellSchools school)
+        {
+            return UnitData.BonusResistanceMods[(int)school];
+        }
+
+        public int GetResistance(SpellSchoolMask mask)
+        {
+            int? resist = null;
+
+            for (int i = (int)SpellSchools.Normal; i < (int)SpellSchools.Max; ++i)
+            {
+                int schoolResistance = GetResistance((SpellSchools)i);
+
+                if (Convert.ToBoolean((int)mask & (1 << i)) &&
+                    (!resist.HasValue || resist.Value > schoolResistance))
+                    resist = schoolResistance;
+            }
+
+            // Resist value will never be negative here
+            return resist.HasValue ? resist.Value : 0;
+        }
+
+        public void SetResistance(SpellSchools school, int val)
+        {
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.Resistances, (int)school), val);
+        }
+
+        public void SetBonusResistanceMod(SpellSchools school, int val)
+        {
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.BonusResistanceMods, (int)school), val);
+        }
+
+        public void SetModCastingSpeed(float castingSpeed)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModCastingSpeed), castingSpeed);
+        }
+
+        public void SetModSpellHaste(float spellHaste)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModSpellHaste), spellHaste);
+        }
+
+        public void SetModHaste(float haste)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHaste), haste);
+        }
+
+        public void SetModRangedHaste(float rangedHaste)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModRangedHaste), rangedHaste);
+        }
+
+        public void SetModHasteRegen(float hasteRegen)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModHasteRegen), hasteRegen);
+        }
+
+        public void SetModTimeRate(float timeRate)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ModTimeRate), timeRate);
+        }
+
+        public void InitStatBuffMods()
+        {
+            for (var stat = Stats.Strength; stat < Stats.Max; ++stat)
+            {
+                _floatStatPosBuff[(int)stat] = 0.0f;
+                _floatStatNegBuff[(int)stat] = 0.0f;
+                UpdateStatBuffModForClient(stat);
+            }
+        }
+
+        public bool CanModifyStats()
+        {
+            return _canModifyStats;
+        }
+
+        public void SetCanModifyStats(bool modifyStats)
+        {
+            _canModifyStats = modifyStats;
+        }
+
+        public float GetTotalStatValue(Stats stat)
+        {
+            UnitMods unitMod = UnitMods.StatStart + (int)stat;
+
+            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+            value += GetCreateStat(stat);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+
+            return value;
+        }
+
+        //Health  
+        public uint GetCreateHealth()
+        {
+            return UnitData.BaseHealth;
+        }
+
+        public void SetCreateHealth(uint val)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.BaseHealth), val);
+        }
+
+        public ulong GetHealth()
+        {
+            return UnitData.Health;
+        }
+
+        public void SetHealth(ulong val)
+        {
+            if (GetDeathState() == DeathState.JustDied ||
+                GetDeathState() == DeathState.Corpse)
+            {
+                val = 0;
+            }
+            else if (IsTypeId(TypeId.Player) &&
+                     GetDeathState() == DeathState.Dead)
+            {
+                val = 1;
+            }
+            else
+            {
+                ulong maxHealth = GetMaxHealth();
+
+                if (maxHealth < val)
+                    val = maxHealth;
+            }
+
+            ulong oldVal = GetHealth();
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.Health), val);
+
+            TriggerOnHealthChangeAuras(oldVal, val);
+
+            // group update
+            Player player = ToPlayer();
+
+            if (player)
+            {
+                if (player.GetGroup())
+                    player.SetGroupUpdateFlag(GroupUpdateFlags.CurHp);
+            }
+            else if (IsPet())
+            {
+                Pet pet = ToCreature().ToPet();
+
+                if (pet.IsControlled())
+                    pet.SetGroupUpdateFlag(GroupUpdatePetFlags.CurHp);
+            }
+        }
+
+        public ulong GetMaxHealth()
+        {
+            return UnitData.MaxHealth;
+        }
+
+        public void SetMaxHealth(ulong val)
+        {
+            if (val == 0)
+                val = 1;
+
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxHealth), val);
+            ulong health = GetHealth();
+
+            // group update
+            if (IsTypeId(TypeId.Player))
+            {
+                if (ToPlayer().GetGroup())
+                    ToPlayer().SetGroupUpdateFlag(GroupUpdateFlags.MaxHp);
+            }
+            else if (IsPet())
+            {
+                Pet pet = ToCreature().ToPet();
+
+                if (pet.IsControlled())
+                    pet.SetGroupUpdateFlag(GroupUpdatePetFlags.MaxHp);
+            }
+
+            if (val < health)
+                SetHealth(val);
+        }
+
+        public float GetHealthPct()
+        {
+            return GetMaxHealth() != 0 ? 100.0f * GetHealth() / GetMaxHealth() : 0.0f;
+        }
+
+        public void SetFullHealth()
+        {
+            SetHealth(GetMaxHealth());
+        }
+
+        public bool IsFullHealth()
+        {
+            return GetHealth() == GetMaxHealth();
+        }
+
+        public bool HealthBelowPct(int pct)
+        {
+            return GetHealth() < CountPctFromMaxHealth(pct);
+        }
+
+        public bool HealthBelowPctDamaged(int pct, uint damage)
+        {
+            return GetHealth() - damage < CountPctFromMaxHealth(pct);
+        }
+
+        public bool HealthAbovePct(int pct)
+        {
+            return GetHealth() > CountPctFromMaxHealth(pct);
+        }
+
+        public bool HealthAbovePctHealed(int pct, uint heal)
+        {
+            return GetHealth() + heal > CountPctFromMaxHealth(pct);
+        }
+
+        public ulong CountPctFromMaxHealth(int pct)
+        {
+            return MathFunctions.CalculatePct(GetMaxHealth(), pct);
+        }
+
+        public ulong CountPctFromCurHealth(int pct)
+        {
+            return MathFunctions.CalculatePct(GetHealth(), pct);
+        }
+
+        public virtual float GetHealthMultiplierForTarget(WorldObject target)
+        {
+            return 1.0f;
+        }
+
+        public virtual float GetDamageMultiplierForTarget(WorldObject target)
+        {
+            return 1.0f;
+        }
+
+        public virtual float GetArmorMultiplierForTarget(WorldObject target)
+        {
+            return 1.0f;
+        }
+
+        //Powers
+        public PowerType GetPowerType()
+        {
+            return (PowerType)(byte)UnitData.DisplayPower;
+        }
+
+        public void SetPowerType(PowerType powerType, bool sendUpdate = true)
+        {
+            if (GetPowerType() == powerType)
+                return;
+
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.DisplayPower), (byte)powerType);
+
+            if (!sendUpdate)
+                return;
+
+            Player thisPlayer = ToPlayer();
+
+            if (thisPlayer != null)
+                if (thisPlayer.GetGroup())
+                    thisPlayer.SetGroupUpdateFlag(GroupUpdateFlags.PowerType);
+            /*else if (IsPet()) TODO 6.x
+			{
+			    Pet pet = ToCreature().ToPet();
+			    if (pet.isControlled())
+			        pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
+			}*/
+
+            // Update max power
+            UpdateMaxPower(powerType);
+
+            // Update current power
+            switch (powerType)
+            {
+                case PowerType.Mana: // Keep the same (druid form switching...)
+                case PowerType.Energy:
+                    break;
+                case PowerType.Rage: // Reset to zero
+                    SetPower(PowerType.Rage, 0);
+
+                    break;
+                case PowerType.Focus: // Make it full
+                    SetFullPower(powerType);
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void SetOverrideDisplayPowerId(uint powerDisplayId)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.OverrideDisplayPowerID), powerDisplayId);
+        }
+
+        public void SetMaxPower(PowerType powerType, int val)
+        {
+            uint powerIndex = GetPowerIndex(powerType);
+
+            if (powerIndex == (int)PowerType.Max ||
+                powerIndex >= (int)PowerType.MaxPerClass)
+                return;
+
+            int cur_power = GetPower(powerType);
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.MaxPower, (int)powerIndex), (uint)val);
+
+            // group update
+            if (IsTypeId(TypeId.Player))
+                if (ToPlayer().GetGroup())
+                    ToPlayer().SetGroupUpdateFlag(GroupUpdateFlags.MaxPower);
+            /*else if (IsPet()) TODO 6.x
+			{
+			    Pet pet = ToCreature().ToPet();
+			    if (pet.isControlled())
+			        pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+			}*/
+
+            if (val < cur_power)
+                SetPower(powerType, val);
+        }
+
+        public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true)
+        {
+            uint powerIndex = GetPowerIndex(powerType);
+
+            if (powerIndex == (int)PowerType.Max ||
+                powerIndex >= (int)PowerType.MaxPerClass)
+                return;
+
+            int maxPower = GetMaxPower(powerType);
+
+            if (maxPower < val)
+                val = maxPower;
+
+            int oldPower = UnitData.Power[(int)powerIndex];
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.Power, (int)powerIndex), val);
+
+            if (IsInWorld && withPowerUpdate)
+            {
+                PowerUpdate packet = new();
+                packet.Guid = GetGUID();
+                packet.Powers.Add(new PowerUpdatePower(val, (byte)powerType));
+                SendMessageToSet(packet, IsTypeId(TypeId.Player));
+            }
+
+            TriggerOnPowerChangeAuras(powerType, oldPower, val);
+
+            // group update
+            if (IsTypeId(TypeId.Player))
+            {
+                Player player = ToPlayer();
+
+                if (player.GetGroup())
+                    player.SetGroupUpdateFlag(GroupUpdateFlags.CurPower);
+            }
+            /*else if (IsPet()) TODO 6.x
+			{
+			    Pet pet = ToCreature().ToPet();
+			    if (pet.isControlled())
+			        pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+			}*/
+        }
+
+        public void SetFullPower(PowerType powerType)
+        {
+            SetPower(powerType, GetMaxPower(powerType));
+        }
+
+        public int GetPower(PowerType powerType)
+        {
+            uint powerIndex = GetPowerIndex(powerType);
+
+            if (powerIndex == (int)PowerType.Max ||
+                powerIndex >= (int)PowerType.MaxPerClass)
+                return 0;
+
+            return UnitData.Power[(int)powerIndex];
+        }
+
+        public int GetMaxPower(PowerType powerType)
+        {
+            uint powerIndex = GetPowerIndex(powerType);
+
+            if (powerIndex == (int)PowerType.Max ||
+                powerIndex >= (int)PowerType.MaxPerClass)
+                return 0;
+
+            return (int)(uint)UnitData.MaxPower[(int)powerIndex];
+        }
+
+        public int GetCreatePowerValue(PowerType powerType)
+        {
+            if (powerType == PowerType.Mana)
+                return (int)GetCreateMana();
+
+            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
+
+            if (powerTypeEntry != null)
+                return powerTypeEntry.MaxBasePower;
+
+            return 0;
+        }
+
+        public virtual uint GetPowerIndex(PowerType powerType)
+        {
+            return 0;
+        }
+
+        public float GetPowerPct(PowerType powerType)
+        {
+            return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f;
+        }
+
+        public bool CanApplyResilience()
+        {
+            return !IsVehicle() && GetOwnerGUID().IsPlayer();
+        }
+
+        public static void ApplyResilience(Unit victim, ref int damage)
+        {
+            // player mounted on multi-passenger Mount is also classified as vehicle
+            if (victim.IsVehicle() &&
+                !victim.IsPlayer())
+                return;
+
+            Unit target = null;
+
+            if (victim.IsPlayer())
+            {
+                target = victim;
+            }
+            else // victim->GetTypeId() == TYPEID_UNIT
+            {
+                Unit owner = victim.GetOwner();
+
+                if (owner != null)
+                    if (owner.IsPlayer())
+                        target = owner;
+            }
+
+            if (!target)
+                return;
+
+            damage -= (int)target.GetDamageReduction((uint)damage);
+        }
+
+        public int CalculateAOEAvoidance(int damage, uint schoolMask, ObjectGuid casterGuid)
+        {
+            damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, schoolMask));
+
+            if (casterGuid.IsAnyTypeCreature())
+                damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, schoolMask));
+
+            return damage;
+        }
+
+        public void SetAttackPower(int attackPower)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.AttackPower), attackPower);
+        }
+
+        public void SetAttackPowerModPos(int attackPowerMod)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.AttackPowerModPos), attackPowerMod);
+        }
+
+        public void SetAttackPowerModNeg(int attackPowerMod)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.AttackPowerModNeg), attackPowerMod);
+        }
+
+        public void SetAttackPowerMultiplier(float attackPowerMult)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.AttackPowerMultiplier), attackPowerMult);
+        }
+
+        public void SetRangedAttackPower(int attackPower)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.RangedAttackPower), attackPower);
+        }
+
+        public void SetRangedAttackPowerModPos(int attackPowerMod)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.RangedAttackPowerModPos), attackPowerMod);
+        }
+
+        public void SetRangedAttackPowerModNeg(int attackPowerMod)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.RangedAttackPowerModNeg), attackPowerMod);
+        }
+
+        public void SetRangedAttackPowerMultiplier(float attackPowerMult)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.RangedAttackPowerMultiplier), attackPowerMult);
+        }
+
+        public void SetMainHandWeaponAttackPower(int attackPower)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.MainHandWeaponAttackPower), attackPower);
+        }
+
+        public void SetOffHandWeaponAttackPower(int attackPower)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.OffHandWeaponAttackPower), attackPower);
+        }
+
+        public void SetRangedWeaponAttackPower(int attackPower)
+        {
+            SetUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.RangedWeaponAttackPower), attackPower);
+        }
+
+        //Chances
+        public override float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
+        {
+            if (spellInfo != null &&
+                spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
+                return 0.0f;
+
+            //calculate miss chance
+            float missChance = victim.GetUnitMissChance();
+
+            // melee attacks while dual wielding have +19% chance to miss
+            if (spellInfo == null &&
+                HaveOffhandWeapon() &&
+                !IsInFeralForm() &&
+                !HasAuraType(AuraType.IgnoreDualWieldHitPenalty))
+                missChance += 19.0f;
+
+            // Spellmod from SpellModOp.HitChance
+            float resistMissChance = 100.0f;
+
+            if (spellInfo != null)
+            {
+                Player modOwner = GetSpellModOwner();
+
+                modOwner?.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref resistMissChance);
+            }
+
+            missChance += resistMissChance - 100.0f;
+
+            if (attType == WeaponAttackType.RangedAttack)
+                missChance -= ModRangedHitChance;
+            else
+                missChance -= ModMeleeHitChance;
+
+            // miss chance from Auras after calculating skill based miss
+            missChance -= GetTotalAuraModifier(AuraType.ModHitChance);
+
+            if (attType == WeaponAttackType.RangedAttack)
+                missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
+            else
+                missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeHitChance);
+
+            return Math.Max(missChance, 0f);
+        }
+
+        public int GetMechanicResistChance(SpellInfo spellInfo)
+        {
+            if (spellInfo == null)
+                return 0;
+
+            int resistMech = 0;
+
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
+            {
+                if (!spellEffectInfo.IsEffect())
+                    break;
+
+                int effect_mech = (int)spellInfo.GetEffectMechanic(spellEffectInfo.EffectIndex);
+
+                if (effect_mech != 0)
+                {
+                    int temp = GetTotalAuraModifierByMiscValue(AuraType.ModMechanicResistance, effect_mech);
+
+                    if (resistMech < temp)
+                        resistMech = temp;
+                }
+            }
+
+            return Math.Max(resistMech, 0);
+        }
+
+        public void ApplyModManaCostMultiplier(float manaCostMultiplier, bool apply)
+        {
+            ApplyModUpdateFieldValue(Values.ModifyValue(UnitData).ModifyValue(UnitData.ManaCostMultiplier), manaCostMultiplier, apply);
+        }
+
+        public void ApplyModManaCostModifier(SpellSchools school, int mod, bool apply)
+        {
+            ApplyModUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.ManaCostModifier, (int)school), mod, apply);
+        }
+
+        private void UpdateUnitMod(UnitMods unitMod)
         {
             if (!CanModifyStats())
                 return;
@@ -114,12 +979,15 @@ namespace Game.Entities
                 case UnitMods.StatStamina:
                 case UnitMods.StatIntellect:
                     UpdateStats(GetStatByAuraGroup(unitMod));
+
                     break;
                 case UnitMods.Armor:
                     UpdateArmor();
+
                     break;
                 case UnitMods.Health:
                     UpdateMaxHealth();
+
                     break;
                 case UnitMods.Mana:
                 case UnitMods.Rage:
@@ -141,6 +1009,7 @@ namespace Game.Entities
                 case UnitMods.Fury:
                 case UnitMods.Pain:
                     UpdateMaxPower((PowerType)(unitMod - UnitMods.PowerStart));
+
                     break;
                 case UnitMods.ResistanceHoly:
                 case UnitMods.ResistanceFire:
@@ -149,65 +1018,39 @@ namespace Game.Entities
                 case UnitMods.ResistanceShadow:
                 case UnitMods.ResistanceArcane:
                     UpdateResistances(GetSpellSchoolByAuraGroup(unitMod));
+
                     break;
                 case UnitMods.AttackPower:
                     UpdateAttackPowerAndDamage();
+
                     break;
                 case UnitMods.AttackPowerRanged:
                     UpdateAttackPowerAndDamage(true);
+
                     break;
                 case UnitMods.DamageMainHand:
                     UpdateDamagePhysical(WeaponAttackType.BaseAttack);
+
                     break;
                 case UnitMods.DamageOffHand:
                     UpdateDamagePhysical(WeaponAttackType.OffAttack);
+
                     break;
                 case UnitMods.DamageRanged:
                     UpdateDamagePhysical(WeaponAttackType.RangedAttack);
+
                     break;
                 default:
                     break;
             }
         }
 
-        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
-
-        // returns negative amount on power reduction
-        public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
+        private int GetMinPower(PowerType power)
         {
-            int gain = 0;
-
-            if (dVal == 0)
-                return 0;
-
-            if (dVal > 0)
-                dVal *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerGainPct, (int)power);
-
-            int curPower = GetPower(power);
-
-            int val = (dVal + curPower);
-            if (val <= GetMinPower(power))
-            {
-                SetPower(power, GetMinPower(power), withPowerUpdate);
-                return -curPower;
-            }
-
-            int maxPower = GetMaxPower(power);
-            if (val < maxPower)
-            {
-                SetPower(power, val, withPowerUpdate);
-                gain = val - curPower;
-            }
-            else if (curPower != maxPower)
-            {
-                SetPower(power, maxPower, withPowerUpdate);
-                gain = maxPower - curPower;
-            }
-
-            return gain;
+            return power == PowerType.LunarPower ? -100 : 0;
         }
 
-        Stats GetStatByAuraGroup(UnitMods unitMod)
+        private Stats GetStatByAuraGroup(UnitMods unitMod)
         {
             Stats stat = Stats.Strength;
 
@@ -215,15 +1058,19 @@ namespace Game.Entities
             {
                 case UnitMods.StatStrength:
                     stat = Stats.Strength;
+
                     break;
                 case UnitMods.StatAgility:
                     stat = Stats.Agility;
+
                     break;
                 case UnitMods.StatStamina:
                     stat = Stats.Stamina;
+
                     break;
                 case UnitMods.StatIntellect:
                     stat = Stats.Intellect;
+
                     break;
                 default:
                     break;
@@ -232,443 +1079,19 @@ namespace Game.Entities
             return stat;
         }
 
-        public void UpdateStatBuffMod(Stats stat)
+        private void UpdateStatBuffModForClient(Stats stat)
         {
-            float modPos = 0.0f;
-            float modNeg = 0.0f;
-            float factor = 0.0f;
-
-            UnitMods unitMod = UnitMods.StatStart + (int)stat;
-
-            // includes value from items and enchantments
-            float modValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
-            if (modValue > 0.0f)
-                modPos += modValue;
-            else
-                modNeg += modValue;
-
-            if (IsGuardian())
-            {
-                modValue = ((Guardian)this).GetBonusStatFromOwner(stat);
-                if (modValue > 0.0f)
-                    modPos += modValue;
-                else
-                    modNeg += modValue;
-            }
-
-            // SPELL_AURA_MOD_STAT_BONUS_PCT only affects BASE_VALUE
-            modPos = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-            modNeg = MathFunctions.CalculatePct(modNeg, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-
-            modPos += GetTotalAuraModifier(AuraType.ModStat, aurEff =>
-            {
-                if ((aurEff.GetMiscValue() < 0 || aurEff.GetMiscValue() == (int)stat) && aurEff.GetAmount() > 0)
-                    return true;
-                return false;
-            });
-
-            modNeg += GetTotalAuraModifier(AuraType.ModStat, aurEff =>
-            {
-                if ((aurEff.GetMiscValue() < 0 || aurEff.GetMiscValue() == (int)stat) && aurEff.GetAmount() < 0)
-                    return true;
-                return false;
-            });
-
-            factor = GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
-            {
-                if (aurEff.GetMiscValue() == -1 || aurEff.GetMiscValue() == (int)stat)
-                    return true;
-                return false;
-            });
-
-            factor *= GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
-            {
-                if (aurEff.GetMiscValue() == -1 || aurEff.GetMiscValue() == (int)stat)
-                    return true;
-                return false;
-            });
-
-            modPos *= factor;
-            modNeg *= factor;
-
-            m_floatStatPosBuff[(int)stat] = modPos;
-            m_floatStatNegBuff[(int)stat] = modNeg;
-
-            UpdateStatBuffModForClient(stat);
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.StatPosBuff, (int)stat), (int)_floatStatPosBuff[(int)stat]);
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.StatNegBuff, (int)stat), (int)_floatStatNegBuff[(int)stat]);
         }
 
-        void UpdateStatBuffModForClient(Stats stat)
-        {
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatPosBuff, (int)stat), (int)m_floatStatPosBuff[(int)stat]);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatNegBuff, (int)stat), (int)m_floatStatNegBuff[(int)stat]);
-        }
-
-        public virtual bool UpdateStats(Stats stat) { return false; }
-        public virtual bool UpdateAllStats() { return false; }
-        public virtual void UpdateResistances(SpellSchools school)
-        {
-            if (school > SpellSchools.Normal)
-            {
-                UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
-                float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-                value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-
-                float baseValue = value;
-
-                value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-                value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
-
-                SetResistance(school, (int)value);
-                SetBonusResistanceMod(school, (int)(value - baseValue));
-            }
-            else
-                UpdateArmor();
-        }
-        public virtual void UpdateArmor() { }
-        public virtual void UpdateMaxHealth() { }
-        public virtual void UpdateMaxPower(PowerType power) { }
-        public virtual void UpdateAttackPowerAndDamage(bool ranged = false) { }
-        public virtual void UpdateDamagePhysical(WeaponAttackType attType)
-        {
-            CalculateMinMaxDamage(attType, false, true, out float minDamage, out float maxDamage);
-
-            switch (attType)
-            {
-                case WeaponAttackType.BaseAttack:
-                default:
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), minDamage);
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxDamage);
-                    break;
-                case WeaponAttackType.OffAttack:
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinOffHandDamage), minDamage);
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxOffHandDamage), maxDamage);
-                    break;
-                case WeaponAttackType.RangedAttack:
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinRangedDamage), minDamage);
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxRangedDamage), maxDamage);
-                    break;
-            }
-        }
-        public virtual void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, out float minDamage, out float maxDamage)
-        {
-            minDamage = 0f;
-            maxDamage = 0f;
-        }
-
-        public void UpdateAllResistances()
-        {
-            for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
-                UpdateResistances(i);
-        }
-
-        //Stats
-        public float GetStat(Stats stat) { return m_unitData.Stats[(int)stat]; }
-        public void SetStat(Stats stat, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Stats, (int)stat), val); }
-        public uint GetCreateMana() { return m_unitData.BaseMana; }
-        public void SetCreateMana(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
-        public uint GetArmor()
-        {
-            return (uint)GetResistance(SpellSchools.Normal);
-        }
-        public void SetArmor(int val, int bonusVal)
-        {
-            SetResistance(SpellSchools.Normal, val);
-            SetBonusResistanceMod(SpellSchools.Normal, bonusVal);
-        }
-        public float GetCreateStat(Stats stat)
-        {
-            return CreateStats[(int)stat];
-        }
-        public void SetCreateStat(Stats stat, float val)
-        {
-            CreateStats[(int)stat] = val;
-        }
-        public float GetPosStat(Stats stat) { return m_unitData.StatPosBuff[(int)stat]; }
-        public float GetNegStat(Stats stat) { return m_unitData.StatNegBuff[(int)stat]; }
-        public int GetResistance(SpellSchools school)
-        {
-            return m_unitData.Resistances[(int)school];
-        }
-        public int GetBonusResistanceMod(SpellSchools school)
-        {
-            return m_unitData.BonusResistanceMods[(int)school];
-        }
-        public int GetResistance(SpellSchoolMask mask)
-        {
-            int? resist = null;
-            for (int i = (int)SpellSchools.Normal; i < (int)SpellSchools.Max; ++i)
-            {
-                int schoolResistance = GetResistance((SpellSchools)i);
-                if (Convert.ToBoolean((int)mask & (1 << i)) && (!resist.HasValue || resist.Value > schoolResistance))
-                    resist = schoolResistance;
-            }
-
-            // resist value will never be negative here
-            return resist.HasValue ? resist.Value : 0;
-        }
-        public void SetResistance(SpellSchools school, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Resistances, (int)school), val); }
-        public void SetBonusResistanceMod(SpellSchools school, int val) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BonusResistanceMods, (int)school), val); }
-        public void SetModCastingSpeed(float castingSpeed) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), castingSpeed); }
-        public void SetModSpellHaste(float spellHaste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), spellHaste); }
-        public void SetModHaste(float haste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), haste); }
-        public void SetModRangedHaste(float rangedHaste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), rangedHaste); }
-        public void SetModHasteRegen(float hasteRegen) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), hasteRegen); }
-        public void SetModTimeRate(float timeRate) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModTimeRate), timeRate); }
-
-        public void InitStatBuffMods()
-        {
-            for (var stat = Stats.Strength; stat < Stats.Max; ++stat)
-            {
-                m_floatStatPosBuff[(int)stat] = 0.0f;
-                m_floatStatNegBuff[(int)stat] = 0.0f;
-                UpdateStatBuffModForClient(stat);
-            }
-        }
-
-        public bool CanModifyStats()
-        {
-            return canModifyStats;
-        }
-        public void SetCanModifyStats(bool modifyStats)
-        {
-            canModifyStats = modifyStats;
-        }
-        public float GetTotalStatValue(Stats stat)
-        {
-            UnitMods unitMod = UnitMods.StatStart + (int)stat;
-
-            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-            value += GetCreateStat(stat);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
-
-            return value;
-        }
-
-        //Health  
-        public uint GetCreateHealth() { return m_unitData.BaseHealth; }
-        public void SetCreateHealth(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseHealth), val); }
-        public ulong GetHealth() { return m_unitData.Health; }
-        public void SetHealth(ulong val)
-        {
-            if (GetDeathState() == DeathState.JustDied || GetDeathState() == DeathState.Corpse)
-                val = 0;
-            else if (IsTypeId(TypeId.Player) && GetDeathState() == DeathState.Dead)
-                val = 1;
-            else
-            {
-                ulong maxHealth = GetMaxHealth();
-                if (maxHealth < val)
-                    val = maxHealth;
-            }
-
-            ulong oldVal = GetHealth();
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Health), val);
-
-            TriggerOnHealthChangeAuras(oldVal, val);
-
-            // group update
-            Player player = ToPlayer();
-            if (player)
-            {
-                if (player.GetGroup())
-                    player.SetGroupUpdateFlag(GroupUpdateFlags.CurHp);
-            }
-            else if (IsPet())
-            {
-                Pet pet = ToCreature().ToPet();
-                if (pet.IsControlled())
-                    pet.SetGroupUpdateFlag(GroupUpdatePetFlags.CurHp);
-            }
-        }
-        public ulong GetMaxHealth() { return m_unitData.MaxHealth; }
-        public void SetMaxHealth(ulong val)
-        {
-            if (val == 0)
-                val = 1;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxHealth), val);
-            ulong health = GetHealth();
-
-            // group update
-            if (IsTypeId(TypeId.Player))
-            {
-                if (ToPlayer().GetGroup())
-                    ToPlayer().SetGroupUpdateFlag(GroupUpdateFlags.MaxHp);
-            }
-            else if (IsPet())
-            {
-                Pet pet = ToCreature().ToPet();
-                if (pet.IsControlled())
-                    pet.SetGroupUpdateFlag(GroupUpdatePetFlags.MaxHp);
-            }
-
-            if (val < health)
-                SetHealth(val);
-        }
-        public float GetHealthPct() { return GetMaxHealth() != 0 ? 100.0f * GetHealth() / GetMaxHealth() : 0.0f; }
-        public void SetFullHealth() { SetHealth(GetMaxHealth()); }
-
-        public bool IsFullHealth() { return GetHealth() == GetMaxHealth(); }
-        public bool HealthBelowPct(int pct) { return GetHealth() < CountPctFromMaxHealth(pct); }
-        public bool HealthBelowPctDamaged(int pct, uint damage) { return GetHealth() - damage < CountPctFromMaxHealth(pct); }
-        public bool HealthAbovePct(int pct) { return GetHealth() > CountPctFromMaxHealth(pct); }
-        public bool HealthAbovePctHealed(int pct, uint heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
-        public ulong CountPctFromMaxHealth(int pct) { return MathFunctions.CalculatePct(GetMaxHealth(), pct); }
-        public ulong CountPctFromCurHealth(int pct) { return MathFunctions.CalculatePct(GetHealth(), pct); }
-
-        public virtual float GetHealthMultiplierForTarget(WorldObject target) { return 1.0f; }
-        public virtual float GetDamageMultiplierForTarget(WorldObject target) { return 1.0f; }
-        public virtual float GetArmorMultiplierForTarget(WorldObject target) { return 1.0f; }
-
-        //Powers
-        public PowerType GetPowerType() { return (PowerType)(byte)m_unitData.DisplayPower; }
-        public void SetPowerType(PowerType powerType, bool sendUpdate = true)
-        {
-            if (GetPowerType() == powerType)
-                return;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayPower), (byte)powerType);
-
-            if (!sendUpdate)
-                return;
-
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
-            {
-                if (thisPlayer.GetGroup())
-                    thisPlayer.SetGroupUpdateFlag(GroupUpdateFlags.PowerType);
-            }
-            /*else if (IsPet()) TODO 6.x
-            {
-                Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
-                    pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
-            }*/
-
-            // Update max power
-            UpdateMaxPower(powerType);
-
-            // Update current power
-            switch (powerType)
-            {
-                case PowerType.Mana: // Keep the same (druid form switching...)
-                case PowerType.Energy:
-                    break;
-                case PowerType.Rage: // Reset to zero
-                    SetPower(PowerType.Rage, 0);
-                    break;
-                case PowerType.Focus: // Make it full
-                    SetFullPower(powerType);
-                    break;
-                default:
-                    break;
-            }
-        }
-        public void SetOverrideDisplayPowerId(uint powerDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OverrideDisplayPowerID), powerDisplayId); }
-
-        public void SetMaxPower(PowerType powerType, int val)
-        {
-            uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
-                return;
-
-            int cur_power = GetPower(powerType);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxPower, (int)powerIndex), (uint)val);
-
-            // group update
-            if (IsTypeId(TypeId.Player))
-            {
-                if (ToPlayer().GetGroup())
-                    ToPlayer().SetGroupUpdateFlag(GroupUpdateFlags.MaxPower);
-            }
-            /*else if (IsPet()) TODO 6.x
-            {
-                Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
-                    pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
-            }*/
-
-            if (val < cur_power)
-                SetPower(powerType, val);
-        }
-        public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true)
-        {
-            uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
-                return;
-
-            int maxPower = GetMaxPower(powerType);
-            if (maxPower < val)
-                val = maxPower;
-
-            int oldPower = m_unitData.Power[(int)powerIndex];
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), val);
-
-            if (IsInWorld && withPowerUpdate)
-            {
-                PowerUpdate packet = new();
-                packet.Guid = GetGUID();
-                packet.Powers.Add(new PowerUpdatePower(val, (byte)powerType));
-                SendMessageToSet(packet, IsTypeId(TypeId.Player));
-            }
-
-            TriggerOnPowerChangeAuras(powerType, oldPower, val);
-
-            // group update
-            if (IsTypeId(TypeId.Player))
-            {
-                Player player = ToPlayer();
-                if (player.GetGroup())
-                    player.SetGroupUpdateFlag(GroupUpdateFlags.CurPower);
-            }
-            /*else if (IsPet()) TODO 6.x
-            {
-                Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
-                    pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
-            }*/
-        }
-        public void SetFullPower(PowerType powerType) { SetPower(powerType, GetMaxPower(powerType)); }
-        public int GetPower(PowerType powerType)
-        {
-            uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
-                return 0;
-
-            return m_unitData.Power[(int)powerIndex];
-        }
-        public int GetMaxPower(PowerType powerType)
-        {
-            uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
-                return 0;
-
-            return (int)(uint)m_unitData.MaxPower[(int)powerIndex];
-        }
-        public int GetCreatePowerValue(PowerType powerType)
-        {
-            if (powerType == PowerType.Mana)
-                return (int)GetCreateMana();
-
-            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
-            if (powerTypeEntry != null)
-                return powerTypeEntry.MaxBasePower;
-
-            return 0;
-        }
-        public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
-        public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
-
-        void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
+        private void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
         {
             var effects = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerPct);
             var effectsAmount = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerAmount);
             effects.AddRange(effectsAmount);
 
             foreach (AuraEffect effect in effects)
-            {
                 if (effect.GetMiscValue() == (int)power)
                 {
                     uint effectAmount = (uint)effect.GetAmount();
@@ -687,12 +1110,16 @@ namespace Game.Entities
                     switch ((AuraTriggerOnPowerChangeDirection)effect.GetMiscValueB())
                     {
                         case AuraTriggerOnPowerChangeDirection.Gain:
-                            if (oldValueCheck >= effect.GetAmount() || newValueCheck < effectAmount)
+                            if (oldValueCheck >= effect.GetAmount() ||
+                                newValueCheck < effectAmount)
                                 continue;
+
                             break;
                         case AuraTriggerOnPowerChangeDirection.Loss:
-                            if (oldValueCheck <= effect.GetAmount() || newValueCheck > effectAmount)
+                            if (oldValueCheck <= effect.GetAmount() ||
+                                newValueCheck > effectAmount)
                                 continue;
+
                             break;
                         default:
                             break;
@@ -700,58 +1127,28 @@ namespace Game.Entities
 
                     CastSpell(this, triggerSpell, new CastSpellExtraArgs(effect));
                 }
-            }
         }
 
-        public bool CanApplyResilience()
-        {
-            return !IsVehicle() && GetOwnerGUID().IsPlayer();
-        }
-
-        public static void ApplyResilience(Unit victim, ref int damage)
-        {
-            // player mounted on multi-passenger mount is also classified as vehicle
-            if (victim.IsVehicle() && !victim.IsPlayer())
-                return;
-
-            Unit target = null;
-            if (victim.IsPlayer())
-                target = victim;
-            else // victim->GetTypeId() == TYPEID_UNIT
-            {
-                Unit owner = victim.GetOwner();
-                if (owner != null)
-                    if (owner.IsPlayer())
-                        target = owner;
-            }
-
-            if (!target)
-                return;
-
-            damage -= (int)target.GetDamageReduction((uint)damage);
-        }
-
-        public int CalculateAOEAvoidance(int damage, uint schoolMask, ObjectGuid casterGuid)
-        {
-            damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, schoolMask));
-            if (casterGuid.IsAnyTypeCreature())
-                damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, schoolMask));
-
-            return damage;
-        }
-        
         // player or player's pet resilience (-1%)
-        uint GetDamageReduction(uint damage) { return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage); }
+        private uint GetDamageReduction(uint damage)
+        {
+            return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage);
+        }
 
-        float GetCombatRatingReduction(CombatRating cr)
+        private float GetCombatRatingReduction(CombatRating cr)
         {
             Player player = ToPlayer();
+
             if (player)
+            {
                 return player.GetRatingBonusValue(cr);
+            }
             // Player's pet get resilience from owner
-            else if (IsPet() && GetOwner())
+            else if (IsPet() &&
+                     GetOwner())
             {
                 Player owner = GetOwner().ToPlayer();
+
                 if (owner)
                     return owner.GetRatingBonusValue(cr);
             }
@@ -759,79 +1156,33 @@ namespace Game.Entities
             return 0.0f;
         }
 
-        uint GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint damage)
+        private uint GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint damage)
         {
             float percent = Math.Min(GetCombatRatingReduction(cr) * rate, cap);
+
             return MathFunctions.CalculatePct(damage, percent);
         }
 
-        public void SetAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AttackPower), attackPower); }
-        public void SetAttackPowerModPos(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AttackPowerModPos), attackPowerMod); }
-        public void SetAttackPowerModNeg(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AttackPowerModNeg), attackPowerMod); }
-        public void SetAttackPowerMultiplier(float attackPowerMult) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AttackPowerMultiplier), attackPowerMult); }
-        public void SetRangedAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPower), attackPower); }
-        public void SetRangedAttackPowerModPos(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModPos), attackPowerMod); }
-        public void SetRangedAttackPowerModNeg(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModNeg), attackPowerMod); }
-        public void SetRangedAttackPowerMultiplier(float attackPowerMult) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerMultiplier), attackPowerMult); }
-        public void SetMainHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MainHandWeaponAttackPower), attackPower); }
-        public void SetOffHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OffHandWeaponAttackPower), attackPower); }
-        public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
-
-        //Chances
-        public override float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
-        {
-            if (spellInfo != null && spellInfo.HasAttribute(SpellAttr7.NoAttackMiss))
-                return 0.0f;
-
-            //calculate miss chance
-            float missChance = victim.GetUnitMissChance();
-
-            // melee attacks while dual wielding have +19% chance to miss
-            if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm() && !HasAuraType(AuraType.IgnoreDualWieldHitPenalty))
-                missChance += 19.0f;
-
-            // Spellmod from SpellModOp.HitChance
-            float resistMissChance = 100.0f;
-            if (spellInfo != null)
-            {
-                Player modOwner = GetSpellModOwner();
-                if (modOwner != null)
-                    modOwner.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref resistMissChance);
-            }
-
-            missChance += resistMissChance - 100.0f;
-
-            if (attType == WeaponAttackType.RangedAttack)
-                missChance -= ModRangedHitChance;
-            else
-                missChance -= ModMeleeHitChance;
-
-            // miss chance from auras after calculating skill based miss
-            missChance -= GetTotalAuraModifier(AuraType.ModHitChance);
-            if (attType == WeaponAttackType.RangedAttack)
-                missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
-            else
-                missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeHitChance);
-
-            return Math.Max(missChance, 0f);
-        }
-
-        float GetUnitCriticalChanceDone(WeaponAttackType attackType)
+        private float GetUnitCriticalChanceDone(WeaponAttackType attackType)
         {
             float chance = 0.0f;
             Player thisPlayer = ToPlayer();
+
             if (thisPlayer != null)
             {
                 switch (attackType)
                 {
                     case WeaponAttackType.BaseAttack:
-                        chance = thisPlayer.m_activePlayerData.CritPercentage;
+                        chance = thisPlayer.ActivePlayerData.CritPercentage;
+
                         break;
                     case WeaponAttackType.OffAttack:
-                        chance = thisPlayer.m_activePlayerData.OffhandCritPercentage;
+                        chance = thisPlayer.ActivePlayerData.OffhandCritPercentage;
+
                         break;
                     case WeaponAttackType.RangedAttack:
-                        chance = thisPlayer.m_activePlayerData.RangedCritPercentage;
+                        chance = thisPlayer.ActivePlayerData.RangedCritPercentage;
+
                         break;
                 }
             }
@@ -844,10 +1195,11 @@ namespace Game.Entities
                     chance += GetTotalAuraModifier(AuraType.ModCritPct);
                 }
             }
+
             return chance;
         }
 
-        float GetUnitCriticalChanceTaken(Unit attacker, WeaponAttackType attackType, float critDone)
+        private float GetUnitCriticalChanceTaken(Unit attacker, WeaponAttackType attackType, float critDone)
         {
             float chance = critDone;
 
@@ -862,6 +1214,7 @@ namespace Game.Entities
             chance += GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() == attacker.GetGUID());
 
             TempSummon tempSummon = attacker.ToTempSummon();
+
             if (tempSummon != null)
                 chance += GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
 
@@ -870,21 +1223,25 @@ namespace Game.Entities
             return Math.Max(chance, 0.0f);
         }
 
-        float GetUnitCriticalChanceAgainst(WeaponAttackType attackType, Unit victim)
+        private float GetUnitCriticalChanceAgainst(WeaponAttackType attackType, Unit victim)
         {
             float chance = GetUnitCriticalChanceDone(attackType);
+
             return victim.GetUnitCriticalChanceTaken(this, attackType, chance);
         }
-        
-        float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
+
+        private float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
 
             float chance = 0.0f;
             float levelBonus = 0.0f;
             Player playerVictim = victim.ToPlayer();
+
             if (playerVictim)
-                chance = playerVictim.m_activePlayerData.DodgePercentage;
+            {
+                chance = playerVictim.ActivePlayerData.DodgePercentage;
+            }
             else
             {
                 if (!victim.IsTotem())
@@ -905,35 +1262,40 @@ namespace Game.Entities
             // reduce dodge by SPELL_AURA_MOD_ENEMY_DODGE
             chance += GetTotalAuraModifier(AuraType.ModEnemyDodge);
 
-            // Reduce dodge chance by attacker expertise rating
+            // Reduce dodge chance by Attacker expertise rating
             if (IsTypeId(TypeId.Player))
                 chance -= ToPlayer().GetExpertiseDodgeOrParryReduction(attType);
             else
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
+
             return Math.Max(chance, 0.0f);
         }
-        float GetUnitParryChance(WeaponAttackType attType, Unit victim)
+
+        private float GetUnitParryChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
 
             float chance = 0.0f;
             float levelBonus = 0.0f;
             Player playerVictim = victim.ToPlayer();
+
             if (playerVictim)
             {
                 if (playerVictim.CanParry())
                 {
                     Item tmpitem = playerVictim.GetWeaponForAttack(WeaponAttackType.BaseAttack, true);
+
                     if (!tmpitem)
                         tmpitem = playerVictim.GetWeaponForAttack(WeaponAttackType.OffAttack, true);
 
                     if (tmpitem)
-                        chance = playerVictim.m_activePlayerData.ParryPercentage;
+                        chance = playerVictim.ActivePlayerData.ParryPercentage;
                 }
             }
             else
             {
-                if (!victim.IsTotem() && !victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParry))
+                if (!victim.IsTotem() &&
+                    !victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParry))
                 {
                     chance = 6.0f;
                     chance += victim.GetTotalAuraModifier(AuraType.ModParryPercent);
@@ -945,38 +1307,46 @@ namespace Game.Entities
 
             chance += levelBonus;
 
-            // Reduce parry chance by attacker expertise rating
+            // Reduce parry chance by Attacker expertise rating
             if (IsTypeId(TypeId.Player))
                 chance -= ToPlayer().GetExpertiseDodgeOrParryReduction(attType);
             else
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
+
             return Math.Max(chance, 0.0f);
         }
-        float GetUnitMissChance()
+
+        private float GetUnitMissChance()
         {
             float miss_chance = 5.0f;
 
             return miss_chance;
         }
-        float GetUnitBlockChance(WeaponAttackType attType, Unit victim)
+
+        private float GetUnitBlockChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
 
             float chance = 0.0f;
             float levelBonus = 0.0f;
             Player playerVictim = victim.ToPlayer();
+
             if (playerVictim)
             {
                 if (playerVictim.CanBlock())
                 {
                     Item tmpitem = playerVictim.GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                    if (tmpitem && !tmpitem.IsBroken() && tmpitem.GetTemplate().GetInventoryType() == InventoryType.Shield)
-                        chance = playerVictim.m_activePlayerData.BlockPercentage;
+
+                    if (tmpitem &&
+                        !tmpitem.IsBroken() &&
+                        tmpitem.GetTemplate().GetInventoryType() == InventoryType.Shield)
+                        chance = playerVictim.ActivePlayerData.BlockPercentage;
                 }
             }
             else
             {
-                if (!victim.IsTotem() && !(victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoBlock)))
+                if (!victim.IsTotem() &&
+                    !(victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoBlock)))
                 {
                     chance = 3.0f;
                     chance += victim.GetTotalAuraModifier(AuraType.ModBlockPercent);
@@ -987,38 +1357,49 @@ namespace Game.Entities
             }
 
             chance += levelBonus;
+
             return Math.Max(chance, 0.0f);
         }
-
-        public int GetMechanicResistChance(SpellInfo spellInfo)
-        {
-            if (spellInfo == null)
-                return 0;
-
-            int resistMech = 0;
-            foreach (var spellEffectInfo in spellInfo.GetEffects())
-            {
-                if (!spellEffectInfo.IsEffect())
-                    break;
-
-                int effect_mech = (int)spellInfo.GetEffectMechanic(spellEffectInfo.EffectIndex);
-                if (effect_mech != 0)
-                {
-                    int temp = GetTotalAuraModifierByMiscValue(AuraType.ModMechanicResistance, effect_mech);
-                    if (resistMech < temp)
-                        resistMech = temp;
-                }
-            }
-            return Math.Max(resistMech, 0);
-        }
-        
-        public void ApplyModManaCostMultiplier(float manaCostMultiplier, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostMultiplier), manaCostMultiplier, apply); }
-
-        public void ApplyModManaCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, (int)school), mod, apply); }
     }
 
     public partial class Player
     {
+        private readonly float[] dodge_cap =
+        {
+            65.631440f,  // Warrior            
+			65.631440f,  // Paladin
+			145.560408f, // Hunter
+			145.560408f, // Rogue
+			150.375940f, // Priest
+			65.631440f,  // DK
+			145.560408f, // Shaman
+			150.375940f, // Mage
+			150.375940f, // Warlock
+			145.560408f, // Monk
+			116.890707f, // Druid
+			145.560408f, // Demon Hunter
+			145.560408f, // Evoker
+			0.0f         // Adventurer
+		};
+
+        private readonly float[] parry_cap =
+        {
+            65.631440f,  // Warrior
+			65.631440f,  // Paladin
+			145.560408f, // Hunter
+			145.560408f, // Rogue
+			0.0f,        // Priest
+			65.631440f,  // DK
+			145.560408f, // Shaman
+			0.0f,        // Mage
+			0.0f,        // Warlock
+			90.6425f,    // Monk
+			0.0f,        // Druid
+			65.631440f,  // Demon Hunter
+			0.0f,        // Evoker
+			0.0f         // Adventurer
+		};
+
         public override bool UpdateAllStats()
         {
             for (var i = Stats.Strength; i < Stats.Max; ++i)
@@ -1058,11 +1439,13 @@ namespace Game.Entities
 
             SetStat(stat, (int)value);
 
-            if (stat == Stats.Stamina || stat == Stats.Intellect || stat == Stats.Strength)
+            if (stat == Stats.Stamina ||
+                stat == Stats.Intellect ||
+                stat == Stats.Strength)
             {
                 Pet pet = GetPet();
-                if (pet != null)
-                    pet.UpdateStats(stat);
+
+                pet?.UpdateStats(stat);
             }
 
             switch (stat)
@@ -1070,19 +1453,24 @@ namespace Game.Entities
                 case Stats.Agility:
                     UpdateAllCritPercentages();
                     UpdateDodgePercentage();
+
                     break;
                 case Stats.Stamina:
                     UpdateMaxHealth();
+
                     break;
                 case Stats.Intellect:
                     UpdateSpellCritChance();
+
                     break;
                 default:
                     break;
             }
 
             if (stat == Stats.Strength)
+            {
                 UpdateAttackPowerAndDamage(false);
+            }
             else if (stat == Stats.Agility)
             {
                 UpdateAttackPowerAndDamage(false);
@@ -1103,26 +1491,53 @@ namespace Game.Entities
                 base.UpdateResistances(school);
 
                 Pet pet = GetPet();
-                if (pet != null)
-                    pet.UpdateResistances(school);
+
+                pet?.UpdateResistances(school);
             }
             else
+            {
                 UpdateArmor();
+            }
         }
 
-        public void ApplyModTargetResistance(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModTargetResistance), mod, apply); }
-        public void ApplyModTargetPhysicalResistance(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModTargetPhysicalResistance), mod, apply); }
+        public void ApplyModTargetResistance(int mod, bool apply)
+        {
+            ApplyModUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModTargetResistance), mod, apply);
+        }
 
-        public void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true); }
+        public void ApplyModTargetPhysicalResistance(int mod, bool apply)
+        {
+            ApplyModUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModTargetPhysicalResistance), mod, apply);
+        }
 
-        public void ApplyModDamageDonePos(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePos, (int)school), mod, apply); }
-        public void ApplyModDamageDoneNeg(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, (int)school), mod, apply); }
-        public void ApplyModDamageDonePercent(SpellSchools school, float pct, bool apply) { ApplyPercentModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, (int)school), pct, apply); }
-        public void SetModDamageDonePercent(SpellSchools school, float pct) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, (int)school), pct); }
+        public void RecalculateRating(CombatRating cr)
+        {
+            ApplyRatingMod(cr, 0, true);
+        }
+
+        public void ApplyModDamageDonePos(SpellSchools school, int mod, bool apply)
+        {
+            ApplyModUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModDamageDonePos, (int)school), mod, apply);
+        }
+
+        public void ApplyModDamageDoneNeg(SpellSchools school, int mod, bool apply)
+        {
+            ApplyModUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModDamageDoneNeg, (int)school), mod, apply);
+        }
+
+        public void ApplyModDamageDonePercent(SpellSchools school, float pct, bool apply)
+        {
+            ApplyPercentModUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModDamageDonePercent, (int)school), pct, apply);
+        }
+
+        public void SetModDamageDonePercent(SpellSchools school, float pct)
+        {
+            SetUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModDamageDonePercent, (int)school), pct);
+        }
 
         public void ApplyRatingMod(CombatRating combatRating, int value, bool apply)
         {
-            baseRatingValue[(int)combatRating] += (apply ? value : -value);
+            _baseRatingValue[(int)combatRating] += (apply ? value : -value);
 
             UpdateRating(combatRating);
         }
@@ -1136,12 +1551,15 @@ namespace Game.Entities
                 case WeaponAttackType.BaseAttack:
                 default:
                     unitMod = UnitMods.DamageMainHand;
+
                     break;
                 case WeaponAttackType.OffAttack:
                     unitMod = UnitMods.DamageOffHand;
+
                     break;
                 case WeaponAttackType.RangedAttack:
                     unitMod = UnitMods.DamageRanged;
+
                     break;
             }
 
@@ -1160,20 +1578,24 @@ namespace Game.Entities
             MathFunctions.AddPct(ref versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
 
             SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
-            if (shapeshift != null && shapeshift.CombatRoundTime != 0)
+
+            if (shapeshift != null &&
+                shapeshift.CombatRoundTime != 0)
             {
                 weaponMinDamage = weaponMinDamage * shapeshift.CombatRoundTime / 1000.0f / attackPowerMod;
                 weaponMaxDamage = weaponMaxDamage * shapeshift.CombatRoundTime / 1000.0f / attackPowerMod;
             }
-            else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
+            else if (!CanUseAttackType(attType)) //check if player not in form but still can't use (disarm case)
             {
                 //cannot use ranged/off attack, set values to 0
                 if (attType != WeaponAttackType.BaseAttack)
                 {
                     min_damage = 0;
                     max_damage = 0;
+
                     return;
                 }
+
                 weaponMinDamage = SharedConst.BaseMinDamage;
                 weaponMaxDamage = SharedConst.BaseMaxDamage;
             }
@@ -1198,6 +1620,7 @@ namespace Game.Entities
         public void UpdateManaRegen()
         {
             uint manaIndex = GetPowerIndex(PowerType.Mana);
+
             if (manaIndex == (int)PowerType.Max)
                 return;
 
@@ -1214,28 +1637,34 @@ namespace Game.Entities
             // Apply PCT bonus from SPELL_AURA_MOD_MANA_REGEN_PCT
             base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModManaRegenPct, (int)PowerType.Mana);
 
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), base_regen);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), base_regen);
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.PowerRegenFlatModifier, (int)manaIndex), base_regen);
+            SetUpdateFieldValue(ref Values.ModifyValue(UnitData).ModifyValue(UnitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), base_regen);
         }
 
         public void UpdateSpellDamageAndHealingBonus()
         {
-            // Magic damage modifiers implemented in Unit.SpellDamageBonusDone
+            // Magic Damage modifiers implemented in Unit.SpellDamageBonusDone
             // This information for client side use only
             // Get healing bonus for all schools
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), (int)SpellBaseHealingBonusDone(SpellSchoolMask.All));
-            // Get damage bonus for all schools
+            SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModHealingDonePos), (int)SpellBaseHealingBonusDone(SpellSchoolMask.All));
+            // Get Damage bonus for all schools
             var modDamageAuras = GetAuraEffectsByType(AuraType.ModDamageDone);
+
             for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
             {
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, i), modDamageAuras.Aggregate(0, (negativeMod, aurEff) =>
-                {
-                    if (aurEff.GetAmount() < 0 && Convert.ToBoolean(aurEff.GetMiscValue() & (1 << i)))
-                        negativeMod += aurEff.GetAmount();
-                    return negativeMod;
-                }));
-                SetUpdateFieldStatValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePos, i),
-                    (SpellBaseDamageBonusDone((SpellSchoolMask)(1 << i)) - m_activePlayerData.ModDamageDoneNeg[i]));
+                SetUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModDamageDoneNeg, i),
+                                    modDamageAuras.Aggregate(0,
+                                                             (negativeMod, aurEff) =>
+                                                             {
+                                                                 if (aurEff.GetAmount() < 0 &&
+                                                                     Convert.ToBoolean(aurEff.GetMiscValue() & (1 << i)))
+                                                                     negativeMod += aurEff.GetAmount();
+
+                                                                 return negativeMod;
+                                                             }));
+
+                SetUpdateFieldStatValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModDamageDonePos, i),
+                                        (SpellBaseDamageBonusDone((SpellSchoolMask)(1 << i)) - ActivePlayerData.ModDamageDoneNeg[i]));
             }
 
             if (HasAuraType(AuraType.OverrideAttackPowerBySpPct))
@@ -1244,7 +1673,11 @@ namespace Game.Entities
                 UpdateAttackPowerAndDamage(true);
             }
         }
-        public uint GetBaseSpellPowerBonus() { return m_baseSpellPower; }
+
+        public uint GetBaseSpellPowerBonus()
+        {
+            return _baseSpellPower;
+        }
 
         public override void UpdateAttackPowerAndDamage(bool ranged = false)
         {
@@ -1262,22 +1695,27 @@ namespace Game.Entities
                     float agilityValue = Math.Max((GetStat(Stats.Agility)) * entry.AttackPowerPerAgility, 0.0f);
 
                     var form = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)GetShapeshiftForm());
+
                     // Directly taken from client, SHAPESHIFT_FLAG_AP_FROM_STRENGTH ?
-                    if (form != null && Convert.ToBoolean((uint)form.Flags & 0x20))
+                    if (form != null &&
+                        Convert.ToBoolean((uint)form.Flags & 0x20))
                         agilityValue += Math.Max(GetStat(Stats.Agility) * entry.AttackPowerPerStrength, 0.0f);
 
                     val2 = strengthValue + agilityValue;
                 }
                 else
+                {
                     val2 = (level + Math.Max(GetStat(Stats.Agility), 0.0f)) * entry.RangedAttackPowerPerAgility;
+                }
             }
             else
             {
-                int minSpellPower = m_activePlayerData.ModHealingDonePos;
-                for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
-                    minSpellPower = Math.Min(minSpellPower, m_activePlayerData.ModDamageDonePos[(int)i]);
+                int minSpellPower = ActivePlayerData.ModHealingDonePos;
 
-                val2 = MathFunctions.CalculatePct(minSpellPower, m_activePlayerData.OverrideAPBySpellPowerPercent);
+                for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
+                    minSpellPower = Math.Min(minSpellPower, ActivePlayerData.ModDamageDonePos[(int)i]);
+
+                val2 = MathFunctions.CalculatePct(minSpellPower, ActivePlayerData.OverrideAPBySpellPowerPercent);
             }
 
             SetStatFlatModifier(unitMod, UnitModifierFlatType.Base, val2);
@@ -1299,30 +1737,37 @@ namespace Game.Entities
                 SetAttackPowerMultiplier(attPowerMultiplier);
             }
 
-            Pet pet = GetPet();                                //update pet's AP
+            Pet pet = GetPet(); //update pet's AP
             Guardian guardian = GetGuardianPet();
-            //automatically update weapon damage after attack power modification
+
+            //automatically update weapon Damage after attack power modification
             if (ranged)
             {
                 UpdateDamagePhysical(WeaponAttackType.RangedAttack);
-                if (pet != null && pet.IsHunterPet()) // At ranged attack change for hunter pet
+
+                if (pet != null &&
+                    pet.IsHunterPet()) // At ranged attack change for hunter pet
                     pet.UpdateAttackPowerAndDamage();
             }
             else
             {
                 UpdateDamagePhysical(WeaponAttackType.BaseAttack);
                 Item offhand = GetWeaponForAttack(WeaponAttackType.OffAttack, true);
+
                 if (offhand)
-                    if (CanDualWield() || offhand.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
+                    if (CanDualWield() ||
+                        offhand.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
                         UpdateDamagePhysical(WeaponAttackType.OffAttack);
 
                 if (HasAuraType(AuraType.OverrideSpellPowerByApPct))
                     UpdateSpellDamageAndHealingBonus();
 
-                if (pet != null && pet.IsPetGhoul()) // At melee attack power change for DK pet
+                if (pet != null &&
+                    pet.IsPetGhoul()) // At melee attack power change for DK pet
                     pet.UpdateAttackPowerAndDamage();
 
-                if (guardian != null && guardian.IsSpiritWolf()) // At melee attack power change for Shaman feral spirit
+                if (guardian != null &&
+                    guardian.IsSpiritWolf()) // At melee attack power change for Shaman feral spirit
                     guardian.UpdateAttackPowerAndDamage();
             }
         }
@@ -1331,81 +1776,53 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.Armor;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);            // armor percent
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base); // base armor
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);        // armor percent
 
             // SPELL_AURA_MOD_ARMOR_PCT_FROM_STAT counts as base armor
-            GetTotalAuraModifier(AuraType.ModArmorPctFromStat, aurEff =>
-            {
-                int miscValue = aurEff.GetMiscValue();
-                Stats stat = (miscValue != -2) ? (Stats)miscValue : GetPrimaryStat();
+            GetTotalAuraModifier(AuraType.ModArmorPctFromStat,
+                                 aurEff =>
+                                 {
+                                     int miscValue = aurEff.GetMiscValue();
+                                     Stats stat = (miscValue != -2) ? (Stats)miscValue : GetPrimaryStat();
 
-                value += MathFunctions.CalculatePct((float)GetStat(stat), aurEff.GetAmount());
-                return true;
-            });
+                                     value += MathFunctions.CalculatePct((float)GetStat(stat), aurEff.GetAmount());
+
+                                     return true;
+                                 });
 
             float baseValue = value;
 
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);        // bonus armor from auras and items
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total); // bonus armor from Auras and items
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
             value *= GetTotalAuraMultiplier(AuraType.ModBonusArmorPct);
 
             SetArmor((int)value, (int)(value - baseValue));
 
             Pet pet = GetPet();
+
             if (pet)
                 pet.UpdateArmor();
 
-            UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
+            UpdateAttackPowerAndDamage(); // armor dependent Auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
         }
 
-        void _ApplyAllStatBonuses()
-        {
-            SetCanModifyStats(false);
-
-            _ApplyAllAuraStatMods();
-            _ApplyAllItemMods();
-            ApplyAllAzeriteItemMods(true);
-
-            SetCanModifyStats(true);
-
-            UpdateAllStats();
-        }
-        void _RemoveAllStatBonuses()
-        {
-            SetCanModifyStats(false);
-
-            ApplyAllAzeriteItemMods(false);
-            _RemoveAllItemMods();
-            _RemoveAllAuraStatMods();
-
-            SetCanModifyStats(true);
-
-            UpdateAllStats();
-        }
-
-        void UpdateAllRatings()
-        {
-            for (CombatRating cr = 0; cr < CombatRating.Max; ++cr)
-                UpdateRating(cr);
-        }
         public void UpdateRating(CombatRating cr)
         {
-            int amount = baseRatingValue[(int)cr];
+            int amount = _baseRatingValue[(int)cr];
 
             foreach (AuraEffect aurEff in GetAuraEffectsByType(AuraType.ModCombatRatingFromCombatRating))
-            {
                 if ((aurEff.GetMiscValueB() & (1 << (int)cr)) != 0)
                 {
                     short? highestRating = null;
+
                     for (byte dependentRating = 0; dependentRating < (int)CombatRating.Max; ++dependentRating)
                         if ((aurEff.GetMiscValue() & (1 << dependentRating)) != 0)
-                            highestRating = (short)Math.Max(highestRating.HasValue ? highestRating.Value : baseRatingValue[dependentRating], baseRatingValue[dependentRating]);
+                            highestRating = (short)Math.Max(highestRating.HasValue ? highestRating.Value : _baseRatingValue[dependentRating], _baseRatingValue[dependentRating]);
 
                     if (highestRating != 0)
                         amount += MathFunctions.CalculatePct(highestRating.Value, aurEff.GetAmount());
                 }
-            }
 
             foreach (var aurEff in GetAuraEffectsByType(AuraType.ModRatingPct))
                 if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
@@ -1414,8 +1831,8 @@ namespace Game.Entities
             if (amount < 0)
                 amount = 0;
 
-            uint oldRating = m_activePlayerData.CombatRatings[(int)cr];
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)cr), (uint)amount);
+            uint oldRating = ActivePlayerData.CombatRatings[(int)cr];
+            SetUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.CombatRatings, (int)cr), (uint)amount);
 
             bool affectStats = CanModifyStats();
 
@@ -1426,21 +1843,27 @@ namespace Game.Entities
                     break;
                 case CombatRating.Dodge:
                     UpdateDodgePercentage();
+
                     break;
                 case CombatRating.Parry:
                     UpdateParryPercentage();
+
                     break;
                 case CombatRating.Block:
                     UpdateBlockPercentage();
+
                     break;
                 case CombatRating.HitMelee:
                     UpdateMeleeHitChances();
+
                     break;
                 case CombatRating.HitRanged:
                     UpdateRangedHitChances();
+
                     break;
                 case CombatRating.HitSpell:
                     UpdateSpellHitChances();
+
                     break;
                 case CombatRating.CritMelee:
                     if (affectStats)
@@ -1448,18 +1871,22 @@ namespace Game.Entities
                         UpdateCritPercentage(WeaponAttackType.BaseAttack);
                         UpdateCritPercentage(WeaponAttackType.OffAttack);
                     }
+
                     break;
                 case CombatRating.CritRanged:
                     if (affectStats)
                         UpdateCritPercentage(WeaponAttackType.RangedAttack);
+
                     break;
                 case CombatRating.CritSpell:
                     if (affectStats)
                         UpdateSpellCritChance();
+
                     break;
                 case CombatRating.Corruption:
                 case CombatRating.CorruptionResistance:
                     UpdateCorruption();
+
                     break;
                 case CombatRating.HasteMelee:
                 case CombatRating.HasteRanged:
@@ -1469,6 +1896,7 @@ namespace Game.Entities
                         float multiplier = GetRatingMultiplier(cr);
                         float oldVal = ApplyRatingDiminishing(cr, oldRating * multiplier);
                         float newVal = ApplyRatingDiminishing(cr, amount * multiplier);
+
                         switch (cr)
                         {
                             case CombatRating.HasteMelee:
@@ -1476,20 +1904,25 @@ namespace Game.Entities
                                 ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, oldVal, false);
                                 ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
                                 ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
+
                                 if (GetClass() == Class.Deathknight)
                                     UpdateAllRunesRegen();
+
                                 break;
                             case CombatRating.HasteRanged:
                                 ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, oldVal, false);
                                 ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, newVal, true);
+
                                 break;
                             case CombatRating.HasteSpell:
                                 ApplyCastTimePercentMod(oldVal, false);
                                 ApplyCastTimePercentMod(newVal, true);
+
                                 break;
                             default:
                                 break;
                         }
+
                         break;
                     }
                 case CombatRating.Expertise:
@@ -1498,59 +1931,67 @@ namespace Game.Entities
                         UpdateExpertise(WeaponAttackType.BaseAttack);
                         UpdateExpertise(WeaponAttackType.OffAttack);
                     }
+
                     break;
                 case CombatRating.ArmorPenetration:
                     if (affectStats)
                         UpdateArmorPenetration(amount);
+
                     break;
                 case CombatRating.Mastery:
                     UpdateMastery();
+
                     break;
                 case CombatRating.VersatilityDamageDone:
                     UpdateVersatilityDamageDone();
+
                     break;
                 case CombatRating.VersatilityHealingDone:
                     UpdateHealingDonePercentMod();
+
                     break;
             }
         }
+
         public void UpdateMastery()
         {
             if (!CanUseMastery())
             {
-                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Mastery), 0.0f);
+                SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Mastery), 0.0f);
+
                 return;
             }
 
             float value = GetTotalAuraModifier(AuraType.Mastery);
             value += GetRatingBonusValue(CombatRating.Mastery);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Mastery), value);
+            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Mastery), value);
 
             ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+
             if (chrSpec == null)
                 return;
 
             foreach (uint masterySpellId in chrSpec.MasterySpellID)
             {
                 Aura aura = GetAura(masterySpellId);
+
                 if (aura != null)
-                {
                     foreach (var spellEffectInfo in aura.GetSpellInfo().GetEffects())
                     {
                         float mult = spellEffectInfo.BonusCoefficient;
+
                         if (MathFunctions.fuzzyEq(mult, 0.0f))
                             continue;
 
                         aura.GetEffect(spellEffectInfo.EffectIndex).ChangeAmount((int)(value * mult));
                     }
-                }
             }
         }
 
         public void UpdateVersatilityDamageDone()
         {
             // No proof that CR_VERSATILITY_DAMAGE_DONE is allways = ActivePlayerData::Versatility
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Versatility), (int)m_activePlayerData.CombatRatings[(int)CombatRating.VersatilityDamageDone]);
+            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.Versatility), (int)ActivePlayerData.CombatRatings[(int)CombatRating.VersatilityDamageDone]);
 
             if (GetClass() == Class.Hunter)
                 UpdateDamagePhysical(WeaponAttackType.RangedAttack);
@@ -1568,107 +2009,17 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref value, auraEffect.GetAmount());
 
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                SetUpdateFieldStatValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent, i), value);
+                SetUpdateFieldStatValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModHealingDonePercent, i), value);
         }
-
-        void UpdateCorruption()
-        {
-            float effectiveCorruption = GetRatingBonusValue(CombatRating.Corruption) - GetRatingBonusValue(CombatRating.CorruptionResistance);
-            foreach (var corruptionEffect in CliDB.CorruptionEffectsStorage.Values)
-            {
-                if (((CorruptionEffectsFlag)corruptionEffect.Flags).HasAnyFlag(CorruptionEffectsFlag.Disabled))
-                    continue;
-
-                if (effectiveCorruption < corruptionEffect.MinCorruption)
-                {
-                    RemoveAura(corruptionEffect.Aura);
-                    continue;
-                }
-
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(corruptionEffect.PlayerConditionID);
-                if (playerCondition != null)
-                {
-                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
-                    {
-                        RemoveAura(corruptionEffect.Aura);
-                        continue;
-                    }
-                }
-
-                CastSpell(this, corruptionEffect.Aura, true);
-            }
-        }
-
-        void UpdateArmorPenetration(int amount)
-        {
-            // Store Rating Value
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)CombatRating.ArmorPenetration), (uint)amount);
-        }
-
-        float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)
-        {
-            float[] m_diminishing_k =
-            {
-                0.9560f,  // Warrior
-                0.9560f,  // Paladin
-                0.9880f,  // Hunter
-                0.9880f,  // Rogue
-                0.9830f,  // Priest
-                0.9560f,  // DK
-                0.9880f,  // Shaman
-                0.9830f,  // Mage
-                0.9830f,  // Warlock
-                0.9830f,  // Monk
-                0.9720f,  // Druid
-                0.9830f,  // Demon Hunter
-                0.9880f,  // Evoker
-                1.0f,     // Adventurer
-            };
-
-            //  1     1     k              cx
-            // --- = --- + --- <=> x' = --------
-            //  x'    c     x            x + ck
-
-            // where:
-            // k  is m_diminishing_k for that class
-            // c  is capArray for that class
-            // x  is chance before DR (diminishValue)
-            // x' is chance after DR (our result)
-
-            uint classIdx = (byte)playerClass - 1u;
-
-            float k = m_diminishing_k[classIdx];
-            float c = capArray[classIdx];
-
-            float result = c * diminishValue / (diminishValue + c * k);
-            result += nonDiminishValue;
-            return result;
-        }
-
-        float[] parry_cap =
-        {
-            65.631440f,     // Warrior
-            65.631440f,     // Paladin
-            145.560408f,    // Hunter
-            145.560408f,    // Rogue
-            0.0f,           // Priest
-            65.631440f,     // DK
-            145.560408f,    // Shaman
-            0.0f,           // Mage
-            0.0f,           // Warlock
-            90.6425f,       // Monk
-            0.0f,           // Druid
-            65.631440f,     // Demon Hunter
-            0.0f,           // Evoker
-            0.0f,           // Adventurer
-        };
 
         public void UpdateParryPercentage()
         {
             // No parry
             float value = 0.0f;
             int pclass = (int)GetClass() - 1;
-            if (CanParry() && parry_cap[pclass] > 0.0f)
+
+            if (CanParry() &&
+                parry_cap[pclass] > 0.0f)
             {
                 float nondiminishing = 5.0f;
                 // Parry from rating
@@ -1682,26 +2033,9 @@ namespace Game.Entities
                 if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                     value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsParry) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsParry) : value;
             }
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), value);
+
+            SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ParryPercentage), value);
         }
-        
-        float[] dodge_cap =
-        {
-            65.631440f,     // Warrior            
-            65.631440f,     // Paladin
-            145.560408f,    // Hunter
-            145.560408f,    // Rogue
-            150.375940f,    // Priest
-            65.631440f,     // DK
-            145.560408f,    // Shaman
-            150.375940f,    // Mage
-            150.375940f,    // Warlock
-            145.560408f,    // Monk
-            116.890707f,    // Druid
-            145.560408f,    // Demon Hunter
-            145.560408f,    // Evoker
-            0.0f,           // Adventurer
-        };
 
         public void UpdateDodgePercentage()
         {
@@ -1717,13 +2051,14 @@ namespace Game.Entities
             if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                 value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsDodge) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsDodge) : value;
 
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DodgePercentage), value);
+            SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.DodgePercentage), value);
         }
 
         public void UpdateBlockPercentage()
         {
             // No block
             float value = 0.0f;
+
             if (CanBlock())
             {
                 // Base value
@@ -1736,7 +2071,8 @@ namespace Game.Entities
                 if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                     value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsBlock) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsBlock) : value;
             }
-            SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BlockPercentage), value);
+
+            SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BlockPercentage), value);
         }
 
         public void UpdateCritPercentage(WeaponAttackType attType)
@@ -1745,23 +2081,27 @@ namespace Game.Entities
             {
                 if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                     value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) : value;
+
                 return value;
             }
 
             switch (attType)
             {
                 case WeaponAttackType.OffAttack:
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OffhandCritPercentage),
-                        applyCritLimit(GetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritMelee)));
+                    SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.OffhandCritPercentage),
+                                            applyCritLimit(GetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritMelee)));
+
                     break;
                 case WeaponAttackType.RangedAttack:
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RangedCritPercentage),
-                        applyCritLimit(GetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritRanged)));
+                    SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.RangedCritPercentage),
+                                            applyCritLimit(GetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritRanged)));
+
                     break;
                 case WeaponAttackType.BaseAttack:
                 default:
-                    SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CritPercentage),
-                        applyCritLimit(GetBaseModValue(BaseModGroup.CritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.CritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritMelee)));
+                    SetUpdateFieldStatValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.CritPercentage),
+                                            applyCritLimit(GetBaseModValue(BaseModGroup.CritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.CritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritMelee)));
+
                     break;
             }
         }
@@ -1783,16 +2123,224 @@ namespace Game.Entities
             switch (attack)
             {
                 case WeaponAttackType.BaseAttack:
-                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MainhandExpertise), expertise);
+                    SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.MainhandExpertise), expertise);
+
                     break;
                 case WeaponAttackType.OffAttack:
-                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OffhandExpertise), expertise);
+                    SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.OffhandExpertise), expertise);
+
                     break;
                 default: break;
             }
         }
 
-        float GetGameTableColumnForCombatRating(GtCombatRatingsRecord row, CombatRating rating)
+        public void UpdateSpellCritChance()
+        {
+            // For others recalculate it from:
+            float crit = 5.0f;
+            // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
+            crit += GetTotalAuraModifier(AuraType.ModSpellCritChance);
+            // Increase crit from SPELL_AURA_MOD_CRIT_PCT
+            crit += GetTotalAuraModifier(AuraType.ModCritPct);
+            // Increase crit from spell crit ratings
+            crit += GetRatingBonusValue(CombatRating.CritSpell);
+
+            // Store crit value
+            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellCritPercentage), crit);
+        }
+
+        public void UpdateMeleeHitChances()
+        {
+            ModMeleeHitChance = 7.5f + GetRatingBonusValue(CombatRating.HitMelee);
+        }
+
+        public void UpdateRangedHitChances()
+        {
+            ModRangedHitChance = 7.5f + GetRatingBonusValue(CombatRating.HitRanged);
+        }
+
+        public void UpdateSpellHitChances()
+        {
+            ModSpellHitChance = 15.0f + GetTotalAuraModifier(AuraType.ModSpellHitChance);
+            ModSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
+        }
+
+        public override void UpdateMaxHealth()
+        {
+            UnitMods unitMod = UnitMods.Health;
+
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + GetHealthBonusFromStamina();
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+
+            SetMaxHealth((uint)value);
+        }
+
+        public override uint GetPowerIndex(PowerType powerType)
+        {
+            return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
+        }
+
+        public override void UpdateMaxPower(PowerType power)
+        {
+            uint powerIndex = GetPowerIndex(power);
+
+            if (powerIndex == (uint)PowerType.Max ||
+                powerIndex >= (uint)PowerType.MaxPerClass)
+                return;
+
+            UnitMods unitMod = UnitMods.PowerStart + (int)power;
+
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+
+            SetMaxPower(power, (int)Math.Round(value));
+        }
+
+        public void ApplySpellPenetrationBonus(int amount, bool apply)
+        {
+            ApplyModTargetResistance(-amount, apply);
+            _spellPenetrationItemMod += apply ? amount : -amount;
+        }
+
+        public bool _ModifyUInt32(bool apply, ref uint baseValue, ref int amount)
+        {
+            // If amount is negative, change sign and value of apply.
+            if (amount < 0)
+            {
+                apply = !apply;
+                amount = -amount;
+            }
+
+            if (apply)
+            {
+                baseValue += (uint)amount;
+            }
+            else
+            {
+                // Make sure we do not get public uint overflow.
+                if (amount > baseValue)
+                    amount = (int)baseValue;
+
+                baseValue -= (uint)amount;
+            }
+
+            return apply;
+        }
+
+        private void _ApplyAllStatBonuses()
+        {
+            SetCanModifyStats(false);
+
+            _ApplyAllAuraStatMods();
+            _ApplyAllItemMods();
+            ApplyAllAzeriteItemMods(true);
+
+            SetCanModifyStats(true);
+
+            UpdateAllStats();
+        }
+
+        private void _RemoveAllStatBonuses()
+        {
+            SetCanModifyStats(false);
+
+            ApplyAllAzeriteItemMods(false);
+            _RemoveAllItemMods();
+            _RemoveAllAuraStatMods();
+
+            SetCanModifyStats(true);
+
+            UpdateAllStats();
+        }
+
+        private void UpdateAllRatings()
+        {
+            for (CombatRating cr = 0; cr < CombatRating.Max; ++cr)
+                UpdateRating(cr);
+        }
+
+        private void UpdateCorruption()
+        {
+            float effectiveCorruption = GetRatingBonusValue(CombatRating.Corruption) - GetRatingBonusValue(CombatRating.CorruptionResistance);
+
+            foreach (var corruptionEffect in CliDB.CorruptionEffectsStorage.Values)
+            {
+                if (((CorruptionEffectsFlag)corruptionEffect.Flags).HasAnyFlag(CorruptionEffectsFlag.Disabled))
+                    continue;
+
+                if (effectiveCorruption < corruptionEffect.MinCorruption)
+                {
+                    RemoveAura(corruptionEffect.Aura);
+
+                    continue;
+                }
+
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(corruptionEffect.PlayerConditionID);
+
+                if (playerCondition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    {
+                        RemoveAura(corruptionEffect.Aura);
+
+                        continue;
+                    }
+
+                CastSpell(this, corruptionEffect.Aura, true);
+            }
+        }
+
+        private void UpdateArmorPenetration(int amount)
+        {
+            // Store Rating Value
+            SetUpdateFieldValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.CombatRatings, (int)CombatRating.ArmorPenetration), (uint)amount);
+        }
+
+        private float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)
+        {
+            float[] _diminishing_k =
+            {
+                0.9560f, // Warrior
+				0.9560f, // Paladin
+				0.9880f, // Hunter
+				0.9880f, // Rogue
+				0.9830f, // Priest
+				0.9560f, // DK
+				0.9880f, // Shaman
+				0.9830f, // Mage
+				0.9830f, // Warlock
+				0.9830f, // Monk
+				0.9720f, // Druid
+				0.9830f, // Demon Hunter
+				0.9880f, // Evoker
+				1.0f     // Adventurer
+			};
+
+            //  1     1     k              cx
+            // --- = --- + --- <=> x' = --------
+            //  x'    c     x            x + ck
+
+            // where:
+            // k  is _diminishing_k for that class
+            // c  is capArray for that class
+            // x  is chance before DR (diminishValue)
+            // x' is chance after DR (our result)
+
+            uint classIdx = (byte)playerClass - 1u;
+
+            float k = _diminishing_k[classIdx];
+            float c = capArray[classIdx];
+
+            float result = c * diminishValue / (diminishValue + c * k);
+            result += nonDiminishValue;
+
+            return result;
+        }
+
+        private float GetGameTableColumnForCombatRating(GtCombatRatingsRecord row, CombatRating rating)
         {
             switch (rating)
             {
@@ -1863,44 +2411,15 @@ namespace Game.Entities
                 default:
                     break;
             }
+
             return 1.0f;
         }
 
-        public void UpdateSpellCritChance()
-        {
-            // For others recalculate it from:
-            float crit = 5.0f;
-            // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
-            crit += GetTotalAuraModifier(AuraType.ModSpellCritChance);
-            // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-            crit += GetTotalAuraModifier(AuraType.ModCritPct);
-            // Increase crit from spell crit ratings
-            crit += GetRatingBonusValue(CombatRating.CritSpell);
-
-            // Store crit value
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SpellCritPercentage), crit);
-        }
-
-        public void UpdateMeleeHitChances()
-        {
-            ModMeleeHitChance = 7.5f + GetRatingBonusValue(CombatRating.HitMelee);
-        }
-
-        public void UpdateRangedHitChances()
-        {
-            ModRangedHitChance = 7.5f + GetRatingBonusValue(CombatRating.HitRanged);
-        }
-
-        public void UpdateSpellHitChances()
-        {
-            ModSpellHitChance = 15.0f + GetTotalAuraModifier(AuraType.ModSpellHitChance);
-            ModSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
-        }
-
-        Stats GetPrimaryStat()
+        private Stats GetPrimaryStat()
         {
             byte primaryStatPriority;
             var specialization = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+
             if (specialization != null)
                 primaryStatPriority = (byte)specialization.PrimaryStatPriority;
             else
@@ -1915,23 +2434,13 @@ namespace Game.Entities
 
             return Stats.Intellect;
         }
-        
-        public override void UpdateMaxHealth()
-        {
-            UnitMods unitMod = UnitMods.Health;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + GetHealthBonusFromStamina();
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
-
-            SetMaxHealth((uint)value);
-        }
-        float GetHealthBonusFromStamina()
+        private float GetHealthBonusFromStamina()
         {
             // Taken from PaperDollFrame.lua - 6.0.3.19085
             float ratio = 10.0f;
             GtHpPerStaRecord hpBase = CliDB.HpPerStaGameTable.GetRow(GetLevel());
+
             if (hpBase != null)
                 ratio = hpBase.Health;
 
@@ -1939,52 +2448,28 @@ namespace Game.Entities
 
             return stamina * ratio;
         }
-        public override uint GetPowerIndex(PowerType powerType)
+
+        private void ApplyManaRegenBonus(int amount, bool apply)
         {
-            return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
-        }
-        public override void UpdateMaxPower(PowerType power)
-        {
-            uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
-                return;
-
-            UnitMods unitMod = UnitMods.PowerStart + (int)power;
-
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
-
-            SetMaxPower(power, (int)Math.Round(value));
-        }
-
-        public void ApplySpellPenetrationBonus(int amount, bool apply)
-        {
-            ApplyModTargetResistance(-amount, apply);
-            m_spellPenetrationItemMod += apply ? amount : -amount;
-        }
-
-        void ApplyManaRegenBonus(int amount, bool apply)
-        {
-            _ModifyUInt32(apply, ref m_baseManaRegen, ref amount);
+            _ModifyUInt32(apply, ref _baseManaRegen, ref amount);
             UpdateManaRegen();
         }
 
-        void ApplyHealthRegenBonus(int amount, bool apply)
+        private void ApplyHealthRegenBonus(int amount, bool apply)
         {
-            _ModifyUInt32(apply, ref m_baseHealthRegen, ref amount);
+            _ModifyUInt32(apply, ref _baseHealthRegen, ref amount);
         }
 
-        void ApplySpellPowerBonus(int amount, bool apply)
+        private void ApplySpellPowerBonus(int amount, bool apply)
         {
             if (HasAuraType(AuraType.OverrideSpellPowerByApPct))
                 return;
 
-            apply = _ModifyUInt32(apply, ref m_baseSpellPower, ref amount);
+            apply = _ModifyUInt32(apply, ref _baseSpellPower, ref amount);
 
             // For speed just update for client
-            ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), amount, apply);
+            ApplyModUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModHealingDonePos), amount, apply);
+
             for (SpellSchools spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
                 ApplyModDamageDonePos(spellSchool, amount, apply);
 
@@ -1993,26 +2478,6 @@ namespace Game.Entities
                 UpdateAttackPowerAndDamage();
                 UpdateAttackPowerAndDamage(true);
             }
-        }
-
-        public bool _ModifyUInt32(bool apply, ref uint baseValue, ref int amount)
-        {
-            // If amount is negative, change sign and value of apply.
-            if (amount < 0)
-            {
-                apply = !apply;
-                amount = -amount;
-            }
-            if (apply)
-                baseValue += (uint)amount;
-            else
-            {
-                // Make sure we do not get public uint overflow.
-                if (amount > baseValue)
-                    amount = (int)baseValue;
-                baseValue -= (uint)amount;
-            }
-            return apply;
         }
     }
 
@@ -2054,8 +2519,10 @@ namespace Game.Entities
         {
             if (powerType == GetPowerType())
                 return 0;
+
             if (powerType == PowerType.AlternatePower)
                 return 1;
+
             if (powerType == PowerType.ComboPoints)
                 return 2;
 
@@ -2095,9 +2562,11 @@ namespace Game.Entities
                 SetAttackPowerMultiplier(attackPowerMultiplier);
             }
 
-            //automatically update weapon damage after attack power modification
+            //automatically update weapon Damage after attack power modification
             if (ranged)
+            {
                 UpdateDamagePhysical(WeaponAttackType.RangedAttack);
+            }
             else
             {
                 UpdateDamagePhysical(WeaponAttackType.BaseAttack);
@@ -2109,27 +2578,33 @@ namespace Game.Entities
         {
             float variance;
             UnitMods unitMod;
+
             switch (attType)
             {
                 case WeaponAttackType.BaseAttack:
                 default:
                     variance = GetCreatureTemplate().BaseVariance;
                     unitMod = UnitMods.DamageMainHand;
+
                     break;
                 case WeaponAttackType.OffAttack:
                     variance = GetCreatureTemplate().BaseVariance;
                     unitMod = UnitMods.DamageOffHand;
+
                     break;
                 case WeaponAttackType.RangedAttack:
                     variance = GetCreatureTemplate().RangeVariance;
                     unitMod = UnitMods.DamageRanged;
+
                     break;
             }
 
-            if (attType == WeaponAttackType.OffAttack && !HaveOffhandWeapon())
+            if (attType == WeaponAttackType.OffAttack &&
+                !HaveOffhandWeapon())
             {
                 minDamage = 0.0f;
                 maxDamage = 0.0f;
+
                 return;
             }
 

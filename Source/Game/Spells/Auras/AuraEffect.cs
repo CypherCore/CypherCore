@@ -1,6 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.BattleFields;
@@ -8,12 +12,9 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Networking.Packets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections;
-using Game.Scripting;
 using Game.Scripting.Interfaces.IUnit;
 
 namespace Game.Spells
@@ -23,38 +24,15 @@ namespace Game.Spells
         public AuraEffect(Aura baseAura, SpellEffectInfo spellEfffectInfo, int? baseAmount, Unit caster)
         {
             auraBase = baseAura;
-            m_spellInfo = baseAura.GetSpellInfo();
+            _spellInfo = baseAura.GetSpellInfo();
             _effectInfo = spellEfffectInfo;
-            m_baseAmount = baseAmount.HasValue ? baseAmount.Value : _effectInfo.CalcBaseValue(caster, baseAura.GetAuraType() == AuraObjectType.Unit ? baseAura.GetOwner().ToUnit() : null, baseAura.GetCastItemId(), baseAura.GetCastItemLevel());
-            m_canBeRecalculated = true;
-            m_isPeriodic = false;
+            _baseAmount = baseAmount.HasValue ? baseAmount.Value : _effectInfo.CalcBaseValue(caster, baseAura.GetAuraType() == AuraObjectType.Unit ? baseAura.GetOwner().ToUnit() : null, baseAura.GetCastItemId(), baseAura.GetCastItemLevel());
+            _canBeRecalculated = true;
+            _isPeriodic = false;
 
             CalculatePeriodic(caster, true, false);
             _amount = CalculateAmount(caster);
             CalculateSpellMod();
-        }
-
-        void GetTargetList(out List<Unit> targetList)
-        {
-            targetList = new List<Unit>();
-            var targetMap = GetBase().GetApplicationMap();
-            // remove all targets which were not added to new list - they no longer deserve area aura
-            foreach (var app in targetMap.Values)
-            {
-                if (app.HasEffect(GetEffIndex()))
-                    targetList.Add(app.GetTarget());
-            }
-        }
-
-        void GetApplicationList(out List<AuraApplication> applicationList)
-        {
-            applicationList = new List<AuraApplication>();
-            var targetMap = GetBase().GetApplicationMap();
-            foreach (var app in targetMap.Values)
-            {
-                if (app.HasEffect(GetEffIndex()))
-                    applicationList.Add(app);
-            }
         }
 
         public int CalculateAmount(Unit caster)
@@ -62,44 +40,55 @@ namespace Game.Spells
             // default amount calculation
             int amount = 0;
 
-            if (!m_spellInfo.HasAttribute(SpellAttr8.MasteryAffectPoints) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
-                amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
-            else if (caster != null && caster.IsTypeId(TypeId.Player))
-                amount = (int)(caster.ToPlayer().m_activePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
+            if (!_spellInfo.HasAttribute(SpellAttr8.MasteryAffectPoints) ||
+                MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
+                amount = GetSpellEffectInfo().CalcValue(caster, _baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
+            else if (caster != null &&
+                     caster.IsTypeId(TypeId.Player))
+                amount = (int)(caster.ToPlayer().ActivePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
 
             // custom amount calculations go here
             switch (GetAuraType())
             {
-                // crowd control auras
+                // crowd control Auras
                 case AuraType.ModConfuse:
                 case AuraType.ModFear:
                 case AuraType.ModStun:
                 case AuraType.ModRoot:
                 case AuraType.Transform:
                 case AuraType.ModRoot2:
-                    m_canBeRecalculated = false;
-                    if (m_spellInfo.ProcFlags == null)
+                    _canBeRecalculated = false;
+
+                    if (_spellInfo.ProcFlags == null)
                         break;
+
                     amount = (int)(GetBase().GetUnitOwner().CountPctFromMaxHealth(10));
+
                     break;
                 case AuraType.SchoolAbsorb:
                 case AuraType.ManaShield:
-                    m_canBeRecalculated = false;
+                    _canBeRecalculated = false;
+
                     break;
                 case AuraType.Mounted:
                     uint mountType = (uint)GetMiscValueB();
                     MountRecord mountEntry = Global.DB2Mgr.GetMount(GetId());
+
                     if (mountEntry != null)
                         mountType = mountEntry.MountTypeID;
 
                     var mountCapability = GetBase().GetUnitOwner().GetMountCapability(mountType);
+
                     if (mountCapability != null)
                         amount = (int)mountCapability.Id;
+
                     break;
                 case AuraType.ShowConfirmationPromptWithDifficulty:
                     if (caster)
                         amount = (int)caster.GetMap().GetDifficultyID();
-                    m_canBeRecalculated = false;
+
+                    _canBeRecalculated = false;
+
                     break;
                 default:
                     break;
@@ -108,15 +97,22 @@ namespace Game.Spells
             if (GetSpellInfo().HasAttribute(SpellAttr10.RollingPeriodic))
             {
                 var periodicAuras = GetBase().GetUnitOwner().GetAuraEffectsByType(GetAuraType());
-                amount = periodicAuras.Aggregate(0, (val, aurEff) =>
-                {
-                    if (aurEff.GetCasterGUID() == GetCasterGUID() && aurEff.GetId() == GetId() && aurEff.GetEffIndex() == GetEffIndex() && aurEff.GetTotalTicks() > 0)
-                        val += aurEff.GetAmount() * (int)aurEff.GetRemainingTicks() / (int)aurEff.GetTotalTicks();
-                    return val;
-                });
+
+                amount = periodicAuras.Aggregate(0,
+                                                 (val, aurEff) =>
+                                                 {
+                                                     if (aurEff.GetCasterGUID() == GetCasterGUID() &&
+                                                         aurEff.GetId() == GetId() &&
+                                                         aurEff.GetEffIndex() == GetEffIndex() &&
+                                                         aurEff.GetTotalTicks() > 0)
+                                                         val += aurEff.GetAmount() * (int)aurEff.GetRemainingTicks() / (int)aurEff.GetTotalTicks();
+
+                                                     return val;
+                                                 });
             }
 
-            GetBase().CallScriptEffectCalcAmountHandlers(this, ref amount, ref m_canBeRecalculated);
+            GetBase().CallScriptEffectCalcAmountHandlers(this, ref amount, ref _canBeRecalculated);
+
             if (!GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack))
                 amount *= GetBase().GetStackAmount();
 
@@ -129,41 +125,36 @@ namespace Game.Spells
                     case AuraType.PeriodicDamage:
                     case AuraType.PeriodicLeech:
                         _estimatedAmount = caster.SpellDamageBonusDone(GetBase().GetUnitOwner(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+
                         break;
                     case AuraType.PeriodicHeal:
                         _estimatedAmount = caster.SpellHealingBonusDone(GetBase().GetUnitOwner(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+
                         break;
                     default:
                         break;
                 }
             }
+
             return amount;
         }
 
         public uint GetTotalTicks()
         {
             uint totalTicks = 0;
-            if (_period != 0 && !GetBase().IsPermanent())
+
+            if (_period != 0 &&
+                !GetBase().IsPermanent())
             {
                 totalTicks = (uint)(GetBase().GetMaxDuration() / _period);
-                if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
+
+                if (_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     ++totalTicks;
             }
 
             return totalTicks;
         }
 
-        void ResetPeriodic(bool resetPeriodicTimer = false)
-        {
-            _ticksDone = 0;
-            if (resetPeriodicTimer)
-            {
-                _periodicTimer = 0;
-                // Start periodic on next tick or at aura apply
-                if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
-                    _periodicTimer = _period;
-            }
-        }
         public void CalculatePeriodic(Unit caster, bool resetPeriodicTimer = true, bool load = false)
         {
             _period = (int)GetSpellEffectInfo().ApplyAuraPeriod;
@@ -185,48 +176,51 @@ namespace Game.Spells
                 case AuraType.PowerBurn:
                 case AuraType.PeriodicDummy:
                 case AuraType.PeriodicTriggerSpellWithValue:
-                    m_isPeriodic = true;
+                    _isPeriodic = true;
+
                     break;
                 default:
                     break;
             }
 
-            GetBase().CallScriptEffectCalcPeriodicHandlers(this, ref m_isPeriodic, ref _period);
+            GetBase().CallScriptEffectCalcPeriodicHandlers(this, ref _isPeriodic, ref _period);
 
-            if (!m_isPeriodic)
+            if (!_isPeriodic)
                 return;
 
-            Player modOwner = caster != null ? caster.GetSpellModOwner() : null;
+            Player modOwner = caster?.GetSpellModOwner();
 
-            // Apply casting time mods
+            // Apply casting Time mods
             if (_period != 0)
             {
-                // Apply periodic time mod
-                if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Period, ref _period);
+                // Apply periodic Time mod
+                modOwner?.ApplySpellMod(GetSpellInfo(), SpellModOp.Period, ref _period);
 
                 if (caster != null)
                 {
-                    // Haste modifies periodic time of channeled spells
-                    if (m_spellInfo.IsChanneled())
-                        caster.ModSpellDurationTime(m_spellInfo, ref _period);
-                    else if (m_spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
-                        _period = (int)(_period * caster.m_unitData.ModCastingSpeed);
+                    // Haste modifies periodic Time of channeled spells
+                    if (_spellInfo.IsChanneled())
+                        caster.ModSpellDurationTime(_spellInfo, ref _period);
+                    else if (_spellInfo.HasAttribute(SpellAttr5.SpellHasteAffectsPeriodic))
+                        _period = (int)(_period * caster.UnitData.ModCastingSpeed);
                 }
             }
             else // prevent infinite loop on Update
-                m_isPeriodic = false;
+            {
+                _isPeriodic = false;
+            }
 
             if (load) // aura loaded from db
             {
-                if (_period != 0 && !GetBase().IsPermanent())
+                if (_period != 0 &&
+                    !GetBase().IsPermanent())
                 {
                     uint elapsedTime = (uint)(GetBase().GetMaxDuration() - GetBase().GetDuration());
                     _ticksDone = elapsedTime / (uint)_period;
                     _periodicTimer = (int)(elapsedTime % _period);
                 }
 
-                if (m_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
+                if (_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
                     ++_ticksDone;
             }
             else // aura just created or reapplied
@@ -236,13 +230,14 @@ namespace Game.Spells
                 ResetPeriodic(resetPeriodicTimer);
             }
         }
+
         public void CalculateSpellMod()
         {
             switch (GetAuraType())
             {
                 case AuraType.AddFlatModifier:
                 case AuraType.AddPctModifier:
-                    if (m_spellmod == null)
+                    if (_spellmod == null)
                     {
                         SpellModifierByClassMask spellmod = new(GetBase());
                         spellmod.op = (SpellModOp)GetMiscValue();
@@ -250,12 +245,14 @@ namespace Game.Spells
                         spellmod.type = GetAuraType() == AuraType.AddPctModifier ? SpellModType.Pct : SpellModType.Flat;
                         spellmod.spellId = GetId();
                         spellmod.mask = GetSpellEffectInfo().SpellClassMask;
-                        m_spellmod = spellmod;
+                        _spellmod = spellmod;
                     }
-                    (m_spellmod as SpellModifierByClassMask).value = GetAmount();
+
+                    (_spellmod as SpellModifierByClassMask).value = GetAmount();
+
                     break;
                 case AuraType.AddFlatModifierBySpellLabel:
-                    if (m_spellmod == null)
+                    if (_spellmod == null)
                     {
                         SpellFlatModifierByLabel spellmod = new(GetBase());
                         spellmod.op = (SpellModOp)GetMiscValue();
@@ -264,12 +261,14 @@ namespace Game.Spells
                         spellmod.spellId = GetId();
                         spellmod.value.ModIndex = GetMiscValue();
                         spellmod.value.LabelID = GetMiscValueB();
-                        m_spellmod = spellmod;
+                        _spellmod = spellmod;
                     }
-                    (m_spellmod as SpellFlatModifierByLabel).value.ModifierValue = GetAmount();
+
+                    (_spellmod as SpellFlatModifierByLabel).value.ModifierValue = GetAmount();
+
                     break;
                 case AuraType.AddPctModifierBySpellLabel:
-                    if (m_spellmod == null)
+                    if (_spellmod == null)
                     {
                         SpellPctModifierByLabel spellmod = new(GetBase());
                         spellmod.op = (SpellModOp)GetMiscValue();
@@ -278,21 +277,27 @@ namespace Game.Spells
                         spellmod.spellId = GetId();
                         spellmod.value.ModIndex = GetMiscValue();
                         spellmod.value.LabelID = GetMiscValueB();
-                        m_spellmod = spellmod;
+                        _spellmod = spellmod;
                     }
-                    (m_spellmod as SpellPctModifierByLabel).value.ModifierValue = 1.0f + MathFunctions.CalculatePct(1.0f, GetAmount());
+
+                    (_spellmod as SpellPctModifierByLabel).value.ModifierValue = 1.0f + MathFunctions.CalculatePct(1.0f, GetAmount());
+
                     break;
                 default:
                     break;
             }
-            GetBase().CallScriptEffectCalcSpellModHandlers(this, ref m_spellmod);
+
+            GetBase().CallScriptEffectCalcSpellModHandlers(this, ref _spellmod);
         }
+
         public void ChangeAmount(int newAmount, bool mark = true, bool onStackOrReapply = false, AuraEffect triggeredBy = null)
         {
             // Reapply if amount change
             AuraEffectHandleModes handleMask = 0;
+
             if (newAmount != GetAmount())
                 handleMask |= AuraEffectHandleModes.ChangeAmount;
+
             if (onStackOrReapply)
                 handleMask |= AuraEffectHandleModes.Reapply;
 
@@ -313,6 +318,7 @@ namespace Game.Spells
                     _amount = newAmount;
                 else
                     SetAmount(newAmount);
+
                 CalculateSpellMod();
             }
 
@@ -325,17 +331,15 @@ namespace Game.Spells
                 HandleEffect(aurApp, handleMask, true, triggeredBy);
             }
 
-            if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || Aura.EffectTypeNeedsSendingAmount(GetAuraType()))
+            if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) ||
+                Aura.EffectTypeNeedsSendingAmount(GetAuraType()))
                 GetBase().SetNeedClientUpdateForTargets();
         }
 
         public void HandleEffect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply, AuraEffect triggeredBy = null)
         {
             // check if call is correct, we really don't want using bitmasks here (with 1 exception)
-            Cypher.Assert(mode == AuraEffectHandleModes.Real || mode == AuraEffectHandleModes.SendForClient
-                || mode == AuraEffectHandleModes.ChangeAmount || mode == AuraEffectHandleModes.Stat
-                || mode == AuraEffectHandleModes.Skill || mode == AuraEffectHandleModes.Reapply
-                || mode == (AuraEffectHandleModes.ChangeAmount | AuraEffectHandleModes.Reapply));
+            Cypher.Assert(mode == AuraEffectHandleModes.Real || mode == AuraEffectHandleModes.SendForClient || mode == AuraEffectHandleModes.ChangeAmount || mode == AuraEffectHandleModes.Stat || mode == AuraEffectHandleModes.Skill || mode == AuraEffectHandleModes.Reapply || mode == (AuraEffectHandleModes.ChangeAmount | AuraEffectHandleModes.Reapply));
 
             // register/unregister effect in lists in case of real AuraEffect apply/remove
             // registration/unregistration is done always before real effect handling (some effect handlers code is depending on this)
@@ -348,6 +352,7 @@ namespace Game.Spells
 
             // call scripts helping/replacing effect handlers
             bool prevented;
+
             if (apply)
                 prevented = GetBase().CallScriptEffectApplyHandlers(this, aurApp, mode);
             else
@@ -371,6 +376,7 @@ namespace Game.Spells
             else
                 GetBase().CallScriptAfterEffectRemoveHandlers(this, aurApp, mode);
         }
+
         public void HandleEffect(Unit target, AuraEffectHandleModes mode, bool apply, AuraEffect triggeredBy = null)
         {
             AuraApplication aurApp = GetBase().GetApplicationOfTarget(target.GetGUID());
@@ -378,85 +384,22 @@ namespace Game.Spells
             HandleEffect(aurApp, mode, apply, triggeredBy);
         }
 
-        void ApplySpellMod(Unit target, bool apply, AuraEffect triggeredBy = null)
-        {
-            if (m_spellmod == null || !target.IsTypeId(TypeId.Player))
-                return;
-
-            target.ToPlayer().AddSpellMod(m_spellmod, apply);
-
-            // Auras with charges do not mod amount of passive auras
-            if (GetBase().IsUsingCharges())
-                return;
-            // reapply some passive spells after add/remove related spellmods
-            // Warning: it is a dead loop if 2 auras each other amount-shouldn't happen
-            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
-            switch ((SpellModOp)GetMiscValue())
-            {
-                case SpellModOp.Points:
-                    recalculateEffectMask.SetAll(true);
-                    break;
-                case SpellModOp.PointsIndex0:
-                    recalculateEffectMask.Set(0, true);
-                    break;
-                case SpellModOp.PointsIndex1:
-                    recalculateEffectMask.Set(1, true);
-                    break;
-                case SpellModOp.PointsIndex2:
-                    recalculateEffectMask.Set(2, true);
-                    break;
-                case SpellModOp.PointsIndex3:
-                    recalculateEffectMask.Set(3, true);
-                    break;
-                case SpellModOp.PointsIndex4:
-                    recalculateEffectMask.Set(4, true);
-                    break;
-                default:
-                    break;
-            }
-
-            if (recalculateEffectMask.Any())
-            {
-                if (triggeredBy == null)
-                    triggeredBy = this;
-
-                ObjectGuid guid = target.GetGUID();
-                var auras = target.GetAppliedAuras();
-                foreach (var iter in auras)
-                {
-                    Aura aura = iter.Value.GetBase();
-                    // only passive and permament auras-active auras should have amount set on spellcast and not be affected
-                    // if aura is cast by others, it will not be affected
-                    if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
-                    {
-                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
-                        {
-                            if (recalculateEffectMask[(int)i])
-                            {
-                                AuraEffect aurEff = aura.GetEffect(i);
-                                if (aurEff != null)
-                                    if (aurEff != triggeredBy)
-                                        aurEff.RecalculateAmount(triggeredBy);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         public void Update(uint diff, Unit caster)
         {
-            if (!m_isPeriodic || (GetBase().GetDuration() < 0 && !GetBase().IsPassive() && !GetBase().IsPermanent()))
+            if (!_isPeriodic ||
+                (GetBase().GetDuration() < 0 && !GetBase().IsPassive() && !GetBase().IsPermanent()))
                 return;
 
             uint totalTicks = GetTotalTicks();
 
             _periodicTimer += (int)diff;
+
             while (_periodicTimer >= _period)
             {
                 _periodicTimer -= _period;
 
-                if (!GetBase().IsPermanent() && (_ticksDone + 1) > totalTicks)
+                if (!GetBase().IsPermanent() &&
+                    (_ticksDone + 1) > totalTicks)
                     break;
 
                 ++_ticksDone;
@@ -464,6 +407,7 @@ namespace Game.Spells
                 GetBase().CallScriptEffectUpdatePeriodicHandlers(this);
 
                 GetApplicationList(out List<AuraApplication> effectApplications);
+
                 // tick on targets of effects
                 foreach (var appt in effectApplications)
                     PeriodicTick(appt, caster);
@@ -480,93 +424,22 @@ namespace Game.Spells
             if (spell == null)
                 return false;
 
-            // Check family name and EffectClassMask
-            if (!spell.IsAffected(m_spellInfo.SpellFamilyName, GetSpellEffectInfo().SpellClassMask))
+            // Check family Name and EffectClassMask
+            if (!spell.IsAffected(_spellInfo.SpellFamilyName, GetSpellEffectInfo().SpellClassMask))
                 return false;
 
             return true;
         }
 
-        void SendTickImmune(Unit target, Unit caster)
-        {
-            if (caster != null)
-                caster.SendSpellDamageImmune(target, m_spellInfo.Id, true);
-        }
-
-        void PeriodicTick(AuraApplication aurApp, Unit caster)
-        {
-            bool prevented = GetBase().CallScriptEffectPeriodicHandlers(this, aurApp);
-            if (prevented)
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            // Update serverside orientation of tracking channeled auras on periodic update ticks
-            // exclude players because can turn during channeling and shouldn't desync orientation client/server
-            if (caster != null && !caster.IsPlayer() && m_spellInfo.IsChanneled() && m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel) && caster.m_unitData.ChannelObjects.Size() != 0)
-            {
-                ObjectGuid channelGuid = caster.m_unitData.ChannelObjects[0];
-                if (channelGuid != caster.GetGUID())
-                {
-                    WorldObject objectTarget = Global.ObjAccessor.GetWorldObject(caster, channelGuid);
-                    if (objectTarget != null)
-                        caster.SetInFront(objectTarget);
-                }
-            }
-
-            switch (GetAuraType())
-            {
-                case AuraType.PeriodicDummy:
-                    // handled via scripts
-                    break;
-                case AuraType.PeriodicTriggerSpell:
-                    HandlePeriodicTriggerSpellAuraTick(target, caster);
-                    break;
-                case AuraType.PeriodicTriggerSpellFromClient:
-                    // Don't actually do anything - client will trigger casts of these spells by itself
-                    break;
-                case AuraType.PeriodicTriggerSpellWithValue:
-                    HandlePeriodicTriggerSpellWithValueAuraTick(target, caster);
-                    break;
-                case AuraType.PeriodicDamage:
-                case AuraType.PeriodicWeaponPercentDamage:
-                case AuraType.PeriodicDamagePercent:
-                    HandlePeriodicDamageAurasTick(target, caster);
-                    break;
-                case AuraType.PeriodicLeech:
-                    HandlePeriodicHealthLeechAuraTick(target, caster);
-                    break;
-                case AuraType.PeriodicHealthFunnel:
-                    HandlePeriodicHealthFunnelAuraTick(target, caster);
-                    break;
-                case AuraType.PeriodicHeal:
-                case AuraType.ObsModHealth:
-                    HandlePeriodicHealAurasTick(target, caster);
-                    break;
-                case AuraType.PeriodicManaLeech:
-                    HandlePeriodicManaLeechAuraTick(target, caster);
-                    break;
-                case AuraType.ObsModPower:
-                    HandleObsModPowerAuraTick(target, caster);
-                    break;
-                case AuraType.PeriodicEnergize:
-                    HandlePeriodicEnergizeAuraTick(target, caster);
-                    break;
-                case AuraType.PowerBurn:
-                    HandlePeriodicPowerBurnAuraTick(target, caster);
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public bool CheckEffectProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool result = GetBase().CallScriptCheckEffectProcHandlers(this, aurApp, eventInfo);
+
             if (!result)
                 return false;
 
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
+
             switch (GetAuraType())
             {
                 case AuraType.ModConfuse:
@@ -574,81 +447,99 @@ namespace Game.Spells
                 case AuraType.ModStun:
                 case AuraType.ModRoot:
                 case AuraType.Transform:
-                {
-                    DamageInfo damageInfo = eventInfo.GetDamageInfo();
-                    if (damageInfo == null || damageInfo.GetDamage() == 0)
-                        return false;
-
-                    // Spell own damage at apply won't break CC
-                    if (spellInfo != null && spellInfo == GetSpellInfo())
                     {
-                        Aura aura = GetBase();
-                        // called from spellcast, should not have ticked yet
-                        if (aura.GetDuration() == aura.GetMaxDuration())
+                        DamageInfo damageInfo = eventInfo.GetDamageInfo();
+
+                        if (damageInfo == null ||
+                            damageInfo.GetDamage() == 0)
                             return false;
+
+                        // Spell own Damage at apply won't break CC
+                        if (spellInfo != null &&
+                            spellInfo == GetSpellInfo())
+                        {
+                            Aura aura = GetBase();
+
+                            // called from spellcast, should not have ticked yet
+                            if (aura.GetDuration() == aura.GetMaxDuration())
+                                return false;
+                        }
+
+                        break;
                     }
-                    break;
-                }
                 case AuraType.MechanicImmunity:
                 case AuraType.ModMechanicResistance:
                     // compare mechanic
-                    if (spellInfo == null || (spellInfo.GetAllEffectsMechanicMask() & (1ul << GetMiscValue())) == 0)
+                    if (spellInfo == null ||
+                        (spellInfo.GetAllEffectsMechanicMask() & (1ul << GetMiscValue())) == 0)
                         return false;
+
                     break;
                 case AuraType.ModCastingSpeedNotStack:
                     // skip melee hits and instant cast spells
-                    if (!eventInfo.GetProcSpell() || eventInfo.GetProcSpell().GetCastTime() == 0)
+                    if (!eventInfo.GetProcSpell() ||
+                        eventInfo.GetProcSpell().GetCastTime() == 0)
                         return false;
+
                     break;
                 case AuraType.ModSchoolMaskDamageFromCaster:
                 case AuraType.ModSpellDamageFromCaster:
                     // Compare casters
                     if (GetCasterGUID() != eventInfo.GetActor().GetGUID())
                         return false;
+
                     break;
                 case AuraType.ModPowerCostSchool:
                 case AuraType.ModPowerCostSchoolPct:
-                {
-                    // Skip melee hits and spells with wrong school or zero cost
-                    if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()) // School Check
-                        || !eventInfo.GetProcSpell())
-                        return false;
+                    {
+                        // Skip melee hits and spells with wrong school or zero cost
+                        if (spellInfo == null ||
+                            !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()) // School Check
+                            ||
+                            !eventInfo.GetProcSpell())
+                            return false;
 
-                    // Costs Check
-                    var costs = eventInfo.GetProcSpell().GetPowerCost();
-                    var m = costs.Find(cost => cost.Amount > 0);
-                    if (m == null)
-                        return false;
-                    break;
-                }
+                        // Costs Check
+                        var costs = eventInfo.GetProcSpell().GetPowerCost();
+                        var m = costs.Find(cost => cost.Amount > 0);
+
+                        if (m == null)
+                            return false;
+
+                        break;
+                    }
                 case AuraType.ReflectSpellsSchool:
                     // Skip melee hits and spells with wrong school
-                    if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()))
+                    if (spellInfo == null ||
+                        !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()))
                         return false;
+
                     break;
                 case AuraType.ProcTriggerSpell:
                 case AuraType.ProcTriggerSpellWithValue:
-                {
-                    // Don't proc extra attacks while already processing extra attack spell
-                    uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
-                    SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
-                    if (triggeredSpellInfo != null)
                     {
-                        if (triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                        {
-                            uint lastExtraAttackSpell = eventInfo.GetActor().GetLastExtraAttackSpell();
+                        // Don't proc extra attacks while already processing extra attack spell
+                        uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+                        SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
 
-                            // Patch 1.12.0(?) extra attack abilities can no longer chain proc themselves
-                            if (lastExtraAttackSpell == triggerSpellId)
-                                return false;
-                        }
+                        if (triggeredSpellInfo != null)
+                            if (triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                            {
+                                uint lastExtraAttackSpell = eventInfo.GetActor().GetLastExtraAttackSpell();
+
+                                // Patch 1.12.0(?) extra attack abilities can no longer chain proc themselves
+                                if (lastExtraAttackSpell == triggerSpellId)
+                                    return false;
+                            }
+
+                        break;
                     }
-                    break;
-                }
                 case AuraType.ModSpellCritChance:
                     // skip spells that can't crit
-                    if (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
+                    if (spellInfo == null ||
+                        !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                         return false;
+
                     break;
                 default:
                     break;
@@ -660,13 +551,14 @@ namespace Game.Spells
         public void HandleProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool prevented = GetBase().CallScriptEffectProcHandlers(this, aurApp, eventInfo);
+
             if (prevented)
                 return;
 
             switch (GetAuraType())
             {
                 // CC Auras which use their amount to drop
-                // Are there any more auras which need this?
+                // Are there any more Auras which need this?
                 case AuraType.ModConfuse:
                 case AuraType.ModFear:
                 case AuraType.ModStun:
@@ -674,16 +566,20 @@ namespace Game.Spells
                 case AuraType.Transform:
                 case AuraType.ModRoot2:
                     HandleBreakableCCAuraProc(aurApp, eventInfo);
+
                     break;
                 case AuraType.Dummy:
                 case AuraType.ProcTriggerSpell:
                     HandleProcTriggerSpellAuraProc(aurApp, eventInfo);
+
                     break;
                 case AuraType.ProcTriggerSpellWithValue:
                     HandleProcTriggerSpellWithValueAuraProc(aurApp, eventInfo);
+
                     break;
                 case AuraType.ProcTriggerDamage:
                     HandleProcTriggerDamageAuraProc(aurApp, eventInfo);
+
                     break;
                 default:
                     break;
@@ -706,35 +602,43 @@ namespace Game.Spells
                     spellId2 = 48629;
                     spellId3 = 106840;
                     spellId4 = 113636;
+
                     break;
                 case ShapeShiftForm.TreeOfLife:
                     spellId = 5420;
                     spellId2 = 81097;
+
                     break;
                 case ShapeShiftForm.TravelForm:
                     spellId = 5419;
+
                     break;
                 case ShapeShiftForm.AquaticForm:
                     spellId = 5421;
+
                     break;
                 case ShapeShiftForm.BearForm:
                     spellId = 1178;
                     spellId2 = 21178;
                     spellId3 = 106829;
                     spellId4 = 106899;
+
                     break;
                 case ShapeShiftForm.FlightForm:
                     spellId = 33948;
                     spellId2 = 34764;
+
                     break;
                 case ShapeShiftForm.FlightFormEpic:
                     spellId = 40122;
                     spellId2 = 40121;
+
                     break;
                 case ShapeShiftForm.SpiritOfRedemption:
                     spellId = 27792;
                     spellId2 = 27795;
                     spellId3 = 62371;
+
                     break;
                 case ShapeShiftForm.Shadowform:
                     if (target.HasAura(107906)) // Glyph of Shadow
@@ -743,10 +647,12 @@ namespace Game.Spells
                         spellId = 142024;
                     else
                         spellId = 107903;
+
                     break;
                 case ShapeShiftForm.GhostWolf:
                     if (target.HasAura(58135)) // Glyph of Spectral Wolf
                         spellId = 160942;
+
                     break;
                 default:
                     break;
@@ -771,16 +677,23 @@ namespace Game.Spells
                     Player plrTarget = target.ToPlayer();
 
                     var sp_list = plrTarget.GetSpellMap();
+
                     foreach (var pair in sp_list)
                     {
-                        if (pair.Value.State == PlayerSpellState.Removed || pair.Value.Disabled)
+                        if (pair.Value.State == PlayerSpellState.Removed ||
+                            pair.Value.Disabled)
                             continue;
 
-                        if (pair.Key == spellId || pair.Key == spellId2 || pair.Key == spellId3 || pair.Key == spellId4)
+                        if (pair.Key == spellId ||
+                            pair.Key == spellId2 ||
+                            pair.Key == spellId3 ||
+                            pair.Key == spellId4)
                             continue;
 
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
-                        if (spellInfo == null || !(spellInfo.IsPassive() || spellInfo.HasAttribute(SpellAttr0.DoNotDisplaySpellbookAuraIconCombatLog)))
+
+                        if (spellInfo == null ||
+                            !(spellInfo.IsPassive() || spellInfo.HasAttribute(SpellAttr0.DoNotDisplaySpellbookAuraIconCombatLog)))
                             continue;
 
                         if (Convert.ToBoolean(spellInfo.Stances & (1ul << (GetMiscValue() - 1))))
@@ -792,61 +705,129 @@ namespace Game.Spells
             {
                 if (spellId != 0)
                     target.RemoveOwnedAura(spellId, target.GetGUID());
+
                 if (spellId2 != 0)
                     target.RemoveOwnedAura(spellId2, target.GetGUID());
+
                 if (spellId3 != 0)
                     target.RemoveOwnedAura(spellId3, target.GetGUID());
+
                 if (spellId4 != 0)
                     target.RemoveOwnedAura(spellId4, target.GetGUID());
 
                 var shapeshifts = target.GetAuraEffectsByType(AuraType.ModShapeshift);
                 AuraEffect newAura = null;
-                // Iterate through all the shapeshift auras that the target has, if there is another aura with SPELL_AURA_MOD_SHAPESHIFT, then this aura is being removed due to that one being applied
+
+                // Iterate through all the shapeshift Auras that the Target has, if there is another aura with SPELL_AURA_MOD_SHAPESHIFT, then this aura is being removed due to that one being applied
                 foreach (var eff in shapeshifts)
-                {
                     if (eff != this)
                     {
                         newAura = eff;
+
                         break;
                     }
-                }
 
                 foreach (var app in target.GetAppliedAuras())
                 {
                     if (app.Value == null)
                         continue;
 
-                    // Use the new aura to see on what stance the target will be
+                    // Use the new aura to see on what stance the Target will be
                     ulong newStance = newAura != null ? (1ul << (newAura.GetMiscValue() - 1)) : 0;
 
                     // If the stances are not compatible with the spell, remove it
-                    if (app.Value.GetBase().IsRemovedOnShapeLost(target) && !Convert.ToBoolean(app.Value.GetBase().GetSpellInfo().Stances & newStance))
+                    if (app.Value.GetBase().IsRemovedOnShapeLost(target) &&
+                        !Convert.ToBoolean(app.Value.GetBase().GetSpellInfo().Stances & newStance))
                         target.RemoveAura(app);
                 }
             }
         }
 
-        public Unit GetCaster() { return auraBase.GetCaster(); }
-        public ObjectGuid GetCasterGUID() { return auraBase.GetCasterGUID(); }
-        public Aura GetBase() { return auraBase; }
+        public Unit GetCaster()
+        {
+            return auraBase.GetCaster();
+        }
 
-        public SpellInfo GetSpellInfo() { return m_spellInfo; }
-        public uint GetId() { return m_spellInfo.Id; }
-        public uint GetEffIndex() { return _effectInfo.EffectIndex; }
-        public int GetBaseAmount() { return m_baseAmount; }
-        public int GetPeriod() { return _period; }
+        public ObjectGuid GetCasterGUID()
+        {
+            return auraBase.GetCasterGUID();
+        }
 
-        public int GetMiscValueB() { return GetSpellEffectInfo().MiscValueB; }
-        public int GetMiscValue() { return GetSpellEffectInfo().MiscValue; }
-        public AuraType GetAuraType() { return GetSpellEffectInfo().ApplyAuraName; }
-        public int GetAmount() { return _amount; }
-        public bool HasAmount() { return _amount != 0; }
-        public void SetAmount(int amount) { _amount = amount; m_canBeRecalculated = false; }
+        public Aura GetBase()
+        {
+            return auraBase;
+        }
 
-        public float? GetEstimatedAmount() { return _estimatedAmount; }
+        public SpellInfo GetSpellInfo()
+        {
+            return _spellInfo;
+        }
 
-        public int GetPeriodicTimer() { return _periodicTimer; }
-        public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
+        public uint GetId()
+        {
+            return _spellInfo.Id;
+        }
+
+        public uint GetEffIndex()
+        {
+            return _effectInfo.EffectIndex;
+        }
+
+        public int GetBaseAmount()
+        {
+            return _baseAmount;
+        }
+
+        public int GetPeriod()
+        {
+            return _period;
+        }
+
+        public int GetMiscValueB()
+        {
+            return GetSpellEffectInfo().MiscValueB;
+        }
+
+        public int GetMiscValue()
+        {
+            return GetSpellEffectInfo().MiscValue;
+        }
+
+        public AuraType GetAuraType()
+        {
+            return GetSpellEffectInfo().ApplyAuraName;
+        }
+
+        public int GetAmount()
+        {
+            return _amount;
+        }
+
+        public bool HasAmount()
+        {
+            return _amount != 0;
+        }
+
+        public void SetAmount(int amount)
+        {
+            _amount = amount;
+            _canBeRecalculated = false;
+        }
+
+        public float? GetEstimatedAmount()
+        {
+            return _estimatedAmount;
+        }
+
+        public int GetPeriodicTimer()
+        {
+            return _periodicTimer;
+        }
+
+        public void SetPeriodicTimer(int periodicTimer)
+        {
+            _periodicTimer = periodicTimer;
+        }
 
         public void RecalculateAmount(AuraEffect triggeredBy = null)
         {
@@ -855,6 +836,7 @@ namespace Game.Spells
 
             ChangeAmount(CalculateAmount(GetCaster()), false, false, triggeredBy);
         }
+
         public void RecalculateAmount(Unit caster, AuraEffect triggeredBy = null)
         {
             if (!CanBeRecalculated())
@@ -863,56 +845,299 @@ namespace Game.Spells
             ChangeAmount(CalculateAmount(caster), false, false, triggeredBy);
         }
 
-        public bool CanBeRecalculated() { return m_canBeRecalculated; }
-        public void SetCanBeRecalculated(bool val) { m_canBeRecalculated = val; }
+        public bool CanBeRecalculated()
+        {
+            return _canBeRecalculated;
+        }
 
-        public void ResetTicks() { _ticksDone = 0; }
-        public uint GetTickNumber() { return _ticksDone; }
-        public uint GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
+        public void SetCanBeRecalculated(bool val)
+        {
+            _canBeRecalculated = val;
+        }
 
-        public bool IsPeriodic() { return m_isPeriodic; }
-        public void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
-        bool HasSpellClassMask() { return GetSpellEffectInfo().SpellClassMask; }
+        public void ResetTicks()
+        {
+            _ticksDone = 0;
+        }
 
-        public SpellEffectInfo GetSpellEffectInfo() { return _effectInfo; }
+        public uint GetTickNumber()
+        {
+            return _ticksDone;
+        }
 
-        public bool IsEffect() { return _effectInfo.Effect != 0; }
-        public bool IsEffect(SpellEffectName effectName) { return _effectInfo.Effect == effectName; }
+        public uint GetRemainingTicks()
+        {
+            return GetTotalTicks() - _ticksDone;
+        }
+
+        public bool IsPeriodic()
+        {
+            return _isPeriodic;
+        }
+
+        public void SetPeriodic(bool isPeriodic)
+        {
+            _isPeriodic = isPeriodic;
+        }
+
+        public SpellEffectInfo GetSpellEffectInfo()
+        {
+            return _effectInfo;
+        }
+
+        public bool IsEffect()
+        {
+            return _effectInfo.Effect != 0;
+        }
+
+        public bool IsEffect(SpellEffectName effectName)
+        {
+            return _effectInfo.Effect == effectName;
+        }
+
         public bool IsAreaAuraEffect()
         {
             return _effectInfo.IsAreaAuraEffect();
         }
 
-        #region Fields
-        Aura auraBase;
-        SpellInfo m_spellInfo;
-        SpellEffectInfo _effectInfo;
-        SpellModifier m_spellmod;
+        private void GetTargetList(out List<Unit> targetList)
+        {
+            targetList = new List<Unit>();
+            var targetMap = GetBase().GetApplicationMap();
 
-        public int m_baseAmount;
-        int _amount;
-        float? _estimatedAmount;   // for periodic damage and healing auras this will include damage done bonuses
+            // remove all targets which were not added to new list - they no longer deserve area aura
+            foreach (var app in targetMap.Values)
+                if (app.HasEffect(GetEffIndex()))
+                    targetList.Add(app.GetTarget());
+        }
+
+        private void GetApplicationList(out List<AuraApplication> applicationList)
+        {
+            applicationList = new List<AuraApplication>();
+            var targetMap = GetBase().GetApplicationMap();
+
+            foreach (var app in targetMap.Values)
+                if (app.HasEffect(GetEffIndex()))
+                    applicationList.Add(app);
+        }
+
+        private void ResetPeriodic(bool resetPeriodicTimer = false)
+        {
+            _ticksDone = 0;
+
+            if (resetPeriodicTimer)
+            {
+                _periodicTimer = 0;
+
+                // Start periodic on next tick or at aura apply
+                if (_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
+                    _periodicTimer = _period;
+            }
+        }
+
+        private void ApplySpellMod(Unit target, bool apply, AuraEffect triggeredBy = null)
+        {
+            if (_spellmod == null ||
+                !target.IsTypeId(TypeId.Player))
+                return;
+
+            target.ToPlayer().AddSpellMod(_spellmod, apply);
+
+            // Auras with charges do not mod amount of passive Auras
+            if (GetBase().IsUsingCharges())
+                return;
+
+            // reapply some passive spells after add/remove related spellmods
+            // Warning: it is a dead loop if 2 Auras each other amount-shouldn't happen
+            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
+
+            switch ((SpellModOp)GetMiscValue())
+            {
+                case SpellModOp.Points:
+                    recalculateEffectMask.SetAll(true);
+
+                    break;
+                case SpellModOp.PointsIndex0:
+                    recalculateEffectMask.Set(0, true);
+
+                    break;
+                case SpellModOp.PointsIndex1:
+                    recalculateEffectMask.Set(1, true);
+
+                    break;
+                case SpellModOp.PointsIndex2:
+                    recalculateEffectMask.Set(2, true);
+
+                    break;
+                case SpellModOp.PointsIndex3:
+                    recalculateEffectMask.Set(3, true);
+
+                    break;
+                case SpellModOp.PointsIndex4:
+                    recalculateEffectMask.Set(4, true);
+
+                    break;
+                default:
+                    break;
+            }
+
+            if (recalculateEffectMask.Any())
+            {
+                if (triggeredBy == null)
+                    triggeredBy = this;
+
+                ObjectGuid guid = target.GetGUID();
+                var auras = target.GetAppliedAuras();
+
+                foreach (var iter in auras)
+                {
+                    Aura aura = iter.Value.GetBase();
+
+                    // only passive and permament Auras-active Auras should have amount set on spellcast and not be affected
+                    // if aura is cast by others, it will not be affected
+                    if ((aura.IsPassive() || aura.IsPermanent()) &&
+                        aura.GetCasterGUID() == guid &&
+                        aura.GetSpellInfo().IsAffectedBySpellMod(_spellmod))
+                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
+                            if (recalculateEffectMask[(int)i])
+                            {
+                                AuraEffect aurEff = aura.GetEffect(i);
+
+                                if (aurEff != null)
+                                    if (aurEff != triggeredBy)
+                                        aurEff.RecalculateAmount(triggeredBy);
+                            }
+                }
+            }
+        }
+
+        private void SendTickImmune(Unit target, Unit caster)
+        {
+            caster?.SendSpellDamageImmune(target, _spellInfo.Id, true);
+        }
+
+        private void PeriodicTick(AuraApplication aurApp, Unit caster)
+        {
+            bool prevented = GetBase().CallScriptEffectPeriodicHandlers(this, aurApp);
+
+            if (prevented)
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            // Update serverside orientation of tracking channeled Auras on periodic update ticks
+            // exclude players because can turn during channeling and shouldn't desync orientation client/server
+            if (caster != null &&
+                !caster.IsPlayer() &&
+                _spellInfo.IsChanneled() &&
+                _spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel) &&
+                caster.UnitData.ChannelObjects.Size() != 0)
+            {
+                ObjectGuid channelGuid = caster.UnitData.ChannelObjects[0];
+
+                if (channelGuid != caster.GetGUID())
+                {
+                    WorldObject objectTarget = Global.ObjAccessor.GetWorldObject(caster, channelGuid);
+
+                    if (objectTarget != null)
+                        caster.SetInFront(objectTarget);
+                }
+            }
+
+            switch (GetAuraType())
+            {
+                case AuraType.PeriodicDummy:
+                    // handled via scripts
+                    break;
+                case AuraType.PeriodicTriggerSpell:
+                    HandlePeriodicTriggerSpellAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicTriggerSpellFromClient:
+                    // Don't actually do anything - client will trigger casts of these spells by itself
+                    break;
+                case AuraType.PeriodicTriggerSpellWithValue:
+                    HandlePeriodicTriggerSpellWithValueAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicDamage:
+                case AuraType.PeriodicWeaponPercentDamage:
+                case AuraType.PeriodicDamagePercent:
+                    HandlePeriodicDamageAurasTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicLeech:
+                    HandlePeriodicHealthLeechAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicHealthFunnel:
+                    HandlePeriodicHealthFunnelAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicHeal:
+                case AuraType.ObsModHealth:
+                    HandlePeriodicHealAurasTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicManaLeech:
+                    HandlePeriodicManaLeechAuraTick(target, caster);
+
+                    break;
+                case AuraType.ObsModPower:
+                    HandleObsModPowerAuraTick(target, caster);
+
+                    break;
+                case AuraType.PeriodicEnergize:
+                    HandlePeriodicEnergizeAuraTick(target, caster);
+
+                    break;
+                case AuraType.PowerBurn:
+                    HandlePeriodicPowerBurnAuraTick(target, caster);
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private bool HasSpellClassMask()
+        {
+            return GetSpellEffectInfo().SpellClassMask;
+        }
+
+        #region Fields
+
+        private readonly Aura auraBase;
+        private readonly SpellInfo _spellInfo;
+        private readonly SpellEffectInfo _effectInfo;
+        private SpellModifier _spellmod;
+
+        public int _baseAmount;
+        private int _amount;
+        private float? _estimatedAmount; // for periodic Damage and healing Auras this will include Damage done bonuses
 
         // periodic stuff
-        int _periodicTimer;
-        int _period; // time between consecutive ticks
-        uint _ticksDone; // ticks counter
+        private int _periodicTimer;
+        private int _period;     // Time between consecutive ticks
+        private uint _ticksDone; // ticks counter
 
-        bool m_canBeRecalculated;
-        bool m_isPeriodic;
+        private bool _canBeRecalculated;
+        private bool _isPeriodic;
+
         #endregion
 
         #region AuraEffect Handlers
+
         /**************************************/
         /***       VISIBILITY & PHASES      ***/
         /**************************************/
         [AuraEffectHandler(AuraType.None)]
-        void HandleUnused(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleUnused(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
         }
 
         [AuraEffectHandler(AuraType.ModInvisibilityDetect)]
-        void HandleModInvisibilityDetect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModInvisibilityDetect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -922,24 +1147,24 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.m_invisibilityDetect.AddFlag(type);
-                target.m_invisibilityDetect.AddValue(type, GetAmount());
+                target.InvisibilityDetect.AddFlag(type);
+                target.InvisibilityDetect.AddValue(type, GetAmount());
             }
             else
             {
                 if (!target.HasAuraType(AuraType.ModInvisibilityDetect))
-                    target.m_invisibilityDetect.DelFlag(type);
+                    target.InvisibilityDetect.DelFlag(type);
 
-                target.m_invisibilityDetect.AddValue(type, -GetAmount());
+                target.InvisibilityDetect.AddValue(type, -GetAmount());
             }
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModInvisibility)]
-        void HandleModInvisibility(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModInvisibility(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
@@ -951,11 +1176,12 @@ namespace Game.Spells
             if (apply)
             {
                 // apply glow vision
-                if (playerTarget != null && type == InvisibilityType.General)
+                if (playerTarget != null &&
+                    type == InvisibilityType.General)
                     playerTarget.AddAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
-                target.m_invisibility.AddFlag(type);
-                target.m_invisibility.AddValue(type, GetAmount());
+                target.Invisibility.AddFlag(type);
+                target.Invisibility.AddValue(type, GetAmount());
 
                 target.SetVisFlag(UnitVisFlags.Invisible);
             }
@@ -963,54 +1189,53 @@ namespace Game.Spells
             {
                 if (!target.HasAuraType(AuraType.ModInvisibility))
                 {
-                    // if not have different invisibility auras.
+                    // if not have different invisibility Auras.
                     // always remove glow vision
-                    if (playerTarget != null)
-                        playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
+                    playerTarget?.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
-                    target.m_invisibility.DelFlag(type);
+                    target.Invisibility.DelFlag(type);
                 }
                 else
                 {
                     bool found = false;
                     var invisAuras = target.GetAuraEffectsByType(AuraType.ModInvisibility);
+
                     foreach (var eff in invisAuras)
-                    {
                         if (GetMiscValue() == eff.GetMiscValue())
                         {
                             found = true;
+
                             break;
                         }
-                    }
+
                     if (!found)
                     {
-                        // if not have invisibility auras of type INVISIBILITY_GENERAL
+                        // if not have invisibility Auras of Type INVISIBILITY_GENERAL
                         // remove glow vision
-                        if (playerTarget != null && type == InvisibilityType.General)
+                        if (playerTarget != null &&
+                            type == InvisibilityType.General)
                             playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
-                        target.m_invisibility.DelFlag(type);
+                        target.Invisibility.DelFlag(type);
 
                         target.RemoveVisFlag(UnitVisFlags.Invisible);
                     }
                 }
 
-                target.m_invisibility.AddValue(type, -GetAmount());
+                target.Invisibility.AddValue(type, -GetAmount());
             }
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
-            {
                 // drop flag at invisibiliy in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
-            }
 
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModStealthDetect)]
-        void HandleModStealthDetect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModStealthDetect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -1020,24 +1245,24 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.m_stealthDetect.AddFlag(type);
-                target.m_stealthDetect.AddValue(type, GetAmount());
+                target.StealthDetect.AddFlag(type);
+                target.StealthDetect.AddValue(type, GetAmount());
             }
             else
             {
                 if (!target.HasAuraType(AuraType.ModStealthDetect))
-                    target.m_stealthDetect.DelFlag(type);
+                    target.StealthDetect.DelFlag(type);
 
-                target.m_stealthDetect.AddValue(type, -GetAmount());
+                target.StealthDetect.AddValue(type, -GetAmount());
             }
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModStealth)]
-        void HandleModStealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModStealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
@@ -1047,41 +1272,39 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.m_stealth.AddFlag(type);
-                target.m_stealth.AddValue(type, GetAmount());
+                target.Stealth.AddFlag(type);
+                target.Stealth.AddValue(type, GetAmount());
                 target.SetVisFlag(UnitVisFlags.Stealthed);
                 Player playerTarget = target.ToPlayer();
-                if (playerTarget != null)
-                    playerTarget.AddAuraVision(PlayerFieldByte2Flags.Stealth);
+
+                playerTarget?.AddAuraVision(PlayerFieldByte2Flags.Stealth);
             }
             else
             {
-                target.m_stealth.AddValue(type, -GetAmount());
+                target.Stealth.AddValue(type, -GetAmount());
 
                 if (!target.HasAuraType(AuraType.ModStealth)) // if last SPELL_AURA_MOD_STEALTH
                 {
-                    target.m_stealth.DelFlag(type);
+                    target.Stealth.DelFlag(type);
 
                     target.RemoveVisFlag(UnitVisFlags.Stealthed);
                     Player playerTarget = target.ToPlayer();
-                    if (playerTarget != null)
-                        playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.Stealth);
+
+                    playerTarget?.RemoveAuraVision(PlayerFieldByte2Flags.Stealth);
                 }
             }
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
-            {
                 // drop flag at stealth in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
-            }
 
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.ModStealthLevel)]
-        void HandleModStealthLevel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModStealthLevel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -1090,17 +1313,17 @@ namespace Game.Spells
             StealthType type = (StealthType)GetMiscValue();
 
             if (apply)
-                target.m_stealth.AddValue(type, GetAmount());
+                target.Stealth.AddValue(type, GetAmount());
             else
-                target.m_stealth.AddValue(type, -GetAmount());
+                target.Stealth.AddValue(type, -GetAmount());
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.DetectAmore)]
-        void HandleDetectAmore(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleDetectAmore(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1113,31 +1336,28 @@ namespace Game.Spells
             if (apply)
             {
                 Player playerTarget = target.ToPlayer();
-                if (playerTarget != null)
-                {
-                    playerTarget.AddAuraVision((PlayerFieldByte2Flags)(1 << (GetMiscValue() - 1)));
-                }
+
+                playerTarget?.AddAuraVision((PlayerFieldByte2Flags)(1 << (GetMiscValue() - 1)));
             }
             else
             {
                 if (target.HasAuraType(AuraType.DetectAmore))
                 {
                     var amoreAuras = target.GetAuraEffectsByType(AuraType.DetectAmore);
+
                     foreach (var auraEffect in amoreAuras)
-                    {
                         if (GetMiscValue() == auraEffect.GetMiscValue())
                             return;
-                    }
                 }
 
                 Player playerTarget = target.ToPlayer();
-                if (playerTarget != null)
-                    playerTarget.RemoveAuraVision((PlayerFieldByte2Flags)(1 << (GetMiscValue() - 1)));
+
+                playerTarget?.RemoveAuraVision((PlayerFieldByte2Flags)(1 << (GetMiscValue() - 1)));
             }
         }
 
         [AuraEffectHandler(AuraType.SpiritOfRedemption)]
-        void HandleSpiritOfRedemption(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleSpiritOfRedemption(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1147,37 +1367,38 @@ namespace Game.Spells
             if (!target.IsTypeId(TypeId.Player))
                 return;
 
-            // prepare spirit state
+            // prepare spirit State
             if (apply)
             {
                 if (target.IsTypeId(TypeId.Player))
-                {
-                    // set stand state (expected in this form)
+                    // set stand State (expected in this form)
                     if (!target.IsStandState())
                         target.SetStandState(UnitStandStateType.Stand);
-                }
             }
             // die at aura end
             else if (target.IsAlive())
-                // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
+            {
                 target.SetDeathState(DeathState.JustDied);
+            }
         }
 
         [AuraEffectHandler(AuraType.Ghost)]
-        void HandleAuraGhost(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraGhost(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
             if (apply)
             {
                 target.SetPlayerFlag(PlayerFlags.Ghost);
-                target.m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
-                target.m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
+                target.ServerSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
+                target.ServerSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
             }
             else
             {
@@ -1185,13 +1406,13 @@ namespace Game.Spells
                     return;
 
                 target.RemovePlayerFlag(PlayerFlags.Ghost);
-                target.m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
-                target.m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
+                target.ServerSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
+                target.ServerSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
             }
         }
 
         [AuraEffectHandler(AuraType.Phase)]
-        void HandlePhase(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandlePhase(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1205,7 +1426,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.PhaseGroup)]
-        void HandlePhaseGroup(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandlePhaseGroup(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1219,7 +1440,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.PhaseAlwaysVisible)]
-        void HandlePhaseAlwaysVisible(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandlePhaseAlwaysVisible(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1227,10 +1448,13 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
+            {
                 PhasingHandler.SetAlwaysVisible(target, true, true);
+            }
             else
             {
-                if (target.HasAuraType(AuraType.PhaseAlwaysVisible) || (target.IsPlayer() && target.ToPlayer().IsGameMaster()))
+                if (target.HasAuraType(AuraType.PhaseAlwaysVisible) ||
+                    (target.IsPlayer() && target.ToPlayer().IsGameMaster()))
                     return;
 
                 PhasingHandler.SetAlwaysVisible(target, false, true);
@@ -1241,7 +1465,7 @@ namespace Game.Spells
         /***   UNIT MODEL   ***/
         /**********************/
         [AuraEffectHandler(AuraType.ModShapeshift)]
-        void HandleAuraModShapeshift(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModShapeshift(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.RealOrReapplyMask))
                 return;
@@ -1255,7 +1479,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                // remove polymorph before changing display id to keep new display id
+                // remove polymorph before changing display Id to keep new display Id
                 switch (form)
                 {
                     case ShapeShiftForm.CatForm:
@@ -1266,15 +1490,16 @@ namespace Game.Spells
                     case ShapeShiftForm.FlightFormEpic:
                     case ShapeShiftForm.FlightForm:
                     case ShapeShiftForm.MoonkinForm:
-                    {
-                        // remove movement affects
-                        target.RemoveAurasByShapeShift();
+                        {
+                            // remove movement affects
+                            target.RemoveAurasByShapeShift();
 
-                        // and polymorphic affects
-                        if (target.IsPolymorphed())
-                            target.RemoveAurasDueToSpell(target.GetTransformSpell());
-                        break;
-                    }
+                            // and polymorphic affects
+                            if (target.IsPolymorphed())
+                                target.RemoveAurasDueToSpell(target.GetTransformSpell());
+
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -1288,6 +1513,7 @@ namespace Game.Spells
 
                 ShapeShiftForm prevForm = target.GetShapeshiftForm();
                 target.SetShapeshiftForm(form);
+
                 // add the shapeshift aura's boosts
                 if (prevForm != form)
                     HandleShapeshiftBoosts(target, true);
@@ -1295,7 +1521,9 @@ namespace Game.Spells
                 if (modelid > 0)
                 {
                     SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransformSpell(), GetBase().GetCastDifficulty());
-                    if (transformSpellInfo == null || !GetSpellInfo().IsPositive())
+
+                    if (transformSpellInfo == null ||
+                        !GetSpellInfo().IsPositive())
                         target.SetDisplayId(modelid);
                 }
 
@@ -1304,16 +1532,15 @@ namespace Game.Spells
             }
             else
             {
-                // reset model id if no other auras present
+                // reset model Id if no other Auras present
                 // may happen when aura is applied on linked event on aura removal
                 if (!target.HasAuraType(AuraType.ModShapeshift))
                 {
                     target.SetShapeshiftForm(ShapeShiftForm.None);
+
                     if (target.GetClass() == Class.Druid)
-                    {
                         // Remove movement impairing effects also when shifting out
                         target.RemoveAurasByShapeShift();
-                    }
                 }
 
                 if (modelid > 0)
@@ -1325,14 +1552,18 @@ namespace Game.Spells
                     case ShapeShiftForm.BearForm:
                     case ShapeShiftForm.CatForm:
                         AuraEffect dummy = target.GetAuraEffect(37315, 0);
+
                         if (dummy != null)
                             target.CastSpell(target, 37316, new CastSpellExtraArgs(dummy));
+
                         break;
                     // Nordrassil Regalia - bonus
                     case ShapeShiftForm.MoonkinForm:
                         dummy = target.GetAuraEffect(37324, 0);
+
                         if (dummy != null)
                             target.CastSpell(target, 37325, new CastSpellExtraArgs(dummy));
+
                         break;
                     default:
                         break;
@@ -1343,20 +1574,23 @@ namespace Game.Spells
             }
 
             Player playerTarget = target.ToPlayer();
+
             if (playerTarget != null)
             {
                 playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(), UpdateCollisionHeightReason.Force);
                 playerTarget.InitDataForForm();
             }
             else
+            {
                 target.UpdateDisplayPower();
+            }
 
             if (target.GetClass() == Class.Druid)
             {
                 // Dash
                 AuraEffect aurEff = target.GetAuraEffect(AuraType.ModIncreaseSpeed, SpellFamilyNames.Druid, new FlagArray128(0, 0, 0x8));
-                if (aurEff != null)
-                    aurEff.RecalculateAmount();
+
+                aurEff?.RecalculateAmount();
 
                 // Disarm handling
                 // If druid shifts while being disarmed we need to deal with that since forms aren't affected by disarm
@@ -1364,6 +1598,7 @@ namespace Game.Spells
                 if (!target.CanUseAttackType(WeaponAttackType.BaseAttack))
                 {
                     Item pItem = target.ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+
                     if (pItem != null)
                         target.ToPlayer()._ApplyWeaponDamage(EquipmentSlot.MainHand, pItem, apply);
                 }
@@ -1374,22 +1609,21 @@ namespace Game.Spells
                 return;
 
             if (target.IsTypeId(TypeId.Player))
-            {
-                // Learn spells for shapeshift form - no need to send action bars or add spells to spellbook
+                // Learn spells for shapeshift form - no need to send Action bars or add spells to spellbook
                 for (byte i = 0; i < SpellConst.MaxShapeshift; ++i)
                 {
                     if (shapeInfo.PresetSpellID[i] == 0)
                         continue;
+
                     if (apply)
                         target.ToPlayer().AddTemporarySpell(shapeInfo.PresetSpellID[i]);
                     else
                         target.ToPlayer().RemoveTemporarySpell(shapeInfo.PresetSpellID[i]);
                 }
-            }
         }
 
         [AuraEffectHandler(AuraType.Transform)]
-        void HandleAuraTransform(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraTransform(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1400,143 +1634,175 @@ namespace Game.Spells
             {
                 // update active transform spell only when transform not set or not overwriting negative by positive case
                 SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransformSpell(), GetBase().GetCastDifficulty());
-                if (transformSpellInfo == null || !GetSpellInfo().IsPositive() || transformSpellInfo.IsPositive())
+
+                if (transformSpellInfo == null ||
+                    !GetSpellInfo().IsPositive() ||
+                    transformSpellInfo.IsPositive())
                 {
                     target.SetTransformSpell(GetId());
+
                     // special case (spell specific functionality)
                     if (GetMiscValue() == 0)
                     {
                         bool isFemale = target.GetNativeGender() == Gender.Female;
+
                         switch (GetId())
                         {
                             // Orb of Deception
                             case 16739:
-                            {
-                                if (!target.IsTypeId(TypeId.Player))
-                                    return;
-
-                                switch (target.GetRace())
                                 {
-                                    // Blood Elf
-                                    case Race.BloodElf:
-                                        target.SetDisplayId(isFemale ? 17830 : 17829u);
-                                        break;
-                                    // Orc
-                                    case Race.Orc:
-                                        target.SetDisplayId(isFemale ? 10140 : 10139u);
-                                        break;
-                                    // Troll
-                                    case Race.Troll:
-                                        target.SetDisplayId(isFemale ? 10134 : 10135u);
-                                        break;
-                                    // Tauren
-                                    case Race.Tauren:
-                                        target.SetDisplayId(isFemale ? 10147 : 10136u);
-                                        break;
-                                    // Undead
-                                    case Race.Undead:
-                                        target.SetDisplayId(isFemale ? 10145 : 10146u);
-                                        break;
-                                    // Draenei
-                                    case Race.Draenei:
-                                        target.SetDisplayId(isFemale ? 17828 : 17827u);
-                                        break;
-                                    // Dwarf
-                                    case Race.Dwarf:
-                                        target.SetDisplayId(isFemale ? 10142 : 10141u);
-                                        break;
-                                    // Gnome
-                                    case Race.Gnome:
-                                        target.SetDisplayId(isFemale ? 10149 : 10148u);
-                                        break;
-                                    // Human
-                                    case Race.Human:
-                                        target.SetDisplayId(isFemale ? 10138 : 10137u);
-                                        break;
-                                    // Night Elf
-                                    case Race.NightElf:
-                                        target.SetDisplayId(isFemale ? 10144 : 10143u);
-                                        break;
-                                    default:
-                                        break;
+                                    if (!target.IsTypeId(TypeId.Player))
+                                        return;
+
+                                    switch (target.GetRace())
+                                    {
+                                        // Blood Elf
+                                        case Race.BloodElf:
+                                            target.SetDisplayId(isFemale ? 17830 : 17829u);
+
+                                            break;
+                                        // Orc
+                                        case Race.Orc:
+                                            target.SetDisplayId(isFemale ? 10140 : 10139u);
+
+                                            break;
+                                        // Troll
+                                        case Race.Troll:
+                                            target.SetDisplayId(isFemale ? 10134 : 10135u);
+
+                                            break;
+                                        // Tauren
+                                        case Race.Tauren:
+                                            target.SetDisplayId(isFemale ? 10147 : 10136u);
+
+                                            break;
+                                        // Undead
+                                        case Race.Undead:
+                                            target.SetDisplayId(isFemale ? 10145 : 10146u);
+
+                                            break;
+                                        // Draenei
+                                        case Race.Draenei:
+                                            target.SetDisplayId(isFemale ? 17828 : 17827u);
+
+                                            break;
+                                        // Dwarf
+                                        case Race.Dwarf:
+                                            target.SetDisplayId(isFemale ? 10142 : 10141u);
+
+                                            break;
+                                        // Gnome
+                                        case Race.Gnome:
+                                            target.SetDisplayId(isFemale ? 10149 : 10148u);
+
+                                            break;
+                                        // Human
+                                        case Race.Human:
+                                            target.SetDisplayId(isFemale ? 10138 : 10137u);
+
+                                            break;
+                                        // Night Elf
+                                        case Race.NightElf:
+                                            target.SetDisplayId(isFemale ? 10144 : 10143u);
+
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
+                                    break;
                                 }
-                                break;
-                            }
                             // Murloc costume
                             case 42365:
                                 target.SetDisplayId(21723);
+
                                 break;
                             // Dread Corsair
                             case 50517:
                             // Corsair Costume
                             case 51926:
-                            {
-                                if (!target.IsTypeId(TypeId.Player))
-                                    return;
-
-                                switch (target.GetRace())
                                 {
-                                    // Blood Elf
-                                    case Race.BloodElf:
-                                        target.SetDisplayId(isFemale ? 25043 : 25032u);
-                                        break;
-                                    // Orc
-                                    case Race.Orc:
-                                        target.SetDisplayId(isFemale ? 25050 : 25039u);
-                                        break;
-                                    // Troll
-                                    case Race.Troll:
-                                        target.SetDisplayId(isFemale ? 25052 : 25041u);
-                                        break;
-                                    // Tauren
-                                    case Race.Tauren:
-                                        target.SetDisplayId(isFemale ? 25051 : 25040u);
-                                        break;
-                                    // Undead
-                                    case Race.Undead:
-                                        target.SetDisplayId(isFemale ? 25053 : 25042u);
-                                        break;
-                                    // Draenei
-                                    case Race.Draenei:
-                                        target.SetDisplayId(isFemale ? 25044 : 25033u);
-                                        break;
-                                    // Dwarf
-                                    case Race.Dwarf:
-                                        target.SetDisplayId(isFemale ? 25045 : 25034u);
-                                        break;
-                                    // Gnome
-                                    case Race.Gnome:
-                                        target.SetDisplayId(isFemale ? 25035 : 25046u);
-                                        break;
-                                    // Human
-                                    case Race.Human:
-                                        target.SetDisplayId(isFemale ? 25037 : 25048u);
-                                        break;
-                                    // Night Elf
-                                    case Race.NightElf:
-                                        target.SetDisplayId(isFemale ? 25038 : 25049u);
-                                        break;
-                                    default:
-                                        break;
+                                    if (!target.IsTypeId(TypeId.Player))
+                                        return;
+
+                                    switch (target.GetRace())
+                                    {
+                                        // Blood Elf
+                                        case Race.BloodElf:
+                                            target.SetDisplayId(isFemale ? 25043 : 25032u);
+
+                                            break;
+                                        // Orc
+                                        case Race.Orc:
+                                            target.SetDisplayId(isFemale ? 25050 : 25039u);
+
+                                            break;
+                                        // Troll
+                                        case Race.Troll:
+                                            target.SetDisplayId(isFemale ? 25052 : 25041u);
+
+                                            break;
+                                        // Tauren
+                                        case Race.Tauren:
+                                            target.SetDisplayId(isFemale ? 25051 : 25040u);
+
+                                            break;
+                                        // Undead
+                                        case Race.Undead:
+                                            target.SetDisplayId(isFemale ? 25053 : 25042u);
+
+                                            break;
+                                        // Draenei
+                                        case Race.Draenei:
+                                            target.SetDisplayId(isFemale ? 25044 : 25033u);
+
+                                            break;
+                                        // Dwarf
+                                        case Race.Dwarf:
+                                            target.SetDisplayId(isFemale ? 25045 : 25034u);
+
+                                            break;
+                                        // Gnome
+                                        case Race.Gnome:
+                                            target.SetDisplayId(isFemale ? 25035 : 25046u);
+
+                                            break;
+                                        // Human
+                                        case Race.Human:
+                                            target.SetDisplayId(isFemale ? 25037 : 25048u);
+
+                                            break;
+                                        // Night Elf
+                                        case Race.NightElf:
+                                            target.SetDisplayId(isFemale ? 25038 : 25049u);
+
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
+                                    break;
                                 }
-                                break;
-                            }
                             // Pygmy Oil
                             case 53806:
                                 target.SetDisplayId(22512);
+
                                 break;
                             // Honor the Dead
                             case 65386:
                             case 65495:
                                 target.SetDisplayId(isFemale ? 29204 : 29203u);
+
                                 break;
                             // Darkspear Pride
                             case 75532:
                                 target.SetDisplayId(isFemale ? 31738 : 31737u);
+
                                 break;
                             // Gnomeregan Pride
                             case 75531:
                                 target.SetDisplayId(isFemale ? 31655 : 31654u);
+
                                 break;
                             default:
                                 break;
@@ -1545,36 +1811,42 @@ namespace Game.Spells
                     else
                     {
                         CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)GetMiscValue());
+
                         if (ci == null)
                         {
-                            target.SetDisplayId(16358);              // pig pink ^_^
-                            Log.outError(LogFilter.Spells, "Auras: unknown creature id = {0} (only need its modelid) From Spell Aura Transform in Spell ID = {1}", GetMiscValue(), GetId());
+                            target.SetDisplayId(16358); // pig pink ^_^
+                            Log.outError(LogFilter.Spells, "Auras: unknown creature Id = {0} (only need its modelid) From Spell Aura Transform in Spell ID = {1}", GetMiscValue(), GetId());
                         }
                         else
                         {
                             uint model_id = 0;
                             uint modelid = ObjectManager.ChooseDisplayId(ci).CreatureDisplayID;
+
                             if (modelid != 0)
-                                model_id = modelid;                     // Will use the default model here
+                                model_id = modelid; // Will use the default model here
 
                             target.SetDisplayId(model_id);
 
-                            // Dragonmaw Illusion (set mount model also)
-                            if (GetId() == 42016 && target.GetMountDisplayId() != 0 && !target.GetAuraEffectsByType(AuraType.ModIncreaseMountedFlightSpeed).Empty())
+                            // Dragonmaw Illusion (set Mount model also)
+                            if (GetId() == 42016 &&
+                                target.GetMountDisplayId() != 0 &&
+                                !target.GetAuraEffectsByType(AuraType.ModIncreaseMountedFlightSpeed).Empty())
                                 target.SetMountDisplayId(16314);
                         }
                     }
                 }
 
                 // polymorph case
-                if (mode.HasAnyFlag(AuraEffectHandleModes.Real) && target.IsTypeId(TypeId.Player) && target.IsPolymorphed())
+                if (mode.HasAnyFlag(AuraEffectHandleModes.Real) &&
+                    target.IsTypeId(TypeId.Player) &&
+                    target.IsPolymorphed())
                 {
                     // for players, start regeneration after 1s (in polymorph fast regeneration case)
                     // only if caster is Player (after patch 2.4.2)
                     if (GetCasterGUID().IsPlayer())
                         target.ToPlayer().SetRegenTimerCount(1 * Time.InMilliseconds);
 
-                    //dismount polymorphed target (after patch 2.4.2)
+                    //dismount polymorphed Target (after patch 2.4.2)
                     if (target.IsMounted())
                         target.RemoveAurasByType(AuraType.Mounted);
                 }
@@ -1586,13 +1858,14 @@ namespace Game.Spells
 
                 target.RestoreDisplayId(target.IsMounted());
 
-                // Dragonmaw Illusion (restore mount model)
-                if (GetId() == 42016 && target.GetMountDisplayId() == 16314)
-                {
+                // Dragonmaw Illusion (restore Mount model)
+                if (GetId() == 42016 &&
+                    target.GetMountDisplayId() == 16314)
                     if (!target.GetAuraEffectsByType(AuraType.Mounted).Empty())
                     {
                         int cr_id = target.GetAuraEffectsByType(AuraType.Mounted)[0].GetMiscValue();
                         CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)cr_id);
+
                         if (ci != null)
                         {
                             CreatureModel model = ObjectManager.ChooseDisplayId(ci);
@@ -1601,13 +1874,12 @@ namespace Game.Spells
                             target.SetMountDisplayId(model.CreatureDisplayID);
                         }
                     }
-                }
             }
         }
 
         [AuraEffectHandler(AuraType.ModScale)]
         [AuraEffectHandler(AuraType.ModScale2)]
-        void HandleAuraModScale(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModScale(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
@@ -1616,7 +1888,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.CloneCaster)]
-        void HandleAuraCloneCaster(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraCloneCaster(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1626,12 +1898,14 @@ namespace Game.Spells
             if (apply)
             {
                 Unit caster = GetCaster();
-                if (caster == null || caster == target)
+
+                if (caster == null ||
+                    caster == target)
                     return;
 
                 // What must be cloned? at least display and scale
                 target.SetDisplayId(caster.GetDisplayId());
-                //target.SetObjectScale(caster.GetFloatValue(OBJECT_FIELD_SCALE_X)); // we need retail info about how scaling is handled (aura maybe?)
+                //Target.SetObjectScale(caster.GetFloatValue(OBJECT_FIELD_SCALE_X)); // we need retail info about how scaling is handled (aura maybe?)
                 target.SetUnitFlag2(UnitFlags2.MirrorImage);
             }
             else
@@ -1645,7 +1919,7 @@ namespace Game.Spells
         /***      FIGHT       ***/
         /************************/
         [AuraEffectHandler(AuraType.FeignDeath)]
-        void HandleFeignDeath(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleFeignDeath(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1659,19 +1933,16 @@ namespace Game.Spells
                 var searcher = new UnitListSearcher(target, targets, u_check);
 
                 Cell.VisitAllObjects(target, searcher, target.GetMap().GetVisibilityRange());
+
                 foreach (var unit in targets)
                 {
                     if (!unit.HasUnitState(UnitState.Casting))
                         continue;
 
                     for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
-                    {
-                        if (unit.GetCurrentSpell(i) != null
-                        && unit.GetCurrentSpell(i).m_targets.GetUnitTargetGUID() == target.GetGUID())
-                        {
+                        if (unit.GetCurrentSpell(i) != null &&
+                            unit.GetCurrentSpell(i)._targets.GetUnitTargetGUID() == target.GetGUID())
                             unit.InterruptSpell(i, false);
-                        }
-                    }
                 }
 
                 foreach (var pair in target.GetThreatManager().GetThreatenedByMeList())
@@ -1681,15 +1952,19 @@ namespace Game.Spells
                 {
                     target.AttackStop();
                     Player targetPlayer = target.ToPlayer();
-                    if (targetPlayer != null)
-                        targetPlayer.SendAttackSwingCancelAttack();
+
+                    targetPlayer?.SendAttackSwingCancelAttack();
                 }
                 else
+                {
                     target.CombatStop(false, false);
+                }
 
                 // prevent interrupt message
-                if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
+                if (GetCasterGUID() == target.GetGUID() &&
+                    target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
                     target.FinishSpell(CurrentSpellTypes.Generic, false);
+
                 target.InterruptNonMeleeSpells(true);
 
                 // stop handling the effect if it was removed by linked event
@@ -1702,8 +1977,8 @@ namespace Game.Spells
                 target.AddUnitState(UnitState.Died);
 
                 Creature creature = target.ToCreature();
-                if (creature != null)
-                    creature.SetReactState(ReactStates.Passive);
+
+                creature?.SetReactState(ReactStates.Passive);
             }
             else
             {
@@ -1713,13 +1988,13 @@ namespace Game.Spells
                 target.ClearUnitState(UnitState.Died);
 
                 Creature creature = target.ToCreature();
-                if (creature != null)
-                    creature.InitializeReactState();
+
+                creature?.InitializeReactState();
             }
         }
 
         [AuraEffectHandler(AuraType.ModUnattackable)]
-        void HandleModUnattackable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModUnattackable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1727,7 +2002,8 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-            if (!apply && target.HasAuraType(AuraType.ModUnattackable))
+            if (!apply &&
+                target.HasAuraType(AuraType.ModUnattackable))
                 return;
 
             if (apply)
@@ -1735,23 +2011,25 @@ namespace Game.Spells
             else
                 target.RemoveUnitFlag(UnitFlags.NonAttackable2);
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 if (target.GetMap().IsDungeon())
                 {
                     target.AttackStop();
                     Player targetPlayer = target.ToPlayer();
-                    if (targetPlayer != null)
-                        targetPlayer.SendAttackSwingCancelAttack();
+
+                    targetPlayer?.SendAttackSwingCancelAttack();
                 }
                 else
+                {
                     target.CombatStop();
+                }
             }
         }
 
         [AuraEffectHandler(AuraType.ModDisarm)]
-        void HandleAuraModDisarm(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModDisarm(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1767,6 +2045,7 @@ namespace Game.Spells
             Action<Unit> flagChangeFunc = null;
             byte slot;
             WeaponAttackType attType;
+
             switch (type)
             {
                 case AuraType.ModDisarm:
@@ -1774,24 +2053,30 @@ namespace Game.Spells
                         flagChangeFunc = unit => { unit.SetUnitFlag(UnitFlags.Disarmed); };
                     else
                         flagChangeFunc = unit => { unit.RemoveUnitFlag(UnitFlags.Disarmed); };
+
                     slot = EquipmentSlot.MainHand;
                     attType = WeaponAttackType.BaseAttack;
+
                     break;
                 case AuraType.ModDisarmOffhand:
                     if (apply)
                         flagChangeFunc = unit => { unit.SetUnitFlag2(UnitFlags2.DisarmOffhand); };
                     else
                         flagChangeFunc = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmOffhand); };
+
                     slot = EquipmentSlot.OffHand;
                     attType = WeaponAttackType.OffAttack;
+
                     break;
                 case AuraType.ModDisarmRanged:
                     if (apply)
                         flagChangeFunc = unit => { unit.SetUnitFlag2(UnitFlags2.DisarmRanged); };
                     else
                         flagChangeFunc = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmRanged); };
+
                     slot = EquipmentSlot.MainHand;
                     attType = WeaponAttackType.RangedAttack;
+
                     break;
                 default:
                     return;
@@ -1800,32 +2085,37 @@ namespace Game.Spells
             // set/remove flag before weapon bonuses so it's properly reflected in CanUseAttackType
             flagChangeFunc?.Invoke(target);
 
-            // Handle damage modification, shapeshifted druids are not affected
-            if (target.IsTypeId(TypeId.Player) && !target.IsInFeralForm())
+            // Handle Damage modification, shapeshifted druids are not affected
+            if (target.IsTypeId(TypeId.Player) &&
+                !target.IsInFeralForm())
             {
                 Player player = target.ToPlayer();
 
                 Item item = player.GetItemByPos(InventorySlots.Bag0, slot);
+
                 if (item != null)
                 {
                     WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
 
                     player.ApplyItemDependentAuras(item, !apply);
+
                     if (attackType < WeaponAttackType.Max)
                     {
                         player._ApplyWeaponDamage(slot, item, !apply);
-                        if (!apply) // apply case already handled on item dependent aura removal (if any)
+
+                        if (!apply) // apply case already handled on Item dependent aura removal (if any)
                             player.UpdateWeaponDependentAuras(attackType);
                     }
                 }
             }
 
-            if (target.IsTypeId(TypeId.Unit) && target.ToCreature().GetCurrentEquipmentId() != 0)
+            if (target.IsTypeId(TypeId.Unit) &&
+                target.ToCreature().GetCurrentEquipmentId() != 0)
                 target.UpdateDamagePhysical(attType);
         }
 
         [AuraEffectHandler(AuraType.ModSilence)]
-        void HandleAuraModSilence(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModSilence(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1836,21 +2126,23 @@ namespace Game.Spells
             {
                 target.SetUnitFlag(UnitFlags.Silenced);
 
-                // call functions which may have additional effects after changing state of unit
+                // call functions which may have additional effects after changing State of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
                 for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
                 {
                     Spell spell = target.GetCurrentSpell(i);
+
                     if (spell != null)
-                        if (spell.m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
-                            // Stop spells on prepare or casting state
+                        if (spell._spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
+                            // Stop spells on prepare or casting State
                             target.InterruptSpell(i, false);
                 }
             }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                if (target.HasAuraType(AuraType.ModSilence) || target.HasAuraType(AuraType.ModPacifySilence))
+                if (target.HasAuraType(AuraType.ModSilence) ||
+                    target.HasAuraType(AuraType.ModPacifySilence))
                     return;
 
                 target.RemoveUnitFlag(UnitFlags.Silenced);
@@ -1858,7 +2150,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModPacify)]
-        void HandleAuraModPacify(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModPacify(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1866,18 +2158,22 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.SetUnitFlag(UnitFlags.Pacified);
+            }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                if (target.HasAuraType(AuraType.ModPacify) || target.HasAuraType(AuraType.ModPacifySilence))
+                if (target.HasAuraType(AuraType.ModPacify) ||
+                    target.HasAuraType(AuraType.ModPacifySilence))
                     return;
+
                 target.RemoveUnitFlag(UnitFlags.Pacified);
             }
         }
 
         [AuraEffectHandler(AuraType.ModPacifySilence)]
-        void HandleAuraModPacifyAndSilence(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModPacifyAndSilence(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1886,25 +2182,25 @@ namespace Game.Spells
 
             // Vengeance of the Blue Flight (@todo REMOVE THIS!)
             // @workaround
-            if (m_spellInfo.Id == 45839)
+            if (_spellInfo.Id == 45839)
             {
                 if (apply)
                     target.SetUnitFlag(UnitFlags.NonAttackable);
                 else
                     target.RemoveUnitFlag(UnitFlags.NonAttackable);
             }
+
             if (!(apply))
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(AuraType.ModPacifySilence))
                     return;
-            }
+
             HandleAuraModPacify(aurApp, mode, apply);
             HandleAuraModSilence(aurApp, mode, apply);
         }
 
         [AuraEffectHandler(AuraType.ModNoActions)]
-        void HandleAuraModNoActions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModNoActions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -1915,14 +2211,15 @@ namespace Game.Spells
             {
                 target.SetUnitFlag2(UnitFlags2.NoActions);
 
-                // call functions which may have additional effects after changing state of unit
+                // call functions which may have additional effects after changing State of unit
                 // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
                 for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
                 {
                     Spell spell = target.GetCurrentSpell(i);
+
                     if (spell)
-                        if (spell.m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
-                            // Stop spells on prepare or casting state
+                        if (spell._spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
+                            // Stop spells on prepare or casting State
                             target.InterruptSpell(i, false);
                 }
             }
@@ -1940,12 +2237,13 @@ namespace Game.Spells
         /***      TRACKING        ***/
         /****************************/
         [AuraEffectHandler(AuraType.TrackCreatures)]
-        void HandleAuraTrackCreatures(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraTrackCreatures(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
@@ -1956,21 +2254,21 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.TrackStealthed)]
-        void HandleAuraTrackStealthed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraTrackStealthed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
             if (!(apply))
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
+
             if (apply)
                 target.SetPlayerLocalFlag(PlayerLocalFlags.TrackStealthed);
             else
@@ -1978,7 +2276,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModStalked)]
-        void HandleAuraModStalked(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModStalked(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -1987,7 +2285,9 @@ namespace Game.Spells
 
             // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
             if (apply)
+            {
                 target.SetDynamicFlag(UnitDynFlags.TrackUnit);
+            }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -1995,28 +2295,32 @@ namespace Game.Spells
                     target.RemoveDynamicFlag(UnitDynFlags.TrackUnit);
             }
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.Untrackable)]
-        void HandleAuraUntrackable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraUntrackable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
             if (apply)
+            {
                 target.SetVisFlag(UnitVisFlags.Untrackable);
+            }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
+
                 target.RemoveVisFlag(UnitVisFlags.Untrackable);
             }
         }
@@ -2026,12 +2330,13 @@ namespace Game.Spells
         /****************************/
         [AuraEffectHandler(AuraType.ModSkill)]
         [AuraEffectHandler(AuraType.ModSkill2)]
-        void HandleAuraModSkill(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModSkill(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Skill)))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
@@ -2045,12 +2350,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.AllowTalentSwapping)]
-        void HandleAuraAllowTalentSwapping(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraAllowTalentSwapping(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
@@ -2064,7 +2370,7 @@ namespace Game.Spells
         /***       MOVEMENT       ***/
         /****************************/
         [AuraEffectHandler(AuraType.Mounted)]
-        void HandleAuraMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
@@ -2080,9 +2386,11 @@ namespace Game.Spells
                     uint vehicleId = 0;
 
                     var mountEntry = Global.DB2Mgr.GetMount(GetId());
+
                     if (mountEntry != null)
                     {
                         var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
+
                         if (mountDisplays != null)
                         {
                             if (mountEntry.IsSelfMount())
@@ -2092,28 +2400,32 @@ namespace Game.Spells
                             else
                             {
                                 var usableDisplays = mountDisplays.Where(mountDisplay =>
-                                {
-                                    Player playerTarget = target.ToPlayer();
-                                    if (playerTarget != null)
-                                    {
-                                        var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
-                                        if (playerCondition != null)
-                                            return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
-                                    }
+                                                                         {
+                                                                             Player playerTarget = target.ToPlayer();
 
-                                    return true;
-                                }).ToList();
+                                                                             if (playerTarget != null)
+                                                                             {
+                                                                                 var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
+
+                                                                                 if (playerCondition != null)
+                                                                                     return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
+                                                                             }
+
+                                                                             return true;
+                                                                         })
+                                                                  .ToList();
 
                                 if (!usableDisplays.Empty())
                                     displayId = usableDisplays.SelectRandom().CreatureDisplayInfoID;
                             }
                         }
-                        // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
+                        // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper _data in MiscValue)
                         //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
                         //    creatureEntry = mountVehicle->VehicleCreatureId;
                     }
 
                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creatureEntry);
+
                     if (creatureInfo != null)
                     {
                         vehicleId = creatureInfo.VehicleId;
@@ -2125,9 +2437,10 @@ namespace Game.Spells
                             displayId = model.CreatureDisplayID;
                         }
 
-                        //some spell has one aura of mount and one of vehicle
+                        //some spell has one aura of Mount and one of vehicle
                         foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
-                            if (effect.IsEffect(SpellEffectName.Summon) && effect.MiscValue == GetMiscValue())
+                            if (effect.IsEffect(SpellEffectName.Summon) &&
+                                effect.MiscValue == GetMiscValue())
                                 displayId = 0;
                     }
 
@@ -2138,6 +2451,7 @@ namespace Game.Spells
                 if (mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
+
                     if (mountCapability != null)
                         target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(this));
                 }
@@ -2157,6 +2471,7 @@ namespace Game.Spells
                 {
                     // remove speed aura
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
+
                     if (mountCapability != null)
                         target.RemoveAurasDueToSpell(mountCapability.ModSpellAuraID, target.GetGUID());
                 }
@@ -2164,7 +2479,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.Fly)]
-        void HandleAuraAllowFlight(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraAllowFlight(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2172,21 +2487,21 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                if (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
+                if (target.HasAuraType(GetAuraType()) ||
+                    target.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
                     return;
-            }
 
             target.SetCanTransitionBetweenSwimAndFly(apply);
 
             if (target.SetCanFly(apply))
-                if (!apply && !target.IsGravityDisabled())
+                if (!apply &&
+                    !target.IsGravityDisabled())
                     target.GetMotionMaster().MoveFall();
         }
 
         [AuraEffectHandler(AuraType.WaterWalk)]
-        void HandleAuraWaterWalk(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraWaterWalk(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2194,17 +2509,15 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
             target.SetWaterWalking(apply);
         }
 
         [AuraEffectHandler(AuraType.FeatherFall)]
-        void HandleAuraFeatherFall(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraFeatherFall(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2212,21 +2525,20 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
             target.SetFeatherFall(apply);
 
             // start fall from current height
-            if (!apply && target.IsTypeId(TypeId.Player))
+            if (!apply &&
+                target.IsTypeId(TypeId.Player))
                 target.ToPlayer().SetFallInformation(0, target.GetPositionZ());
         }
 
         [AuraEffectHandler(AuraType.Hover)]
-        void HandleAuraHover(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraHover(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2234,17 +2546,15 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
-            target.SetHover(apply);    //! Sets movementflags
+            target.SetHover(apply); //! Sets movementflags
         }
 
         [AuraEffectHandler(AuraType.WaterBreathing)]
-        void HandleWaterBreathing(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleWaterBreathing(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2257,7 +2567,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ForceMoveForward)]
-        void HandleForceMoveForward(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleForceMoveForward(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2265,18 +2575,21 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.SetUnitFlag2(UnitFlags2.ForceMovement);
+            }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
+
                 target.RemoveUnitFlag2(UnitFlags2.ForceMovement);
             }
         }
 
         [AuraEffectHandler(AuraType.CanTurnWhileFalling)]
-        void HandleAuraCanTurnWhileFalling(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraCanTurnWhileFalling(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2284,34 +2597,31 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
             target.SetCanTurnWhileFalling(apply);
         }
 
         [AuraEffectHandler(AuraType.IgnoreMovementForces)]
-        void HandleIgnoreMovementForces(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleIgnoreMovementForces(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
 
             Unit target = aurApp.GetTarget();
+
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
             target.SetIgnoreMovementForces(apply);
         }
 
         [AuraEffectHandler(AuraType.DisableInertia)]
-        void HandleDisableInertia(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleDisableInertia(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -2319,11 +2629,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
             target.SetDisableInertia(apply);
         }
@@ -2332,7 +2640,7 @@ namespace Game.Spells
         /***        THREAT        ***/
         /****************************/
         [AuraEffectHandler(AuraType.ModThreat)]
-        void HandleModThreat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModThreat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -2341,37 +2649,41 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModTotalThreat)]
-        void HandleAuraModTotalThreat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModTotalThreat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            if (!target.IsAlive() || !target.IsTypeId(TypeId.Player))
+            if (!target.IsAlive() ||
+                !target.IsTypeId(TypeId.Player))
                 return;
 
             Unit caster = GetCaster();
-            if (caster != null && caster.IsAlive())
+
+            if (caster != null &&
+                caster.IsAlive())
                 caster.GetThreatManager().UpdateMyTempModifiers();
         }
 
         [AuraEffectHandler(AuraType.ModTaunt)]
-        void HandleModTaunt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModTaunt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            if (!target.IsAlive() || !target.CanHaveThreatList())
+            if (!target.IsAlive() ||
+                !target.CanHaveThreatList())
                 return;
 
             target.GetThreatManager().TauntUpdate();
         }
 
         [AuraEffectHandler(AuraType.ModDetaunt)]
-        void HandleModDetaunt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModDetaunt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2379,7 +2691,10 @@ namespace Game.Spells
             Unit caster = GetCaster();
             Unit target = aurApp.GetTarget();
 
-            if (!caster || !caster.IsAlive() || !target.IsAlive() || !caster.CanHaveThreatList())
+            if (!caster ||
+                !caster.IsAlive() ||
+                !target.IsAlive() ||
+                !caster.CanHaveThreatList())
                 return;
 
             caster.GetThreatManager().TauntUpdate();
@@ -2389,7 +2704,7 @@ namespace Game.Spells
         /***        CONTROL        ***/
         /*****************************/
         [AuraEffectHandler(AuraType.ModConfuse)]
-        void HandleModConfuse(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModConfuse(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2403,7 +2718,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModFear)]
-        void HandleModFear(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModFear(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2414,7 +2729,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModStun)]
-        void HandleAuraModStun(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModStun(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2429,7 +2744,7 @@ namespace Game.Spells
 
         [AuraEffectHandler(AuraType.ModRoot)]
         [AuraEffectHandler(AuraType.ModRoot2)]
-        void HandleAuraModRoot(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModRoot(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2440,7 +2755,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.PreventsFleeing)]
-        void HandlePreventFleeing(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandlePreventFleeing(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2448,15 +2763,17 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // Since patch 3.0.2 this mechanic no longer affects fear effects. It will ONLY prevent humanoids from fleeing due to low health.
-            if (!apply || target.HasAuraType(AuraType.ModFear))
+            if (!apply ||
+                target.HasAuraType(AuraType.ModFear))
                 return;
+
             // TODO: find a way to cancel fleeing for assistance.
             // Currently this will only stop creatures fleeing due to low health that could not find nearby allies to flee towards.
             target.SetControlled(false, UnitState.Fleeing);
         }
 
         [AuraEffectHandler(AuraType.ModRootDisableGravity)]
-        void HandleAuraModRootAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModRootAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2466,19 +2783,18 @@ namespace Game.Spells
             target.SetControlled(apply, UnitState.Root);
 
             // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
-            if (!apply
-                && (target.HasAuraType(GetAuraType())
-                    || target.HasAuraType(AuraType.ModStunDisableGravity)
-                    || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
+            if (!apply &&
+                (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModStunDisableGravity) || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
                 return;
 
             if (target.SetDisableGravity(apply))
-                if (!apply && !target.IsFlying())
+                if (!apply &&
+                    !target.IsFlying())
                     target.GetMotionMaster().MoveFall();
         }
-        
+
         [AuraEffectHandler(AuraType.ModStunDisableGravity)]
-        void HandleAuraModStunAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModStunAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2491,14 +2807,13 @@ namespace Game.Spells
                 target.GetThreatManager().EvaluateSuppressed();
 
             // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
-            if (!apply
-                && (target.HasAuraType(GetAuraType())
-                    || target.HasAuraType(AuraType.ModStunDisableGravity)
-                    || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
+            if (!apply &&
+                (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModStunDisableGravity) || (target.IsCreature() && target.ToCreature().GetMovementTemplate().Flight == CreatureFlightMovementType.DisableGravity)))
                 return;
 
             if (target.SetDisableGravity(apply))
-                if (!apply && !target.IsFlying())
+                if (!apply &&
+                    !target.IsFlying())
                     target.GetMotionMaster().MoveFall();
         }
 
@@ -2506,7 +2821,7 @@ namespace Game.Spells
         /***        CHARM        ***/
         /***************************/
         [AuraEffectHandler(AuraType.ModPossess)]
-        void HandleModPossess(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModPossess(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2516,9 +2831,11 @@ namespace Game.Spells
             Unit caster = GetCaster();
 
             // no support for posession AI yet
-            if (caster != null && caster.IsTypeId(TypeId.Unit))
+            if (caster != null &&
+                caster.IsTypeId(TypeId.Unit))
             {
                 HandleModCharm(aurApp, mode, apply);
+
                 return;
             }
 
@@ -2529,17 +2846,21 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModPossessPet)]
-        void HandleModPossessPet(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModPossessPet(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit caster = GetCaster();
-            if (caster == null || !caster.IsTypeId(TypeId.Player))
+
+            if (caster == null ||
+                !caster.IsTypeId(TypeId.Player))
                 return;
 
             Unit target = aurApp.GetTarget();
-            if (!target.IsTypeId(TypeId.Unit) || !target.IsPet())
+
+            if (!target.IsTypeId(TypeId.Unit) ||
+                !target.IsPet())
                 return;
 
             Pet pet = target.ToPet();
@@ -2556,21 +2877,24 @@ namespace Game.Spells
                 pet.RemoveCharmedBy(caster);
 
                 if (!pet.IsWithinDistInMap(caster, pet.GetMap().GetVisibilityRange()))
+                {
                     pet.Remove(PetSaveMode.NotInSlot, true);
+                }
                 else
                 {
                     // Reinitialize the pet bar or it will appear greyed out
                     caster.ToPlayer().PetSpellInitialize();
 
                     // TODO: remove this
-                    if (pet.GetVictim() == null && !pet.GetCharmInfo().HasCommandState(CommandStates.Stay))
+                    if (pet.GetVictim() == null &&
+                        !pet.GetCharmInfo().HasCommandState(CommandStates.Stay))
                         pet.GetMotionMaster().MoveFollow(caster, SharedConst.PetFollowDist, pet.GetFollowAngle());
                 }
             }
         }
 
         [AuraEffectHandler(AuraType.ModCharm)]
-        void HandleModCharm(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModCharm(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2586,7 +2910,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.AoeCharm)]
-        void HandleCharmConvert(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleCharmConvert(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2602,21 +2926,24 @@ namespace Game.Spells
         }
 
         /**
-         * Such auras are applied from a caster(=player) to a vehicle.
-         * This has been verified using spell #49256
-         */
+		 * Such Auras are applied from a caster(=player) to a vehicle.
+		 * This has been verified using spell #49256
+		 */
         [AuraEffectHandler(AuraType.ControlVehicle)]
-        void HandleAuraControlVehicle(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraControlVehicle(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
 
             Unit target = aurApp.GetTarget();
+
             if (!target.IsVehicle())
                 return;
 
             Unit caster = GetCaster();
-            if (caster == null || caster == target)
+
+            if (caster == null ||
+                caster == target)
                 return;
 
             if (apply)
@@ -2624,7 +2951,7 @@ namespace Game.Spells
                 // Currently spells that have base points  0 and DieSides 0 = "0/0" exception are pushed to -1,
                 // however the idea of 0/0 is to ingore flag VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT and -1 checks for it,
                 // so this break such spells or most of them.
-                // Current formula about m_amount: effect base points + dieside - 1
+                // Current formula about _amount: effect base points + dieside - 1
                 // TO DO: Reasearch more about 0/0 and fix it.
                 caster._EnterVehicle(target.GetVehicleKit(), (sbyte)(GetAmount() - 1), aurApp);
             }
@@ -2636,19 +2963,21 @@ namespace Game.Spells
                 if (GetId() == 53111) // Devour Humanoid
                 {
                     Unit.Kill(target, caster);
+
                     if (caster.IsTypeId(TypeId.Unit))
                         caster.ToCreature().DespawnOrUnsummon();
                 }
 
-                bool seatChange = mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmount)                             // Seat change on the same direct vehicle
-                    || target.HasAuraTypeWithCaster(AuraType.ControlVehicle, caster.GetGUID());                                 // Seat change to a proxy vehicle (for example turret mounted on a siege engine)
+                bool seatChange = mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmount) // Seat change on the same direct vehicle
+                                  ||
+                                  target.HasAuraTypeWithCaster(AuraType.ControlVehicle, caster.GetGUID()); // Seat change to a proxy vehicle (for example turret mounted on a siege engine)
 
                 if (!seatChange)
                     caster._ExitVehicle();
                 else
-                    target.GetVehicleKit().RemovePassenger(caster);  // Only remove passenger from vehicle without launching exit movement or despawning the vehicle
+                    target.GetVehicleKit().RemovePassenger(caster); // Only remove passenger from vehicle without launching exit movement or despawning the vehicle
 
-                // some SPELL_AURA_CONTROL_VEHICLE auras have a dummy effect on the player - remove them
+                // some SPELL_AURA_CONTROL_VEHICLE Auras have a dummy effect on the player - remove them
                 caster.RemoveAurasDueToSpell(GetId());
             }
         }
@@ -2660,7 +2989,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModSpeedAlways)]
         [AuraEffectHandler(AuraType.ModSpeedNotStack)]
         [AuraEffectHandler(AuraType.ModMinimumSpeed)]
-        void HandleAuraModIncreaseSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -2673,7 +3002,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModIncreaseMountedSpeed)]
         [AuraEffectHandler(AuraType.ModMountedSpeedAlways)]
         [AuraEffectHandler(AuraType.ModMountedSpeedNotStack)]
-        void HandleAuraModIncreaseMountedSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseMountedSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             HandleAuraModIncreaseSpeed(aurApp, mode, apply);
         }
@@ -2684,12 +3013,13 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModMountedFlightSpeedAlways)]
         [AuraEffectHandler(AuraType.ModVehicleSpeedAlways)]
         [AuraEffectHandler(AuraType.ModFlightSpeedNotStack)]
-        void HandleAuraModIncreaseFlightSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseFlightSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
 
             Unit target = aurApp.GetTarget();
+
             if (mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 target.UpdateSpeed(UnitMoveType.Flight);
 
@@ -2697,12 +3027,14 @@ namespace Game.Spells
             if (GetAuraType() == AuraType.ModIncreaseMountedFlightSpeed)
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask) && (apply || (!target.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !target.HasAuraType(AuraType.Fly))))
+                if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask) &&
+                    (apply || (!target.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !target.HasAuraType(AuraType.Fly))))
                 {
                     target.SetCanTransitionBetweenSwimAndFly(apply);
 
                     if (target.SetCanFly(apply))
-                        if (!apply && !target.IsGravityDisabled())
+                        if (!apply &&
+                            !target.IsGravityDisabled())
                             target.GetMotionMaster().MoveFall();
                 }
 
@@ -2713,15 +3045,17 @@ namespace Game.Spells
                     if (target.IsTypeId(TypeId.Player))
                         target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)Mechanics.Polymorph, apply);
 
-                    // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
-                    if (apply && target.HasAuraEffect(42016, 0) && target.GetMountDisplayId() != 0)
+                    // Dragonmaw Illusion (overwrite Mount model, mounted aura already applied)
+                    if (apply &&
+                        target.HasAuraEffect(42016, 0) &&
+                        target.GetMountDisplayId() != 0)
                         target.SetMountDisplayId(16314);
                 }
             }
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseSwimSpeed)]
-        void HandleAuraModIncreaseSwimSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseSwimSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -2732,7 +3066,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModDecreaseSpeed)]
-        void HandleAuraModDecreaseSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModDecreaseSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -2748,7 +3082,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.UseNormalMovementSpeed)]
-        void HandleAuraModUseNormalSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModUseNormalSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2761,7 +3095,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModMinimumSpeedRate)]
-        void HandleAuraModMinimumSpeedRate(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModMinimumSpeedRate(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -2772,7 +3106,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModMovementForceMagnitude)]
-        void HandleModMovementForceMagnitude(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModMovementForceMagnitude(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -2784,99 +3118,107 @@ namespace Game.Spells
         /***                     IMMUNITY                      ***/
         /*********************************************************/
         [AuraEffectHandler(AuraType.MechanicImmunityMask)]
-        void HandleModMechanicImmunityMask(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModMechanicImmunityMask(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.MechanicImmunity)]
-        void HandleModMechanicImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModMechanicImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.EffectImmunity)]
-        void HandleAuraModEffectImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModEffectImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             // when removing flag aura, handle flag drop
             // TODO: this should be handled in aura script for flag spells using AfterEffectRemove hook
             Player player = target.ToPlayer();
-            if (!apply && player != null && GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.StealthOrInvis))
+
+            if (!apply &&
+                player != null &&
+                GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.StealthOrInvis))
             {
                 if (player.InBattleground())
                 {
                     Battleground bg = player.GetBattleground();
+
                     if (bg)
                         bg.EventPlayerDroppedFlag(player);
                 }
                 else
+                {
                     Global.OutdoorPvPMgr.HandleDropFlag(player, GetSpellInfo().Id);
+                }
             }
         }
 
         [AuraEffectHandler(AuraType.StateImmunity)]
-        void HandleAuraModStateImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModStateImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.SchoolImmunity)]
-        void HandleAuraModSchoolImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModSchoolImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             if (GetSpellInfo().Mechanic == Mechanics.Banish)
             {
                 if (apply)
+                {
                     target.AddUnitState(UnitState.Isolated);
+                }
                 else
                 {
                     bool banishFound = false;
                     var banishAuras = target.GetAuraEffectsByType(GetAuraType());
+
                     foreach (var aurEff in banishAuras)
-                    {
                         if (aurEff.GetSpellInfo().Mechanic == Mechanics.Banish)
                         {
                             banishFound = true;
+
                             break;
                         }
-                    }
 
                     if (!banishFound)
                         target.ClearUnitState(UnitState.Isolated);
                 }
             }
 
-            // TODO: should be changed to a proc script on flag spell (they have "Taken positive" proc flags in db2)
+            // TODO: should be changed to a proc script on flag spell (they have "Taken positive" proc Flags in db2)
             {
                 if (apply && GetMiscValue() == (int)SpellSchoolMask.Normal)
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
 
-                // remove all flag auras (they are positive, but they must be removed when you are immune)
-                if (GetSpellInfo().HasAttribute(SpellAttr1.ImmunityPurgesEffect)
-                    && GetSpellInfo().HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
+                // remove all flag Auras (they are positive, but they must be removed when you are immune)
+                if (GetSpellInfo().HasAttribute(SpellAttr1.ImmunityPurgesEffect) &&
+                    GetSpellInfo().HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
 
@@ -2888,7 +3230,8 @@ namespace Game.Spells
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit
-                if (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.DamageImmunity))
+                if (target.HasAuraType(GetAuraType()) ||
+                    target.HasAuraType(AuraType.DamageImmunity))
                     return;
 
                 target.RemoveUnitFlag(UnitFlags.Immune);
@@ -2896,13 +3239,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]
-        void HandleAuraModDmgImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModDmgImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             if (apply)
             {
@@ -2912,20 +3255,22 @@ namespace Game.Spells
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit
-                if (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.SchoolImmunity))
+                if (target.HasAuraType(GetAuraType()) ||
+                    target.HasAuraType(AuraType.SchoolImmunity))
                     return;
+
                 target.RemoveUnitFlag(UnitFlags.Immune);
             }
         }
 
         [AuraEffectHandler(AuraType.DispelImmunity)]
-        void HandleAuraModDispelImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModDispelImmunity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+            _spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         /*********************************************************/
@@ -2936,7 +3281,7 @@ namespace Game.Spells
         /***        RESISTANCE        ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModResistance)]
-        void HandleAuraModResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -2949,21 +3294,24 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBaseResistancePct)]
-        void HandleAuraModBaseResistancePCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModBaseResistancePCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            // only players have base stats
+            // only players have base Stats
             if (!target.IsTypeId(TypeId.Player))
             {
                 //pets only have base armor
-                if (target.IsPet() && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
+                if (target.IsPet() &&
+                    Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
                 {
                     if (apply)
+                    {
                         target.ApplyStatPctModifier(UnitMods.Armor, UnitModifierPctType.Base, GetAmount());
+                    }
                     else
                     {
                         float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, (uint)SpellSchoolMask.Normal);
@@ -2974,23 +3322,23 @@ namespace Game.Spells
             else
             {
                 for (byte x = (byte)SpellSchools.Normal; x < (byte)SpellSchools.Max; x++)
-                {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << x)))
                     {
                         if (apply)
+                        {
                             target.ApplyStatPctModifier(UnitMods.ResistanceStart + x, UnitModifierPctType.Base, GetAmount());
+                        }
                         else
                         {
                             float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModBaseResistancePct, 1u << x);
                             target.SetStatPctModifier(UnitMods.ResistanceStart + x, UnitModifierPctType.Base, amount);
                         }
                     }
-                }
             }
         }
 
         [AuraEffectHandler(AuraType.ModResistancePct)]
-        void HandleModResistancePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModResistancePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -2998,31 +3346,31 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             for (byte i = (byte)SpellSchools.Normal; i < (byte)SpellSchools.Max; i++)
-            {
                 if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
                 {
                     float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModResistancePct, 1u << i);
+
                     if (target.GetPctModifierValue(UnitMods.ResistanceStart + i, UnitModifierPctType.Total) == amount)
                         continue;
 
                     target.SetStatPctModifier(UnitMods.ResistanceStart + i, UnitModifierPctType.Total, amount);
                 }
-            }
         }
 
         [AuraEffectHandler(AuraType.ModBaseResistance)]
-        void HandleModBaseResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModBaseResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            // only players have base stats
+            // only players have base Stats
             if (!target.IsTypeId(TypeId.Player))
             {
-                //only pets have base stats
-                if (target.IsPet() && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
+                //only pets have base Stats
+                if (target.IsPet() &&
+                    Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
                     target.HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, GetAmount(), apply);
             }
             else
@@ -3034,23 +3382,26 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModTargetResistance)]
-        void HandleModTargetResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModTargetResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
-            // applied to damage as HandleNoImmediateEffect in Unit.CalcAbsorbResist and Unit.CalcArmorReducedDamage
+            // applied to Damage as HandleNoImmediateEffect in Unit.CalcAbsorbResist and Unit.CalcArmorReducedDamage
 
             // show armor penetration
-            if (target.IsTypeId(TypeId.Player) && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
+            if (target.IsTypeId(TypeId.Player) &&
+                Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
                 target.ApplyModTargetPhysicalResistance(GetAmount(), apply);
 
             // show as spell penetration only full spell penetration bonuses (all resistances except armor and holy
-            if (target.IsTypeId(TypeId.Player) && ((SpellSchoolMask)GetMiscValue() & SpellSchoolMask.Spell) == SpellSchoolMask.Spell)
+            if (target.IsTypeId(TypeId.Player) &&
+                ((SpellSchoolMask)GetMiscValue() & SpellSchoolMask.Spell) == SpellSchoolMask.Spell)
                 target.ApplyModTargetResistance(GetAmount(), apply);
         }
 
@@ -3058,81 +3409,94 @@ namespace Game.Spells
         /***           STAT           ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModStat)]
-        void HandleAuraModStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            if (GetMiscValue() < -2 || GetMiscValue() > 4)
+            if (GetMiscValue() < -2 ||
+                GetMiscValue() > 4)
             {
                 Log.outError(LogFilter.Spells, "WARNING: Spell {0} effect {1} has an unsupported misc value ({2}) for SPELL_AURA_MOD_STAT ", GetId(), GetEffIndex(), GetMiscValue());
+
                 return;
             }
 
             Unit target = aurApp.GetTarget();
             int spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, AuraType.ModStat, true, GetMiscValue());
+
             if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
                 return;
 
             for (var i = Stats.Strength; i < Stats.Max; i++)
-            {
-                // -1 or -2 is all stats (misc < -2 checked in function beginning)
-                if (GetMiscValue() < 0 || GetMiscValue() == (int)i)
+                // -1 or -2 is all Stats (misc < -2 checked in function beginning)
+                if (GetMiscValue() < 0 ||
+                    GetMiscValue() == (int)i)
                 {
                     if (spellGroupVal != 0)
                     {
                         target.HandleStatFlatModifier((UnitMods.StatStart + (int)i), UnitModifierFlatType.Total, (float)spellGroupVal, !apply);
-                        if (target.IsTypeId(TypeId.Player) || target.IsPet())
+
+                        if (target.IsTypeId(TypeId.Player) ||
+                            target.IsPet())
                             target.UpdateStatBuffMod(i);
                     }
 
                     target.HandleStatFlatModifier(UnitMods.StatStart + (int)i, UnitModifierFlatType.Total, GetAmount(), apply);
-                    if (target.IsTypeId(TypeId.Player) || target.IsPet())
+
+                    if (target.IsTypeId(TypeId.Player) ||
+                        target.IsPet())
                         target.UpdateStatBuffMod(i);
                 }
-            }
         }
 
         [AuraEffectHandler(AuraType.ModPercentStat)]
-        void HandleModPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            if (GetMiscValue() < -1 || GetMiscValue() > 4)
+            if (GetMiscValue() < -1 ||
+                GetMiscValue() > 4)
             {
                 Log.outError(LogFilter.Spells, "WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+
                 return;
             }
 
-            // only players have base stats
+            // only players have base Stats
             if (!target.IsTypeId(TypeId.Player))
                 return;
 
             for (int i = (int)Stats.Strength; i < (int)Stats.Max; ++i)
-            {
-                if (GetMiscValue() == i || GetMiscValue() == -1)
+                if (GetMiscValue() == i ||
+                    GetMiscValue() == -1)
                 {
                     if (apply)
+                    {
                         target.ApplyStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Base, GetAmount());
+                    }
                     else
                     {
-                        float amount = target.GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
-                        {
-                            if (aurEff.GetMiscValue() == i || aurEff.GetMiscValue() == -1)
-                                return true;
-                            return false;
-                        });
+                        float amount = target.GetTotalAuraMultiplier(AuraType.ModPercentStat,
+                                                                     aurEff =>
+                                                                     {
+                                                                         if (aurEff.GetMiscValue() == i ||
+                                                                             aurEff.GetMiscValue() == -1)
+                                                                             return true;
+
+                                                                         return false;
+                                                                     });
+
                         target.SetStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Base, amount);
                     }
                 }
-            }
         }
 
         [AuraEffectHandler(AuraType.ModSpellDamageOfStatPercent)]
-        void HandleModSpellDamagePercentFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModSpellDamagePercentFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3142,14 +3506,14 @@ namespace Game.Spells
             if (!target.IsTypeId(TypeId.Player))
                 return;
 
-            // Magic damage modifiers implemented in Unit.SpellDamageBonus
+            // Magic Damage modifiers implemented in Unit.SpellDamageBonus
             // This information for client side use only
             // Recalculate bonus
             target.ToPlayer().UpdateSpellDamageAndHealingBonus();
         }
 
         [AuraEffectHandler(AuraType.ModSpellHealingOfStatPercent)]
-        void HandleModSpellHealingPercentFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModSpellHealingPercentFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3164,7 +3528,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModHealingDone)]
-        void HandleModHealingDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModHealingDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3173,68 +3537,75 @@ namespace Game.Spells
 
             if (!target.IsTypeId(TypeId.Player))
                 return;
+
             // implemented in Unit.SpellHealingBonus
             // this information is for client side only
             target.ToPlayer().UpdateSpellDamageAndHealingBonus();
         }
 
         [AuraEffectHandler(AuraType.ModHealingDonePercent)]
-        void HandleModHealingDonePct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModHealingDonePct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (player)
                 player.UpdateHealingDonePercentMod();
         }
 
         [AuraEffectHandler(AuraType.ModTotalStatPercentage)]
-        void HandleModTotalPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModTotalPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            // save current health state
+            // save current health State
             float healthPct = target.GetHealthPct();
             bool zeroHealth = !target.IsAlive();
 
-            // players in corpse state may mean two different states:
+            // players in corpse State may mean two different states:
             /// 1. player just died but did not release (in this case health == 0)
             /// 2. player is corpse running (ie ghost) (in this case health == 1)
             if (target.GetDeathState() == DeathState.Corpse)
                 zeroHealth = target.GetHealth() == 0;
 
             for (int i = (int)Stats.Strength; i < (int)Stats.Max; i++)
-            {
-                if (Convert.ToBoolean(GetMiscValueB() & 1 << i) || GetMiscValueB() == 0) // 0 is also used for all stats
+                if (Convert.ToBoolean(GetMiscValueB() & (1 << i)) ||
+                    GetMiscValueB() == 0) // 0 is also used for all Stats
                 {
-                    float amount = target.GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
-                    {
-                        if ((aurEff.GetMiscValueB() & 1 << i) != 0 || aurEff.GetMiscValueB() == 0)
-                            return true;
-                        return false;
-                    });
+                    float amount = target.GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage,
+                                                                 aurEff =>
+                                                                 {
+                                                                     if ((aurEff.GetMiscValueB() & (1 << i)) != 0 ||
+                                                                         aurEff.GetMiscValueB() == 0)
+                                                                         return true;
+
+                                                                     return false;
+                                                                 });
 
                     if (target.GetPctModifierValue(UnitMods.StatStart + i, UnitModifierPctType.Total) == amount)
                         continue;
 
                     target.SetStatPctModifier(UnitMods.StatStart + i, UnitModifierPctType.Total, amount);
-                    if (target.IsTypeId(TypeId.Player) || target.IsPet())
+
+                    if (target.IsTypeId(TypeId.Player) ||
+                        target.IsPet())
                         target.UpdateStatBuffMod((Stats)i);
                 }
-            }
 
             // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_ABILITY 0x00000010 flag)
             // this check is total bullshit i think
-            if ((Convert.ToBoolean(GetMiscValueB() & 1 << (int)Stats.Stamina) || GetMiscValueB() == 0) && m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
+            if ((Convert.ToBoolean(GetMiscValueB() & (1 << (int)Stats.Stamina)) || GetMiscValueB() == 0) &&
+                _spellInfo.HasAttribute(SpellAttr0.IsAbility))
                 target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1ul)));
         }
 
         [AuraEffectHandler(AuraType.ModExpertise)]
-        void HandleAuraModExpertise(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModExpertise(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3250,13 +3621,14 @@ namespace Game.Spells
 
         // Increase armor by <AuraEffect.BasePoints> % of your <primary stat>
         [AuraEffectHandler(AuraType.ModArmorPctFromStat)]
-        void HandleModArmorPctFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModArmorPctFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
-            // only players have primary stats
+            // only players have primary Stats
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (!player)
                 return;
 
@@ -3264,7 +3636,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBonusArmor)]
-        void HandleModBonusArmor(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModBonusArmor(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3273,7 +3645,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBonusArmorPct)]
-        void HandleModBonusArmorPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModBonusArmorPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3282,40 +3654,42 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModStatBonusPct)]
-        void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            if (GetMiscValue() < -1 || GetMiscValue() > 4)
+            if (GetMiscValue() < -1 ||
+                GetMiscValue() > 4)
             {
                 Log.outError(LogFilter.Spells, "WARNING: Misc Value for SPELL_AURA_MOD_STAT_BONUS_PCT not valid");
+
                 return;
             }
 
-            // only players have base stats
+            // only players have base Stats
             if (!target.IsTypeId(TypeId.Player))
                 return;
 
             for (Stats stat = Stats.Strength; stat < Stats.Max; ++stat)
-            {
-                if (GetMiscValue() == (int)stat || GetMiscValue() == -1)
+                if (GetMiscValue() == (int)stat ||
+                    GetMiscValue() == -1)
                 {
                     target.HandleStatFlatModifier(UnitMods.StatStart + (int)stat, UnitModifierFlatType.BasePCTExcludeCreate, GetAmount(), apply);
                     target.UpdateStatBuffMod(stat);
                 }
-            }
         }
 
         [AuraEffectHandler(AuraType.OverrideSpellPowerByApPct)]
-        void HandleOverrideSpellPowerByAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleOverrideSpellPowerByAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (!target)
                 return;
 
@@ -3324,12 +3698,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.OverrideAttackPowerBySpPct)]
-        void HandleOverrideAttackPowerBySpellPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleOverrideAttackPowerBySpellPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (!target)
                 return;
 
@@ -3339,12 +3714,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModVersatility)]
-        void HandleModVersatilityByPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModVersatilityByPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target)
             {
                 target.SetVersatilityBonus(target.GetTotalAuraModifier(AuraType.ModVersatility));
@@ -3354,7 +3730,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModMaxPower)]
-        void HandleAuraModMaxPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModMaxPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3371,7 +3747,7 @@ namespace Game.Spells
         /***      HEAL & ENERGIZE     ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModPowerRegen)]
-        void HandleModPowerRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModPowerRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3390,13 +3766,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModPowerRegenPercent)]
-        void HandleModPowerRegenPCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModPowerRegenPCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             HandleModPowerRegen(aurApp, mode, apply);
         }
 
         [AuraEffectHandler(AuraType.ModManaRegenPct)]
-        void HandleModManaRegenPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModManaRegenPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3412,7 +3788,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModIncreaseHealth)]
         [AuraEffectHandler(AuraType.ModIncreaseHealth2)]
         [AuraEffectHandler(AuraType.ModMaxHealth)]
-        void HandleAuraModIncreaseHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3420,6 +3796,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             int amt = apply ? GetAmount() : -GetAmount();
+
             if (amt < 0)
                 target.ModifyHealth(Math.Max((int)(1 - target.GetHealth()), amt));
 
@@ -3429,7 +3806,7 @@ namespace Game.Spells
                 target.ModifyHealth(amt);
         }
 
-        void HandleAuraModIncreaseMaxHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseMaxHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3449,7 +3826,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseEnergy)]
-        void HandleAuraModIncreaseEnergy(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseEnergy(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3462,7 +3839,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseEnergyPercent)]
-        void HandleAuraModIncreaseEnergyPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseEnergyPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3478,22 +3855,28 @@ namespace Game.Spells
 
             // Handle aura effect for max power
             if (apply)
+            {
                 target.ApplyStatPctModifier(unitMod, UnitModifierPctType.Total, GetAmount());
+            }
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
-                    {
-                        if (aurEff.GetMiscValue() == (int)powerType)
-                            return true;
-                        return false;
-                    });
+                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent,
+                                                             aurEff =>
+                                                             {
+                                                                 if (aurEff.GetMiscValue() == (int)powerType)
+                                                                     return true;
 
-                amount *= target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
-                    {
-                        if (aurEff.GetMiscValue() == (int)powerType)
-                            return true;
-                        return false;
-                    });
+                                                                 return false;
+                                                             });
+
+                amount *= target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct,
+                                                        aurEff =>
+                                                        {
+                                                            if (aurEff.GetMiscValue() == (int)powerType)
+                                                                return true;
+
+                                                            return false;
+                                                        });
 
                 target.SetStatPctModifier(unitMod, UnitModifierPctType.Total, amount);
             }
@@ -3504,7 +3887,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseHealthPercent)]
-        void HandleAuraModIncreaseHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3513,8 +3896,11 @@ namespace Game.Spells
 
             // Unit will keep hp% after MaxHealth being modified if unit is alive.
             float percent = target.GetHealthPct();
+
             if (apply)
+            {
                 target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, GetAmount());
+            }
             else
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent) * target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent2);
@@ -3529,7 +3915,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBaseHealthPct)]
-        void HandleAuraIncreaseBaseHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraIncreaseBaseHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3537,7 +3923,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Base, GetAmount());
+            }
             else
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModBaseHealthPct);
@@ -3546,7 +3934,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBaseManaPct)]
-        void HandleAuraModIncreaseBaseManaPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModIncreaseBaseManaPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3554,7 +3942,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.ApplyStatPctModifier(UnitMods.Mana, UnitModifierPctType.Base, GetAmount());
+            }
             else
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModBaseManaPct);
@@ -3563,7 +3953,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModManaCostPct)]
-        void HandleModManaCostPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModManaCostPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3572,7 +3962,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModPowerDisplay)]
-        void HandleAuraModPowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModPowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.RealOrReapplyMask))
                 return;
@@ -3587,16 +3977,18 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModOverridePowerDisplay)]
-        void HandleAuraModOverridePowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModOverridePowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(GetMiscValue());
+
             if (powerDisplay == null)
                 return;
 
             Unit target = aurApp.GetTarget();
+
             if (target.GetPowerIndex((PowerType)powerDisplay.ActualType) == (int)PowerType.Max)
                 return;
 
@@ -3606,16 +3998,19 @@ namespace Game.Spells
                 target.SetOverrideDisplayPowerId(powerDisplay.Id);
             }
             else
+            {
                 target.SetOverrideDisplayPowerId(0);
+            }
         }
 
         [AuraEffectHandler(AuraType.ModMaxPowerPct)]
-        void HandleAuraModMaxPowerPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModMaxPowerPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
+
             if (!target.IsPlayer())
                 return;
 
@@ -3628,22 +4023,28 @@ namespace Game.Spells
 
             // Handle aura effect for max power
             if (apply)
+            {
                 target.ApplyStatPctModifier(unitMod, UnitModifierPctType.Total, GetAmount());
+            }
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
-                {
-                    if (aurEff.GetMiscValue() == (int)powerType)
-                        return true;
-                    return false;
-                });
+                float amount = target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct,
+                                                             aurEff =>
+                                                             {
+                                                                 if (aurEff.GetMiscValue() == (int)powerType)
+                                                                     return true;
 
-                amount *= target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
-                {
-                    if (aurEff.GetMiscValue() == (int)powerType)
-                        return true;
-                    return false;
-                });
+                                                                 return false;
+                                                             });
+
+                amount *= target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent,
+                                                        aurEff =>
+                                                        {
+                                                            if (aurEff.GetMiscValue() == (int)powerType)
+                                                                return true;
+
+                                                            return false;
+                                                        });
 
                 target.SetStatPctModifier(unitMod, UnitModifierPctType.Total, amount);
             }
@@ -3655,9 +4056,10 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnHealthPct)]
-        void HandleTriggerSpellOnHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleTriggerSpellOnHealthPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasFlag(AuraEffectHandleModes.Real) || !apply)
+            if (!mode.HasFlag(AuraEffectHandleModes.Real) ||
+                !apply)
                 return;
 
             Unit target = aurApp.GetTarget();
@@ -3669,10 +4071,12 @@ namespace Game.Spells
                 case AuraTriggerOnHealthChangeDirection.Above:
                     if (!target.HealthAbovePct(thresholdPct))
                         return;
+
                     break;
                 case AuraTriggerOnHealthChangeDirection.Below:
                     if (!target.HealthBelowPct(thresholdPct))
                         return;
+
                     break;
                 default:
                     break;
@@ -3685,7 +4089,7 @@ namespace Game.Spells
         /***          FIGHT           ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModParryPercent)]
-        void HandleAuraModParryPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModParryPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3699,7 +4103,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModDodgePercent)]
-        void HandleAuraModDodgePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModDodgePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3713,7 +4117,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModBlockPercent)]
-        void HandleAuraModBlockPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModBlockPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3727,7 +4131,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.InterruptRegen)]
-        void HandleAuraModRegenInterrupt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModRegenInterrupt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3741,12 +4145,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModWeaponCritPercent)]
-        void HandleAuraModWeaponCritPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModWeaponCritPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (!target)
                 return;
 
@@ -3754,7 +4159,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModSpellHitChance)]
-        void HandleModSpellHitChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModSpellHitChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3768,7 +4173,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModSpellCritChance)]
-        void HandleModSpellCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModSpellCritChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3782,7 +4187,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModCritPct)]
-        void HandleAuraModCritPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModCritPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3792,6 +4197,7 @@ namespace Game.Spells
             if (!target.IsTypeId(TypeId.Player))
             {
                 target.BaseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
+
                 return;
             }
 
@@ -3806,33 +4212,36 @@ namespace Game.Spells
         /********************************/
         [AuraEffectHandler(AuraType.HasteSpells)]
         [AuraEffectHandler(AuraType.ModCastingSpeedNotStack)]
-        void HandleModCastingSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModCastingSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            // Do not apply such auras in normal way
+            // Do not apply such Auras in normal way
             if (GetAmount() >= 1000)
             {
                 if (apply)
+                {
                     target.SetInstantCast(true);
+                }
                 else
                 {
                     // only SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK can have this high amount
-                    // it's some rare case that you have 2 auras like that, but just in case ;)
+                    // it's some rare case that you have 2 Auras like that, but just in case ;)
 
                     bool remove = true;
                     var castingSpeedNotStack = target.GetAuraEffectsByType(AuraType.ModCastingSpeedNotStack);
+
                     foreach (AuraEffect aurEff in castingSpeedNotStack)
-                    {
-                        if (aurEff != this && aurEff.GetAmount() >= 1000)
+                        if (aurEff != this &&
+                            aurEff.GetAmount() >= 1000)
                         {
                             remove = false;
+
                             break;
                         }
-                    }
 
                     if (remove)
                         target.SetInstantCast(false);
@@ -3842,6 +4251,7 @@ namespace Game.Spells
             }
 
             int spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, GetAuraType());
+
             if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
                 return;
 
@@ -3853,12 +4263,12 @@ namespace Game.Spells
 
         [AuraEffectHandler(AuraType.ModMeleeRangedHaste)]
         [AuraEffectHandler(AuraType.ModMeleeRangedHaste2)]
-        void HandleModMeleeRangedSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModMeleeRangedSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
-            //! ToDo: Haste auras with the same handler _CAN'T_ stack together
+            //! ToDo: Haste Auras with the same handler _CAN'T_ stack together
             Unit target = aurApp.GetTarget();
 
             target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, GetAmount(), apply);
@@ -3868,13 +4278,14 @@ namespace Game.Spells
 
         [AuraEffectHandler(AuraType.MeleeSlow)]
         [AuraEffectHandler(AuraType.ModSpeedSlowAll)]
-        void HandleModCombatSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModCombatSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
             int spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, AuraType.MeleeSlow);
+
             if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
                 return;
 
@@ -3893,7 +4304,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModAttackspeed)]
-        void HandleModAttackSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModAttackSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3907,14 +4318,15 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModMeleeHaste)]
         [AuraEffectHandler(AuraType.ModMeleeHaste2)]
         [AuraEffectHandler(AuraType.ModMeleeHaste3)]
-        void HandleModMeleeSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModMeleeSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            //! ToDo: Haste auras with the same handler _CAN'T_ stack together
+            //! ToDo: Haste Auras with the same handler _CAN'T_ stack together
             Unit target = aurApp.GetTarget();
             int spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, AuraType.ModMeleeHaste);
+
             if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
                 return;
 
@@ -3923,17 +4335,18 @@ namespace Game.Spells
                 target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, spellGroupVal, !apply);
                 target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, spellGroupVal, !apply);
             }
+
             target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, GetAmount(), apply);
             target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModRangedHaste)]
-        void HandleAuraModRangedHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModRangedHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            //! ToDo: Haste auras with the same handler _CAN'T_ stack together
+            //! ToDo: Haste Auras with the same handler _CAN'T_ stack together
             Unit target = aurApp.GetTarget();
 
             target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, GetAmount(), apply);
@@ -3943,7 +4356,7 @@ namespace Game.Spells
         /***       COMBAT RATING      ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModRating)]
-        void HandleModRating(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModRating(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3959,7 +4372,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModRatingPct)]
-        void HandleModRatingPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModRatingPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
@@ -3979,7 +4392,7 @@ namespace Game.Spells
         /***        ATTACK POWER      ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModAttackPower)]
-        void HandleAuraModAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -3990,7 +4403,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPower)]
-        void HandleAuraModRangedAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModRangedAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -4004,16 +4417,18 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModAttackPowerPct)]
-        void HandleAuraModAttackPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModAttackPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
+            //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = Multiplier - 1
             if (apply)
+            {
                 target.ApplyStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, GetAmount());
+            }
             else
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModAttackPowerPct);
@@ -4022,7 +4437,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPowerPct)]
-        void HandleAuraModRangedAttackPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModRangedAttackPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -4032,9 +4447,11 @@ namespace Game.Spells
             if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
                 return;
 
-            //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
+            //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = Multiplier - 1
             if (apply)
+            {
                 target.ApplyStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, GetAmount());
+            }
             else
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModRangedAttackPowerPct);
@@ -4046,7 +4463,7 @@ namespace Game.Spells
         /***        DAMAGE BONUS      ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModDamageDone)]
-        void HandleModDamageDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModDamageDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -4056,13 +4473,13 @@ namespace Game.Spells
             if ((GetMiscValue() & (int)SpellSchoolMask.Normal) != 0)
                 target.UpdateAllDamageDoneMods();
 
-            // Magic damage modifiers implemented in Unit::SpellBaseDamageBonusDone
+            // Magic Damage modifiers implemented in Unit::SpellBaseDamageBonusDone
             // This information for client side use only
             Player playerTarget = target.ToPlayer();
+
             if (playerTarget != null)
             {
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
                     {
                         if (GetAmount() >= 0)
@@ -4070,16 +4487,16 @@ namespace Game.Spells
                         else
                             playerTarget.ApplyModDamageDoneNeg((SpellSchools)i, GetAmount(), apply);
                     }
-                }
 
                 Guardian pet = playerTarget.GetGuardianPet();
+
                 if (pet)
                     pet.UpdateAttackPowerAndDamage();
             }
         }
 
         [AuraEffectHandler(AuraType.ModDamagePercentDone)]
-        void HandleModDamagePercentDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModDamagePercentDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -4091,22 +4508,19 @@ namespace Game.Spells
                 target.UpdateAllDamagePctDoneMods();
 
             Player thisPlayer = target.ToPlayer();
+
             if (thisPlayer != null)
-            {
                 for (var i = SpellSchools.Normal; i < SpellSchools.Max; ++i)
-                {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << (int)i)))
                     {
-                        // only aura type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
+                        // only aura Type modifying PLAYER_FIELD_MOD_DAMAGE_DONE_PCT
                         float amount = thisPlayer.GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, 1u << (int)i);
                         thisPlayer.SetModDamageDonePercent(i, amount);
                     }
-                }
-            }
         }
 
         [AuraEffectHandler(AuraType.ModOffhandDamagePct)]
-        void HandleModOffhandDamagePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModOffhandDamagePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
@@ -4117,28 +4531,31 @@ namespace Game.Spells
             target.UpdateDamagePctDoneMods(WeaponAttackType.OffAttack);
         }
 
-        void HandleShieldBlockValue(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleShieldBlockValue(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
-            if (player != null)
-                player.HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, GetAmount(), apply);
+
+            player?.HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModShieldBlockvaluePct)]
-        void HandleShieldBlockValuePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleShieldBlockValuePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (!target)
                 return;
 
             if (apply)
+            {
                 target.ApplyBaseModPctValue(BaseModGroup.ShieldBlockValue, GetAmount());
+            }
             else
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModShieldBlockvaluePct);
@@ -4150,7 +4567,7 @@ namespace Game.Spells
         /***        POWER COST        ***/
         /********************************/
         [AuraEffectHandler(AuraType.ModPowerCostSchool)]
-        void HandleModPowerCost(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModPowerCost(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -4167,7 +4584,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ArenaPreparation)]
-        void HandleArenaPreparation(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleArenaPreparation(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -4175,12 +4592,15 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.SetUnitFlag(UnitFlags.Preparation);
+            }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
+
                 target.RemoveUnitFlag(UnitFlags.Preparation);
             }
 
@@ -4188,7 +4608,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.NoReagentUse)]
-        void HandleNoReagentUseAura(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleNoReagentUseAura(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -4200,9 +4620,11 @@ namespace Game.Spells
 
             FlagArray128 mask = new();
             var noReagent = target.GetAuraEffectsByType(AuraType.NoReagentUse);
+
             foreach (var eff in noReagent)
             {
                 SpellEffectInfo effect = eff.GetSpellEffectInfo();
+
                 if (effect != null)
                     mask |= effect.SpellClassMask;
             }
@@ -4214,7 +4636,7 @@ namespace Game.Spells
         /***                    OTHERS                         ***/
         /*********************************************************/
         [AuraEffectHandler(AuraType.Dummy)]
-        void HandleAuraDummy(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraDummy(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Reapply)))
                 return;
@@ -4223,10 +4645,12 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
 
-            // pet auras
-            if (target.GetTypeId() == TypeId.Player && mode.HasAnyFlag(AuraEffectHandleModes.Real))
+            // pet Auras
+            if (target.GetTypeId() == TypeId.Player &&
+                mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 PetAura petSpell = Global.SpellMgr.GetPetAura(GetId(), (byte)GetEffIndex());
+
                 if (petSpell != null)
                 {
                     if (apply)
@@ -4240,60 +4664,68 @@ namespace Game.Spells
             {
                 // AT APPLY
                 if (apply)
-                {
                     switch (GetId())
                     {
-                        case 1515:                                      // Tame beast
-                            // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
-                            if (caster != null && target.CanHaveThreatList())
+                        case 1515: // Tame beast
+                                   // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
+                            if (caster != null &&
+                                target.CanHaveThreatList())
                                 target.GetThreatManager().AddThreat(caster, 10.0f);
-                            break;
-                        case 13139:                                     // net-o-matic
-                            // root to self part of (root_target.charge.root_self sequence
-                            if (caster != null)
-                                caster.CastSpell(caster, 13138, new CastSpellExtraArgs(this));
-                            break;
-                        case 34026:   // kill command
-                        {
-                            Unit pet = target.GetGuardianPet();
-                            if (pet == null)
-                                break;
 
-                            target.CastSpell(target, 34027, new CastSpellExtraArgs(this));
+                            break;
+                        case 13139: // net-o-matic
+                                    // root to self part of (root_target.charge.root_self sequence
+                            caster?.CastSpell(caster, 13138, new CastSpellExtraArgs(this));
 
-                            // set 3 stacks and 3 charges (to make all auras not disappear at once)
-                            Aura owner_aura = target.GetAura(34027, GetCasterGUID());
-                            Aura pet_aura = pet.GetAura(58914, GetCasterGUID());
-                            if (owner_aura != null)
+                            break;
+                        case 34026: // kill command
                             {
-                                owner_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
-                                if (pet_aura != null)
+                                Unit pet = target.GetGuardianPet();
+
+                                if (pet == null)
+                                    break;
+
+                                target.CastSpell(target, 34027, new CastSpellExtraArgs(this));
+
+                                // set 3 stacks and 3 charges (to make all Auras not disappear at once)
+                                Aura owner_aura = target.GetAura(34027, GetCasterGUID());
+                                Aura pet_aura = pet.GetAura(58914, GetCasterGUID());
+
+                                if (owner_aura != null)
                                 {
-                                    pet_aura.SetCharges(0);
-                                    pet_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
+                                    owner_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
+
+                                    if (pet_aura != null)
+                                    {
+                                        pet_aura.SetCharges(0);
+                                        pet_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
+                                    }
                                 }
+
+                                break;
                             }
-                            break;
-                        }
-                        case 37096:                                     // Blood Elf Illusion
-                        {
-                            if (caster != null)
+                        case 37096: // Blood Elf Illusion
                             {
-                                if (caster.GetGender() == Gender.Female)
-                                    caster.CastSpell(target, 37095, new CastSpellExtraArgs(this)); // Blood Elf Disguise
-                                else
-                                    caster.CastSpell(target, 37093, new CastSpellExtraArgs(this));
+                                if (caster != null)
+                                {
+                                    if (caster.GetGender() == Gender.Female)
+                                        caster.CastSpell(target, 37095, new CastSpellExtraArgs(this)); // Blood Elf Disguise
+                                    else
+                                        caster.CastSpell(target, 37093, new CastSpellExtraArgs(this));
+                                }
+
+                                break;
                             }
-                            break;
-                        }
-                        case 39850:                                     // Rocket Blast
-                            if (RandomHelper.randChance(20))                       // backfire stun
+                        case 39850:                          // Rocket Blast
+                            if (RandomHelper.randChance(20)) // backfire stun
                                 target.CastSpell(target, 51581, new CastSpellExtraArgs(this));
+
                             break;
-                        case 43873:                                     // Headless Horseman Laugh
+                        case 43873: // Headless Horseman Laugh
                             target.PlayDistanceSound(11965);
+
                             break;
-                        case 46354:                                     // Blood Elf Illusion
+                        case 46354: // Blood Elf Illusion
                             if (caster != null)
                             {
                                 if (caster.GetGender() == Gender.Female)
@@ -4301,195 +4733,225 @@ namespace Game.Spells
                                 else
                                     caster.CastSpell(target, 46355, new CastSpellExtraArgs(this));
                             }
+
                             break;
-                        case 46361:                                     // Reinforced Net
+                        case 46361: // Reinforced Net
                             if (caster != null)
                                 target.GetMotionMaster().MoveFall();
+
                             break;
                     }
-                }
                 // AT REMOVE
                 else
-                {
-                    switch (m_spellInfo.SpellFamilyName)
+                    switch (_spellInfo.SpellFamilyName)
                     {
                         case SpellFamilyNames.Generic:
                             switch (GetId())
                             {
                                 case 2584: // Waiting to Resurrect
-                                    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
+                                           // Waiting to resurrect spell cancel, we must remove player from resurrect queue
                                     if (target.IsTypeId(TypeId.Player))
                                     {
                                         Battleground bg = target.ToPlayer().GetBattleground();
+
                                         if (bg)
                                             bg.RemovePlayerFromResurrectQueue(target.GetGUID());
+
                                         BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(target.GetMap(), target.GetZoneId());
-                                        if (bf != null)
-                                            bf.RemovePlayerFromResurrectQueue(target.GetGUID());
+
+                                        bf?.RemovePlayerFromResurrectQueue(target.GetGUID());
                                     }
+
                                     break;
-                                case 36730:                                     // Flame Strike
+                                case 36730: // Flame Strike
                                     target.CastSpell(target, 36731, new CastSpellExtraArgs(this));
+
                                     break;
                                 case 43681: // Inactive
-                                {
-                                    if (!target.IsTypeId(TypeId.Player) || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
-                                        return;
+                                    {
+                                        if (!target.IsTypeId(TypeId.Player) ||
+                                            aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
+                                            return;
 
-                                    if (target.GetMap().IsBattleground())
-                                        target.ToPlayer().LeaveBattleground();
-                                    break;
-                                }
+                                        if (target.GetMap().IsBattleground())
+                                            target.ToPlayer().LeaveBattleground();
+
+                                        break;
+                                    }
                                 case 42783: // Wrath of the Astromancer
                                     target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
+
                                     break;
                                 case 46308: // Burning Winds casted only at creatures at spawn
                                     target.CastSpell(target, 47287, new CastSpellExtraArgs(this));
+
                                     break;
-                                case 52172:  // Coyote Spirit Despawn Aura
-                                case 60244:  // Blood Parrot Despawn Aura
+                                case 52172: // Coyote Spirit Despawn Aura
+                                case 60244: // Blood Parrot Despawn Aura
                                     target.CastSpell((Unit)null, (uint)GetAmount(), new CastSpellExtraArgs(this));
+
                                     break;
                                 case 91604: // Restricted Flight Area
                                     if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire)
                                         target.CastSpell(target, 58601, new CastSpellExtraArgs(this));
+
                                     break;
                             }
+
                             break;
                         case SpellFamilyNames.Deathknight:
                             // Summon Gargoyle (Dismiss Gargoyle at remove)
                             if (GetId() == 61777)
                                 target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
+
                             break;
                         default:
                             break;
                     }
-                }
             }
 
             // AT APPLY & REMOVE
 
-            switch (m_spellInfo.SpellFamilyName)
+            switch (_spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
-                {
-                    if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                        break;
-                    switch (GetId())
                     {
-                        // Recently Bandaged
-                        case 11196:
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)GetMiscValue(), apply);
+                        if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                             break;
-                        // Unstable Power
-                        case 24658:
-                        {
-                            uint spellId = 24659;
-                            if (apply && caster != null)
-                            {
-                                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
-                                CastSpellExtraArgs args = new();
-                                args.TriggerFlags = TriggerCastFlags.FullMask;
-                                args.OriginalCaster = GetCasterGUID();
-                                args.OriginalCastId = GetBase().GetCastId();
-                                args.CastDifficulty = GetBase().GetCastDifficulty();
 
-                                for (uint i = 0; i < spell.StackAmount; ++i)
-                                    caster.CastSpell(target, spell.Id, args);
+                        switch (GetId())
+                        {
+                            // Recently Bandaged
+                            case 11196:
+                                target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)GetMiscValue(), apply);
+
                                 break;
-                            }
-                            target.RemoveAurasDueToSpell(spellId);
-                            break;
-                        }
-                        // Restless Strength
-                        case 24661:
-                        {
-                            uint spellId = 24662;
-                            if (apply && caster != null)
-                            {
-                                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
-                                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                                args.OriginalCaster = GetCasterGUID();
-                                args.OriginalCastId = GetBase().GetCastId();
-                                args.CastDifficulty = GetBase().GetCastDifficulty();
-
-                                for (uint i = 0; i < spell.StackAmount; ++i)
-                                    caster.CastSpell(target, spell.Id, args);
-                                break;
-                            }
-                            target.RemoveAurasDueToSpell(spellId);
-                            break;
-                        }
-                        // Tag Murloc
-                        case 30877:
-                        {
-                            // Tag/untag Blacksilt Scout
-                            target.SetEntry((uint)(apply ? 17654 : 17326));
-                            break;
-                        }
-                        case 57819: // Argent Champion
-                        case 57820: // Ebon Champion
-                        case 57821: // Champion of the Kirin Tor
-                        case 57822: // Wyrmrest Champion
-                        {
-                            if (!caster || !caster.IsTypeId(TypeId.Player))
-                                break;
-
-                            uint FactionID = 0;
-
-                            if (apply)
-                            {
-                                switch (m_spellInfo.Id)
+                            // Unstable Power
+                            case 24658:
                                 {
-                                    case 57819:
-                                        FactionID = 1106; // Argent Crusade
+                                    uint spellId = 24659;
+
+                                    if (apply && caster != null)
+                                    {
+                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
+                                        CastSpellExtraArgs args = new();
+                                        args.TriggerFlags = TriggerCastFlags.FullMask;
+                                        args.OriginalCaster = GetCasterGUID();
+                                        args.OriginalCastId = GetBase().GetCastId();
+                                        args.CastDifficulty = GetBase().GetCastDifficulty();
+
+                                        for (uint i = 0; i < spell.StackAmount; ++i)
+                                            caster.CastSpell(target, spell.Id, args);
+
                                         break;
-                                    case 57820:
-                                        FactionID = 1098;// Knights of the Ebon Blade
-                                        break;
-                                    case 57821:
-                                        FactionID = 1090; // Kirin Tor
-                                        break;
-                                    case 57822:
-                                        FactionID = 1091; // The Wyrmrest Accord
-                                        break;
+                                    }
+
+                                    target.RemoveAurasDueToSpell(spellId);
+
+                                    break;
                                 }
-                            }
-                            caster.ToPlayer().SetChampioningFaction(FactionID);
-                            break;
+                            // Restless Strength
+                            case 24661:
+                                {
+                                    uint spellId = 24662;
+
+                                    if (apply && caster != null)
+                                    {
+                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
+                                        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                                        args.OriginalCaster = GetCasterGUID();
+                                        args.OriginalCastId = GetBase().GetCastId();
+                                        args.CastDifficulty = GetBase().GetCastDifficulty();
+
+                                        for (uint i = 0; i < spell.StackAmount; ++i)
+                                            caster.CastSpell(target, spell.Id, args);
+
+                                        break;
+                                    }
+
+                                    target.RemoveAurasDueToSpell(spellId);
+
+                                    break;
+                                }
+                            // Tag Murloc
+                            case 30877:
+                                {
+                                    // Tag/untag Blacksilt Scout
+                                    target.SetEntry((uint)(apply ? 17654 : 17326));
+
+                                    break;
+                                }
+                            case 57819: // Argent Champion
+                            case 57820: // Ebon Champion
+                            case 57821: // Champion of the Kirin Tor
+                            case 57822: // Wyrmrest Champion
+                                {
+                                    if (!caster ||
+                                        !caster.IsTypeId(TypeId.Player))
+                                        break;
+
+                                    uint FactionID = 0;
+
+                                    if (apply)
+                                        switch (_spellInfo.Id)
+                                        {
+                                            case 57819:
+                                                FactionID = 1106; // Argent Crusade
+
+                                                break;
+                                            case 57820:
+                                                FactionID = 1098; // Knights of the Ebon Blade
+
+                                                break;
+                                            case 57821:
+                                                FactionID = 1090; // Kirin Tor
+
+                                                break;
+                                            case 57822:
+                                                FactionID = 1091; // The Wyrmrest Accord
+
+                                                break;
+                                        }
+
+                                    caster.ToPlayer().SetChampioningFaction(FactionID);
+
+                                    break;
+                                }
+                            // LK Intro VO (1)
+                            case 58204:
+                                if (target.IsTypeId(TypeId.Player))
+                                {
+                                    // Play part 1
+                                    if (apply)
+                                        target.PlayDirectSound(14970, target.ToPlayer());
+                                    // continue in 58205
+                                    else
+                                        target.CastSpell(target, 58205, new CastSpellExtraArgs(this));
+                                }
+
+                                break;
+                            // LK Intro VO (2)
+                            case 58205:
+                                if (target.IsTypeId(TypeId.Player))
+                                {
+                                    // Play part 2
+                                    if (apply)
+                                        target.PlayDirectSound(14971, target.ToPlayer());
+                                    // Play part 3
+                                    else
+                                        target.PlayDirectSound(14972, target.ToPlayer());
+                                }
+
+                                break;
                         }
-                        // LK Intro VO (1)
-                        case 58204:
-                            if (target.IsTypeId(TypeId.Player))
-                            {
-                                // Play part 1
-                                if (apply)
-                                    target.PlayDirectSound(14970, target.ToPlayer());
-                                // continue in 58205
-                                else
-                                    target.CastSpell(target, 58205, new CastSpellExtraArgs(this));
-                            }
-                            break;
-                        // LK Intro VO (2)
-                        case 58205:
-                            if (target.IsTypeId(TypeId.Player))
-                            {
-                                // Play part 2
-                                if (apply)
-                                    target.PlayDirectSound(14971, target.ToPlayer());
-                                // Play part 3
-                                else
-                                    target.PlayDirectSound(14972, target.ToPlayer());
-                            }
-                            break;
+
+                        break;
                     }
-                    break;
-                }
             }
         }
 
         [AuraEffectHandler(AuraType.ChannelDeathItem)]
-        void HandleChannelDeathItem(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleChannelDeathItem(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -4499,7 +4961,8 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
 
-            if (caster == null || !caster.IsTypeId(TypeId.Player))
+            if (caster == null ||
+                !caster.IsTypeId(TypeId.Player))
                 return;
 
             Player plCaster = caster.ToPlayer();
@@ -4514,12 +4977,10 @@ namespace Game.Spells
 
             // Soul Shard
             if (GetSpellEffectInfo().ItemType == 6265)
-            {
                 // Soul Shard only from units that grant XP or honor
                 if (!plCaster.IsHonorOrXPTarget(target) ||
                     (target.IsTypeId(TypeId.Unit) && !target.ToCreature().IsTappedBy(plCaster)))
                     return;
-            }
 
             //Adding items
             uint noSpaceForCount;
@@ -4527,25 +4988,30 @@ namespace Game.Spells
 
             List<ItemPosCount> dest = new();
             InventoryResult msg = plCaster.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, GetSpellEffectInfo().ItemType, count, out noSpaceForCount);
+
             if (msg != InventoryResult.Ok)
             {
                 count -= noSpaceForCount;
                 plCaster.SendEquipError(msg, null, null, GetSpellEffectInfo().ItemType);
+
                 if (count == 0)
                     return;
             }
 
             Item newitem = plCaster.StoreNewItem(dest, GetSpellEffectInfo().ItemType, true);
+
             if (newitem == null)
             {
                 plCaster.SendEquipError(InventoryResult.ItemNotFound);
+
                 return;
             }
+
             plCaster.SendNewItem(newitem, count, true, true);
         }
 
         [AuraEffectHandler(AuraType.BindSight)]
-        void HandleBindSight(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleBindSight(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -4554,14 +5020,15 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
 
-            if (caster == null || !caster.IsTypeId(TypeId.Player))
+            if (caster == null ||
+                !caster.IsTypeId(TypeId.Player))
                 return;
 
             caster.ToPlayer().SetViewpoint(target, apply);
         }
 
         [AuraEffectHandler(AuraType.ForceReaction)]
-        void HandleForceReaction(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleForceReaction(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -4569,6 +5036,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             Player player = target.ToPlayer();
+
             if (player == null)
                 return;
 
@@ -4579,23 +5047,23 @@ namespace Game.Spells
             player.GetReputationMgr().SendForceReactions();
 
             // stop fighting at apply (if forced rank friendly) or at remove (if real rank friendly)
-            if ((apply && factionRank >= ReputationRank.Friendly) || (!apply && player.GetReputationRank(factionId) >= ReputationRank.Friendly))
+            if ((apply && factionRank >= ReputationRank.Friendly) ||
+                (!apply && player.GetReputationRank(factionId) >= ReputationRank.Friendly))
                 player.StopAttackFaction(factionId);
         }
 
         [AuraEffectHandler(AuraType.Empathy)]
-        void HandleAuraEmpathy(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraEmpathy(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
+
             if (!apply)
-            {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (target.HasAuraType(GetAuraType()))
                     return;
-            }
 
             if (target.GetCreatureType() == CreatureType.Beast)
             {
@@ -4607,7 +5075,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModFaction)]
-        void HandleAuraModFaction(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModFaction(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -4617,24 +5085,27 @@ namespace Game.Spells
             if (apply)
             {
                 target.SetFaction((uint)GetMiscValue());
+
                 if (target.IsTypeId(TypeId.Player))
                     target.RemoveUnitFlag(UnitFlags.PlayerControlled);
             }
             else
             {
                 target.RestoreFaction();
+
                 if (target.IsTypeId(TypeId.Player))
                     target.SetUnitFlag(UnitFlags.PlayerControlled);
             }
         }
 
         [AuraEffectHandler(AuraType.LearnSpell)]
-        void HandleLearnSpell(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleLearnSpell(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (player == null)
                 return;
 
@@ -4645,7 +5116,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ComprehendLanguage)]
-        void HandleComprehendLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleComprehendLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -4653,7 +5124,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.SetUnitFlag2(UnitFlags2.ComprehendLang);
+            }
             else
             {
                 if (target.HasAuraType(GetAuraType()))
@@ -4664,7 +5137,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModAlternativeDefaultLanguage)]
-        void HandleModAlternativeDefaultLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModAlternativeDefaultLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 return;
@@ -4672,7 +5145,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            {
                 target.SetUnitFlag3(UnitFlags3.AlternativeDefaultLanguage);
+            }
             else
             {
                 if (target.HasAuraType(GetAuraType()))
@@ -4683,16 +5158,18 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.Linked)]
-        void HandleAuraLinked(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraLinked(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             Unit target = aurApp.GetTarget();
 
             uint triggeredSpellId = GetSpellEffectInfo().TriggerSpell;
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggeredSpellId, GetBase().GetCastDifficulty());
+
             if (triggeredSpellInfo == null)
                 return;
 
-            Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCaster() : target;
+            Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(_spellInfo) ? GetCaster() : target;
+
             if (!caster)
                 return;
 
@@ -4701,6 +5178,7 @@ namespace Game.Spells
                 if (apply)
                 {
                     CastSpellExtraArgs args = new(this);
+
                     if (GetAmount() != 0) // If amount avalible cast with basepoints (Crypt Fever for example)
                         args.AddSpellMod(SpellValueMod.BasePoint0, GetAmount());
 
@@ -4708,24 +5186,25 @@ namespace Game.Spells
                 }
                 else
                 {
-                    ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCasterGUID() : target.GetGUID();
+                    ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(_spellInfo) ? GetCasterGUID() : target.GetGUID();
                     target.RemoveAura(triggeredSpellId, casterGUID);
                 }
             }
             else if (mode.HasAnyFlag(AuraEffectHandleModes.Reapply) && apply)
             {
-                ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCasterGUID() : target.GetGUID();
+                ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(_spellInfo) ? GetCasterGUID() : target.GetGUID();
                 // change the stack amount to be equal to stack amount of our aura
                 Aura triggeredAura = target.GetAura(triggeredSpellId, casterGUID);
-                if (triggeredAura != null)
-                    triggeredAura.ModStackAmount(GetBase().GetStackAmount() - triggeredAura.GetStackAmount());
+
+                triggeredAura?.ModStackAmount(GetBase().GetStackAmount() - triggeredAura.GetStackAmount());
             }
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnPowerPct)]
-        void HandleTriggerSpellOnPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleTriggerSpellOnPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real) || !apply)
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real) ||
+                !apply)
                 return;
 
             Unit target = aurApp.GetTarget();
@@ -4739,10 +5218,12 @@ namespace Game.Spells
                 case AuraTriggerOnPowerChangeDirection.Gain:
                     if (powerAmountPct < effectAmount)
                         return;
+
                     break;
                 case AuraTriggerOnPowerChangeDirection.Loss:
                     if (powerAmountPct > effectAmount)
                         return;
+
                     break;
                 default:
                     break;
@@ -4752,9 +5233,10 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnPowerAmount)]
-        void HandleTriggerSpellOnPowerAmount(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleTriggerSpellOnPowerAmount(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real) || !apply)
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real) ||
+                !apply)
                 return;
 
             Unit target = aurApp.GetTarget();
@@ -4768,10 +5250,12 @@ namespace Game.Spells
                 case AuraTriggerOnPowerChangeDirection.Gain:
                     if (powerAmount < effectAmount)
                         return;
+
                     break;
                 case AuraTriggerOnPowerChangeDirection.Loss:
                     if (powerAmount > effectAmount)
                         return;
+
                     break;
                 default:
                     break;
@@ -4781,23 +5265,26 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnExpire)]
-        void HandleTriggerSpellOnExpire(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleTriggerSpellOnExpire(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasFlag(AuraEffectHandleModes.Real) || apply || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
+            if (!mode.HasFlag(AuraEffectHandleModes.Real) ||
+                apply ||
+                aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
             aurApp.GetTarget().CastSpell(aurApp.GetTarget(), GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(this));
         }
 
         [AuraEffectHandler(AuraType.OpenStable)]
-        void HandleAuraOpenStable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraOpenStable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
 
-            if (!target.IsTypeId(TypeId.Player) || !target.IsInWorld)
+            if (!target.IsTypeId(TypeId.Player) ||
+                !target.IsInWorld)
                 return;
 
             if (apply)
@@ -4807,7 +5294,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModFakeInebriate)]
-        void HandleAuraModFakeInebriation(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraModFakeInebriation(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
@@ -4816,10 +5303,11 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);
-                target.m_invisibilityDetect.AddValue(InvisibilityType.Drunk, GetAmount());
+                target.InvisibilityDetect.AddFlag(InvisibilityType.Drunk);
+                target.InvisibilityDetect.AddValue(InvisibilityType.Drunk, GetAmount());
 
                 Player playerTarget = target.ToPlayer();
+
                 if (playerTarget)
                     playerTarget.ApplyModFakeInebriation(GetAmount(), true);
             }
@@ -4827,9 +5315,10 @@ namespace Game.Spells
             {
                 bool removeDetect = !target.HasAuraType(AuraType.ModFakeInebriate);
 
-                target.m_invisibilityDetect.AddValue(InvisibilityType.Drunk, -GetAmount());
+                target.InvisibilityDetect.AddValue(InvisibilityType.Drunk, -GetAmount());
 
                 Player playerTarget = target.ToPlayer();
+
                 if (playerTarget != null)
                 {
                     playerTarget.ApplyModFakeInebriation(GetAmount(), false);
@@ -4839,23 +5328,24 @@ namespace Game.Spells
                 }
 
                 if (removeDetect)
-                    target.m_invisibilityDetect.DelFlag(InvisibilityType.Drunk);
+                    target.InvisibilityDetect.DelFlag(InvisibilityType.Drunk);
             }
 
-            // call functions which may have additional effects after changing state of unit
+            // call functions which may have additional effects after changing State of unit
             if (target.IsInWorld)
                 target.UpdateObjectVisibility();
         }
 
         [AuraEffectHandler(AuraType.OverrideSpells)]
-        void HandleAuraOverrideSpells(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraOverrideSpells(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
 
-            if (target == null || !target.IsInWorld)
+            if (target == null ||
+                !target.IsInWorld)
                 return;
 
             uint overrideId = (uint)GetMiscValue();
@@ -4864,34 +5354,34 @@ namespace Game.Spells
             {
                 target.SetOverrideSpellsId(overrideId);
                 OverrideSpellDataRecord overrideSpells = CliDB.OverrideSpellDataStorage.LookupByKey(overrideId);
+
                 if (overrideSpells != null)
-                {
                     for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
                         uint spellId = overrideSpells.Spells[i];
+
                         if (spellId != 0)
                             target.AddTemporarySpell(spellId);
                     }
-                }
             }
             else
             {
                 target.SetOverrideSpellsId(0);
                 OverrideSpellDataRecord overrideSpells = CliDB.OverrideSpellDataStorage.LookupByKey(overrideId);
+
                 if (overrideSpells != null)
-                {
                     for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
                         uint spellId = overrideSpells.Spells[i];
+
                         if (spellId != 0)
                             target.RemoveTemporarySpell(spellId);
                     }
-                }
             }
         }
 
         [AuraEffectHandler(AuraType.SetVehicleId)]
-        void HandleAuraSetVehicle(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraSetVehicle(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -4909,7 +5399,9 @@ namespace Game.Spells
                     return;
             }
             else if (target.GetVehicleKit() != null)
+            {
                 target.RemoveVehicleKit();
+            }
 
             if (!target.IsTypeId(TypeId.Player))
                 return;
@@ -4919,12 +5411,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.PreventResurrection)]
-        void HandlePreventResurrection(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandlePreventResurrection(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
@@ -4935,31 +5428,36 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.Mastery)]
-        void HandleMastery(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleMastery(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
             target.UpdateMastery();
         }
 
-        void HandlePeriodicTriggerSpellAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicTriggerSpellAuraTick(Unit target, Unit caster)
         {
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandlePeriodicTriggerSpellAuraTick: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+
                 return;
             }
 
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
+
             if (triggeredSpellInfo != null)
             {
-                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
+                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(_spellInfo) ? caster : target;
+
                 if (triggerCaster != null)
                 {
                     triggerCaster.CastSpell(target, triggerSpellId, new CastSpellExtraArgs(this));
@@ -4967,25 +5465,32 @@ namespace Game.Spells
                 }
             }
             else
+            {
                 Log.outError(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
+            }
         }
 
-        void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)
         {
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+
                 return;
             }
 
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
+
             if (triggeredSpellInfo != null)
             {
-                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
+                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(_spellInfo) ? caster : target;
+
                 if (triggerCaster != null)
                 {
                     CastSpellExtraArgs args = new(this);
+
                     for (int i = 0; i < SpellConst.MaxEffects; ++i)
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, GetAmount());
 
@@ -4994,22 +5499,26 @@ namespace Game.Spells
                 }
             }
             else
+            {
                 Log.outError(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
+            }
         }
 
-        void HandlePeriodicDamageAurasTick(Unit target, Unit caster)
+        private void HandlePeriodicDamageAurasTick(Unit target, Unit caster)
         {
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) ||
+                target.IsImmunedToDamage(GetSpellInfo()))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
             // Consecrate ticks can miss and will not show up in the combat log
-            // dynobj auras must always have a caster
+            // dynobj Auras must always have a caster
             if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
@@ -5018,7 +5527,7 @@ namespace Game.Spells
 
             uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
 
-            // ignore non positive values (can be result apply spellmods to aura damage
+            // ignore non positive values (can be result apply spellmods to aura Damage
             uint damage = (uint)Math.Max(GetAmount(), 0);
 
             // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
@@ -5027,77 +5536,90 @@ namespace Game.Spells
             switch (GetAuraType())
             {
                 case AuraType.PeriodicDamage:
-                {
-                    if (caster != null)
-                        damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
-
-                    damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
-
-                    // There is a Chance to make a Soul Shard when Drain soul does damage
-                    if (caster != null && GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
                     {
-                        if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
-                            caster.CastSpell(caster, 95810, new CastSpellExtraArgs(this));
-                    }
-                    else if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
-                    {
-                        switch (GetId())
+                        if (caster != null)
+                            damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+
+                        damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+
+                        // There is a Chance to make a Soul Shard when Drain soul does Damage
+                        if (caster != null &&
+                            GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock &&
+                            GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
                         {
-                            case 70911: // Unbound Plague
-                            case 72854: // Unbound Plague
-                            case 72855: // Unbound Plague
-                            case 72856: // Unbound Plague
-                                damage *= (uint)Math.Pow(1.25f, _ticksDone);
-                                break;
-                            default:
-                                break;
+                            if (caster.IsTypeId(TypeId.Player) &&
+                                caster.ToPlayer().IsHonorOrXPTarget(target))
+                                caster.CastSpell(caster, 95810, new CastSpellExtraArgs(this));
                         }
+                        else if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
+                        {
+                            switch (GetId())
+                            {
+                                case 70911: // Unbound Plague
+                                case 72854: // Unbound Plague
+                                case 72855: // Unbound Plague
+                                case 72856: // Unbound Plague
+                                    damage *= (uint)Math.Pow(1.25f, _ticksDone);
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        break;
                     }
-                    break;
-                }
                 case AuraType.PeriodicWeaponPercentDamage:
-                {
-                    WeaponAttackType attackType = GetSpellInfo().GetAttackType();
+                    {
+                        WeaponAttackType attackType = GetSpellInfo().GetAttackType();
 
-                    damage = MathFunctions.CalculatePct(caster.CalculateDamage(attackType, false, true), GetAmount());
+                        damage = MathFunctions.CalculatePct(caster.CalculateDamage(attackType, false, true), GetAmount());
 
-                    // Add melee damage bonuses (also check for negative)
-                    if (caster != null)
-                        damage = caster.MeleeDamageBonusDone(target, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+                        // Add melee Damage bonuses (also check for negative)
+                        if (caster != null)
+                            damage = caster.MeleeDamageBonusDone(target, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
 
-                    damage = target.MeleeDamageBonusTaken(caster, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
-                    break;
-                }
+                        damage = target.MeleeDamageBonusTaken(caster, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+
+                        break;
+                    }
                 case AuraType.PeriodicDamagePercent:
-                    // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
+                    // ceil obtained value, it may happen that 10 ticks for 10% Damage may not kill owner
                     damage = (uint)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), (float)damage));
                     damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+
                     break;
                 default:
                     break;
             }
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
+
             if (crit)
-                damage = Unit.SpellCriticalDamageBonus(caster, m_spellInfo, damage, target);
+                damage = Unit.SpellCriticalDamageBonus(caster, _spellInfo, damage, target);
 
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
                 uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
-                cleanDamage.mitigated_damage += damage - damageReducedArmor;
+                cleanDamage.MitigatedDamage += damage - damageReducedArmor;
                 damage = damageReducedArmor;
             }
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
-            {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
-            }
+                if (GetSpellEffectInfo().IsTargetingArea() ||
+                    GetSpellEffectInfo().IsAreaAuraEffect() ||
+                    GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) ||
+                    GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
+                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
 
             int dmg = (int)damage;
-            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
+
+            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) &&
+                caster != null &&
+                caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
+
             damage = (uint)dmg;
 
             DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
@@ -5109,8 +5631,8 @@ namespace Game.Spells
             Unit.DealDamageMods(caster, target, ref damage, ref absorb);
 
             // Set trigger flag
-            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic);
-            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic);
+            ProcFlagsInit procAttacker = new(ProcFlags.DealHarmfulPeriodic);
+            ProcFlagsInit procVictim = new(ProcFlags.TakeHarmfulPeriodic);
             ProcFlagsHit hitMask = damageInfo.GetHitMask();
 
             if (damage != 0)
@@ -5120,6 +5642,7 @@ namespace Game.Spells
             }
 
             int overkill = (int)(damage - target.GetHealth());
+
             if (overkill < 0)
                 overkill = 0;
 
@@ -5131,18 +5654,20 @@ namespace Game.Spells
             target.SendPeriodicAuraLog(pInfo);
         }
 
-        void HandlePeriodicHealthLeechAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicHealthLeechAuraTick(Unit target, Unit caster)
         {
             if (!target.IsAlive())
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) ||
+                target.IsImmunedToDamage(GetSpellInfo()))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
-            // dynobj auras must always have a caster
+            // dynobj Auras must always have a caster
             if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
@@ -5151,7 +5676,7 @@ namespace Game.Spells
 
             uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
 
-            // ignore negative values (can be result apply spellmods to aura damage
+            // ignore negative values (can be result apply spellmods to aura Damage
             uint damage = (uint)Math.Max(GetAmount(), 0);
 
             if (caster)
@@ -5160,25 +5685,30 @@ namespace Game.Spells
             damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
+
             if (crit)
-                damage = Unit.SpellCriticalDamageBonus(caster, m_spellInfo, damage, target);
+                damage = Unit.SpellCriticalDamageBonus(caster, _spellInfo, damage, target);
 
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
                 uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
-                cleanDamage.mitigated_damage += damage - damageReducedArmor;
+                cleanDamage.MitigatedDamage += damage - damageReducedArmor;
                 damage = damageReducedArmor;
             }
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
-            {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
-            }
+                if (GetSpellEffectInfo().IsTargetingArea() ||
+                    GetSpellEffectInfo().IsAreaAuraEffect() ||
+                    GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) ||
+                    GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect))
+                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
 
             int dmg = (int)damage;
-            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) && caster != null && caster.CanApplyResilience())
+
+            if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers) &&
+                caster != null &&
+                caster.CanApplyResilience())
                 Unit.ApplyResilience(target, ref dmg);
 
             damage = (uint)dmg;
@@ -5189,19 +5719,20 @@ namespace Game.Spells
             uint absorb = damageInfo.GetAbsorb();
             uint resist = damageInfo.GetResist();
 
-            // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
+            // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted Damage
             SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastId());
-            log.damage = damage;
-            log.originalDamage = (uint)dmg;
-            log.absorb = absorb;
-            log.resist = resist;
-            log.periodicLog = true;
+            log.Damage = damage;
+            log.OriginalDamage = (uint)dmg;
+            log.Absorb = absorb;
+            log.Resist = resist;
+            log.PeriodicLog = true;
+
             if (crit)
                 log.HitInfo |= HitInfo.CriticalHit;
 
             // Set trigger flag
-            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic);
-            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic);
+            ProcFlagsInit procAttacker = new(ProcFlags.DealHarmfulPeriodic);
+            ProcFlagsInit procVictim = new(ProcFlags.TakeHarmfulPeriodic);
             ProcFlagsHit hitMask = damageInfo.GetHitMask();
 
             if (damage != 0)
@@ -5214,7 +5745,8 @@ namespace Game.Spells
             Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, null, damageInfo, null);
 
             // process caster heal from now on (must be in world)
-            if (!caster || !caster.IsAlive())
+            if (!caster ||
+                !caster.IsAlive())
                 return;
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
@@ -5231,26 +5763,31 @@ namespace Game.Spells
             caster.SendSpellNonMeleeDamageLog(log);
         }
 
-        void HandlePeriodicHealthFunnelAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicHealthFunnelAuraTick(Unit target, Unit caster)
         {
-            if (caster == null || !caster.IsAlive() || !target.IsAlive())
+            if (caster == null ||
+                !caster.IsAlive() ||
+                !target.IsAlive())
                 return;
 
             if (target.HasUnitState(UnitState.Isolated))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
             uint damage = (uint)Math.Max(GetAmount(), 0);
+
             // do not kill health donator
             if (caster.GetHealth() < damage)
                 damage = (uint)caster.GetHealth() - 1;
+
             if (damage == 0)
                 return;
 
             caster.ModifyHealth(-(int)damage);
-            Log.outDebug(LogFilter.Spells, "PeriodicTick: donator {0} target {1} damage {2}.", caster.GetEntry(), target.GetEntry(), damage);
+            Log.outDebug(LogFilter.Spells, "PeriodicTick: donator {0} Target {1} Damage {2}.", caster.GetEntry(), target.GetEntry(), damage);
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
@@ -5261,7 +5798,7 @@ namespace Game.Spells
             Unit.ProcSkillsAndAuras(caster, target, new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic), new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic), ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Normal, null, null, healInfo);
         }
 
-        void HandlePeriodicHealAurasTick(Unit target, Unit caster)
+        private void HandlePeriodicHealAurasTick(Unit target, Unit caster)
         {
             if (!target.IsAlive())
                 return;
@@ -5269,16 +5806,18 @@ namespace Game.Spells
             if (target.HasUnitState(UnitState.Isolated))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
-            // don't regen when permanent aura target has full power
-            if (GetBase().IsPermanent() && target.IsFullHealth())
+            // don't regen when permanent aura Target has full power
+            if (GetBase().IsPermanent() &&
+                target.IsFullHealth())
                 return;
 
             uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
 
-            // ignore negative values (can be result apply spellmods to aura damage
+            // ignore negative values (can be result apply spellmods to aura Damage
             uint damage = (uint)Math.Max(GetAmount(), 0);
 
             if (GetAuraType() == AuraType.ObsModHealth)
@@ -5289,11 +5828,18 @@ namespace Game.Spells
             damage = target.SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
 
             bool crit = RandomHelper.randChance(GetCritChanceFor(caster, target));
-            if (crit)
-                damage = (uint)Unit.SpellCriticalHealingBonus(caster, m_spellInfo, (int)damage, target);
 
-            Log.outDebug(LogFilter.Spells, "PeriodicTick: {0} (TypeId: {1}) heal of {2} (TypeId: {3}) for {4} health inflicted by {5}",
-                GetCasterGUID().ToString(), GetCaster().GetTypeId(), target.GetGUID().ToString(), target.GetTypeId(), damage, GetId());
+            if (crit)
+                damage = (uint)Unit.SpellCriticalHealingBonus(caster, _spellInfo, (int)damage, target);
+
+            Log.outDebug(LogFilter.Spells,
+                         "PeriodicTick: {0} (TypeId: {1}) heal of {2} (TypeId: {3}) for {4} health inflicted by {5}",
+                         GetCasterGUID().ToString(),
+                         GetCaster().GetTypeId(),
+                         target.GetGUID().ToString(),
+                         target.GetTypeId(),
+                         damage,
+                         GetId());
 
             uint heal = (uint)damage;
 
@@ -5307,28 +5853,34 @@ namespace Game.Spells
             if (caster != null)
                 target.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
 
-            // %-based heal - does not proc auras
+            // %-based heal - does not proc Auras
             if (GetAuraType() == AuraType.ObsModHealth)
                 return;
 
-            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHelpfulPeriodic);
-            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakeHelpfulPeriodic);
+            ProcFlagsInit procAttacker = new(ProcFlags.DealHelpfulPeriodic);
+            ProcFlagsInit procVictim = new(ProcFlags.TakeHelpfulPeriodic);
             ProcFlagsHit hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-            // ignore item heals
+
+            // ignore Item heals
             if (GetBase().GetCastItemGUID().IsEmpty())
                 Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, null, null, healInfo);
         }
 
-        void HandlePeriodicManaLeechAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicManaLeechAuraTick(Unit target, Unit caster)
         {
             PowerType powerType = (PowerType)GetMiscValue();
 
-            if (caster == null || !caster.IsAlive() || !target.IsAlive() || target.GetPowerType() != powerType)
+            if (caster == null ||
+                !caster.IsAlive() ||
+                !target.IsAlive() ||
+                target.GetPowerType() != powerType)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) ||
+                target.IsImmunedToDamage(GetSpellInfo()))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
@@ -5336,7 +5888,7 @@ namespace Game.Spells
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
-            // ignore negative values (can be result apply spellmods to aura damage
+            // ignore negative values (can be result apply spellmods to aura Damage
             int drainAmount = Math.Max(GetAmount(), 0);
 
             int drainedAmount = -target.ModifyPower(powerType, -drainAmount);
@@ -5346,19 +5898,24 @@ namespace Game.Spells
 
             int gainAmount = (int)(drainedAmount * gainMultiplier);
             int gainedAmount = 0;
+
             if (gainAmount != 0)
             {
                 gainedAmount = caster.ModifyPower(powerType, gainAmount);
+
                 // energize is not modified by threat modifiers
                 if (!GetSpellInfo().HasAttribute(SpellAttr4.NoHelpfulThreat))
                     target.GetThreatManager().AddThreat(caster, gainedAmount * 0.5f, GetSpellInfo(), true);
             }
 
             // Drain Mana
-            if (caster.GetGuardianPet() != null && m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00000010))
+            if (caster.GetGuardianPet() != null &&
+                _spellInfo.SpellFamilyName == SpellFamilyNames.Warlock &&
+                _spellInfo.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00000010))
             {
                 int manaFeedVal = 0;
                 AuraEffect aurEff = GetBase().GetEffect(1);
+
                 if (aurEff != null)
                     manaFeedVal = aurEff.GetAmount();
 
@@ -5375,28 +5932,32 @@ namespace Game.Spells
             target.SendPeriodicAuraLog(pInfo);
         }
 
-        void HandleObsModPowerAuraTick(Unit target, Unit caster)
+        private void HandleObsModPowerAuraTick(Unit target, Unit caster)
         {
             PowerType powerType;
+
             if (GetMiscValue() == (int)PowerType.All)
                 powerType = target.GetPowerType();
             else
                 powerType = (PowerType)GetMiscValue();
 
-            if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
+            if (!target.IsAlive() ||
+                target.GetMaxPower(powerType) == 0)
                 return;
 
             if (target.HasUnitState(UnitState.Isolated))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
-            // don't regen when permanent aura target has full power
-            if (GetBase().IsPermanent() && target.GetPower(powerType) == target.GetMaxPower(powerType))
+            // don't regen when permanent aura Target has full power
+            if (GetBase().IsPermanent() &&
+                target.GetPower(powerType) == target.GetMaxPower(powerType))
                 return;
 
-            // ignore negative values (can be result apply spellmods to aura damage
+            // ignore negative values (can be result apply spellmods to aura Damage
             int amount = Math.Max(GetAmount(), 0) * target.GetMaxPower(powerType) / 100;
 
             SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
@@ -5409,23 +5970,27 @@ namespace Game.Spells
             target.SendPeriodicAuraLog(pInfo);
         }
 
-        void HandlePeriodicEnergizeAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicEnergizeAuraTick(Unit target, Unit caster)
         {
             PowerType powerType = (PowerType)GetMiscValue();
-            if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
+
+            if (!target.IsAlive() ||
+                target.GetMaxPower(powerType) == 0)
                 return;
 
             if (target.HasUnitState(UnitState.Isolated))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
-            // don't regen when permanent aura target has full power
-            if (GetBase().IsPermanent() && target.GetPower(powerType) == target.GetMaxPower(powerType))
+            // don't regen when permanent aura Target has full power
+            if (GetBase().IsPermanent() &&
+                target.GetPower(powerType) == target.GetMaxPower(powerType))
                 return;
 
-            // ignore negative values (can be result apply spellmods to aura damage
+            // ignore negative values (can be result apply spellmods to aura Damage
             int amount = Math.Max(GetAmount(), 0);
 
             SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
@@ -5437,20 +6002,24 @@ namespace Game.Spells
             target.SendPeriodicAuraLog(pInfo);
         }
 
-        void HandlePeriodicPowerBurnAuraTick(Unit target, Unit caster)
+        private void HandlePeriodicPowerBurnAuraTick(Unit target, Unit caster)
         {
             PowerType powerType = (PowerType)GetMiscValue();
 
-            if (caster == null || !target.IsAlive() || target.GetPowerType() != powerType)
+            if (caster == null ||
+                !target.IsAlive() ||
+                target.GetPowerType() != powerType)
                 return;
 
-            if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
+            if (target.HasUnitState(UnitState.Isolated) ||
+                target.IsImmunedToDamage(GetSpellInfo()))
             {
                 SendTickImmune(target, caster);
+
                 return;
             }
 
-            // ignore negative values (can be result apply spellmods to aura damage
+            // ignore negative values (can be result apply spellmods to aura Damage
             int damage = Math.Max(GetAmount(), 0);
 
             uint gain = (uint)(-target.ModifyPower(powerType, -damage));
@@ -5460,18 +6029,19 @@ namespace Game.Spells
             SpellInfo spellProto = GetSpellInfo();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
             SpellNonMeleeDamage damageInfo = new(caster, target, spellProto, GetBase().GetSpellVisual(), spellProto.SchoolMask, GetBase().GetCastId());
-            damageInfo.periodicLog = true;
+            damageInfo.PeriodicLog = true;
             // no SpellDamageBonus for burn mana
             caster.CalculateSpellDamageTaken(damageInfo, (int)(gain * dmgMultiplier), spellProto);
 
-            Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+            Unit.DealDamageMods(damageInfo.Attacker, damageInfo.Target, ref damageInfo.Damage, ref damageInfo.Absorb);
 
             // Set trigger flag
-            ProcFlagsInit procAttacker = new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic);
-            ProcFlagsInit procVictim = new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic);
+            ProcFlagsInit procAttacker = new(ProcFlags.DealHarmfulPeriodic);
+            ProcFlagsInit procVictim = new(ProcFlags.TakeHarmfulPeriodic);
             ProcFlagsHit hitMask = Unit.CreateProcHitMask(damageInfo, SpellMissInfo.None);
             ProcFlagsSpellType spellTypeMask = ProcFlagsSpellType.NoDmgHeal;
-            if (damageInfo.damage != 0)
+
+            if (damageInfo.Damage != 0)
             {
                 procVictim.Or(ProcFlags.TakeAnyDamage);
                 spellTypeMask |= ProcFlagsSpellType.Damage;
@@ -5485,7 +6055,7 @@ namespace Game.Spells
             caster.SendSpellNonMeleeDamageLog(damageInfo);
         }
 
-        bool CanPeriodicTickCrit()
+        private bool CanPeriodicTickCrit()
         {
             if (GetSpellInfo().HasAttribute(SpellAttr2.CantCrit))
                 return false;
@@ -5493,20 +6063,23 @@ namespace Game.Spells
             return true;
         }
 
-        float CalcPeriodicCritChance(Unit caster)
+        private float CalcPeriodicCritChance(Unit caster)
         {
-            if (!caster || !CanPeriodicTickCrit())
+            if (!caster ||
+                !CanPeriodicTickCrit())
                 return 0.0f;
 
             Player modOwner = caster.GetSpellModOwner();
+
             if (!modOwner)
                 return 0.0f;
 
             float critChance = modOwner.SpellCritChanceDone(null, this, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
+
             return Math.Max(0.0f, critChance);
         }
 
-        void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
+        private void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             int damageLeft = (int)(GetAmount() - eventInfo.GetDamageInfo().GetDamage());
 
@@ -5516,41 +6089,50 @@ namespace Game.Spells
                 ChangeAmount(damageLeft);
         }
 
-        void HandleProcTriggerSpellAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
+        private void HandleProcTriggerSpellAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
 
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandleProcTriggerSpellAuraProc: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+
                 return;
             }
 
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
+
             if (triggeredSpellInfo != null)
             {
                 Log.outDebug(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Triggering spell {triggeredSpellInfo.Id} from aura {GetId()} proc");
                 triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo.Id, new CastSpellExtraArgs(this).SetTriggeringSpell(eventInfo.GetProcSpell()));
             }
-            else if (triggerSpellId != 0 && GetAuraType() != AuraType.Dummy)
+            else if (triggerSpellId != 0 &&
+                     GetAuraType() != AuraType.Dummy)
+            {
                 Log.outError(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Spell {GetId()} has non-existent spell {triggerSpellId} in EffectTriggered[{GetEffIndex()}] and is therefore not triggered.");
+            }
         }
 
-        void HandleProcTriggerSpellWithValueAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
+        private void HandleProcTriggerSpellWithValueAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit triggerCaster = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
 
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+
             if (triggerSpellId == 0)
             {
                 Log.outWarn(LogFilter.Spells, $"AuraEffect::HandleProcTriggerSpellAuraProc: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have triggered spell.");
+
                 return;
             }
 
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
+
             if (triggeredSpellInfo != null)
             {
                 CastSpellExtraArgs args = new(this);
@@ -5560,16 +6142,21 @@ namespace Game.Spells
                 Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Triggering spell {0} with value {1} from aura {2} proc", triggeredSpellInfo.Id, GetAmount(), GetId());
             }
             else
+            {
                 Log.outError(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Spell {GetId()} has non-existent spell {triggerSpellId} in EffectTriggered[{GetEffIndex()}] and is therefore not triggered.");
+            }
         }
 
-        void HandleProcTriggerDamageAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
+        private void HandleProcTriggerDamageAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit target = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
-            if (triggerTarget.HasUnitState(UnitState.Isolated) || triggerTarget.IsImmunedToDamage(GetSpellInfo()))
+
+            if (triggerTarget.HasUnitState(UnitState.Isolated) ||
+                triggerTarget.IsImmunedToDamage(GetSpellInfo()))
             {
                 SendTickImmune(triggerTarget, target);
+
                 return;
             }
 
@@ -5577,13 +6164,13 @@ namespace Game.Spells
             int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect);
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
-            Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+            Unit.DealDamageMods(damageInfo.Attacker, damageInfo.Target, ref damageInfo.Damage, ref damageInfo.Absorb);
             target.DealSpellDamage(damageInfo, true);
             target.SendSpellNonMeleeDamageLog(damageInfo);
         }
 
         [AuraEffectHandler(AuraType.ForceWeather)]
-        void HandleAuraForceWeather(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraForceWeather(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -5600,13 +6187,14 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.EnableAltPower)]
-        void HandleEnableAltPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleEnableAltPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             int altPowerId = GetMiscValue();
             UnitPowerBarRecord powerEntry = CliDB.UnitPowerBarStorage.LookupByKey(altPowerId);
+
             if (powerEntry == null)
                 return;
 
@@ -5617,24 +6205,26 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModSpellCategoryCooldown)]
-        void HandleModSpellCategoryCooldown(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModSpellCategoryCooldown(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (player)
                 player.SendSpellCategoryCooldowns();
         }
 
         [AuraEffectHandler(AuraType.ShowConfirmationPrompt)]
         [AuraEffectHandler(AuraType.ShowConfirmationPromptWithDifficulty)]
-        void HandleShowConfirmationPrompt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleShowConfirmationPrompt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (!player)
                 return;
 
@@ -5645,12 +6235,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.OverridePetSpecs)]
-        void HandleOverridePetSpecs(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleOverridePetSpecs(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (!player)
                 return;
 
@@ -5658,10 +6249,12 @@ namespace Game.Spells
                 return;
 
             Pet pet = player.GetPet();
+
             if (!pet)
                 return;
 
             ChrSpecializationRecord currSpec = CliDB.ChrSpecializationStorage.LookupByKey(pet.GetSpecialization());
+
             if (currSpec == null)
                 return;
 
@@ -5669,12 +6262,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.AllowUsingGameobjectsWhileMounted)]
-        void HandleAllowUsingGameobjectsWhileMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAllowUsingGameobjectsWhileMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
@@ -5685,12 +6279,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.PlayScene)]
-        void HandlePlayScene(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandlePlayScene(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player player = aurApp.GetTarget().ToPlayer();
+
             if (!player)
                 return;
 
@@ -5701,7 +6296,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.AreaTrigger)]
-        void HandleCreateAreaTrigger(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleCreateAreaTrigger(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -5715,18 +6310,20 @@ namespace Game.Spells
             else
             {
                 Unit caster = GetCaster();
+
                 if (caster)
                     caster.RemoveAreaTrigger(this);
             }
         }
 
         [AuraEffectHandler(AuraType.PvpTalents)]
-        void HandleAuraPvpTalents(AuraApplication auraApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleAuraPvpTalents(AuraApplication auraApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = auraApp.GetTarget().ToPlayer();
+
             if (target)
             {
                 if (apply)
@@ -5737,13 +6334,14 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.LinkedSummon)]
-        void HandleLinkedSummon(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleLinkedSummon(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
             SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(GetSpellEffectInfo().TriggerSpell, GetBase().GetCastDifficulty());
+
             if (triggerSpellInfo == null)
                 return;
 
@@ -5758,53 +6356,53 @@ namespace Game.Spells
             else
             {
                 List<uint> summonedEntries = new();
+
                 foreach (var spellEffectInfo in triggerSpellInfo.GetEffects())
-                {
                     if (spellEffectInfo.IsEffect(SpellEffectName.Summon))
                     {
                         uint summonEntry = (uint)spellEffectInfo.MiscValue;
+
                         if (summonEntry != 0)
                             summonedEntries.Add(summonEntry);
-
                     }
-                }
 
                 // we don't know if there can be multiple summons for the same effect, so consider only 1 summon for each effect
-                // most of the spells have multiple effects with the same summon spell id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
+                // most of the spells have multiple effects with the same summon spell Id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
                 foreach (uint summonEntry in summonedEntries)
                 {
                     List<Creature> nearbyEntries = target.GetCreatureListWithEntryInGrid(summonEntry);
+
                     foreach (var creature in nearbyEntries)
-                    {
                         if (creature.GetOwner() == target)
                         {
                             creature.DespawnOrUnsummon();
+
                             break;
                         }
                         else
                         {
                             TempSummon tempSummon = creature.ToTempSummon();
+
                             if (tempSummon)
-                            {
                                 if (tempSummon.GetSummoner() == target)
                                 {
                                     tempSummon.DespawnOrUnsummon();
+
                                     break;
                                 }
-                            }
                         }
-                    }
                 }
             }
         }
 
         [AuraEffectHandler(AuraType.SetFFAPvp)]
-        void HandleSetFFAPvP(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleSetFFAPvP(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (!target)
                 return;
 
@@ -5812,12 +6410,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ModOverrideZonePvpType)]
-        void HandleModOverrideZonePVPType(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleModOverrideZonePVPType(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
@@ -5834,20 +6433,23 @@ namespace Game.Spells
 
         [AuraEffectHandler(AuraType.BattleGroundPlayerPositionFactional)]
         [AuraEffectHandler(AuraType.BattleGroundPlayerPosition)]
-        void HandleBattlegroundPlayerPosition(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleBattlegroundPlayerPosition(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player target = aurApp.GetTarget().ToPlayer();
+
             if (target == null)
                 return;
 
             BattlegroundMap battlegroundMap = target.GetMap().ToBattlegroundMap();
+
             if (battlegroundMap == null)
                 return;
 
             Battleground bg = battlegroundMap.GetBG();
+
             if (bg == null)
                 return;
 
@@ -5868,16 +6470,19 @@ namespace Game.Spells
                 bg.AddPlayerPosition(playerPosition);
             }
             else
+            {
                 bg.RemovePlayerPosition(target.GetGUID());
+            }
         }
 
         [AuraEffectHandler(AuraType.StoreTeleportReturnPoint)]
-        void HandleStoreTeleportReturnPoint(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleStoreTeleportReturnPoint(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player playerTarget = aurApp.GetTarget().ToPlayer();
+
             if (playerTarget == null)
                 return;
 
@@ -5888,7 +6493,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.MountRestrictions)]
-        void HandleMountRestrictions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleMountRestrictions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -5897,7 +6502,7 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.CosmeticMounted)]
-        void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
@@ -5905,9 +6510,10 @@ namespace Game.Spells
             if (apply)
                 aurApp.GetTarget().SetCosmeticMountDisplayId((uint)GetMiscValue());
             else
-                aurApp.GetTarget().SetCosmeticMountDisplayId(0); // set cosmetic mount to 0, even if multiple auras are active; tested with zandalari racial + divine steed
+                aurApp.GetTarget().SetCosmeticMountDisplayId(0); // set cosmetic Mount to 0, even if multiple Auras are active; tested with zandalari racial + divine steed
 
             Player playerTarget = aurApp.GetTarget().ToPlayer();
+
             if (playerTarget == null)
                 return;
 
@@ -5915,12 +6521,13 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.SuppressItemPassiveEffectBySpellLabel)]
-        void HandleSuppressItemPassiveEffectBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleSuppressItemPassiveEffectBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             List<Aura> suppressedAuras = new();
+
             foreach (var appliedAura in aurApp.GetTarget().GetOwnedAuras())
                 if (appliedAura.Value.GetSpellInfo().HasLabel((uint)GetMiscValue()))
                     suppressedAuras.Add(appliedAura.Value);
@@ -5931,21 +6538,23 @@ namespace Game.Spells
         }
 
         [AuraEffectHandler(AuraType.ForceBeathBar)]
-        void HandleForceBreathBar(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        private void HandleForceBreathBar(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Player playerTarget = aurApp.GetTarget().ToPlayer();
+
             if (playerTarget == null)
                 return;
 
             playerTarget.UpdatePositionData();
         }
+
         #endregion
     }
 
-    class AbsorbAuraOrderPred : Comparer<AuraEffect>
+    internal class AbsorbAuraOrderPred : Comparer<AuraEffect>
     {
         public override int Compare(AuraEffect aurEffA, AuraEffect aurEffB)
         {
@@ -5955,30 +6564,35 @@ namespace Game.Spells
             // Fel Blossom
             if (spellProtoA.Id == 28527)
                 return 1;
+
             if (spellProtoB.Id == 28527)
                 return 0;
 
             // Ice Barrier
             if (spellProtoA.GetCategory() == 471)
                 return 1;
+
             if (spellProtoB.GetCategory() == 471)
                 return 0;
 
             // Sacrifice
             if (spellProtoA.Id == 7812)
                 return 1;
+
             if (spellProtoB.Id == 7812)
                 return 0;
 
             // Cauterize (must be last)
             if (spellProtoA.Id == 86949)
                 return 0;
+
             if (spellProtoB.Id == 86949)
                 return 1;
 
             // Spirit of Redemption (must be last)
             if (spellProtoA.Id == 20711)
                 return 0;
+
             if (spellProtoB.Id == 20711)
                 return 1;
 

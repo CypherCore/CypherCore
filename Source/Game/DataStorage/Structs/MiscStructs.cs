@@ -3,7 +3,7 @@
 
 namespace Game.DataStorage
 {
-    public struct WMOAreaTableTripple
+    public readonly struct WMOAreaTableTripple
     {
         public WMOAreaTableTripple(int r, int a, int g)
         {
@@ -13,20 +13,20 @@ namespace Game.DataStorage
         }
 
         // ordered by entropy; that way memcmp will have a minimal medium runtime
-        int groupId;
-        int rootId;
-        int adtId;
+        private readonly int groupId;
+        private readonly int rootId;
+        private readonly int adtId;
     }
 
     public class TaxiPathBySourceAndDestination
     {
+        public uint Id;
+        public uint price;
+
         public TaxiPathBySourceAndDestination(uint _id, uint _price)
         {
             Id = _id;
             price = _price;
         }
-
-        public uint Id;
-        public uint price;
     }
 }

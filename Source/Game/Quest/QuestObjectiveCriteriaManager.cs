@@ -1,19 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
 using Game.Achievements;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
-using System.Collections.Generic;
 
 namespace Game
 {
-    class QuestObjectiveCriteriaManager : CriteriaHandler
+    internal class QuestObjectiveCriteriaManager : CriteriaHandler
     {
+        private readonly List<uint> _completedObjectives = new();
+
+
+        private readonly Player _owner;
+
         public QuestObjectiveCriteriaManager(Player owner)
         {
             _owner = owner;
@@ -35,7 +40,7 @@ namespace Game
 
             DeleteFromDB(_owner.GetGUID());
 
-            // re-fill data
+            // re-fill _data
             CheckAllQuestObjectiveCriteria(_owner);
         }
 
@@ -57,23 +62,22 @@ namespace Game
         public void LoadFromDB(SQLResult objectiveResult, SQLResult criteriaResult)
         {
             if (!objectiveResult.IsEmpty())
-            {
                 do
                 {
                     uint objectiveId = objectiveResult.Read<uint>(0);
 
                     QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveId);
+
                     if (objective == null)
                         continue;
 
                     _completedObjectives.Add(objectiveId);
-
                 } while (objectiveResult.NextRow());
-            }
 
             if (!criteriaResult.IsEmpty())
             {
                 long now = GameTime.GetGameTime();
+
                 do
                 {
                     uint criteriaId = criteriaResult.Read<uint>(0);
@@ -81,10 +85,11 @@ namespace Game
                     long date = criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
+
                     if (criteria == null)
                     {
-                        // Removing non-existing criteria data for all characters
-                        Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
+                        // Removing non-existing criteria _data for all characters
+                        Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} _data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
 
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
                         stmt.AddValue(0, criteriaId);
@@ -93,7 +98,8 @@ namespace Game
                         continue;
                     }
 
-                    if (criteria.Entry.StartTimer != 0 && date + criteria.Entry.StartTimer < now)
+                    if (criteria.Entry.StartTimer != 0 &&
+                        date + criteria.Entry.StartTimer < now)
                         continue;
 
                     CriteriaProgress progress = new();
@@ -113,7 +119,6 @@ namespace Game
             trans.Append(stmt);
 
             if (!_completedObjectives.Empty())
-            {
                 foreach (uint completedObjectiveId in _completedObjectives)
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
@@ -121,10 +126,8 @@ namespace Game
                     stmt.AddValue(1, completedObjectiveId);
                     trans.Append(stmt);
                 }
-            }
 
             if (!_criteriaProgress.Empty())
-            {
                 foreach (var pair in _criteriaProgress)
                 {
                     if (!pair.Value.Changed)
@@ -147,7 +150,6 @@ namespace Game
 
                     pair.Value.Changed = false;
                 }
-            }
         }
 
         public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete)
@@ -159,19 +161,20 @@ namespace Game
                 return;
 
             var playerCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
+
             foreach (Criteria playerCriteria in playerCriteriaList)
             {
                 var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(playerCriteria.Id);
                 bool allComplete = true;
+
                 foreach (CriteriaTree tree in trees)
-                {
                     // don't update already completed criteria if not forced
                     if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete))
                     {
                         allComplete = false;
+
                         break;
                     }
-                }
 
                 if (allComplete)
                     continue;
@@ -183,13 +186,11 @@ namespace Game
         public void ResetCriteriaTree(uint criteriaTreeId)
         {
             CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(criteriaTreeId);
+
             if (tree == null)
                 return;
 
-            CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
-            {
-                RemoveCriteriaProgress(criteriaTree.Criteria);
-            });
+            CriteriaManager.WalkCriteriaTree(tree, criteriaTree => { RemoveCriteriaProgress(criteriaTree.Criteria); });
         }
 
         public override void SendAllData(Player receiver)
@@ -210,18 +211,6 @@ namespace Game
             }
         }
 
-        void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
-        {
-            if (HasCompletedObjective(questObjective))
-                return;
-
-            _owner.KillCreditCriteriaTreeObjective(questObjective);
-
-            Log.outInfo(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.Id}). {GetOwnerInfo()}");
-
-            _completedObjectives.Add(questObjective.Id);
-        }
-
         public bool HasCompletedObjective(QuestObjective questObjective)
         {
             return _completedObjectives.Contains(questObjective.Id);
@@ -235,6 +224,7 @@ namespace Game
             criteriaUpdate.Quantity = progress.Counter;
             criteriaUpdate.PlayerGUID = _owner.GetGUID();
             criteriaUpdate.Flags = 0;
+
             if (criteria.Entry.StartTimer != 0)
                 criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
@@ -255,32 +245,42 @@ namespace Game
         public override bool CanUpdateCriteriaTree(Criteria criteria, CriteriaTree tree, Player referencePlayer)
         {
             QuestObjective objective = tree.QuestObjective;
+
             if (objective == null)
                 return false;
 
             if (HasCompletedObjective(objective))
             {
                 Log.outTrace(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective already completed");
+
                 return false;
             }
 
             if (_owner.GetQuestStatus(objective.QuestID) != QuestStatus.Incomplete)
             {
                 Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Not on quest");
+
                 return false;
             }
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
-            if (_owner.GetGroup() && _owner.GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(referencePlayer.GetMap().GetDifficultyID()))
+
+            if (_owner.GetGroup() &&
+                _owner.GetGroup().IsRaidGroup() &&
+                !quest.IsAllowedInRaid(referencePlayer.GetMap().GetDifficultyID()))
             {
                 Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Quest cannot be completed in raid group");
+
                 return false;
             }
 
             ushort slot = _owner.FindQuestSlot(objective.QuestID);
-            if (slot >= SharedConst.MaxQuestLogSize || !_owner.IsQuestObjectiveCompletable(slot, quest, objective))
+
+            if (slot >= SharedConst.MaxQuestLogSize ||
+                !_owner.IsQuestObjectiveCompletable(slot, quest, objective))
             {
                 Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective not completable");
+
                 return false;
             }
 
@@ -290,6 +290,7 @@ namespace Game
         public override bool CanCompleteCriteriaTree(CriteriaTree tree)
         {
             QuestObjective objective = tree.QuestObjective;
+
             if (objective == null)
                 return false;
 
@@ -299,6 +300,7 @@ namespace Game
         public override void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer)
         {
             QuestObjective objective = tree.QuestObjective;
+
             if (objective == null)
                 return;
 
@@ -320,8 +322,16 @@ namespace Game
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }
 
+        private void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
+        {
+            if (HasCompletedObjective(questObjective))
+                return;
 
-        Player _owner;
-        List<uint> _completedObjectives = new();
+            _owner.KillCreditCriteriaTreeObjective(questObjective);
+
+            Log.outInfo(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.Id}). {GetOwnerInfo()}");
+
+            _completedObjectives.Add(questObjective.Id);
+        }
     }
 }

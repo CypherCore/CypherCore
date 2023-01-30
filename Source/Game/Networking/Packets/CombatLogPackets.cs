@@ -1,23 +1,27 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Dynamic;
-using Game.Entities;
-using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
+using Game.Spells;
 
 namespace Game.Networking.Packets
 {
     public class CombatLogServerPacket : ServerPacket
     {
+        internal SpellCastLogData LogData;
+        private bool _includeLogData;
+
         public CombatLogServerPacket(ServerOpcodes opcode, ConnectionType connection = ConnectionType.Realm) : base(opcode, connection)
         {
             LogData = new SpellCastLogData();
         }
 
-        public override void Write() { }
+        public override void Write()
+        {
+        }
 
         public void SetAdvancedCombatLogging(bool value)
         {
@@ -39,14 +43,33 @@ namespace Game.Networking.Packets
             if (_includeLogData)
                 LogData.Write(_worldPacket);
         }
-
-        internal SpellCastLogData LogData;
-        bool _includeLogData;
     }
 
-    class SpellNonMeleeDamageLog : CombatLogServerPacket
+    internal class SpellNonMeleeDamageLog : CombatLogServerPacket
     {
-        public SpellNonMeleeDamageLog() : base(ServerOpcodes.SpellNonMeleeDamageLog, ConnectionType.Instance) { }
+        public int Absorbed;
+        public ObjectGuid CasterGUID;
+
+        public ObjectGuid CastID;
+
+        // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
+        public ContentTuningParams ContentTuning;
+        public int Damage;
+        public int Flags;
+
+        public ObjectGuid Me;
+        public int OriginalDamage;
+        public int Overkill = -1;
+        public bool Periodic;
+        public int Resisted;
+        public byte SchoolMask;
+        public int ShieldBlock;
+        public int SpellID;
+        public SpellCastVisual Visual;
+
+        public SpellNonMeleeDamageLog() : base(ServerOpcodes.SpellNonMeleeDamageLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -70,31 +93,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ContentTuning != null);
             FlushBits();
             WriteLogData();
-            if (ContentTuning != null)
-                ContentTuning.Write(_worldPacket);
-        }
 
-        public ObjectGuid Me;
-        public ObjectGuid CasterGUID;
-        public ObjectGuid CastID;
-        public int SpellID;
-        public SpellCastVisual Visual;
-        public int Damage;
-        public int OriginalDamage;
-        public int Overkill = -1;
-        public byte SchoolMask;
-        public int ShieldBlock;
-        public int Resisted;
-        public bool Periodic;
-        public int Absorbed;
-        public int Flags;
-        // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
-        public ContentTuningParams ContentTuning;
+            ContentTuning?.Write(_worldPacket);
+        }
     }
 
-    class EnvironmentalDamageLog : CombatLogServerPacket
+    internal class EnvironmentalDamageLog : CombatLogServerPacket
     {
-        public EnvironmentalDamageLog() : base(ServerOpcodes.EnvironmentalDamageLog) { }
+        public int Absorbed;
+        public int Amount;
+        public int Resisted;
+        public EnviromentalDamage Type;
+
+        public ObjectGuid Victim;
+
+        public EnvironmentalDamageLog() : base(ServerOpcodes.EnvironmentalDamageLog)
+        {
+        }
 
         public override void Write()
         {
@@ -108,17 +123,17 @@ namespace Game.Networking.Packets
             FlushBits();
             WriteLogData();
         }
-
-        public ObjectGuid Victim;
-        public EnviromentalDamage Type;
-        public int Amount;
-        public int Resisted;
-        public int Absorbed;
     }
 
-    class SpellExecuteLog : CombatLogServerPacket
+    internal class SpellExecuteLog : CombatLogServerPacket
     {
-        public SpellExecuteLog() : base(ServerOpcodes.SpellExecuteLog, ConnectionType.Instance) { }
+        public ObjectGuid Caster;
+        public List<SpellLogEffect> Effects = new();
+        public uint SpellID;
+
+        public SpellExecuteLog() : base(ServerOpcodes.SpellExecuteLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -173,15 +188,26 @@ namespace Game.Networking.Packets
             FlushBits();
             WriteLogData();
         }
-
-        public ObjectGuid Caster;
-        public uint SpellID;
-        public List<SpellLogEffect> Effects = new();
     }
 
-    class SpellHealLog : CombatLogServerPacket
+    internal class SpellHealLog : CombatLogServerPacket
     {
-        public SpellHealLog() : base(ServerOpcodes.SpellHealLog, ConnectionType.Instance) { }
+        public uint Absorbed;
+
+        public ObjectGuid CasterGUID;
+        public ContentTuningParams ContentTuning;
+        public bool Crit;
+        public float? CritRollMade;
+        public float? CritRollNeeded;
+        public uint Health;
+        public int OriginalHeal;
+        public uint OverHeal;
+        public uint SpellID;
+        public ObjectGuid TargetGUID;
+
+        public SpellHealLog() : base(ServerOpcodes.SpellHealLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -210,46 +236,12 @@ namespace Game.Networking.Packets
             if (CritRollNeeded.HasValue)
                 _worldPacket.WriteFloat(CritRollNeeded.Value);
 
-            if (ContentTuning != null)
-                ContentTuning.Write(_worldPacket);
+            ContentTuning?.Write(_worldPacket);
         }
-
-        public ObjectGuid CasterGUID;
-        public ObjectGuid TargetGUID;
-        public uint SpellID;
-        public uint Health;
-        public int OriginalHeal;
-        public uint OverHeal;
-        public uint Absorbed;
-        public bool Crit;
-        public float? CritRollMade;
-        public float? CritRollNeeded;
-        public ContentTuningParams ContentTuning;
     }
 
-    class SpellPeriodicAuraLog : CombatLogServerPacket
+    internal class SpellPeriodicAuraLog : CombatLogServerPacket
     {
-        public SpellPeriodicAuraLog() : base(ServerOpcodes.SpellPeriodicAuraLog, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(TargetGUID);
-            _worldPacket.WritePackedGuid(CasterGUID);
-            _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteInt32(Effects.Count);
-            WriteLogDataBit();
-            FlushBits();
-
-            Effects.ForEach(p => p.Write(_worldPacket));
-
-            WriteLogData();
-        }
-
-        public ObjectGuid TargetGUID;
-        public ObjectGuid CasterGUID;
-        public uint SpellID;
-        public List<SpellLogEffect> Effects = new();
-
         public struct PeriodicalAuraLogEffectDebugInfo
         {
             public float CritRollMade;
@@ -258,6 +250,18 @@ namespace Game.Networking.Packets
 
         public class SpellLogEffect
         {
+            public uint AbsorbedOrAmplitude;
+            public uint Amount;
+            public ContentTuningParams ContentTuning;
+            public bool Crit;
+            public PeriodicalAuraLogEffectDebugInfo? DebugInfo;
+
+            public uint Effect;
+            public int OriginalDamage;
+            public uint OverHealOrKill;
+            public uint Resisted;
+            public uint SchoolMaskOrPower;
+
             public void Write(WorldPacket data)
             {
                 data.WriteUInt32(Effect);
@@ -273,8 +277,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(ContentTuning != null);
                 data.FlushBits();
 
-                if (ContentTuning != null)
-                    ContentTuning.Write(data);
+                ContentTuning?.Write(data);
 
                 if (DebugInfo.HasValue)
                 {
@@ -282,23 +285,43 @@ namespace Game.Networking.Packets
                     data.WriteFloat(DebugInfo.Value.CritRollNeeded);
                 }
             }
+        }
 
-            public uint Effect;
-            public uint Amount;
-            public int OriginalDamage;
-            public uint OverHealOrKill;
-            public uint SchoolMaskOrPower;
-            public uint AbsorbedOrAmplitude;
-            public uint Resisted;
-            public bool Crit;
-            public PeriodicalAuraLogEffectDebugInfo? DebugInfo;
-            public ContentTuningParams ContentTuning;
+        public ObjectGuid CasterGUID;
+        public List<SpellLogEffect> Effects = new();
+        public uint SpellID;
+
+        public ObjectGuid TargetGUID;
+
+        public SpellPeriodicAuraLog() : base(ServerOpcodes.SpellPeriodicAuraLog, ConnectionType.Instance)
+        {
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(TargetGUID);
+            _worldPacket.WritePackedGuid(CasterGUID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(Effects.Count);
+            WriteLogDataBit();
+            FlushBits();
+
+            Effects.ForEach(p => p.Write(_worldPacket));
+
+            WriteLogData();
         }
     }
 
-    class SpellInterruptLog : ServerPacket
+    internal class SpellInterruptLog : ServerPacket
     {
-        public SpellInterruptLog() : base(ServerOpcodes.SpellInterruptLog, ConnectionType.Instance) { }
+        public ObjectGuid Caster;
+        public uint InterruptedSpellID;
+        public uint SpellID;
+        public ObjectGuid Victim;
+
+        public SpellInterruptLog() : base(ServerOpcodes.SpellInterruptLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -307,16 +330,21 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(InterruptedSpellID);
             _worldPacket.WriteUInt32(SpellID);
         }
-
-        public ObjectGuid Caster;
-        public ObjectGuid Victim;
-        public uint InterruptedSpellID;
-        public uint SpellID;
     }
 
-    class SpellDispellLog : ServerPacket
+    internal class SpellDispellLog : ServerPacket
     {
-        public SpellDispellLog() : base(ServerOpcodes.SpellDispellLog, ConnectionType.Instance) { }
+        public ObjectGuid CasterGUID;
+
+        public List<SpellDispellData> DispellData = new();
+        public uint DispelledBySpellID;
+        public bool IsBreak;
+        public bool IsSteal;
+        public ObjectGuid TargetGUID;
+
+        public SpellDispellLog() : base(ServerOpcodes.SpellDispellLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -327,33 +355,39 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(DispelledBySpellID);
 
             _worldPacket.WriteInt32(DispellData.Count);
+
             foreach (var data in DispellData)
             {
                 _worldPacket.WriteUInt32(data.SpellID);
                 _worldPacket.WriteBit(data.Harmful);
                 _worldPacket.WriteBit(data.Rolled.HasValue);
                 _worldPacket.WriteBit(data.Needed.HasValue);
+
                 if (data.Rolled.HasValue)
                     _worldPacket.WriteInt32(data.Rolled.Value);
+
                 if (data.Needed.HasValue)
                     _worldPacket.WriteInt32(data.Needed.Value);
 
                 _worldPacket.FlushBits();
             }
         }
-
-        public List<SpellDispellData> DispellData = new();
-        public ObjectGuid CasterGUID;
-        public ObjectGuid TargetGUID;
-        public uint DispelledBySpellID;
-        public bool IsBreak;
-        public bool IsSteal;
     }
 
 
-    class SpellEnergizeLog : CombatLogServerPacket
+    internal class SpellEnergizeLog : CombatLogServerPacket
     {
-        public SpellEnergizeLog() : base(ServerOpcodes.SpellEnergizeLog, ConnectionType.Instance) { }
+        public int Amount;
+        public ObjectGuid CasterGUID;
+        public int OverEnergize;
+        public uint SpellID;
+
+        public ObjectGuid TargetGUID;
+        public PowerType Type;
+
+        public SpellEnergizeLog() : base(ServerOpcodes.SpellEnergizeLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -369,18 +403,18 @@ namespace Game.Networking.Packets
             FlushBits();
             WriteLogData();
         }
-
-        public ObjectGuid TargetGUID;
-        public ObjectGuid CasterGUID;
-        public uint SpellID;
-        public PowerType Type;
-        public int Amount;
-        public int OverEnergize;
     }
 
     public class SpellInstakillLog : ServerPacket
     {
-        public SpellInstakillLog() : base(ServerOpcodes.SpellInstakillLog, ConnectionType.Instance) { }
+        public ObjectGuid Caster;
+        public uint SpellID;
+
+        public ObjectGuid Target;
+
+        public SpellInstakillLog() : base(ServerOpcodes.SpellInstakillLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -388,15 +422,18 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteUInt32(SpellID);
         }
-
-        public ObjectGuid Target;
-        public ObjectGuid Caster;
-        public uint SpellID;
     }
 
-    class SpellMissLog : ServerPacket
+    internal class SpellMissLog : ServerPacket
     {
-        public SpellMissLog() : base(ServerOpcodes.SpellMissLog, ConnectionType.Instance) { }
+        public ObjectGuid Caster;
+        public List<SpellLogMissEntry> Entries = new();
+
+        public uint SpellID;
+
+        public SpellMissLog() : base(ServerOpcodes.SpellMissLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -407,15 +444,19 @@ namespace Game.Networking.Packets
             foreach (SpellLogMissEntry missEntry in Entries)
                 missEntry.Write(_worldPacket);
         }
-
-        public uint SpellID;
-        public ObjectGuid Caster;
-        public List<SpellLogMissEntry> Entries = new();
     }
 
-    class ProcResist : ServerPacket
+    internal class ProcResist : ServerPacket
     {
-        public ProcResist() : base(ServerOpcodes.ProcResist) { }
+        public ObjectGuid Caster;
+        public float? Needed;
+        public float? Rolled;
+        public uint SpellID;
+        public ObjectGuid Target;
+
+        public ProcResist() : base(ServerOpcodes.ProcResist)
+        {
+        }
 
         public override void Write()
         {
@@ -432,17 +473,18 @@ namespace Game.Networking.Packets
             if (Needed.HasValue)
                 _worldPacket.WriteFloat(Needed.Value);
         }
-
-        public ObjectGuid Caster;
-        public ObjectGuid Target;
-        public uint SpellID;
-        public float? Rolled;
-        public float? Needed;
     }
 
-    class SpellOrDamageImmune : ServerPacket
+    internal class SpellOrDamageImmune : ServerPacket
     {
-        public SpellOrDamageImmune() : base(ServerOpcodes.SpellOrDamageImmune, ConnectionType.Instance) { }
+        public ObjectGuid CasterGUID;
+        public bool IsPeriodic;
+        public uint SpellID;
+        public ObjectGuid VictimGUID;
+
+        public SpellOrDamageImmune() : base(ServerOpcodes.SpellOrDamageImmune, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -452,16 +494,22 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsPeriodic);
             _worldPacket.FlushBits();
         }
-
-        public ObjectGuid CasterGUID;
-        public ObjectGuid VictimGUID;
-        public uint SpellID;
-        public bool IsPeriodic;
     }
 
-    class SpellDamageShield : CombatLogServerPacket
+    internal class SpellDamageShield : CombatLogServerPacket
     {
-        public SpellDamageShield() : base(ServerOpcodes.SpellDamageShield, ConnectionType.Instance) { }
+        public ObjectGuid Attacker;
+        public ObjectGuid Defender;
+        public uint LogAbsorbed;
+        public int OriginalDamage;
+        public uint OverKill;
+        public uint SchoolMask;
+        public uint SpellID;
+        public uint TotalDamage;
+
+        public SpellDamageShield() : base(ServerOpcodes.SpellDamageShield, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -478,20 +526,30 @@ namespace Game.Networking.Packets
             FlushBits();
             WriteLogData();
         }
-
-        public ObjectGuid Attacker;
-        public ObjectGuid Defender;
-        public uint SpellID;
-        public uint TotalDamage;
-        public int OriginalDamage;
-        public uint OverKill;
-        public uint SchoolMask;
-        public uint LogAbsorbed;
     }
 
-    class AttackerStateUpdate : CombatLogServerPacket
+    internal class AttackerStateUpdate : CombatLogServerPacket
     {
-        public AttackerStateUpdate() : base(ServerOpcodes.AttackerStateUpdate, ConnectionType.Instance) { }
+        public ObjectGuid AttackerGUID;
+        public uint AttackerState;
+        public int BlockAmount;
+        public ContentTuningParams ContentTuning = new();
+        public int Damage;
+
+        public HitInfo hitInfo; // Flags
+        public uint MeleeSpellID;
+        public int OriginalDamage;
+        public int OverDamage = -1; // (Damage - health) or -1 if unit is still alive
+        public int RageGained;
+        public SubDamage? SubDmg;
+        public float Unk;
+        public UnkAttackerState UnkState;
+        public ObjectGuid VictimGUID;
+        public byte VictimState;
+
+        public AttackerStateUpdate() : base(ServerOpcodes.AttackerStateUpdate, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -509,8 +567,10 @@ namespace Game.Networking.Packets
                 attackRoundInfo.WriteInt32(SubDmg.Value.SchoolMask);
                 attackRoundInfo.WriteFloat(SubDmg.Value.FDamage);
                 attackRoundInfo.WriteInt32(SubDmg.Value.Damage);
+
                 if (hitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.PartialAbsorb))
                     attackRoundInfo.WriteInt32(SubDmg.Value.Absorbed);
+
                 if (hitInfo.HasAnyFlag(HitInfo.FullResist | HitInfo.PartialResist))
                     attackRoundInfo.WriteInt32(SubDmg.Value.Resisted);
             }
@@ -563,27 +623,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(attackRoundInfo.GetSize());
             _worldPacket.WriteBytes(attackRoundInfo);
         }
-
-        public HitInfo hitInfo; // Flags
-        public ObjectGuid AttackerGUID;
-        public ObjectGuid VictimGUID;
-        public int Damage;
-        public int OriginalDamage;
-        public int OverDamage = -1; // (damage - health) or -1 if unit is still alive
-        public SubDamage? SubDmg;
-        public byte VictimState;
-        public uint AttackerState;
-        public uint MeleeSpellID;
-        public int BlockAmount;
-        public int RageGained;
-        public UnkAttackerState UnkState;
-        public float Unk;
-        public ContentTuningParams ContentTuning = new();
     }
 
-    class SpellAbsorbLog : CombatLogServerPacket
+    internal class SpellAbsorbLog : CombatLogServerPacket
     {
-        public SpellAbsorbLog() : base(ServerOpcodes.SpellAbsorbLog, ConnectionType.Instance) { }
+        public int Absorbed;
+        public uint AbsorbedSpellID;
+        public uint AbsorbSpellID;
+
+        public ObjectGuid Attacker;
+        public ObjectGuid Caster;
+        public uint OriginalDamage;
+        public bool Unk;
+        public ObjectGuid Victim;
+
+        public SpellAbsorbLog() : base(ServerOpcodes.SpellAbsorbLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -601,20 +657,23 @@ namespace Game.Networking.Packets
 
             WriteLogData();
         }
-
-        public ObjectGuid Attacker;
-        public ObjectGuid Victim;
-        public ObjectGuid Caster;
-        public uint AbsorbedSpellID;
-        public uint AbsorbSpellID;
-        public int Absorbed;
-        public uint OriginalDamage;
-        public bool Unk;
     }
 
-    class SpellHealAbsorbLog : ServerPacket
+    internal class SpellHealAbsorbLog : ServerPacket
     {
-        public SpellHealAbsorbLog() : base(ServerOpcodes.SpellHealAbsorbLog, ConnectionType.Instance) { }
+        public ObjectGuid AbsorbCaster;
+        public int Absorbed;
+        public int AbsorbedSpellID;
+        public int AbsorbSpellID;
+        public ContentTuningParams ContentTuning;
+
+        public ObjectGuid Healer;
+        public int OriginalHeal;
+        public ObjectGuid Target;
+
+        public SpellHealAbsorbLog() : base(ServerOpcodes.SpellHealAbsorbLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -628,20 +687,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ContentTuning != null);
             _worldPacket.FlushBits();
 
-            if (ContentTuning != null)
-                ContentTuning.Write(_worldPacket);
+            ContentTuning?.Write(_worldPacket);
         }
-
-        public ObjectGuid Healer;
-        public ObjectGuid Target;
-        public ObjectGuid AbsorbCaster;
-        public int AbsorbSpellID;
-        public int AbsorbedSpellID;
-        public int Absorbed;
-        public int OriginalHeal;
-        public ContentTuningParams ContentTuning;
     }
-    
+
     //Structs
     public struct SpellLogEffectPowerDrainParams
     {
@@ -679,7 +728,7 @@ namespace Game.Networking.Packets
         public int ItemID;
     }
 
-    struct SpellLogMissDebug
+    internal struct SpellLogMissDebug
     {
         public void Write(WorldPacket data)
         {
@@ -693,6 +742,11 @@ namespace Game.Networking.Packets
 
     public class SpellLogMissEntry
     {
+        public byte MissReason;
+
+        public ObjectGuid Victim;
+        private SpellLogMissDebug? Debug;
+
         public SpellLogMissEntry(ObjectGuid victim, byte missReason)
         {
             Victim = victim;
@@ -703,18 +757,15 @@ namespace Game.Networking.Packets
         {
             data.WritePackedGuid(Victim);
             data.WriteUInt8(MissReason);
+
             if (data.WriteBit(Debug.HasValue))
                 Debug.Value.Write(data);
 
             data.FlushBits();
         }
-
-        public ObjectGuid Victim;
-        public byte MissReason;
-        SpellLogMissDebug? Debug;
     }
 
-    struct SpellDispellData
+    internal struct SpellDispellData
     {
         public uint SpellID;
         public bool Harmful;
@@ -725,7 +776,7 @@ namespace Game.Networking.Packets
     public struct SubDamage
     {
         public int SchoolMask;
-        public float FDamage; // Float damage (Most of the time equals to Damage)
+        public float FDamage; // Float Damage (Most of the Time equals to Damage)
         public int Damage;
         public int Absorbed;
         public int Resisted;

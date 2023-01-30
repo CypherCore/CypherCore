@@ -7,9 +7,12 @@ namespace Game.Movement
 {
     public class AbstractFollower
     {
-        Unit _target;
+        private Unit _target;
 
-        public AbstractFollower(Unit target = null) { SetTarget(target); }
+        public AbstractFollower(Unit target = null)
+        {
+            SetTarget(target);
+        }
 
         public void SetTarget(Unit unit)
         {
@@ -25,6 +28,9 @@ namespace Game.Movement
                 _target.FollowerAdded(this);
         }
 
-        public Unit GetTarget() { return _target; }
+        public Unit GetTarget()
+        {
+            return _target;
+        }
     }
 }

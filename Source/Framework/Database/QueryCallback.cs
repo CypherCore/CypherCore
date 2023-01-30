@@ -9,9 +9,49 @@ namespace Framework.Database
 {
     public class QueryCallback : ISqlCallback
     {
+        private readonly Queue<QueryCallbackData> _callbacks = new();
+
+        private Task<SQLResult> _result;
+
         public QueryCallback(Task<SQLResult> result)
         {
             _result = result;
+        }
+
+        public bool InvokeIfReady()
+        {
+            QueryCallbackData callback = _callbacks.Peek();
+
+            while (true)
+                if (_result != null &&
+                    _result.Wait(0))
+                {
+                    Task<SQLResult> f = _result;
+                    Action<QueryCallback, SQLResult> cb = callback._result;
+                    _result = null;
+
+                    cb(this, f.Result);
+
+                    _callbacks.Dequeue();
+                    bool hasNext = _result != null;
+
+                    if (_callbacks.Count == 0)
+                    {
+                        Cypher.Assert(!hasNext);
+
+                        return true;
+                    }
+
+                    // abort chain
+                    if (!hasNext)
+                        return true;
+
+                    callback = _callbacks.Peek();
+                }
+                else
+                {
+                    return false;
+                }
         }
 
         public QueryCallback WithCallback(Action<SQLResult> callback)
@@ -27,6 +67,7 @@ namespace Framework.Database
         public QueryCallback WithChainingCallback(Action<QueryCallback, SQLResult> callback)
         {
             _callbacks.Enqueue(new QueryCallbackData(callback));
+
             return this;
         }
 
@@ -34,45 +75,9 @@ namespace Framework.Database
         {
             _result = next._result;
         }
-
-        public bool InvokeIfReady()
-        {
-            QueryCallbackData callback = _callbacks.Peek();
-
-            while (true)
-            {
-                if (_result != null && _result.Wait(0))
-                {
-                    Task<SQLResult> f = _result;
-                    Action<QueryCallback, SQLResult> cb = callback._result;
-                    _result = null;
-
-                    cb(this, f.Result);
-
-                    _callbacks.Dequeue();
-                    bool hasNext = _result != null;
-                    if (_callbacks.Count == 0)
-                    {
-                        Cypher.Assert(!hasNext);
-                        return true;
-                    }
-
-                    // abort chain
-                    if (!hasNext)
-                        return true;
-
-                    callback = _callbacks.Peek();
-                }
-                else
-                    return false;
-            }
-        }
-
-        Task<SQLResult> _result;
-        Queue<QueryCallbackData> _callbacks = new();
     }
 
-    struct QueryCallbackData
+    internal struct QueryCallbackData
     {
         public QueryCallbackData(Action<QueryCallback, SQLResult> callback)
         {

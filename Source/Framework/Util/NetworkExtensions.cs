@@ -15,10 +15,10 @@ public static class NetworkExtensions
             throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
 
         byte[] broadcastAddress = new byte[ipAdressBytes.Length];
+
         for (int i = 0; i < broadcastAddress.Length; i++)
-        {
             broadcastAddress[i] = (byte)(ipAdressBytes[i] & (subnetMaskBytes[i]));
-        }
+
         return new IPAddress(broadcastAddress);
     }
 }

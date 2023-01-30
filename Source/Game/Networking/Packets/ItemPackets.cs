@@ -1,31 +1,43 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Dynamic;
-using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
+using Framework.Constants;
+using Game.Entities;
+using Game.Loots;
 
 namespace Game.Networking.Packets
 {
     public class BuyBackItem : ClientPacket
     {
-        public BuyBackItem(WorldPacket packet) : base(packet) { }
+        public uint Slot;
+
+        public ObjectGuid VendorGUID;
+
+        public BuyBackItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             VendorGUID = _worldPacket.ReadPackedGuid();
             Slot = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid VendorGUID;
-        public uint Slot;
     }
 
     public class BuyItem : ClientPacket
     {
+        public ObjectGuid ContainerGUID;
+        public ItemInstance Item;
+        public ItemVendorType ItemType;
+        public uint Muid;
+        public int Quantity;
+        public uint Slot;
+
+        public ObjectGuid VendorGUID;
+
         public BuyItem(WorldPacket packet) : base(packet)
         {
             Item = new ItemInstance();
@@ -41,19 +53,19 @@ namespace Game.Networking.Packets
             Item.Read(_worldPacket);
             ItemType = (ItemVendorType)_worldPacket.ReadBits<int>(3);
         }
-
-        public ObjectGuid VendorGUID;
-        public ItemInstance Item;
-        public uint Muid;
-        public uint Slot;
-        public ItemVendorType ItemType;
-        public int Quantity;
-        public ObjectGuid ContainerGUID;
     }
 
     public class BuySucceeded : ServerPacket
     {
-        public BuySucceeded() : base(ServerOpcodes.BuySucceeded) { }
+        public uint Muid;
+        public uint NewQuantity;
+        public uint QuantityBought;
+
+        public ObjectGuid VendorGUID;
+
+        public BuySucceeded() : base(ServerOpcodes.BuySucceeded)
+        {
+        }
 
         public override void Write()
         {
@@ -62,16 +74,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(NewQuantity);
             _worldPacket.WriteUInt32(QuantityBought);
         }
-
-        public ObjectGuid VendorGUID;
-        public uint Muid;
-        public uint QuantityBought;
-        public uint NewQuantity;
     }
 
     public class BuyFailed : ServerPacket
     {
-        public BuyFailed() : base(ServerOpcodes.BuyFailed) { }
+        public uint Muid;
+        public BuyResult Reason = BuyResult.CantFindItem;
+
+        public ObjectGuid VendorGUID;
+
+        public BuyFailed() : base(ServerOpcodes.BuyFailed)
+        {
+        }
 
         public override void Write()
         {
@@ -79,27 +93,33 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Muid);
             _worldPacket.WriteUInt8((byte)Reason);
         }
-
-        public ObjectGuid VendorGUID;
-        public uint Muid;
-        public BuyResult Reason = BuyResult.CantFindItem;
     }
 
     public class GetItemPurchaseData : ClientPacket
     {
-        public GetItemPurchaseData(WorldPacket packet) : base(packet) { }
+        public ObjectGuid ItemGUID;
+
+        public GetItemPurchaseData(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid ItemGUID;
     }
 
-    class SetItemPurchaseData : ServerPacket
+    internal class SetItemPurchaseData : ServerPacket
     {
-        public SetItemPurchaseData() : base(ServerOpcodes.SetItemPurchaseData, ConnectionType.Instance) { }
+        public ItemPurchaseContents Contents = new();
+        public uint Flags;
+        public ObjectGuid ItemGUID;
+
+        public uint PurchaseTime;
+
+        public SetItemPurchaseData() : base(ServerOpcodes.SetItemPurchaseData, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -108,28 +128,32 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WriteUInt32(PurchaseTime);
         }
-
-        public uint PurchaseTime;
-        public uint Flags;
-        public ItemPurchaseContents Contents = new();
-        public ObjectGuid ItemGUID;
     }
 
-    class ItemPurchaseRefund : ClientPacket
+    internal class ItemPurchaseRefund : ClientPacket
     {
-        public ItemPurchaseRefund(WorldPacket packet) : base(packet) { }
+        public ObjectGuid ItemGUID;
+
+        public ItemPurchaseRefund(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid ItemGUID;
     }
 
-    class ItemPurchaseRefundResult : ServerPacket
+    internal class ItemPurchaseRefundResult : ServerPacket
     {
-        public ItemPurchaseRefundResult() : base(ServerOpcodes.ItemPurchaseRefundResult, ConnectionType.Instance) { }
+        public ItemPurchaseContents Contents;
+        public ObjectGuid ItemGUID;
+
+        public byte Result;
+
+        public ItemPurchaseRefundResult() : base(ServerOpcodes.ItemPurchaseRefundResult, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -137,30 +161,35 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(Result);
             _worldPacket.WriteBit(Contents != null);
             _worldPacket.FlushBits();
-            if (Contents != null)
-                Contents.Write(_worldPacket);
-        }
 
-        public byte Result;
-        public ObjectGuid ItemGUID;
-        public ItemPurchaseContents Contents;
+            Contents?.Write(_worldPacket);
+        }
     }
 
-    class ItemExpirePurchaseRefund : ServerPacket
+    internal class ItemExpirePurchaseRefund : ServerPacket
     {
-        public ItemExpirePurchaseRefund() : base(ServerOpcodes.ItemExpirePurchaseRefund, ConnectionType.Instance) { }
+        public ObjectGuid ItemGUID;
+
+        public ItemExpirePurchaseRefund() : base(ServerOpcodes.ItemExpirePurchaseRefund, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ItemGUID);
         }
-
-        public ObjectGuid ItemGUID;
     }
 
     public class RepairItem : ClientPacket
     {
-        public RepairItem(WorldPacket packet) : base(packet) { }
+        public ObjectGuid ItemGUID;
+
+        public ObjectGuid NpcGUID;
+        public bool UseGuildBank;
+
+        public RepairItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -168,15 +197,18 @@ namespace Game.Networking.Packets
             ItemGUID = _worldPacket.ReadPackedGuid();
             UseGuildBank = _worldPacket.HasBit();
         }
-
-        public ObjectGuid NpcGUID;
-        public ObjectGuid ItemGUID;
-        public bool UseGuildBank;
     }
 
     public class SellItem : ClientPacket
     {
-        public SellItem(WorldPacket packet) : base(packet) { }
+        public uint Amount;
+        public ObjectGuid ItemGUID;
+
+        public ObjectGuid VendorGUID;
+
+        public SellItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -184,83 +216,100 @@ namespace Game.Networking.Packets
             ItemGUID = _worldPacket.ReadPackedGuid();
             Amount = _worldPacket.ReadUInt32();
         }
-
-        public ObjectGuid VendorGUID;
-        public ObjectGuid ItemGUID;
-        public uint Amount;
     }
 
     public class ItemTimeUpdate : ServerPacket
     {
-        public ItemTimeUpdate() : base(ServerOpcodes.ItemTimeUpdate) { }
+        public uint DurationLeft;
+
+        public ObjectGuid ItemGuid;
+
+        public ItemTimeUpdate() : base(ServerOpcodes.ItemTimeUpdate)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ItemGuid);
             _worldPacket.WriteUInt32(DurationLeft);
         }
-
-        public ObjectGuid ItemGuid;
-        public uint DurationLeft;
     }
 
     public class SetProficiency : ServerPacket
     {
-        public SetProficiency() : base(ServerOpcodes.SetProficiency, ConnectionType.Instance) { }
+        public byte ProficiencyClass;
+
+        public uint ProficiencyMask;
+
+        public SetProficiency() : base(ServerOpcodes.SetProficiency, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(ProficiencyMask);
             _worldPacket.WriteUInt8(ProficiencyClass);
         }
-
-        public uint ProficiencyMask;
-        public byte ProficiencyClass;
     }
 
     public class InventoryChangeFailure : ServerPacket
     {
-        public InventoryChangeFailure() : base(ServerOpcodes.InventoryChangeFailure) { }
+        public InventoryResult BagResult;
+        public byte ContainerBSlot;
+        public ObjectGuid DstContainer;
+        public ObjectGuid[] Item = new ObjectGuid[2];
+        public int Level;
+        public int LimitCategory;
+        public ObjectGuid SrcContainer;
+        public int SrcSlot;
+
+        public InventoryChangeFailure() : base(ServerOpcodes.InventoryChangeFailure)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WriteInt8((sbyte)BagResult);
             _worldPacket.WritePackedGuid(Item[0]);
             _worldPacket.WritePackedGuid(Item[1]);
-            _worldPacket.WriteUInt8(ContainerBSlot); // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
+            _worldPacket.WriteUInt8(ContainerBSlot); // bag Type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
 
             switch (BagResult)
             {
                 case InventoryResult.CantEquipLevelI:
                 case InventoryResult.PurchaseLevelTooLow:
                     _worldPacket.WriteInt32(Level);
+
                     break;
                 case InventoryResult.EventAutoequipBindConfirm:
                     _worldPacket.WritePackedGuid(SrcContainer);
                     _worldPacket.WriteInt32(SrcSlot);
                     _worldPacket.WritePackedGuid(DstContainer);
+
                     break;
                 case InventoryResult.ItemMaxLimitCategoryCountExceededIs:
                 case InventoryResult.ItemMaxLimitCategorySocketedExceededIs:
                 case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
                     _worldPacket.WriteInt32(LimitCategory);
+
                     break;
             }
         }
-
-        public InventoryResult BagResult;
-        public byte ContainerBSlot;
-        public ObjectGuid SrcContainer;
-        public ObjectGuid DstContainer;
-        public int SrcSlot;
-        public int LimitCategory;
-        public int Level;
-        public ObjectGuid[] Item = new ObjectGuid[2];
     }
 
     public class SplitItem : ClientPacket
     {
-        public SplitItem(WorldPacket packet) : base(packet) { }
+        public byte FromPackSlot;
+        public byte FromSlot;
+        public InvUpdate Inv;
+        public int Quantity;
+        public byte ToPackSlot;
+
+        public byte ToSlot;
+
+        public SplitItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -271,18 +320,17 @@ namespace Game.Networking.Packets
             ToSlot = _worldPacket.ReadUInt8();
             Quantity = _worldPacket.ReadInt32();
         }
-
-        public byte ToSlot;
-        public byte ToPackSlot;
-        public byte FromPackSlot;
-        public int Quantity;
-        public InvUpdate Inv;
-        public byte FromSlot;
     }
 
     public class SwapInvItem : ClientPacket
     {
-        public SwapInvItem(WorldPacket packet) : base(packet) { }
+        public InvUpdate Inv;
+        public byte Slot1; // Source Slot
+        public byte Slot2; // Destination Slot
+
+        public SwapInvItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -290,15 +338,20 @@ namespace Game.Networking.Packets
             Slot2 = _worldPacket.ReadUInt8();
             Slot1 = _worldPacket.ReadUInt8();
         }
-
-        public InvUpdate Inv;
-        public byte Slot1; // Source Slot
-        public byte Slot2; // Destination Slot
     }
 
     public class SwapItem : ClientPacket
     {
-        public SwapItem(WorldPacket packet) : base(packet) { }
+        public byte ContainerSlotA;
+        public byte ContainerSlotB;
+
+        public InvUpdate Inv;
+        public byte SlotA;
+        public byte SlotB;
+
+        public SwapItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -308,17 +361,18 @@ namespace Game.Networking.Packets
             SlotB = _worldPacket.ReadUInt8();
             SlotA = _worldPacket.ReadUInt8();
         }
-
-        public InvUpdate Inv;
-        public byte SlotA;
-        public byte ContainerSlotB;
-        public byte SlotB;
-        public byte ContainerSlotA;
     }
 
     public class AutoEquipItem : ClientPacket
     {
-        public AutoEquipItem(WorldPacket packet) : base(packet) { }
+        public InvUpdate Inv;
+        public byte PackSlot;
+
+        public byte Slot;
+
+        public AutoEquipItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -326,15 +380,18 @@ namespace Game.Networking.Packets
             PackSlot = _worldPacket.ReadUInt8();
             Slot = _worldPacket.ReadUInt8();
         }
-
-        public byte Slot;
-        public InvUpdate Inv;
-        public byte PackSlot;
     }
 
-    class AutoEquipItemSlot : ClientPacket
+    internal class AutoEquipItemSlot : ClientPacket
     {
-        public AutoEquipItemSlot(WorldPacket packet) : base(packet) { }
+        public InvUpdate Inv;
+
+        public ObjectGuid Item;
+        public byte ItemDstSlot;
+
+        public AutoEquipItemSlot(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -342,15 +399,19 @@ namespace Game.Networking.Packets
             Item = _worldPacket.ReadPackedGuid();
             ItemDstSlot = _worldPacket.ReadUInt8();
         }
-
-        public ObjectGuid Item;
-        public byte ItemDstSlot;
-        public InvUpdate Inv;
     }
 
     public class AutoStoreBagItem : ClientPacket
     {
-        public AutoStoreBagItem(WorldPacket packet) : base(packet) { }
+        public byte ContainerSlotA;
+
+        public byte ContainerSlotB;
+        public InvUpdate Inv;
+        public byte SlotA;
+
+        public AutoStoreBagItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -359,16 +420,18 @@ namespace Game.Networking.Packets
             ContainerSlotA = _worldPacket.ReadUInt8();
             SlotA = _worldPacket.ReadUInt8();
         }
-
-        public byte ContainerSlotB;
-        public InvUpdate Inv;
-        public byte ContainerSlotA;
-        public byte SlotA;
     }
 
     public class DestroyItem : ClientPacket
     {
-        public DestroyItem(WorldPacket packet) : base(packet) { }
+        public byte ContainerId;
+
+        public uint Count;
+        public byte SlotNum;
+
+        public DestroyItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -376,15 +439,18 @@ namespace Game.Networking.Packets
             ContainerId = _worldPacket.ReadUInt8();
             SlotNum = _worldPacket.ReadUInt8();
         }
-
-        public uint Count;
-        public byte SlotNum;
-        public byte ContainerId;
     }
 
     public class SellResponse : ServerPacket
     {
-        public SellResponse() : base(ServerOpcodes.SellResponse) { }
+        public ObjectGuid ItemGUID;
+        public SellResult Reason = SellResult.Unk;
+
+        public ObjectGuid VendorGUID;
+
+        public SellResponse() : base(ServerOpcodes.SellResponse)
+        {
+        }
 
         public override void Write()
         {
@@ -392,15 +458,46 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(ItemGUID);
             _worldPacket.WriteUInt8((byte)Reason);
         }
-
-        public ObjectGuid VendorGUID;
-        public ObjectGuid ItemGUID;
-        public SellResult Reason = SellResult.Unk;
     }
 
-    class ItemPushResult : ServerPacket
+    internal class ItemPushResult : ServerPacket
     {
-        public ItemPushResult() : base(ServerOpcodes.ItemPushResult) { }
+        public enum DisplayType
+        {
+            Hidden = 0,
+            Normal = 1,
+            EncounterLoot = 2
+        }
+
+        public int BattlePetBreedID;
+        public uint BattlePetBreedQuality;
+        public int BattlePetLevel;
+        public int BattlePetSpeciesID;
+        public CraftingData CraftingData;
+        public bool Created;
+        public DisplayType DisplayText;
+        public int DungeonEncounterID;
+        public uint? FirstCraftOperationID;
+        public bool IsBonusRoll;
+        public bool IsEncounterLoot;
+        public ItemInstance Item;
+        public ObjectGuid ItemGUID;
+
+        public ObjectGuid PlayerGUID;
+
+        public bool Pushed;
+
+        // only set if different than real ID (similar to CreatureTemplate.KillCredit)
+        public uint Quantity;
+        public uint QuantityInInventory;
+        public int QuestLogItemID; // Item ID used for updating quest progress
+        public byte Slot;
+        public int SlotInBag;
+        public List<UiEventToast> Toasts = new();
+
+        public ItemPushResult() : base(ServerOpcodes.ItemPushResult)
+        {
+        }
 
         public override void Write()
         {
@@ -417,6 +514,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(BattlePetLevel);
             _worldPacket.WritePackedGuid(ItemGUID);
             _worldPacket.WriteInt32(Toasts.Count);
+
             foreach (UiEventToast uiEventToast in Toasts)
                 uiEventToast.Write(_worldPacket);
 
@@ -434,59 +532,36 @@ namespace Game.Networking.Packets
             if (FirstCraftOperationID.HasValue)
                 _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
 
-            if (CraftingData != null)
-                CraftingData.Write(_worldPacket);
-        }
-
-        public ObjectGuid PlayerGUID;
-        public byte Slot;
-        public int SlotInBag;
-        public ItemInstance Item;
-        public int QuestLogItemID;// Item ID used for updating quest progress
-                                  // only set if different than real ID (similar to CreatureTemplate.KillCredit)
-        public uint Quantity;
-        public uint QuantityInInventory;
-        public int DungeonEncounterID;
-        public int BattlePetSpeciesID;
-        public int BattlePetBreedID;
-        public uint BattlePetBreedQuality;
-        public int BattlePetLevel;
-        public ObjectGuid ItemGUID;
-        public List<UiEventToast> Toasts = new();
-        public CraftingData CraftingData;
-        public uint? FirstCraftOperationID;
-        public bool Pushed;
-        public DisplayType DisplayText;
-        public bool Created;
-        public bool IsBonusRoll;
-        public bool IsEncounterLoot;
-
-
-        public enum DisplayType
-        {
-            Hidden = 0,
-            Normal = 1,
-            EncounterLoot = 2
+            CraftingData?.Write(_worldPacket);
         }
     }
 
-    class ReadItem : ClientPacket
+    internal class ReadItem : ClientPacket
     {
-        public ReadItem(WorldPacket packet) : base(packet) { }
+        public byte PackSlot;
+        public byte Slot;
+
+        public ReadItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             PackSlot = _worldPacket.ReadUInt8();
             Slot = _worldPacket.ReadUInt8();
         }
-
-        public byte PackSlot;
-        public byte Slot;
     }
 
-    class ReadItemResultFailed : ServerPacket
+    internal class ReadItemResultFailed : ServerPacket
     {
-        public ReadItemResultFailed() : base(ServerOpcodes.ReadItemResultFailed) { }
+        public uint Delay;
+
+        public ObjectGuid Item;
+        public byte Subcode;
+
+        public ReadItemResultFailed() : base(ServerOpcodes.ReadItemResultFailed)
+        {
+        }
 
         public override void Write()
         {
@@ -495,39 +570,49 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Subcode, 2);
             _worldPacket.FlushBits();
         }
-
-        public ObjectGuid Item;
-        public byte Subcode;
-        public uint Delay;
     }
 
-    class ReadItemResultOK : ServerPacket
+    internal class ReadItemResultOK : ServerPacket
     {
-        public ReadItemResultOK() : base(ServerOpcodes.ReadItemResultOk) { }
+        public ObjectGuid Item;
+
+        public ReadItemResultOK() : base(ServerOpcodes.ReadItemResultOk)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Item);
         }
-
-        public ObjectGuid Item;
     }
 
-    class WrapItem : ClientPacket
+    internal class WrapItem : ClientPacket
     {
-        public WrapItem(WorldPacket packet) : base(packet) { }
+        public InvUpdate Inv;
+
+        public WrapItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Inv = new InvUpdate(_worldPacket);
         }
-
-        public InvUpdate Inv;
     }
 
-    class EnchantmentLog : ServerPacket
+    internal class EnchantmentLog : ServerPacket
     {
-        public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
+        public ObjectGuid Caster;
+        public uint Enchantment;
+        public uint EnchantSlot;
+        public ObjectGuid ItemGUID;
+        public uint ItemID;
+
+        public ObjectGuid Owner;
+
+        public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -538,30 +623,32 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Enchantment);
             _worldPacket.WriteUInt32(EnchantSlot);
         }
-
-        public ObjectGuid Owner;
-        public ObjectGuid Caster;
-        public ObjectGuid ItemGUID;
-        public uint ItemID;
-        public uint Enchantment;
-        public uint EnchantSlot;
     }
 
-    class CancelTempEnchantment : ClientPacket
+    internal class CancelTempEnchantment : ClientPacket
     {
-        public CancelTempEnchantment(WorldPacket packet) : base(packet) { }
+        public int Slot;
+
+        public CancelTempEnchantment(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Slot = _worldPacket.ReadInt32();
         }
-
-        public int Slot;
     }
 
-    class ItemCooldown : ServerPacket
+    internal class ItemCooldown : ServerPacket
     {
-        public ItemCooldown() : base(ServerOpcodes.ItemCooldown) { }
+        public uint Cooldown;
+
+        public ObjectGuid ItemGuid;
+        public uint SpellID;
+
+        public ItemCooldown() : base(ServerOpcodes.ItemCooldown)
+        {
+        }
 
         public override void Write()
         {
@@ -569,15 +656,19 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt32(Cooldown);
         }
-
-        public ObjectGuid ItemGuid;
-        public uint SpellID;
-        public uint Cooldown;
     }
 
-    class ItemEnchantTimeUpdate : ServerPacket
+    internal class ItemEnchantTimeUpdate : ServerPacket
     {
-        public ItemEnchantTimeUpdate() : base(ServerOpcodes.ItemEnchantTimeUpdate, ConnectionType.Instance) { }
+        public uint DurationLeft;
+        public ObjectGuid ItemGuid;
+
+        public ObjectGuid OwnerGuid;
+        public uint Slot;
+
+        public ItemEnchantTimeUpdate() : base(ServerOpcodes.ItemEnchantTimeUpdate, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -586,106 +677,136 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Slot);
             _worldPacket.WritePackedGuid(OwnerGuid);
         }
-
-        public ObjectGuid OwnerGuid;
-        public ObjectGuid ItemGuid;
-        public uint DurationLeft;
-        public uint Slot;
     }
 
-    class UseCritterItem : ClientPacket
+    internal class UseCritterItem : ClientPacket
     {
-        public UseCritterItem(WorldPacket packet) : base(packet) { }
+        public ObjectGuid ItemGuid;
+
+        public UseCritterItem(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             ItemGuid = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid ItemGuid;
     }
 
-    class SocketGems : ClientPacket
+    internal class SocketGems : ClientPacket
     {
-        public SocketGems(WorldPacket packet) : base(packet) { }
+        public ObjectGuid[] GemItem = new ObjectGuid[ItemConst.MaxGemSockets];
+
+        public ObjectGuid ItemGuid;
+
+        public SocketGems(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             ItemGuid = _worldPacket.ReadPackedGuid();
+
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
                 GemItem[i] = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid ItemGuid;
-        public ObjectGuid[] GemItem = new ObjectGuid[ItemConst.MaxGemSockets];
     }
 
-    class SocketGemsSuccess : ServerPacket
+    internal class SocketGemsSuccess : ServerPacket
     {
-        public SocketGemsSuccess() : base(ServerOpcodes.SocketGemsSuccess, ConnectionType.Instance) { }
+        public ObjectGuid Item;
+
+        public SocketGemsSuccess() : base(ServerOpcodes.SocketGemsSuccess, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Item);
         }
-
-        public ObjectGuid Item;
     }
 
-    class SortBags : ClientPacket
+    internal class SortBags : ClientPacket
     {
-        public SortBags(WorldPacket packet) : base(packet) { }
+        public SortBags(WorldPacket packet) : base(packet)
+        {
+        }
 
-        public override void Read() { }
+        public override void Read()
+        {
+        }
     }
 
-    class SortBankBags : ClientPacket
+    internal class SortBankBags : ClientPacket
     {
-        public SortBankBags(WorldPacket packet) : base(packet) { }
+        public SortBankBags(WorldPacket packet) : base(packet)
+        {
+        }
 
-        public override void Read() { }
+        public override void Read()
+        {
+        }
     }
 
-    class SortReagentBankBags : ClientPacket
+    internal class SortReagentBankBags : ClientPacket
     {
-        public SortReagentBankBags(WorldPacket packet) : base(packet) { }
+        public SortReagentBankBags(WorldPacket packet) : base(packet)
+        {
+        }
 
-        public override void Read() { }
+        public override void Read()
+        {
+        }
     }
 
-    class BagCleanupFinished : ServerPacket
+    internal class BagCleanupFinished : ServerPacket
     {
-        public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance) { }
+        public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance)
+        {
+        }
 
-        public override void Write() { }
+        public override void Write()
+        {
+        }
     }
 
-    class RemoveNewItem : ClientPacket
+    internal class RemoveNewItem : ClientPacket
     {
-        public RemoveNewItem(WorldPacket packet) : base(packet) { }
+        public RemoveNewItem(WorldPacket packet) : base(packet)
+        {
+        }
+
+        public ObjectGuid ItemGuid { get; set; }
 
         public override void Read()
         {
             ItemGuid = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid ItemGuid { get; set; }
     }
 
-    class InventoryFullOverflow : ServerPacket
+    internal class InventoryFullOverflow : ServerPacket
     {
-        public InventoryFullOverflow() : base(ServerOpcodes.InventoryFullOverflow) { }
+        public InventoryFullOverflow() : base(ServerOpcodes.InventoryFullOverflow)
+        {
+        }
 
-        public override void Write() { }
+        public override void Write()
+        {
+        }
     }
 
     //Structs
     public class ItemBonuses
     {
+        public List<uint> BonusListIDs = new();
+
+        public ItemContext Context;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt8((byte)Context);
             data.WriteInt32(BonusListIDs.Count);
+
             foreach (uint bonusID in BonusListIDs)
                 data.WriteUInt32(bonusID);
         }
@@ -696,6 +817,7 @@ namespace Game.Networking.Packets
             uint bonusListIdSize = data.ReadUInt32();
 
             BonusListIDs = new List<uint>();
+
             for (uint i = 0u; i < bonusListIdSize; ++i)
             {
                 uint bonusId = data.ReadUInt32();
@@ -721,7 +843,8 @@ namespace Game.Networking.Packets
             if (ReferenceEquals(left, right))
                 return true;
 
-            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+            if (left is null ||
+                right is null)
                 return false;
 
             if (left.Context != right.Context)
@@ -737,20 +860,18 @@ namespace Game.Networking.Packets
         {
             return !(left == right);
         }
-
-        public ItemContext Context;
-        public List<uint> BonusListIDs = new();
     }
 
     public class ItemMod
     {
-        public uint Value;
         public ItemModifier Type;
+        public uint Value;
 
         public ItemMod()
         {
             Type = ItemModifier.Max;
         }
+
         public ItemMod(uint value, ItemModifier type)
         {
             Value = value;
@@ -851,38 +972,43 @@ namespace Game.Networking.Packets
 
     public class ItemInstance
     {
-        public uint ItemID;
         public ItemBonuses ItemBonus;
+        public uint ItemID;
         public ItemModList Modifications = new();
 
-        public ItemInstance() { }
+        public ItemInstance()
+        {
+        }
 
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
             List<uint> bonusListIds = item.GetBonusListIDs();
+
             if (!bonusListIds.Empty())
             {
-                ItemBonus = new();
+                ItemBonus = new ItemBonuses();
                 ItemBonus.BonusListIDs.AddRange(bonusListIds);
                 ItemBonus.Context = item.GetContext();
             }
 
-            foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
+            foreach (var mod in item._itemData.Modifiers.GetValue().Values)
                 Modifications.Values.Add(new ItemMod(mod.Value, (ItemModifier)mod.Type));
         }
 
-        public ItemInstance(Loots.LootItem lootItem)
+        public ItemInstance(LootItem lootItem)
         {
-            ItemID = lootItem.itemid;
+            ItemID = lootItem.Itemid;
 
-            if (!lootItem.BonusListIDs.Empty() || lootItem.randomBonusListId != 0)
+            if (!lootItem.BonusListIDs.Empty() ||
+                lootItem.RandomBonusListId != 0)
             {
-                ItemBonus = new();
+                ItemBonus = new ItemBonuses();
                 ItemBonus.BonusListIDs = lootItem.BonusListIDs;
-                ItemBonus.Context = lootItem.context;
-                if (lootItem.randomBonusListId != 0)
-                    ItemBonus.BonusListIDs.Add(lootItem.randomBonusListId);
+                ItemBonus.Context = lootItem.Context;
+
+                if (lootItem.RandomBonusListId != 0)
+                    ItemBonus.BonusListIDs.Add(lootItem.RandomBonusListId);
             }
         }
 
@@ -898,7 +1024,7 @@ namespace Game.Networking.Packets
 
             if (!voidItem.BonusListIDs.Empty())
             {
-                ItemBonus = new();
+                ItemBonus = new ItemBonuses();
                 ItemBonus.Context = voidItem.Context;
                 ItemBonus.BonusListIDs = voidItem.BonusListIDs;
             }
@@ -910,11 +1036,13 @@ namespace Game.Networking.Packets
 
             ItemBonuses bonus = new();
             bonus.Context = (ItemContext)(byte)gem.Context;
+
             foreach (ushort bonusListId in gem.BonusListIDs)
                 if (bonusListId != 0)
                     bonus.BonusListIDs.Add(bonusListId);
 
-            if (bonus.Context != 0 || !bonus.BonusListIDs.Empty())
+            if (bonus.Context != 0 ||
+                !bonus.BonusListIDs.Empty())
                 ItemBonus = bonus;
         }
 
@@ -927,8 +1055,7 @@ namespace Game.Networking.Packets
 
             Modifications.Write(data);
 
-            if (ItemBonus != null)
-                ItemBonus.Write(data);
+            ItemBonus?.Write(data);
         }
 
         public void Read(WorldPacket data)
@@ -936,14 +1063,13 @@ namespace Game.Networking.Packets
             ItemID = data.ReadUInt32();
 
             if (data.HasBit())
-                ItemBonus = new();
+                ItemBonus = new ItemBonuses();
 
             data.ResetBitPos();
 
             Modifications.Read(data);
 
-            if (ItemBonus != null)
-                ItemBonus.Read(data);
+            ItemBonus?.Read(data);
         }
 
         public override int GetHashCode()
@@ -963,15 +1089,19 @@ namespace Game.Networking.Packets
         {
             if (ReferenceEquals(left, right))
                 return true;
-            if (ReferenceEquals(left, null))
+
+            if (left is null)
                 return false;
-            if (ReferenceEquals(right, null))
+
+            if (right is null)
                 return false;
 
             if (left.ItemID != right.ItemID)
                 return false;
 
-            if (left.ItemBonus != null && right.ItemBonus != null && left.ItemBonus != right.ItemBonus)
+            if (left.ItemBonus != null &&
+                right.ItemBonus != null &&
+                left.ItemBonus != right.ItemBonus)
                 return false;
 
             if (left.Modifications != right.Modifications)
@@ -988,23 +1118,9 @@ namespace Game.Networking.Packets
 
     public class ItemBonusKey : IEquatable<ItemBonusKey>
     {
-        public uint ItemID;
         public List<uint> BonusListIDs = new();
+        public uint ItemID;
         public List<ItemMod> Modifications = new();
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(ItemID);
-            data.WriteInt32(BonusListIDs.Count);
-            data.WriteInt32(Modifications.Count);
-
-            if (!BonusListIDs.Empty())
-                foreach (var id in BonusListIDs)
-                    data.WriteUInt32(id);
-
-            foreach (ItemMod modification in Modifications)
-                modification.Write(data);
-        }
 
         public bool Equals(ItemBonusKey right)
         {
@@ -1019,11 +1135,34 @@ namespace Game.Networking.Packets
 
             return true;
         }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(ItemID);
+            data.WriteInt32(BonusListIDs.Count);
+            data.WriteInt32(Modifications.Count);
+
+            if (!BonusListIDs.Empty())
+                foreach (var id in BonusListIDs)
+                    data.WriteUInt32(id);
+
+            foreach (ItemMod modification in Modifications)
+                modification.Write(data);
+        }
     }
 
     public class ItemEnchantData
     {
-        public ItemEnchantData() { }
+        public int Charges;
+        public uint Expiration;
+
+        public uint ID;
+        public byte Slot;
+
+        public ItemEnchantData()
+        {
+        }
+
         public ItemEnchantData(uint id, uint expiration, int charges, byte slot)
         {
             ID = id;
@@ -1039,15 +1178,14 @@ namespace Game.Networking.Packets
             data.WriteInt32(Charges);
             data.WriteUInt8(Slot);
         }
-
-        public uint ID;
-        public uint Expiration;
-        public int Charges;
-        public byte Slot;
     }
 
     public class ItemGemData
     {
+        public ItemInstance Item = new();
+
+        public byte Slot;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Slot);
@@ -1059,9 +1197,6 @@ namespace Game.Networking.Packets
             Slot = data.ReadUInt8();
             Item.Read(data);
         }
-
-        public byte Slot;
-        public ItemInstance Item = new();
     }
 
     public struct InvUpdate
@@ -1071,6 +1206,7 @@ namespace Game.Networking.Packets
             Items = new List<InvItem>();
             int size = data.ReadBits<int>(2);
             data.ResetBitPos();
+
             for (int i = 0; i < size; ++i)
             {
                 var item = new InvItem
@@ -1078,6 +1214,7 @@ namespace Game.Networking.Packets
                     ContainerSlot = data.ReadUInt8(),
                     Slot = data.ReadUInt8()
                 };
+
                 Items.Add(item);
             }
         }
@@ -1091,7 +1228,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct ItemPurchaseRefundItem
+    internal struct ItemPurchaseRefundItem
     {
         public void Write(WorldPacket data)
         {
@@ -1103,7 +1240,7 @@ namespace Game.Networking.Packets
         public uint ItemCount;
     }
 
-    struct ItemPurchaseRefundCurrency
+    internal struct ItemPurchaseRefundCurrency
     {
         public void Write(WorldPacket data)
         {
@@ -1115,21 +1252,23 @@ namespace Game.Networking.Packets
         public uint CurrencyCount;
     }
 
-    class ItemPurchaseContents
+    internal class ItemPurchaseContents
     {
+        public ItemPurchaseRefundCurrency[] Currencies = new ItemPurchaseRefundCurrency[5];
+        public ItemPurchaseRefundItem[] Items = new ItemPurchaseRefundItem[5];
+
+        public ulong Money;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(Money);
+
             for (int i = 0; i < 5; ++i)
                 Items[i].Write(data);
 
             for (int i = 0; i < 5; ++i)
                 Currencies[i].Write(data);
         }
-
-        public ulong Money;
-        public ItemPurchaseRefundItem[] Items = new ItemPurchaseRefundItem[5];
-        public ItemPurchaseRefundCurrency[] Currencies = new ItemPurchaseRefundCurrency[5];
     }
 
     public struct UiEventToast

@@ -1,15 +1,17 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
-using System.Collections.Generic;
 
 namespace Game.Entities
 {
     public class ItemEnchantmentManager
     {
+        private static readonly Dictionary<uint, RandomBonusListIds> _storage = new();
+
         public static void LoadItemRandomBonusListTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -22,8 +24,10 @@ namespace Game.Entities
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.Player, "Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+
                 return;
             }
+
             uint count = 0;
 
             do
@@ -34,13 +38,16 @@ namespace Game.Entities
 
                 if (Global.DB2Mgr.GetItemBonusList(bonusListId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by id {id} doesn't have exist in ItemBonus.db2");
+                    Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by Id {id} doesn't have exist in ItemBonus.db2");
+
                     continue;
                 }
 
-                if (chance < 0.000001f || chance > 100.0f)
+                if (chance < 0.000001f ||
+                    chance > 100.0f)
                 {
-                    Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by id {id} has invalid chance {chance}");
+                    Log.outError(LogFilter.Sql, $"Bonus list {bonusListId} used in `item_random_bonus_list_template` by Id {id} has invalid chance {chance}");
+
                     continue;
                 }
 
@@ -54,25 +61,29 @@ namespace Game.Entities
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.Player, $"Loaded {count} Random item bonus list definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.Player, $"Loaded {count} Random Item bonus list definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public static uint GenerateItemRandomBonusListId(uint item_id)
         {
             ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+
             if (itemProto == null)
                 return 0;
 
-            // item must have one from this field values not null if it can have random enchantments
+            // Item must have one from this field values not null if it can have random enchantments
             if (itemProto.RandomBonusListTemplateId == 0)
                 return 0;
 
             var tab = _storage.LookupByKey(itemProto.RandomBonusListTemplateId);
+
             if (tab == null)
             {
-                Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+                Log.outError(LogFilter.Sql, $"Item RandomBonusListTemplateId Id {itemProto.RandomBonusListTemplateId} used in `item_template_addon` but it does not have records in `item_random_bonus_list_template` table.");
+
                 return 0;
             }
+
             //todo fix me this is ulgy
             return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
         }
@@ -92,17 +103,20 @@ namespace Game.Entities
                 case InventoryType.Robe:
                 case InventoryType.Thrown:
                     propIndex = 0;
+
                     break;
                 case InventoryType.RangedRight:
                     if ((ItemSubClassWeapon)subClass == ItemSubClassWeapon.Wand)
                         propIndex = 3;
                     else
                         propIndex = 0;
+
                     break;
                 case InventoryType.Weapon:
                 case InventoryType.WeaponMainhand:
                 case InventoryType.WeaponOffhand:
                     propIndex = 3;
+
                     break;
                 case InventoryType.Shoulders:
                 case InventoryType.Waist:
@@ -110,6 +124,7 @@ namespace Game.Entities
                 case InventoryType.Hands:
                 case InventoryType.Trinket:
                     propIndex = 1;
+
                     break;
                 case InventoryType.Neck:
                 case InventoryType.Wrists:
@@ -118,15 +133,18 @@ namespace Game.Entities
                 case InventoryType.Cloak:
                 case InventoryType.Holdable:
                     propIndex = 2;
+
                     break;
                 case InventoryType.Relic:
                     propIndex = 4;
+
                     break;
                 default:
                     return 0;
             }
 
             RandPropPointsRecord randPropPointsEntry = CliDB.RandPropPointsStorage.LookupByKey(itemLevel);
+
             if (randPropPointsEntry == null)
                 return 0;
 
@@ -145,13 +163,5 @@ namespace Game.Entities
 
             return 0;
         }
-
-        static Dictionary<uint, RandomBonusListIds> _storage = new();
-    }
-
-    public class RandomBonusListIds
-    {
-        public List<uint> BonusListIDs = new();
-        public List<double> Chances = new();
     }
 }

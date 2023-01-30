@@ -2,16 +2,14 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.BattleGrounds;
-using Game.BattleGrounds.Zones;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
-using Game.DataStorage;
 using Game.Scripting.Interfaces.IAchievement;
 
 namespace Scripts.World.Achievements
 {
-    struct AreaIds
+    internal struct AreaIds
     {
         //Tilted
         public const uint AreaArgentTournamentFields = 4658;
@@ -22,7 +20,7 @@ namespace Scripts.World.Achievements
         public const uint AreaRingOfChampions = 4669;
     }
 
-    struct AuraIds
+    internal struct AuraIds
     {
         //Flirt With Disaster
         public const uint AuraPerfumeForever = 70235;
@@ -30,7 +28,7 @@ namespace Scripts.World.Achievements
         public const uint AuraPerfumeVictory = 70233;
     }
 
-    struct VehicleIds
+    internal struct VehicleIds
     {
         //BgSA Artillery
         public const uint AntiPersonnalCannon = 27894;
@@ -39,9 +37,9 @@ namespace Scripts.World.Achievements
     [Script("achievement_arena_2v2_kills", ArenaTypes.Team2v2)]
     [Script("achievement_arena_3v3_kills", ArenaTypes.Team3v3)]
     [Script("achievement_arena_5v5_kills", ArenaTypes.Team5v5)]
-    class achievement_arena_kills : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
+    internal class achievement_arena_kills : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
-        ArenaTypes _arenaType;
+        private readonly ArenaTypes _arenaType;
 
         public achievement_arena_kills(string name, ArenaTypes arenaType) : base(name)
         {
@@ -59,9 +57,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_tilted : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
+    internal class achievement_tilted : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
-        public achievement_tilted() : base("achievement_tilted") { }
+        public achievement_tilted() : base("achievement_tilted")
+        {
+        }
 
         public bool OnCheck(Player player, Unit target)
         {
@@ -69,27 +69,31 @@ namespace Scripts.World.Achievements
                 return false;
 
             bool checkArea = player.GetAreaId() == AreaIds.AreaArgentTournamentFields ||
-                                player.GetAreaId() == AreaIds.AreaRingOfAspirants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfArgentValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfAllianceValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfChampions;
+                             player.GetAreaId() == AreaIds.AreaRingOfAspirants ||
+                             player.GetAreaId() == AreaIds.AreaRingOfArgentValiants ||
+                             player.GetAreaId() == AreaIds.AreaRingOfAllianceValiants ||
+                             player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
+                             player.GetAreaId() == AreaIds.AreaRingOfChampions;
 
-            return checkArea && player.duel != null && player.duel.IsMounted;
+            return checkArea && player.Duel != null && player.Duel.IsMounted;
         }
     }
 
     [Script]
-    class achievement_flirt_with_disaster_perf_check : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
+    internal class achievement_flirt_with_disaster_perf_check : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
-        public achievement_flirt_with_disaster_perf_check() : base("achievement_flirt_with_disaster_perf_check") { }
+        public achievement_flirt_with_disaster_perf_check() : base("achievement_flirt_with_disaster_perf_check")
+        {
+        }
 
         public bool OnCheck(Player player, Unit target)
         {
             if (!player)
                 return false;
 
-            if (player.HasAura(AuraIds.AuraPerfumeForever) || player.HasAura(AuraIds.AuraPerfumeEnchantress) || player.HasAura(AuraIds.AuraPerfumeVictory))
+            if (player.HasAura(AuraIds.AuraPerfumeForever) ||
+                player.HasAura(AuraIds.AuraPerfumeEnchantress) ||
+                player.HasAura(AuraIds.AuraPerfumeVictory))
                 return true;
 
             return false;
@@ -97,9 +101,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_killed_exp_or_honor_target : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
+    internal class achievement_killed_exp_or_honor_target : ScriptObjectAutoAddDBBound, IAchievementCriteriaOnCheck
     {
-        public achievement_killed_exp_or_honor_target() : base("achievement_killed_exp_or_honor_target") { }
+        public achievement_killed_exp_or_honor_target() : base("achievement_killed_exp_or_honor_target")
+        {
+        }
 
         public bool OnCheck(Player player, Unit target)
         {
@@ -108,9 +114,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script] // 7433 - Newbie
-    class achievement_newbie : ScriptObjectAutoAddDBBound, IAchievementOnCompleted
+    internal class achievement_newbie : ScriptObjectAutoAddDBBound, IAchievementOnCompleted
     {
-        public achievement_newbie() : base("achievement_newbie") { }
+        public achievement_newbie() : base("achievement_newbie")
+        {
+        }
 
         public void OnCompleted(Player player, AchievementRecord achievement)
         {
@@ -120,9 +128,11 @@ namespace Scripts.World.Achievements
     }
 
     [Script] // 6566 - Just a Pup
-    class achievement_just_a_pup : ScriptObjectAutoAddDBBound, IAchievementOnCompleted
+    internal class achievement_just_a_pup : ScriptObjectAutoAddDBBound, IAchievementOnCompleted
     {
-        public achievement_just_a_pup() : base("achievement_just_a_pup") { }
+        public achievement_just_a_pup() : base("achievement_just_a_pup")
+        {
+        }
 
         public void OnCompleted(Player player, AchievementRecord achievement)
         {

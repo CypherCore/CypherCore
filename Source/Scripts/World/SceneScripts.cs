@@ -8,15 +8,17 @@ using Game.Scripting.Interfaces.IScene;
 
 namespace Scripts.World.SceneScripts
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint DeathwingSimulator = 201184;
     }
 
     [Script]
-    class scene_deathwing_simulator : ScriptObjectAutoAddDBBound, ISceneOnSceneTrigger
+    internal class scene_deathwing_simulator : ScriptObjectAutoAddDBBound, ISceneOnSceneTrigger
     {
-        public scene_deathwing_simulator() : base("scene_deathwing_simulator") { }
+        public scene_deathwing_simulator() : base("scene_deathwing_simulator")
+        {
+        }
 
         // Called when a player receive trigger from scene
         public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)

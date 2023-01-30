@@ -5,8 +5,9 @@ namespace Framework.Constants
 {
     public struct BlackMarketConst
     {
-        public const ulong MaxBid = 1000000UL* MoneyConstants.Gold;
+        public const ulong MaxBid = 1000000UL * MoneyConstants.Gold;
     }
+
     public enum BlackMarketError
     {
         Ok = 0,
@@ -21,6 +22,6 @@ namespace Framework.Constants
     public enum BMAHMailAuctionAnswers
     {
         Outbid = 0,
-        Won = 1,
+        Won = 1
     }
 }

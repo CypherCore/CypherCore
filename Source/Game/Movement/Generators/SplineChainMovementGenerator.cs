@@ -1,17 +1,26 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Game.AI;
-using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Framework.Constants;
+using Game.AI;
+using Game.Entities;
 
 namespace Game.Movement
 {
     public class SplineChainMovementGenerator : MovementGenerator
     {
+        private readonly List<SplineChainLink> _chain = new();
+        private readonly byte _chainSize;
+
+        private readonly uint _id;
+        private readonly bool _walk;
+        private uint _msToNext;
+        private byte _nextFirstWP; // only used for resuming
+        private byte _nextIndex;
+
         public SplineChainMovementGenerator(uint id, List<SplineChainLink> chain, bool walk = false)
         {
             _id = id;
@@ -38,6 +47,7 @@ namespace Game.Movement
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
+
             if (info.SplineIndex >= info.Chain.Count)
                 AddFlag(MovementGeneratorFlags.Finalized);
 
@@ -52,6 +62,7 @@ namespace Game.Movement
             if (_chainSize == 0)
             {
                 Log.outError(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: couldn't initialize generator, referenced spline is empty! ({owner.GetGUID()})");
+
                 return;
             }
 
@@ -59,19 +70,20 @@ namespace Game.Movement
             {
                 Log.outWarn(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: couldn't initialize generator, _nextIndex is >= _chainSize ({owner.GetGUID()})");
                 _msToNext = 0;
+
                 return;
             }
 
             if (_nextFirstWP != 0) // this is a resumed movegen that has to start with a partial spline
             {
-
                 if (HasFlag(MovementGeneratorFlags.Finalized))
                     return;
 
                 SplineChainLink thisLink = _chain[_nextIndex];
+
                 if (_nextFirstWP >= thisLink.Points.Count)
                 {
-                    Log.outError(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: attempted to resume spline chain from invalid resume state, _nextFirstWP >= path size (_nextIndex: {_nextIndex}, _nextFirstWP: {_nextFirstWP}). ({owner.GetGUID()})");
+                    Log.outError(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: attempted to resume spline chain from invalid resume State, _nextFirstWP >= path size (_nextIndex: {_nextIndex}, _nextFirstWP: {_nextFirstWP}). ({owner.GetGUID()})");
                     _nextFirstWP = (byte)(thisLink.Points.Count - 1);
                 }
 
@@ -79,13 +91,15 @@ namespace Game.Movement
                 Span<Vector3> partial = thisLink.Points.ToArray();
                 SendPathSpline(owner, thisLink.Velocity, partial[(_nextFirstWP - 1)..]);
 
-                Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: resumed spline chain generator from resume state. ({owner.GetGUID()})");
+                Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: resumed spline chain generator from resume State. ({owner.GetGUID()})");
 
                 ++_nextIndex;
+
                 if (_nextIndex >= _chainSize)
                     _msToNext = 0;
                 else if (_msToNext == 0)
                     _msToNext = 1;
+
                 _nextFirstWP = 0;
             }
             else
@@ -94,12 +108,13 @@ namespace Game.Movement
                 SendSplineFor(owner, _nextIndex, ref _msToNext);
 
                 ++_nextIndex;
+
                 if (_nextIndex >= _chainSize)
                     _msToNext = 0;
             }
         }
 
-        public override void Reset(Unit owner) 
+        public override void Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
 
@@ -109,7 +124,8 @@ namespace Game.Movement
 
         public override bool Update(Unit owner, uint diff)
         {
-            if (owner == null || HasFlag(MovementGeneratorFlags.Finalized))
+            if (owner == null ||
+                HasFlag(MovementGeneratorFlags.Finalized))
                 return false;
 
             // _msToNext being zero here means we're on the final spline
@@ -118,8 +134,10 @@ namespace Game.Movement
                 if (owner.MoveSpline.Finalized())
                 {
                     AddFlag(MovementGeneratorFlags.InformEnabled);
+
                     return false;
                 }
+
                 return true;
             }
 
@@ -130,15 +148,19 @@ namespace Game.Movement
                 _msToNext = Math.Max(_chain[_nextIndex].TimeToNext, 1u);
                 SendSplineFor(owner, _nextIndex, ref _msToNext);
                 ++_nextIndex;
+
                 if (_nextIndex >= _chainSize)
                 {
                     // We have reached the final spline, once it finalizes we should also finalize the movegen (start checking on next update)
                     _msToNext = 0;
+
                     return true;
                 }
             }
             else
+            {
                 _msToNext -= diff;
+            }
 
             return true;
         }
@@ -159,17 +181,28 @@ namespace Game.Movement
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
                 CreatureAI ai = owner.ToCreature().GetAI();
-                if (ai != null)
-                    ai.MovementInform(MovementGeneratorType.SplineChain, _id);
+
+                ai?.MovementInform(MovementGeneratorType.SplineChain, _id);
             }
         }
 
-        uint SendPathSpline(Unit owner, float velocity, Span<Vector3> path)
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.SplineChain;
+        }
+
+        public uint GetId()
+        {
+            return _id;
+        }
+
+        private uint SendPathSpline(Unit owner, float velocity, Span<Vector3> path)
         {
             int nodeCount = path.Length;
             Cypher.Assert(nodeCount > 1, $"SplineChainMovementGenerator::SendPathSpline: Every path must have source & destination (size > 1)! ({owner.GetGUID()})");
 
             MoveSplineInit init = new(owner);
+
             if (nodeCount > 2)
                 init.MovebyPath(path.ToArray());
             else
@@ -179,16 +212,18 @@ namespace Game.Movement
                 init.SetVelocity(velocity);
 
             init.SetWalk(_walk);
+
             return (uint)init.Launch();
         }
 
-        void SendSplineFor(Unit owner, int index, ref uint duration)
+        private void SendSplineFor(Unit owner, int index, ref uint duration)
         {
             Cypher.Assert(index < _chainSize, $"SplineChainMovementGenerator::SendSplineFor: referenced index ({index}) higher than path size ({_chainSize})!");
             Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::SendSplineFor: sending spline on index: {index}. ({owner.GetGUID()})");
 
             SplineChainLink thisLink = _chain[index];
             uint actualDuration = SendPathSpline(owner, thisLink.Velocity, new Span<Vector3>(thisLink.Points.ToArray()));
+
             if (actualDuration != thisLink.ExpectedDuration)
             {
                 Log.outDebug(LogFilter.Movement, $"SplineChainMovementGenerator::SendSplineFor: sent spline on index: {index}, duration: {actualDuration} ms. Expected duration: {thisLink.ExpectedDuration} ms (delta {actualDuration - thisLink.ExpectedDuration} ms). Adjusting. ({owner.GetGUID()})");
@@ -200,7 +235,7 @@ namespace Game.Movement
             }
         }
 
-        SplineChainResumeInfo GetResumeInfo(Unit owner)
+        private SplineChainResumeInfo GetResumeInfo(Unit owner)
         {
             if (_nextIndex == 0)
                 return new SplineChainResumeInfo(_id, _chain, _walk, 0, 0, _msToNext);
@@ -215,17 +250,5 @@ namespace Game.Movement
 
             return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)owner.MoveSpline.CurrentSplineIdx(), _msToNext);
         }
-
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.SplineChain; }
-
-        public uint GetId() { return _id; }
-
-    uint _id;
-        List<SplineChainLink> _chain = new();
-        byte _chainSize;
-        bool _walk;
-        byte _nextIndex;
-        byte _nextFirstWP; // only used for resuming
-        uint _msToNext;
     }
 }

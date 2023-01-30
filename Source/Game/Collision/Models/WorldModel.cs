@@ -1,12 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.GameMath;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using Framework.Constants;
+using Framework.GameMath;
 
 namespace Game.Collision
 {
@@ -26,14 +26,16 @@ namespace Game.Collision
 
     public class WmoLiquid
     {
-        uint iTilesX;
-        uint iTilesY;
-        Vector3 iCorner;
-        uint iType;
-        float[] iHeight;
-        byte[] iFlags;
+        private Vector3 iCorner;
+        private byte[] iFlags;
+        private float[] iHeight;
+        private uint iTilesX;
+        private uint iTilesY;
+        private uint iType;
 
-        public WmoLiquid() { }
+        public WmoLiquid()
+        {
+        }
 
         public WmoLiquid(uint width, uint height, Vector3 corner, uint type)
         {
@@ -42,7 +44,8 @@ namespace Game.Collision
             iCorner = corner;
             iType = type;
 
-            if (width != 0 && height != 0)
+            if (width != 0 &&
+                height != 0)
             {
                 iHeight = new float[(width + 1) * (height + 1)];
                 iFlags = new byte[width * height];
@@ -63,20 +66,26 @@ namespace Game.Collision
             iTilesY = other.iTilesY;
             iCorner = other.iCorner;
             iType = other.iType;
+
             if (other.iHeight != null)
             {
                 iHeight = new float[(iTilesX + 1) * (iTilesY + 1)];
                 Buffer.BlockCopy(other.iHeight, 0, iHeight, 0, (int)((iTilesX + 1) * (iTilesY + 1)));
             }
             else
+            {
                 iHeight = null;
+            }
+
             if (other.iFlags != null)
             {
                 iFlags = new byte[iTilesX * iTilesY];
                 Buffer.BlockCopy(other.iFlags, 0, iFlags, 0, (int)(iTilesX * iTilesY));
             }
             else
+            {
                 iFlags = null;
+            }
         }
 
         public bool GetLiquidHeight(Vector3 pos, out float liqHeight)
@@ -85,18 +94,23 @@ namespace Game.Collision
             if (iFlags == null)
             {
                 liqHeight = iHeight[0];
+
                 return true;
             }
 
             liqHeight = 0f;
             float tx_f = (pos.X - iCorner.X) / MapConst.LiquidTileSize;
             uint tx = (uint)tx_f;
-            if (tx_f < 0.0f || tx >= iTilesX)
+
+            if (tx_f < 0.0f ||
+                tx >= iTilesX)
                 return false;
 
             float ty_f = (pos.Y - iCorner.Y) / MapConst.LiquidTileSize;
             uint ty = (uint)ty_f;
-            if (ty_f < 0.0f || ty >= iTilesY)
+
+            if (ty_f < 0.0f ||
+                ty >= iTilesY)
                 return false;
 
             // check if tile shall be used for liquid level
@@ -109,6 +123,7 @@ namespace Game.Collision
             float dy = ty_f - ty;
 
             uint rowOffset = iTilesX + 1;
+
             if (dx > dy) // case (a)
             {
                 float sx = iHeight[tx + 1 + ty * rowOffset] - iHeight[tx + ty * rowOffset];
@@ -121,6 +136,7 @@ namespace Game.Collision
                 float sy = iHeight[tx + (ty + 1) * rowOffset] - iHeight[tx + ty * rowOffset];
                 liqHeight = iHeight[tx + ty * rowOffset] + dx * sx + dy * sy;
             }
+
             return true;
         }
 
@@ -133,7 +149,8 @@ namespace Game.Collision
             liquid.iCorner = reader.Read<Vector3>();
             liquid.iType = reader.ReadUInt32();
 
-            if (liquid.iTilesX != 0 && liquid.iTilesY != 0)
+            if (liquid.iTilesX != 0 &&
+                liquid.iTilesY != 0)
             {
                 uint size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
                 liquid.iHeight = reader.ReadArray<float>(size);
@@ -150,18 +167,21 @@ namespace Game.Collision
             return liquid;
         }
 
-        public uint GetLiquidType() { return iType; }
+        public uint GetLiquidType()
+        {
+            return iType;
+        }
     }
 
     public class GroupModel : IModel
     {
-        AxisAlignedBox iBound;
-        uint iMogpFlags;
-        uint iGroupWMOID;
-        List<Vector3> vertices = new();
-        List<MeshTriangle> triangles = new();
-        BIH meshTree = new();
-        WmoLiquid iLiquid;
+        private readonly BoundingIntervalHierarchy meshTree = new();
+        private readonly List<MeshTriangle> triangles = new();
+        private readonly List<Vector3> vertices = new();
+        private AxisAlignedBox iBound;
+        private uint iGroupWMOID;
+        private WmoLiquid iLiquid;
+        private uint iMogpFlags;
 
         public GroupModel()
         {
@@ -208,6 +228,7 @@ namespace Game.Collision
 
             uint chunkSize = reader.ReadUInt32();
             uint count = reader.ReadUInt32();
+
             if (count == 0)
                 return false;
 
@@ -230,11 +251,12 @@ namespace Game.Collision
 
             meshTree.ReadFromFile(reader);
 
-            // write liquid data
+            // write liquid _data
             if (reader.ReadStringFromChars(4) != "LIQU")
                 return false;
 
             chunkSize = reader.ReadUInt32();
+
             if (chunkSize > 0)
                 iLiquid = WmoLiquid.ReadFromFile(reader);
 
@@ -248,29 +270,36 @@ namespace Game.Collision
 
             GModelRayCallback callback = new(triangles, vertices);
             meshTree.IntersectRay(ray, callback, ref distance, stopAtFirstHit);
-            return callback.hit;
+
+            return callback.Hit;
         }
 
         public bool IsInsideObject(Vector3 pos, Vector3 down, out float z_dist)
         {
             z_dist = 0f;
-            if (triangles.Empty() || !iBound.contains(pos))
+
+            if (triangles.Empty() ||
+                !iBound.contains(pos))
                 return false;
 
             Vector3 rPos = pos - 0.1f * down;
             float dist = float.PositiveInfinity;
             Ray ray = new(rPos, down);
             bool hit = IntersectRay(ray, ref dist, false);
+
             if (hit)
                 z_dist = dist - 0.1f;
+
             return hit;
         }
 
         public bool GetLiquidLevel(Vector3 pos, out float liqHeight)
         {
             liqHeight = 0f;
+
             if (iLiquid != null)
                 return iLiquid.GetLiquidHeight(pos, out liqHeight);
+
             return false;
         }
 
@@ -278,33 +307,41 @@ namespace Game.Collision
         {
             if (iLiquid != null)
                 return iLiquid.GetLiquidType();
+
             return 0;
         }
 
-        public override AxisAlignedBox GetBounds() { return iBound; }
+        public override AxisAlignedBox GetBounds()
+        {
+            return iBound;
+        }
 
-        public uint GetMogpFlags() { return iMogpFlags; }
+        public uint GetMogpFlags()
+        {
+            return iMogpFlags;
+        }
 
-        public uint GetWmoID() { return iGroupWMOID; }
+        public uint GetWmoID()
+        {
+            return iGroupWMOID;
+        }
     }
 
     public class WorldModel : IModel
     {
         public uint Flags;
+        private readonly List<GroupModel> groupModels = new();
+        private readonly BoundingIntervalHierarchy groupTree = new();
 
-        uint RootWMOID;
-        List<GroupModel> groupModels = new();
-        BIH groupTree = new();
+        private uint RootWMOID;
 
         public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
-            // If the caller asked us to ignore certain objects we should check flags
+            // If the caller asked us to ignore certain objects we should check Flags
             if ((ignoreFlags & ModelIgnoreFlags.M2) != ModelIgnoreFlags.Nothing)
-            {
                 // M2 models are not taken into account for LoS calculation if caller requested their ignoring.
                 if ((Flags & (uint)ModelFlags.M2) != 0)
                     return false;
-            }
 
             // small M2 workaround, maybe better make separate class with virtual intersection funcs
             // in any case, there's no need to use a bound tree if we only have one submodel
@@ -313,44 +350,53 @@ namespace Game.Collision
 
             WModelRayCallBack isc = new(groupModels);
             groupTree.IntersectRay(ray, isc, ref distance, stopAtFirstHit);
-            return isc.hit;
+
+            return isc.Hit;
         }
 
         public bool IntersectPoint(Vector3 p, Vector3 down, out float dist, AreaInfo info)
         {
             dist = 0f;
+
             if (groupModels.Empty())
                 return false;
 
             WModelAreaCallback callback = new(groupModels, down);
             groupTree.IntersectPoint(p, callback);
-            if (callback.hit != null)
+
+            if (callback.Hit != null)
             {
-                info.rootId = (int)RootWMOID;
-                info.groupId = (int)callback.hit.GetWmoID();
-                info.flags = callback.hit.GetMogpFlags();
-                info.result = true;
-                dist = callback.zDist;
+                info.RootId = (int)RootWMOID;
+                info.GroupId = (int)callback.Hit.GetWmoID();
+                info.Flags = callback.Hit.GetMogpFlags();
+                info.Result = true;
+                dist = callback.ZDist;
+
                 return true;
             }
+
             return false;
         }
 
         public bool GetLocationInfo(Vector3 p, Vector3 down, out float dist, GroupLocationInfo info)
         {
             dist = 0f;
+
             if (groupModels.Empty())
                 return false;
 
             WModelAreaCallback callback = new(groupModels, down);
             groupTree.IntersectPoint(p, callback);
-            if (callback.hit != null)
+
+            if (callback.Hit != null)
             {
-                info.rootId = (int)RootWMOID;
-                info.hitModel = callback.hit;
-                dist = callback.zDist;
+                info.RootId = (int)RootWMOID;
+                info.HitModel = callback.Hit;
+                dist = callback.ZDist;
+
                 return true;
             }
+
             return false;
         }
 
@@ -359,11 +405,13 @@ namespace Game.Collision
             if (!File.Exists(filename))
             {
                 filename += ".vmo";
+
                 if (!File.Exists(filename))
                     return false;
             }
 
             using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
+
             if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                 return false;
 
@@ -378,6 +426,7 @@ namespace Game.Collision
                 return false;
 
             uint count = reader.ReadUInt32();
+
             for (var i = 0; i < count; ++i)
             {
                 GroupModel group = new();

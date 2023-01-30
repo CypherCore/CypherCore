@@ -1,9 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.Entities;
-using System;
 
 namespace Game.Movement
 {
@@ -32,7 +32,9 @@ namespace Game.Movement
             return true;
         }
 
-        public override void Deactivate(Unit owner) { }
+        public override void Deactivate(Unit owner)
+        {
+        }
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
         {
@@ -47,6 +49,12 @@ namespace Game.Movement
 
     public class RotateMovementGenerator : MovementGenerator
     {
+        private readonly RotateDirection _direction;
+
+        private readonly uint _id;
+        private readonly uint _maxDuration;
+        private uint _duration;
+
         public RotateMovementGenerator(uint id, uint time, RotateDirection direction)
         {
             _id = id;
@@ -64,17 +72,17 @@ namespace Game.Movement
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
-            
+
             owner.StopMoving();
 
             /*
-             *  TODO: This code should be handled somewhere else, like MovementInform
-             *
-             *  if (owner->GetVictim())
-             *      owner->SetInFront(owner->GetVictim());
-             *
-             *  owner->AttackStop();
-             */
+			 *  TODO: This code should be handled somewhere else, like MovementInform
+			 *
+			 *  if (owner->GetVictim())
+			 *      owner->SetInFront(owner->GetVictim());
+			 *
+			 *  owner->AttackStop();
+			 */
         }
 
         public override void Reset(Unit owner)
@@ -94,6 +102,7 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
             init.MoveTo(owner, false);
+
             if (!owner.GetTransGUID().IsEmpty())
                 init.DisableTransportPathTransformations();
 
@@ -101,12 +110,15 @@ namespace Game.Movement
             init.Launch();
 
             if (_duration > diff)
+            {
                 _duration -= diff;
+            }
             else
             {
                 AddFlag(MovementGeneratorFlags.InformEnabled);
+
                 return false;
-            } 
+            }
 
             return true;
         }
@@ -124,16 +136,18 @@ namespace Game.Movement
                 owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Rotate, _id);
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
-
-        uint _id;
-        uint _duration;
-        uint _maxDuration;
-        RotateDirection _direction;
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Rotate;
+        }
     }
 
     public class DistractMovementGenerator : MovementGenerator
     {
+        private readonly float _orientation;
+
+        private uint _timer;
+
         public DistractMovementGenerator(uint timer, float orientation)
         {
             _timer = timer;
@@ -156,6 +170,7 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
             init.MoveTo(owner, false);
+
             if (!owner.GetTransGUID().IsEmpty())
                 init.DisableTransportPathTransformations();
 
@@ -163,7 +178,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        public override void Reset(Unit owner) 
+        public override void Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
             Initialize(owner);
@@ -177,10 +192,12 @@ namespace Game.Movement
             if (diff > _timer)
             {
                 AddFlag(MovementGeneratorFlags.InformEnabled);
+
                 return false;
             }
 
             _timer -= diff;
+
             return true;
         }
 
@@ -195,17 +212,19 @@ namespace Game.Movement
 
             // TODO: This code should be handled somewhere else
             // If this is a creature, then return orientation to original position (for idle movement creatures)
-            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled) && owner.IsCreature())
+            if (movementInform &&
+                HasFlag(MovementGeneratorFlags.InformEnabled) &&
+                owner.IsCreature())
             {
                 float angle = owner.ToCreature().GetHomePosition().GetOrientation();
                 owner.SetFacingTo(angle);
             }
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
-
-        uint _timer;
-        float _orientation;
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Distract;
+        }
     }
 
     public class AssistanceDistractMovementGenerator : DistractMovementGenerator
@@ -221,6 +240,9 @@ namespace Game.Movement
             owner.ToCreature().SetReactState(ReactStates.Aggressive);
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.AssistanceDistract; }
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.AssistanceDistract;
+        }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework.Constants;
+﻿using Framework.Constants;
 using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IAura
@@ -16,7 +11,8 @@ namespace Game.Scripting.Interfaces.IAura
     public class EffectCalcPeriodicHandler : AuraEffectHandler, IAuraCalcPeriodic
     {
         public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
-        AuraEffectCalcPeriodicDelegate _fn;
+
+        private readonly AuraEffectCalcPeriodicDelegate _fn;
 
         public EffectCalcPeriodicHandler(AuraEffectCalcPeriodicDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcPeriodic)
         {

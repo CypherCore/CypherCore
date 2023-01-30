@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Framework.IO;
 
 namespace Framework.Serialization
 {
@@ -34,10 +35,19 @@ namespace Framework.Serialization
 
         public static T CreateObject<T>(string jsonData, bool split = false)
         {
-            return CreateObject<T>(Encoding.UTF8.GetBytes(split ? jsonData.Split(new[] { ':' }, 2)[1] : jsonData));
+            return CreateObject<T>(Encoding.UTF8.GetBytes(split
+                                                              ? jsonData.Split(new[]
+                                                                               {
+                                                                                   ':'
+                                                                               },
+                                                                               2)[1]
+                                                              : jsonData));
         }
 
-        public static T CreateObject<T>(byte[] jsonData) => CreateObject<T>(new MemoryStream(jsonData));
+        public static T CreateObject<T>(byte[] jsonData)
+        {
+            return CreateObject<T>(new MemoryStream(jsonData));
+        }
 
         public static object CreateObject(Stream jsonData, Type type)
         {
@@ -48,16 +58,26 @@ namespace Framework.Serialization
 
         public static object CreateObject(string jsonData, Type type, bool split = false)
         {
-            return CreateObject(Encoding.UTF8.GetBytes(split ? jsonData.Split(new[] { ':' }, 2)[1] : jsonData), type);
+            return CreateObject(Encoding.UTF8.GetBytes(split
+                                                           ? jsonData.Split(new[]
+                                                                            {
+                                                                                ':'
+                                                                            },
+                                                                            2)[1]
+                                                           : jsonData),
+                                type);
         }
 
-        public static object CreateObject(byte[] jsonData, Type type) => CreateObject(new MemoryStream(jsonData), type);
+        public static object CreateObject(byte[] jsonData, Type type)
+        {
+            return CreateObject(new MemoryStream(jsonData), type);
+        }
 
         // Used for protobuf json strings.
         public static byte[] Deflate<T>(string name, T data)
         {
             var jsonData = Encoding.UTF8.GetBytes(name + ":" + CreateString(data) + "\0");
-            var compressedData = IO.ZLib.Compress(jsonData);
+            var compressedData = ZLib.Compress(jsonData);
 
             return BitConverter.GetBytes(jsonData.Length).Combine(compressedData);
         }

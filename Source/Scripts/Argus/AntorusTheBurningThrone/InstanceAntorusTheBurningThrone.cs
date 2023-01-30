@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
-using Game.Entities;
-using Framework.Constants;
-using Game.Scripting.Interfaces.IMap;
 using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.Argus.AntorusTheBurningThrone
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         // Encounters
         public const uint GarothiWorldbreaker = 0;
@@ -30,62 +30,32 @@ namespace Scripts.Argus.AntorusTheBurningThrone
         public const uint Annihilator = 12;
     }
 
-    struct BossIds
+    internal struct BossIds
     {
         // Bosses
         public const uint GarothiWorldbreaker = 122450;
         public const uint EncounterCount = 10;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         // Garothi Worldbreaker
-       public const uint Decimator = 122773;
-       public const uint Annihilator = 122778;
-       public const uint Annihilation = 122818;
-       public const uint GarothiWorldbreaker = 124167;
+        public const uint Decimator = 122773;
+        public const uint Annihilator = 122778;
+        public const uint Annihilation = 122818;
+        public const uint GarothiWorldbreaker = 124167;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint Collision = 277365;
         public const uint Rock = 278488;
     }
 
     [Script]
-    class instance_antorus_the_burning_throne : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_antorus_the_burning_throne : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        static ObjectData[] creatureData =
-        {
-            new ObjectData(BossIds.GarothiWorldbreaker, DataTypes.GarothiWorldbreaker),
-            new ObjectData(CreatureIds.Decimator, DataTypes.Decimator),
-            new ObjectData(CreatureIds.Annihilator, DataTypes.Annihilator)
-        };
-
-        static DoorData[] doorData =
-        {
-            new DoorData(GameObjectIds.Collision, DataTypes.GarothiWorldbreaker, DoorType.Passage),
-            new DoorData(GameObjectIds.Rock, DataTypes.GarothiWorldbreaker, DoorType.Passage)
-        };
-
-        static DungeonEncounterData[] encounters =
-        {
-            new DungeonEncounterData(DataTypes.GarothiWorldbreaker, 2076),
-            new DungeonEncounterData(DataTypes.FelhoundsOfSageras, 2074),
-            new DungeonEncounterData(DataTypes.AntoranHighCommand, 2070),
-            new DungeonEncounterData(DataTypes.PortalKeeperHasabel, 2064),
-            new DungeonEncounterData(DataTypes.EonarTheLifeBinder, 2075),
-            new DungeonEncounterData(DataTypes.ImonarTheSoulhunter, 2082),
-            new DungeonEncounterData(DataTypes.Kingaroth, 2088),
-            new DungeonEncounterData(DataTypes.Varimathras, 2069),
-            new DungeonEncounterData(DataTypes.TheCovenOfShivarra, 2073),
-            new DungeonEncounterData(DataTypes.Aggramar, 2063),
-            new DungeonEncounterData(DataTypes.ArgusTheUnmaker, 2092)
-        };
-
-        public instance_antorus_the_burning_throne() : base("instance_antorus_the_burning_throne", 1712) { }
-
-        class instance_antorus_the_burning_throne_InstanceMapScript : InstanceScript
+        private class instance_antorus_the_burning_throne_InstanceMapScript : InstanceScript
         {
             public instance_antorus_the_burning_throne_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -104,13 +74,34 @@ namespace Scripts.Argus.AntorusTheBurningThrone
                 {
                     case CreatureIds.Annihilation:
                         Creature garothi = GetCreature(DataTypes.GarothiWorldbreaker);
+
                         if (garothi)
                             garothi.GetAI().JustSummoned(creature);
+
                         break;
                     default:
                         break;
                 }
             }
+        }
+
+        private static readonly ObjectData[] creatureData =
+        {
+            new(BossIds.GarothiWorldbreaker, DataTypes.GarothiWorldbreaker), new(CreatureIds.Decimator, DataTypes.Decimator), new(CreatureIds.Annihilator, DataTypes.Annihilator)
+        };
+
+        private static readonly DoorData[] doorData =
+        {
+            new(GameObjectIds.Collision, DataTypes.GarothiWorldbreaker, DoorType.Passage), new(GameObjectIds.Rock, DataTypes.GarothiWorldbreaker, DoorType.Passage)
+        };
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.GarothiWorldbreaker, 2076), new(DataTypes.FelhoundsOfSageras, 2074), new(DataTypes.AntoranHighCommand, 2070), new(DataTypes.PortalKeeperHasabel, 2064), new(DataTypes.EonarTheLifeBinder, 2075), new(DataTypes.ImonarTheSoulhunter, 2082), new(DataTypes.Kingaroth, 2088), new(DataTypes.Varimathras, 2069), new(DataTypes.TheCovenOfShivarra, 2073), new(DataTypes.Aggramar, 2063), new(DataTypes.ArgusTheUnmaker, 2092)
+        };
+
+        public instance_antorus_the_burning_throne() : base("instance_antorus_the_burning_throne", 1712)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)
@@ -119,4 +110,3 @@ namespace Scripts.Argus.AntorusTheBurningThrone
         }
     }
 }
-

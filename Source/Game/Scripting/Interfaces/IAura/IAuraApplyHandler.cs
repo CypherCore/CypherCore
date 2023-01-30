@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Framework.Constants;
 using Game.Spells;
-using static Game.ScriptInfo;
 
 namespace Game.Scripting.Interfaces.IAura
 {
@@ -18,9 +13,8 @@ namespace Game.Scripting.Interfaces.IAura
     public class EffectApplyHandler : AuraEffectHandler, IAuraApplyHandler
     {
         public delegate void AuraEffectApplicationModeDelegate(AuraEffect aura, AuraEffectHandleModes auraMode);
-        AuraEffectApplicationModeDelegate _fn;
 
-        public AuraEffectHandleModes Modes { get; }
+        private readonly AuraEffectApplicationModeDelegate _fn;
 
         public EffectApplyHandler(AuraEffectApplicationModeDelegate fn, uint effectIndex, AuraType auraType, AuraEffectHandleModes mode, AuraScriptHookType hookType) : base(effectIndex, auraType, hookType)
         {
@@ -33,6 +27,8 @@ namespace Game.Scripting.Interfaces.IAura
                 hookType != AuraScriptHookType.EffectAfterRemove)
                 throw new Exception($"Hook Type {hookType} is not valid for {nameof(EffectApplyHandler)}. Use {AuraScriptHookType.EffectApply}, {AuraScriptHookType.EffectRemove}, {AuraScriptHookType.EffectAfterApply}, or {AuraScriptHookType.EffectAfterRemove}");
         }
+
+        public AuraEffectHandleModes Modes { get; }
 
         public void Apply(AuraEffect aura, AuraEffectHandleModes auraMode)
         {

@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolderweb
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Crystalize = 16104;
         public const uint Mothersmilk = 16468;
@@ -18,9 +18,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
     }
 
     [Script]
-    class boss_mother_smolderweb : BossAI
+    internal class boss_mother_smolderweb : BossAI
     {
-        public boss_mother_smolderweb(Creature creature) : base(creature, DataTypes.MotherSmolderweb) { }
+        public boss_mother_smolderweb(Creature creature) : base(creature, DataTypes.MotherSmolderweb)
+        {
+        }
 
         public override void Reset()
         {
@@ -30,16 +32,20 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
-            {
-                DoCast(me, SpellIds.Crystalize);
-                task.Repeat(TimeSpan.FromSeconds(15));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-            {
-                DoCast(me, SpellIds.Mothersmilk);
-                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(12500));
-            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.Crystalize);
+                                    task.Repeat(TimeSpan.FromSeconds(15));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.Mothersmilk);
+                                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(12500));
+                                });
         }
 
         public override void JustDied(Unit killer)
@@ -62,4 +68,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.MotherSmolder
         }
     }
 }
-

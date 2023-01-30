@@ -5,12 +5,13 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Spells;
 
 namespace Scripts.Pets
 {
     namespace Priest
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             public const uint GlyphOfShadowFiend = 58228;
             public const uint ShadowFiendDeath = 57989;
@@ -18,11 +19,11 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_pri_lightwell : PassiveAI
+        internal class npc_pet_pri_lightwell : PassiveAI
         {
             public npc_pet_pri_lightwell(Creature creature) : base(creature)
             {
-                DoCast(creature, SpellIds.LightWellCharges, new Game.Spells.CastSpellExtraArgs(false));
+                DoCast(creature, SpellIds.LightWellCharges, new CastSpellExtraArgs(false));
             }
 
             public override void EnterEvadeMode(EvadeReason why)
@@ -37,13 +38,16 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_pri_shadowfiend : PetAI
+        internal class npc_pet_pri_shadowfiend : PetAI
         {
-            public npc_pet_pri_shadowfiend(Creature creature) : base(creature) { }
+            public npc_pet_pri_shadowfiend(Creature creature) : base(creature)
+            {
+            }
 
             public override void IsSummonedBy(WorldObject summoner)
             {
                 Unit unitSummoner = summoner.ToUnit();
+
                 if (unitSummoner == null)
                     return;
 

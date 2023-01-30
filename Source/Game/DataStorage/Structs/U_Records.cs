@@ -1,56 +1,59 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using System.Numerics;
+using Framework.Constants;
 
 namespace Game.DataStorage
 {
     public sealed class UiMapRecord
     {
-        public LocalizedString Name;
-        public uint Id;
-        public int ParentUiMapID;
+        public int AlternateUiMapGroup;
+        public int BkgAtlasID;
+        public uint BountyDisplayLocation;
+        public int BountySetID;
+        public int ContentTuningID;
         public int Flags;
+        public sbyte HelpTextPosition;
+        public uint Id;
+        public LocalizedString Name;
+        public int ParentUiMapID;
         public uint System;
         public UiMapType Type;
-        public int BountySetID;
-        public uint BountyDisplayLocation;
         public int VisibilityPlayerConditionID;
-        public sbyte HelpTextPosition;
-        public int BkgAtlasID;
-        public int AlternateUiMapGroup;
-        public int ContentTuningID;
 
-        public UiMapFlag GetFlags() { return (UiMapFlag)Flags; }
-}
+        public UiMapFlag GetFlags()
+        {
+            return (UiMapFlag)Flags;
+        }
+    }
 
     public sealed class UiMapAssignmentRecord
     {
-        public Vector2 UiMin;
-        public Vector2 UiMax;
-        public Vector3[] Region = new Vector3[2];
-        public uint Id;
-        public int UiMapID;
-        public int OrderIndex;
-        public int MapID;
         public int AreaID;
+        public uint Id;
+        public int MapID;
+        public int OrderIndex;
+        public Vector3[] Region = new Vector3[2];
+        public int UiMapID;
+        public Vector2 UiMax;
+        public Vector2 UiMin;
         public int WmoDoodadPlacementID;
         public int WmoGroupID;
     }
 
     public sealed class UiMapLinkRecord
     {
-        public Vector2 UiMin;
-        public Vector2 UiMax;
-        public uint Id;
-        public int ParentUiMapID;
-        public int OrderIndex;
         public int ChildUiMapID;
-        public int PlayerConditionID;
-        public int OverrideHighlightFileDataID;
-        public int OverrideHighlightAtlasID;
         public int Flags;
+        public uint Id;
+        public int OrderIndex;
+        public int OverrideHighlightAtlasID;
+        public int OverrideHighlightFileDataID;
+        public int ParentUiMapID;
+        public int PlayerConditionID;
+        public Vector2 UiMax;
+        public Vector2 UiMin;
     }
 
     public sealed class UiMapXMapArtRecord
@@ -63,53 +66,56 @@ namespace Game.DataStorage
 
     public sealed class UISplashScreenRecord
     {
-        public uint Id;
-        public string Header;
-        public string TopLeftFeatureTitle;
-        public string TopLeftFeatureDesc;
-        public string BottomLeftFeatureTitle;
-        public string BottomLeftFeatureDesc;
-        public string RightFeatureTitle;
-        public string RightFeatureDesc;
         public int AllianceQuestID;
-        public int HordeQuestID;
-        public sbyte ScreenType;
-        public int TextureKitID;
-        public int SoundKitID;
-        public int PlayerConditionID;
+        public string BottomLeftFeatureDesc;
+        public string BottomLeftFeatureTitle;
         public int CharLevelConditionID;
+        public string Header;
+        public int HordeQuestID;
+        public uint Id;
+        public int PlayerConditionID;
         public int RequiredTimeEventPassed; // serverside TimeEvent table, see ModifierTreeType::HasTimeEventPassed
+        public string RightFeatureDesc;
+        public string RightFeatureTitle;
+        public sbyte ScreenType;
+        public int SoundKitID;
+        public int TextureKitID;
+        public string TopLeftFeatureDesc;
+        public string TopLeftFeatureTitle;
     }
 
     public sealed class UnitConditionRecord
     {
-        public uint Id;
         public byte Flags;
-        public byte[] Variable = new byte[8];
+        public uint Id;
         public sbyte[] Op = new sbyte[8];
         public int[] Value = new int[8];
+        public byte[] Variable = new byte[8];
 
-        public UnitConditionFlags GetFlags() { return (UnitConditionFlags)Flags; }
+        public UnitConditionFlags GetFlags()
+        {
+            return (UnitConditionFlags)Flags;
+        }
     }
 
     public sealed class UnitPowerBarRecord
     {
-        public uint Id;
-        public string Name;
-        public string Cost;
-        public string OutOfError;
-        public string ToolTip;
-        public uint MinPower;
-        public uint MaxPower;
-        public uint StartPower;
-        public byte CenterPower;
-        public float RegenerationPeace;
-        public float RegenerationCombat;
         public byte BarType;
-        public ushort Flags;
-        public float StartInset;
+        public byte CenterPower;
+        public uint[] Color = new uint[6];
+        public string Cost;
         public float EndInset;
         public uint[] FileDataID = new uint[6];
-        public uint[] Color = new uint[6];
+        public ushort Flags;
+        public uint Id;
+        public uint MaxPower;
+        public uint MinPower;
+        public string Name;
+        public string OutOfError;
+        public float RegenerationCombat;
+        public float RegenerationPeace;
+        public float StartInset;
+        public uint StartPower;
+        public string ToolTip;
     }
 }

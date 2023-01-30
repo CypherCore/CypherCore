@@ -11,15 +11,17 @@ namespace Framework.Networking
 
     public class AsyncAcceptor
     {
-        TcpListener _listener;
-        volatile bool _closed;
+        private volatile bool _closed;
+        private TcpListener _listener;
 
         public bool Start(string ip, int port)
         {
             IPAddress bindIP;
+
             if (!IPAddress.TryParse(ip, out bindIP))
             {
                 Log.outError(LogFilter.Network, $"Server can't be started: Invalid IP-Address: {ip}");
+
                 return false;
             }
 
@@ -31,6 +33,7 @@ namespace Framework.Networking
             catch (SocketException ex)
             {
                 Log.outException(ex);
+
                 return false;
             }
 
@@ -42,6 +45,7 @@ namespace Framework.Networking
             try
             {
                 var _socket = await _listener.AcceptSocketAsync();
+
                 if (_socket != null)
                 {
                     mgrHandler(_socket);
@@ -61,6 +65,7 @@ namespace Framework.Networking
             try
             {
                 var socket = await _listener.AcceptSocketAsync();
+
                 if (socket != null)
                 {
                     T newSocket = (T)Activator.CreateInstance(typeof(T), socket);
@@ -71,7 +76,8 @@ namespace Framework.Networking
                 }
             }
             catch (ObjectDisposedException)
-            { }
+            {
+            }
         }
 
         public void Close()

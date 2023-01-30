@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-<Import Project="..\..\default.props" />
-<PropertyGroup>
-  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-</PropertyGroup>
+    <Import Project="..\..\default.props" />
+    <PropertyGroup>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Framework\Framework.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Framework\Framework.csproj" />
+    </ItemGroup>
 
 </Project>

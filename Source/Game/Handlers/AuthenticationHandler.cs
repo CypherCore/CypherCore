@@ -15,13 +15,13 @@ namespace Game
 
             if (code == BattlenetRpcErrorCode.Ok)
             {
-                response.SuccessInfo = new();
-
                 response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.ActiveExpansionLevel = (byte)GetExpansion();
+
+                response.SuccessInfo                       = new AuthResponse.AuthSuccessInfo();
+                response.SuccessInfo.ActiveExpansionLevel  = (byte)GetExpansion();
                 response.SuccessInfo.AccountExpansionLevel = (byte)GetAccountExpansion();
-                response.SuccessInfo.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-                response.SuccessInfo.Time = (uint)GameTime.GetGameTime();
+                response.SuccessInfo.VirtualRealmAddress   = Global.WorldMgr.GetVirtualRealmAddress();
+                response.SuccessInfo.Time                  = (uint)GameTime.GetGameTime();
 
                 var realm = Global.WorldMgr.GetRealm();
 
@@ -56,14 +56,16 @@ namespace Game
                 SendPacket(waitQueueUpdate);
             }
             else
+            {
                 SendPacket(new WaitQueueFinish());
+            }
         }
 
         public void SendClientCacheVersion(uint version)
         {
             ClientCacheVersion cache = new();
             cache.CacheVersion = version;
-            SendPacket(cache);//enabled it
+            SendPacket(cache); //enabled it
         }
 
         public void SendSetTimeZoneInformation()
@@ -74,7 +76,7 @@ namespace Game
             packet.GameTimeTZ = "Europe/Paris";
             packet.ServerRegionalTZ = "Europe/Paris";
 
-            SendPacket(packet);//enabled it
+            SendPacket(packet); //enabled it
         }
 
         public void SendFeatureSystemStatusGlueScreen()

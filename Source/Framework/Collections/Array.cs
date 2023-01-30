@@ -7,7 +7,7 @@ namespace System.Collections.Generic
 {
     public class Array<T> : List<T>
     {
-        int _limit;
+        private readonly int _limit;
 
         public Array(int size) : base(size)
         {
@@ -25,18 +25,9 @@ namespace System.Collections.Generic
             Fill(defaultFillValue);
         }
 
-        public void Fill(T value)
-        {
-            for (var i = 0; i < _limit; ++i)
-                Add(value);
-        }
-
         public new T this[int index]
         {
-            get
-            {
-                return base[index];
-            }
+            get => base[index];
             set
             {
                 if (index >= Count)
@@ -47,13 +38,24 @@ namespace System.Collections.Generic
                     Insert(index, value);
                 }
                 else
+                {
                     base[index] = value;
+                }
             }
         }
 
-        public int GetLimit() { return _limit; }
+        public void Fill(T value)
+        {
+            for (var i = 0; i < _limit; ++i)
+                Add(value);
+        }
 
-        public static implicit operator T[] (Array<T> array)
+        public int GetLimit()
+        {
+            return _limit;
+        }
+
+        public static implicit operator T[](Array<T> array)
         {
             return array.ToArray();
         }

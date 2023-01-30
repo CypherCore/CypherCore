@@ -1,18 +1,18 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IMap;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.MagistersTerrace
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         // Encounter states
         public const uint SelinFireheart = 0;
@@ -29,7 +29,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
         public const uint EscapeOrb = 7;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         // Bosses
         public const uint KaelthasSunstrider = 24664;
@@ -58,7 +58,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
         public const uint SunbladeBloodKnight = 24684;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint AssemblyChamberDoor = 188065;
         public const uint SunwellRaidGate2 = 187979;
@@ -68,7 +68,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
         public const uint EscapeOrb = 188173;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint EventSpawnKalecgos = 16547;
 
@@ -78,49 +78,30 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
 
         public static ObjectData[] creatureData =
         {
-            new ObjectData(CreatureIds.SelinFireheart, DataTypes.SelinFireheart),
-            new ObjectData(CreatureIds.Vexallus, DataTypes.Vexallus),
-            new ObjectData(CreatureIds.PriestessDelrissa, DataTypes.PriestessDelrissa),
-            new ObjectData(CreatureIds.KaelthasSunstrider, DataTypes.KaelthasSunstrider),
-            new ObjectData(CreatureIds.Kalecgos, DataTypes.Kalecgos),
-            new ObjectData(CreatureIds.HumanKalecgos, DataTypes.Kalecgos),
+            new(CreatureIds.SelinFireheart, DataTypes.SelinFireheart), new(CreatureIds.Vexallus, DataTypes.Vexallus), new(CreatureIds.PriestessDelrissa, DataTypes.PriestessDelrissa), new(CreatureIds.KaelthasSunstrider, DataTypes.KaelthasSunstrider), new(CreatureIds.Kalecgos, DataTypes.Kalecgos), new(CreatureIds.HumanKalecgos, DataTypes.Kalecgos)
         };
 
         public static ObjectData[] gameObjectData =
         {
-            new ObjectData(GameObjectIds.EscapeOrb, DataTypes.EscapeOrb),
+            new(GameObjectIds.EscapeOrb, DataTypes.EscapeOrb)
         };
 
         public static DoorData[] doorData =
         {
-            new DoorData(GameObjectIds.SunwellRaidGate2, DataTypes.SelinFireheart, DoorType.Passage),
-            new DoorData(GameObjectIds.AssemblyChamberDoor, DataTypes.SelinFireheart, DoorType.Room),
-            new DoorData(GameObjectIds.SunwellRaidGate5, DataTypes.Vexallus, DoorType.Passage),
-            new DoorData(GameObjectIds.SunwellRaidGate4, DataTypes.PriestessDelrissa, DoorType.Passage),
-            new DoorData(GameObjectIds.AsylumDoor, DataTypes.KaelthasSunstrider, DoorType.Room),
+            new(GameObjectIds.SunwellRaidGate2, DataTypes.SelinFireheart, DoorType.Passage), new(GameObjectIds.AssemblyChamberDoor, DataTypes.SelinFireheart, DoorType.Room), new(GameObjectIds.SunwellRaidGate5, DataTypes.Vexallus, DoorType.Passage), new(GameObjectIds.SunwellRaidGate4, DataTypes.PriestessDelrissa, DoorType.Passage), new(GameObjectIds.AsylumDoor, DataTypes.KaelthasSunstrider, DoorType.Room)
         };
 
-        public static Position KalecgosSpawnPos = new Position(164.3747f, -397.1197f, 2.151798f, 1.66219f);
-        public static Position KaelthasTrashGroupDistanceComparisonPos = new Position(150.0f, 141.0f, -14.4f);
+        public static Position KalecgosSpawnPos = new(164.3747f, -397.1197f, 2.151798f, 1.66219f);
+        public static Position KaelthasTrashGroupDistanceComparisonPos = new(150.0f, 141.0f, -14.4f);
     }
 
     [Script]
-    class instance_magisters_terrace : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_magisters_terrace : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        static DungeonEncounterData[] encounters =
+        private class instance_magisters_terrace_InstanceMapScript : InstanceScript
         {
-            new DungeonEncounterData(DataTypes.SelinFireheart, 1897),
-            new DungeonEncounterData(DataTypes.Vexallus, 1898),
-            new DungeonEncounterData(DataTypes.PriestessDelrissa, 1895),
-            new DungeonEncounterData(DataTypes.KaelthasSunstrider, 1894)
-        };
-        
-        public instance_magisters_terrace() : base(nameof(instance_magisters_terrace), 585) { }
-
-        class instance_magisters_terrace_InstanceMapScript : InstanceScript
-        {
-            List<ObjectGuid> _kaelthasPreTrashGUIDs = new();
-            byte _delrissaDeathCount;
+            private readonly List<ObjectGuid> _kaelthasPreTrashGUIDs = new();
+            private byte _delrissaDeathCount;
 
             public instance_magisters_terrace_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -140,6 +121,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                     default:
                         break;
                 }
+
                 return 0;
             }
 
@@ -152,6 +134,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                             _delrissaDeathCount++;
                         else
                             _delrissaDeathCount = 0;
+
                         break;
                     default:
                         break;
@@ -172,6 +155,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                     case CreatureIds.SunbladeBloodKnight:
                         if (creature.GetDistance(MiscConst.KaelthasTrashGroupDistanceComparisonPos) < 10.0f)
                             _kaelthasPreTrashGUIDs.Add(creature.GetGUID());
+
                         break;
                     default:
                         break;
@@ -194,13 +178,16 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                         if (_kaelthasPreTrashGUIDs.Contains(unit.GetGUID()))
                         {
                             _kaelthasPreTrashGUIDs.Remove(unit.GetGUID());
+
                             if (_kaelthasPreTrashGUIDs.Count == 0)
                             {
                                 Creature kaelthas = GetCreature(DataTypes.KaelthasSunstrider);
+
                                 if (kaelthas)
                                     kaelthas.GetAI().SetData(DataTypes.KaelthasIntro, (uint)EncounterState.InProgress);
                             }
                         }
+
                         break;
                     default:
                         break;
@@ -216,6 +203,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                     case GameObjectIds.EscapeOrb:
                         if (GetBossState(DataTypes.KaelthasSunstrider) == EncounterState.Done)
                             go.RemoveFlag(GameObjectFlags.NotSelectable);
+
                         break;
                     default:
                         break;
@@ -225,17 +213,19 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
             public override void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
             {
                 if (eventId == MiscConst.EventSpawnKalecgos)
-                    if (!GetCreature(DataTypes.Kalecgos) && _events.Empty())
-                        _events.ScheduleEvent(MiscConst.EventSpawnKalecgos, TimeSpan.FromMinutes(1));
+                    if (!GetCreature(DataTypes.Kalecgos) &&
+                        EventMp.Empty())
+                        EventMp.ScheduleEvent(MiscConst.EventSpawnKalecgos, TimeSpan.FromMinutes(1));
             }
 
             public override void Update(uint diff)
             {
-                _events.Update(diff);
+                EventMp.Update(diff);
 
-                if (_events.ExecuteEvent() == MiscConst.EventSpawnKalecgos)
+                if (EventMp.ExecuteEvent() == MiscConst.EventSpawnKalecgos)
                 {
-                    Creature kalecgos = instance.SummonCreature(CreatureIds.Kalecgos, MiscConst.KalecgosSpawnPos);
+                    Creature kalecgos = Instance.SummonCreature(CreatureIds.Kalecgos, MiscConst.KalecgosSpawnPos);
+
                     if (kalecgos)
                     {
                         kalecgos.GetMotionMaster().MovePath(MiscConst.PathKalecgosFlight, false);
@@ -254,20 +244,32 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
                     case DataTypes.PriestessDelrissa:
                         if (state == EncounterState.InProgress)
                             _delrissaDeathCount = 0;
+
                         break;
                     case DataTypes.KaelthasSunstrider:
                         if (state == EncounterState.Done)
                         {
                             GameObject orb = GetGameObject(DataTypes.EscapeOrb);
-                            if (orb != null)
-                                orb.RemoveFlag(GameObjectFlags.NotSelectable);
+
+                            orb?.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
+
                         break;
                     default:
                         break;
                 }
+
                 return true;
             }
+        }
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.SelinFireheart, 1897), new(DataTypes.Vexallus, 1898), new(DataTypes.PriestessDelrissa, 1895), new(DataTypes.KaelthasSunstrider, 1894)
+        };
+
+        public instance_magisters_terrace() : base(nameof(instance_magisters_terrace), 585)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)
@@ -276,4 +278,3 @@ namespace Scripts.EasternKingdoms.MagistersTerrace
         }
     }
 }
-

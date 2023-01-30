@@ -7,15 +7,18 @@ namespace System.Collections.Generic
 {
     public sealed class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
     {
-        static List<object> _emptyList = new List<object>();
-        public MultiMap() { }
+        private static readonly List<object> _emptyList = new();
+
+        private readonly Dictionary<TKey, List<TValue>> _interalStorage = new();
+
+        public MultiMap()
+        {
+        }
 
         public MultiMap(IEnumerable<KeyValuePair<TKey, TValue>> initialData)
         {
             foreach (var item in initialData)
-            {
                 Add(item);
-            }
         }
 
         public void Add(TKey key, TValue value)
@@ -72,6 +75,7 @@ namespace System.Collections.Generic
                 return false;
 
             bool val = _interalStorage[key].Remove(value);
+
             if (!val)
                 return false;
 
@@ -89,14 +93,17 @@ namespace System.Collections.Generic
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             List<TValue> valueList;
+
             if (_interalStorage.TryGetValue(item.Key, out valueList))
                 return valueList.Contains(item.Value);
+
             return false;
         }
 
         public bool Contains(TKey key, TValue item)
         {
             if (!_interalStorage.ContainsKey(key)) return false;
+
             return _interalStorage[key].Contains(item);
         }
 
@@ -111,22 +118,11 @@ namespace System.Collections.Generic
         public List<TValue> LookupByKey(object key)
         {
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+
             if (_interalStorage.ContainsKey(newkey))
                 return _interalStorage[newkey];
 
             return _emptyList.Cast<TValue>().ToList();
-        }
-
-        bool TryGetValue(TKey key, out TValue value)
-        {
-            value = default(TValue);
-            if (_interalStorage.TryGetValue(key, out var val))
-            {
-                value = val.LastOrDefault();
-                return true;
-            }
-
-            return false;
         }
 
         public List<TValue> this[TKey key]
@@ -135,6 +131,7 @@ namespace System.Collections.Generic
             {
                 if (!_interalStorage.TryGetValue(key, out var val))
                     return _emptyList.Cast<TValue>().ToList();
+
                 return val;
             }
             set
@@ -146,20 +143,17 @@ namespace System.Collections.Generic
             }
         }
 
-        public ICollection<TKey> Keys
-        {
-            get { return _interalStorage.Keys; }
-        }
+        public ICollection<TKey> Keys => _interalStorage.Keys;
 
         public ICollection<TValue> Values
         {
             get
             {
                 List<TValue> retVal = new();
+
                 foreach (var item in _interalStorage)
-                {
                     retVal.AddRange(item.Value);
-                }
+
                 return retVal;
             }
         }
@@ -187,13 +181,14 @@ namespace System.Collections.Generic
             if (arrayIndex < 0)
                 throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "argument 'arrayIndex' cannot be negative");
 
-            if (arrayIndex >= array.Length || Count > array.Length - arrayIndex)
+            if (arrayIndex >= array.Length ||
+                Count > array.Length - arrayIndex)
                 array = new KeyValuePair<TKey, TValue>[Count];
 
             int index = arrayIndex;
+
             foreach (KeyValuePair<TKey, TValue> pair in this)
                 array[index++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
-
         }
 
         public int Count
@@ -201,14 +196,13 @@ namespace System.Collections.Generic
             get
             {
                 int count = 0;
+
                 foreach (var item in _interalStorage)
-                {
                     count += item.Value.Count;
-                }
+
                 return count;
             }
         }
-
 
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -218,7 +212,7 @@ namespace System.Collections.Generic
 
         public bool Empty()
         {
-            return _interalStorage == null || _interalStorage.Count == 0;  
+            return _interalStorage == null || _interalStorage.Count == 0;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -226,7 +220,18 @@ namespace System.Collections.Generic
             return GetEnumerator();
         }
 
-        private Dictionary<TKey, List<TValue>> _interalStorage = new();
+        private bool TryGetValue(TKey key, out TValue value)
+        {
+            value = default;
+
+            if (_interalStorage.TryGetValue(key, out var val))
+            {
+                value = val.LastOrDefault();
+
+                return true;
+            }
+
+            return false;
+        }
     }
-    
 }

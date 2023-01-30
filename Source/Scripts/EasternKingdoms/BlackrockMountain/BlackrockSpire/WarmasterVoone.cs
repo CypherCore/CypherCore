@@ -1,14 +1,14 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoone
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Snapkick = 15618;
         public const uint Cleave = 15284;
@@ -19,9 +19,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoon
     }
 
     [Script]
-    class boss_warmaster_voone : BossAI
+    internal class boss_warmaster_voone : BossAI
     {
-        public boss_warmaster_voone(Creature creature) : base(creature, DataTypes.WarmasterVoone) { }
+        public boss_warmaster_voone(Creature creature) : base(creature, DataTypes.WarmasterVoone)
+        {
+        }
 
         public override void Reset()
         {
@@ -32,36 +34,47 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoon
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-            {
-                DoCastVictim(SpellIds.Snapkick);
-                task.Repeat(TimeSpan.FromSeconds(6));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
-            {
-                DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(12));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
-            {
-                DoCastVictim(SpellIds.Uppercut);
-                task.Repeat(TimeSpan.FromSeconds(14));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-            {
-                DoCastVictim(SpellIds.Mortalstrike);
-                task.Repeat(TimeSpan.FromSeconds(10));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
-            {
-                DoCastVictim(SpellIds.Pummel);
-                task.Repeat(TimeSpan.FromSeconds(16));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-            {
-                DoCastVictim(SpellIds.Throwaxe);
-                task.Repeat(TimeSpan.FromSeconds(8));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Snapkick);
+                                    task.Repeat(TimeSpan.FromSeconds(6));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(14),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Cleave);
+                                    task.Repeat(TimeSpan.FromSeconds(12));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Uppercut);
+                                    task.Repeat(TimeSpan.FromSeconds(14));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(12),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Mortalstrike);
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(32),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Pummel);
+                                    task.Repeat(TimeSpan.FromSeconds(16));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(1),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Throwaxe);
+                                    task.Repeat(TimeSpan.FromSeconds(8));
+                                });
         }
 
         public override void JustDied(Unit killer)
@@ -78,4 +91,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.WarmasterVoon
         }
     }
 }
-

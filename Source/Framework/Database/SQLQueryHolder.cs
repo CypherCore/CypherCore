@@ -9,8 +9,8 @@ namespace Framework.Database
 {
     public class SQLQueryHolder<T>
     {
-        public Dictionary<T, PreparedStatement> m_queries = new();
-        Dictionary<T, SQLResult> _results = new();
+        public Dictionary<T, PreparedStatement> _queries = new();
+        private readonly Dictionary<T, SQLResult> _results = new();
 
         public void SetQuery(T index, string sql, params object[] args)
         {
@@ -19,7 +19,7 @@ namespace Framework.Database
 
         public void SetQuery(T index, PreparedStatement stmt)
         {
-            m_queries[index] = stmt;
+            _queries[index] = stmt;
         }
 
         public void SetResult(T index, SQLResult result)
@@ -36,56 +36,61 @@ namespace Framework.Database
         }
     }
 
-    class SQLQueryHolderTask<R> : ISqlOperation
+    internal class SQLQueryHolderTask<R> : ISqlOperation
     {
-        SQLQueryHolder<R> m_holder;
-        TaskCompletionSource<SQLQueryHolder<R>> m_result;
+        private readonly SQLQueryHolder<R> _holder;
+        private readonly TaskCompletionSource<SQLQueryHolder<R>> _result;
 
         public SQLQueryHolderTask(SQLQueryHolder<R> holder)
         {
-            m_holder = holder;
-            m_result = new TaskCompletionSource<SQLQueryHolder<R>>();
+            _holder = holder;
+            _result = new TaskCompletionSource<SQLQueryHolder<R>>();
         }
 
         public bool Execute<T>(MySqlBase<T> mySqlBase)
         {
-            if (m_holder == null)
+            if (_holder == null)
                 return false;
 
             // execute all queries in the holder and pass the results
-            foreach (var pair in m_holder.m_queries)
-                m_holder.SetResult(pair.Key, mySqlBase.Query(pair.Value));
+            foreach (var pair in _holder._queries)
+                _holder.SetResult(pair.Key, mySqlBase.Query(pair.Value));
 
-            return m_result.TrySetResult(m_holder);
+            return _result.TrySetResult(_holder);
         }
 
-        public Task<SQLQueryHolder<R>> GetFuture() { return m_result.Task; }
+        public Task<SQLQueryHolder<R>> GetFuture()
+        {
+            return _result.Task;
+        }
     }
 
     public class SQLQueryHolderCallback<R> : ISqlCallback
     {
-        Task<SQLQueryHolder<R>> m_future;
-        Action<SQLQueryHolder<R>> m_callback;
+        private readonly Task<SQLQueryHolder<R>> _future;
+        private Action<SQLQueryHolder<R>> _callback;
 
         public SQLQueryHolderCallback(Task<SQLQueryHolder<R>> future)
         {
-            m_future = future;
-        }
-
-        public void AfterComplete(Action<SQLQueryHolder<R>> callback)
-        {
-            m_callback = callback;
+            _future = future;
         }
 
         public bool InvokeIfReady()
         {
-            if (m_future != null && m_future.Wait(0))
+            if (_future != null &&
+                _future.Wait(0))
             {
-                m_callback(m_future.Result);
+                _callback(_future.Result);
+
                 return true;
             }
 
             return false;
+        }
+
+        public void AfterComplete(Action<SQLQueryHolder<R>> callback)
+        {
+            _callback = callback;
         }
     }
 }

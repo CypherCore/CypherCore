@@ -6,23 +6,36 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class TotemDestroyed : ClientPacket
+    internal class TotemDestroyed : ClientPacket
     {
-        public TotemDestroyed(WorldPacket packet) : base(packet) { }
+        public byte Slot;
+
+        public ObjectGuid TotemGUID;
+
+        public TotemDestroyed(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Slot = _worldPacket.ReadUInt8();
             TotemGUID = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid TotemGUID;
-        public byte Slot;
     }
 
-    class TotemCreated : ServerPacket
+    internal class TotemCreated : ServerPacket
     {
-        public TotemCreated() : base(ServerOpcodes.TotemCreated) { }
+        public bool CannotDismiss;
+        public uint Duration;
+        public byte Slot;
+        public uint SpellID;
+        public float TimeMod = 1.0f;
+
+        public ObjectGuid Totem;
+
+        public TotemCreated() : base(ServerOpcodes.TotemCreated)
+        {
+        }
 
         public override void Write()
         {
@@ -34,18 +47,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(CannotDismiss);
             _worldPacket.FlushBits();
         }
-
-        public ObjectGuid Totem;
-        public uint SpellID;
-        public uint Duration;
-        public byte Slot;
-        public float TimeMod = 1.0f;
-        public bool CannotDismiss;
     }
 
-    class TotemMoved : ServerPacket
+    internal class TotemMoved : ServerPacket
     {
-        public TotemMoved() : base(ServerOpcodes.TotemMoved) { }
+        public byte NewSlot;
+        public byte Slot;
+
+        public ObjectGuid Totem;
+
+        public TotemMoved() : base(ServerOpcodes.TotemMoved)
+        {
+        }
 
         public override void Write()
         {
@@ -53,9 +66,5 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(NewSlot);
             _worldPacket.WritePackedGuid(Totem);
         }
-
-        public ObjectGuid Totem;
-        public byte Slot;
-        public byte NewSlot;
     }
 }

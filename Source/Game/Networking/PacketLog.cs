@@ -1,22 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
-using Framework.Constants;
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using Framework.Configuration;
+using Framework.Constants;
 
 public class PacketLog
 {
-    static object syncObj = new();
-    static string FullPath;
+    private static readonly object syncObj = new();
+    private static readonly string FullPath;
 
     static PacketLog()
     {
         string logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
         string logname = ConfigMgr.GetDefaultValue("PacketLogFile", "");
+
         if (!string.IsNullOrEmpty(logname))
         {
             FullPath = logsDir + @"\" + logname;
@@ -26,7 +28,7 @@ public class PacketLog
             writer.Write(Encoding.ASCII.GetBytes("T"));
             writer.Write(Global.WorldMgr.GetRealm().Build);
             writer.Write(Encoding.ASCII.GetBytes("enUS"));
-            writer.Write(new byte[40]);//SessionKey
+            writer.Write(new byte[40]); //SessionKey
             writer.Write((uint)GameTime.GetGameTime());
             writer.Write(Time.GetMSTime());
             writer.Write(0);
@@ -47,12 +49,14 @@ public class PacketLog
 
             writer.Write(20);
             byte[] SocketIPBytes = new byte[16];
-            if (endPoint.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+
+            if (endPoint.AddressFamily == AddressFamily.InterNetwork)
                 Buffer.BlockCopy(endPoint.Address.GetAddressBytes(), 0, SocketIPBytes, 0, 4);
             else
                 Buffer.BlockCopy(endPoint.Address.GetAddressBytes(), 0, SocketIPBytes, 0, 16);
 
             int size = data.Length;
+
             if (isClientPacket)
                 size -= 2;
 

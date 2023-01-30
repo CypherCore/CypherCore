@@ -1,15 +1,15 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Corla
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Evolution = 75610;
         public const uint DrainEssense = 75645;
@@ -17,7 +17,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Corla
         public const uint HShadowPower = 39193;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint YellAggro = 0;
         public const uint YellKill = 1;
@@ -28,11 +28,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Corla
     }
 
     [Script]
-    class boss_corla : BossAI
+    internal class boss_corla : BossAI
     {
-        bool combatPhase;
+        private bool combatPhase;
 
-        public boss_corla(Creature creature) : base(creature, DataTypes.Corla) { }
+        public boss_corla(Creature creature) : base(creature, DataTypes.Corla)
+        {
+        }
 
         public override void Reset()
         {
@@ -40,19 +42,25 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Corla
             combatPhase = false;
 
             _scheduler.SetValidator(() => !combatPhase);
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), drainTask =>
-            {
-                DoCast(me, SpellIds.DrainEssense);
-                drainTask.Schedule(TimeSpan.FromSeconds(15), stopDrainTask =>
-                {
-                    me.InterruptSpell(CurrentSpellTypes.Channeled);
-                    stopDrainTask.Schedule(TimeSpan.FromSeconds(2), evolutionTask =>
-                    {
-                        DoCast(me, SpellIds.Evolution);
-                        drainTask.Repeat(TimeSpan.FromSeconds(2));
-                    });
-                });
-            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                drainTask =>
+                                {
+                                    DoCast(me, SpellIds.DrainEssense);
+
+                                    drainTask.Schedule(TimeSpan.FromSeconds(15),
+                                                       stopDrainTask =>
+                                                       {
+                                                           me.InterruptSpell(CurrentSpellTypes.Channeled);
+
+                                                           stopDrainTask.Schedule(TimeSpan.FromSeconds(2),
+                                                                                  evolutionTask =>
+                                                                                  {
+                                                                                      DoCast(me, SpellIds.Evolution);
+                                                                                      drainTask.Repeat(TimeSpan.FromSeconds(2));
+                                                                                  });
+                                                       });
+                                });
         }
 
         public override void JustEngagedWith(Unit who)
@@ -83,4 +91,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.Corla
         }
     }
 }
-

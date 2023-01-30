@@ -1,17 +1,17 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.Karazhan.Midnight
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         // Attumen
         public const uint Shadowcleave = 29832;
@@ -26,7 +26,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         public const uint SummonAttumenMounted = 29799;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SayKill = 0;
         public const uint SayRandom = 1;
@@ -42,7 +42,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         public const uint EmoteMountUp = 1;
     }
 
-    enum Phases
+    internal enum Phases
     {
         None,
         AttumenEngages,
@@ -50,20 +50,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
     }
 
     [Script]
-    class boss_attumen : BossAI
+    internal class boss_attumen : BossAI
     {
-        ObjectGuid _midnightGUID;
-        Phases _phase;
+        private ObjectGuid _midnightGUID;
+        private Phases _phase;
 
         public boss_attumen(Creature creature) : base(creature, DataTypes.Attumen)
         {
             Initialize();
-        }
-
-        void Initialize()
-        {
-            _midnightGUID.Clear();
-            _phase = Phases.None;
         }
 
         public override void Reset()
@@ -75,47 +69,58 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         public override void EnterEvadeMode(EvadeReason why)
         {
             Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+
             if (midnight)
-                base._DespawnAtEvade(TimeSpan.FromSeconds(10), midnight);
+                _DespawnAtEvade(TimeSpan.FromSeconds(10), midnight);
 
             me.DespawnOrUnsummon();
         }
 
         public override void ScheduleTasks()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
-            {
-                DoCastVictim(SpellIds.Shadowcleave);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(15),
+                                TimeSpan.FromSeconds(25),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Shadowcleave);
+                                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                                });
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
-                    DoCast(target, SpellIds.IntangiblePresence);
+            _scheduler.Schedule(TimeSpan.FromSeconds(25),
+                                TimeSpan.FromSeconds(45),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
 
-                task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45));
-            });
+                                    if (target)
+                                        DoCast(target, SpellIds.IntangiblePresence);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60), task =>
-            {
-                Talk(TextIds.SayRandom);
-                task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60));
-            });
+                                    task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(30),
+                                TimeSpan.FromSeconds(60),
+                                task =>
+                                {
+                                    Talk(TextIds.SayRandom);
+                                    task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60));
+                                });
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            // Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further damage.
-            if (damage >= me.GetHealth() && _phase != Phases.Mounted)
+            // Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further Damage.
+            if (damage >= me.GetHealth() &&
+                _phase != Phases.Mounted)
                 damage = (uint)(me.GetHealth() - 1);
 
-            if (_phase == Phases.AttumenEngages && me.HealthBelowPctDamaged(25, damage))
+            if (_phase == Phases.AttumenEngages &&
+                me.HealthBelowPctDamaged(25, damage))
             {
                 _phase = Phases.None;
 
                 Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+
                 if (midnight)
                     midnight.GetAI().DoCastAOE(SpellIds.Mount, new CastSpellExtraArgs(true));
             }
@@ -131,6 +136,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (summon.GetEntry() == CreatureIds.AttumenMounted)
             {
                 Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+
                 if (midnight)
                 {
                     if (midnight.GetHealth() > me.GetHealth())
@@ -156,32 +162,39 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 _phase = Phases.Mounted;
                 DoCastSelf(SpellIds.SpawnSmoke);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25), task =>
-                {
-                    Unit target = null;
-                    List<Unit> targetList = new();
+                _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                    TimeSpan.FromSeconds(25),
+                                    task =>
+                                    {
+                                        Unit target = null;
+                                        List<Unit> targetList = new();
 
-                    foreach (var refe in me.GetThreatManager().GetSortedThreatList())
-                    {
-                        target = refe.GetVictim();
-                        if (target && !target.IsWithinDist(me, 8.00f, false) && target.IsWithinDist(me, 25.0f, false))
-                            targetList.Add(target);
+                                        foreach (var refe in me.GetThreatManager().GetSortedThreatList())
+                                        {
+                                            target = refe.GetVictim();
 
-                        target = null;
-                    }
+                                            if (target &&
+                                                !target.IsWithinDist(me, 8.00f, false) &&
+                                                target.IsWithinDist(me, 25.0f, false))
+                                                targetList.Add(target);
 
-                    if (!targetList.Empty())
-                        target = targetList.SelectRandom();
+                                            target = null;
+                                        }
 
-                    DoCast(target, SpellIds.Charge);
-                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
-                });
+                                        if (!targetList.Empty())
+                                            target = targetList.SelectRandom();
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35), task =>
-                {
-                    DoCastVictim(SpellIds.Knockdown);
-                    task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
-                });
+                                        DoCast(target, SpellIds.Charge);
+                                        task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                                    });
+
+                _scheduler.Schedule(TimeSpan.FromSeconds(25),
+                                    TimeSpan.FromSeconds(35),
+                                    task =>
+                                    {
+                                        DoCastVictim(SpellIds.Knockdown);
+                                        task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                                    });
             }
         }
 
@@ -189,6 +202,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         {
             Talk(TextIds.SayDeath);
             Unit midnight = Global.ObjAccessor.GetUnit(me, _midnightGUID);
+
             if (midnight)
                 midnight.KillSelf();
 
@@ -203,7 +217,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim() && _phase != Phases.None)
+            if (!UpdateVictim() &&
+                _phase != Phases.None)
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
@@ -217,6 +232,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (spellInfo.Id == SpellIds.Mount)
             {
                 Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+
                 if (midnight)
                 {
                     _phase = Phases.None;
@@ -234,45 +250,48 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                     me.GetMotionMaster().MoveFollow(midnight, 2.0f, 0.0f);
                     Talk(TextIds.SayMount);
 
-                    _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-                                   {
-                                       Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
-                                       if (midnight)
-                                       {
-                                           if (me.IsWithinDist2d(midnight, 5.0f))
-                                           {
-                                               DoCastAOE(SpellIds.SummonAttumenMounted);
-                                               me.SetVisible(false);
-                                               me.GetMotionMaster().Clear();
-                                               midnight.SetVisible(false);
-                                           }
-                                           else
-                                           {
-                                               midnight.GetMotionMaster().MoveFollow(me, 2.0f, 0.0f);
-                                               me.GetMotionMaster().MoveFollow(midnight, 2.0f, 0.0f);
-                                               task.Repeat();
-                                           }
-                                       }
-                                   });
+                    _scheduler.Schedule(TimeSpan.FromSeconds(1),
+                                        task =>
+                                        {
+                                            Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+
+                                            if (midnight)
+                                            {
+                                                if (me.IsWithinDist2d(midnight, 5.0f))
+                                                {
+                                                    DoCastAOE(SpellIds.SummonAttumenMounted);
+                                                    me.SetVisible(false);
+                                                    me.GetMotionMaster().Clear();
+                                                    midnight.SetVisible(false);
+                                                }
+                                                else
+                                                {
+                                                    midnight.GetMotionMaster().MoveFollow(me, 2.0f, 0.0f);
+                                                    me.GetMotionMaster().MoveFollow(midnight, 2.0f, 0.0f);
+                                                    task.Repeat();
+                                                }
+                                            }
+                                        });
                 }
             }
+        }
+
+        private void Initialize()
+        {
+            _midnightGUID.Clear();
+            _phase = Phases.None;
         }
     }
 
     [Script]
-    class boss_midnight : BossAI
+    internal class boss_midnight : BossAI
     {
-        ObjectGuid _attumenGUID;
-        Phases _phase;
+        private ObjectGuid _attumenGUID;
+        private Phases _phase;
 
         public boss_midnight(Creature creature) : base(creature, DataTypes.Attumen)
         {
             Initialize();
-        }
-
-        void Initialize()
-        {
-            _phase = Phases.None;
         }
 
         public override void Reset()
@@ -285,17 +304,19 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            // Midnight never dies, let health fall to 1 and prevent further damage.
+            // Midnight never dies, let health fall to 1 and prevent further Damage.
             if (damage >= me.GetHealth())
                 damage = (uint)(me.GetHealth() - 1);
 
-            if (_phase == Phases.None && me.HealthBelowPctDamaged(95, damage))
+            if (_phase == Phases.None &&
+                me.HealthBelowPctDamaged(95, damage))
             {
                 _phase = Phases.AttumenEngages;
                 Talk(TextIds.EmoteCallAttumen);
                 DoCastAOE(SpellIds.SummonAttumen);
             }
-            else if (_phase == Phases.AttumenEngages && me.HealthBelowPctDamaged(25, damage))
+            else if (_phase == Phases.AttumenEngages &&
+                     me.HealthBelowPctDamaged(25, damage))
             {
                 _phase = Phases.Mounted;
                 DoCastAOE(SpellIds.Mount, new CastSpellExtraArgs(true));
@@ -319,16 +340,18 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
-            {
-                DoCastVictim(SpellIds.Knockdown);
-                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(15),
+                                TimeSpan.FromSeconds(25),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Knockdown);
+                                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+                                });
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
-            base._DespawnAtEvade(TimeSpan.FromSeconds(10));
+            _DespawnAtEvade(TimeSpan.FromSeconds(10));
         }
 
         public override void KilledUnit(Unit victim)
@@ -336,6 +359,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
             if (_phase == Phases.AttumenEngages)
             {
                 Unit unit = Global.ObjAccessor.GetUnit(me, _attumenGUID);
+
                 if (unit)
                     Talk(TextIds.SayMidnightKill, unit);
             }
@@ -343,10 +367,16 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim() || _phase == Phases.Mounted)
+            if (!UpdateVictim() ||
+                _phase == Phases.Mounted)
                 return;
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void Initialize()
+        {
+            _phase = Phases.None;
         }
     }
 }

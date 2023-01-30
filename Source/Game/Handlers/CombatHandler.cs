@@ -12,20 +12,23 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
-        void HandleAttackSwing(AttackSwing packet)
+        private void HandleAttackSwing(AttackSwing packet)
         {
             Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
+
             if (!enemy)
             {
-                // stop attack state at client
+                // stop attack State at client
                 SendAttackStop(null);
+
                 return;
             }
 
             if (!GetPlayer().IsValidAttackTarget(enemy))
             {
-                // stop attack state at client
+                // stop attack State at client
                 SendAttackStop(enemy);
+
                 return;
             }
 
@@ -33,13 +36,16 @@ namespace Game
             //! so we'll place the same check here. Note that it might be possible to reuse this snippet
             //! in other places as well.
             Vehicle vehicle = GetPlayer().GetVehicle();
+
             if (vehicle)
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
                 Cypher.Assert(seat != null);
+
                 if (!seat.HasFlag(VehicleSeatFlags.CanAttack))
                 {
                     SendAttackStop(enemy);
+
                     return;
                 }
             }
@@ -48,24 +54,25 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AttackStop, Processing = PacketProcessing.Inplace)]
-        void HandleAttackStop(AttackStop packet)
+        private void HandleAttackStop(AttackStop packet)
         {
             GetPlayer().AttackStop();
         }
 
         [WorldPacketHandler(ClientOpcodes.SetSheathed, Processing = PacketProcessing.Inplace)]
-        void HandleSetSheathed(SetSheathed packet)
+        private void HandleSetSheathed(SetSheathed packet)
         {
             if (packet.CurrentSheathState >= (int)SheathState.Max)
             {
-                Log.outError(LogFilter.Network, "Unknown sheath state {0} ??", packet.CurrentSheathState);
+                Log.outError(LogFilter.Network, "Unknown sheath State {0} ??", packet.CurrentSheathState);
+
                 return;
             }
 
             GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
         }
 
-        void SendAttackStop(Unit enemy)
+        private void SendAttackStop(Unit enemy)
         {
             SendPacket(new SAttackStop(GetPlayer(), enemy));
         }

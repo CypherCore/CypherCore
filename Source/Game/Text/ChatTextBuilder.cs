@@ -1,33 +1,35 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
-using System.Collections.Generic;
 
 namespace Game.Chat
 {
     public class MessageBuilder
     {
-        public virtual dynamic Invoke(Locale locale = Locale.enUS) { return default; }
+        public virtual dynamic Invoke(Locale locale = Locale.enUS)
+        {
+            return default;
+        }
     }
 
     public class ChatPacketSender : IDoWork<Player>
     {
-        ChatMsg Type;
-        Language Language;
-        WorldObject Sender;
-        WorldObject Receiver;
-        string Text;
-        uint AchievementId;
-        Locale Locale;
+        public ChatPkt TranslatedPacket;
 
         // caches
         public ChatPkt UntranslatedPacket;
-        public ChatPkt TranslatedPacket;
+        private readonly uint AchievementId;
+        private readonly Language Language;
+        private readonly Locale Locale;
+        private readonly WorldObject Receiver;
+        private readonly WorldObject Sender;
+        private readonly string Text;
+        private readonly ChatMsg Type;
 
         public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS)
         {
@@ -39,22 +41,26 @@ namespace Game.Chat
             AchievementId = achievementId;
             Locale = locale;
 
-            UntranslatedPacket = new();
+            UntranslatedPacket = new ChatPkt();
             UntranslatedPacket.Initialize(Type, Language, Sender, Receiver, Text, AchievementId, "", Locale);
             UntranslatedPacket.Write();
         }
 
         public void Invoke(Player player)
         {
-            if (Language == Language.Universal || Language == Language.Addon || Language == Language.AddonLogged || player.CanUnderstandLanguage(Language))
+            if (Language == Language.Universal ||
+                Language == Language.Addon ||
+                Language == Language.AddonLogged ||
+                player.CanUnderstandLanguage(Language))
             {
                 player.SendPacket(UntranslatedPacket);
+
                 return;
             }
 
             if (TranslatedPacket == null)
             {
-                TranslatedPacket = new();
+                TranslatedPacket = new ChatPkt();
                 TranslatedPacket.Initialize(Type, Language, Sender, Receiver, Global.LanguageMgr.Translate(Text, (uint)Language, player.GetSession().GetSessionDbcLocale()), AchievementId, "", Locale);
                 TranslatedPacket.Write();
             }
@@ -62,9 +68,17 @@ namespace Game.Chat
             player.SendPacket(TranslatedPacket);
         }
     }
-    
+
     public class BroadcastTextBuilder : MessageBuilder
     {
+        private readonly uint _achievementId;
+        private readonly Gender _gender;
+        private readonly ChatMsg _msgType;
+
+        private readonly WorldObject _source;
+        private readonly WorldObject _target;
+        private readonly uint _textId;
+
         public BroadcastTextBuilder(WorldObject obj, ChatMsg msgtype, uint textId, Gender gender, WorldObject target = null, uint achievementId = 0)
         {
             _source = obj;
@@ -78,19 +92,20 @@ namespace Game.Chat
         public override ChatPacketSender Invoke(Locale locale = Locale.enUS)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
+
             return new ChatPacketSender(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, locale);
         }
-
-        WorldObject _source;
-        ChatMsg _msgType;
-        uint _textId;
-        Gender _gender;
-        WorldObject _target;
-        uint _achievementId;
     }
 
     public class CustomChatTextBuilder : MessageBuilder
     {
+        private readonly Language _language;
+        private readonly ChatMsg _msgType;
+
+        private readonly WorldObject _source;
+        private readonly WorldObject _target;
+        private readonly string _text;
+
         public CustomChatTextBuilder(WorldObject obj, ChatMsg msgType, string text, Language language = Language.Universal, WorldObject target = null)
         {
             _source = obj;
@@ -104,16 +119,17 @@ namespace Game.Chat
         {
             return new ChatPacketSender(_msgType, _language, _source, _target, _text, 0, locale);
         }
-
-        WorldObject _source;
-        ChatMsg _msgType;
-        string _text;
-        Language _language;
-        WorldObject _target;
     }
 
-    class CypherStringChatBuilder : MessageBuilder
+    internal class CypherStringChatBuilder : MessageBuilder
     {
+        private readonly object[] _args;
+        private readonly ChatMsg _msgType;
+
+        private readonly WorldObject _source;
+        private readonly WorldObject _target;
+        private readonly CypherStrings _textId;
+
         public CypherStringChatBuilder(WorldObject obj, ChatMsg msgType, CypherStrings textId, WorldObject target = null, object[] args = null)
         {
             _source = obj;
@@ -132,11 +148,5 @@ namespace Game.Chat
             else
                 return new ChatPacketSender(_msgType, Language.Universal, _source, _target, text, 0, locale);
         }
-
-        WorldObject _source;
-        ChatMsg _msgType;
-        CypherStrings _textId;
-        WorldObject _target;
-        object[] _args;
     }
 }

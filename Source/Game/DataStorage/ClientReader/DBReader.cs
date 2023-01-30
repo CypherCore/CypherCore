@@ -1,10 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Collections;
-using Framework.Constants;
-using Framework.Database;
-using Framework.Dynamic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,12 +10,24 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Framework.Collections;
+using Framework.Constants;
+using Framework.Database;
+using Framework.Dynamic;
 
 namespace Game.DataStorage
 {
-    class DBReader
+    internal class DBReader
     {
         private const uint WDC3FmtSig = 0x33434457; // WDC3
+        internal ColumnMetaData[] ColumnMeta;
+        internal Dictionary<int, Value32>[] CommonData;
+        internal FieldMetaData[] FieldMeta;
+
+        internal WDCHeader Header;
+        internal Value32[][] PalletData;
+
+        private readonly Dictionary<int, WDC3Row> _records = new();
 
         public static DB6Storage<T> Read<T>(BitSet availableDb2Locales, string db2Path, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale, ref uint loadedFileCount) where T : new()
         {
@@ -28,15 +36,18 @@ namespace Game.DataStorage
             if (!File.Exists(db2Path + fileName))
             {
                 Log.outError(LogFilter.ServerLoading, $"File {fileName} not found.");
+
                 return storage;
             }
 
             DBReader reader = new();
+
             using (var stream = new FileStream(db2Path + fileName, FileMode.Open))
             {
                 if (!reader.Load(stream))
                 {
                     Log.outError(LogFilter.ServerLoading, $"Error loading {fileName}.");
+
                     return storage;
                 }
             }
@@ -48,15 +59,17 @@ namespace Game.DataStorage
 
             Global.DB2Mgr.AddDB2(reader.Header.TableHash, storage);
             loadedFileCount++;
+
             return storage;
         }
 
-        bool Load(Stream stream)
+        private bool Load(Stream stream)
         {
             using (var reader = new BinaryReader(stream, Encoding.UTF8))
             {
                 Header = new WDCHeader();
                 Header.Signature = reader.ReadUInt32();
+
                 if (Header.Signature != WDC3FmtSig)
                     return false;
 
@@ -81,27 +94,24 @@ namespace Game.DataStorage
 
                 var sections = reader.ReadArray<SectionHeader>(Header.SectionsCount);
 
-                // field meta data
+                // field meta _data
                 FieldMeta = reader.ReadArray<FieldMetaData>(Header.FieldCount);
 
-                // column meta data 
+                // column meta _data 
                 ColumnMeta = reader.ReadArray<ColumnMetaData>(Header.FieldCount);
 
-                // pallet data
+                // pallet _data
                 PalletData = new Value32[ColumnMeta.Length][];
-                for (int i = 0; i < ColumnMeta.Length; i++)
-                {
-                    if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Pallet || ColumnMeta[i].CompressionType == DB2ColumnCompression.PalletArray)
-                    {
-                        PalletData[i] = reader.ReadArray<Value32>(ColumnMeta[i].AdditionalDataSize / 4);
-                    }
-                }
 
-                // common data
+                for (int i = 0; i < ColumnMeta.Length; i++)
+                    if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Pallet ||
+                        ColumnMeta[i].CompressionType == DB2ColumnCompression.PalletArray)
+                        PalletData[i] = reader.ReadArray<Value32>(ColumnMeta[i].AdditionalDataSize / 4);
+
+                // common _data
                 CommonData = new Dictionary<int, Value32>[ColumnMeta.Length];
 
                 for (int i = 0; i < ColumnMeta.Length; i++)
-                {
                     if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Common)
                     {
                         Dictionary<int, Value32> commonValues = new();
@@ -110,16 +120,17 @@ namespace Game.DataStorage
                         for (int j = 0; j < ColumnMeta[i].AdditionalDataSize / 8; j++)
                             commonValues[reader.ReadInt32()] = reader.Read<Value32>();
                     }
-                }
 
                 long previousStringTableSize = 0;
                 long previousRecordCount = 0;
+
                 for (int sectionIndex = 0; sectionIndex < Header.SectionsCount; sectionIndex++)
                 {
-                    if (sections[sectionIndex].TactKeyLookup != 0)// && !hasTactKeyFunc(sections[sectionIndex].TactKeyLookup))
+                    if (sections[sectionIndex].TactKeyLookup != 0) // && !hasTactKeyFunc(sections[sectionIndex].TactKeyLookup))
                     {
                         previousStringTableSize += sections[sectionIndex].StringTableSize;
                         previousRecordCount += sections[sectionIndex].NumRecords;
+
                         //Console.WriteLine("Detected db2 with encrypted section! HasKey {0}", CASC.HasKey(Sections[sectionIndex].TactKeyLookup));
                         continue;
                     }
@@ -132,13 +143,14 @@ namespace Game.DataStorage
 
                     if (!Header.HasOffsetTable())
                     {
-                        // records data
+                        // records _data
                         recordsData = reader.ReadBytes((int)(sections[sectionIndex].NumRecords * Header.RecordSize));
 
-                        // string data
+                        // string _data
                         stringsTable = new Dictionary<long, string>();
 
                         long stringDataOffset = 0;
+
                         if (sectionIndex == 0)
                             stringDataOffset = (Header.RecordCount - sections[sectionIndex].NumRecords) * Header.RecordSize;
                         else
@@ -155,7 +167,7 @@ namespace Game.DataStorage
                     }
                     else
                     {
-                        // sparse data with inlined strings
+                        // sparse _data with inlined strings
                         recordsData = reader.ReadBytes(sections[sectionIndex].SparseTableOffset - sections[sectionIndex].FileOffset);
 
                         if (reader.BaseStream.Position != sections[sectionIndex].SparseTableOffset)
@@ -164,11 +176,11 @@ namespace Game.DataStorage
 
                     Array.Resize(ref recordsData, recordsData.Length + 8); // pad with extra zeros so we don't crash when reading
 
-                    // index data
+                    // index _data
                     int[] indexData = reader.ReadArray<int>((uint)(sections[sectionIndex].IndexDataSize / 4));
                     bool isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == sections[sectionIndex].NumRecords;
 
-                    // duplicate rows data
+                    // duplicate rows _data
                     Dictionary<int, int> copyData = new();
 
                     for (int i = 0; i < sections[sectionIndex].NumCopyRecords; i++)
@@ -177,7 +189,7 @@ namespace Game.DataStorage
                     if (sections[sectionIndex].NumSparseRecords > 0)
                         sparseEntries = reader.ReadArray<SparseEntry>((uint)sections[sectionIndex].NumSparseRecords);
 
-                    // reference data
+                    // reference _data
                     ReferenceData refData = null;
 
                     if (sections[sectionIndex].ParentLookupDataSize > 0)
@@ -191,6 +203,7 @@ namespace Game.DataStorage
 
                         refData.Entries = new Dictionary<int, int>();
                         ReferenceEntry[] entries = reader.ReadArray<ReferenceEntry>((uint)refData.NumRecords);
+
                         foreach (var entry in entries)
                             refData.Entries[entry.Index] = entry.Id;
                     }
@@ -207,7 +220,8 @@ namespace Game.DataStorage
                         // TODO: use this shit
                         int[] sparseIndexData = reader.ReadArray<int>((uint)sections[sectionIndex].NumSparseRecords);
 
-                        if (Header.HasIndexTable() && indexData.Length != sparseIndexData.Length)
+                        if (Header.HasIndexTable() &&
+                            indexData.Length != sparseIndexData.Length)
                             throw new Exception("indexData.Length != sparseIndexData.Length");
 
                         indexData = sparseIndexData;
@@ -218,6 +232,7 @@ namespace Game.DataStorage
                     for (int i = 0; i < sections[sectionIndex].NumRecords; ++i)
                     {
                         bitReader.Position = 0;
+
                         if (Header.HasOffsetTable())
                             bitReader.Offset = sparseEntries[i].Offset - sections[sectionIndex].FileOffset;
                         else
@@ -226,54 +241,42 @@ namespace Game.DataStorage
                         bool hasRef = refData.Entries.TryGetValue(i, out int refId);
 
                         long recordIndex = i + previousRecordCount;
-                        long recordOffset =  (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
+                        long recordOffset = (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
 
                         var rec = new WDC3Row(this, bitReader, (int)recordOffset, Header.HasIndexTable() ? (isIndexEmpty ? i : indexData[i]) : -1, hasRef ? refId : -1, stringsTable);
                         _records.Add(rec.Id, rec);
                     }
 
                     foreach (var copyRow in copyData)
-                    {
                         if (copyRow.Key != 0)
                         {
                             var rec = _records[copyRow.Value].Clone();
                             rec.Id = copyRow.Key;
                             _records.Add(copyRow.Key, rec);
                         }
-                    }
 
                     previousStringTableSize += sections[sectionIndex].StringTableSize;
                     previousRecordCount += sections[sectionIndex].NumRecords;
                 }
             }
 
-            return true;            
+            return true;
         }
-
-        internal WDCHeader Header;
-        internal FieldMetaData[] FieldMeta;
-        internal ColumnMetaData[] ColumnMeta;
-        internal Value32[][] PalletData;
-        internal Dictionary<int, Value32>[] CommonData;
-
-        Dictionary<int, WDC3Row> _records = new();
     }
 
-    class WDC3Row
+    internal class WDC3Row
     {
-        private BitReader _data;
-        private int _dataOffset;
-        private int _recordsOffset;
-        private int _refId;
-        private bool _dataHasId;
+        private readonly ColumnMetaData[] _columnMeta;
+        private readonly Dictionary<int, Value32>[] _commonData;
+        private readonly BitReader _data;
+        private readonly bool _dataHasId;
+        private readonly int _dataOffset;
 
-        public int Id { get; set; }
-
-        private FieldMetaData[] _fieldMeta;
-        private ColumnMetaData[] _columnMeta;
-        private Value32[][] _palletData;
-        private Dictionary<int, Value32>[] _commonData;
-        private Dictionary<long, string> _stringsTable;
+        private readonly FieldMetaData[] _fieldMeta;
+        private readonly Value32[][] _palletData;
+        private readonly int _recordsOffset;
+        private readonly int _refId;
+        private readonly Dictionary<long, string> _stringsTable;
 
         public WDC3Row(DBReader reader, BitReader data, int recordsOffset, int id, int refId, Dictionary<long, string> stringsTable)
         {
@@ -290,7 +293,9 @@ namespace Game.DataStorage
             _stringsTable = stringsTable;
 
             if (id != -1)
+            {
                 Id = id;
+            }
             else
             {
                 int idFieldIndex = reader.Header.IdIndex;
@@ -301,13 +306,236 @@ namespace Game.DataStorage
             }
         }
 
-        T GetFieldValue<T>(int fieldIndex) where T : unmanaged
+        public int Id { get; set; }
+
+        public T As<T>() where T : new()
+        {
+            _data.Position = 0;
+            _data.Offset = _dataOffset;
+
+            int fieldIndex = 0;
+            T obj = new();
+
+            foreach (var f in typeof(T).GetFields())
+            {
+                Type type = f.FieldType;
+
+                if (f.Name == "Id" &&
+                    !_dataHasId)
+                {
+                    f.SetValue(obj, (uint)Id);
+
+                    continue;
+                }
+
+                if (fieldIndex >= _fieldMeta.Length)
+                {
+                    if (_refId != -1)
+                        f.SetValue(obj, (uint)_refId);
+
+                    continue;
+                }
+
+                if (type.IsArray)
+                {
+                    Type arrayElementType = type.GetElementType();
+
+                    if (arrayElementType.IsEnum)
+                        arrayElementType = arrayElementType.GetEnumUnderlyingType();
+
+                    Array atr = (Array)f.GetValue(obj);
+
+                    switch (Type.GetTypeCode(arrayElementType))
+                    {
+                        case TypeCode.SByte:
+                            f.SetValue(obj, GetFieldValueArray<sbyte>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.Byte:
+                            f.SetValue(obj, GetFieldValueArray<byte>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.Int16:
+                            f.SetValue(obj, GetFieldValueArray<short>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.UInt16:
+                            f.SetValue(obj, GetFieldValueArray<ushort>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.Int32:
+                            f.SetValue(obj, GetFieldValueArray<int>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.UInt32:
+                            f.SetValue(obj, GetFieldValueArray<uint>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.Int64:
+                            f.SetValue(obj, GetFieldValueArray<long>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.UInt64:
+                            f.SetValue(obj, GetFieldValueArray<ulong>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.Single:
+                            f.SetValue(obj, GetFieldValueArray<float>(fieldIndex, atr.Length));
+
+                            break;
+                        case TypeCode.String:
+                            string[] array = new string[atr.Length];
+
+                            if (_stringsTable == null)
+                            {
+                                for (int i = 0; i < array.Length; i++)
+                                    array[i] = _data.ReadCString();
+                            }
+                            else
+                            {
+                                var pos = _recordsOffset + (_data.Position >> 3);
+
+                                int[] strIdx = GetFieldValueArray<int>(fieldIndex, atr.Length);
+
+                                for (int i = 0; i < array.Length; i++)
+                                    array[i] = _stringsTable.LookupByKey(pos + i * 4 + strIdx[i]);
+                            }
+
+                            f.SetValue(obj, array);
+
+                            break;
+                        case TypeCode.Object:
+                            if (arrayElementType == typeof(Vector3))
+                            {
+                                float[] pos = GetFieldValueArray<float>(fieldIndex, atr.Length * 3);
+
+                                Vector3[] vectors = new Vector3[atr.Length];
+
+                                for (var i = 0; i < atr.Length; ++i)
+                                    vectors[i] = new Vector3(pos[i * 3], pos[(i * 3) + 1], pos[(i * 3) + 2]);
+
+                                f.SetValue(obj, vectors);
+                            }
+
+                            break;
+                        default:
+                            throw new Exception("Unhandled array Type: " + arrayElementType.Name);
+                    }
+                }
+                else
+                {
+                    if (type.IsEnum)
+                        type = type.GetEnumUnderlyingType();
+
+                    switch (Type.GetTypeCode(type))
+                    {
+                        case TypeCode.Single:
+                            f.SetValue(obj, GetFieldValue<float>(fieldIndex));
+
+                            break;
+                        case TypeCode.Int64:
+                            f.SetValue(obj, GetFieldValue<long>(fieldIndex));
+
+                            break;
+                        case TypeCode.UInt64:
+                            f.SetValue(obj, GetFieldValue<ulong>(fieldIndex));
+
+                            break;
+                        case TypeCode.Int32:
+                            f.SetValue(obj, GetFieldValue<int>(fieldIndex));
+
+                            break;
+                        case TypeCode.UInt32:
+                            f.SetValue(obj, GetFieldValue<uint>(fieldIndex));
+
+                            break;
+                        case TypeCode.Int16:
+                            f.SetValue(obj, GetFieldValue<short>(fieldIndex));
+
+                            break;
+                        case TypeCode.UInt16:
+                            f.SetValue(obj, GetFieldValue<ushort>(fieldIndex));
+
+                            break;
+                        case TypeCode.Byte:
+                            f.SetValue(obj, GetFieldValue<byte>(fieldIndex));
+
+                            break;
+                        case TypeCode.SByte:
+                            f.SetValue(obj, GetFieldValue<sbyte>(fieldIndex));
+
+                            break;
+                        case TypeCode.String:
+                            if (_stringsTable == null)
+                            {
+                                f.SetValue(obj, _data.ReadCString());
+                            }
+                            else
+                            {
+                                var pos = _recordsOffset + (_data.Position >> 3);
+                                int ofs = GetFieldValue<int>(fieldIndex);
+                                f.SetValue(obj, _stringsTable.LookupByKey(pos + ofs));
+                            }
+
+                            break;
+                        case TypeCode.Object:
+                            if (type == typeof(LocalizedString))
+                            {
+                                LocalizedString localized = new();
+
+                                if (_stringsTable == null)
+                                {
+                                    localized[Locale.enUS] = _data.ReadCString();
+                                }
+                                else
+                                {
+                                    var pos = _recordsOffset + (_data.Position >> 3);
+                                    int ofs = GetFieldValue<int>(fieldIndex);
+                                    localized[Locale.enUS] = _stringsTable.LookupByKey(pos + ofs);
+                                }
+
+                                f.SetValue(obj, localized);
+                            }
+                            else if (type == typeof(Vector2))
+                            {
+                                float[] pos = GetFieldValueArray<float>(fieldIndex, 2);
+                                f.SetValue(obj, new Vector2(pos));
+                            }
+                            else if (type == typeof(Vector3))
+                            {
+                                float[] pos = GetFieldValueArray<float>(fieldIndex, 3);
+                                f.SetValue(obj, new Vector3(pos));
+                            }
+                            else if (type == typeof(FlagArray128))
+                            {
+                                uint[] flags = GetFieldValueArray<uint>(fieldIndex, 4);
+                                f.SetValue(obj, new FlagArray128(flags));
+                            }
+
+                            break;
+                    }
+                }
+
+                fieldIndex++;
+            }
+
+            return obj;
+        }
+
+        public WDC3Row Clone()
+        {
+            return (WDC3Row)MemberwiseClone();
+        }
+
+        private T GetFieldValue<T>(int fieldIndex) where T : unmanaged
         {
             var columnMeta = _columnMeta[fieldIndex];
+
             switch (columnMeta.CompressionType)
             {
                 case DB2ColumnCompression.None:
                     int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
+
                     if (bitSize > 0)
                         return _data.Read<T>(bitSize);
                     else
@@ -324,12 +552,14 @@ namespace Game.DataStorage
                 case DB2ColumnCompression.Pallet:
                 case DB2ColumnCompression.PalletArray:
                     uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
+
                     return _palletData[fieldIndex][palletIndex].As<T>();
             }
-            throw new Exception(string.Format("Unexpected compression type {0}", _columnMeta[fieldIndex].CompressionType));
+
+            throw new Exception(string.Format("Unexpected compression Type {0}", _columnMeta[fieldIndex].CompressionType));
         }
 
-        T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
+        private T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
         {
             var columnMeta = _columnMeta[fieldIndex];
 
@@ -341,12 +571,10 @@ namespace Game.DataStorage
                     T[] arr1 = new T[arraySize];
 
                     for (int i = 0; i < arr1.Length; i++)
-                    {
                         if (bitSize > 0)
                             arr1[i] = _data.Read<T>(bitSize);
                         else
                             arr1[i] = _data.Read<T>(columnMeta.Immediate.BitWidth);
-                    }
 
                     return arr1;
                 case DB2ColumnCompression.Immediate:
@@ -378,202 +606,35 @@ namespace Game.DataStorage
 
                     return arr4;
             }
-            throw new Exception(string.Format("Unexpected compression type {0}", columnMeta.CompressionType));
-        }
 
-        public T As<T>() where T : new()
-        {
-            _data.Position = 0;
-            _data.Offset = _dataOffset;
-
-            int fieldIndex = 0;
-            T obj = new();
-
-            foreach (var f in typeof(T).GetFields())
-            {
-                Type type = f.FieldType;
-
-                if (f.Name == "Id" && !_dataHasId)
-                {
-                    f.SetValue(obj, (uint)Id);
-                    continue;
-                }
-
-                if (fieldIndex >= _fieldMeta.Length)
-                {
-                    if (_refId != -1)
-                        f.SetValue(obj, (uint)_refId);
-                    continue;
-                }
-
-                if (type.IsArray)
-                {
-                    Type arrayElementType = type.GetElementType();
-                    if (arrayElementType.IsEnum)
-                        arrayElementType = arrayElementType.GetEnumUnderlyingType();
-
-                    Array atr = (Array)f.GetValue(obj);
-                    switch (Type.GetTypeCode(arrayElementType))
-                    {
-                        case TypeCode.SByte:
-                            f.SetValue(obj, GetFieldValueArray<sbyte>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.Byte:
-                            f.SetValue(obj, GetFieldValueArray<byte>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.Int16:
-                            f.SetValue(obj, GetFieldValueArray<short>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.UInt16:
-                            f.SetValue(obj, GetFieldValueArray<ushort>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.Int32:
-                            f.SetValue(obj, GetFieldValueArray<int>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.UInt32:
-                            f.SetValue(obj, GetFieldValueArray<uint>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.Int64:
-                            f.SetValue(obj, GetFieldValueArray<long>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.UInt64:
-                            f.SetValue(obj, GetFieldValueArray<ulong>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.Single:
-                            f.SetValue(obj, GetFieldValueArray<float>(fieldIndex, atr.Length));
-                            break;
-                        case TypeCode.String:
-                            string[] array = new string[atr.Length];
-
-                            if (_stringsTable == null)
-                            {
-                                for (int i = 0; i < array.Length; i++)
-                                    array[i] = _data.ReadCString();
-                            }
-                            else
-                            {
-                                var pos = _recordsOffset + (_data.Position >> 3);
-
-                                int[] strIdx = GetFieldValueArray<int>(fieldIndex, atr.Length);
-
-                                for (int i = 0; i < array.Length; i++)
-                                    array[i] = _stringsTable.LookupByKey(pos + i * 4 + strIdx[i]);
-                            }
-
-                            f.SetValue(obj, array);
-                            break;
-                        case TypeCode.Object:
-                            if (arrayElementType == typeof(Vector3))
-                            {
-                                float[] pos = GetFieldValueArray<float>(fieldIndex, atr.Length * 3);
-
-                                Vector3[] vectors = new Vector3[atr.Length];
-                                for (var i = 0; i < atr.Length; ++i)
-                                    vectors[i] = new Vector3(pos[i * 3], pos[(i * 3) + 1], pos[(i * 3) + 2]);
-
-                                f.SetValue(obj, vectors);
-                            }
-                            break;
-                        default:
-                            throw new Exception("Unhandled array type: " + arrayElementType.Name);
-                    }
-                }
-                else
-                {
-                    if (type.IsEnum)
-                        type = type.GetEnumUnderlyingType();
-
-                    switch (Type.GetTypeCode(type))
-                    {
-                        case TypeCode.Single:
-                            f.SetValue(obj, GetFieldValue<float>(fieldIndex));
-                            break;
-                        case TypeCode.Int64:
-                            f.SetValue(obj, GetFieldValue<long>(fieldIndex));
-                            break;
-                        case TypeCode.UInt64:
-                            f.SetValue(obj, GetFieldValue<ulong>(fieldIndex));
-                            break;
-                        case TypeCode.Int32:
-                            f.SetValue(obj, GetFieldValue<int>(fieldIndex));
-                            break;
-                        case TypeCode.UInt32:
-                            f.SetValue(obj, GetFieldValue<uint>(fieldIndex));
-                            break;
-                        case TypeCode.Int16:
-                            f.SetValue(obj, GetFieldValue<short>(fieldIndex));
-                            break;
-                        case TypeCode.UInt16:
-                            f.SetValue(obj, GetFieldValue<ushort>(fieldIndex));
-                            break;
-                        case TypeCode.Byte:
-                            f.SetValue(obj, GetFieldValue<byte>(fieldIndex));
-                            break;
-                        case TypeCode.SByte:
-                            f.SetValue(obj, GetFieldValue<sbyte>(fieldIndex));
-                            break;
-                        case TypeCode.String:
-                            if (_stringsTable == null)
-                            {
-                                f.SetValue(obj, _data.ReadCString());
-                            }
-                            else
-                            {
-                                var pos = _recordsOffset + (_data.Position >> 3);
-                                int ofs = GetFieldValue<int>(fieldIndex);
-                                f.SetValue(obj, _stringsTable.LookupByKey(pos + ofs));
-                            }
-                            break;
-                        case TypeCode.Object:
-                            if (type == typeof(LocalizedString))
-                            {
-                                LocalizedString localized = new();
-                                if (_stringsTable == null)
-                                {
-                                    localized[Locale.enUS] = _data.ReadCString();
-                                }
-                                else
-                                {
-                                    var pos = _recordsOffset + (_data.Position >> 3);
-                                    int ofs = GetFieldValue<int>(fieldIndex);
-                                    localized[Locale.enUS] = _stringsTable.LookupByKey(pos + ofs);
-                                }
-
-                                f.SetValue(obj, localized);
-                            }
-                            else if (type == typeof(Vector2))
-                            {
-                                float[] pos = GetFieldValueArray<float>(fieldIndex, 2);
-                                f.SetValue(obj, new Vector2(pos));
-                            }
-                            else if (type == typeof(Vector3))
-                            {
-                                float[] pos = GetFieldValueArray<float>(fieldIndex, 3);
-                                f.SetValue(obj, new Vector3(pos));
-                            }
-                            else if (type == typeof(FlagArray128))
-                            {
-                                uint[] flags = GetFieldValueArray<uint>(fieldIndex, 4);
-                                f.SetValue(obj, new FlagArray128(flags));
-                            }
-                            break;
-                    }
-                }
-
-                fieldIndex++;
-            }
-
-            return obj;
-        }
-
-        public WDC3Row Clone()
-        {
-            return (WDC3Row)MemberwiseClone();
+            throw new Exception(string.Format("Unexpected compression Type {0}", columnMeta.CompressionType));
         }
     }
 
     public class WDCHeader
     {
+        public uint BitpackedDataOffset;
+        public uint ColumnMetaSize;
+        public uint CommonDataSize;
+        public uint FieldCount;
+        public HeaderFlags Flags;
+        public int IdIndex;
+        public uint LayoutHash;
+        public int Locale;
+        public uint LookupColumnCount;
+        public int MaxId;
+        public int MinId;
+        public uint PalletDataSize;
+        public uint RecordCount;
+        public uint RecordSize;
+        public uint SectionsCount;
+
+        public uint Signature;
+        public uint StringTableSize;
+
+        public uint TableHash;
+        public uint TotalFieldCount;
+
         public bool HasIndexTable()
         {
             return Convert.ToBoolean(Flags & HeaderFlags.IndexMap);
@@ -583,27 +644,6 @@ namespace Game.DataStorage
         {
             return Convert.ToBoolean(Flags & HeaderFlags.OffsetMap);
         }
-
-        public uint Signature;
-        public uint RecordCount;
-        public uint FieldCount;
-        public uint RecordSize;
-        public uint StringTableSize;
-
-        public uint TableHash;
-        public uint LayoutHash;
-        public int MinId;
-        public int MaxId;
-        public int Locale;
-        public HeaderFlags Flags;
-        public int IdIndex;
-        public uint TotalFieldCount;
-        public uint BitpackedDataOffset;
-        public uint LookupColumnCount;
-        public uint ColumnMetaSize;
-        public uint CommonDataSize;
-        public uint PalletDataSize;
-        public uint SectionsCount;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -617,6 +657,7 @@ namespace Game.DataStorage
             get
             {
                 int value = (32 - Bits) >> 3;
+
                 return (value < 0 ? Math.Abs(value) + 4 : value);
             }
         }
@@ -626,8 +667,10 @@ namespace Game.DataStorage
             get
             {
                 int bitSize = 32 - Bits;
+
                 if (bitSize < 0)
                     bitSize = (bitSize * -1) + 32;
+
                 return bitSize;
             }
         }
@@ -642,20 +685,13 @@ namespace Game.DataStorage
     [StructLayout(LayoutKind.Explicit)]
     public struct ColumnMetaData
     {
-        [FieldOffset(0)]
-        public ushort RecordOffset;
-        [FieldOffset(2)]
-        public ushort Size;
-        [FieldOffset(4)]
-        public uint AdditionalDataSize;
-        [FieldOffset(8)]
-        public DB2ColumnCompression CompressionType;
-        [FieldOffset(12)]
-        public ColumnCompressionData_Immediate Immediate;
-        [FieldOffset(12)]
-        public ColumnCompressionData_Pallet Pallet;
-        [FieldOffset(12)]
-        public ColumnCompressionData_Common Common;
+        [FieldOffset(0)] public ushort RecordOffset;
+        [FieldOffset(2)] public ushort Size;
+        [FieldOffset(4)] public uint AdditionalDataSize;
+        [FieldOffset(8)] public DB2ColumnCompression CompressionType;
+        [FieldOffset(12)] public ColumnCompressionData_Immediate Immediate;
+        [FieldOffset(12)] public ColumnCompressionData_Pallet Pallet;
+        [FieldOffset(12)] public ColumnCompressionData_Common Common;
     }
 
     public struct ColumnCompressionData_Immediate
@@ -686,9 +722,9 @@ namespace Game.DataStorage
         public int FileOffset;
         public int NumRecords;
         public int StringTableSize;
-        public int SparseTableOffset; // CatalogDataOffset, absolute value, {uint offset, ushort size}[MaxId - MinId + 1]
-        public int IndexDataSize; // int indexData[IndexDataSize / 4]
-        public int ParentLookupDataSize; // uint NumRecords, uint minId, uint maxId, {uint id, uint index}[NumRecords], questionable usefulness...
+        public int SparseTableOffset;    // CatalogDataOffset, absolute value, {uint offset, ushort size}[MaxId - MinId + 1]
+        public int IndexDataSize;        // int indexData[IndexDataSize / 4]
+        public int ParentLookupDataSize; // uint NumRecords, uint minId, uint maxId, {uint Id, uint index}[NumRecords], questionable usefulness...
         public int NumSparseRecords;
         public int NumCopyRecords;
     }
@@ -726,23 +762,17 @@ namespace Game.DataStorage
 
     public class LocalizedString
     {
+        private readonly StringArray stringStorage = new((int)Locale.Total);
+
+        public string this[Locale locale]
+        {
+            get => stringStorage[(int)locale] ?? "";
+            set => stringStorage[(int)locale] = value;
+        }
+
         public bool HasString(Locale locale = SharedConst.DefaultLocale)
         {
             return !string.IsNullOrEmpty(stringStorage[(int)locale]);
         }
-
-        public string this[Locale locale]
-        {
-            get
-            {
-                return stringStorage[(int)locale] ?? "";
-            }
-            set
-            {
-                stringStorage[(int)locale] = value;
-            }
-        }
-
-        StringArray stringStorage = new((int)Locale.Total);
     }
 }

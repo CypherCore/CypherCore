@@ -8,7 +8,9 @@ namespace Game.AI
 {
     public class GuardAI : ScriptedAI
     {
-        public GuardAI(Creature creature) : base(creature) { }
+        public GuardAI(Creature creature) : base(creature)
+        {
+        }
 
         public override void UpdateAI(uint diff)
         {
@@ -21,8 +23,10 @@ namespace Game.AI
         public override bool CanSeeAlways(WorldObject obj)
         {
             Unit unit = obj.ToUnit();
+
             if (unit != null)
-                if (unit.IsControlledByPlayer() && me.IsEngagedBy(unit))
+                if (unit.IsControlledByPlayer() &&
+                    me.IsEngagedBy(unit))
                     return true;
 
             return false;
@@ -35,6 +39,7 @@ namespace Game.AI
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop(true);
                 EngagementOver();
+
                 return;
             }
 
@@ -52,6 +57,7 @@ namespace Game.AI
             if (killer != null)
             {
                 Player player = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+
                 if (player != null)
                     me.SendZoneUnderAttackMessage(player);
             }

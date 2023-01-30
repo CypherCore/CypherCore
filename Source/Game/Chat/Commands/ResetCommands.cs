@@ -1,25 +1,25 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting.Interfaces.IPlayer;
-using System.Collections.Generic;
 
 namespace Game.Chat
 {
     [CommandGroup("reset")]
-    class ResetCommands
+    internal class ResetCommands
     {
         [Command("achievements", RBACPermissions.CommandResetAchievements, true)]
-        static bool HandleResetAchievementsCommand(CommandHandler handler, PlayerIdentifier player)
+        private static bool HandleResetAchievementsCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
+
             if (player == null)
                 return false;
 
@@ -32,11 +32,13 @@ namespace Game.Chat
         }
 
         [Command("honor", RBACPermissions.CommandResetHonor, true)]
-        static bool HandleResetHonorCommand(CommandHandler handler, PlayerIdentifier player)
+        private static bool HandleResetHonorCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null || !player.IsConnected())
+
+            if (player == null ||
+                !player.IsConnected())
                 return false;
 
             player.GetConnectedPlayer().ResetHonorStats();
@@ -45,18 +47,20 @@ namespace Game.Chat
             return true;
         }
 
-        static bool HandleResetStatsOrLevelHelper(Player player)
+        private static bool HandleResetStatsOrLevelHelper(Player player)
         {
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
+
             if (classEntry == null)
             {
                 Log.outError(LogFilter.Server, "Class {0} not found in DBC (Wrong DBC files?)", player.GetClass());
+
                 return false;
             }
 
             PowerType powerType = classEntry.DisplayPower;
 
-            // reset m_form if no aura
+            // reset _form if no aura
             if (!player.HasAuraType(AuraType.ModShapeshift))
                 player.SetShapeshiftForm(ShapeShiftForm.None);
 
@@ -73,15 +77,18 @@ namespace Game.Chat
 
             //-1 is default value
             player.SetWatchedFactionIndex(0xFFFFFFFF);
+
             return true;
         }
 
         [Command("level", RBACPermissions.CommandResetLevel, true)]
-        static bool HandleResetLevelCommand(CommandHandler handler, PlayerIdentifier player)
+        private static bool HandleResetLevelCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null || !player.IsConnected())
+
+            if (player == null ||
+                !player.IsConnected())
                 return false;
 
             Player target = player.GetConnectedPlayer();
@@ -106,6 +113,7 @@ namespace Game.Chat
 
             // reset level for pet
             Pet pet = target.GetPet();
+
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
@@ -115,10 +123,11 @@ namespace Game.Chat
         }
 
         [Command("spells", RBACPermissions.CommandResetSpells, true)]
-        static bool HandleResetSpellsCommand(CommandHandler handler, PlayerIdentifier player)
+        private static bool HandleResetSpellsCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
+
             if (player == null)
                 return false;
 
@@ -128,7 +137,9 @@ namespace Game.Chat
                 target.ResetSpells();
 
                 target.SendSysMessage(CypherStrings.ResetSpells);
-                if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
+
+                if (handler.GetSession() == null ||
+                    handler.GetSession().GetPlayer() != target)
                     handler.SendSysMessage(CypherStrings.ResetSpellsOnline, handler.GetNameLink(target));
             }
             else
@@ -144,12 +155,14 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("stats", RBACPermissions.CommandResetStats, true)]
-        static bool HandleResetStatsCommand(CommandHandler handler, PlayerIdentifier player)
+        [Command("Stats", RBACPermissions.CommandResetStats, true)]
+        private static bool HandleResetStatsCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null || !player.IsConnected())
+
+            if (player == null ||
+                !player.IsConnected())
                 return false;
 
             var target = player.GetConnectedPlayer();
@@ -166,10 +179,11 @@ namespace Game.Chat
         }
 
         [Command("talents", RBACPermissions.CommandResetTalents, true)]
-        static bool HandleResetTalentsCommand(CommandHandler handler, PlayerIdentifier player)
+        private static bool HandleResetTalentsCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
+
             if (player == null)
                 return false;
 
@@ -180,15 +194,17 @@ namespace Game.Chat
                 target.ResetTalentSpecialization();
                 target.SendTalentsInfoData();
                 target.SendSysMessage(CypherStrings.ResetTalents);
-                if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
+
+                if (handler.GetSession() == null ||
+                    handler.GetSession().GetPlayer() != target)
                     handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));
 
                 /* TODO: 6.x remove/update pet talents
-                Pet* pet = target.GetPet();
-                Pet.resetTalentsForAllPetsOf(target, pet);
-                if (pet)
-                    target.SendTalentsInfoData(true);
-                */
+				Pet* pet = Target.GetPet();
+				Pet.resetTalentsForAllPetsOf(Target, pet);
+				if (pet)
+				    Target.SendTalentsInfoData(true);
+				*/
                 return true;
             }
             else if (!player.GetGUID().IsEmpty())
@@ -200,15 +216,17 @@ namespace Game.Chat
 
                 string nameLink = handler.PlayerLink(player.GetName());
                 handler.SendSysMessage(CypherStrings.ResetTalentsOffline, nameLink);
+
                 return true;
             }
 
             handler.SendSysMessage(CypherStrings.NoCharSelected);
+
             return false;
         }
 
         [Command("all", RBACPermissions.CommandResetAll, true)]
-        static bool HandleResetAllCommand(CommandHandler handler, string subCommand)
+        private static bool HandleResetAllCommand(CommandHandler handler, string subCommand)
         {
             AtLoginFlags atLogin;
 
@@ -217,6 +235,7 @@ namespace Game.Chat
             {
                 atLogin = AtLoginFlags.ResetSpells;
                 Global.WorldMgr.SendWorldText(CypherStrings.ResetallSpells);
+
                 if (handler.GetSession() == null)
                     handler.SendSysMessage(CypherStrings.ResetallSpells);
             }
@@ -224,12 +243,14 @@ namespace Game.Chat
             {
                 atLogin = AtLoginFlags.ResetTalents | AtLoginFlags.ResetPetTalents;
                 Global.WorldMgr.SendWorldText(CypherStrings.ResetallTalents);
+
                 if (handler.GetSession() == null)
                     handler.SendSysMessage(CypherStrings.ResetallTalents);
             }
             else
             {
                 handler.SendSysMessage(CypherStrings.ResetallUnknownCase, subCommand);
+
                 return false;
             }
 
@@ -238,6 +259,7 @@ namespace Game.Chat
             DB.Characters.Execute(stmt);
 
             var plist = Global.ObjAccessor.GetPlayers();
+
             foreach (var player in plist)
                 player.SetAtLoginFlag(atLogin);
 

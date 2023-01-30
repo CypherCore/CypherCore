@@ -18,11 +18,13 @@ namespace Game.Networking.Packets
             uint versionLength = data.ReadBits<uint>(10);
             Loaded = data.HasBit();
             Disabled = data.HasBit();
+
             if (nameLength > 1)
             {
                 Name = data.ReadString(nameLength - 1);
                 data.ReadUInt8(); // null terminator
             }
+
             if (versionLength > 1)
             {
                 Version = data.ReadString(versionLength - 1);

@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint SummonRagnaros = 19774;
         public const uint BlastWave = 20229;
@@ -20,7 +20,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
         public const uint DamageReflection = 21075;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SayAggro = 0;
         public const uint SaySpawn = 1;
@@ -36,9 +36,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
     }
 
     [Script]
-    class boss_majordomo : BossAI
+    internal class boss_majordomo : BossAI
     {
-        public boss_majordomo(Creature creature) : base(creature, DataTypes.MajordomoExecutus) { }
+        public boss_majordomo(Creature creature) : base(creature, DataTypes.MajordomoExecutus)
+        {
+        }
 
         public override void KilledUnit(Unit victim)
         {
@@ -51,51 +53,64 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
-            {
-                DoCast(me, SpellIds.MagicReflection);
-                task.Repeat(TimeSpan.FromSeconds(30));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
-            {
-                DoCast(me, SpellIds.DamageReflection);
-                task.Repeat(TimeSpan.FromSeconds(30));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-            {
-                DoCastVictim(SpellIds.BlastWave);
-                task.Repeat(TimeSpan.FromSeconds(10));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 1);
-                if (target)
-                    DoCast(target, SpellIds.Teleport);
-                task.Repeat(TimeSpan.FromSeconds(20));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(30),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.MagicReflection);
+                                    task.Repeat(TimeSpan.FromSeconds(30));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15),
+                                task =>
+                                {
+                                    DoCast(me, SpellIds.DamageReflection);
+                                    task.Repeat(TimeSpan.FromSeconds(30));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.BlastWave);
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 1);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.Teleport);
+
+                                    task.Repeat(TimeSpan.FromSeconds(20));
+                                });
         }
 
         public override void UpdateAI(uint diff)
         {
             _scheduler.Update(diff);
 
-            if (instance.GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
+            if (Instance.GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
             {
                 if (!UpdateVictim())
                     return;
 
-                if (!me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) && !me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f))
+                if (!me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) &&
+                    !me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f))
                 {
-                    instance.UpdateEncounterStateForKilledCreature(me.GetEntry(), me);
+                    Instance.UpdateEncounterStateForKilledCreature(me.GetEntry(), me);
                     me.SetFaction((uint)FactionTemplates.Friendly);
                     EnterEvadeMode();
                     Talk(TextIds.SayDefeat);
                     _JustDied();
-                    _scheduler.Schedule(TimeSpan.FromSeconds(32), task =>
-                    {
-                        me.NearTeleportTo(MCMiscConst.RagnarosTelePos.GetPositionX(), MCMiscConst.RagnarosTelePos.GetPositionY(), MCMiscConst.RagnarosTelePos.GetPositionZ(), MCMiscConst.RagnarosTelePos.GetOrientation());
-                        me.SetNpcFlag(NPCFlags.Gossip);
-                    });
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(32),
+                                        task =>
+                                        {
+                                            me.NearTeleportTo(MCMiscConst.RagnarosTelePos.GetPositionX(), MCMiscConst.RagnarosTelePos.GetPositionY(), MCMiscConst.RagnarosTelePos.GetPositionZ(), MCMiscConst.RagnarosTelePos.GetOrientation());
+                                            me.SetNpcFlag(NPCFlags.Gossip);
+                                        });
+
                     return;
                 }
 
@@ -116,14 +131,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
                 me.RemoveNpcFlag(NPCFlags.Gossip);
                 Talk(TextIds.SaySummonMaj);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-                {
-                    instance.instance.SummonCreature(MCCreatureIds.Ragnaros, MCMiscConst.RagnarosSummonPos);
-                });
-                _scheduler.Schedule(TimeSpan.FromSeconds(24), task =>
-                {
-                    Talk(TextIds.SayArrival2Maj);
-                });
+                _scheduler.Schedule(TimeSpan.FromSeconds(8), task => { Instance.Instance.SummonCreature(MCCreatureIds.Ragnaros, MCMiscConst.RagnarosSummonPos); });
+                _scheduler.Schedule(TimeSpan.FromSeconds(24), task => { Talk(TextIds.SayArrival2Maj); });
             }
             else if (action == ActionIds.StartRagnarosAlt)
             {
@@ -134,13 +143,14 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
 
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            if (menuId == TextIds.MenuOptionYouChallengedUs && gossipListId == TextIds.OptionIdYouChallengedUs)
+            if (menuId == TextIds.MenuOptionYouChallengedUs &&
+                gossipListId == TextIds.OptionIdYouChallengedUs)
             {
                 player.CloseGossipMenu();
                 DoAction(ActionIds.StartRagnaros);
             }
+
             return false;
         }
     }
 }
-

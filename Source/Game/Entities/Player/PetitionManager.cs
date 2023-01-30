@@ -1,32 +1,37 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Database;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Constants;
+using Framework.Database;
 
 namespace Game.Entities
 {
     public class PetitionManager : Singleton<PetitionManager>
     {
-        Dictionary<ObjectGuid, Petition> _petitionStorage = new();
+        private readonly Dictionary<ObjectGuid, Petition> _petitionStorage = new();
 
-        PetitionManager() { }
+        private PetitionManager()
+        {
+        }
 
         public void LoadPetitions()
         {
             uint oldMSTime = Time.GetMSTime();
             _petitionStorage.Clear();
 
-            SQLResult result = DB.Characters.Query("SELECT petitionguid, ownerguid, name FROM petition");
+            SQLResult result = DB.Characters.Query("SELECT petitionguid, ownerguid, Name FROM petition");
+
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 petitions.");
+
                 return;
             }
 
             uint count = 0;
+
             do
             {
                 AddPetition(ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0)), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1)), result.Read<string>(2), true);
@@ -41,16 +46,20 @@ namespace Game.Entities
             uint oldMSTime = Time.GetMSTime();
 
             SQLResult result = DB.Characters.Query("SELECT petitionguid, player_account, playerguid FROM petition_sign");
+
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Petition signs!");
+
                 return;
             }
 
             uint count = 0;
+
             do
             {
                 Petition petition = GetPetition(ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0)));
+
                 if (petition == null)
                     continue;
 
@@ -112,13 +121,12 @@ namespace Game.Entities
         public void RemovePetitionsByOwner(ObjectGuid ownerGuid)
         {
             foreach (var key in _petitionStorage.Keys.ToList())
-            {
                 if (_petitionStorage[key].ownerGuid == ownerGuid)
                 {
                     _petitionStorage.Remove(key);
+
                     break;
                 }
-            }
 
             SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_OWNER);
@@ -144,8 +152,8 @@ namespace Game.Entities
 
     public class Petition
     {
-        public ObjectGuid PetitionGuid;
         public ObjectGuid ownerGuid;
+        public ObjectGuid PetitionGuid;
         public string PetitionName;
         public List<(uint AccountId, ObjectGuid PlayerGuid)> Signatures = new();
 
@@ -187,19 +195,17 @@ namespace Game.Entities
         public void RemoveSignatureBySigner(ObjectGuid playerGuid)
         {
             foreach (var itr in Signatures)
-            {
                 if (itr.PlayerGuid == playerGuid)
                 {
                     Signatures.Remove(itr);
 
                     // notify owner
                     Player owner = Global.ObjAccessor.FindConnectedPlayer(ownerGuid);
-                    if (owner != null)
-                        owner.GetSession().SendPetitionQuery(PetitionGuid);
+
+                    owner?.GetSession().SendPetitionQuery(PetitionGuid);
 
                     break;
                 }
-            }
         }
     }
 }

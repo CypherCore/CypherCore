@@ -9,9 +9,11 @@ using Game.Scripting.Interfaces.IPlayer;
 
 namespace Scripts.World
 {
-    class xp_boost_PlayerScript : ScriptObjectAutoAdd, IPlayerOnGiveXP
+    internal class xp_boost_PlayerScript : ScriptObjectAutoAdd, IPlayerOnGiveXP
     {
-        public xp_boost_PlayerScript() : base("xp_boost_PlayerScript") { }
+        public xp_boost_PlayerScript() : base("xp_boost_PlayerScript")
+        {
+        }
 
         public void OnGiveXP(Player player, ref uint amount, Unit victim)
         {
@@ -19,13 +21,14 @@ namespace Scripts.World
                 amount *= (uint)WorldConfig.GetFloatValue(WorldCfg.RateXpBoost);
         }
 
-        bool IsXPBoostActive()
+        private bool IsXPBoostActive()
         {
             long time = GameTime.GetGameTime();
             var localTm = Time.UnixTimeToDateTime(time);
             uint weekdayMaskBoosted = WorldConfig.GetUIntValue(WorldCfg.XpBoostDaymask);
             uint weekdayMask = 1u << localTm.Day;
             bool currentDayBoosted = (weekdayMask & weekdayMaskBoosted) != 0;
+
             return currentDayBoosted;
         }
     }

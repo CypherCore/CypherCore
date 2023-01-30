@@ -8,59 +8,74 @@ namespace Game.Networking.Packets
 {
     public class GameObjUse : ClientPacket
     {
-        public GameObjUse(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Guid;
+        public bool IsSoftInteract;
+
+        public GameObjUse(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
             IsSoftInteract = _worldPacket.HasBit();
         }
-
-        public ObjectGuid Guid;
-        public bool IsSoftInteract;
     }
 
     public class GameObjReportUse : ClientPacket
     {
-        public GameObjReportUse(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Guid;
+        public bool IsSoftInteract;
+
+        public GameObjReportUse(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
             IsSoftInteract = _worldPacket.HasBit();
         }
-
-        public ObjectGuid Guid;
-        public bool IsSoftInteract;
     }
 
-    class GameObjectDespawn : ServerPacket
+    internal class GameObjectDespawn : ServerPacket
     {
-        public GameObjectDespawn() : base(ServerOpcodes.GameObjectDespawn) { }
+        public ObjectGuid ObjectGUID;
+
+        public GameObjectDespawn() : base(ServerOpcodes.GameObjectDespawn)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ObjectGUID);
         }
-
-        public ObjectGuid ObjectGUID;
     }
 
-    class PageTextPkt : ServerPacket
+    internal class PageTextPkt : ServerPacket
     {
-        public PageTextPkt() : base(ServerOpcodes.PageText) { }
+        public ObjectGuid GameObjectGUID;
+
+        public PageTextPkt() : base(ServerOpcodes.PageText)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GameObjectGUID);
         }
-
-        public ObjectGuid GameObjectGUID;
     }
 
-    class GameObjectActivateAnimKit : ServerPacket
+    internal class GameObjectActivateAnimKit : ServerPacket
     {
-        public GameObjectActivateAnimKit() : base(ServerOpcodes.GameObjectActivateAnimKit, ConnectionType.Instance) { }
+        public int AnimKitID;
+        public bool Maintain;
+
+        public ObjectGuid ObjectGUID;
+
+        public GameObjectActivateAnimKit() : base(ServerOpcodes.GameObjectActivateAnimKit, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -69,15 +84,20 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Maintain);
             _worldPacket.FlushBits();
         }
-
-        public ObjectGuid ObjectGUID;
-        public int AnimKitID;
-        public bool Maintain;
     }
 
-    class DestructibleBuildingDamage : ServerPacket
+    internal class DestructibleBuildingDamage : ServerPacket
     {
-        public DestructibleBuildingDamage() : base(ServerOpcodes.DestructibleBuildingDamage, ConnectionType.Instance) { }
+        public ObjectGuid Caster;
+        public int Damage;
+        public ObjectGuid Owner;
+        public uint SpellID;
+
+        public ObjectGuid Target;
+
+        public DestructibleBuildingDamage() : base(ServerOpcodes.DestructibleBuildingDamage, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -87,31 +107,40 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Damage);
             _worldPacket.WriteUInt32(SpellID);
         }
-
-        public ObjectGuid Target;
-        public ObjectGuid Caster;
-        public ObjectGuid Owner;
-        public int Damage;
-        public uint SpellID;
     }
 
-    class FishNotHooked : ServerPacket
+    internal class FishNotHooked : ServerPacket
     {
-        public FishNotHooked() : base(ServerOpcodes.FishNotHooked) { }
+        public FishNotHooked() : base(ServerOpcodes.FishNotHooked)
+        {
+        }
 
-        public override void Write() { }
+        public override void Write()
+        {
+        }
     }
 
-    class FishEscaped : ServerPacket
+    internal class FishEscaped : ServerPacket
     {
-        public FishEscaped() : base(ServerOpcodes.FishEscaped) { }
+        public FishEscaped() : base(ServerOpcodes.FishEscaped)
+        {
+        }
 
-        public override void Write() { }
+        public override void Write()
+        {
+        }
     }
 
-    class GameObjectCustomAnim : ServerPacket
+    internal class GameObjectCustomAnim : ServerPacket
     {
-        public GameObjectCustomAnim() : base(ServerOpcodes.GameObjectCustomAnim, ConnectionType.Instance) { }
+        public uint CustomAnim;
+
+        public ObjectGuid ObjectGUID;
+        public bool PlayAsDespawn;
+
+        public GameObjectCustomAnim() : base(ServerOpcodes.GameObjectCustomAnim, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -120,15 +149,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(PlayAsDespawn);
             _worldPacket.FlushBits();
         }
-
-        public ObjectGuid ObjectGUID;
-        public uint CustomAnim;
-        public bool PlayAsDespawn;
     }
 
-    class GameObjectPlaySpellVisual : ServerPacket
+    internal class GameObjectPlaySpellVisual : ServerPacket
     {
-        public GameObjectPlaySpellVisual() : base(ServerOpcodes.GameObjectPlaySpellVisual) { }
+        public ObjectGuid ActivatorGUID;
+
+        public ObjectGuid ObjectGUID;
+        public uint SpellVisualID;
+
+        public GameObjectPlaySpellVisual() : base(ServerOpcodes.GameObjectPlaySpellVisual)
+        {
+        }
 
         public override void Write()
         {
@@ -136,32 +168,32 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(ActivatorGUID);
             _worldPacket.WriteUInt32(SpellVisualID);
         }
-
-        public ObjectGuid ObjectGUID;
-        public ObjectGuid ActivatorGUID;
-        public uint SpellVisualID;
     }
 
-    class GameObjectSetStateLocal : ServerPacket
+    internal class GameObjectSetStateLocal : ServerPacket
     {
-        public GameObjectSetStateLocal() : base(ServerOpcodes.GameObjectSetStateLocal, ConnectionType.Instance) { }
+        public ObjectGuid ObjectGUID;
+        public byte State;
+
+        public GameObjectSetStateLocal() : base(ServerOpcodes.GameObjectSetStateLocal, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ObjectGUID);
             _worldPacket.WriteUInt8(State);
         }
-
-        public ObjectGuid ObjectGUID;
-        public byte State;
     }
 
-    class GameObjectInteraction : ServerPacket
+    internal class GameObjectInteraction : ServerPacket
     {
-        public ObjectGuid ObjectGUID;
         public PlayerInteractionType InteractionType;
+        public ObjectGuid ObjectGUID;
 
-        public GameObjectInteraction() : base(ServerOpcodes.GameObjectInteraction) { }
+        public GameObjectInteraction() : base(ServerOpcodes.GameObjectInteraction)
+        {
+        }
 
         public override void Write()
         {
@@ -169,11 +201,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32((int)InteractionType);
         }
     }
-    class GameObjectCloseInteraction : ServerPacket
+
+    internal class GameObjectCloseInteraction : ServerPacket
     {
         public PlayerInteractionType InteractionType;
 
-        public GameObjectCloseInteraction() : base(ServerOpcodes.GameObjectCloseInteraction) { }
+        public GameObjectCloseInteraction() : base(ServerOpcodes.GameObjectCloseInteraction)
+        {
+        }
 
         public override void Write()
         {

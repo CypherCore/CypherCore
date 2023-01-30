@@ -1,17 +1,17 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         // Golemagg
         public const uint Magmasplash = 13879;
@@ -24,15 +24,17 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
         public const uint Mangle = 19820;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint EmoteLowhp = 0;
     }
 
     [Script]
-    class boss_golemagg : BossAI
+    internal class boss_golemagg : BossAI
     {
-        public boss_golemagg(Creature creature) : base(creature, DataTypes.GolemaggTheIncinerator) { }
+        public boss_golemagg(Creature creature) : base(creature, DataTypes.GolemaggTheIncinerator)
+        {
+        }
 
         public override void Reset()
         {
@@ -43,26 +45,33 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
         public override void JustEngagedWith(Unit victim)
         {
             base.JustEngagedWith(victim);
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
-                    DoCast(target, SpellIds.Pyroblast);
-                task.Repeat(TimeSpan.FromSeconds(7));
-            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(7),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.Pyroblast);
+
+                                    task.Repeat(TimeSpan.FromSeconds(7));
+                                });
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            if (!HealthBelowPct(10) || me.HasAura(SpellIds.Enrage))
+            if (!HealthBelowPct(10) ||
+                me.HasAura(SpellIds.Enrage))
                 return;
 
             DoCast(me, SpellIds.Enrage, new CastSpellExtraArgs(true));
-            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
-            {
-                DoCastVictim(SpellIds.Earthquake);
-                task.Repeat(TimeSpan.FromSeconds(3));
-            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(3),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Earthquake);
+                                    task.Repeat(TimeSpan.FromSeconds(3));
+                                });
         }
 
         public override void UpdateAI(uint diff)
@@ -75,9 +84,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
     }
 
     [Script]
-    class npc_core_rager : ScriptedAI
+    internal class npc_core_rager : ScriptedAI
     {
-        InstanceScript _instance;
+        private readonly InstanceScript _instance;
 
         public npc_core_rager(Creature creature) : base(creature)
         {
@@ -91,28 +100,29 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
 
         public override void JustEngagedWith(Unit who)
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(7), task => // These times are probably wrong
-        {
-            DoCastVictim(SpellIds.Mangle);
-            task.Repeat(TimeSpan.FromSeconds(10));
-        });
+            _scheduler.Schedule(TimeSpan.FromSeconds(7),
+                                task => // These times are probably wrong
+                                {
+                                    DoCastVictim(SpellIds.Mangle);
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            if (HealthAbovePct(50) || _instance == null)
+            if (HealthAbovePct(50) ||
+                _instance == null)
                 return;
 
             Creature pGolemagg = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.GolemaggTheIncinerator));
+
             if (pGolemagg)
-            {
                 if (pGolemagg.IsAlive())
                 {
                     me.AddAura(SpellIds.GolemaggTrust, me);
                     Talk(TextIds.EmoteLowhp);
                     me.SetFullHealth();
                 }
-            }
         }
 
         public override void UpdateAI(uint diff)
@@ -124,4 +134,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Golemagg
         }
     }
 }
-

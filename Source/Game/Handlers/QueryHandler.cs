@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Numerics;
 using Framework.Constants;
 using Framework.Realm;
 using Game.DataStorage;
@@ -9,17 +11,32 @@ using Game.Maps;
 using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
-using System.Collections.Generic;
-using System.Numerics;
 
 namespace Game
 {
     public partial class WorldSession
     {
+        public void BuildNameQueryData(ObjectGuid guid, out NameCacheLookupResult lookupData)
+        {
+            lookupData = new NameCacheLookupResult();
+
+            Player player = Global.ObjAccessor.FindPlayer(guid);
+
+            lookupData.Player = guid;
+
+            lookupData.Data = new PlayerGuidLookupData();
+
+            if (lookupData.Data.Initialize(guid, player))
+                lookupData.Result = (byte)ResponseCodes.Success;
+            else
+                lookupData.Result = (byte)ResponseCodes.Failure; // Name unknown
+        }
+
         [WorldPacketHandler(ClientOpcodes.QueryPlayerNames, Processing = PacketProcessing.Inplace)]
-        void HandleQueryPlayerNames(QueryPlayerNames queryPlayerName)
+        private void HandleQueryPlayerNames(QueryPlayerNames queryPlayerName)
         {
             QueryPlayerNamesResponse response = new();
+
             foreach (ObjectGuid guid in queryPlayerName.Players)
             {
                 BuildNameQueryData(guid, out NameCacheLookupResult nameCacheLookupResult);
@@ -29,28 +46,13 @@ namespace Game
             SendPacket(response);
         }
 
-        public void BuildNameQueryData(ObjectGuid guid, out NameCacheLookupResult lookupData)
-        {
-            lookupData = new();
-
-            Player player = Global.ObjAccessor.FindPlayer(guid);
-
-            lookupData.Player = guid;
-
-            lookupData.Data = new();
-            if (lookupData.Data.Initialize(guid, player))
-                lookupData.Result = (byte)ResponseCodes.Success;
-            else
-                lookupData.Result = (byte)ResponseCodes.Failure; // name unknown
-        }
-
         [WorldPacketHandler(ClientOpcodes.QueryTime, Processing = PacketProcessing.Inplace)]
-        void HandleQueryTime(QueryTime packet)
+        private void HandleQueryTime(QueryTime packet)
         {
             SendQueryTimeResponse();
         }
 
-        void SendQueryTimeResponse()
+        private void SendQueryTimeResponse()
         {
             QueryTimeResponse queryTimeResponse = new();
             queryTimeResponse.CurrentTime = GameTime.GetGameTime();
@@ -58,9 +60,10 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryGameObject, Processing = PacketProcessing.Inplace)]
-        void HandleGameObjectQuery(QueryGameObject packet)
+        private void HandleGameObjectQuery(QueryGameObject packet)
         {
             GameObjectTemplate info = Global.ObjectMgr.GetGameObjectTemplate(packet.GameObjectID);
+
             if (info != null)
             {
                 if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
@@ -69,9 +72,11 @@ namespace Game
                 QueryGameObjectResponse queryGameObjectResponse = info.QueryData;
 
                 Locale loc = GetSessionDbLocaleIndex();
+
                 if (loc != Locale.enUS)
                 {
                     GameObjectLocale gameObjectLocale = Global.ObjectMgr.GetGameObjectLocale(queryGameObjectResponse.GameObjectID);
+
                     if (gameObjectLocale != null)
                     {
                         ObjectManager.GetLocaleString(gameObjectLocale.Name, loc, ref queryGameObjectResponse.Stats.Name[0]);
@@ -94,9 +99,10 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCreature, Processing = PacketProcessing.Inplace)]
-        void HandleCreatureQuery(QueryCreature packet)
+        private void HandleCreatureQuery(QueryCreature packet)
         {
             CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(packet.CreatureID);
+
             if (ci != null)
             {
                 if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
@@ -105,9 +111,11 @@ namespace Game
                 QueryCreatureResponse queryCreatureResponse = ci.QueryData;
 
                 Locale loc = GetSessionDbLocaleIndex();
+
                 if (loc != Locale.enUS)
                 {
                     CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(ci.Entry);
+
                     if (creatureLocale != null)
                     {
                         string name = queryCreatureResponse.Stats.Name[0];
@@ -136,7 +144,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryNpcText, Processing = PacketProcessing.Inplace)]
-        void HandleNpcTextQuery(QueryNPCText packet)
+        private void HandleNpcTextQuery(QueryNPCText packet)
         {
             NpcText npcText = Global.ObjectMgr.GetNpcText(packet.TextID);
 
@@ -144,15 +152,15 @@ namespace Game
             response.TextID = packet.TextID;
 
             if (npcText != null)
-            {
                 for (byte i = 0; i < SharedConst.MaxNpcTextOptions; ++i)
                 {
                     response.Probabilities[i] = npcText.Data[i].Probability;
                     response.BroadcastTextID[i] = npcText.Data[i].BroadcastTextID;
-                    if (!response.Allow && npcText.Data[i].BroadcastTextID != 0)
+
+                    if (!response.Allow &&
+                        npcText.Data[i].BroadcastTextID != 0)
                         response.Allow = true;
                 }
-            }
 
             if (!response.Allow)
                 Log.outError(LogFilter.Sql, "HandleNpcTextQuery: no BroadcastTextID found for text {0} in `npc_text table`", packet.TextID);
@@ -161,12 +169,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryPageText, Processing = PacketProcessing.Inplace)]
-        void HandleQueryPageText(QueryPageText packet)
+        private void HandleQueryPageText(QueryPageText packet)
         {
             QueryPageTextResponse response = new();
             response.PageTextID = packet.PageTextID;
 
             uint pageID = packet.PageTextID;
+
             while (pageID != 0)
             {
                 PageText pageText = Global.ObjectMgr.GetPageText(pageID);
@@ -182,9 +191,11 @@ namespace Game
                 page.Flags = pageText.Flags;
 
                 Locale locale = GetSessionDbLocaleIndex();
+
                 if (locale != Locale.enUS)
                 {
                     PageTextLocale pageLocale = Global.ObjectMgr.GetPageTextLocale(pageID);
+
                     if (pageLocale != null)
                         ObjectManager.GetLocaleString(pageLocale.Text, locale, ref page.Text);
                 }
@@ -198,15 +209,19 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCorpseLocationFromClient)]
-        void HandleQueryCorpseLocation(QueryCorpseLocationFromClient queryCorpseLocation)
+        private void HandleQueryCorpseLocation(QueryCorpseLocationFromClient queryCorpseLocation)
         {
             CorpseLocation packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseLocation.Player);
-            if (!player || !player.HasCorpse() || !_player.IsInSameRaidWith(player))
+
+            if (!player ||
+                !player.HasCorpse() ||
+                !_player.IsInSameRaidWith(player))
             {
-                packet.Valid = false;                               // corpse not found
+                packet.Valid = false; // corpse not found
                 packet.Player = queryCorpseLocation.Player;
                 SendPacket(packet);
+
                 return;
             }
 
@@ -222,12 +237,14 @@ namespace Game
             {
                 // search entrance map for proper show entrance
                 MapRecord corpseMapEntry = CliDB.MapStorage.LookupByKey(mapID);
+
                 if (corpseMapEntry != null)
-                {
-                    if (corpseMapEntry.IsDungeon() && corpseMapEntry.CorpseMapID >= 0)
+                    if (corpseMapEntry.IsDungeon() &&
+                        corpseMapEntry.CorpseMapID >= 0)
                     {
                         // if corpse map have entrance
                         TerrainInfo entranceTerrain = Global.TerrainMgr.LoadTerrain((uint)corpseMapEntry.CorpseMapID);
+
                         if (entranceTerrain != null)
                         {
                             mapID = (uint)corpseMapEntry.CorpseMapID;
@@ -236,7 +253,6 @@ namespace Game
                             z = entranceTerrain.GetStaticHeight(player.GetPhaseShift(), mapID, x, y, MapConst.MaxHeight);
                         }
                     }
-                }
             }
 
             packet.Valid = true;
@@ -249,16 +265,21 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCorpseTransport)]
-        void HandleQueryCorpseTransport(QueryCorpseTransport queryCorpseTransport)
+        private void HandleQueryCorpseTransport(QueryCorpseTransport queryCorpseTransport)
         {
             CorpseTransportQuery response = new();
             response.Player = queryCorpseTransport.Player;
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseTransport.Player);
+
             if (player)
             {
                 Corpse corpse = player.GetCorpse();
-                if (_player.IsInSameRaidWith(player) && corpse && !corpse.GetTransGUID().IsEmpty() && corpse.GetTransGUID() == queryCorpseTransport.Transport)
+
+                if (_player.IsInSameRaidWith(player) &&
+                    corpse &&
+                    !corpse.GetTransGUID().IsEmpty() &&
+                    corpse.GetTransGUID() == queryCorpseTransport.Transport)
                 {
                     response.Position = new Vector3(corpse.GetTransOffsetX(), corpse.GetTransOffsetY(), corpse.GetTransOffsetZ());
                     response.Facing = corpse.GetTransOffsetO();
@@ -269,7 +290,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryQuestCompletionNpcs, Processing = PacketProcessing.Inplace)]
-        void HandleQueryQuestCompletionNPCs(QueryQuestCompletionNPCs queryQuestCompletionNPCs)
+        private void HandleQueryQuestCompletionNPCs(QueryQuestCompletionNPCs queryQuestCompletionNPCs)
         {
             QuestCompletionNPCResponse response = new();
 
@@ -280,6 +301,7 @@ namespace Game
                 if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
                 {
                     Log.outDebug(LogFilter.Network, "WORLD: Unknown quest {0} in CMSG_QUEST_NPC_QUERY by {1}", questID, GetPlayer().GetGUID());
+
                     continue;
                 }
 
@@ -298,38 +320,39 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestPoiQuery, Processing = PacketProcessing.Inplace)]
-        void HandleQuestPOIQuery(QuestPOIQuery packet)
+        private void HandleQuestPOIQuery(QuestPOIQuery packet)
         {
             if (packet.MissingQuestCount >= SharedConst.MaxQuestLogSize)
                 return;
 
             // Read quest ids and add the in a unordered_set so we don't send POIs for the same quest multiple times
             HashSet<uint> questIds = new();
+
             for (int i = 0; i < packet.MissingQuestCount; ++i)
                 questIds.Add(packet.MissingQuestPOIs[i]); // QuestID
 
             QuestPOIQueryResponse response = new();
 
             foreach (uint questId in questIds)
-            {
                 if (_player.FindQuestSlot(questId) != SharedConst.MaxQuestLogSize)
                 {
                     QuestPOIData poiData = Global.ObjectMgr.GetQuestPOIData(questId);
+
                     if (poiData != null)
                         response.QuestPOIDataStats.Add(poiData);
                 }
-            }
 
             SendPacket(response);
         }
 
         [WorldPacketHandler(ClientOpcodes.ItemTextQuery, Processing = PacketProcessing.Inplace)]
-        void HandleItemTextQuery(ItemTextQuery packet)
+        private void HandleItemTextQuery(ItemTextQuery packet)
         {
             QueryItemTextResponse queryItemTextResponse = new();
             queryItemTextResponse.Id = packet.Id;
 
             Item item = GetPlayer().GetItemByGuid(packet.Id);
+
             if (item)
             {
                 queryItemTextResponse.Valid = true;
@@ -340,12 +363,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryRealmName, Processing = PacketProcessing.Inplace)]
-        void HandleQueryRealmName(QueryRealmName queryRealmName)
+        private void HandleQueryRealmName(QueryRealmName queryRealmName)
         {
             RealmQueryResponse realmQueryResponse = new();
             realmQueryResponse.VirtualRealmAddress = queryRealmName.VirtualRealmAddress;
 
             RealmId realmHandle = new(queryRealmName.VirtualRealmAddress);
+
             if (Global.ObjectMgr.GetRealmName(realmHandle.Index, ref realmQueryResponse.NameInfo.RealmNameActual, ref realmQueryResponse.NameInfo.RealmNameNormalized))
             {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Success;
@@ -353,7 +377,9 @@ namespace Game
                 realmQueryResponse.NameInfo.IsLocal = queryRealmName.VirtualRealmAddress == Global.WorldMgr.GetRealm().Id.GetAddress();
             }
             else
+            {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Failure;
+            }
         }
     }
 }

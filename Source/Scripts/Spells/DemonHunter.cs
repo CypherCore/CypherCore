@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
@@ -9,12 +11,10 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.Spells.DemonHunter
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint AbyssalStrike = 207550;
         public const uint Annihilation = 201427;
@@ -146,7 +146,7 @@ namespace Scripts.Spells.DemonHunter
         public const uint VengefulRetreatTrigger = 198793;
     }
 
-    struct AreaTriggerIds
+    internal struct AreaTriggerIds
     {
         public const uint ShatteredSoulsHavoc = 8352;
         public const uint ShatteredSoulsHavocDemon = 11231;
@@ -157,15 +157,21 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 197125 - Chaos Strike
-    class spell_dh_chaos_strike : AuraScript, IHasAuraEffects
+    internal class spell_dh_chaos_strike : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChaosStrikeEnergize);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
@@ -173,50 +179,63 @@ namespace Scripts.Spells.DemonHunter
             args.SetTriggeringAura(aurEff);
             GetTarget().CastSpell(GetTarget(), SpellIds.ChaosStrikeEnergize, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 206416 - First Blood
-    class spell_dh_first_blood : AuraScript
+    internal class spell_dh_first_blood : AuraScript
     {
-        ObjectGuid _firstTargetGUID;
+        private ObjectGuid _firstTargetGUID;
 
-        public ObjectGuid GetFirstTarget() { return _firstTargetGUID; }
-        public void SetFirstTarget(ObjectGuid targetGuid) { _firstTargetGUID = targetGuid; }
+        public ObjectGuid GetFirstTarget()
+        {
+            return _firstTargetGUID;
+        }
 
-        public override void Register() { }
+        public void SetFirstTarget(ObjectGuid targetGuid)
+        {
+            _firstTargetGUID = targetGuid;
+        }
+
+        public override void Register()
+        {
+        }
     }
 
     // 188499 - Blade Dance
     [Script] // 210152 - Death Sweep
-    class spell_dh_blade_dance : SpellScript, IHasSpellEffects
+    internal class spell_dh_blade_dance : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FirstBlood);
         }
 
-        void DecideFirstTarget(List<WorldObject> targetList)
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
+        }
+
+        private void DecideFirstTarget(List<WorldObject> targetList)
         {
             if (targetList.Empty())
                 return;
 
             Aura aura = GetCaster().GetAura(SpellIds.FirstBlood);
+
             if (aura == null)
                 return;
 
             ObjectGuid firstTargetGUID = ObjectGuid.Empty;
             ObjectGuid selectedTarget = GetCaster().GetTarget();
 
-            // Prefer the selected target if he is one of the enemies
-            if (targetList.Count > 1 && !selectedTarget.IsEmpty())
+            // Prefer the selected Target if he is one of the enemies
+            if (targetList.Count > 1 &&
+                !selectedTarget.IsEmpty())
             {
                 var foundObj = targetList.Find(obj => obj.GetGUID() == selectedTarget);
+
                 if (foundObj != null)
                     firstTargetGUID = foundObj.GetGUID();
             }
@@ -225,13 +244,8 @@ namespace Scripts.Spells.DemonHunter
                 firstTargetGUID = targetList[0].GetGUID();
 
             spell_dh_first_blood script = aura.GetScript<spell_dh_first_blood>();
-            if (script != null)
-                script.SetFirstTarget(firstTargetGUID);
-        }
 
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
+            script?.SetFirstTarget(firstTargetGUID);
         }
     }
 
@@ -239,7 +253,7 @@ namespace Scripts.Spells.DemonHunter
     // 200685 - Blade Dance
     // 210153 - Death Sweep
     [Script] // 210155 - Death Sweep
-    class spell_dh_blade_dance_damage : SpellScript, IOnHit
+    internal class spell_dh_blade_dance_damage : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -251,9 +265,11 @@ namespace Scripts.Spells.DemonHunter
             int damage = GetHitDamage();
 
             AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.FirstBlood, 0);
+
             if (aurEff != null)
             {
                 spell_dh_first_blood script = aurEff.GetBase().GetScript<spell_dh_first_blood>();
+
                 if (script != null)
                     if (GetHitUnit().GetGUID() == script.GetFirstTarget())
                         MathFunctions.AddPct(ref damage, aurEff.GetAmount());
@@ -269,9 +285,9 @@ namespace Scripts.Spells.DemonHunter
     [Script("areatrigger_dh_sigil_of_silence", SpellIds.SigilOfSilenceAoe)]
     [Script("areatrigger_dh_sigil_of_misery", SpellIds.SigilOfMiseryAoe)]
     [Script("areatrigger_dh_sigil_of_flame", SpellIds.SigilOfFlameAoe)]
-    class areatrigger_dh_generic_sigil : AreaTriggerAI
+    internal class areatrigger_dh_generic_sigil : AreaTriggerAI
     {
-        uint _trigger;
+        private readonly uint _trigger;
 
         public areatrigger_dh_generic_sigil(AreaTrigger at, uint trigger) : base(at)
         {
@@ -281,44 +297,49 @@ namespace Scripts.Spells.DemonHunter
         public override void OnRemove()
         {
             Unit caster = at.GetCaster();
-            if (caster != null)
-                caster.CastSpell(at.GetPosition(), _trigger, new CastSpellExtraArgs());
+
+            caster?.CastSpell(at.GetPosition(), _trigger, new CastSpellExtraArgs());
         }
     }
 
     [Script] // 208673 - Sigil of Chains
-    class spell_dh_sigil_of_chains : SpellScript, IHasSpellEffects
+    internal class spell_dh_sigil_of_chains : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SigilOfChainsSlow, SpellIds.SigilOfChainsGrip);
-        }
-
-        void HandleEffectHitTarget(uint effIndex)
-        {
-            WorldLocation loc = GetExplTargetDest();
-            if (loc != null)
-            {
-                GetCaster().CastSpell(GetHitUnit(), SpellIds.SigilOfChainsSlow, new CastSpellExtraArgs(true));
-                GetHitUnit().CastSpell(loc.GetPosition(), SpellIds.SigilOfChainsGrip, new CastSpellExtraArgs(true));
-            }
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleEffectHitTarget(uint effIndex)
+        {
+            WorldLocation loc = GetExplTargetDest();
+
+            if (loc != null)
+            {
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.SigilOfChainsSlow, new CastSpellExtraArgs(true));
+                GetHitUnit().CastSpell(loc.GetPosition(), SpellIds.SigilOfChainsGrip, new CastSpellExtraArgs(true));
+            }
+        }
     }
 
     [Script] // 202138 - Sigil of Chains
-    class areatrigger_dh_sigil_of_chains : AreaTriggerAI
+    internal class areatrigger_dh_sigil_of_chains : AreaTriggerAI
     {
-        public areatrigger_dh_sigil_of_chains(AreaTrigger at) : base(at) { }
+        public areatrigger_dh_sigil_of_chains(AreaTrigger at) : base(at)
+        {
+        }
 
         public override void OnRemove()
         {
             Unit caster = at.GetCaster();
+
             if (caster != null)
             {
                 caster.CastSpell(at.GetPosition(), SpellIds.SigilOfChainsVisual, new CastSpellExtraArgs());
@@ -328,28 +349,12 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 131347 - Glide
-    class spell_dh_glide : SpellScript, ICheckCastHander, IBeforeCast
+    internal class spell_dh_glide : SpellScript, ICheckCastHander, IBeforeCast
     {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.GlideDuration, SpellIds.VengefulRetreatTrigger, SpellIds.FelRush);
-        }
-
-        public SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (caster.IsMounted() || caster.GetVehicleBase())
-                return SpellCastResult.DontReport;
-
-            if (!caster.IsFalling())
-                return SpellCastResult.NotOnGround;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
         public void BeforeCast()
         {
             Player caster = GetCaster().ToPlayer();
+
             if (!caster)
                 return;
 
@@ -359,45 +364,66 @@ namespace Scripts.Spells.DemonHunter
             caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.VengefulRetreatTrigger, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
             caster.GetSpellHistory().StartCooldown(Global.SpellMgr.GetSpellInfo(SpellIds.FelRush, GetCastDifficulty()), 0, null, false, TimeSpan.FromMilliseconds(250));
         }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GlideKnockback, SpellIds.GlideDuration, SpellIds.VengefulRetreatTrigger, SpellIds.FelRush);
+        }
+
+        public SpellCastResult CheckCast()
+        {
+            Unit caster = GetCaster();
+
+            if (caster.IsMounted() ||
+                caster.GetVehicleBase())
+                return SpellCastResult.DontReport;
+
+            if (!caster.IsFalling())
+                return SpellCastResult.NotOnGround;
+
+            return SpellCastResult.SpellCastOk;
+        }
     }
 
     [Script] // 131347 - Glide
-    class spell_dh_glide_AuraScript : AuraScript, IHasAuraEffects
+    internal class spell_dh_glide_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GlideDuration);
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAura(SpellIds.GlideDuration);
         }
 
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.FeatherFall, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.GlideDuration);
+        }
     }
 
     [Script] // 197154 - Glide
-    class spell_dh_glide_timer : AuraScript, IHasAuraEffects
+    internal class spell_dh_glide_timer : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Glide);
         }
 
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAura(SpellIds.Glide);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
+        }
+
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.Glide);
         }
     }
 }

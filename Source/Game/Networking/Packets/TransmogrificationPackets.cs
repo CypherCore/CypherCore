@@ -1,15 +1,22 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
-using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class TransmogrifyItems : ClientPacket
+    internal class TransmogrifyItems : ClientPacket
     {
-        public TransmogrifyItems(WorldPacket packet) : base(packet) { }
+        public bool CurrentSpecOnly;
+        public Array<TransmogrifyItem> Items = new(13);
+
+        public ObjectGuid Npc;
+
+        public TransmogrifyItems(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -25,15 +32,19 @@ namespace Game.Networking.Packets
 
             CurrentSpecOnly = _worldPacket.HasBit();
         }
-
-        public ObjectGuid Npc;
-        public Array<TransmogrifyItem> Items = new(13);
-        public bool CurrentSpecOnly;
     }
 
-    class AccountTransmogUpdate : ServerPacket
+    internal class AccountTransmogUpdate : ServerPacket
     {
-        public AccountTransmogUpdate() : base(ServerOpcodes.AccountTransmogUpdate) { }
+        public List<uint> FavoriteAppearances = new();
+
+        public bool IsFullUpdate;
+        public bool IsSetFavorite;
+        public List<uint> NewAppearances = new();
+
+        public AccountTransmogUpdate() : base(ServerOpcodes.AccountTransmogUpdate)
+        {
+        }
 
         public override void Write()
         {
@@ -48,14 +59,9 @@ namespace Game.Networking.Packets
             foreach (var newAppearance in NewAppearances)
                 _worldPacket.WriteUInt32(newAppearance);
         }
-
-        public bool IsFullUpdate;
-        public bool IsSetFavorite;
-        public List<uint> FavoriteAppearances = new();
-        public List<uint> NewAppearances = new();
     }
 
-    struct TransmogrifyItem
+    internal struct TransmogrifyItem
     {
         public void Read(WorldPacket data)
         {

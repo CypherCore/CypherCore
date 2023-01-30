@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 public class Cypher
 {
-    public static void Assert(bool value, string message = "", [CallerMemberName]string memberName = "")
+    public static void Assert(bool value, string message = "", [CallerMemberName] string memberName = "")
     {
         if (!value)
         {

@@ -89,36 +89,43 @@ namespace Framework.Database
 
     public class PreparedStatementTask : ISqlOperation
     {
-        PreparedStatement m_stmt;
-        bool _needsResult;
-        TaskCompletionSource<SQLResult> m_result;
+        private readonly bool _needsResult;
+        private readonly TaskCompletionSource<SQLResult> _result;
+        private readonly PreparedStatement _stmt;
 
         public PreparedStatementTask(PreparedStatement stmt, bool needsResult = false)
         {
-            m_stmt = stmt;
+            _stmt = stmt;
             _needsResult = needsResult;
+
             if (needsResult)
-                m_result = new TaskCompletionSource<SQLResult>();
+                _result = new TaskCompletionSource<SQLResult>();
         }
 
         public bool Execute<T>(MySqlBase<T> mySqlBase)
         {
             if (_needsResult)
             {
-                SQLResult result = mySqlBase.Query(m_stmt);
+                SQLResult result = mySqlBase.Query(_stmt);
+
                 if (result == null)
                 {
-                    m_result.SetResult(new SQLResult());
+                    _result.SetResult(new SQLResult());
+
                     return false;
                 }
 
-                m_result.SetResult(result);
+                _result.SetResult(result);
+
                 return true;
             }
 
-            return mySqlBase.DirectExecute(m_stmt);
+            return mySqlBase.DirectExecute(_stmt);
         }
 
-        public Task<SQLResult> GetFuture() { return m_result.Task; }
+        public Task<SQLResult> GetFuture()
+        {
+            return _result.Task;
+        }
     }
 }

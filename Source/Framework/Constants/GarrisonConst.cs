@@ -14,7 +14,7 @@ namespace Framework.Constants
         NeedsPlan = 0x1
     }
 
-    enum GarrisonFollowerFlags
+    internal enum GarrisonFollowerFlags
     {
         Unique = 0x1
     }

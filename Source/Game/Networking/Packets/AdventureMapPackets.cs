@@ -3,15 +3,17 @@
 
 namespace Game.Networking.Packets
 {
-    class AdventureMapStartQuest : ClientPacket
+    internal class AdventureMapStartQuest : ClientPacket
     {
-        public AdventureMapStartQuest(WorldPacket packet) : base(packet) { }
+        public uint QuestID;
+
+        public AdventureMapStartQuest(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             QuestID = _worldPacket.ReadUInt32();
         }
-
-        public uint QuestID;
     }
 }

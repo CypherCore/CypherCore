@@ -1,17 +1,17 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IMap;
-using System;
 
 namespace Scripts.EasternKingdoms.Karazhan
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         public const uint Attumen = 0;
         public const uint Moroes = 1;
@@ -45,7 +45,7 @@ namespace Scripts.EasternKingdoms.Karazhan
         public const uint GoBlackenedUrn = 30;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         public const uint HyakissTheLurker = 16179;
         public const uint RokadTheRavager = 16181;
@@ -69,7 +69,7 @@ namespace Scripts.EasternKingdoms.Karazhan
         public const uint Kilrek = 17229;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint StageCurtain = 183932;
         public const uint StageDoorLeft = 184278;
@@ -86,60 +86,36 @@ namespace Scripts.EasternKingdoms.Karazhan
         public const uint BlackenedUrn = 194092;
     }
 
-    enum KZMisc
+    internal enum KZMisc
     {
         OptionalBossRequiredDeathCount = 50
     }
 
     [Script]
-    class instance_karazhan : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_karazhan : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public static Position[] OptionalSpawn =
+        private class instance_karazhan_InstanceMapScript : InstanceScript
         {
-            new Position(-10960.981445f, -1940.138428f, 46.178097f, 4.12f), // Hyakiss the Lurker
-            new Position(-10945.769531f, -2040.153320f, 49.474438f, 0.077f), // Shadikith the Glider
-            new Position(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)  // Rokad the Ravager
-        };
-
-        static DungeonEncounterData[] encounters =
-        {
-            new DungeonEncounterData(DataTypes.Attumen, 652),
-            new DungeonEncounterData(DataTypes.Moroes, 653),
-            new DungeonEncounterData(DataTypes.MaidenOfVirtue, 654),
-            new DungeonEncounterData(DataTypes.OperaPerformance, 655),
-            new DungeonEncounterData(DataTypes.Curator, 656),
-            new DungeonEncounterData(DataTypes.Aran, 658),
-            new DungeonEncounterData(DataTypes.Terestian, 657),
-            new DungeonEncounterData(DataTypes.Netherspite, 659),
-            new DungeonEncounterData(DataTypes.Chess, 660),
-            new DungeonEncounterData(DataTypes.Malchezzar, 661),
-            new DungeonEncounterData(DataTypes.Nightbane, 662)
-        };
-
-        public instance_karazhan() : base(nameof(instance_karazhan), 532) { }
-
-        class instance_karazhan_InstanceMapScript : InstanceScript
-        {
-            uint OperaEvent;
-            uint OzDeathCount;
-            uint OptionalBossCount;
-            ObjectGuid CurtainGUID;
-            ObjectGuid StageDoorLeftGUID;
-            ObjectGuid StageDoorRightGUID;
-            ObjectGuid KilrekGUID;
-            ObjectGuid TerestianGUID;
-            ObjectGuid MoroesGUID;
-            ObjectGuid NightbaneGUID;
-            ObjectGuid LibraryDoor;                 // Door at Shade of Aran
-            ObjectGuid MassiveDoor;                 // Door at Netherspite
-            ObjectGuid SideEntranceDoor;            // Side Entrance
-            ObjectGuid GamesmansDoor;               // Door before Chess
-            ObjectGuid GamesmansExitDoor;           // Door after Chess
-            ObjectGuid NetherspaceDoor;             // Door at Malchezaar
-            ObjectGuid[] MastersTerraceDoor = new ObjectGuid[2];
-            ObjectGuid ImageGUID;
-            ObjectGuid DustCoveredChest;
-            ObjectGuid BlackenedUrnGUID;
+            private readonly ObjectGuid[] MastersTerraceDoor = new ObjectGuid[2];
+            private readonly uint OperaEvent;
+            private ObjectGuid BlackenedUrnGUID;
+            private ObjectGuid CurtainGUID;
+            private ObjectGuid DustCoveredChest;
+            private ObjectGuid GamesmansDoor;     // Door before Chess
+            private ObjectGuid GamesmansExitDoor; // Door after Chess
+            private ObjectGuid ImageGUID;
+            private ObjectGuid KilrekGUID;
+            private ObjectGuid LibraryDoor; // Door at Shade of Aran
+            private ObjectGuid MassiveDoor; // Door at Netherspite
+            private ObjectGuid MoroesGUID;
+            private ObjectGuid NetherspaceDoor; // Door at Malchezaar
+            private ObjectGuid NightbaneGUID;
+            private uint OptionalBossCount;
+            private uint OzDeathCount;
+            private ObjectGuid SideEntranceDoor; // Side Entrance
+            private ObjectGuid StageDoorLeftGUID;
+            private ObjectGuid StageDoorRightGUID;
+            private ObjectGuid TerestianGUID;
 
             public instance_karazhan_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -159,15 +135,19 @@ namespace Scripts.EasternKingdoms.Karazhan
                 {
                     case CreatureIds.Kilrek:
                         KilrekGUID = creature.GetGUID();
+
                         break;
                     case CreatureIds.TerestianIllhoof:
                         TerestianGUID = creature.GetGUID();
+
                         break;
                     case CreatureIds.Moroes:
                         MoroesGUID = creature.GetGUID();
+
                         break;
                     case CreatureIds.Nightbane:
                         NightbaneGUID = creature.GetGUID();
+
                         break;
                     default:
                         break;
@@ -177,6 +157,7 @@ namespace Scripts.EasternKingdoms.Karazhan
             public override void OnUnitDeath(Unit unit)
             {
                 Creature creature = unit.ToCreature();
+
                 if (!creature)
                     return;
 
@@ -193,22 +174,25 @@ namespace Scripts.EasternKingdoms.Karazhan
                         if (GetBossState(DataTypes.OptionalBoss) == EncounterState.ToBeDecided)
                         {
                             ++OptionalBossCount;
+
                             if (OptionalBossCount == (uint)KZMisc.OptionalBossRequiredDeathCount)
-                            {
                                 switch (RandomHelper.URand(CreatureIds.HyakissTheLurker, CreatureIds.RokadTheRavager))
                                 {
                                     case CreatureIds.HyakissTheLurker:
-                                        instance.SummonCreature(CreatureIds.HyakissTheLurker, OptionalSpawn[0]);
+                                        Instance.SummonCreature(CreatureIds.HyakissTheLurker, OptionalSpawn[0]);
+
                                         break;
                                     case CreatureIds.ShadikithTheGlider:
-                                        instance.SummonCreature(CreatureIds.ShadikithTheGlider, OptionalSpawn[1]);
+                                        Instance.SummonCreature(CreatureIds.ShadikithTheGlider, OptionalSpawn[1]);
+
                                         break;
                                     case CreatureIds.RokadTheRavager:
-                                        instance.SummonCreature(CreatureIds.RokadTheRavager, OptionalSpawn[2]);
+                                        Instance.SummonCreature(CreatureIds.RokadTheRavager, OptionalSpawn[2]);
+
                                         break;
                                 }
-                            }
                         }
+
                         break;
                     default:
                         break;
@@ -224,6 +208,7 @@ namespace Scripts.EasternKingdoms.Karazhan
                             ++OzDeathCount;
                         else if (data == (uint)EncounterState.InProgress)
                             OzDeathCount = 0;
+
                         break;
                 }
             }
@@ -240,15 +225,19 @@ namespace Scripts.EasternKingdoms.Karazhan
                         {
                             HandleGameObject(StageDoorLeftGUID, true);
                             HandleGameObject(StageDoorRightGUID, true);
-                            GameObject sideEntrance = instance.GetGameObject(SideEntranceDoor);
+                            GameObject sideEntrance = Instance.GetGameObject(SideEntranceDoor);
+
                             if (sideEntrance)
                                 sideEntrance.RemoveFlag(GameObjectFlags.Locked);
+
                             UpdateEncounterStateForKilledCreature(16812, null);
                         }
+
                         break;
                     case DataTypes.Chess:
                         if (state == EncounterState.Done)
                             DoRespawnGameObject(DustCoveredChest, TimeSpan.FromHours(24));
+
                         break;
                     default:
                         break;
@@ -269,50 +258,66 @@ namespace Scripts.EasternKingdoms.Karazhan
                 {
                     case GameObjectIds.StageCurtain:
                         CurtainGUID = go.GetGUID();
+
                         break;
                     case GameObjectIds.StageDoorLeft:
                         StageDoorLeftGUID = go.GetGUID();
+
                         if (GetBossState(DataTypes.OperaPerformance) == EncounterState.Done)
                             go.SetGoState(GameObjectState.Active);
+
                         break;
                     case GameObjectIds.StageDoorRight:
                         StageDoorRightGUID = go.GetGUID();
+
                         if (GetBossState(DataTypes.OperaPerformance) == EncounterState.Done)
                             go.SetGoState(GameObjectState.Active);
+
                         break;
                     case GameObjectIds.PrivateLibraryDoor:
                         LibraryDoor = go.GetGUID();
+
                         break;
                     case GameObjectIds.MassiveDoor:
                         MassiveDoor = go.GetGUID();
+
                         break;
                     case GameObjectIds.GamesmanHallDoor:
                         GamesmansDoor = go.GetGUID();
+
                         break;
                     case GameObjectIds.GamesmanHallExitDoor:
                         GamesmansExitDoor = go.GetGUID();
+
                         break;
                     case GameObjectIds.NetherspaceDoor:
                         NetherspaceDoor = go.GetGUID();
+
                         break;
                     case GameObjectIds.MastersTerraceDoor:
                         MastersTerraceDoor[0] = go.GetGUID();
+
                         break;
                     case GameObjectIds.MastersTerraceDoor2:
                         MastersTerraceDoor[1] = go.GetGUID();
+
                         break;
                     case GameObjectIds.SideEntranceDoor:
                         SideEntranceDoor = go.GetGUID();
+
                         if (GetBossState(DataTypes.OperaPerformance) == EncounterState.Done)
                             go.SetFlag(GameObjectFlags.Locked);
                         else
                             go.RemoveFlag(GameObjectFlags.Locked);
+
                         break;
                     case GameObjectIds.DustCoveredChest:
                         DustCoveredChest = go.GetGUID();
+
                         break;
                     case GameObjectIds.BlackenedUrn:
                         BlackenedUrnGUID = go.GetGUID();
+
                         break;
                 }
 
@@ -385,6 +390,22 @@ namespace Scripts.EasternKingdoms.Karazhan
 
                 return ObjectGuid.Empty;
             }
+        }
+
+        public static Position[] OptionalSpawn =
+        {
+            new(-10960.981445f, -1940.138428f, 46.178097f, 4.12f),  // Hyakiss the Lurker
+			new(-10945.769531f, -2040.153320f, 49.474438f, 0.077f), // Shadikith the Glider
+			new(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)   // Rokad the Ravager
+		};
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.Attumen, 652), new(DataTypes.Moroes, 653), new(DataTypes.MaidenOfVirtue, 654), new(DataTypes.OperaPerformance, 655), new(DataTypes.Curator, 656), new(DataTypes.Aran, 658), new(DataTypes.Terestian, 657), new(DataTypes.Netherspite, 659), new(DataTypes.Chess, 660), new(DataTypes.Malchezzar, 661), new(DataTypes.Nightbane, 662)
+        };
+
+        public instance_karazhan() : base(nameof(instance_karazhan), 532)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)

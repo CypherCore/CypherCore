@@ -8,6 +8,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnCreate : IScriptObject
     {
-        void OnCreate(Guilds.Guild guild, Player leader, string name);
+        void OnCreate(Guild guild, Player leader, string name);
     }
 }

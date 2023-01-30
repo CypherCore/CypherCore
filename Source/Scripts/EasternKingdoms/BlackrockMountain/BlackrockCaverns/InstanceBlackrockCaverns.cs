@@ -9,7 +9,7 @@ using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         // Encounter States // Boss GUIDs
         public const uint RomoggBonecrusher = 0;
@@ -22,7 +22,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
         public const uint RazTheCrazed = 5;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         public const uint TwilightFlameCaller = 39708;
         public const uint RazTheCrazed = 39670;
@@ -30,25 +30,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
     }
 
     [Script]
-    class instance_blackrock_caverns : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_blackrock_caverns : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        static ObjectData[] creatureData =
-        {
-            new ObjectData(CreatureIds.RazTheCrazed, DataTypes.RazTheCrazed)
-        };
-
-        static DungeonEncounterData[] encounters =
-        {
-            new DungeonEncounterData(DataTypes.RomoggBonecrusher, 1040),
-            new DungeonEncounterData(DataTypes.Corla, 1038),
-            new DungeonEncounterData(DataTypes.KarshSteelbender, 1039),
-            new DungeonEncounterData(DataTypes.Beauty, 1037),
-            new DungeonEncounterData(DataTypes.AscendantLordObsidius, 1036)
-        };
-
-        public instance_blackrock_caverns() : base(nameof(instance_blackrock_caverns), 645) { }
-
-        class instance_blackrock_caverns_InstanceMapScript : InstanceScript
+        private class instance_blackrock_caverns_InstanceMapScript : InstanceScript
         {
             public instance_blackrock_caverns_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -79,10 +63,23 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
             }
         }
 
+        private static readonly ObjectData[] creatureData =
+        {
+            new(CreatureIds.RazTheCrazed, DataTypes.RazTheCrazed)
+        };
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.RomoggBonecrusher, 1040), new(DataTypes.Corla, 1038), new(DataTypes.KarshSteelbender, 1039), new(DataTypes.Beauty, 1037), new(DataTypes.AscendantLordObsidius, 1036)
+        };
+
+        public instance_blackrock_caverns() : base(nameof(instance_blackrock_caverns), 645)
+        {
+        }
+
         public InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_blackrock_caverns_InstanceMapScript(map);
         }
     }
 }
-

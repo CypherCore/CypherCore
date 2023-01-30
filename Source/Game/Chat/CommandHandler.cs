@@ -1,6 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Framework.Collections;
 using Framework.Constants;
 using Framework.IO;
@@ -8,16 +12,27 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Networking.Packets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Game.Chat
 {
     public class CommandHandler
     {
+        private static readonly string[] _spellKeys =
+        {
+            "Hspell",   // normal spell
+			"Htalent",  // talent spell
+			"Henchant", // enchanting recipe spell
+			"Htrade",   // profession/skill spell
+			"Hglyph"    // glyph
+		};
+
+        private readonly WorldSession _session;
+
+        private bool _sentErrorMessage;
+
         public CommandHandler(WorldSession session = null)
         {
             _session = session;
@@ -29,7 +44,8 @@ namespace Game.Chat
                 return false;
 
             // chat case (.command or !command format)
-            if (text[0] != '!' && text[0] != '.')
+            if (text[0] != '!' &&
+                text[0] != '.')
                 return false;
 
             /// ignore single . and ! in line
@@ -43,7 +59,7 @@ namespace Game.Chat
             if (text[1] == ' ')
                 return false;
 
-            return _ParseCommands(text.Substring(1));
+            return _ParseCommands(text[1..]);
         }
 
         public bool _ParseCommands(string text)
@@ -52,11 +68,13 @@ namespace Game.Chat
                 return true;
 
             // Pretend commands don't exist for regular players
-            if (_session != null && !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
+            if (_session != null &&
+                !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
                 return false;
 
             // Send error message for GMs
             SendSysMessage(CypherStrings.CmdInvalid, text);
+
             return true;
         }
 
@@ -65,18 +83,26 @@ namespace Game.Chat
             return HasPermission(cmd._permission.RequiredPermission);
         }
 
-        public virtual bool IsHumanReadable() { return true; }
-        
-        public virtual bool HasPermission(RBACPermissions permission) { return _session.HasPermission(permission); }
+        public virtual bool IsHumanReadable()
+        {
+            return true;
+        }
+
+        public virtual bool HasPermission(RBACPermissions permission)
+        {
+            return _session.HasPermission(permission);
+        }
 
         public string ExtractKeyFromLink(StringArguments args, params string[] linkType)
         {
             return ExtractKeyFromLink(args, linkType, out _);
         }
+
         public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx)
         {
             return ExtractKeyFromLink(args, linkType, out found_idx, out _);
         }
+
         public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx, out string something1)
         {
             found_idx = 0;
@@ -93,33 +119,37 @@ namespace Game.Chat
             if (args[1] == 'c')
             {
                 string check = args.NextString("|");
+
                 if (string.IsNullOrEmpty(check))
                     return null;
             }
             else
+            {
                 args.NextChar();
+            }
 
             string cLinkType = args.NextString(":");
+
             if (string.IsNullOrEmpty(cLinkType))
                 return null;
 
             for (var i = 0; i < linkType.Length; ++i)
-            {
                 if (cLinkType == linkType[i])
                 {
-                    string cKey = args.NextString(":|");       // extract key
+                    string cKey = args.NextString(":|"); // extract key
 
-                    something1 = args.NextString(":|");      // extract something
+                    something1 = args.NextString(":|"); // extract something
 
-                    args.NextString("]");                         // restart scan tail and skip name with possible spaces
-                    args.NextString();                              // skip link tail (to allow continue strtok(NULL, s) use after return from function
+                    args.NextString("]"); // restart scan tail and skip Name with possible spaces
+                    args.NextString();    // skip link tail (to allow continue strtok(NULL, s) use after return from function
                     found_idx = i;
+
                     return cKey;
                 }
-            }
 
             args.NextString();
             SendSysMessage(CypherStrings.WrongLinkType);
+
             return null;
         }
 
@@ -131,24 +161,14 @@ namespace Game.Chat
             if (!str.Contains("\""))
                 return str;
 
-            return str.Replace("\"", String.Empty);
+            return str.Replace("\"", string.Empty);
         }
-        string ExtractPlayerNameFromLink(StringArguments args)
-        {
-            // |color|Hplayer:name|h[name]|h|r
-            string name = ExtractKeyFromLink(args, "Hplayer");
-            if (name.IsEmpty())
-                return "";
 
-            if (!ObjectManager.NormalizePlayerName(ref name))
-                return "";
-
-            return name;
-        }
         public bool ExtractPlayerTarget(StringArguments args, out Player player)
         {
             return ExtractPlayerTarget(args, out player, out _, out _);
         }
+
         public bool ExtractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid)
         {
             return ExtractPlayerTarget(args, out player, out playerGuid, out _);
@@ -160,13 +180,16 @@ namespace Game.Chat
             playerGuid = ObjectGuid.Empty;
             playerName = "";
 
-            if (args != null && !args.Empty())
+            if (args != null &&
+                !args.Empty())
             {
                 string name = ExtractPlayerNameFromLink(args);
+
                 if (string.IsNullOrEmpty(name))
                 {
                     SendSysMessage(CypherStrings.PlayerNotFound);
                     _sentErrorMessage = true;
+
                     return false;
                 }
 
@@ -183,29 +206,33 @@ namespace Game.Chat
                 playerName = player != null ? player.GetName() : "";
             }
 
-            if (player == null && playerGuid.IsEmpty() && string.IsNullOrEmpty(playerName))
+            if (player == null &&
+                playerGuid.IsEmpty() &&
+                string.IsNullOrEmpty(playerName))
             {
                 SendSysMessage(CypherStrings.PlayerNotFound);
                 _sentErrorMessage = true;
+
                 return false;
             }
 
             return true;
         }
+
         public ulong ExtractLowGuidFromLink(StringArguments args, ref HighGuid guidHigh)
         {
             int type;
 
             string[] guidKeys =
             {
-                "Hplayer",
-                "Hcreature",
-                "Hgameobject"
+                "Hplayer", "Hcreature", "Hgameobject"
             };
-            // |color|Hcreature:creature_guid|h[name]|h|r
-            // |color|Hgameobject:go_guid|h[name]|h|r
-            // |color|Hplayer:name|h[name]|h|r
+
+            // |color|Hcreature:creature_guid|h[Name]|h|r
+            // |color|Hgameobject:go_guid|h[Name]|h|r
+            // |color|Hplayer:Name|h[Name]|h|r
             string idS = ExtractKeyFromLink(args, guidKeys, out type);
+
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
@@ -214,14 +241,17 @@ namespace Game.Chat
                 case 0:
                     {
                         guidHigh = HighGuid.Player;
+
                         if (!ObjectManager.NormalizePlayerName(ref idS))
                             return 0;
 
                         Player player = Global.ObjAccessor.FindPlayerByName(idS);
+
                         if (player)
                             return player.GetGUID().GetCounter();
 
                         ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
+
                         if (guid.IsEmpty())
                             return 0;
 
@@ -230,44 +260,41 @@ namespace Game.Chat
                 case 1:
                     {
                         guidHigh = HighGuid.Creature;
+
                         if (!ulong.TryParse(idS, out ulong lowguid))
                             return 0;
+
                         return lowguid;
                     }
                 case 2:
                     {
                         guidHigh = HighGuid.GameObject;
+
                         if (!ulong.TryParse(idS, out ulong lowguid))
                             return 0;
+
                         return lowguid;
                     }
             }
 
-            // unknown type?
+            // unknown Type?
             return 0;
         }
 
-        static string[] spellKeys =
-        {
-            "Hspell",                                               // normal spell
-            "Htalent",                                              // talent spell
-            "Henchant",                                             // enchanting recipe spell
-            "Htrade",                                               // profession/skill spell
-            "Hglyph",                                               // glyph
-        };
         public uint ExtractSpellIdFromLink(StringArguments args)
         {
-            // number or [name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
-            // number or [name] Shift-click form |color|Hglyph:glyph_slot_id:glyph_prop_id|h[value]|h|r
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-            // number or [name] Shift-click form |color|Htalent:talent_id, rank|h[name]|h|r
-            // number or [name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[name]|h|r
-            string idS = ExtractKeyFromLink(args, spellKeys, out int type, out string param1Str);
+            // number or [Name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
+            // number or [Name] Shift-click form |color|Hglyph:glyph_slot_id:glyph_prop_id|h[value]|h|r
+            // number or [Name] Shift-click form |color|Hspell:spell_id|h[Name]|h|r
+            // number or [Name] Shift-click form |color|Htalent:talent_id, rank|h[Name]|h|r
+            // number or [Name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[Name]|h|r
+            string idS = ExtractKeyFromLink(args, _spellKeys, out int type, out string param1Str);
+
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
             if (!uint.TryParse(idS, out uint id))
-                return 0;               
+                return 0;
 
             switch (type)
             {
@@ -277,6 +304,7 @@ namespace Game.Chat
                     {
                         // talent
                         TalentRecord talentEntry = CliDB.TalentStorage.LookupByKey(id);
+
                         if (talentEntry == null)
                             return 0;
 
@@ -291,6 +319,7 @@ namespace Game.Chat
                             glyph_prop_id = 0;
 
                         GlyphPropertiesRecord glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
+
                         if (glyphPropEntry == null)
                             return 0;
 
@@ -298,7 +327,7 @@ namespace Game.Chat
                     }
             }
 
-            // unknown type?
+            // unknown Type?
             return 0;
         }
 
@@ -314,17 +343,20 @@ namespace Game.Chat
 
             return Global.ObjAccessor.FindConnectedPlayer(selected);
         }
+
         public Unit GetSelectedUnit()
         {
             if (_session == null)
                 return null;
 
             Unit selected = _session.GetPlayer().GetSelectedUnit();
+
             if (selected)
                 return selected;
 
             return _session.GetPlayer();
         }
+
         public WorldObject GetSelectedObject()
         {
             if (_session == null)
@@ -337,6 +369,7 @@ namespace Game.Chat
 
             return Global.ObjAccessor.GetUnit(_session.GetPlayer(), selected);
         }
+
         public Creature GetSelectedCreature()
         {
             if (_session == null)
@@ -344,18 +377,21 @@ namespace Game.Chat
 
             return ObjectAccessor.GetCreatureOrPetOrVehicle(_session.GetPlayer(), _session.GetPlayer().GetTarget());
         }
+
         public Player GetSelectedPlayerOrSelf()
         {
             if (_session == null)
                 return null;
 
             ObjectGuid selected = _session.GetPlayer().GetTarget();
+
             if (selected.IsEmpty())
                 return _session.GetPlayer();
 
-            // first try with selected target
+            // first try with selected Target
             Player targetPlayer = Global.ObjAccessor.FindConnectedPlayer(selected);
-            // if the target is not a player, then return self
+
+            // if the Target is not a player, then return self
             if (!targetPlayer)
                 targetPlayer = _session.GetPlayer();
 
@@ -368,6 +404,7 @@ namespace Game.Chat
                 return null;
 
             var bounds = _session.GetPlayer().GetMap().GetGameObjectBySpawnIdStore().LookupByKey(lowguid);
+
             if (!bounds.Empty())
                 return bounds.First();
 
@@ -382,44 +419,40 @@ namespace Game.Chat
             // Select the first alive creature or a dead one if not found
             Creature creature = null;
             var bounds = _session.GetPlayer().GetMap().GetCreatureBySpawnIdStore().LookupByKey(lowguid);
+
             foreach (var it in bounds)
             {
                 creature = it;
+
                 if (it.IsAlive())
                     break;
             }
 
             return creature;
         }
-        GameObject GetNearbyGameObject()
-        {
-            if (_session == null)
-                return null;
-
-            Player pl = _session.GetPlayer();
-            NearestGameObjectCheck check = new(pl);
-            GameObjectLastSearcher searcher = new(pl, check);
-            Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
-            return searcher.GetTarget();
-        }
 
         public string PlayerLink(string name)
         {
             return _session != null ? "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r" : name;
         }
+
         public virtual string GetNameLink()
         {
             return GetNameLink(_session.GetPlayer());
         }
+
         public string GetNameLink(Player obj)
         {
             return PlayerLink(obj.GetName());
         }
+
         public virtual bool NeedReportToTarget(Player chr)
         {
             Player pl = _session.GetPlayer();
+
             return pl != chr && pl.IsVisibleGloballyFor(chr);
         }
+
         public bool HasLowerSecurity(Player target, ObjectGuid guid, bool strong = false)
         {
             WorldSession target_session = null;
@@ -430,15 +463,18 @@ namespace Game.Chat
             else if (!guid.IsEmpty())
                 target_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
 
-            if (target_session == null && target_account == 0)
+            if (target_session == null &&
+                target_account == 0)
             {
                 SendSysMessage(CypherStrings.PlayerNotFound);
                 _sentErrorMessage = true;
+
                 return true;
             }
 
             return HasLowerSecurityAccount(target_session, target_account, strong);
         }
+
         public bool HasLowerSecurityAccount(WorldSession target, uint target_account, bool strong = false)
         {
             AccountTypes target_ac_sec;
@@ -448,7 +484,9 @@ namespace Game.Chat
                 return false;
 
             // ignore only for non-players for non strong checks (when allow apply command at least to same sec level)
-            if (!Global.AccountMgr.IsPlayerAccount(_session.GetSecurity()) && !strong && !WorldConfig.GetBoolValue(WorldCfg.GmLowerSecurity))
+            if (!Global.AccountMgr.IsPlayerAccount(_session.GetSecurity()) &&
+                !strong &&
+                !WorldConfig.GetBoolValue(WorldCfg.GmLowerSecurity))
                 return false;
 
             if (target != null)
@@ -456,52 +494,35 @@ namespace Game.Chat
             else if (target_account != 0)
                 target_ac_sec = Global.AccountMgr.GetSecurity(target_account, (int)Global.WorldMgr.GetRealmId().Index);
             else
-                return true;                                        // caller must report error for (target == NULL && target_account == 0)
+                return true; // caller must report error for (Target == NULL && target_account == 0)
 
-            if (_session.GetSecurity() < target_ac_sec || (strong && _session.GetSecurity() <= target_ac_sec))
+            if (_session.GetSecurity() < target_ac_sec ||
+                (strong && _session.GetSecurity() <= target_ac_sec))
             {
                 SendSysMessage(CypherStrings.YoursSecurityIsLow);
                 _sentErrorMessage = true;
+
                 return true;
             }
+
             return false;
         }
 
-        bool HasStringAbbr(string name, string part)
+        public bool IsConsole()
         {
-            // non "" command
-            if (!name.IsEmpty())
-            {
-                // "" part from non-"" command
-                if (part.IsEmpty())
-                    return false;
-
-                int partIndex = 0;
-                while (true)
-                {
-                    if (partIndex >= part.Length || part[partIndex] == ' ')
-                        return true;
-                    else if (partIndex >= name.Length)
-                        return false;
-                    else if (char.ToLower(name[partIndex]) != char.ToLower(part[partIndex]))
-                        return false;
-                    ++partIndex;
-                }
-            }
-            // allow with any for ""
-
-            return true;
+            return _session == null;
         }
 
-        public bool IsConsole() { return _session == null; }
         public WorldSession GetSession()
         {
             return _session;
         }
+
         public Player GetPlayer()
         {
             return _session?.GetPlayer();
         }
+
         public string GetCypherString(CypherStrings str)
         {
             return Global.ObjectMgr.GetCypherString(str);
@@ -511,10 +532,12 @@ namespace Game.Chat
         {
             return _session.GetSessionDbcLocale();
         }
+
         public virtual byte GetSessionDbLocaleIndex()
         {
             return (byte)_session.GetSessionDbLocaleIndex();
         }
+
         public string GetParsedString(CypherStrings cypherString, params object[] args)
         {
             return string.Format(Global.ObjectMgr.GetCypherString(cypherString), args);
@@ -524,6 +547,7 @@ namespace Game.Chat
         {
             SendSysMessage(string.Format(str, args));
         }
+
         public void SendSysMessage(CypherStrings cypherString, params object[] args)
         {
             SendSysMessage(string.Format(Global.ObjectMgr.GetCypherString(cypherString), args));
@@ -539,11 +563,12 @@ namespace Game.Chat
             ChatPkt messageChat = new();
 
             var lines = new StringArray(str, "\n", "\r");
+
             for (var i = 0; i < lines.Length; ++i)
             {
                 messageChat.Initialize(ChatMsg.System, Language.Universal, null, null, lines[i]);
                 _session.SendPacket(messageChat);
-            }            
+            }
         }
 
         public void SendNotification(CypherStrings str, params object[] args)
@@ -578,10 +603,12 @@ namespace Game.Chat
                 if (!ObjectManager.NormalizePlayerName(ref name))
                 {
                     SendSysMessage(CypherStrings.PlayerNotFound);
+
                     return false;
                 }
 
                 player = Global.ObjAccessor.FindPlayerByName(name);
+
                 if (offline)
                     guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
             }
@@ -589,7 +616,9 @@ namespace Game.Chat
             if (player)
             {
                 group = player.GetGroup();
-                if (guid.IsEmpty() || !offline)
+
+                if (guid.IsEmpty() ||
+                    !offline)
                     guid = player.GetGUID();
             }
             else
@@ -599,30 +628,94 @@ namespace Game.Chat
                 else
                     player = _session.GetPlayer();
 
-                if (guid.IsEmpty() || !offline)
+                if (guid.IsEmpty() ||
+                    !offline)
                     guid = player.GetGUID();
+
                 group = player.GetGroup();
             }
 
             return true;
         }
 
-        public bool HasSentErrorMessage() { return _sentErrorMessage; }
-        public void SetSentErrorMessage(bool val) { _sentErrorMessage = val; }
+        public bool HasSentErrorMessage()
+        {
+            return _sentErrorMessage;
+        }
 
-        bool _sentErrorMessage;
-        WorldSession _session;
+        public void SetSentErrorMessage(bool val)
+        {
+            _sentErrorMessage = val;
+        }
+
+        private string ExtractPlayerNameFromLink(StringArguments args)
+        {
+            // |color|Hplayer:Name|h[Name]|h|r
+            string name = ExtractKeyFromLink(args, "Hplayer");
+
+            if (name.IsEmpty())
+                return "";
+
+            if (!ObjectManager.NormalizePlayerName(ref name))
+                return "";
+
+            return name;
+        }
+
+        private GameObject GetNearbyGameObject()
+        {
+            if (_session == null)
+                return null;
+
+            Player pl = _session.GetPlayer();
+            NearestGameObjectCheck check = new(pl);
+            GameObjectLastSearcher searcher = new(pl, check);
+            Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
+
+            return searcher.GetTarget();
+        }
+
+        private bool HasStringAbbr(string name, string part)
+        {
+            // non "" command
+            if (!name.IsEmpty())
+            {
+                // "" part from non-"" command
+                if (part.IsEmpty())
+                    return false;
+
+                int partIndex = 0;
+
+                while (true)
+                {
+                    if (partIndex >= part.Length ||
+                        part[partIndex] == ' ')
+                        return true;
+                    else if (partIndex >= name.Length)
+                        return false;
+                    else if (char.ToLower(name[partIndex]) != char.ToLower(part[partIndex]))
+                        return false;
+
+                    ++partIndex;
+                }
+            }
+            // allow with any for ""
+
+            return true;
+        }
     }
 
-    class AddonChannelCommandHandler : CommandHandler
+    internal class AddonChannelCommandHandler : CommandHandler
     {
         public static string PREFIX = "TrinityCore";
 
-        string echo;
-        bool hadAck;
-        bool humanReadable;
+        private string echo;
+        private bool hadAck;
+        private bool humanReadable;
 
-        public AddonChannelCommandHandler(WorldSession session) : base(session) { }
+        public AddonChannelCommandHandler(WorldSession session) : base(session)
+        {
+        }
 
         public override bool ParseCommands(string str)
         {
@@ -630,12 +723,13 @@ namespace Game.Chat
                 return false;
 
             char opcode = str[0];
-            echo = str.Substring(1);
+            echo = str[1..];
 
             switch (opcode)
             {
                 case 'p': // p Ping
                     SendAck();
+
                     return true;
                 case 'h': // h Issue human-readable command
                 case 'i': // i Issue command
@@ -643,11 +737,13 @@ namespace Game.Chat
                         return false;
 
                     humanReadable = opcode == 'h';
-                    string cmd = str.Substring(5);
+                    string cmd = str[5..];
+
                     if (_ParseCommands(cmd)) // actual command starts at str[5]
                     {
                         if (!hadAck)
                             SendAck();
+
                         if (HasSentErrorMessage())
                             SendFailed();
                         else
@@ -658,33 +754,11 @@ namespace Game.Chat
                         SendSysMessage(CypherStrings.CmdInvalid, cmd);
                         SendFailed();
                     }
+
                     return true;
                 default:
                     return false;
             }
-        }
-
-        void Send(string msg)
-        {
-            ChatPkt chat = new();
-            chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
-            GetSession().SendPacket(chat);
-        }
-
-        void SendAck() // a Command acknowledged, no body
-        {
-            Send($"a{echo:4}\0");
-            hadAck = true;
-        }
-
-        void SendOK() // o Command OK, no body
-        {
-            Send($"o{echo:4}\0");
-        }
-
-        void SendFailed() // f Command failed, no body
-        {
-            Send($"f{echo:4}\0");
         }
 
         public override void SendSysMessage(string str, bool escapeCharacters)
@@ -695,21 +769,50 @@ namespace Game.Chat
             StringBuilder msg = new("m");
             msg.Append(echo, 0, 4);
             string body = str;
+
             if (escapeCharacters)
                 body.Replace("|", "||");
 
             int pos, lastpos;
+
             for (lastpos = 0, pos = body.IndexOf('\n', lastpos); pos != -1; lastpos = pos + 1, pos = body.IndexOf('\n', lastpos))
             {
                 StringBuilder line = msg;
                 line.Append(body, lastpos, pos - lastpos);
                 Send(line.ToString());
             }
+
             msg.Append(body, lastpos, pos - lastpos);
             Send(msg.ToString());
         }
 
-        public override bool IsHumanReadable() { return humanReadable; }
+        public override bool IsHumanReadable()
+        {
+            return humanReadable;
+        }
+
+        private void Send(string msg)
+        {
+            ChatPkt chat = new();
+            chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
+            GetSession().SendPacket(chat);
+        }
+
+        private void SendAck() // a Command acknowledged, no body
+        {
+            Send($"a{echo:4}\0");
+            hadAck = true;
+        }
+
+        private void SendOK() // o Command OK, no body
+        {
+            Send($"o{echo:4}\0");
+        }
+
+        private void SendFailed() // f Command failed, no body
+        {
+            Send($"f{echo:4}\0");
+        }
     }
 
     public class ConsoleHandler : CommandHandler
@@ -736,8 +839,9 @@ namespace Game.Chat
                 return false;
 
             // Console allows using commands both with and without leading indicator
-            if (str[0] == '.' || str[0] == '!')
-                str = str.Substring(1);
+            if (str[0] == '.' ||
+                str[0] == '!')
+                str = str[1..];
 
             return _ParseCommands(str);
         }
@@ -765,9 +869,9 @@ namespace Game.Chat
 
     public class RemoteAccessHandler : CommandHandler
     {
-        Action<string> _reportToRA;
+        private readonly Action<string> _reportToRA;
 
-        public RemoteAccessHandler(Action<string> reportToRA) : base() 
+        public RemoteAccessHandler(Action<string> reportToRA) : base()
         {
             _reportToRA = reportToRA;
         }
@@ -794,8 +898,9 @@ namespace Game.Chat
                 return false;
 
             // Console allows using commands both with and without leading indicator
-            if (str[0] == '.' || str[0] == '!')
-                str = str.Substring(1);
+            if (str[0] == '.' ||
+                str[0] == '!')
+                str = str[1..];
 
             return _ParseCommands(str);
         }

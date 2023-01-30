@@ -9,7 +9,7 @@ using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.DragonIsles.RubyLifePools
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         // Encounters
         public const uint MelidrussaChillworn = 0;
@@ -17,7 +17,7 @@ namespace Scripts.DragonIsles.RubyLifePools
         public const uint KyrakkaAndErkhartStormvein = 2;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         // Bosses
         public const uint MelidrussaChillworn = 188252;
@@ -25,36 +25,15 @@ namespace Scripts.DragonIsles.RubyLifePools
         public const uint Kyrakka = 190484;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint FireWall = 377194;
     }
 
     [Script]
-    class instance_ruby_life_pools : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_ruby_life_pools : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public static ObjectData[] creatureData =
-        {
-            new ObjectData(CreatureIds.MelidrussaChillworn, DataTypes.MelidrussaChillworn),
-            new ObjectData(CreatureIds.KokiaBlazehoof, DataTypes.KokiaBlazehoof),
-            new ObjectData(CreatureIds.Kyrakka, DataTypes.KyrakkaAndErkhartStormvein),
-        };
-
-        public static DoorData[] doorData =
-        {
-            new DoorData(GameObjectIds.FireWall, DataTypes.KokiaBlazehoof, DoorType.Passage),
-        };
-
-        public static DungeonEncounterData[] encounters =
-        {
-            new DungeonEncounterData(DataTypes.MelidrussaChillworn, 2609 ),
-            new DungeonEncounterData(DataTypes.KokiaBlazehoof, 2606 ),
-            new DungeonEncounterData(DataTypes.KyrakkaAndErkhartStormvein, 2623 )
-        };
-
-        public instance_ruby_life_pools() : base(nameof(instance_ruby_life_pools), 2521) { }
-
-        class instance_ruby_life_pools_InstanceMapScript : InstanceScript
+        private class instance_ruby_life_pools_InstanceMapScript : InstanceScript
         {
             public instance_ruby_life_pools_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -64,6 +43,25 @@ namespace Scripts.DragonIsles.RubyLifePools
                 LoadDoorData(doorData);
                 LoadDungeonEncounterData(encounters);
             }
+        }
+
+        public static ObjectData[] creatureData =
+        {
+            new(CreatureIds.MelidrussaChillworn, DataTypes.MelidrussaChillworn), new(CreatureIds.KokiaBlazehoof, DataTypes.KokiaBlazehoof), new(CreatureIds.Kyrakka, DataTypes.KyrakkaAndErkhartStormvein)
+        };
+
+        public static DoorData[] doorData =
+        {
+            new(GameObjectIds.FireWall, DataTypes.KokiaBlazehoof, DoorType.Passage)
+        };
+
+        public static DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.MelidrussaChillworn, 2609), new(DataTypes.KokiaBlazehoof, 2606), new(DataTypes.KyrakkaAndErkhartStormvein, 2623)
+        };
+
+        public instance_ruby_life_pools() : base(nameof(instance_ruby_life_pools), 2521)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)

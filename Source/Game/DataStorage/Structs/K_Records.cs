@@ -11,9 +11,9 @@ namespace Game.DataStorage
 
     public sealed class KeystoneAffixRecord
     {
-        public LocalizedString Name;
         public LocalizedString Description;
-        public uint Id;
         public int FiledataID;
+        public uint Id;
+        public LocalizedString Name;
     }
 }

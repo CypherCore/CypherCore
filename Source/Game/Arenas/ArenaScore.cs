@@ -8,8 +8,14 @@ using Game.Networking.Packets;
 
 namespace Game.Arenas
 {
-    class ArenaScore : BattlegroundScore
+    internal class ArenaScore : BattlegroundScore
     {
+        private readonly uint PostMatchMMR;
+        private readonly uint PostMatchRating;
+        private readonly uint PreMatchMMR;
+
+        private readonly uint PreMatchRating;
+
         public ArenaScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team)
         {
             TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
@@ -36,17 +42,18 @@ namespace Game.Arenas
         public override string ToString()
         {
             return $"Damage done: {DamageDone} Healing done: {HealingDone} Killing blows: {KillingBlows} PreMatchRating: {PreMatchRating} " +
-                $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
+                   $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
         }
-
-        uint PreMatchRating;
-        uint PreMatchMMR;
-        uint PostMatchRating;
-        uint PostMatchMMR;
     }
 
     public class ArenaTeamScore
     {
+        public uint PostMatchMMR;
+        public uint PostMatchRating;
+        public uint PreMatchMMR;
+
+        public uint PreMatchRating;
+
         public void Assign(uint preMatchRating, uint postMatchRating, uint preMatchMMR, uint postMatchMMR)
         {
             PreMatchRating = preMatchRating;
@@ -54,10 +61,5 @@ namespace Game.Arenas
             PreMatchMMR = preMatchMMR;
             PostMatchMMR = postMatchMMR;
         }
-
-        public uint PreMatchRating;
-        public uint PostMatchRating;
-        public uint PreMatchMMR;
-        public uint PostMatchMMR;
     }
 }

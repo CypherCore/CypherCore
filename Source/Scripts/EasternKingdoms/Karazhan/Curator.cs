@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System;
 
 namespace Scripts.EasternKingdoms.Karazhan.Curator
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint HatefulBolt = 30383;
         public const uint Evocation = 30254;
@@ -22,7 +22,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
         public const uint SummonAstralFlareSw = 30241;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SayAggro = 0;
         public const uint SaySummon = 1;
@@ -32,15 +32,19 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
         public const uint SayDeath = 5;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint GroupAstralFlare = 1;
     }
 
     [Script]
-    class boss_curator : BossAI
+    internal class boss_curator : BossAI
     {
-        public boss_curator(Creature creature) : base(creature, DataTypes.Curator) { }
+        private bool _infused;
+
+        public boss_curator(Creature creature) : base(creature, DataTypes.Curator)
+        {
+        }
 
         public override void Reset()
         {
@@ -65,44 +69,55 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 1);
-                if (target)
-                    DoCast(target, SpellIds.HatefulBolt);
-                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(15));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), MiscConst.GroupAstralFlare, task =>
-            {
-                if (RandomHelper.randChance(50))
-                    Talk(TextIds.SaySummon);
+            _scheduler.Schedule(TimeSpan.FromSeconds(12),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.MaxThreat, 1);
 
-                DoCastSelf(RandomHelper.RAND(SpellIds.SummonAstralFlareNe, SpellIds.SummonAstralFlareNw, SpellIds.SummonAstralFlareSe, SpellIds.SummonAstralFlareSw), new CastSpellExtraArgs(true));
+                                    if (target)
+                                        DoCast(target, SpellIds.HatefulBolt);
 
-                int mana = (me.GetMaxPower(PowerType.Mana) / 10);
-                if (mana != 0)
-                {
-                    me.ModifyPower(PowerType.Mana, -mana);
+                                    task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(15));
+                                });
 
-                    if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
-                    {
-                        Talk(TextIds.SayEvocate);
-                        me.InterruptNonMeleeSpells(false);
-                        DoCastSelf(SpellIds.Evocation);
-                    }
-                }
-                task.Repeat(TimeSpan.FromSeconds(10));
-            });
-            _scheduler.Schedule(TimeSpan.FromMinutes(12), ScheduleTasks =>
-            {
-                Talk(TextIds.SayEnrage);
-                DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                MiscConst.GroupAstralFlare,
+                                task =>
+                                {
+                                    if (RandomHelper.randChance(50))
+                                        Talk(TextIds.SaySummon);
+
+                                    DoCastSelf(RandomHelper.RAND(SpellIds.SummonAstralFlareNe, SpellIds.SummonAstralFlareNw, SpellIds.SummonAstralFlareSe, SpellIds.SummonAstralFlareSw), new CastSpellExtraArgs(true));
+
+                                    int mana = (me.GetMaxPower(PowerType.Mana) / 10);
+
+                                    if (mana != 0)
+                                    {
+                                        me.ModifyPower(PowerType.Mana, -mana);
+
+                                        if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
+                                        {
+                                            Talk(TextIds.SayEvocate);
+                                            me.InterruptNonMeleeSpells(false);
+                                            DoCastSelf(SpellIds.Evocation);
+                                        }
+                                    }
+
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromMinutes(12),
+                                ScheduleTasks =>
+                                {
+                                    Talk(TextIds.SayEnrage);
+                                    DoCastSelf(SpellIds.Berserk, new CastSpellExtraArgs(true));
+                                });
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
-            if (!HealthAbovePct(15) && !_infused)
+            if (!HealthAbovePct(15) &&
+                !_infused)
             {
                 _infused = true;
                 _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task => DoCastSelf(SpellIds.ArcaneInfusion, new CastSpellExtraArgs(true)));
@@ -114,12 +129,10 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
         {
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
-
-        bool _infused;
     }
 
     [Script]
-    class npc_curator_astral_flare : ScriptedAI
+    internal class npc_curator_astral_flare : ScriptedAI
     {
         public npc_curator_astral_flare(Creature creature) : base(creature)
         {
@@ -128,12 +141,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
 
         public override void Reset()
         {
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
-            {
-                me.SetReactState(ReactStates.Aggressive);
-                me.RemoveUnitFlag(UnitFlags.Uninteractible);
-                DoZoneInCombat();
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                task =>
+                                {
+                                    me.SetReactState(ReactStates.Aggressive);
+                                    me.RemoveUnitFlag(UnitFlags.Uninteractible);
+                                    DoZoneInCombat();
+                                });
         }
 
         public override void UpdateAI(uint diff)

@@ -1,19 +1,23 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Text;
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Game.Loots
 {
     public class LootItemStorage : Singleton<LootItemStorage>
     {
-        LootItemStorage() { }
+        private readonly ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new();
+
+        private LootItemStorage()
+        {
+        }
 
         public void LoadStorageFromDB()
         {
@@ -23,31 +27,34 @@ namespace Game.Loots
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
             SQLResult result = DB.Characters.Query(stmt);
+
             if (!result.IsEmpty())
             {
                 do
                 {
                     ulong key = result.Read<ulong>(0);
+
                     if (!_lootItemStorage.ContainsKey(key))
                         _lootItemStorage[key] = new StoredLootContainer(key);
 
                     StoredLootContainer storedContainer = _lootItemStorage[key];
 
                     LootItem lootItem = new();
-                    lootItem.itemid = result.Read<uint>(1);
-                    lootItem.count = result.Read<byte>(2);
+                    lootItem.Itemid = result.Read<uint>(1);
+                    lootItem.Count = result.Read<byte>(2);
                     lootItem.LootListId = result.Read<uint>(3);
-                    lootItem.follow_loot_rules = result.Read<bool>(4);
-                    lootItem.freeforall = result.Read<bool>(5);
-                    lootItem.is_blocked = result.Read<bool>(6);
-                    lootItem.is_counted = result.Read<bool>(7);
-                    lootItem.is_underthreshold = result.Read<bool>(8);
-                    lootItem.needs_quest = result.Read<bool>(9);
-                    lootItem.randomBonusListId = result.Read<uint>(10);
-                    lootItem.context = (ItemContext)result.Read<byte>(11);
+                    lootItem.Follow_loot_rules = result.Read<bool>(4);
+                    lootItem.Freeforall = result.Read<bool>(5);
+                    lootItem.Is_blocked = result.Read<bool>(6);
+                    lootItem.Is_counted = result.Read<bool>(7);
+                    lootItem.Is_underthreshold = result.Read<bool>(8);
+                    lootItem.Needs_quest = result.Read<bool>(9);
+                    lootItem.RandomBonusListId = result.Read<uint>(10);
+                    lootItem.Context = (ItemContext)result.Read<byte>(11);
                     StringArray bonusLists = new(result.Read<string>(12), ' ');
 
-                    if (bonusLists != null && !bonusLists.IsEmpty())
+                    if (bonusLists != null &&
+                        !bonusLists.IsEmpty())
                         foreach (string str in bonusLists)
                             lootItem.BonusListIDs.Add(uint.Parse(str));
 
@@ -56,21 +63,26 @@ namespace Game.Loots
                     ++count;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored Item loots in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item loots");
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored Item loots");
+            }
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_MONEY);
             result = DB.Characters.Query(stmt);
+
             if (!result.IsEmpty())
             {
                 count = 0;
+
                 do
                 {
                     ulong key = result.Read<ulong>(0);
-                    if (!_lootItemStorage.ContainsKey(key))  
-                         _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
+
+                    if (!_lootItemStorage.ContainsKey(key))
+                        _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
 
                     StoredLootContainer storedContainer = _lootItemStorage[key];
                     storedContainer.AddMoney(result.Read<uint>(1), null);
@@ -78,10 +90,12 @@ namespace Game.Loots
                     ++count;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} stored Item money in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
             else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored item money");
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 stored Item money");
+            }
         }
 
         public bool LoadStoredLoot(Item item, Player player)
@@ -92,45 +106,45 @@ namespace Game.Loots
             var container = _lootItemStorage[item.GetGUID().GetCounter()];
 
             Loot loot = new(player.GetMap(), item.GetGUID(), LootType.Item, null);
-            loot.gold = container.GetMoney();
+            loot.Gold = container.GetMoney();
 
             LootTemplate lt = LootStorage.Items.GetLootFor(item.GetEntry());
+
             if (lt != null)
-            {
                 foreach (var (id, storedItem) in container.GetLootItems())
                 {
                     LootItem li = new();
-                    li.itemid = id;
-                    li.count = (byte)storedItem.Count;
+                    li.Itemid = id;
+                    li.Count = (byte)storedItem.Count;
                     li.LootListId = storedItem.ItemIndex;
-                    li.follow_loot_rules = storedItem.FollowRules;
-                    li.freeforall = storedItem.FFA;
-                    li.is_blocked = storedItem.Blocked;
-                    li.is_counted = storedItem.Counted;
-                    li.is_underthreshold = storedItem.UnderThreshold;
-                    li.needs_quest = storedItem.NeedsQuest;
-                    li.randomBonusListId = storedItem.RandomBonusListId;
-                    li.context = storedItem.Context;
+                    li.Follow_loot_rules = storedItem.FollowRules;
+                    li.Freeforall = storedItem.FFA;
+                    li.Is_blocked = storedItem.Blocked;
+                    li.Is_counted = storedItem.Counted;
+                    li.Is_underthreshold = storedItem.UnderThreshold;
+                    li.Needs_quest = storedItem.NeedsQuest;
+                    li.RandomBonusListId = storedItem.RandomBonusListId;
+                    li.Context = storedItem.Context;
                     li.BonusListIDs = storedItem.BonusListIDs;
 
-                    // Copy the extra loot conditions from the item in the loot template
+                    // Copy the extra loot conditions from the Item in the loot template
                     lt.CopyConditions(li);
 
-                    // If container item is in a bag, add that player as an allowed looter
+                    // If container Item is in a bag, add that player as an allowed looter
                     if (item.GetBagSlot() != 0)
                         li.AddAllowedLooter(player);
 
                     // Finally add the LootItem to the container
-                    loot.items.Add(li);
+                    loot.Items.Add(li);
 
-                    // Increment unlooted count
-                    ++loot.unlootedCount;
+                    // Increment unlooted Count
+                    ++loot.UnlootedCount;
                 }
-            }
 
-            // Mark the item if it has loot so it won't be generated again on open
+            // Mark the Item if it has loot so it won't be generated again on open
             item.loot = loot;
-            item.m_lootGenerated = true;
+            item._lootGenerated = true;
+
             return true;
         }
 
@@ -168,27 +182,29 @@ namespace Game.Loots
 
         public void AddNewStoredLoot(ulong containerId, Loot loot, Player player)
         {
-            // Saves the money and item loot associated with an openable item to the DB
+            // Saves the money and Item loot associated with an openable Item to the DB
             if (loot.IsLooted()) // no money and no loot
                 return;
-            
+
             if (_lootItemStorage.ContainsKey(containerId))
             {
-                Log.outError(LogFilter.Misc, $"Trying to store item loot by player: {player.GetGUID()} for container id: {containerId} that is already in storage!");
+                Log.outError(LogFilter.Misc, $"Trying to store Item loot by player: {player.GetGUID()} for container Id: {containerId} that is already in storage!");
+
                 return;
             }
 
             StoredLootContainer container = new(containerId);
 
             SQLTransaction trans = new();
-            if (loot.gold != 0)
-                container.AddMoney(loot.gold, trans);
+
+            if (loot.Gold != 0)
+                container.AddMoney(loot.Gold, trans);
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
             stmt.AddValue(0, containerId);
             trans.Append(stmt);
 
-            foreach (LootItem li in loot.items)
+            foreach (LootItem li in loot.Items)
             {
                 // Conditions are not checked when loot is generated, it is checked when loot is sent to a player.
                 // For items that are lootable, loot is saved to the DB immediately, that means that loot can be
@@ -199,8 +215,10 @@ namespace Game.Loots
                     continue;
 
                 // Don't save currency tokens
-                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(li.itemid);
-                if (itemTemplate == null || itemTemplate.IsCurrencyToken())
+                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(li.Itemid);
+
+                if (itemTemplate == null ||
+                    itemTemplate.IsCurrencyToken())
                     continue;
 
                 container.AddLootItem(li, trans);
@@ -210,12 +228,15 @@ namespace Game.Loots
 
             _lootItemStorage.TryAdd(containerId, container);
         }
-
-        ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new();
     }
 
-    class StoredLootContainer
+    internal class StoredLootContainer
     {
+        private readonly ulong _containerId;
+
+        private readonly MultiMap<uint, StoredLootItem> _lootItems = new();
+        private uint _money;
+
         public StoredLootContainer(ulong containerId)
         {
             _containerId = containerId;
@@ -223,27 +244,29 @@ namespace Game.Loots
 
         public void AddLootItem(LootItem lootItem, SQLTransaction trans)
         {
-            _lootItems.Add(lootItem.itemid, new StoredLootItem(lootItem));
+            _lootItems.Add(lootItem.Itemid, new StoredLootItem(lootItem));
+
             if (trans == null)
                 return;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
 
-            // container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
+            // container_id, ItemId, item_count, follow_rules, ffa, Blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
             stmt.AddValue(0, _containerId);
-            stmt.AddValue(1, lootItem.itemid);
-            stmt.AddValue(2, lootItem.count);
+            stmt.AddValue(1, lootItem.Itemid);
+            stmt.AddValue(2, lootItem.Count);
             stmt.AddValue(3, lootItem.LootListId);
-            stmt.AddValue(4, lootItem.follow_loot_rules);
-            stmt.AddValue(5, lootItem.freeforall);
-            stmt.AddValue(6, lootItem.is_blocked);
-            stmt.AddValue(7, lootItem.is_counted);
-            stmt.AddValue(8, lootItem.is_underthreshold);
-            stmt.AddValue(9, lootItem.needs_quest);
-            stmt.AddValue(10, lootItem.randomBonusListId);
-            stmt.AddValue(11, (uint)lootItem.context);
+            stmt.AddValue(4, lootItem.Follow_loot_rules);
+            stmt.AddValue(5, lootItem.Freeforall);
+            stmt.AddValue(6, lootItem.Is_blocked);
+            stmt.AddValue(7, lootItem.Is_counted);
+            stmt.AddValue(8, lootItem.Is_underthreshold);
+            stmt.AddValue(9, lootItem.Needs_quest);
+            stmt.AddValue(10, lootItem.RandomBonusListId);
+            stmt.AddValue(11, (uint)lootItem.Context);
 
             StringBuilder bonusListIDs = new();
+
             foreach (int bonusListID in lootItem.BonusListIDs)
                 bonusListIDs.Append(bonusListID + ' ');
 
@@ -254,6 +277,7 @@ namespace Game.Loots
         public void AddMoney(uint money, SQLTransaction trans)
         {
             _money = money;
+
             if (trans == null)
                 return;
 
@@ -279,16 +303,16 @@ namespace Game.Loots
         public void RemoveItem(uint itemId, uint count, uint itemIndex)
         {
             var bounds = _lootItems.LookupByKey(itemId);
+
             foreach (var itr in bounds)
-            {
                 if (itr.Count == count)
                 {
                     _lootItems.Remove(itr.ItemId);
+
                     break;
                 }
-            }
 
-            // Deletes a single item associated with an openable item from the DB
+            // Deletes a single Item associated with an openable Item from the DB
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, itemId);
@@ -297,46 +321,52 @@ namespace Game.Loots
             DB.Characters.Execute(stmt);
         }
 
-        ulong GetContainer() { return _containerId; }
-
-        public uint GetMoney() { return _money; }
-
-        public MultiMap<uint, StoredLootItem> GetLootItems() { return _lootItems; }
-
-        MultiMap<uint, StoredLootItem> _lootItems = new();
-        ulong _containerId;
-        uint _money;
-    }
-
-    class StoredLootItem
-    {
-        public StoredLootItem(LootItem lootItem)
+        public uint GetMoney()
         {
-            ItemId = lootItem.itemid;
-            Count = lootItem.count;
-            ItemIndex = lootItem.LootListId;
-            FollowRules = lootItem.follow_loot_rules;
-            FFA = lootItem.freeforall;
-            Blocked = lootItem.is_blocked;
-            Counted = lootItem.is_counted;
-            UnderThreshold = lootItem.is_underthreshold;
-            NeedsQuest = lootItem.needs_quest;
-            RandomBonusListId = lootItem.randomBonusListId;
-            Context = lootItem.context;
-            BonusListIDs = lootItem.BonusListIDs;
+            return _money;
         }
 
-        public uint ItemId;
-        public uint Count;
-        public uint ItemIndex;
-        public bool FollowRules;
-        public bool FFA;
+        public MultiMap<uint, StoredLootItem> GetLootItems()
+        {
+            return _lootItems;
+        }
+
+        private ulong GetContainer()
+        {
+            return _containerId;
+        }
+    }
+
+    internal class StoredLootItem
+    {
         public bool Blocked;
+        public List<uint> BonusListIDs = new();
+        public ItemContext Context;
+        public uint Count;
         public bool Counted;
-        public bool UnderThreshold;
+        public bool FFA;
+        public bool FollowRules;
+
+        public uint ItemId;
+        public uint ItemIndex;
         public bool NeedsQuest;
         public uint RandomBonusListId;
-        public ItemContext Context;
-        public List<uint> BonusListIDs = new();
+        public bool UnderThreshold;
+
+        public StoredLootItem(LootItem lootItem)
+        {
+            ItemId = lootItem.Itemid;
+            Count = lootItem.Count;
+            ItemIndex = lootItem.LootListId;
+            FollowRules = lootItem.Follow_loot_rules;
+            FFA = lootItem.Freeforall;
+            Blocked = lootItem.Is_blocked;
+            Counted = lootItem.Is_counted;
+            UnderThreshold = lootItem.Is_underthreshold;
+            NeedsQuest = lootItem.Needs_quest;
+            RandomBonusListId = lootItem.RandomBonusListId;
+            Context = lootItem.Context;
+            BonusListIDs = lootItem.BonusListIDs;
+        }
     }
 }

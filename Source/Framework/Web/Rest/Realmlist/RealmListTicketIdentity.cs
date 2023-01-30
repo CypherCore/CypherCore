@@ -8,8 +8,7 @@ namespace Framework.Web
     [DataContract]
     public class RealmListTicketIdentity
     {
-        [DataMember(Name = "gameAccountID")]
-        public int GameAccountId { get; set; }
+        [DataMember(Name = "gameAccountID")] public int GameAccountId { get; set; }
 
         [DataMember(Name = "gameAccountRegion")]
         public int GameAccountRegion { get; set; }

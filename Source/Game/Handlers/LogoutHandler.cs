@@ -11,24 +11,29 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LogoutRequest)]
-        void HandleLogoutRequest(LogoutRequest packet)
+        private void HandleLogoutRequest(LogoutRequest packet)
         {
             Player pl = GetPlayer();
+
             if (!GetPlayer().GetLootGUID().IsEmpty())
                 GetPlayer().SendLootReleaseAll();
 
-            bool instantLogout = (pl.HasPlayerFlag(PlayerFlags.Resting) && !pl.IsInCombat() ||
-                pl.IsInFlight() || HasPermission(RBACPermissions.InstantLogout));
+            bool instantLogout = ((pl.HasPlayerFlag(PlayerFlags.Resting) && !pl.IsInCombat()) ||
+                                  pl.IsInFlight() ||
+                                  HasPermission(RBACPermissions.InstantLogout));
 
             bool canLogoutInCombat = pl.HasPlayerFlag(PlayerFlags.Resting);
 
             int reason = 0;
-            if (pl.IsInCombat() && !canLogoutInCombat)
+
+            if (pl.IsInCombat() &&
+                !canLogoutInCombat)
                 reason = 1;
             else if (pl.IsFalling())
-                reason = 3;                                         // is jumping or falling
-            else if (pl.duel != null || pl.HasAura(9454)) // is dueling or frozen by GM via freeze command
-                reason = 2;                                         // FIXME - Need the correct value
+                reason = 3; // is jumping or falling
+            else if (pl.Duel != null ||
+                     pl.HasAura(9454)) // is dueling or frozen by GM via freeze command
+                reason = 2;            // FIXME - Need the correct value
 
             LogoutResponse logoutResponse = new();
             logoutResponse.LogoutResult = reason;
@@ -38,6 +43,7 @@ namespace Game
             if (reason != 0)
             {
                 SetLogoutStartTime(0);
+
                 return;
             }
 
@@ -45,14 +51,16 @@ namespace Game
             if (instantLogout)
             {
                 LogoutPlayer(true);
+
                 return;
             }
 
-            // not set flags if player can't free move to prevent lost state at logout cancel
+            // not set Flags if player can't free move to prevent lost State at logout cancel
             if (pl.CanFreeMove())
             {
                 if (pl.GetStandState() == UnitStandStateType.Stand)
                     pl.SetStandState(UnitStandStateType.Sit);
+
                 pl.SetRooted(true);
                 pl.SetUnitFlag(UnitFlags.Stunned);
             }
@@ -61,7 +69,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LogoutCancel)]
-        void HandleLogoutCancel(LogoutCancel packet)
+        private void HandleLogoutCancel(LogoutCancel packet)
         {
             // Player have already logged out serverside, too late to cancel
             if (!GetPlayer())
@@ -71,7 +79,7 @@ namespace Game
 
             SendPacket(new LogoutCancelAck());
 
-            // not remove flags if can't free move - its not set in Logout request code.
+            // not remove Flags if can't free move - its not set in Logout request code.
             if (GetPlayer().CanFreeMove())
             {
                 //!we can move again

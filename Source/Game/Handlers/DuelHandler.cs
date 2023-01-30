@@ -11,7 +11,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.CanDuel)]
-        void HandleCanDuel(CanDuel packet)
+        private void HandleCanDuel(CanDuel packet)
         {
             Player player = Global.ObjAccessor.FindPlayer(packet.TargetGUID);
 
@@ -20,7 +20,7 @@ namespace Game
 
             CanDuelResult response = new();
             response.TargetGUID = packet.TargetGUID;
-            response.Result = player.duel == null;
+            response.Result = player.Duel == null;
             SendPacket(response);
 
             if (response.Result)
@@ -33,33 +33,38 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DuelResponse)]
-        void HandleDuelResponse(DuelResponse duelResponse)
+        private void HandleDuelResponse(DuelResponse duelResponse)
         {
-            if (duelResponse.Accepted && !duelResponse.Forfeited)
+            if (duelResponse.Accepted &&
+                !duelResponse.Forfeited)
                 HandleDuelAccepted(duelResponse.ArbiterGUID);
             else
                 HandleDuelCancelled();
         }
 
-        void HandleDuelAccepted(ObjectGuid arbiterGuid)
+        private void HandleDuelAccepted(ObjectGuid arbiterGuid)
         {
             Player player = GetPlayer();
-            if (player.duel == null || player == player.duel.Initiator || player.duel.State != DuelState.Challenged)
+
+            if (player.Duel == null ||
+                player == player.Duel.Initiator ||
+                player.Duel.State != DuelState.Challenged)
                 return;
 
-            Player target = player.duel.Opponent;
-            if (target.m_playerData.DuelArbiter != arbiterGuid)
+            Player target = player.Duel.Opponent;
+
+            if (target.PlayerData.DuelArbiter != arbiterGuid)
                 return;
 
             Log.outDebug(LogFilter.Network, "Player 1 is: {0} ({1})", player.GetGUID().ToString(), player.GetName());
             Log.outDebug(LogFilter.Network, "Player 2 is: {0} ({1})", target.GetGUID().ToString(), target.GetName());
 
             long now = GameTime.GetGameTime();
-            player.duel.StartTime = now + 3;
-            target.duel.StartTime = now + 3;
+            player.Duel.StartTime = now + 3;
+            target.Duel.StartTime = now + 3;
 
-            player.duel.State = DuelState.Countdown;
-            target.duel.State = DuelState.Countdown;
+            player.Duel.State = DuelState.Countdown;
+            target.Duel.State = DuelState.Countdown;
 
             DuelCountdown packet = new(3000);
 
@@ -70,22 +75,24 @@ namespace Game
             target.EnablePvpRules();
         }
 
-        void HandleDuelCancelled()
+        private void HandleDuelCancelled()
         {
             Player player = GetPlayer();
 
-            // no duel requested
-            if (player.duel == null || player.duel.State == DuelState.Completed)
+            // no Duel requested
+            if (player.Duel == null ||
+                player.Duel.State == DuelState.Completed)
                 return;
 
-            // player surrendered in a duel using /forfeit
-            if (player.duel.State == DuelState.InProgress)
+            // player surrendered in a Duel using /forfeit
+            if (player.Duel.State == DuelState.InProgress)
             {
                 player.CombatStopWithPets(true);
-                player.duel.Opponent.CombatStopWithPets(true);
+                player.Duel.Opponent.CombatStopWithPets(true);
 
-                player.CastSpell(GetPlayer(), 7267, true);    // beg
+                player.CastSpell(GetPlayer(), 7267, true); // beg
                 player.DuelComplete(DuelCompleteType.Won);
+
                 return;
             }
 

@@ -7,115 +7,118 @@ namespace Game.DataStorage
 {
     public sealed class BankBagSlotPricesRecord
     {
-        public uint Id;
         public uint Cost;
+        public uint Id;
     }
 
     public sealed class BannedAddonsRecord
     {
+        public byte Flags;
         public uint Id;
         public string Name;
         public string Version;
-        public byte Flags;
     }
 
     public sealed class BarberShopStyleRecord
     {
-        public uint Id;
-        public string DisplayName;
-        public string Description;
-        public byte Type;                                                     // value 0 . hair, value 2 . facialhair
         public float CostModifier;
+        public byte Data; // real ID to hair/facial hair
+        public string Description;
+        public string DisplayName;
+        public uint Id;
         public byte Race;
         public byte Sex;
-        public byte Data;                                                     // real ID to hair/facial hair
+        public byte Type; // value 0 . hair, value 2 . facialhair
     }
 
     public sealed class BattlePetBreedQualityRecord
     {
         public uint Id;
         public int MaxQualityRoll;
-        public float StateMultiplier;
         public sbyte QualityEnum;
+        public float StateMultiplier;
     }
 
     public sealed class BattlePetBreedStateRecord
     {
-        public uint Id;
-        public int BattlePetStateID;
-        public ushort Value;
         public uint BattlePetBreedID;
+        public int BattlePetStateID;
+        public uint Id;
+        public ushort Value;
     }
 
     public sealed class BattlePetSpeciesRecord
     {
-        public string Description;
-        public string SourceText;
-        public uint Id;
-        public uint CreatureID;
-        public uint SummonSpellID;
-        public int IconFileDataID;
-        public sbyte PetTypeEnum;
-        public int Flags;
-        public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;
-        public int LoadoutUIModelSceneID;
         public int CovenantID;
+        public uint CreatureID;
+        public string Description;
+        public int Flags;
+        public int IconFileDataID;
+        public uint Id;
+        public int LoadoutUIModelSceneID;
+        public sbyte PetTypeEnum;
+        public string SourceText;
+        public sbyte SourceTypeEnum;
+        public uint SummonSpellID;
 
-        public BattlePetSpeciesFlags GetFlags() { return (BattlePetSpeciesFlags)Flags; }
-}
+        public BattlePetSpeciesFlags GetFlags()
+        {
+            return (BattlePetSpeciesFlags)Flags;
+        }
+    }
 
     public sealed class BattlePetSpeciesStateRecord
     {
-        public uint Id;
-        public ushort BattlePetStateID;
-        public int Value;
         public uint BattlePetSpeciesID;
+        public ushort BattlePetStateID;
+        public uint Id;
+        public int Value;
     }
 
     public sealed class BattlemasterListRecord
     {
-        public uint Id;
-        public LocalizedString Name;
-        public string GameType;
-        public string ShortDescription;
-        public string LongDescription;
-        public sbyte InstanceType;
-        public byte MinLevel;
-        public byte MaxLevel;
-        public sbyte RatedPlayers;
-        public sbyte MinPlayers;
-        public int MaxPlayers;
-        public sbyte GroupsAllowed;
-        public sbyte MaxGroupSize;
-        public ushort HolidayWorldState;
         public BattlemasterListFlags Flags;
+        public string GameType;
+        public sbyte GroupsAllowed;
+        public ushort HolidayWorldState;
         public int IconFileDataID;
-        public int RequiredPlayerConditionID;
+        public uint Id;
+        public sbyte InstanceType;
+        public string LongDescription;
         public short[] MapId = new short[16];
+        public sbyte MaxGroupSize;
+        public byte MaxLevel;
+        public int MaxPlayers;
+        public byte MinLevel;
+        public sbyte MinPlayers;
+        public LocalizedString Name;
+        public sbyte RatedPlayers;
+        public int RequiredPlayerConditionID;
+        public string ShortDescription;
     }
 
     public sealed class BroadcastTextRecord
     {
-        public LocalizedString Text;
-        public LocalizedString Text1;
-        public uint Id;
-        public int LanguageID;
+        public uint ChatBubbleDurationMs;
         public int ConditionID;
+        public ushort[] EmoteDelay = new ushort[3];
+        public ushort[] EmoteID = new ushort[3];
         public ushort EmotesID;
         public byte Flags;
-        public uint ChatBubbleDurationMs;
-        public int VoiceOverPriorityID;
+        public uint Id;
+        public int LanguageID;
         public uint[] SoundKitID = new uint[2];
-        public ushort[] EmoteID = new ushort[3];
-        public ushort[] EmoteDelay = new ushort[3];
+        public LocalizedString Text;
+        public LocalizedString Text1;
+        public int VoiceOverPriorityID;
     }
 
     public sealed class BroadcastTextDurationRecord
     {
-        public uint Id;
         public int BroadcastTextID;
-        public int Locale;
         public int Duration;
+        public uint Id;
+        public int Locale;
     }
 }

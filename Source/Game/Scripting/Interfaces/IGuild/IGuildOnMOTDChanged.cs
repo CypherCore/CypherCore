@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnMOTDChanged : IScriptObject
     {
-        void OnMOTDChanged(Guilds.Guild guild, string newMotd);
+        void OnMOTDChanged(Guild guild, string newMotd);
     }
 }

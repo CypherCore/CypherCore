@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework.Constants;
+﻿using Framework.Constants;
 
 namespace Game.Scripting.Interfaces.ISpell
 {
@@ -18,6 +13,8 @@ namespace Game.Scripting.Interfaces.ISpell
     {
         public delegate void SpellEffectFn(uint index);
 
+        private readonly SpellEffectFn _callEffect;
+
         public EffectHandler(SpellEffectFn callEffect, uint effectIndex, SpellEffectName spellEffectName, SpellScriptHookType hookType) : base(effectIndex, hookType)
         {
             EffectName = spellEffectName;
@@ -25,8 +22,6 @@ namespace Game.Scripting.Interfaces.ISpell
         }
 
         public SpellEffectName EffectName { get; private set; }
-
-        private readonly SpellEffectFn _callEffect;
 
         public void CallEffect(uint effIndex)
         {

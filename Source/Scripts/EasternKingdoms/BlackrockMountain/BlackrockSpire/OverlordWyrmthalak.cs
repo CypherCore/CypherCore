@@ -1,15 +1,15 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmthalak
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Blastwave = 11130;
         public const uint Shout = 23511;
@@ -17,28 +17,23 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
         public const uint Knockaway = 20686;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint NpcSpirestoneWarlord = 9216;
         public const uint NpcSmolderthornBerserker = 9268;
 
-        public static Position SummonLocation1 = new Position(-39.355f, -513.456f, 88.472f, 4.679f);
-        public static Position SummonLocation2 = new Position(-49.875f, -511.896f, 88.195f, 4.613f);
+        public static Position SummonLocation1 = new(-39.355f, -513.456f, 88.472f, 4.679f);
+        public static Position SummonLocation2 = new(-49.875f, -511.896f, 88.195f, 4.613f);
     }
 
     [Script]
-    class boss_overlord_wyrmthalak : BossAI
+    internal class boss_overlord_wyrmthalak : BossAI
     {
-        bool Summoned;
+        private bool Summoned;
 
         public boss_overlord_wyrmthalak(Creature creature) : base(creature, DataTypes.OverlordWyrmthalak)
         {
             Initialize();
-        }
-
-        void Initialize()
-        {
-            Summoned = false;
         }
 
         public override void Reset()
@@ -51,26 +46,33 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
         {
             base.JustEngagedWith(who);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
-            {
-                DoCastVictim(SpellIds.Blastwave);
-                task.Repeat(TimeSpan.FromSeconds(20));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
-            {
-                DoCastVictim(SpellIds.Shout);
-                task.Repeat(TimeSpan.FromSeconds(10));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
-            {
-                DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(7));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-            {
-                DoCastVictim(SpellIds.Knockaway);
-                task.Repeat(TimeSpan.FromSeconds(14));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(20),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Blastwave);
+                                    task.Repeat(TimeSpan.FromSeconds(20));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Shout);
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(6),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Cleave);
+                                    task.Repeat(TimeSpan.FromSeconds(7));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(12),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Knockaway);
+                                    task.Repeat(TimeSpan.FromSeconds(14));
+                                });
         }
 
         public override void JustDied(Unit killer)
@@ -83,23 +85,33 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.OverlordWyrmt
             if (!UpdateVictim())
                 return;
 
-            if (!Summoned && HealthBelowPct(51))
+            if (!Summoned &&
+                HealthBelowPct(51))
             {
                 Unit target = SelectTarget(SelectTargetMethod.Random, 0, 100, true);
+
                 if (target)
                 {
                     Creature warlord = me.SummonCreature(MiscConst.NpcSpirestoneWarlord, MiscConst.SummonLocation1, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+
                     if (warlord)
                         warlord.GetAI().AttackStart(target);
+
                     Creature berserker = me.SummonCreature(MiscConst.NpcSmolderthornBerserker, MiscConst.SummonLocation2, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+
                     if (berserker)
                         berserker.GetAI().AttackStart(target);
+
                     Summoned = true;
                 }
             }
 
             _scheduler.Update(diff, () => DoMeleeAttackIfReady());
         }
+
+        private void Initialize()
+        {
+            Summoned = false;
+        }
     }
 }
-

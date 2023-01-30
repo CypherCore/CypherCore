@@ -8,6 +8,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnRemoveMember : IScriptObject
     {
-        void OnRemoveMember(Guilds.Guild guild, Player player, bool isDisbanding, bool isKicked);
+        void OnRemoveMember(Guild guild, Player player, bool isDisbanding, bool isKicked);
     }
 }

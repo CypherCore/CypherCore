@@ -1,11 +1,11 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.GameMath;
 using System;
 using System.IO;
 using System.Numerics;
+using Framework.Constants;
+using Framework.GameMath;
 
 namespace Game.Collision
 {
@@ -18,12 +18,12 @@ namespace Game.Collision
 
     public class ModelMinimalData
     {
-        public byte flags;
         public byte adtId;
+        public byte flags;
+        public AxisAlignedBox iBound;
         public uint Id;
         public Vector3 iPos;
         public float iScale;
-        public AxisAlignedBox iBound;
         public string name;
     }
 
@@ -31,7 +31,9 @@ namespace Game.Collision
     {
         public Vector3 iRot;
 
-        public ModelSpawn() { }
+        public ModelSpawn()
+        {
+        }
 
         public ModelSpawn(ModelSpawn spawn)
         {
@@ -57,6 +59,7 @@ namespace Game.Collision
             spawn.iScale = reader.ReadSingle();
 
             bool has_bound = Convert.ToBoolean(spawn.flags & (uint)ModelFlags.HasBound);
+
             if (has_bound) // only WMOs have bound in MPQ, only available after computation
             {
                 Vector3 bLow = reader.Read<Vector3>();
@@ -66,15 +69,16 @@ namespace Game.Collision
 
             uint nameLen = reader.ReadUInt32();
             spawn.name = reader.ReadString((int)nameLen);
+
             return true;
         }
     }
 
     public class ModelInstance : ModelMinimalData
     {
-        Matrix4x4 iInvRot;
-        float iInvScale;
-        WorldModel iModel;
+        private readonly float iInvScale;
+        private Matrix4x4 iInvRot;
+        private WorldModel iModel;
 
         public ModelInstance()
         {
@@ -105,19 +109,22 @@ namespace Game.Collision
                 return false;
 
             float time = pRay.intersectionTime(iBound);
+
             if (float.IsInfinity(time))
                 return false;
 
             // child bounds are defined in object space:
             Vector3 p = iInvRot.Multiply(pRay.Origin - iPos) * iInvScale;
-            Ray modRay = new Ray(p, iInvRot.Multiply(pRay.Direction));
+            Ray modRay = new(p, iInvRot.Multiply(pRay.Direction));
             float distance = pMaxDist * iInvScale;
             bool hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit, ignoreFlags);
+
             if (hit)
             {
                 distance *= iScale;
                 pMaxDist = distance;
             }
+
             return hit;
         }
 
@@ -129,12 +136,15 @@ namespace Game.Collision
             // M2 files don't contain area info, only WMO files
             if (Convert.ToBoolean(flags & (uint)ModelFlags.M2))
                 return;
+
             if (!iBound.contains(p))
                 return;
+
             // child bounds are defined in object space:
             Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
+
             if (iModel.IntersectPoint(pModel, zDirModel, out zDist, info))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
@@ -142,10 +152,11 @@ namespace Game.Collision
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
                 float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;
-                if (info.ground_Z < world_Z)
+
+                if (info.Ground_Z < world_Z)
                 {
-                    info.ground_Z = world_Z;
-                    info.adtId = adtId;
+                    info.Ground_Z = world_Z;
+                    info.AdtId = adtId;
                 }
             }
         }
@@ -156,13 +167,16 @@ namespace Game.Collision
             Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
-            if (info.hitModel.GetLiquidLevel(pModel, out zDist))
+
+            if (info.HitModel.GetLiquidLevel(pModel, out zDist))
             {
                 // calculate world height (zDist in model coords):
                 // assume WMO not tilted (wouldn't make much sense anyway)
                 liqHeight = zDist * iScale + iPos.Z;
+
                 return true;
             }
+
             return false;
         }
 
@@ -174,14 +188,17 @@ namespace Game.Collision
             // M2 files don't contain area info, only WMO files
             if (Convert.ToBoolean(flags & (uint)ModelFlags.M2))
                 return false;
+
             if (!iBound.contains(p))
                 return false;
+
             // child bounds are defined in object space:
             Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
             float zDist;
 
             GroupLocationInfo groupInfo = new();
+
             if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, groupInfo))
             {
                 Vector3 modelGround = pModel + zDist * zDirModel;
@@ -189,18 +206,24 @@ namespace Game.Collision
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
                 float world_Z = (iInvRot.Multiply(modelGround * iScale) + iPos).Z;
-                if (info.ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
+
+                if (info.Ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
                 {
-                    info.rootId = groupInfo.rootId;
-                    info.hitModel = groupInfo.hitModel;
-                    info.ground_Z = world_Z;
-                    info.hitInstance = this;
+                    info.RootId = groupInfo.RootId;
+                    info.HitModel = groupInfo.HitModel;
+                    info.Ground_Z = world_Z;
+                    info.HitInstance = this;
+
                     return true;
                 }
             }
+
             return false;
         }
 
-        public void SetUnloaded() { iModel = null; }
+        public void SetUnloaded()
+        {
+            iModel = null;
+        }
     }
 }

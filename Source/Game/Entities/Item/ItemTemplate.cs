@@ -1,16 +1,19 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Game.DataStorage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Framework.Constants;
+using Game.DataStorage;
 
 namespace Game.Entities
 {
     public class ItemTemplate
     {
+        protected ItemRecord BasicData;
+        protected ItemSparseRecord ExtendedData;
+
         public ItemTemplate(ItemRecord item, ItemSparseRecord sparse)
         {
             BasicData = item;
@@ -21,6 +24,21 @@ namespace Game.Entities
             Specializations[2] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
         }
 
+        public List<ItemEffectRecord> Effects { get; set; } = new();
+        public ItemFlagsCustom FlagsCu { get; set; }
+        public uint FoodType { get; set; }
+        public uint ItemSpecClassMask { get; set; }
+
+        public uint MaxDurability { get; set; }
+        public uint MaxMoneyLoot { get; set; }
+        public uint MinMoneyLoot { get; set; }
+        public uint RandomBonusListTemplateId { get; set; }
+
+        // extra fields, not part of db2 files
+        public uint ScriptId { get; set; }
+        public BitSet[] Specializations { get; set; } = new BitSet[3];
+        public float SpellPPMRate { get; set; }
+
         public string GetName(Locale locale = SharedConst.DefaultLocale)
         {
             return ExtendedData.Display[locale];
@@ -29,18 +47,37 @@ namespace Game.Entities
         public bool HasSignature()
         {
             return GetMaxStackSize() == 1 &&
-                GetClass() != ItemClass.Consumable &&
-                GetClass() != ItemClass.Quest &&
-                !HasFlag(ItemFlags.NoCreator) &&
-                GetId() != 6948; /*Hearthstone*/
+                   GetClass() != ItemClass.Consumable &&
+                   GetClass() != ItemClass.Quest &&
+                   !HasFlag(ItemFlags.NoCreator) &&
+                   GetId() != 6948; /*Hearthstone*/
         }
 
-        public bool HasFlag(ItemFlags flag) { return (ExtendedData.Flags[0] & (int)flag) != 0; }
-        public bool HasFlag(ItemFlags2 flag) { return (ExtendedData.Flags[1] & (int)flag) != 0; }
-        public bool HasFlag(ItemFlags3 flag) { return (ExtendedData.Flags[2] & (int)flag) != 0; }
-        public bool HasFlag(ItemFlags4 flag) { return (ExtendedData.Flags[3] & (int)flag) != 0; }
-        public bool HasFlag(ItemFlagsCustom customFlag) { return (FlagsCu & customFlag) != 0; }
-        
+        public bool HasFlag(ItemFlags flag)
+        {
+            return (ExtendedData.Flags[0] & (int)flag) != 0;
+        }
+
+        public bool HasFlag(ItemFlags2 flag)
+        {
+            return (ExtendedData.Flags[1] & (int)flag) != 0;
+        }
+
+        public bool HasFlag(ItemFlags3 flag)
+        {
+            return (ExtendedData.Flags[2] & (int)flag) != 0;
+        }
+
+        public bool HasFlag(ItemFlags4 flag)
+        {
+            return (ExtendedData.Flags[3] & (int)flag) != 0;
+        }
+
+        public bool HasFlag(ItemFlagsCustom customFlag)
+        {
+            return (FlagsCu & customFlag) != 0;
+        }
+
         public bool CanChangeEquipStateInCombat()
         {
             switch (GetInventoryType())
@@ -67,11 +104,7 @@ namespace Game.Entities
         {
             SkillType[] item_weapon_skills =
             {
-                SkillType.Axes,             SkillType.TwoHandedAxes,    SkillType.Bows,     SkillType.Guns,             SkillType.Maces,
-                SkillType.TwoHandedMaces,   SkillType.Polearms,         SkillType.Swords,   SkillType.TwoHandedSwords,  SkillType.Warglaives,
-                SkillType.Staves,           0,                          0,                  SkillType.FistWeapons,      0,
-                SkillType.Daggers,          0,                          0,                  SkillType.Crossbows,        SkillType.Wands,
-                SkillType.Fishing
+                SkillType.Axes, SkillType.TwoHandedAxes, SkillType.Bows, SkillType.Guns, SkillType.Maces, SkillType.TwoHandedMaces, SkillType.Polearms, SkillType.Swords, SkillType.TwoHandedSwords, SkillType.Warglaives, SkillType.Staves, 0, 0, SkillType.FistWeapons, 0, SkillType.Daggers, 0, 0, SkillType.Crossbows, SkillType.Wands, SkillType.Fishing
             };
 
             SkillType[] item_armor_skills =
@@ -102,47 +135,59 @@ namespace Game.Entities
         public uint GetArmor(uint itemLevel)
         {
             ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
+
             if (quality > ItemQuality.Artifact)
                 return 0;
 
             // all items but shields
-            if (GetClass() != ItemClass.Armor || GetSubClass() != (uint)ItemSubClassArmor.Shield)
+            if (GetClass() != ItemClass.Armor ||
+                GetSubClass() != (uint)ItemSubClassArmor.Shield)
             {
                 ItemArmorQualityRecord armorQuality = CliDB.ItemArmorQualityStorage.LookupByKey(itemLevel);
                 ItemArmorTotalRecord armorTotal = CliDB.ItemArmorTotalStorage.LookupByKey(itemLevel);
-                if (armorQuality == null || armorTotal == null)
+
+                if (armorQuality == null ||
+                    armorTotal == null)
                     return 0;
 
                 InventoryType inventoryType = GetInventoryType();
+
                 if (inventoryType == InventoryType.Robe)
                     inventoryType = InventoryType.Chest;
 
                 ArmorLocationRecord location = CliDB.ArmorLocationStorage.LookupByKey(inventoryType);
+
                 if (location == null)
                     return 0;
 
-                if (GetSubClass() < (uint)ItemSubClassArmor.Cloth || GetSubClass() > (uint)ItemSubClassArmor.Plate)
+                if (GetSubClass() < (uint)ItemSubClassArmor.Cloth ||
+                    GetSubClass() > (uint)ItemSubClassArmor.Plate)
                     return 0;
 
                 float total = 1.0f;
                 float locationModifier = 1.0f;
+
                 switch ((ItemSubClassArmor)GetSubClass())
                 {
                     case ItemSubClassArmor.Cloth:
                         total = armorTotal.Cloth;
                         locationModifier = location.Clothmodifier;
+
                         break;
                     case ItemSubClassArmor.Leather:
                         total = armorTotal.Leather;
                         locationModifier = location.Leathermodifier;
+
                         break;
                     case ItemSubClassArmor.Mail:
                         total = armorTotal.Mail;
                         locationModifier = location.Chainmodifier;
+
                         break;
                     case ItemSubClassArmor.Plate:
                         total = armorTotal.Plate;
                         locationModifier = location.Platemodifier;
+
                         break;
                     default:
                         break;
@@ -153,6 +198,7 @@ namespace Game.Entities
 
             // shields
             ItemArmorShieldRecord shield = CliDB.ItemArmorShieldStorage.LookupByKey(itemLevel);
+
             if (shield == null)
                 return 0;
 
@@ -162,20 +208,25 @@ namespace Game.Entities
         public float GetDPS(uint itemLevel)
         {
             ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
-            if (GetClass() != ItemClass.Weapon || quality > ItemQuality.Artifact)
+
+            if (GetClass() != ItemClass.Weapon ||
+                quality > ItemQuality.Artifact)
                 return 0.0f;
 
             float dps = 0.0f;
+
             switch (GetInventoryType())
             {
                 case InventoryType.Ammo:
                     dps = CliDB.ItemDamageAmmoStorage.LookupByKey(itemLevel).Quality[(int)quality];
+
                     break;
                 case InventoryType.Weapon2Hand:
                     if (HasFlag(ItemFlags2.CasterWeapon))
                         dps = CliDB.ItemDamageTwoHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
                     else
                         dps = CliDB.ItemDamageTwoHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
+
                     break;
                 case InventoryType.Ranged:
                 case InventoryType.Thrown:
@@ -184,6 +235,7 @@ namespace Game.Entities
                     {
                         case ItemSubClassWeapon.Wand:
                             dps = CliDB.ItemDamageOneHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
+
                             break;
                         case ItemSubClassWeapon.Bow:
                         case ItemSubClassWeapon.Gun:
@@ -192,10 +244,12 @@ namespace Game.Entities
                                 dps = CliDB.ItemDamageTwoHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
                             else
                                 dps = CliDB.ItemDamageTwoHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
+
                             break;
                         default:
                             break;
                     }
+
                     break;
                 case InventoryType.Weapon:
                 case InventoryType.WeaponMainhand:
@@ -204,6 +258,7 @@ namespace Game.Entities
                         dps = CliDB.ItemDamageOneHandCasterStorage.LookupByKey(itemLevel).Quality[(int)quality];
                     else
                         dps = CliDB.ItemDamageOneHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
+
                     break;
                 default:
                     break;
@@ -216,6 +271,7 @@ namespace Game.Entities
         {
             minDamage = maxDamage = 0.0f;
             float dps = GetDPS(itemLevel);
+
             if (dps > 0.0f)
             {
                 float avgDamage = dps * GetDelay() * 0.001f;
@@ -230,16 +286,20 @@ namespace Game.Entities
                 return true;
 
             uint spec = player.GetLootSpecId();
+
             if (spec == 0)
                 spec = player.GetPrimarySpecialization();
+
             if (spec == 0)
                 spec = player.GetDefaultSpecId();
 
             ChrSpecializationRecord chrSpecialization = CliDB.ChrSpecializationStorage.LookupByKey(spec);
+
             if (chrSpecialization == null)
                 return false;
 
             int levelIndex = 0;
+
             if (player.GetLevel() >= 110)
                 levelIndex = 2;
             else if (player.GetLevel() > 40)
@@ -253,97 +313,305 @@ namespace Game.Entities
             return (int)((spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex);
         }
 
-        public uint GetId() { return BasicData.Id; }
-        public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
-        public uint GetSubClass() { return BasicData.SubclassID; }
-        public ItemQuality GetQuality() { return (ItemQuality)ExtendedData.OverallQualityID; }
-        public uint GetOtherFactionItemId() { return ExtendedData.FactionRelated; }
-        public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
-        public float GetPriceVariance() { return ExtendedData.PriceVariance; }
-        public uint GetBuyCount() { return Math.Max(ExtendedData.VendorStackCount, 1u); }
-        public uint GetBuyPrice() { return ExtendedData.BuyPrice; }
-        public uint GetSellPrice() { return ExtendedData.SellPrice; }
-        public InventoryType GetInventoryType() { return ExtendedData.inventoryType; }
-        public int GetAllowableClass() { return ExtendedData.AllowableClass; }
-        public long GetAllowableRace() { return ExtendedData.AllowableRace; }
-        public uint GetBaseItemLevel() { return ExtendedData.ItemLevel; }
-        public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
-        public uint GetRequiredSkill() { return ExtendedData.RequiredSkill; }
-        public uint GetRequiredSkillRank() { return ExtendedData.RequiredSkillRank; }
-        public uint GetRequiredSpell() { return ExtendedData.RequiredAbility; }
-        public uint GetRequiredReputationFaction() { return ExtendedData.MinFactionID; }
-        public uint GetRequiredReputationRank() { return ExtendedData.MinReputation; }
-        public uint GetMaxCount() { return ExtendedData.MaxCount; }
-        public uint GetContainerSlots() { return ExtendedData.ContainerSlots; }
-        public int GetStatModifierBonusStat(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat[index]; }
-        public int GetStatPercentEditor(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentEditor[index]; }
-        public float GetStatPercentageOfSocket(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
-        public uint GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
-        public uint GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
-        public uint GetDamageType() { return ExtendedData.DamageType; }
-        public uint GetDelay() { return ExtendedData.ItemDelay; }
-        public float GetRangedModRange() { return ExtendedData.ItemRange; }
-        public ItemBondingType GetBonding() { return (ItemBondingType)ExtendedData.Bonding; }
-        public uint GetPageText() { return ExtendedData.PageID; }
-        public uint GetStartQuest() { return ExtendedData.StartQuestID; }
-        public uint GetLockID() { return ExtendedData.LockID; }
-        public uint GetItemSet() { return ExtendedData.ItemSet; }
-        public uint GetArea(int index) { return ExtendedData.ZoneBound[index]; }
-        public uint GetMap() { return ExtendedData.InstanceBound; }
-        public BagFamilyMask GetBagFamily() { return (BagFamilyMask)ExtendedData.BagFamily; }
-        public uint GetTotemCategory() { return ExtendedData.TotemCategoryID; }
+        public uint GetId()
+        {
+            return BasicData.Id;
+        }
+
+        public ItemClass GetClass()
+        {
+            return (ItemClass)BasicData.ClassID;
+        }
+
+        public uint GetSubClass()
+        {
+            return BasicData.SubclassID;
+        }
+
+        public ItemQuality GetQuality()
+        {
+            return (ItemQuality)ExtendedData.OverallQualityID;
+        }
+
+        public uint GetOtherFactionItemId()
+        {
+            return ExtendedData.FactionRelated;
+        }
+
+        public float GetPriceRandomValue()
+        {
+            return ExtendedData.PriceRandomValue;
+        }
+
+        public float GetPriceVariance()
+        {
+            return ExtendedData.PriceVariance;
+        }
+
+        public uint GetBuyCount()
+        {
+            return Math.Max(ExtendedData.VendorStackCount, 1u);
+        }
+
+        public uint GetBuyPrice()
+        {
+            return ExtendedData.BuyPrice;
+        }
+
+        public uint GetSellPrice()
+        {
+            return ExtendedData.SellPrice;
+        }
+
+        public InventoryType GetInventoryType()
+        {
+            return ExtendedData.inventoryType;
+        }
+
+        public int GetAllowableClass()
+        {
+            return ExtendedData.AllowableClass;
+        }
+
+        public long GetAllowableRace()
+        {
+            return ExtendedData.AllowableRace;
+        }
+
+        public uint GetBaseItemLevel()
+        {
+            return ExtendedData.ItemLevel;
+        }
+
+        public int GetBaseRequiredLevel()
+        {
+            return ExtendedData.RequiredLevel;
+        }
+
+        public uint GetRequiredSkill()
+        {
+            return ExtendedData.RequiredSkill;
+        }
+
+        public uint GetRequiredSkillRank()
+        {
+            return ExtendedData.RequiredSkillRank;
+        }
+
+        public uint GetRequiredSpell()
+        {
+            return ExtendedData.RequiredAbility;
+        }
+
+        public uint GetRequiredReputationFaction()
+        {
+            return ExtendedData.MinFactionID;
+        }
+
+        public uint GetRequiredReputationRank()
+        {
+            return ExtendedData.MinReputation;
+        }
+
+        public uint GetMaxCount()
+        {
+            return ExtendedData.MaxCount;
+        }
+
+        public uint GetContainerSlots()
+        {
+            return ExtendedData.ContainerSlots;
+        }
+
+        public int GetStatModifierBonusStat(uint index)
+        {
+            Cypher.Assert(index < ItemConst.MaxStats);
+
+            return ExtendedData.StatModifierBonusStat[index];
+        }
+
+        public int GetStatPercentEditor(uint index)
+        {
+            Cypher.Assert(index < ItemConst.MaxStats);
+
+            return ExtendedData.StatPercentEditor[index];
+        }
+
+        public float GetStatPercentageOfSocket(uint index)
+        {
+            Cypher.Assert(index < ItemConst.MaxStats);
+
+            return ExtendedData.StatPercentageOfSocket[index];
+        }
+
+        public uint GetScalingStatContentTuning()
+        {
+            return ExtendedData.ContentTuningID;
+        }
+
+        public uint GetPlayerLevelToItemLevelCurveId()
+        {
+            return ExtendedData.PlayerLevelToItemLevelCurveID;
+        }
+
+        public uint GetDamageType()
+        {
+            return ExtendedData.DamageType;
+        }
+
+        public uint GetDelay()
+        {
+            return ExtendedData.ItemDelay;
+        }
+
+        public float GetRangedModRange()
+        {
+            return ExtendedData.ItemRange;
+        }
+
+        public ItemBondingType GetBonding()
+        {
+            return (ItemBondingType)ExtendedData.Bonding;
+        }
+
+        public uint GetPageText()
+        {
+            return ExtendedData.PageID;
+        }
+
+        public uint GetStartQuest()
+        {
+            return ExtendedData.StartQuestID;
+        }
+
+        public uint GetLockID()
+        {
+            return ExtendedData.LockID;
+        }
+
+        public uint GetItemSet()
+        {
+            return ExtendedData.ItemSet;
+        }
+
+        public uint GetArea(int index)
+        {
+            return ExtendedData.ZoneBound[index];
+        }
+
+        public uint GetMap()
+        {
+            return ExtendedData.InstanceBound;
+        }
+
+        public BagFamilyMask GetBagFamily()
+        {
+            return (BagFamilyMask)ExtendedData.BagFamily;
+        }
+
+        public uint GetTotemCategory()
+        {
+            return ExtendedData.TotemCategoryID;
+        }
+
         public SocketColor GetSocketColor(uint index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets);
+
             return (SocketColor)ExtendedData.SocketType[index];
         }
-        public uint GetSocketBonus() { return ExtendedData.SocketMatchEnchantmentId; }
-        public uint GetGemProperties() { return ExtendedData.GemProperties; }
-        public float GetQualityModifier() { return ExtendedData.QualityModifier; }
-        public uint GetDuration() { return ExtendedData.DurationInInventory; }
-        public uint GetItemLimitCategory() { return ExtendedData.LimitCategory; }
-        public HolidayIds GetHolidayID() { return (HolidayIds)ExtendedData.RequiredHoliday; }
-        public float GetDmgVariance() { return ExtendedData.DmgVariance; }
-        public byte GetArtifactID() { return ExtendedData.ArtifactID; }
-        public byte GetRequiredExpansion() { return (byte)ExtendedData.ExpansionID; }
 
-        public bool IsCurrencyToken() { return (GetBagFamily() & BagFamilyMask.CurrencyTokens) != 0; }
+        public uint GetSocketBonus()
+        {
+            return ExtendedData.SocketMatchEnchantmentId;
+        }
+
+        public uint GetGemProperties()
+        {
+            return ExtendedData.GemProperties;
+        }
+
+        public float GetQualityModifier()
+        {
+            return ExtendedData.QualityModifier;
+        }
+
+        public uint GetDuration()
+        {
+            return ExtendedData.DurationInInventory;
+        }
+
+        public uint GetItemLimitCategory()
+        {
+            return ExtendedData.LimitCategory;
+        }
+
+        public HolidayIds GetHolidayID()
+        {
+            return (HolidayIds)ExtendedData.RequiredHoliday;
+        }
+
+        public float GetDmgVariance()
+        {
+            return ExtendedData.DmgVariance;
+        }
+
+        public byte GetArtifactID()
+        {
+            return ExtendedData.ArtifactID;
+        }
+
+        public byte GetRequiredExpansion()
+        {
+            return (byte)ExtendedData.ExpansionID;
+        }
+
+        public bool IsCurrencyToken()
+        {
+            return (GetBagFamily() & BagFamilyMask.CurrencyTokens) != 0;
+        }
 
         public uint GetMaxStackSize()
         {
             return (ExtendedData.Stackable == 2147483647 || ExtendedData.Stackable <= 0) ? (0x7FFFFFFF - 1) : ExtendedData.Stackable;
         }
 
-        public bool IsPotion() { return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion; }
-        public bool IsVellum() { return HasFlag(ItemFlags3.CanStoreEnchants); }
-        public bool IsConjuredConsumable() { return GetClass() == ItemClass.Consumable && HasFlag(ItemFlags.Conjured); }
-        public bool IsCraftingReagent() { return HasFlag(ItemFlags2.UsedInATradeskill); }
-
-        public bool IsWeapon() { return GetClass() == ItemClass.Weapon; }
-
-        public bool IsArmor() { return GetClass() == ItemClass.Armor; }
-        
-        public bool IsRangedWeapon()
+        public bool IsPotion()
         {
-            return IsWeapon() && (GetSubClass() == (uint)ItemSubClassWeapon.Bow ||
-                   GetSubClass() == (uint)ItemSubClassWeapon.Gun || GetSubClass() == (uint)ItemSubClassWeapon.Crossbow);
+            return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion;
         }
 
-        public uint MaxDurability;
-        public List<ItemEffectRecord> Effects = new();
+        public bool IsVellum()
+        {
+            return HasFlag(ItemFlags3.CanStoreEnchants);
+        }
 
-        // extra fields, not part of db2 files
-        public uint ScriptId;
-        public uint FoodType;
-        public uint MinMoneyLoot;
-        public uint MaxMoneyLoot;
-        public ItemFlagsCustom FlagsCu;
-        public float SpellPPMRate;
-        public uint RandomBonusListTemplateId;
-        public BitSet[] Specializations = new BitSet[3];
-        public uint ItemSpecClassMask;
+        public bool IsConjuredConsumable()
+        {
+            return GetClass() == ItemClass.Consumable && HasFlag(ItemFlags.Conjured);
+        }
 
-        protected ItemRecord BasicData;
-        protected ItemSparseRecord ExtendedData;
+        public bool IsCraftingReagent()
+        {
+            return HasFlag(ItemFlags2.UsedInATradeskill);
+        }
+
+        public bool IsWeapon()
+        {
+            return GetClass() == ItemClass.Weapon;
+        }
+
+        public bool IsArmor()
+        {
+            return GetClass() == ItemClass.Armor;
+        }
+
+        public bool IsRangedWeapon()
+        {
+            return IsWeapon() &&
+                   (GetSubClass() == (uint)ItemSubClassWeapon.Bow ||
+                    GetSubClass() == (uint)ItemSubClassWeapon.Gun ||
+                    GetSubClass() == (uint)ItemSubClassWeapon.Crossbow);
+        }
     }
 }

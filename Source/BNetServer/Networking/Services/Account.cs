@@ -1,16 +1,16 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Bgs.Protocol.Account.V1;
 using Framework.Constants;
-using System.Collections.Generic;
 
 namespace BNetServer.Networking
 {
     public partial class Session
     {
         [Service(OriginalHash.AccountService, 30)]
-        BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
+        private BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
         {
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
@@ -31,7 +31,7 @@ namespace BNetServer.Networking
         }
 
         [Service(OriginalHash.AccountService, 31)]
-        BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
+        private BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
         {
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
@@ -39,6 +39,7 @@ namespace BNetServer.Networking
             if (request.Options.FieldGameLevelInfo)
             {
                 var gameAccountInfo = accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+
                 if (gameAccountInfo != null)
                 {
                     response.State = new GameAccountState();
@@ -59,6 +60,7 @@ namespace BNetServer.Networking
                 response.State.GameStatus = new GameStatus();
 
                 var gameAccountInfo = accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;

@@ -8,6 +8,8 @@ namespace Framework.Collections
 {
     public class StringArray
     {
+        private string[] _str;
+
         public StringArray(int size)
         {
             _str = new string[size];
@@ -34,15 +36,17 @@ namespace Framework.Collections
 
         public string this[int index]
         {
-            get 
+            get
             {
                 if (IsEmpty())
                     return null;
 
-                return _str[index]; 
+                return _str[index];
             }
-            set { _str[index] = value; }
+            set => _str[index] = value;
         }
+
+        public int Length => _str != null ? _str.Length : 0;
 
         public IEnumerator GetEnumerator()
         {
@@ -56,9 +60,5 @@ namespace Framework.Collections
         {
             return _str == null || _str.Length == 0;
         }
-
-        public int Length => _str != null ? _str.Length : 0;
-
-        string[] _str;
     }
 }

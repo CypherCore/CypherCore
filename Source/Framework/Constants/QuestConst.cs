@@ -23,9 +23,9 @@ namespace Framework.Constants
         WinPvpPetBattles = 13,
         CriteriaTree = 14,
         ProgressBar = 15,
-        HaveCurrency = 16,      // requires the player to have X currency when turning in but does not consume it
-        ObtainCurrency = 17,    // requires the player to gain X currency after starting the quest but not required to keep it until the end (does not consume)
-        IncreaseReputation = 18,// requires the player to gain X reputation with a faction
+        HaveCurrency = 16,       // requires the player to have X currency when turning in but does not consume it
+        ObtainCurrency = 17,     // requires the player to gain X currency after starting the quest but not required to keep it until the end (does not consume)
+        IncreaseReputation = 18, // requires the player to gain X reputation with a faction
         AreaTriggerEnter = 19,
         AreaTriggerExit = 20,
         Max
@@ -34,10 +34,10 @@ namespace Framework.Constants
     public enum QuestObjectiveFlags
     {
         TrackedOnMinimap = 0x01, // Client Displays Large Yellow Blob On Minimap For Creature/Gameobject
-        Sequenced = 0x02, // Client Will Not See The Objective Displayed Until All Previous Objectives Are Completed
-        Optional = 0x04, // Not Required To Complete The Quest
-        Hidden = 0x08, // Never Displayed In Quest Log
-        HideCreditMsg = 0x10, // Skip Showing Item Objective Progress
+        Sequenced = 0x02,        // Client Will Not See The Objective Displayed Until All Previous Objectives Are Completed
+        Optional = 0x04,         // Not Required To Complete The Quest
+        Hidden = 0x08,           // Never Displayed In Quest Log
+        HideCreditMsg = 0x10,    // Skip Showing Item Objective Progress
         PreserveQuestItems = 0x20,
         PartOfProgressBar = 0x40, // Hidden Objective Used To Calculate Progress Bar Percent (Quests Are Limited To A Single Progress Bar Objective)
         KillPlayersSameFaction = 0x80
@@ -61,7 +61,7 @@ namespace Framework.Constants
 
     public enum QuestType
     {
-        AutoComplete= 0,
+        AutoComplete = 0,
         Disabled = 1,
         Normal = 2,
         Task = 3,
@@ -287,71 +287,71 @@ namespace Framework.Constants
         TheArchivistsCodex = 603,
         CovenantAssaults = 604,
         ProtoformSynthesis = 606,
-        Ch6SymbolTracking = 607,
+        Ch6SymbolTracking = 607
     }
 
     public enum QuestFailedReasons
     {
         None = 0,
         FailedLowLevel = 1,        // "You Are Not High Enough Level For That Quest.""
-        FailedWrongRace = 6,        // "That Quest Is Not Available To Your Race."
-        AlreadyDone = 7,        // "You Have Completed That Daily Quest Today."
-        OnlyOneTimed = 12,       // "You Can Only Be On One Timed Quest At A Time"
-        AlreadyOn1 = 13,       // "You Are Already On That Quest"
-        FailedExpansion = 16,       // "This Quest Requires An Expansion Enabled Account."
-        AlreadyOn2 = 18,       // "You Are Already On That Quest"
-        FailedMissingItems = 21,       // "You Don'T Have The Required Items With You.  Check Storage."
-        FailedNotEnoughMoney = 23,       // "You Don'T Have Enough Money For That Quest"
-        FailedCais = 24,       // "You Cannot Complete Quests Once You Have Reached Tired Time"
-        AlreadyDoneDaily = 26,       // "You Have Completed That Daily Quest Today."
-        FailedSpell = 28,       // "You Haven'T Learned The Required Spell."
-        HasInProgress = 30        // "Progress Bar Objective Not Completed"
+        FailedWrongRace = 6,       // "That Quest Is Not Available To Your Race."
+        AlreadyDone = 7,           // "You Have Completed That Daily Quest Today."
+        OnlyOneTimed = 12,         // "You Can Only Be On One Timed Quest At A Time"
+        AlreadyOn1 = 13,           // "You Are Already On That Quest"
+        FailedExpansion = 16,      // "This Quest Requires An Expansion Enabled Account."
+        AlreadyOn2 = 18,           // "You Are Already On That Quest"
+        FailedMissingItems = 21,   // "You Don'T Have The Required Items With You.  Check Storage."
+        FailedNotEnoughMoney = 23, // "You Don'T Have Enough Money For That Quest"
+        FailedCais = 24,           // "You Cannot Complete Quests Once You Have Reached Tired Time"
+        AlreadyDoneDaily = 26,     // "You Have Completed That Daily Quest Today."
+        FailedSpell = 28,          // "You Haven'T Learned The Required Spell."
+        HasInProgress = 30         // "Progress Bar Objective Not Completed"
     }
 
     public enum QuestPushReason
     {
-        Success = 0,    // "Sharing quest with %s..."
-        Invalid = 1,    // "%s is not eligible for that quest"
-        InvalidToRecipient = 2,    // "%s's attempt to share quest "%s" failed. You are not eligible for that quest."
-        Accepted = 3,    // "%s has accepted your quest"
-        Declined = 4,    // "%s has declined your quest"
-        Busy = 5,    // "%s is busy"
-        Dead = 6,    // "%s is dead."
-        DeadToRecipient = 7,    // "%s's attempt to share quest "%s" failed. You are dead."
-        LogFull = 8,    // "%s's quest log is full"
-        LogFullToRecipient = 9,    // "%s's attempt to share quest "%s" failed. Your quest log is full."
-        OnQuest = 10,   // "%s is already on that quest"
-        OnQuestToRecipient = 11,   // "%s's attempt to share quest "%s" failed. You are already on that quest."
-        AlreadyDone = 12,   // "%s has completed that quest"
-        AlreadyDoneToRecipient = 13,   // "%s's attempt to share quest "%s" failed. You have completed that quest."
-        NotDaily = 14,   // "That quest cannot be shared today"
-        TimerExpired = 15,   // "Quest sharing timer has expired"
-        NotInParty = 16,   // "You are not in a party"
-        DifferentServerDaily = 17,   // "%s is not eligible for that quest today"
-        DifferentServerDailyToRecipient = 18,   // "%s's attempt to share quest "%s" failed. You are not eligible for that quest today."
-        NotAllowed = 19,   // "That quest cannot be shared"
-        Prerequisite = 20,   // "%s hasn't completed all of the prerequisite quests required for that quest."
-        PrerequisiteToRecipient = 21,   // "%s's attempt to share quest "%s" failed. You must complete all of the prerequisite quests first."
-        LowLevel = 22,   // "%s is too low level for that quest."
-        LowLevelToRecipient = 23,   // "%s's attempt to share quest "%s" failed. You are too low level for that quest."
-        HighLevel = 24,   // "%s is too high level for that quest."
-        HighLevelToRecipient = 25,   // "%s's attempt to share quest "%s" failed. You are too high level for that quest."
-        Class = 26,   // "%s is the wrong class for that quest."
-        ClassToRecipient = 27,   // "%s's attempt to share quest "%s" failed. You are the wrong class for that quest."
-        Race = 28,   // "%s is the wrong race for that quest."
-        RaceToRecipient = 29,   // "%s's attempt to share quest "%s" failed. You are the wrong race for that quest."
-        LowFaction = 30,   // "%s's reputation is too low for that quest."
-        LowFactionToRecipient = 31,   // "%s's attempt to share quest "%s" failed. Your reputation is too low for that quest."
-        Expansion = 32,   // "%s doesn't own the required expansion for that quest."
-        ExpansionToRecipient = 33,   // "%s's attempt to share quest "%s" failed. You do not own the required expansion for that quest."
-        NotGarrisonOwner = 34,   // "%s must own a garrison to accept that quest."
-        NotGarrisonOwnerToRecipient = 35,   // "%s's attempt to share quest "%s" failed. You must own a garrison to accept that quest."
-        WrongCovenant = 36,   // "%s is in the wrong covenant for that quest."
-        WrongCovenantToRecipient = 37,   // "%s's attempt to share quest "%s" failed. You are in the wrong covenant for that quest."
-        NewPlayerExperience = 38,   // "%s must complete Exile's Reach to accept that quest."
-        NewPlayerExperienceToRecipient = 39,   // "%s's attempt to share quest "%s" failed. You must complete Exile's Reach to accept that quest."
-        WrongFaction = 40,   // "%s is the wrong faction for that quest."
-        WrongFactionToRecipient = 41    // "%s's attempt to share quest "%s" failed. You are the wrong faction for that quest."
+        Success = 0,                          // "Sharing quest with %s..."
+        Invalid = 1,                          // "%s is not eligible for that quest"
+        InvalidToRecipient = 2,               // "%s's attempt to share quest "%s" failed. You are not eligible for that quest."
+        Accepted = 3,                         // "%s has accepted your quest"
+        Declined = 4,                         // "%s has declined your quest"
+        Busy = 5,                             // "%s is busy"
+        Dead = 6,                             // "%s is dead."
+        DeadToRecipient = 7,                  // "%s's attempt to share quest "%s" failed. You are dead."
+        LogFull = 8,                          // "%s's quest log is full"
+        LogFullToRecipient = 9,               // "%s's attempt to share quest "%s" failed. Your quest log is full."
+        OnQuest = 10,                         // "%s is already on that quest"
+        OnQuestToRecipient = 11,              // "%s's attempt to share quest "%s" failed. You are already on that quest."
+        AlreadyDone = 12,                     // "%s has completed that quest"
+        AlreadyDoneToRecipient = 13,          // "%s's attempt to share quest "%s" failed. You have completed that quest."
+        NotDaily = 14,                        // "That quest cannot be shared today"
+        TimerExpired = 15,                    // "Quest sharing timer has expired"
+        NotInParty = 16,                      // "You are not in a party"
+        DifferentServerDaily = 17,            // "%s is not eligible for that quest today"
+        DifferentServerDailyToRecipient = 18, // "%s's attempt to share quest "%s" failed. You are not eligible for that quest today."
+        NotAllowed = 19,                      // "That quest cannot be shared"
+        Prerequisite = 20,                    // "%s hasn't completed all of the prerequisite quests required for that quest."
+        PrerequisiteToRecipient = 21,         // "%s's attempt to share quest "%s" failed. You must complete all of the prerequisite quests first."
+        LowLevel = 22,                        // "%s is too low level for that quest."
+        LowLevelToRecipient = 23,             // "%s's attempt to share quest "%s" failed. You are too low level for that quest."
+        HighLevel = 24,                       // "%s is too high level for that quest."
+        HighLevelToRecipient = 25,            // "%s's attempt to share quest "%s" failed. You are too high level for that quest."
+        Class = 26,                           // "%s is the wrong class for that quest."
+        ClassToRecipient = 27,                // "%s's attempt to share quest "%s" failed. You are the wrong class for that quest."
+        Race = 28,                            // "%s is the wrong race for that quest."
+        RaceToRecipient = 29,                 // "%s's attempt to share quest "%s" failed. You are the wrong race for that quest."
+        LowFaction = 30,                      // "%s's reputation is too low for that quest."
+        LowFactionToRecipient = 31,           // "%s's attempt to share quest "%s" failed. Your reputation is too low for that quest."
+        Expansion = 32,                       // "%s doesn't own the required expansion for that quest."
+        ExpansionToRecipient = 33,            // "%s's attempt to share quest "%s" failed. You do not own the required expansion for that quest."
+        NotGarrisonOwner = 34,                // "%s must own a garrison to accept that quest."
+        NotGarrisonOwnerToRecipient = 35,     // "%s's attempt to share quest "%s" failed. You must own a garrison to accept that quest."
+        WrongCovenant = 36,                   // "%s is in the wrong covenant for that quest."
+        WrongCovenantToRecipient = 37,        // "%s's attempt to share quest "%s" failed. You are in the wrong covenant for that quest."
+        NewPlayerExperience = 38,             // "%s must complete Exile's Reach to accept that quest."
+        NewPlayerExperienceToRecipient = 39,  // "%s's attempt to share quest "%s" failed. You must complete Exile's Reach to accept that quest."
+        WrongFaction = 40,                    // "%s is the wrong faction for that quest."
+        WrongFactionToRecipient = 41          // "%s's attempt to share quest "%s" failed. You are the wrong faction for that quest."
     }
 
     public enum QuestTradeSkill
@@ -377,11 +377,13 @@ namespace Framework.Constants
     {
         None = 0,
         Complete = 1,
+
         //Unavailable    = 2,
         Incomplete = 3,
+
         //Available      = 4,
         Failed = 5,
-        Rewarded = 6,        // Not Used In Db
+        Rewarded = 6, // Not Used In Db
         Max
     }
 
@@ -408,28 +410,28 @@ namespace Framework.Constants
         JourneyRewardCompletePOI = 0x40000,
         CovenantCallingQuest = 0x80000,
         CovenantCallingRewardCompleteNoPOI = 0x100000,
-        CovenantCallingRewardCompletePOI = 0x200000,
+        CovenantCallingRewardCompletePOI = 0x200000
     }
 
     [Flags]
     public enum QuestFlags : uint
     {
         None = 0x00,
-        StayAlive = 0x01,               // Not Used Currently
-        PartyAccept = 0x02,             // Not Used Currently. If Player In Party, All Players That Can Accept This Quest Will Receive Confirmation Box To Accept Quest Cmsg_Quest_Confirm_Accept/Smsg_Quest_Confirm_Accept
-        Exploration = 0x04,             // Not Used Currently
-        Sharable = 0x08,                // Can Be Shared: Player.Cansharequest()
-        HasCondition = 0x10,            // Not Used Currently
-        HideRewardPoi = 0x20,           // Not Used Currently: Unsure Of Content
-        Raid = 0x40,                    // Can be completed while in raid
-        WarModeRewardsOptIn = 0x80,     // Not Used Currently
-        NoMoneyFromXp = 0x100,          // Not Used Currently: Experience Is Not Converted To Gold At Max Level
-        HiddenRewards = 0x200,          // Items And Money Rewarded Only Sent In Smsg_Questgiver_Offer_Reward (Not In Smsg_Questgiver_Quest_Details Or In Client Quest Log(Smsg_Quest_Query_Response))
-        Tracking = 0x400,               // These Quests Are Automatically Rewarded On Quest Complete And They Will Never Appear In Quest Log Client Side.
-        DeprecateReputation = 0x800,    // Not Used Currently
-        Daily = 0x1000,                 // Used To Know Quest Is Daily One
-        Pvp = 0x2000,                   // Having This Quest In Log Forces Pvp Flag
-        Unavailable = 0x4000,           // Used On Quests That Are Not Generically Available
+        StayAlive = 0x01,            // Not Used Currently
+        PartyAccept = 0x02,          // Not Used Currently. If Player In Party, All Players That Can Accept This Quest Will Receive Confirmation Box To Accept Quest Cmsg_Quest_Confirm_Accept/Smsg_Quest_Confirm_Accept
+        Exploration = 0x04,          // Not Used Currently
+        Sharable = 0x08,             // Can Be Shared: Player.Cansharequest()
+        HasCondition = 0x10,         // Not Used Currently
+        HideRewardPoi = 0x20,        // Not Used Currently: Unsure Of Content
+        Raid = 0x40,                 // Can be completed while in raid
+        WarModeRewardsOptIn = 0x80,  // Not Used Currently
+        NoMoneyFromXp = 0x100,       // Not Used Currently: Experience Is Not Converted To Gold At Max Level
+        HiddenRewards = 0x200,       // Items And Money Rewarded Only Sent In Smsg_Questgiver_Offer_Reward (Not In Smsg_Questgiver_Quest_Details Or In Client Quest Log(Smsg_Quest_Query_Response))
+        Tracking = 0x400,            // These Quests Are Automatically Rewarded On Quest Complete And They Will Never Appear In Quest Log Client Side.
+        DeprecateReputation = 0x800, // Not Used Currently
+        Daily = 0x1000,              // Used To Know Quest Is Daily One
+        Pvp = 0x2000,                // Having This Quest In Log Forces Pvp Flag
+        Unavailable = 0x4000,        // Used On Quests That Are Not Generically Available
         Weekly = 0x8000,
         AutoComplete = 0x10000,         // Quests with this flag player submit automatically by special button in player gui
         DisplayItemInTracker = 0x20000, // Displays Usable Item In Quest Tracker
@@ -510,13 +512,14 @@ namespace Framework.Constants
     public enum QuestSpecialFlags
     {
         None = 0x00,
+
         // Flags For Set Specialflags In Db If Required But Used Only At Server
         Repeatable = 0x001,
         ExplorationOrEvent = 0x002, // If Required Area Explore, Spell Spell_Effect_Quest_Complete Casting, Table `*_Script` Command Script_Command_Quest_Explored Use, Set From Script)
-        AutoAccept = 0x004, // Quest Is To Be Auto-Accepted.
-        DfQuest = 0x008, // Quest Is Used By Dungeon Finder.
-        Monthly = 0x010, // Quest Is Reset At The Begining Of The Month
-        // Room For More Custom Flags
+        AutoAccept = 0x004,         // Quest Is To Be Auto-Accepted.
+        DfQuest = 0x008,            // Quest Is Used By Dungeon Finder.
+        Monthly = 0x010,            // Quest Is Reset At The Begining Of The Month
+                                    // Room For More Custom Flags
 
         DbAllowed = Repeatable | ExplorationOrEvent | AutoAccept | DfQuest | Monthly,
 

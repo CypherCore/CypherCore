@@ -12,15 +12,17 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.AddToy)]
-        void HandleAddToy(AddToy packet)
+        private void HandleAddToy(AddToy packet)
         {
             if (packet.Guid.IsEmpty())
                 return;
 
             Item item = _player.GetItemByGuid(packet.Guid);
+
             if (!item)
             {
                 _player.SendEquipError(InventoryResult.ItemNotFound);
+
                 return;
             }
 
@@ -28,9 +30,11 @@ namespace Game
                 return;
 
             InventoryResult msg = _player.CanUseItem(item);
+
             if (msg != InventoryResult.Ok)
             {
                 _player.SendEquipError(msg, item);
+
                 return;
             }
 
@@ -39,10 +43,11 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UseToy, Processing = PacketProcessing.Inplace)]
-        void HandleUseToy(UseToy packet)
+        private void HandleUseToy(UseToy packet)
         {
             uint itemId = packet.Cast.Misc[0];
             ItemTemplate item = Global.ObjectMgr.GetItemTemplate(itemId);
+
             if (item == null)
                 return;
 
@@ -50,13 +55,16 @@ namespace Game
                 return;
 
             var effect = item.Effects.Find(eff => packet.Cast.SpellID == eff.SpellID);
+
             if (effect == null)
                 return;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID, Difficulty.None);
+
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, "HandleUseToy: unknown spell id: {0} used by Toy Item entry {1}", packet.Cast.SpellID, itemId);
+                Log.outError(LogFilter.Network, "HandleUseToy: unknown spell Id: {0} used by Toy Item entry {1}", packet.Cast.SpellID, itemId);
+
                 return;
             }
 
@@ -69,19 +77,19 @@ namespace Game
 
             SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = packet.Cast.CastID;
-            spellPrepare.ServerCastID = spell.m_castId;
+            spellPrepare.ServerCastID = spell._castId;
             SendPacket(spellPrepare);
 
-            spell.m_fromClient = true;
-            spell.m_castItemEntry = itemId;
-            spell.m_misc.Data0 = packet.Cast.Misc[0];
-            spell.m_misc.Data1 = packet.Cast.Misc[1];
-            spell.m_castFlagsEx |= SpellCastFlagsEx.UseToySpell;
+            spell._fromClient = true;
+            spell._castItemEntry = itemId;
+            spell._misc.Data0 = packet.Cast.Misc[0];
+            spell._misc.Data1 = packet.Cast.Misc[1];
+            spell._castFlagsEx |= SpellCastFlagsEx.UseToySpell;
             spell.Prepare(targets);
         }
 
         [WorldPacketHandler(ClientOpcodes.ToyClearFanfare)]
-        void HandleToyClearFanfare(ToyClearFanfare toyClearFanfare)
+        private void HandleToyClearFanfare(ToyClearFanfare toyClearFanfare)
         {
             _collectionMgr.ToyClearFanfare(toyClearFanfare.ItemID);
         }

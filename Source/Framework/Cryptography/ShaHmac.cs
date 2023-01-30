@@ -9,11 +9,15 @@ namespace Framework.Cryptography
 {
     public class Sha256
     {
+        private readonly SHA256 sha;
+
         public Sha256()
         {
             sha = SHA256.Create();
             sha.Initialize();
         }
+
+        public byte[] Digest { get; private set; }
 
         public void Process(byte[] data, int length)
         {
@@ -47,9 +51,6 @@ namespace Framework.Cryptography
 
             Digest = sha.Hash;
         }
-
-        SHA256 sha;
-        public byte[] Digest { get; private set; }
     }
 
     public class HmacHash : HMACSHA1
@@ -58,6 +59,8 @@ namespace Framework.Cryptography
         {
             Initialize();
         }
+
+        public byte[] Digest { get; private set; }
 
         public void Process(byte[] data, int length)
         {
@@ -93,8 +96,6 @@ namespace Framework.Cryptography
 
             Digest = Hash;
         }
-
-        public byte[] Digest { get; private set; }
     }
 
     public class HmacSha256 : HMACSHA256
@@ -103,6 +104,8 @@ namespace Framework.Cryptography
         {
             Initialize();
         }
+
+        public byte[] Digest { get; private set; }
 
         public void Process(byte[] data, int length)
         {
@@ -129,7 +132,5 @@ namespace Framework.Cryptography
 
             Digest = Hash;
         }
-
-        public byte[] Digest { get; private set; }
     }
 }

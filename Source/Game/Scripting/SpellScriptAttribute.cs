@@ -8,14 +8,16 @@ namespace Game.Scripting
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SpellScriptAttribute : ScriptAttribute
     {
-        public SpellScriptAttribute(string name = "", params object[] args) : base (name, args)
+        public SpellScriptAttribute(string name = "", params object[] args) : base(name, args)
         {
-
         }
 
         public SpellScriptAttribute(uint spellId, string name = "", params object[] args) : base(name, args)
         {
-            SpellIds = new[] { spellId };
+            SpellIds = new[]
+                       {
+                           spellId
+                       };
         }
 
         public SpellScriptAttribute(uint[] spellId, string name = "", params object[] args) : base(name, args)

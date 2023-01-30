@@ -60,7 +60,7 @@ namespace Framework.Constants
         SignedUp = 6,
         NotSignedUp = 7,
         Tentative = 8,
-        Removed = 9     // Correct Name?
+        Removed = 9 // Correct Name?
     }
 
     public enum CalendarError

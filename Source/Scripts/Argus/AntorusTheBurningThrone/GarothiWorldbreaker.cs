@@ -1,22 +1,21 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Game.Entities;
-using Game.Scripting;
-using Game.AI;
-using Game.Maps;
-using Game.Spells;
-using System.Linq;
+using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using System;
-using Game.Scripting.Interfaces.ISpell;
+using Game.AI;
+using Game.Entities;
+using Game.Maps;
+using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
+using Game.Scripting.Interfaces.ISpell;
+using Game.Spells;
 
 namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 {
-    struct TextIds
+    internal struct TextIds
     {
         // Garothi Worldbreaker
         public const uint SayAggro = 0;
@@ -35,7 +34,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
         public const uint SayAnnounceDecimation = 0;
     }
 
-    struct SpellIds
+    internal struct SpellIds
     {
         // Garothi Worldbreaker
         public const uint Melee = 248229;
@@ -82,17 +81,17 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
         public const uint SurgingFelDamage = 246663;
     }
 
-    struct EventIds
+    internal struct EventIds
     {
         // Garothi Worldbreaker
         public const uint ReengagePlayers = 1;
-        public const uint FelBombardment= 2;
-        public const uint SearingBarrage= 3;
+        public const uint FelBombardment = 2;
+        public const uint SearingBarrage = 3;
         public const uint CannonChooser = 4;
         public const uint SurgingFel = 5;
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint MinTargetsSize = 2;
         public const uint MaxTargetsSize = 6;
@@ -102,8 +101,8 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
         public const uint DataLastFiredCannon = 0;
 
         public const uint MaxApocalypseDriveCount = 2;
-        public static Position AnnihilationCenterReferencePos = new(-3296.72f, 9767.78f, -60.0f); 
-        
+        public static Position AnnihilationCenterReferencePos = new(-3296.72f, 9767.78f, -60.0f);
+
         public static void PreferNonTankTargetsAndResizeTargets(List<WorldObject> targets, Unit caster)
         {
             if (targets.Empty())
@@ -111,18 +110,20 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
             List<WorldObject> targetsCopy = targets;
             byte size = (byte)targetsCopy.Count;
-            // Selecting our prefered target size based on total targets (min 10 player: 2, max 30 player: 6)
-            byte preferedSize = (byte)(Math.Min(Math.Max(MathF.Ceiling(size / 5), MiscConst.MinTargetsSize), MiscConst.MaxTargetsSize));
+            // Selecting our prefered Target size based on total targets (min 10 player: 2, max 30 player: 6)
+            byte preferedSize = (byte)(Math.Min(Math.Max(MathF.Ceiling(size / 5), MinTargetsSize), MaxTargetsSize));
 
             // Now we get rid of the tank as these abilities prefer non-tanks above tanks as long as there are alternatives
             targetsCopy.RemoveAll(new VictimCheck(caster, false));
 
             // We have less available nontank targets than we want, include tanks
             if (targetsCopy.Count < preferedSize)
+            {
                 targets.RandomResize(preferedSize);
+            }
             else
             {
-                // Our target list has enough alternative targets, resize
+                // Our Target list has enough alternative targets, resize
                 targetsCopy.RandomResize(preferedSize);
                 targets.Clear();
                 targets.AddRange(targetsCopy);
@@ -131,8 +132,16 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     }
 
     [Script]
-    class boss_garothi_worldbreaker : BossAI
+    internal class boss_garothi_worldbreaker : BossAI
     {
+        private readonly byte[] _apocalypseDriveHealthLimit = new byte[MiscConst.MaxApocalypseDriveCount];
+        private readonly List<ObjectGuid> _surgingFelDummyGuids = new();
+        private byte _apocalypseDriveCount;
+        private bool _castEradication;
+        private uint _lastCanonEntry;
+        private ObjectGuid _lastSurgingFelDummyGuid;
+        private uint _searingBarrageSpellId;
+
         public boss_garothi_worldbreaker(Creature creature) : base(creature, DataTypes.GarothiWorldbreaker)
         {
             _lastCanonEntry = CreatureIds.Decimator;
@@ -148,11 +157,13 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 case Difficulty.HeroicRaid:
                     _apocalypseDriveHealthLimit[0] = 65;
                     _apocalypseDriveHealthLimit[1] = 35;
+
                     break;
                 case Difficulty.NormalRaid:
                 case Difficulty.LFRNew:
                     _apocalypseDriveHealthLimit[0] = 60;
                     _apocalypseDriveHealthLimit[1] = 20;
+
                     break;
                 default:
                     break;
@@ -170,17 +181,17 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
             DoCastSelf(SpellIds.Melee);
-            instance.SendEncounterUnit(EncounterFrameType.Engage, me);
-            _events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
-            _events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
+            Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+            Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
+            Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
             Talk(TextIds.SayDisengage);
             _EnterEvadeMode();
-            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-            _events.Reset();
+            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            Events.Reset();
             CleanupEncounter();
             _DespawnAtEvade(TimeSpan.FromSeconds(30));
         }
@@ -196,7 +207,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             _JustDied();
             Talk(TextIds.SayDeath);
             CleanupEncounter();
-            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
         }
 
         public override void OnSpellCast(SpellInfo spell)
@@ -205,10 +216,12 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             {
                 case SpellIds.ApocalypseDriveFinalDamage:
                     if (_apocalypseDriveCount < MiscConst.MaxApocalypseDriveCount)
-                        _events.Reset();
-                    _events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
+                        Events.Reset();
+
+                    Events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
                     HideCannons();
                     me.RemoveUnitFlag(UnitFlags.Uninteractible);
+
                     break;
                 default:
                     break;
@@ -223,10 +236,11 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 me.SetReactState(ReactStates.Passive);
                 me.InterruptNonMeleeSpells(true);
                 me.SetFacingTo(me.GetHomePosition().GetOrientation());
-                _events.Reset();
+                Events.Reset();
 
-                if (GetDifficulty() == Difficulty.MythicRaid || GetDifficulty() == Difficulty.HeroicRaid)
-                    _events.ScheduleEvent(EventIds.SurgingFel, TimeSpan.FromSeconds(8));
+                if (GetDifficulty() == Difficulty.MythicRaid ||
+                    GetDifficulty() == Difficulty.HeroicRaid)
+                    Events.ScheduleEvent(EventIds.SurgingFel, TimeSpan.FromSeconds(8));
 
                 DoCastSelf(SpellIds.ApocalypseDrive);
                 DoCastSelf(SpellIds.ApocalypseDriveFinalDamage);
@@ -234,40 +248,47 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 Talk(TextIds.SayApocalypseDrive);
                 me.SetUnitFlag(UnitFlags.Uninteractible);
 
-                Creature decimator = instance.GetCreature(DataTypes.Decimator);
+                Creature decimator = Instance.GetCreature(DataTypes.Decimator);
+
                 if (decimator)
                 {
-                    instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
+                    Instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
                     decimator.SetUnitFlag(UnitFlags.InCombat);
                     decimator.RemoveUnitFlag(UnitFlags.Uninteractible);
                 }
 
-                Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
+                Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
+
                 if (annihilator)
                 {
-                    instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
+                    Instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
                     annihilator.SetUnitFlag(UnitFlags.InCombat);
                     annihilator.RemoveUnitFlag(UnitFlags.Uninteractible);
                 }
+
                 ++_apocalypseDriveCount;
             }
         }
 
         public override void JustSummoned(Creature summon)
         {
-            summons.Summon(summon);
+            Summons.Summon(summon);
+
             switch (summon.GetEntry())
             {
                 case CreatureIds.Annihilation:
                     summon.CastSpell(summon, SpellIds.AnnihilationWarning);
                     summon.CastSpell(summon, SpellIds.AnnihilationAreaTrigger);
+
                     break;
                 case CreatureIds.Annihilator:
                 case CreatureIds.Decimator:
                     summon.SetReactState(ReactStates.Passive);
+
                     break;
                 case CreatureIds.GarothiWorldbreaker:
                     _surgingFelDummyGuids.Add(summon.GetGUID());
+
                     break;
                 default:
                     break;
@@ -290,10 +311,10 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                         _searingBarrageSpellId = SpellIds.SearingBarrageDecimator;
 
                     if (_apocalypseDriveCount < MiscConst.MaxApocalypseDriveCount)
-                        _events.Reset();
+                        Events.Reset();
 
-                    _events.ScheduleEvent(EventIds.SearingBarrage, TimeSpan.FromSeconds(3.5));
-                    _events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
+                    Events.ScheduleEvent(EventIds.SearingBarrage, TimeSpan.FromSeconds(3.5));
+                    Events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
                     _castEradication = true;
 
                     if (summon.GetEntry() == CreatureIds.Decimator)
@@ -303,6 +324,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
                     me.PlayOneShotAnimKitId(MiscConst.AnimKitIdCannonDestroyed);
                     HideCannons();
+
                     break;
                 default:
                     break;
@@ -328,115 +350,118 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             if (!UpdateVictim())
                 return;
 
-            _events.Update(diff);
+            Events.Update(diff);
 
-            if (me.HasUnitState(UnitState.Casting) && !me.HasAura(SpellIds.ApocalypseDrive))
+            if (me.HasUnitState(UnitState.Casting) &&
+                !me.HasAura(SpellIds.ApocalypseDrive))
                 return;
 
-            _events.ExecuteEvents(eventId =>
-            {
-                switch (eventId)
-                {
-                    case EventIds.ReengagePlayers:
-                        DoCastSelf(SpellIds.Empowered);
-                        DoCastSelf(SpellIds.RestoreHealth);
-                        if (_castEradication)
-                        {
-                            DoCastSelf(SpellIds.Eradication);
-                            Talk(TextIds.SayAnnounceEradication);
-                            Talk(TextIds.SayFinishApocalypseDrive);
-                            _castEradication = false;
-                        }
-                        me.SetReactState(ReactStates.Aggressive);
-                        _events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(20));
-                        _events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(18));
-                        break;
-                    case EventIds.FelBombardment:
-                        DoCastAOE(SpellIds.FelBombardmentSelector);
-                        _events.Repeat(TimeSpan.FromSeconds(20));
-                        break;
-                    case EventIds.SearingBarrage:
-                        DoCastSelf(_searingBarrageSpellId);
-                        break;
-                    case EventIds.CannonChooser:
-                        DoCastSelf(SpellIds.CannonChooser);
-                        _events.Repeat(TimeSpan.FromSeconds(16));
-                        break;
-                    case EventIds.SurgingFel:
-                    {
-                        _surgingFelDummyGuids.Remove(_lastSurgingFelDummyGuid);
-                        _lastSurgingFelDummyGuid = _surgingFelDummyGuids.SelectRandom();
-                        Creature dummy = ObjectAccessor.GetCreature(me, _lastSurgingFelDummyGuid);
-                        if (dummy)
-                            dummy.CastSpell(dummy, SpellIds.SurgingFelAreaTrigger);
+            Events.ExecuteEvents(eventId =>
+                                  {
+                                      switch (eventId)
+                                      {
+                                          case EventIds.ReengagePlayers:
+                                              DoCastSelf(SpellIds.Empowered);
+                                              DoCastSelf(SpellIds.RestoreHealth);
 
-                        _events.Repeat(TimeSpan.FromSeconds(8));
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            });
-    
-        if (me.GetVictim() && me.GetVictim().IsWithinMeleeRange(me))
+                                              if (_castEradication)
+                                              {
+                                                  DoCastSelf(SpellIds.Eradication);
+                                                  Talk(TextIds.SayAnnounceEradication);
+                                                  Talk(TextIds.SayFinishApocalypseDrive);
+                                                  _castEradication = false;
+                                              }
+
+                                              me.SetReactState(ReactStates.Aggressive);
+                                              Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(20));
+                                              Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(18));
+
+                                              break;
+                                          case EventIds.FelBombardment:
+                                              DoCastAOE(SpellIds.FelBombardmentSelector);
+                                              Events.Repeat(TimeSpan.FromSeconds(20));
+
+                                              break;
+                                          case EventIds.SearingBarrage:
+                                              DoCastSelf(_searingBarrageSpellId);
+
+                                              break;
+                                          case EventIds.CannonChooser:
+                                              DoCastSelf(SpellIds.CannonChooser);
+                                              Events.Repeat(TimeSpan.FromSeconds(16));
+
+                                              break;
+                                          case EventIds.SurgingFel:
+                                              {
+                                                  _surgingFelDummyGuids.Remove(_lastSurgingFelDummyGuid);
+                                                  _lastSurgingFelDummyGuid = _surgingFelDummyGuids.SelectRandom();
+                                                  Creature dummy = ObjectAccessor.GetCreature(me, _lastSurgingFelDummyGuid);
+
+                                                  if (dummy)
+                                                      dummy.CastSpell(dummy, SpellIds.SurgingFelAreaTrigger);
+
+                                                  Events.Repeat(TimeSpan.FromSeconds(8));
+
+                                                  break;
+                                              }
+                                          default:
+                                              break;
+                                      }
+                                  });
+
+            if (me.GetVictim() &&
+                me.GetVictim().IsWithinMeleeRange(me))
                 DoMeleeAttackIfReady();
             else
                 DoSpellAttackIfReady(SpellIds.Carnage);
         }
 
-        byte[] _apocalypseDriveHealthLimit = new byte[MiscConst.MaxApocalypseDriveCount];
-        byte _apocalypseDriveCount;
-        uint _searingBarrageSpellId;
-        uint _lastCanonEntry;
-        bool _castEradication;
-        ObjectGuid _lastSurgingFelDummyGuid;
-        List<ObjectGuid> _surgingFelDummyGuids = new();
-
-        void CleanupEncounter()
+        private void CleanupEncounter()
         {
-            Creature decimator = instance.GetCreature(DataTypes.Decimator);
+            Creature decimator = Instance.GetCreature(DataTypes.Decimator);
+
             if (decimator)
-                instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
+                Instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
 
-            Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
+            Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
+
             if (annihilator)
-                instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
+                Instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
 
-            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.DecimationWarning);
-            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentWarning);
-            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentPeriodic);
-            summons.DespawnAll();
+            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.DecimationWarning);
+            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentWarning);
+            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentPeriodic);
+            Summons.DespawnAll();
         }
 
-        void HideCannons()
+        private void HideCannons()
         {
-            Creature decimator = instance.GetCreature(DataTypes.Decimator);
+            Creature decimator = Instance.GetCreature(DataTypes.Decimator);
+
             if (decimator)
             {
-                instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
+                Instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
                 decimator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
             }
 
-            Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
+            Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
+
             if (annihilator)
             {
-                instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
+                Instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
                 annihilator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
             }
         }
     }
 
     [Script]
-    class at_garothi_annihilation : AreaTriggerAI
+    internal class at_garothi_annihilation : AreaTriggerAI
     {
+        private byte _playerCount;
+
         public at_garothi_annihilation(AreaTrigger areatrigger) : base(areatrigger)
         {
             Initialize();
-        }
-
-        void Initialize()
-        {
-            _playerCount = 0;
         }
 
         public override void OnUnitEnter(Unit unit)
@@ -447,6 +472,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             _playerCount++;
 
             Unit annihilation = at.GetCaster();
+
             if (annihilation)
                 annihilation.RemoveAurasDueToSpell(SpellIds.AnnihilationWarning);
         }
@@ -458,66 +484,50 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
             _playerCount--;
 
-            if (_playerCount == 0 && !at.IsRemoved())
+            if (_playerCount == 0 &&
+                !at.IsRemoved())
             {
                 Unit annihilation = at.GetCaster();
-                if (annihilation != null)
-                    annihilation.CastSpell(annihilation, SpellIds.AnnihilationWarning);
+
+                annihilation?.CastSpell(annihilation, SpellIds.AnnihilationWarning);
             }
         }
 
-        byte _playerCount;
+        private void Initialize()
+        {
+            _playerCount = 0;
+        }
     }
 
     [Script]
-    class spell_garothi_apocalypse_drive : AuraScript, IHasAuraEffects
+    internal class spell_garothi_apocalypse_drive : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ApocalypseDrivePeriodicDamage);
-        }
-
-        void HandlePeriodic(AuraEffect aurEff)
-        {
-            GetTarget().CastSpell(GetTarget(), SpellIds.ApocalypseDrivePeriodicDamage, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
+
+        private void HandlePeriodic(AuraEffect aurEff)
+        {
+            GetTarget().CastSpell(GetTarget(), SpellIds.ApocalypseDrivePeriodicDamage, new CastSpellExtraArgs(aurEff));
+        }
     }
 
     [Script]
-    class spell_garothi_fel_bombardment_selector : SpellScript, IHasSpellEffects
+    internal class spell_garothi_fel_bombardment_selector : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FelBombardmentWarning, SpellIds.FelBombardmentDummy);
-        }
-
-        void FilterTargets(List<WorldObject> targets)
-        {
-            if (targets.Empty())
-                return;
-
-            Unit caster = GetCaster();
-            if (caster)
-                targets.RemoveAll(new VictimCheck(caster, true));
-        }
-
-        void HandleWarningEffect(uint effIndex)
-        {
-            Creature caster = GetCaster() ? GetCaster().ToCreature() : null;
-            if (!caster || !caster.IsAIEnabled())
-                return;
-
-            Unit target = GetHitUnit();
-            caster.GetAI().Talk(TextIds.SayAnnounceFelBombardment, target);
-            caster.CastSpell(target, SpellIds.FelBombardmentWarning, true);
-            caster.CastSpell(target, SpellIds.FelBombardmentDummy, true);
         }
 
         public override void Register()
@@ -525,95 +535,113 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy, SpellScriptHookType.ObjectAreaTargetSelect));
             SpellEffects.Add(new EffectHandler(HandleWarningEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void FilterTargets(List<WorldObject> targets)
+        {
+            if (targets.Empty())
+                return;
+
+            Unit caster = GetCaster();
+
+            if (caster)
+                targets.RemoveAll(new VictimCheck(caster, true));
+        }
+
+        private void HandleWarningEffect(uint effIndex)
+        {
+            Creature caster = GetCaster() ? GetCaster().ToCreature() : null;
+
+            if (!caster ||
+                !caster.IsAIEnabled())
+                return;
+
+            Unit target = GetHitUnit();
+            caster.GetAI().Talk(TextIds.SayAnnounceFelBombardment, target);
+            caster.CastSpell(target, SpellIds.FelBombardmentWarning, true);
+            caster.CastSpell(target, SpellIds.FelBombardmentDummy, true);
+        }
     }
 
     [Script]
-    class spell_garothi_fel_bombardment_warning : AuraScript, IHasAuraEffects
+    internal class spell_garothi_fel_bombardment_warning : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FelBombardmentPeriodic);
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
-            {
-                Unit caster = GetCaster();
-                if (caster)
-                    caster.CastSpell(GetTarget(), SpellIds.FelBombardmentPeriodic, true);
-            }
         }
 
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
+
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+            {
+                Unit caster = GetCaster();
+
+                if (caster)
+                    caster.CastSpell(GetTarget(), SpellIds.FelBombardmentPeriodic, true);
+            }
+        }
     }
 
     [Script]
-    class spell_garothi_fel_bombardment_periodic : AuraScript, IHasAuraEffects
+    internal class spell_garothi_fel_bombardment_periodic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
-        }
-
-        void HandlePeriodic(AuraEffect aurEff)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-                caster.CastSpell(GetTarget(), (uint)aurEff.GetSpellEffectInfo().CalcValue(caster), true);
         }
 
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
+
+        private void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+
+            if (caster)
+                caster.CastSpell(GetTarget(), (uint)aurEff.GetSpellEffectInfo().CalcValue(caster), true);
+        }
     }
 
     [Script]
-    class spell_garothi_searing_barrage_dummy : SpellScript, IHasSpellEffects
+    internal class spell_garothi_searing_barrage_dummy : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SearingBarrageSelector);
-        }
-
-        void HandleHit(uint effIndex)
-        {
-            GetHitUnit().CastSpell(GetHitUnit(), SpellIds.SearingBarrageSelector, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetSpellInfo().Id));
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleHit(uint effIndex)
+        {
+            GetHitUnit().CastSpell(GetHitUnit(), SpellIds.SearingBarrageSelector, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetSpellInfo().Id));
+        }
     }
 
     [Script]
-    class spell_garothi_searing_barrage_selector : SpellScript, IHasSpellEffects
+    internal class spell_garothi_searing_barrage_selector : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SearingBarrageDamageAnnihilator, SpellIds.SearingBarrageDamageDecimator, SpellIds.SearingBarrageDummyAnnihilator, SpellIds.SearingBarrageDummyDecimator);
-        }
-
-        void FilterTargets(List<WorldObject> targets)
-        {
-            MiscConst.PreferNonTankTargetsAndResizeTargets(targets, GetCaster());
-        }
-
-        void HandleHit(uint effIndex)
-        {
-            uint spellId = GetEffectValue() == SpellIds.SearingBarrageDummyAnnihilator ? SpellIds.SearingBarrageDamageAnnihilator : SpellIds.SearingBarrageDamageDecimator;
-            Unit caster = GetCaster();
-            if (caster)
-                caster.CastSpell(GetHitUnit(), spellId, true);
         }
 
         public override void Register()
@@ -621,33 +649,30 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry, SpellScriptHookType.ObjectAreaTargetSelect));
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
-    }
 
-    [Script]
-    class spell_garothi_decimation_selector : SpellScript, IHasSpellEffects
-    {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.DecimationWarning);
-        }
-
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             MiscConst.PreferNonTankTargetsAndResizeTargets(targets, GetCaster());
         }
 
-        void HandleHit(uint effIndex)
+        private void HandleHit(uint effIndex)
         {
+            uint spellId = GetEffectValue() == SpellIds.SearingBarrageDummyAnnihilator ? SpellIds.SearingBarrageDamageAnnihilator : SpellIds.SearingBarrageDamageDecimator;
             Unit caster = GetCaster();
+
             if (caster)
-            {
-                caster.CastSpell(GetHitUnit(), SpellIds.DecimationWarning, true);
-                Creature decimator = caster.ToCreature();
-                if (decimator)
-                    if (decimator.IsAIEnabled())
-                        decimator.GetAI().Talk(TextIds.SayAnnounceDecimation, GetHitUnit());
-            }
+                caster.CastSpell(GetHitUnit(), spellId, true);
+        }
+    }
+
+    [Script]
+    internal class spell_garothi_decimation_selector : SpellScript, IHasSpellEffects
+    {
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.DecimationWarning);
         }
 
         public override void Register()
@@ -655,107 +680,136 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void FilterTargets(List<WorldObject> targets)
+        {
+            MiscConst.PreferNonTankTargetsAndResizeTargets(targets, GetCaster());
+        }
+
+        private void HandleHit(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            if (caster)
+            {
+                caster.CastSpell(GetHitUnit(), SpellIds.DecimationWarning, true);
+                Creature decimator = caster.ToCreature();
+
+                if (decimator)
+                    if (decimator.IsAIEnabled())
+                        decimator.GetAI().Talk(TextIds.SayAnnounceDecimation, GetHitUnit());
+            }
+        }
     }
 
     [Script]
-    class spell_garothi_decimation_warning : AuraScript, IHasAuraEffects
+    internal class spell_garothi_decimation_warning : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DecimationMissile);
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
-            {
-                Unit caster = GetCaster();
-                if (caster)
-                {
-                    caster.CastSpell(GetTarget(), SpellIds.DecimationMissile, true);
-                    if (!caster.HasUnitState(UnitState.Casting))
-                        caster.CastSpell(caster, SpellIds.DecimationCastVisual);
-                }
-            }
         }
 
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
+
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+            {
+                Unit caster = GetCaster();
+
+                if (caster)
+                {
+                    caster.CastSpell(GetTarget(), SpellIds.DecimationMissile, true);
+
+                    if (!caster.HasUnitState(UnitState.Casting))
+                        caster.CastSpell(caster, SpellIds.DecimationCastVisual);
+                }
+            }
+        }
     }
 
     [Script]
-    class spell_garothi_carnage : AuraScript, IHasAuraEffects
+    internal class spell_garothi_carnage : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             // Usually we could just handle this via spell_proc but since we want
             // to silence the console message because it's not a spell trigger proc, we need a script here.
             PreventDefaultAction();
             Remove();
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script]
-    class spell_garothi_annihilation_selector : SpellScript, IHasSpellEffects
+    internal class spell_garothi_annihilation_selector : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
-        }
-
-        void HandleHit(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-                caster.CastSpell(GetHitUnit(), (uint)GetEffectInfo().CalcValue(caster), true);
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleHit, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleHit(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            if (caster)
+                caster.CastSpell(GetHitUnit(), (uint)GetEffectInfo().CalcValue(caster), true);
+        }
     }
 
     [Script]
-    class spell_garothi_annihilation_triggered : SpellScript, IHasSpellEffects
+    internal class spell_garothi_annihilation_triggered : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AnnihilationDamageUnsplitted);
-        }
-
-        void HandleHit(uint effIndex)
-        {
-            Unit target = GetHitUnit();
-            if (target.HasAura(SpellIds.AnnihilationWarning))
-                target.CastSpell(target, SpellIds.AnnihilationDamageUnsplitted, true);
-
-            target.RemoveAllAuras();
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleHit, 1, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleHit(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+
+            if (target.HasAura(SpellIds.AnnihilationWarning))
+                target.CastSpell(target, SpellIds.AnnihilationDamageUnsplitted, true);
+
+            target.RemoveAllAuras();
+        }
     }
 
     [Script]
-    class spell_garothi_eradication : SpellScript, IOnHit
+    internal class spell_garothi_eradication : SpellScript, IOnHit
     {
         public void OnHit()
         {
             Unit caster = GetCaster();
+
             if (caster)
             {
                 uint damageReduction = (uint)MathFunctions.CalculatePct(GetHitDamage(), GetHitUnit().GetDistance(caster));
@@ -765,37 +819,47 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
     }
 
     [Script]
-    class spell_garothi_surging_fel : AuraScript, IHasAuraEffects
+    internal class spell_garothi_surging_fel : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SurgingFelDamage);
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
-                GetTarget().CastSpell(GetTarget(), SpellIds.SurgingFelDamage, true);
         }
 
         public override void Register()
         {
             Effects.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.AreaTrigger, AuraEffectHandleModes.Real, AuraScriptHookType.EffectAfterRemove));
         }
+
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+                GetTarget().CastSpell(GetTarget(), SpellIds.SurgingFelDamage, true);
+        }
     }
 
     [Script]
-    class spell_garothi_cannon_chooser : SpellScript, IHasSpellEffects
+    internal class spell_garothi_cannon_chooser : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        void HandleDummyEffect(uint effIndex)
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummyEffect(uint effIndex)
         {
             Creature caster = GetHitCreature();
-            if (!caster || !caster.IsAIEnabled())
+
+            if (!caster ||
+                !caster.IsAIEnabled())
                 return;
 
             InstanceScript instance = caster.GetInstanceScript();
+
             if (instance == null)
                 return;
 
@@ -803,16 +867,17 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
             uint lastCannonEntry = caster.GetAI().GetData(MiscConst.DataLastFiredCannon);
 
-            if ((lastCannonEntry == CreatureIds.Annihilator && decimator) || (decimator && !annihilator))
+            if ((lastCannonEntry == CreatureIds.Annihilator && decimator) ||
+                (decimator && !annihilator))
             {
                 decimator.CastSpell(decimator, SpellIds.DecimationSelector, true);
                 caster.GetAI().Talk(TextIds.SayDecimation, decimator);
                 lastCannonEntry = CreatureIds.Decimator;
             }
-            else if ((lastCannonEntry == CreatureIds.Decimator && annihilator) || (annihilator && !decimator))
+            else if ((lastCannonEntry == CreatureIds.Decimator && annihilator) ||
+                     (annihilator && !decimator))
             {
-                byte count = (byte)(caster.GetMap().GetDifficultyID() == Difficulty.MythicRaid ? MiscConst.MaxTargetsSize :
-                    Math.Max(MiscConst.MinTargetsSize, Math.Ceiling((float)caster.GetMap().GetPlayersCountExceptGMs() / 5)));
+                byte count = (byte)(caster.GetMap().GetDifficultyID() == Difficulty.MythicRaid ? MiscConst.MaxTargetsSize : Math.Max(MiscConst.MinTargetsSize, Math.Ceiling((float)caster.GetMap().GetPlayersCountExceptGMs() / 5)));
 
                 for (byte i = 0; i < count; i++)
                 {
@@ -830,15 +895,13 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
             caster.GetAI().SetData(MiscConst.DataLastFiredCannon, lastCannonEntry);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummyEffect, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
-    class VictimCheck : ICheck<WorldObject>
+    internal class VictimCheck : ICheck<WorldObject>
     {
+        private readonly Unit _caster;
+        private readonly bool _keepTank; // true = remove all nontank targets | false = remove current tank
+
         public VictimCheck(Unit caster, bool keepTank)
         {
             _caster = caster;
@@ -848,17 +911,15 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
         public bool Invoke(WorldObject obj)
         {
             Unit unit = obj.ToUnit();
+
             if (!unit)
                 return true;
 
-            if (_caster.GetVictim() && _caster.GetVictim() != unit)
+            if (_caster.GetVictim() &&
+                _caster.GetVictim() != unit)
                 return _keepTank;
 
             return false;
         }
-
-        Unit _caster;
-        bool _keepTank; // true = remove all nontank targets | false = remove current tank
     }
 }
-

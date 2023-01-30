@@ -1,7 +1,6 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using Game;
 using Game.AI;
 using Game.Entities;
@@ -10,7 +9,7 @@ using Game.Scripting;
 namespace Scripts.Draenor
 {
     // 79243 - Baros Alexston
-    struct MiscConst
+    internal struct MiscConst
     {
         // Quest
         public const uint QuestEstablishYourGarrison = 34586;
@@ -26,13 +25,15 @@ namespace Scripts.Draenor
         public const uint SpellCreateGarrisonShadowmoonValleyAlliance = 156020;
         public const uint SpellDespawnAllSummonsGarrisonIntroOnly = 160938;
 
-        public static Position GarrisonLevelOneCreationPlayerPosition = new Position(1904.58f, 312.906f, 88.9542f, 4.303615f);
+        public static Position GarrisonLevelOneCreationPlayerPosition = new(1904.58f, 312.906f, 88.9542f, 4.303615f);
     }
 
     [Script]
-    class npc_baros_alexston : ScriptedAI
+    internal class npc_baros_alexston : ScriptedAI
     {
-        public npc_baros_alexston(Creature creature) : base(creature) { }
+        public npc_baros_alexston(Creature creature) : base(creature)
+        {
+        }
 
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
         {
@@ -57,4 +58,3 @@ namespace Scripts.Draenor
         }
     }
 }
-

@@ -1,16 +1,32 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Scenarios;
-using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class ScenarioState : ServerPacket
+    internal class ScenarioState : ServerPacket
     {
-        public ScenarioState() : base(ServerOpcodes.ScenarioState, ConnectionType.Instance) { }
+        public List<BonusObjectiveData> BonusObjectives = new();
+        public List<CriteriaProgressPkt> CriteriaProgress = new();
+        public int CurrentStep = -1;
+        public uint DifficultyID;
+        public List<uint> PickedSteps = new();
+        public ObjectGuid PlayerGUID;
+        public bool ScenarioComplete = false;
+
+        public int ScenarioID;
+        public List<ScenarioSpellUpdate> Spells = new();
+        public uint TimerDuration;
+        public uint WaveCurrent;
+        public uint WaveMax;
+
+        public ScenarioState() : base(ServerOpcodes.ScenarioState, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -41,35 +57,26 @@ namespace Game.Networking.Packets
             foreach (ScenarioSpellUpdate spell in Spells)
                 spell.Write(_worldPacket);
         }
-
-        public int ScenarioID;
-        public int CurrentStep = -1;
-        public uint DifficultyID;
-        public uint WaveCurrent;
-        public uint WaveMax;
-        public uint TimerDuration;
-        public List<CriteriaProgressPkt> CriteriaProgress = new();
-        public List<BonusObjectiveData> BonusObjectives = new();
-        public List<uint> PickedSteps = new();
-        public List<ScenarioSpellUpdate> Spells = new();
-        public ObjectGuid PlayerGUID;
-        public bool ScenarioComplete = false;
     }
 
-    class ScenarioProgressUpdate : ServerPacket
+    internal class ScenarioProgressUpdate : ServerPacket
     {
-        public ScenarioProgressUpdate() : base(ServerOpcodes.ScenarioProgressUpdate, ConnectionType.Instance) { }
+        public CriteriaProgressPkt CriteriaProgress;
+
+        public ScenarioProgressUpdate() : base(ServerOpcodes.ScenarioProgressUpdate, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
             CriteriaProgress.Write(_worldPacket);
         }
-
-        public CriteriaProgressPkt CriteriaProgress;
     }
 
-    class ScenarioCompleted : ServerPacket
+    internal class ScenarioCompleted : ServerPacket
     {
+        public uint ScenarioID;
+
         public ScenarioCompleted(uint scenarioId) : base(ServerOpcodes.ScenarioCompleted, ConnectionType.Instance)
         {
             ScenarioID = scenarioId;
@@ -79,13 +86,17 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(ScenarioID);
         }
-
-        public uint ScenarioID;
     }
 
-    class ScenarioVacate : ServerPacket
+    internal class ScenarioVacate : ServerPacket
     {
-        public ScenarioVacate() : base(ServerOpcodes.ScenarioVacate, ConnectionType.Instance) { }
+        public int ScenarioID;
+        public int Unk1;
+        public byte Unk2;
+
+        public ScenarioVacate() : base(ServerOpcodes.ScenarioVacate, ConnectionType.Instance)
+        {
+        }
 
         public override void Write()
         {
@@ -94,29 +105,32 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Unk2, 2);
             _worldPacket.FlushBits();
         }
-
-        public int ScenarioID;
-        public int Unk1;
-        public byte Unk2;
     }
 
-    class QueryScenarioPOI : ClientPacket
+    internal class QueryScenarioPOI : ClientPacket
     {
-        public QueryScenarioPOI(WorldPacket packet) : base(packet) { }
+        public Array<int> MissingScenarioPOIs = new(50);
+
+        public QueryScenarioPOI(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             var count = _worldPacket.ReadUInt32();
+
             for (var i = 0; i < count; ++i)
                 MissingScenarioPOIs[i] = _worldPacket.ReadInt32();
         }
-
-        public Array<int> MissingScenarioPOIs = new(50);
     }
 
-    class ScenarioPOIs : ServerPacket
+    internal class ScenarioPOIs : ServerPacket
     {
-        public ScenarioPOIs() : base(ServerOpcodes.ScenarioPois) { }
+        public List<ScenarioPOIData> ScenarioPOIDataStats = new();
+
+        public ScenarioPOIs() : base(ServerOpcodes.ScenarioPois)
+        {
+        }
 
         public override void Write()
         {
@@ -148,11 +162,9 @@ namespace Game.Networking.Packets
                 }
             }
         }
-
-        public List<ScenarioPOIData> ScenarioPOIDataStats = new();
     }
 
-    struct BonusObjectiveData
+    internal struct BonusObjectiveData
     {
         public void Write(WorldPacket data)
         {
@@ -165,20 +177,20 @@ namespace Game.Networking.Packets
         public bool ObjectiveComplete;
     }
 
-    class ScenarioSpellUpdate
+    internal class ScenarioSpellUpdate
     {
+        public uint SpellID;
+        public bool Usable = true;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(SpellID);
             data.WriteBit(Usable);
             data.FlushBits();
         }
-
-        public uint SpellID;
-        public bool Usable = true;
     }
 
-    struct ScenarioPOIData
+    internal struct ScenarioPOIData
     {
         public int CriteriaTreeID;
         public List<ScenarioPOI> ScenarioPOIs;

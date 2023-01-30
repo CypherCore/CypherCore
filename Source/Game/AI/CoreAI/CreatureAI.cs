@@ -1,6 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Combat;
@@ -8,30 +11,29 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.AI
 {
     public class CreatureAI : UnitAI
     {
-        bool _isEngaged;
-        bool _moveInLOSLocked;
-        List<AreaBoundary> _boundary = new();
-        bool _negateBoundary;
+        protected readonly TaskScheduler _scheduler = new();
+
+        protected readonly EventMap Events = new();
+        protected InstanceScript InstanceScript;
 
         protected new Creature me;
-
-        protected EventMap _events = new();
-        protected TaskScheduler _scheduler = new();
-        protected InstanceScript _instanceScript;
+        private List<AreaBoundary> _boundary = new();
+        private bool _isEngaged;
+        private bool _moveInLosLocked;
+        private bool _negateBoundary;
 
         public CreatureAI(Creature _creature) : base(_creature)
         {
             me = _creature;
-            _moveInLOSLocked = false;
+            _moveInLosLocked = false;
         }
+
+        public TaskScheduler Scheduler => _scheduler;
 
         public void Talk(uint id, WorldObject whisperTarget = null)
         {
@@ -40,11 +42,14 @@ namespace Game.AI
 
         public override void OnCharmed(bool isNew)
         {
-            if (isNew && !me.IsCharmed() && !me.LastCharmerGUID.IsEmpty())
+            if (isNew &&
+                !me.IsCharmed() &&
+                !me.LastCharmerGUID.IsEmpty())
             {
                 if (!me.HasReactState(ReactStates.Passive))
                 {
                     Unit lastCharmer = Global.ObjAccessor.GetUnit(me, me.LastCharmerGUID);
+
                     if (lastCharmer != null)
                         me.EngageWithTarget(lastCharmer);
                 }
@@ -61,9 +66,11 @@ namespace Game.AI
                 creature = me;
 
             Map map = creature.GetMap();
+
             if (!map.IsDungeon()) // use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
             {
                 Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
+
                 return;
             }
 
@@ -71,31 +78,32 @@ namespace Game.AI
                 return;
 
             foreach (var player in map.GetPlayers())
-            {
                 if (player != null)
                 {
-                    if (!player.IsAlive() || !CombatManager.CanBeginCombat(creature, player))
+                    if (!player.IsAlive() ||
+                        !CombatManager.CanBeginCombat(creature, player))
                         continue;
 
                     creature.EngageWithTarget(player);
-                    foreach (Unit pet in player.m_Controlled)
+
+                    foreach (Unit pet in player.Controlled)
                         creature.EngageWithTarget(pet);
 
                     Unit vehicle = player.GetVehicleBase();
+
                     if (vehicle != null)
                         creature.EngageWithTarget(vehicle);
                 }
-            }
         }
 
         public virtual void MoveInLineOfSight_Safe(Unit who)
         {
-            if (_moveInLOSLocked)
+            if (_moveInLosLocked)
                 return;
 
-            _moveInLOSLocked = true;
+            _moveInLosLocked = true;
             MoveInLineOfSight(who);
-            _moveInLOSLocked = false;
+            _moveInLosLocked = false;
         }
 
         public virtual void MoveInLineOfSight(Unit who)
@@ -103,38 +111,36 @@ namespace Game.AI
             if (me.IsEngaged())
                 return;
 
-            if (me.HasReactState(ReactStates.Aggressive) && me.CanStartAttack(who, false))
+            if (me.HasReactState(ReactStates.Aggressive) &&
+                me.CanStartAttack(who, false))
                 me.EngageWithTarget(who);
-        }
-
-        void OnOwnerCombatInteraction(Unit target)
-        {
-            if (target == null || !me.IsAlive())
-                return;
-
-            if (!me.HasReactState(ReactStates.Passive) && me.CanStartAttack(target, true))
-                me.EngageWithTarget(target);
         }
 
         // Distract creature, if player gets too close while stealthed/prowling
         public void TriggerAlert(Unit who)
         {
-            // If there's no target, or target isn't a player do nothing
-            if (!who || !who.IsTypeId(TypeId.Player))
+            // If there's no Target, or Target isn't a player do nothing
+            if (!who ||
+                !who.IsTypeId(TypeId.Player))
                 return;
 
             // If this unit isn't an NPC, is already distracted, is fighting, is confused, stunned or fleeing, do nothing
-            if (!me.IsTypeId(TypeId.Unit) || me.IsEngaged() || me.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing | UnitState.Distracted))
+            if (!me.IsTypeId(TypeId.Unit) ||
+                me.IsEngaged() ||
+                me.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing | UnitState.Distracted))
                 return;
 
             // Only alert for hostiles!
-            if (me.IsCivilian() || me.HasReactState(ReactStates.Passive) || !me.IsHostileTo(who) || !me._IsTargetAcceptable(who))
+            if (me.IsCivilian() ||
+                me.HasReactState(ReactStates.Passive) ||
+                !me.IsHostileTo(who) ||
+                !me._IsTargetAcceptable(who))
                 return;
 
             // Send alert sound (if any) for this creature
             me.SendAIReaction(AiReaction.Alert);
 
-            // Face the unit (stealthed player) and set distracted state for 5 seconds
+            // Face the unit (stealthed player) and set distracted State for 5 seconds
             me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
         }
 
@@ -154,6 +160,7 @@ namespace Game.AI
                 case SummonCategory.Unk:
                     if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
                         return true;
+
                     switch (properties.Title)
                     {
                         case SummonTitle.Pet:
@@ -176,25 +183,28 @@ namespace Game.AI
             if (!IsEngaged())
             {
                 TempSummon summon = me.ToTempSummon();
+
                 if (summon != null)
-                {
                     // Only apply this to specific types of summons
-                    if (!summon.GetVehicle() && ShouldFollowOnSpawn(summon.m_Properties) && summon.CanFollowOwner())
+                    if (!summon.GetVehicle() &&
+                        ShouldFollowOnSpawn(summon.Properties) &&
+                        summon.CanFollowOwner())
                     {
                         Unit owner = summon.GetCharmerOrOwner();
+
                         if (owner != null)
                         {
                             summon.GetMotionMaster().Clear();
                             summon.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, summon.GetFollowAngle());
                         }
                     }
-                }
             }
         }
 
         public override void JustEnteredCombat(Unit who)
         {
-            if (!IsEngaged() && !me.CanHaveThreatList())
+            if (!IsEngaged() &&
+                !me.CanHaveThreatList())
                 EngagementStart(who);
         }
 
@@ -209,6 +219,7 @@ namespace Game.AI
             if (me.GetVehicle() == null) // otherwise me will be in evade mode forever
             {
                 Unit owner = me.GetCharmerOrOwner();
+
                 if (owner != null)
                 {
                     me.GetMotionMaster().Clear();
@@ -234,13 +245,16 @@ namespace Game.AI
             if (!me.IsAlive())
             {
                 EngagementOver();
+
                 return false;
             }
 
             if (!me.HasReactState(ReactStates.Passive))
             {
                 Unit victim = me.SelectVictim();
-                if (victim != null && victim != me.GetVictim())
+
+                if (victim != null &&
+                    victim != me.GetVictim())
                     AttackStart(victim);
 
                 return me.GetVictim() != null;
@@ -248,10 +262,13 @@ namespace Game.AI
             else if (!me.IsInCombat())
             {
                 EnterEvadeMode(EvadeReason.NoHostiles);
+
                 return false;
             }
             else if (me.GetVictim() != null)
+            {
                 me.AttackStop();
+            }
 
             return true;
         }
@@ -261,8 +278,10 @@ namespace Game.AI
             if (_isEngaged)
             {
                 Log.outError(LogFilter.ScriptsAi, $"CreatureAI::EngagementStart called even though creature is already engaged. Creature debug info:\n{me.GetDebugInfo()}");
+
                 return;
             }
+
             _isEngaged = true;
 
             me.AtEngage(who);
@@ -273,8 +292,10 @@ namespace Game.AI
             if (!_isEngaged)
             {
                 Log.outDebug(LogFilter.ScriptsAi, $"CreatureAI::EngagementOver called even though creature is not currently engaged. Creature debug info:\n{me.GetDebugInfo()}");
+
                 return;
             }
+
             _isEngaged = false;
 
             me.AtDisengage();
@@ -288,6 +309,7 @@ namespace Game.AI
             if (!me.IsAlive())
             {
                 EngagementOver();
+
                 return false;
             }
 
@@ -320,63 +342,91 @@ namespace Game.AI
             List<KeyValuePair<int, int>> outOfBounds = new();
 
             Position startPosition = owner.GetPosition();
+
             if (!IsInBoundary(startPosition)) // fall back to creature position
             {
                 startPosition = me.GetPosition();
+
                 if (!IsInBoundary(startPosition))
                 {
                     startPosition = me.GetHomePosition();
+
                     if (!IsInBoundary(startPosition)) // fall back to creature home position
                         return CypherStrings.CreatureNoInteriorPointFound;
                 }
             }
+
             float spawnZ = startPosition.GetPositionZ() + SharedConst.BoundaryVisualizeSpawnHeight;
 
             bool boundsWarning = false;
             Q.Add(new KeyValuePair<int, int>(0, 0));
+
             while (!Q.Empty())
             {
                 var front = Q.First();
                 bool hasOutOfBoundsNeighbor = false;
-                foreach (var off in new List<KeyValuePair<int, int>>() { new KeyValuePair<int, int>(1, 0), new KeyValuePair<int, int>(0, 1), new KeyValuePair<int, int>(-1, 0), new KeyValuePair<int, int>(0, -1) })
+
+                foreach (var off in new List<KeyValuePair<int, int>>()
+                                    {
+                                        new(1, 0),
+                                        new(0, 1),
+                                        new(-1, 0),
+                                        new(0, -1)
+                                    })
                 {
                     var next = new KeyValuePair<int, int>(front.Key + off.Key, front.Value + off.Value);
-                    if (next.Key > SharedConst.BoundaryVisualizeFailsafeLimit || next.Key < -SharedConst.BoundaryVisualizeFailsafeLimit || next.Value > SharedConst.BoundaryVisualizeFailsafeLimit || next.Value < -SharedConst.BoundaryVisualizeFailsafeLimit)
+
+                    if (next.Key > SharedConst.BoundaryVisualizeFailsafeLimit ||
+                        next.Key < -SharedConst.BoundaryVisualizeFailsafeLimit ||
+                        next.Value > SharedConst.BoundaryVisualizeFailsafeLimit ||
+                        next.Value < -SharedConst.BoundaryVisualizeFailsafeLimit)
                     {
                         boundsWarning = true;
+
                         continue;
                     }
+
                     if (!alreadyChecked.Contains(next)) // never check a coordinate twice
                     {
                         Position nextPos = new(startPosition.GetPositionX() + next.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + next.Value * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionZ());
+
                         if (IsInBoundary(nextPos))
+                        {
                             Q.Add(next);
+                        }
                         else
                         {
                             outOfBounds.Add(next);
                             hasOutOfBoundsNeighbor = true;
                         }
+
                         alreadyChecked.Add(next);
                     }
                     else if (outOfBounds.Contains(next))
+                    {
                         hasOutOfBoundsNeighbor = true;
+                    }
                 }
 
                 if (fill || hasOutOfBoundsNeighbor)
                 {
                     var pos = new Position(startPosition.GetPositionX() + front.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + front.Value * SharedConst.BoundaryVisualizeStepSize, spawnZ);
                     TempSummon point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, duration);
+
                     if (point)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
                         point.SetUnitFlag(UnitFlags.Stunned);
                         point.SetImmuneToAll(true);
+
                         if (!hasOutOfBoundsNeighbor)
                             point.SetUnitFlag(UnitFlags.Uninteractible);
                     }
+
                     Q.Remove(front);
                 }
             }
+
             return boundsWarning ? CypherStrings.CreatureMovementMaybeUnbounded : 0;
         }
 
@@ -394,10 +444,13 @@ namespace Game.AI
         public virtual bool CheckInRoom()
         {
             if (IsInBoundary())
+            {
                 return true;
+            }
             else
             {
                 EnterEvadeMode(EvadeReason.Boundary);
+
                 return false;
             }
         }
@@ -410,13 +463,15 @@ namespace Game.AI
         public Creature DoSummon(uint entry, WorldObject obj, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             Position pos = obj.GetRandomNearPosition(radius);
+
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
         public Creature DoSummonFlyer(uint entry, WorldObject obj, float flightZ, float radius = 5.0f, TimeSpan despawnTime = default, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
             Position pos = obj.GetRandomNearPosition(radius);
-            pos.posZ += flightZ;
+            pos.Z += flightZ;
+
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
@@ -443,73 +498,131 @@ namespace Game.AI
                 EngagementStart(who);
         }
 
-        public TaskScheduler Scheduler { get { return _scheduler; } }
-
         // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
-        public virtual void JustEngagedWith(Unit who) { }
+        public virtual void JustEngagedWith(Unit who)
+        {
+        }
 
         // Called when the creature is killed
-        public virtual void JustDied(Unit killer) { }
+        public virtual void JustDied(Unit killer)
+        {
+        }
 
         // Called when the creature kills a unit
-        public virtual void KilledUnit(Unit victim) { }
+        public virtual void KilledUnit(Unit victim)
+        {
+        }
 
         // Called when the creature summon successfully other creature
-        public virtual void JustSummoned(Creature summon) { }
-        public virtual void IsSummonedBy(WorldObject summoner) { }
+        public virtual void JustSummoned(Creature summon)
+        {
+        }
 
-        public virtual void SummonedCreatureDespawn(Creature summon) { }
-        public virtual void SummonedCreatureDies(Creature summon, Unit killer) { }
+        public virtual void IsSummonedBy(WorldObject summoner)
+        {
+        }
+
+        public virtual void SummonedCreatureDespawn(Creature summon)
+        {
+        }
+
+        public virtual void SummonedCreatureDies(Creature summon, Unit killer)
+        {
+        }
 
         // Called when the creature successfully summons a gameobject
-        public virtual void JustSummonedGameobject(GameObject gameobject) { }
-        public virtual void SummonedGameobjectDespawn(GameObject gameobject) { }
+        public virtual void JustSummonedGameobject(GameObject gameobject)
+        {
+        }
+
+        public virtual void SummonedGameobjectDespawn(GameObject gameobject)
+        {
+        }
 
         // Called when the creature successfully registers a dynamicobject
-        public virtual void JustRegisteredDynObject(DynamicObject dynObject) { }
-        public virtual void JustUnregisteredDynObject(DynamicObject dynObject) { }
+        public virtual void JustRegisteredDynObject(DynamicObject dynObject)
+        {
+        }
+
+        public virtual void JustUnregisteredDynObject(DynamicObject dynObject)
+        {
+        }
 
         // Called when the creature successfully registers an areatrigger
-        public virtual void JustRegisteredAreaTrigger(AreaTrigger areaTrigger) { }
-        public virtual void JustUnregisteredAreaTrigger(AreaTrigger areaTrigger) { }
+        public virtual void JustRegisteredAreaTrigger(AreaTrigger areaTrigger)
+        {
+        }
+
+        public virtual void JustUnregisteredAreaTrigger(AreaTrigger areaTrigger)
+        {
+        }
 
         // Called when hit by a spell
-        public virtual void SpellHit(WorldObject caster, SpellInfo spellInfo) { }
+        public virtual void SpellHit(WorldObject caster, SpellInfo spellInfo)
+        {
+        }
 
-        // Called when spell hits a target
-        public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo) { }
+        // Called when spell hits a Target
+        public virtual void SpellHitTarget(WorldObject target, SpellInfo spellInfo)
+        {
+        }
 
         // Called when a spell finishes
-        public virtual void OnSpellCast(SpellInfo spell) { }
+        public virtual void OnSpellCast(SpellInfo spell)
+        {
+        }
 
         // Called when a spell fails
-        public virtual void OnSpellFailed(SpellInfo spell) { }
+        public virtual void OnSpellFailed(SpellInfo spell)
+        {
+        }
 
         // Called when a spell starts
-        public virtual void OnSpellStart(SpellInfo spell) { }
+        public virtual void OnSpellStart(SpellInfo spell)
+        {
+        }
 
         // Called when a channeled spell finishes
-        public virtual void OnChannelFinished(SpellInfo spell) { }
+        public virtual void OnChannelFinished(SpellInfo spell)
+        {
+        }
 
         // Should return true if the NPC is currently being escorted
-        public virtual bool IsEscorted() { return false; }
+        public virtual bool IsEscorted()
+        {
+            return false;
+        }
 
-        public virtual void MovementInform(MovementGeneratorType type, uint id) { }
+        public virtual void MovementInform(MovementGeneratorType type, uint id)
+        {
+        }
 
         // Called at reaching home after evade
-        public virtual void JustReachedHome() { }
+        public virtual void JustReachedHome()
+        {
+        }
 
-        // Called at text emote receive from player
-        public virtual void ReceiveEmote(Player player, TextEmotes emoteId) { }
+        // Called at text Emote receive from player
+        public virtual void ReceiveEmote(Player player, TextEmotes emoteId)
+        {
+        }
 
-        // Called when owner takes damage
-        public virtual void OwnerAttackedBy(Unit attacker) { OnOwnerCombatInteraction(attacker); }
+        // Called when owner takes Damage
+        public virtual void OwnerAttackedBy(Unit attacker)
+        {
+            OnOwnerCombatInteraction(attacker);
+        }
 
         // Called when owner attacks something
-        public virtual void OwnerAttacked(Unit target) { OnOwnerCombatInteraction(target); }
+        public virtual void OwnerAttacked(Unit target)
+        {
+            OnOwnerCombatInteraction(target);
+        }
 
         // called when the corpse of this creature gets removed
-        public virtual void CorpseRemoved(long respawnDelay) { }
+        public virtual void CorpseRemoved(long respawnDelay)
+        {
+        }
 
         /// == Gossip system ================================
 
@@ -520,10 +633,16 @@ namespace Game.AI
         }
 
         // Called when a player opens a gossip dialog with the creature.
-        public virtual bool OnGossipHello(Player player) { return false; }
+        public virtual bool OnGossipHello(Player player)
+        {
+            return false;
+        }
 
-        // Called when a player selects a gossip item in the creature's gossip menu.
-        public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
+        // Called when a player selects a gossip Item in the creature's gossip menu.
+        public virtual bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
+        {
+            return false;
+        }
 
         // Called when a player selects a gossip with a code in the creature's gossip menu.
         public virtual bool OnGossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
@@ -532,68 +651,68 @@ namespace Game.AI
         }
 
         // Called when a player accepts a quest from the creature.
-        public virtual void OnQuestAccept(Player player, Quest quest) { }
+        public virtual void OnQuestAccept(Player player, Quest quest)
+        {
+        }
 
-        // Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
-        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
+        // Called when a player completes a quest and is rewarded, opt is the selected Item's index or 0
+        public virtual void OnQuestReward(Player player, Quest quest, LootItemType type, uint opt)
+        {
+        }
 
         /// == Waypoints system =============================
-        /// 
-        public virtual void WaypointStarted(uint nodeId, uint pathId) { }
+        public virtual void WaypointStarted(uint nodeId, uint pathId)
+        {
+        }
 
-        public virtual void WaypointReached(uint nodeId, uint pathId) { }
+        public virtual void WaypointReached(uint nodeId, uint pathId)
+        {
+        }
 
-        public virtual void WaypointPathEnded(uint nodeId, uint pathId) { }
+        public virtual void WaypointPathEnded(uint nodeId, uint pathId)
+        {
+        }
 
-        public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply) { }
+        public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply)
+        {
+        }
 
-        public virtual void OnSpellClick(Unit clicker, ref bool spellClickHandled) { }
+        public virtual void OnSpellClick(Unit clicker, ref bool spellClickHandled)
+        {
+        }
 
-        public virtual bool CanSeeAlways(WorldObject obj) { return false; }
+        public virtual bool CanSeeAlways(WorldObject obj)
+        {
+            return false;
+        }
 
         // Called when a player is charmed by the creature
         // If a PlayerAI* is returned, that AI is placed on the player instead of the default charm AI
         // Object destruction is handled by Unit::RemoveCharmedBy
-        public virtual PlayerAI GetAIForCharmedPlayer(Player who) { return null; }
-
-        public List<AreaBoundary> GetBoundary() { return _boundary; }
-
-        public bool IsEngaged() { return _isEngaged; }
-    }
-
-    public class AISpellInfoType
-    {
-        public AISpellInfoType()
+        public virtual PlayerAI GetAIForCharmedPlayer(Player who)
         {
-            target = AITarget.Self;
-            condition = AICondition.Combat;
-            cooldown = TimeSpan.FromMilliseconds(SharedConst.AIDefaultCooldown);
+            return null;
         }
 
-        public AITarget target;
-        public AICondition condition;
-        public TimeSpan cooldown;
-        public TimeSpan realCooldown;
-        public float maxRange;
+        public List<AreaBoundary> GetBoundary()
+        {
+            return _boundary;
+        }
 
-        public byte Targets;                                          // set of enum SelectTarget
-        public byte Effects;                                          // set of enum SelectEffect
-    }
+        public bool IsEngaged()
+        {
+            return _isEngaged;
+        }
 
-    public enum AITarget
-    {
-        Self,
-        Victim,
-        Enemy,
-        Ally,
-        Buff,
-        Debuff
-    }
+        private void OnOwnerCombatInteraction(Unit target)
+        {
+            if (target == null ||
+                !me.IsAlive())
+                return;
 
-    public enum AICondition
-    {
-        Aggro,
-        Combat,
-        Die
+            if (!me.HasReactState(ReactStates.Passive) &&
+                me.CanStartAttack(target, true))
+                me.EngageWithTarget(target);
+        }
     }
 }

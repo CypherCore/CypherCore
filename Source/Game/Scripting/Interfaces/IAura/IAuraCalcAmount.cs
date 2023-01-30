@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework.Constants;
+﻿using Framework.Constants;
 using Game.Spells;
 
 namespace Game.Scripting.Interfaces.IAura
@@ -16,7 +11,8 @@ namespace Game.Scripting.Interfaces.IAura
     public class EffectCalcAmountHandler : AuraEffectHandler, IAuraCalcAmount
     {
         public delegate void AuraEffectCalcAmountDelegate(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated);
-        AuraEffectCalcAmountDelegate _fn;
+
+        private readonly AuraEffectCalcAmountDelegate _fn;
 
         public EffectCalcAmountHandler(AuraEffectCalcAmountDelegate fn, uint effectIndex, AuraType auraType) : base(effectIndex, auraType, AuraScriptHookType.EffectCalcAmount)
         {

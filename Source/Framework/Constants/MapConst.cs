@@ -49,9 +49,9 @@ namespace Framework.Constants
         public const uint MapMagic = 0x5350414D; //"MAPS";
         public const uint MapVersionMagic = 10;
         public const uint MapVersionMagic2 = 0x302E3276; //"v2.0"; // Hack for some different extractors using v2.0 header
-        public const uint MapAreaMagic = 0x41455241; //"AREA";
-        public const uint MapHeightMagic = 0x5447484D; //"MHGT";
-        public const uint MapLiquidMagic = 0x51494C4D; //"MLIQ";
+        public const uint MapAreaMagic = 0x41455241;     //"AREA";
+        public const uint MapHeightMagic = 0x5447484D;   //"MHGT";
+        public const uint MapLiquidMagic = 0x51494C4D;   //"MLIQ";
 
         public const uint mmapMagic = 0x4D4D4150; // 'MMAP'
         public const int mmapVersion = 15;
@@ -64,16 +64,16 @@ namespace Framework.Constants
 
     public enum NewWorldReason
     {
-        Normal = 16,   // Normal map change
-        Seamless = 21,   // Teleport to another map without a loading screen, used for outdoor scenarios
+        Normal = 16,  // Normal map change
+        Seamless = 21 // Teleport to another map without a loading screen, used for outdoor scenarios
     }
 
     public enum InstanceResetWarningType
     {
-        WarningHours = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
-        WarningMin = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
-        WarningMinSoon = 3,                    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
-        Welcome = 4,                    // Welcome to %s. This raid instance is scheduled to reset in %s.
+        WarningHours = 1,   // WARNING! %s is scheduled to reset in %d hour(s).
+        WarningMin = 2,     // WARNING! %s is scheduled to reset in %d minute(s)!
+        WarningMinSoon = 3, // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
+        Welcome = 4,        // Welcome to %s. This raid instance is scheduled to reset in %s.
         Expired = 5
     }
 
@@ -81,7 +81,7 @@ namespace Framework.Constants
     {
         Manual,
         OnChangeDifficulty,
-        Expire,
+        Expire
     }
 
     public enum InstanceResetResult
@@ -137,7 +137,7 @@ namespace Framework.Constants
         EnableObjective = 6,
         UpdateObjective = 7,
         DisableObjective = 8,
-        Unk7 = 9,    // Seems To Have Something To Do With Sorting The Encounter Units
+        Unk7 = 9, // Seems To Have Something To Do With Sorting The Encounter Units
         AddCombatResLimit = 10
     }
 
@@ -159,9 +159,9 @@ namespace Framework.Constants
 
     public enum DoorType
     {
-        Room = 0,    // Door can open if encounter is not in progress
-        Passage = 1,    // Door can open if encounter is done
-        SpawnHole = 2,    // Door can open if encounter is in progress, typically used for spawning places
+        Room = 0,      // Door can open if encounter is not in progress
+        Passage = 1,   // Door can open if encounter is done
+        SpawnHole = 2, // Door can open if encounter is in progress, typically used for spawning places
         Max
     }
 
@@ -173,7 +173,7 @@ namespace Framework.Constants
 
     public enum LineOfSightChecks
     {
-        Vmap = 0x1, // check static floor layout data
+        Vmap = 0x1,    // check static floor layout data
         Gobject = 0x2, // check dynamic game object data
 
         All = Vmap | Gobject

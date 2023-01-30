@@ -1,21 +1,21 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.KarshSteelbender
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Cleave = 15284;
         public const uint QuicksilverArmor = 75842;
         public const uint SuperheatedQuicksilverArmor = 75846;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint YellAggro = 0;
         public const uint YellKill = 1;
@@ -26,9 +26,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.KarshSteelb
     }
 
     [Script]
-    class boss_karsh_steelbender : BossAI
+    internal class boss_karsh_steelbender : BossAI
     {
-        public boss_karsh_steelbender(Creature creature) : base(creature, DataTypes.KarshSteelbender) { }
+        public boss_karsh_steelbender(Creature creature) : base(creature, DataTypes.KarshSteelbender)
+        {
+        }
 
         public override void Reset()
         {
@@ -40,11 +42,12 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.KarshSteelb
             base.JustEngagedWith(who);
             Talk(TextIds.YellAggro);
 
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-            {
-                DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(10));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(10),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Cleave);
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
         }
 
         public override void KilledUnit(Unit who)
@@ -68,4 +71,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns.KarshSteelb
         }
     }
 }
-

@@ -11,9 +11,16 @@ namespace Game.Networking.Packets
         TransmogSet = 4
     }
 
-    class CollectionItemSetFavorite : ClientPacket
+    internal class CollectionItemSetFavorite : ClientPacket
     {
-        public CollectionItemSetFavorite(WorldPacket packet) : base(packet) { }
+        public uint Id;
+        public bool IsFavorite;
+
+        public CollectionType Type;
+
+        public CollectionItemSetFavorite(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -21,9 +28,5 @@ namespace Game.Networking.Packets
             Id = _worldPacket.ReadUInt32();
             IsFavorite = _worldPacket.HasBit();
         }
-
-        public CollectionType Type;
-        public uint Id;
-        public bool IsFavorite;
     }
 }

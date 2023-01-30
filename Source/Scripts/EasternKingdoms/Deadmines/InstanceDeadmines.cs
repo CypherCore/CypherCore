@@ -1,16 +1,16 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces.IMap;
-using System;
 
 namespace Scripts.EasternKingdoms.Deadmines
 {
-    enum DMCannonState
+    internal enum DMCannonState
     {
         CannonNotUsed,
         CannonGunpowderUsed,
@@ -19,18 +19,18 @@ namespace Scripts.EasternKingdoms.Deadmines
         EventDone
     }
 
-    enum DMData
+    internal enum DMData
     {
         EventState,
         EventRhahkzor
     }
 
-    struct DataTypes
+    internal struct DataTypes
     {
         public const uint SmiteChest = 0;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint FactoryDoor = 13965;
         public const uint IroncladDoor = 16397;
@@ -39,7 +39,7 @@ namespace Scripts.EasternKingdoms.Deadmines
         public const uint MrSmiteChest = 144111;
     }
 
-    struct SoundIds
+    internal struct SoundIds
     {
         public const uint Cannonfire = 1400;
         public const uint Destroydoor = 3079;
@@ -48,29 +48,27 @@ namespace Scripts.EasternKingdoms.Deadmines
     }
 
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const uint DataCannonBlastTimer = 3000;
         public const uint DataPiratesDelayTimer = 1000;
     }
 
-    class instance_deadmines : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_deadmines : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        public instance_deadmines() : base(nameof(instance_deadmines), 36) { }
-
-        class instance_deadmines_InstanceMapScript : InstanceScript
+        private class instance_deadmines_InstanceMapScript : InstanceScript
         {
-            ObjectGuid FactoryDoorGUID;
-            ObjectGuid IronCladDoorGUID;
-            ObjectGuid DefiasCannonGUID;
-            ObjectGuid DoorLeverGUID;
-            ObjectGuid DefiasPirate1GUID;
-            ObjectGuid DefiasPirate2GUID;
+            private uint CannonBlast_Timer;
+            private ObjectGuid DefiasCannonGUID;
+            private ObjectGuid DefiasPirate1GUID;
+            private ObjectGuid DefiasPirate2GUID;
+            private ObjectGuid DoorLeverGUID;
+            private ObjectGuid FactoryDoorGUID;
+            private ObjectGuid IronCladDoorGUID;
+            private uint PiratesDelay_Timer;
 
-            DMCannonState State;
-            uint CannonBlast_Timer;
-            uint PiratesDelay_Timer;
-            ObjectGuid uiSmiteChestGUID;
+            private DMCannonState State;
+            private ObjectGuid uiSmiteChestGUID;
 
             public instance_deadmines_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -83,10 +81,13 @@ namespace Scripts.EasternKingdoms.Deadmines
 
             public override void Update(uint diff)
             {
-                if (IronCladDoorGUID.IsEmpty() || DefiasCannonGUID.IsEmpty() || DoorLeverGUID.IsEmpty())
+                if (IronCladDoorGUID.IsEmpty() ||
+                    DefiasCannonGUID.IsEmpty() ||
+                    DoorLeverGUID.IsEmpty())
                     return;
 
-                GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
+                GameObject pIronCladDoor = Instance.GetGameObject(IronCladDoorGUID);
+
                 if (!pIronCladDoor)
                     return;
 
@@ -99,9 +100,11 @@ namespace Scripts.EasternKingdoms.Deadmines
                         //pIronCladDoor.MonsterYell(SayMrSmiteAlarm1, LangUniversal, null);
                         pIronCladDoor.PlayDirectSound(SoundIds.MrSmiteAlarm1);
                         State = DMCannonState.CannonBlastInitiated;
+
                         break;
                     case DMCannonState.CannonBlastInitiated:
                         PiratesDelay_Timer = MiscConst.DataPiratesDelayTimer;
+
                         if (CannonBlast_Timer <= diff)
                         {
                             SummonCreatures();
@@ -112,7 +115,11 @@ namespace Scripts.EasternKingdoms.Deadmines
                             pIronCladDoor.PlayDirectSound(SoundIds.MrSmiteAlarm2);
                             State = DMCannonState.PiratesAttack;
                         }
-                        else CannonBlast_Timer -= diff;
+                        else
+                        {
+                            CannonBlast_Timer -= diff;
+                        }
+
                         break;
                     case DMCannonState.PiratesAttack:
                         if (PiratesDelay_Timer <= diff)
@@ -120,69 +127,13 @@ namespace Scripts.EasternKingdoms.Deadmines
                             MoveCreaturesInside();
                             State = DMCannonState.EventDone;
                         }
-                        else PiratesDelay_Timer -= diff;
+                        else
+                        {
+                            PiratesDelay_Timer -= diff;
+                        }
+
                         break;
                 }
-            }
-
-            void SummonCreatures()
-            {
-                GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
-                if (pIronCladDoor)
-                {
-                    Creature DefiasPirate1 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() - 2, pIronCladDoor.GetPositionY() - 7, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
-                    Creature DefiasPirate2 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() + 3, pIronCladDoor.GetPositionY() - 6, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
-
-                    DefiasPirate1GUID = DefiasPirate1.GetGUID();
-                    DefiasPirate2GUID = DefiasPirate2.GetGUID();
-                }
-            }
-
-            void MoveCreaturesInside()
-            {
-                if (DefiasPirate1GUID.IsEmpty() || DefiasPirate2GUID.IsEmpty())
-                    return;
-
-                Creature pDefiasPirate1 = instance.GetCreature(DefiasPirate1GUID);
-                Creature pDefiasPirate2 = instance.GetCreature(DefiasPirate2GUID);
-                if (!pDefiasPirate1 || !pDefiasPirate2)
-                    return;
-
-                MoveCreatureInside(pDefiasPirate1);
-                MoveCreatureInside(pDefiasPirate2);
-            }
-
-            void MoveCreatureInside(Creature creature)
-            {
-                creature.SetWalk(false);
-                creature.GetMotionMaster().MovePoint(0, -102.7f, -655.9f, creature.GetPositionZ());
-            }
-
-            void ShootCannon()
-            {
-                GameObject pDefiasCannon = instance.GetGameObject(DefiasCannonGUID);
-                if (pDefiasCannon)
-                {
-                    pDefiasCannon.SetGoState(GameObjectState.Active);
-                    pDefiasCannon.PlayDirectSound(SoundIds.Cannonfire);
-                }
-            }
-
-            void BlastOutDoor()
-            {
-                GameObject pIronCladDoor = instance.GetGameObject(IronCladDoorGUID);
-                if (pIronCladDoor)
-                {
-                    pIronCladDoor.SetGoState(GameObjectState.Destroyed);
-                    pIronCladDoor.PlayDirectSound(SoundIds.Destroydoor);
-                }
-            }
-
-            void LeverStucked()
-            {
-                GameObject pDoorLever = instance.GetGameObject(DoorLeverGUID);
-                if (pDoorLever)
-                    pDoorLever.SetFlag(GameObjectFlags.InteractCond);
             }
 
             public override void OnGameObjectCreate(GameObject go)
@@ -191,18 +142,23 @@ namespace Scripts.EasternKingdoms.Deadmines
                 {
                     case GameObjectIds.FactoryDoor:
                         FactoryDoorGUID = go.GetGUID();
+
                         break;
                     case GameObjectIds.IroncladDoor:
                         IronCladDoorGUID = go.GetGUID();
+
                         break;
                     case GameObjectIds.DefiasCannon:
                         DefiasCannonGUID = go.GetGUID();
+
                         break;
                     case GameObjectIds.DoorLever:
                         DoorLeverGUID = go.GetGUID();
+
                         break;
                     case GameObjectIds.MrSmiteChest:
                         uiSmiteChestGUID = go.GetGUID();
+
                         break;
                 }
             }
@@ -212,16 +168,20 @@ namespace Scripts.EasternKingdoms.Deadmines
                 switch ((DMData)type)
                 {
                     case DMData.EventState:
-                        if (!DefiasCannonGUID.IsEmpty() && !IronCladDoorGUID.IsEmpty())
+                        if (!DefiasCannonGUID.IsEmpty() &&
+                            !IronCladDoorGUID.IsEmpty())
                             State = (DMCannonState)data;
+
                         break;
                     case DMData.EventRhahkzor:
                         if (data == (uint)EncounterState.Done)
                         {
-                            GameObject go = instance.GetGameObject(FactoryDoorGUID);
+                            GameObject go = Instance.GetGameObject(FactoryDoorGUID);
+
                             if (go)
                                 go.SetGoState(GameObjectState.Active);
                         }
+
                         break;
                 }
             }
@@ -247,6 +207,77 @@ namespace Scripts.EasternKingdoms.Deadmines
 
                 return ObjectGuid.Empty;
             }
+
+            private void SummonCreatures()
+            {
+                GameObject pIronCladDoor = Instance.GetGameObject(IronCladDoorGUID);
+
+                if (pIronCladDoor)
+                {
+                    Creature DefiasPirate1 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() - 2, pIronCladDoor.GetPositionY() - 7, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
+                    Creature DefiasPirate2 = pIronCladDoor.SummonCreature(657, pIronCladDoor.GetPositionX() + 3, pIronCladDoor.GetPositionY() - 6, pIronCladDoor.GetPositionZ(), 0, TempSummonType.CorpseTimedDespawn, TimeSpan.FromSeconds(3));
+
+                    DefiasPirate1GUID = DefiasPirate1.GetGUID();
+                    DefiasPirate2GUID = DefiasPirate2.GetGUID();
+                }
+            }
+
+            private void MoveCreaturesInside()
+            {
+                if (DefiasPirate1GUID.IsEmpty() ||
+                    DefiasPirate2GUID.IsEmpty())
+                    return;
+
+                Creature pDefiasPirate1 = Instance.GetCreature(DefiasPirate1GUID);
+                Creature pDefiasPirate2 = Instance.GetCreature(DefiasPirate2GUID);
+
+                if (!pDefiasPirate1 ||
+                    !pDefiasPirate2)
+                    return;
+
+                MoveCreatureInside(pDefiasPirate1);
+                MoveCreatureInside(pDefiasPirate2);
+            }
+
+            private void MoveCreatureInside(Creature creature)
+            {
+                creature.SetWalk(false);
+                creature.GetMotionMaster().MovePoint(0, -102.7f, -655.9f, creature.GetPositionZ());
+            }
+
+            private void ShootCannon()
+            {
+                GameObject pDefiasCannon = Instance.GetGameObject(DefiasCannonGUID);
+
+                if (pDefiasCannon)
+                {
+                    pDefiasCannon.SetGoState(GameObjectState.Active);
+                    pDefiasCannon.PlayDirectSound(SoundIds.Cannonfire);
+                }
+            }
+
+            private void BlastOutDoor()
+            {
+                GameObject pIronCladDoor = Instance.GetGameObject(IronCladDoorGUID);
+
+                if (pIronCladDoor)
+                {
+                    pIronCladDoor.SetGoState(GameObjectState.Destroyed);
+                    pIronCladDoor.PlayDirectSound(SoundIds.Destroydoor);
+                }
+            }
+
+            private void LeverStucked()
+            {
+                GameObject pDoorLever = Instance.GetGameObject(DoorLeverGUID);
+
+                if (pDoorLever)
+                    pDoorLever.SetFlag(GameObjectFlags.InteractCond);
+            }
+        }
+
+        public instance_deadmines() : base(nameof(instance_deadmines), 36)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)
@@ -255,4 +286,3 @@ namespace Scripts.EasternKingdoms.Deadmines
         }
     }
 }
-

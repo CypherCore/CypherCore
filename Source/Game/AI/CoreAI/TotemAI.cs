@@ -4,12 +4,14 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 
 namespace Game.AI
 {
     public class TotemAI : NullCreatureAI
     {
-        ObjectGuid _victimGuid;
+        private ObjectGuid _victimGuid;
 
         public TotemAI(Creature creature) : base(creature)
         {
@@ -22,11 +24,13 @@ namespace Game.AI
             if (me.ToTotem().GetTotemType() != TotemType.Active)
                 return;
 
-            if (!me.IsAlive() || me.IsNonMeleeSpellCast(false))
+            if (!me.IsAlive() ||
+                me.IsNonMeleeSpellCast(false))
                 return;
 
             // Search spell
             var spellInfo = Global.SpellMgr.GetSpellInfo(me.ToTotem().GetSpell(), me.GetMap().GetDifficultyID());
+
             if (spellInfo == null)
                 return;
 
@@ -37,8 +41,12 @@ namespace Game.AI
 
             Unit victim = !_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, _victimGuid) : null;
 
-            // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
-            if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) || me.IsFriendlyTo(victim) || !me.CanSeeOrDetect(victim))
+            // Search victim if no, not attackable, or out of range, or friendly (possible in case Duel end)
+            if (victim == null ||
+                !victim.IsTargetableForAttack() ||
+                !me.IsWithinDistInMap(victim, max_range) ||
+                me.IsFriendlyTo(victim) ||
+                !me.CanSeeOrDetect(victim))
             {
                 float extraSearchRadius = max_range > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                 var u_check = new NearestAttackableUnitInObjectRangeCheck(me, me.GetCharmerOrOwnerOrSelf(), max_range);
@@ -47,7 +55,7 @@ namespace Game.AI
                 victim = checker.GetTarget();
             }
 
-            // If have target
+            // If have Target
             if (victim != null)
             {
                 // remember
@@ -57,9 +65,13 @@ namespace Game.AI
                 me.CastSpell(victim, me.ToTotem().GetSpell());
             }
             else
+            {
                 _victimGuid.Clear();
+            }
         }
 
-        public override void AttackStart(Unit victim) { }
+        public override void AttackStart(Unit victim)
+        {
+        }
     }
 }

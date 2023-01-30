@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
 using Game.Cache;
@@ -8,24 +10,22 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
-using System.Collections.Generic;
 
 namespace Game
 {
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.Who, Processing = PacketProcessing.ThreadSafe)]
-        void HandleWho(WhoRequestPkt whoRequest)
+        private void HandleWho(WhoRequestPkt whoRequest)
         {
             WhoRequest request = whoRequest.Request;
 
-            // zones count, client limit = 10 (2.0.10)
+            // zones Count, client limit = 10 (2.0.10)
             // can't be received from real client or broken packet
             if (whoRequest.Areas.Count > 10)
                 return;
 
-            // user entered strings count, client limit=4 (checked on 2.0.10)
+            // user entered strings Count, client limit=4 (checked on 2.0.10)
             // can't be received from real client or broken packet
             if (request.Words.Count > 4)
                 return;
@@ -55,24 +55,31 @@ namespace Game
             response.RequestID = whoRequest.RequestID;
 
             List<WhoListPlayerInfo> whoList = Global.WhoListStorageMgr.GetWhoList();
+
             foreach (WhoListPlayerInfo target in whoList)
             {
                 // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
-                if (target.Team != team && !HasPermission(RBACPermissions.TwoSideWhoList))
+                if (target.Team != team &&
+                    !HasPermission(RBACPermissions.TwoSideWhoList))
                     continue;
 
                 // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-                if (target.Security > (AccountTypes)gmLevelInWhoList && !HasPermission(RBACPermissions.WhoSeeAllSecLevels))
+                if (target.Security > (AccountTypes)gmLevelInWhoList &&
+                    !HasPermission(RBACPermissions.WhoSeeAllSecLevels))
                     continue;
 
-                // check if target is globally visible for player
-                if (_player.GetGUID() != target.Guid && !target.IsVisible)
-                    if (Global.AccountMgr.IsPlayerAccount(_player.GetSession().GetSecurity()) || target.Security > _player.GetSession().GetSecurity())
+                // check if Target is globally visible for player
+                if (_player.GetGUID() != target.Guid &&
+                    !target.IsVisible)
+                    if (Global.AccountMgr.IsPlayerAccount(_player.GetSession().GetSecurity()) ||
+                        target.Security > _player.GetSession().GetSecurity())
                         continue;
 
-                // check if target's level is in level range
+                // check if Target's level is in level range
                 uint lvl = target.Level;
-                if (lvl < request.MinLevel || lvl > request.MaxLevel)
+
+                if (lvl < request.MinLevel ||
+                    lvl > request.MaxLevel)
                     continue;
 
                 // check if class matches classmask
@@ -84,46 +91,47 @@ namespace Game
                     continue;
 
                 if (!whoRequest.Areas.Empty())
-                {
                     if (whoRequest.Areas.Contains((int)target.ZoneId))
                         continue;
-                }
 
                 string wTargetName = target.PlayerName.ToLower();
+
                 if (!(request.Name.IsEmpty() || wTargetName.Equals(request.Name)))
                     continue;
 
                 string wTargetGuildName = target.GuildName.ToLower();
-                if (!request.Guild.IsEmpty() && !wTargetGuildName.Equals(request.Guild))
+
+                if (!request.Guild.IsEmpty() &&
+                    !wTargetGuildName.Equals(request.Guild))
                     continue;
 
                 if (!request.Words.Empty())
                 {
                     string aname = "";
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(target.ZoneId);
+
                     if (areaEntry != null)
                         aname = areaEntry.AreaName[GetSessionDbcLocale()].ToLower();
 
                     bool show = false;
+
                     for (int i = 0; i < request.Words.Count; ++i)
-                    {
                         if (!string.IsNullOrEmpty(request.Words[i]))
-                        {
                             if (wTargetName.Equals(request.Words[i]) ||
-                                wTargetGuildName.Equals(request.Words[i]) || 
+                                wTargetGuildName.Equals(request.Words[i]) ||
                                 aname.Equals(request.Words[i]))
                             {
                                 show = true;
+
                                 break;
                             }
-                        }
-                    }
 
                     if (!show)
                         continue;
                 }
 
                 WhoEntry whoEntry = new();
+
                 if (!whoEntry.PlayerData.Initialize(target.Guid, null))
                     continue;
 
@@ -139,7 +147,7 @@ namespace Game
 
                 response.Response.Add(whoEntry);
 
-                // 50 is maximum player count sent to client
+                // 50 is maximum player Count sent to client
                 if (response.Response.Count >= 50)
                     break;
             }
@@ -148,24 +156,28 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.WhoIs)]
-        void HandleWhoIs(WhoIsRequest packet)
+        private void HandleWhoIs(WhoIsRequest packet)
         {
             if (!HasPermission(RBACPermissions.OpcodeWhois))
             {
                 SendNotification(CypherStrings.YouNotHavePermission);
+
                 return;
             }
 
             if (!ObjectManager.NormalizePlayerName(ref packet.CharName))
             {
                 SendNotification(CypherStrings.NeedCharacterName);
+
                 return;
             }
 
             Player player = Global.ObjAccessor.FindPlayerByName(packet.CharName);
+
             if (!player)
             {
                 SendNotification(CypherStrings.PlayerNotExistOrOffline, packet.CharName);
+
                 return;
             }
 
@@ -173,21 +185,26 @@ namespace Game
             stmt.AddValue(0, player.GetSession().GetAccountId());
 
             SQLResult result = DB.Login.Query(stmt);
+
             if (result.IsEmpty())
             {
                 SendNotification(CypherStrings.AccountForPlayerNotFound, packet.CharName);
+
                 return;
             }
 
             string acc = result.Read<string>(0);
+
             if (string.IsNullOrEmpty(acc))
                 acc = "Unknown";
 
             string email = result.Read<string>(1);
+
             if (string.IsNullOrEmpty(email))
                 email = "Unknown";
 
             string lastip = result.Read<string>(2);
+
             if (string.IsNullOrEmpty(lastip))
                 lastip = "Unknown";
 
@@ -197,21 +214,23 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SendContactList)]
-        void HandleContactList(SendContactList packet)
+        private void HandleContactList(SendContactList packet)
         {
             GetPlayer().GetSocial().SendSocialList(GetPlayer(), packet.Flags);
         }
 
         [WorldPacketHandler(ClientOpcodes.AddFriend)]
-        void HandleAddFriend(AddFriend packet)
+        private void HandleAddFriend(AddFriend packet)
         {
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
             CharacterCacheEntry friendCharacterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);
+
             if (friendCharacterInfo == null)
             {
                 Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
+
                 return;
             }
 
@@ -223,23 +242,34 @@ namespace Game
                 var team = Player.TeamForRace(friendCharacterInfo.RaceId);
                 var friendNote = packet.Notes;
 
-                if (playerGuid.GetCounter() != m_GUIDLow)
+                if (playerGuid.GetCounter() != _GUIDLow)
                     return; // not the player initiating request, do nothing
 
                 FriendsResult friendResult = FriendsResult.NotFound;
+
                 if (friendGuid == GetPlayer().GetGUID())
+                {
                     friendResult = FriendsResult.Self;
-                else if (GetPlayer().GetTeam() != team && !HasPermission(RBACPermissions.TwoSideAddFriend))
+                }
+                else if (GetPlayer().GetTeam() != team &&
+                         !HasPermission(RBACPermissions.TwoSideAddFriend))
+                {
                     friendResult = FriendsResult.Enemy;
+                }
                 else if (GetPlayer().GetSocial().HasFriend(friendGuid))
+                {
                     friendResult = FriendsResult.Already;
+                }
                 else
                 {
                     Player pFriend = Global.ObjAccessor.FindPlayer(friendGuid);
-                    if (pFriend != null && pFriend.IsVisibleGloballyFor(GetPlayer()))
+
+                    if (pFriend != null &&
+                        pFriend.IsVisibleGloballyFor(GetPlayer()))
                         friendResult = FriendsResult.Online;
                     else
                         friendResult = FriendsResult.AddedOnline;
+
                     if (GetPlayer().GetSocial().AddToSocialList(friendGuid, friendAccountGuid, SocialFlag.Friend))
                         GetPlayer().GetSocial().SetFriendNote(friendGuid, friendNote);
                     else
@@ -252,48 +282,46 @@ namespace Game
             if (HasPermission(RBACPermissions.AllowGmFriend))
             {
                 processFriendRequest();
+
                 return;
             }
 
             // First try looking up friend candidate security from online object
             Player friendPlayer = Global.ObjAccessor.FindPlayer(friendCharacterInfo.Guid);
+
             if (friendPlayer != null)
             {
                 if (!Global.AccountMgr.IsPlayerAccount(friendPlayer.GetSession().GetSecurity()))
                 {
                     Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
+
                     return;
                 }
 
                 processFriendRequest();
+
                 return;
             }
 
             // When not found, consult database
-            GetQueryProcessor().AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId, (int)Global.WorldMgr.GetRealmId().Index, friendSecurity =>
-            {
-                if (!Global.AccountMgr.IsPlayerAccount((AccountTypes)friendSecurity))
-                {
-                    Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
-                    return;
-                }
+            GetQueryProcessor()
+                .AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId,
+                                                                (int)Global.WorldMgr.GetRealmId().Index,
+                                                                friendSecurity =>
+                                                                {
+                                                                    if (!Global.AccountMgr.IsPlayerAccount((AccountTypes)friendSecurity))
+                                                                    {
+                                                                        Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
 
-                processFriendRequest();
-            }));
+                                                                        return;
+                                                                    }
 
-
-
-
-
-
-
-
-
-
+                                                                    processFriendRequest();
+                                                                }));
         }
 
         [WorldPacketHandler(ClientOpcodes.DelFriend)]
-        void HandleDelFriend(DelFriend packet)
+        private void HandleDelFriend(DelFriend packet)
         {
             // @todo: handle VirtualRealmAddress
             GetPlayer().GetSocial().RemoveFromSocialList(packet.Player.Guid, SocialFlag.Friend);
@@ -302,7 +330,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AddIgnore)]
-        void HandleAddIgnore(AddIgnore packet)
+        private void HandleAddIgnore(AddIgnore packet)
         {
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
@@ -311,14 +339,20 @@ namespace Game
             FriendsResult ignoreResult = FriendsResult.IgnoreNotFound;
 
             CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);
+
             if (characterInfo != null)
             {
                 ignoreGuid = characterInfo.Guid;
                 ObjectGuid ignoreAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, characterInfo.AccountId);
-                if (ignoreGuid == GetPlayer().GetGUID())              //not add yourself
+
+                if (ignoreGuid == GetPlayer().GetGUID()) //not add yourself
+                {
                     ignoreResult = FriendsResult.IgnoreSelf;
+                }
                 else if (GetPlayer().GetSocial().HasIgnore(ignoreGuid, ignoreAccountGuid))
+                {
                     ignoreResult = FriendsResult.IgnoreAlready;
+                }
                 else
                 {
                     ignoreResult = FriendsResult.IgnoreAdded;
@@ -333,7 +367,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DelIgnore)]
-        void HandleDelIgnore(DelIgnore packet)
+        private void HandleDelIgnore(DelIgnore packet)
         {
             // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleDelIgnoreOpcode: {0}", packet.Player.Guid.ToString());
@@ -344,7 +378,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetContactNotes)]
-        void HandleSetContactNotes(SetContactNotes packet)
+        private void HandleSetContactNotes(SetContactNotes packet)
         {
             // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleSetContactNotesOpcode: Contact: {0}, Notes: {1}", packet.Player.Guid.ToString(), packet.Notes);
@@ -352,7 +386,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SocialContractRequest)]
-        void HandleSocialContractRequest(SocialContractRequest socialContractRequest)
+        private void HandleSocialContractRequest(SocialContractRequest socialContractRequest)
         {
             SocialContractRequestResponse response = new();
             response.ShowSocialContract = false;

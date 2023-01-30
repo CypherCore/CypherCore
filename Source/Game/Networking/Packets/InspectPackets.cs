@@ -1,28 +1,45 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Dynamic;
-using Game.Entities;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Framework.Constants;
+using Game.Entities;
 
 namespace Game.Networking.Packets
 {
     public class Inspect : ClientPacket
     {
-        public Inspect(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Target;
+
+        public Inspect(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Target = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid Target;
     }
 
     public class InspectResult : ServerPacket
     {
+        public uint? AzeriteLevel;
+        public Array<PVPBracketData> Bracket = new(7, default);
+
+        public PlayerModelDisplayInfo DisplayInfo;
+        public List<ushort> Glyphs = new();
+        public InspectGuildData? GuildData;
+        public uint HonorLevel;
+        public int ItemLevel;
+        public uint LifetimeHK;
+        public byte LifetimeMaxRank;
+        public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
+        public List<ushort> Talents = new();
+        public TraitInspectInfo TalentTraits;
+        public ushort TodayHK;
+        public ushort YesterdayHK;
+
         public InspectResult() : base(ServerOpcodes.InspectResult)
         {
             DisplayInfo = new PlayerModelDisplayInfo();
@@ -65,37 +82,23 @@ namespace Game.Networking.Packets
 
             TalentTraits.Write(_worldPacket);
         }
-
-        public PlayerModelDisplayInfo DisplayInfo;
-        public List<ushort> Glyphs = new();
-        public List<ushort> Talents = new();
-        public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
-        public InspectGuildData? GuildData;
-        public Array<PVPBracketData> Bracket = new(7, default);
-        public uint? AzeriteLevel;
-        public int ItemLevel;
-        public uint LifetimeHK;
-        public uint HonorLevel;
-        public ushort TodayHK;
-        public ushort YesterdayHK;
-        public byte LifetimeMaxRank;
-        public TraitInspectInfo TalentTraits;
     }
 
     public class QueryInspectAchievements : ClientPacket
     {
-        public QueryInspectAchievements(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Guid;
+
+        public QueryInspectAchievements(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid Guid;
     }
 
     /// RespondInspectAchievements in AchievementPackets
-
 
     //Structs
     public struct InspectEnchantData
@@ -118,6 +121,16 @@ namespace Game.Networking.Packets
 
     public class InspectItemData
     {
+        public List<AzeriteEssenceData> AzeriteEssences = new();
+        public List<int> AzeritePowers = new();
+
+        public ObjectGuid CreatorGUID;
+        public List<InspectEnchantData> Enchants = new();
+        public List<ItemGemData> Gems = new();
+        public byte Index;
+        public ItemInstance Item;
+        public bool Usable;
+
         public InspectItemData(Item item, byte index)
         {
             CreatorGUID = item.GetCreator();
@@ -129,12 +142,14 @@ namespace Game.Networking.Packets
             for (EnchantmentSlot enchant = 0; enchant < EnchantmentSlot.Max; ++enchant)
             {
                 uint enchId = item.GetEnchantmentId(enchant);
+
                 if (enchId != 0)
                     Enchants.Add(new InspectEnchantData(enchId, (byte)enchant));
             }
 
             byte i = 0;
-            foreach (SocketedGem gemData in item.m_itemData.Gems)
+
+            foreach (SocketedGem gemData in item._itemData.Gems)
             {
                 if (gemData.ItemId != 0)
                 {
@@ -143,31 +158,35 @@ namespace Game.Networking.Packets
                     gem.Item = new ItemInstance(gemData);
                     Gems.Add(gem);
                 }
+
                 ++i;
             }
 
             AzeriteItem azeriteItem = item.ToAzeriteItem();
+
             if (azeriteItem != null)
             {
                 SelectedAzeriteEssences essences = azeriteItem.GetSelectedAzeriteEssences();
+
                 if (essences != null)
-                {
                     for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
                     {
                         AzeriteEssenceData essence = new();
                         essence.Index = slot;
                         essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
+
                         if (essence.AzeriteEssenceID != 0)
                         {
                             essence.Rank = azeriteItem.GetEssenceRank(essence.AzeriteEssenceID);
                             essence.SlotUnlocked = true;
                         }
                         else
+                        {
                             essence.SlotUnlocked = azeriteItem.HasUnlockedEssenceSlot(slot);
+                        }
 
                         AzeriteEssences.Add(essence);
                     }
-                }
             }
         }
 
@@ -177,6 +196,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Index);
             data.WriteInt32(AzeritePowers.Count);
             data.WriteInt32(AzeriteEssences.Count);
+
             foreach (var id in AzeritePowers)
                 data.WriteInt32(id);
 
@@ -195,27 +215,18 @@ namespace Game.Networking.Packets
             foreach (var gem in Gems)
                 gem.Write(data);
         }
-
-        public ObjectGuid CreatorGUID;
-        public ItemInstance Item;
-        public byte Index;
-        public bool Usable;
-        public List<InspectEnchantData> Enchants = new();
-        public List<ItemGemData> Gems = new();
-        public List<int> AzeritePowers = new();
-        public List<AzeriteEssenceData> AzeriteEssences = new();
     }
 
     public class PlayerModelDisplayInfo
     {
+        public byte ClassID;
+        public List<ChrCustomizationChoice> Customizations = new();
+        public byte GenderID;
         public ObjectGuid GUID;
         public List<InspectItemData> Items = new();
         public string Name;
-        public uint SpecializationID;
-        public byte GenderID;
         public byte Race;
-        public byte ClassID;
-        public List<ChrCustomizationChoice> Customizations = new();
+        public uint SpecializationID;
 
         public void Initialize(Player player)
         {
@@ -226,12 +237,13 @@ namespace Game.Networking.Packets
             Race = (byte)player.GetRace();
             ClassID = (byte)player.GetClass();
 
-            foreach (var customization in player.m_playerData.Customizations)
+            foreach (var customization in player.PlayerData.Customizations)
                 Customizations.Add(customization);
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
                 Item item = player.GetItemByPos(InventorySlots.Bag0, i);
+
                 if (item != null)
                     Items.Add(new InspectItemData(item, i));
             }
@@ -352,4 +364,3 @@ namespace Game.Networking.Packets
         }
     }
 }
-

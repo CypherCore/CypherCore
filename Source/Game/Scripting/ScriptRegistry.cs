@@ -1,14 +1,19 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Game.Scripting.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
+using Game.Scripting.Interfaces;
 
 namespace Game.Scripting
 {
     public class ScriptRegistry
     {
+        private readonly Dictionary<uint, IScriptObject> _scriptMap = new();
+
+        // Counter used for code-only scripts.
+        private uint _scriptIdCounter;
+
         public void AddScript(IScriptObject script)
         {
             Cypher.Assert(script != null);
@@ -18,46 +23,53 @@ namespace Game.Scripting
                 // We're dealing with a code-only script; just add it.
                 _scriptMap[Interlocked.Increment(ref _scriptIdCounter)] = script;
                 Global.ScriptMgr.IncrementScriptCount();
+
                 return;
             }
 
             // Get an ID for the script. An ID only exists if it's a script that is assigned in the database
-            // through a script name (or similar).
+            // through a script Name (or similar).
             uint id = Global.ObjectMgr.GetScriptId(script.GetName());
+
             if (id != 0)
             {
                 // Try to find an existing script.
                 bool existing = false;
 
                 lock (_scriptMap)
+                {
                     foreach (var it in _scriptMap)
-                    {
                         if (it.Value.GetName() == script.GetName())
                         {
                             existing = true;
+
                             break;
                         }
-                    }
+                }
 
                 // If the script isn't assigned . assign it!
                 if (!existing)
                 {
                     lock (_scriptMap)
+                    {
                         _scriptMap[id] = script;
+                    }
+
                     Global.ScriptMgr.IncrementScriptCount();
                 }
                 else
                 {
                     // If the script is already assigned . delete it!
-                    Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script name, so the script can't work.", script.GetName());
+                    Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script Name, so the script can't work.", script.GetName());
 
                     Cypher.Assert(false); // Error that should be fixed ASAP.
                 }
             }
             else
             {
-                // The script uses a script name from database, but isn't assigned to anything.
-                Log.outError(LogFilter.Sql, "Script named '{0}' does not have a script name assigned in database.", script.GetName());
+                // The script uses a script Name from database, but isn't assigned to anything.
+                Log.outError(LogFilter.Sql, "Script named '{0}' does not have a script Name assigned in database.", script.GetName());
+
                 return;
             }
         }
@@ -66,23 +78,25 @@ namespace Game.Scripting
         public T GetScriptById<T>(uint id) where T : IScriptObject
         {
             lock (_scriptMap)
+            {
                 return (T)_scriptMap.LookupByKey(id);
+            }
         }
 
         public bool Empty()
         {
-            lock(_scriptMap)
+            lock (_scriptMap)
+            {
                 return _scriptMap.Empty();
+            }
         }
 
         public void Unload()
         {
-            lock(_scriptMap)
+            lock (_scriptMap)
+            {
                 _scriptMap.Clear();
+            }
         }
-
-        // Counter used for code-only scripts.
-        uint _scriptIdCounter;
-        Dictionary<uint, IScriptObject> _scriptMap = new();
     }
 }

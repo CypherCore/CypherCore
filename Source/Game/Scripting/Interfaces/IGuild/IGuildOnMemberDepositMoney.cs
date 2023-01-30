@@ -8,6 +8,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnMemberDepositMoney : IScriptObject
     {
-        void OnMemberDepositMoney(Guilds.Guild guild, Player player, ulong amount);
+        void OnMemberDepositMoney(Guild guild, Player player, ulong amount);
     }
 }

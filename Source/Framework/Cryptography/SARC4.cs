@@ -21,6 +21,10 @@ namespace Framework.Cryptography
     //Thx Fabian over at Arctium.
     public sealed class SARC4
     {
+        private readonly byte[] _s;
+        private byte _tmp;
+        private byte _tmp2;
+
         public SARC4()
         {
             _s = new byte[0x100];
@@ -34,6 +38,7 @@ namespace Framework.Cryptography
                 _s[i] = (byte)i;
 
             var j = 0;
+
             for (int i = 0; i < 0x100; i++)
             {
                 j = (byte)((j + key[i % key.Length] + _s[i]) & 255);
@@ -60,9 +65,5 @@ namespace Framework.Cryptography
                 data[i] = (byte)(_s[(_s[_tmp] + _s[_tmp2]) % 0x100] ^ data[i]);
             }
         }
-
-        byte[] _s;
-        byte _tmp;
-        byte _tmp2;
     }
 }

@@ -1,14 +1,14 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.MoiraBronzebeard
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Heal = 10917;
         public const uint Renew = 10929;
@@ -19,9 +19,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.MoiraBronzeb
     }
 
     [Script]
-    class boss_moira_bronzebeard : ScriptedAI
+    internal class boss_moira_bronzebeard : ScriptedAI
     {
-        public boss_moira_bronzebeard(Creature creature) : base(creature) { }
+        public boss_moira_bronzebeard(Creature creature) : base(creature)
+        {
+        }
 
         public override void Reset()
         {
@@ -31,21 +33,26 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.MoiraBronzeb
         public override void JustEngagedWith(Unit who)
         {
             //_scheduler.Schedule(EventHeal, TimeSpan.FromSeconds(12s)); // not used atm // These times are probably wrong
-            _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
-            {
-                DoCastVictim(SpellIds.Mindblast);
-                task.Repeat(TimeSpan.FromSeconds(14));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
-            {
-                DoCastVictim(SpellIds.Shadowwordpain);
-                task.Repeat(TimeSpan.FromSeconds(18));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-            {
-                DoCastVictim(SpellIds.Smite);
-                task.Repeat(TimeSpan.FromSeconds(10));
-            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(16),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Mindblast);
+                                    task.Repeat(TimeSpan.FromSeconds(14));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Shadowwordpain);
+                                    task.Repeat(TimeSpan.FromSeconds(18));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(8),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Smite);
+                                    task.Repeat(TimeSpan.FromSeconds(10));
+                                });
         }
 
         public override void UpdateAI(uint diff)
@@ -57,4 +64,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.MoiraBronzeb
         }
     }
 }
-

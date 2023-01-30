@@ -23,7 +23,7 @@ namespace Framework.Constants
         SecondIndex = 0x2,
         IndexMap = 0x4,
         Unknown = 0x8,
-        Compressed = 0x10,
+        Compressed = 0x10
     }
 
     [Flags]
@@ -37,6 +37,7 @@ namespace Framework.Constants
         InheritParentRankWhenLearned = 0x20,
         ShowsInSpellTooltip = 0x40,
         AppearsInMiscTabOfSpellbook = 0x80,
+
         // unused                                       = 0x0100,
         IgnoreCategoryMods = 0x200,
         DisplaysAsProficiency = 0x400,
@@ -44,20 +45,20 @@ namespace Framework.Constants
         UniqueBitfield = 0x1000,
         RacialForThePurposeOfPaidRaceOrFactionChange = 0x2000,
         ProgressiveSkillUp = 0x4000,
-        RacialForThePurposeOfTemporaryRaceChange = 0x8000,
+        RacialForThePurposeOfTemporaryRaceChange = 0x8000
     }
 
     public enum AbilityLearnType : byte
     {
-        OnSkillValue = 1, // Spell state will update depending on skill value
-        OnSkillLearn = 2, // Spell will be learned/removed together with entire skill
+        OnSkillValue = 1,     // Spell state will update depending on skill value
+        OnSkillLearn = 2,     // Spell will be learned/removed together with entire skill
         RewardedFromQuest = 4 // Learned as quest reward, also re-learned if missing
     }
 
     [Flags]
     public enum SkillLineAbilityFlags
     {
-        CanFallbackToLearnedOnSkillLearn = 0x80, // The skill is rewarded from a quest if player started on exile's reach
+        CanFallbackToLearnedOnSkillLearn = 0x80 // The skill is rewarded from a quest if player started on exile's reach
     }
 
     public enum Anim
@@ -889,43 +890,43 @@ namespace Framework.Constants
     [Flags]
     public enum AreaFlags
     {
-        Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
-        Unk1 = 0x02,                // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)
-        Unk2 = 0x04,                // Only Used For Areas On Map 571 (Development Before)
-        SlaveCapital = 0x08,                // City And City Subzones
-        Unk3 = 0x10,                // Can'T Find Common Meaning
-        SlaveCapital2 = 0x20,                // Slave Capital City Flag?
-        AllowDuels = 0x40,                // Allow To Duel Here
-        Arena = 0x80,                // Arena, Both Instanced And World Arenas
-        Capital = 0x100,                // Main Capital City Flag
-        City = 0x200,                // Only For One Zone Named "City" (Where It Located?)
-        Outland = 0x400,                // Expansion Zones? (Only Eye Of The Storm Not Have This Flag, But Have 0x4000 Flag)
-        Sanctuary = 0x800,                // Sanctuary Area (Pvp Disabled)
-        NeedFly = 0x1000,                // Unknown
-        Unused1 = 0x2000,                // Unused In 3.3.5a
-        Outland2 = 0x4000,                // Expansion Zones? (Only Circle Of Blood Arena Not Have This Flag, But Have 0x400 Flag)
-        OutdoorPvp = 0x8000,                // Pvp Objective Area? (Death'S Door Also Has This Flag Although It'S No Pvp Object Area)
-        ArenaInstance = 0x10000,                // Used By Instanced Arenas Only
-        Unused2 = 0x20000,                // Unused In 3.3.5a
-        ContestedArea = 0x40000,                // On Pvp Servers These Areas Are Considered Contested, Even Though The Zone It Is Contained In Is A Horde/Alliance Territory.
-        Unk6 = 0x80000,                // Valgarde And Acherus: The Ebon Hold
-        Lowlevel = 0x100000,                // Used For Some Starting Areas With AreaLevel <= 15
-        Town = 0x200000,                // Small Towns With Inn
-        RestZoneHorde = 0x400000,                // Warsong Hold, Acherus: The Ebon Hold, New Agamand Inn, Vengeance Landing Inn, Sunreaver Pavilion (Something To Do With Team?)
-        RestZoneAlliance = 0x800000,                // Valgarde, Acherus: The Ebon Hold, Westguard Inn, Silver Covenant Pavilion (Something To Do With Team?)
+        Snow = 0x01,                       // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
+        Unk1 = 0x02,                       // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)
+        Unk2 = 0x04,                       // Only Used For Areas On Map 571 (Development Before)
+        SlaveCapital = 0x08,               // City And City Subzones
+        Unk3 = 0x10,                       // Can'T Find Common Meaning
+        SlaveCapital2 = 0x20,              // Slave Capital City Flag?
+        AllowDuels = 0x40,                 // Allow To Duel Here
+        Arena = 0x80,                      // Arena, Both Instanced And World Arenas
+        Capital = 0x100,                   // Main Capital City Flag
+        City = 0x200,                      // Only For One Zone Named "City" (Where It Located?)
+        Outland = 0x400,                   // Expansion Zones? (Only Eye Of The Storm Not Have This Flag, But Have 0x4000 Flag)
+        Sanctuary = 0x800,                 // Sanctuary Area (Pvp Disabled)
+        NeedFly = 0x1000,                  // Unknown
+        Unused1 = 0x2000,                  // Unused In 3.3.5a
+        Outland2 = 0x4000,                 // Expansion Zones? (Only Circle Of Blood Arena Not Have This Flag, But Have 0x400 Flag)
+        OutdoorPvp = 0x8000,               // Pvp Objective Area? (Death'S Door Also Has This Flag Although It'S No Pvp Object Area)
+        ArenaInstance = 0x10000,           // Used By Instanced Arenas Only
+        Unused2 = 0x20000,                 // Unused In 3.3.5a
+        ContestedArea = 0x40000,           // On Pvp Servers These Areas Are Considered Contested, Even Though The Zone It Is Contained In Is A Horde/Alliance Territory.
+        Unk6 = 0x80000,                    // Valgarde And Acherus: The Ebon Hold
+        Lowlevel = 0x100000,               // Used For Some Starting Areas With AreaLevel <= 15
+        Town = 0x200000,                   // Small Towns With Inn
+        RestZoneHorde = 0x400000,          // Warsong Hold, Acherus: The Ebon Hold, New Agamand Inn, Vengeance Landing Inn, Sunreaver Pavilion (Something To Do With Team?)
+        RestZoneAlliance = 0x800000,       // Valgarde, Acherus: The Ebon Hold, Westguard Inn, Silver Covenant Pavilion (Something To Do With Team?)
         Combat = 0x1000000,                // "combat" area (Script_GetZonePVPInfo), used
         Inside = 0x2000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
-        Outside = 0x4000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
-        CanHearthAndResurrect = 0x8000000,                // Can Hearth And Resurrect From Area
-        NoFlyZone = 0x20000000,                // Marks Zones Where You Cannot Fly
-        Unk9 = 0x40000000,
+        Outside = 0x4000000,               // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
+        CanHearthAndResurrect = 0x8000000, // Can Hearth And Resurrect From Area
+        NoFlyZone = 0x20000000,            // Marks Zones Where You Cannot Fly
+        Unk9 = 0x40000000
     }
 
     [Flags]
     public enum AreaFlags2
     {
-        DontShowSanctuary = 0x200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
-        CanEnableWarMode = 0x1000,                // Allows enabling war mode
+        DontShowSanctuary = 0x200, // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
+        CanEnableWarMode = 0x1000  // Allows enabling war mode
     }
 
     public enum ArtifactCategory
@@ -943,7 +944,7 @@ namespace Framework.Constants
         DontCountFirstBonusRank = 0x10,
         MaxRankWithTier = 0x20,
 
-        First = NoLinkRequired | DontCountFirstBonusRank,
+        First = NoLinkRequired | DontCountFirstBonusRank
     }
 
     public enum AzeriteItemMilestoneType
@@ -958,7 +959,7 @@ namespace Framework.Constants
         Default = 0x01
     }
 
-    public enum BattlegroundBracketId                                  // bracketId for level ranges
+    public enum BattlegroundBracketId // bracketId for level ranges
     {
         First = 0,
         Last = 12,
@@ -1036,7 +1037,7 @@ namespace Framework.Constants
         DAMMComponentNoMaleGeneration = 0x200000,
         DAMMComponentNoFemaleGeneration = 0x400000,
         NoAssociatedFactionReputationInRaceChange = 0x800000,
-        InternalOnly = 0x100000,
+        InternalOnly = 0x100000
     }
 
     public enum ChrSpecializationFlag
@@ -1045,9 +1046,9 @@ namespace Framework.Constants
         Ranged = 0x02,
         Melee = 0x04,
         Unknown = 0x08,
-        DualWieldTwoHanded = 0x10,     // Used For Cunitdisplay::Setsheatheinvertedfordualwield
+        DualWieldTwoHanded = 0x10, // Used For Cunitdisplay::Setsheatheinvertedfordualwield
         PetOverrideSpec = 0x20,
-        Recommended = 0x40,
+        Recommended = 0x40
     }
 
     public enum ContentTuningCalcType
@@ -1444,6 +1445,7 @@ namespace Framework.Constants
         StateWaguardstand06 = 885,
         StateBartendstand = 886,
         StateWahammerloop2 = 887,
+
         // StandStateStateReadythrown          = 890,  //< Doesn'T Work
         StateWorkMiningNoCombat = 893,
         OneshotCaststrong = 894,
@@ -1484,7 +1486,7 @@ namespace Framework.Constants
         OneshotTalkSubdued = 1005,
         StateEmotetalk = 1006,
         StateWainteraction = 1007,
-        OneshotTakeOffStart = 1009,
+        OneshotTakeOffStart = 1009
     }
 
     public enum GlyphSlotType
@@ -1496,7 +1498,7 @@ namespace Framework.Constants
 
     public enum ItemSetFlags
     {
-        LegacyInactive = 0x01,
+        LegacyInactive = 0x01
     }
 
     public enum ItemSpecStat : byte
@@ -1627,7 +1629,7 @@ namespace Framework.Constants
         UseLootBasedLockInsteadOfInstanceLock = 0x02, // Lock to single encounters
         LockedToSoloOwner = 0x04,
         ResumeDungeonProgressBasedOnLockout = 0x08, // Mythic dungeons with this flag zone into leaders instance instead of always using a fresh one (Return to Karazhan, Operation: Mechagon)
-        DisableLockExtension = 0x10,
+        DisableLockExtension = 0x10
     }
 
     public enum MapDifficultyResetInterval : byte
@@ -1664,7 +1666,7 @@ namespace Framework.Constants
 
     public enum MountFlags : ushort
     {
-        SelfMount = 0x02,                   // Player becomes the mount himself
+        SelfMount = 0x02, // Player becomes the mount himself
         FactionSpecific = 0x04,
         PreferredSwimming = 0x10,
         PreferredWaterWalking = 0x20,
@@ -1682,7 +1684,7 @@ namespace Framework.Constants
         EventsAreObservable = 0x080,
         UsesPreloadConditions = 0x100,
         UnshareablePersonal = 0x200,
-        ObjectsAreVisible = 0x400,
+        ObjectsAreVisible = 0x400
     }
 
     // PhaseUseFlags fields in different db2s
@@ -1779,15 +1781,15 @@ namespace Framework.Constants
 
     public enum PrestigeLevelInfoFlags : byte
     {
-        Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.
+        Disabled = 0x01 // Prestige levels with this flag won't be included to calculate max prestigelevel.
     }
 
     public enum QuestPackageFilter : byte
     {
-        LootSpecialization = 0,    // Players can select this quest reward if it matches their selected loot specialization
-        Class = 1,    // Players can select this quest reward if it matches their class
-        Unmatched = 2,    // Players can select this quest reward if no class/loot_spec rewards are available
-        Everyone = 3     // Players can always select this quest reward
+        LootSpecialization = 0, // Players can select this quest reward if it matches their selected loot specialization
+        Class = 1,              // Players can select this quest reward if it matches their class
+        Unmatched = 2,          // Players can select this quest reward if no class/loot_spec rewards are available
+        Everyone = 3            // Players can always select this quest reward
     }
 
     public enum ScenarioStepFlags : byte
@@ -1800,10 +1802,10 @@ namespace Framework.Constants
     {
         NoSkillupMessage = 0x2,
         AlwaysMaxValue = 0x10,
-        Unlearnable = 0x20,     // Skill can be unlearned
-        IncludeInSort = 0x80,     // Spells belonging to a skill with this flag will additionally compare skill ids when sorting spellbook in client
+        Unlearnable = 0x20,   // Skill can be unlearned
+        IncludeInSort = 0x80, // Spells belonging to a skill with this flag will additionally compare skill ids when sorting spellbook in client
         NotTrainable = 0x100,
-        MonoValue = 0x400     // Skill always has value 1
+        MonoValue = 0x400 // Skill always has value 1
     }
 
     public enum SpellCategoryFlags : sbyte
@@ -1839,16 +1841,16 @@ namespace Framework.Constants
     public enum SpellShapeshiftFormFlags
     {
         Stance = 0x01,
-        NotToggleable = 0x02,   // player cannot cancel the aura giving this shapeshift
+        NotToggleable = 0x02, // player cannot cancel the aura giving this shapeshift
         PersistOnDeath = 0x04,
-        CanInteractNPC = 0x08,   // if the form does not have SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT then this flag must be present to allow NPC interaction
+        CanInteractNPC = 0x08, // if the form does not have SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT then this flag must be present to allow NPC interaction
         DontUseWeapon = 0x10,
 
-        CanUseEquippedItems = 0x40,   // if the form does not have SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT then this flag allows equipping items without ITEM_FLAG_USABLE_WHEN_SHAPESHIFTED
-        CanUseItems = 0x80,   // if the form does not have SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT then this flag allows using items without ITEM_FLAG_USABLE_WHEN_SHAPESHIFTED
-        DontAutoUnshift = 0x100,   // clientside
+        CanUseEquippedItems = 0x40, // if the form does not have SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT then this flag allows equipping items without ITEM_FLAG_USABLE_WHEN_SHAPESHIFTED
+        CanUseItems = 0x80,         // if the form does not have SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT then this flag allows using items without ITEM_FLAG_USABLE_WHEN_SHAPESHIFTED
+        DontAutoUnshift = 0x100,    // clientside
         ConsideredDead = 0x200,
-        CanOnlyCastShapeshiftSpells = 0x400,   // prevents using spells that don't have any shapeshift requirement
+        CanOnlyCastShapeshiftSpells = 0x400, // prevents using spells that don't have any shapeshift requirement
         StanceCancelsAtFlightmaster = 0x800,
         NoEmoteSounds = 0x1000,
         NoTriggerTeleport = 0x2000,
@@ -1860,38 +1862,38 @@ namespace Framework.Constants
     public enum SummonPropertiesFlags : uint
     {
         None = 0x00,
-        AttackSummoner = 0x01, // NYI
+        AttackSummoner = 0x01,           // NYI
         HelpWhenSummonedInCombat = 0x02, // NYI
-        UseLevelOffset = 0x04, // NYI
-        DespawnOnSummonerDeath = 0x08, // NYI
+        UseLevelOffset = 0x04,           // NYI
+        DespawnOnSummonerDeath = 0x08,   // NYI
         OnlyVisibleToSummoner = 0x10,
         CannotDismissPet = 0x20, // NYI
-        UseDemonTimeout = 0x40, // NYI
+        UseDemonTimeout = 0x40,  // NYI
         UnlimitedSummons = 0x80, // NYI
         UseCreatureLevel = 0x100,
         JoinSummonerSpawnGroup = 0x200, // NYI
-        DoNotToggle = 0x400, // NYI
-        DespawnWhenExpired = 0x800, // NYI
+        DoNotToggle = 0x400,            // NYI
+        DespawnWhenExpired = 0x800,     // NYI
         UseSummonerFaction = 0x1000,
         DoNotFollowMountedSummoner = 0x2000, // NYI
-        SavePetAutocast = 0x4000, // NYI
-        IgnoreSummonerPhase = 0x8000, // Wild Only
+        SavePetAutocast = 0x4000,            // NYI
+        IgnoreSummonerPhase = 0x8000,        // Wild Only
         OnlyVisibleToSummonerGroup = 0x10000,
-        DespawnOnSummonerLogout = 0x20000, // NYI
+        DespawnOnSummonerLogout = 0x20000,        // NYI
         CastRideVehicleSpellOnSummoner = 0x40000, // NYI
-        GuardianActsLikePet = 0x80000, // NYI
-        DontSnapSessileToGround = 0x100000, // NYI
+        GuardianActsLikePet = 0x80000,            // NYI
+        DontSnapSessileToGround = 0x100000,       // NYI
         SummonFromBattlePetJournal = 0x200000,
-        UnitClutter = 0x400000, // NYI
-        DefaultNameColor = 0x800000, // NYI
-        UseOwnInvisibilityDetection = 0x1000000, // NYI. Ignore Owner's Invisibility Detection
-        DespawnWhenReplaced = 0x2000000, // NYI. Totem Slots Only
-        DespawnWhenTeleportingOutOfRange = 0x4000000, // NYI
-        SummonedAtGroupFormationPosition = 0x8000000, // NYI
-        DontDespawnOnSummonerDeath = 0x10000000, // NYI
-        UseTitleAsCreatureName = 0x20000000, // NYI
-        AttackableBySummoner = 0x40000000, // NYI
-        DontDismissWhenEncounterIsAborted = 0x80000000  // NYI
+        UnitClutter = 0x400000,                        // NYI
+        DefaultNameColor = 0x800000,                   // NYI
+        UseOwnInvisibilityDetection = 0x1000000,       // NYI. Ignore Owner's Invisibility Detection
+        DespawnWhenReplaced = 0x2000000,               // NYI. Totem Slots Only
+        DespawnWhenTeleportingOutOfRange = 0x4000000,  // NYI
+        SummonedAtGroupFormationPosition = 0x8000000,  // NYI
+        DontDespawnOnSummonerDeath = 0x10000000,       // NYI
+        UseTitleAsCreatureName = 0x20000000,           // NYI
+        AttackableBySummoner = 0x40000000,             // NYI
+        DontDismissWhenEncounterIsAborted = 0x80000000 // NYI
     }
 
     public enum TaxiNodeFlags : ushort
@@ -2174,7 +2176,7 @@ namespace Framework.Constants
         Wince = 623,
         Huzzah = 624,
         Impressed = 625,
-        Magnificent = 626,
+        Magnificent = 626
     }
 
     public enum ExpectedStatType : byte
@@ -2206,7 +2208,7 @@ namespace Framework.Constants
         None = 0x0,
         IsGate = 0x1,
         IsAlwaysMet = 0x2,
-        IsSufficient = 0x4,
+        IsSufficient = 0x4
     }
 
     public enum TraitConditionType
@@ -2344,103 +2346,103 @@ namespace Framework.Constants
 
     public enum UnitConditionVariable
     {
-        None = 0,  // - NONE -
-        Race = 1,  // Race {$Is/Is Not} "{ChrRaces}"
-        Class = 2,  // Class {$Is/Is Not} "{ChrClasses}"
-        Level = 3,  // Level {$Relative Op} "{#Level}"
-        IsSelf = 4,  // Is self? {$Yes/No}{=1}
-        IsMyPet = 5,  // Is my pet? {$Yes/No}{=1}
-        IsMaster = 6,  // Is master? {$Yes/No}{=1}
-        IsTarget = 7,  // Is target? {$Yes/No}{=1}
-        CanAssist = 8,  // Can assist? {$Yes/No}{=1}
-        CanAttack = 9,  // Can attack? {$Yes/No}{=1}
-        HasPet = 10, // Has pet? {$Yes/No}{=1}
-        HasWeapon = 11, // Has weapon? {$Yes/No}{=1}
-        HealthPct = 12, // Health {$Relative Op} {#Health %}%
-        ManaPct = 13, // Mana {$Relative Op} {#Mana %}%
-        RagePct = 14, // Rage {$Relative Op} {#Rage %}%
-        EnergyPct = 15, // Energy {$Relative Op} {#Energy %}%
-        ComboPoints = 16, // Combo Points {$Relative Op} {#Points}
-        HasHelpfulAuraSpell = 17, // Has helpful aura spell? {$Yes/No} "{Spell}"
-        HasHelpfulAuraDispelType = 18, // Has helpful aura dispel type? {$Yes/No} "{SpellDispelType}"
-        HasHelpfulAuraMechanic = 19, // Has helpful aura mechanic? {$Yes/No} "{SpellMechanic}"
-        HasHarmfulAuraSpell = 20, // Has harmful aura spell? {$Yes/No} "{Spell}"
-        HasHarmfulAuraDispelType = 21, // Has harmful aura dispel type? {$Yes/No} "{SpellDispelType}"
-        HasHarmfulAuraMechanic = 22, // Has harmful aura mechanic? {$Yes/No} "{SpellMechanic}"
-        HasHarmfulAuraSchool = 23, // Has harmful aura school? {$Yes/No} "{Resistances}"
-        DamagePhysicalPct = 24, // NYI Damage (Physical) {$Relative Op} {#Physical Damage %}%
-        DamageHolyPct = 25, // NYI Damage (Holy) {$Relative Op} {#Holy Damage %}%
-        DamageFirePct = 26, // NYI Damage (Fire) {$Relative Op} {#Fire Damage %}%
-        DamageNaturePct = 27, // NYI Damage (Nature) {$Relative Op} {#Nature Damage %}%
-        DamageFrostPct = 28, // NYI Damage (Frost) {$Relative Op} {#Frost Damage %}%
-        DamageShadowPct = 29, // NYI Damage (Shadow) {$Relative Op} {#Shadow Damage %}%
-        DamageArcanePct = 30, // NYI Damage (Arcane) {$Relative Op} {#Arcane Damage %}%
-        InCombat = 31, // In combat? {$Yes/No}{=1}
-        IsMoving = 32, // Is moving? {$Yes/No}{=1}
-        IsCasting = 33, // Is casting? {$Yes/No}{=1}
-        IsCastingSpell = 34, // Is casting spell? {$Yes/No}{=1}
-        IsChanneling = 35, // Is channeling? {$Yes/No}{=1}
-        IsChannelingSpell = 36, // Is channeling spell? {$Yes/No}{=1}
-        NumberOfMeleeAttackers = 37, // Number of melee attackers {$Relative Op} {#Attackers}
-        IsAttackingMe = 38, // Is attacking me? {$Yes/No}{=1}
-        Range = 39, // Range {$Relative Op} {#Yards}
-        InMeleeRange = 40, // In melee range? {$Yes/No}{=1}
-        PursuitTime = 41, // NYI Pursuit time {$Relative Op} {#Seconds}
-        HasHarmfulAuraCanceledByDamage = 42, // Has harmful aura canceled by damage? {$Yes/No}{=1}
+        None = 0,                              // - NONE -
+        Race = 1,                              // Race {$Is/Is Not} "{ChrRaces}"
+        Class = 2,                             // Class {$Is/Is Not} "{ChrClasses}"
+        Level = 3,                             // Level {$Relative Op} "{#Level}"
+        IsSelf = 4,                            // Is self? {$Yes/No}{=1}
+        IsMyPet = 5,                           // Is my pet? {$Yes/No}{=1}
+        IsMaster = 6,                          // Is master? {$Yes/No}{=1}
+        IsTarget = 7,                          // Is target? {$Yes/No}{=1}
+        CanAssist = 8,                         // Can assist? {$Yes/No}{=1}
+        CanAttack = 9,                         // Can attack? {$Yes/No}{=1}
+        HasPet = 10,                           // Has pet? {$Yes/No}{=1}
+        HasWeapon = 11,                        // Has weapon? {$Yes/No}{=1}
+        HealthPct = 12,                        // Health {$Relative Op} {#Health %}%
+        ManaPct = 13,                          // Mana {$Relative Op} {#Mana %}%
+        RagePct = 14,                          // Rage {$Relative Op} {#Rage %}%
+        EnergyPct = 15,                        // Energy {$Relative Op} {#Energy %}%
+        ComboPoints = 16,                      // Combo Points {$Relative Op} {#Points}
+        HasHelpfulAuraSpell = 17,              // Has helpful aura spell? {$Yes/No} "{Spell}"
+        HasHelpfulAuraDispelType = 18,         // Has helpful aura dispel type? {$Yes/No} "{SpellDispelType}"
+        HasHelpfulAuraMechanic = 19,           // Has helpful aura mechanic? {$Yes/No} "{SpellMechanic}"
+        HasHarmfulAuraSpell = 20,              // Has harmful aura spell? {$Yes/No} "{Spell}"
+        HasHarmfulAuraDispelType = 21,         // Has harmful aura dispel type? {$Yes/No} "{SpellDispelType}"
+        HasHarmfulAuraMechanic = 22,           // Has harmful aura mechanic? {$Yes/No} "{SpellMechanic}"
+        HasHarmfulAuraSchool = 23,             // Has harmful aura school? {$Yes/No} "{Resistances}"
+        DamagePhysicalPct = 24,                // NYI Damage (Physical) {$Relative Op} {#Physical Damage %}%
+        DamageHolyPct = 25,                    // NYI Damage (Holy) {$Relative Op} {#Holy Damage %}%
+        DamageFirePct = 26,                    // NYI Damage (Fire) {$Relative Op} {#Fire Damage %}%
+        DamageNaturePct = 27,                  // NYI Damage (Nature) {$Relative Op} {#Nature Damage %}%
+        DamageFrostPct = 28,                   // NYI Damage (Frost) {$Relative Op} {#Frost Damage %}%
+        DamageShadowPct = 29,                  // NYI Damage (Shadow) {$Relative Op} {#Shadow Damage %}%
+        DamageArcanePct = 30,                  // NYI Damage (Arcane) {$Relative Op} {#Arcane Damage %}%
+        InCombat = 31,                         // In combat? {$Yes/No}{=1}
+        IsMoving = 32,                         // Is moving? {$Yes/No}{=1}
+        IsCasting = 33,                        // Is casting? {$Yes/No}{=1}
+        IsCastingSpell = 34,                   // Is casting spell? {$Yes/No}{=1}
+        IsChanneling = 35,                     // Is channeling? {$Yes/No}{=1}
+        IsChannelingSpell = 36,                // Is channeling spell? {$Yes/No}{=1}
+        NumberOfMeleeAttackers = 37,           // Number of melee attackers {$Relative Op} {#Attackers}
+        IsAttackingMe = 38,                    // Is attacking me? {$Yes/No}{=1}
+        Range = 39,                            // Range {$Relative Op} {#Yards}
+        InMeleeRange = 40,                     // In melee range? {$Yes/No}{=1}
+        PursuitTime = 41,                      // NYI Pursuit time {$Relative Op} {#Seconds}
+        HasHarmfulAuraCanceledByDamage = 42,   // Has harmful aura canceled by damage? {$Yes/No}{=1}
         HasHarmfulAuraWithPeriodicDamage = 43, // Has harmful aura with periodic damage? {$Yes/No}{=1}
-        NumberOfEnemies = 44, // Number of enemies {$Relative Op} {#Enemies}
-        NumberOfFriends = 45, // NYI Number of friends {$Relative Op} {#Friends}
-        ThreatPhysicalPct = 46, // NYI Threat (Physical) {$Relative Op} {#Physical Threat %}%
-        ThreatHolyPct = 47, // NYI Threat (Holy) {$Relative Op} {#Holy Threat %}%
-        ThreatFirePct = 48, // NYI Threat (Fire) {$Relative Op} {#Fire Threat %}%
-        ThreatNaturePct = 49, // NYI Threat (Nature) {$Relative Op} {#Nature Threat %}%
-        ThreatFrostPct = 50, // NYI Threat (Frost) {$Relative Op} {#Frost Threat %}%
-        ThreatShadowPct = 51, // NYI Threat (Shadow) {$Relative Op} {#Shadow Threat %}%
-        ThreatArcanePct = 52, // NYI Threat (Arcane) {$Relative Op} {#Arcane Threat %}%
-        IsInterruptible = 53, // NYI Is interruptible? {$Yes/No}{=1}
-        NumberOfAttackers = 54, // Number of attackers {$Relative Op} {#Attackers}
-        NumberOfRangedAttackers = 55, // Number of ranged attackers {$Relative Op} {#Ranged Attackers}
-        CreatureType = 56, // Creature type {$Is/Is Not} "{CreatureType}"
-        IsMeleeAttacking = 57, // Is melee-attacking? {$Yes/No}{=1}
-        IsRangedAttacking = 58, // Is ranged-attacking? {$Yes/No}{=1}
-        Health = 59, // Health {$Relative Op} {#HP} HP
-        SpellKnown = 60, // Spell known? {$Yes/No} "{Spell}"
-        HasHarmfulAuraEffect = 61, // Has harmful aura effect? {$Yes/No} "{#Spell Aura}"
-        IsImmuneToAreaOfEffect = 62, // NYI Is immune to area-of-effect? {$Yes/No}{=1}
-        IsPlayer = 63, // Is player? {$Yes/No}{=1}
-        DamageMagicPct = 64, // NYI Damage (Magic) {$Relative Op} {#Magic Damage %}%
-        DamageTotalPct = 65, // NYI Damage (Total) {$Relative Op} {#Damage %}%
-        ThreatMagicPct = 66, // NYI Threat (Magic) {$Relative Op} {#Magic Threat %}%
-        ThreatTotalPct = 67, // NYI Threat (Total) {$Relative Op} {#Threat %}%
-        HasCritter = 68, // Has critter? {$Yes/No}{=1}
-        HasTotemInSlot1 = 69, // Has totem in slot 1? {$Yes/No}{=1}
-        HasTotemInSlot2 = 70, // Has totem in slot 2? {$Yes/No}{=1}
-        HasTotemInSlot3 = 71, // Has totem in slot 3? {$Yes/No}{=1}
-        HasTotemInSlot4 = 72, // Has totem in slot 4? {$Yes/No}{=1}
-        HasTotemInSlot5 = 73, // NYI Has totem in slot 5? {$Yes/No}{=1}
-        Creature = 74, // Creature {$Is/Is Not} "{Creature}"
-        StringID = 75, // NYI String ID {$Is/Is Not} "{StringID}"
-        HasAura = 76, // Has aura? {$Yes/No} {Spell}
-        IsEnemy = 77, // Is enemy? {$Yes/No}{=1}
-        IsSpecMelee = 78, // Is spec - melee? {$Yes/No}{=1}
-        IsSpecTank = 79, // Is spec - tank? {$Yes/No}{=1}
-        IsSpecRanged = 80, // Is spec - ranged? {$Yes/No}{=1}
-        IsSpecHealer = 81, // Is spec - healer? {$Yes/No}{=1}
-        IsPlayerControlledNPC = 82, // Is player controlled NPC? {$Yes/No}{=1}
-        IsDying = 83, // Is dying? {$Yes/No}{=1}
-        PathFailCount = 84, // NYI Path fail count {$Relative Op} {#Path Fail Count}
-        IsMounted = 85, // Is mounted? {$Yes/No}{=1}
-        Label = 86, // NYI Label {$Is/Is Not} "{Label}"
-        IsMySummon = 87, //
-        IsSummoner = 88, //
-        IsMyTarget = 89, //
-        Sex = 90, // Sex {$Is/Is Not} "{UnitSex}"
-        LevelWithinContentTuning = 91, // Level is within {$Is/Is Not} {ContentTuning}
+        NumberOfEnemies = 44,                  // Number of enemies {$Relative Op} {#Enemies}
+        NumberOfFriends = 45,                  // NYI Number of friends {$Relative Op} {#Friends}
+        ThreatPhysicalPct = 46,                // NYI Threat (Physical) {$Relative Op} {#Physical Threat %}%
+        ThreatHolyPct = 47,                    // NYI Threat (Holy) {$Relative Op} {#Holy Threat %}%
+        ThreatFirePct = 48,                    // NYI Threat (Fire) {$Relative Op} {#Fire Threat %}%
+        ThreatNaturePct = 49,                  // NYI Threat (Nature) {$Relative Op} {#Nature Threat %}%
+        ThreatFrostPct = 50,                   // NYI Threat (Frost) {$Relative Op} {#Frost Threat %}%
+        ThreatShadowPct = 51,                  // NYI Threat (Shadow) {$Relative Op} {#Shadow Threat %}%
+        ThreatArcanePct = 52,                  // NYI Threat (Arcane) {$Relative Op} {#Arcane Threat %}%
+        IsInterruptible = 53,                  // NYI Is interruptible? {$Yes/No}{=1}
+        NumberOfAttackers = 54,                // Number of attackers {$Relative Op} {#Attackers}
+        NumberOfRangedAttackers = 55,          // Number of ranged attackers {$Relative Op} {#Ranged Attackers}
+        CreatureType = 56,                     // Creature type {$Is/Is Not} "{CreatureType}"
+        IsMeleeAttacking = 57,                 // Is melee-attacking? {$Yes/No}{=1}
+        IsRangedAttacking = 58,                // Is ranged-attacking? {$Yes/No}{=1}
+        Health = 59,                           // Health {$Relative Op} {#HP} HP
+        SpellKnown = 60,                       // Spell known? {$Yes/No} "{Spell}"
+        HasHarmfulAuraEffect = 61,             // Has harmful aura effect? {$Yes/No} "{#Spell Aura}"
+        IsImmuneToAreaOfEffect = 62,           // NYI Is immune to area-of-effect? {$Yes/No}{=1}
+        IsPlayer = 63,                         // Is player? {$Yes/No}{=1}
+        DamageMagicPct = 64,                   // NYI Damage (Magic) {$Relative Op} {#Magic Damage %}%
+        DamageTotalPct = 65,                   // NYI Damage (Total) {$Relative Op} {#Damage %}%
+        ThreatMagicPct = 66,                   // NYI Threat (Magic) {$Relative Op} {#Magic Threat %}%
+        ThreatTotalPct = 67,                   // NYI Threat (Total) {$Relative Op} {#Threat %}%
+        HasCritter = 68,                       // Has critter? {$Yes/No}{=1}
+        HasTotemInSlot1 = 69,                  // Has totem in slot 1? {$Yes/No}{=1}
+        HasTotemInSlot2 = 70,                  // Has totem in slot 2? {$Yes/No}{=1}
+        HasTotemInSlot3 = 71,                  // Has totem in slot 3? {$Yes/No}{=1}
+        HasTotemInSlot4 = 72,                  // Has totem in slot 4? {$Yes/No}{=1}
+        HasTotemInSlot5 = 73,                  // NYI Has totem in slot 5? {$Yes/No}{=1}
+        Creature = 74,                         // Creature {$Is/Is Not} "{Creature}"
+        StringID = 75,                         // NYI String ID {$Is/Is Not} "{StringID}"
+        HasAura = 76,                          // Has aura? {$Yes/No} {Spell}
+        IsEnemy = 77,                          // Is enemy? {$Yes/No}{=1}
+        IsSpecMelee = 78,                      // Is spec - melee? {$Yes/No}{=1}
+        IsSpecTank = 79,                       // Is spec - tank? {$Yes/No}{=1}
+        IsSpecRanged = 80,                     // Is spec - ranged? {$Yes/No}{=1}
+        IsSpecHealer = 81,                     // Is spec - healer? {$Yes/No}{=1}
+        IsPlayerControlledNPC = 82,            // Is player controlled NPC? {$Yes/No}{=1}
+        IsDying = 83,                          // Is dying? {$Yes/No}{=1}
+        PathFailCount = 84,                    // NYI Path fail count {$Relative Op} {#Path Fail Count}
+        IsMounted = 85,                        // Is mounted? {$Yes/No}{=1}
+        Label = 86,                            // NYI Label {$Is/Is Not} "{Label}"
+        IsMySummon = 87,                       //
+        IsSummoner = 88,                       //
+        IsMyTarget = 89,                       //
+        Sex = 90,                              // Sex {$Is/Is Not} "{UnitSex}"
+        LevelWithinContentTuning = 91,         // Level is within {$Is/Is Not} {ContentTuning}
 
-        IsFlying = 93, // Is flying? {$Yes/No}{=1}
-        IsHovering = 94, // Is hovering? {$Yes/No}{=1}
+        IsFlying = 93,             // Is flying? {$Yes/No}{=1}
+        IsHovering = 94,           // Is hovering? {$Yes/No}{=1}
         HasHelpfulAuraEffect = 95, // Has helpful aura effect? {$Yes/No} "{#Spell Aura}"
-        HasHelpfulAuraSchool = 96, // Has helpful aura school? {$Yes/No} "{Resistances}"
+        HasHelpfulAuraSchool = 96  // Has helpful aura school? {$Yes/No} "{Resistances}"
     }
 
     public enum WorldStateExpressionValueType
@@ -2455,7 +2457,7 @@ namespace Framework.Constants
         None = 0,
         And = 1,
         Or = 2,
-        Xor = 3,
+        Xor = 3
     }
 
     public enum WorldStateExpressionComparisonType
@@ -2466,7 +2468,7 @@ namespace Framework.Constants
         Less = 3,
         LessOrEqual = 4,
         Greater = 5,
-        GreaterOrEqual = 6,
+        GreaterOrEqual = 6
     }
 
     public enum WorldStateExpressionOperatorType
@@ -2476,7 +2478,7 @@ namespace Framework.Constants
         Substraction = 2,
         Multiplication = 3,
         Division = 4,
-        Remainder = 5,
+        Remainder = 5
     }
 
     public enum WorldStateExpressionFunctions
@@ -2521,7 +2523,7 @@ namespace Framework.Constants
         UiWidgetData,
         TimeEventPassed,
 
-        Max,
+        Max
     }
 
     public enum CorruptionEffectsFlag
@@ -2579,7 +2581,7 @@ namespace Framework.Constants
 
         ContentTuningPvpItemLevelHealthScaling = 13,
         ContentTuningPvpLevelDamageScaling = 14,
-        ContentTuningPvpItemLevelDamageScaling = 15,
+        ContentTuningPvpItemLevelDamageScaling = 15
     }
 
     public enum BattlePetSpeciesFlags : int
@@ -2600,7 +2602,7 @@ namespace Framework.Constants
         AddsAllowedWithBoss = 0x2000,
         HideUntilLearned = 0x4000,
         MatchPlayerHighPetLevel = 0x8000,
-        NoWildPetAddsAllowed = 0x10000,
+        NoWildPetAddsAllowed = 0x10000
     }
 
     public enum SpellVisualEffectNameType
@@ -2622,6 +2624,6 @@ namespace Framework.Constants
     public enum TransmogIllusionFlags
     {
         HideUntilCollected = 0x1,
-        PlayerConditionGrantsOnLogin = 0x2,
+        PlayerConditionGrantsOnLogin = 0x2
     }
 }

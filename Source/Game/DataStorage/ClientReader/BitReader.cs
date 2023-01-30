@@ -8,10 +8,6 @@ namespace Game.DataStorage
 {
     public class BitReader
     {
-        public int Position { get; set; }
-        public int Offset { get; set; }
-        public byte[] Data { get; set; }
-
         public BitReader(byte[] data)
         {
             Data = data;
@@ -23,19 +19,25 @@ namespace Game.DataStorage
             Offset = offset;
         }
 
+        public int Position { get; set; }
+        public int Offset { get; set; }
+        public byte[] Data { get; set; }
+
         public T Read<T>(int numBits) where T : unmanaged
         {
-            ulong result = Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);
+            ulong result = (Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7))) >> (64 - numBits);
             Position += numBits;
+
             return Unsafe.As<ulong, T>(ref result);
         }
 
         public T ReadSigned<T>(int numBits) where T : unmanaged
         {
-            ulong result = Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);
+            ulong result = (Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7))) >> (64 - numBits);
             Position += numBits;
             ulong signedShift = (1UL << (numBits - 1));
             result = (signedShift ^ result) - signedShift;
+
             return Unsafe.As<ulong, T>(ref result);
         }
 
@@ -48,6 +50,7 @@ namespace Game.DataStorage
 
             string result = Encoding.UTF8.GetString(Data, Offset + (start >> 3), (Position - start) >> 3);
             Position += 8;
+
             return result;
         }
     }

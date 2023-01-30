@@ -1,6 +1,8 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
@@ -8,12 +10,10 @@ using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint BellowingRoar = 36922;
         public const uint CharredEarth = 30129;
@@ -27,7 +27,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
         public const uint TailSweep = 25653;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint EmoteSummon = 0;
         public const uint YellAggro = 1;
@@ -36,7 +36,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
         public const uint EmoteBreath = 4;
     }
 
-    struct PointIds
+    internal struct PointIds
     {
         public const uint IntroStart = 0;
         public const uint IntroEnd = 1;
@@ -47,7 +47,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
         public const uint PhaseTwoEnd = 6;
     }
 
-    struct SplineChainIds
+    internal struct SplineChainIds
     {
         public const uint IntroStart = 1;
         public const uint IntroEnd = 2;
@@ -56,14 +56,14 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
         public const uint PhaseTwo = 5;
     }
 
-    enum NightbanePhases
+    internal enum NightbanePhases
     {
         Intro = 0,
         Ground,
         Fly
     }
 
-    struct MiscConst
+    internal struct MiscConst
     {
         public const int ActionSummon = 0;
         public const uint PathPhaseTwo = 13547500;
@@ -71,18 +71,20 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
         public const uint GroupGround = 1;
         public const uint GroupFly = 2;
 
-        public static Position FlyPosition = new Position(-11160.13f, -1870.683f, 97.73876f, 0.0f);
-        public static Position FlyPositionLeft = new Position(-11094.42f, -1866.992f, 107.8375f, 0.0f);
-        public static Position FlyPositionRight = new Position(-11193.77f, -1921.983f, 107.9845f, 0.0f);
+        public static Position FlyPosition = new(-11160.13f, -1870.683f, 97.73876f, 0.0f);
+        public static Position FlyPositionLeft = new(-11094.42f, -1866.992f, 107.8375f, 0.0f);
+        public static Position FlyPositionRight = new(-11193.77f, -1921.983f, 107.9845f, 0.0f);
     }
 
     [Script]
-    class boss_nightbane : BossAI
+    internal class boss_nightbane : BossAI
     {
-        byte _flyCount;
-        NightbanePhases phase;
+        private byte _flyCount;
+        private NightbanePhases phase;
 
-        public boss_nightbane(Creature creature) : base(creature, DataTypes.Nightbane) { }
+        public boss_nightbane(Creature creature) : base(creature, DataTypes.Nightbane)
+        {
+        }
 
         public override void Reset()
         {
@@ -90,7 +92,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             _flyCount = 0;
             me.SetDisableGravity(true);
             HandleTerraceDoors(true);
-            GameObject urn = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.GoBlackenedUrn));
+            GameObject urn = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(DataTypes.GoBlackenedUrn));
+
             if (urn)
                 urn.RemoveFlag(GameObjectFlags.InUse);
         }
@@ -126,52 +129,6 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             }
         }
 
-        void SetupGroundPhase()
-        {
-            phase = NightbanePhases.Ground;
-            _scheduler.Schedule(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(15), MiscConst.GroupGround, task =>
-            {
-                DoCastVictim(SpellIds.Cleave);
-                task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(15));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(23), MiscConst.GroupGround, task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
-                    if (!me.HasInArc(MathF.PI, target))
-                        DoCast(target, SpellIds.TailSweep);
-                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(48), MiscConst.GroupGround, task =>
-            {
-                DoCastAOE(SpellIds.BellowingRoar);
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(18), MiscConst.GroupGround, task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
-                    DoCast(target, SpellIds.CharredEarth);
-                task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(21));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(26), TimeSpan.FromSeconds(30), MiscConst.GroupGround, task =>
-            {
-                DoCastVictim(SpellIds.SmolderingBreath);
-                task.Repeat(TimeSpan.FromSeconds(28), TimeSpan.FromSeconds(40));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(82), MiscConst.GroupGround, task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                if (target)
-                    DoCast(target, SpellIds.DistractingAsh);
-            });
-        }
-
-        void HandleTerraceDoors(bool open)
-        {
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
-        }
-
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
@@ -185,10 +142,13 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             {
                 if (damage >= me.GetHealth())
                     damage = (uint)(me.GetHealth() - 1);
+
                 return;
             }
 
-            if ((_flyCount == 0 && HealthBelowPct(75)) || (_flyCount == 1 && HealthBelowPct(50)) || (_flyCount == 2 && HealthBelowPct(25)))
+            if ((_flyCount == 0 && HealthBelowPct(75)) ||
+                (_flyCount == 1 && HealthBelowPct(50)) ||
+                (_flyCount == 2 && HealthBelowPct(25)))
             {
                 phase = NightbanePhases.Fly;
                 StartPhaseFly();
@@ -203,41 +163,41 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
                 {
                     case PointIds.IntroStart:
                         me.SetStandState(UnitStandStateType.Stand);
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
-                        {
-                            me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroEnd, SplineChainIds.IntroEnd, false);
-                        });
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task => { me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroEnd, SplineChainIds.IntroEnd, false); });
+
                         break;
                     case PointIds.IntroEnd:
-                        _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
-                        {
-                            me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroLanding, SplineChainIds.IntroLanding, false);
-                        });
+                        _scheduler.Schedule(TimeSpan.FromSeconds(2), task => { me.GetMotionMaster().MoveAlongSplineChain(PointIds.IntroLanding, SplineChainIds.IntroLanding, false); });
+
                         break;
                     case PointIds.IntroLanding:
                         me.SetDisableGravity(false);
                         me.HandleEmoteCommand(Emote.OneshotLand);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
-                        {
-                            me.SetImmuneToPC(false);
-                            DoZoneInCombat();
-                        });
+
+                        _scheduler.Schedule(TimeSpan.FromSeconds(3),
+                                            task =>
+                                            {
+                                                me.SetImmuneToPC(false);
+                                                DoZoneInCombat();
+                                            });
+
                         break;
                     case PointIds.PhaseTwoLanding:
                         phase = NightbanePhases.Ground;
                         me.SetDisableGravity(false);
                         me.HandleEmoteCommand(Emote.OneshotLand);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
-                        {
-                            SetupGroundPhase();
-                            me.SetReactState(ReactStates.Aggressive);
-                        });
+
+                        _scheduler.Schedule(TimeSpan.FromSeconds(3),
+                                            task =>
+                                            {
+                                                SetupGroundPhase();
+                                                me.SetReactState(ReactStates.Aggressive);
+                                            });
+
                         break;
                     case PointIds.PhaseTwoEnd:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
-                        {
-                            me.GetMotionMaster().MoveAlongSplineChain(PointIds.PhaseTwoLanding, SplineChainIds.SecondLanding, false);
-                        });
+                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task => { me.GetMotionMaster().MoveAlongSplineChain(PointIds.PhaseTwoLanding, SplineChainIds.SecondLanding, false); });
+
                         break;
                     default:
                         break;
@@ -247,56 +207,152 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             {
                 if (pointId == PointIds.PhaseTwoFly)
                 {
-                    _scheduler.Schedule(TimeSpan.FromSeconds(33), MiscConst.GroupFly, task =>
-                    {
-                        _scheduler.CancelGroup(MiscConst.GroupFly);
-                        _scheduler.Schedule(TimeSpan.FromSeconds(2), MiscConst.GroupGround, landTask =>
-                        {
-                            Talk(TextIds.YellLandPhase);
-                            me.SetDisableGravity(true);
-                            me.GetMotionMaster().MoveAlongSplineChain(PointIds.PhaseTwoEnd, SplineChainIds.PhaseTwo, false);
-                        });
-                    });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(2), MiscConst.GroupFly, task =>
-                    {
-                        Talk(TextIds.EmoteBreath);
-                        task.Schedule(TimeSpan.FromSeconds(3), MiscConst.GroupFly, somethingTask =>
-                        {
-                            ResetThreatList();
-                            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                            if (target)
-                            {
-                                me.SetFacingToObject(target);
-                                DoCast(target, SpellIds.RainOfBones);
-                            }
-                        });
-                    });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(21), MiscConst.GroupFly, task =>
-                    {
-                        Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                        if (target)
-                            DoCast(target, SpellIds.SmokingBlastT);
-                        task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(7));
-                    });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(17), MiscConst.GroupFly, task =>
-                    {
-                        Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
-                        if (target)
-                            DoCast(target, SpellIds.SmokingBlast);
-                        task.Repeat(TimeSpan.FromMilliseconds(1400));
-                    });
+                    _scheduler.Schedule(TimeSpan.FromSeconds(33),
+                                        MiscConst.GroupFly,
+                                        task =>
+                                        {
+                                            _scheduler.CancelGroup(MiscConst.GroupFly);
+
+                                            _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                                                MiscConst.GroupGround,
+                                                                landTask =>
+                                                                {
+                                                                    Talk(TextIds.YellLandPhase);
+                                                                    me.SetDisableGravity(true);
+                                                                    me.GetMotionMaster().MoveAlongSplineChain(PointIds.PhaseTwoEnd, SplineChainIds.PhaseTwo, false);
+                                                                });
+                                        });
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(2),
+                                        MiscConst.GroupFly,
+                                        task =>
+                                        {
+                                            Talk(TextIds.EmoteBreath);
+
+                                            task.Schedule(TimeSpan.FromSeconds(3),
+                                                          MiscConst.GroupFly,
+                                                          somethingTask =>
+                                                          {
+                                                              ResetThreatList();
+                                                              Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                                              if (target)
+                                                              {
+                                                                  me.SetFacingToObject(target);
+                                                                  DoCast(target, SpellIds.RainOfBones);
+                                                              }
+                                                          });
+                                        });
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(21),
+                                        MiscConst.GroupFly,
+                                        task =>
+                                        {
+                                            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                            if (target)
+                                                DoCast(target, SpellIds.SmokingBlastT);
+
+                                            task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(7));
+                                        });
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(17),
+                                        MiscConst.GroupFly,
+                                        task =>
+                                        {
+                                            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                            if (target)
+                                                DoCast(target, SpellIds.SmokingBlast);
+
+                                            task.Repeat(TimeSpan.FromMilliseconds(1400));
+                                        });
                 }
                 else if (pointId == PointIds.PhaseTwoPreFly)
                 {
-                    _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
-                    {
-                        me.GetMotionMaster().MovePoint(PointIds.PhaseTwoFly, MiscConst.FlyPosition, true);
-                    });
+                    _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task => { me.GetMotionMaster().MovePoint(PointIds.PhaseTwoFly, MiscConst.FlyPosition, true); });
                 }
             }
         }
 
-        void StartPhaseFly()
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() &&
+                phase != NightbanePhases.Intro)
+                return;
+
+            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
+        }
+
+        private void SetupGroundPhase()
+        {
+            phase = NightbanePhases.Ground;
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(0),
+                                TimeSpan.FromSeconds(15),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Cleave);
+                                    task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(15));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(4),
+                                TimeSpan.FromSeconds(23),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        if (!me.HasInArc(MathF.PI, target))
+                                            DoCast(target, SpellIds.TailSweep);
+
+                                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(30));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(48), MiscConst.GroupGround, task => { DoCastAOE(SpellIds.BellowingRoar); });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(12),
+                                TimeSpan.FromSeconds(18),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.CharredEarth);
+
+                                    task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(21));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(26),
+                                TimeSpan.FromSeconds(30),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.SmolderingBreath);
+                                    task.Repeat(TimeSpan.FromSeconds(28), TimeSpan.FromSeconds(40));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(82),
+                                MiscConst.GroupGround,
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.DistractingAsh);
+                                });
+        }
+
+        private void HandleTerraceDoors(bool open)
+        {
+            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
+            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
+        }
+
+        private void StartPhaseFly()
         {
             ++_flyCount;
             Talk(TextIds.YellFlyPhase);
@@ -314,41 +370,34 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             else
                 me.GetMotionMaster().MovePoint(PointIds.PhaseTwoFly, MiscConst.FlyPosition, true);
         }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim() && phase != NightbanePhases.Intro)
-                return;
-
-            _scheduler.Update(diff, () => DoMeleeAttackIfReady());
-        }
     }
 
     [Script] // 37098 - Rain of Bones
-    class spell_rain_of_bones_AuraScript : AuraScript, IHasAuraEffects
+    internal class spell_rain_of_bones_AuraScript : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SummonSkeleton);
-        }
-
-        void OnTrigger(AuraEffect aurEff)
-        {
-            if (aurEff.GetTickNumber() % 5 == 0)
-                GetTarget().CastSpell(GetTarget(), SpellIds.SummonSkeleton, true);
         }
 
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(OnTrigger, 1, AuraType.PeriodicTriggerSpell));
         }
+
+        private void OnTrigger(AuraEffect aurEff)
+        {
+            if (aurEff.GetTickNumber() % 5 == 0)
+                GetTarget().CastSpell(GetTarget(), SpellIds.SummonSkeleton, true);
+        }
     }
 
     [Script]
-    class go_blackened_urn : GameObjectAI
+    internal class go_blackened_urn : GameObjectAI
     {
-        InstanceScript instance;
+        private readonly InstanceScript instance;
 
         public go_blackened_urn(GameObject go) : base(go)
         {
@@ -360,15 +409,18 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             if (me.HasFlag(GameObjectFlags.InUse))
                 return false;
 
-            if (instance.GetBossState(DataTypes.Nightbane) == EncounterState.Done || instance.GetBossState(DataTypes.Nightbane) == EncounterState.InProgress)
+            if (instance.GetBossState(DataTypes.Nightbane) == EncounterState.Done ||
+                instance.GetBossState(DataTypes.Nightbane) == EncounterState.InProgress)
                 return false;
 
             Creature nightbane = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Nightbane));
+
             if (nightbane)
             {
                 me.SetFlag(GameObjectFlags.InUse);
                 nightbane.GetAI().DoAction(MiscConst.ActionSummon);
             }
+
             return false;
         }
     }

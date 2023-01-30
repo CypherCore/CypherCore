@@ -1,22 +1,22 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.AI;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
-using Game.Spells;
-using System;
-using System.Collections.Generic;
-using Framework.Dynamic;
-using Game.Scripting.Interfaces.ISpell;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
+using Game.Scripting.Interfaces.ISpell;
+using Game.Spells;
 
 namespace Scripts.Spells.Paladin
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint ArtOfWarTriggered = 231843;
         public const uint AshenHallow = 316958;
@@ -85,12 +85,12 @@ namespace Scripts.Spells.Paladin
         public const uint ZealAura = 269571;
     }
 
-    struct SpellVisualKit
+    internal struct SpellVisualKit
     {
         public const uint DivineStorm = 73892;
     }
 
-    struct SpellVisual
+    internal struct SpellVisual
     {
         public const uint HolyShockDamage = 83731;
         public const uint HolyShockDamageCrit = 83881;
@@ -99,23 +99,13 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 267344 - Art of War
-    class spell_pal_art_of_war : AuraScript, IHasAuraEffects
+    internal class spell_pal_art_of_war : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ArtOfWarTriggered, SpellIds.BladeOfJustice);
-        }
-
-        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            return RandomHelper.randChance(aurEff.GetAmount());
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            GetTarget().GetSpellHistory().ResetCooldown(SpellIds.BladeOfJustice, true);
-            GetTarget().CastSpell(GetTarget(), SpellIds.ArtOfWarTriggered, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
         }
 
         public override void Register()
@@ -123,25 +113,27 @@ namespace Scripts.Spells.Paladin
             Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
             Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
-    }
-    
-    [Script] // 19042 - Ashen Hallow
-    class areatrigger_pal_ashen_hallow : AreaTriggerAI
-    {
-        TimeSpan _refreshTimer;
-        TimeSpan _period;
 
-        public areatrigger_pal_ashen_hallow(AreaTrigger areatrigger) : base(areatrigger) { }
-
-        void RefreshPeriod()
+        private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Unit caster = at.GetCaster();
-            if (caster != null)
-            {
-                AuraEffect ashen = caster.GetAuraEffect(SpellIds.AshenHallow, 1);
-                if (ashen != null)
-                    _period = TimeSpan.FromMilliseconds(ashen.GetPeriod());
-            }
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().GetSpellHistory().ResetCooldown(SpellIds.BladeOfJustice, true);
+            GetTarget().CastSpell(GetTarget(), SpellIds.ArtOfWarTriggered, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+        }
+    }
+
+    [Script] // 19042 - Ashen Hallow
+    internal class areatrigger_pal_ashen_hallow : AreaTriggerAI
+    {
+        private TimeSpan _period;
+        private TimeSpan _refreshTimer;
+
+        public areatrigger_pal_ashen_hallow(AreaTrigger areatrigger) : base(areatrigger)
+        {
         }
 
         public override void OnCreate()
@@ -157,6 +149,7 @@ namespace Scripts.Spells.Paladin
             while (_refreshTimer <= TimeSpan.Zero)
             {
                 Unit caster = at.GetCaster();
+
                 if (caster != null)
                 {
                     caster.CastSpell(at.GetPosition(), SpellIds.AshenHallowHeal, new CastSpellExtraArgs());
@@ -180,41 +173,29 @@ namespace Scripts.Spells.Paladin
             if (unit.GetGUID() == at.GetCasterGuid())
                 unit.RemoveAura(SpellIds.AshenHallowAllowHammer);
         }
+
+        private void RefreshPeriod()
+        {
+            Unit caster = at.GetCaster();
+
+            if (caster != null)
+            {
+                AuraEffect ashen = caster.GetAuraEffect(SpellIds.AshenHallow, 1);
+
+                if (ashen != null)
+                    _period = TimeSpan.FromMilliseconds(ashen.GetPeriod());
+            }
+        }
     }
 
     [Script] // 248033 - Awakening
-    class spell_pal_awakening : AuraScript, IHasAuraEffects
+    internal class spell_pal_awakening : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.AvengingWrath)
-                && spellInfo.GetEffects().Count >= 1;
-        }
-
-        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            return RandomHelper.randChance(aurEff.GetAmount());
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            TimeSpan extraDuration = TimeSpan.Zero;
-            AuraEffect durationEffect = GetEffect(1);
-            if (durationEffect != null)
-            extraDuration = TimeSpan.FromSeconds(durationEffect.GetAmount());
-
-            Aura avengingWrath = GetTarget().GetAura(SpellIds.AvengingWrath);
-            if (avengingWrath != null)
-            {
-                avengingWrath.SetDuration((int)(avengingWrath.GetDuration() + extraDuration.TotalMilliseconds));
-                avengingWrath.SetMaxDuration((int)(avengingWrath.GetMaxDuration() + extraDuration.TotalMilliseconds));
-            }
-            else
-                GetTarget().CastSpell(GetTarget(), SpellIds.AvengingWrath,
-                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreSpellAndCategoryCD)
-                        .SetTriggeringSpell(eventInfo.GetProcSpell())
-                        .AddSpellMod(SpellValueMod.Duration, (int)extraDuration.TotalMilliseconds));
+            return ValidateSpellInfo(SpellIds.AvengingWrath) && spellInfo.GetEffects().Count >= 1;
         }
 
         public override void Register()
@@ -222,95 +203,139 @@ namespace Scripts.Spells.Paladin
             Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
             Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            TimeSpan extraDuration = TimeSpan.Zero;
+            AuraEffect durationEffect = GetEffect(1);
+
+            if (durationEffect != null)
+                extraDuration = TimeSpan.FromSeconds(durationEffect.GetAmount());
+
+            Aura avengingWrath = GetTarget().GetAura(SpellIds.AvengingWrath);
+
+            if (avengingWrath != null)
+            {
+                avengingWrath.SetDuration((int)(avengingWrath.GetDuration() + extraDuration.TotalMilliseconds));
+                avengingWrath.SetMaxDuration((int)(avengingWrath.GetMaxDuration() + extraDuration.TotalMilliseconds));
+            }
+            else
+            {
+                GetTarget()
+                    .CastSpell(GetTarget(),
+                               SpellIds.AvengingWrath,
+                               new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreSpellAndCategoryCD)
+                                   .SetTriggeringSpell(eventInfo.GetProcSpell())
+                                   .AddSpellMod(SpellValueMod.Duration, (int)extraDuration.TotalMilliseconds));
+            }
+        }
     }
-    
+
     // 1022 - Blessing of Protection
     [Script] // 204018 - Blessing of Spellwarding
-    class spell_pal_blessing_of_protection : SpellScript, ICheckCastHander, IAfterHit
+    internal class spell_pal_blessing_of_protection : SpellScript, ICheckCastHander, IAfterHit
     {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Forbearance) //, SpellIds._PALADIN_IMMUNE_SHIELD_MARKER) // uncomment when we have serverside only spells
-                && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
-        }
-
-        public SpellCastResult CheckCast()
-        {
-            Unit target = GetExplTargetUnit();
-            if (!target || target.HasAura(SpellIds.Forbearance))
-                return SpellCastResult.TargetAurastate;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
         public void AfterHit()
         {
             Unit target = GetHitUnit();
+
             if (target)
             {
                 GetCaster().CastSpell(target, SpellIds.Forbearance, true);
                 GetCaster().CastSpell(target, SpellIds.ImmuneShieldMarker, true);
             }
         }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Forbearance) //, SpellIds._PALADIN_IMMUNE_SHIELD_MARKER) // uncomment when we have serverside only spells
+                   &&
+                   spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
+        }
+
+        public SpellCastResult CheckCast()
+        {
+            Unit target = GetExplTargetUnit();
+
+            if (!target ||
+                target.HasAura(SpellIds.Forbearance))
+                return SpellCastResult.TargetAurastate;
+
+            return SpellCastResult.SpellCastOk;
+        }
     }
 
     [Script] // 115750 - Blinding Light
-    class spell_pal_blinding_light : SpellScript, IHasSpellEffects
+    internal class spell_pal_blinding_light : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlindingLightEffect);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit target = GetHitUnit();
-            if (target)
-                GetCaster().CastSpell(target, SpellIds.BlindingLightEffect, true);
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleDummy(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+
+            if (target)
+                GetCaster().CastSpell(target, SpellIds.BlindingLightEffect, true);
+        }
     }
 
     [Script] // 26573 - Consecration
-    class spell_pal_consecration : AuraScript, IHasAuraEffects
+    internal class spell_pal_consecration : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConsecrationDamage, SpellIds.ConsecrationProtectionAura, SpellIds.ConsecratedGroundPassive, SpellIds.ConsecratedGroundSlow);
-        }
-
-        void HandleEffectPeriodic(AuraEffect aurEff)
-        {
-            AreaTrigger at = GetTarget().GetAreaTrigger(SpellIds.Consecration);
-            if (at != null)
-                GetTarget().CastSpell(at.GetPosition(), SpellIds.ConsecrationDamage, new CastSpellExtraArgs());
         }
 
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
+
+        private void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            AreaTrigger at = GetTarget().GetAreaTrigger(SpellIds.Consecration);
+
+            if (at != null)
+                GetTarget().CastSpell(at.GetPosition(), SpellIds.ConsecrationDamage, new CastSpellExtraArgs());
+        }
     }
 
     // 26573 - Consecration
     [Script] //  9228 - AreaTriggerId
-    class areatrigger_pal_consecration : AreaTriggerAI
+    internal class areatrigger_pal_consecration : AreaTriggerAI
     {
-        public areatrigger_pal_consecration(AreaTrigger areatrigger) : base(areatrigger) { }
+        public areatrigger_pal_consecration(AreaTrigger areatrigger) : base(areatrigger)
+        {
+        }
 
         public override void OnUnitEnter(Unit unit)
         {
             Unit caster = at.GetCaster();
+
             if (caster != null)
             {
                 // 243597 is also being cast as protection, but CreateObject is not sent, either serverside areatrigger for this aura or unused - also no visual is seen
-                if (unit == caster && caster.IsPlayer() && caster.ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinProtection)
+                if (unit == caster &&
+                    caster.IsPlayer() &&
+                    caster.ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinProtection)
                     caster.CastSpell(caster, SpellIds.ConsecrationProtectionAura);
 
                 if (caster.IsValidAttackTarget(unit))
@@ -329,37 +354,46 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 196926 - Crusader Might
-    class spell_pal_crusader_might : AuraScript, IHasAuraEffects
+    internal class spell_pal_crusader_might : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyShock);
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromSeconds(aurEff.GetAmount()));
         }
 
         public override void Register()
         {
             Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromSeconds(aurEff.GetAmount()));
+        }
     }
 
     [Script] // 223817 - Divine Purpose
-    class spell_pal_divine_purpose : AuraScript, IHasAuraEffects
+    internal class spell_pal_divine_purpose : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DivinePurposeTriggerred);
         }
 
-        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public override void Register()
+        {
+            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
+        private bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             Spell procSpell = eventInfo.GetProcSpell();
+
             if (!procSpell)
                 return false;
 
@@ -369,26 +403,35 @@ namespace Scripts.Spells.Paladin
             return RandomHelper.randChance(aurEff.GetAmount());
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.DivinePurposeTriggerred,
-                new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(eventInfo.GetProcSpell()));
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new CheckEffectProcHandler(CheckProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+            eventInfo.GetActor()
+                     .CastSpell(eventInfo.GetActor(),
+                                SpellIds.DivinePurposeTriggerred,
+                                new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(eventInfo.GetProcSpell()));
         }
     }
-    
+
     [Script] // 642 - Divine Shield
-    class spell_pal_divine_shield : SpellScript, ICheckCastHander, IAfterCast
+    internal class spell_pal_divine_shield : SpellScript, ICheckCastHander, IAfterCast
     {
+        public void AfterCast()
+        {
+            Unit caster = GetCaster();
+
+            if (caster.HasAura(SpellIds.FinalStand))
+                caster.CastSpell((Unit)null, SpellIds.FinalStandEffect, true);
+
+
+            caster.CastSpell(caster, SpellIds.Forbearance, true);
+            caster.CastSpell(caster, SpellIds.ImmuneShieldMarker, true);
+        }
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FinalStand, SpellIds.FinalStandEffect, SpellIds.Forbearance) //, SpellIds._PALADIN_IMMUNE_SHIELD_MARKER // uncomment when we have serverside only spells
-                    && spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
+                   &&
+                   spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
         public SpellCastResult CheckCast()
@@ -398,22 +441,10 @@ namespace Scripts.Spells.Paladin
 
             return SpellCastResult.SpellCastOk;
         }
-
-        public void AfterCast()
-        {
-            Unit caster = GetCaster();
-
-            if (caster.HasAura(SpellIds.FinalStand))
-                caster.CastSpell((Unit)null, SpellIds.FinalStandEffect, true);
-   
-            
-            caster.CastSpell(caster, SpellIds.Forbearance, true);
-            caster.CastSpell(caster, SpellIds.ImmuneShieldMarker, true);
-        }
     }
 
     [Script] // 190784 - Divine Steed
-    class spell_pal_divine_steed : SpellScript, IOnCast
+    internal class spell_pal_divine_steed : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -425,29 +456,37 @@ namespace Scripts.Spells.Paladin
             Unit caster = GetCaster();
 
             uint spellId = SpellIds.DivineSteedHuman;
+
             switch (caster.GetRace())
             {
                 case Race.Human:
                     spellId = SpellIds.DivineSteedHuman;
+
                     break;
                 case Race.Dwarf:
                     spellId = SpellIds.DivineSteedDwarf;
+
                     break;
                 case Race.Draenei:
                 case Race.LightforgedDraenei:
                     spellId = SpellIds.DivineSteedDraenei;
+
                     break;
                 case Race.DarkIronDwarf:
                     spellId = SpellIds.DivineSteedDarkIronDwarf;
+
                     break;
                 case Race.BloodElf:
                     spellId = SpellIds.DivineSteedBloodelf;
+
                     break;
                 case Race.Tauren:
                     spellId = SpellIds.DivineSteedTauren;
+
                     break;
                 case Race.ZandalariTroll:
                     spellId = SpellIds.DivineSteedZandalariTroll;
+
                     break;
                 default:
                     break;
@@ -458,7 +497,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 224239 - Divine Storm
-    class spell_pal_divine_storm : SpellScript, IOnCast
+    internal class spell_pal_divine_storm : SpellScript, IOnCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -472,48 +511,34 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 205191 - Eye for an Eye
-    class spell_pal_eye_for_an_eye : AuraScript, IHasAuraEffects
+    internal class spell_pal_eye_for_an_eye : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EyeForAnEyeTriggered);
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.EyeForAnEyeTriggered, true);
         }
 
         public override void Register()
         {
             Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.EyeForAnEyeTriggered, true);
+        }
     }
-    
+
     [Script] // 234299 - Fist of Justice
-    class spell_pal_fist_of_justice : AuraScript, IHasAuraEffects
+    internal class spell_pal_fist_of_justice : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HammerOfJustice);
-        }
-
-        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            Spell procSpell = eventInfo.GetProcSpell();
-            if (procSpell != null)
-                return procSpell.HasPowerTypeCost(PowerType.HolyPower);
-
-            return false;
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
-        {
-            int value = aurEff.GetAmount() / 10;
-
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, TimeSpan.FromSeconds(-value));
         }
 
         public override void Register()
@@ -521,12 +546,28 @@ namespace Scripts.Spells.Paladin
             Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
             Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+
+            if (procSpell != null)
+                return procSpell.HasPowerTypeCost(PowerType.HolyPower);
+
+            return false;
+        }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            int value = aurEff.GetAmount() / 10;
+
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, TimeSpan.FromSeconds(-value));
+        }
     }
 
     [Script] // -85043 - Grand Crusader
-    class spell_pal_grand_crusader : AuraScript, IAuraCheckProc, IHasAuraEffects
+    internal class spell_pal_grand_crusader : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AvengersShield);
@@ -537,22 +578,30 @@ namespace Scripts.Spells.Paladin
             return GetTarget().IsTypeId(TypeId.Player);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            GetTarget().GetSpellHistory().ResetCooldown(SpellIds.AvengersShield, true);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
+
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().GetSpellHistory().ResetCooldown(SpellIds.AvengersShield, true);
+        }
     }
 
     [Script] // 54968 - Glyph of Holy Light
-    class spell_pal_glyph_of_holy_light : SpellScript, IHasSpellEffects
+    internal class spell_pal_glyph_of_holy_light : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        void FilterTargets(List<WorldObject> targets)
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
+        public override void Register()
+        {
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+
+        private void FilterTargets(List<WorldObject> targets)
         {
             uint maxTargets = GetSpellInfo().MaxAffectedTargets;
 
@@ -562,92 +611,73 @@ namespace Scripts.Spells.Paladin
                 targets.Resize(maxTargets);
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
-        }
     }
 
     [Script] // 53595 - Hammer of the Righteous
-    class spell_pal_hammer_of_the_righteous : SpellScript, IHasSpellEffects
+    internal class spell_pal_hammer_of_the_righteous : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConsecrationProtectionAura, SpellIds.HammerOfTheRighteousAoe);
-        }
-
-        void HandleAoEHit(uint effIndex)
-        {
-            if (GetCaster().HasAura(SpellIds.ConsecrationProtectionAura))
-                GetCaster().CastSpell(GetHitUnit(), SpellIds.HammerOfTheRighteousAoe);
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleAoEHit, 0, SpellEffectName.SchoolDamage, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleAoEHit(uint effIndex)
+        {
+            if (GetCaster().HasAura(SpellIds.ConsecrationProtectionAura))
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.HammerOfTheRighteousAoe);
+        }
     }
 
     [Script] // 6940 - Hand of Sacrifice
-    class spell_pal_hand_of_sacrifice : AuraScript, IHasAuraEffects
+    internal class spell_pal_hand_of_sacrifice : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        int remainingAmount;
+        private int remainingAmount;
+        public List<IAuraEffectHandler> Effects { get; } = new();
 
         public override bool Load()
         {
             Unit caster = GetCaster();
+
             if (caster)
             {
                 remainingAmount = (int)caster.GetMaxHealth();
+
                 return true;
             }
+
             return false;
-        }
-
-        void Split(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
-        {
-            remainingAmount -= (int)splitAmount;
-
-            if (remainingAmount <= 0)
-            {
-                GetTarget().RemoveAura(SpellIds.HandOfSacrifice);
-            }
         }
 
         public override void Register()
         {
             Effects.Add(new EffectSplitHandler(Split, 0));
         }
+
+        private void Split(AuraEffect aurEff, DamageInfo dmgInfo, uint splitAmount)
+        {
+            remainingAmount -= (int)splitAmount;
+
+            if (remainingAmount <= 0)
+                GetTarget().RemoveAura(SpellIds.HandOfSacrifice);
+        }
     }
 
     [Script] // 54149 - Infusion of Light
-    class spell_pal_infusion_of_light : AuraScript, IHasAuraEffects
+    internal class spell_pal_infusion_of_light : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        static FlagArray128 HolyLightSpellClassMask = new(0, 0, 0x400);
+        private static readonly FlagArray128 HolyLightSpellClassMask = new(0, 0, 0x400);
+        public List<IAuraEffectHandler> Effects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.InfusionOfLightEnergize);
-        }
-
-        bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            return eventInfo.GetProcSpell() && eventInfo.GetProcSpell().m_appliedMods.Contains(GetAura());
-        }
-
-        bool CheckHolyLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Paladin, HolyLightSpellClassMask);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.InfusionOfLightEnergize,
-                new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(eventInfo.GetProcSpell()));
         }
 
         public override void Register()
@@ -658,10 +688,28 @@ namespace Scripts.Spells.Paladin
             Effects.Add(new CheckEffectProcHandler(CheckHolyLightProc, 1, AuraType.Dummy));
             Effects.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        private bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcSpell() && eventInfo.GetProcSpell()._appliedMods.Contains(GetAura());
+        }
+
+        private bool CheckHolyLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Paladin, HolyLightSpellClassMask);
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            eventInfo.GetActor()
+                     .CastSpell(eventInfo.GetActor(),
+                                SpellIds.InfusionOfLightEnergize,
+                                new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetTriggeringSpell(eventInfo.GetProcSpell()));
+        }
     }
-    
+
     [Script] // 327193 - Moment of Glory
-    class spell_pal_moment_of_glory : SpellScript, IOnHit
+    internal class spell_pal_moment_of_glory : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -675,7 +723,7 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 20271/275779/275773 - Judgement (Retribution/Protection/Holy)
-    class spell_pal_judgment : SpellScript, IOnHit
+    internal class spell_pal_judgment : SpellScript, IOnHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -685,6 +733,7 @@ namespace Scripts.Spells.Paladin
         public void OnHit()
         {
             Unit caster = GetCaster();
+
             if (caster.HasSpell(SpellIds.JudgmentProtRetR3))
                 caster.CastSpell(caster, SpellIds.JudgmentGainHolyPower, GetSpell());
 
@@ -694,15 +743,21 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 114165 - Holy Prism
-    class spell_pal_holy_prism : SpellScript, IHasSpellEffects
+    internal class spell_pal_holy_prism : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismTargetEnemy, SpellIds.HolyPrismTargetBeamVisual);
         }
 
-        void HandleDummy(uint effIndex)
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void HandleDummy(uint effIndex)
         {
             if (GetCaster().IsFriendlyTo(GetHitUnit()))
                 GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetAlly, true);
@@ -711,32 +766,40 @@ namespace Scripts.Spells.Paladin
 
             GetCaster().CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetBeamVisual, true);
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     // 114852 - Holy Prism (Damage)
     [Script] // 114871 - Holy Prism (Heal)
-    class spell_pal_holy_prism_selector : SpellScript, IHasSpellEffects
+    internal class spell_pal_holy_prism_selector : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
-        List<WorldObject> _sharedTargets = new();
-        ObjectGuid _targetGUID;
+        private List<WorldObject> _sharedTargets = new();
+        private ObjectGuid _targetGUID;
+        public List<ISpellEffect> SpellEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyPrismTargetAlly, SpellIds.HolyPrismTargetBeamVisual);
         }
 
-        void SaveTargetGuid(uint effIndex)
+        public override void Register()
+        {
+            if (ScriptSpellId == SpellIds.HolyPrismTargetEnemy)
+                SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaAlly));
+            else if (ScriptSpellId == SpellIds.HolyPrismTargetAlly)
+                SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+
+            SpellEffects.Add(new ObjectAreaTargetSelectHandler(ShareTargets, 2, Targets.UnitDestAreaEntry));
+
+            SpellEffects.Add(new EffectHandler(SaveTargetGuid, 0, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
+            SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+        }
+
+        private void SaveTargetGuid(uint effIndex)
         {
             _targetGUID = GetHitUnit().GetGUID();
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             byte maxTargets = 5;
 
@@ -748,43 +811,31 @@ namespace Scripts.Spells.Paladin
                     targets.Resize(maxTargets);
                 }
                 else
+                {
                     targets.RandomResize(maxTargets);
+                }
             }
 
             _sharedTargets = targets;
         }
 
-        void ShareTargets(List<WorldObject> targets)
+        private void ShareTargets(List<WorldObject> targets)
         {
             targets.Clear();
             targets.AddRange(_sharedTargets);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             Unit initialTarget = Global.ObjAccessor.GetUnit(GetCaster(), _targetGUID);
-            if (initialTarget != null)
-                initialTarget.CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetBeamVisual, true);
-        }
 
-        public override void Register()
-        {
-            if (m_scriptSpellId == SpellIds.HolyPrismTargetEnemy)
-                SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaAlly));
-            else if (m_scriptSpellId == SpellIds.HolyPrismTargetAlly)
-                SpellEffects.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-
-            SpellEffects.Add(new ObjectAreaTargetSelectHandler(ShareTargets, 2, Targets.UnitDestAreaEntry));
-
-            SpellEffects.Add(new EffectHandler(SaveTargetGuid, 0, SpellEffectName.Any, SpellScriptHookType.EffectHitTarget));
-            SpellEffects.Add(new EffectHandler(HandleScript, 2, SpellEffectName.ScriptEffect, SpellScriptHookType.EffectHitTarget));
+            initialTarget?.CastSpell(GetHitUnit(), SpellIds.HolyPrismTargetBeamVisual, true);
         }
     }
-    
+
     [Script] // 20473 - Holy Shock
-    class spell_pal_holy_shock : SpellScript, ICheckCastHander, IHasSpellEffects
+    internal class spell_pal_holy_shock : SpellScript, ICheckCastHander, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyShock, SpellIds.HolyShockHealing, SpellIds.HolyShockDamage);
@@ -794,6 +845,7 @@ namespace Scripts.Spells.Paladin
         {
             Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();
+
             if (target)
             {
                 if (!caster.IsFriendlyTo(target))
@@ -806,15 +858,25 @@ namespace Scripts.Spells.Paladin
                 }
             }
             else
+            {
                 return SpellCastResult.BadTargets;
+            }
 
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        public override void Register()
+        {
+            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
+        }
+
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
+        private void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
             Unit unitTarget = GetHitUnit();
+
             if (unitTarget != null)
             {
                 if (caster.IsFriendlyTo(unitTarget))
@@ -823,20 +885,14 @@ namespace Scripts.Spells.Paladin
                     caster.CastSpell(unitTarget, SpellIds.HolyShockDamage, new CastSpellExtraArgs(GetSpell()));
             }
         }
-
-        public override void Register()
-        {
-            SpellEffects.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
-        }
     }
 
     [Script] // 25912 - Holy Shock
-    class spell_pal_holy_shock_damage_visual : SpellScript, IAfterHit
+    internal class spell_pal_holy_shock_damage_visual : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamage)
-                && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamageCrit);
+            return CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamage) && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockDamageCrit);
         }
 
         public void AfterHit()
@@ -846,12 +902,11 @@ namespace Scripts.Spells.Paladin
     }
 
     [Script] // 25914 - Holy Shock
-    class spell_pal_holy_shock_heal_visual : SpellScript, IAfterHit
+    internal class spell_pal_holy_shock_heal_visual : SpellScript, IAfterHit
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHeal)
-                && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHealCrit);
+            return CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHeal) && CliDB.SpellVisualStorage.HasRecord(SpellVisual.HolyShockHealCrit);
         }
 
         public void AfterHit()
@@ -859,41 +914,49 @@ namespace Scripts.Spells.Paladin
             GetCaster().SendPlaySpellVisual(GetHitUnit(), IsHitCrit() ? SpellVisual.HolyShockHealCrit : SpellVisual.HolyShockHeal, 0, 0, 0.0f, false);
         }
     }
-    
+
     [Script] // 37705 - Healing Discount
-    class spell_pal_item_healing_discount : AuraScript, IHasAuraEffects
+    internal class spell_pal_item_healing_discount : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemHealingTrance);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.ItemHealingTrance, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
         {
             Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            GetTarget().CastSpell(GetTarget(), SpellIds.ItemHealingTrance, new CastSpellExtraArgs(aurEff));
+        }
     }
 
     [Script] // 40470 - Paladin Tier 6 Trinket
-    class spell_pal_item_t6_trinket : AuraScript, IHasAuraEffects
+    internal class spell_pal_item_t6_trinket : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EnduringLight, SpellIds.EnduringJudgement);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
+
             if (spellInfo == null)
                 return;
 
@@ -913,51 +976,51 @@ namespace Scripts.Spells.Paladin
                 chance = 50;
             }
             else
+            {
                 return;
+            }
 
             if (RandomHelper.randChance(chance))
                 eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), spellId, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 633 - Lay on Hands
-    class spell_pal_lay_on_hands : SpellScript, ICheckCastHander, IAfterHit
+    internal class spell_pal_lay_on_hands : SpellScript, ICheckCastHander, IAfterHit
     {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Forbearance)//, SpellIds.ImmuneShieldMarker);
-                && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
-        }
-
-        public SpellCastResult CheckCast()
-        {
-            Unit target = GetExplTargetUnit();
-            if (!target || target.HasAura(SpellIds.Forbearance))
-                return SpellCastResult.TargetAurastate;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
         public void AfterHit()
         {
             Unit target = GetHitUnit();
+
             if (target)
             {
                 GetCaster().CastSpell(target, SpellIds.Forbearance, true);
                 GetCaster().CastSpell(target, SpellIds.ImmuneShieldMarker, true);
             }
         }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Forbearance) //, SpellIds.ImmuneShieldMarker);
+                   &&
+                   spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
+        }
+
+        public SpellCastResult CheckCast()
+        {
+            Unit target = GetExplTargetUnit();
+
+            if (!target ||
+                target.HasAura(SpellIds.Forbearance))
+                return SpellCastResult.TargetAurastate;
+
+            return SpellCastResult.SpellCastOk;
+        }
     }
 
     [Script] // 53651 - Beacon of Light
-    class spell_pal_light_s_beacon : AuraScript, IAuraCheckProc, IHasAuraEffects
+    internal class spell_pal_light_s_beacon : AuraScript, IAuraCheckProc, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BeaconOfLight, SpellIds.BeaconOfLightHeal);
@@ -967,46 +1030,53 @@ namespace Scripts.Spells.Paladin
         {
             if (!eventInfo.GetActionTarget())
                 return false;
+
             if (eventInfo.GetActionTarget().HasAura(SpellIds.BeaconOfLight, eventInfo.GetActor().GetGUID()))
                 return false;
+
             return true;
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            HealInfo healInfo = eventInfo.GetHealInfo();
-            if (healInfo == null || healInfo.GetHeal() == 0)
-                return;
-
-            uint heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
-
-            var auras = GetCaster().GetSingleCastAuras();
-            foreach (var eff in auras)
-            {
-                if (eff.GetId() == SpellIds.BeaconOfLight)
-                {
-                    List<AuraApplication> applications = eff.GetApplicationList();
-                    if (!applications.Empty())
-                    {
-                        CastSpellExtraArgs args = new(aurEff);
-                        args.AddSpellMod(SpellValueMod.BasePoint0, (int)heal);
-                        eventInfo.GetActor().CastSpell(applications[0].GetTarget(), SpellIds.BeaconOfLightHeal, args);
-                    }
-                    return;
-                }
-            }
         }
 
         public override void Register()
         {
             Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            HealInfo healInfo = eventInfo.GetHealInfo();
+
+            if (healInfo == null ||
+                healInfo.GetHeal() == 0)
+                return;
+
+            uint heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+
+            var auras = GetCaster().GetSingleCastAuras();
+
+            foreach (var eff in auras)
+                if (eff.GetId() == SpellIds.BeaconOfLight)
+                {
+                    List<AuraApplication> applications = eff.GetApplicationList();
+
+                    if (!applications.Empty())
+                    {
+                        CastSpellExtraArgs args = new(aurEff);
+                        args.AddSpellMod(SpellValueMod.BasePoint0, (int)heal);
+                        eventInfo.GetActor().CastSpell(applications[0].GetTarget(), SpellIds.BeaconOfLightHeal, args);
+                    }
+
+                    return;
+                }
+        }
     }
 
     [Script] // 122773 - Light's Hammer
-    class spell_pal_light_hammer_init_summon : SpellScript, IAfterCast
+    internal class spell_pal_light_hammer_init_summon : SpellScript, IAfterCast
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1018,57 +1088,70 @@ namespace Scripts.Spells.Paladin
             foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffectName.Summon).GenericVictimTargets)
             {
                 Unit hammer = Global.ObjAccessor.GetUnit(GetCaster(), summonedObject.Victim);
+
                 if (hammer != null)
                 {
-                    hammer.CastSpell(hammer, SpellIds.LightHammerCosmetic,
-                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
-                    hammer.CastSpell(hammer, SpellIds.LightHammerPeriodic,
-                        new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+                    hammer.CastSpell(hammer,
+                                     SpellIds.LightHammerCosmetic,
+                                     new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
+
+                    hammer.CastSpell(hammer,
+                                     SpellIds.LightHammerPeriodic,
+                                     new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell()));
                 }
             }
         }
     }
 
     [Script] // 114918 - Light's Hammer (Periodic)
-    class spell_pal_light_hammer_periodic : AuraScript, IHasAuraEffects
+    internal class spell_pal_light_hammer_periodic : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LightHammerHealing, SpellIds.LightHammerDamage);
-        }
-
-        void HandleEffectPeriodic(AuraEffect aurEff)
-        {
-            Unit lightHammer = GetTarget();
-            Unit originalCaster = lightHammer.GetOwner();
-            if (originalCaster != null)
-            {
-                originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
-                originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerHealing, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
-            }
         }
 
         public override void Register()
         {
             Effects.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
+
+        private void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            Unit lightHammer = GetTarget();
+            Unit originalCaster = lightHammer.GetOwner();
+
+            if (originalCaster != null)
+            {
+                originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+                originalCaster.CastSpell(lightHammer.GetPosition(), SpellIds.LightHammerHealing, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress));
+            }
+        }
     }
-    
+
     [Script] // 204074 - Righteous Protector
-    class spell_pal_righteous_protector : AuraScript, IHasAuraEffects
+    internal class spell_pal_righteous_protector : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        SpellPowerCost _baseHolyPowerCost;
+        private SpellPowerCost _baseHolyPowerCost;
+        public List<IAuraEffectHandler> Effects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AvengingWrath, SpellIds.GuardianOfAcientKings);
         }
 
-        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public override void Register()
+        {
+            Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
+        private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             SpellInfo procSpell = eventInfo.GetSpellInfo();
+
             if (procSpell != null)
                 _baseHolyPowerCost = procSpell.CalcPowerCost(PowerType.HolyPower, false, eventInfo.GetActor(), eventInfo.GetSchoolMask());
             else
@@ -1077,90 +1160,94 @@ namespace Scripts.Spells.Paladin
             return _baseHolyPowerCost != null;
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             int value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
 
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, TimeSpan.FromMilliseconds(-value));
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAcientKings, TimeSpan.FromMilliseconds(-value));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 267610 - Righteous Verdict
-    class spell_pal_righteous_verdict : AuraScript, IHasAuraEffects
+    internal class spell_pal_righteous_verdict : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.RighteousVerdictAura);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
-        {
-            procInfo.GetActor().CastSpell(procInfo.GetActor(), SpellIds.RighteousVerdictAura, true);
-        }
-
         public override void Register()
         {
             Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
         }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            procInfo.GetActor().CastSpell(procInfo.GetActor(), SpellIds.RighteousVerdictAura, true);
+        }
     }
 
     [Script] // 85804 - Selfless Healer
-    class spell_pal_selfless_healer : AuraScript, IHasAuraEffects
+    internal class spell_pal_selfless_healer : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
-        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            Spell procSpell = eventInfo.GetProcSpell();
-            if (procSpell != null)
-                return procSpell.HasPowerTypeCost(PowerType.HolyPower);
-
-            return false;
-        }
+        public List<IAuraEffectHandler> Effects { get; } = new();
 
         public override void Register()
         {
             Effects.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
         }
+
+        private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Spell procSpell = eventInfo.GetProcSpell();
+
+            if (procSpell != null)
+                return procSpell.HasPowerTypeCost(PowerType.HolyPower);
+
+            return false;
+        }
     }
 
     [Script] // 85256 - Templar's Verdict
-    class spell_pal_templar_s_verdict : SpellScript, IHasSpellEffects
+    internal class spell_pal_templar_s_verdict : SpellScript, IHasSpellEffects
     {
-        public List<ISpellEffect> SpellEffects { get; } = new List<ISpellEffect>();
+        public List<ISpellEffect> SpellEffects { get; } = new();
+
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.TemplarVerdictDamage);
-        }
-
-        void HandleHitTarget(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.TemplarVerdictDamage, true);
         }
 
         public override void Register()
         {
             SpellEffects.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy, SpellScriptHookType.EffectHitTarget));
         }
+
+        private void HandleHitTarget(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.TemplarVerdictDamage, true);
+        }
     }
 
     [Script] // 28789 - Holy Power
-    class spell_pal_t3_6p_bonus : AuraScript, IHasAuraEffects
+    internal class spell_pal_t3_6p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyPowerArmor, SpellIds.HolyPowerAttackPower, SpellIds.HolyPowerSpellPower, SpellIds.HolyPowerMp5);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -1175,17 +1262,21 @@ namespace Scripts.Spells.Paladin
                 case Class.Shaman:
                 case Class.Druid:
                     spellId = SpellIds.HolyPowerMp5;
+
                     break;
                 case Class.Mage:
                 case Class.Warlock:
                     spellId = SpellIds.HolyPowerSpellPower;
+
                     break;
                 case Class.Hunter:
                 case Class.Rogue:
                     spellId = SpellIds.HolyPowerAttackPower;
+
                     break;
                 case Class.Warrior:
                     spellId = SpellIds.HolyPowerArmor;
+
                     break;
                 default:
                     return;
@@ -1193,28 +1284,31 @@ namespace Scripts.Spells.Paladin
 
             caster.CastSpell(target, spellId, new CastSpellExtraArgs(aurEff));
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 64890 - Item - Paladin T8 Holy 2P Bonus
-    class spell_pal_t8_2p_bonus : AuraScript, IHasAuraEffects
+    internal class spell_pal_t8_2p_bonus : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyMending);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
+        }
+
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
             HealInfo healInfo = eventInfo.GetHealInfo();
-            if (healInfo == null || healInfo.GetHeal() == 0)
+
+            if (healInfo == null ||
+                healInfo.GetHeal() == 0)
                 return;
 
             Unit caster = eventInfo.GetActor();
@@ -1228,33 +1322,29 @@ namespace Scripts.Spells.Paladin
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(target, SpellIds.HolyMending, args);
         }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy, AuraScriptHookType.EffectProc));
-        }
     }
 
     [Script] // 269569 - Zeal
-    class spell_pal_zeal : AuraScript, IHasAuraEffects
+    internal class spell_pal_zeal : AuraScript, IHasAuraEffects
     {
-        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ZealAura);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        public override void Register()
+        {
+            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
+        }
+
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             Unit target = GetTarget();
             target.CastSpell(target, SpellIds.ZealAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, aurEff.GetAmount()));
 
             PreventDefaultAction();
-        }
-
-        public override void Register()
-        {
-            Effects.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell, AuraScriptHookType.EffectProc));
         }
     }
 }

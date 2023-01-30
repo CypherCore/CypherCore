@@ -1,17 +1,22 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
-using Framework.Dynamic;
-using Game.Entities;
 using System.Collections.Generic;
 using System.Numerics;
+using Framework.Constants;
+using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class AreaTriggerPkt : ClientPacket
+    internal class AreaTriggerPkt : ClientPacket
     {
-        public AreaTriggerPkt(WorldPacket packet) : base(packet) { }
+        public uint AreaTriggerID;
+        public bool Entered;
+        public bool FromClient;
+
+        public AreaTriggerPkt(WorldPacket packet) : base(packet)
+        {
+        }
 
         public override void Read()
         {
@@ -19,15 +24,16 @@ namespace Game.Networking.Packets
             Entered = _worldPacket.HasBit();
             FromClient = _worldPacket.HasBit();
         }
-
-        public uint AreaTriggerID;
-        public bool Entered;
-        public bool FromClient;
     }
 
-    class AreaTriggerDenied : ServerPacket
+    internal class AreaTriggerDenied : ServerPacket
     {
-        public AreaTriggerDenied() : base(ServerOpcodes.AreaTriggerDenied) { }
+        public int AreaTriggerID;
+        public bool Entered;
+
+        public AreaTriggerDenied() : base(ServerOpcodes.AreaTriggerDenied)
+        {
+        }
 
         public override void Write()
         {
@@ -35,21 +41,30 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Entered);
             _worldPacket.FlushBits();
         }
-
-        public int AreaTriggerID;
-        public bool Entered;
     }
 
-    class AreaTriggerNoCorpse : ServerPacket
+    internal class AreaTriggerNoCorpse : ServerPacket
     {
-        public AreaTriggerNoCorpse() : base(ServerOpcodes.AreaTriggerNoCorpse) { }
+        public AreaTriggerNoCorpse() : base(ServerOpcodes.AreaTriggerNoCorpse)
+        {
+        }
 
-        public override void Write() { }
+        public override void Write()
+        {
+        }
     }
 
-    class AreaTriggerRePath : ServerPacket
+    internal class AreaTriggerRePath : ServerPacket
     {
-        public AreaTriggerRePath() : base(ServerOpcodes.AreaTriggerRePath) { }
+        public AreaTriggerMovementScriptInfo? AreaTriggerMovementScript;
+        public AreaTriggerOrbitInfo AreaTriggerOrbit;
+
+        public AreaTriggerSplineInfo AreaTriggerSpline;
+        public ObjectGuid TriggerGUID;
+
+        public AreaTriggerRePath() : base(ServerOpcodes.AreaTriggerRePath)
+        {
+        }
 
         public override void Write()
         {
@@ -60,25 +75,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AreaTriggerMovementScript.HasValue);
             _worldPacket.FlushBits();
 
-            if (AreaTriggerSpline != null)
-                AreaTriggerSpline.Write(_worldPacket);
+            AreaTriggerSpline?.Write(_worldPacket);
 
             if (AreaTriggerMovementScript.HasValue)
                 AreaTriggerMovementScript.Value.Write(_worldPacket);
 
-            if (AreaTriggerOrbit != null)
-                AreaTriggerOrbit.Write(_worldPacket);
+            AreaTriggerOrbit?.Write(_worldPacket);
         }
-
-        public AreaTriggerSplineInfo AreaTriggerSpline;
-        public AreaTriggerOrbitInfo AreaTriggerOrbit;
-        public AreaTriggerMovementScriptInfo? AreaTriggerMovementScript;
-        public ObjectGuid TriggerGUID;
     }
 
     //Structs
-    class AreaTriggerSplineInfo
+    internal class AreaTriggerSplineInfo
     {
+        public uint ElapsedTimeForMovement;
+        public List<Vector3> Points = new();
+
+        public uint TimeToTarget;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(TimeToTarget);
@@ -90,9 +103,5 @@ namespace Game.Networking.Packets
             foreach (Vector3 point in Points)
                 data.WriteVector3(point);
         }
-
-        public uint TimeToTarget;
-        public uint ElapsedTimeForMovement;
-        public List<Vector3> Points = new();
     }
 }

@@ -8,6 +8,8 @@ namespace Game.Maps
 {
     public class ZoneScript
     {
+        protected EventMap EventMp { get; set; } = new();
+
         public virtual void TriggerGameEvent(uint gameEventId, WorldObject source = null, WorldObject target = null)
         {
             if (source != null)
@@ -16,30 +18,67 @@ namespace Game.Maps
                 ProcessEvent(null, gameEventId, null);
         }
 
-        public virtual uint GetCreatureEntry(ulong guidlow, CreatureData data) { return data.Id; }
-        public virtual uint GetGameObjectEntry(ulong spawnId, uint entry) { return entry; }
+        public virtual uint GetCreatureEntry(ulong guidlow, CreatureData data)
+        {
+            return data.Id;
+        }
 
-        public virtual void OnCreatureCreate(Creature creature) { }
-        public virtual void OnCreatureRemove(Creature creature) { }
+        public virtual uint GetGameObjectEntry(ulong spawnId, uint entry)
+        {
+            return entry;
+        }
 
-        public virtual void OnGameObjectCreate(GameObject go) { }
-        public virtual void OnGameObjectRemove(GameObject go) { }
+        public virtual void OnCreatureCreate(Creature creature)
+        {
+        }
 
-        public virtual void OnUnitDeath(Unit unit) { }
+        public virtual void OnCreatureRemove(Creature creature)
+        {
+        }
 
-        //All-purpose data storage 64 bit
-        public virtual ObjectGuid GetGuidData(uint DataId) { return ObjectGuid.Empty; }
-        public virtual void SetGuidData(uint DataId, ObjectGuid Value) { }
+        public virtual void OnGameObjectCreate(GameObject go)
+        {
+        }
 
-        public virtual ulong GetData64(uint dataId) { return 0; }
-        public virtual void SetData64(uint dataId, ulong value) { }
+        public virtual void OnGameObjectRemove(GameObject go)
+        {
+        }
 
-        //All-purpose data storage 32 bit
-        public virtual uint GetData(uint dataId) { return 0; }
-        public virtual void SetData(uint dataId, uint value) { }
+        public virtual void OnUnitDeath(Unit unit)
+        {
+        }
 
-        public virtual void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker) { }
+        //All-purpose _data storage 64 bit
+        public virtual ObjectGuid GetGuidData(uint DataId)
+        {
+            return ObjectGuid.Empty;
+        }
 
-        protected EventMap _events = new();
+        public virtual void SetGuidData(uint DataId, ObjectGuid Value)
+        {
+        }
+
+        public virtual ulong GetData64(uint dataId)
+        {
+            return 0;
+        }
+
+        public virtual void SetData64(uint dataId, ulong value)
+        {
+        }
+
+        //All-purpose _data storage 32 bit
+        public virtual uint GetData(uint dataId)
+        {
+            return 0;
+        }
+
+        public virtual void SetData(uint dataId, uint value)
+        {
+        }
+
+        public virtual void ProcessEvent(WorldObject obj, uint eventId, WorldObject invoker)
+        {
+        }
     }
 }

@@ -1,22 +1,22 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
-using System;
 
 namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthaurissan
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint Handofthaurissan = 17492;
         public const uint Avatarofflame = 15636;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SayAggro = 0;
         public const uint SaySlay = 1;
@@ -25,9 +25,9 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
     }
 
     [Script]
-    class boss_draganthaurissan : ScriptedAI
+    internal class boss_draganthaurissan : ScriptedAI
     {
-        InstanceScript _instance;
+        private readonly InstanceScript _instance;
 
         public boss_draganthaurissan(Creature creature) : base(creature)
         {
@@ -43,18 +43,24 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
         {
             Talk(TextIds.SayAggro);
             me.CallForHelp(166.0f);
-            _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
-            {
-                Unit target = SelectTarget(SelectTargetMethod.Random, 0);
-                if (target)
-                    DoCast(target, SpellIds.Handofthaurissan);
-                task.Repeat(TimeSpan.FromSeconds(5));
-            });
-            _scheduler.Schedule(TimeSpan.FromSeconds(25), task =>
-            {
-                DoCastVictim(SpellIds.Avatarofflame);
-                task.Repeat(TimeSpan.FromSeconds(18));
-            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(4),
+                                task =>
+                                {
+                                    Unit target = SelectTarget(SelectTargetMethod.Random, 0);
+
+                                    if (target)
+                                        DoCast(target, SpellIds.Handofthaurissan);
+
+                                    task.Repeat(TimeSpan.FromSeconds(5));
+                                });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(25),
+                                task =>
+                                {
+                                    DoCastVictim(SpellIds.Avatarofflame);
+                                    task.Repeat(TimeSpan.FromSeconds(18));
+                                });
         }
 
         public override void KilledUnit(Unit who)
@@ -66,6 +72,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
         public override void JustDied(Unit killer)
         {
             Creature moira = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.DataMoira));
+
             if (moira)
             {
                 moira.GetAI().EnterEvadeMode();
@@ -83,4 +90,3 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.Draganthauri
         }
     }
 }
-

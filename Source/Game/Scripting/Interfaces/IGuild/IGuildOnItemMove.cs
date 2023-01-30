@@ -8,6 +8,6 @@ namespace Game.Scripting.Interfaces.IGuild
 {
     public interface IGuildOnItemMove : IScriptObject
     {
-        void OnItemMove(Guilds.Guild guild, Player player, Item pItem, bool isSrcBank, byte srcContainer, byte srcSlotId, bool isDestBank, byte destContainer, byte destSlotId);
+        void OnItemMove(Guild guild, Player player, Item pItem, bool isSrcBank, byte srcContainer, byte srcSlotId, bool isDestBank, byte destContainer, byte destSlotId);
     }
 }

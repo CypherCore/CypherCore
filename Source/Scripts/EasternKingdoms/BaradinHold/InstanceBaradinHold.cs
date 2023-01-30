@@ -10,28 +10,28 @@ using Game.Scripting.Interfaces.IMap;
 
 namespace Scripts.EasternKingdoms.BaradinHold
 {
-    struct DataTypes
+    internal struct DataTypes
     {
         public const uint Argaloth = 0;
         public const uint Occuthar = 1;
         public const uint Alizabal = 2;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         public const uint EyeOfOccuthar = 52389;
         public const uint FocusFireDummy = 52369;
         public const uint OccutharEye = 52368;
     }
 
-    struct BossIds
+    internal struct BossIds
     {
         public const uint Argaloth = 47120;
         public const uint Occuthar = 52363;
         public const uint Alizabal = 55869;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         public const uint ArgalothDoor = 207619;
         public const uint OccutharDoor = 208953;
@@ -39,29 +39,13 @@ namespace Scripts.EasternKingdoms.BaradinHold
     }
 
     [Script]
-    class instance_baradin_hold : InstanceMapScript, IInstanceMapGetInstanceScript
+    internal class instance_baradin_hold : InstanceMapScript, IInstanceMapGetInstanceScript
     {
-        static DoorData[] doorData =
+        private class instance_baradin_hold_InstanceMapScript : InstanceScript
         {
-            new DoorData(GameObjectIds.ArgalothDoor,  DataTypes.Argaloth, DoorType.Room),
-            new DoorData(GameObjectIds.OccutharDoor,  DataTypes.Occuthar, DoorType.Room),
-            new DoorData(GameObjectIds.AlizabalDoor,  DataTypes.Alizabal, DoorType.Room),
-        };
-
-        static DungeonEncounterData[] encounters =
-        {
-            new DungeonEncounterData(DataTypes.Argaloth, 1033),
-            new DungeonEncounterData(DataTypes.Occuthar, 1250),
-            new DungeonEncounterData(DataTypes.Alizabal, 1332)
-        };
-
-        public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757) { }
-
-        class instance_baradin_hold_InstanceMapScript : InstanceScript
-        {
-            ObjectGuid ArgalothGUID;
-            ObjectGuid OccutharGUID;
-            ObjectGuid AlizabalGUID;
+            private ObjectGuid AlizabalGUID;
+            private ObjectGuid ArgalothGUID;
+            private ObjectGuid OccutharGUID;
 
             public instance_baradin_hold_InstanceMapScript(InstanceMap map) : base(map)
             {
@@ -77,12 +61,15 @@ namespace Scripts.EasternKingdoms.BaradinHold
                 {
                     case BossIds.Argaloth:
                         ArgalothGUID = creature.GetGUID();
+
                         break;
                     case BossIds.Occuthar:
                         OccutharGUID = creature.GetGUID();
+
                         break;
                     case BossIds.Alizabal:
                         AlizabalGUID = creature.GetGUID();
+
                         break;
                 }
             }
@@ -95,6 +82,7 @@ namespace Scripts.EasternKingdoms.BaradinHold
                     case GameObjectIds.OccutharDoor:
                     case GameObjectIds.AlizabalDoor:
                         AddDoor(go, true);
+
                         break;
                 }
             }
@@ -124,9 +112,24 @@ namespace Scripts.EasternKingdoms.BaradinHold
                     case GameObjectIds.OccutharDoor:
                     case GameObjectIds.AlizabalDoor:
                         AddDoor(go, false);
+
                         break;
                 }
             }
+        }
+
+        private static readonly DoorData[] doorData =
+        {
+            new(GameObjectIds.ArgalothDoor, DataTypes.Argaloth, DoorType.Room), new(GameObjectIds.OccutharDoor, DataTypes.Occuthar, DoorType.Room), new(GameObjectIds.AlizabalDoor, DataTypes.Alizabal, DoorType.Room)
+        };
+
+        private static readonly DungeonEncounterData[] encounters =
+        {
+            new(DataTypes.Argaloth, 1033), new(DataTypes.Occuthar, 1250), new(DataTypes.Alizabal, 1332)
+        };
+
+        public instance_baradin_hold() : base(nameof(instance_baradin_hold), 757)
+        {
         }
 
         public InstanceScript GetInstanceScript(InstanceMap map)
@@ -135,4 +138,3 @@ namespace Scripts.EasternKingdoms.BaradinHold
         }
     }
 }
-

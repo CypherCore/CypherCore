@@ -7,6 +7,6 @@ namespace Game.Scripting.Interfaces.IConversation
 {
     public interface IConversationOnConversationLineStarted : IScriptObject
     {
-        void OnConversationLineStarted(Entities.Conversation conversation, uint lineId, Player sender);
+        void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender);
     }
 }

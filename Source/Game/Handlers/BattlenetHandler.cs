@@ -1,43 +1,17 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
 using Framework.Constants;
+using Framework.IO;
 using Game.Networking;
 using Game.Networking.Packets;
 using Google.Protobuf;
-using System;
 
 namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.BattlenetRequest, Status = SessionStatus.Authed)]
-        void HandleBattlenetRequest(BattlenetRequest request)
-        {
-            var handler = Global.ServiceMgr.GetHandler(request.Method.GetServiceHash(), request.Method.GetMethodId());
-            if (handler != null)
-                handler.Invoke(this, request.Method, new CodedInputStream(request.Data));
-            else
-            {
-                SendBattlenetResponse(request.Method.GetServiceHash(), request.Method.GetMethodId(), request.Method.Token, BattlenetRpcErrorCode.RpcNotImplemented);
-                Log.outDebug(LogFilter.SessionRpc, "{0} tried to call invalid service {1}", GetPlayerInfo(), request.Method.GetServiceHash());
-            }
-        }
-
-        [WorldPacketHandler(ClientOpcodes.ChangeRealmTicket, Status = SessionStatus.Authed)]
-        void HandleBattlenetChangeRealmTicket(ChangeRealmTicket changeRealmTicket)
-        {
-            SetRealmListSecret(changeRealmTicket.Secret);
-
-            ChangeRealmTicketResponse realmListTicket = new();
-            realmListTicket.Token = changeRealmTicket.Token;
-            realmListTicket.Allow = true;
-            realmListTicket.Ticket = new Framework.IO.ByteBuffer();
-            realmListTicket.Ticket.WriteCString("WorldserverRealmListTicket");
-
-            SendPacket(realmListTicket);
-        }        
-
         public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token, IMessage response)
         {
             Response bnetResponse = new();
@@ -52,7 +26,7 @@ namespace Game
             SendPacket(bnetResponse);
         }
 
-        public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token,  BattlenetRpcErrorCode status)
+        public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token, BattlenetRpcErrorCode status)
         {
             Response bnetResponse = new();
             bnetResponse.BnetStatus = status;
@@ -80,6 +54,36 @@ namespace Game
                 notification.Data.WriteBytes(request.ToByteArray());
 
             SendPacket(notification);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.BattlenetRequest, Status = SessionStatus.Authed)]
+        private void HandleBattlenetRequest(BattlenetRequest request)
+        {
+            var handler = Global.ServiceMgr.GetHandler(request.Method.GetServiceHash(), request.Method.GetMethodId());
+
+            if (handler != null)
+            {
+                handler.Invoke(this, request.Method, new CodedInputStream(request.Data));
+            }
+            else
+            {
+                SendBattlenetResponse(request.Method.GetServiceHash(), request.Method.GetMethodId(), request.Method.Token, BattlenetRpcErrorCode.RpcNotImplemented);
+                Log.outDebug(LogFilter.SessionRpc, "{0} tried to call invalid service {1}", GetPlayerInfo(), request.Method.GetServiceHash());
+            }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.ChangeRealmTicket, Status = SessionStatus.Authed)]
+        private void HandleBattlenetChangeRealmTicket(ChangeRealmTicket changeRealmTicket)
+        {
+            SetRealmListSecret(changeRealmTicket.Secret);
+
+            ChangeRealmTicketResponse realmListTicket = new();
+            realmListTicket.Token = changeRealmTicket.Token;
+            realmListTicket.Allow = true;
+            realmListTicket.Ticket = new ByteBuffer();
+            realmListTicket.Ticket.WriteCString("WorldserverRealmListTicket");
+
+            SendPacket(realmListTicket);
         }
     }
 }

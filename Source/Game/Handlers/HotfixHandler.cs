@@ -11,7 +11,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.DbQueryBulk, Processing = PacketProcessing.Inplace, Status = SessionStatus.Authed)]
-        void HandleDBQueryBulk(DBQueryBulk dbQuery)
+        private void HandleDBQueryBulk(DBQueryBulk dbQuery)
         {
             IDB2Storage store = Global.DB2Mgr.GetStorage(dbQuery.TableHash);
 
@@ -21,13 +21,15 @@ namespace Game
                 dbReply.TableHash = dbQuery.TableHash;
                 dbReply.RecordID = record.RecordID;
 
-                if (store != null && store.HasRecord(record.RecordID))
+                if (store != null &&
+                    store.HasRecord(record.RecordID))
                 {
-                    dbReply.Status = HotfixRecord.Status.Valid;
+                    dbReply.Status    = HotfixRecord.Status.Valid;
                     dbReply.Timestamp = (uint)GameTime.GetGameTime();
                     store.WriteRecord(record.RecordID, GetSessionDbcLocale(), dbReply.Data);
 
                     var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(dbQuery.TableHash, record.RecordID, GetSessionDbcLocale());
+
                     foreach (HotfixOptionalData optionalData in optionalDataEntries)
                     {
                         dbReply.Data.WriteUInt32(optionalData.Key);
@@ -44,63 +46,68 @@ namespace Game
             }
         }
 
-        void SendAvailableHotfixes()
+        private void SendAvailableHotfixes()
         {
             SendPacket(new AvailableHotfixes(Global.WorldMgr.GetRealmId().GetAddress(), Global.DB2Mgr.GetHotfixData()));
         }
 
         [WorldPacketHandler(ClientOpcodes.HotfixRequest, Status = SessionStatus.Authed)]
-        void HandleHotfixRequest(HotfixRequest hotfixQuery)
+        private void HandleHotfixRequest(HotfixRequest hotfixQuery)
         {
             var hotfixes = Global.DB2Mgr.GetHotfixData();
 
             HotfixConnect hotfixQueryResponse = new();
+
             foreach (var hotfixId in hotfixQuery.Hotfixes)
             {
                 var hotfixRecords = hotfixes.LookupByKey(hotfixId);
+
                 if (hotfixRecords != null)
-                {
                     foreach (var hotfixRecord in hotfixRecords)
                     {
                         HotfixConnect.HotfixData hotfixData = new();
                         hotfixData.Record = hotfixRecord;
+
                         if (hotfixRecord.HotfixStatus == HotfixRecord.Status.Valid)
                         {
                             var storage = Global.DB2Mgr.GetStorage(hotfixRecord.TableHash);
-                            if (storage != null && storage.HasRecord((uint)hotfixRecord.RecordID))
+
+                            if (storage != null &&
+                                storage.HasRecord((uint)hotfixRecord.RecordID))
                             {
                                 var pos = hotfixQueryResponse.HotfixContent.GetSize();
                                 storage.WriteRecord((uint)hotfixRecord.RecordID, GetSessionDbcLocale(), hotfixQueryResponse.HotfixContent);
 
                                 var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(hotfixRecord.TableHash, (uint)hotfixRecord.RecordID, GetSessionDbcLocale());
+
                                 if (optionalDataEntries != null)
-                                {
                                     foreach (var optionalData in optionalDataEntries)
                                     {
                                         hotfixQueryResponse.HotfixContent.WriteUInt32(optionalData.Key);
                                         hotfixQueryResponse.HotfixContent.WriteBytes(optionalData.Data);
                                     }
-                                }
 
                                 hotfixData.Size = hotfixQueryResponse.HotfixContent.GetSize() - pos;
                             }
                             else
                             {
                                 var blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixRecord.TableHash, hotfixRecord.RecordID, GetSessionDbcLocale());
+
                                 if (blobData != null)
                                 {
                                     hotfixData.Size = (uint)blobData.Length;
                                     hotfixQueryResponse.HotfixContent.WriteBytes(blobData);
                                 }
                                 else
-                                    // Do not send Status::Valid when we don't have a hotfix blob for current locale
+                                // Do not send Status::Valid when we don't have a hotfix blob for current locale
+                                {
                                     hotfixData.Record.HotfixStatus = storage != null ? HotfixRecord.Status.RecordRemoved : HotfixRecord.Status.Invalid;
+                                }
                             }
                         }
 
                         hotfixQueryResponse.Hotfixes.Add(hotfixData);
                     }
-                }
             }
 
             SendPacket(hotfixQueryResponse);

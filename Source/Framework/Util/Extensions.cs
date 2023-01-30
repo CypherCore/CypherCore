@@ -6,10 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -19,6 +19,7 @@ namespace System
         {
             long lValue = Convert.ToInt64(value);
             long lFlag = Convert.ToInt64(flag);
+
             return (lValue & lFlag) != 0;
         }
 
@@ -29,17 +30,19 @@ namespace System
             else
                 return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
         }
-        
+
         public static byte[] ToByteArray(this string str)
         {
-            str = str.Replace(" ", String.Empty);
+            str = str.Replace(" ", string.Empty);
 
             var res = new byte[str.Length / 2];
+
             for (int i = 0; i < res.Length; ++i)
             {
-                string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
+                string temp = string.Concat(str[i * 2], str[i * 2 + 1]);
                 res[i] = Convert.ToByte(temp, 16);
             }
+
             return res;
         }
 
@@ -48,14 +51,9 @@ namespace System
             return Array.ConvertAll(value.Split(separator), byte.Parse);
         }
 
-        static uint LeftRotate(this uint value, int shiftCount)
-        {
-            return (value << shiftCount) | (value >> (0x20 - shiftCount));
-        }
-
         public static byte[] GenerateRandomKey(this byte[] s, int length)
         {
-            var random = new Random((int)((uint)(Guid.NewGuid().GetHashCode() ^ 1 >> 89 << 2 ^ 42)).LeftRotate(13));
+            var random = new Random((int)((uint)(Guid.NewGuid().GetHashCode() ^ ((1 >> 89) << 2) ^ 42)).LeftRotate(13));
             var key = new byte[length];
 
             for (int i = 0; i < length; i++)
@@ -124,7 +122,7 @@ namespace System
         public static uint[] SerializeObject<T>(this T obj)
         {
             //if (obj.GetType()<StructLayoutAttribute>() == null)
-                //return null;
+            //return null;
 
             var size = Marshal.SizeOf(typeof(T));
             var ptr = Marshal.AllocHGlobal(size);
@@ -189,12 +187,15 @@ namespace System
             {
                 case 0:
                     vector.X = value;
+
                     break;
                 case 1:
                     vector.Y = value;
+
                     break;
                 case 2:
                     vector.Z = value;
+
                     break;
                 default:
                     throw new IndexOutOfRangeException();
@@ -231,24 +232,21 @@ namespace System
         {
             float lenSquared = vector.LengthSquared();
             float invSqrt = 1.0f / MathF.Sqrt(lenSquared);
+
             return new Vector3(vector.X * invSqrt, vector.Y * invSqrt, vector.Z * invSqrt);
         }
-        
+
         public static Vector3 directionOrZero(this Vector3 vector)
         {
             float mag = vector.LengthSquared();
+
             if (mag < 0.0000001f)
-            {
                 return Vector3.Zero;
-            }
-            else if (mag < 1.00001f && mag > 0.99999f)
-            {
+            else if (mag < 1.00001f &&
+                     mag > 0.99999f)
                 return vector;
-            }
             else
-            {
                 return vector * (1.0f / mag);
-            }
         }
 
         public static void toEulerAnglesZYX(this Quaternion quaternion, out float z, out float y, out float x)
@@ -258,6 +256,7 @@ namespace System
             //       -sy              cy*sx           cx*cy
 
             var matrix = quaternion.ToMatrix();
+
             if (matrix.M31 < 1.0)
             {
                 if (matrix.M31 > -1.0)
@@ -282,7 +281,7 @@ namespace System
                 x = 0.0f;
             }
         }
-        
+
         public static Matrix4x4 fromEulerAnglesZYX(float fYAngle, float fPAngle, float fRAngle)
         {
             float fCos = MathF.Cos(fYAngle);
@@ -300,7 +299,13 @@ namespace System
             return kZMat * (kYMat * kXMat);
         }
 
+        private static uint LeftRotate(this uint value, int shiftCount)
+        {
+            return (value << shiftCount) | (value >> (0x20 - shiftCount));
+        }
+
         #region Strings
+
         public static bool IsEmpty(this string str)
         {
             return string.IsNullOrEmpty(str);
@@ -309,6 +314,7 @@ namespace System
         public static T ToEnum<T>(this string str) where T : struct
         {
             T value;
+
             if (!Enum.TryParse(str, out value))
                 return default;
 
@@ -318,7 +324,7 @@ namespace System
         public static string ConvertFormatSyntax(this string str)
         {
             string pattern = @"(%\W*\d*[a-zA-Z]*)";
-            
+
             int count = 0;
             string result = Regex.Replace(str, pattern, m => string.Concat("{", count++, "}"));
 
@@ -327,7 +333,8 @@ namespace System
 
         public static bool Like(this string toSearch, string toFind)
         {
-            if (toSearch == null || toFind == null)
+            if (toSearch == null ||
+                toFind == null)
                 return false;
 
             return toSearch.ToLower().Contains(toFind.ToLower());
@@ -336,6 +343,7 @@ namespace System
         public static bool IsNumber(this string str)
         {
             double value;
+
             return double.TryParse(str, out value);
         }
 
@@ -351,48 +359,60 @@ namespace System
         {
             if (isBasicLatinCharacter(wchar))
                 return true;
-            if (wchar >= 0x00C0 && wchar <= 0x00D6)                  // LATIN CAPITAL LETTER A WITH GRAVE - LATIN CAPITAL LETTER O WITH DIAERESIS
+
+            if (wchar >= 0x00C0 &&
+                wchar <= 0x00D6) // LATIN CAPITAL LETTER A WITH GRAVE - LATIN CAPITAL LETTER O WITH DIAERESIS
                 return true;
-            if (wchar >= 0x00D8 && wchar <= 0x00DE)                  // LATIN CAPITAL LETTER O WITH STROKE - LATIN CAPITAL LETTER THORN
+
+            if (wchar >= 0x00D8 &&
+                wchar <= 0x00DE) // LATIN CAPITAL LETTER O WITH STROKE - LATIN CAPITAL LETTER THORN
                 return true;
-            if (wchar == 0x00DF)                                     // LATIN SMALL LETTER SHARP S
+
+            if (wchar == 0x00DF) // LATIN SMALL LETTER SHARP S
                 return true;
-            if (wchar >= 0x00E0 && wchar <= 0x00F6)                  // LATIN SMALL LETTER A WITH GRAVE - LATIN SMALL LETTER O WITH DIAERESIS
+
+            if (wchar >= 0x00E0 &&
+                wchar <= 0x00F6) // LATIN SMALL LETTER A WITH GRAVE - LATIN SMALL LETTER O WITH DIAERESIS
                 return true;
-            if (wchar >= 0x00F8 && wchar <= 0x00FE)                  // LATIN SMALL LETTER O WITH STROKE - LATIN SMALL LETTER THORN
+
+            if (wchar >= 0x00F8 &&
+                wchar <= 0x00FE) // LATIN SMALL LETTER O WITH STROKE - LATIN SMALL LETTER THORN
                 return true;
-            if (wchar >= 0x0100 && wchar <= 0x012F)                  // LATIN CAPITAL LETTER A WITH MACRON - LATIN SMALL LETTER I WITH OGONEK
+
+            if (wchar >= 0x0100 &&
+                wchar <= 0x012F) // LATIN CAPITAL LETTER A WITH MACRON - LATIN SMALL LETTER I WITH OGONEK
                 return true;
-            if (wchar == 0x1E9E)                                     // LATIN CAPITAL LETTER SHARP S
+
+            if (wchar == 0x1E9E) // LATIN CAPITAL LETTER SHARP S
                 return true;
+
             return false;
         }
 
         public static bool isBasicLatinCharacter(char wchar)
         {
-            if (wchar >= 'a' && wchar <= 'z')                      // LATIN SMALL LETTER A - LATIN SMALL LETTER Z
+            if (wchar >= 'a' &&
+                wchar <= 'z') // LATIN SMALL LETTER A - LATIN SMALL LETTER Z
                 return true;
-            if (wchar >= 'A' && wchar <= 'Z')                      // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
+
+            if (wchar >= 'A' &&
+                wchar <= 'Z') // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
                 return true;
+
             return false;
         }
 
         public static Vector3 ParseVector3(this string value)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
+
             if (m.Success)
-            {
-                return new Vector3(
-                    float.Parse(m.Result("${x}")),
-                    float.Parse(m.Result("${y}")),
-                    float.Parse(m.Result("${z}"))
-                    );
-            }
+                return new Vector3(float.Parse(m.Result("${x}")),
+                                   float.Parse(m.Result("${y}")),
+                                   float.Parse(m.Result("${z}")));
             else
-            {
                 throw new Exception("Unsuccessful Match.");
-            }
         }
 
         public static (string token, string tail) Tokenize(this string args)
@@ -401,15 +421,19 @@ namespace System
             string tail = "";
 
             int delimPos = args.IndexOf(' ');
+
             if (delimPos != -1)
             {
-                token = args.Substring(0, delimPos);
+                token = args[..delimPos];
                 int tailPos = args.FindFirstNotOf(" ", delimPos);
+
                 if (tailPos != -1)
-                    tail = args.Substring(tailPos);
+                    tail = args[tailPos..];
             }
             else
+            {
                 token = args;
+            }
 
             return (token, tail);
         }
@@ -422,9 +446,11 @@ namespace System
 
             return -1;
         }
+
         #endregion
 
         #region BinaryReader
+
         public static string ReadCString(this BinaryReader reader)
         {
             byte num;
@@ -439,6 +465,7 @@ namespace System
         public static string ReadString(this BinaryReader reader, int count)
         {
             var array = reader.ReadBytes(count);
+
             return Encoding.ASCII.GetString(array);
         }
 
@@ -456,12 +483,10 @@ namespace System
             T[] result = new T[source.Length / Unsafe.SizeOf<T>()];
 
             if (source.Length > 0)
-            {
                 unsafe
                 {
                     Unsafe.CopyBlockUnaligned(Unsafe.AsPointer(ref result[0]), Unsafe.AsPointer(ref source[0]), (uint)source.Length);
                 }
-            }
 
             return result;
         }
@@ -472,6 +497,7 @@ namespace System
 
             return Unsafe.ReadUnaligned<T>(ref result[0]);
         }
+
         #endregion
     }
 }

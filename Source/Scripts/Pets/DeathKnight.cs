@@ -1,20 +1,22 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
+using Game.Maps.Checks;
+using Game.Maps.Notifiers;
 using Game.Scripting;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Scripts.Pets
 {
     namespace DeathKnight
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             public const uint SummonGargoyle1 = 49206;
             public const uint SummonGargoyle2 = 50514;
@@ -23,14 +25,17 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_dk_ebon_gargoyle : CasterAI
+        internal class npc_pet_dk_ebon_gargoyle : CasterAI
         {
-            public npc_pet_dk_ebon_gargoyle(Creature creature) : base(creature) { }
+            public npc_pet_dk_ebon_gargoyle(Creature creature) : base(creature)
+            {
+            }
 
             public override void InitializeAI()
             {
                 base.InitializeAI();
                 ObjectGuid ownerGuid = me.GetOwnerGUID();
+
                 if (ownerGuid.IsEmpty())
                     return;
 
@@ -39,20 +44,21 @@ namespace Scripts.Pets
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
                 var searcher = new UnitListSearcher(me, targets, u_check);
                 Cell.VisitAllObjects(me, searcher, 30.0f);
+
                 foreach (var target in targets)
-                {
                     if (target.HasAura(SpellIds.SummonGargoyle1, ownerGuid))
                     {
                         me.Attack(target, false);
+
                         break;
                     }
-                }
             }
 
             public override void JustDied(Unit killer)
             {
                 // Stop Feeding Gargoyle when it dies
                 Unit owner = me.GetOwner();
+
                 if (owner)
                     owner.RemoveAurasDueToSpell(SpellIds.SummonGargoyle2);
             }
@@ -60,11 +66,14 @@ namespace Scripts.Pets
             // Fly away when dismissed
             public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
             {
-                if (spellInfo.Id != SpellIds.DismissGargoyle || !me.IsAlive())
+                if (spellInfo.Id != SpellIds.DismissGargoyle ||
+                    !me.IsAlive())
                     return;
 
                 Unit owner = me.GetOwner();
-                if (!owner || owner != caster)
+
+                if (!owner ||
+                    owner != caster)
                     return;
 
                 // Stop Fighting
@@ -88,22 +97,25 @@ namespace Scripts.Pets
                 // Despawn as soon as possible
                 me.DespawnOrUnsummon(TimeSpan.FromSeconds(4));
             }
-
-
         }
 
         [Script]
-        class npc_pet_dk_guardian : AggressorAI
+        internal class npc_pet_dk_guardian : AggressorAI
         {
-            public npc_pet_dk_guardian(Creature creature) : base(creature) { }
+            public npc_pet_dk_guardian(Creature creature) : base(creature)
+            {
+            }
 
             public override bool CanAIAttack(Unit target)
             {
                 if (!target)
                     return false;
+
                 Unit owner = me.GetOwner();
+
                 if (owner && !target.IsInCombatWith(owner))
                     return false;
+
                 return base.CanAIAttack(target);
             }
         }

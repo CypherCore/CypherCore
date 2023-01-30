@@ -18,7 +18,7 @@ namespace Framework.Constants
         BattlePet = 10,
         Calendar = 11,
         Mail = 12,
-        PvP = 13,
+        PvP = 13
     }
 
     public enum ReportMajorCategory
@@ -26,7 +26,7 @@ namespace Framework.Constants
         InappropriateCommunication = 0,
         GameplaySabotage = 1,
         Cheating = 2,
-        InappropriateName = 3,
+        InappropriateName = 3
     }
 
     public enum ReportMinorCategory
@@ -45,7 +45,7 @@ namespace Framework.Constants
         CharacterName = 0x0800,
         GuildName = 0x1000,
         Description = 0x2000,
-        Name = 0x4000,
+        Name = 0x4000
     }
 
     public enum GMTicketSystemStatus

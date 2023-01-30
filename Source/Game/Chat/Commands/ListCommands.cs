@@ -1,28 +1,136 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Spells;
-using System;
-using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
     [CommandGroup("list")]
-    class ListCommands
+    internal class ListCommands
     {
+        [CommandGroup("Auras")]
+        private class ListAuraCommands
+        {
+            [Command("", RBACPermissions.CommandListAuras)]
+            private static bool HandleListAllAurasCommand(CommandHandler handler)
+            {
+                return ListAurasCommand(handler, null, null);
+            }
+
+            [Command("Id", RBACPermissions.CommandListAuras)]
+            private static bool HandleListAurasByIdCommand(CommandHandler handler, uint spellId)
+            {
+                return ListAurasCommand(handler, spellId, null);
+            }
+
+            [Command("Name", RBACPermissions.CommandListAuras)]
+            private static bool HandleListAurasByNameCommand(CommandHandler handler, Tail namePart)
+            {
+                return ListAurasCommand(handler, null, namePart);
+            }
+
+            private static bool ListAurasCommand(CommandHandler handler, uint? spellId, string namePart)
+            {
+                Unit unit = handler.GetSelectedUnit();
+
+                if (!unit)
+                {
+                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+
+                    return false;
+                }
+
+                string talentStr = handler.GetCypherString(CypherStrings.Talent);
+                string passiveStr = handler.GetCypherString(CypherStrings.Passive);
+
+                var auras = unit.GetAppliedAuras();
+                handler.SendSysMessage(CypherStrings.CommandTargetListauras, unit.GetAppliedAurasCount());
+
+                foreach (var (_, aurApp) in auras)
+                {
+                    Aura aura = aurApp.GetBase();
+                    string name = aura.GetSpellInfo().SpellName[handler.GetSessionDbcLocale()];
+                    bool talent = aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.IsTalent);
+
+                    if (!ShouldListAura(aura.GetSpellInfo(), spellId, namePart, handler.GetSessionDbcLocale()))
+                        continue;
+
+                    string ss_name = "|cffffffff|Hspell:" + aura.GetId() + "|h[" + name + "]|h|r";
+
+                    handler.SendSysMessage(CypherStrings.CommandTargetAuradetail,
+                                           aura.GetId(),
+                                           (handler.GetSession() != null ? ss_name : name),
+                                           aurApp.GetEffectMask(),
+                                           aura.GetCharges(),
+                                           aura.GetStackAmount(),
+                                           aurApp.GetSlot(),
+                                           aura.GetDuration(),
+                                           aura.GetMaxDuration(),
+                                           (aura.IsPassive() ? passiveStr : ""),
+                                           (talent ? talentStr : ""),
+                                           aura.GetCasterGUID().IsPlayer() ? "player" : "creature",
+                                           aura.GetCasterGUID().ToString());
+                }
+
+                for (AuraType auraType = 0; auraType < AuraType.Total; ++auraType)
+                {
+                    var auraList = unit.GetAuraEffectsByType(auraType);
+
+                    if (auraList.Empty())
+                        continue;
+
+                    bool sizeLogged = false;
+
+                    foreach (var effect in auraList)
+                    {
+                        if (!ShouldListAura(effect.GetSpellInfo(), spellId, namePart, handler.GetSessionDbcLocale()))
+                            continue;
+
+                        if (!sizeLogged)
+                        {
+                            sizeLogged = true;
+                            handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, auraType);
+                        }
+
+                        handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, effect.GetId(), effect.GetEffIndex(), effect.GetAmount());
+                    }
+                }
+
+                return true;
+            }
+
+            private static bool ShouldListAura(SpellInfo spellInfo, uint? spellId, string namePart, Locale locale)
+            {
+                if (spellId.HasValue)
+                    return spellInfo.Id == spellId.Value;
+
+                if (!namePart.IsEmpty())
+                {
+                    string name = spellInfo.SpellName[locale];
+
+                    return name.Like(namePart);
+                }
+
+                return true;
+            }
+        }
+
         [Command("creature", RBACPermissions.CommandListCreature, true)]
-        static bool HandleListCreatureCommand(CommandHandler handler, uint creatureId, uint? countArg)
+        private static bool HandleListCreatureCommand(CommandHandler handler, uint creatureId, uint? countArg)
         {
             CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(creatureId);
+
             if (cInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandInvalidcreatureid, creatureId);
+
                 return false;
             }
 
@@ -32,22 +140,30 @@ namespace Game.Chat.Commands
                 return false;
 
             uint creatureCount = 0;
-            SQLResult result = DB.World.Query("SELECT COUNT(guid) FROM creature WHERE id='{0}'", creatureId);
+            SQLResult result = DB.World.Query("SELECT COUNT(Guid) FROM creature WHERE Id='{0}'", creatureId);
+
             if (!result.IsEmpty())
                 creatureCount = result.Read<uint>(0);
 
             if (handler.GetSession() != null)
             {
                 Player player = handler.GetSession().GetPlayer();
-                result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM creature WHERE id = '{3}' ORDER BY order_ ASC LIMIT {4}",
-                                player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), creatureId, count);
+
+                result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM creature WHERE Id = '{3}' ORDER BY order_ ASC LIMIT {4}",
+                                        player.GetPositionX(),
+                                        player.GetPositionY(),
+                                        player.GetPositionZ(),
+                                        creatureId,
+                                        count);
             }
             else
-                result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map FROM creature WHERE id = '{0}' LIMIT {1}",
-                    creatureId, count);
+            {
+                result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map FROM creature WHERE Id = '{0}' LIMIT {1}",
+                                        creatureId,
+                                        count);
+            }
 
             if (!result.IsEmpty())
-            {
                 do
                 {
                     ulong guid = result.Read<ulong>(0);
@@ -59,6 +175,7 @@ namespace Game.Chat.Commands
 
                     // Get map (only support base map from console)
                     Map thisMap = null;
+
                     if (handler.GetSession() != null)
                         thisMap = handler.GetSession().GetPlayer().GetMap();
 
@@ -66,8 +183,10 @@ namespace Game.Chat.Commands
                     if (thisMap)
                     {
                         var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
+
                         foreach (var creature in creBounds)
                             handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
+
                         liveFound = !creBounds.Empty();
                     }
 
@@ -78,17 +197,15 @@ namespace Game.Chat.Commands
                         else
                             handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, "", "");
                     }
-                }
-                while (result.NextRow());
-            }
+                } while (result.NextRow());
 
             handler.SendSysMessage(CypherStrings.CommandListcreaturemessage, creatureId, creatureCount);
 
             return true;
         }
 
-        [Command("item", RBACPermissions.CommandListItem, true)]
-        static bool HandleListItemCommand(CommandHandler handler, uint itemId, uint? countArg)
+        [Command("Item", RBACPermissions.CommandListItem, true)]
+        private static bool HandleListItemCommand(CommandHandler handler, uint itemId, uint? countArg)
         {
             uint count = countArg.GetValueOrDefault(10);
 
@@ -111,7 +228,6 @@ namespace Game.Chat.Commands
             result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
-            {
                 do
                 {
                     ObjectGuid itemGuid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0));
@@ -122,6 +238,7 @@ namespace Game.Chat.Commands
                     string ownerName = result.Read<string>(5);
 
                     string itemPos;
+
                     if (Player.IsEquipmentPos((byte)itemBag, itemSlot))
                         itemPos = "[equipped]";
                     else if (Player.IsInventoryPos((byte)itemBag, itemSlot))
@@ -136,9 +253,7 @@ namespace Game.Chat.Commands
                     handler.SendSysMessage(CypherStrings.ItemlistSlot, itemGuid.ToString(), ownerName, ownerGuid.ToString(), ownerAccountId, itemPos);
 
                     count--;
-                }
-                while (result.NextRow());
-            }
+                } while (result.NextRow());
 
             // mail case
             uint mailCount = 0;
@@ -158,10 +273,12 @@ namespace Game.Chat.Commands
                 result = DB.Characters.Query(stmt);
             }
             else
-                result = null;
-
-            if (result != null && !result.IsEmpty())
             {
+                result = null;
+            }
+
+            if (result != null &&
+                !result.IsEmpty())
                 do
                 {
                     ulong itemGuid = result.Read<ulong>(0);
@@ -177,9 +294,7 @@ namespace Game.Chat.Commands
                     handler.SendSysMessage(CypherStrings.ItemlistMail, itemGuid, itemSenderName, itemSender, itemSenderAccountId, itemReceiverName, itemReceiver, itemReceiverAccount, itemPos);
 
                     count--;
-                }
-                while (result.NextRow());
-            }
+                } while (result.NextRow());
 
             // auction case
             uint auctionCount = 0;
@@ -199,10 +314,12 @@ namespace Game.Chat.Commands
                 result = DB.Characters.Query(stmt);
             }
             else
-                result = null;
-
-            if (result != null && !result.IsEmpty())
             {
+                result = null;
+            }
+
+            if (result != null &&
+                !result.IsEmpty())
                 do
                 {
                     ObjectGuid itemGuid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0));
@@ -213,9 +330,7 @@ namespace Game.Chat.Commands
                     string itemPos = "[in auction]";
 
                     handler.SendSysMessage(CypherStrings.ItemlistAuction, itemGuid.ToString(), ownerName, owner.ToString(), ownerAccountId, itemPos);
-                }
-                while (result.NextRow());
-            }
+                } while (result.NextRow());
 
             // guild bank case
             uint guildCount = 0;
@@ -233,7 +348,6 @@ namespace Game.Chat.Commands
             result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
-            {
                 do
                 {
                     ObjectGuid itemGuid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(0));
@@ -245,31 +359,33 @@ namespace Game.Chat.Commands
                     handler.SendSysMessage(CypherStrings.ItemlistGuild, itemGuid.ToString(), guildName, guildGuid.ToString(), itemPos);
 
                     count--;
-                }
-                while (result.NextRow());
-            }
+                } while (result.NextRow());
 
             if (inventoryCount + mailCount + auctionCount + guildCount == 0)
             {
                 handler.SendSysMessage(CypherStrings.CommandNoitemfound);
+
                 return false;
             }
 
             handler.SendSysMessage(CypherStrings.CommandListitemmessage, itemId, inventoryCount + mailCount + auctionCount + guildCount, inventoryCount, mailCount, auctionCount, guildCount);
+
             return true;
         }
 
         [Command("mail", RBACPermissions.CommandListMail, true)]
-        static bool HandleListMailCommand(CommandHandler handler, PlayerIdentifier player)
+        private static bool HandleListMailCommand(CommandHandler handler, PlayerIdentifier player)
         {
             if (player == null)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
+
             if (player == null)
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
             stmt.AddValue(0, player.GetGUID().GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
+
             if (!result.IsEmpty())
             {
                 uint countMail = result.Read<uint>(0);
@@ -283,7 +399,6 @@ namespace Game.Chat.Commands
                 SQLResult result1 = DB.Characters.Query(stmt);
 
                 if (!result1.IsEmpty())
-                {
                     do
                     {
                         uint messageId = result1.Read<uint>(0);
@@ -308,22 +423,23 @@ namespace Game.Chat.Commands
                         if (hasItem == 1)
                         {
                             SQLResult result2 = DB.Characters.Query("SELECT item_guid FROM mail_items WHERE mail_id = '{0}'", messageId);
+
                             if (!result2.IsEmpty())
-                            {
                                 do
                                 {
                                     uint item_guid = result2.Read<uint>(0);
                                     stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_ITEMS);
                                     stmt.AddValue(0, item_guid);
                                     SQLResult result3 = DB.Characters.Query(stmt);
+
                                     if (!result3.IsEmpty())
-                                    {
                                         do
                                         {
                                             uint item_entry = result3.Read<uint>(0);
                                             uint item_count = result3.Read<uint>(1);
 
                                             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(item_entry);
+
                                             if (itemTemplate == null)
                                                 continue;
 
@@ -334,34 +450,37 @@ namespace Game.Chat.Commands
                                                 handler.SendSysMessage(CypherStrings.ListMailInfoItem, itemStr, item_entry, item_guid, item_count);
                                             }
                                             else
+                                            {
                                                 handler.SendSysMessage(CypherStrings.ListMailInfoItem, itemTemplate.GetName(handler.GetSessionDbcLocale()), item_entry, item_guid, item_count);
-                                        }
-                                        while (result3.NextRow());
-                                    }
-                                }
-                                while (result2.NextRow());
-                            }
+                                            }
+                                        } while (result3.NextRow());
+                                } while (result2.NextRow());
                         }
+
                         handler.SendSysMessage(CypherStrings.AccountListBar);
-                    }
-                    while (result1.NextRow());
-                }
+                    } while (result1.NextRow());
                 else
                     handler.SendSysMessage(CypherStrings.ListMailNotFound);
+
                 return true;
             }
             else
+            {
                 handler.SendSysMessage(CypherStrings.ListMailNotFound);
+            }
+
             return true;
         }
 
         [Command("object", RBACPermissions.CommandListObject, true)]
-        static bool HandleListObjectCommand(CommandHandler handler, uint gameObjectId, uint? countArg)
+        private static bool HandleListObjectCommand(CommandHandler handler, uint gameObjectId, uint? countArg)
         {
             GameObjectTemplate gInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObjectId);
+
             if (gInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandListobjinvalidid, gameObjectId);
+
                 return false;
             }
 
@@ -371,22 +490,30 @@ namespace Game.Chat.Commands
                 return false;
 
             uint objectCount = 0;
-            SQLResult result = DB.World.Query("SELECT COUNT(guid) FROM gameobject WHERE id='{0}'", gameObjectId);
+            SQLResult result = DB.World.Query("SELECT COUNT(Guid) FROM gameobject WHERE Id='{0}'", gameObjectId);
+
             if (!result.IsEmpty())
                 objectCount = result.Read<uint>(0);
 
             if (handler.GetSession() != null)
             {
                 Player player = handler.GetSession().GetPlayer();
-                result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map, id, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE id = '{3}' ORDER BY order_ ASC LIMIT {4}",
-                    player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), gameObjectId, count);
+
+                result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map, Id, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE Id = '{3}' ORDER BY order_ ASC LIMIT {4}",
+                                        player.GetPositionX(),
+                                        player.GetPositionY(),
+                                        player.GetPositionZ(),
+                                        gameObjectId,
+                                        count);
             }
             else
-                result = DB.World.Query("SELECT guid, position_x, position_y, position_z, map, id FROM gameobject WHERE id = '{0}' LIMIT {1}",
-                    gameObjectId, count);
+            {
+                result = DB.World.Query("SELECT Guid, position_x, position_y, position_z, map, Id FROM gameobject WHERE Id = '{0}' LIMIT {1}",
+                                        gameObjectId,
+                                        count);
+            }
 
             if (!result.IsEmpty())
-            {
                 do
                 {
                     ulong guid = result.Read<ulong>(0);
@@ -399,6 +526,7 @@ namespace Game.Chat.Commands
 
                     // Get map (only support base map from console)
                     Map thisMap = null;
+
                     if (handler.GetSession() != null)
                         thisMap = handler.GetSession().GetPlayer().GetMap();
 
@@ -406,8 +534,10 @@ namespace Game.Chat.Commands
                     if (thisMap)
                     {
                         var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
+
                         foreach (var go in goBounds)
                             handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID().ToString(), go.IsSpawned() ? "*" : " ");
+
                         liveFound = !goBounds.Empty();
                     }
 
@@ -418,9 +548,7 @@ namespace Game.Chat.Commands
                         else
                             handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId, "", "");
                     }
-                }
-                while (result.NextRow());
-            }
+                } while (result.NextRow());
 
             handler.SendSysMessage(CypherStrings.CommandListobjmessage, gameObjectId, objectCount);
 
@@ -428,7 +556,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("respawns", RBACPermissions.CommandListRespawns)]
-        static bool HandleListRespawnsCommand(CommandHandler handler, uint? range)
+        private static bool HandleListRespawnsCommand(CommandHandler handler, uint? range)
         {
             Player player = handler.GetSession().GetPlayer();
             Map map = player.GetMap();
@@ -438,6 +566,7 @@ namespace Game.Chat.Commands
 
             uint zoneId = player.GetZoneId();
             string zoneName = GetZoneName(zoneId, locale);
+
             for (SpawnObjectType type = 0; type < SpawnObjectType.NumSpawnTypes; type++)
             {
                 if (range.HasValue)
@@ -448,17 +577,21 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.ListRespawnsListheader);
                 List<RespawnInfo> respawns = new();
                 map.GetRespawnInfo(respawns, (SpawnObjectTypeMask)(1 << (int)type));
+
                 foreach (RespawnInfo ri in respawns)
                 {
-                    SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(ri.type, ri.spawnId);
+                    SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(ri.Type, ri.SpawnId);
+
                     if (data == null)
                         continue;
 
                     uint respawnZoneId = 0;
                     SpawnData edata = data.ToSpawnData();
+
                     if (edata != null)
                     {
                         respawnZoneId = map.GetZoneId(PhasingHandler.EmptyPhaseShift, edata.SpawnPoint);
+
                         if (range.HasValue)
                         {
                             if (!player.IsInDist(edata.SpawnPoint, range.Value))
@@ -471,26 +604,29 @@ namespace Game.Chat.Commands
                         }
                     }
 
-                    uint gridY = ri.gridId / MapConst.MaxGrids;
-                    uint gridX = ri.gridId % MapConst.MaxGrids;
+                    uint gridY = ri.GridId / MapConst.MaxGrids;
+                    uint gridX = ri.GridId % MapConst.MaxGrids;
 
-                    string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.respawnTime - GameTime.GetGameTime()), TimeFormat.ShortText) : stringOverdue;
-                    handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
+                    string respawnTime = ri.RespawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.RespawnTime - GameTime.GetGameTime()), TimeFormat.ShortText) : stringOverdue;
+                    handler.SendSysMessage($"{ri.SpawnId} | {ri.Entry} | [{gridX:2},{gridY:2}] | {GetZoneName(respawnZoneId, locale)} ({respawnZoneId}) | {respawnTime}{(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? "" : " (inactive)")}");
                 }
             }
+
             return true;
         }
 
         [Command("scenes", RBACPermissions.CommandListScenes)]
-        static bool HandleListScenesCommand(CommandHandler handler)
+        private static bool HandleListScenesCommand(CommandHandler handler)
         {
             Player target = handler.GetSelectedPlayer();
+
             if (!target)
                 target = handler.GetSession().GetPlayer();
 
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
+
                 return false;
             }
 
@@ -505,7 +641,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("spawnpoints", RBACPermissions.CommandListSpawnpoints)]
-        static bool HandleListSpawnPointsCommand(CommandHandler handler)
+        private static bool HandleListSpawnPointsCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
             Map map = player.GetMap();
@@ -516,130 +652,43 @@ namespace Game.Chat.Commands
             foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
             {
                 SpawnData data = pair.Value;
+
                 if (data.MapId != mapId)
                     continue;
 
                 CreatureTemplate cTemp = Global.ObjectMgr.GetCreatureTemplate(data.Id);
+
                 if (cTemp == null)
                     continue;
 
                 if (showAll || data.SpawnPoint.IsInDist2d(player, 5000.0f))
                     handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({cTemp.Name}) | X: {data.SpawnPoint.GetPositionX():3} | Y: {data.SpawnPoint.GetPositionY():3} | Z: {data.SpawnPoint.GetPositionZ():3}");
             }
+
             foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
             {
                 SpawnData data = pair.Value;
+
                 if (data.MapId != mapId)
                     continue;
 
                 GameObjectTemplate goTemp = Global.ObjectMgr.GetGameObjectTemplate(data.Id);
+
                 if (goTemp == null)
                     continue;
 
                 if (showAll || data.SpawnPoint.IsInDist2d(player, 5000.0f))
                     handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.SpawnId} | Entry: {data.Id} ({goTemp.name}) | X: {data.SpawnPoint.GetPositionX():3} | Y: {data.SpawnPoint.GetPositionY():3} | Z: {data.SpawnPoint.GetPositionZ():3}");
             }
+
             return true;
         }
 
-        static string GetZoneName(uint zoneId, Locale locale)
+        private static string GetZoneName(uint zoneId, Locale locale)
         {
             AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+
             return zoneEntry != null ? zoneEntry.AreaName[locale] : "<unknown zone>";
-        }
-
-        [CommandGroup("auras")]
-        class ListAuraCommands
-        {
-            [Command("", RBACPermissions.CommandListAuras)]
-            static bool HandleListAllAurasCommand(CommandHandler handler)
-            {
-                return ListAurasCommand(handler, null, null);
-            }
-
-            [Command("id", RBACPermissions.CommandListAuras)]
-            static bool HandleListAurasByIdCommand(CommandHandler handler, uint spellId)
-            {
-                return ListAurasCommand(handler, spellId, null);
-            }
-
-            [Command("name", RBACPermissions.CommandListAuras)]
-            static bool HandleListAurasByNameCommand(CommandHandler handler, Tail namePart)
-            {
-                return ListAurasCommand(handler, null, namePart);
-            }
-
-            static bool ListAurasCommand(CommandHandler handler, uint? spellId, string namePart)
-            {
-                Unit unit = handler.GetSelectedUnit();
-                if (!unit)
-                {
-                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                    return false;
-                }
-
-                string talentStr = handler.GetCypherString(CypherStrings.Talent);
-                string passiveStr = handler.GetCypherString(CypherStrings.Passive);
-
-                var auras = unit.GetAppliedAuras();
-                handler.SendSysMessage(CypherStrings.CommandTargetListauras, unit.GetAppliedAurasCount());
-                foreach (var (_, aurApp) in auras)
-                {
-                    Aura aura = aurApp.GetBase();
-                    string name = aura.GetSpellInfo().SpellName[handler.GetSessionDbcLocale()];
-                    bool talent = aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.IsTalent);
-
-                    if (!ShouldListAura(aura.GetSpellInfo(), spellId, namePart, handler.GetSessionDbcLocale()))
-                        continue;
-
-                    string ss_name = "|cffffffff|Hspell:" + aura.GetId() + "|h[" + name + "]|h|r";
-
-                    handler.SendSysMessage(CypherStrings.CommandTargetAuradetail, aura.GetId(), (handler.GetSession() != null ? ss_name : name),
-                        aurApp.GetEffectMask(), aura.GetCharges(), aura.GetStackAmount(), aurApp.GetSlot(),
-                        aura.GetDuration(), aura.GetMaxDuration(), (aura.IsPassive() ? passiveStr : ""),
-                        (talent ? talentStr : ""), aura.GetCasterGUID().IsPlayer() ? "player" : "creature",
-                        aura.GetCasterGUID().ToString());
-                }
-
-                for (AuraType auraType = 0; auraType < AuraType.Total; ++auraType)
-                {
-                    var auraList = unit.GetAuraEffectsByType(auraType);
-                    if (auraList.Empty())
-                        continue;
-
-                    bool sizeLogged = false;
-
-                    foreach (var effect in auraList)
-                    {
-                        if (!ShouldListAura(effect.GetSpellInfo(), spellId, namePart, handler.GetSessionDbcLocale()))
-                            continue;
-
-                        if (!sizeLogged)
-                        {
-                            sizeLogged = true;
-                            handler.SendSysMessage(CypherStrings.CommandTargetListauratype, auraList.Count, auraType);
-                        }
-
-                        handler.SendSysMessage(CypherStrings.CommandTargetAurasimple, effect.GetId(), effect.GetEffIndex(), effect.GetAmount());
-                    }
-                }
-
-                return true;
-            }
-
-            static bool ShouldListAura(SpellInfo spellInfo, uint? spellId, string namePart, Locale locale)
-            {
-                if (spellId.HasValue)
-                    return spellInfo.Id == spellId.Value;
-
-                if (!namePart.IsEmpty())
-                {
-                    string name = spellInfo.SpellName[locale];
-                    return name.Like(namePart);
-                }
-
-                return true;
-            }
         }
     }
 }
