@@ -20,6 +20,7 @@ namespace Scripts.Spells.Hunter
         public const uint Exhilaration = 109304;
         public const uint ExhilarationPet = 128594;
         public const uint ExhilarationR2 = 231546;
+        public const uint ExplosiveShotDamage = 212680;
         public const uint Lonewolf = 155228;
         public const uint MastersCallTriggered = 62305;
         public const uint Misdirection = 34477;
@@ -72,7 +73,7 @@ namespace Scripts.Spells.Hunter
             OnEffectRemove.Add(new EffectApplyHandler(RemoveEffect, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 186257 - Aspect of the Cheetah
     class spell_hun_aspect_cheetah : AuraScript
     {
@@ -104,12 +105,31 @@ namespace Scripts.Spells.Hunter
         void HandleOnHit()
         {
             if (GetCaster().HasAura(SpellIds.ExhilarationR2) && !GetCaster().HasAura(SpellIds.Lonewolf))
-                GetCaster().CastSpell((Unit)null, SpellIds.ExhilarationPet, true);
+                GetCaster().CastSpell(null, SpellIds.ExhilarationPet, true);
         }
 
         public override void Register()
         {
             OnHit.Add(new HitHandler(HandleOnHit));
+        }
+    }
+
+    [Script] // 212431 - Explosive Shot
+    class spell_hun_explosive_shot : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ExplosiveShotDamage);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            GetCaster()?.CastSpell(GetTarget(), SpellIds.ExplosiveShotDamage, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -326,7 +346,7 @@ namespace Scripts.Spells.Hunter
             AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
-    
+
     [Script] // 53480 - Roar of Sacrifice
     class spell_hun_roar_of_sacrifice : AuraScript
     {
