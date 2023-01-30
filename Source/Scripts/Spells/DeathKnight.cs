@@ -35,6 +35,7 @@ namespace Scripts.Spells.DeathKnight
         public const uint DeathStrikeOffhand = 66188;
         public const uint FesteringWound = 194310;
         public const uint Frost = 137006;
+        public const uint FrostFever = 55095;
         public const uint FrostScythe = 207230;
         public const uint GlyphOfFoulMenagerie = 58642;
         public const uint GlyphOfTheGeist = 58640;
@@ -574,6 +575,25 @@ namespace Scripts.Spells.DeathKnight
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 49184 - Howling Blast
+    class spell_dk_howling_blast : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FrostFever);
+        }
+
+        void HandleFrostFever(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.FrostFever);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleFrostFever, 0, SpellEffectName.SchoolDamage));
         }
     }
     
