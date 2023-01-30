@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.Spells.Evoker
 {
@@ -16,6 +17,22 @@ namespace Scripts.Spells.Evoker
         public const uint SoarRacial = 369536;
     }
 
+    [Script] // 362969 - Azure Strike (blue)
+    class spell_evo_azure_strike : SpellScript
+    {
+        void FilterTargets(List<WorldObject> targets)
+        {
+            targets.Remove(GetExplTargetUnit());
+            targets.RandomResize((uint)GetEffectInfo(0).CalcValue(GetCaster()) - 1);
+            targets.Add(GetExplTargetUnit());
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
+        }
+    }
+    
     [Script] // 358733 - Glide (Racial)
     class spell_evo_glide : SpellScript
     {
