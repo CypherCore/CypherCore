@@ -4329,6 +4329,18 @@ namespace Game.Entities
                 });
             });
 
+            // Fire Cannon
+            ApplySpellFix(new[] { 181593 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    // This spell never triggers, theory is that it was supposed to be only triggered until target reaches some health percentage
+                    // but was broken and always caused visuals to break, then target was changed to immediately spawn with desired health
+                    // leaving old data in db2
+                    spellEffectInfo.TriggerSpell = 0;
+                });
+            });
+
             // Ray of Frost (Fingers of Frost charges)
             ApplySpellFix(new []{ 269748 }, spellInfo =>
             {
