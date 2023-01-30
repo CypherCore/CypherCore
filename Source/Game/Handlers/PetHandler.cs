@@ -354,7 +354,7 @@ namespace Game
                             !pet.IsPossessed() &&
                             !pet.IsVehicle())
                         {
-                            Unit unit_target2 = spell._targets.GetUnitTarget();
+                            Unit unit_target2 = spell.Targets.GetUnitTarget();
 
                             if (unit_target)
                             {
@@ -392,7 +392,7 @@ namespace Game
 
                         if (result == SpellCastResult.SpellCastOk)
                         {
-                            unit_target = spell._targets.GetUnitTarget();
+                            unit_target = spell.Targets.GetUnitTarget();
 
                             //10% chance to play special pet attack talk, else growl
                             //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
@@ -424,13 +424,13 @@ namespace Game
                                     }
                                 }
 
-                            spell.Prepare(spell._targets);
+                            spell.Prepare(spell.Targets);
                         }
                         else
                         {
                             if (pet.IsPossessed() ||
                                 pet.IsVehicle()) // @todo: confirm this check
-                                Spell.SendCastResult(GetPlayer(), spellInfo, spell._SpellVisual, spell._castId, result);
+                                Spell.SendCastResult(GetPlayer(), spellInfo, spell.SpellVisual, spell.CastId, result);
                             else
                                 spell.SendPetCastResult(result);
 
@@ -799,10 +799,10 @@ namespace Game
             }
 
             Spell spell = new(caster, spellInfo, triggerCastFlags);
-            spell._fromClient = true;
-            spell._misc.Data0 = petCastSpell.Cast.Misc[0];
-            spell._misc.Data1 = petCastSpell.Cast.Misc[1];
-            spell._targets = targets;
+            spell.FromClient = true;
+            spell.Misc.Data0 = petCastSpell.Cast.Misc[0];
+            spell.Misc.Data1 = petCastSpell.Cast.Misc[1];
+            spell.Targets = targets;
 
             SpellCastResult result = spell.CheckPetCast(null);
 
@@ -828,7 +828,7 @@ namespace Game
 
                 SpellPrepare spellPrepare = new();
                 spellPrepare.ClientCastID = petCastSpell.Cast.CastID;
-                spellPrepare.ServerCastID = spell._castId;
+                spellPrepare.ServerCastID = spell.CastId;
                 SendPacket(spellPrepare);
 
                 spell.Prepare(targets);

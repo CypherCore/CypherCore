@@ -13,6 +13,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.Spells.Druid
 {
@@ -1616,7 +1617,7 @@ namespace Scripts.Spells.Druid
 
             reduction *= (aurEff.GetTickNumber() - 1);
 
-            MathFunctions.AddPct(ref damage, 6.0f - reduction);
+            damage = MathFunctions.AddPct(damage, 6.0f - reduction);
             aurEff.SetAmount((int)damage);
         }
     }

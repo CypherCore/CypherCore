@@ -67,7 +67,7 @@ namespace Game.Entities
                 if (!_cinematicCamera.Empty())
                 {
                     FlyByCamera firstCamera = _cinematicCamera.FirstOrDefault();
-                    Position pos = new(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
+                    Position pos = new(firstCamera.Locations.X, firstCamera.Locations.Y, firstCamera.Locations.Z, firstCamera.Locations.W);
 
                     if (!pos.IsPositionValid())
                         return;
@@ -82,7 +82,7 @@ namespace Game.Entities
                     }
 
                     // Get cinematic length
-                    _cinematicLength = _cinematicCamera.LastOrDefault().timeStamp;
+                    _cinematicLength = _cinematicCamera.LastOrDefault().TimeStamp;
                 }
             }
         }
@@ -125,16 +125,16 @@ namespace Game.Entities
             // Obtain direction of travel
             foreach (FlyByCamera cam in _cinematicCamera)
             {
-                if (cam.timeStamp > _cinematicDiff)
+                if (cam.TimeStamp > _cinematicDiff)
                 {
-                    nextPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-                    nextTimestamp = cam.timeStamp;
+                    nextPosition = new Position(cam.Locations.X, cam.Locations.Y, cam.Locations.Z, cam.Locations.W);
+                    nextTimestamp = cam.TimeStamp;
 
                     break;
                 }
 
-                lastPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-                lastTimestamp = cam.timeStamp;
+                lastPosition = new Position(cam.Locations.X, cam.Locations.Y, cam.Locations.Z, cam.Locations.W);
+                lastTimestamp = cam.TimeStamp;
             }
 
             float angle = lastPosition.GetAbsoluteAngle(nextPosition);
@@ -153,8 +153,8 @@ namespace Game.Entities
             var endItr = _cinematicCamera.LastOrDefault();
 
             if (endItr != null &&
-                workDiff > endItr.timeStamp)
-                workDiff = (int)endItr.timeStamp;
+                workDiff > endItr.TimeStamp)
+                workDiff = (int)endItr.TimeStamp;
 
             // Never try to go back in Time before the start of cinematic!
             if (workDiff < 0)
@@ -163,16 +163,16 @@ namespace Game.Entities
             // Obtain the previous and next waypoint based on timestamp
             foreach (FlyByCamera cam in _cinematicCamera)
             {
-                if (cam.timeStamp >= workDiff)
+                if (cam.TimeStamp >= workDiff)
                 {
-                    nextPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-                    nextTimestamp = cam.timeStamp;
+                    nextPosition = new Position(cam.Locations.X, cam.Locations.Y, cam.Locations.Z, cam.Locations.W);
+                    nextTimestamp = cam.TimeStamp;
 
                     break;
                 }
 
-                lastPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
-                lastTimestamp = cam.timeStamp;
+                lastPosition = new Position(cam.Locations.X, cam.Locations.Y, cam.Locations.Z, cam.Locations.W);
+                lastTimestamp = cam.TimeStamp;
             }
 
             // Never try to go beyond the end of the cinematic

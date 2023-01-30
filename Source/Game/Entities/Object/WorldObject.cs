@@ -19,6 +19,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -1933,7 +1934,7 @@ namespace Game.Entities
                 int durationMod = Math.Min(durationMod_always, durationMod_not_stack);
 
                 if (durationMod != 0)
-                    MathFunctions.AddPct(ref duration, durationMod);
+                    duration = MathFunctions.AddPct(duration, durationMod);
 
                 // there are only negative mods currently
                 durationMod_always = unitTarget.GetTotalAuraModifierByMiscValue(AuraType.ModAuraDurationByDispel, (int)spellInfo.Dispel);
@@ -1942,7 +1943,7 @@ namespace Game.Entities
                 durationMod = Math.Min(durationMod_always, durationMod_not_stack);
 
                 if (durationMod != 0)
-                    MathFunctions.AddPct(ref duration, durationMod);
+                    duration = MathFunctions.AddPct(duration, durationMod);
             }
             else
             {
@@ -2422,17 +2423,17 @@ namespace Game.Entities
             foreach (var pair in args.SpellValueOverrides)
                 spell.SetSpellValue(pair.Key, pair.Value);
 
-            spell._CastItem = args.CastItem;
+            spell.CastItem = args.CastItem;
 
             if (args.OriginalCastItemLevel.HasValue)
-                spell._castItemLevel = args.OriginalCastItemLevel.Value;
+                spell.CastItemLevel = args.OriginalCastItemLevel.Value;
 
-            if (spell._CastItem == null &&
+            if (spell.CastItem == null &&
                 info.HasAttribute(SpellAttr2.RetainItemCast))
             {
                 if (args.TriggeringSpell)
                 {
-                    spell._CastItem = args.TriggeringSpell._CastItem;
+                    spell.CastItem = args.TriggeringSpell.CastItem;
                 }
                 else if (args.TriggeringAura != null &&
                          !args.TriggeringAura.GetBase().GetCastItemGUID().IsEmpty())
@@ -2440,11 +2441,11 @@ namespace Game.Entities
                     Player triggeringAuraCaster = args.TriggeringAura.GetCaster()?.ToPlayer();
 
                     if (triggeringAuraCaster != null)
-                        spell._CastItem = triggeringAuraCaster.GetItemByGuid(args.TriggeringAura.GetBase().GetCastItemGUID());
+                        spell.CastItem = triggeringAuraCaster.GetItemByGuid(args.TriggeringAura.GetBase().GetCastItemGUID());
                 }
             }
 
-            spell._customArg = args.CustomArg;
+            spell.CustomArg = args.CustomArg;
 
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }

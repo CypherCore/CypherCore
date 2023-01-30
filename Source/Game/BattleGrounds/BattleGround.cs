@@ -275,8 +275,8 @@ namespace Game.BattleGrounds
                     continue;
 
                 uint repGain = Reputation;
-                MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifier(AuraType.ModReputationGain));
-                MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, (int)faction_id));
+                repGain = MathFunctions.AddPct(repGain, player.GetTotalAuraModifier(AuraType.ModReputationGain));
+                repGain = MathFunctions.AddPct(repGain, player.GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, (int)faction_id));
                 player.GetReputationMgr().ModifyReputation(factionEntry, (int)repGain);
             }
         }

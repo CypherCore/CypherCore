@@ -14,7 +14,7 @@ namespace Game.Scenarios
 {
     public class Scenario : CriteriaHandler
     {
-        protected ScenarioData _data;
+        protected ScenarioData Data;
 
         private readonly List<ObjectGuid> _players = new();
         private readonly Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new();
@@ -22,12 +22,12 @@ namespace Game.Scenarios
 
         public Scenario(ScenarioData scenarioData)
         {
-            _data = scenarioData;
+            Data = scenarioData;
             _currentstep = null;
 
             //ASSERT(_data);
 
-            foreach (var scenarioStep in _data.Steps.Values)
+            foreach (var scenarioStep in Data.Steps.Values)
                 SetStepState(scenarioStep, ScenarioStepState.NotStarted);
 
             ScenarioStepRecord firstStep = GetFirstStep();
@@ -35,7 +35,7 @@ namespace Game.Scenarios
             if (firstStep != null)
                 SetStep(firstStep);
             else
-                Log.outError(LogFilter.Scenario, "Scenario.Scenario: Could not launch Scenario (Id: {0}), found no valid scenario step", _data.Entry.Id);
+                Log.outError(LogFilter.Scenario, "Scenario.Scenario: Could not launch Scenario (Id: {0}), found no valid scenario step", Data.Entry.Id);
         }
 
         public override void Reset()
@@ -62,7 +62,7 @@ namespace Game.Scenarios
 
             ScenarioStepRecord newStep = null;
 
-            foreach (var scenarioStep in _data.Steps.Values)
+            foreach (var scenarioStep in Data.Steps.Values)
             {
                 if (scenarioStep.IsBonusObjective())
                     continue;
@@ -85,7 +85,7 @@ namespace Game.Scenarios
 
         public virtual void CompleteScenario()
         {
-            SendPacket(new ScenarioCompleted(_data.Entry.Id));
+            SendPacket(new ScenarioCompleted(Data.Entry.Id));
         }
 
         public virtual void OnPlayerEnter(Player player)
@@ -102,7 +102,7 @@ namespace Game.Scenarios
 
         public ScenarioRecord GetEntry()
         {
-            return _data.Entry;
+            return Data.Entry;
         }
 
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
@@ -129,7 +129,7 @@ namespace Game.Scenarios
             if (step == null)
                 return false;
 
-            if (step.ScenarioID != _data.Entry.Id)
+            if (step.ScenarioID != Data.Entry.Id)
                 return false;
 
             ScenarioStepRecord currentStep = GetStep();
@@ -194,7 +194,7 @@ namespace Game.Scenarios
             // Do it like this because we don't know what order they're in inside the container.
             ScenarioStepRecord lastStep = null;
 
-            foreach (var scenarioStep in _data.Steps.Values)
+            foreach (var scenarioStep in Data.Steps.Values)
             {
                 if (scenarioStep.IsBonusObjective())
                     continue;
@@ -216,7 +216,7 @@ namespace Game.Scenarios
 
         public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
         {
-            return Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(type, _data.Entry.Id);
+            return Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(type, Data.Entry.Id);
         }
 
         public virtual void Update(uint diff)
@@ -259,7 +259,7 @@ namespace Game.Scenarios
 
         private bool IsComplete()
         {
-            foreach (var scenarioStep in _data.Steps.Values)
+            foreach (var scenarioStep in Data.Steps.Values)
             {
                 if (scenarioStep.IsBonusObjective())
                     continue;
@@ -291,7 +291,7 @@ namespace Game.Scenarios
 
         private void BuildScenarioState(ScenarioState scenarioState)
         {
-            scenarioState.ScenarioID = (int)_data.Entry.Id;
+            scenarioState.ScenarioID = (int)Data.Entry.Id;
             ScenarioStepRecord step = GetStep();
 
             if (step != null)
@@ -327,7 +327,7 @@ namespace Game.Scenarios
             // Do it like this because we don't know what order they're in inside the container.
             ScenarioStepRecord firstStep = null;
 
-            foreach (var scenarioStep in _data.Steps.Values)
+            foreach (var scenarioStep in Data.Steps.Values)
             {
                 if (scenarioStep.IsBonusObjective())
                     continue;
@@ -344,7 +344,7 @@ namespace Game.Scenarios
         {
             List<BonusObjectiveData> bonusObjectivesData = new();
 
-            foreach (var scenarioStep in _data.Steps.Values)
+            foreach (var scenarioStep in Data.Steps.Values)
             {
                 if (!scenarioStep.IsBonusObjective())
                     continue;
@@ -382,7 +382,7 @@ namespace Game.Scenarios
         private void SendBootPlayer(Player player)
         {
             ScenarioVacate scenarioBoot = new();
-            scenarioBoot.ScenarioID = (int)_data.Entry.Id;
+            scenarioBoot.ScenarioID = (int)Data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }
 
@@ -398,21 +398,5 @@ namespace Game.Scenarios
 
             _players.Clear();
         }
-    }
-
-    public enum ScenarioStepState
-    {
-        Invalid = 0,
-        NotStarted = 1,
-        InProgress = 2,
-        Done = 3
-    }
-
-    internal enum ScenarioType
-    {
-        Scenario = 0,
-        ChallengeMode = 1,
-        Solo = 2,
-        Dungeon = 10
     }
 }

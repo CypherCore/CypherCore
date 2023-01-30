@@ -3879,7 +3879,7 @@ namespace Game.AI
                             Spell currSpell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
 
                             if (currSpell != null)
-                                if (currSpell._spellInfo.Id != e.Event.targetCasting.spellId)
+                                if (currSpell.SpellInfo.Id != e.Event.targetCasting.spellId)
                                     return;
                         }
 

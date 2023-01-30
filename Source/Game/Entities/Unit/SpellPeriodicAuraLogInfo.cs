@@ -1,4 +1,4 @@
-﻿using Game.Spells;
+﻿using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities;
 

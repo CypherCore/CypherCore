@@ -20,7 +20,7 @@ namespace Game.PvP
 
         public HellfirePeninsulaPvP(Map map) : base(map)
         {
-            _TypeId = OutdoorPvPTypes.HellfirePeninsula;
+            TypeId = OutdoorPvPTypes.HellfirePeninsula;
             _AllianceTowersControlled = 0;
             _HordeTowersControlled = 0;
         }
@@ -150,7 +150,7 @@ namespace Game.PvP
 
         public override void HandleKillImpl(Player killer, Unit killed)
         {
-            if (!killed.IsTypeId(TypeId.Player))
+            if (!killed.IsTypeId(Framework.Constants.TypeId.Player))
                 return;
 
             if (killer.GetTeam() == Team.Alliance &&

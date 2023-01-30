@@ -12,42 +12,173 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.Spells.Warrior
 {
     internal struct SpellIds
     {
-        public const uint BladestormPeriodicWhirlwind = 50622;
-        public const uint BloodthirstHeal = 117313;
-        public const uint Charge = 34846;
-        public const uint ChargeEffect = 218104;
-        public const uint ChargeEffectBlazingTrail = 198337;
-        public const uint ChargePauseRageDecay = 109128;
-        public const uint ChargeRootEffect = 105771;
-        public const uint ChargeSlowEffect = 236027;
-        public const uint ColossusSmash = 167105;
-        public const uint ColossusSmashEffect = 208086;
-        public const uint Execute = 20647;
-        public const uint GlyphOfTheBlazingTrail = 123779;
-        public const uint GlyphOfHeroicLeap = 159708;
-        public const uint GlyphOfHeroicLeapBuff = 133278;
-        public const uint HeroicLeapJump = 178368;
-        public const uint ImpendingVictory = 202168;
-        public const uint ImpendingVictoryHeal = 202166;
-        public const uint ImprovedHeroicLeap = 157449;
-        public const uint MortalStrike = 12294;
-        public const uint MortalWounds = 213667;
-        public const uint RallyingCry = 97463;
-        public const uint Shockwave = 46968;
-        public const uint ShockwaveStun = 132168;
-        public const uint Stoicism = 70845;
-        public const uint StormBoltStun = 132169;
-        public const uint SweepingStrikesExtraAttack1 = 12723;
-        public const uint SweepingStrikesExtraAttack2 = 26654;
-        public const uint Taunt = 355;
-        public const uint TraumaEffect = 215537;
-        public const uint Victorious = 32216;
-        public const uint VictoriousRushHeal = 118779;
+        public const uint BLADESTORM_PERIODIC_WHIRLWIND = 50622;
+        public const uint BLOODTHIRST_HEAL = 117313;
+        public const uint CHARGE = 34846;
+        public const uint COLOSSUS_SMASH_BUFF = 208086;
+        public const uint CHARGE_EFFECT = 218104;
+        public const uint CHARGE_EFFECT_BLAZING_TRAIL = 198337;
+        public const uint CHARGE_PAUSE_RAGE_DECAY = 109128;
+        public const uint CHARGE_ROOT_EFFECT = 105771;
+        public const uint CHARGE_SLOW_EFFECT = 236027;
+        public const uint COLOSSUS_SMASH = 167105;
+        public const uint UNCHACKLED_FURY = 76856;
+        public const uint COLOSSUS_SMASH_EFFECT = 208086;
+        public const uint EXECUTE = 20647;
+        public const uint GLYPH_OF_THE_BLAZING_TRAIL = 123779;
+        public const uint GLYPH_OF_HEROIC_LEAP = 159708;
+        public const uint GLYPH_OF_HEROIC_LEAP_BUFF = 133278;
+        public const uint HEROIC_LEAP_JUMP = 94954;
+        public const uint IMPENDING_VICTORY = 202168;
+        public const uint IMPENDING_VICTORY_HEAL = 202166;
+        public const uint IMPROVED_HEROIC_LEAP = 157449;
+        public const uint MORTAL_STRIKE = 12294;
+        public const uint MORTAL_WOUNDS = 213667;
+        public const uint RALLYING_CRY = 97463;
+        public const uint SHOCKWAVE = 46968;
+        public const uint SHOCKWAVE_STUN = 132168;
+        public const uint STOICISM = 70845;
+        public const uint STORM_BOLT_STUN = 132169;
+        public const uint SWEEPING_STRIKES_EXTRA_ATTACK_1 = 12723;
+        public const uint SWEEPING_STRIKES_EXTRA_ATTACK_2 = 26654;
+        public const uint TAUNT = 355;
+        public const uint TRAUMA_EFFECT = 215537;
+        public const uint WAR_MACHINE_AURA = 215566;
+        public const uint WAR_MACHINE = 262231;
+        public const uint SPELL_WARRRIOR_WAR_MACHINE_BUFF = 262232;
+        public const uint VICTORIOUS = 32216;
+        public const uint VICTORY_RUSH_HEAL = 118779;
+        public const uint SIEGEBREAKER_BUFF = 280773;
+        public const uint ALLOW_RAGING_BLOW = 131116;
+        public const uint ANGER_MANAGEMENT = 152278;
+        public const uint BERZERKER_RAGE_EFFECT = 23691;
+        public const uint BLOODTHIRST = 23885;
+        public const uint BLOODTHIRST_DAMAGE = 23881;
+        public const uint BLOOD_AND_THUNDER = 84615;
+        public const uint BOUNDING_STRIDE = 202163;
+        public const uint BOUNDING_STRIDE_SPEED = 202164;
+        public const uint DEEP_WOUNDS = 115767;
+        public const uint DEEP_WOUNDS_PERIODIC = 12721;
+        public const uint DEEP_WOUNDS_RANK_1 = 12162;
+        public const uint DEEP_WOUNDS_RANK_2 = 12850;
+        public const uint DEEP_WOUNDS_RANK_3 = 12868;
+        public const uint DEEP_WOUNDS_RANK_PERIODIC = 12721;
+        public const uint DEVASTATE = 20243;
+        public const uint DOUBLE_TIME = 103827;
+        public const uint DRAGON_ROAR_KNOCK_BACK = 118895;
+        public const uint ENRAGE = 184361;
+        public const uint ENRAGE_AURA = 184362;
+        public const uint EXECUTE_FURY = 5308;
+        public const uint EXECUTE_PVP = 217955;
+        public const uint FOCUSED_RAGE_ARMS = 207982;
+        public const uint FOCUSED_RAGE_PROTECTION = 204488;
+        public const uint FROTHING_BERSERKER = 215572;
+        public const uint FURIOUS_SLASH = 100130;
+        public const uint GLYPH_OF_EXECUTION = 58367;
+        public const uint GLYPH_OF_HINDERING_STRIKES = 58366;
+        public const uint GLYPH_OF_MORTAL_STRIKE = 58368;
+        public const uint HEAVY_REPERCUSSIONS = 203177;
+        public const uint HEROIC_LEAP_DAMAGE = 52174;
+        public const uint HEROIC_LEAP_SPEED = 133278;
+        public const uint IGNORE_PAIN = 190456;
+        public const uint INTERCEPT_STUN = 105771;
+        public const uint INTERVENE_TRIGGER = 147833;
+        public const uint ITEM_PVP_SET_4P_BONUS = 133277;
+        public const uint JUGGERNAUT_CRIT_BONUS_BUFF = 65156;
+        public const uint JUGGERNAUT_CRIT_BONUS_TALENT = 64976;
+        public const uint JUMP_TO_SKYHOLD_AURA = 215997;
+        public const uint JUMP_TO_SKYHOLD_JUMP = 192085;
+        public const uint JUMP_TO_SKYHOLD_TELEPORT = 216016;
+        public const uint LAST_STAND = 12975;
+        public const uint LAST_STAND_TRIGGERED = 12976;
+        public const uint MASSACRE = 206315;
+        public const uint WHIRLWIND_PASSIVE = 85739;
+        public const uint MOCKING_BANNER_TAUNT = 114198;
+        public const uint MORTAL_STRIKE_AURA = 12294;
+        public const uint NEW_BLADESTORM = 222634;
+        public const uint OLD_BLADESTORM = 227847;
+        public const uint OPPORTUNITY_STRIKE_DAMAGE = 76858;
+        public const uint OVERPOWER_PROC = 60503;
+        public const uint RALLYING_CRY_TRIGGER = 97462;
+        public const uint RAMPAGE = 184367;
+        public const uint RAVAGER = 152277;
+        public const uint RAVAGER_DAMAGE = 156287;
+        public const uint RAVAGER_ENERGIZE = 248439;
+        public const uint RAVAGER_PARRY = 227744;
+        public const uint RAVAGER_SUMMON = 227876;
+        public const uint REND = 94009;
+        public const uint RENEWED_FURY = 202288;
+        public const uint RENEWED_FURY_EFFECT = 202289;
+        public const uint RETALIATION_DAMAGE = 22858;
+        public const uint SEASONED_SOLDIER = 279423;
+        public const uint SECOND_WIND_DAMAGED = 202149;
+        public const uint SECOND_WIND_HEAL = 202147;
+        public const uint SHIELD_BLOCKC_TRIGGERED = 132404;
+        public const uint SHIELD_SLAM = 23922;
+        public const uint SLAM = 23922;
+        public const uint SLAM_ARMS = 1464;
+        public const uint SLUGGISH = 129923;
+        public const uint SUNDER_ARMOR = 58567;
+        public const uint SWEEPING_STRIKES_EXTRA_ATTACK = 26654;
+        public const uint SWORD_AND_BOARD = 199127;
+        public const uint TACTICIAN_CD = 184783;
+        public const uint TASTE_FOR_BLOOD = 206333;
+        public const uint TASTE_FOR_BLOOD_DAMAGE_DONE = 125831;
+        public const uint THUNDERSTRUCK = 199045;
+        public const uint THUNDERSTRUCK_STUN = 199042;
+        public const uint THUNDER_CLAP = 6343;
+        public const uint TRAUMA_DOT = 215537;
+        public const uint UNRELENTING_ASSAULT_RANK_1 = 46859;
+        public const uint UNRELENTING_ASSAULT_RANK_2 = 46860;
+        public const uint UNRELENTING_ASSAULT_TRIGGER_1 = 64849;
+        public const uint UNRELENTING_ASSAULT_TRIGGER_2 = 64850;
+        public const uint VENGEANCE = 76691;
+        public const uint VENGEANCE_AURA = 202572;
+        public const uint VENGEANCE_FOCUSED_RAGE = 202573;
+        public const uint VENGEANCE_IGNORE_PAIN = 202574;
+        public const uint VICTORIOUS_STATE = 32215;
+        public const uint VICTORY_RUSH_DAMAGE = 34428;
+        public const uint VIGILANCE_PROC = 50725;
+        public const uint WAR_MACHINE_TALENT_AURA = 215556;
+        public const uint WARBRINGER = 103828;
+        public const uint WARBRINGER_ROOT = 105771;
+        public const uint WARBRINGER_SNARE = 137637;
+        public const uint WEAKENED_BLOWS = 115798;
+        public const uint WHIRLWIND = 190411;
+        public const uint WHIRLWIND_ARMS = 1680;
+        public const uint WHIRLWIND_MAINHAND = 199667;
+        public const uint WHIRLWIND_OFFHAND = 44949;
+        public const uint WRECKING_BALL_EFFECT = 215570;
+        public const uint COMMANDING_SHOUT = 97463;
+        public const uint GLYPH_OF_MIGHTY_VICTORY = 58104;
+        public const uint INTO_THE_FRAY = 202602;
+        public const uint NPC_WARRIOR_RAVAGER = 76168;
+        public const uint COLD_STEEL_HOT_BLOOD_MAIN = 288080;
+        public const uint COLD_STEEL_HOT_BLOOD = 288085;
+        public const uint COLD_STEEL_HOT_BLOOD_GIVE_POWER = 288087;
+        public const uint GUSHING_WOUND = 288091;
+        // 8.0
+        public const uint FURIOUS_CHARGE = 202224;
+        public const uint FURIOUS_CHARGE_BUFF = 202225;
+        public const uint FRESH_MEAT = 215568;
+        public const uint MEAT_CLEAVER = 280392;
+        public const uint THIRST_FOR_BATTLE = 199202;
+        public const uint THIRST_FOR_BATTLE_BUFF = 199203;
+        public const uint BARBARIAN = 280745;
+        public const uint BARBARIAN_ALLOW_HEROIC_LEAP = 280746;
+        public const uint BATTLE_TRANCE = 213857;
+        public const uint BATTLE_TRANCE_BUFF = 213858;
+        public const uint ENDLESS_RAGE = 202296;
+        public const uint ENDLESS_RAGE_GIVE_POWER = 280283;
+        public const uint SUDDEN_DEATH = 280721;
+        public const uint SUDDEN_DEATH_PROC = 280776;
+        public const uint WAR_BANNER_BUFF = 236321;
     }
 
     internal struct Misc
@@ -55,14 +186,50 @@ namespace Scripts.Spells.Warrior
         public const uint SpellVisualBlazingCharge = 26423;
     }
 
-    [Script] // 23881 - Bloodthirst
+    //280772 - Siegebreaker
+    [SpellScript(280772)]
+    public class spell_warr_siegebreaker : SpellScript, IOnHit
+    {
+        public void OnHit()
+        {
+            Unit caster = GetCaster();
+            caster.CastSpell(null, SpellIds.SIEGEBREAKER_BUFF, true);
+        }
+    }
+
+    //197690
+    [SpellScript(197690)]
+    public class spell_defensive_state : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> Effects { get; } = new List<IAuraEffectHandler>();
+
+        private void OnApply(AuraEffect aura, AuraEffectHandleModes auraMode)
+        {
+            Unit caster = GetCaster();
+
+            if (caster != null)
+            {
+                AuraEffect defensiveState = caster?.GetAura(197690)?.GetEffect(0);
+
+                if (defensiveState != null)
+                    defensiveState.GetAmount();
+            }
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [SpellScript(23881)] // 23881 - Bloodthirst
     internal class spell_warr_bloodthirst : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.BloodthirstHeal);
+            return ValidateSpellInfo(SpellIds.BLOODTHIRST_HEAL);
         }
 
         public override void Register()
@@ -72,18 +239,18 @@ namespace Scripts.Spells.Warrior
 
         private void HandleDummy(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, true);
+            GetCaster().CastSpell(GetCaster(), SpellIds.BLOODTHIRST_HEAL, true);
         }
     }
 
-    [Script] // 100 - Charge
+    [SpellScript(100)] // 100 - Charge
     internal class spell_warr_charge : SpellScript, IHasSpellEffects
     {
         public List<ISpellEffect> SpellEffects { get; } = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ChargeEffect, SpellIds.ChargeEffectBlazingTrail);
+            return ValidateSpellInfo(SpellIds.CHARGE_EFFECT, SpellIds.CHARGE_EFFECT_BLAZING_TRAIL);
         }
 
         public override void Register()
@@ -93,16 +260,16 @@ namespace Scripts.Spells.Warrior
 
         private void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.ChargeEffect;
+            uint spellId = SpellIds.CHARGE_EFFECT;
 
-            if (GetCaster().HasAura(SpellIds.GlyphOfTheBlazingTrail))
-                spellId = SpellIds.ChargeEffectBlazingTrail;
+            if (GetCaster().HasAura(SpellIds.GLYPH_OF_THE_BLAZING_TRAIL))
+                spellId = SpellIds.CHARGE_EFFECT_BLAZING_TRAIL;
 
             GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }
     }
 
-    [Script] // 126661 - Warrior Charge Drop Fire Periodic
+    [SpellScript(126661)] // 126661 - Warrior Charge Drop Fire Periodic
     internal class spell_warr_charge_drop_fire_periodic : AuraScript, IHasAuraEffects
     {
         public List<IAuraEffectHandler> Effects { get; } = new();
@@ -134,7 +301,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ChargePauseRageDecay, SpellIds.ChargeRootEffect, SpellIds.ChargeSlowEffect);
+            return ValidateSpellInfo(SpellIds.CHARGE_PAUSE_RAGE_DECAY, SpellIds.CHARGE_ROOT_EFFECT, SpellIds.CHARGE_SLOW_EFFECT);
         }
 
         public override void Register()
@@ -146,9 +313,9 @@ namespace Scripts.Spells.Warrior
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            caster.CastSpell(caster, SpellIds.ChargePauseRageDecay, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
-            caster.CastSpell(target, SpellIds.ChargeRootEffect, true);
-            caster.CastSpell(target, SpellIds.ChargeSlowEffect, true);
+            caster.CastSpell(caster, SpellIds.CHARGE_PAUSE_RAGE_DECAY, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
+            caster.CastSpell(target, SpellIds.CHARGE_ROOT_EFFECT, true);
+            caster.CastSpell(target, SpellIds.CHARGE_SLOW_EFFECT, true);
         }
     }
 
@@ -157,7 +324,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ColossusSmashEffect);
+            return ValidateSpellInfo(SpellIds.COLOSSUS_SMASH_EFFECT);
         }
 
         public void OnHit()
@@ -165,7 +332,7 @@ namespace Scripts.Spells.Warrior
             Unit target = GetHitUnit();
 
             if (target)
-                GetCaster().CastSpell(target, SpellIds.ColossusSmashEffect, true);
+                GetCaster().CastSpell(target, SpellIds.COLOSSUS_SMASH_EFFECT, true);
         }
     }
 
@@ -174,7 +341,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HeroicLeapJump);
+            return ValidateSpellInfo(SpellIds.HEROIC_LEAP_JUMP);
         }
 
         public SpellCastResult CheckCast()
@@ -224,7 +391,7 @@ namespace Scripts.Spells.Warrior
             WorldLocation dest = GetHitDest();
 
             if (dest != null)
-                GetCaster().CastSpell(dest.GetPosition(), SpellIds.HeroicLeapJump, new CastSpellExtraArgs(true));
+                GetCaster().CastSpell(dest.GetPosition(), SpellIds.HEROIC_LEAP_JUMP, new CastSpellExtraArgs(true));
         }
     }
 
@@ -235,10 +402,10 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GlyphOfHeroicLeap,
-                                     SpellIds.GlyphOfHeroicLeapBuff,
-                                     SpellIds.ImprovedHeroicLeap,
-                                     SpellIds.Taunt);
+            return ValidateSpellInfo(SpellIds.GLYPH_OF_HEROIC_LEAP,
+                                     SpellIds.GLYPH_OF_HEROIC_LEAP_BUFF,
+                                     SpellIds.IMPROVED_HEROIC_LEAP,
+                                     SpellIds.TAUNT);
         }
 
         public override void Register()
@@ -248,11 +415,11 @@ namespace Scripts.Spells.Warrior
 
         private void AfterJump(uint effIndex)
         {
-            if (GetCaster().HasAura(SpellIds.GlyphOfHeroicLeap))
-                GetCaster().CastSpell(GetCaster(), SpellIds.GlyphOfHeroicLeapBuff, true);
+            if (GetCaster().HasAura(SpellIds.GLYPH_OF_HEROIC_LEAP))
+                GetCaster().CastSpell(GetCaster(), SpellIds.GLYPH_OF_HEROIC_LEAP_BUFF, true);
 
-            if (GetCaster().HasAura(SpellIds.ImprovedHeroicLeap))
-                GetCaster().GetSpellHistory().ResetCooldown(SpellIds.Taunt, true);
+            if (GetCaster().HasAura(SpellIds.IMPROVED_HEROIC_LEAP))
+                GetCaster().GetSpellHistory().ResetCooldown(SpellIds.TAUNT, true);
         }
     }
 
@@ -261,14 +428,14 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ImpendingVictoryHeal);
+            return ValidateSpellInfo(SpellIds.IMPENDING_VICTORY_HEAL);
         }
 
         public void AfterCast()
         {
             Unit caster = GetCaster();
-            caster.CastSpell(caster, SpellIds.ImpendingVictoryHeal, true);
-            caster.RemoveAurasDueToSpell(SpellIds.Victorious);
+            caster.CastSpell(caster, SpellIds.IMPENDING_VICTORY_HEAL, true);
+            caster.RemoveAurasDueToSpell(SpellIds.VICTORIOUS);
         }
     }
 
@@ -296,7 +463,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Stoicism) && spellInfo.GetEffects().Count > 1;
+            return ValidateSpellInfo(SpellIds.STOICISM) && spellInfo.GetEffects().Count > 1;
         }
 
         public void OnProc(ProcEventInfo eventInfo)
@@ -307,7 +474,7 @@ namespace Scripts.Spells.Warrior
             int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetEffectInfo(1).CalcValue());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
-            target.CastSpell((Unit)null, SpellIds.Stoicism, args);
+            target.CastSpell((Unit)null, SpellIds.STOICISM, args);
         }
     }
 
@@ -318,7 +485,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.MortalWounds);
+            return ValidateSpellInfo(SpellIds.MORTAL_WOUNDS);
         }
 
         public override void Register()
@@ -331,7 +498,7 @@ namespace Scripts.Spells.Warrior
             Unit target = GetHitUnit();
 
             if (target)
-                GetCaster().CastSpell(target, SpellIds.MortalWounds, true);
+                GetCaster().CastSpell(target, SpellIds.MORTAL_WOUNDS, true);
         }
     }
 
@@ -342,7 +509,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RallyingCry);
+            return ValidateSpellInfo(SpellIds.RALLYING_CRY);
         }
 
         public override bool Load()
@@ -360,7 +527,7 @@ namespace Scripts.Spells.Warrior
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
 
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.RallyingCry, args);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.RALLYING_CRY, args);
         }
     }
 
@@ -371,7 +538,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!ValidateSpellInfo(SpellIds.Shockwave, SpellIds.ShockwaveStun))
+            if (!ValidateSpellInfo(SpellIds.SHOCKWAVE, SpellIds.SHOCKWAVE_STUN))
                 return false;
 
             return spellInfo.GetEffects().Count > 3;
@@ -398,7 +565,7 @@ namespace Scripts.Spells.Warrior
 
         private void HandleStun(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.ShockwaveStun, true);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.SHOCKWAVE_STUN, true);
             ++_targetCount;
         }
     }
@@ -410,7 +577,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.StormBoltStun);
+            return ValidateSpellInfo(SpellIds.STORM_BOLT_STUN);
         }
 
         public override void Register()
@@ -420,7 +587,7 @@ namespace Scripts.Spells.Warrior
 
         private void HandleOnHit(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.StormBoltStun, true);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.STORM_BOLT_STUN, true);
         }
     }
 
@@ -432,7 +599,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ColossusSmash);
+            return ValidateSpellInfo(SpellIds.COLOSSUS_SMASH);
         }
 
         public override void Register()
@@ -446,7 +613,7 @@ namespace Scripts.Spells.Warrior
             Player player = GetTarget().ToPlayer();
 
             if (player)
-                player.GetSpellHistory().ResetCooldown(SpellIds.ColossusSmash, true);
+                player.GetSpellHistory().ResetCooldown(SpellIds.COLOSSUS_SMASH, true);
         }
     }
 
@@ -458,7 +625,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SweepingStrikesExtraAttack1, SpellIds.SweepingStrikesExtraAttack2);
+            return ValidateSpellInfo(SpellIds.SWEEPING_STRIKES_EXTRA_ATTACK_1, SpellIds.SWEEPING_STRIKES_EXTRA_ATTACK_2);
         }
 
         public bool CheckProc(ProcEventInfo eventInfo)
@@ -485,16 +652,16 @@ namespace Scripts.Spells.Warrior
                 SpellInfo spellInfo = damageInfo.GetSpellInfo();
 
                 if (spellInfo != null &&
-                    (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.Wounded20Percent))))
+                    (spellInfo.Id == SpellIds.BLADESTORM_PERIODIC_WHIRLWIND || (spellInfo.Id == SpellIds.EXECUTE && !_procTarget.HasAuraState(AuraStateType.Wounded20Percent))))
                 {
                     // If triggered by Execute (while Target is not under 20% hp) or Bladestorm deals normalized weapon Damage
-                    GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack2, new CastSpellExtraArgs(aurEff));
+                    GetTarget().CastSpell(_procTarget, SpellIds.SWEEPING_STRIKES_EXTRA_ATTACK_2, new CastSpellExtraArgs(aurEff));
                 }
                 else
                 {
                     CastSpellExtraArgs args = new(aurEff);
                     args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage());
-                    GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack1, args);
+                    GetTarget().CastSpell(_procTarget, SpellIds.SWEEPING_STRIKES_EXTRA_ATTACK_1, args);
                 }
             }
         }
@@ -507,7 +674,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.TraumaEffect);
+            return ValidateSpellInfo(SpellIds.TRAUMA_EFFECT);
         }
 
         public override void Register()
@@ -519,10 +686,10 @@ namespace Scripts.Spells.Warrior
         {
             Unit target = eventInfo.GetActionTarget();
             //Get 25% of Damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks());
+            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TRAUMA_EFFECT, GetCastDifficulty()).GetMaxTicks());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, damage);
-            GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);
+            GetCaster().CastSpell(target, SpellIds.TRAUMA_EFFECT, args);
         }
     }
 
@@ -552,7 +719,7 @@ namespace Scripts.Spells.Warrior
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ImpendingVictory);
+            return ValidateSpellInfo(SpellIds.IMPENDING_VICTORY);
         }
 
         public override void Register()
@@ -566,7 +733,7 @@ namespace Scripts.Spells.Warrior
                 procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.WarriorFury)
                 PreventDefaultAction();
 
-            procInfo.GetActor().GetSpellHistory().ResetCooldown(SpellIds.ImpendingVictory, true);
+            procInfo.GetActor().GetSpellHistory().ResetCooldown(SpellIds.IMPENDING_VICTORY, true);
         }
     }
 
@@ -575,15 +742,15 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Victorious, SpellIds.VictoriousRushHeal);
+            return ValidateSpellInfo(SpellIds.VICTORIOUS, SpellIds.VICTORY_RUSH_HEAL);
         }
 
         public void AfterCast()
         {
             Unit caster = GetCaster();
 
-            caster.CastSpell(caster, SpellIds.VictoriousRushHeal, true);
-            caster.RemoveAurasDueToSpell(SpellIds.Victorious);
+            caster.CastSpell(caster, SpellIds.VICTORY_RUSH_HEAL, true);
+            caster.RemoveAurasDueToSpell(SpellIds.VICTORIOUS);
         }
     }
 }

@@ -31,6 +31,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 using Group = Game.Groups.Group;
 
 namespace Game.Entities
@@ -1541,31 +1542,31 @@ namespace Game.Entities
                 switch (source)
                 {
                     case ReputationSource.Kill:
-                        repRate = repData.creatureRate;
+                        repRate = repData.CreatureRate;
 
                         break;
                     case ReputationSource.Quest:
-                        repRate = repData.questRate;
+                        repRate = repData.QuestRate;
 
                         break;
                     case ReputationSource.DailyQuest:
-                        repRate = repData.questDailyRate;
+                        repRate = repData.QuestDailyRate;
 
                         break;
                     case ReputationSource.WeeklyQuest:
-                        repRate = repData.questWeeklyRate;
+                        repRate = repData.QuestWeeklyRate;
 
                         break;
                     case ReputationSource.MonthlyQuest:
-                        repRate = repData.questMonthlyRate;
+                        repRate = repData.QuestMonthlyRate;
 
                         break;
                     case ReputationSource.RepeatableQuest:
-                        repRate = repData.questRepeatableRate;
+                        repRate = repData.QuestRepeatableRate;
 
                         break;
                     case ReputationSource.Spell:
-                        repRate = repData.spellRate;
+                        repRate = repData.SpellRate;
 
                         break;
                 }
@@ -5472,7 +5473,7 @@ namespace Game.Entities
                 return;
             }
 
-            MathFunctions.AddPct(ref _auraBasePctMod[(int)modGroup], pct);
+            _auraBasePctMod[(int)modGroup] = MathFunctions.AddPct(_auraBasePctMod[(int)modGroup], pct);
             UpdateBaseModGroup(modGroup);
         }
 
@@ -5664,7 +5665,7 @@ namespace Game.Entities
                 Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
 
                 if (spell != null)
-                    if (spell._spellInfo.Id != spellid)
+                    if (spell.SpellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Generic, false);
 
                 InterruptSpell(CurrentSpellTypes.AutoRepeat, false);
@@ -5672,7 +5673,7 @@ namespace Game.Entities
                 spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
 
                 if (spell != null)
-                    if (spell._spellInfo.Id != spellid)
+                    if (spell.SpellInfo.Id != spellid)
                         InterruptSpell(CurrentSpellTypes.Channeled, true);
             }
 
@@ -7467,7 +7468,7 @@ namespace Game.Entities
                 }
                 else if (HasAuraType(AuraType.ModRegenDuringCombat))
                 {
-                    MathFunctions.ApplyPct(ref addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
+                    addValue = MathFunctions.CalculatePct(addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
                 }
 
                 if (!IsStandState())

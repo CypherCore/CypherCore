@@ -46,37 +46,22 @@ public static class MathFunctions
         return degrees * (2.0f * PI / 360.0f);
     }
 
-    public static int ApplyPct(ref int Base, float pct)
-    {
-        return Base = CalculatePct(Base, pct);
-    }
-
-    public static uint ApplyPct(ref uint Base, float pct)
-    {
-        return Base = CalculatePct(Base, pct);
-    }
-
-    public static float ApplyPct(ref float Base, float pct)
-    {
-        return Base = CalculatePct(Base, pct);
-    }
-
-    public static long AddPct(ref long value, float pct)
+    public static long AddPct(long value, float pct)
     {
         return value += (long)CalculatePct(value, pct);
     }
 
-    public static int AddPct(ref int value, float pct)
+    public static int AddPct(int value, float pct)
     {
         return value += CalculatePct(value, pct);
     }
 
-    public static uint AddPct(ref uint value, float pct)
+    public static uint AddPct(uint value, float pct)
     {
         return value += CalculatePct(value, pct);
     }
 
-    public static float AddPct(ref float value, float pct)
+    public static float AddPct(float value, float pct)
     {
         return value += CalculatePct(value, pct);
     }

@@ -11,6 +11,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.Spells.DemonHunter
 {
@@ -272,7 +273,7 @@ namespace Scripts.Spells.DemonHunter
 
                 if (script != null)
                     if (GetHitUnit().GetGUID() == script.GetFirstTarget())
-                        MathFunctions.AddPct(ref damage, aurEff.GetAmount());
+                        damage = MathFunctions.AddPct(damage, aurEff.GetAmount());
             }
 
             SetHitDamage(damage);

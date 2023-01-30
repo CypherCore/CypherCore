@@ -15,6 +15,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.Spells.Items
 {

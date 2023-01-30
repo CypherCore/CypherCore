@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.AI
 {

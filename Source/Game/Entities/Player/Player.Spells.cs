@@ -10,6 +10,7 @@ using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -831,7 +832,7 @@ namespace Game.Entities
                 if (spell.IsIgnoringCooldowns())
                     return;
                 else
-                    GetSpellHistory().SendCooldownEvent(spell._spellInfo, _lastPotionId, spell);
+                    GetSpellHistory().SendCooldownEvent(spell.SpellInfo, _lastPotionId, spell);
             }
 
             _lastPotionId = 0;
@@ -1222,13 +1223,13 @@ namespace Game.Entities
 
                     SpellPrepare spellPrepare = new();
                     spellPrepare.ClientCastID = castCount;
-                    spellPrepare.ServerCastID = spell._castId;
+                    spellPrepare.ServerCastID = spell.CastId;
                     SendPacket(spellPrepare);
 
-                    spell._fromClient = true;
-                    spell._CastItem = item;
-                    spell._misc.Data0 = misc[0];
-                    spell._misc.Data1 = misc[1];
+                    spell.FromClient = true;
+                    spell.CastItem = item;
+                    spell.Misc.Data0 = misc[0];
+                    spell.Misc.Data1 = misc[1];
                     spell.Prepare(targets);
 
                     return;
@@ -1261,13 +1262,13 @@ namespace Game.Entities
 
                     SpellPrepare spellPrepare = new();
                     spellPrepare.ClientCastID = castCount;
-                    spellPrepare.ServerCastID = spell._castId;
+                    spellPrepare.ServerCastID = spell.CastId;
                     SendPacket(spellPrepare);
 
-                    spell._fromClient = true;
-                    spell._CastItem = item;
-                    spell._misc.Data0 = misc[0];
-                    spell._misc.Data1 = misc[1];
+                    spell.FromClient = true;
+                    spell.CastItem = item;
+                    spell.Misc.Data0 = misc[0];
+                    spell.Misc.Data1 = misc[1];
                     spell.Prepare(targets);
 
                     return;
@@ -1549,10 +1550,10 @@ namespace Game.Entities
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newZone);
 
             foreach (var spell in saBounds)
-                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
                     spell.IsFitToRequirements(this, newZone, 0))
-                    if (!HasAura(spell.spellId))
-                        CastSpell(this, spell.spellId, true);
+                    if (!HasAura(spell.SpellId))
+                        CastSpell(this, spell.SpellId, true);
         }
 
         public void UpdateAreaDependentAuras(uint newArea)
@@ -1567,10 +1568,10 @@ namespace Game.Entities
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newArea);
 
             foreach (var spell in saBounds)
-                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
+                if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) &&
                     spell.IsFitToRequirements(this, _zoneUpdateId, newArea))
-                    if (!HasAura(spell.spellId))
-                        CastSpell(this, spell.spellId, true);
+                    if (!HasAura(spell.SpellId))
+                        CastSpell(this, spell.SpellId, true);
         }
 
         public void ApplyModToSpell(SpellModifier mod, Spell spell)
@@ -1579,12 +1580,12 @@ namespace Game.Entities
                 return;
 
             // don't do anything with no charges
-            if (mod.ownerAura.IsUsingCharges() &&
-                mod.ownerAura.GetCharges() == 0)
+            if (mod.OwnerAura.IsUsingCharges() &&
+                mod.OwnerAura.GetCharges() == 0)
                 return;
 
             // register inside spell, proc system uses this to drop charges
-            spell._appliedMods.Add(mod.ownerAura);
+            spell.AppliedMods.Add(mod.OwnerAura);
         }
 
         public void LearnCustomSpells()
@@ -1811,7 +1812,7 @@ namespace Game.Entities
 
                 if (prev_spell == 0) // first rank, remove skill
                 {
-                    SetSkill(spellLearnSkill.skill, 0, 0, 0);
+                    SetSkill(spellLearnSkill.Skill, 0, 0, 0);
                 }
                 else
                 {
@@ -1826,22 +1827,22 @@ namespace Game.Entities
 
                     if (prevSkill == null) // not found prev skill setting, remove skill
                     {
-                        SetSkill(spellLearnSkill.skill, 0, 0, 0);
+                        SetSkill(spellLearnSkill.Skill, 0, 0, 0);
                     }
                     else // set to prev. skill setting values
                     {
-                        uint skill_value = GetPureSkillValue(prevSkill.skill);
-                        uint skill_max_value = GetPureMaxSkillValue(prevSkill.skill);
+                        uint skill_value = GetPureSkillValue(prevSkill.Skill);
+                        uint skill_max_value = GetPureMaxSkillValue(prevSkill.Skill);
 
-                        if (skill_value > prevSkill.value)
-                            skill_value = prevSkill.value;
+                        if (skill_value > prevSkill.Value)
+                            skill_value = prevSkill.Value;
 
-                        uint new_skill_max_value = prevSkill.maxvalue == 0 ? GetMaxSkillValueForLevel() : prevSkill.maxvalue;
+                        uint new_skill_max_value = prevSkill.Maxvalue == 0 ? GetMaxSkillValueForLevel() : prevSkill.Maxvalue;
 
                         if (skill_max_value > new_skill_max_value)
                             skill_max_value = new_skill_max_value;
 
-                        SetSkill(prevSkill.skill, prevSkill.step, skill_value, skill_max_value);
+                        SetSkill(prevSkill.Skill, prevSkill.Step, skill_value, skill_max_value);
                     }
                 }
             }
@@ -1983,53 +1984,53 @@ namespace Game.Entities
 
         public void AddSpellMod(SpellModifier mod, bool apply)
         {
-            Log.outDebug(LogFilter.Spells, "Player.AddSpellMod {0}", mod.spellId);
+            Log.outDebug(LogFilter.Spells, "Player.AddSpellMod {0}", mod.SpellId);
 
             // First, manipulate our spellmodifier container
             if (apply)
-                _spellMods[(int)mod.op][(int)mod.type].Add(mod);
+                _spellMods[(int)mod.Op][(int)mod.Type].Add(mod);
             else
-                _spellMods[(int)mod.op][(int)mod.type].Remove(mod);
+                _spellMods[(int)mod.Op][(int)mod.Type].Remove(mod);
 
             // Now, send spellmodifier packet
-            switch (mod.type)
+            switch (mod.Type)
             {
                 case SpellModType.Flat:
                 case SpellModType.Pct:
                     if (!IsLoading())
                     {
-                        ServerOpcodes opcode = (mod.type == SpellModType.Flat ? ServerOpcodes.SetFlatSpellModifier : ServerOpcodes.SetPctSpellModifier);
+                        ServerOpcodes opcode = (mod.Type == SpellModType.Flat ? ServerOpcodes.SetFlatSpellModifier : ServerOpcodes.SetPctSpellModifier);
                         SetSpellModifier packet = new(opcode);
 
                         // @todo Implement sending of bulk modifiers instead of single
                         SpellModifierInfo spellMod = new();
 
-                        spellMod.ModIndex = (byte)mod.op;
+                        spellMod.ModIndex = (byte)mod.Op;
 
                         for (int eff = 0; eff < 128; ++eff)
                         {
                             FlagArray128 mask = new();
                             mask[eff / 32] = 1u << (eff % 32);
 
-                            if ((mod as SpellModifierByClassMask).mask & mask)
+                            if ((mod as SpellModifierByClassMask).Mask & mask)
                             {
                                 SpellModifierData modData = new();
 
-                                if (mod.type == SpellModType.Flat)
+                                if (mod.Type == SpellModType.Flat)
                                 {
                                     modData.ModifierValue = 0.0f;
 
-                                    foreach (SpellModifierByClassMask spell in _spellMods[(int)mod.op][(int)SpellModType.Flat])
-                                        if (spell.mask & mask)
-                                            modData.ModifierValue += spell.value;
+                                    foreach (SpellModifierByClassMask spell in _spellMods[(int)mod.Op][(int)SpellModType.Flat])
+                                        if (spell.Mask & mask)
+                                            modData.ModifierValue += spell.Value;
                                 }
                                 else
                                 {
                                     modData.ModifierValue = 1.0f;
 
-                                    foreach (SpellModifierByClassMask spell in _spellMods[(int)mod.op][(int)SpellModType.Pct])
-                                        if (spell.mask & mask)
-                                            modData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, spell.value);
+                                    foreach (SpellModifierByClassMask spell in _spellMods[(int)mod.Op][(int)SpellModType.Pct])
+                                        if (spell.Mask & mask)
+                                            modData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, spell.Value);
                                 }
 
                                 modData.ClassIndex = (byte)eff;
@@ -2047,11 +2048,11 @@ namespace Game.Entities
                 case SpellModType.LabelFlat:
                     if (apply)
                     {
-                        AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellFlatModByLabel), (mod as SpellFlatModifierByLabel).value);
+                        AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellFlatModByLabel), (mod as SpellFlatModifierByLabel).Value);
                     }
                     else
                     {
-                        int firstIndex = ActivePlayerData.SpellFlatModByLabel.FindIndex((mod as SpellFlatModifierByLabel).value);
+                        int firstIndex = ActivePlayerData.SpellFlatModByLabel.FindIndex((mod as SpellFlatModifierByLabel).Value);
 
                         if (firstIndex >= 0)
                             RemoveDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellFlatModByLabel), firstIndex);
@@ -2061,11 +2062,11 @@ namespace Game.Entities
                 case SpellModType.LabelPct:
                     if (apply)
                     {
-                        AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellPctModByLabel), (mod as SpellPctModifierByLabel).value);
+                        AddDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellPctModByLabel), (mod as SpellPctModifierByLabel).Value);
                     }
                     else
                     {
-                        int firstIndex = ActivePlayerData.SpellPctModByLabel.FindIndex((mod as SpellPctModifierByLabel).value);
+                        int firstIndex = ActivePlayerData.SpellPctModByLabel.FindIndex((mod as SpellPctModifierByLabel).Value);
 
                         if (firstIndex >= 0)
                             RemoveDynamicUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.SpellPctModByLabel), firstIndex);
@@ -2137,7 +2138,7 @@ namespace Game.Entities
                                 continue;
 
                             if (baseValue.CompareTo(10000) < 0 &&
-                                mod.value <= -100)
+                                mod.Value <= -100)
                             {
                                 modInstantSpell = mod;
 
@@ -2152,7 +2153,7 @@ namespace Game.Entities
                                     continue;
 
                                 if (baseValue.CompareTo(10000) < 0 &&
-                                    mod.value.ModifierValue <= -1.0f)
+                                    mod.Value.ModifierValue <= -1.0f)
                                 {
                                     modInstantSpell = mod;
 
@@ -2180,7 +2181,7 @@ namespace Game.Entities
                             if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                                 continue;
 
-                            if (mod.value >= 100)
+                            if (mod.Value >= 100)
                             {
                                 modCritical = mod;
 
@@ -2194,7 +2195,7 @@ namespace Game.Entities
                                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                                     continue;
 
-                                if (mod.value.ModifierValue >= 100)
+                                if (mod.Value.ModifierValue >= 100)
                                 {
                                     modCritical = mod;
 
@@ -2221,7 +2222,7 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                int value = mod.value;
+                int value = mod.Value;
 
                 if (value == 0)
                     continue;
@@ -2235,7 +2236,7 @@ namespace Game.Entities
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                int value = mod.value.ModifierValue;
+                int value = mod.Value.ModifierValue;
 
                 if (value == 0)
                     continue;
@@ -2253,7 +2254,7 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
-                int value = mod.value;
+                int value = mod.Value;
 
                 if (value == 0)
                     continue;
@@ -2277,7 +2278,7 @@ namespace Game.Entities
                 if (baseValue + (dynamic)flat == 0)
                     continue;
 
-                float value = mod.value.ModifierValue;
+                float value = mod.Value.ModifierValue;
 
                 if (value == 1.0f)
                     continue;
@@ -3277,7 +3278,7 @@ namespace Game.Entities
 
                 if (spell != null)
                     if (spell.GetState() != SpellState.Delayed &&
-                        !HasItemFitToSpellRequirements(spell._spellInfo, pItem))
+                        !HasItemFitToSpellRequirements(spell.SpellInfo, pItem))
                         InterruptSpell(i);
             }
         }
@@ -3771,20 +3772,20 @@ namespace Game.Entities
             if (spellLearnSkill != null)
             {
                 // add dependent Skills if this spell is not learned from adding skill already
-                if ((uint)spellLearnSkill.skill != fromSkill)
+                if ((uint)spellLearnSkill.Skill != fromSkill)
                 {
-                    ushort skill_value = GetPureSkillValue(spellLearnSkill.skill);
-                    ushort skill_max_value = GetPureMaxSkillValue(spellLearnSkill.skill);
+                    ushort skill_value = GetPureSkillValue(spellLearnSkill.Skill);
+                    ushort skill_max_value = GetPureMaxSkillValue(spellLearnSkill.Skill);
 
-                    if (skill_value < spellLearnSkill.value)
-                        skill_value = spellLearnSkill.value;
+                    if (skill_value < spellLearnSkill.Value)
+                        skill_value = spellLearnSkill.Value;
 
-                    ushort new_skill_max_value = spellLearnSkill.maxvalue == 0 ? GetMaxSkillValueForLevel() : spellLearnSkill.maxvalue;
+                    ushort new_skill_max_value = spellLearnSkill.Maxvalue == 0 ? GetMaxSkillValueForLevel() : spellLearnSkill.Maxvalue;
 
                     if (skill_max_value < new_skill_max_value)
                         skill_max_value = new_skill_max_value;
 
-                    SetSkill(spellLearnSkill.skill, spellLearnSkill.step, skill_value, skill_max_value);
+                    SetSkill(spellLearnSkill.Skill, spellLearnSkill.Step, skill_value, skill_max_value);
                 }
             }
             else
@@ -3860,12 +3861,12 @@ namespace Game.Entities
 
             // First Time this aura applies a mod to us and is out of charges
             if (spell &&
-                mod.ownerAura.IsUsingCharges() &&
-                mod.ownerAura.GetCharges() == 0 &&
-                !spell._appliedMods.Contains(mod.ownerAura))
+                mod.OwnerAura.IsUsingCharges() &&
+                mod.OwnerAura.GetCharges() == 0 &&
+                !spell.AppliedMods.Contains(mod.OwnerAura))
                 return false;
 
-            switch (mod.op)
+            switch (mod.Op)
             {
                 case SpellModOp.Duration: // +duration to infinite duration spells making them limited
                     if (spellInfo.GetDuration() == -1)
@@ -3935,12 +3936,12 @@ namespace Game.Entities
                     pctData.ModifierValue = 1.0f;
 
                     foreach (SpellModifierByClassMask mod in _spellMods[i][(int)SpellModType.Flat])
-                        if (mod.mask & mask)
-                            flatData.ModifierValue += mod.value;
+                        if (mod.Mask & mask)
+                            flatData.ModifierValue += mod.Value;
 
                     foreach (SpellModifierByClassMask mod in _spellMods[i][(int)SpellModType.Pct])
-                        if (mod.mask & mask)
-                            pctData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
+                        if (mod.Mask & mask)
+                            pctData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.Value);
 
                     flatMod.ModifierData.Add(flatData);
                     pctMod.ModifierData.Add(pctData);

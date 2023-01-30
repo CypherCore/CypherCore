@@ -8,6 +8,7 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -58,7 +59,7 @@ namespace Game.Entities
             {
                 case UnitModifierPctType.Base:
                 case UnitModifierPctType.Total:
-                    MathFunctions.AddPct(ref AuraPctModifiersGroup[(int)unitMod][(int)modifierType], pct);
+                    AuraPctModifiersGroup[(int)unitMod][(int)modifierType] = MathFunctions.AddPct(AuraPctModifiersGroup[(int)unitMod][(int)modifierType], pct);
 
                     break;
                 default:
@@ -1575,7 +1576,7 @@ namespace Game.Entities
 
             float versaDmgMod = 1.0f;
 
-            MathFunctions.AddPct(ref versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
+            versaDmgMod = MathFunctions.AddPct(versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
 
             SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
 
@@ -2003,10 +2004,10 @@ namespace Game.Entities
         {
             float value = 1.0f;
 
-            MathFunctions.AddPct(ref value, GetRatingBonusValue(CombatRating.VersatilityHealingDone) + GetTotalAuraModifier(AuraType.ModVersatility));
+            value = MathFunctions.AddPct(value, GetRatingBonusValue(CombatRating.VersatilityHealingDone) + GetTotalAuraModifier(AuraType.ModVersatility));
 
             foreach (AuraEffect auraEffect in GetAuraEffectsByType(AuraType.ModHealingDonePercent))
-                MathFunctions.AddPct(ref value, auraEffect.GetAmount());
+                value = MathFunctions.AddPct(value, auraEffect.GetAmount());
 
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 SetUpdateFieldStatValue(ref Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.ModHealingDonePercent, i), value);

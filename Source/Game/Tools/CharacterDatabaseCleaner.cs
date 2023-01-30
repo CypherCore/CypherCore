@@ -25,7 +25,7 @@ namespace Game
 
             uint oldMSTime = Time.GetMSTime();
 
-            CleaningFlags flags = (CleaningFlags)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.CharacterDatabaseCleaningFlagsVarId);
+            CleaningFlags flags = (CleaningFlags)Global.WorldMgr.GetPersistentWorldVariable(WorldManager.CHARACTER_DATABASE_CLEANING_FLAGS_VAR_ID);
 
             // clean up
             if (flags.HasAnyFlag(CleaningFlags.AchievementProgress))
@@ -46,7 +46,7 @@ namespace Game
             // NOTE: In order to have persistentFlags be set in worldstates for the next cleanup,
             // you need to define them at least once in worldstates.
             flags &= (CleaningFlags)WorldConfig.GetIntValue(WorldCfg.PersistentCharacterCleanFlags);
-            Global.WorldMgr.SetPersistentWorldVariable(WorldManager.CharacterDatabaseCleaningFlagsVarId, (int)flags);
+            Global.WorldMgr.SetPersistentWorldVariable(WorldManager.CHARACTER_DATABASE_CLEANING_FLAGS_VAR_ID, (int)flags);
 
             Global.WorldMgr.SetCleaningFlags(flags);
 
@@ -146,15 +146,5 @@ namespace Game
         {
             DB.Characters.DirectExecute("DELETE FROM character_queststatus WHERE status = 0");
         }
-    }
-
-    [Flags]
-    public enum CleaningFlags
-    {
-        AchievementProgress = 0x1,
-        Skills = 0x2,
-        Spells = 0x4,
-        Talents = 0x8,
-        Queststatus = 0x10
     }
 }

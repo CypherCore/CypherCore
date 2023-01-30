@@ -16,6 +16,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IItem;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {

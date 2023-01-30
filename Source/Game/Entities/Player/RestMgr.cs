@@ -122,7 +122,7 @@ namespace Game.Entities
             uint rested_loss = rested_bonus;
 
             if (restType == RestTypes.XP)
-                MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
+                rested_loss = MathFunctions.AddPct(rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
             SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
 

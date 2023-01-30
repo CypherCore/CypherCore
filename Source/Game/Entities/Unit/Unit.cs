@@ -20,6 +20,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IUnit;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -3053,7 +3054,7 @@ namespace Game.Entities
 
                         if (spell != null)
                             if (spell.GetState() == SpellState.Preparing &&
-                                spell._spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageAbsorb))
+                                spell.SpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageAbsorb))
                                 victim.InterruptNonMeleeSpells(false);
                     }
 
@@ -3326,13 +3327,13 @@ namespace Game.Entities
                                 bool isCastInterrupted()
                                 {
                                     if (damage == 0)
-                                        return spell._spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.ZeroDamageCancels);
+                                        return spell.SpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.ZeroDamageCancels);
 
                                     if (victim.IsPlayer() &&
-                                        spell._spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
+                                        spell.SpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
                                         return true;
 
-                                    if (spell._spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancels))
+                                    if (spell.SpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancels))
                                         return true;
 
                                     return false;
@@ -3346,10 +3347,10 @@ namespace Game.Entities
                                         return false;
 
                                     if (victim.IsPlayer() &&
-                                        spell._spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushbackPlayerOnly))
+                                        spell.SpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushbackPlayerOnly))
                                         return true;
 
-                                    if (spell._spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushback))
+                                    if (spell.SpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushback))
                                         return true;
 
                                     return false;
@@ -3369,7 +3370,7 @@ namespace Game.Entities
 
                         if (spell1 != null)
                             if (spell1.GetState() == SpellState.Casting &&
-                                spell1._spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
+                                spell1.SpellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
                                 spell1.DelayedChannel();
                     }
                 }
@@ -3586,7 +3587,7 @@ namespace Game.Entities
             float addRage = baseRage;
 
             // talent who gave more rage on attack
-            MathFunctions.AddPct(ref addRage, GetTotalAuraModifier(AuraType.ModRageFromDamageDealt));
+            addRage = MathFunctions.AddPct(addRage, GetTotalAuraModifier(AuraType.ModRageFromDamageDealt));
 
             addRage *= WorldConfig.GetFloatValue(WorldCfg.RatePowerRageIncome);
 
@@ -3689,7 +3690,7 @@ namespace Game.Entities
             if (count == 0)
                 return;
 
-            sbyte comboPoints = (sbyte)(spell != null ? spell._comboPointGain : GetPower(PowerType.ComboPoints));
+            sbyte comboPoints = (sbyte)(spell != null ? spell.ComboPointGain : GetPower(PowerType.ComboPoints));
 
             comboPoints += count;
 
@@ -3701,7 +3702,7 @@ namespace Game.Entities
             if (!spell)
                 SetPower(PowerType.ComboPoints, comboPoints);
             else
-                spell._comboPointGain = comboPoints;
+                spell.ComboPointGain = comboPoints;
         }
 
         public void ClearComboPoints()
@@ -4105,7 +4106,7 @@ namespace Game.Entities
                 foreach (var eff in resIgnoreAuras)
                     if (eff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal) &&
                         eff.IsAffectingSpell(spellInfo))
-                        armor = (float)Math.Floor(MathFunctions.AddPct(ref armor, -eff.GetAmount()));
+                        armor = (float)Math.Floor(MathFunctions.AddPct(armor, -eff.GetAmount()));
 
                 // Apply Player CR_ARMOR_PENETRATION rating
                 if (attacker.IsPlayer())
@@ -4223,7 +4224,7 @@ namespace Game.Entities
             if (spellProto == null)
                 // melee attack
                 foreach (AuraEffect autoAttackDamage in GetAuraEffectsByType(AuraType.ModAutoAttackDamage))
-                    MathFunctions.AddPct(ref DoneTotalMod, autoAttackDamage.GetAmount());
+                    DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, autoAttackDamage.GetAmount());
 
             DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamageDoneVersus, creatureTypeMask);
 
@@ -4240,10 +4241,10 @@ namespace Game.Entities
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
             if (spellEffectInfo != null &&
                 spellEffectInfo.Mechanic != 0)
-                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
+                DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellEffectInfo.Mechanic));
             else if (spellProto != null &&
                      spellProto.Mechanic != 0)
-                MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
+                DoneTotalMod = MathFunctions.AddPct(DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
             float damageF = damage;
 
@@ -4323,7 +4324,7 @@ namespace Game.Entities
             AuraEffect cheatDeath = GetAuraEffect(45182, 0);
 
             if (cheatDeath != null)
-                MathFunctions.AddPct(ref TakenTotalMod, cheatDeath.GetAmount());
+                TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, cheatDeath.GetAmount());
 
             if (attType != WeaponAttackType.RangedAttack)
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMeleeDamageTakenPct);
@@ -4337,7 +4338,7 @@ namespace Game.Entities
             {
                 // only 50% of SPELL_AURA_MOD_VERSATILITY for Damage reduction
                 float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
-                MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
+                TakenTotalMod = MathFunctions.AddPct(TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
             }
 
             // Sanctified Wrath (bypass Damage reduction)
@@ -4353,7 +4354,7 @@ namespace Game.Entities
                     if ((aurEff.GetMiscValue() & (int)attackSchoolMask) == 0)
                         continue;
 
-                    MathFunctions.AddPct(ref damageReduction, -aurEff.GetAmount());
+                    damageReduction = MathFunctions.AddPct(damageReduction, -aurEff.GetAmount());
                 }
 
                 TakenTotalMod = 1.0f - damageReduction;
@@ -4605,7 +4606,7 @@ namespace Game.Entities
 
         private void _UpdateAutoRepeatSpell()
         {
-            SpellInfo autoRepeatSpellInfo = CurrentSpells[CurrentSpellTypes.AutoRepeat]._spellInfo;
+            SpellInfo autoRepeatSpellInfo = CurrentSpells[CurrentSpellTypes.AutoRepeat].SpellInfo;
 
             // check "realtime" interrupts
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
@@ -4631,14 +4632,14 @@ namespace Game.Entities
                     if (autoRepeatSpellInfo.Id != 75)
                         InterruptSpell(CurrentSpellTypes.AutoRepeat);
                     else if (GetTypeId() == TypeId.Player)
-                        Spell.SendCastResult(ToPlayer(), autoRepeatSpellInfo, CurrentSpells[CurrentSpellTypes.AutoRepeat]._SpellVisual, CurrentSpells[CurrentSpellTypes.AutoRepeat]._castId, result);
+                        Spell.SendCastResult(ToPlayer(), autoRepeatSpellInfo, CurrentSpells[CurrentSpellTypes.AutoRepeat].SpellVisual, CurrentSpells[CurrentSpellTypes.AutoRepeat].CastId, result);
 
                     return;
                 }
 
                 // we want to shoot
                 Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.IgnoreGCD);
-                spell.Prepare(CurrentSpells[CurrentSpellTypes.AutoRepeat]._targets);
+                spell.Prepare(CurrentSpells[CurrentSpellTypes.AutoRepeat].Targets);
             }
         }
 
@@ -4945,7 +4946,7 @@ namespace Game.Entities
                     ignoredResistance += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
 
                 ignoredResistance = Math.Min(ignoredResistance, 100);
-                MathFunctions.ApplyPct(ref damageResisted, 100 - ignoredResistance);
+                damageResisted = MathFunctions.CalculatePct(damageResisted, 100 - ignoredResistance);
 
                 // Spells with melee and magic school mask, decide whether resistance or armor Absorb is higher
                 if (spellInfo != null &&

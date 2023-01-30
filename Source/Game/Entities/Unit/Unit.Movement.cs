@@ -11,6 +11,7 @@ using Game.Maps;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {
@@ -549,7 +550,7 @@ namespace Game.Entities
             float speed = Math.Max(non_stack_bonus, stack_bonus);
 
             if (main_speed_mod != 0)
-                MathFunctions.AddPct(ref speed, main_speed_mod);
+                speed = MathFunctions.AddPct(speed, main_speed_mod);
 
             switch (mtype)
             {
@@ -632,7 +633,7 @@ namespace Game.Entities
             int slow = GetMaxNegativeAuraModifier(AuraType.ModDecreaseSpeed);
 
             if (slow != 0)
-                MathFunctions.AddPct(ref speed, slow);
+                speed = MathFunctions.AddPct(speed, slow);
 
             float minSpeedMod = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeed);
 

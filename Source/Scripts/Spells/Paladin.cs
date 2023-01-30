@@ -13,6 +13,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.Spells.Paladin
 {
@@ -691,7 +692,7 @@ namespace Scripts.Spells.Paladin
 
         private bool CheckFlashOfLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            return eventInfo.GetProcSpell() && eventInfo.GetProcSpell()._appliedMods.Contains(GetAura());
+            return eventInfo.GetProcSpell() && eventInfo.GetProcSpell().AppliedMods.Contains(GetAura());
         }
 
         private bool CheckHolyLightProc(AuraEffect aurEff, ProcEventInfo eventInfo)

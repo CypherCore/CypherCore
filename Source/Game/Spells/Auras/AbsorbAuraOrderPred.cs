@@ -1,0 +1,54 @@
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
+using Game.Spells.Auras.EffectHandlers;
+
+namespace Game.Spells
+{
+    internal class AbsorbAuraOrderPred : Comparer<AuraEffect>
+    {
+        public override int Compare(AuraEffect aurEffA, AuraEffect aurEffB)
+        {
+            SpellInfo spellProtoA = aurEffA.GetSpellInfo();
+            SpellInfo spellProtoB = aurEffB.GetSpellInfo();
+
+            // Fel Blossom
+            if (spellProtoA.Id == 28527)
+                return 1;
+
+            if (spellProtoB.Id == 28527)
+                return 0;
+
+            // Ice Barrier
+            if (spellProtoA.GetCategory() == 471)
+                return 1;
+
+            if (spellProtoB.GetCategory() == 471)
+                return 0;
+
+            // Sacrifice
+            if (spellProtoA.Id == 7812)
+                return 1;
+
+            if (spellProtoB.Id == 7812)
+                return 0;
+
+            // Cauterize (must be last)
+            if (spellProtoA.Id == 86949)
+                return 0;
+
+            if (spellProtoB.Id == 86949)
+                return 1;
+
+            // Spirit of Redemption (must be last)
+            if (spellProtoA.Id == 20711)
+                return 0;
+
+            if (spellProtoB.Id == 20711)
+                return 1;
+
+            return 0;
+        }
+    }
+}

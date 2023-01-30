@@ -1,6 +1,6 @@
 ﻿using System;
 using Framework.Constants;
-using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Scripting.Interfaces.IAura
 {
@@ -16,7 +16,7 @@ namespace Game.Scripting.Interfaces.IAura
 
         private readonly AuraEffectApplicationModeDelegate _fn;
 
-        public EffectApplyHandler(AuraEffectApplicationModeDelegate fn, uint effectIndex, AuraType auraType, AuraEffectHandleModes mode, AuraScriptHookType hookType) : base(effectIndex, auraType, hookType)
+        public EffectApplyHandler(AuraEffectApplicationModeDelegate fn, uint effectIndex, AuraType auraType, AuraEffectHandleModes mode, AuraScriptHookType hookType = AuraScriptHookType.EffectApply) : base(effectIndex, auraType, hookType)
         {
             _fn = fn;
             Modes = mode;

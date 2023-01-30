@@ -17,6 +17,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Scripts.Spells.Priest
 {
@@ -1018,20 +1019,20 @@ namespace Scripts.Spells.Priest
 
                 if (player != null)
                 {
-                    MathFunctions.AddPct(ref amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
+                    amountF = MathFunctions.AddPct(amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
 
                     AuraEffect mastery = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
 
                     if (mastery != null)
                         if (GetUnitOwner().HasAura(SpellIds.AtonementTriggered) ||
                             GetUnitOwner().HasAura(SpellIds.AtonementTriggeredPowerTrinity))
-                            MathFunctions.AddPct(ref amountF, mastery.GetAmount());
+                            amountF = MathFunctions.AddPct(amountF, mastery.GetAmount());
                 }
 
                 AuraEffect rapture = caster.GetAuraEffect(SpellIds.Rapture, 1);
 
                 if (rapture != null)
-                    MathFunctions.AddPct(ref amountF, rapture.GetAmount());
+                    amountF = MathFunctions.AddPct(amountF, rapture.GetAmount());
 
                 amount = (int)amountF;
             }

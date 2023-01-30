@@ -20,6 +20,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Entities
 {

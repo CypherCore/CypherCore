@@ -9042,13 +9042,13 @@ namespace Game
 
                 RepRewardRate repRate = new();
 
-                repRate.questRate = result.Read<float>(1);
-                repRate.questDailyRate = result.Read<float>(2);
-                repRate.questWeeklyRate = result.Read<float>(3);
-                repRate.questMonthlyRate = result.Read<float>(4);
-                repRate.questRepeatableRate = result.Read<float>(5);
-                repRate.creatureRate = result.Read<float>(6);
-                repRate.spellRate = result.Read<float>(7);
+                repRate.QuestRate = result.Read<float>(1);
+                repRate.QuestDailyRate = result.Read<float>(2);
+                repRate.QuestWeeklyRate = result.Read<float>(3);
+                repRate.QuestMonthlyRate = result.Read<float>(4);
+                repRate.QuestRepeatableRate = result.Read<float>(5);
+                repRate.CreatureRate = result.Read<float>(6);
+                repRate.SpellRate = result.Read<float>(7);
 
                 FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 
@@ -9059,51 +9059,51 @@ namespace Game
                     continue;
                 }
 
-                if (repRate.questRate < 0.0f)
+                if (repRate.QuestRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_rate with invalid rate {0}, skipping _data for faction {1}", repRate.questRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_rate with invalid rate {0}, skipping _data for faction {1}", repRate.QuestRate, factionId);
 
                     continue;
                 }
 
-                if (repRate.questDailyRate < 0.0f)
+                if (repRate.QuestDailyRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_daily_rate with invalid rate {0}, skipping _data for faction {1}", repRate.questDailyRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_daily_rate with invalid rate {0}, skipping _data for faction {1}", repRate.QuestDailyRate, factionId);
 
                     continue;
                 }
 
-                if (repRate.questWeeklyRate < 0.0f)
+                if (repRate.QuestWeeklyRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_weekly_rate with invalid rate {0}, skipping _data for faction {1}", repRate.questWeeklyRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_weekly_rate with invalid rate {0}, skipping _data for faction {1}", repRate.QuestWeeklyRate, factionId);
 
                     continue;
                 }
 
-                if (repRate.questMonthlyRate < 0.0f)
+                if (repRate.QuestMonthlyRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_monthly_rate with invalid rate {0}, skipping _data for faction {1}", repRate.questMonthlyRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_monthly_rate with invalid rate {0}, skipping _data for faction {1}", repRate.QuestMonthlyRate, factionId);
 
                     continue;
                 }
 
-                if (repRate.questRepeatableRate < 0.0f)
+                if (repRate.QuestRepeatableRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_repeatable_rate with invalid rate {0}, skipping _data for faction {1}", repRate.questRepeatableRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has quest_repeatable_rate with invalid rate {0}, skipping _data for faction {1}", repRate.QuestRepeatableRate, factionId);
 
                     continue;
                 }
 
-                if (repRate.creatureRate < 0.0f)
+                if (repRate.CreatureRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has creature_rate with invalid rate {0}, skipping _data for faction {1}", repRate.creatureRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has creature_rate with invalid rate {0}, skipping _data for faction {1}", repRate.CreatureRate, factionId);
 
                     continue;
                 }
 
-                if (repRate.spellRate < 0.0f)
+                if (repRate.SpellRate < 0.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has spell_rate with invalid rate {0}, skipping _data for faction {1}", repRate.spellRate, factionId);
+                    Log.outError(LogFilter.Sql, "Table reputation_reward_rate has spell_rate with invalid rate {0}, skipping _data for faction {1}", repRate.SpellRate, factionId);
 
                     continue;
                 }
@@ -9216,21 +9216,21 @@ namespace Game
                 uint factionId = result.Read<uint>(0);
 
                 RepSpilloverTemplate repTemplate = new();
-                repTemplate.faction[0] = result.Read<uint>(1);
-                repTemplate.faction_rate[0] = result.Read<float>(2);
-                repTemplate.faction_rank[0] = result.Read<uint>(3);
-                repTemplate.faction[1] = result.Read<uint>(4);
-                repTemplate.faction_rate[1] = result.Read<float>(5);
-                repTemplate.faction_rank[1] = result.Read<uint>(6);
-                repTemplate.faction[2] = result.Read<uint>(7);
-                repTemplate.faction_rate[2] = result.Read<float>(8);
-                repTemplate.faction_rank[2] = result.Read<uint>(9);
-                repTemplate.faction[3] = result.Read<uint>(10);
-                repTemplate.faction_rate[3] = result.Read<float>(11);
-                repTemplate.faction_rank[3] = result.Read<uint>(12);
-                repTemplate.faction[4] = result.Read<uint>(13);
-                repTemplate.faction_rate[4] = result.Read<float>(14);
-                repTemplate.faction_rank[4] = result.Read<uint>(15);
+                repTemplate.Faction[0] = result.Read<uint>(1);
+                repTemplate.FactionRate[0] = result.Read<float>(2);
+                repTemplate.FactionRank[0] = result.Read<uint>(3);
+                repTemplate.Faction[1] = result.Read<uint>(4);
+                repTemplate.FactionRate[1] = result.Read<float>(5);
+                repTemplate.FactionRank[1] = result.Read<uint>(6);
+                repTemplate.Faction[2] = result.Read<uint>(7);
+                repTemplate.FactionRate[2] = result.Read<float>(8);
+                repTemplate.FactionRank[2] = result.Read<uint>(9);
+                repTemplate.Faction[3] = result.Read<uint>(10);
+                repTemplate.FactionRate[3] = result.Read<float>(11);
+                repTemplate.FactionRank[3] = result.Read<uint>(12);
+                repTemplate.Faction[4] = result.Read<uint>(13);
+                repTemplate.FactionRate[4] = result.Read<float>(14);
+                repTemplate.FactionRank[4] = result.Read<uint>(15);
 
                 var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 
@@ -9251,13 +9251,13 @@ namespace Game
                 bool invalidSpilloverFaction = false;
 
                 for (var i = 0; i < 5; ++i)
-                    if (repTemplate.faction[i] != 0)
+                    if (repTemplate.Faction[i] != 0)
                     {
-                        var factionSpillover = CliDB.FactionStorage.LookupByKey(repTemplate.faction[i]);
+                        var factionSpillover = CliDB.FactionStorage.LookupByKey(repTemplate.Faction[i]);
 
                         if (factionSpillover.Id == 0)
                         {
-                            Log.outError(LogFilter.Sql, "Spillover faction (faction.dbc) {0} does not exist but is used in `reputation_spillover_template` for faction {1}, skipping", repTemplate.faction[i], factionId);
+                            Log.outError(LogFilter.Sql, "Spillover faction (faction.dbc) {0} does not exist but is used in `reputation_spillover_template` for faction {1}, skipping", repTemplate.Faction[i], factionId);
                             invalidSpilloverFaction = true;
 
                             break;
@@ -9267,7 +9267,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql,
                                          "Spillover faction (faction.dbc) {0} for faction {1} in `reputation_spillover_template` can not be listed for client, and then useless, skipping",
-                                         repTemplate.faction[i],
+                                         repTemplate.Faction[i],
                                          factionId);
 
                             invalidSpilloverFaction = true;
@@ -9275,9 +9275,9 @@ namespace Game
                             break;
                         }
 
-                        if (repTemplate.faction_rank[i] >= (uint)ReputationRank.Max)
+                        if (repTemplate.FactionRank[i] >= (uint)ReputationRank.Max)
                         {
-                            Log.outError(LogFilter.Sql, "Rank {0} used in `reputation_spillover_template` for spillover faction {1} is not valid, skipping", repTemplate.faction_rank[i], repTemplate.faction[i]);
+                            Log.outError(LogFilter.Sql, "Rank {0} used in `reputation_spillover_template` for spillover faction {1} is not valid, skipping", repTemplate.FactionRank[i], repTemplate.Faction[i]);
                             invalidSpilloverFaction = true;
 
                             break;

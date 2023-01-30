@@ -9,6 +9,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Networking.Packets;
 using Game.Spells;
+using Game.Spells.Auras.EffectHandlers;
 
 namespace Game.Combat
 {
@@ -481,8 +482,8 @@ namespace Game.Combat
                 SpellThreatEntry threatEntry = Global.SpellMgr.GetSpellThreatEntry(spell.Id);
 
                 if (threatEntry != null)
-                    if (threatEntry.pctMod != 1.0f) // flat/AP modifiers handled in Spell::HandleThreatSpells
-                        threat *= threatEntry.pctMod;
+                    if (threatEntry.PctMod != 1.0f) // flat/AP modifiers handled in Spell::HandleThreatSpells
+                        threat *= threatEntry.PctMod;
 
                 Player modOwner = victim.GetSpellModOwner();
 
