@@ -12,8 +12,12 @@ namespace Scripts.Spells.Evoker
 {
     struct SpellIds
     {
+        public const uint EnergizingFlame = 400006;
         public const uint GlideKnockback = 358736;
         public const uint Hover = 358267;
+        public const uint LivingFlame = 361469;
+        public const uint LivingFlameDamage = 361500;
+        public const uint LivingFlameHeal = 361509;
         public const uint SoarRacial = 369536;
     }
 
@@ -32,7 +36,7 @@ namespace Scripts.Spells.Evoker
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEnemy));
         }
     }
-    
+
     [Script] // 358733 - Glide (Racial)
     class spell_evo_glide : SpellScript
     {
@@ -67,6 +71,46 @@ namespace Scripts.Spells.Evoker
         {
             OnCheckCast.Add(new CheckCastHandler(CheckCast));
             OnCast.Add(new CastHandler(HandleCast));
+        }
+    }
+
+    [Script] // 361469 - Living Flame (Red)
+    class spell_evo_living_flame : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LivingFlameDamage, SpellIds.LivingFlameHeal, SpellIds.EnergizingFlame);
+        }
+
+        void HandleHitTarget(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit hitUnit = GetHitUnit();
+            if (caster.IsFriendlyTo(hitUnit))
+                caster.CastSpell(hitUnit, SpellIds.LivingFlameHeal, true);
+            else
+                caster.CastSpell(hitUnit, SpellIds.LivingFlameDamage, true);
+        }
+
+        void HandleLaunchTarget(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            if (caster.IsFriendlyTo(GetHitUnit()))
+                return;
+
+            AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.EnergizingFlame, 0);
+            if (auraEffect != null)
+            {
+                int manaCost = GetSpell().GetPowerTypeCostAmount(PowerType.Mana).GetValueOrDefault(0);
+                if (manaCost != 0)
+                    GetCaster().ModifyPower(PowerType.Mana, MathFunctions.CalculatePct(manaCost, auraEffect.GetAmount()));
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy));
+            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 0, SpellEffectName.Dummy));
         }
     }
 }
