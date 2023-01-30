@@ -1182,14 +1182,73 @@ namespace Game.Entities
                 UpdatePvPState();
             }
 
-            SendQuestUpdate(questId);
             SendQuestGiverStatusMultiple();
+
+            bool conditionChanged = SendQuestUpdate(questId, false);
 
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
+            bool canHaveNextQuest = !quest.HasFlag(QuestFlags.AutoComplete) ? !questGiver.IsPlayer() : true;
+            if (canHaveNextQuest)
+            {
+                switch (questGiver.GetTypeId())
+                {
+                    case TypeId.Unit:
+                    case TypeId.Player:
+                    {
+                        //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
+                        // Send next quest
+                        Quest nextQuest = GetNextQuest(questGiver.GetGUID(), quest);
+                        if (nextQuest != null)
+                        {
+                            // Only send the quest to the player if the conditions are met
+                            if (CanTakeQuest(nextQuest, false))
+                            {
+                                if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                                    AddQuestAndCheckCompletion(nextQuest, questGiver);
+
+                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
+                            }
+                        }
+
+                        PlayerTalkClass.ClearMenus();
+                        Creature creatureQGiver = questGiver.ToCreature();
+                        if (creatureQGiver != null)
+                            creatureQGiver.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                        break;
+                    }
+                    case TypeId.GameObject:
+                    {
+                        GameObject questGiverGob = questGiver.ToGameObject();
+                        // Send next quest
+                        Quest nextQuest = GetNextQuest(questGiverGob.GetGUID(), quest);
+                        if (nextQuest != null)
+                        {
+                            // Only send the quest to the player if the conditions are met
+                            if (CanTakeQuest(nextQuest, false))
+                            {
+                                if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                                    AddQuestAndCheckCompletion(nextQuest, questGiver);
+
+                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiverGob.GetGUID(), true, false);
+                            }
+                        }
+
+                        PlayerTalkClass.ClearMenus();
+                        questGiverGob.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
             Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
+
+            if (conditionChanged)
+                UpdateObjectVisibility();
         }
 
         public void SetRewardedQuest(uint quest_id)
@@ -1878,7 +1937,7 @@ namespace Game.Entities
                 SendQuestUpdate(questId);
         }
 
-        void SendQuestUpdate(uint questId)
+        bool SendQuestUpdate(uint questId, bool updateVisiblity = true)
         {
             var saBounds = Global.SpellMgr.GetSpellAreaForQuestMapBounds(questId);
             if (!saBounds.Empty())
@@ -1926,7 +1985,7 @@ namespace Game.Entities
             }
 
             UpdateVisibleGameobjectsOrSpellClicks();
-            PhasingHandler.OnConditionChange(this);
+            return PhasingHandler.OnConditionChange(this, updateVisiblity);
         }
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)
