@@ -1206,6 +1206,7 @@ namespace Game.Entities
             public uint SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
             public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint CustomizationScope;                      // 4 Customization Scope, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Preventteleportingtheplayeroutofthebarbershopchair;// 5 Prevent teleporting the player out of the barbershop chair, enum { false, true, }; Default: false
         }
 
         public struct destructiblebuilding
@@ -1511,6 +1512,12 @@ namespace Game.Entities
         public struct craftingTable
         {
             public uint Profession;                              // 0 Profession, enum { First Aid, Blacksmithing, Leatherworking, Alchemy, Herbalism, Cooking, Mining, Tailoring, Engineering, Enchanting, Fishing, Skinning, Jewelcrafting, Inscription, Archaeology, }; Default: Blacksmithing
+        }
+
+        public struct perksProgramChest
+        {
+            public uint Script;                                  // 0 Script, References: SpellScript, NoValue = 0
+            public uint autoClose;                               // 1 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
         }
         #endregion
     }

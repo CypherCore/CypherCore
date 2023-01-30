@@ -9614,7 +9614,7 @@ namespace Game
                 return;                                             // any mails need to be returned or deleted
             }
 
-            MultiMap<uint, MailItemInfo> itemsCache = new();
+            MultiMap<ulong, MailItemInfo> itemsCache = new();
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL_ITEMS);
             stmt.AddValue(0, curTime);
             SQLResult items = DB.Characters.Query(stmt);
@@ -9625,7 +9625,7 @@ namespace Game
                 {
                     item.item_guid = result.Read<uint>(0);
                     item.item_template = result.Read<uint>(1);
-                    uint mailId = result.Read<uint>(2);
+                    ulong mailId = result.Read<ulong>(2);
                     itemsCache.Add(mailId, item);
                 } while (items.NextRow());
             }
@@ -9639,7 +9639,7 @@ namespace Game
                     continue;
 
                 Mail m = new();
-                m.messageID = result.Read<uint>(0);
+                m.messageID = result.Read<ulong>(0);
                 m.messageType = (MailMessageType)result.Read<byte>(1);
                 m.sender = result.Read<uint>(2);
                 m.receiver = receiver;
@@ -10360,7 +10360,7 @@ namespace Game
 
             result = DB.Characters.Query("SELECT MAX(id) FROM mail");
             if (!result.IsEmpty())
-                _mailId = result.Read<uint>(0) + 1;
+                _mailId = result.Read<ulong>(0) + 1;
 
             result = DB.Characters.Query("SELECT MAX(arenateamid) FROM arena_team");
             if (!result.IsEmpty())
@@ -10404,7 +10404,7 @@ namespace Game
             }
             return _equipmentSetGuid++;
         }
-        public uint GenerateMailID()
+        public ulong GenerateMailID()
         {
             if (_mailId >= 0xFFFFFFFE)
             {
@@ -11042,7 +11042,7 @@ namespace Game
         // first free id for selected id type
         uint _auctionId;
         ulong _equipmentSetGuid;
-        uint _mailId;
+        ulong _mailId;
         uint _hiPetNumber;
         ulong _creatureSpawnId;
         ulong _gameObjectSpawnId;

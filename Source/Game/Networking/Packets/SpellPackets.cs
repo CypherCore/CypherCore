@@ -899,11 +899,9 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             UnitGUID = _worldPacket.ReadPackedGuid();
-            DisplayID = _worldPacket.ReadUInt32();
         }
 
         public ObjectGuid UnitGUID;
-        public uint DisplayID;
     }
 
     class MirrorImageComponentedData : ServerPacket

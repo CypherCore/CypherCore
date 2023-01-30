@@ -2880,9 +2880,14 @@ namespace Game.Entities
 
         public void SendQuestGiverStatusMultiple()
         {
+            SendQuestGiverStatusMultiple(m_clientGUIDs);
+        }
+        
+        public void SendQuestGiverStatusMultiple(List<ObjectGuid> guids)
+        {
             QuestGiverStatusMultiple response = new();
 
-            foreach (var itr in m_clientGUIDs)
+            foreach (var itr in guids)
             {
                 if (itr.IsAnyTypeCreature())
                 {

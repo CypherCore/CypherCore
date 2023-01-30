@@ -2763,7 +2763,8 @@ namespace Game.Entities
 
         //Mail
         public void AddMail(Mail mail) { m_mail.Insert(0, mail); }
-        public void RemoveMail(uint id)
+
+        public void RemoveMail(ulong id)
         {
             foreach (var mail in m_mail)
             {
@@ -2775,27 +2776,30 @@ namespace Game.Entities
                 }
             }
         }
-        public void SendMailResult(uint mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, uint item_guid = 0, uint item_count = 0)
+
+        public void SendMailResult(ulong mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, ulong itemGuid = 0, uint itemCount = 0)
         {
             MailCommandResult result = new();
             result.MailID = mailId;
-            result.Command = (uint)mailAction;
-            result.ErrorCode = (uint)mailError;
+            result.Command = (int)mailAction;
+            result.ErrorCode = (int)mailError;
 
             if (mailError == MailResponseResult.EquipError)
-                result.BagResult = (uint)equipError;
+                result.BagResult = (int)equipError;
             else if (mailAction == MailResponseType.ItemTaken)
             {
-                result.AttachID = item_guid;
-                result.QtyInInventory = item_count;
+                result.AttachID = itemGuid;
+                result.QtyInInventory = (int)itemCount;
             }
 
             SendPacket(result);
         }
+
         void SendNewMail()
         {
             SendPacket(new NotifyReceivedMail());
         }
+
         public void UpdateNextMailTimeAndUnreads()
         {
             // calculate next delivery time (min. from non-delivered mails
@@ -2814,6 +2818,7 @@ namespace Game.Entities
                     ++unReadMails;
             }
         }
+
         public void AddNewMailDeliverTime(long deliver_time)
         {
             if (deliver_time <= GameTime.GetGameTime())                          // ready now
@@ -2827,16 +2832,19 @@ namespace Game.Entities
                     m_nextMailDelivereTime = deliver_time;
             }
         }
+
         public void AddMItem(Item it)
         {
             mMitems[it.GetGUID().GetCounter()] = it;
         }
+
         public bool RemoveMItem(ulong id)
         {
             return mMitems.Remove(id);
         }
+
         public Item GetMItem(ulong id) { return mMitems.LookupByKey(id); }
-        public Mail GetMail(uint id) { return m_mail.Find(p => p.messageID == id); }
+        public Mail GetMail(ulong id) { return m_mail.Find(p => p.messageID == id); }
         public List<Mail> GetMails() { return m_mail; }
         public uint GetMailSize() { return (uint)m_mail.Count; }
 

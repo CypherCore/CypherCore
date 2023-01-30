@@ -17,9 +17,6 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8(ComplaintStatus);
 
-            _worldPacket.WriteUInt32(ScrollOfResurrectionRequestsRemaining);
-            _worldPacket.WriteUInt32(ScrollOfResurrectionMaxRequestsPerDay);
-
             _worldPacket.WriteUInt32(CfgRealmID);
             _worldPacket.WriteInt32(CfgRealmRecID);
 
@@ -51,7 +48,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
-            _worldPacket.WriteBit(ScrollOfResurrectionEnabled);
             _worldPacket.WriteBit(BpayStoreEnabled);
             _worldPacket.WriteBit(BpayStoreAvailable);
             _worldPacket.WriteBit(BpayStoreDisabledByParentalControls);
@@ -140,10 +136,7 @@ namespace Game.Networking.Packets
         public bool BpayStoreAvailable;
         public bool BpayStoreEnabled;
         public SessionAlertConfig? SessionAlert;
-        public uint ScrollOfResurrectionMaxRequestsPerDay;
-        public bool ScrollOfResurrectionEnabled;
         public EuropaTicketConfig? EuropaTicketSystemStatus;
-        public uint ScrollOfResurrectionRequestsRemaining;
         public uint CfgRealmID;
         public byte ComplaintStatus;
         public int CfgRealmRecID;

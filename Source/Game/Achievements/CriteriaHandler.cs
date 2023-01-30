@@ -3600,10 +3600,34 @@ namespace Game.Achievements
                     if (GameTime.GetGameTime() - referencePlayer.m_playerData.LogoutTime < reqValue * Time.Day)
                         return false;
                     break;
+                case ModifierTreeType.PlayerHasPerksProgramPendingReward: // 350
+                    if (!referencePlayer.m_activePlayerData.HasPerksProgramPendingReward)
+                        return false;
+                    break;
                 case ModifierTreeType.PlayerCanUseItem: // 351
                 {
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(reqValue);
                     if (itemTemplate == null || referencePlayer.CanUseItem(itemTemplate) != InventoryResult.Ok)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasAtLeastProfPathRanks: // 355
+                {
+                    uint ranks = 0;
+                    foreach (TraitConfig traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
+                    {
+                        if ((TraitConfigType)(int)traitConfig.Type != TraitConfigType.Profession)
+                            continue;
+
+                        if (traitConfig.SkillLineID != secondaryAsset)
+                            continue;
+
+                        foreach (TraitEntry traitEntry in traitConfig.Entries)
+                            if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.GetNodeEntryType() == TraitNodeEntryType.ProfPath)
+                                ranks += (uint)(traitEntry.Rank + traitEntry.GrantedRanks);
+                    }
+
+                    if (ranks < reqValue)
                         return false;
                     break;
                 }

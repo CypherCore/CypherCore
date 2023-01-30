@@ -755,6 +755,12 @@ namespace Game
             _player.SendQuestGiverStatusMultiple();
         }
 
+        [WorldPacketHandler(ClientOpcodes.QuestGiverStatusTrackedQuery)]
+        void HandleQuestgiverStatusTrackedQueryOpcode(QuestGiverStatusTrackedQuery questGiverStatusTrackedQuery)
+        {
+            _player.SendQuestGiverStatusMultiple(questGiverStatusTrackedQuery.QuestGiverGUIDs);
+        }
+
         [WorldPacketHandler(ClientOpcodes.RequestWorldQuestUpdate)]
         void HandleRequestWorldQuestUpdate(RequestWorldQuestUpdate packet)
         {

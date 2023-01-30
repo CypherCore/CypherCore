@@ -421,7 +421,12 @@ namespace Framework.Constants
         PlayerDaysSinceLogout = 344,
         CraftingOrderSkillLineAbility = 347, /*NYI*/
         CraftingOrderProfession = 348, /*NYI*/ // ProfessionEnum
+
+        PlayerHasPerksProgramPendingReward = 350,
         PlayerCanUseItem = 351, // Player can use item {#Item}
+
+        PlayerHasAtLeastProfPathRanks = 355, // Player has purchased or granted at least {#Count} ranks in {SkillLine} config
+        PlayerHasAtLeastMissingProfPathRanks = 356, /*NYI*/ // Player is missing least {#Count} ranks in {SkillLine} config
     }
 
     public enum CriteriaFailEvent : byte
@@ -716,6 +721,9 @@ namespace Framework.Constants
         ReputationAmountGained = 243, /*NYI*/ // Gain reputation amount with {FactionID}; accumulate, not highest
         FulfillAnyCraftingOrder = 245, /*NYI*/
         FulfillCraftingOrderType = 246, /*NYI*/ // {CraftingOrderType}
+
+        PerksProgramMonthComplete = 249, /*NYI*/
+
         Count
     }
 

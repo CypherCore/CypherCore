@@ -478,7 +478,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(BattlemasterListID);
             _worldPacket.WriteBit(Registered);
             _worldPacket.WriteBit(AffectsRating);
+            _worldPacket.WriteBit(DeserterPenalty != null);
             _worldPacket.FlushBits();
+
+            if (DeserterPenalty != null)
+                DeserterPenalty.Write(_worldPacket);
         }
 
         public enum MatchState
@@ -492,6 +496,7 @@ namespace Game.Networking.Packets
         public MatchState State = MatchState.Inactive;
         public long StartTime;
         public int Duration;
+        public RatedMatchDeserterPenalty DeserterPenalty;
         public byte ArenaFaction;
         public uint BattlemasterListID;
         public bool Registered;
@@ -595,6 +600,20 @@ namespace Game.Networking.Packets
             data.WriteInt32(Rank);
             data.WriteBit(Disqualified);
             data.FlushBits();
+        }
+    }
+
+    class RatedMatchDeserterPenalty
+    {
+        public int PersonalRatingChange;
+        public int QueuePenaltySpellID;
+        public int QueuePenaltyDuration;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(PersonalRatingChange);
+            data.WriteInt32(QueuePenaltySpellID);
+            data.WriteInt32(QueuePenaltyDuration);
         }
     }
 

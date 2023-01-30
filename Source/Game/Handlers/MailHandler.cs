@@ -405,7 +405,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MailTakeItem)]
         void HandleMailTakeItem(MailTakeItem takeItem)
         {
-            uint AttachID = takeItem.AttachID;
+            ulong AttachID = takeItem.AttachID;
 
             if (!CanOpenMailBox(takeItem.Mailbox))
                 return;

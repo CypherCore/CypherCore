@@ -21,11 +21,12 @@ namespace Game.Networking.Packets
     class CraftingData
     {
         public int CraftingQualityID;
-        public int field_4;
-        public int field_8;
+        public float QualityProgress;
+        public int SkillLineAbilityID;
+        public int CraftingDataID;
         public int Multicraft;
-        public int field_10;
-        public int field_14;
+        public int SkillFromReagents;
+        public int Skill;
         public int CritBonusSkill;
         public float field_1C;
         public ulong field_20;
@@ -44,11 +45,12 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(CraftingQualityID);
-            data.WriteInt32(field_4);
-            data.WriteInt32(field_8);
+            data.WriteFloat(QualityProgress);
+            data.WriteInt32(SkillLineAbilityID);
+            data.WriteInt32(CraftingDataID);
             data.WriteInt32(Multicraft);
-            data.WriteInt32(field_10);
-            data.WriteInt32(field_14);
+            data.WriteInt32(SkillFromReagents);
+            data.WriteInt32(Skill);
             data.WriteInt32(CritBonusSkill);
             data.WriteFloat(field_1C);
             data.WriteUInt64(field_20);

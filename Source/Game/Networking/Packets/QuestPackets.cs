@@ -28,6 +28,21 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
+    class QuestGiverStatusTrackedQuery : ClientPacket
+    {
+        public List<ObjectGuid> QuestGiverGUIDs = new();
+
+        public QuestGiverStatusTrackedQuery(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint guidCount = _worldPacket.ReadUInt32();
+
+            for (uint i = 0; i < guidCount; ++i)
+                QuestGiverGUIDs.Add(_worldPacket.ReadPackedGuid());
+        }
+    }
+    
     public class QuestGiverStatusPkt : ServerPacket
     {
         public QuestGiverStatusPkt() : base(ServerOpcodes.QuestGiverStatus, ConnectionType.Instance)

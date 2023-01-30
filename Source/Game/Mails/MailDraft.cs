@@ -131,7 +131,7 @@ namespace Game.Mails
             if (pReceiver != null)
                 PrepareItems(pReceiver, trans);                            // generate mail template items
 
-            uint mailId = Global.ObjectMgr.GenerateMailID();
+            ulong mailId = Global.ObjectMgr.GenerateMailID();
 
             long deliver_time = GameTime.GetGameTime() + deliver_delay;
 

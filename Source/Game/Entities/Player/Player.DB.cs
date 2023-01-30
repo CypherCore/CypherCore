@@ -1246,7 +1246,7 @@ namespace Game.Entities
         {
             m_mail.Clear();
 
-            Dictionary<uint, Mail> mailById = new();
+            Dictionary<ulong, Mail> mailById = new();
 
             if (!mailsResult.IsEmpty())
             {
@@ -1254,7 +1254,7 @@ namespace Game.Entities
                 {
                     Mail m = new();
 
-                    m.messageID = mailsResult.Read<uint>(0);
+                    m.messageID = mailsResult.Read<ulong>(0);
                     m.messageType = (MailMessageType)mailsResult.Read<byte>(1);
                     m.sender = mailsResult.Read<uint>(2);
                     m.receiver = mailsResult.Read<uint>(3);
@@ -1289,7 +1289,7 @@ namespace Game.Entities
 
                 do
                 {
-                    uint mailId = mailItemsResult.Read<uint>(52);
+                    ulong mailId = mailItemsResult.Read<ulong>(52);
                     _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], mailItemsResult.GetFields(), additionalData.LookupByKey(mailItemsResult.Read<ulong>(0)));
                 }
                 while (mailItemsResult.NextRow());
@@ -1298,7 +1298,7 @@ namespace Game.Entities
             UpdateNextMailTimeAndUnreads();
         }
 
-        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
+        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, ulong mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
         {
             ulong itemGuid = fields.Read<ulong>(0);
             uint itemEntry = fields.Read<uint>(1);
@@ -4081,7 +4081,7 @@ namespace Game.Entities
                     SQLResult resultMail = DB.Characters.Query(stmt);
                     if (!resultMail.IsEmpty())
                     {
-                        MultiMap<uint, Item> itemsByMail = new();
+                        MultiMap<ulong, Item> itemsByMail = new();
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
                         stmt.AddValue(0, guid);
@@ -4114,7 +4114,7 @@ namespace Game.Entities
 
                             do
                             {
-                                uint mailId = resultItems.Read<uint>(44);
+                                ulong mailId = resultItems.Read<ulong>(44);
                                 Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
                                 if (mailItem != null)
                                     itemsByMail.Add(mailId, mailItem);
@@ -4124,7 +4124,7 @@ namespace Game.Entities
 
                         do
                         {
-                            uint mail_id = resultMail.Read<uint>(0);
+                            ulong mail_id = resultMail.Read<ulong>(0);
                             MailMessageType mailType = (MailMessageType)resultMail.Read<byte>(1);
                             ushort mailTemplateId = resultMail.Read<ushort>(2);
                             uint sender = resultMail.Read<uint>(3);

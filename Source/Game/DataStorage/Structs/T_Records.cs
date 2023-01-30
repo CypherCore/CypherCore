@@ -191,7 +191,9 @@ namespace Game.DataStorage
         public uint Id;
         public int TraitDefinitionID;
         public int MaxRanks;
-        public byte NodeRecordType;
+        public byte NodeEntryType;
+
+        public TraitNodeEntryType GetNodeEntryType() { return (TraitNodeEntryType)NodeEntryType; }
     }
 
     public sealed class TraitNodeEntryXTraitCondRecord
