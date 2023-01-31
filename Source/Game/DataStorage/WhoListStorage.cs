@@ -3,6 +3,8 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Guilds;
+using System.Collections.Generic;
 
 namespace Game.DataStorage
 {
@@ -38,5 +40,43 @@ namespace Game.DataStorage
         public string PlayerName { get; }
         public string GuildName { get; }
         public ObjectGuid GuildGuid { get; }
+    }
+
+    public class WhoListStorageManager : Singleton<WhoListStorageManager>
+    {
+        List<WhoListPlayerInfo> _whoListStorage;
+
+        WhoListStorageManager()
+        {
+            _whoListStorage = new List<WhoListPlayerInfo>();
+        }
+
+        public void Update()
+        {
+            // clear current list
+            _whoListStorage.Clear();
+
+            var players = Global.ObjAccessor.GetPlayers();
+            foreach (var player in players)
+            {
+                if (player.GetMap() == null || player.Session.PlayerLoading())
+                    continue;
+
+                string playerName = player.GetName();
+                string guildName = Global.GuildMgr.GetGuildNameById((uint)player.GetGuildId());
+
+                Guild guild = player.GetGuild();
+                ObjectGuid guildGuid = ObjectGuid.Empty;
+
+                if (guild)
+                    guildGuid = guild.GetGUID();
+
+                _whoListStorage.Add(new WhoListPlayerInfo(player.GetGUID(), player.GetTeam(), player.Session.GetSecurity(), player.GetLevel(),
+                    player.GetClass(), player.GetRace(), player.GetZoneId(), (byte)player.GetNativeGender(), player.IsVisible(),
+                    player.IsGameMaster(), playerName, guildName, guildGuid));
+            }
+        }
+
+        public List<WhoListPlayerInfo> GetWhoList() { return _whoListStorage; }
     }
 }

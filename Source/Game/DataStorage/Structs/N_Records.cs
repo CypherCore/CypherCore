@@ -14,8 +14,8 @@ namespace Game.DataStorage
     public sealed class NamesProfanityRecord
     {
         public uint Id;
-        public sbyte Language;
         public string Name;
+        public sbyte Language;
     }
 
     public sealed class NamesReservedRecord
@@ -27,8 +27,8 @@ namespace Game.DataStorage
     public sealed class NamesReservedLocaleRecord
     {
         public uint Id;
-        public byte LocaleMask;
         public string Name;
+        public byte LocaleMask;
     }
 
     public sealed class NumTalentsAtLevelRecord

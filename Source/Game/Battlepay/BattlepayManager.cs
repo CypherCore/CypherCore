@@ -160,7 +160,7 @@ namespace Game.Battlepay
 
                 foreach (var itr in itemTemplate.Effects)
                 {
-                    if (itr.TriggerType == ItemSpelltriggerType.OnLearn && player.HasSpell(itr.SpellID))
+                    if (itr.TriggerType == ItemSpelltriggerType.OnLearn && player.HasSpell((uint)itr.SpellID))
                     {
                         return true;
                     }

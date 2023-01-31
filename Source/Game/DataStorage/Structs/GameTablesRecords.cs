@@ -21,20 +21,20 @@ namespace Game.DataStorage
 
     public sealed class GtBaseMPRecord
     {
-        public float Adventurer;
-        public float DeathKnight;
-        public float DemonHunter;
+        public float Rogue;
         public float Druid;
-        public float Evoker;
         public float Hunter;
         public float Mage;
-        public float Monk;
         public float Paladin;
         public float Priest;
-        public float Rogue;
         public float Shaman;
         public float Warlock;
         public float Warrior;
+        public float DeathKnight;
+        public float Monk;
+        public float DemonHunter;
+        public float Evoker;
+        public float Adventurer;
     }
 
     public sealed class GtBattlePetXPRecord
@@ -46,45 +46,45 @@ namespace Game.DataStorage
     public sealed class GtCombatRatingsRecord
     {
         public float Amplify;
-        public float ArmorPenetration;
-        public float Avoidance;
-        public float Block;
-        public float Cleave;
-        public float Corruption;
-        public float CorruptionResistance;
-        public float CritMelee;
-        public float CritRanged;
-        public float CritSpell;
         public float DefenseSkill;
         public float Dodge;
-        public float Expertise;
-        public float HasteMelee;
-        public float HasteRanged;
-        public float HasteSpell;
+        public float Parry;
+        public float Block;
         public float HitMelee;
         public float HitRanged;
         public float HitSpell;
-        public float Lifesteal;
-        public float Mastery;
-        public float Parry;
-        public float PvPPower;
+        public float CritMelee;
+        public float CritRanged;
+        public float CritSpell;
+        public float Corruption;
+        public float CorruptionResistance;
+        public float Speed;
         public float ResilienceCritTaken;
         public float ResiliencePlayerDamage;
-        public float Speed;
+        public float Lifesteal;
+        public float HasteMelee;
+        public float HasteRanged;
+        public float HasteSpell;
+        public float Avoidance;
         public float Sturdiness;
-        public float Unused12;
         public float Unused7;
+        public float Expertise;
+        public float ArmorPenetration;
+        public float Mastery;
+        public float PvPPower;
+        public float Cleave;
         public float VersatilityDamageDone;
-        public float VersatilityDamageTaken;
         public float VersatilityHealingDone;
+        public float VersatilityDamageTaken;
+        public float Unused12;
     }
 
     public sealed class GtGenericMultByILvlRecord
     {
         public float ArmorMultiplier;
-        public float JewelryMultiplier;
-        public float TrinketMultiplier;
         public float WeaponMultiplier;
+        public float TrinketMultiplier;
+        public float JewelryMultiplier;
     }
 
     public sealed class GtHpPerStaRecord
@@ -104,37 +104,37 @@ namespace Game.DataStorage
 
     public sealed class GtSpellScalingRecord
     {
-        public float Adventurer;
-        public float Consumable;
-        public float DamageReplaceStat;
-        public float DamageSecondary;
-        public float DeathKnight;
-        public float DemonHunter;
+        public float Rogue;
         public float Druid;
+        public float Hunter;
+        public float Mage;
+        public float Paladin;
+        public float Priest;
+        public float Shaman;
+        public float Warlock;
+        public float Warrior;
+        public float DeathKnight;
+        public float Monk;
+        public float DemonHunter;
         public float Evoker;
+        public float Adventurer;
+        public float Item;
+        public float Consumable;
         public float Gem1;
         public float Gem2;
         public float Gem3;
         public float Health;
-        public float Hunter;
-        public float Item;
-        public float Mage;
+        public float DamageReplaceStat;
+        public float DamageSecondary;
         public float ManaConsumable;
-        public float Monk;
-        public float Paladin;
-        public float Priest;
-        public float Rogue;
-        public float Shaman;
-        public float Warlock;
-        public float Warrior;
     }
 
     public sealed class GtXpRecord
     {
-        public float Divisor;
-        public float Junk;
-        public float PerKill;
-        public float Stats;
         public float Total;
+        public float PerKill;
+        public float Junk;
+        public float Stats;
+        public float Divisor;
     }
 }

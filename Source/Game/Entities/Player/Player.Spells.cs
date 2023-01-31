@@ -3322,7 +3322,7 @@ namespace Game.Entities
                 if (effect.TriggerType != ItemSpelltriggerType.OnPickup) // On obtain trigger
                     continue;
 
-                var spellId = effect.SpellID;
+                uint spellId = (uint)effect.SpellID;
 
                 if (spellId <= 0)
                     continue;
