@@ -4371,7 +4371,7 @@ namespace Game.Achievements
 
                     break;
                 case ModifierTreeType.PlayerHasPerksProgramPendingReward: // 350
-                    if (!referencePlayer.m_activePlayerData.HasPerksProgramPendingReward)
+                    if (!referencePlayer.ActivePlayerData.HasPerksProgramPendingReward)
                         return false;
                     break;
                 case ModifierTreeType.PlayerCanUseItem: // 351
@@ -4384,7 +4384,7 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerHasAtLeastProfPathRanks: // 355
                 {
                     uint ranks = 0;
-                    foreach (TraitConfig traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
+                    foreach (TraitConfig traitConfig in referencePlayer.ActivePlayerData.TraitConfigs)
                     {
                         if ((TraitConfigType)(int)traitConfig.Type != TraitConfigType.Profession)
                             continue;
