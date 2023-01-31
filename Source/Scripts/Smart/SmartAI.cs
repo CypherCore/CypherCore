@@ -58,28 +58,28 @@ namespace Scripts.Smart
         public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
         public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneComplete, player);
         }
 
         public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
         public void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(player, null, sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
     }
@@ -100,7 +100,7 @@ namespace Scripts.Smart
                 player.IsQuestObjectiveComplete(slot, quest, objective))
             {
                 SmartScript smartScript = new();
-                smartScript.OnInitialize(null, null, null, quest);
+                smartScript.OnInitialize(player, null, null, quest);
                 smartScript.ProcessEventsFor(SmartEvents.QuestObjCompletion, player, objective.Id);
             }
         }
@@ -109,7 +109,7 @@ namespace Scripts.Smart
         public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
             SmartScript smartScript = new();
-            smartScript.OnInitialize(null, null, null, quest);
+            smartScript.OnInitialize(player, null, null, quest);
 
             switch (newStatus)
             {
