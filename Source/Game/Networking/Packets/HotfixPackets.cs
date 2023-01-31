@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Framework.Constants;
 using Framework.IO;
 using Game.DataStorage;
@@ -78,7 +79,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(VirtualRealmAddress);
-            _worldPacket.WriteInt32(Hotfixes.Keys.Count);
+            _worldPacket.WriteInt32(Hotfixes.Keys.Count());
 
             foreach (var key in Hotfixes.Keys)
                 Hotfixes[key][0].ID.Write(_worldPacket);

@@ -212,10 +212,9 @@ namespace Framework.Dynamic
             MultiMap<TimeSpan, uint> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
-            {
                 delayed.Add(pair.Key + delay, pair.Value);
-                _eventMap.Remove(pair.Key, pair.Value);
-            }
+
+            _eventMap.Clear();
 
             foreach (var del in delayed)
                 _eventMap.Add(del);

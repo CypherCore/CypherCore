@@ -2,14 +2,27 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using System.Threading;
+using Google.Protobuf.WellKnownTypes;
 
 namespace System.Collections.Generic
 {
     public sealed class MultiMap<TKey, TValue> : IMultiMap<TKey, TValue>
     {
         private static readonly List<object> _emptyList = new();
-
+        private Queue<Action> _actionQueue = new Queue<Action>();
         private readonly Dictionary<TKey, List<TValue>> _interalStorage = new();
+        private bool _completing = false;
+        internal int SyncObj = 0;
+        internal HashSet<TKey> KeysRemoved = new HashSet<TKey>();
+        internal HashSet<TValue> ValuesRemoved = new HashSet<TValue>();
+        internal bool Itterating 
+        { 
+            get 
+            { 
+                return _completing ? false : SyncObj != 0; 
+            } 
+        }
 
         public MultiMap()
         {
@@ -23,6 +36,12 @@ namespace System.Collections.Generic
 
         public void Add(TKey key, TValue value)
         {
+            if (Itterating)
+            {
+                _actionQueue.Enqueue(() => Add(key, value));
+                return;
+            }
+
             if (!_interalStorage.TryGetValue(key, out var val))
             {
                 val = new List<TValue>();
@@ -34,6 +53,12 @@ namespace System.Collections.Generic
 
         public void AddRange(TKey key, IEnumerable<TValue> valueList)
         {
+            if (Itterating)
+            {
+                _actionQueue.Enqueue(() => AddRange(key, valueList));
+                return;
+            }
+
             if (!_interalStorage.TryGetValue(key, out var val))
             {
                 val = new List<TValue>();
@@ -47,39 +72,53 @@ namespace System.Collections.Generic
         {
             Add(item.Key, item.Value);
         }
+        
+        public void Set(TKey key, List<TValue> values)
+        {
+            if (Itterating)
+            {
+                _actionQueue.Enqueue(() => Set(key, values));
+                return;
+            }
+
+            _interalStorage[key] = values;
+        }
 
         public bool Remove(TKey key)
         {
+            if (Itterating)
+            {
+                KeysRemoved.Add(key);
+                _actionQueue.Enqueue(() => Remove(key));
+                return true;
+            }
+
             return _interalStorage.Remove(key);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            if (!ContainsKey(item.Key))
-                return false;
-
-            bool val = _interalStorage[item.Key].Remove(item.Value);
-
-            if (!val)
-                return false;
-
-            if (_interalStorage[item.Key].Empty())
-                _interalStorage.Remove(item.Key);
-
-            return true;
+            return Remove(item.Key, item.Value);
         }
 
         public bool Remove(TKey key, TValue value)
         {
-            if (!ContainsKey(key))
+            if (Itterating)
+            {
+                ValuesRemoved.Add(value);
+                _actionQueue.Enqueue(() => Remove(key, value));
+                return true;
+            }
+
+            if (!_interalStorage.TryGetValue(key, out var list))
                 return false;
 
-            bool val = _interalStorage[key].Remove(value);
+            bool val = list.Remove(value);
 
             if (!val)
                 return false;
 
-            if (_interalStorage[key].Empty())
+            if (list.Empty())
                 _interalStorage.Remove(key);
 
             return true;
@@ -87,30 +126,45 @@ namespace System.Collections.Generic
 
         public bool ContainsKey(TKey key)
         {
+            if (KeysRemoved.Contains(key))
+                return false;
+
             return _interalStorage.ContainsKey(key);
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            List<TValue> valueList;
+            if (KeysRemoved.Contains(item.Key))
+                return false;
 
-            if (_interalStorage.TryGetValue(item.Key, out valueList))
-                return valueList.Contains(item.Value);
+            if (_interalStorage.TryGetValue(item.Key, out var valueList))
+                if (ValuesRemoved.Contains(item.Value))
+                    return false;
+                else
+                    return valueList.Contains(item.Value);
 
             return false;
         }
 
         public bool Contains(TKey key, TValue item)
         {
-            if (!_interalStorage.ContainsKey(key)) return false;
+            if (KeysRemoved.Contains(key))
+                return false;
+
+            if (!_interalStorage.ContainsKey(key)) 
+                return false;
+
+            if (ValuesRemoved.Contains(item))
+                return false;
 
             return _interalStorage[key].Contains(item);
         }
 
         public List<TValue> LookupByKey(TKey key)
         {
-            if (_interalStorage.TryGetValue(key, out var values))
-                return values;
+            if (!KeysRemoved.Contains(key))
+                if (_interalStorage.TryGetValue(key, out var values))
+                    return values;
 
             return _emptyList.Cast<TValue>().ToList();
         }
@@ -119,8 +173,9 @@ namespace System.Collections.Generic
         {
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
 
-            if (_interalStorage.ContainsKey(newkey))
-                return _interalStorage[newkey];
+            if (!KeysRemoved.Contains(newkey))
+                if (_interalStorage.ContainsKey(newkey))
+                    return _interalStorage[newkey];
 
             return _emptyList.Cast<TValue>().ToList();
         }
@@ -129,32 +184,33 @@ namespace System.Collections.Generic
         {
             get
             {
-                if (!_interalStorage.TryGetValue(key, out var val))
+                if (KeysRemoved.Contains(key) || !_interalStorage.TryGetValue(key, out var val))
                     return _emptyList.Cast<TValue>().ToList();
 
                 return val;
             }
             set
             {
-                if (!_interalStorage.ContainsKey(key))
-                    _interalStorage.Add(key, value);
-                else
-                    _interalStorage[key] = value;
+                Set(key, value);
             }
         }
 
-        public ICollection<TKey> Keys => _interalStorage.Keys;
+        public IEnumerable<TKey> Keys => _interalStorage.Keys.Where(k => KeysRemoved.Contains(k));
 
-        public ICollection<TValue> Values
+        public IEnumerable<TValue> Values
         {
             get
             {
-                List<TValue> retVal = new();
+                Interlocked.Increment(ref SyncObj);
 
                 foreach (var item in _interalStorage)
-                    retVal.AddRange(item.Value);
+                    if (!KeysRemoved.Contains(item.Key))
+                        foreach (var li in item.Value)
+                            if (!ValuesRemoved.Contains(li))
+                                yield return li;
 
-                return retVal;
+                ItteratingComplete();
+                
             }
         }
 
@@ -162,14 +218,47 @@ namespace System.Collections.Generic
         {
             get
             {
+                Interlocked.Increment(ref SyncObj);
+
                 foreach (var pair in _interalStorage)
-                    foreach (var value in pair.Value)
-                        yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
+                    if (!KeysRemoved.Contains(pair.Key))
+                        foreach (var value in pair.Value)
+                            if (!ValuesRemoved.Contains(value))
+                                yield return new KeyValuePair<TKey, TValue>(pair.Key, value);
+
+                ItteratingComplete();
+            }
+        }
+
+        internal void ItteratingComplete()
+        {
+            Interlocked.Decrement(ref SyncObj);
+
+            if (SyncObj == 0)
+            {
+                _completing = true;
+                while (_actionQueue.Count > 0)
+                {
+                    var action = _actionQueue.Dequeue();
+                    action.Invoke();
+                }
+                KeysRemoved.Clear();
+                ValuesRemoved.Clear();
+                _completing = false;
             }
         }
 
         public void Clear()
         {
+            if (Itterating)
+            {
+                foreach (var key in Keys)
+                    KeysRemoved.Add(key);
+
+                _actionQueue.Enqueue(Clear);
+                return;
+            }
+
             _interalStorage.Clear();
         }
 

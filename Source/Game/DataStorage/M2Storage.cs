@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -185,7 +186,7 @@ namespace Game.DataStorage
                     Log.outError(LogFilter.ServerLoading, "File {0} not found!!!!", filename);
                 }
             }
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", _flyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", _flyByCameraStorage.Keys.Count(), Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public static List<FlyByCamera> GetFlyByCameras(uint cameraId)

@@ -39,7 +39,7 @@ namespace Game
             _maxInviteId = 0;
 
             //                                              0        1      2      3            4          5          6     7      8
-            SQLResult result = DB.Characters.Query("SELECT EventID, _owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events");
+            SQLResult result = DB.Characters.Query("SELECT EventID, Owner, Title, Description, EventType, TextureID, Date, Flags, LockDate FROM calendar_events");
 
             if (!result.IsEmpty())
                 do

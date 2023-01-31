@@ -1405,6 +1405,7 @@ namespace Game
             }
 
             uint count = 0;
+            List<KeyValuePair<uint, uint>> remove = new List<KeyValuePair<uint, uint>>();
 
             foreach (var script in spellScriptsStorage.KeyValueList)
             {
@@ -1429,11 +1430,14 @@ namespace Game
                         spellScript._Register();
 
                         if (!spellScript._Validate(spellEntry))
+                        {
                             valid = false;
+                            Log.outError(LogFilter.Scripts, "Functions GetSpellScript() of script `{0}` did not pass _Validate check", GetScriptName(pair.Value));
+                        }
                     }
 
                     if (!valid)
-                        spellScriptsStorage.Remove(script);
+                        remove.Add(script);
                 }
 
                 Dictionary<AuraScriptLoader, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
@@ -1455,15 +1459,21 @@ namespace Game
                         auraScript._Register();
 
                         if (!auraScript._Validate(spellEntry))
+                        {
                             valid = false;
+                            Log.outError(LogFilter.Scripts, "Functions GetAuraScript() of script `{0}`  did not pass _Validate check", GetScriptName(pair.Value));
+                        }
                     }
 
                     if (!valid)
-                        spellScriptsStorage.Remove(script);
+                        remove.Add(script);
                 }
 
                 ++count;
             }
+
+            foreach (var script in remove)
+                spellScriptsStorage.Remove(script);
 
             Log.outInfo(LogFilter.ServerLoading, "Validated {0} scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -1679,7 +1689,7 @@ namespace Game
         {
             var time = Time.GetMSTime();
             //                                         0      1        2      3           4         5         6            7         8      9          10               11            12                      13
-            SQLResult result = DB.World.Query("SELECT entry, PathId, Mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, Emote, aiAnimKit, MovementAnimKit, MeleeAnimKit, VisibilityDistanceType, Auras FROM creature_template_addon");
+            SQLResult result = DB.World.Query("SELECT entry, path_id, Mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, Emote, aiAnimKit, MovementAnimKit, MeleeAnimKit, VisibilityDistanceType, Auras FROM creature_template_addon");
 
             if (result.IsEmpty())
             {
@@ -1824,7 +1834,7 @@ namespace Game
         {
             var time = Time.GetMSTime();
             //                                         0     1        2      3           4         5         6            7         8      9          10               11            12                      13
-            SQLResult result = DB.World.Query("SELECT Guid, PathId, Mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, Emote, aiAnimKit, MovementAnimKit, MeleeAnimKit, VisibilityDistanceType, Auras FROM creature_addon");
+            SQLResult result = DB.World.Query("SELECT Guid, path_id, Mount, StandState, AnimTier, VisFlags, SheathState, PvPFlags, Emote, aiAnimKit, MovementAnimKit, MeleeAnimKit, VisibilityDistanceType, Auras FROM creature_addon");
 
             if (result.IsEmpty())
             {
@@ -3302,7 +3312,7 @@ namespace Game
             //                                         0              1   2    3           4           5           6            7        8             9              10
             SQLResult result = DB.World.Query("SELECT creature.Guid, Id, map, position_x, position_y, position_z, orientation, modelid, equipment_id, spawntimesecs, wander_distance, " +
                                               //11               12         13       14            15                 16          17           18                19                   20                    21
-                                              "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.Npcflag, creature.UnitFlags, creature.UnitFlags2, creature.UnitFlags3, " +
+                                              "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, poolSpawnId, creature.Npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
                                               //   22                     23                      24                25                   26                       27                   28
                                               "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName, creature.StringId " +
                                               "FROM creature LEFT OUTER JOIN game_event_creature ON creature.Guid = game_event_creature.Guid LEFT OUTER JOIN pool_members ON pool_members.Type = 0 AND creature.Guid = pool_members.spawnId");
@@ -12395,7 +12405,7 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT _mapId, TerrainSwapMap FROM `terrain_swap_defaults`");
+            SQLResult result = DB.World.Query("SELECT mapId, TerrainSwapMap FROM `terrain_swap_defaults`");
 
             if (result.IsEmpty())
             {

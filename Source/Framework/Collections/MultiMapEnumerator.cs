@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Threading;
+
 namespace System.Collections.Generic
 {
     public class MultiMapEnumerator<TKey, TValue> : IEnumerator<KeyValuePair<TKey, TValue>>
@@ -28,22 +30,34 @@ namespace System.Collections.Generic
 
         public bool MoveNext()
         {
-            if (!_valueEnumerator.MoveNext())
-            {
-                if (!_keyEnumerator.MoveNext())
-                    return false;
+            while (true)
+                if (!_valueEnumerator.MoveNext())
+                {
+                    while (true)
+                        if (!_keyEnumerator.MoveNext())
+                        {
+                            _map.ItteratingComplete();
+                            return false;
+                        }
+                        else if (!_map.KeysRemoved.Contains(_keyEnumerator.Current))
+                            break;
 
-                _valueEnumerator = _map[_keyEnumerator.Current].GetEnumerator();
-                _valueEnumerator.MoveNext();
+                    _valueEnumerator = _map[_keyEnumerator.Current].GetEnumerator();
+                    _valueEnumerator.MoveNext();
 
-                return true;
-            }
+                    if (!_map.ValuesRemoved.Contains(_valueEnumerator.Current))
+                        return true;
+                }
+                else if (!_map.ValuesRemoved.Contains(_valueEnumerator.Current))
+                    break;
+        
 
             return true;
         }
 
         public void Reset()
         {
+            Interlocked.Increment(ref _map.SyncObj);
             _keyEnumerator = _map.Keys.GetEnumerator();
             _valueEnumerator = new List<TValue>().GetEnumerator();
         }

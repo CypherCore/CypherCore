@@ -28,7 +28,7 @@ namespace Game.Maps
             Dictionary<uint, SharedInstanceLockData> instanceLockDataById = new();
 
             //                                              0           1     2
-            SQLResult result = DB.Characters.Query("SELECT InstanceId, _data, completedEncountersMask FROM instance");
+            SQLResult result = DB.Characters.Query("SELECT InstanceId, data, completedEncountersMask FROM instance");
 
             if (!result.IsEmpty())
                 do
@@ -44,7 +44,7 @@ namespace Game.Maps
                 } while (result.NextRow());
 
             //                                                  0     1      2       3           4           5     6                        7           8
-            SQLResult lockResult = DB.Characters.Query("SELECT Guid, mapId, lockId, InstanceId, difficulty, _data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
+            SQLResult lockResult = DB.Characters.Query("SELECT Guid, mapId, lockId, InstanceId, difficulty, data, completedEncountersMask, expiryTime, extended FROM character_instance_lock");
 
             if (!result.IsEmpty())
                 do
@@ -67,7 +67,7 @@ namespace Game.Maps
 
                         if (sharedData == null)
                         {
-                            Log.outError(LogFilter.Instance, $"Missing instance _data for instance Id based lock (Id {instanceId})");
+                            Log.outError(LogFilter.Instance, $"Missing instance data for instance Id based lock (Id {instanceId})");
                             DB.Characters.Execute($"DELETE FROM character_instance_lock WHERE InstanceId = {instanceId}");
 
                             continue;

@@ -2208,7 +2208,7 @@ namespace Game.Entities
         {
             // used just after dieing to remove all visible Auras
             // and disable the mods for the passive ones
-            foreach (var app in GetAppliedAuras())
+            foreach (var app in GetAppliedAuras().ToArray())
             {
                 if (app.Value == null)
                     continue;
@@ -2220,7 +2220,7 @@ namespace Game.Entities
                     _UnapplyAura(app, AuraRemoveMode.Death);
             }
 
-            foreach (var pair in GetOwnedAuras())
+            foreach (var pair in GetOwnedAuras().ToArray())
             {
                 Aura aura = pair.Value;
 
@@ -2243,7 +2243,7 @@ namespace Game.Entities
 
         public void RemoveAllAurasRequiringDeadTarget()
         {
-            foreach (var app in GetAppliedAuras())
+            foreach (var app in GetAppliedAuras().ToArray())
             {
                 Aura aura = app.Value.GetBase();
 
@@ -2252,7 +2252,7 @@ namespace Game.Entities
                     _UnapplyAura(app, AuraRemoveMode.Default);
             }
 
-            foreach (var aura in GetOwnedAuras())
+            foreach (var aura in GetOwnedAuras().ToArray())
                 if (!aura.Value.IsPassive() &&
                     aura.Value.GetSpellInfo().IsRequiringDeadTarget())
                     RemoveOwnedAura(aura, AuraRemoveMode.Default);
@@ -3145,6 +3145,7 @@ namespace Game.Entities
             // Such situation occurs when player is logging in inside an instance and fails the entry check for any reason.
             // The aura that was loaded from db (indirectly, via linked casts) gets removed before it has a chance
             // to register in _appliedAuras
+            List<KeyValuePair<uint, Aura>> toRemove = new();
             foreach (var pair in GetOwnedAuras())
             {
                 Aura aura = pair.Value;
@@ -3154,7 +3155,7 @@ namespace Game.Entities
                 {
                     if (onPhaseChange)
                     {
-                        RemoveOwnedAura(pair);
+                        toRemove.Add(pair);
                     }
                     else
                     {
@@ -3162,10 +3163,13 @@ namespace Game.Entities
 
                         if (!caster ||
                             !caster.InSamePhase(this))
-                            RemoveOwnedAura(pair);
+                            toRemove.Add(pair);
                     }
                 }
             }
+
+            foreach(var pair in toRemove)
+                RemoveOwnedAura(pair);
 
             // single Target Auras at other targets
             for (var i = 0; i < _scAuras.Count; i++)
@@ -3179,6 +3183,20 @@ namespace Game.Entities
         }
 
         // All aura base removes should go through this function!
+        public void RemoveOwnedAura(uint spellId, Aura aura, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        {
+            Cypher.Assert(!aura.IsRemoved());
+
+            _ownedAuras.Remove(spellId, aura);
+            _removedAuras.Add(aura);
+
+            // Unregister single Target aura
+            if (aura.IsSingleTarget())
+                aura.UnregisterSingleTarget();
+
+            aura._Remove(removeMode);
+        }
+
         public void RemoveOwnedAura(KeyValuePair<uint, Aura> keyValuePair, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             Aura aura = keyValuePair.Value;
@@ -3197,15 +3215,19 @@ namespace Game.Entities
 
         public void RemoveOwnedAura(uint spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
-            foreach (var pair in GetOwnedAuras())
-            {
-                if (pair.Key != spellId)
-                    continue;
+            var auras = _ownedAuras[spellId];
+            List<Aura> toRemove = new List<Aura>();
 
-                if (((pair.Value.GetEffectMask() & reqEffMask) == reqEffMask) &&
-                    (casterGUID.IsEmpty() || pair.Value.GetCasterGUID() == casterGUID))
-                    RemoveOwnedAura(pair, removeMode);
-            }
+            if (auras != null)
+                foreach (var aura in auras)
+                {
+                    if (((aura.GetEffectMask() & reqEffMask) == reqEffMask) &&
+                        (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID))
+                        toRemove.Add(aura); 
+                }
+
+            foreach (var aura in toRemove)
+                RemoveOwnedAura(spellId, aura, removeMode);
         }
 
         public void RemoveOwnedAura(Aura auraToRemove, AuraRemoveMode removeMode = AuraRemoveMode.Default)
@@ -3224,14 +3246,13 @@ namespace Game.Entities
 
             uint spellId = auraToRemove.GetId();
 
-            foreach (var pair in GetOwnedAuras())
-            {
-                if (pair.Key != spellId)
-                    continue;
+            var auras = _ownedAuras[spellId];
 
-                if (pair.Value == auraToRemove)
+            if (auras != null)
+            {
+                if (auras.Contains(auraToRemove))
                 {
-                    RemoveOwnedAura(pair, removeMode);
+                    RemoveOwnedAura(spellId, auraToRemove, removeMode);
 
                     return;
                 }
@@ -3469,10 +3490,10 @@ namespace Game.Entities
             // we want to have all Auras removed, so use your brain when linking events
             for (int counter = 0; !_appliedAuras.Empty() || !_ownedAuras.Empty(); counter++)
             {
-                foreach (var aurAppIter in GetAppliedAuras())
+                foreach (var aurAppIter in GetAppliedAuras().ToArray()) // toarray to execute the IEnumerable.
                     _UnapplyAura(aurAppIter, AuraRemoveMode.Default);
 
-                foreach (var aurIter in GetOwnedAuras())
+                foreach (var aurIter in GetOwnedAuras().ToArray()) // toarray to execute the IEnumerable.
                     RemoveOwnedAura(aurIter);
 
                 const int maxIteration = 50;
@@ -3684,8 +3705,10 @@ namespace Game.Entities
         public void _UnapplyAura(KeyValuePair<uint, AuraApplication> pair, AuraRemoveMode removeMode)
         {
             //Check if aura was already removed, if so just return.
-            if (!_appliedAuras.Remove(pair))
+            if (!_appliedAuras.Contains(pair))
                 return;
+
+            _appliedAuras.Remove(pair);
 
             AuraApplication aurApp = pair.Value;
             Cypher.Assert(aurApp != null);
@@ -4809,13 +4832,17 @@ namespace Game.Entities
                 return;
             }
 
+            List<KeyValuePair<uint, AuraApplication>> toRemove = new();
             foreach (var app in GetAppliedAuras())
             {
                 if (aura.CanStackWith(app.Value.GetBase()))
                     continue;
 
-                RemoveAura(app, AuraRemoveMode.Default);
+                toRemove.Add(app);
             }
+
+            foreach(var app in toRemove)
+                RemoveAura(app, AuraRemoveMode.Default);
         }
 
         private int GetMaxPositiveAuraModifierByMiscValue(AuraType auraType, int miscValue)
