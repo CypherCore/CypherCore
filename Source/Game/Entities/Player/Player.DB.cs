@@ -56,7 +56,7 @@ namespace Game.Entities
         {
             _mail.Clear();
 
-            Dictionary<uint, Mail> mailById = new();
+            Dictionary<ulong, Mail> mailById = new();
 
             if (!mailsResult.IsEmpty())
                 do
@@ -3426,7 +3426,7 @@ namespace Game.Entities
             } while (result.NextRow());
         }
 
-        private static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
+        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, ulong mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
         {
             ulong itemGuid = fields.Read<ulong>(0);
             uint itemEntry = fields.Read<uint>(1);
@@ -4882,9 +4882,8 @@ namespace Game.Entities
 
     public enum CharDeleteMethod
     {
-        Remove = 0, // Completely remove from the database
-
-        Unlink = 1 // The character gets unlinked from the account,
-                   // the Name gets freed up and appears as deleted ingame
+        Remove = 0,                      // Completely remove from the database
+        Unlink = 1                       // The character gets unlinked from the account,
+        // the name gets freed up and appears as deleted ingame
     }
 }

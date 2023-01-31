@@ -5,8 +5,8 @@ namespace Game.Scripting.Interfaces.ISpell
     public interface ITargetHookHandler : ISpellEffect
     {
         Targets TargetType { get; }
-        bool Area { get; }
-        bool Dest { get; }
+        bool Area { get { return true; } }
+        bool Dest { get { return false; } }
     }
 
     public class TargetHookHandler : SpellEffect, ITargetHookHandler

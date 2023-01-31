@@ -1032,7 +1032,6 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             UnitGUID = _worldPacket.ReadPackedGuid();
-            DisplayID = _worldPacket.ReadUInt32();
         }
     }
 

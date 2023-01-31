@@ -117,12 +117,12 @@ namespace Game.Networking.Packets
 
     public class MailCommandResult : ServerPacket
     {
-        public uint AttachID;
+        public ulong AttachID;
         public uint BagResult;
         public uint Command;
         public uint ErrorCode;
 
-        public uint MailID;
+        public ulong MailID;
         public uint QtyInInventory;
 
         public MailCommandResult() : base(ServerOpcodes.MailCommandResult)
@@ -131,11 +131,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MailID);
+            _worldPacket.WriteUInt64(MailID);
             _worldPacket.WriteUInt32(Command);
             _worldPacket.WriteUInt32(ErrorCode);
             _worldPacket.WriteUInt32(BagResult);
-            _worldPacket.WriteUInt32(AttachID);
+            _worldPacket.WriteUInt64(AttachID);
             _worldPacket.WriteUInt32(QtyInInventory);
         }
     }
@@ -159,7 +159,7 @@ namespace Game.Networking.Packets
     public class MailMarkAsRead : ClientPacket
     {
         public ObjectGuid Mailbox;
-        public uint MailID;
+        public ulong MailID;
 
         public MailMarkAsRead(WorldPacket packet) : base(packet)
         {
@@ -176,7 +176,7 @@ namespace Game.Networking.Packets
     {
         public int DeleteReason;
 
-        public uint MailID;
+        public ulong MailID;
 
         public MailDelete(WorldPacket packet) : base(packet)
         {
@@ -194,7 +194,7 @@ namespace Game.Networking.Packets
         public uint AttachID;
 
         public ObjectGuid Mailbox;
-        public uint MailID;
+        public ulong MailID;
 
         public MailTakeItem(WorldPacket packet) : base(packet)
         {
@@ -211,8 +211,8 @@ namespace Game.Networking.Packets
     public class MailTakeMoney : ClientPacket
     {
         public ObjectGuid Mailbox;
-        public uint MailID;
-        public long Money;
+        public ulong MailID;
+        public ulong Money;
 
         public MailTakeMoney(WorldPacket packet) : base(packet)
         {
@@ -222,7 +222,7 @@ namespace Game.Networking.Packets
         {
             Mailbox = _worldPacket.ReadPackedGuid();
             MailID = _worldPacket.ReadUInt32();
-            Money = _worldPacket.ReadInt64();
+            Money = _worldPacket.ReadUInt64();
         }
     }
 
@@ -313,7 +313,7 @@ namespace Game.Networking.Packets
     //Structs
     public class MailAttachedItem
     {
-        public int AttachID;
+        public ulong AttachID;
         public int Charges;
         public uint Count;
         public uint Durability;
@@ -328,7 +328,7 @@ namespace Game.Networking.Packets
         public MailAttachedItem(Item item, byte pos)
         {
             Position = pos;
-            AttachID = (int)item.GetGUID().GetCounter();
+            AttachID = item.GetGUID().GetCounter();
             Item = new ItemInstance(item);
             Count = item.GetCount();
             Charges = item.GetSpellCharges();
@@ -363,7 +363,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Position);
-            data.WriteInt32(AttachID);
+            data.WriteUInt64(AttachID);
             data.WriteUInt32(Count);
             data.WriteInt32(Charges);
             data.WriteUInt32(MaxDurability);
@@ -391,7 +391,7 @@ namespace Game.Networking.Packets
         public float DaysLeft;
         public int Flags;
 
-        public int MailID;
+        public ulong MailID;
         public int MailTemplateID;
         public ObjectGuid? SenderCharacter;
         public byte SenderType;
@@ -401,7 +401,7 @@ namespace Game.Networking.Packets
 
         public MailListEntry(Mail mail, Player player)
         {
-            MailID = (int)mail.MessageID;
+            MailID = mail.MessageID;
             SenderType = (byte)mail.MessageType;
 
             switch (mail.MessageType)
@@ -439,7 +439,7 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(MailID);
+            data.WriteUInt64(MailID);
             data.WriteUInt8(SenderType);
             data.WriteUInt64(Cod);
             data.WriteInt32(StationeryID);

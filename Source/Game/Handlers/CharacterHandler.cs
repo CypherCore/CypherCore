@@ -503,8 +503,6 @@ namespace Game
 
             // START OF DUMMY VALUES
             features.ComplaintStatus = (byte)ComplaintStatus.EnabledWithAutoIgnore;
-            features.ScrollOfResurrectionRequestsRemaining = 1;
-            features.ScrollOfResurrectionMaxRequestsPerDay = 1;
             features.TwitterPostThrottleLimit = 60;
             features.TwitterPostThrottleCooldown = 20;
             features.CfgRealmID = 2;

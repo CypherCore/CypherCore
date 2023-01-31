@@ -4370,16 +4370,37 @@ namespace Game.Achievements
                         return false;
 
                     break;
+                case ModifierTreeType.PlayerHasPerksProgramPendingReward: // 350
+                    if (!referencePlayer.ActivePlayerData.HasPerksProgramPendingReward)
+                        return false;
+                    break;
                 case ModifierTreeType.PlayerCanUseItem: // 351
+                {
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(reqValue);
+                    if (itemTemplate == null || referencePlayer.CanUseItem(itemTemplate) != InventoryResult.Ok)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasAtLeastProfPathRanks: // 355
+                {
+                    uint ranks = 0;
+                    foreach (TraitConfig traitConfig in referencePlayer.ActivePlayerData.TraitConfigs)
                     {
-                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(reqValue);
+                        if ((TraitConfigType)(int)traitConfig.Type != TraitConfigType.Profession)
+                            continue;
 
-                        if (itemTemplate == null ||
-                            referencePlayer.CanUseItem(itemTemplate) != InventoryResult.Ok)
-                            return false;
+                        if (traitConfig.SkillLineID != secondaryAsset)
+                            continue;
 
-                        break;
+                        foreach (TraitEntry traitEntry in traitConfig.Entries)
+                            if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.GetNodeEntryType() == TraitNodeEntryType.ProfPath)
+                                ranks += (uint)(traitEntry.Rank + traitEntry.GrantedRanks);
                     }
+
+                    if (ranks < reqValue)
+                        return false;
+                    break;
+                }
                 default:
                     return false;
             }

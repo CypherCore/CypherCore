@@ -16,7 +16,7 @@ namespace Game.Mails
         public List<MailItemInfo> Items = new();
         public uint MailTemplateId { get; set; }
 
-        public uint MessageID { get; set; }
+        public ulong MessageID { get; set; }
         public MailMessageType MessageType { get; set; }
         public ulong Money { get; set; }
         public ulong Receiver { get; set; }
@@ -34,13 +34,12 @@ namespace Game.Mails
             Items.Add(mii);
         }
 
-        public bool RemoveItem(uint item_guid)
+        public bool RemoveItem(ulong itemGuid)
         {
             foreach (var item in Items)
-                if (item.ItemGuid == item_guid)
+                if (item.ItemGuid == itemGuid)
                 {
                     Items.Remove(item);
-
                     return true;
                 }
 

@@ -66,7 +66,10 @@ namespace Framework.Constants
         GarrTalentTree = 58,
         WeeklyRewardChest = 59,
         ClientModel = 60,
-        Max = 61
+        CraftingTable = 61,
+        PerksProgramChest = 62,
+
+        Max
     }
 
     public enum GameObjectState

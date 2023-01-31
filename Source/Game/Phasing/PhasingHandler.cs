@@ -235,7 +235,7 @@ namespace Game
             UpdateVisibilityIfNeeded(obj, true, changed);
         }
 
-        public static void OnConditionChange(WorldObject obj)
+        public static bool OnConditionChange(WorldObject obj, bool updateVisibility = true)
         {
             PhaseShift phaseShift = obj.GetPhaseShift();
             PhaseShift suppressedPhaseShift = obj.GetSuppressedPhaseShift();
@@ -334,7 +334,8 @@ namespace Game
                     unit.RemoveNotOwnSingleTargetAuras(true);
             }
 
-            UpdateVisibilityIfNeeded(obj, true, changed);
+            UpdateVisibilityIfNeeded(obj, updateVisibility, changed);
+            return changed;
         }
 
         public static void SendToPlayer(Player player, PhaseShift phaseShift)

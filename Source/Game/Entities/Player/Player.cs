@@ -2873,7 +2873,7 @@ namespace Game.Entities
             _mail.Insert(0, mail);
         }
 
-        public void RemoveMail(uint id)
+        public void RemoveMail(ulong id)
         {
             foreach (var mail in _mail)
                 if (mail.MessageID == id)
@@ -2885,7 +2885,7 @@ namespace Game.Entities
                 }
         }
 
-        public void SendMailResult(uint mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, uint item_guid = 0, uint item_count = 0)
+        public void SendMailResult(ulong mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, ulong itemGuid = 0, uint itemCount = 0)
         {
             MailCommandResult result = new();
             result.MailID = mailId;
@@ -2893,16 +2893,19 @@ namespace Game.Entities
             result.ErrorCode = (uint)mailError;
 
             if (mailError == MailResponseResult.EquipError)
-            {
                 result.BagResult = (uint)equipError;
-            }
             else if (mailAction == MailResponseType.ItemTaken)
             {
-                result.AttachID = item_guid;
-                result.QtyInInventory = item_count;
+                result.AttachID = itemGuid;
+                result.QtyInInventory = itemCount;
             }
 
             SendPacket(result);
+        }
+
+        void SendNewMail()
+        {
+            SendPacket(new NotifyReceivedMail());
         }
 
         public void UpdateNextMailTimeAndUnreads()
@@ -3061,12 +3064,13 @@ namespace Game.Entities
             return _mMitems.Remove(id);
         }
 
+
         public Item GetMItem(ulong id)
         {
             return _mMitems.LookupByKey(id);
         }
 
-        public Mail GetMail(uint id)
+        public Mail GetMail(ulong id)
         {
             return _mail.Find(p => p.MessageID == id);
         }
@@ -7246,11 +7250,6 @@ namespace Game.Entities
                     cMgr.LeftChannel(removeChannel.GetChannelId(), removeChannel.GetZoneEntry()); // Delete if empty
                 }
             }
-        }
-
-        private void SendNewMail()
-        {
-            SendPacket(new NotifyReceivedMail());
         }
 
         private void UpdateHomebindTime(uint time)
