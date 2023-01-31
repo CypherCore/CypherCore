@@ -193,6 +193,30 @@ namespace System.Collections.Generic
 
             list.Add(item);
         }
+
+        public static void RemoveIf<T>(this LinkedList<T> values, Func<T, bool> func)
+        {
+            var toRemove = new List<T>();
+
+            foreach (var v in values)
+                if (func.Invoke(v))
+                    toRemove.Add(v);
+
+            foreach (var v in toRemove)
+                values.Remove(v);
+        }
+        public static void RemoveIf<T>(this List<T> values, Func<T, bool> func)
+        {
+            var toRemove = new List<T>();
+
+            foreach (var v in values)
+                if (func.Invoke(v))
+                    toRemove.Add(v);
+
+            foreach (var v in toRemove)
+                values.Remove(v);
+        }
+
     }
 
     public interface ICheck<in T>

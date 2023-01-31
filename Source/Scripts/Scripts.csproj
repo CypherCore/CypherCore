@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="..\..\default.props"/>
+    <Import Project="..\..\default.props" />
 
     <ItemGroup>
-        <ProjectReference Include="..\Game\Game.csproj"/>
+        <ProjectReference Include="..\Game\Game.csproj" />
     </ItemGroup>
 
 </Project>

@@ -278,8 +278,7 @@ namespace Game.Scripting
                                                          }.Combine(attribute.Args));
                         }
 
-                        if (attribute is SpellScriptAttribute spellScript &&
-                            spellScript.SpellIds != null)
+                        if (attribute is SpellScriptAttribute spellScript && spellScript.SpellIds != null)
                             foreach (var id in spellScript.SpellIds)
                                 Global.ObjectMgr.RegisterSpellScript(id, name);
                     }

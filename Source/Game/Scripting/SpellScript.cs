@@ -98,13 +98,13 @@ namespace Game.Scripting
 
     public class SpellScript : BaseSpellScript, ISpellScript
     {
-        private Spell m_spell;
-        private uint m_hitPreventEffectMask;
-        private uint m_hitPreventDefaultEffectMask;
+        private Spell _spell;
+        private uint _hitPreventEffectMask;
+        private uint _hitPreventDefaultEffectMask;
 
         public bool _Load(Spell spell)
         {
-            m_spell = spell;
+            _spell = spell;
             _PrepareScriptCall((SpellScriptHookType)SpellScriptState.Loading);
             bool load = Load();
             _FinishScriptCall();
@@ -113,12 +113,12 @@ namespace Game.Scripting
 
         public void _InitHit()
         {
-            m_hitPreventEffectMask = 0;
-            m_hitPreventDefaultEffectMask = 0;
+            _hitPreventEffectMask = 0;
+            _hitPreventDefaultEffectMask = 0;
         }
 
-        public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventEffectMask & 1 << (int)effIndex); }
-        public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & 1 << (int)effIndex); }
+        public bool _IsEffectPrevented(uint effIndex) { return Convert.ToBoolean(_hitPreventEffectMask & 1 << (int)effIndex); }
+        public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(_hitPreventDefaultEffectMask & 1 << (int)effIndex); }
 
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
@@ -180,12 +180,12 @@ namespace Game.Scripting
         // methods allowing interaction with Spell object
         //
         // methods useable during all spell handling phases
-        public Unit GetCaster() { return m_spell.GetCaster().ToUnit(); }
-        public GameObject GetGObjCaster() { return m_spell.GetCaster().ToGameObject(); }
-        public Unit GetOriginalCaster() { return m_spell.GetOriginalCaster(); }
-        public SpellInfo GetSpellInfo() { return m_spell.GetSpellInfo(); }
-        public Difficulty GetCastDifficulty() { return m_spell.GetCastDifficulty(); }
-        public SpellValue GetSpellValue() { return m_spell.SpellValue; }
+        public Unit GetCaster() { return _spell.GetCaster().ToUnit(); }
+        public GameObject GetGObjCaster() { return _spell.GetCaster().ToGameObject(); }
+        public Unit GetOriginalCaster() { return _spell.GetOriginalCaster(); }
+        public SpellInfo GetSpellInfo() { return _spell.GetSpellInfo(); }
+        public Difficulty GetCastDifficulty() { return _spell.GetCastDifficulty(); }
+        public SpellValue GetSpellValue() { return _spell.SpellValue; }
 
         public SpellEffectInfo GetEffectInfo(uint effIndex)
         {
@@ -206,27 +206,27 @@ namespace Game.Scripting
         // returns: WorldLocation which was selected as a spell destination or null
         public WorldLocation GetExplTargetDest()
         {
-            if (m_spell.Targets.HasDst())
-                return m_spell.Targets.GetDstPos();
+            if (_spell.Targets.HasDst())
+                return _spell.Targets.GetDstPos();
             return null;
         }
 
         public void SetExplTargetDest(WorldLocation loc)
         {
-            m_spell.Targets.SetDst(loc);
+            _spell.Targets.SetDst(loc);
         }
 
         // returns: WorldObject which was selected as an explicit spell Target or null if there's no Target
-        public WorldObject GetExplTargetWorldObject() { return m_spell.Targets.GetObjectTarget(); }
+        public WorldObject GetExplTargetWorldObject() { return _spell.Targets.GetObjectTarget(); }
 
         // returns: Unit which was selected as an explicit spell Target or null if there's no Target
-        public Unit GetExplTargetUnit() { return m_spell.Targets.GetUnitTarget(); }
+        public Unit GetExplTargetUnit() { return _spell.Targets.GetUnitTarget(); }
 
         // returns: GameObject which was selected as an explicit spell Target or null if there's no Target
-        public GameObject GetExplTargetGObj() { return m_spell.Targets.GetGOTarget(); }
+        public GameObject GetExplTargetGObj() { return _spell.Targets.GetGOTarget(); }
 
         // returns: Item which was selected as an explicit spell Target or null if there's no Target
-        public Item GetExplTargetItem() { return m_spell.Targets.GetItemTarget(); }
+        public Item GetExplTargetItem() { return _spell.Targets.GetItemTarget(); }
 
         public long GetUnitTargetCountForEffect(uint effect)
         {
@@ -235,7 +235,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, $"Script: `{ScriptName}` Spell: `{ScriptSpellId}`: function SpellScript.GetUnitTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
-            return m_spell.GetUnitTargetCountForEffect(effect);
+            return _spell.GetUnitTargetCountForEffect(effect);
         }
 
         public long GetGameObjectTargetCountForEffect(uint effect)
@@ -245,7 +245,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, $"Script: `{ScriptName}` Spell: `{ScriptSpellId}`: function SpellScript.GetGameObjectTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
-            return m_spell.GetGameObjectTargetCountForEffect(effect);
+            return _spell.GetGameObjectTargetCountForEffect(effect);
         }
 
         public long GetItemTargetCountForEffect(uint effect)
@@ -255,7 +255,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, $"Script: `{ScriptName}` Spell: `{ScriptSpellId}`: function SpellScript.GetItemTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
-            return m_spell.GetItemTargetCountForEffect(effect);
+            return _spell.GetItemTargetCountForEffect(effect);
         }
 
         public long GetCorpseTargetCountForEffect(uint effect)
@@ -265,7 +265,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, $"Script: `{ScriptName}` Spell: `{ScriptSpellId}`: function SpellScript::GetCorpseTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
                 return 0;
             }
-            return m_spell.GetCorpseTargetCountForEffect(effect);
+            return _spell.GetCorpseTargetCountForEffect(effect);
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitUnit was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return null;
             }
-            return m_spell.UnitTarget;
+            return _spell.UnitTarget;
         }
 
         /// <summary>
@@ -293,8 +293,8 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitCreature was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return null;
             }
-            if (m_spell.UnitTarget != null)
-                return m_spell.UnitTarget.ToCreature();
+            if (_spell.UnitTarget != null)
+                return _spell.UnitTarget.ToCreature();
             else
                 return null;
         }
@@ -310,8 +310,8 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitPlayer was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return null;
             }
-            if (m_spell.UnitTarget != null)
-                return m_spell.UnitTarget.ToPlayer();
+            if (_spell.UnitTarget != null)
+                return _spell.UnitTarget.ToPlayer();
             else
                 return null;
         }
@@ -327,7 +327,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitItem was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return null;
             }
-            return m_spell.ItemTarget;
+            return _spell.ItemTarget;
         }
 
         /// <summary>
@@ -341,7 +341,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitGObj was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return null;
             }
-            return m_spell.GameObjTarget;
+            return _spell.GameObjTarget;
         }
 
         /// <summary>
@@ -355,7 +355,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, $"Script: `{ScriptName}` Spell: `{ScriptSpellId}`: function SpellScript::GetHitCorpse was called, but function has no effect in current hook!");
                 return null;
             }
-            return m_spell.CorpseTarget;
+            return _spell.CorpseTarget;
         }
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitDest was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return null;
             }
-            return m_spell.DestTarget;
+            return _spell.DestTarget;
         }
 
         // setter/getter for for Damage done by spell to Target of spell hit
@@ -381,7 +381,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitDamage was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return 0;
             }
-            return m_spell.EffectDamage;
+            return _spell.EffectDamage;
         }
 
         public void SetHitDamage(int damage)
@@ -391,7 +391,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetHitDamage was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return;
             }
-            m_spell.EffectDamage = damage;
+            _spell.EffectDamage = damage;
         }
 
         public void PreventHitDamage() { SetHitDamage(0); }
@@ -405,7 +405,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitHeal was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return 0;
             }
-            return m_spell.EffectHealing;
+            return _spell.EffectHealing;
         }
 
         public void SetHitHeal(int heal)
@@ -415,10 +415,10 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetHitHeal was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return;
             }
-            m_spell.EffectHealing = heal;
+            _spell.EffectHealing = heal;
         }
 
-        public Spell GetSpell() { return m_spell; }
+        public Spell GetSpell() { return _spell; }
 
         /// <summary>
         /// 
@@ -435,7 +435,7 @@ namespace Game.Scripting
             Unit hitUnit = GetHitUnit();
             if (hitUnit != null)
             {
-                var targetInfo = m_spell.UniqueTargetInfo.Find(targetInfo => targetInfo.TargetGUID == hitUnit.GetGUID());
+                var targetInfo = _spell.UniqueTargetInfo.Find(targetInfo => targetInfo.TargetGUID == hitUnit.GetGUID());
                 Cypher.Assert(targetInfo != null);
                 return targetInfo.IsCrit;
             }
@@ -451,9 +451,9 @@ namespace Game.Scripting
                 return null;
             }
 
-            Aura aura = m_spell.SpellAura;
+            Aura aura = _spell.SpellAura;
             if (dynObjAura)
-                aura = m_spell.DynObjAura;
+                aura = _spell.DynObjAura;
 
             if (aura == null || aura.IsRemoved())
                 return null;
@@ -470,10 +470,10 @@ namespace Game.Scripting
                 return;
             }
 
-            UnitAura unitAura = m_spell.SpellAura;
+            UnitAura unitAura = _spell.SpellAura;
             unitAura?.Remove();
 
-            DynObjAura dynAura = m_spell.DynObjAura;
+            DynObjAura dynAura = _spell.DynObjAura;
             dynAura?.Remove();
         }
 
@@ -488,7 +488,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitEffect was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return;
             }
-            m_hitPreventEffectMask |= 1u << (int)effIndex;
+            _hitPreventEffectMask |= 1u << (int)effIndex;
             PreventHitDefaultEffect(effIndex);
         }
 
@@ -502,14 +502,14 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return;
             }
-            m_hitPreventDefaultEffectMask |= 1u << (int)effIndex;
+            _hitPreventDefaultEffectMask |= 1u << (int)effIndex;
         }
 
         public SpellEffectInfo GetEffectInfo()
         {
             Cypher.Assert(IsInEffectHook(), $"Script: `{ScriptName}` Spell: `{ScriptSpellId}`: function SpellScript::GetEffectInfo was called, but function has no effect in current hook!");
 
-            return m_spell.EffectInfo;
+            return _spell.EffectInfo;
         }
 
         // method avalible only in EffectHandler method
@@ -520,7 +520,7 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", ScriptName, ScriptSpellId);
                 return 0;
             }
-            return m_spell.Damage;
+            return _spell.Damage;
         }
 
         public void SetEffectValue(int value)
@@ -531,7 +531,7 @@ namespace Game.Scripting
                 return;
             }
 
-            m_spell.Damage = value;
+            _spell.Damage = value;
         }
 
         public float GetEffectVariance()
@@ -542,7 +542,7 @@ namespace Game.Scripting
                 return 0.0f;
             }
 
-            return m_spell.Variance;
+            return _spell.Variance;
         }
 
         public void SetEffectVariance(float variance)
@@ -553,23 +553,23 @@ namespace Game.Scripting
                 return;
             }
 
-            m_spell.Variance = variance;
+            _spell.Variance = variance;
         }
 
         // returns: cast Item if present.
-        public Item GetCastItem() { return m_spell.CastItem; }
+        public Item GetCastItem() { return _spell.CastItem; }
 
         // Creates Item. Calls Spell.DoCreateItem method.
-        public void CreateItem(uint itemId, ItemContext context) { m_spell.DoCreateItem(itemId, context); }
+        public void CreateItem(uint itemId, ItemContext context) { _spell.DoCreateItem(itemId, context); }
 
         // Returns SpellInfo from the spell that triggered the current one
-        public SpellInfo GetTriggeringSpell() { return m_spell.TriggeredByAuraSpell; }
+        public SpellInfo GetTriggeringSpell() { return _spell.TriggeredByAuraSpell; }
 
         // finishes spellcast prematurely with selected error message
         public void FinishCast(SpellCastResult result, int? param1 = null, int? param2 = null)
         {
-            m_spell.SendCastResult(result, param1, param2);
-            m_spell.Finish(result == SpellCastResult.SpellCastOk);
+            _spell.SendCastResult(result, param1, param2);
+            _spell.Finish(result == SpellCastResult.SpellCastOk);
         }
 
         public void SetCustomCastResultMessage(SpellCustomErrors result)
@@ -580,7 +580,7 @@ namespace Game.Scripting
                 return;
             }
 
-            m_spell.CustomError = result;
+            _spell.CustomError = result;
         }
 
         public void SelectRandomInjuredTargets(List<WorldObject> targets, uint maxTargets, bool prioritizePlayers)
