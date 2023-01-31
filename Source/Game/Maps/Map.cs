@@ -428,7 +428,7 @@ namespace Game.Maps
 
                 if (player.IsInWorld)
                 {
-                    WorldSession session = player.GetSession();
+                    WorldSession session = player.Session;
                     var updater = new MapSessionFilter(session);
                     session.Update(diff, updater);
                 }

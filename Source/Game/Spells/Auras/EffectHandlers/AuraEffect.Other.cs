@@ -677,7 +677,7 @@ namespace Game.Spells.Auras.EffectHandlers
                 return;
 
             if (apply)
-                target.ToPlayer().GetSession().SendStablePet(target.GetGUID());
+                target.ToPlayer().Session.SendStablePet(target.GetGUID());
 
             // client auto close stable dialog at !apply aura
         }
@@ -1877,7 +1877,7 @@ namespace Game.Spells.Auras.EffectHandlers
 
             if (apply)
                 playerTarget.AddStoredAuraTeleportLocation(GetSpellInfo().Id);
-            else if (!playerTarget.GetSession().IsLogingOut())
+            else if (!playerTarget.Session.IsLogingOut())
                 playerTarget.RemoveStoredAuraTeleportLocation(GetSpellInfo().Id);
         }
 

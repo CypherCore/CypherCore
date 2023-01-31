@@ -187,7 +187,7 @@ namespace Game.Chat.Commands
                 return false;
 
             // Check that he is not logging out.
-            if (playerIdentifier.GetConnectedPlayer().GetSession().IsLogingOut())
+            if (playerIdentifier.GetConnectedPlayer().Session.IsLogingOut())
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
 
@@ -195,8 +195,8 @@ namespace Game.Chat.Commands
             }
 
             // - Send the message
-            playerIdentifier.GetConnectedPlayer().GetSession().SendNotification("{0}", msgStr);
-            playerIdentifier.GetConnectedPlayer().GetSession().SendNotification("|cffff0000[Message from administrator]:|r");
+            playerIdentifier.GetConnectedPlayer().Session.SendNotification("{0}", msgStr);
+            playerIdentifier.GetConnectedPlayer().Session.SendNotification("|cffff0000[Message from administrator]:|r");
 
             // Confirmation message
             string nameLink = handler.GetNameLink(playerIdentifier.GetConnectedPlayer());

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Framework.IO
 {
@@ -270,6 +271,96 @@ namespace Framework.IO
         #endregion
 
         #region Write Methods
+
+        public void Write(short data)
+        {
+            WriteInt16(data);
+        }
+
+        public void Write(sbyte data)
+        {
+            WriteInt8(data);
+        }
+        public void Write(int data)
+        {
+            WriteInt32(data);
+        }
+
+        public void Write(long data)
+        {
+            WriteInt64(data);
+        }
+
+        public void Write(byte data)
+        {
+            WriteUInt8(data);
+        }
+
+        public void Write(ushort data)
+        {
+            WriteUInt16(data);
+        }
+
+        public void Write(uint data)
+        {
+            WriteUInt32(data);
+        }
+
+        public void Write(ulong data)
+        {
+            WriteUInt64(data);
+        }
+
+        public void Write(float data)
+        {
+            WriteFloat(data);
+        }
+
+        public void Write(double data)
+        {
+            WriteDouble(data);
+        }
+
+
+        public void Write(string str)
+        {
+            WriteString(str);
+        }
+
+        public void Write(byte[] data)
+        {
+            WriteBytes(data);
+        }
+
+        public void Write(byte[] data, uint count)
+        {
+            WriteBytes(data, count);
+        }
+
+        public void Write(ByteBuffer buffer)
+        {
+            WriteBytes(buffer);
+        }
+
+        public void Write(Vector4 pos)
+        {
+            WriteVector4(pos);
+        }
+
+        public void Write(Vector3 pos)
+        {
+            WriteVector3(pos);
+        }
+
+        public void Write(Vector2 pos)
+        {
+            WriteVector2(pos);
+        }
+
+        public bool Write(bool bit)
+        {
+            return WriteBit(bit);
+        }
 
         public void WriteInt8(sbyte data)
         {

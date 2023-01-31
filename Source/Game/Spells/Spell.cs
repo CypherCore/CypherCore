@@ -2457,7 +2457,7 @@ namespace Game.Spells
                             Player target = Global.ObjAccessor.FindPlayer(playerCaster.GetTarget());
 
                             if (target == null ||
-                                !(target.GetSession().GetRecruiterId() == playerCaster.GetSession().GetAccountId() || target.GetSession().GetAccountId() == playerCaster.GetSession().GetRecruiterId()))
+                                !(target.Session.GetRecruiterId() == playerCaster.Session.GetAccountId() || target.Session.GetAccountId() == playerCaster.Session.GetRecruiterId()))
                                 return SpellCastResult.BadTargets;
 
                             break;
@@ -2603,7 +2603,7 @@ namespace Game.Spells
                                 !Targets.GetUnitTarget().IsCreature())
                                 return SpellCastResult.BadTargets;
 
-                            var battlePetMgr = playerCaster.GetSession().GetBattlePetMgr();
+                            var battlePetMgr = playerCaster.Session.GetBattlePetMgr();
 
                             if (!battlePetMgr.HasJournalLock())
                                 return SpellCastResult.CantDoThatRightNow;
@@ -6885,7 +6885,7 @@ namespace Game.Spells
             string sentName = "";
 
             if (!_caster.IsPlayer())
-                sentName = _caster.GetName(target.GetSession().GetSessionDbLocaleIndex());
+                sentName = _caster.GetName(target.Session.GetSessionDbLocaleIndex());
 
             ResurrectRequest resurrectRequest = new();
             resurrectRequest.ResurrectOffererGUID = _caster.GetGUID();

@@ -1221,11 +1221,11 @@ namespace Game
             }
 
             if (condition.MinExpansionLevel != -1 &&
-                (int)player.GetSession().GetExpansion() < condition.MinExpansionLevel)
+                (int)player.Session.GetExpansion() < condition.MinExpansionLevel)
                 return false;
 
             if (condition.MaxExpansionLevel != -1 &&
-                (int)player.GetSession().GetExpansion() > condition.MaxExpansionLevel)
+                (int)player.Session.GetExpansion() > condition.MaxExpansionLevel)
                 return false;
 
             if (condition.MinExpansionLevel != -1 &&

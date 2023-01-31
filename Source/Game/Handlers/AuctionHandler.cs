@@ -536,7 +536,7 @@ namespace Game
                 // Not sure if we must send this now.
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
 
-                owner?.GetSession().SendAuctionOwnerBidNotification(auction);
+                owner?.Session.SendAuctionOwnerBidNotification(auction);
             }
 
             player.SaveInventoryAndGoldToDB(trans);

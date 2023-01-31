@@ -304,7 +304,7 @@ namespace Game
                 // update for owner if online
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(ownerGuid);
 
-                owner?.GetSession().SendPacket(signResult);
+                owner?.Session.SendPacket(signResult);
 
                 return;
             }

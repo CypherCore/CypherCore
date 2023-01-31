@@ -405,7 +405,7 @@ namespace Game.Chat
 
                 if (target)
                 {
-                    target.ResurrectPlayer(target.GetSession().HasPermission(RBACPermissions.ResurrectWithFullHps) ? 1.0f : 0.5f);
+                    target.ResurrectPlayer(target.Session.HasPermission(RBACPermissions.ResurrectWithFullHps) ? 1.0f : 0.5f);
                     target.SpawnCorpseBones();
                     target.SaveToDB();
                 }
@@ -468,7 +468,7 @@ namespace Game.Chat
 
                 if (!player ||
                     player == gmPlayer ||
-                    player.GetSession() == null)
+                    player.Session == null)
                     continue;
 
                 // check online security

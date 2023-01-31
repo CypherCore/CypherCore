@@ -5967,7 +5967,7 @@ namespace Game.Entities
         public uint GetViewerStartTime(ConversationLine conversationLine, Conversation conversation, Player receiver)
         {
             uint startTime = conversationLine.StartTime;
-            Locale locale = receiver.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = receiver.Session.GetSessionDbLocaleIndex();
 
             TimeSpan localizedStartTime = conversation.GetLineStartTime(locale, (int)conversationLine.ConversationLineID);
 
@@ -6107,7 +6107,7 @@ namespace Game.Entities
 
         public uint GetViewerLastLineEndTime(ConversationData conversationLineData, Conversation conversation, Player receiver)
         {
-            Locale locale = receiver.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = receiver.Session.GetSessionDbLocaleIndex();
 
             return (uint)conversation.GetLastLineEndTime(locale).TotalMilliseconds;
         }

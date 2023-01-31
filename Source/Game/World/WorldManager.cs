@@ -1656,7 +1656,7 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
 
             if (pBanned)
-                pBanned.GetSession().KickPlayer("World::BanCharacter Banning character");
+                pBanned.Session.KickPlayer("World::BanCharacter Banning character");
 
             return BanReturn.Success;
         }

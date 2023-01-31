@@ -142,7 +142,7 @@ namespace Scripts.World.NpcInnkeeper
             switch (action)
             {
                 case eTradeskill.GossipActionTrade:
-                    player.GetSession().SendListInventory(me.GetGUID());
+                    player.Session.SendListInventory(me.GetGUID());
 
                     break;
                 case eTradeskill.GossipActionInn:

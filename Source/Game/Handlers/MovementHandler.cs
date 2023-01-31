@@ -606,11 +606,11 @@ namespace Game
                     Log.outDebug(LogFilter.Server,
                                  "Player {0} from account Id {1} kicked for incorrect speed (must be {2} instead {3})",
                                  GetPlayer().GetName(),
-                                 GetPlayer().GetSession().GetAccountId(),
+                                 GetPlayer().Session.GetAccountId(),
                                  GetPlayer().GetSpeed(move_type),
                                  packet.Speed);
 
-                    GetPlayer().GetSession().KickPlayer("WorldSession::HandleForceSpeedChangeAck Incorrect speed");
+                    GetPlayer().Session.KickPlayer("WorldSession::HandleForceSpeedChangeAck Incorrect speed");
                 }
             }
         }
@@ -748,8 +748,8 @@ namespace Game
 
                     if (Math.Abs(expectedModMagnitude - setModMovementForceMagnitudeAck.Speed) > 0.01f)
                     {
-                        Log.outDebug(LogFilter.Misc, $"Player {_player.GetName()} from account Id {_player.GetSession().GetAccountId()} kicked for incorrect movement Force magnitude (must be {expectedModMagnitude} instead {setModMovementForceMagnitudeAck.Speed})");
-                        _player.GetSession().KickPlayer("WorldSession::HandleMoveSetModMovementForceMagnitudeAck Incorrect magnitude");
+                        Log.outDebug(LogFilter.Misc, $"Player {_player.GetName()} from account Id {_player.Session.GetAccountId()} kicked for incorrect movement Force magnitude (must be {expectedModMagnitude} instead {setModMovementForceMagnitudeAck.Speed})");
+                        _player.Session.KickPlayer("WorldSession::HandleMoveSetModMovementForceMagnitudeAck Incorrect magnitude");
 
                         return;
                     }

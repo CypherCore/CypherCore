@@ -257,10 +257,10 @@ namespace Game
 
                     if (item.IsBoundAccountWide() &&
                         item.IsSoulBound() &&
-                        player.GetSession().GetAccountId() != receiverAccountId)
+                        player.Session.GetAccountId() != receiverAccountId)
                         if (!item.IsBattlenetAccountBound() ||
-                            player.GetSession().GetBattlenetAccountId() == 0 ||
-                            player.GetSession().GetBattlenetAccountId() != receiverBnetAccountId)
+                            player.Session.GetBattlenetAccountId() == 0 ||
+                            player.Session.GetBattlenetAccountId() != receiverBnetAccountId)
                         {
                             player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.NotSameAccount);
 
@@ -330,7 +330,7 @@ namespace Game
                         }
 
                         // if Item send to character at another account, then apply Item delivery delay
-                        needItemDelay = player.GetSession().GetAccountId() != receiverAccountId;
+                        needItemDelay = player.Session.GetAccountId() != receiverAccountId;
                     }
 
                     if (log && sendMail.Info.SendMoney > 0)
@@ -364,7 +364,7 @@ namespace Game
 
             if (receiver != null)
             {
-                mailCountCheckContinuation(receiver.GetTeam(), receiver.GetMailSize(), receiver.GetLevel(), receiver.GetSession().GetAccountId(), receiver.GetSession().GetBattlenetAccountId());
+                mailCountCheckContinuation(receiver.GetTeam(), receiver.GetMailSize(), receiver.GetLevel(), receiver.Session.GetAccountId(), receiver.Session.GetBattlenetAccountId());
             }
             else
             {
@@ -559,7 +559,7 @@ namespace Game
 
                         if (receiver)
                         {
-                            sender_accId = receiver.GetSession().GetAccountId();
+                            sender_accId = receiver.Session.GetAccountId();
                             sender_name = receiver.GetName();
                         }
                         else

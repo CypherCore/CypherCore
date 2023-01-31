@@ -227,9 +227,9 @@ namespace Game.BlackMarket
 
             if (bidder)
             {
-                bidderAccId = bidder.GetSession().GetAccountId();
+                bidderAccId = bidder.Session.GetAccountId();
                 bidderName = bidder.GetName();
-                logGmTrade = bidder.GetSession().HasPermission(RBACPermissions.LogGmTrade);
+                logGmTrade = bidder.Session.HasPermission(RBACPermissions.LogGmTrade);
             }
             else
             {
@@ -271,7 +271,7 @@ namespace Game.BlackMarket
                                entry.GetCurrentBid() / MoneyConstants.Gold);
 
             if (bidder)
-                bidder.GetSession().SendBlackMarketWonNotification(entry, item);
+                bidder.Session.SendBlackMarketWonNotification(entry, item);
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Won), entry.BuildAuctionMailBody())
                 .AddItem(item)
@@ -296,7 +296,7 @@ namespace Game.BlackMarket
                 return;
 
             if (oldBidder)
-                oldBidder.GetSession().SendBlackMarketOutbidNotification(entry.GetTemplate());
+                oldBidder.Session.SendBlackMarketOutbidNotification(entry.GetTemplate());
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Outbid), entry.BuildAuctionMailBody())
                 .AddMoney(entry.GetCurrentBid())

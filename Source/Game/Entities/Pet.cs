@@ -376,11 +376,11 @@ namespace Game.Entities
                 (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
                 owner.ToPlayer().SetLastPetNumber(petInfo.PetNumber);
 
-            var session = owner.GetSession();
+            var session = owner.Session;
             var lastSaveTime = petInfo.LastSaveTime;
             var specializationId = petInfo.SpecializationId;
 
-            owner.GetSession()
+            owner.Session
                  .AddQueryHolderCallback(DB.Characters.DelayQueryHolder(new PetLoadQueryHolder(ownerid, petInfo.PetNumber)))
                  .AfterComplete(holder =>
                                 {
@@ -668,7 +668,7 @@ namespace Game.Entities
                             if (owner.GetPetGUID() != GetGUID())
                             {
                                 Log.outError(LogFilter.Pet, $"Pet {GetEntry()} is not pet of owner {GetOwner().GetName()}, removed");
-                                Cypher.Assert(GetPetType() != PetType.Hunter, $"Unexpected unlinked pet found for owner {owner.GetSession().GetPlayerInfo()}");
+                                Cypher.Assert(GetPetType() != PetType.Hunter, $"Unexpected unlinked pet found for owner {owner.Session.GetPlayerInfo()}");
                                 Remove(PetSaveMode.NotInSlot);
 
                                 return;
@@ -817,7 +817,7 @@ namespace Game.Entities
             CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
 
             if (cFamily != null)
-                SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
+                SetName(cFamily.Name[GetOwner().Session.GetSessionDbcLocale()]);
             else
                 SetName(creature.GetName(Global.WorldMgr.GetDefaultDbcLocale()));
 
@@ -832,7 +832,7 @@ namespace Game.Entities
             CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
 
             if (cFamily != null)
-                SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
+                SetName(cFamily.Name[GetOwner().Session.GetSessionDbcLocale()]);
 
             Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetOrientation());
 

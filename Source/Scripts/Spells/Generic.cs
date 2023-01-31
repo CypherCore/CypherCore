@@ -5375,7 +5375,7 @@ namespace Scripts.Spells.Generic
             Player target = GetUnitOwner().ToPlayer();
             SpellInfo reviveBattlePetSpellInfo = Global.SpellMgr.GetSpellInfo(SharedConst.SpellReviveBattlePets, Difficulty.None);
 
-            if (target.GetSession().GetBattlePetMgr().IsBattlePetSystemEnabled())
+            if (target.Session.GetBattlePetMgr().IsBattlePetSystemEnabled())
             {
                 TimeSpan expectedCooldown = TimeSpan.FromMilliseconds(GetAura().GetMaxDuration());
                 TimeSpan remainingCooldown = target.GetSpellHistory().GetRemainingCategoryCooldown(reviveBattlePetSpellInfo);

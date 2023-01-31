@@ -425,7 +425,7 @@ namespace Game.Arenas
                 Player player = Global.ObjAccessor.FindPlayer(member.Guid);
 
                 if (player)
-                    SendStats(player.GetSession());
+                    SendStats(player.Session);
             }
         }
 

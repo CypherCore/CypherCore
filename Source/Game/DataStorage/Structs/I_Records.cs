@@ -192,7 +192,7 @@ namespace Game.DataStorage
         public uint Id;
         public byte LegacySlotIndex;
         public ushort SpellCategoryID;
-        public int SpellID;
+        public uint SpellID;
         public ItemSpelltriggerType TriggerType;
     }
 

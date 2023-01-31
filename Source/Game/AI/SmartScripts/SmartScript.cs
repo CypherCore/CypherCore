@@ -652,7 +652,7 @@ namespace Game.AI
                                     {
                                         if (player.CanTakeQuest(quest, true))
                                         {
-                                            WorldSession session = player.GetSession();
+                                            WorldSession session = player.Session;
 
                                             if (session)
                                             {

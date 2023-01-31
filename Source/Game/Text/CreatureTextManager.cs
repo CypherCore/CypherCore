@@ -661,7 +661,7 @@ namespace Game
 
         public void Invoke(Player player)
         {
-            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            Locale loc_idx = player.Session.GetSessionDbLocaleIndex();
             ChatPacketSender sender;
 
             // create if not cached yet

@@ -244,14 +244,20 @@ namespace Game.Entities
 
         public bool IsDebugAreaTriggers { get; set; }
 
-        public WorldSession GetSession()
+        public WorldSession Session
         {
-            return _session;
+            get
+            {
+                return _session;
+            }
         }
 
-        public PlayerSocial GetSocial()
+        public PlayerSocial Social
         {
-            return _social;
+            get
+            {
+                return _social;
+            }
         }
     }
 }

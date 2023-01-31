@@ -217,7 +217,7 @@ namespace Game.Arenas
                                                  player.GetName(),
                                                  score.Key,
                                                  player.GetArenaTeamId((byte)(GetArenaType() == ArenaTypes.Team5v5 ? 2 : (GetArenaType() == ArenaTypes.Team3v3 ? 1 : 0))),
-                                                 player.GetSession().GetRemoteAddress(),
+                                                 player.Session.GetRemoteAddress(),
                                                  score.Value.ToString());
                             }
                     }

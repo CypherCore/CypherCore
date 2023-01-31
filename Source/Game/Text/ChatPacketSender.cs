@@ -52,7 +52,7 @@ namespace Game.Chat
             if (TranslatedPacket == null)
             {
                 TranslatedPacket = new ChatPkt();
-                TranslatedPacket.Initialize(_type, _language, _sender, _receiver, Global.LanguageMgr.Translate(_text, (uint)_language, player.GetSession().GetSessionDbcLocale()), _achievementId, "", _locale);
+                TranslatedPacket.Initialize(_type, _language, _sender, _receiver, Global.LanguageMgr.Translate(_text, (uint)_language, player.Session.GetSessionDbcLocale()), _achievementId, "", _locale);
                 TranslatedPacket.Write();
             }
 

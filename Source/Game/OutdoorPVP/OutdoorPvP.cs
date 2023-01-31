@@ -41,7 +41,7 @@ namespace Game.PvP
                 pair.Value.HandlePlayerLeave(player);
 
             // remove the world State information from the player (we can't keep everyone up to date, so leave out those who are not in the concerning zones)
-            if (!player.GetSession().PlayerLogout())
+            if (!player.Session.PlayerLogout())
                 SendRemoveWorldStates(player);
 
             _players[player.GetTeamId()].Remove(player.GetGUID());

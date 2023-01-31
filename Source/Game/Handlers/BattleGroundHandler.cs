@@ -693,7 +693,7 @@ namespace Game
                 return;
             }
 
-            Log.outDebug(LogFilter.BattlegroundReportPvpAfk, "WorldSession.HandleReportPvPAFK:  {0} [IP: {1}] reported {2}", _player.GetName(), _player.GetSession().GetRemoteAddress(), reportedPlayer.GetGUID().ToString());
+            Log.outDebug(LogFilter.BattlegroundReportPvpAfk, "WorldSession.HandleReportPvPAFK:  {0} [IP: {1}] reported {2}", _player.GetName(), _player.Session.GetRemoteAddress(), reportedPlayer.GetGUID().ToString());
 
             reportedPlayer.ReportedAfkBy(GetPlayer());
         }

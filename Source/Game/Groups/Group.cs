@@ -827,7 +827,7 @@ namespace Game.Groups
             Player player = Global.ObjAccessor.FindPlayer(playerGUID);
 
             if (player == null ||
-                player.GetSession() == null ||
+                player.Session == null ||
                 player.GetGroup() != this)
                 return;
 
@@ -874,7 +874,7 @@ namespace Game.Groups
 
                 playerInfos.FactionGroup = Player.GetFactionGroupForRace(member.Race);
 
-                playerInfos.Connected = memberPlayer?.GetSession() != null && !memberPlayer.GetSession().PlayerLogout();
+                playerInfos.Connected = memberPlayer?.Session != null && !memberPlayer.Session.PlayerLogout();
 
                 playerInfos.Subgroup = member.Group;       // groupid
                 playerInfos.Flags = (byte)member.Flags; // See enum GroupMemberFlags
@@ -971,7 +971,7 @@ namespace Game.Groups
                     continue;
 
                 if ((group == -1 || refe.GetSubGroup() == group))
-                    if (player.GetSession().IsAddonRegistered(prefix))
+                    if (player.Session.IsAddonRegistered(prefix))
                         player.SendPacket(packet);
             }
         }
@@ -987,7 +987,7 @@ namespace Game.Groups
                     (ignorePlayersInBGRaid && player.GetGroup() != this))
                     continue;
 
-                if (player.GetSession() != null &&
+                if (player.Session != null &&
                     (group == -1 || refe.GetSubGroup() == group))
                     player.SendPacket(packet);
             }
@@ -1319,7 +1319,7 @@ namespace Game.Groups
             {
                 Player player = refe.GetSource();
 
-                if (player.GetSession() == null)
+                if (player.Session == null)
                     continue;
 
                 player.SetDungeonDifficultyID(difficulty);
@@ -1346,7 +1346,7 @@ namespace Game.Groups
             {
                 Player player = refe.GetSource();
 
-                if (player.GetSession() == null)
+                if (player.Session == null)
                     continue;
 
                 player.SetRaidDifficultyID(difficulty);
@@ -1373,7 +1373,7 @@ namespace Game.Groups
             {
                 Player player = refe.GetSource();
 
-                if (player.GetSession() == null)
+                if (player.Session == null)
                     continue;
 
                 player.SetLegacyRaidDifficultyID(difficulty);
@@ -2023,7 +2023,7 @@ namespace Game.Groups
                 Player player = Global.ObjAccessor.FindConnectedPlayer(member.Guid);
 
                 if (!player ||
-                    !player.GetSession())
+                    !player.Session)
                     SetMemberReadyCheck(member, false);
             }
         }

@@ -444,7 +444,7 @@ namespace Game.Chat.Commands
 
             if (assignedPlayer && assignedPlayer.IsInWorld)
             {
-                security = assignedPlayer.GetSession().GetSecurity();
+                security = assignedPlayer.Session.GetSecurity();
             }
             else
             {

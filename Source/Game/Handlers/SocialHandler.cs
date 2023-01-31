@@ -71,8 +71,8 @@ namespace Game
                 // check if Target is globally visible for player
                 if (_player.GetGUID() != target.Guid &&
                     !target.IsVisible)
-                    if (Global.AccountMgr.IsPlayerAccount(_player.GetSession().GetSecurity()) ||
-                        target.Security > _player.GetSession().GetSecurity())
+                    if (Global.AccountMgr.IsPlayerAccount(_player.Session.GetSecurity()) ||
+                        target.Security > _player.Session.GetSecurity())
                         continue;
 
                 // check if Target's level is in level range
@@ -182,7 +182,7 @@ namespace Game
             }
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
-            stmt.AddValue(0, player.GetSession().GetAccountId());
+            stmt.AddValue(0, player.Session.GetAccountId());
 
             SQLResult result = DB.Login.Query(stmt);
 
@@ -216,7 +216,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SendContactList)]
         private void HandleContactList(SendContactList packet)
         {
-            GetPlayer().GetSocial().SendSocialList(GetPlayer(), packet.Flags);
+            GetPlayer().Social.SendSocialList(GetPlayer(), packet.Flags);
         }
 
         [WorldPacketHandler(ClientOpcodes.AddFriend)]
@@ -256,7 +256,7 @@ namespace Game
                 {
                     friendResult = FriendsResult.Enemy;
                 }
-                else if (GetPlayer().GetSocial().HasFriend(friendGuid))
+                else if (GetPlayer().Social.HasFriend(friendGuid))
                 {
                     friendResult = FriendsResult.Already;
                 }
@@ -270,8 +270,8 @@ namespace Game
                     else
                         friendResult = FriendsResult.AddedOnline;
 
-                    if (GetPlayer().GetSocial().AddToSocialList(friendGuid, friendAccountGuid, SocialFlag.Friend))
-                        GetPlayer().GetSocial().SetFriendNote(friendGuid, friendNote);
+                    if (GetPlayer().Social.AddToSocialList(friendGuid, friendAccountGuid, SocialFlag.Friend))
+                        GetPlayer().Social.SetFriendNote(friendGuid, friendNote);
                     else
                         friendResult = FriendsResult.ListFull;
                 }
@@ -291,7 +291,7 @@ namespace Game
 
             if (friendPlayer != null)
             {
-                if (!Global.AccountMgr.IsPlayerAccount(friendPlayer.GetSession().GetSecurity()))
+                if (!Global.AccountMgr.IsPlayerAccount(friendPlayer.Session.GetSecurity()))
                 {
                     Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.NotFound, ObjectGuid.Empty);
 
@@ -324,7 +324,7 @@ namespace Game
         private void HandleDelFriend(DelFriend packet)
         {
             // @todo: handle VirtualRealmAddress
-            GetPlayer().GetSocial().RemoveFromSocialList(packet.Player.Guid, SocialFlag.Friend);
+            GetPlayer().Social.RemoveFromSocialList(packet.Player.Guid, SocialFlag.Friend);
 
             Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.Removed, packet.Player.Guid);
         }
@@ -349,7 +349,7 @@ namespace Game
                 {
                     ignoreResult = FriendsResult.IgnoreSelf;
                 }
-                else if (GetPlayer().GetSocial().HasIgnore(ignoreGuid, ignoreAccountGuid))
+                else if (GetPlayer().Social.HasIgnore(ignoreGuid, ignoreAccountGuid))
                 {
                     ignoreResult = FriendsResult.IgnoreAlready;
                 }
@@ -358,7 +358,7 @@ namespace Game
                     ignoreResult = FriendsResult.IgnoreAdded;
 
                     // ignore list full
-                    if (!GetPlayer().GetSocial().AddToSocialList(ignoreGuid, ignoreAccountGuid, SocialFlag.Ignored))
+                    if (!GetPlayer().Social.AddToSocialList(ignoreGuid, ignoreAccountGuid, SocialFlag.Ignored))
                         ignoreResult = FriendsResult.IgnoreFull;
                 }
             }
@@ -372,7 +372,7 @@ namespace Game
             // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleDelIgnoreOpcode: {0}", packet.Player.Guid.ToString());
 
-            GetPlayer().GetSocial().RemoveFromSocialList(packet.Player.Guid, SocialFlag.Ignored);
+            GetPlayer().Social.RemoveFromSocialList(packet.Player.Guid, SocialFlag.Ignored);
 
             Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.IgnoreRemoved, packet.Player.Guid);
         }
@@ -382,7 +382,7 @@ namespace Game
         {
             // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleSetContactNotesOpcode: Contact: {0}, Notes: {1}", packet.Player.Guid.ToString(), packet.Notes);
-            GetPlayer().GetSocial().SetFriendNote(packet.Player.Guid, packet.Notes);
+            GetPlayer().Social.SetFriendNote(packet.Player.Guid, packet.Notes);
         }
 
         [WorldPacketHandler(ClientOpcodes.SocialContractRequest)]

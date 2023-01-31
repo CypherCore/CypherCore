@@ -374,7 +374,7 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = target.Session.GetSessionDbLocaleIndex();
             ChatPkt data = new();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, text, 0, "", locale);
             target.SendPacket(data);
@@ -424,7 +424,7 @@ namespace Game.Entities
                 return;
             }
 
-            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = target.Session.GetSessionDbLocaleIndex();
             ChatPkt data = new();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()), 0, "", locale);
             target.SendPacket(data);
@@ -1489,7 +1489,7 @@ namespace Game.Entities
                                 ChrCustomizationReqRecord choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
 
                                 if (choiceReq == null ||
-                                    thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.PlayerData.Customizations))
+                                    thisPlayer.Session.MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.PlayerData.Customizations))
                                     displayIds.Add(displayInfo.DisplayID);
                             }
                         }
@@ -1671,7 +1671,7 @@ namespace Game.Entities
             // ghost spell check, allow apply any Auras at player loading in ghost mode (will be cleanup after load)
             if (!IsAlive() &&
                 !aurSpellInfo.IsDeathPersistent() &&
-                (!IsTypeId(TypeId.Player) || !ToPlayer().GetSession().PlayerLoading()))
+                (!IsTypeId(TypeId.Player) || !ToPlayer().Session.PlayerLoading()))
                 return null;
 
             Unit caster = aura.GetCaster();

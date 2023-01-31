@@ -4479,7 +4479,7 @@ namespace Game.Entities
         {
             // Player is loaded now - do not allow passive spell casts to proc
             if (IsPlayer() &&
-                ToPlayer().GetSession().PlayerLoading())
+                ToPlayer().Session.PlayerLoading())
                 return;
 
             // For melee/ranged based attack need update Skills and set some Aura states if victim present

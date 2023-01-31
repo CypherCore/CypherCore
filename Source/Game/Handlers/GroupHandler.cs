@@ -86,14 +86,14 @@ namespace Game
                 return;
             }
 
-            if (invitedPlayer.GetSocial().HasIgnore(invitingPlayer.GetGUID(), invitingPlayer.GetSession().GetAccountGUID()))
+            if (invitedPlayer.Social.HasIgnore(invitingPlayer.GetGUID(), invitingPlayer.Session.GetAccountGUID()))
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.IgnoringYouS);
 
                 return;
             }
 
-            if (!invitedPlayer.GetSocial().HasFriend(invitingPlayer.GetGUID()) &&
+            if (!invitedPlayer.Social.HasFriend(invitingPlayer.GetGUID()) &&
                 invitingPlayer.GetLevel() < WorldConfig.GetIntValue(WorldCfg.PartyLevelReq))
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.InviteRestricted);
@@ -250,7 +250,7 @@ namespace Game
                 GetPlayer().UninviteFromGroup();
 
                 if (!leader ||
-                    leader.GetSession() == null)
+                    leader.Session == null)
                     return;
 
                 // report

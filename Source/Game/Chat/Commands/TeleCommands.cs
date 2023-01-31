@@ -290,7 +290,7 @@ namespace Game.Chat
                 Player player = refe.GetSource();
 
                 if (!player ||
-                    !player.GetSession())
+                    !player.Session)
                     continue;
 
                 // check online security

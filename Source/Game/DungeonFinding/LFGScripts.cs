@@ -35,7 +35,7 @@ namespace Game.DungeonFinding
 
                 if (gguid != gguid2)
                 {
-                    Log.outError(LogFilter.Lfg, "{0} on group {1} but LFG has group {2} saved... Fixing.", player.GetSession().GetPlayerInfo(), gguid2.ToString(), gguid.ToString());
+                    Log.outError(LogFilter.Lfg, "{0} on group {1} but LFG has group {2} saved... Fixing.", player.Session.GetPlayerInfo(), gguid2.ToString(), gguid.ToString());
                     Global.LFGMgr.SetupGroupMember(guid, group.GetGUID());
                 }
             }
@@ -52,7 +52,7 @@ namespace Game.DungeonFinding
 
             if (!player.GetGroup())
                 Global.LFGMgr.LeaveLfg(player.GetGUID());
-            else if (player.GetSession().PlayerDisconnected())
+            else if (player.Session.PlayerDisconnected())
                 Global.LFGMgr.LeaveLfg(player.GetGUID(), true);
         }
 
@@ -86,7 +86,7 @@ namespace Game.DungeonFinding
 
                 foreach (MemberSlot memberSlot in group.GetMemberSlots())
                 {
-                    player.GetSession().BuildNameQueryData(memberSlot.Guid, out NameCacheLookupResult nameCacheLookupResult);
+                    player.Session.BuildNameQueryData(memberSlot.Guid, out NameCacheLookupResult nameCacheLookupResult);
                     response.Players.Add(nameCacheLookupResult);
                 }
 
@@ -244,7 +244,7 @@ namespace Game.DungeonFinding
                 //else if (State == LFG_STATE_BOOT)
                 // Update internal kick cooldown of kicked
 
-                player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.LeaderUnk1), true);
+                player.Session.SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.LeaderUnk1), true);
 
                 if (isLFG && player.GetMap().IsDungeon()) // Teleport player out the dungeon
                     Global.LFGMgr.TeleportPlayer(player, true);
@@ -255,7 +255,7 @@ namespace Game.DungeonFinding
                 Player leader = Global.ObjAccessor.FindPlayer(Global.LFGMgr.GetLeader(gguid));
 
                 if (leader)
-                    leader.GetSession().SendLfgOfferContinue(Global.LFGMgr.GetDungeon(gguid, false));
+                    leader.Session.SendLfgOfferContinue(Global.LFGMgr.GetDungeon(gguid, false));
             }
         }
     }

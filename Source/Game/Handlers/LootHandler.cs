@@ -258,7 +258,7 @@ namespace Game
                 // If player is removing the last LootItem, delete the empty container.
                 if (loot.IsLooted() &&
                     lguid.IsItem())
-                    player.GetSession().DoLootRelease(loot);
+                    player.Session.DoLootRelease(loot);
             }
 
             if (aeResult != null)
@@ -345,7 +345,7 @@ namespace Game
                 // Delete container if empty
                 if (loot.IsLooted() &&
                     guid.IsItem())
-                    player.GetSession().DoLootRelease(loot);
+                    player.Session.DoLootRelease(loot);
             }
         }
 

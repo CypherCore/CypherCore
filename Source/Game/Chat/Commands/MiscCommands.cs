@@ -914,7 +914,7 @@ namespace Game.Chat
             else
                 handler.SendSysMessage(CypherStrings.CommandKickmessage, playerName);
 
-            target.GetSession().KickPlayer("HandleKickPlayerCommand GM Command");
+            target.Session.KickPlayer("HandleKickPlayerCommand GM Command");
 
             return true;
         }
@@ -1133,7 +1133,7 @@ namespace Game.Chat
             }
 
             Player target = player.GetConnectedPlayer();
-            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
+            uint accountId = target != null ? target.Session.GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
 
             // find only player from same account if any
             if (!target)
@@ -1161,7 +1161,7 @@ namespace Game.Chat
             {
                 // Target is online, mute will be in effect right away.
                 long mutedUntil = GameTime.GetGameTime() + muteTime * Time.Minute;
-                target.GetSession()._muteTime = mutedUntil;
+                target.Session.MuteTime = mutedUntil;
                 stmt.AddValue(0, mutedUntil);
             }
             else
@@ -1418,14 +1418,14 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                accId = target.GetSession().GetAccountId();
+                accId = target.Session.GetAccountId();
                 money = target.GetMoney();
                 totalPlayerTime = target.GetTotalPlayedTime();
                 level = target.GetLevel();
-                latency = target.GetSession().GetLatency();
+                latency = target.Session.GetLatency();
                 raceid = target.GetRace();
                 classid = target.GetClass();
-                muteTime = target.GetSession()._muteTime;
+                muteTime = target.Session.MuteTime;
                 mapId = target.GetMapId();
                 areaId = target.GetAreaId();
                 alive = target.IsAlive() ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No);
@@ -2155,7 +2155,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            uint accountId = target ? target.Session.GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
             if (!target)
@@ -2172,14 +2172,14 @@ namespace Game.Chat
 
             if (target)
             {
-                if (target.GetSession().CanSpeak())
+                if (target.Session.CanSpeak())
                 {
                     handler.SendSysMessage(CypherStrings.ChatAlreadyEnabled);
 
                     return false;
                 }
 
-                target.GetSession()._muteTime = 0;
+                target.Session.MuteTime = 0;
             }
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);

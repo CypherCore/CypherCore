@@ -79,10 +79,10 @@ namespace Game.Chat
 
             foreach (var player in Global.ObjAccessor.GetPlayers())
             {
-                AccountTypes playerSec = player.GetSession().GetSecurity();
+                AccountTypes playerSec = player.Session.GetSecurity();
 
                 if ((player.IsGameMaster() ||
-                     (player.GetSession().HasPermission(RBACPermissions.CommandsAppearInGmList) &&
+                     (player.Session.HasPermission(RBACPermissions.CommandsAppearInGmList) &&
                       playerSec <= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInGmList))) &&
                     (handler.GetSession() == null || player.IsVisibleGloballyFor(handler.GetSession().GetPlayer())))
                 {

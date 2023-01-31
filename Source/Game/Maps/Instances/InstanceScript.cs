@@ -354,7 +354,7 @@ namespace Game.Maps
 
         public bool _SkipCheckRequiredBosses(Player player = null)
         {
-            return player && player.GetSession().HasPermission(RBACPermissions.SkipCheckInstanceRequiredBosses);
+            return player && player.Session.HasPermission(RBACPermissions.SkipCheckInstanceRequiredBosses);
         }
 
         public virtual void Create()
@@ -1068,7 +1068,7 @@ namespace Game.Maps
         // Send Notify to all players in instance
         private void DoSendNotifyToInstance(string format, params object[] args)
         {
-            Instance.DoOnPlayers(player => player.GetSession()?.SendNotification(format, args));
+            Instance.DoOnPlayers(player => player.Session?.SendNotification(format, args));
         }
 
         private void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)

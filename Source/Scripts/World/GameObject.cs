@@ -423,7 +423,7 @@ namespace Scripts.World.GameObjects
             if (player.GetQuestRewardStatus(QuestIds.TeleCrystalFlag))
                 return false;
 
-            player.GetSession().SendNotification(GossipConst.GoTeleToDalaranCrystalFailed);
+            player.Session.SendNotification(GossipConst.GoTeleToDalaranCrystalFailed);
 
             return true;
         }
@@ -534,7 +534,7 @@ namespace Scripts.World.GameObjects
             else
             {
                 player.CloseGossipMenu();
-                player.GetSession().SendNotification(GossipConst.AnderholsSliderCiderNotFound);
+                player.Session.SendNotification(GossipConst.AnderholsSliderCiderNotFound);
 
                 return false;
             }

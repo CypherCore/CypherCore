@@ -336,7 +336,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                if (ObjectManager.CheckPlayerName(newName, player.IsConnected() ? player.GetConnectedPlayer().GetSession().GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale(), true) != ResponseCodes.CharNameSuccess)
+                if (ObjectManager.CheckPlayerName(newName, player.IsConnected() ? player.GetConnectedPlayer().Session.GetSessionDbcLocale() : Global.WorldMgr.GetDefaultDbcLocale(), true) != ResponseCodes.CharNameSuccess)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
 
@@ -375,7 +375,7 @@ namespace Game.Chat
                 if (target != null)
                 {
                     target.SetName(newName);
-                    session = target.GetSession();
+                    session = target.Session;
 
                     session?.KickPlayer("HandleCharacterRenameCommand GM Command renaming character");
                 }
@@ -545,7 +545,7 @@ namespace Game.Chat
 
             Player onlinePlayer = player.GetConnectedPlayer();
 
-            onlinePlayer?.GetSession().KickPlayer("HandleCharacterChangeAccountCommand GM Command transferring character to another account");
+            onlinePlayer?.Session.KickPlayer("HandleCharacterChangeAccountCommand GM Command transferring character to another account");
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_BY_GUID);
             stmt.AddValue(0, newAccount.GetID());
@@ -701,8 +701,8 @@ namespace Game.Chat
 
             if (target != null)
             {
-                accountId = target.GetSession().GetAccountId();
-                target.GetSession().KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
+                accountId = target.Session.GetAccountId();
+                target.Session.KickPlayer("HandleCharacterEraseCommand GM Command deleting character");
             }
             else
             {

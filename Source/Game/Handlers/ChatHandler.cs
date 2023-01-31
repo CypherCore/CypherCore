@@ -161,7 +161,7 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString((ulong)(_muteTime - GameTime.GetGameTime()));
+                string timeStr = Time.secsToTimeString((ulong)(MuteTime - GameTime.GetGameTime()));
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
 
                 return;
@@ -178,7 +178,7 @@ namespace Game
             if (string.IsNullOrEmpty(msg))
                 return;
 
-            if (new CommandHandler(this).ParseCommands(msg))
+            if (sender.Session.CommandHandler.ParseCommands(msg))
                 return;
 
             switch (type)
@@ -242,7 +242,7 @@ namespace Game
                     Player receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
 
                     if (!receiver ||
-                        (lang != Language.Addon && !receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
+                        (lang != Language.Addon && !receiver.IsAcceptWhispers() && receiver.Session.HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
                     {
                         SendChatPlayerNotfoundNotice(target);
 
@@ -616,7 +616,7 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString((ulong)(_muteTime - GameTime.GetGameTime()));
+                string timeStr = Time.secsToTimeString((ulong)(MuteTime - GameTime.GetGameTime()));
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
 
                 return;
@@ -683,7 +683,7 @@ namespace Game
             Player player = Global.ObjAccessor.FindPlayer(packet.IgnoredGUID);
 
             if (!player ||
-                player.GetSession() == null)
+                player.Session == null)
                 return;
 
             ChatPkt data = new();

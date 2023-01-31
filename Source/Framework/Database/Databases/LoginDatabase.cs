@@ -171,6 +171,14 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.DEL_BNET_ITEM_FAVORITE_APPEARANCE, "DELETE FROM battlenet_item_favorite_appearances WHERE battlenetAccountId = ? AND itemModifiedAppearanceId = ?");
             PrepareStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS, "SELECT blobIndex, illusionMask FROM battlenet_account_transmog_illusions WHERE battlenetAccountId = ? ORDER BY blobIndex DESC");
             PrepareStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS, "INSERT INTO battlenet_account_transmog_illusions (battlenetAccountId, blobIndex, illusionMask) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE illusionMask = illusionMask | VALUES(illusionMask)");
+
+            PrepareStatement(LoginStatements.LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS, "SELECT `battlePayCredits` from battlenet_accounts WHERE id = ?;");
+            PrepareStatement(LoginStatements.LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS, "UPDATE battlenet_accounts SET battlePayCredits = ? WHERE id = ?;");
+            PrepareStatement(LoginStatements.LOGIN_INS_PURCHASE, "INSERT INTO battlepay_purchases (battlenetAccountId, realm, characterGuid, productID, productName, CurrentPrice, RemoteAddress) VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+            /// Seraphim
+            PrepareStatement(LoginStatements.LOGIN_SEL_BNET_RUNEFORGE_MEMORIES, "SELECT blobIndex, runeForgeMask FROM battlenet_account_runeforge_memories WHERE battlenetAccountId = ? ORDER BY blobIndex DESC");
+            PrepareStatement(LoginStatements.LOGIN_INS_BNET_RUNEFORGE_MEMORIES, "INSERT INTO battlenet_account_runeforge_memories (battlenetAccountId, blobIndex, runeForgeMask) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE runeForgeMask = runeForgeMask | VALUES(runeForgeMask)");
         }
     }
 
@@ -317,6 +325,14 @@ namespace Framework.Database
         DEL_BNET_ITEM_FAVORITE_APPEARANCE,
         SEL_BNET_TRANSMOG_ILLUSIONS,
         INS_BNET_TRANSMOG_ILLUSIONS,
+
+        // BattlePay System
+        LOGIN_SEL_BATTLE_PAY_ACCOUNT_CREDITS,
+        LOGIN_UPD_BATTLE_PAY_ACCOUNT_CREDITS,
+        LOGIN_INS_PURCHASE,
+        /// Seraphim
+		LOGIN_SEL_BNET_RUNEFORGE_MEMORIES,
+        LOGIN_INS_BNET_RUNEFORGE_MEMORIES,
 
         MAX_LOGINDATABASE_STATEMENTS
     }

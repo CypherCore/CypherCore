@@ -75,7 +75,7 @@ namespace Game
                 return;
             }
 
-            BattlePet battlePet = petOwner.ToPlayer().GetSession().GetBattlePetMgr().GetPet(queryBattlePetName.BattlePetID);
+            BattlePet battlePet = petOwner.ToPlayer().Session.GetBattlePetMgr().GetPet(queryBattlePetName.BattlePetID);
 
             if (battlePet == null)
             {

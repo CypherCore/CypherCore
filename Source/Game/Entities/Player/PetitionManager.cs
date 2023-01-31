@@ -202,7 +202,7 @@ namespace Game.Entities
                     // notify owner
                     Player owner = Global.ObjAccessor.FindConnectedPlayer(ownerGuid);
 
-                    owner?.GetSession().SendPetitionQuery(PetitionGuid);
+                    owner?.Session.SendPetitionQuery(PetitionGuid);
 
                     break;
                 }

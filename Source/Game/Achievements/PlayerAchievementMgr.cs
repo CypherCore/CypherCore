@@ -189,7 +189,7 @@ public class PlayerAchievementMgr : AchievementManager
 
         // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
         if (_owner.IsGameMaster() ||
-            _owner.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
+            _owner.Session.HasPermission(RBACPermissions.CannotEarnAchievements))
             return;
 
         var achievementCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
@@ -261,7 +261,7 @@ public class PlayerAchievementMgr : AchievementManager
                 CriteriaProgressPkt accountProgress = new();
                 accountProgress.Id = pair.Key;
                 accountProgress.Quantity = pair.Value.Counter;
-                accountProgress.Player = _owner.GetSession().GetBattlenetAccountGUID();
+                accountProgress.Player = _owner.Session.GetBattlenetAccountGUID();
                 accountProgress.Flags = 0;
                 accountProgress.Date = pair.Value.Date;
                 accountProgress.TimeFromStart = 0;
@@ -321,7 +321,7 @@ public class PlayerAchievementMgr : AchievementManager
     {
         // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
         if (_owner.IsGameMaster() ||
-            _owner.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
+            _owner.Session.HasPermission(RBACPermissions.CannotEarnAchievements))
             return;
 
         if ((achievement.Faction == AchievementFaction.Horde && referencePlayer.GetTeam() != Team.Horde) ||
@@ -340,7 +340,7 @@ public class PlayerAchievementMgr : AchievementManager
                 guild.AddGuildNews(GuildNews.PlayerAchievement, referencePlayer.GetGUID(), (uint)(achievement.Flags & AchievementFlags.ShowInGuildHeader), achievement.Id);
         }
 
-        if (!_owner.GetSession().PlayerLoading())
+        if (!_owner.Session.PlayerLoading())
             SendAchievementEarned(achievement);
 
         Log.outDebug(LogFilter.Achievement, "PlayerAchievementMgr.CompletedAchievement({0}). {1}", achievement.Id, GetOwnerInfo());
@@ -393,7 +393,7 @@ public class PlayerAchievementMgr : AchievementManager
                 string subject = reward.Subject;
                 string text = reward.Body;
 
-                Locale localeConstant = _owner.GetSession().GetSessionDbLocaleIndex();
+                Locale localeConstant = _owner.Session.GetSessionDbLocaleIndex();
 
                 if (localeConstant != Locale.enUS)
                 {
@@ -444,7 +444,7 @@ public class PlayerAchievementMgr : AchievementManager
             AccountCriteriaUpdate criteriaUpdate = new();
             criteriaUpdate.Progress.Id = criteria.Id;
             criteriaUpdate.Progress.Quantity = progress.Counter;
-            criteriaUpdate.Progress.Player = _owner.GetSession().GetBattlenetAccountGUID();
+            criteriaUpdate.Progress.Player = _owner.Session.GetBattlenetAccountGUID();
             criteriaUpdate.Progress.Flags = 0;
 
             if (criteria.Entry.StartTimer != 0)

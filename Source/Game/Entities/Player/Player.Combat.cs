@@ -259,7 +259,7 @@ namespace Game.Entities
             duelCompleted.Started = type != DuelCompleteType.Interrupted;
             SendPacket(duelCompleted);
 
-            if (opponent.GetSession() != null)
+            if (opponent.Session != null)
                 opponent.SendPacket(duelCompleted);
 
             if (type != DuelCompleteType.Interrupted)

@@ -287,9 +287,9 @@ namespace Game.Entities
 
             // check if the character's account in the db and the logged in account match.
             // player should be able to load/delete character only with correct account!
-            if (accountId != GetSession().GetAccountId())
+            if (accountId != Session.GetAccountId())
             {
-                Log.outError(LogFilter.Player, "Player (GUID: {0}) loading from wrong account (is: {1}, should be: {2})", GetGUID().ToString(), GetSession().GetAccountId(), accountId);
+                Log.outError(LogFilter.Player, "Player (GUID: {0}) loading from wrong account (is: {1}, should be: {2})", GetGUID().ToString(), Session.GetAccountId(), accountId);
 
                 return false;
             }
@@ -308,8 +308,8 @@ namespace Game.Entities
             SetName(name);
 
             // check Name limitations
-            if (ObjectManager.CheckPlayerName(GetName(), GetSession().GetSessionDbcLocale()) != ResponseCodes.CharNameSuccess ||
-                (!GetSession().HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) && Global.ObjectMgr.IsReservedName(GetName())))
+            if (ObjectManager.CheckPlayerName(GetName(), Session.GetSessionDbcLocale()) != ResponseCodes.CharNameSuccess ||
+                (!Session.HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) && Global.ObjectMgr.IsReservedName(GetName())))
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                 stmt.AddValue(0, (ushort)AtLoginFlags.Rename);
@@ -320,8 +320,8 @@ namespace Game.Entities
             }
 
 
-            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.WowAccount), GetSession().GetAccountGUID());
-            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
+            SetUpdateFieldValue(Values.ModifyValue(PlayerData).ModifyValue(PlayerData.WowAccount), Session.GetAccountGUID());
+            SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.BnetAccount), Session.GetBattlenetAccountGUID());
 
             if (gender >= Gender.None)
             {
@@ -390,7 +390,7 @@ namespace Game.Entities
 
             AtLoginFlags = (AtLoginFlags)at_login;
 
-            if (!GetSession().ValidateAppearance(GetRace(), GetClass(), gender, customizations))
+            if (!Session.ValidateAppearance(GetRace(), GetClass(), gender, customizations))
             {
                 Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), can't be loaded.", guid.ToString());
 
@@ -439,7 +439,7 @@ namespace Game.Entities
             _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
             _LoadBGData(holder.GetResult(PlayerLoginQueryLoad.BgData));
 
-            GetSession().SetPlayer(this);
+            Session.SetPlayer(this);
 
             Map map = null;
             bool player_at_bg = false;
@@ -634,7 +634,7 @@ namespace Game.Entities
 
             // client without expansion support
             if (mapEntry != null)
-                if (GetSession().GetExpansion() < mapEntry.Expansion())
+                if (Session.GetExpansion() < mapEntry.Expansion())
                 {
                     Log.outDebug(LogFilter.Player, "Player {0} using client without required expansion tried login at non accessible map {1}", GetName(), mapId);
                     RelocateToHomebind();
@@ -788,11 +788,11 @@ namespace Game.Entities
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));
             _LoadPvpTalents(holder.GetResult(PlayerLoginQueryLoad.PvpTalents));
             _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells), holder.GetResult(PlayerLoginQueryLoad.SpellFavorites));
-            GetSession().GetCollectionMgr().LoadToys();
-            GetSession().GetCollectionMgr().LoadHeirlooms();
-            GetSession().GetCollectionMgr().LoadMounts();
-            GetSession().GetCollectionMgr().LoadItemAppearances();
-            GetSession().GetCollectionMgr().LoadTransmogIllusions();
+            Session.GetCollectionMgr().LoadToys();
+            Session.GetCollectionMgr().LoadHeirlooms();
+            Session.GetCollectionMgr().LoadMounts();
+            Session.GetCollectionMgr().LoadItemAppearances();
+            Session.GetCollectionMgr().LoadTransmogIllusions();
 
             LearnSpecializationSpells();
 
@@ -919,7 +919,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "The value of player {0} after load Item and aura is: ", GetName());
 
             // GM State
-            if (GetSession().HasPermission(RBACPermissions.RestoreSavedGmState))
+            if (Session.HasPermission(RBACPermissions.RestoreSavedGmState))
             {
                 switch (WorldConfig.GetIntValue(WorldCfg.GmLoginState))
                 {
@@ -989,8 +989,8 @@ namespace Game.Entities
             InitPvP();
 
             // RaF stuff.
-            if (GetSession().IsARecruiter() ||
-                (GetSession().GetRecruiterId() != 0))
+            if (Session.IsARecruiter() ||
+                (Session.GetRecruiterId() != 0))
                 SetDynamicFlag(UnitDynFlags.ReferAFriend);
 
             _LoadDeclinedNames(holder.GetResult(PlayerLoginQueryLoad.DeclinedNames));
@@ -1028,7 +1028,7 @@ namespace Game.Entities
             }
 
             // Unlock battle pet system if it's enabled in bnet account
-            if (GetSession().GetBattlePetMgr().IsBattlePetSystemEnabled())
+            if (Session.GetBattlePetMgr().IsBattlePetSystemEnabled())
                 LearnSpell(SharedConst.SpellBattlePetTraining, false);
 
             _achievementSys.CheckAllAchievementCriteria(this);
@@ -1041,7 +1041,7 @@ namespace Game.Entities
                 if (!transmogIllusion.GetFlags().HasFlag(TransmogIllusionFlags.PlayerConditionGrantsOnLogin))
                     continue;
 
-                if (GetSession().GetCollectionMgr().HasTransmogIllusion(transmogIllusion.Id))
+                if (Session.GetCollectionMgr().HasTransmogIllusion(transmogIllusion.Id))
                     continue;
 
                 var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(transmogIllusion.UnlockConditionID);
@@ -1050,7 +1050,7 @@ namespace Game.Entities
                     if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
                         continue;
 
-                GetSession().GetCollectionMgr().AddTransmogIllusion(transmogIllusion.Id);
+                Session.GetCollectionMgr().AddTransmogIllusion(transmogIllusion.Id);
             }
 
             return true;
@@ -1108,7 +1108,7 @@ namespace Game.Entities
                 /// @todo: Filter out more redundant fields that can take their default value at player create
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER);
                 stmt.AddValue(index++, GetGUID().GetCounter());
-                stmt.AddValue(index++, GetSession().GetAccountId());
+                stmt.AddValue(index++, Session.GetAccountId());
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
@@ -1192,7 +1192,7 @@ namespace Game.Entities
                 for (; storedPowers < (int)PowerType.MaxPerClass; ++storedPowers)
                     stmt.AddValue(index++, 0);
 
-                stmt.AddValue(index++, GetSession().GetLatency());
+                stmt.AddValue(index++, Session.GetLatency());
                 stmt.AddValue(index++, GetActiveTalentGroup());
                 stmt.AddValue(index++, GetLootSpecId());
 
@@ -1350,7 +1350,7 @@ namespace Game.Entities
                 for (; storedPowers < (int)PowerType.MaxPerClass; ++storedPowers)
                     stmt.AddValue(index++, 0);
 
-                stmt.AddValue(index++, GetSession().GetLatency());
+                stmt.AddValue(index++, Session.GetLatency());
                 stmt.AddValue(index++, GetActiveTalentGroup());
                 stmt.AddValue(index++, GetLootSpecId());
 
@@ -1396,7 +1396,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, ss.ToString());
                 stmt.AddValue(index++, ActivePlayerData.MultiActionBars);
 
-                stmt.AddValue(index++, IsInWorld && !GetSession().PlayerLogout() ? 1 : 0);
+                stmt.AddValue(index++, IsInWorld && !Session.PlayerLogout() ? 1 : 0);
                 stmt.AddValue(index++, ActivePlayerData.Honor);
                 stmt.AddValue(index++, GetHonorLevel());
                 stmt.AddValue(index++, ActivePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
@@ -1443,7 +1443,7 @@ namespace Game.Entities
             _reputationMgr.SaveToDB(characterTransaction);
             _questObjectiveCriteriaMgr.SaveToDB(characterTransaction);
             _SaveEquipmentSets(characterTransaction);
-            GetSession().SaveTutorialsData(characterTransaction); // changed only while character in game
+            Session.SaveTutorialsData(characterTransaction); // changed only while character in game
             _SaveInstanceTimeRestrictions(characterTransaction);
             _SaveCurrency(characterTransaction);
             _SaveCUFProfiles(characterTransaction);
@@ -1452,26 +1452,26 @@ namespace Game.Entities
 
             // check if Stats should only be saved on logout
             // save Stats can be out of transaction
-            if (GetSession().IsLogingOut() ||
+            if (Session.IsLogingOut() ||
                 !WorldConfig.GetBoolValue(WorldCfg.StatsSaveOnlyOnLogout))
                 _SaveStats(characterTransaction);
 
             // TODO: Move this out
-            GetSession().GetCollectionMgr().SaveAccountToys(loginTransaction);
-            GetSession().GetBattlePetMgr().SaveToDB(loginTransaction);
-            GetSession().GetCollectionMgr().SaveAccountHeirlooms(loginTransaction);
-            GetSession().GetCollectionMgr().SaveAccountMounts(loginTransaction);
-            GetSession().GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
-            GetSession().GetCollectionMgr().SaveAccountTransmogIllusions(loginTransaction);
+            Session.GetCollectionMgr().SaveAccountToys(loginTransaction);
+            Session.GetBattlePetMgr().SaveToDB(loginTransaction);
+            Session.GetCollectionMgr().SaveAccountHeirlooms(loginTransaction);
+            Session.GetCollectionMgr().SaveAccountMounts(loginTransaction);
+            Session.GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
+            Session.GetCollectionMgr().SaveAccountTransmogIllusions(loginTransaction);
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BNET_LAST_PLAYER_CHARACTERS);
-            stmt.AddValue(0, GetSession().GetAccountId());
+            stmt.AddValue(0, Session.GetAccountId());
             stmt.AddValue(1, Global.WorldMgr.GetRealmId().Region);
             stmt.AddValue(2, Global.WorldMgr.GetRealmId().Site);
             loginTransaction.Append(stmt);
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_LAST_PLAYER_CHARACTERS);
-            stmt.AddValue(0, GetSession().GetAccountId());
+            stmt.AddValue(0, Session.GetAccountId());
             stmt.AddValue(1, Global.WorldMgr.GetRealmId().Region);
             stmt.AddValue(2, Global.WorldMgr.GetRealmId().Site);
             stmt.AddValue(3, Global.WorldMgr.GetRealmId().Index);
@@ -1744,7 +1744,7 @@ namespace Game.Entities
 
                                 if (playerFriend)
                                 {
-                                    playerFriend.GetSocial().RemoveFromSocialList(playerGuid, SocialFlag.All);
+                                    playerFriend.Social.RemoveFromSocialList(playerGuid, SocialFlag.All);
                                     Global.SocialMgr.SendFriendStatus(playerFriend, FriendsResult.Removed, playerGuid);
                                 }
                             } while (resultFriends.NextRow());
@@ -2145,8 +2145,8 @@ namespace Game.Entities
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
                         byte slot = result.Read<byte>(52);
 
-                        GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
-                        GetSession().GetCollectionMgr().AddItemAppearance(item);
+                        Session.GetCollectionMgr().CheckHeirloomUpgrades(item);
+                        Session.GetCollectionMgr().AddItemAppearance(item);
 
                         InventoryResult err = InventoryResult.Ok;
 
@@ -2753,7 +2753,7 @@ namespace Game.Entities
                 // accept saved _data only for valid position (and non instanceable), and accessable
                 if (GridDefines.IsValidMapCoord(_homebind) &&
                     !map.Instanceable() &&
-                    GetSession().GetExpansion() >= map.Expansion())
+                    Session.GetExpansion() >= map.Expansion())
                 {
                     ok = true;
                 }
@@ -3042,10 +3042,10 @@ namespace Game.Entities
                         }
 
                         for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
-                            GetSession().GetCollectionMgr().AddItemAppearance(quest.RewardChoiceItemId[i]);
+                            Session.GetCollectionMgr().AddItemAppearance(quest.RewardChoiceItemId[i]);
 
                         for (uint i = 0; i < quest.GetRewItemsCount(); ++i)
-                            GetSession().GetCollectionMgr().AddItemAppearance(quest.RewardItemId[i]);
+                            Session.GetCollectionMgr().AddItemAppearance(quest.RewardItemId[i]);
 
                         var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(quest.PackageID);
 
@@ -3056,7 +3056,7 @@ namespace Game.Entities
 
                                 if (rewardProto != null)
                                     if (rewardProto.ItemSpecClassMask.HasAnyFlag(GetClassMask()))
-                                        GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
+                                        Session.GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
                             }
 
                         if (quest.CanIncreaseRewardedQuestCounters())
@@ -3313,7 +3313,7 @@ namespace Game.Entities
                     traitConfig.ChrSpecializationID = (int)spec.Id;
                     traitConfig.CombatConfigFlags = TraitCombatConfigFlags.ActiveForSpec;
                     traitConfig.LocalIdentifier = findFreeLocalIdentifier((int)spec.Id);
-                    traitConfig.Name = spec.Name[GetSession().GetSessionDbcLocale()];
+                    traitConfig.Name = spec.Name[Session.GetSessionDbcLocale()];
 
                     CreateTraitConfig(traitConfig);
                 }
@@ -3422,7 +3422,7 @@ namespace Game.Entities
                 _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
 
                 BonusData bonus = new(new ItemInstance(_voidStorageItems[slot]));
-                GetSession().GetCollectionMgr().AddItemAppearance(itemEntry, bonus.AppearanceModID);
+                Session.GetCollectionMgr().AddItemAppearance(itemEntry, bonus.AppearanceModID);
             } while (result.NextRow());
         }
 
@@ -4838,13 +4838,13 @@ namespace Game.Entities
                 return;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ACCOUNT_INSTANCE_LOCK_TIMES);
-            stmt.AddValue(0, GetSession().GetAccountId());
+            stmt.AddValue(0, Session.GetAccountId());
             trans.Append(stmt);
 
             foreach (var pair in _instanceResetTimes)
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ACCOUNT_INSTANCE_LOCK_TIMES);
-                stmt.AddValue(0, GetSession().GetAccountId());
+                stmt.AddValue(0, Session.GetAccountId());
                 stmt.AddValue(1, pair.Key);
                 stmt.AddValue(2, pair.Value);
                 trans.Append(stmt);

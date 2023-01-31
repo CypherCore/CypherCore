@@ -122,7 +122,7 @@ namespace Scripts.World.Achievements
 
         public void OnCompleted(Player player, AchievementRecord achievement)
         {
-            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
+            player.Session.GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
             // TODO: Unlock trap
         }
     }
@@ -136,7 +136,7 @@ namespace Scripts.World.Achievements
 
         public void OnCompleted(Player player, AchievementRecord achievement)
         {
-            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot2);
+            player.Session.GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot2);
         }
     }
 }

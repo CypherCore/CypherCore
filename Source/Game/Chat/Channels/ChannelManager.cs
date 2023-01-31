@@ -115,7 +115,7 @@ namespace Game.Chat
         {
             foreach (Channel channel in playerSearcher.GetJoinedChannels())
             {
-                string chanName = channel.GetName(playerSearcher.GetSession().GetSessionDbcLocale());
+                string chanName = channel.GetName(playerSearcher.Session.GetSessionDbcLocale());
 
                 if (chanName.ToLower().Equals(namePart.ToLower()))
                     return channel;
@@ -193,7 +193,7 @@ namespace Game.Chat
             if (result == null && notify)
             {
                 string channelName = name;
-                Channel.GetChannelName(ref channelName, channelId, player.GetSession().GetSessionDbcLocale(), zoneEntry);
+                Channel.GetChannelName(ref channelName, channelId, player.Session.GetSessionDbcLocale(), zoneEntry);
 
                 SendNotOnChannelNotify(player, channelName);
             }

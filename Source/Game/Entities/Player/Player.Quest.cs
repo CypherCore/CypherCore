@@ -1754,7 +1754,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestExpansion(Quest qInfo, bool msg)
         {
-            if ((int)GetSession().GetExpansion() < qInfo.Expansion)
+            if ((int)Session.GetExpansion() < qInfo.Expansion)
             {
                 if (msg)
                     SendCanTakeQuestResponse(QuestFailedReasons.FailedExpansion);
@@ -2902,7 +2902,7 @@ namespace Game.Entities
 
             packet.QuestTitle = quest.LogTitle;
 
-            Locale loc_idx = receiver.GetSession().GetSessionDbLocaleIndex();
+            Locale loc_idx = receiver.Session.GetSessionDbLocaleIndex();
 
             if (loc_idx != Locale.enUS)
             {
@@ -2929,7 +2929,7 @@ namespace Game.Entities
                 if (quest != null)
                 {
                     response.QuestTitle = quest.LogTitle;
-                    Locale localeConstant = GetSession().GetSessionDbLocaleIndex();
+                    Locale localeConstant = Session.GetSessionDbLocaleIndex();
 
                     if (localeConstant != Locale.enUS)
                     {

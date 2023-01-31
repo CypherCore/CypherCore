@@ -33,7 +33,7 @@ namespace Game.Entities
             }
             else
             {
-                if (!GetSession().HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
+                if (!Session.HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
                     for (uint t = talentTiers; t < PlayerConst.MaxTalentTiers; ++t)
                         for (uint c = 0; c < PlayerConst.MaxTalentColumns; ++c)
                             foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), t, c))
@@ -42,7 +42,7 @@ namespace Game.Entities
 
             SetUpdateFieldValue(Values.ModifyValue(ActivePlayerData).ModifyValue(ActivePlayerData.MaxTalentTiers), talentTiers);
 
-            if (!GetSession().HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
+            if (!Session.HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
                 for (byte spec = 0; spec < PlayerConst.MaxSpecializations; ++spec)
                 {
                     for (int slot = Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()); slot < PlayerConst.MaxPvpTalentSlots; ++slot)
@@ -54,7 +54,7 @@ namespace Game.Entities
                     }
                 }
 
-            if (!GetSession().PlayerLoading())
+            if (!Session.PlayerLoading())
                 SendTalentsInfoData(); // update at client
         }
 
@@ -1041,7 +1041,7 @@ namespace Game.Entities
 
             var myGuid = GetGUID();
 
-            WorldSession mySess = GetSession();
+            WorldSession mySess = Session;
 
             mySess.GetQueryProcessor()
                   .AddCallback(DB.Characters.AsyncQuery(stmt)

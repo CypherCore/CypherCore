@@ -99,7 +99,7 @@ namespace Game.Networking.Packets
 
             InviterName = inviter.GetName();
             InviterGUID = inviter.GetGUID();
-            InviterBNetAccountId = inviter.GetSession().GetAccountGUID();
+            InviterBNetAccountId = inviter.Session.GetAccountGUID();
 
             ProposedRoles = proposedRoles;
 

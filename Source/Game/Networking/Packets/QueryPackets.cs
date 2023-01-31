@@ -680,8 +680,8 @@ namespace Game.Networking.Packets
             {
                 Cypher.Assert(player.GetGUID() == guid);
 
-                AccountID = player.GetSession().GetAccountGUID();
-                BnetAccountID = player.GetSession().GetBattlenetAccountGUID();
+                AccountID = player.Session.GetAccountGUID();
+                BnetAccountID = player.Session.GetBattlenetAccountGUID();
                 Name = player.GetName();
                 RaceID = player.GetRace();
                 Sex = player.GetNativeGender();

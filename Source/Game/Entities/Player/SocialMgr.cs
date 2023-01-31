@@ -36,7 +36,7 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            var playerFriendInfo = player.GetSocial().PlayerSocialMap.LookupByKey(friendGUID);
+            var playerFriendInfo = player.Social.PlayerSocialMap.LookupByKey(friendGUID);
 
             if (playerFriendInfo != null)
                 friendInfo.Note = playerFriendInfo.Note;
@@ -44,13 +44,13 @@ namespace Game.Entities
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
 
-            if (!player.GetSession().HasPermission(RBACPermissions.WhoSeeAllSecLevels) &&
-                target.GetSession().GetSecurity() > (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList))
+            if (!player.Session.HasPermission(RBACPermissions.WhoSeeAllSecLevels) &&
+                target.Session.GetSecurity() > (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList))
                 return;
 
             // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
             if (target.GetTeam() != player.GetTeam() &&
-                !player.GetSession().HasPermission(RBACPermissions.TwoSideWhoList))
+                !player.Session.HasPermission(RBACPermissions.TwoSideWhoList))
                 return;
 
             if (target.IsVisibleGloballyFor(player))
@@ -67,8 +67,8 @@ namespace Game.Entities
                 {
                     friendInfo.Status = FriendStatus.Online;
 
-                    if (target.GetSession().GetRecruiterId() == player.GetSession().GetAccountId() ||
-                        target.GetSession().GetAccountId() == player.GetSession().GetRecruiterId())
+                    if (target.Session.GetRecruiterId() == player.Session.GetAccountId() ||
+                        target.Session.GetAccountId() == player.Session.GetRecruiterId())
                         friendInfo.Status |= FriendStatus.RAF;
                 }
 
@@ -140,10 +140,10 @@ namespace Game.Entities
                         !target.IsInWorld)
                         continue;
 
-                    WorldSession session = target.GetSession();
+                    WorldSession session = target.Session;
 
                     if (!session.HasPermission(RBACPermissions.WhoSeeAllSecLevels) &&
-                        player.GetSession().GetSecurity() > gmSecLevel)
+                        player.Session.GetSecurity() > gmSecLevel)
                         continue;
 
                     if (target.GetTeam() != player.GetTeam() &&

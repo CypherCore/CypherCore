@@ -110,7 +110,7 @@ namespace Game
                 {
                     bucketInfo.ItemModifiedAppearanceIDs.Add(appearance.Id);
 
-                    if (!player.GetSession().GetCollectionMgr().HasItemAppearance(appearance.Id).PermAppearance)
+                    if (!player.Session.GetCollectionMgr().HasItemAppearance(appearance.Id).PermAppearance)
                         bucketInfo.ContainsOnlyCollectedAppearances = false;
                 }
         }

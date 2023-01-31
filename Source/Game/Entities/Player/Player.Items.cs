@@ -101,7 +101,7 @@ namespace Game.Entities
 
             // Delete any references to the refund _data
             item.SetNotRefundable(this, true, trans, false);
-            GetSession().GetCollectionMgr().RemoveTemporaryAppearance(item);
+            Session.GetCollectionMgr().RemoveTemporaryAppearance(item);
 
             // Destroy Item
             DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
@@ -256,9 +256,9 @@ namespace Game.Entities
 
                 // send yellow "Trade canceled" message to both traders
                 if (sendback)
-                    GetSession().SendCancelTrade();
+                    Session.SendCancelTrade();
 
-                trader.GetSession().SendCancelTrade();
+                trader.Session.SendCancelTrade();
 
                 // cleanup
                 _trade = null;
@@ -490,7 +490,7 @@ namespace Game.Entities
                 }
 
                 // Take money for repairs from the guild bank
-                guild.HandleMemberWithdrawMoney(GetSession(), totalCost, true);
+                guild.HandleMemberWithdrawMoney(Session, totalCost, true);
             }
             else
             {
@@ -873,7 +873,7 @@ namespace Game.Entities
                 }
 
                 if (addToCollection)
-                    GetSession().GetCollectionMgr().OnItemAdded(item);
+                    Session.GetCollectionMgr().OnItemAdded(item);
 
                 ItemChildEquipmentRecord childItemEntry = Global.DB2Mgr.GetItemChildEquipment(itemId);
 
@@ -2001,7 +2001,7 @@ namespace Game.Entities
                         if (bagItem != null)
                             if (GetLootByWorldObjectGUID(bagItem.GetGUID()) != null)
                             {
-                                GetSession().DoLootReleaseAll();
+                                Session.DoLootReleaseAll();
                                 released = true; // so we don't need to look at dstBag
 
                                 break;
@@ -2021,7 +2021,7 @@ namespace Game.Entities
                         if (bagItem != null)
                             if (GetLootByWorldObjectGUID(bagItem.GetGUID()) != null)
                             {
-                                GetSession().DoLootReleaseAll();
+                                Session.DoLootReleaseAll();
 
                                 break;
                             }
@@ -3639,7 +3639,7 @@ namespace Game.Entities
                 ItemRemovedQuestCheck(it.GetEntry(), it.GetCount());
                 it.SetNotRefundable(this, false, null, false);
                 Item.RemoveItemFromUpdateQueueOf(it, this);
-                GetSession().GetCollectionMgr().RemoveTemporaryAppearance(it);
+                Session.GetCollectionMgr().RemoveTemporaryAppearance(it);
 
                 if (it.IsInWorld)
                 {
@@ -5445,7 +5445,7 @@ namespace Game.Entities
 
             if (slot >= SharedConst.VoidStorageMaxSlot)
             {
-                GetSession().SendVoidStorageTransferResult(VoidTransferError.Full);
+                Session.SendVoidStorageTransferResult(VoidTransferError.Full);
 
                 return 255;
             }
@@ -5459,7 +5459,7 @@ namespace Game.Entities
         {
             if (slot >= SharedConst.VoidStorageMaxSlot)
             {
-                GetSession().SendVoidStorageTransferResult(VoidTransferError.InternalError1);
+                Session.SendVoidStorageTransferResult(VoidTransferError.InternalError1);
 
                 return;
             }
@@ -5483,7 +5483,7 @@ namespace Game.Entities
         {
             if (slot >= SharedConst.VoidStorageMaxSlot)
             {
-                GetSession().SendVoidStorageTransferResult(VoidTransferError.InternalError1);
+                Session.SendVoidStorageTransferResult(VoidTransferError.InternalError1);
 
                 return null;
             }
@@ -6414,7 +6414,7 @@ namespace Game.Entities
             return res; // return latest error if any
         }
 
-        private Item EquipNewItem(ushort pos, uint item, ItemContext context, bool update)
+        public Item EquipNewItem(ushort pos, uint item, ItemContext context, bool update)
         {
             Item pItem = Item.CreateItem(item, 1, context, this);
 
@@ -6430,7 +6430,7 @@ namespace Game.Entities
             return null;
         }
 
-        private void QuickEquipItem(ushort pos, Item pItem)
+        public void QuickEquipItem(ushort pos, Item pItem)
         {
             if (pItem != null)
             {
@@ -6521,7 +6521,7 @@ namespace Game.Entities
                     AddRefundReference(it.GetGUID());
                 }
 
-                GetSession().GetCollectionMgr().OnItemAdded(it);
+                Session.GetCollectionMgr().OnItemAdded(it);
             }
 
             return true;
@@ -6558,7 +6558,7 @@ namespace Game.Entities
         private void SendEnchantmentDurations()
         {
             foreach (var enchantDuration in _enchantDuration)
-                GetSession().SendItemEnchantTimeUpdate(GetGUID(), enchantDuration.Item.GetGUID(), (uint)enchantDuration.Slot, enchantDuration.Leftduration / 1000);
+                Session.SendItemEnchantTimeUpdate(GetGUID(), enchantDuration.Item.GetGUID(), (uint)enchantDuration.Slot, enchantDuration.Leftduration / 1000);
         }
 
         private void SendItemDurations()
@@ -7404,7 +7404,7 @@ namespace Game.Entities
                 pItem.SetBinding(true);
 
                 if (IsInWorld)
-                    GetSession().GetCollectionMgr().AddItemAppearance(pItem);
+                    Session.GetCollectionMgr().AddItemAppearance(pItem);
             }
 
             Log.outDebug(LogFilter.Player, "STORAGE: EquipItem Slot = {0}, Item = {1}", slot, pItem.GetEntry());

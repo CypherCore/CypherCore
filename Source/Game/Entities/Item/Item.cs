@@ -1019,13 +1019,13 @@ namespace Game.Entities
 
                 if (oldEnchant != null &&
                     !oldEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
-                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
+                    owner.Session.SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant.Id, (uint)slot);
 
                 var newEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(id);
 
                 if (newEnchant != null &&
                     !newEnchant.GetFlags().HasFlag(SpellItemEnchantmentFlags.DoNotLog))
-                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
+                    owner.Session.SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
             }
 
             ApplyArtifactPowerEnchantmentBonuses(slot, GetEnchantmentId(slot), false, owner);
@@ -1445,7 +1445,7 @@ namespace Game.Entities
             owner.DeleteRefundReference(GetGUID());
 
             if (addToCollection)
-                owner.GetSession().GetCollectionMgr().AddItemAppearance(this);
+                owner.Session.GetCollectionMgr().AddItemAppearance(this);
         }
 
         public void UpdatePlayedTime(Player owner)
@@ -1501,7 +1501,7 @@ namespace Game.Entities
             if (allowedGUIDs.Empty())
                 return;
 
-            currentOwner.GetSession().GetCollectionMgr().AddItemAppearance(this);
+            currentOwner.Session.GetCollectionMgr().AddItemAppearance(this);
             allowedGUIDs.Clear();
             SetState(ItemUpdateState.Changed, currentOwner);
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_BOP_TRADE);

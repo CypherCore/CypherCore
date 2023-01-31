@@ -16,6 +16,7 @@ using Framework.Database;
 using Framework.Realm;
 using Game.Accounts;
 using Game.BattleGrounds;
+using Game.Battlepay;
 using Game.BattlePets;
 using Game.Chat;
 using Game.Entities;
@@ -66,10 +67,10 @@ namespace Game
         private uint _battlenetRequestToken;
         private readonly List<string> _registeredAddonPrefixes = new();
         private bool _filterAddonMessages;
-        private readonly uint recruiterId;
-        private readonly bool isRecruiter;
+        private readonly uint _recruiterId;
+        private readonly bool _isRecruiter;
 
-        public long _muteTime { get; set; }
+        public long MuteTime { get; set; }
         private long _timeOutTime;
         private readonly ConcurrentQueue<WorldPacket> _recvQueue = new();
         private RBACData _RBACData;
@@ -84,13 +85,16 @@ namespace Game
         // Packets cooldown
         private long _calendarEventCreationCooldown;
         private readonly BattlePetMgr _battlePetMgr;
+        private BattlepayManager _battlePayMgr;
         private readonly AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         private readonly AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
         private readonly AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
 
+        public CommandHandler CommandHandler { get; private set; }
+
         public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, Locale locale, uint recruiter, bool isARecruiter)
         {
-            _muteTime = mute_time;
+            MuteTime = mute_time;
             _antiDOS = new DosProtection(this);
             _socket[(int)ConnectionType.Realm] = sock;
             _security = sec;
@@ -102,12 +106,13 @@ namespace Game
             _os = os;
             _sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
             _sessionDbLocaleIndex = locale;
-            recruiterId = recruiter;
-            isRecruiter = isARecruiter;
+            _recruiterId = recruiter;
+            _isRecruiter = isARecruiter;
             _expireTime = 60000; // 1 min after socket loss, session is deleted
             _battlePetMgr = new BattlePetMgr(this);
             _collectionMgr = new CollectionMgr(this);
-
+            _battlePayMgr = new BattlepayManager(this);
+            CommandHandler = new CommandHandler(this);
             _address = sock.GetRemoteIpAddress().Address.ToString();
             ResetTimeOutTime(false);
             DB.Login.Execute("UPDATE account SET online = 1 WHERE Id = {0};", GetAccountId());     // One-Time query
@@ -566,7 +571,7 @@ namespace Game
 
         public bool CanSpeak()
         {
-            return _muteTime <= GameTime.GetGameTime();
+            return MuteTime <= GameTime.GetGameTime();
         }
 
         public bool DisallowHyperlinksAndMaybeKick(string str)
@@ -602,6 +607,34 @@ namespace Game
 
             if (_player)
                 _GUIDLow = _player.GetGUID().GetCounter();
+        }
+
+        public BattlepayManager GetBattlePayMgr()
+        {
+            return _battlePayMgr;
+        }
+
+        public uint GetBagsFreeSlots(Player player)
+        {
+            uint freeBagSlots = 0;
+
+            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
+            {
+                var bag = player.GetBagByPos(i);
+
+                if (bag != null)
+                    freeBagSlots += bag.GetFreeSlots();
+
+            }
+
+
+            int inventoryEnd = InventorySlots.ItemStart + player.GetInventorySlotCount();
+
+            for (var i = InventorySlots.ItemStart; i < inventoryEnd; i++)
+                if (!player.GetItemByPos(InventorySlots.Bag0, i))
+                    ++freeBagSlots;
+
+            return freeBagSlots;
         }
 
         public string GetPlayerName()
@@ -775,8 +808,8 @@ namespace Game
                 _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
         }
 
-        public uint GetRecruiterId() { return recruiterId; }
-        public bool IsARecruiter() { return isRecruiter; }
+        public uint GetRecruiterId() { return _recruiterId; }
+        public bool IsARecruiter() { return _isRecruiter; }
 
         // Packets cooldown
         public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }

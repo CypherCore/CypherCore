@@ -206,7 +206,7 @@ namespace Game
 
         public void SendVisible(FactionState faction, bool visible = true)
         {
-            if (_player.GetSession().PlayerLoading())
+            if (_player.Session.PlayerLoading())
                 return;
 
             //make faction visible / not visible in reputation list at client

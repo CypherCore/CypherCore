@@ -95,7 +95,7 @@ namespace Game.Achievements
 
             // Don't update realm first achievements if the player's account isn't allowed to do so
             if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
-                if (referencePlayer.GetSession().HasPermission(RBACPermissions.CannotEarnRealmFirstAchievements))
+                if (referencePlayer.Session.HasPermission(RBACPermissions.CannotEarnRealmFirstAchievements))
                     return false;
 
             if (achievement.CovenantID != 0 &&

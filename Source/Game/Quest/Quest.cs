@@ -429,7 +429,7 @@ namespace Game
                 uint xp = (uint)(diffFactor * questXp.Difficulty[xpDifficulty] * xpMultiplier / 10);
 
                 if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) &&
-                    player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion &&
+                    player.Session.GetExpansion() == PlayerConst.CurrentExpansion &&
                     expansion >= 0 &&
                     expansion < (int)PlayerConst.CurrentExpansion)
                     xp = (uint)(xp / 9.0f);

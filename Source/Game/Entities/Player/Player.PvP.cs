@@ -573,7 +573,7 @@ namespace Game.Entities
             else if (bg.IsRandom())
                 perm = RBACPermissions.JoinRandomBg;
 
-            return GetSession().HasPermission(perm);
+            return Session.HasPermission(perm);
         }
 
         public void ClearAfkReports()

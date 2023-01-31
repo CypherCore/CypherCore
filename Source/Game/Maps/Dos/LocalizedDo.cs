@@ -21,7 +21,7 @@ namespace Game.Maps.Dos
 
         public void Invoke(Player player)
         {
-            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            Locale loc_idx = player.Session.GetSessionDbLocaleIndex();
             int cache_idx = (int)loc_idx + 1;
             IDoWork<Player> action;
 

@@ -61,7 +61,7 @@ namespace Game.Achievements
 
             // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
             if (referencePlayer.IsGameMaster() ||
-                referencePlayer.GetSession().HasPermission(RBACPermissions.CannotEarnAchievements))
+                referencePlayer.Session.HasPermission(RBACPermissions.CannotEarnAchievements))
             {
                 Log.outDebug(LogFilter.Achievement,
                              $"CriteriaHandler::UpdateCriteria: [Player {referencePlayer.GetName()} {(referencePlayer.IsGameMaster() ? "GM mode on" : "disallowed by RBAC")}]" +
@@ -395,7 +395,7 @@ namespace Game.Achievements
                             break;
                         }
                     case CriteriaType.UniquePetsOwned:
-                        SetCriteriaProgress(criteria, referencePlayer.GetSession().GetBattlePetMgr().GetPetUniqueSpeciesCount(), referencePlayer);
+                        SetCriteriaProgress(criteria, referencePlayer.Session.GetBattlePetMgr().GetPetUniqueSpeciesCount(), referencePlayer);
 
                         break;
                     case CriteriaType.GuildAttainedLevel:
@@ -1720,7 +1720,7 @@ namespace Game.Achievements
 
                     break;
                 case ModifierTreeType.BattlePetTeamLevel: // 34
-                    foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                    foreach (BattlePetSlot slot in referencePlayer.Session.GetBattlePetMgr().GetSlots())
                         if (slot.Pet.Level < reqValue)
                             return false;
 
@@ -2023,7 +2023,7 @@ namespace Game.Achievements
                         break;
                     }
                 case ModifierTreeType.UniqueBattlePetsEqualOrGreaterThan: // 77
-                    if (referencePlayer.GetSession().GetBattlePetMgr().GetPetUniqueSpeciesCount() < reqValue)
+                    if (referencePlayer.Session.GetBattlePetMgr().GetPetUniqueSpeciesCount() < reqValue)
                         return false;
 
                     break;
@@ -2104,7 +2104,7 @@ namespace Game.Achievements
 
                     break;
                 case ModifierTreeType.PlayerHasBattlePetJournalLock: // 93
-                    if (!referencePlayer.GetSession().GetBattlePetMgr().HasJournalLock())
+                    if (!referencePlayer.Session.GetBattlePetMgr().HasJournalLock())
                         return false;
 
                     break;
@@ -2191,7 +2191,7 @@ namespace Game.Achievements
 
                     break;
                 case ModifierTreeType.PlayerExpansionLevelEqualOrGreaterThan: // 106
-                    if (referencePlayer.GetSession().GetExpansion() < (Expansion)reqValue)
+                    if (referencePlayer.Session.GetExpansion() < (Expansion)reqValue)
                         return false;
 
                     break;
@@ -2815,7 +2815,7 @@ namespace Game.Achievements
                     {
                         uint count = 0;
 
-                        foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        foreach (BattlePetSlot slot in referencePlayer.Session.GetBattlePetMgr().GetSlots())
                             if (slot.Pet.Species == secondaryAsset)
                                 ++count;
 
@@ -2828,7 +2828,7 @@ namespace Game.Achievements
                     {
                         uint count = 0;
 
-                        foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        foreach (BattlePetSlot slot in referencePlayer.Session.GetBattlePetMgr().GetSlots())
                         {
                             BattlePetSpeciesRecord species = CliDB.BattlePetSpeciesStorage.LookupByKey(slot.Pet.Species);
 
@@ -2849,7 +2849,7 @@ namespace Game.Achievements
                     {
                         uint count = 0;
 
-                        foreach (var slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        foreach (var slot in referencePlayer.Session.GetBattlePetMgr().GetSlots())
                             if (slot.Pet.Health > 0)
                                 ++count;
 
@@ -3097,7 +3097,7 @@ namespace Game.Achievements
                     return false;
                 case ModifierTreeType.PlayerHasMount: // 183
                     {
-                        foreach (var pair in referencePlayer.GetSession().GetCollectionMgr().GetAccountMounts())
+                        foreach (var pair in referencePlayer.Session.GetCollectionMgr().GetAccountMounts())
                         {
                             var mount = Global.DB2Mgr.GetMount(pair.Key);
 
@@ -3180,20 +3180,20 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerIsInstanceOwner:           // 196 NYI
                     return false;
                 case ModifierTreeType.PlayerHasHeirloom: // 197
-                    if (!referencePlayer.GetSession().GetCollectionMgr().GetAccountHeirlooms().ContainsKey(reqValue))
+                    if (!referencePlayer.Session.GetCollectionMgr().GetAccountHeirlooms().ContainsKey(reqValue))
                         return false;
 
                     break;
                 case ModifierTreeType.TeamPoints: // 198 NYI
                     return false;
                 case ModifierTreeType.PlayerHasToy: // 199
-                    if (!referencePlayer.GetSession().GetCollectionMgr().HasToy(reqValue))
+                    if (!referencePlayer.Session.GetCollectionMgr().HasToy(reqValue))
                         return false;
 
                     break;
                 case ModifierTreeType.PlayerHasTransmog: // 200
                     {
-                        var (PermAppearance, TempAppearance) = referencePlayer.GetSession().GetCollectionMgr().HasItemAppearance(reqValue);
+                        var (PermAppearance, TempAppearance) = referencePlayer.Session.GetCollectionMgr().HasItemAppearance(reqValue);
 
                         if (!PermAppearance || TempAppearance)
                             return false;
@@ -3271,7 +3271,7 @@ namespace Game.Achievements
                         break;
                     }
                 case ModifierTreeType.PlayersAuthExpansionLevelEqualOrGreaterThan: // 212
-                    if (referencePlayer.GetSession().GetAccountExpansion() < (Expansion)reqValue)
+                    if (referencePlayer.Session.GetAccountExpansion() < (Expansion)reqValue)
                         return false;
 
                     break;
@@ -3403,7 +3403,7 @@ namespace Game.Achievements
                 case ModifierTreeType.IsTournamentRealm: // 229
                     return false;
                 case ModifierTreeType.PlayerCanAccessAlliedRaces: // 230
-                    if (!referencePlayer.GetSession().CanAccessAlliedRaces())
+                    if (!referencePlayer.Session.CanAccessAlliedRaces())
                         return false;
 
                     break;
@@ -3945,7 +3945,7 @@ namespace Game.Achievements
                             return false;
 
                         for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            if (itr.GetSource().GetSession().GetRecruiterId() == referencePlayer.GetSession().GetAccountId())
+                            if (itr.GetSource().Session.GetRecruiterId() == referencePlayer.Session.GetAccountId())
                                 return true;
 
                         return false;
@@ -3958,7 +3958,7 @@ namespace Game.Achievements
                             return false;
 
                         for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            if (itr.GetSource().GetSession().GetAccountId() == referencePlayer.GetSession().GetRecruiterId())
+                            if (itr.GetSource().Session.GetAccountId() == referencePlayer.Session.GetRecruiterId())
                                 return true;
 
                         return false;
@@ -3979,7 +3979,7 @@ namespace Game.Achievements
                         break;
                     }
                 case ModifierTreeType.PlayerCanAccessShadowlandsPrepurchaseContent: // 281
-                    if (referencePlayer.GetSession().GetAccountExpansion() < Expansion.ShadowLands)
+                    if (referencePlayer.Session.GetAccountExpansion() < Expansion.ShadowLands)
                         return false;
 
                     break;
@@ -4106,7 +4106,7 @@ namespace Game.Achievements
 
                     break;
                 case ModifierTreeType.IsRaFRecruit: // 305
-                    if (referencePlayer.GetSession().GetRecruiterId() == 0)
+                    if (referencePlayer.Session.GetRecruiterId() == 0)
                         return false;
 
                     break;

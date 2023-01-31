@@ -4067,3 +4067,32 @@ Pvp.FactionBalance.Pct20 = 0.8
 
 #
 ###################################################################################################
+
+#
+#   BpayStore.Enabled
+#        Description: Enables the in game store
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+BpayStore.Enabled = 0
+
+#   BpayStore.Currency
+#        Description: Set currency displayed on the in game store
+#        Default:	USD = 1,
+#					GBP = 2,
+#					KRW = 3,
+#					EUR = 4,
+#					RUB = 5,
+#					ARS = 8,
+#					CLP = 9,
+#					MXN = 10,
+#					BRL = 11,
+#					AUD = 12,
+#					CPT = 14,
+#					TPT = 15,
+#					BETA = 16,
+#					JPY = 28,
+#					CAD = 29,
+#					NZD = 30
+
+BpayStore.Currency = 9

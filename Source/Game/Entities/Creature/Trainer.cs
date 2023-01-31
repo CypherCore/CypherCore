@@ -81,7 +81,7 @@ namespace Game.Entities
 
             if (speciesEntry != null)
             {
-                if (player.GetSession().GetBattlePetMgr().HasMaxPetCount(speciesEntry, player.GetGUID()))
+                if (player.Session.GetBattlePetMgr().HasMaxPetCount(speciesEntry, player.GetGUID()))
                     // Don't send any error to client (intended)
                     return;
 
@@ -117,7 +117,7 @@ namespace Game.Entities
 
                 if (speciesEntry != null)
                 {
-                    player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+                    player.Session.GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
                     // If the spell summons a battle pet, we fake that it has been learned and the battle pet is added
                     // marking as dependent prevents saving the spell to database (intended)
                     dependent = true;

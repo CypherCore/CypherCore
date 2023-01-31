@@ -414,6 +414,7 @@ public enum LogFilter
     Battlefield,
     Battleground,
     BattlegroundReportPvpAfk,
+    BattlePay,
     Calendar,
     ChatLog,
     ChatSystem,

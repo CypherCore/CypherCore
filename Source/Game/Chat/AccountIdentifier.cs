@@ -81,7 +81,7 @@ namespace Game.Chat
 
                 if (target != null)
                 {
-                    WorldSession session = target.GetSession();
+                    WorldSession session = target.Session;
 
                     if (session != null)
                         return new AccountIdentifier(session);

@@ -26,7 +26,7 @@ namespace Game.DataStorage
             foreach (var player in players)
             {
                 if (player.GetMap() == null ||
-                    player.GetSession().PlayerLoading())
+                    player.Session.PlayerLoading())
                     continue;
 
                 string playerName = player.GetName();
@@ -40,7 +40,7 @@ namespace Game.DataStorage
 
                 _whoListStorage.Add(new WhoListPlayerInfo(player.GetGUID(),
                                                           player.GetTeam(),
-                                                          player.GetSession().GetSecurity(),
+                                                          player.Session.GetSecurity(),
                                                           player.GetLevel(),
                                                           player.GetClass(),
                                                           player.GetRace(),

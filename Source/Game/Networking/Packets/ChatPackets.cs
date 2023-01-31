@@ -270,7 +270,7 @@ namespace Game.Networking.Packets
 
             if (playerSender)
             {
-                SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
+                SenderAccountGUID = playerSender.Session.GetAccountGUID();
                 _ChatFlags = playerSender.GetChatFlags();
 
                 SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());

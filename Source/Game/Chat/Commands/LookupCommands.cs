@@ -316,7 +316,7 @@ namespace Game.Chat
                         target == handler.GetSession().GetPlayer())
                         return false;
 
-                    ip = target.GetSession().GetRemoteAddress();
+                    ip = target.Session.GetRemoteAddress();
                 }
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);

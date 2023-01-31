@@ -366,7 +366,7 @@ namespace Game.Chat
                     if (!player)
                         return false;
 
-                    accountId = player.GetSession().GetAccountId();
+                    accountId = player.Session.GetAccountId();
                     Global.AccountMgr.GetName(accountId, out accountName);
                 }
 
@@ -465,7 +465,7 @@ namespace Game.Chat
                     if (!player)
                         return false;
 
-                    accountId = player.GetSession().GetAccountId();
+                    accountId = player.Session.GetAccountId();
                     Global.AccountMgr.GetName(accountId, out accountName);
                 }
 

@@ -777,7 +777,7 @@ namespace Game.Chat
             List<ChrCustomizationChoice> customizations = new();
 
             var options = Global.DB2Mgr.GetCustomiztionOptions(target.GetRace(), gender);
-            WorldSession worldSession = target.GetSession();
+            WorldSession worldSession = target.Session;
 
             foreach (ChrCustomizationOptionRecord option in options)
             {

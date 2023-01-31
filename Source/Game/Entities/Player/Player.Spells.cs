@@ -2780,7 +2780,7 @@ namespace Game.Entities
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillPermBonus, (int)pos), bonus);
         }
 
-        private void UpdateSkillsForLevel()
+        public void UpdateSkillsForLevel()
         {
             Race race = GetRace();
             ushort maxSkill = GetMaxSkillValueForLevel();
@@ -2863,7 +2863,7 @@ namespace Game.Entities
                     AddSelfResSpell(selfResSpell);
         }
 
-        private void LearnSpecializationSpells()
+        public void LearnSpecializationSpells()
         {
             var specSpells = Global.DB2Mgr.GetSpecializationSpells(GetPrimarySpecialization());
 
@@ -3050,7 +3050,7 @@ namespace Game.Entities
 
             if (duration > 0)
             {
-                GetSession().SendItemEnchantTimeUpdate(GetGUID(), item.GetGUID(), (uint)slot, duration / 1000);
+                Session.SendItemEnchantTimeUpdate(GetGUID(), item.GetGUID(), (uint)slot, duration / 1000);
                 _enchantDuration.Add(new EnchantDuration(item, slot, duration));
             }
         }
@@ -3322,19 +3322,19 @@ namespace Game.Entities
                 if (effect.TriggerType != ItemSpelltriggerType.OnPickup) // On obtain trigger
                     continue;
 
-                int spellId = effect.SpellID;
+                var spellId = effect.SpellID;
 
                 if (spellId <= 0)
                     continue;
 
                 if (apply)
                 {
-                    if (!HasAura((uint)spellId))
-                        CastSpell(this, (uint)spellId, new CastSpellExtraArgs().SetCastItem(item));
+                    if (!HasAura(spellId))
+                        CastSpell(this, spellId, new CastSpellExtraArgs().SetCastItem(item));
                 }
                 else
                 {
-                    RemoveAurasDueToSpell((uint)spellId);
+                    RemoveAurasDueToSpell(spellId);
                 }
             }
         }
@@ -3833,7 +3833,7 @@ namespace Game.Entities
                     AddOverrideSpell(spellNode.OverridesSpell, spellNode.Spell);
             }
 
-            if (!GetSession().PlayerLoading())
+            if (!Session.PlayerLoading())
             {
                 // not ranked Skills
                 foreach (var _spell_idx in skill_bounds)
@@ -3847,7 +3847,7 @@ namespace Game.Entities
 
             // needs to be when spell is already learned, to prevent infinite recursion crashes
             if (Global.DB2Mgr.GetMount(spellId) != null)
-                GetSession().GetCollectionMgr().AddMount(spellId, MountStatusFlags.None, false, !IsInWorld);
+                Session.GetCollectionMgr().AddMount(spellId, MountStatusFlags.None, false, !IsInWorld);
 
             // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
             return active && !disabled && !superceded_old;

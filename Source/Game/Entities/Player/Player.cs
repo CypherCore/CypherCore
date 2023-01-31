@@ -49,7 +49,7 @@ namespace Game.Entities
             _session = session;
 
             // players always accept
-            if (!GetSession().HasPermission(RBACPermissions.CanFilterWhispers))
+            if (!Session.HasPermission(RBACPermissions.CanFilterWhispers))
                 SetAcceptWhispers(true);
 
             _zoneUpdateId = 0xffffffff;
@@ -169,7 +169,7 @@ namespace Game.Entities
             {
                 Log.outError(LogFilter.Player,
                              "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid race/class pair ({2}/{3}) - refusing to do so.",
-                             GetSession().GetAccountId(),
+                             Session.GetAccountId(),
                              GetName(),
                              createInfo.RaceId,
                              createInfo.ClassId);
@@ -183,18 +183,18 @@ namespace Game.Entities
             {
                 Log.outError(LogFilter.Player,
                              "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid character class ({2}) - refusing to do so (wrong DBC-files?)",
-                             GetSession().GetAccountId(),
+                             Session.GetAccountId(),
                              GetName(),
                              createInfo.ClassId);
 
                 return false;
             }
 
-            if (!GetSession().ValidateAppearance(createInfo.RaceId, createInfo.ClassId, createInfo.Sex, createInfo.Customizations))
+            if (!Session.ValidateAppearance(createInfo.RaceId, createInfo.ClassId, createInfo.Sex, createInfo.Customizations))
             {
                 Log.outError(LogFilter.Player,
                              "Player.Create: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with invalid appearance attributes - refusing to do so",
-                             GetSession().GetAccountId(),
+                             Session.GetAccountId(),
                              GetName());
 
                 return false;
@@ -236,7 +236,7 @@ namespace Game.Entities
             {
                 Log.outError(LogFilter.Player,
                              "Player:Create: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid Gender ({2}) - refusing to do so",
-                             GetSession().GetAccountId(),
+                             Session.GetAccountId(),
                              GetName(),
                              createInfo.Sex);
 
@@ -262,7 +262,7 @@ namespace Game.Entities
             SetWatchedFactionIndex(0xFFFFFFFF);
 
             SetCustomizations(createInfo.Customizations);
-            SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.Normal));
+            SetRestState(RestTypes.XP, ((Session.IsARecruiter() || Session.GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.Normal));
             SetRestState(RestTypes.Honor, PlayerRestState.Normal);
             SetNativeGender(createInfo.Sex);
             SetInventorySlotCount(InventorySlots.DefaultSize);
@@ -431,15 +431,15 @@ namespace Game.Entities
                 UpdateSoulboundTradeItems();
 
             // If mute expired, remove it from the DB
-            if (GetSession()._muteTime != 0 &&
-                GetSession()._muteTime < now)
+            if (Session.MuteTime != 0 &&
+                Session.MuteTime < now)
             {
-                GetSession()._muteTime = 0;
+                Session.MuteTime = 0;
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
                 stmt.AddValue(0, 0); // Set the mute Time to 0
                 stmt.AddValue(1, "");
                 stmt.AddValue(2, "");
-                stmt.AddValue(3, GetSession().GetAccountId());
+                stmt.AddValue(3, Session.GetAccountId());
                 DB.Login.Execute(stmt);
             }
 
@@ -804,7 +804,7 @@ namespace Game.Entities
                 StopCastingBindSight();
                 UnsummonPetTemporaryIfAny();
                 ClearComboPoints();
-                GetSession().DoLootReleaseAll();
+                Session.DoLootReleaseAll();
                 _lootRolls.Clear();
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, _zoneUpdateId);
                 Global.BattleFieldMgr.HandlePlayerLeaveZone(this, _zoneUpdateId);
@@ -880,7 +880,7 @@ namespace Game.Entities
 
         public override bool IsLoading()
         {
-            return GetSession().PlayerLoading();
+            return Session.PlayerLoading();
         }
 
         //Network
@@ -1675,7 +1675,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!GetSession().HasPermission(RBACPermissions.SkipCheckDisableMap) &&
+            if (!Session.HasPermission(RBACPermissions.SkipCheckDisableMap) &&
                 Global.DisableMgr.IsDisabledFor(DisableType.Map, mapid, this))
             {
                 Log.outError(LogFilter.Maps, "Player (GUID: {0}, Name: {1}) tried to enter a forbidden map {2}", GetGUID().ToString(), GetName(), mapid);
@@ -1696,7 +1696,7 @@ namespace Game.Entities
                 return false;
 
             // client without expansion support
-            if (GetSession().GetExpansion() < mEntry.Expansion())
+            if (Session.GetExpansion() < mEntry.Expansion())
             {
                 Log.outDebug(LogFilter.Maps, "Player {0} using client without required expansion tried teleport to non accessible map {1}", GetName(), mapid);
 
@@ -1784,7 +1784,7 @@ namespace Game.Entities
                 SetSemaphoreTeleportNear(true);
 
                 // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
-                if (!GetSession().PlayerLogout())
+                if (!Session.PlayerLogout())
                     SendTeleportPacket(_teleportDest);
             }
             else
@@ -1885,7 +1885,7 @@ namespace Game.Entities
                 //remove Auras before removing from map...
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Turning);
 
-                if (!GetSession().PlayerLogout() &&
+                if (!Session.PlayerLogout() &&
                     !options.HasAnyFlag(TeleportToOptions.Seamless))
                 {
                     // send transfer packets
@@ -1916,7 +1916,7 @@ namespace Game.Entities
                 // if the player is saved before worldportack (at logout for example)
                 // this will be used instead of the current location in SaveToDB
 
-                if (!GetSession().PlayerLogout())
+                if (!Session.PlayerLogout())
                 {
                     SuspendToken suspendToken = new();
                     suspendToken.SequenceIndex = MovementCounter; // not incrementing
@@ -1970,7 +1970,7 @@ namespace Game.Entities
 
             if (characterTemplateId.HasValue)
             {
-                if (GetSession().HasPermission(RBACPermissions.UseCharacterTemplates))
+                if (Session.HasPermission(RBACPermissions.UseCharacterTemplates))
                 {
                     CharacterTemplate charTemplate = Global.CharacterTemplateDataStorage.GetCharacterTemplate(characterTemplateId.Value);
 
@@ -1979,11 +1979,11 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outWarn(LogFilter.Cheat, $"Account: {GetSession().GetAccountId()} (IP: {GetSession().GetRemoteAddress()}) tried to use a character template without given permission. Possible cheating attempt.");
+                    Log.outWarn(LogFilter.Cheat, $"Account: {Session.GetAccountId()} (IP: {Session.GetRemoteAddress()}) tried to use a character template without given permission. Possible cheating attempt.");
                 }
             }
 
-            if (GetSession().HasPermission(RBACPermissions.UseStartGmLevel))
+            if (Session.HasPermission(RBACPermissions.UseStartGmLevel))
                 startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartGmLevel), startLevel);
 
             return startLevel;
@@ -2058,7 +2058,7 @@ namespace Game.Entities
 			*/
 
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Flying | MovementFlag.CanFly) &&
-                                 GetSession().GetSecurity() == AccountTypes.Player &&
+                                 Session.GetSecurity() == AccountTypes.Player &&
                                  !UnitMovedByMe.HasAuraType(AuraType.Fly) &&
                                  !UnitMovedByMe.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed),
                                  MovementFlag.Flying | MovementFlag.CanFly);
@@ -2305,7 +2305,7 @@ namespace Game.Entities
 
         public bool CanBeGameMaster()
         {
-            return GetSession().HasPermission(RBACPermissions.CommandGm);
+            return Session.HasPermission(RBACPermissions.CommandGm);
         }
 
         public void SetGameMaster(bool on)
@@ -2327,7 +2327,7 @@ namespace Game.Entities
                 CombatStopWithPets();
 
                 PhasingHandler.SetAlwaysVisible(this, true, false);
-                ServerSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, GetSession().GetSecurity());
+                ServerSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, Session.GetSecurity());
             }
             else
             {
@@ -2400,7 +2400,7 @@ namespace Game.Entities
                 SetAcceptWhispers(false);
                 SetGameMaster(true);
 
-                ServerSideVisibility.SetValue(ServerSideVisibilityType.GM, GetSession().GetSecurity());
+                ServerSideVisibility.SetValue(ServerSideVisibilityType.GM, Session.GetSecurity());
             }
 
             foreach (Channel channel in _channels)
@@ -2441,7 +2441,7 @@ namespace Game.Entities
                     switch (gossipMenuItem.OptionNpc)
                     {
                         case GossipOptionNpc.Taxinode:
-                            if (GetSession().SendLearnNewTaxiNode(creature))
+                            if (Session.SendLearnNewTaxiNode(creature))
                                 return;
 
                             break;
@@ -2623,15 +2623,15 @@ namespace Game.Entities
             switch (gossipOptionNpc)
             {
                 case GossipOptionNpc.Vendor:
-                    GetSession().SendListInventory(guid);
+                    Session.SendListInventory(guid);
 
                     break;
                 case GossipOptionNpc.Taxinode:
-                    GetSession().SendTaxiMenu(source.ToCreature());
+                    Session.SendTaxiMenu(source.ToCreature());
 
                     break;
                 case GossipOptionNpc.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, item.OrderIndex));
+                    Session.SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, item.OrderIndex));
 
                     break;
                 case GossipOptionNpc.SpiritHealer:
@@ -2641,7 +2641,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.PetitionVendor:
                     PlayerTalkClass.SendCloseGossip();
-                    GetSession().SendPetitionShowList(guid);
+                    Session.SendPetitionShowList(guid);
 
                     break;
                 case GossipOptionNpc.Battlemaster:
@@ -2660,7 +2660,7 @@ namespace Game.Entities
                         break;
                     }
                 case GossipOptionNpc.Auctioneer:
-                    GetSession().SendAuctionHello(guid, source.ToCreature());
+                    Session.SendAuctionHello(guid, source.ToCreature());
 
                     break;
                 case GossipOptionNpc.TalentMaster:
@@ -2669,7 +2669,7 @@ namespace Game.Entities
 
                     break;
                 case GossipOptionNpc.Stablemaster:
-                    GetSession().SendStablePet(guid);
+                    Session.SendStablePet(guid);
 
                     break;
                 case GossipOptionNpc.PetSpecializationMaster:
@@ -2681,9 +2681,9 @@ namespace Game.Entities
                     Guild guild = GetGuild();
 
                     if (guild != null)
-                        guild.SendBankList(GetSession(), 0, true);
+                        guild.SendBankList(Session, 0, true);
                     else
-                        Guild.SendCommandResult(GetSession(), GuildCommandType.ViewTab, GuildCommandError.PlayerNotInGuild);
+                        Guild.SendCommandResult(Session, GuildCommandType.ViewTab, GuildCommandError.PlayerNotInGuild);
 
                     break;
                 case GossipOptionNpc.Spellclick:
@@ -2939,6 +2939,116 @@ namespace Game.Entities
                     _nextMailDelivereTime > deliver_time)
                     _nextMailDelivereTime = deliver_time;
             }
+        }
+
+        public void GearUpByLoadout(uint loadout_purpose, in List<uint> bonusListIDs)
+        {
+            // Get equipped item and store it in bag. If bag is full store it in toBeMailedCurrentEquipment to send it in mail later.
+            List<Item> toBeMailedCurrentEquipment = new List<Item>();
+            for (var es = EquipmentSlot.Start; es < EquipmentSlot.End; es++)
+            {
+                Item currentEquiped = GetItemByPos(InventorySlots.Bag0, es);
+                if (GetItemByPos(InventorySlots.Bag0, es))
+                {
+                    List<ItemPosCount> off_dest = new List<ItemPosCount>();
+                    if (CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, off_dest, currentEquiped, false) == InventoryResult.Ok)
+                    {
+                        RemoveItem(InventorySlots.Bag0, es, true);
+                        StoreItem(off_dest, currentEquiped, true);
+                    }
+                    else
+                    {
+                        toBeMailedCurrentEquipment.Add(currentEquiped);
+                    }
+                }
+            }
+
+            // If there are item in the toBeMailedCurrentEquipment vector remove it from inventory and send it in mail.
+            if (toBeMailedCurrentEquipment.Count > 0)
+            {
+                SQLTransaction trans = new SQLTransaction();
+                MailDraft draft = new MailDraft("Inventory Full: Old Equipment.", "To equip your new gear, your old gear had to be unequiped. You did not have enough free bag space, the items that could not be added to your bag you can find in this mail.");
+
+                foreach (Item currentEquiped in toBeMailedCurrentEquipment)
+                {
+                    MoveItemFromInventory(InventorySlots.Bag0, currentEquiped.GetBagSlot(), true);
+                    Item.DeleteFromInventoryDB(trans, currentEquiped.GetGUID().GetCounter()); // deletes item from character's inventory
+                    currentEquiped.SaveToDB(trans); // recursive and not have transaction guard into self, item not in inventory and can be save standalone
+                    draft.AddItem(currentEquiped);
+                }
+
+                draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied | MailCheckMask.Returned);
+                DB.Characters.CommitTransaction(trans);
+            }
+
+            List<uint> toBeMailedNewItems = new List<uint>();
+
+            // Add the new items from loadout. TODO
+            //foreach (uint item in sDB2Manager.GetLowestIdItemLoadOutItemsBy(GetClass(), loadout_purpose))
+            //{
+            //    if (!StoreNewItemInBestSlotsWithBonus(item, 1, bonusListIDs))
+            //    {
+            //        toBeMailedNewItems.Add(item);
+            //    }
+            //}
+
+            // If we added more item than free bag slot send the new item as well in mail.
+            if (toBeMailedNewItems.Count > 0)
+            {
+                SQLTransaction trans = new SQLTransaction();
+                MailDraft draft = new MailDraft("Inventory Full: New Gear.", "You did not have enough free bag space to add all your complementary new gear to your bags, those that did not fit you can find in this mail.");
+
+                foreach (uint item in toBeMailedNewItems)
+                {
+                    Item pItem = Item.CreateItem(item, 1, ItemContext.None, this);
+                    if (pItem != null)
+                    {
+                        foreach (var bonus in bonusListIDs)
+                            pItem.AddBonuses(bonus);
+                        
+                        pItem.SaveToDB(trans);
+                        draft.AddItem(pItem);
+                    }
+                }
+
+                draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied | MailCheckMask.Returned);
+                DB.Characters.CommitTransaction(trans);
+            }
+
+            SaveToDB();
+        }
+        public void SendABunchOfItemsInMail(List<uint> BunchOfItems, string subject, List<uint> bonusListIDs = default)
+        {
+            SQLTransaction trans = new SQLTransaction();
+            string _subject = subject;
+            MailDraft draft = new MailDraft(_subject, "This is a system message. Do not answer! Don't forget to take out the items! :)");
+
+            foreach (uint item in BunchOfItems)
+            {
+                Log.outInfo(LogFilter.PlayerItems, "[BunchOfItems]: {}.", item);
+                Item pItem = Item.CreateItem(item, 1, ItemContext.None, this);
+                if (pItem != null)
+                {
+                    if (bonusListIDs != null)
+                        foreach (var bonus in bonusListIDs)
+                            pItem.AddBonuses(bonus);
+
+                    pItem.SaveToDB(trans);
+                    draft.AddItem(pItem);
+                }
+            }
+
+            draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied | MailCheckMask.Returned);
+            DB.Characters.CommitTransaction(trans);
+        }
+
+
+        public void AddItemWithToast(uint itemID, ushort quantity, uint bonusid)
+        {
+	        Item pItem = Item.CreateItem(itemID, quantity, ItemContext.None, this);
+	        pItem.AddBonuses(bonusid);
+	        SendDisplayToast(itemID, DisplayToastType.NewItem, false, quantity, DisplayToastMethod.PersonalLoot, 0U, pItem);
+	        StoreNewItemInBestSlots(itemID, quantity, ItemContext.None);
         }
 
         public void AddMItem(Item it)
@@ -3422,8 +3532,8 @@ namespace Game.Entities
             if (base.IsNeverVisibleFor(seer))
                 return true;
 
-            if (GetSession().PlayerLogout() ||
-                GetSession().PlayerLoading())
+            if (Session.PlayerLogout() ||
+                Session.PlayerLoading())
                 return true;
 
             return false;
@@ -3474,7 +3584,7 @@ namespace Game.Entities
 
             SetWaterWalking(true);
 
-            if (!GetSession().IsLogingOut() &&
+            if (!Session.IsLogingOut() &&
                 !HasUnitState(UnitState.Stunned))
                 SetRooted(false);
 
@@ -3529,8 +3639,8 @@ namespace Game.Entities
             RemoveAurasDueToSpell(20584); // speed bonuses
             RemoveAurasDueToSpell(8326);  // SPELL_AURA_GHOST
 
-            if (GetSession().IsARecruiter() ||
-                (GetSession().GetRecruiterId() != 0))
+            if (Session.IsARecruiter() ||
+                (Session.GetRecruiterId() != 0))
                 SetDynamicFlag(UnitDynFlags.ReferAFriend);
 
             SetDeathState(DeathState.Alive);
@@ -3651,7 +3761,7 @@ namespace Game.Entities
             _corpseLocation = new WorldLocation();
 
             if (GetMap().ConvertCorpseToBones(GetGUID()))
-                if (triggerSave && !GetSession().PlayerLogoutWithSave()) // at logout we will already store the player
+                if (triggerSave && !Session.PlayerLogoutWithSave()) // at logout we will already store the player
                     SaveToDB();                                          // prevent loading as ghost without corpse
         }
 
@@ -4024,7 +4134,7 @@ namespace Game.Entities
             if (playerChoice == null)
                 return;
 
-            Locale locale = GetSession().GetSessionDbLocaleIndex();
+            Locale locale = Session.GetSessionDbLocaleIndex();
             PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
 
             PlayerTalkClass.GetInteractionData().Reset();
@@ -4353,7 +4463,7 @@ namespace Game.Entities
 
         public void SetMoney(ulong value)
         {
-            bool loading = GetSession().PlayerLoading();
+            bool loading = Session.PlayerLoading();
 
             if (!loading)
                 MoneyChanged((uint)value);
@@ -4766,12 +4876,12 @@ namespace Game.Entities
             if (!_teleport_options.HasAnyFlag(TeleportToOptions.Seamless))
             {
                 MovementCounter = 0;
-                GetSession().ResetTimeSync();
+                Session.ResetTimeSync();
             }
 
-            GetSession().SendTimeSync();
+            Session.SendTimeSync();
 
-            GetSocial().SendSocialList(this, SocialFlag.All);
+            Social.SendSocialList(this, SocialFlag.All);
 
             // SMSG_BINDPOINTUPDATE
             SendBindPointUpdate();
@@ -4855,22 +4965,22 @@ namespace Game.Entities
             // SMSG_ACCOUNT_MOUNT_UPDATE
             AccountMountUpdate mountUpdate = new();
             mountUpdate.IsFullUpdate = true;
-            mountUpdate.Mounts = GetSession().GetCollectionMgr().GetAccountMounts();
+            mountUpdate.Mounts = Session.GetCollectionMgr().GetAccountMounts();
             SendPacket(mountUpdate);
 
             // SMSG_ACCOUNT_TOYS_UPDATE
             AccountToyUpdate toyUpdate = new();
             toyUpdate.IsFullUpdate = true;
-            toyUpdate.Toys = GetSession().GetCollectionMgr().GetAccountToys();
+            toyUpdate.Toys = Session.GetCollectionMgr().GetAccountToys();
             SendPacket(toyUpdate);
 
             // SMSG_ACCOUNT_HEIRLOOM_UPDATE
             AccountHeirloomUpdate heirloomUpdate = new();
             heirloomUpdate.IsFullUpdate = true;
-            heirloomUpdate.Heirlooms = GetSession().GetCollectionMgr().GetAccountHeirlooms();
+            heirloomUpdate.Heirlooms = Session.GetCollectionMgr().GetAccountHeirlooms();
             SendPacket(heirloomUpdate);
 
-            GetSession().GetCollectionMgr().SendFavoriteAppearances();
+            Session.GetCollectionMgr().SendFavoriteAppearances();
 
             InitialSetup initialSetup = new();
             initialSetup.ServerExpansionLevel = (byte)WorldConfig.GetIntValue(WorldCfg.Expansion);
@@ -4888,7 +4998,7 @@ namespace Game.Entities
             GetZoneAndAreaId(out newzone, out newarea);
             UpdateZone(newzone, newarea); // also call SendInitWorldStates();
 
-            GetSession().SendLoadCUFProfiles();
+            Session.SendLoadCUFProfiles();
 
             CastSpell(this, 836, true); // LOGINEFFECT
 
@@ -5018,7 +5128,7 @@ namespace Game.Entities
 
             PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
-            int exp_max_lvl = (int)Global.ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
+            int exp_max_lvl = (int)Global.ObjectMgr.GetMaxLevelForExpansion(Session.GetExpansion());
             int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
 
             if (exp_max_lvl == SharedConst.DefaultMaxLevel ||
@@ -5611,18 +5721,18 @@ namespace Game.Entities
         {
             if (nodes.Count < 2)
             {
-                GetSession().SendActivateTaxiReply(ActivateTaxiReply.NoSuchPath);
+                Session.SendActivateTaxiReply(ActivateTaxiReply.NoSuchPath);
 
                 return false;
             }
 
             // not let cheating with start flight in Time of logout process || while in combat || has Type State: stunned || has Type State: root
-            if (GetSession().IsLogingOut() ||
+            if (Session.IsLogingOut() ||
                 IsInCombat() ||
                 HasUnitState(UnitState.Stunned) ||
                 HasUnitState(UnitState.Root))
             {
-                GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerBusy);
+                Session.SendActivateTaxiReply(ActivateTaxiReply.PlayerBusy);
 
                 return false;
             }
@@ -5641,7 +5751,7 @@ namespace Game.Entities
 
                 if (IsDisallowedMountForm(GetTransformSpell(), ShapeShiftForm.None, GetDisplayId()))
                 {
-                    GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerShapeshifted);
+                    Session.SendActivateTaxiReply(ActivateTaxiReply.PlayerShapeshifted);
 
                     return false;
                 }
@@ -5649,7 +5759,7 @@ namespace Game.Entities
                 // not let cheating with start flight in Time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi
                 if (IsNonMeleeSpellCast(false))
                 {
-                    GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerBusy);
+                    Session.SendActivateTaxiReply(ActivateTaxiReply.PlayerBusy);
 
                     return false;
                 }
@@ -5684,7 +5794,7 @@ namespace Game.Entities
 
             if (node == null)
             {
-                GetSession().SendActivateTaxiReply(ActivateTaxiReply.NoSuchPath);
+                Session.SendActivateTaxiReply(ActivateTaxiReply.NoSuchPath);
 
                 return false;
             }
@@ -5760,7 +5870,7 @@ namespace Game.Entities
             if ((mount_display_id == 0 && spellid == 0) ||
                 sourcepath == 0)
             {
-                GetSession().SendActivateTaxiReply(ActivateTaxiReply.UnspecifiedServerError);
+                Session.SendActivateTaxiReply(ActivateTaxiReply.UnspecifiedServerError);
                 Taxi.ClearTaxiDestinations();
 
                 return false;
@@ -5782,7 +5892,7 @@ namespace Game.Entities
 
             if (money < totalcost)
             {
-                GetSession().SendActivateTaxiReply(ActivateTaxiReply.NotEnoughMoney);
+                Session.SendActivateTaxiReply(ActivateTaxiReply.NotEnoughMoney);
                 Taxi.ClearTaxiDestinations();
 
                 return false;
@@ -5805,8 +5915,8 @@ namespace Game.Entities
             {
                 ModifyMoney(-firstcost);
                 UpdateCriteria(CriteriaType.MoneySpentOnTaxis, firstcost);
-                GetSession().SendActivateTaxiReply();
-                GetSession().SendDoFlight(mount_display_id, sourcepath);
+                Session.SendActivateTaxiReply();
+                Session.SendDoFlight(mount_display_id, sourcepath);
             }
 
             return true;
@@ -5893,7 +6003,7 @@ namespace Game.Entities
                 }
             }
 
-            GetSession().SendDoFlight(mountDisplayId, path, startNode);
+            Session.SendDoFlight(mountDisplayId, path, startNode);
         }
 
         public bool GetsRecruitAFriendBonus(bool forXP)
@@ -5928,8 +6038,8 @@ namespace Game.Entities
                                     continue;
                         }
 
-                        bool ARecruitedB = (player.GetSession().GetRecruiterId() == GetSession().GetAccountId());
-                        bool BRecruitedA = (GetSession().GetRecruiterId() == player.GetSession().GetAccountId());
+                        bool ARecruitedB = (player.Session.GetRecruiterId() == Session.GetAccountId());
+                        bool BRecruitedA = (Session.GetRecruiterId() == player.Session.GetAccountId());
 
                         if (ARecruitedB || BRecruitedA)
                         {
@@ -6000,7 +6110,7 @@ namespace Game.Entities
             randomRoll.Max = (int)maximum;
             randomRoll.Result = (int)roll;
             randomRoll.Roller = GetGUID();
-            randomRoll.RollerWowAccount = GetSession().GetAccountGUID();
+            randomRoll.RollerWowAccount = Session.GetAccountGUID();
 
             Group group = GetGroup();
 
@@ -6026,8 +6136,8 @@ namespace Game.Entities
                 return true;
 
             // GMs are visible for higher gms (or players are visible for gms)
-            if (!Global.AccountMgr.IsPlayerAccount(u.GetSession().GetSecurity()))
-                return GetSession().GetSecurity() <= u.GetSession().GetSecurity();
+            if (!Global.AccountMgr.IsPlayerAccount(u.Session.GetSecurity()))
+                return Session.GetSecurity() <= u.Session.GetSecurity();
 
             // non faction visibility non-breakable for non-GMs
             return false;
@@ -6921,7 +7031,7 @@ namespace Game.Entities
                     break;
                 case ActionButtonType.Companion:
                     {
-                        if (GetSession().GetBattlePetMgr().GetPet(ObjectGuid.Create(HighGuid.BattlePet, action)) == null)
+                        if (Session.GetBattlePetMgr().GetPet(ObjectGuid.Create(HighGuid.BattlePet, action)) == null)
                         {
                             Log.outError(LogFilter.Player, $"Player::IsActionButtonDataValid: Companion Action {action} not added into Button {button} for player {GetName()} ({GetGUID()}): companion does not exist");
 
@@ -7060,7 +7170,7 @@ namespace Game.Entities
 
         private void UpdateLocalChannels(uint newZone)
         {
-            if (GetSession().PlayerLoading() &&
+            if (Session.PlayerLoading() &&
                 !IsBeingTeleportedFar())
                 return; // The client handles it automatically after loading, but not after teleporting
 
@@ -7700,7 +7810,7 @@ namespace Game.Entities
                     {
                         if (!IsAlive() ||
                             HasAuraType(AuraType.WaterBreathing) ||
-                            GetSession().GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
+                            Session.GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
                             return -1;
 
                         int UnderWaterTime = 3 * Time.Minute * Time.InMilliseconds;
@@ -8348,7 +8458,7 @@ namespace Game.Entities
 
             if (GetTrader() &&
                 !IsWithinDistInMap(GetTrader(), SharedConst.InteractionDistance))
-                GetSession().SendCancelTrade();
+                Session.SendCancelTrade();
 
             CheckAreaExploreAndOutdoor();
 
@@ -8553,6 +8663,11 @@ namespace Game.Entities
 
         public void SendSysMessage(CypherStrings str, params object[] args)
         {
+            SendSysMessage((uint)str, args);
+        }
+
+        public void SendSysMessage(uint str, params object[] args)
+        {
             string input = Global.ObjectMgr.GetCypherString(str);
             string pattern = @"%(\d+(\.\d+)?)?(d|f|s|u)";
 
@@ -8562,9 +8677,10 @@ namespace Game.Entities
             SendSysMessage(result, args);
         }
 
+
         public void SendSysMessage(string str, params object[] args)
         {
-            new CommandHandler(_session).SendSysMessage(string.Format(str, args));
+            _session.CommandHandler.SendSysMessage(string.Format(str, args));
         }
 
         public void SendBuyError(BuyResult msg, Creature creature, uint item)
@@ -8634,7 +8750,7 @@ namespace Game.Entities
 
             ChatPkt data = new();
             data.Initialize(ChatMsg.Emote, Language.Universal, this, this, text);
-            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, !GetSession().HasPermission(RBACPermissions.TwoSideInteractionChat), true);
+            SendMessageToSetInRange(data, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true, !Session.HasPermission(RBACPermissions.TwoSideInteractionChat), true);
         }
 
         public override void TextEmote(uint textId, WorldObject target = null, bool isBossEmote = false)
@@ -8646,7 +8762,7 @@ namespace Game.Entities
         {
             Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
 
-            if (!receiver.GetSession().IsAddonRegistered(prefix))
+            if (!receiver.Session.IsAddonRegistered(prefix))
                 return;
 
             ChatPkt data = new();
@@ -8705,7 +8821,7 @@ namespace Game.Entities
                 return;
             }
 
-            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = target.Session.GetSessionDbLocaleIndex();
             ChatPkt packet = new();
             packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
             target.SendPacket(packet);

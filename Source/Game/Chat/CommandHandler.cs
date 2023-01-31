@@ -459,7 +459,7 @@ namespace Game.Chat
             uint target_account = 0;
 
             if (target != null)
-                target_session = target.GetSession();
+                target_session = target.Session;
             else if (!guid.IsEmpty())
                 target_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
 

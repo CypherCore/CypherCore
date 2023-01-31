@@ -1897,7 +1897,7 @@ namespace Game.Spells
 
                     if (speciesEntry != null)
                     {
-                        player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+                        player.Session.GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
                         // If the spell summons a battle pet, we fake that it has been learned and the battle pet is added
                         // marking as dependent prevents saving the spell to database (intended)
                         dependent = true;
@@ -2251,15 +2251,15 @@ namespace Game.Spells
                     return;
 
                 if (item_owner != player &&
-                    player.GetSession().HasPermission(RBACPermissions.LogGmTrade))
-                    Log.outCommand(player.GetSession().GetAccountId(),
+                    player.Session.HasPermission(RBACPermissions.LogGmTrade))
+                    Log.outCommand(player.Session.GetAccountId(),
                                    "GM {0} (Account: {1}) enchanting(perm): {2} (Entry: {3}) for player: {4} (Account: {5})",
                                    player.GetName(),
-                                   player.GetSession().GetAccountId(),
+                                   player.Session.GetAccountId(),
                                    ItemTarget.GetTemplate().GetName(),
                                    ItemTarget.GetEntry(),
                                    item_owner.GetName(),
-                                   item_owner.GetSession().GetAccountId());
+                                   item_owner.Session.GetAccountId());
 
                 // remove old enchanting before applying new if equipped
                 item_owner.ApplyEnchantment(ItemTarget, EnchantmentSlot.Perm, false);
@@ -2329,15 +2329,15 @@ namespace Game.Spells
                 return;
 
             if (item_owner != player &&
-                player.GetSession().HasPermission(RBACPermissions.LogGmTrade))
-                Log.outCommand(player.GetSession().GetAccountId(),
+                player.Session.HasPermission(RBACPermissions.LogGmTrade))
+                Log.outCommand(player.Session.GetAccountId(),
                                "GM {0} (Account: {1}) enchanting(perm): {2} (Entry: {3}) for player: {4} (Account: {5})",
                                player.GetName(),
-                               player.GetSession().GetAccountId(),
+                               player.Session.GetAccountId(),
                                ItemTarget.GetTemplate().GetName(),
                                ItemTarget.GetEntry(),
                                item_owner.GetName(),
-                               item_owner.GetSession().GetAccountId());
+                               item_owner.Session.GetAccountId());
 
             // remove old enchanting before applying new if equipped
             item_owner.ApplyEnchantment(ItemTarget, EnchantmentSlot.Prismatic, false);
@@ -2393,15 +2393,15 @@ namespace Game.Spells
                 return;
 
             if (item_owner != player &&
-                player.GetSession().HasPermission(RBACPermissions.LogGmTrade))
-                Log.outCommand(player.GetSession().GetAccountId(),
+                player.Session.HasPermission(RBACPermissions.LogGmTrade))
+                Log.outCommand(player.Session.GetAccountId(),
                                "GM {0} (Account: {1}) enchanting(temp): {2} (Entry: {3}) for player: {4} (Account: {5})",
                                player.GetName(),
-                               player.GetSession().GetAccountId(),
+                               player.Session.GetAccountId(),
                                ItemTarget.GetTemplate().GetName(),
                                ItemTarget.GetEntry(),
                                item_owner.GetName(),
-                               item_owner.GetSession().GetAccountId());
+                               item_owner.Session.GetAccountId());
 
             // remove old enchanting before applying new if equipped
             item_owner.ApplyEnchantment(ItemTarget, EnchantmentSlot.Temp, false);
@@ -3193,8 +3193,8 @@ namespace Game.Spells
             // caster or Target already have requested Duel
             if (caster.Duel != null ||
                 target.Duel != null ||
-                target.GetSocial() == null ||
-                target.GetSocial().HasIgnore(caster.GetGUID(), caster.GetSession().GetAccountGUID()))
+                target.Social == null ||
+                target.Social.HasIgnore(caster.GetGUID(), caster.Session.GetAccountGUID()))
                 return;
 
             // Players can only fight a Duel in zones with this flag
@@ -3254,7 +3254,7 @@ namespace Game.Spells
             DuelRequested packet = new();
             packet.ArbiterGUID = go.GetGUID();
             packet.RequestedByGUID = caster.GetGUID();
-            packet.RequestedByWowAccount = caster.GetSession().GetAccountGUID();
+            packet.RequestedByWowAccount = caster.Session.GetAccountGUID();
 
             caster.SendPacket(packet);
             target.SendPacket(packet);
@@ -5001,7 +5001,7 @@ namespace Game.Spells
             uint nodeid = (uint)EffectInfo.MiscValue;
 
             if (CliDB.TaxiNodesStorage.ContainsKey(nodeid))
-                UnitTarget.ToPlayer().GetSession().SendDiscoverNewTaxiNode(nodeid);
+                UnitTarget.ToPlayer().Session.SendDiscoverNewTaxiNode(nodeid);
         }
 
         [SpellEffectHandler(SpellEffectName.TitanGrip)]
@@ -5227,7 +5227,7 @@ namespace Game.Spells
             switch (SpellInfo.Id)
             {
                 case 91604: // Restricted Flight Area
-                    player.GetSession().SendNotification(CypherStrings.ZoneNoflyzone);
+                    player.Session.SendNotification(CypherStrings.ZoneNoflyzone);
 
                     break;
                 default:
@@ -5440,7 +5440,7 @@ namespace Game.Spells
             Player caster = _caster.ToPlayer();
             Guild guild = caster.GetGuild();
 
-            guild?.HandleBuyBankTab(caster.GetSession(), (byte)(Damage - 1)); // Bank tabs start at zero internally
+            guild?.HandleBuyBankTab(caster.Session, (byte)(Damage - 1)); // Bank tabs start at zero internally
         }
 
         [SpellEffectHandler(SpellEffectName.SummonPersonalGameobject)]
@@ -5684,7 +5684,7 @@ namespace Game.Spells
             if (!player)
                 return;
 
-            CollectionMgr collectionMgr = player.GetSession().GetCollectionMgr();
+            CollectionMgr collectionMgr = player.Session.GetCollectionMgr();
 
             if (collectionMgr == null)
                 return;
@@ -5726,7 +5726,7 @@ namespace Game.Spells
                 !UnitTarget.IsCreature())
                 return;
 
-            playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetLevel(UnitTarget.GetBattlePetCompanionGUID(), (ushort)Damage);
+            playerCaster.Session.GetBattlePetMgr().GrantBattlePetLevel(UnitTarget.GetBattlePetCompanionGUID(), (ushort)Damage);
         }
 
         [SpellEffectHandler(SpellEffectName.GiveExperience)]
@@ -5769,7 +5769,7 @@ namespace Game.Spells
                 !UnitTarget.IsTypeId(TypeId.Player))
                 return;
 
-            BattlePetMgr battlePetMgr = UnitTarget.ToPlayer().GetSession().GetBattlePetMgr();
+            BattlePetMgr battlePetMgr = UnitTarget.ToPlayer().Session.GetBattlePetMgr();
 
             battlePetMgr?.HealBattlePetsPct((byte)Damage);
         }
@@ -5786,7 +5786,7 @@ namespace Game.Spells
 
             Player player = UnitTarget.ToPlayer();
             player.SetPlayerFlag(PlayerFlags.PetBattlesUnlocked);
-            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot0);
+            player.Session.GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot0);
         }
 
         [SpellEffectHandler(SpellEffectName.ChangeBattlepetQuality)]
@@ -5811,7 +5811,7 @@ namespace Game.Spells
             if (qualityRecord != null)
                 quality = (BattlePetBreedQuality)qualityRecord.QualityEnum;
 
-            playerCaster.GetSession().GetBattlePetMgr().ChangeBattlePetQuality(UnitTarget.GetBattlePetCompanionGUID(), quality);
+            playerCaster.Session.GetBattlePetMgr().ChangeBattlePetQuality(UnitTarget.GetBattlePetCompanionGUID(), quality);
         }
 
         [SpellEffectHandler(SpellEffectName.LaunchQuestChoice)]
@@ -5850,7 +5850,7 @@ namespace Game.Spells
                 return;
 
             Player player = _caster.ToPlayer();
-            BattlePetMgr battlePetMgr = player.GetSession().GetBattlePetMgr();
+            BattlePetMgr battlePetMgr = player.Session.GetBattlePetMgr();
 
             if (battlePetMgr == null)
                 return;
@@ -5889,7 +5889,7 @@ namespace Game.Spells
 
             if (player)
             {
-                CollectionMgr collectionMgr = player.GetSession().GetCollectionMgr();
+                CollectionMgr collectionMgr = player.Session.GetCollectionMgr();
 
                 collectionMgr?.UpgradeHeirloom(Misc.Data0, CastItemEntry);
             }
@@ -6154,7 +6154,7 @@ namespace Game.Spells
                 !UnitTarget.IsPlayer())
                 return;
 
-            UnitTarget.ToPlayer().GetSession().GetCollectionMgr().AddTransmogSet((uint)EffectInfo.MiscValue);
+            UnitTarget.ToPlayer().Session.GetCollectionMgr().AddTransmogSet((uint)EffectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnAzeriteEssencePower)]
@@ -6249,7 +6249,7 @@ namespace Game.Spells
                 !UnitTarget.IsCreature())
                 return;
 
-            playerCaster.GetSession().GetBattlePetMgr().GrantBattlePetExperience(UnitTarget.GetBattlePetCompanionGUID(), (ushort)Damage, BattlePetXpSource.SpellEffect);
+            playerCaster.Session.GetBattlePetMgr().GrantBattlePetExperience(UnitTarget.GetBattlePetCompanionGUID(), (ushort)Damage, BattlePetXpSource.SpellEffect);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnTransmogIllusion)]
@@ -6268,7 +6268,7 @@ namespace Game.Spells
             if (!CliDB.TransmogIllusionStorage.ContainsKey(illusionId))
                 return;
 
-            player.GetSession().GetCollectionMgr().AddTransmogIllusion(illusionId);
+            player.Session.GetCollectionMgr().AddTransmogIllusion(illusionId);
         }
 
         [SpellEffectHandler(SpellEffectName.ModifyAuraStacks)]

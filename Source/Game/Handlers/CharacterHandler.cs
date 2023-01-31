@@ -216,7 +216,7 @@ namespace Game
             if (pCurrChar.HasSpell(SharedConst.CallPetSpellId))
                 SendStablePet(ObjectGuid.Empty);
 
-            pCurrChar.GetSession().GetBattlePetMgr().SendJournalLockStatus();
+            pCurrChar.Session.GetBattlePetMgr().SendJournalLockStatus();
 
             pCurrChar.SendInitialPacketsBeforeAddToMap();
 

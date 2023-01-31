@@ -123,6 +123,11 @@ namespace Game.Networking
             return new Position(ReadFloat(), ReadFloat(), ReadFloat());
         }
 
+        public void Write(ObjectGuid guid)
+        {
+            WritePackedGuid(guid);
+        }
+
         public void WritePackedGuid(ObjectGuid guid)
         {
             if (guid.IsEmpty())

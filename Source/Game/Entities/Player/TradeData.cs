@@ -121,7 +121,7 @@ namespace Game.Entities
                 TradeStatusPkt info = new();
                 info.Status = TradeStatus.Failed;
                 info.BagResult = InventoryResult.NotEnoughMoney;
-                _player.GetSession().SendTradeStatus(info);
+                _player.Session.SendTradeStatus(info);
 
                 return;
             }
@@ -146,9 +146,9 @@ namespace Game.Entities
                 info.Status = TradeStatus.Unaccepted;
 
                 if (crosssend)
-                    _trader.GetSession().SendTradeStatus(info);
+                    _trader.Session.SendTradeStatus(info);
                 else
-                    _player.GetSession().SendTradeStatus(info);
+                    _player.Session.SendTradeStatus(info);
             }
         }
 
@@ -205,9 +205,9 @@ namespace Game.Entities
         private void Update(bool forTarget = true)
         {
             if (forTarget)
-                _trader.GetSession().SendUpdateTrade(true); // player State for trader
+                _trader.Session.SendUpdateTrade(true); // player State for trader
             else
-                _player.GetSession().SendUpdateTrade(false); // player State for player
+                _player.Session.SendUpdateTrade(false); // player State for player
         }
     }
 }

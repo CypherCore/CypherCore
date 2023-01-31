@@ -17,7 +17,7 @@ namespace Game
         {
             info.Clear(); // reuse packet
             Player trader = GetPlayer().GetTrader();
-            info.PartnerIsSameBnetAccount = trader && trader.GetSession().GetBattlenetAccountId() == GetBattlenetAccountId();
+            info.PartnerIsSameBnetAccount = trader && trader.Session.GetBattlenetAccountId() == GetBattlenetAccountId();
             SendPacket(info);
         }
 
@@ -126,15 +126,15 @@ namespace Game
                         Log.outDebug(LogFilter.Network, "partner storing: {0}", myItems[i].GetGUID().ToString());
 
                         if (HasPermission(RBACPermissions.LogGmTrade))
-                            Log.outCommand(_player.GetSession().GetAccountId(),
+                            Log.outCommand(_player.Session.GetAccountId(),
                                            "GM {0} (Account: {1}) trade: {2} (Entry: {3} Count: {4}) to player: {5} (Account: {6})",
                                            GetPlayer().GetName(),
-                                           GetPlayer().GetSession().GetAccountId(),
+                                           GetPlayer().Session.GetAccountId(),
                                            myItems[i].GetTemplate().GetName(),
                                            myItems[i].GetEntry(),
                                            myItems[i].GetCount(),
                                            trader.GetName(),
-                                           trader.GetSession().GetAccountId());
+                                           trader.Session.GetAccountId());
 
                         // adjust Time (depends on /played)
                         if (myItems[i].IsBOPTradeable())
@@ -150,15 +150,15 @@ namespace Game
                         Log.outDebug(LogFilter.Network, "player storing: {0}", hisItems[i].GetGUID().ToString());
 
                         if (HasPermission(RBACPermissions.LogGmTrade))
-                            Log.outCommand(trader.GetSession().GetAccountId(),
+                            Log.outCommand(trader.Session.GetAccountId(),
                                            "GM {0} (Account: {1}) trade: {2} (Entry: {3} Count: {4}) to player: {5} (Account: {6})",
                                            trader.GetName(),
-                                           trader.GetSession().GetAccountId(),
+                                           trader.Session.GetAccountId(),
                                            hisItems[i].GetTemplate().GetName(),
                                            hisItems[i].GetEntry(),
                                            hisItems[i].GetCount(),
                                            GetPlayer().GetName(),
-                                           GetPlayer().GetSession().GetAccountId());
+                                           GetPlayer().Session.GetAccountId());
 
 
                         // adjust Time (depends on /played)
@@ -304,7 +304,7 @@ namespace Game
             {
                 info.Status = TradeStatus.Failed;
                 info.BagResult = InventoryResult.NotEnoughMoney;
-                trader.GetSession().SendTradeStatus(info);
+                trader.Session.SendTradeStatus(info);
                 his_trade.SetAccepted(false, true);
 
                 return;
@@ -324,7 +324,7 @@ namespace Game
             {
                 info.Status = TradeStatus.Failed;
                 info.BagResult = InventoryResult.TooMuchGold;
-                trader.GetSession().SendTradeStatus(info);
+                trader.Session.SendTradeStatus(info);
                 his_trade.SetAccepted(false, true);
 
                 return;
@@ -463,7 +463,7 @@ namespace Game
 
                 // inform partner client
                 info.Status = TradeStatus.Accepted;
-                trader.GetSession().SendTradeStatus(info);
+                trader.Session.SendTradeStatus(info);
 
                 // test if Item will fit in each inventory
                 TradeStatusPkt myCanCompleteInfo = new();
@@ -479,7 +479,7 @@ namespace Game
                     ClearAcceptTradeMode(my_trade, his_trade);
 
                     myCanCompleteInfo.Status = TradeStatus.Failed;
-                    trader.GetSession().SendTradeStatus(myCanCompleteInfo);
+                    trader.Session.SendTradeStatus(myCanCompleteInfo);
                     myCanCompleteInfo.FailureForYou = true;
                     SendTradeStatus(myCanCompleteInfo);
                     my_trade.SetAccepted(false);
@@ -494,7 +494,7 @@ namespace Game
                     hisCanCompleteInfo.Status = TradeStatus.Failed;
                     SendTradeStatus(hisCanCompleteInfo);
                     hisCanCompleteInfo.FailureForYou = true;
-                    trader.GetSession().SendTradeStatus(hisCanCompleteInfo);
+                    trader.Session.SendTradeStatus(hisCanCompleteInfo);
                     my_trade.SetAccepted(false);
                     his_trade.SetAccepted(false);
 
@@ -524,22 +524,22 @@ namespace Game
                 if (HasPermission(RBACPermissions.LogGmTrade))
                 {
                     if (my_trade.GetMoney() > 0)
-                        Log.outCommand(GetPlayer().GetSession().GetAccountId(),
+                        Log.outCommand(GetPlayer().Session.GetAccountId(),
                                        "GM {0} (Account: {1}) give money (Amount: {2}) to player: {3} (Account: {4})",
                                        GetPlayer().GetName(),
-                                       GetPlayer().GetSession().GetAccountId(),
+                                       GetPlayer().Session.GetAccountId(),
                                        my_trade.GetMoney(),
                                        trader.GetName(),
-                                       trader.GetSession().GetAccountId());
+                                       trader.Session.GetAccountId());
 
                     if (his_trade.GetMoney() > 0)
-                        Log.outCommand(GetPlayer().GetSession().GetAccountId(),
+                        Log.outCommand(GetPlayer().Session.GetAccountId(),
                                        "GM {0} (Account: {1}) give money (Amount: {2}) to player: {3} (Account: {4})",
                                        trader.GetName(),
-                                       trader.GetSession().GetAccountId(),
+                                       trader.Session.GetAccountId(),
                                        his_trade.GetMoney(),
                                        GetPlayer().GetName(),
-                                       GetPlayer().GetSession().GetAccountId());
+                                       GetPlayer().Session.GetAccountId());
                 }
 
 
@@ -567,13 +567,13 @@ namespace Game
                 DB.Characters.CommitTransaction(trans);
 
                 info.Status = TradeStatus.Complete;
-                trader.GetSession().SendTradeStatus(info);
+                trader.Session.SendTradeStatus(info);
                 SendTradeStatus(info);
             }
             else
             {
                 info.Status = TradeStatus.Accepted;
-                trader.GetSession().SendTradeStatus(info);
+                trader.Session.SendTradeStatus(info);
             }
         }
 
@@ -597,7 +597,7 @@ namespace Game
                 return;
 
             TradeStatusPkt info = new();
-            my_trade.GetTrader().GetSession().SendTradeStatus(info);
+            my_trade.GetTrader().Session.SendTradeStatus(info);
             SendTradeStatus(info);
         }
 
@@ -702,7 +702,7 @@ namespace Game
                 return;
             }
 
-            if (pOther.GetSession().IsLogingOut())
+            if (pOther.Session.IsLogingOut())
             {
                 info.Status = TradeStatus.TargetLoggingOut;
                 SendTradeStatus(info);
@@ -710,7 +710,7 @@ namespace Game
                 return;
             }
 
-            if (pOther.GetSocial().HasIgnore(GetPlayer().GetGUID(), GetPlayer().GetSession().GetAccountGUID()))
+            if (pOther.Social.HasIgnore(GetPlayer().GetGUID(), GetPlayer().Session.GetAccountGUID()))
             {
                 info.Status = TradeStatus.PlayerIgnored;
                 SendTradeStatus(info);
@@ -753,7 +753,7 @@ namespace Game
 
             info.Status = TradeStatus.Proposed;
             info.Partner = GetPlayer().GetGUID();
-            pOther.GetSession().SendTradeStatus(info);
+            pOther.Session.SendTradeStatus(info);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetTradeGold)]

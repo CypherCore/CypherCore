@@ -159,7 +159,7 @@ namespace Game.Entities
                     if (thisPlayer != null)
                         if (properties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
-                            var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
+                            var pet = thisPlayer.Session.GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
 
                             if (pet != null)
                             {

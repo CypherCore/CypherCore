@@ -32,7 +32,7 @@ namespace Game.Guilds
             if (Global.GuildMgr.GetGuildByName(name) != null)
                 return false;
 
-            WorldSession pLeaderSession = pLeader.GetSession();
+            WorldSession pLeaderSession = pLeader.Session;
 
             if (pLeaderSession == null)
                 return false;
@@ -575,7 +575,7 @@ namespace Game.Guilds
             Player player = session.GetPlayer();
 
             // Do not show invitations from ignored players
-            if (pInvitee.GetSocial().HasIgnore(player.GetGUID(), player.GetSession().GetAccountGUID()))
+            if (pInvitee.Social.HasIgnore(player.GetGUID(), player.Session.GetAccountGUID()))
                 return;
 
             if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) &&
@@ -977,11 +977,11 @@ namespace Game.Guilds
 
             SendEventBankMoneyChanged();
 
-            if (player.GetSession().HasPermission(RBACPermissions.LogGmTrade))
-                Log.outCommand(player.GetSession().GetAccountId(),
+            if (player.Session.HasPermission(RBACPermissions.LogGmTrade))
+                Log.outCommand(player.Session.GetAccountId(),
                                "GM {0} (Account: {1}) deposit money (Amount: {2}) to guild bank (Guild ID {3})",
                                player.GetName(),
-                               player.GetSession().GetAccountId(),
+                               player.Session.GetAccountId(),
                                amount,
                                _id);
         }
@@ -1527,9 +1527,9 @@ namespace Game.Guilds
                     Player player = member.FindPlayer();
 
                     if (player != null)
-                        if (player.GetSession() != null &&
+                        if (player.Session != null &&
                             _HasRankRight(player, officerOnly ? GuildRankRights.OffChatListen : GuildRankRights.GChatListen) &&
-                            !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()))
+                            !player.Social.HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()))
                             player.SendPacket(data);
                 }
             }
@@ -1549,10 +1549,10 @@ namespace Game.Guilds
                     Player player = member.FindPlayer();
 
                     if (player)
-                        if (player.GetSession() != null &&
+                        if (player.Session != null &&
                             _HasRankRight(player, officerOnly ? GuildRankRights.OffChatListen : GuildRankRights.GChatListen) &&
-                            !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()) &&
-                            player.GetSession().IsAddonRegistered(prefix))
+                            !player.Social.HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()) &&
+                            player.Session.IsAddonRegistered(prefix))
                             player.SendPacket(data);
                 }
             }
@@ -1673,7 +1673,7 @@ namespace Game.Guilds
                 player.SetGuildRank((byte)rankId);
                 player.SetGuildLevel(GetLevel());
                 member.SetStats(player);
-                SendLoginInfo(player.GetSession());
+                SendLoginInfo(player.Session);
                 name = player.GetName();
             }
             else
@@ -2875,7 +2875,7 @@ namespace Game.Guilds
                 _class = player.GetClass();
                 _gender = player.GetNativeGender();
                 _zoneId = player.GetZoneId();
-                _accountId = player.GetSession().GetAccountId();
+                _accountId = player.Session.GetAccountId();
                 _achievementPoints = player.GetAchievementPoints();
             }
 
@@ -4461,12 +4461,12 @@ namespace Game.Guilds
                 base.LogAction(pFrom);
 
                 if (!pFrom.IsBank() &&
-                    _pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
-                    Log.outCommand(_pPlayer.GetSession().GetAccountId(),
+                    _pPlayer.Session.HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
+                    Log.outCommand(_pPlayer.Session.GetAccountId(),
                                    "GM {0} ({1}) (Account: {2}) deposit Item: {3} (Entry: {4} Count: {5}) to guild bank named: {6} (Guild ID: {7})",
                                    _pPlayer.GetName(),
                                    _pPlayer.GetGUID().ToString(),
-                                   _pPlayer.GetSession().GetAccountId(),
+                                   _pPlayer.Session.GetAccountId(),
                                    pFrom.GetItem().GetTemplate().GetName(),
                                    pFrom.GetItem().GetEntry(),
                                    pFrom.GetItem().GetCount(),

@@ -59,7 +59,7 @@ namespace Game.Entities
 
             if (affectedByRaF &&
                 _player.GetsRecruitAFriendBonus(true) &&
-                (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
+                (_player.Session.IsARecruiter() || _player.Session.GetRecruiterId() != 0))
                 newRestState = PlayerRestState.RAFLinked;
             else if (_restBonus[(int)restType] >= 1)
                 newRestState = PlayerRestState.Rested;

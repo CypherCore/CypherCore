@@ -116,7 +116,7 @@ namespace Game.Maps
                         pendingRaidLock.CompletedMask = _instanceLock.GetData().CompletedEncountersMask;
                         pendingRaidLock.Extending = playerLock != null && playerLock.IsExtended();
                         pendingRaidLock.WarningOnly = entries.Map.IsFlexLocking(); // events it triggers:  1 : INSTANCE_LOCK_WARNING   0 : INSTANCE_LOCK_STOP / INSTANCE_LOCK_START
-                        player.GetSession().SendPacket(pendingRaidLock);
+                        player.Session.SendPacket(pendingRaidLock);
 
                         if (!entries.Map.IsFlexLocking())
                             player.SetPendingBind(GetInstanceId(), 60000);
@@ -358,7 +358,7 @@ namespace Game.Maps
                         data.Gm = player.IsGameMaster();
                         player.SendPacket(data);
 
-                        player.GetSession().SendCalendarRaidLockoutAdded(newLock);
+                        player.Session.SendCalendarRaidLockoutAdded(newLock);
                     }
                 }
 
@@ -408,7 +408,7 @@ namespace Game.Maps
                         data.Gm = player.IsGameMaster();
                         player.SendPacket(data);
 
-                        player.GetSession().SendCalendarRaidLockoutAdded(newLock);
+                        player.Session.SendCalendarRaidLockoutAdded(newLock);
                     }
                 }
 
@@ -435,7 +435,7 @@ namespace Game.Maps
                 data.Gm = player.IsGameMaster();
                 player.SendPacket(data);
 
-                player.GetSession().SendCalendarRaidLockoutAdded(newLock);
+                player.Session.SendCalendarRaidLockoutAdded(newLock);
             }
         }
 
