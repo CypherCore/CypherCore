@@ -24,6 +24,7 @@ namespace Scripts.Spells.Hunter
         public const uint Exhilaration = 109304;
         public const uint ExhilarationPet = 128594;
         public const uint ExhilarationR2 = 231546;
+        public const uint ExplosiveShotDamage = 212680;
         public const uint Lonewolf = 155228;
         public const uint MastersCallTriggered = 62305;
         public const uint Misdirection = 34477;
@@ -114,6 +115,27 @@ namespace Scripts.Spells.Hunter
             if (GetCaster().HasAura(SpellIds.ExhilarationR2) &&
                 !GetCaster().HasAura(SpellIds.Lonewolf))
                 GetCaster().CastSpell((Unit)null, SpellIds.ExhilarationPet, true);
+        }
+    }
+
+    [Script] // 212431 - Explosive Shot
+    class spell_hun_explosive_shot : AuraScript, IHasAuraEffects
+    {
+        public List<IAuraEffectHandler> Effects { get; } = new();
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ExplosiveShotDamage);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            GetCaster()?.CastSpell(GetTarget(), SpellIds.ExplosiveShotDamage, true);
+        }
+
+        public override void Register()
+        {
+            Effects.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 

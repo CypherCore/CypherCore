@@ -9622,7 +9622,7 @@ namespace Game
                 return; // any mails need to be returned or deleted
             }
 
-            MultiMap<uint, MailItemInfo> itemsCache = new();
+            MultiMap<ulong, MailItemInfo> itemsCache = new();
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL_ITEMS);
             stmt.AddValue(0, curTime);
             SQLResult items = DB.Characters.Query(stmt);
@@ -9635,7 +9635,7 @@ namespace Game
                 {
                     item.ItemGuid = result.Read<uint>(0);
                     item.Item_Template = result.Read<uint>(1);
-                    uint mailId = result.Read<uint>(2);
+                    ulong mailId = result.Read<ulong>(2);
                     itemsCache.Add(mailId, item);
                 } while (items.NextRow());
             }
@@ -9651,7 +9651,7 @@ namespace Game
                     continue;
 
                 Mail m = new();
-                m.MessageID = result.Read<uint>(0);
+                m.MessageID = result.Read<ulong>(0);
                 m.MessageType = (MailMessageType)result.Read<byte>(1);
                 m.Sender = result.Read<uint>(2);
                 m.Receiver = receiver;
@@ -10443,7 +10443,7 @@ namespace Game
             result = DB.Characters.Query("SELECT MAX(Id) FROM mail");
 
             if (!result.IsEmpty())
-                _mailId = result.Read<uint>(0) + 1;
+                _mailId = result.Read<ulong>(0) + 1;
 
             result = DB.Characters.Query("SELECT MAX(arenateamid) FROM arena_team");
 
@@ -10497,10 +10497,9 @@ namespace Game
 
             return _equipmentSetGuid++;
         }
-
-        public uint GenerateMailID()
+        public ulong GenerateMailID()
         {
-            if (_mailId >= 0xFFFFFFFE)
+            if (_mailId >= 0xFFFFFFFFFFFFFFFE)
             {
                 Log.outError(LogFilter.Server, "Mail ids overflow!! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
@@ -12683,7 +12682,7 @@ namespace Game
         // first free Id for selected Id Type
         private uint _auctionId;
         private ulong _equipmentSetGuid;
-        private uint _mailId;
+        private ulong _mailId;
         private uint _hiPetNumber;
         private ulong _creatureSpawnId;
         private ulong _gameObjectSpawnId;

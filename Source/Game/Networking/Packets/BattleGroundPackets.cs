@@ -565,7 +565,7 @@ namespace Game.Networking.Packets
         public byte ArenaFaction;
         public uint BattlemasterListID;
         public int Duration;
-
+        public RatedMatchDeserterPenalty DeserterPenalty;
         public uint MapID;
         public bool Registered;
         public long StartTime;
@@ -585,7 +585,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(BattlemasterListID);
             _worldPacket.WriteBit(Registered);
             _worldPacket.WriteBit(AffectsRating);
+            _worldPacket.WriteBit(DeserterPenalty != null);
             _worldPacket.FlushBits();
+
+            if (DeserterPenalty != null)
+                DeserterPenalty.Write(_worldPacket);
         }
     }
 
@@ -693,6 +697,20 @@ namespace Game.Networking.Packets
             data.WriteInt32(Rank);
             data.WriteBit(Disqualified);
             data.FlushBits();
+        }
+    }
+
+    class RatedMatchDeserterPenalty
+    {
+        public int PersonalRatingChange;
+        public int QueuePenaltySpellID;
+        public int QueuePenaltyDuration;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(PersonalRatingChange);
+            data.WriteInt32(QueuePenaltySpellID);
+            data.WriteInt32(QueuePenaltyDuration);
         }
     }
 

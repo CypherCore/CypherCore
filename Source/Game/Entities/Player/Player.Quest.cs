@@ -1307,14 +1307,73 @@ namespace Game.Entities
                 UpdatePvPState();
             }
 
-            SendQuestUpdate(questId);
             SendQuestGiverStatusMultiple();
+
+            bool conditionChanged = SendQuestUpdate(questId, false);
 
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(p => p.OnQuestStatusChange(this, questId));
-            Global.ScriptMgr.RunScript<IQuestOnQuestStatusChange>(script => script.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded), quest.ScriptId);
+            bool canHaveNextQuest = !quest.HasFlag(QuestFlags.AutoComplete) ? !questGiver.IsPlayer() : true;
+            if (canHaveNextQuest)
+            {
+                switch (questGiver.GetTypeId())
+                {
+                    case TypeId.Unit:
+                    case TypeId.Player:
+                    {
+                        //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
+                        // Send next quest
+                        Quest nextQuest = GetNextQuest(questGiver.GetGUID(), quest);
+                        if (nextQuest != null)
+                        {
+                            // Only send the quest to the player if the conditions are met
+                            if (CanTakeQuest(nextQuest, false))
+                            {
+                                if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                                    AddQuestAndCheckCompletion(nextQuest, questGiver);
+
+                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiver.GetGUID(), true, false);
+                            }
+                        }
+
+                        PlayerTalkClass.ClearMenus();
+                        Creature creatureQGiver = questGiver.ToCreature();
+                        if (creatureQGiver != null)
+                            creatureQGiver.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                        break;
+                    }
+                    case TypeId.GameObject:
+                    {
+                        GameObject questGiverGob = questGiver.ToGameObject();
+                        // Send next quest
+                        Quest nextQuest = GetNextQuest(questGiverGob.GetGUID(), quest);
+                        if (nextQuest != null)
+                        {
+                            // Only send the quest to the player if the conditions are met
+                            if (CanTakeQuest(nextQuest, false))
+                            {
+                                if (nextQuest.IsAutoAccept() && CanAddQuest(nextQuest, true))
+                                    AddQuestAndCheckCompletion(nextQuest, questGiver);
+
+                                PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, questGiverGob.GetGUID(), true, false);
+                            }
+                        }
+
+                        PlayerTalkClass.ClearMenus();
+                        questGiverGob.GetAI().OnQuestReward(this, quest, rewardType, rewardId);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            Global.ScriptMgr.ForEach<IPlayerOnQuestStatusChange>(q => q.OnQuestStatusChange(this, questId));
+            Global.ScriptMgr.ForEach<IQuestOnQuestStatusChange>(q => q.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded));
+
+            if (conditionChanged)
+                UpdateObjectVisibility();
         }
 
         public void SetRewardedQuest(uint quest_id)
@@ -1975,6 +2034,57 @@ namespace Game.Entities
 
             if (update)
                 SendQuestUpdate(questId);
+        }
+
+        bool SendQuestUpdate(uint questId, bool updateVisiblity = true)
+        {
+            var saBounds = Global.SpellMgr.GetSpellAreaForQuestMapBounds(questId);
+            if (!saBounds.Empty())
+            {
+                List<uint> aurasToRemove = new();
+                List<uint> aurasToCast = new();
+                GetZoneAndAreaId(out uint zone, out uint area);
+
+                foreach (var spell in saBounds)
+                {
+                    if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spell.IsFitToRequirements(this, zone, area))
+                        aurasToRemove.Add(spell.SpellId);
+                    else if (spell.Flags.HasAnyFlag(SpellAreaFlag.AutoCast) && !spell.Flags.HasAnyFlag(SpellAreaFlag.IgnoreAutocastOnQuestStatusChange))
+                        aurasToCast.Add(spell.SpellId);
+                }
+
+                // Auras matching the requirements will be inside the aurasToCast container.
+                // Auras not matching the requirements may prevent using auras matching the requirements.
+                // aurasToCast will erase conflicting auras in aurasToRemove container to handle spells used by multiple quests.
+
+                for (var c = 0; c < aurasToRemove.Count;)
+                {
+                    bool auraRemoved = false;
+
+                    foreach (var i in aurasToCast)
+                    {
+                        if (aurasToRemove[c] == i)
+                        {
+                            aurasToRemove.Remove(aurasToRemove[c]);
+                            auraRemoved = true;
+                            break;
+                        }
+                    }
+
+                    if (!auraRemoved)
+                        ++c;
+                }
+
+                foreach (var spellId in aurasToCast)
+                    if (!HasAura(spellId))
+                        CastSpell(this, spellId, true);
+
+                foreach (var spellId in aurasToRemove)
+                    RemoveAurasDueToSpell(spellId);
+            }
+
+            UpdateVisibleGameobjectsOrSpellClicks();
+            return PhasingHandler.OnConditionChange(this, updateVisiblity);
         }
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)
@@ -2963,9 +3073,15 @@ namespace Game.Entities
 
         public void SendQuestGiverStatusMultiple()
         {
+            SendQuestGiverStatusMultiple(ClientGUIDs);
+        }
+        
+        public void SendQuestGiverStatusMultiple(List<ObjectGuid> guids)
+        {
             QuestGiverStatusMultiple response = new();
 
-            foreach (var itr in ClientGUIDs)
+            foreach (var itr in guids)
+            {
                 if (itr.IsAnyTypeCreature())
                 {
                     // need also pet quests case support
@@ -2991,7 +3107,8 @@ namespace Game.Entities
                     response.QuestGiver.Add(new QuestGiverInfo(questgiver.GetGUID(), GetQuestDialogStatus(questgiver)));
                 }
 
-            SendPacket(response);
+                SendPacket(response);
+            }
         }
 
         public bool HasPvPForcingQuest()

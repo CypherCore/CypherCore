@@ -130,9 +130,6 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8(ComplaintStatus);
 
-            _worldPacket.WriteUInt32(ScrollOfResurrectionRequestsRemaining);
-            _worldPacket.WriteUInt32(ScrollOfResurrectionMaxRequestsPerDay);
-
             _worldPacket.WriteUInt32(CfgRealmID);
             _worldPacket.WriteInt32(CfgRealmRecID);
 
@@ -164,7 +161,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
-            _worldPacket.WriteBit(ScrollOfResurrectionEnabled);
             _worldPacket.WriteBit(BpayStoreEnabled);
             _worldPacket.WriteBit(BpayStoreAvailable);
             _worldPacket.WriteBit(BpayStoreDisabledByParentalControls);
@@ -267,6 +263,7 @@ namespace Game.Networking.Packets
         public List<GameRuleValuePair> GameRuleValues = new();
         public bool IsExpansionPreorderInStore; // NYI
         public bool KioskModeEnabled;           // NYI
+        public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
         public uint KioskSessionMinutes;
         public int? LaunchETA;
         public bool LiveRegionAccountCopyEnabled;   // NYI
