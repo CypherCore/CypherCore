@@ -26,7 +26,7 @@ namespace Framework.Dynamic
             // main event loop
             KeyValuePair<ulong, BasicEvent> i;
 
-            while ((i = _events.FirstOrDefault()).Value != null && i.Key <= _time)
+            while ((i = _events.GetFirst()).Value != null && i.Key <= _time)
             {
                 var Event = i.Value;
                 _events.Remove(i);

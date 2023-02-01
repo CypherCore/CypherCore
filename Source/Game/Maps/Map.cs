@@ -5429,7 +5429,7 @@ namespace Game.Maps
                 }
 
                 _scriptSchedule.Remove(iter);
-                iter = _scriptSchedule.FirstOrDefault();
+                iter = _scriptSchedule.GetFirst();
                 Global.MapMgr.DecreaseScheduledScriptCount();
             }
         }
