@@ -195,7 +195,7 @@ namespace System.Collections.Generic
             }
         }
 
-        public IEnumerable<TKey> Keys => _interalStorage.Keys.Where(k => KeysRemoved.Contains(k));
+        public IEnumerable<TKey> Keys => _interalStorage.Keys.Where(k => !KeysRemoved.Contains(k));
 
         public IEnumerable<TValue> Values
         {
@@ -246,6 +246,21 @@ namespace System.Collections.Generic
                 ValuesRemoved.Clear();
                 _completing = false;
             }
+        }
+
+        public KeyValuePair<TKey, TValue> GetFirst()
+        {
+            var firstKey = _interalStorage.FirstOrDefault();
+
+            if (firstKey.Value != null)
+            {
+                var firstVal = firstKey.Value.FirstOrDefault();
+
+                if (firstVal != null)
+                    return new KeyValuePair<TKey, TValue>(firstKey.Key, firstVal);
+            }
+
+            return default;
         }
 
         public void Clear()

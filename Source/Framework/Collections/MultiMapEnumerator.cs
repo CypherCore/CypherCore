@@ -23,6 +23,7 @@ namespace System.Collections.Generic
 
         public void Dispose()
         {
+            _map.ItteratingComplete();
             _keyEnumerator = null;
             _valueEnumerator = null;
             _map = null;
@@ -36,7 +37,6 @@ namespace System.Collections.Generic
                     while (true)
                         if (!_keyEnumerator.MoveNext())
                         {
-                            _map.ItteratingComplete();
                             return false;
                         }
                         else if (!_map.KeysRemoved.Contains(_keyEnumerator.Current))

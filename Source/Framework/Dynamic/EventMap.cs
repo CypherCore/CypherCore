@@ -167,7 +167,7 @@ namespace Framework.Dynamic
         {
             while (!Empty())
             {
-                var pair = _eventMap.FirstOrDefault();
+                var pair = _eventMap.GetFirst();
 
                 if (pair.Key > _time)
                 {
