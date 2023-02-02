@@ -3,6 +3,7 @@
 
 namespace Game.Arenas
 {
-    internal class TigersPeak
-    {}
+    class TigersPeak
+    {
+    }
 }

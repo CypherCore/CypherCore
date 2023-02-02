@@ -1,27 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Globalization;
-using System.Threading;
-using System.Timers;
 using BNetServer.Networking;
 using Framework.Configuration;
+using Framework.Cryptography;
 using Framework.Database;
 using Framework.Networking;
-using Timer = System.Timers.Timer;
+using System;
+using System.Globalization;
+using System.Timers;
 
 namespace BNetServer
 {
-    internal class Server
+    class Server
     {
-        private static Timer _banExpiryCheckTimer;
-
-        private static void Main()
+        static void Main()
         {
             //Set Culture
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             if (!ConfigMgr.Load("BNetServer.conf"))
                 ExitNow();
@@ -34,9 +31,7 @@ namespace BNetServer
 
             var restSocketServer = new SocketManager<RestSession>();
             int restPort = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
-
-            if (restPort < 0 ||
-                restPort > 0xFFFF)
+            if (restPort < 0 || restPort > 0xFFFF)
             {
                 Log.outError(LogFilter.Network, $"Specified login service port ({restPort}) out of allowed range (1-65535), defaulting to 8081");
                 restPort = 8081;
@@ -55,9 +50,7 @@ namespace BNetServer
             var sessionSocketServer = new SocketManager<Session>();
             // Start the listening port (acceptor) for auth connections
             int bnPort = ConfigMgr.GetDefaultValue("BattlenetPort", 1119);
-
-            if (bnPort < 0 ||
-                bnPort > 0xFFFF)
+            if (bnPort < 0 || bnPort > 0xFFFF)
             {
                 Log.outError(LogFilter.Server, $"Specified battle.net port ({bnPort}) out of allowed range (1-65535)");
                 ExitNow();
@@ -75,7 +68,7 @@ namespace BNetServer
             _banExpiryCheckTimer.Start();
         }
 
-        private static bool StartDB()
+        static bool StartDB()
         {
             DatabaseLoader loader = new(DatabaseTypeFlags.None);
             loader.AddDatabase(DB.Login, "Login");
@@ -84,22 +77,23 @@ namespace BNetServer
                 return false;
 
             Log.SetRealmId(0); // Enables DB appenders when realm is set.
-
             return true;
         }
 
-        private static void ExitNow()
+        static void ExitNow()
         {
             Console.WriteLine("Halting process...");
-            Thread.Sleep(10000);
+            System.Threading.Thread.Sleep(10000);
             Environment.Exit(-1);
         }
 
-        private static void BanExpiryCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
+        static void BanExpiryCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.UpdExpiredAccountBans));
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelBnetExpiredAccountBanned));
         }
+
+        static Timer _banExpiryCheckTimer;
     }
 }

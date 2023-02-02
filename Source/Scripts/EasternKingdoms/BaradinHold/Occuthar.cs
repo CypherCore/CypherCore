@@ -12,7 +12,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 {
@@ -58,29 +58,29 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         public override void JustEngagedWith(Unit who)
         {
             base.JustEngagedWith(who);
-            Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
-            Events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(8));
-            Events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
-            Events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(30));
-            Events.ScheduleEvent(EventIds.Berserk, TimeSpan.FromMinutes(5));
+            instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+            _events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(8));
+            _events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
+            _events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(30));
+            _events.ScheduleEvent(EventIds.Berserk, TimeSpan.FromMinutes(5));
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
             base.EnterEvadeMode(why);
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
             _DespawnAtEvade();
         }
 
         public override void JustDied(Unit killer)
         {
             _JustDied();
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
         }
 
         public override void JustSummoned(Creature summon)
         {
-            Summons.Summon(summon);
+            summons.Summon(summon);
 
             if (summon.GetEntry() == CreatureIds.FocusFireDummy)
             {
@@ -101,29 +101,29 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
             if (!UpdateVictim())
                 return;
 
-            Events.Update(diff);
+            _events.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            Events.ExecuteEvents(eventId =>
+            _events.ExecuteEvents(eventId =>
                                   {
                                       switch (eventId)
                                       {
                                           case EventIds.SearingShadows:
                                               DoCastAOE(SpellIds.SearingShadows);
-                                              Events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(25));
+                                              _events.ScheduleEvent(EventIds.SearingShadows, TimeSpan.FromSeconds(25));
 
                                               break;
                                           case EventIds.FocusedFire:
                                               DoCastAOE(SpellIds.FocusedFireTrigger, new CastSpellExtraArgs(true));
-                                              Events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
+                                              _events.ScheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
 
                                               break;
                                           case EventIds.EyesOfOccuthar:
                                               DoCastAOE(SpellIds.EyesOfOccuthar);
-                                              Events.RescheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
-                                              Events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(60));
+                                              _events.RescheduleEvent(EventIds.FocusedFire, TimeSpan.FromSeconds(15));
+                                              _events.ScheduleEvent(EventIds.EyesOfOccuthar, TimeSpan.FromSeconds(60));
 
                                               break;
                                           case EventIds.Berserk:
@@ -160,20 +160,20 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
 
         public override void Reset()
         {
-            Events.Reset();
-            Events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(0));
+            _events.Reset();
+            _events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(0));
         }
 
         public override void UpdateAI(uint diff)
         {
-            Events.Update(diff);
+            _events.Update(diff);
 
-            if (Events.ExecuteEvent() == EventIds.FocusedFireFirstDamage)
+            if (_events.ExecuteEvent() == EventIds.FocusedFireFirstDamage)
             {
                 DoCastAOE(SpellIds.FocusedFireFirstDamage);
 
                 if (++_damageCount < 2)
-                    Events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(1));
+                    _events.ScheduleEvent(EventIds.FocusedFireFirstDamage, TimeSpan.FromSeconds(1));
             }
         }
 

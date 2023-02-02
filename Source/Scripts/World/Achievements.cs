@@ -75,7 +75,7 @@ namespace Scripts.World.Achievements
                              player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
                              player.GetAreaId() == AreaIds.AreaRingOfChampions;
 
-            return checkArea && player.Duel != null && player.Duel.IsMounted;
+            return checkArea && player.duel != null && player.duel.IsMounted;
         }
     }
 
@@ -122,7 +122,7 @@ namespace Scripts.World.Achievements
 
         public void OnCompleted(Player player, AchievementRecord achievement)
         {
-            player.Session.GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
+            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot1);
             // TODO: Unlock trap
         }
     }
@@ -136,7 +136,7 @@ namespace Scripts.World.Achievements
 
         public void OnCompleted(Player player, AchievementRecord achievement)
         {
-            player.Session.GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot2);
+            player.GetSession().GetBattlePetMgr().UnlockSlot(BattlePetSlots.Slot2);
         }
     }
 }

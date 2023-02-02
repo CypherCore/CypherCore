@@ -9,38 +9,32 @@ namespace Framework.Dynamic
 {
     public class EventSystem
     {
-        private readonly MultiMap<ulong, BasicEvent> _events = new();
-
-        private ulong _time;
-
         public EventSystem()
         {
-            _time = 0;
+            m_time = 0;
         }
 
         public void Update(uint p_time)
         {
             // update time
-            _time += p_time;
+            m_time += p_time;
 
             // main event loop
             KeyValuePair<ulong, BasicEvent> i;
-
-            while ((i = _events.GetFirst()).Value != null && i.Key <= _time)
+            while ((i = m_events.FirstOrDefault()).Value != null && i.Key <= m_time)
             {
                 var Event = i.Value;
-                _events.Remove(i);
+                m_events.Remove(i);
 
                 if (Event.IsRunning())
                 {
-                    Event.Execute(_time, p_time);
-
+                    Event.Execute(m_time, p_time);
                     continue;
                 }
 
                 if (Event.IsAbortScheduled())
                 {
-                    Event.Abort(_time);
+                    Event.Abort(m_time);
                     // Mark the event as aborted
                     Event.SetAborted();
                 }
@@ -56,144 +50,108 @@ namespace Framework.Dynamic
 
         public void KillAllEvents(bool force)
         {
-            foreach (var pair in _events.KeyValueList)
+            foreach (var pair in m_events.KeyValueList)
             {
                 // Abort events which weren't aborted already
                 if (!pair.Value.IsAborted())
                 {
                     pair.Value.SetAborted();
-                    pair.Value.Abort(_time);
+                    pair.Value.Abort(m_time);
                 }
 
                 // Skip non-deletable events when we are
                 // not forcing the event cancellation.
-                if (!force &&
-                    !pair.Value.IsDeletable())
+                if (!force && !pair.Value.IsDeletable())
                     continue;
 
                 if (!force)
-                    _events.Remove(pair);
+                    m_events.Remove(pair);
             }
 
             // fast clear event list (in force case)
             if (force)
-                _events.Clear();
+                m_events.Clear();
         }
 
         public void AddEvent(BasicEvent Event, TimeSpan e_time, bool set_addtime = true)
         {
             if (set_addtime)
-                Event._addTime = _time;
+                Event.m_addTime = m_time;
 
-            Event._execTime = (ulong)e_time.TotalMilliseconds;
-            _events.Add((ulong)e_time.TotalMilliseconds, Event);
+            Event.m_execTime = (ulong)e_time.TotalMilliseconds;
+            m_events.Add((ulong)e_time.TotalMilliseconds, Event);
         }
 
-        public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true)
-        {
-            AddEvent(new LambdaBasicEvent(action), e_time, set_addtime);
-        }
+        public void AddEvent(Action action, TimeSpan e_time, bool set_addtime = true) { AddEvent(new LambdaBasicEvent(action), e_time, set_addtime); }
+        
+        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime(offset)); }
 
-        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset)
-        {
-            AddEvent(Event, CalculateTime(offset));
-        }
+        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset, TimeSpan offset2) { AddEvent(Event, CalculateTime(RandomHelper.RandTime(offset, offset2))); }
 
-        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset, TimeSpan offset2)
-        {
-            AddEvent(Event, CalculateTime(RandomHelper.RandTime(offset, offset2)));
-        }
-
-        public void AddEventAtOffset(Action action, TimeSpan offset)
-        {
-            AddEventAtOffset(new LambdaBasicEvent(action), offset);
-        }
+        public void AddEventAtOffset(Action action, TimeSpan offset) { AddEventAtOffset(new LambdaBasicEvent(action), offset); }
 
         public void ModifyEventTime(BasicEvent Event, TimeSpan newTime)
         {
-            foreach (var pair in _events)
+            foreach (var pair in m_events)
             {
                 if (pair.Value != Event)
                     continue;
 
-                Event._execTime = (ulong)newTime.TotalMilliseconds;
-                _events.Remove(pair);
-                _events.Add((ulong)newTime.TotalMilliseconds, Event);
-
+                Event.m_execTime = (ulong)newTime.TotalMilliseconds;
+                m_events.Remove(pair);
+                m_events.Add((ulong)newTime.TotalMilliseconds, Event);
                 break;
             }
         }
 
         public TimeSpan CalculateTime(TimeSpan t_offset)
         {
-            return TimeSpan.FromMilliseconds(_time) + t_offset;
+            return TimeSpan.FromMilliseconds(m_time) + t_offset;
         }
 
-        public MultiMap<ulong, BasicEvent> GetEvents()
-        {
-            return _events;
-        }
+        public MultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
+
+        ulong m_time;
+        MultiMap<ulong, BasicEvent> m_events = new();
     }
 
     public class BasicEvent
     {
-        public ulong _addTime;          // time when the event was added to queue, filled by event handler
-        public ulong _execTime;         // planned time of next execution, filled by event handler
-        private AbortState _abortState; // set by externals when the event is aborted, aborted events don't execute
-
-        public BasicEvent()
-        {
-            _abortState = AbortState.Running;
-        }
+        public BasicEvent() { m_abortState = AbortState.Running; }
 
         public void ScheduleAbort()
         {
             Cypher.Assert(IsRunning(), "Tried to scheduled the abortion of an event twice!");
-            _abortState = AbortState.Scheduled;
+            m_abortState = AbortState.Scheduled;
         }
 
         public void SetAborted()
         {
             Cypher.Assert(!IsAborted(), "Tried to abort an already aborted event!");
-            _abortState = AbortState.Aborted;
+            m_abortState = AbortState.Aborted;
         }
 
         // this method executes when the event is triggered
         // return false if event does not want to be deleted
         // e_time is execution time, p_time is update interval
-        public virtual bool Execute(ulong e_time, uint p_time)
-        {
-            return true;
-        }
+        public virtual bool Execute(ulong e_time, uint p_time) { return true; }
 
-        public virtual bool IsDeletable()
-        {
-            return true;
-        } // this event can be safely deleted
+        public virtual bool IsDeletable() { return true; }   // this event can be safely deleted
 
-        public virtual void Abort(ulong e_time)
-        {
-        } // this method executes when the event is aborted
+        public virtual void Abort(ulong e_time) { } // this method executes when the event is aborted
 
-        public bool IsRunning()
-        {
-            return _abortState == AbortState.Running;
-        }
+        public bool IsRunning() { return m_abortState == AbortState.Running; }
+        public bool IsAbortScheduled() { return m_abortState == AbortState.Scheduled; }
+        public bool IsAborted() { return m_abortState == AbortState.Aborted; }
 
-        public bool IsAbortScheduled()
-        {
-            return _abortState == AbortState.Scheduled;
-        }
-
-        public bool IsAborted()
-        {
-            return _abortState == AbortState.Aborted;
-        }
+        AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
+        public ulong m_addTime; // time when the event was added to queue, filled by event handler
+        public ulong m_execTime; // planned time of next execution, filled by event handler
     }
 
-    internal class LambdaBasicEvent : BasicEvent
+    class LambdaBasicEvent : BasicEvent
     {
-        private readonly Action _callback;
+        Action _callback;
 
         public LambdaBasicEvent(Action callback) : base()
         {
@@ -203,12 +161,11 @@ namespace Framework.Dynamic
         public override bool Execute(ulong e_time, uint p_time)
         {
             _callback();
-
             return true;
         }
     }
-
-    internal enum AbortState
+    
+    enum AbortState
     {
         Running,
         Scheduled,

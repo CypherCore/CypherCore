@@ -21,6 +21,7 @@ using Game.Scripting.BaseScripts;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAreaTrigger;
 using Game.Scripting.Interfaces.IPlayer;
+using Game.Scripting.Registers;
 using Game.Spells;
 
 namespace Game.Scripting
@@ -163,127 +164,130 @@ namespace Game.Scripting
 
         public void LoadScripts()
         {
-            if (!File.Exists(AppContext.BaseDirectory + "Scripts.dll"))
+            List<Assembly> assemblies = new List<Assembly>();
+
+            if (File.Exists(AppContext.BaseDirectory + "Scripts.dll"))
             {
-                Log.outError(LogFilter.ServerLoading, "Cant find Scripts.dll, Only Core Scripts are loaded.");
+                Assembly scrAss = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
 
-                return;
+                if (scrAss != null)
+                    assemblies.Add(scrAss);
             }
+            
+            assemblies.Add(typeof(IScriptActivator).Assembly);
 
-            Assembly assembly = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
+            var scriptDir = Path.Combine(AppContext.BaseDirectory, "Scripts");
 
-            if (assembly == null)
-            {
-                Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");
+            if (!Directory.Exists(scriptDir))
+                Directory.CreateDirectory(scriptDir);
 
-                return;
-            }
+            foreach (var file in Directory.GetFiles(scriptDir, "*.dll"))
+                assemblies.Add(Assembly.LoadFile(file));
 
             Dictionary<string, IScriptActivator> activators = new();
+            Dictionary<Type, IScriptRegister> registers = new();
 
-            foreach (var type in typeof(IScriptActivator).Assembly.GetTypes()) // check game
-                RegisterActivators(activators, type);
-
-            foreach (var type in assembly.GetTypes()) // check scripts
-                RegisterActivators(activators, type);
-
-            foreach (var type in assembly.GetTypes())
-            {
-                var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>();
-
-                if (!attributes.Empty())
+            foreach (var asm in assemblies)
+                foreach (var type in asm.GetTypes()) 
                 {
-                    var constructors = type.GetConstructors();
-                    int numArgsMin = 99;
+                    RegisterActivators(activators, type);
+                    RegisterRegistors(registers, type);
+                }
 
-                    if (constructors.Length == 0)
+            foreach (var assembly in assemblies)
+                foreach (var type in assembly.GetTypes())
+                {
+                    var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>(true);
+
+                    if (!attributes.Empty())
                     {
-                        Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors. Can't load script.", type.Name);
+                        var constructors = type.GetConstructors();
+                        int numArgsMin = 99;
 
-                        continue;
-                    }
-
-                    foreach (var attribute in attributes)
-                    {
-                        string name = type.Name;
-                        Type paramType = null;
-                        bool validArgs = true;
-                        int i = 0;
-
-                        foreach (var constructor in constructors)
+                        if (constructors.Length == 0)
                         {
-                            var parameters = constructor.GetParameters();
+                            Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors. Can't load script.", type.Name);
 
-                            if (parameters.Length < numArgsMin)
+                            continue;
+                        }
+
+                        foreach (var attribute in attributes)
+                        {
+                            string name = type.Name;
+                            Type paramType = null;
+                            bool validArgs = true;
+                            int i = 0;
+
+                            foreach (var constructor in constructors)
                             {
-                                numArgsMin = parameters.Length;
+                                var parameters = constructor.GetParameters();
 
-                                if (numArgsMin == 1)
-                                    paramType = parameters.FirstOrDefault().ParameterType;
-                            }
-
-                            if (parameters.Length != attribute.Args.Length)
-                                continue;
-
-                            foreach (var arg in parameters)
-                                if (arg.ParameterType != attribute.Args[i++].GetType())
+                                if (parameters.Length < numArgsMin)
                                 {
-                                    validArgs = false;
+                                    numArgsMin = parameters.Length;
 
-                                    break;
+                                    if (numArgsMin == 1)
+                                        paramType = parameters.FirstOrDefault().ParameterType;
                                 }
 
-                            if (validArgs)
-                                break;
+                                if (parameters.Length != attribute.Args.Length)
+                                    continue;
+
+                                foreach (var arg in parameters)
+                                    if (arg.ParameterType != attribute.Args[i++].GetType())
+                                    {
+                                        validArgs = false;
+
+                                        break;
+                                    }
+
+                                if (validArgs)
+                                    break;
+                            }
+
+                            if (!validArgs)
+                            {
+                                Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors with the right parameter types. Can't load script.", type.Name);
+
+                                continue;
+                            }
+
+                            if (!attribute.Name.IsEmpty())
+                                name = attribute.Name;
+
+                            IScriptObject activatedObj = null;
+                            if (!string.IsNullOrEmpty(type?.BaseType?.Name) &&
+                                activators.TryGetValue(type.BaseType.Name, out var scriptActivator))
+                            {
+                                activatedObj = scriptActivator.Activate(type, name, attribute);
+                            }
+
+                            if (activatedObj == null)
+                                if (attribute.Args.Empty())
+                                {
+                                    if (numArgsMin == 0)
+                                        activatedObj = Activator.CreateInstance(type) as IScriptObject;
+                                    else if (numArgsMin == 1 &&
+                                             paramType != null &&
+                                             paramType == typeof(string))
+                                        activatedObj = Activator.CreateInstance(type, name) as IScriptObject;
+                                }
+                                else
+                                {
+                                    if (numArgsMin == 1 &&
+                                        paramType != null &&
+                                        paramType != typeof(string))
+                                        activatedObj = Activator.CreateInstance(type, attribute.Args) as IScriptObject;
+                                    else
+                                        activatedObj = Activator.CreateInstance(type, new object[] { name }.Combine(attribute.Args)) as IScriptObject;
+                                }
+
+              
+                            if (registers.TryGetValue(attribute.GetType(), out var reg))
+                                reg.Register(attribute, activatedObj, name);
                         }
-
-                        if (!validArgs)
-                        {
-                            Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors with the right parameter types. Can't load script.", type.Name);
-
-                            continue;
-                        }
-
-                        if (!attribute.Name.IsEmpty())
-                            name = attribute.Name;
-
-                        if (!string.IsNullOrEmpty(type?.BaseType?.Name) &&
-                            activators.TryGetValue(type.BaseType.Name, out var scriptActivator))
-                        {
-                            scriptActivator.Activate(type, name, attribute);
-
-                            continue;
-                        }
-
-                        if (attribute.Args.Empty())
-                        {
-                            if (numArgsMin == 0)
-                                Activator.CreateInstance(type);
-                            else if (numArgsMin == 1 &&
-                                     paramType != null &&
-                                     paramType == typeof(string))
-                                Activator.CreateInstance(type, name);
-                        }
-                        else
-                        {
-                            if (numArgsMin == 1 &&
-                                paramType != null &&
-                                paramType != typeof(string))
-                                Activator.CreateInstance(type, attribute.Args);
-                            else
-                                Activator.CreateInstance(type,
-                                                         new object[]
-                                                         {
-                                                             name
-                                                         }.Combine(attribute.Args));
-                        }
-
-                        if (attribute is SpellScriptAttribute spellScript && spellScript.SpellIds != null)
-                            foreach (var id in spellScript.SpellIds)
-                                Global.ObjectMgr.RegisterSpellScript(id, name);
                     }
                 }
-            }
         }
 
         private static void RegisterActivators(Dictionary<string, IScriptActivator> activators, Type type)
@@ -294,6 +298,15 @@ namespace Game.Scripting
 
                 foreach (var t in asa.ScriptBaseTypes)
                     activators[t] = asa;
+            }
+        }
+
+        private static void RegisterRegistors(Dictionary<Type, IScriptRegister> registers, Type type)
+        {
+            if (DoesTypeSupportInterface(type, typeof(IScriptRegister)))
+            {
+                var newReg = (IScriptRegister)Activator.CreateInstance(type);
+                registers[newReg.AttributeType] = newReg;
             }
         }
 
@@ -370,8 +383,8 @@ namespace Game.Scripting
                     _waypointStore[entry] = new WaypointPath();
 
                 WaypointPath path = _waypointStore[entry];
-                path.Id = entry;
-                path.Nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
+                path.id = entry;
+                path.nodes.Add(new WaypointNode(id, x, y, z, null, waitTime));
 
                 ++count;
             } while (result.NextRow());

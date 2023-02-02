@@ -9,8 +9,8 @@ namespace Framework.Constants
     public enum BattlePetError
     {
         CantHaveMorePetsOfThatType = 3, // You can't have any more pets of that type.
-        CantHaveMorePets = 4,           // You can't have any more pets.
-        TooHighLevelToUncage = 7        // This pet is too high level for you to uncage.
+        CantHaveMorePets = 4, // You can't have any more pets.
+        TooHighLevelToUncage = 7, // This pet is too high level for you to uncage.
     }
 
     public enum FlagsControlType
@@ -38,11 +38,9 @@ namespace Framework.Constants
         PassiveElite = 153,
         PassiveBoss = 162,
         CosmeticTreasureGoblin = 176,
-
         // These Are Not In Battlepetstate.Db2 But Are Used In Battlepetspeciesstate.Db2
         StartWithBuff = 183,
         StartWithBuff2 = 184,
-
         //
         CosmeticSpectralBlue = 196
     }

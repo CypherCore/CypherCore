@@ -1,51 +1,41 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal class BlackMarketOpen : ClientPacket
+    class BlackMarketOpen : ClientPacket
     {
-        public ObjectGuid Guid;
-
-        public BlackMarketOpen(WorldPacket packet) : base(packet)
-        {
-        }
+        public BlackMarketOpen(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid Guid;
     }
 
-    internal class BlackMarketRequestItems : ClientPacket
+    class BlackMarketRequestItems : ClientPacket
     {
-        public ObjectGuid Guid;
-        public long LastUpdateID;
-
-        public BlackMarketRequestItems(WorldPacket packet) : base(packet)
-        {
-        }
+        public BlackMarketRequestItems(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
             LastUpdateID = _worldPacket.ReadInt64();
         }
+
+        public ObjectGuid Guid;
+        public long LastUpdateID;
     }
 
     public class BlackMarketRequestItemsResult : ServerPacket
     {
-        public List<BlackMarketItem> Items = new();
-
-        public long LastUpdateID;
-
-        public BlackMarketRequestItemsResult() : base(ServerOpcodes.BlackMarketRequestItemsResult)
-        {
-        }
+        public BlackMarketRequestItemsResult() : base(ServerOpcodes.BlackMarketRequestItemsResult) { }
 
         public override void Write()
         {
@@ -55,19 +45,14 @@ namespace Game.Networking.Packets
             foreach (BlackMarketItem item in Items)
                 item.Write(_worldPacket);
         }
+
+        public long LastUpdateID;
+        public List<BlackMarketItem> Items = new();
     }
 
-    internal class BlackMarketBidOnItem : ClientPacket
+    class BlackMarketBidOnItem : ClientPacket
     {
-        public ulong BidAmount;
-
-        public ObjectGuid Guid;
-        public ItemInstance Item = new();
-        public uint MarketID;
-
-        public BlackMarketBidOnItem(WorldPacket packet) : base(packet)
-        {
-        }
+        public BlackMarketBidOnItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -76,18 +61,16 @@ namespace Game.Networking.Packets
             BidAmount = _worldPacket.ReadUInt64();
             Item.Read(_worldPacket);
         }
+
+        public ObjectGuid Guid;
+        public uint MarketID;
+        public ItemInstance Item = new();
+        public ulong BidAmount;
     }
 
-    internal class BlackMarketBidOnItemResult : ServerPacket
+    class BlackMarketBidOnItemResult : ServerPacket
     {
-        public ItemInstance Item;
-
-        public uint MarketID;
-        public BlackMarketError Result;
-
-        public BlackMarketBidOnItemResult() : base(ServerOpcodes.BlackMarketBidOnItemResult)
-        {
-        }
+        public BlackMarketBidOnItemResult() : base(ServerOpcodes.BlackMarketBidOnItemResult) { }
 
         public override void Write()
         {
@@ -95,18 +78,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             Item.Write(_worldPacket);
         }
-    }
-
-    internal class BlackMarketOutbid : ServerPacket
-    {
-        public ItemInstance Item;
 
         public uint MarketID;
-        public uint RandomPropertiesID;
+        public ItemInstance Item;
+        public BlackMarketError Result;
+    }
 
-        public BlackMarketOutbid() : base(ServerOpcodes.BlackMarketOutbid)
-        {
-        }
+    class BlackMarketOutbid : ServerPacket
+    {
+        public BlackMarketOutbid() : base(ServerOpcodes.BlackMarketOutbid) { }
 
         public override void Write()
         {
@@ -114,18 +94,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(RandomPropertiesID);
             Item.Write(_worldPacket);
         }
-    }
-
-    internal class BlackMarketWon : ServerPacket
-    {
-        public ItemInstance Item;
 
         public uint MarketID;
-        public int RandomPropertiesID;
+        public ItemInstance Item;
+        public uint RandomPropertiesID;
+    }
 
-        public BlackMarketWon() : base(ServerOpcodes.BlackMarketWon)
-        {
-        }
+    class BlackMarketWon : ServerPacket
+    {
+        public BlackMarketWon() : base(ServerOpcodes.BlackMarketWon) { }
 
         public override void Write()
         {
@@ -133,6 +110,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(RandomPropertiesID);
             Item.Write(_worldPacket);
         }
+
+        public uint MarketID;
+        public ItemInstance Item;
+        public int RandomPropertiesID;
     }
 
     public struct BlackMarketItem

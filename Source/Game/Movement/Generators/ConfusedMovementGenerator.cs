@@ -1,22 +1,18 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.Movement
 {
     public class ConfusedMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
-        private readonly TimeTracker _timer;
-        private PathGenerator _path;
-        private Position _reference;
-
         public ConfusedMovementGenerator()
         {
             _timer = new TimeTracker();
-            _reference = new Position();
+            _reference = new();
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
@@ -29,8 +25,7 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            if (!owner ||
-                !owner.IsAlive())
+            if (!owner || !owner.IsAlive())
                 return;
 
             // TODO: UNIT_FIELD_FLAGS should not be handled by generators
@@ -50,29 +45,22 @@ namespace Game.Movement
 
         public override bool DoUpdate(T owner, uint diff)
         {
-            if (!owner ||
-                !owner.IsAlive())
+            if (!owner || !owner.IsAlive())
                 return false;
 
-            if (owner.HasUnitState(UnitState.NotMove) ||
-                owner.IsMovementPreventedByCasting())
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 _path = null;
-
                 return true;
             }
             else
-            {
                 RemoveFlag(MovementGeneratorFlags.Interrupted);
-            }
 
             // waiting for next move
             _timer.Update(diff);
-
-            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) ||
-                (_timer.Passed() && owner.MoveSpline.Finalized()))
+            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
             {
                 RemoveFlag(MovementGeneratorFlags.Transitory);
 
@@ -86,7 +74,6 @@ namespace Game.Movement
                 {
                     // Retry later on
                     _timer.Reset(200);
-
                     return true;
                 }
 
@@ -97,14 +84,9 @@ namespace Game.Movement
                 }
 
                 bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
-
-                if (!result ||
-                    _path.GetPathType().HasFlag(PathType.NoPath) ||
-                    _path.GetPathType().HasFlag(PathType.Shortcut) ||
-                    _path.GetPathType().HasFlag(PathType.FarFromPoly))
+                if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut) || _path.GetPathType().HasFlag(PathType.FarFromPoly))
                 {
                     _timer.Reset(100);
-
                     return true;
                 }
 
@@ -142,7 +124,6 @@ namespace Game.Movement
                 {
                     owner.RemoveUnitFlag(UnitFlags.Confused);
                     owner.ClearUnitState(UnitState.ConfusedMove);
-
                     if (owner.GetVictim())
                         owner.SetTarget(owner.GetVictim().GetGUID());
                 }
@@ -154,9 +135,10 @@ namespace Game.Movement
             return MovementGeneratorType.Confused;
         }
 
-        public override void UnitSpeedChanged()
-        {
-            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
-        }
+        public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
+
+        PathGenerator _path;
+        TimeTracker _timer;
+        Position _reference;
     }
 }

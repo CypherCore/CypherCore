@@ -51,7 +51,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         public override void Reset()
         {
             EntryCheckPredicate pred = new(MiscConst.NpcFiendishPortal);
-            Summons.DoAction(MiscConst.ActionDespawnImps, pred);
+            summons.DoAction(MiscConst.ActionDespawnImps, pred);
             _Reset();
 
             _scheduler.Schedule(TimeSpan.FromSeconds(1),
@@ -125,7 +125,7 @@ namespace Scripts.EasternKingdoms.Karazhan.TerestianIllhoof
         {
             Talk(TextIds.SayDeath);
             EntryCheckPredicate pred = new(MiscConst.NpcFiendishPortal);
-            Summons.DoAction(MiscConst.ActionDespawnImps, pred);
+            summons.DoAction(MiscConst.ActionDespawnImps, pred);
             _JustDied();
         }
 

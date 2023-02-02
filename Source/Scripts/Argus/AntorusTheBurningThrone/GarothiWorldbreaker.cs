@@ -12,7 +12,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 {
@@ -182,17 +182,17 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             base.JustEngagedWith(who);
             Talk(TextIds.SayAggro);
             DoCastSelf(SpellIds.Melee);
-            Instance.SendEncounterUnit(EncounterFrameType.Engage, me);
-            Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
-            Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
+            instance.SendEncounterUnit(EncounterFrameType.Engage, me);
+            _events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(9));
+            _events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(8));
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
             Talk(TextIds.SayDisengage);
             _EnterEvadeMode();
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-            Events.Reset();
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            _events.Reset();
             CleanupEncounter();
             _DespawnAtEvade(TimeSpan.FromSeconds(30));
         }
@@ -208,7 +208,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             _JustDied();
             Talk(TextIds.SayDeath);
             CleanupEncounter();
-            Instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
         }
 
         public override void OnSpellCast(SpellInfo spell)
@@ -217,9 +217,9 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             {
                 case SpellIds.ApocalypseDriveFinalDamage:
                     if (_apocalypseDriveCount < MiscConst.MaxApocalypseDriveCount)
-                        Events.Reset();
+                        _events.Reset();
 
-                    Events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
+                    _events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
                     HideCannons();
                     me.RemoveUnitFlag(UnitFlags.Uninteractible);
 
@@ -237,11 +237,11 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 me.SetReactState(ReactStates.Passive);
                 me.InterruptNonMeleeSpells(true);
                 me.SetFacingTo(me.GetHomePosition().GetOrientation());
-                Events.Reset();
+                _events.Reset();
 
                 if (GetDifficulty() == Difficulty.MythicRaid ||
                     GetDifficulty() == Difficulty.HeroicRaid)
-                    Events.ScheduleEvent(EventIds.SurgingFel, TimeSpan.FromSeconds(8));
+                    _events.ScheduleEvent(EventIds.SurgingFel, TimeSpan.FromSeconds(8));
 
                 DoCastSelf(SpellIds.ApocalypseDrive);
                 DoCastSelf(SpellIds.ApocalypseDriveFinalDamage);
@@ -249,20 +249,20 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                 Talk(TextIds.SayApocalypseDrive);
                 me.SetUnitFlag(UnitFlags.Uninteractible);
 
-                Creature decimator = Instance.GetCreature(DataTypes.Decimator);
+                Creature decimator = instance.GetCreature(DataTypes.Decimator);
 
                 if (decimator)
                 {
-                    Instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
+                    instance.SendEncounterUnit(EncounterFrameType.Engage, decimator, 2);
                     decimator.SetUnitFlag(UnitFlags.InCombat);
                     decimator.RemoveUnitFlag(UnitFlags.Uninteractible);
                 }
 
-                Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
+                Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
 
                 if (annihilator)
                 {
-                    Instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
+                    instance.SendEncounterUnit(EncounterFrameType.Engage, annihilator, 2);
                     annihilator.SetUnitFlag(UnitFlags.InCombat);
                     annihilator.RemoveUnitFlag(UnitFlags.Uninteractible);
                 }
@@ -273,7 +273,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         public override void JustSummoned(Creature summon)
         {
-            Summons.Summon(summon);
+            summons.Summon(summon);
 
             switch (summon.GetEntry())
             {
@@ -312,10 +312,10 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                         _searingBarrageSpellId = SpellIds.SearingBarrageDecimator;
 
                     if (_apocalypseDriveCount < MiscConst.MaxApocalypseDriveCount)
-                        Events.Reset();
+                        _events.Reset();
 
-                    Events.ScheduleEvent(EventIds.SearingBarrage, TimeSpan.FromSeconds(3.5));
-                    Events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
+                    _events.ScheduleEvent(EventIds.SearingBarrage, TimeSpan.FromSeconds(3.5));
+                    _events.ScheduleEvent(EventIds.ReengagePlayers, TimeSpan.FromSeconds(3.5));
                     _castEradication = true;
 
                     if (summon.GetEntry() == CreatureIds.Decimator)
@@ -351,13 +351,13 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
             if (!UpdateVictim())
                 return;
 
-            Events.Update(diff);
+            _events.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting) &&
                 !me.HasAura(SpellIds.ApocalypseDrive))
                 return;
 
-            Events.ExecuteEvents(eventId =>
+            _events.ExecuteEvents(eventId =>
                                   {
                                       switch (eventId)
                                       {
@@ -374,13 +374,13 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                                               }
 
                                               me.SetReactState(ReactStates.Aggressive);
-                                              Events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(20));
-                                              Events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(18));
+                                              _events.ScheduleEvent(EventIds.FelBombardment, TimeSpan.FromSeconds(20));
+                                              _events.ScheduleEvent(EventIds.CannonChooser, TimeSpan.FromSeconds(18));
 
                                               break;
                                           case EventIds.FelBombardment:
                                               DoCastAOE(SpellIds.FelBombardmentSelector);
-                                              Events.Repeat(TimeSpan.FromSeconds(20));
+                                              _events.Repeat(TimeSpan.FromSeconds(20));
 
                                               break;
                                           case EventIds.SearingBarrage:
@@ -389,7 +389,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                                               break;
                                           case EventIds.CannonChooser:
                                               DoCastSelf(SpellIds.CannonChooser);
-                                              Events.Repeat(TimeSpan.FromSeconds(16));
+                                              _events.Repeat(TimeSpan.FromSeconds(16));
 
                                               break;
                                           case EventIds.SurgingFel:
@@ -401,7 +401,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
                                                   if (dummy)
                                                       dummy.CastSpell(dummy, SpellIds.SurgingFelAreaTrigger);
 
-                                                  Events.Repeat(TimeSpan.FromSeconds(8));
+                                                  _events.Repeat(TimeSpan.FromSeconds(8));
 
                                                   break;
                                               }
@@ -419,37 +419,37 @@ namespace Scripts.Argus.AntorusTheBurningThrone.GarothiWorldbreaker
 
         private void CleanupEncounter()
         {
-            Creature decimator = Instance.GetCreature(DataTypes.Decimator);
+            Creature decimator = instance.GetCreature(DataTypes.Decimator);
 
             if (decimator)
-                Instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
+                instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
 
-            Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
+            Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
 
             if (annihilator)
-                Instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
+                instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
 
-            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.DecimationWarning);
-            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentWarning);
-            Instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentPeriodic);
-            Summons.DespawnAll();
+            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.DecimationWarning);
+            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentWarning);
+            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.FelBombardmentPeriodic);
+            summons.DespawnAll();
         }
 
         private void HideCannons()
         {
-            Creature decimator = Instance.GetCreature(DataTypes.Decimator);
+            Creature decimator = instance.GetCreature(DataTypes.Decimator);
 
             if (decimator)
             {
-                Instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
+                instance.SendEncounterUnit(EncounterFrameType.Disengage, decimator);
                 decimator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
             }
 
-            Creature annihilator = Instance.GetCreature(DataTypes.Annihilator);
+            Creature annihilator = instance.GetCreature(DataTypes.Annihilator);
 
             if (annihilator)
             {
-                Instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
+                instance.SendEncounterUnit(EncounterFrameType.Disengage, annihilator);
                 annihilator.SetUnitFlag(UnitFlags.Uninteractible | UnitFlags.Immune);
             }
         }

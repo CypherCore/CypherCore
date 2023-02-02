@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -64,8 +63,8 @@ namespace Game.DataStorage
 
                     // Add to vector
                     FlyByCamera thisCam = new();
-                    thisCam.TimeStamp = targTimestamps[i];
-                    thisCam.Locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0.0f);
+                    thisCam.timeStamp = targTimestamps[i];
+                    thisCam.locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0.0f);
                     targetcam.Add(thisCam);
                 }
             }
@@ -96,8 +95,8 @@ namespace Game.DataStorage
 
                     // Add to vector
                     FlyByCamera thisCam = new();
-                    thisCam.TimeStamp = posTimestamps[i];
-                    thisCam.Locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0);
+                    thisCam.timeStamp = posTimestamps[i];
+                    thisCam.locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0);
 
                     if (targetcam.Count > 0)
                     {
@@ -108,46 +107,46 @@ namespace Game.DataStorage
                         for (int j = 0; j < targetcam.Count; ++j)
                         {
                             nextTarget = targetcam[j];
-                            if (targetcam[j].TimeStamp > posTimestamps[i])
+                            if (targetcam[j].timeStamp > posTimestamps[i])
                                 break;
 
                             lastTarget = targetcam[j];
                         }
 
-                        float x = lastTarget.Locations.X;
-                        float y = lastTarget.Locations.Y;
-                        float z = lastTarget.Locations.Z;
+                        float x = lastTarget.locations.X;
+                        float y = lastTarget.locations.Y;
+                        float z = lastTarget.locations.Z;
 
                         // Now, the timestamps for target cam and position can be different. So, if they differ we interpolate
-                        if (lastTarget.TimeStamp != posTimestamps[i])
+                        if (lastTarget.timeStamp != posTimestamps[i])
                         {
-                            uint timeDiffTarget = nextTarget.TimeStamp - lastTarget.TimeStamp;
-                            uint timeDiffThis = posTimestamps[i] - lastTarget.TimeStamp;
-                            float xDiff = nextTarget.Locations.X - lastTarget.Locations.X;
-                            float yDiff = nextTarget.Locations.Y - lastTarget.Locations.Y;
-                            float zDiff = nextTarget.Locations.Z - lastTarget.Locations.Z;
-                            x = lastTarget.Locations.X + (xDiff * ((float)timeDiffThis / timeDiffTarget));
-                            y = lastTarget.Locations.Y + (yDiff * ((float)timeDiffThis / timeDiffTarget));
-                            z = lastTarget.Locations.Z + (zDiff * ((float)timeDiffThis / timeDiffTarget));
+                            uint timeDiffTarget = nextTarget.timeStamp - lastTarget.timeStamp;
+                            uint timeDiffThis = posTimestamps[i] - lastTarget.timeStamp;
+                            float xDiff = nextTarget.locations.X - lastTarget.locations.X;
+                            float yDiff = nextTarget.locations.Y - lastTarget.locations.Y;
+                            float zDiff = nextTarget.locations.Z - lastTarget.locations.Z;
+                            x = lastTarget.locations.X + (xDiff * ((float)timeDiffThis / timeDiffTarget));
+                            y = lastTarget.locations.Y + (yDiff * ((float)timeDiffThis / timeDiffTarget));
+                            z = lastTarget.locations.Z + (zDiff * ((float)timeDiffThis / timeDiffTarget));
                         }
-                        float xDiff1 = x - thisCam.Locations.X;
-                        float yDiff1 = y - thisCam.Locations.Y;
-                        thisCam.Locations.W = (float)Math.Atan2(yDiff1, xDiff1);
+                        float xDiff1 = x - thisCam.locations.X;
+                        float yDiff1 = y - thisCam.locations.Y;
+                        thisCam.locations.W = (float)Math.Atan2(yDiff1, xDiff1);
 
-                        if (thisCam.Locations.W < 0)
-                            thisCam.Locations.W += 2 * MathFunctions.PI;
+                        if (thisCam.locations.W < 0)
+                            thisCam.locations.W += 2 * MathFunctions.PI;
                     }
 
                     cameras.Add(thisCam);
                 }
             }
 
-            _flyByCameraStorage[dbcentry.Id] = cameras;
+            FlyByCameraStorage[dbcentry.Id] = cameras;
         }
 
         public static void LoadM2Cameras(string dataPath)
         {
-            _flyByCameraStorage.Clear();
+            FlyByCameraStorage.Clear();
             Log.outInfo(LogFilter.ServerLoading, "Loading Cinematic Camera files");
 
             uint oldMSTime = Time.GetMSTime();
@@ -186,20 +185,20 @@ namespace Game.DataStorage
                     Log.outError(LogFilter.ServerLoading, "File {0} not found!!!!", filename);
                 }
             }
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", _flyByCameraStorage.Keys.Count(), Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public static List<FlyByCamera> GetFlyByCameras(uint cameraId)
         {
-            return _flyByCameraStorage.LookupByKey(cameraId);
+            return FlyByCameraStorage.LookupByKey(cameraId);
         }
 
-        static MultiMap<uint, FlyByCamera> _flyByCameraStorage = new();
+        static MultiMap<uint, FlyByCamera> FlyByCameraStorage = new();
     }
 
     public class FlyByCamera
     {
-        public uint TimeStamp;
-        public Vector4 Locations;
+        public uint timeStamp;
+        public Vector4 locations;
     }
 }

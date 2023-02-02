@@ -1,20 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Numerics;
-using System.Text;
 using Framework.Collections;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
 using Game.Accounts;
+using Game.AI;
 using Game.BattleGrounds;
 using Game.Battlepay;
 using Game.BattlePets;
@@ -25,97 +18,42 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scripting.Interfaces.IPlayer;
-using Google.Protobuf;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Numerics;
+using System.Text;
 
 namespace Game
 {
     public partial class WorldSession : IDisposable
     {
-
-        private readonly List<ObjectGuid> _legitCharacters = new();
-        private ulong _GUIDLow;
-        private Player _player;
-        private readonly WorldSocket[] _socket = new WorldSocket[(int)ConnectionType.Max];
-        private readonly string _address;
-        private AccountTypes _security;
-        private readonly uint _accountId;
-        private readonly string _accountName;
-        private readonly uint _battlenetAccountId;
-        private readonly Expansion _accountExpansion;
-        private readonly Expansion _expansion;
-        private readonly string _os;
-        private uint _expireTime;
-        private bool _forceExit;
-        private readonly DosProtection _antiDOS;
-        private Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
-
-        private long _logoutTime;
-        private bool _inQueue;
-        private ObjectGuid _playerLoading; // code processed in LoginPlayer
-        private bool _playerLogout;        // code processed in LogoutPlayer
-        private bool _playerRecentlyLogout;
-        private bool _playerSave;
-        private readonly Locale _sessionDbcLocale;
-        private readonly Locale _sessionDbLocaleIndex;
-        private uint _latency;
-        private readonly AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
-        private readonly uint[] _tutorials = new uint[SharedConst.MaxAccountTutorialValues];
-        private TutorialsFlag _tutorialsChanged;
-        private Array<byte> _realmListSecret = new(32);
-        private readonly Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
-        private readonly Dictionary<uint, Action<CodedInputStream>> _battlenetResponseCallbacks = new();
-        private uint _battlenetRequestToken;
-        private readonly List<string> _registeredAddonPrefixes = new();
-        private bool _filterAddonMessages;
-        private readonly uint _recruiterId;
-        private readonly bool _isRecruiter;
-
-        public long MuteTime { get; set; }
-        private long _timeOutTime;
-        private readonly ConcurrentQueue<WorldPacket> _recvQueue = new();
-        private RBACData _RBACData;
-        private readonly CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
-        private long _timeSyncClockDelta;
-        private readonly Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server Time when packet with that counter was sent.
-        private uint _timeSyncNextCounter;
-        private uint _timeSyncTimer;
-        private readonly CollectionMgr _collectionMgr;
-        private ConnectToKey _instanceConnectKey;
-
-        // Packets cooldown
-        private long _calendarEventCreationCooldown;
-        private readonly BattlePetMgr _battlePetMgr;
-        private BattlepayManager _battlePayMgr;
-        private readonly AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
-        private readonly AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
-        private readonly AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
-
-        public CommandHandler CommandHandler { get; private set; }
-
         public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, Locale locale, uint recruiter, bool isARecruiter)
         {
-            MuteTime = mute_time;
-            _antiDOS = new DosProtection(this);
-            _socket[(int)ConnectionType.Realm] = sock;
+            m_muteTime = mute_time;
+            AntiDOS = new DosProtection(this);
+            m_Socket[(int)ConnectionType.Realm] = sock;
             _security = sec;
             _accountId = id;
             _accountName = name;
             _battlenetAccountId = battlenetAccountId;
-            _accountExpansion = expansion;
-            _expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
+            m_accountExpansion = expansion;
+            m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
             _os = os;
-            _sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
-            _sessionDbLocaleIndex = locale;
-            _recruiterId = recruiter;
-            _isRecruiter = isARecruiter;
-            _expireTime = 60000; // 1 min after socket loss, session is deleted
+            m_sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            m_sessionDbLocaleIndex = locale;
+            recruiterId = recruiter;
+            isRecruiter = isARecruiter;
+            expireTime = 60000; // 1 min after socket loss, session is deleted
             _battlePetMgr = new BattlePetMgr(this);
             _collectionMgr = new CollectionMgr(this);
             _battlePayMgr = new BattlepayManager(this);
             CommandHandler = new CommandHandler(this);
-            _address = sock.GetRemoteIpAddress().Address.ToString();
+
+            m_Address = sock.GetRemoteIpAddress().Address.ToString();
             ResetTimeOutTime(false);
-            DB.Login.Execute("UPDATE account SET online = 1 WHERE Id = {0};", GetAccountId());     // One-Time query
+            DB.Login.Execute("UPDATE account SET online = 1 WHERE id = {0};", GetAccountId());     // One-time query
         }
 
         public void Dispose()
@@ -127,30 +65,30 @@ namespace Game
             // - If have unclosed socket, close it
             for (byte i = 0; i < 2; ++i)
             {
-                if (_socket[i] != null)
+                if (m_Socket[i] != null)
                 {
-                    _socket[i].CloseSocket();
-                    _socket[i] = null;
+                    m_Socket[i].CloseSocket();
+                    m_Socket[i] = null;
                 }
             }
 
             // empty incoming packet queue
             _recvQueue.Clear();
 
-            DB.Login.Execute("UPDATE account SET online = 0 WHERE Id = {0};", GetAccountId());     // One-Time query
+            DB.Login.Execute("UPDATE account SET online = 0 WHERE id = {0};", GetAccountId());     // One-time query
         }
 
         public void LogoutPlayer(bool save)
         {
-            if (_playerLogout)
+            if (m_playerLogout)
                 return;
 
             // finish pending transfers before starting the logout
             while (_player && _player.IsBeingTeleportedFar())
                 HandleMoveWorldportAck();
 
-            _playerLogout = true;
-            _playerSave = save;
+            m_playerLogout = true;
+            m_playerSave = save;
 
             if (_player)
             {
@@ -158,7 +96,7 @@ namespace Game
                     DoLootReleaseAll();
 
                 // If the player just died before logging out, make him appear as a ghost
-                //FIXME: logout must be delayed in case lost connection with client in Time of combat
+                //FIXME: logout must be delayed in case lost connection with client in time of combat
                 if (GetPlayer().GetDeathTimer() != 0)
                 {
                     _player.CombatStop();
@@ -185,7 +123,7 @@ namespace Game
                     bg.EventPlayerLoggedOut(GetPlayer());
 
                 // Teleport to home if the player is in an invalid instance
-                if (!_player.InstanceValid && !_player.IsGameMaster())
+                if (!_player.m_InstanceValid && !_player.IsGameMaster())
                     _player.TeleportTo(_player.GetHomebind());
 
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(_player, _player.GetZoneId());
@@ -266,7 +204,8 @@ namespace Game
                 Log.outInfo(LogFilter.Player, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
                 Map map = GetPlayer().GetMap();
-                map?.RemovePlayerFromMap(GetPlayer(), true);
+                if (map != null)
+                    map.RemovePlayerFromMap(GetPlayer(), true);
 
                 SetPlayer(null);
 
@@ -275,21 +214,21 @@ namespace Game
                 LogoutComplete logoutComplete = new();
                 SendPacket(logoutComplete);
 
-                //! Since each account can only have one online character at any given Time, ensure all characters for active account are marked as offline
+                //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
                 stmt.AddValue(0, GetAccountId());
                 DB.Characters.Execute(stmt);
             }
 
-            if (_socket[(int)ConnectionType.Instance] != null)
+            if (m_Socket[(int)ConnectionType.Instance] != null)
             {
-                _socket[(int)ConnectionType.Instance].CloseSocket();
-                _socket[(int)ConnectionType.Instance] = null;
+                m_Socket[(int)ConnectionType.Instance].CloseSocket();
+                m_Socket[(int)ConnectionType.Instance] = null;
             }
 
-            _playerLogout = false;
-            _playerSave = false;
-            _playerRecentlyLogout = true;
+            m_playerLogout = false;
+            m_playerSave = false;
+            m_playerRecentlyLogout = true;
             SetLogoutStartTime(0);
         }
 
@@ -299,7 +238,7 @@ namespace Game
             /// If necessary, kick the player because the client didn't send anything for too long
             /// (or they've been idling in character select)
             if (IsConnectionIdle() && !HasPermission(RBACPermissions.IgnoreIdleConnection))
-                _socket[(int)ConnectionType.Realm].CloseSocket();
+                m_Socket[(int)ConnectionType.Realm].CloseSocket();
 
             WorldPacket firstDelayedPacket = null;
             uint processedPackets = 0;
@@ -307,7 +246,7 @@ namespace Game
 
             WorldPacket packet;
             //Check for any packets they was not recived yet.
-            while (_socket[(int)ConnectionType.Realm] != null && !_recvQueue.IsEmpty && (_recvQueue.TryPeek(out packet, updater) && packet != firstDelayedPacket) && _recvQueue.TryDequeue(out packet))
+            while (m_Socket[(int)ConnectionType.Realm] != null && !_recvQueue.IsEmpty && (_recvQueue.TryPeek(out packet, updater) && packet != firstDelayedPacket) && _recvQueue.TryDequeue(out packet))
             {
                 try
                 {
@@ -317,7 +256,7 @@ namespace Game
                         case SessionStatus.Loggedin:
                             if (!_player)
                             {
-                                if (!_playerRecentlyLogout)
+                                if (!m_playerRecentlyLogout)
                                 {
                                     if (firstDelayedPacket == null)
                                         firstDelayedPacket = packet;
@@ -327,13 +266,13 @@ namespace Game
                                 }
                                 break;
                             }
-                            else if (_player.IsInWorld && _antiDOS.EvaluateOpcode(packet, currentTime))
+                            else if (_player.IsInWorld && AntiDOS.EvaluateOpcode(packet, currentTime))
                                 handler.Invoke(this, packet);
                             break;
                         case SessionStatus.LoggedinOrRecentlyLogout:
-                            if (!_player && !_playerRecentlyLogout && !_playerLogout)
+                            if (!_player && !m_playerRecentlyLogout && !m_playerLogout)
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player has not logged in yet and not recently logout");
-                            else if (_antiDOS.EvaluateOpcode(packet, currentTime))
+                            else if (AntiDOS.EvaluateOpcode(packet, currentTime))
                                 handler.Invoke(this, packet);
                             break;
                         case SessionStatus.Transfer:
@@ -341,21 +280,21 @@ namespace Game
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player has not logged in yet");
                             else if (_player.IsInWorld)
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player is still in world");
-                            else if (_antiDOS.EvaluateOpcode(packet, currentTime))
+                            else if (AntiDOS.EvaluateOpcode(packet, currentTime))
                                 handler.Invoke(this, packet);
                             break;
                         case SessionStatus.Authed:
                             // prevent cheating with skip queue wait
-                            if (_inQueue)
+                            if (m_inQueue)
                             {
                                 LogUnexpectedOpcode(packet, handler.sessionStatus, "the player not pass queue yet");
                                 break;
                             }
 
                             if ((ClientOpcodes)packet.GetOpcode() == ClientOpcodes.EnumCharacters)
-                                _playerRecentlyLogout = false;
+                                m_playerRecentlyLogout = false;
 
-                            if (_antiDOS.EvaluateOpcode(packet, currentTime))
+                            if (AntiDOS.EvaluateOpcode(packet, currentTime))
                                 handler.Invoke(this, packet);
                             break;
                         default:
@@ -379,9 +318,9 @@ namespace Game
                     break;
             }
 
-            if (!updater.ProcessUnsafe()) // <=> updater is of Type MapSessionFilter
+            if (!updater.ProcessUnsafe()) // <=> updater is of type MapSessionFilter
             {
-                // Send Time sync packet every 10s.
+                // Send time sync packet every 10s.
                 if (_timeSyncTimer > 0)
                 {
                     if (diff >= _timeSyncTimer)
@@ -395,37 +334,37 @@ namespace Game
 
             if (updater.ProcessUnsafe())
             {
-                if (_socket[(int)ConnectionType.Realm] != null && _socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
+                if (m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
                     _warden.Update(diff);
 
                 // If necessary, log the player out
-                if (ShouldLogOut(currentTime) && _playerLoading.IsEmpty())
+                if (ShouldLogOut(currentTime) && m_playerLoading.IsEmpty())
                     LogoutPlayer(true);
 
                 //- Cleanup socket if need
-                if ((_socket[(int)ConnectionType.Realm] != null && !_socket[(int)ConnectionType.Realm].IsOpen()) ||
-                    (_socket[(int)ConnectionType.Instance] != null && !_socket[(int)ConnectionType.Instance].IsOpen()))
+                if ((m_Socket[(int)ConnectionType.Realm] != null && !m_Socket[(int)ConnectionType.Realm].IsOpen()) ||
+                    (m_Socket[(int)ConnectionType.Instance] != null && !m_Socket[(int)ConnectionType.Instance].IsOpen()))
                 {
                     if (GetPlayer() != null && _warden != null)
                         _warden.Update(diff);
 
-                    _expireTime -= _expireTime > diff ? diff : _expireTime;
-                    if (_expireTime < diff || _forceExit || !GetPlayer())
+                    expireTime -= expireTime > diff ? diff : expireTime;
+                    if (expireTime < diff || forceExit || !GetPlayer())
                     {
-                        if (_socket[(int)ConnectionType.Realm] != null)
+                        if (m_Socket[(int)ConnectionType.Realm] != null)
                         {
-                            _socket[(int)ConnectionType.Realm].CloseSocket();
-                            _socket[(int)ConnectionType.Realm] = null;
+                            m_Socket[(int)ConnectionType.Realm].CloseSocket();
+                            m_Socket[(int)ConnectionType.Realm] = null;
                         }
-                        if (_socket[(int)ConnectionType.Instance] != null)
+                        if (m_Socket[(int)ConnectionType.Instance] != null)
                         {
-                            _socket[(int)ConnectionType.Instance].CloseSocket();
-                            _socket[(int)ConnectionType.Instance] = null;
+                            m_Socket[(int)ConnectionType.Instance].CloseSocket();
+                            m_Socket[(int)ConnectionType.Instance] = null;
                         }
                     }
                 }
 
-                if (_socket[(int)ConnectionType.Realm] == null)
+                if (m_Socket[(int)ConnectionType.Realm] == null)
                     return false;                                       //Will remove this session from the world session map
             }
 
@@ -435,6 +374,11 @@ namespace Game
         public void QueuePacket(WorldPacket packet)
         {
             _recvQueue.Enqueue(packet);
+        }
+
+        void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
+        {
+            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
         }
 
         public void SendPacket(ServerPacket packet)
@@ -451,20 +395,20 @@ namespace Game
             ConnectionType conIdx = packet.GetConnection();
             if (conIdx != ConnectionType.Instance && PacketManager.IsInstanceOnlyOpcode(packet.GetOpcode()))
             {
-                Log.outError(LogFilter.Network, "Prevented sending of instance only opcode {0} with connection Type {1} to {2}", packet.GetOpcode(), packet.GetConnection(), GetPlayerInfo());
+                Log.outError(LogFilter.Network, "Prevented sending of instance only opcode {0} with connection type {1} to {2}", packet.GetOpcode(), packet.GetConnection(), GetPlayerInfo());
                 return;
             }
 
-            if (_socket[(int)conIdx] == null)
+            if (m_Socket[(int)conIdx] == null)
             {
                 Log.outError(LogFilter.Network, "Prevented sending of {0} to non existent socket {1} to {2}", packet.GetOpcode(), conIdx, GetPlayerInfo());
                 return;
             }
 
-            _socket[(int)conIdx].SendPacket(packet);
+            m_Socket[(int)conIdx].SendPacket(packet);
         }
 
-        public void AddInstanceConnection(WorldSocket sock) { _socket[(int)ConnectionType.Instance] = sock; }
+        public void AddInstanceConnection(WorldSocket sock) { m_Socket[(int)ConnectionType.Instance] = sock; }
 
         public void KickPlayer(string reason)
         {
@@ -472,10 +416,10 @@ namespace Game
 
             for (byte i = 0; i < 2; ++i)
             {
-                if (_socket[i] != null)
+                if (m_Socket[i] != null)
                 {
-                    _socket[i].CloseSocket();
-                    _forceExit = true;
+                    m_Socket[i].CloseSocket();
+                    forceExit = true;
                 }
             }
         }
@@ -508,35 +452,35 @@ namespace Game
             if (!result.IsEmpty())
             {
                 for (var i = 0; i < SharedConst.MaxAccountTutorialValues; i++)
-                    _tutorials[i] = result.Read<uint>(i);
-                _tutorialsChanged |= TutorialsFlag.LoadedFromDB;
+                    tutorials[i] = result.Read<uint>(i);
+                tutorialsChanged |= TutorialsFlag.LoadedFromDB;
             }
 
-            _tutorialsChanged &= ~TutorialsFlag.Changed;
+            tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
         public void SaveTutorialsData(SQLTransaction trans)
         {
-            if (!_tutorialsChanged.HasAnyFlag(TutorialsFlag.Changed))
+            if (!tutorialsChanged.HasAnyFlag(TutorialsFlag.Changed))
                 return;
 
-            bool hasTutorialsInDB = _tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
+            bool hasTutorialsInDB = tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
             for (var i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
-                stmt.AddValue(i, _tutorials[i]);
+                stmt.AddValue(i, tutorials[i]);
             stmt.AddValue(SharedConst.MaxAccountTutorialValues, GetAccountId());
             trans.Append(stmt);
 
             // now has, set flag so next save uses update query
             if (!hasTutorialsInDB)
-                _tutorialsChanged |= TutorialsFlag.LoadedFromDB;
+                tutorialsChanged |= TutorialsFlag.LoadedFromDB;
 
-            _tutorialsChanged &= ~TutorialsFlag.Changed;
+            tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
         public void SendConnectToInstance(ConnectToSerial serial)
         {
-            var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(IPAddress.Parse(GetRemoteAddress()));
+            var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(System.Net.IPAddress.Parse(GetRemoteAddress()));
 
             _instanceConnectKey.AccountId = GetAccountId();
             _instanceConnectKey.connectionType = ConnectionType.Instance;
@@ -548,7 +492,7 @@ namespace Game
             connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
             connectTo.Con = (byte)ConnectionType.Instance;
 
-            if (instanceAddress.AddressFamily == AddressFamily.InterNetwork)
+            if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
                 connectTo.Payload.Where.IPv4 = instanceAddress.Address.GetAddressBytes();
                 connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv4;
@@ -562,16 +506,92 @@ namespace Game
             SendPacket(connectTo);
         }
 
+        void LoadAccountData(SQLResult result, AccountDataTypes mask)
+        {
+            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
+                if (Convert.ToBoolean((int)mask & (1 << i)))
+                    _accountData[i] = new AccountData();
+
+            if (result.IsEmpty())
+                return;
+
+            do
+            {
+                int type = result.Read<byte>(0);
+                if (type >= (int)AccountDataTypes.Max)
+                {
+                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account data type ({1}), ignore.",
+                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                    continue;
+                }
+
+                if (((int)mask & (1 << type)) == 0)
+                {
+                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account data type ({1}), ignore.",
+                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
+                    continue;
+                }
+
+                _accountData[type].Time = result.Read<long>(1);
+                var bytes = result.Read<byte[]>(2);
+                var line = Encoding.Default.GetString(bytes);
+                _accountData[type].Data = line;
+            }
+            while (result.NextRow());
+        }
+
+        void SetAccountData(AccountDataTypes type, long time, string data)
+        {
+            if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
+            {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
+                stmt.AddValue(0, GetAccountId());
+                stmt.AddValue(1, (byte)type);
+                stmt.AddValue(2, time);
+                stmt.AddValue(3, data);
+                DB.Characters.Execute(stmt);
+            }
+            else
+            {
+                // _player can be NULL and packet received after logout but m_GUID still store correct guid
+                if (m_GUIDLow == 0)
+                    return;
+
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
+                stmt.AddValue(0, m_GUIDLow);
+                stmt.AddValue(1, (byte)type);
+                stmt.AddValue(2, time);
+                stmt.AddValue(3, data);
+                DB.Characters.Execute(stmt);
+            }
+
+            _accountData[(int)type].Time = time;
+            _accountData[(int)type].Data = data;
+        }
+
         public void SendTutorialsData()
         {
             TutorialFlags packet = new();
-            Array.Copy(_tutorials, packet.TutorialData, SharedConst.MaxAccountTutorialValues);
+            Array.Copy(tutorials, packet.TutorialData, SharedConst.MaxAccountTutorialValues);
             SendPacket(packet);
         }
 
         public bool CanSpeak()
         {
-            return MuteTime <= GameTime.GetGameTime();
+            return m_muteTime <= GameTime.GetGameTime();
+        }
+
+        bool ValidateHyperlinksAndMaybeKick(string str)
+        {
+            if (Hyperlink.CheckAllLinks(str))
+                return true;
+
+            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} sent a message with an invalid link:\n{str}");
+
+            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
+                KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
+
+            return false;
         }
 
         public bool DisallowHyperlinksAndMaybeKick(string str)
@@ -606,35 +626,7 @@ namespace Game
             _player = pl;
 
             if (_player)
-                _GUIDLow = _player.GetGUID().GetCounter();
-        }
-
-        public BattlepayManager GetBattlePayMgr()
-        {
-            return _battlePayMgr;
-        }
-
-        public uint GetBagsFreeSlots(Player player)
-        {
-            uint freeBagSlots = 0;
-
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
-            {
-                var bag = player.GetBagByPos(i);
-
-                if (bag != null)
-                    freeBagSlots += bag.GetFreeSlots();
-
-            }
-
-
-            int inventoryEnd = InventorySlots.ItemStart + player.GetInventorySlotCount();
-
-            for (var i = InventorySlots.ItemStart; i < inventoryEnd; i++)
-                if (!player.GetItemByPos(InventorySlots.Bag0, i))
-                    ++freeBagSlots;
-
-            return freeBagSlots;
+                m_GUIDLow = _player.GetGUID().GetCounter();
         }
 
         public string GetPlayerName()
@@ -646,8 +638,8 @@ namespace Game
         {
             StringBuilder ss = new();
             ss.Append("[Player: ");
-            if (!_playerLoading.IsEmpty())
-                ss.AppendFormat("Logging in: {0}, ", _playerLoading.ToString());
+            if (!m_playerLoading.IsEmpty())
+                ss.AppendFormat("Logging in: {0}, ", m_playerLoading.ToString());
             else if (_player)
                 ss.AppendFormat("{0} {1}, ", _player.GetName(), _player.GetGUID().ToString());
 
@@ -655,15 +647,22 @@ namespace Game
             return ss.ToString();
         }
 
-        public bool PlayerLoading() { return !_playerLoading.IsEmpty(); }
-        public bool PlayerLogout() { return _playerLogout; }
-        public bool PlayerLogoutWithSave() { return _playerLogout && _playerSave; }
-        public bool PlayerRecentlyLoggedOut() { return _playerRecentlyLogout; }
+        void HandleWardenData(WardenData packet)
+        {
+            if (_warden == null || packet.Data.GetSize() == 0)
+                return;
 
+            _warden.HandleData(packet.Data);
+        }
+
+        public bool PlayerLoading() { return !m_playerLoading.IsEmpty(); }
+        public bool PlayerLogout() { return m_playerLogout; }
+        public bool PlayerLogoutWithSave() { return m_playerLogout && m_playerSave; }
+        public bool PlayerRecentlyLoggedOut() { return m_playerRecentlyLogout; }
         public bool PlayerDisconnected()
         {
-            return !(_socket[(int)ConnectionType.Realm] != null && _socket[(int)ConnectionType.Realm].IsOpen() &&
-                _socket[(int)ConnectionType.Instance] != null && _socket[(int)ConnectionType.Instance].IsOpen());
+            return !(m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() &&
+                m_Socket[(int)ConnectionType.Instance] != null && m_Socket[(int)ConnectionType.Instance].IsOpen());
         }
 
         public AccountTypes GetSecurity() { return _security; }
@@ -675,18 +674,42 @@ namespace Game
 
         public Player GetPlayer() { return _player; }
 
-        public string GetRemoteAddress() { return _address; }
+        void SetSecurity(AccountTypes security) { _security = security; }
 
-        public Expansion GetAccountExpansion() { return _accountExpansion; }
-        public Expansion GetExpansion() { return _expansion; }
+        public string GetRemoteAddress() { return m_Address; }
+
+        public Expansion GetAccountExpansion() { return m_accountExpansion; }
+        public Expansion GetExpansion() { return m_expansion; }
         public string GetOS() { return _os; }
-        public void SetInQueue(bool state) { _inQueue = state; }
+        public void SetInQueue(bool state) { m_inQueue = state; }
 
-        public bool IsLogingOut() { return _logoutTime != 0 || _playerLogout; }
+        public bool IsLogingOut() { return _logoutTime != 0 || m_playerLogout; }
 
         public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
 
         public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
+
+        void SetLogoutStartTime(long requestTime)
+        {
+            _logoutTime = requestTime;
+        }
+
+        bool ShouldLogOut(long currTime)
+        {
+            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
+        }
+
+        void ProcessQueryCallbacks()
+        {
+            _queryProcessor.ProcessReadyCallbacks();
+            _transactionCallbacks.ProcessReadyCallbacks();
+            _queryHolderProcessor.ProcessReadyCallbacks();
+        }
+
+        TransactionCallback AddTransactionCallback(TransactionCallback callback)
+        {
+            return _transactionCallbacks.AddCallback(callback);
+        }
 
         public SQLQueryHolderCallback<R> AddQueryHolderCallback<R>(SQLQueryHolderCallback<R> callback)
         {
@@ -696,9 +719,26 @@ namespace Game
         public bool CanAccessAlliedRaces()
         {
             if (ConfigMgr.GetDefaultValue("CharacterCreating.DisableAlliedRaceAchievementRequirement", false))
-                return true;
+                return true; 
             else
                 return GetAccountExpansion() >= Expansion.BattleForAzeroth;
+        }
+
+        void InitWarden(BigInteger k)
+        {
+            if (_os == "Win")
+            {
+                _warden = new WardenWin();
+                _warden.Init(this, k);
+            }
+            else if (_os == "Wn64")
+            {
+                // Not implemented
+            }
+            else if (_os == "Mc64")
+            {
+                // Not implemented
+            }
         }
 
         public void LoadPermissions()
@@ -751,214 +791,7 @@ namespace Game
             });
         }
 
-        public RBACData GetRBACData()
-        {
-            return _RBACData;
-        }
-
-        public bool HasPermission(RBACPermissions permission)
-        {
-            if (_RBACData == null)
-                LoadPermissions();
-
-            bool hasPermission = _RBACData.HasPermission(permission);
-            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
-
-            return hasPermission;
-        }
-
-        public void InvalidateRBACData()
-        {
-            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
-            _RBACData = null;
-        }
-
-        public void ResetTimeSync()
-        {
-            _timeSyncNextCounter = 0;
-            _pendingTimeSyncRequests.Clear();
-        }
-
-        public void SendTimeSync()
-        {
-            TimeSyncRequest timeSyncRequest = new();
-            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
-            SendPacket(timeSyncRequest);
-
-            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
-
-            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
-            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
-            _timeSyncNextCounter++;
-        }
-
-        public Locale GetSessionDbcLocale() { return _sessionDbcLocale; }
-        public Locale GetSessionDbLocaleIndex() { return _sessionDbLocaleIndex; }
-
-        public uint GetLatency() { return _latency; }
-        public void SetLatency(uint latency) { _latency = latency; }
-
-        public void ResetTimeOutTime(bool onlyActive)
-        {
-            if (GetPlayer())
-                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
-            else if (!onlyActive)
-                _timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
-        }
-
-        public uint GetRecruiterId() { return _recruiterId; }
-        public bool IsARecruiter() { return _isRecruiter; }
-
-        // Packets cooldown
-        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
-        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
-
-        // Battle Pets
-        public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
-        public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
-
-        // Battlenet
-        public Array<byte> GetRealmListSecret() { return _realmListSecret; }
-        public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
-
-        public static implicit operator bool(WorldSession session)
-        {
-            return session != null;
-        }
-
-        private void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
-        {
-            Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
-        }
-
-        private void LoadAccountData(SQLResult result, AccountDataTypes mask)
-        {
-            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
-                if (Convert.ToBoolean((int)mask & (1 << i)))
-                    _accountData[i] = new AccountData();
-
-            if (result.IsEmpty())
-                return;
-
-            do
-            {
-                int type = result.Read<byte>(0);
-                if (type >= (int)AccountDataTypes.Max)
-                {
-                    Log.outError(LogFilter.Server, "Table `{0}` have invalid account _data Type ({1}), ignore.",
-                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
-                    continue;
-                }
-
-                if (((int)mask & (1 << type)) == 0)
-                {
-                    Log.outError(LogFilter.Server, "Table `{0}` have non appropriate for table  account _data Type ({1}), ignore.",
-                        mask == AccountDataTypes.GlobalCacheMask ? "account_data" : "character_account_data", type);
-                    continue;
-                }
-
-                _accountData[type].Time = result.Read<long>(1);
-                var bytes = result.Read<byte[]>(2);
-                var line = Encoding.Default.GetString(bytes);
-                _accountData[type].Data = line;
-            }
-            while (result.NextRow());
-        }
-
-        private void SetAccountData(AccountDataTypes type, long time, string data)
-        {
-            if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
-                stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (byte)type);
-                stmt.AddValue(2, time);
-                stmt.AddValue(3, data);
-                DB.Characters.Execute(stmt);
-            }
-            else
-            {
-                // _player can be NULL and packet received after logout but _GUID still store correct Guid
-                if (_GUIDLow == 0)
-                    return;
-
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
-                stmt.AddValue(0, _GUIDLow);
-                stmt.AddValue(1, (byte)type);
-                stmt.AddValue(2, time);
-                stmt.AddValue(3, data);
-                DB.Characters.Execute(stmt);
-            }
-
-            _accountData[(int)type].Time = time;
-            _accountData[(int)type].Data = data;
-        }
-
-        private bool ValidateHyperlinksAndMaybeKick(string str)
-        {
-            if (Hyperlink.CheckAllLinks(str))
-                return true;
-
-            Log.outError(LogFilter.Network, $"Player {GetPlayer().GetName()} {GetPlayer().GetGUID()} sent a message with an invalid link:\n{str}");
-
-            if (WorldConfig.GetIntValue(WorldCfg.ChatStrictLinkCheckingKick) != 0)
-                KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
-
-            return false;
-        }
-
-        private void HandleWardenData(WardenData packet)
-        {
-            if (_warden == null || packet.Data.GetSize() == 0)
-                return;
-
-            _warden.HandleData(packet.Data);
-        }
-
-        private void SetSecurity(AccountTypes security) { _security = security; }
-
-        private void SetLogoutStartTime(long requestTime)
-        {
-            _logoutTime = requestTime;
-        }
-
-        private bool ShouldLogOut(long currTime)
-        {
-            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
-        }
-
-        private void ProcessQueryCallbacks()
-        {
-            _queryProcessor.ProcessReadyCallbacks();
-            _transactionCallbacks.ProcessReadyCallbacks();
-            _queryHolderProcessor.ProcessReadyCallbacks();
-        }
-
-        private TransactionCallback AddTransactionCallback(TransactionCallback callback)
-        {
-            return _transactionCallbacks.AddCallback(callback);
-        }
-
-        private void InitWarden(BigInteger k)
-        {
-            if (_os == "Win")
-            {
-                _warden = new WardenWin();
-                _warden.Init(this, k);
-            }
-            else if (_os == "Wn64")
-            {
-                // Not implemented
-            }
-            else if (_os == "Mc64")
-            {
-                // Not implemented
-            }
-        }
-
-        private void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
+        void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> holder, SQLQueryHolder<AccountInfoQueryLoad> realmHolder)
         {
             LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypes.GlobalCacheMask);
             LoadTutorialsData(realmHolder.GetResult(AccountInfoQueryLoad.TutorialsIndexPerRealm));
@@ -968,7 +801,7 @@ namespace Game
             _collectionMgr.LoadAccountItemAppearances(holder.GetResult(AccountInfoQueryLoad.ItemAppearances), holder.GetResult(AccountInfoQueryLoad.ItemFavoriteAppearances));
             _collectionMgr.LoadAccountTransmogIllusions(holder.GetResult(AccountInfoQueryLoad.TransmogIllusions));
 
-            if (!_inQueue)
+            if (!m_inQueue)
                 SendAuthResponse(BattlenetRpcErrorCode.Ok, false);
             else
                 SendAuthWaitQueue(0);
@@ -1000,37 +833,364 @@ namespace Game
             _battlePetMgr.LoadFromDB(holder.GetResult(AccountInfoQueryLoad.BattlePets), holder.GetResult(AccountInfoQueryLoad.BattlePetSlot));
         }
 
-        private AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
-
-        private uint GetTutorialInt(byte index) { return _tutorials[index]; }
-
-        private void SetTutorialInt(byte index, uint value)
+        public RBACData GetRBACData()
         {
-            if (_tutorials[index] != value)
+            return _RBACData;
+        }
+
+        public bool HasPermission(RBACPermissions permission)
+        {
+            if (_RBACData == null)
+                LoadPermissions();
+
+            bool hasPermission = _RBACData.HasPermission(permission);
+            Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+
+            return hasPermission;
+        }
+
+        public void InvalidateRBACData()
+        {
+            Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
+            _RBACData = null;
+        }
+
+        AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
+
+        uint GetTutorialInt(byte index) { return tutorials[index]; }
+
+        void SetTutorialInt(byte index, uint value)
+        {
+            if (tutorials[index] != value)
             {
-                _tutorials[index] = value;
-                _tutorialsChanged |= TutorialsFlag.Changed;
+                tutorials[index] = value;
+                tutorialsChanged |= TutorialsFlag.Changed;
             }
         }
 
-        private uint AdjustClientMovementTime(uint time)
+        public void ResetTimeSync()
+        {
+            _timeSyncNextCounter = 0;
+            _pendingTimeSyncRequests.Clear();
+        }
+
+        public void SendTimeSync()
+        {
+            TimeSyncRequest timeSyncRequest = new();
+            timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
+            SendPacket(timeSyncRequest);
+
+            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
+
+            // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
+            _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
+            _timeSyncNextCounter++;
+        }
+
+        uint AdjustClientMovementTime(uint time)
         {
             long movementTime = (long)time + _timeSyncClockDelta;
             if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
             {
-                Log.outWarn(LogFilter.Misc, "The computed movement Time using clockDelta is erronous. Using fallback instead");
+                Log.outWarn(LogFilter.Misc, "The computed movement time using clockDelta is erronous. Using fallback instead");
                 return GameTime.GetGameTimeMS();
             }
             else
                 return (uint)movementTime;
         }
 
-        private bool IsConnectionIdle()
+        public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
+        public Locale GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
+
+        public uint GetLatency() { return m_latency; }
+        public void SetLatency(uint latency) { m_latency = latency; }
+        public void ResetTimeOutTime(bool onlyActive)
         {
-            return _timeOutTime < GameTime.GetGameTime() && !_inQueue;
+            if (GetPlayer())
+                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
+            else if (!onlyActive)
+                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
+        }
+        bool IsConnectionIdle()
+        {
+            return m_timeOutTime < GameTime.GetGameTime() && !m_inQueue;
         }
 
-        private void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
+        public uint GetRecruiterId() { return recruiterId; }
+        public bool IsARecruiter() { return isRecruiter; }
 
+        // Packets cooldown
+        public long GetCalendarEventCreationCooldown() { return _calendarEventCreationCooldown; }
+        public void SetCalendarEventCreationCooldown(long cooldown) { _calendarEventCreationCooldown = cooldown; }
+
+        // Battle Pets
+        public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
+        public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
+
+        // Battlenet
+        public Array<byte> GetRealmListSecret() { return _realmListSecret; }
+        void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
+        public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
+
+        public CommandHandler CommandHandler { get; private set; }
+
+        public static implicit operator bool(WorldSession session)
+        {
+            return session != null;
+        }
+
+        public BattlepayManager GetBattlePayMgr()
+        {
+            return _battlePayMgr;
+        }
+
+        #region Fields
+        List<ObjectGuid> _legitCharacters = new();
+        ulong m_GUIDLow;
+        Player _player;
+        WorldSocket[] m_Socket = new WorldSocket[(int)ConnectionType.Max];
+        string m_Address;
+
+        AccountTypes _security;
+        uint _accountId;
+        string _accountName;
+        uint _battlenetAccountId;
+        Expansion m_accountExpansion;
+        Expansion m_expansion;
+        string _os;
+
+        uint expireTime;
+        bool forceExit;
+
+        DosProtection AntiDOS;
+        Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
+
+        long _logoutTime;
+        bool m_inQueue;
+        ObjectGuid m_playerLoading;                               // code processed in LoginPlayer
+        bool m_playerLogout;                                // code processed in LogoutPlayer
+        bool m_playerRecentlyLogout;
+        bool m_playerSave;
+        Locale m_sessionDbcLocale;
+        Locale m_sessionDbLocaleIndex;
+        uint m_latency;
+        AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
+        uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
+        TutorialsFlag tutorialsChanged;
+
+        Array<byte> _realmListSecret = new(32);
+        Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
+        Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new();
+        uint _battlenetRequestToken;
+
+        List<string> _registeredAddonPrefixes = new();
+        bool _filterAddonMessages;
+        uint recruiterId;
+        bool isRecruiter;
+
+        public long m_muteTime;
+        long m_timeOutTime;
+
+        ConcurrentQueue<WorldPacket> _recvQueue = new();
+        RBACData _RBACData;
+
+        CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
+        long _timeSyncClockDelta;
+
+        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
+        uint _timeSyncNextCounter;
+        uint _timeSyncTimer;
+
+        CollectionMgr _collectionMgr;
+
+        ConnectToKey _instanceConnectKey;
+
+        // Packets cooldown
+        long _calendarEventCreationCooldown;
+
+        BattlePetMgr _battlePetMgr;
+        private BattlepayManager _battlePayMgr;
+
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
+        AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
+        AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
+        #endregion
+    }
+
+    public struct ConnectToKey
+    {
+        public ulong Raw
+        {
+            get { return ((ulong)AccountId | ((ulong)connectionType << 32) | (Key << 33)); }
+            set
+            {
+                AccountId = (uint)(value & 0xFFFFFFFF);
+                connectionType = (ConnectionType)((value >> 32) & 1);
+                Key = (value >> 33);
+            }
+        }
+
+        public uint AccountId;
+        public ConnectionType connectionType;
+        public ulong Key;
+    }
+
+    public class DosProtection
+    {
+        public DosProtection(WorldSession s)
+        {
+            Session = s;
+            _policy = (Policy)WorldConfig.GetIntValue(WorldCfg.PacketSpoofPolicy);
+        }
+        //todo fix me
+        public bool EvaluateOpcode(WorldPacket packet, long time)
+        {
+            uint maxPacketCounterAllowed = 0;// GetMaxPacketCounterAllowed(p.GetOpcode());
+
+            // Return true if there no limit for the opcode
+            if (maxPacketCounterAllowed == 0)
+                return true;
+
+            if (!_PacketThrottlingMap.ContainsKey(packet.GetOpcode()))
+                _PacketThrottlingMap[packet.GetOpcode()] = new PacketCounter();
+
+            PacketCounter packetCounter = _PacketThrottlingMap[packet.GetOpcode()];
+            if (packetCounter.lastReceiveTime != time)
+            {
+                packetCounter.lastReceiveTime = time;
+                packetCounter.amountCounter = 0;
+            }
+
+            // Check if player is flooding some packets
+            if (++packetCounter.amountCounter <= maxPacketCounterAllowed)
+                return true;
+
+            Log.outWarn(LogFilter.Network, "AntiDOS: Account {0}, IP: {1}, Ping: {2}, Character: {3}, flooding packet (opc: {4} (0x{4}), count: {5})",
+                Session.GetAccountId(), Session.GetRemoteAddress(), Session.GetLatency(), Session.GetPlayerName(), packet.GetOpcode(), packetCounter.amountCounter);
+
+            switch (_policy)
+            {
+                case Policy.Log:
+                    return true;
+                case Policy.Kick:
+                    Log.outInfo(LogFilter.Network, "AntiDOS: Player kicked!");
+                    return false;
+                case Policy.Ban:
+                    BanMode bm = (BanMode)WorldConfig.GetIntValue(WorldCfg.PacketSpoofBanmode);
+                    uint duration = WorldConfig.GetUIntValue(WorldCfg.PacketSpoofBanduration); // in seconds
+                    string nameOrIp = "";
+                    switch (bm)
+                    {
+                        case BanMode.Character: // not supported, ban account
+                        case BanMode.Account:
+                            Global.AccountMgr.GetName(Session.GetAccountId(), out nameOrIp);
+                            break;
+                        case BanMode.IP:
+                            nameOrIp = Session.GetRemoteAddress();
+                            break;
+                    }
+                    Global.WorldMgr.BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding/Spoofing", "Server: AutoDOS");
+                    Log.outInfo(LogFilter.Network, "AntiDOS: Player automatically banned for {0} seconds.", duration);
+                    return false;
+            }
+            return true;
+        }
+
+        Policy _policy;
+        WorldSession Session;
+        Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
+
+        enum Policy
+        {
+            Log,
+            Kick,
+            Ban,
+        }
+    }
+
+    struct PacketCounter
+    {
+        public long lastReceiveTime;
+        public uint amountCounter;
+    }
+
+    public struct AccountData
+    {
+        public long Time;
+        public string Data;
+    }
+
+    class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
+    {
+        public void Initialize(uint accountId, uint battlenetAccountId)
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
+            stmt.AddValue(0, accountId);
+            SetQuery(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_TUTORIALS);
+            stmt.AddValue(0, accountId);
+            SetQuery(AccountInfoQueryLoad.TutorialsIndexPerRealm, stmt);
+        }
+    }
+
+    class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
+    {
+        public void Initialize(uint accountId, uint battlenetAccountId)
+        {
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.GlobalAccountToys, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BATTLE_PETS);
+            stmt.AddValue(0, battlenetAccountId);
+            stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
+            SetQuery(AccountInfoQueryLoad.BattlePets, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BATTLE_PET_SLOTS);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.BattlePetSlot, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_HEIRLOOMS);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.GlobalAccountHeirlooms, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MOUNTS);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.Mounts, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
+            stmt.AddValue(0, accountId);
+            SetQuery(AccountInfoQueryLoad.GlobalRealmCharacterCounts, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ITEM_APPEARANCES);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.ItemAppearances, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ITEM_FAVORITE_APPEARANCES);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.ItemFavoriteAppearances, stmt);
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.TransmogIllusions, stmt);
+        }
+    }
+
+    enum AccountInfoQueryLoad
+    {
+        GlobalAccountToys,
+        BattlePets,
+        BattlePetSlot,
+        GlobalAccountHeirlooms,
+        GlobalRealmCharacterCounts,
+        Mounts,
+        ItemAppearances,
+        ItemFavoriteAppearances,
+        GlobalAccountDataIndexPerRealm,
+        TutorialsIndexPerRealm,
+        TransmogIllusions,
     }
 }

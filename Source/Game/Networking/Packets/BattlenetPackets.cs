@@ -1,21 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Framework.IO;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal class Notification : ServerPacket
+    class Notification : ServerPacket
     {
-        public ByteBuffer Data = new();
-
-        public MethodCall Method;
-
-        public Notification() : base(ServerOpcodes.BattlenetNotification)
-        {
-        }
+        public Notification() : base(ServerOpcodes.BattlenetNotification) { }
 
         public override void Write()
         {
@@ -23,17 +17,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data);
         }
+
+        public MethodCall Method;
+        public ByteBuffer Data = new();
     }
 
-    internal class Response : ServerPacket
+    class Response : ServerPacket
     {
-        public BattlenetRpcErrorCode BnetStatus = BattlenetRpcErrorCode.Ok;
-        public ByteBuffer Data = new();
-        public MethodCall Method;
-
-        public Response() : base(ServerOpcodes.BattlenetResponse)
-        {
-        }
+        public Response() : base(ServerOpcodes.BattlenetResponse) { }
 
         public override void Write()
         {
@@ -42,16 +33,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data);
         }
+
+        public BattlenetRpcErrorCode BnetStatus = BattlenetRpcErrorCode.Ok;
+        public MethodCall Method;
+        public ByteBuffer Data = new();
     }
 
-    internal class ConnectionStatus : ServerPacket
+    class ConnectionStatus : ServerPacket
     {
-        public byte State;
-        public bool SuppressNotification;
-
-        public ConnectionStatus() : base(ServerOpcodes.BattleNetConnectionStatus)
-        {
-        }
+        public ConnectionStatus() : base(ServerOpcodes.BattleNetConnectionStatus) { }
 
         public override void Write()
         {
@@ -59,18 +49,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(SuppressNotification);
             _worldPacket.FlushBits();
         }
+
+        public byte State;
+        public bool SuppressNotification;
     }
 
-    internal class ChangeRealmTicketResponse : ServerPacket
+    class ChangeRealmTicketResponse : ServerPacket
     {
-        public bool Allow = true;
-        public ByteBuffer Ticket;
-
-        public uint Token;
-
-        public ChangeRealmTicketResponse() : base(ServerOpcodes.ChangeRealmTicketResponse)
-        {
-        }
+        public ChangeRealmTicketResponse() : base(ServerOpcodes.ChangeRealmTicketResponse) { }
 
         public override void Write()
         {
@@ -79,17 +65,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Ticket.GetSize());
             _worldPacket.WriteBytes(Ticket);
         }
+
+        public uint Token;
+        public bool Allow = true;
+        public ByteBuffer Ticket;
     }
 
-    internal class BattlenetRequest : ClientPacket
+    class BattlenetRequest : ClientPacket
     {
-        public byte[] Data;
-
-        public MethodCall Method;
-
-        public BattlenetRequest(WorldPacket packet) : base(packet)
-        {
-        }
+        public BattlenetRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -98,38 +82,30 @@ namespace Game.Networking.Packets
 
             Data = _worldPacket.ReadBytes(protoSize);
         }
+
+        public MethodCall Method;
+        public byte[] Data;
     }
 
-    internal class ChangeRealmTicket : ClientPacket
+    class ChangeRealmTicket : ClientPacket
     {
-        public Array<byte> Secret = new(32);
-
-        public uint Token;
-
-        public ChangeRealmTicket(WorldPacket packet) : base(packet)
-        {
-        }
+        public ChangeRealmTicket(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Token = _worldPacket.ReadUInt32();
-
             for (var i = 0; i < Secret.GetLimit(); ++i)
                 Secret[i] = _worldPacket.ReadUInt8();
         }
+
+        public uint Token;
+        public Array<byte> Secret = new(32);
     }
 
     public struct MethodCall
     {
-        public uint GetServiceHash()
-        {
-            return (uint)(Type >> 32);
-        }
-
-        public uint GetMethodId()
-        {
-            return (uint)(Type & 0xFFFFFFFF);
-        }
+        public uint GetServiceHash() { return (uint)(Type >> 32); }
+        public uint GetMethodId() { return (uint)(Type & 0xFFFFFFFF); }
 
         public void Read(ByteBuffer data)
         {

@@ -1,22 +1,24 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Framework.Database;
+using Game.Entities;
+using Game.Maps;
 using System;
 using System.Collections.Generic;
-using Framework.Database;
+using System.Linq;
 
 namespace Game
 {
     public class QuestPoolManager : Singleton<QuestPoolManager>
     {
-        private readonly List<QuestPool> _dailyPools = new();
-        private readonly List<QuestPool> _monthlyPools = new();
-        private readonly Dictionary<uint, QuestPool> _poolLookup = new(); // questId -> pool
-        private readonly List<QuestPool> _weeklyPools = new();
+        List<QuestPool> _dailyPools = new();
+        List<QuestPool> _weeklyPools = new();
+        List<QuestPool> _monthlyPools = new();
+        Dictionary<uint, QuestPool> _poolLookup = new(); // questId -> pool
 
-        private QuestPoolManager()
-        {
-        }
+        QuestPoolManager() { }
 
         public static void RegeneratePool(QuestPool pool)
         {
@@ -25,11 +27,9 @@ namespace Game
 
             int n = pool.members.Count - 1;
             pool.activeQuests.Clear();
-
             for (uint i = 0; i < pool.numActive; ++i)
             {
                 uint j = RandomHelper.URand(i, n);
-
                 if (i != j)
                 {
                     var leftList = pool.members[i];
@@ -67,14 +67,12 @@ namespace Game
             _weeklyPools.Clear();
             _monthlyPools.Clear();
 
-            // load template _data from world DB
+            // load template data from world DB
             {
                 SQLResult result = DB.World.Query("SELECT qpm.questId, qpm.poolId, qpm.poolIndex, qpt.numActive FROM quest_pool_members qpm LEFT JOIN quest_pool_template qpt ON qpm.poolId = qpt.poolId");
-
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest pools. DB table `quest_pool_members` is empty.");
-
                     return;
                 }
 
@@ -83,7 +81,6 @@ namespace Game
                     if (result.IsNull(2))
                     {
                         Log.outError(LogFilter.Sql, $"Table `quest_pool_members` contains reference to non-existing pool {result.Read<uint>(1)}. Skipped.");
-
                         continue;
                     }
 
@@ -93,31 +90,21 @@ namespace Game
                     uint numActive = result.Read<uint>(3);
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
-
                     if (quest == null)
                     {
                         Log.outError(LogFilter.Sql, "Table `quest_pool_members` contains reference to non-existing quest %u. Skipped.", questId);
-
                         continue;
                     }
-
-                    if (!quest.IsDailyOrWeekly() &&
-                        !quest.IsMonthly())
+                    if (!quest.IsDailyOrWeekly() && !quest.IsMonthly())
                     {
                         Log.outError(LogFilter.Sql, "Table `quest_pool_members` contains reference to quest %u, which is neither daily, weekly nor monthly. Skipped.", questId);
-
                         continue;
                     }
 
                     if (!lookup.ContainsKey(poolId))
                     {
                         var poolList = quest.IsDaily() ? _dailyPools : quest.IsWeekly() ? _weeklyPools : _monthlyPools;
-
-                        poolList.Add(new QuestPool()
-                        {
-                            poolId = poolId,
-                            numActive = numActive
-                        });
+                        poolList.Add(new QuestPool() { poolId = poolId, numActive = numActive });
 
                         lookup.Add(poolId, new Tuple<List<QuestPool>, int>(poolList, poolList.Count - 1));
                     }
@@ -132,53 +119,44 @@ namespace Game
             // load saved spawns from character DB
             {
                 SQLResult result = DB.Characters.Query("SELECT pool_id, quest_id FROM pool_quest_save");
-
                 if (!result.IsEmpty())
                 {
                     List<uint> unknownPoolIds = new();
-
                     do
                     {
                         uint poolId = result.Read<uint>(0);
                         uint questId = result.Read<uint>(1);
 
                         var it = lookup.LookupByKey(poolId);
-
-                        if (it == null ||
-                            it.Item1 == null)
+                        if (it == null || it.Item1 == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `pool_quest_save` contains reference to non-existant quest pool %u. Deleted.", poolId);
                             unknownPoolIds.Add(poolId);
-
                             continue;
                         }
 
                         it.Item1[it.Item2].activeQuests.Add(questId);
                     } while (result.NextRow());
 
-                    SQLTransaction trans0 = new();
-
+                    SQLTransaction trans0 = new SQLTransaction();
                     foreach (uint poolId in unknownPoolIds)
                     {
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_POOL_QUEST_SAVE);
                         stmt.AddValue(0, poolId);
                         trans0.Append(stmt);
                     }
-
                     DB.Characters.CommitTransaction(trans0);
                 }
             }
 
             // post-processing and sanity checks
-            SQLTransaction trans = new();
-
+            SQLTransaction trans = new SQLTransaction();
             foreach (var pair in lookup)
             {
                 if (pair.Value.Item1 == null)
                     continue;
 
                 QuestPool pool = pair.Value.Item1[pair.Value.Item2];
-
                 if (pool.members.Count < pool.numActive)
                 {
                     Log.outError(LogFilter.Sql, $"Table `quest_pool_template` contains quest pool {pool.poolId} requesting {pool.numActive} spawns, but only has {pool.members.Count} members. Requested spawns reduced.");
@@ -186,27 +164,22 @@ namespace Game
                 }
 
                 bool doRegenerate = pool.activeQuests.Empty();
-
                 if (!doRegenerate)
                 {
                     List<uint> accountedFor = new();
                     uint activeCount = 0;
-
                     for (uint i = (uint)pool.members.Count; (i--) != 0;)
                     {
                         var member = pool.members[i];
-
                         if (member.Empty())
                         {
                             Log.outError(LogFilter.Sql, $"Table `quest_pool_members` contains no entries at index {i} for quest pool {pool.poolId}. Index removed.");
                             pool.members.Remove(i);
-
                             continue;
                         }
 
                         // check if the first member is active
                         bool status = pool.activeQuests.Contains(member[0]);
-
                         // temporarily remove any spawns that are accounted for
                         if (status)
                         {
@@ -218,15 +191,11 @@ namespace Game
                         foreach (var id in member)
                         {
                             bool otherStatus = pool.activeQuests.Contains(id);
-
                             if (status != otherStatus)
-                                Log.outWarn(LogFilter.Sql,
-                                            $"Table `pool_quest_save` {(status ? "does not have" : "has")} quest {id} (in pool {pool.poolId}, index {i}) saved, but its index is{(status ? "" : " not")} " +
-                                            $"active (because quest {member[0]} is{(status ? "" : " not")} in the table). Set quest {id} to {(status ? "" : "in")}active.");
-
+                                Log.outWarn(LogFilter.Sql, $"Table `pool_quest_save` {(status ? "does not have" : "has")} quest {id} (in pool {pool.poolId}, index {i}) saved, but its index is{(status ? "" : " not")} " +
+                                    $"active (because quest {member[0]} is{(status ? "" : " not")} in the table). Set quest {id} to {(status ? "" : "in")}active.");
                             if (otherStatus)
                                 pool.activeQuests.Remove(id);
-
                             if (status)
                                 accountedFor.Add(id);
                         }
@@ -262,43 +231,43 @@ namespace Game
                         if (_poolLookup.ContainsKey(quest))
                         {
                             Log.outError(LogFilter.Sql, $"Table `quest_pool_members` lists quest {quest} as member of pool {pool.poolId}, but it is already a member of pool {_poolLookup[quest].poolId}. Skipped.");
-
                             continue;
                         }
-
                         _poolLookup[quest] = pool;
                     }
                 }
             }
-
             DB.Characters.CommitTransaction(trans);
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_dailyPools.Count} daily, {_weeklyPools.Count} weekly and {_monthlyPools.Count} monthly quest pools in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        void Regenerate(List<QuestPool> pools)
+        {
+            SQLTransaction trans = new SQLTransaction();
+            foreach (QuestPool pool in pools)
+            {
+                RegeneratePool(pool);
+                SaveToDB(pool, trans);
+            }
+            DB.Characters.CommitTransaction(trans);
         }
 
         // the storage structure ends up making this kind of inefficient
         // we don't use it in practice (only in debug commands), so that's fine
         public QuestPool FindQuestPool(uint poolId)
         {
-            bool lambda(QuestPool p)
-            {
-                return p.poolId == poolId;
-            }
-
-            ;
+            bool lambda(QuestPool p) { return p.poolId == poolId; };
 
             var questPool = _dailyPools.Find(lambda);
-
             if (questPool != null)
                 return questPool;
 
             questPool = _weeklyPools.Find(lambda);
-
             if (questPool != null)
                 return questPool;
 
             questPool = _monthlyPools.Find(lambda);
-
             if (questPool != null)
                 return questPool;
 
@@ -308,52 +277,24 @@ namespace Game
         public bool IsQuestActive(uint questId)
         {
             var it = _poolLookup.LookupByKey(questId);
-
             if (it == null) // not pooled
                 return true;
 
             return it.activeQuests.Contains(questId);
         }
 
-        public void ChangeDailyQuests()
-        {
-            Regenerate(_dailyPools);
-        }
+        public void ChangeDailyQuests() { Regenerate(_dailyPools); }
+        public void ChangeWeeklyQuests() { Regenerate(_weeklyPools); }
+        public void ChangeMonthlyQuests() { Regenerate(_monthlyPools); }
 
-        public void ChangeWeeklyQuests()
-        {
-            Regenerate(_weeklyPools);
-        }
-
-        public void ChangeMonthlyQuests()
-        {
-            Regenerate(_monthlyPools);
-        }
-
-        public bool IsQuestPooled(uint questId)
-        {
-            return _poolLookup.ContainsKey(questId);
-        }
-
-        private void Regenerate(List<QuestPool> pools)
-        {
-            SQLTransaction trans = new();
-
-            foreach (QuestPool pool in pools)
-            {
-                RegeneratePool(pool);
-                SaveToDB(pool, trans);
-            }
-
-            DB.Characters.CommitTransaction(trans);
-        }
+        public bool IsQuestPooled(uint questId) { return _poolLookup.ContainsKey(questId); }
     }
 
     public class QuestPool
     {
-        public List<uint> activeQuests = new();
-        public MultiMap<uint, uint> members = new();
-        public uint numActive;
         public uint poolId;
+        public uint numActive;
+        public MultiMap<uint, uint> members = new();
+        public List<uint> activeQuests = new();
     }
 }

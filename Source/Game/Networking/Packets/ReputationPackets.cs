@@ -1,22 +1,16 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
     public class InitializeFactions : ServerPacket
     {
-        public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
-        public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
+        const ushort FactionCount = 443;
 
-        public int[] FactionStandings = new int[FactionCount];
-        private const ushort FactionCount = 443;
-
-        public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance)
-        {
-        }
+        public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -31,61 +25,55 @@ namespace Game.Networking.Packets
 
             _worldPacket.FlushBits();
         }
+
+        public int[] FactionStandings = new int[FactionCount];
+        public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
+        public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
     }
 
-    internal class RequestForcedReactions : ClientPacket
+    class RequestForcedReactions : ClientPacket
     {
-        public RequestForcedReactions(WorldPacket packet) : base(packet)
-        {
-        }
+        public RequestForcedReactions(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class SetForcedReactions : ServerPacket
+    class SetForcedReactions : ServerPacket
     {
-        public List<ForcedReaction> Reactions = new();
-
-        public SetForcedReactions() : base(ServerOpcodes.SetForcedReactions, ConnectionType.Instance)
-        {
-        }
+        public SetForcedReactions() : base(ServerOpcodes.SetForcedReactions, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Reactions.Count);
-
             foreach (ForcedReaction reaction in Reactions)
                 reaction.Write(_worldPacket);
         }
+
+        public List<ForcedReaction> Reactions = new();
     }
 
-    internal class SetFactionStanding : ServerPacket
+    class SetFactionStanding : ServerPacket
     {
-        public float BonusFromAchievementSystem;
-        public List<FactionStandingData> Faction = new();
-        public bool ShowVisual;
-
-        public SetFactionStanding() : base(ServerOpcodes.SetFactionStanding, ConnectionType.Instance)
-        {
-        }
+        public SetFactionStanding() : base(ServerOpcodes.SetFactionStanding, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteFloat(BonusFromAchievementSystem);
 
             _worldPacket.WriteInt32(Faction.Count);
-
             foreach (FactionStandingData factionStanding in Faction)
                 factionStanding.Write(_worldPacket);
 
             _worldPacket.WriteBit(ShowVisual);
             _worldPacket.FlushBits();
         }
+
+        public float BonusFromAchievementSystem;
+        public List<FactionStandingData> Faction = new();
+        public bool ShowVisual;
     }
 
-    internal struct ForcedReaction
+    struct ForcedReaction
     {
         public void Write(WorldPacket data)
         {
@@ -97,7 +85,7 @@ namespace Game.Networking.Packets
         public int Reaction;
     }
 
-    internal readonly struct FactionStandingData
+    struct FactionStandingData
     {
         public FactionStandingData(int index, int standing)
         {
@@ -111,7 +99,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Standing);
         }
 
-        private readonly int Index;
-        private readonly int Standing;
+        int Index;
+        int Standing;
     }
 }

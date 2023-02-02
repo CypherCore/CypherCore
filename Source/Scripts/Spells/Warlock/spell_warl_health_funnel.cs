@@ -6,7 +6,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Warlock
 {
@@ -60,8 +60,8 @@ namespace Scripts.Spells.Warlock
                 modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
 
             SpellNonMeleeDamage damageInfo = new(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId());
-            damageInfo.PeriodicLog = true;
-            damageInfo.Damage = damage;
+            damageInfo.periodicLog = true;
+            damageInfo.damage = damage;
             caster.DealSpellDamage(damageInfo, false);
             caster.SendSpellNonMeleeDamageLog(damageInfo);
         }

@@ -32,7 +32,7 @@ namespace Scripts.Spells.Warlock
 
         private void HandleDummy(uint effIndex)
         {
-            SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().ActivePlayerData.SpellCritPercentage));
+            SetHitDamage(GetHitDamage() + MathFunctions.CalculatePct(GetHitDamage(), GetCaster().ToPlayer().m_activePlayerData.SpellCritPercentage));
         }
     }
 }

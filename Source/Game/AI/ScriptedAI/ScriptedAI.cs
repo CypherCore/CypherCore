@@ -1,23 +1,22 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Maps.Checks;
-using Game.Maps.Notifiers;
 using Game.Spells;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.AI
 {
     public class ScriptedAI : CreatureAI
     {
-        private readonly Difficulty _difficulty;
-        private readonly bool _isHeroic;
-        private bool _isCombatMovementAllowed;
+        Difficulty _difficulty;
+        bool _isCombatMovementAllowed;
+        bool _isHeroic;
 
         public ScriptedAI(Creature creature) : base(creature)
         {
@@ -47,7 +46,7 @@ namespace Game.AI
         //Called at World update tick
         public override void UpdateAI(uint diff)
         {
-            //Check if we have a current Target
+            //Check if we have a current target
             if (!UpdateVictim())
                 return;
 
@@ -80,8 +79,7 @@ namespace Game.AI
         //Cast spell by spell info
         public void DoCastSpell(Unit target, SpellInfo spellInfo, bool triggered = false)
         {
-            if (target == null ||
-                me.IsNonMeleeSpellCast(false))
+            if (target == null || me.IsNonMeleeSpellCast(false))
                 return;
 
             me.StopMoving();
@@ -97,7 +95,6 @@ namespace Game.AI
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
                 Log.outError(LogFilter.ScriptsAi, $"ScriptedAI::DoPlaySoundToSet: Invalid soundId {soundId} used in DoPlaySoundToSet (Source: {source.GetGUID()})");
-
                 return;
             }
 
@@ -105,11 +102,11 @@ namespace Game.AI
         }
 
         /// <summary>
-        ///  Add specified amount of threat directly to victim (ignores redirection effects) - also puts victim in combat and engages them if necessary
+        /// Add specified amount of threat directly to victim (ignores redirection effects) - also puts victim in combat and engages them if necessary
         /// </summary>
-        /// <param Name="victim"></param>
-        /// <param Name="amount"></param>
-        /// <param Name="who"></param>
+        /// <param name="victim"></param>
+        /// <param name="amount"></param>
+        /// <param name="who"></param>
         public void AddThreat(Unit victim, float amount, Unit who = null)
         {
             if (!victim)
@@ -122,11 +119,11 @@ namespace Game.AI
         }
 
         /// <summary>
-        ///  Adds/removes the specified percentage from the specified victim's threat (to who, or me if not specified)
+        /// Adds/removes the specified percentage from the specified victim's threat (to who, or me if not specified)
         /// </summary>
-        /// <param Name="victim"></param>
-        /// <param Name="pct"></param>
-        /// <param Name="who"></param>
+        /// <param name="victim"></param>
+        /// <param name="pct"></param>
+        /// <param name="who"></param>
         public void ModifyThreatByPercent(Unit victim, int pct, Unit who = null)
         {
             if (!victim)
@@ -139,10 +136,10 @@ namespace Game.AI
         }
 
         /// <summary>
-        ///  Resets the victim's threat level to who (or me if not specified) to zero
+        /// Resets the victim's threat level to who (or me if not specified) to zero
         /// </summary>
-        /// <param Name="victim"></param>
-        /// <param Name="who"></param>
+        /// <param name="victim"></param>
+        /// <param name="who"></param>
         public void ResetThreat(Unit victim, Unit who)
         {
             if (!victim)
@@ -155,9 +152,9 @@ namespace Game.AI
         }
 
         /// <summary>
-        ///  Resets the specified unit's threat list (me if not specified) - does not delete entries, just sets their threat to zero
+        /// Resets the specified unit's threat list (me if not specified) - does not delete entries, just sets their threat to zero
         /// </summary>
-        /// <param Name="who"></param>
+        /// <param name="who"></param>
         public void ResetThreatList(Unit who = null)
         {
             if (!who)
@@ -167,10 +164,10 @@ namespace Game.AI
         }
 
         /// <summary>
-        ///  Returns the threat level of victim towards who (or me if not specified)
+        /// Returns the threat level of victim towards who (or me if not specified)
         /// </summary>
-        /// <param Name="victim"></param>
-        /// <param Name="who"></param>
+        /// <param name="victim"></param>
+        /// <param name="who"></param>
         /// <returns></returns>
         public float GetThreat(Unit victim, Unit who = null)
         {
@@ -183,6 +180,70 @@ namespace Game.AI
             return who.GetThreatManager().GetThreat(victim);
         }
 
+        /// <summary>
+        /// Stops combat, ignoring restrictions, for the given creature
+        /// </summary>
+        /// <param name="who"></param>
+        /// <param name="reset"></param>
+        void ForceCombatStop(Creature who, bool reset = true)
+        {
+            if (who == null || !who.IsInCombat())
+                return;
+
+            who.CombatStop(true);
+            who.DoNotReacquireSpellFocusTarget();
+            who.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+            if (reset)
+            {
+                who.LoadCreaturesAddon();
+                who.SetTappedBy(null);
+                who.ResetPlayerDamageReq();
+                who.SetLastDamagedTime(0);
+                who.SetCannotReachTarget(false);
+            }
+        }
+
+        /// <summary>
+        /// Stops combat, ignoring restrictions, for the found creatures
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="maxSearchRange"></param>
+        /// <param name="samePhase"></param>
+        /// <param name="reset"></param>
+        void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        {
+            Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
+
+            List<Creature> creatures = new();
+            AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
+            CreatureListSearcher searcher = new(me, creatures, check);
+
+            if (!samePhase)
+                PhasingHandler.SetAlwaysVisible(me, true, false);
+
+            Cell.VisitGridObjects(me, searcher, maxSearchRange);
+
+            if (!samePhase)
+                PhasingHandler.SetAlwaysVisible(me, false, false);
+
+            foreach (Creature creature in creatures)
+                ForceCombatStop(creature, reset);
+        }
+
+        /// <summary>
+        /// Stops combat, ignoring restrictions, for the found creatures
+        /// </summary>
+        /// <param name="creatureEntries"></param>
+        /// <param name="maxSearchRange"></param>
+        /// <param name="samePhase"></param>
+        /// <param name="reset"></param>
+        void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        {
+            foreach (var entry in creatureEntries)
+                ForceCombatStopForCreatureEntry(entry, maxSearchRange, samePhase, reset);
+        }
+
         //Spawns a creature relative to me
         public Creature DoSpawnCreature(uint entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, TimeSpan despawntime)
         {
@@ -192,7 +253,7 @@ namespace Game.AI
         //Returns spells that meet the specified criteria from the creatures spell list
         public SpellInfo SelectSpell(Unit target, SpellSchoolMask school, Mechanics mechanic, SelectTargetType targets, float rangeMin, float rangeMax, SelectEffect effect)
         {
-            //No Target so we can't cast
+            //No target so we can't cast
             if (target == null)
                 return null;
 
@@ -208,61 +269,53 @@ namespace Game.AI
             //Check if each spell is viable(set it to null if not)
             for (uint i = 0; i < SharedConst.MaxCreatureSpells; i++)
             {
-                SpellInfo tempSpell = Global.SpellMgr.GetSpellInfo(me.Spells[i], me.GetMap().GetDifficultyID());
-                AISpellInfoType aiSpell = GetAISpellInfo(me.Spells[i], me.GetMap().GetDifficultyID());
+                SpellInfo tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
+                AISpellInfoType aiSpell = GetAISpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
 
                 //This spell doesn't exist
-                if (tempSpell == null ||
-                    aiSpell == null)
+                if (tempSpell == null || aiSpell == null)
                     continue;
 
                 // Targets and Effects checked first as most used restrictions
                 //Check the spell targets if specified
-                if (targets != 0 &&
-                    !Convert.ToBoolean(aiSpell.Targets & (1 << ((int)targets - 1))))
+                if (targets != 0 && !Convert.ToBoolean(aiSpell.Targets & (1 << ((int)targets - 1))))
                     continue;
 
-                //Check the Type of spell if we are looking for a specific spell Type
-                if (effect != 0 &&
-                    !Convert.ToBoolean(aiSpell.Effects & (1 << ((int)effect - 1))))
+                //Check the type of spell if we are looking for a specific spell type
+                if (effect != 0 && !Convert.ToBoolean(aiSpell.Effects & (1 << ((int)effect - 1))))
                     continue;
 
                 //Check for school if specified
-                if (school != 0 &&
-                    (tempSpell.SchoolMask & school) == 0)
+                if (school != 0 && (tempSpell.SchoolMask & school) == 0)
                     continue;
 
                 //Check for spell mechanic if specified
-                if (mechanic != 0 &&
-                    tempSpell.Mechanic != mechanic)
+                if (mechanic != 0 && tempSpell.Mechanic != mechanic)
                     continue;
 
                 // Continue if we don't have the mana to actually cast this spell
                 bool hasPower = true;
-
                 foreach (SpellPowerCost cost in tempSpell.CalcPowerCost(me, tempSpell.GetSchoolMask()))
+                {
                     if (cost.Amount > me.GetPower(cost.Power))
                     {
                         hasPower = false;
-
                         break;
                     }
-
+                }
+                
                 if (!hasPower)
                     continue;
-
+                
                 //Check if the spell meets our range requirements
-                if (rangeMin != 0 &&
-                    me.GetSpellMinRangeForTarget(target, tempSpell) < rangeMin)
+                if (rangeMin != 0 && me.GetSpellMinRangeForTarget(target, tempSpell) < rangeMin)
                     continue;
 
-                if (rangeMax != 0 &&
-                    me.GetSpellMaxRangeForTarget(target, tempSpell) > rangeMax)
+                if (rangeMax != 0 && me.GetSpellMaxRangeForTarget(target, tempSpell) > rangeMax)
                     continue;
 
-                //Check if our Target is in range
-                if (me.IsWithinDistInMap(target, me.GetSpellMinRangeForTarget(target, tempSpell)) ||
-                    !me.IsWithinDistInMap(target, me.GetSpellMaxRangeForTarget(target, tempSpell)))
+                //Check if our target is in range
+                if (me.IsWithinDistInMap(target, me.GetSpellMinRangeForTarget(target, tempSpell)) || !me.IsWithinDistInMap(target, me.GetSpellMaxRangeForTarget(target, tempSpell)))
                     continue;
 
                 //All good so lets add it to the spell list
@@ -294,9 +347,7 @@ namespace Game.AI
         {
             if (unit == null)
                 return;
-
             Player player = unit.ToPlayer();
-
             if (player != null)
                 player.TeleportTo(unit.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
             else
@@ -306,15 +357,14 @@ namespace Game.AI
         public void DoTeleportAll(float x, float y, float z, float o)
         {
             Map map = me.GetMap();
-
             if (!map.IsDungeon())
                 return;
 
             var PlayerList = map.GetPlayers();
-
             foreach (var player in PlayerList)
                 if (player.IsAlive())
                     player.TeleportTo(me.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
+
         }
 
         //Returns friendly unit with the most amount of hp missing from max hp
@@ -364,7 +414,6 @@ namespace Game.AI
             if (loadDefault)
             {
                 me.LoadEquipment(me.GetOriginalEquipmentId(), true);
-
                 return;
             }
 
@@ -397,55 +446,36 @@ namespace Game.AI
         {
             return source.FindNearestCreatureWithOptions(maxSearchRange, options);
         }
-
+        
         public static GameObject GetClosestGameObjectWithEntry(WorldObject source, uint entry, float maxSearchRange, bool spawnedOnly = true)
         {
             return source.FindNearestGameObject(entry, maxSearchRange, spawnedOnly);
         }
 
-        public bool HealthBelowPct(int pct)
-        {
-            return me.HealthBelowPct(pct);
-        }
+        public bool HealthBelowPct(int pct) { return me.HealthBelowPct(pct); }
+        public bool HealthAbovePct(int pct) { return me.HealthAbovePct(pct); }
 
-        public bool HealthAbovePct(int pct)
-        {
-            return me.HealthAbovePct(pct);
-        }
-
-        public bool IsCombatMovementAllowed()
-        {
-            return _isCombatMovementAllowed;
-        }
+        public bool IsCombatMovementAllowed() { return _isCombatMovementAllowed; }
 
         // return true for heroic mode. i.e.
         //   - for dungeon in mode 10-heroic,
         //   - for raid in mode 10-Heroic
         //   - for raid in mode 25-heroic
         // DO NOT USE to check raid in mode 25-normal.
-        public bool IsHeroic()
-        {
-            return _isHeroic;
-        }
+        public bool IsHeroic() { return _isHeroic; }
 
         // return the dungeon or raid difficulty
-        public Difficulty GetDifficulty()
-        {
-            return _difficulty;
-        }
+        public Difficulty GetDifficulty() { return _difficulty; }
 
         // return true for 25 man or 25 man heroic mode
-        public bool Is25ManRaid()
-        {
-            return _difficulty == Difficulty.Raid25N || _difficulty == Difficulty.Raid25HC;
-        }
+        public bool Is25ManRaid() { return _difficulty == Difficulty.Raid25N || _difficulty == Difficulty.Raid25HC; }
 
         public T DungeonMode<T>(T normal5, T heroic10)
         {
             return _difficulty switch
             {
                 Difficulty.Normal => normal5,
-                _ => heroic10
+                _ => heroic10,
             };
         }
 
@@ -454,7 +484,7 @@ namespace Game.AI
             return _difficulty switch
             {
                 Difficulty.Raid10N => normal10,
-                _ => normal25
+                _ => normal25,
             };
         }
 
@@ -465,73 +495,382 @@ namespace Game.AI
                 Difficulty.Raid10N => normal10,
                 Difficulty.Raid25N => normal25,
                 Difficulty.Raid10HC => heroic10,
-                _ => heroic25
+                _ => heroic25,
             };
         }
+    }
 
-        /// <summary>
-        ///  Stops combat, ignoring restrictions, for the given creature
-        /// </summary>
-        /// <param Name="who"></param>
-        /// <param Name="reset"></param>
-        private void ForceCombatStop(Creature who, bool reset = true)
+    public class BossAI : ScriptedAI
+    {
+        public InstanceScript instance;
+        public SummonList summons;
+        uint _bossId;
+
+        public BossAI(Creature creature, uint bossId) : base(creature)
         {
-            if (who == null ||
-                !who.IsInCombat())
+            instance = creature.GetInstanceScript();
+            summons = new SummonList(creature);
+            _bossId = bossId;
+
+            if (instance != null)
+                SetBoundary(instance.GetBossBoundary(bossId));
+
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+        }
+
+        public void _Reset()
+        {
+            if (!me.IsAlive())
                 return;
 
-            who.CombatStop(true);
-            who.DoNotReacquireSpellFocusTarget();
-            who.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+            me.SetCombatPulseDelay(0);
+            me.ResetLootMode();
+            _events.Reset();
+            summons.DespawnAll();
+            _scheduler.CancelAll();
+            if (instance != null && instance.GetBossState(_bossId) != EncounterState.Done)
+                instance.SetBossState(_bossId, EncounterState.NotStarted);
+        }
 
-            if (reset)
+        public void _JustDied()
+        {
+            _events.Reset();
+            summons.DespawnAll();
+            _scheduler.CancelAll();
+            if (instance != null)
+                instance.SetBossState(_bossId, EncounterState.Done);
+        }
+
+        public void _JustEngagedWith(Unit who)
+        {
+            if (instance != null)
             {
-                who.LoadCreaturesAddon();
-                who.SetTappedBy(null);
-                who.ResetPlayerDamageReq();
-                who.SetLastDamagedTime(0);
-                who.SetCannotReachTarget(false);
+                // bosses do not respawn, check only on enter combat
+                if (!instance.CheckRequiredBosses(_bossId, who.ToPlayer()))
+                {
+                    EnterEvadeMode(EvadeReason.SequenceBreak);
+                    return;
+                }
+                instance.SetBossState(_bossId, EncounterState.InProgress);
+            }
+
+            me.SetCombatPulseDelay(5);
+            me.SetActive(true);
+            DoZoneInCombat();
+            ScheduleTasks();
+        }
+
+        public void TeleportCheaters()
+        {
+            float x, y, z;
+            me.GetPosition(out x, out y, out z);
+
+            foreach (var pair in me.GetCombatManager().GetPvECombatRefs())
+            {
+                Unit target = pair.Value.GetOther(me);
+                if (target.IsControlledByPlayer() && !IsInBoundary(target))
+                    target.NearTeleportTo(x, y, z, 0);
             }
         }
 
-        /// <summary>
-        ///  Stops combat, ignoring restrictions, for the found creatures
-        /// </summary>
-        /// <param Name="entry"></param>
-        /// <param Name="maxSearchRange"></param>
-        /// <param Name="samePhase"></param>
-        /// <param Name="reset"></param>
-        private void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        void ForceCombatStopForCreatureEntry(uint entry, float maxSearchRange = 250.0f, bool reset = true)
         {
             Log.outDebug(LogFilter.ScriptsAi, $"BossAI::ForceStopCombatForCreature: called on {me.GetGUID()}. Debug info: {me.GetDebugInfo()}");
 
-            List<Creature> creatures = new();
-            AllCreaturesOfEntryInRange check = new(me, entry, maxSearchRange);
-            CreatureListSearcher searcher = new(me, creatures, check);
-
-            if (!samePhase)
-                PhasingHandler.SetAlwaysVisible(me, true, false);
-
-            Cell.VisitGridObjects(me, searcher, maxSearchRange);
-
-            if (!samePhase)
-                PhasingHandler.SetAlwaysVisible(me, false, false);
-
+            List<Creature> creatures = me.GetCreatureListWithEntryInGrid(entry, maxSearchRange);
             foreach (Creature creature in creatures)
-                ForceCombatStop(creature, reset);
+            {
+                creature.CombatStop(true);
+                creature.DoNotReacquireSpellFocusTarget();
+                creature.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+
+                if (reset)
+                {
+                    creature.LoadCreaturesAddon();
+                    creature.SetTappedBy(null);
+                    creature.ResetPlayerDamageReq();
+                    creature.SetLastDamagedTime(0);
+                    creature.SetCannotReachTarget(false);
+                }
+            }
         }
 
-        /// <summary>
-        ///  Stops combat, ignoring restrictions, for the found creatures
-        /// </summary>
-        /// <param Name="creatureEntries"></param>
-        /// <param Name="maxSearchRange"></param>
-        /// <param Name="samePhase"></param>
-        /// <param Name="reset"></param>
-        private void ForceCombatStopForCreatureEntry(List<uint> creatureEntries, float maxSearchRange = 250.0f, bool samePhase = true, bool reset = true)
+        public override void JustSummoned(Creature summon)
         {
-            foreach (var entry in creatureEntries)
-                ForceCombatStopForCreatureEntry(entry, maxSearchRange, samePhase, reset);
+            summons.Summon(summon);
+            if (me.IsEngaged())
+                DoZoneInCombat(summon);
         }
+
+        public override void SummonedCreatureDespawn(Creature summon)
+        {
+            summons.Despawn(summon);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+
+            _events.ExecuteEvents(eventId =>
+            {
+                ExecuteEvent(eventId);
+
+                if (me.HasUnitState(UnitState.Casting))
+                    return;
+            });
+
+            DoMeleeAttackIfReady();
+        }
+
+        public void _DespawnAtEvade()
+        {
+            _DespawnAtEvade(TimeSpan.FromSeconds(30));
+        }
+
+        public void _DespawnAtEvade(TimeSpan delayToRespawn, Creature who = null)
+        {
+            if (delayToRespawn < TimeSpan.FromSeconds(2))
+            {
+                Log.outError(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called with delay of {delayToRespawn} seconds, defaulting to 2 (me: {me.GetGUID()})");
+                delayToRespawn = TimeSpan.FromSeconds(2);
+            }
+
+            if (!who)
+                who = me;
+
+            TempSummon whoSummon = who.ToTempSummon();
+            if (whoSummon)
+            {
+                Log.outWarn(LogFilter.ScriptsAi, $"BossAI::_DespawnAtEvade: called on a temporary summon (who: {who.GetGUID()})");
+                whoSummon.UnSummon();
+                return;
+            }
+
+            who.DespawnOrUnsummon(TimeSpan.Zero, delayToRespawn);
+
+            if (instance != null && who == me)
+                instance.SetBossState(_bossId, EncounterState.Fail);
+        }
+
+        public virtual void ExecuteEvent(uint eventId) { }
+
+        public virtual void ScheduleTasks() { }
+
+        public override void Reset() { _Reset(); }
+        public override void JustEngagedWith(Unit who) { _JustEngagedWith(who); }
+        public override void JustDied(Unit killer) { _JustDied(); }
+        public override void JustReachedHome() { _JustReachedHome(); }
+
+        public override bool CanAIAttack(Unit victim) { return IsInBoundary(victim); }
+
+        public void _JustReachedHome() { me.SetActive(false); }
+
+        public uint GetBossId() { return _bossId; }
+    }
+
+    public class WorldBossAI : ScriptedAI
+    {
+        SummonList summons;
+
+        public WorldBossAI(Creature creature) : base(creature)
+        {
+            summons = new SummonList(creature);
+        }
+
+        void _Reset()
+        {
+            if (!me.IsAlive())
+                return;
+
+            _events.Reset();
+            summons.DespawnAll();
+        }
+
+        void _JustDied()
+        {
+            _events.Reset();
+            summons.DespawnAll();
+        }
+
+        void _JustEngagedWith()
+        {
+            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+            if (target)
+                AttackStart(target);
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            summons.Summon(summon);
+            Unit target = SelectTarget(SelectTargetMethod.Random, 0, 0.0f, true);
+            if (target)
+                summon.GetAI().AttackStart(target);
+        }
+
+        public override void SummonedCreatureDespawn(Creature summon)
+        {
+            summons.Despawn(summon);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                ExecuteEvent(eventId);
+
+                if (me.HasUnitState(UnitState.Casting))
+                    return;
+            });
+
+            DoMeleeAttackIfReady();
+        }
+
+        // Hook used to execute events scheduled into EventMap without the need
+        // to override UpdateAI
+        // note: You must re-schedule the event within this method if the event
+        // is supposed to run more than once
+        public virtual void ExecuteEvent(uint eventId) { }
+
+        public override void Reset() { _Reset(); }
+
+        public override void JustEngagedWith(Unit who) { _JustEngagedWith(); }
+
+        public override void JustDied(Unit killer) { _JustDied(); }
+    }
+
+    public class SummonList : List<ObjectGuid>
+    {
+        Creature _me;
+
+        public SummonList(Creature creature)
+        {
+            _me = creature;
+        }
+
+        public void Summon(Creature summon) { Add(summon.GetGUID()); }
+
+        public void DoZoneInCombat(uint entry = 0)
+        {
+            foreach (var id in this)
+            {
+                Creature summon = ObjectAccessor.GetCreature(_me, id);
+                if (summon && summon.IsAIEnabled() && (entry == 0 || summon.GetEntry() == entry))
+                {
+                    summon.GetAI().DoZoneInCombat(null);
+                }
+            }
+        }
+
+        public void DespawnEntry(uint entry)
+        {
+            foreach (var id in this)
+            {
+                Creature summon = ObjectAccessor.GetCreature(_me, id);
+                if (!summon)
+                    Remove(id);
+                else if (summon.GetEntry() == entry)
+                {
+                    Remove(id);
+                    summon.DespawnOrUnsummon();
+                }
+            }
+        }
+
+        public void DespawnAll()
+        {
+            while (!this.Empty())
+            {
+                Creature summon = ObjectAccessor.GetCreature(_me, this.FirstOrDefault());
+                RemoveAt(0);
+                if (summon)
+                    summon.DespawnOrUnsummon();
+            }
+        }
+
+        public void Despawn(Creature summon) { Remove(summon.GetGUID()); }
+
+        public void DespawnIf(ICheck<ObjectGuid> predicate)
+        {
+            this.RemoveAll(predicate);
+        }
+
+        public void DespawnIf(Predicate<ObjectGuid> predicate)
+        {
+            RemoveAll(predicate);
+        }
+
+        public void RemoveNotExisting()
+        {
+            foreach (var id in this)
+            {
+                if (!ObjectAccessor.GetCreature(_me, id))
+                    Remove(id);
+            }
+        }
+
+        public void DoAction(int info, ICheck<ObjectGuid> predicate, ushort max = 0)
+        {
+            // We need to use a copy of SummonList here, otherwise original SummonList would be modified
+            List<ObjectGuid> listCopy = new(this);
+            listCopy.RandomResize(predicate.Invoke, max);
+            DoActionImpl(info, listCopy);
+        }
+
+        public void DoAction(int info, Predicate<ObjectGuid> predicate, ushort max = 0)
+        {
+            // We need to use a copy of SummonList here, otherwise original SummonList would be modified
+            List<ObjectGuid> listCopy = new(this);
+            listCopy.RandomResize(predicate, max);
+            DoActionImpl(info, listCopy);
+        }
+
+        public bool HasEntry(uint entry)
+        {
+            foreach (var id in this)
+            {
+                Creature summon = ObjectAccessor.GetCreature(_me, id);
+                if (summon && summon.GetEntry() == entry)
+                    return true;
+            }
+
+            return false;
+        }
+
+        void DoActionImpl(int action, List<ObjectGuid> summons)
+        {
+            foreach (var guid in summons)
+            {
+                Creature summon = ObjectAccessor.GetCreature(_me, guid);
+                if (summon && summon.IsAIEnabled())
+                    summon.GetAI().DoAction(action);
+            }
+        }
+    }
+
+    public class EntryCheckPredicate : ICheck<ObjectGuid>
+    {
+        uint _entry;
+
+        public EntryCheckPredicate(uint entry)
+        {
+            _entry = entry;
+        }
+
+        public bool Invoke(ObjectGuid guid) { return guid.GetEntry() == _entry; }
     }
 }

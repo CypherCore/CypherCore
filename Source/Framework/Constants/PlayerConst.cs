@@ -26,7 +26,7 @@ namespace Framework.Constants
 
         public const int MaxDailyQuests = 25;
 
-        public static TimeSpan InfinityCooldownDelay = TimeSpan.FromSeconds(Time.Month); // used for set "infinity cooldowns" for spells and check
+        public static TimeSpan InfinityCooldownDelay = TimeSpan.FromSeconds(Time.Month);  // used for set "infinity cooldowns" for spells and check
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
@@ -36,10 +36,7 @@ namespace Framework.Constants
 
         public const int MaxCUFProfiles = 5;
 
-        public static uint[] copseReclaimDelay =
-        {
-            30, 60, 120
-        };
+        public static uint[] copseReclaimDelay = { 30, 60, 120 };
 
         public const int MaxRunes = 7;
         public const int MaxRechargingRunes = 3;
@@ -120,7 +117,7 @@ namespace Framework.Constants
         WrongRealm = 22,
         NotOnTaplist = 23,
         CurrencyNotTradable = 24,
-        NotEnoughCurrency = 25
+        NotEnoughCurrency = 25,
     }
 
     public enum RestFlag
@@ -212,35 +209,35 @@ namespace Framework.Constants
     {
         None = 0,
         Error = 1,
-        MaxPlayers = 2,                  // Transfer ed: Instance Is Full
-        NotFound = 3,                    // Transfer ed: Instance Not Found
-        TooManyInstances = 4,            // You Have Entered Too Many Instances Recently.
-        ZoneInCombat = 6,                // Unable To Zone In While An Encounter Is In Progress.
-        InsufExpanLvl = 7,               // You Must Have <Tbc, Wotlk> Expansion Installed To Access This Area.
-        Difficulty = 8,                  // <Normal, Heroic, Epic> Difficulty Mode Is Not Available For %S.
-        UniqueMessage = 9,               // Until You'Ve Escaped Tlk'S Grasp, You Cannot Leave This Place!
-        TooManyRealmInstances = 10,      // Additional Instances Cannot Be Launched, Please Try Again Later.
-        NeedGroup = 11,                  // Transfer ed: You Must Be In A Raid Group To Enter This Instance
-        NotFound2 = 12,                  // Transfer ed: Instance Not Found
-        NotFound3 = 13,                  // Transfer ed: Instance Not Found
-        NotFound4 = 14,                  // Transfer ed: Instance Not Found
-        RealmOnly = 15,                  // All Players In The Party Must Be From The Same Realm To Enter %S.
-        MapNotAllowed = 16,              // Map Cannot Be Entered At This Time.
+        MaxPlayers = 2,   // Transfer ed: Instance Is Full
+        NotFound = 3,   // Transfer ed: Instance Not Found
+        TooManyInstances = 4,   // You Have Entered Too Many Instances Recently.
+        ZoneInCombat = 6,   // Unable To Zone In While An Encounter Is In Progress.
+        InsufExpanLvl = 7,   // You Must Have <Tbc, Wotlk> Expansion Installed To Access This Area.
+        Difficulty = 8,   // <Normal, Heroic, Epic> Difficulty Mode Is Not Available For %S.
+        UniqueMessage = 9,   // Until You'Ve Escaped Tlk'S Grasp, You Cannot Leave This Place!
+        TooManyRealmInstances = 10,  // Additional Instances Cannot Be Launched, Please Try Again Later.
+        NeedGroup = 11,  // Transfer ed: You Must Be In A Raid Group To Enter This Instance
+        NotFound2 = 12,  // Transfer ed: Instance Not Found
+        NotFound3 = 13,  // Transfer ed: Instance Not Found
+        NotFound4 = 14,  // Transfer ed: Instance Not Found
+        RealmOnly = 15,  // All Players In The Party Must Be From The Same Realm To Enter %S.
+        MapNotAllowed = 16,  // Map Cannot Be Entered At This Time.
         LockedToDifferentInstance = 18,  // You Are Already Locked To %S
         AlreadyCompletedEncounter = 19,  // You Are Ineligible To Participate In At Least One Encounter In This Instance Because You Are Already Locked To An Instance In Which It Has Been Defeated.
-        DifficultyNotFound = 22,         // Client Writes To Console "Unable To Resolve Requested Difficultyid %U To Actual Difficulty For Map %D"
-        XrealmZoneDown = 24,             // Transfer ed: Cross-Realm Zone Is Down
-        SoloPlayerSwitchDifficulty = 26, // This Instance Is Already In Progress. You May Only Switch Difficulties From Inside The Instance.
-        NotCrossFactionCompatible = 33   // This instance isn't available for cross-faction groups
+        DifficultyNotFound = 22,  // Client Writes To Console "Unable To Resolve Requested Difficultyid %U To Actual Difficulty For Map %D"
+        XrealmZoneDown = 24,  // Transfer ed: Cross-Realm Zone Is Down
+        SoloPlayerSwitchDifficulty = 26,  // This Instance Is Already In Progress. You May Only Switch Difficulties From Inside The Instance.
+        NotCrossFactionCompatible = 33,  // This instance isn't available for cross-faction groups
     }
 
     public enum RaidGroupReason
     {
         None = 0,
-        Lowlevel = 1,           // "You are too low level to enter this instance."
-        Only = 2,               // "You must be in a raid group to enter this instance."
-        Full = 3,               // "The instance is full."
-        RequirementsUnmatch = 4 // "You do not meet the requirements to enter this instance."
+        Lowlevel = 1, // "You are too low level to enter this instance."
+        Only = 2, // "You must be in a raid group to enter this instance."
+        Full = 3, // "The instance is full."
+        RequirementsUnmatch = 4  // "You do not meet the requirements to enter this instance."
     }
 
     public enum ResetFailedReason
@@ -264,7 +261,7 @@ namespace Framework.Constants
         PlayerShapeshifted = 9,
         PlayerMoving = 10,
         SameNode = 11,
-        NotStanding = 12
+        NotStanding = 12,
     }
 
     public enum TaxiNodeStatus
@@ -280,9 +277,9 @@ namespace Framework.Constants
         SavePlayer = 0x01,
         ResurrectPlayer = 0x02,
         SpellCastDeserter = 0x04,
-        BGMountRestore = 0x08, // Flag to restore mount state after teleport from BG
-        BGTaxiRestore = 0x10,  // Flag to restore taxi state after teleport from BG
-        BGGroupRestore = 0x20, // Flag to restore group state after teleport from BG
+        BGMountRestore = 0x08,                     // Flag to restore mount state after teleport from BG
+        BGTaxiRestore = 0x10,                     // Flag to restore taxi state after teleport from BG
+        BGGroupRestore = 0x20,                     // Flag to restore group state after teleport from BG
         End
     }
 
@@ -317,7 +314,7 @@ namespace Framework.Constants
     public enum ActionButtonType
     {
         Spell = 0x00,
-        C = 0x01, // click?
+        C = 0x01,                         // click?
         Eqset = 0x20,
         Dropdown = 0x30,
         Macro = 0x40,
@@ -347,16 +344,16 @@ namespace Framework.Constants
         Lava = 3,
         Slime = 4,
         Fire = 5,
-        FallToVoid = 6 // custom case for fall without durability loss
+        FallToVoid = 6                                 // custom case for fall without durability loss
     }
 
     public enum PlayerUnderwaterState
     {
         None = 0x00,
-        InWater = 0x01,     // terrain type is water and player is afflicted by it
-        InLava = 0x02,      // terrain type is lava and player is afflicted by it
-        InSlime = 0x04,     // terrain type is lava and player is afflicted by it
-        InDarkWater = 0x08, // terrain type is dark water and player is afflicted by it
+        InWater = 0x01,             // terrain type is water and player is afflicted by it
+        InLava = 0x02,             // terrain type is lava and player is afflicted by it
+        InSlime = 0x04,             // terrain type is lava and player is afflicted by it
+        InDarkWater = 0x08,             // terrain type is dark water and player is afflicted by it
 
         ExistTimers = 0x10
     }
@@ -364,7 +361,7 @@ namespace Framework.Constants
     public struct RuneCooldowns
     {
         public const int Base = 10000;
-        public const int Miss = 1500; // cooldown applied on runes when the spell misses
+        public const int Miss = 1500;     // cooldown applied on runes when the spell misses
     }
 
     public enum PlayerFlags : uint
@@ -408,7 +405,7 @@ namespace Framework.Constants
         ReagentBankUnlocked = 0x01,
         MercenaryMode = 0x02,
         ArtifactForgeCheat = 0x04,
-        InPvpCombat = 0x0040, // Forbids /Follow
+        InPvpCombat = 0x0040,       // Forbids /Follow
         Mentor = 0x0080,
         Newcomer = 0x0100,
         UnlockedAoeLoot = 0x0200
@@ -455,9 +452,9 @@ namespace Framework.Constants
     {
         ControllingPet = 0x01, // Displays "You have an active summon already" when trying to tame new pet
         TrackStealthed = 0x02,
-        ReleaseTimer = 0x08,    // Display time till auto release spirit
-        NoReleaseWindow = 0x10, // Display no "release spirit" window at all
-        NoPetBar = 0x20,        // CGPetInfo::IsPetBarUsed
+        ReleaseTimer = 0x08,       // Display time till auto release spirit
+        NoReleaseWindow = 0x10,        // Display no "release spirit" window at all
+        NoPetBar = 0x20,   // CGPetInfo::IsPetBarUsed
         OverrideCameraMinHeight = 0x40,
         NewlyBosstedCharacter = 0x80,
         UsingPartGarrison = 0x100,
@@ -502,21 +499,21 @@ namespace Framework.Constants
     public enum CharacterCustomizeFlags
     {
         None = 0x00,
-        Customize = 0x01,  // Name, Gender, Etc...
-        Faction = 0x10000, // Name, Gender, Faction, Etc...
-        Race = 0x100000    // Name, Gender, Race, Etc...
+        Customize = 0x01,       // Name, Gender, Etc...
+        Faction = 0x10000,       // Name, Gender, Faction, Etc...
+        Race = 0x100000        // Name, Gender, Race, Etc...
     }
 
     public enum CharacterFlags3 : uint
     {
         LockedByRevokedVasTransaction = 0x100000,
-        LockedByRevokedCharacterUpgrade = 0x80000000
+        LockedByRevokedCharacterUpgrade = 0x80000000,
     }
 
     public enum CharacterFlags4
     {
         TrialBoost = 0x80,
-        TrialBoostLocked = 0x40000
+        TrialBoostLocked = 0x40000,
     }
 
     public enum TextureSection // TODO: Find a better name. Used in CharSections.dbc
@@ -525,7 +522,7 @@ namespace Framework.Constants
         Face = 1,
         FacialHair = 2,
         Hair = 3,
-        Underwear = 4
+        Underwear = 4,
     }
 
     public enum AtLoginFlags
@@ -546,7 +543,6 @@ namespace Framework.Constants
     {
         // first slot for item stored (in any way in player items data)
         Start = 0,
-
         // last+1 slot for item stored (in any way in player items data)
         End = 218,
         Count = (End - Start)
@@ -556,46 +552,46 @@ namespace Framework.Constants
     {
         Disabled = 0x0000000000000000,
         None = 0x0000000000000001,
-        Private = 0x0000000000000002,             // 1
-        Corporal = 0x0000000000000004,            // 2
-        SergeantA = 0x0000000000000008,           // 3
-        MasterSergeant = 0x0000000000000010,      // 4
-        SergeantMajor = 0x0000000000000020,       // 5
-        Knight = 0x0000000000000040,              // 6
-        KnightLieutenant = 0x0000000000000080,    // 7
-        KnightCaptain = 0x0000000000000100,       // 8
-        KnightChampion = 0x0000000000000200,      // 9
+        Private = 0x0000000000000002, // 1
+        Corporal = 0x0000000000000004, // 2
+        SergeantA = 0x0000000000000008, // 3
+        MasterSergeant = 0x0000000000000010, // 4
+        SergeantMajor = 0x0000000000000020, // 5
+        Knight = 0x0000000000000040, // 6
+        KnightLieutenant = 0x0000000000000080, // 7
+        KnightCaptain = 0x0000000000000100, // 8
+        KnightChampion = 0x0000000000000200, // 9
         LieutenantCommander = 0x0000000000000400, // 10
-        Commander = 0x0000000000000800,           // 11
-        Marshal = 0x0000000000001000,             // 12
-        FieldMarshal = 0x0000000000002000,        // 13
-        GrandMarshal = 0x0000000000004000,        // 14
-        Scout = 0x0000000000008000,               // 15
-        Grunt = 0x0000000000010000,               // 16
-        SergeantH = 0x0000000000020000,           // 17
-        SeniorSergeant = 0x0000000000040000,      // 18
-        FirstSergeant = 0x0000000000080000,       // 19
-        StoneGuard = 0x0000000000100000,          // 20
-        BloodGuard = 0x0000000000200000,          // 21
-        Legionnaire = 0x0000000000400000,         // 22
-        Centurion = 0x0000000000800000,           // 23
-        Champion = 0x0000000001000000,            // 24
-        LieutenantGeneral = 0x0000000002000000,   // 25
-        General = 0x0000000004000000,             // 26
-        Warlord = 0x0000000008000000,             // 27
-        HighWarlord = 0x0000000010000000,         // 28
-        Gladiator = 0x0000000020000000,           // 29
-        Duelist = 0x0000000040000000,             // 30
-        Rival = 0x0000000080000000,               // 31
-        Challenger = 0x0000000100000000,          // 32
-        ScarabLord = 0x0000000200000000,          // 33
-        Conqueror = 0x0000000400000000,           // 34
-        Justicar = 0x0000000800000000,            // 35
-        ChampionOfTheNaaru = 0x0000001000000000,  // 36
-        MercilessGladiator = 0x0000002000000000,  // 37
-        OfTheShatteredSun = 0x0000004000000000,   // 38
-        HandOfAdal = 0x0000008000000000,          // 39
-        VengefulGladiator = 0x0000010000000000    // 40
+        Commander = 0x0000000000000800, // 11
+        Marshal = 0x0000000000001000, // 12
+        FieldMarshal = 0x0000000000002000, // 13
+        GrandMarshal = 0x0000000000004000, // 14
+        Scout = 0x0000000000008000, // 15
+        Grunt = 0x0000000000010000, // 16
+        SergeantH = 0x0000000000020000, // 17
+        SeniorSergeant = 0x0000000000040000, // 18
+        FirstSergeant = 0x0000000000080000, // 19
+        StoneGuard = 0x0000000000100000, // 20
+        BloodGuard = 0x0000000000200000, // 21
+        Legionnaire = 0x0000000000400000, // 22
+        Centurion = 0x0000000000800000, // 23
+        Champion = 0x0000000001000000, // 24
+        LieutenantGeneral = 0x0000000002000000, // 25
+        General = 0x0000000004000000, // 26
+        Warlord = 0x0000000008000000, // 27
+        HighWarlord = 0x0000000010000000, // 28
+        Gladiator = 0x0000000020000000, // 29
+        Duelist = 0x0000000040000000, // 30
+        Rival = 0x0000000080000000, // 31
+        Challenger = 0x0000000100000000, // 32
+        ScarabLord = 0x0000000200000000, // 33
+        Conqueror = 0x0000000400000000, // 34
+        Justicar = 0x0000000800000000, // 35
+        ChampionOfTheNaaru = 0x0000001000000000, // 36
+        MercilessGladiator = 0x0000002000000000, // 37
+        OfTheShatteredSun = 0x0000004000000000, // 38
+        HandOfAdal = 0x0000008000000000, // 39
+        VengefulGladiator = 0x0000010000000000, // 40
     }
 
     [Flags]
@@ -606,10 +602,10 @@ namespace Framework.Constants
         AcceptWhispers = 0x04,
         TaxiCheat = 0x08,
         GMInvisible = 0x10,
-        GMChat = 0x20, // Show GM badge in chat messages
+        GMChat = 0x20,               // Show GM badge in chat messages
 
         // other states
-        PVPDeath = 0x100, // store PvP death status until corpse creating.
+        PVPDeath = 0x100,            // store PvP death status until corpse creating.
 
         // Character services markers
         HasRaceChanged = 0x0200,
@@ -655,7 +651,7 @@ namespace Framework.Constants
         AutoActivatePvp,
         AutoActivatePve,
 
-        BoolOptionsCount
+        BoolOptionsCount,
     }
 
     public enum DuelCompleteType
@@ -717,7 +713,7 @@ namespace Framework.Constants
         UpgradeLevel3 = 0x04,
         UpgradeLevel4 = 0x08,
         UpgradeLevel5 = 0x10,
-        UpgradeLevel6 = 0x20
+        UpgradeLevel6 = 0x20,
     }
 
     public enum HeirloomItemFlags

@@ -10,7 +10,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Hunter
 {
@@ -112,9 +112,8 @@ namespace Scripts.Spells.Hunter
 
         public void OnHit()
         {
-            if (GetCaster().HasAura(SpellIds.ExhilarationR2) &&
-                !GetCaster().HasAura(SpellIds.Lonewolf))
-                GetCaster().CastSpell((Unit)null, SpellIds.ExhilarationPet, true);
+            if (GetCaster().HasAura(SpellIds.ExhilarationR2) && !GetCaster().HasAura(SpellIds.Lonewolf))
+                GetCaster().CastSpell(null, SpellIds.ExhilarationPet, true);
         }
     }
 
@@ -212,7 +211,7 @@ namespace Scripts.Spells.Hunter
 
             // Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
             SpellCastResult result = SpellCastResult.SpellCastOk;
-            UnitFlags unitflag = (UnitFlags)(uint)pet.UnitData.Flags;
+            UnitFlags unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
 
             if (!pet.GetCharmerGUID().IsEmpty())
                 result = SpellCastResult.Charmed;

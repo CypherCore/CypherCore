@@ -72,22 +72,22 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
 
             switch (action)
             {
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 11);
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 1:
+                    player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach2, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 11);
                     player.SendGossipMenu(2606, me.GetGUID());
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 11:
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 11:
                     player.CloseGossipMenu();
                     player.CastSpell(player, SpellIds.LearnSmelt, false);
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 22);
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 2:
+                    player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach3, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 22);
                     player.SendGossipMenu(2604, me.GetGUID());
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 22:
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 22:
                     player.CloseGossipMenu();
                     //are 5 minutes expected? go template may have data to despawn when used at quest
                     instance.DoRespawnGameObject(instance.GetGuidData(DataTypes.DataGoChalice), TimeSpan.FromMinutes(5));
@@ -103,11 +103,11 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
             if (player.GetQuestRewardStatus(QuestIds.SpectralChalice) &&
                 player.GetSkillValue(SkillType.Mining) >= MiscConst.DataSkillpointMin &&
                 !player.HasSpell(SpellIds.SmeltDarkIron))
-                player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTeach1, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 1);
 
             if (!player.GetQuestRewardStatus(QuestIds.SpectralChalice) &&
                 player.GetSkillValue(SkillType.Mining) >= MiscConst.DataSkillpointMin)
-                player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTribute, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                player.AddGossipItem(GossipOptionNpc.None, MiscConst.GossipItemTribute, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 2);
 
             player.SendGossipMenu(player.GetGossipTextId(me), me.GetGUID());
 
@@ -214,13 +214,13 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
 
             switch (action)
             {
-                case eTradeskill.GossipActionInfoDef + 1:
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 1:
                     player.InitGossipMenu(TextIds.GossipSelectDoomrel);
-                    player.AddGossipItem(TextIds.GossipSelectDoomrel, TextIds.GossipMenuIdContinue, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.AddGossipItem(TextIds.GossipSelectDoomrel, TextIds.GossipMenuIdContinue, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 2);
                     player.SendGossipMenu(2605, me.GetGUID());
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 2:
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 2:
                     player.CloseGossipMenu();
                     //start event here
                     me.SetFaction((int)FactionTemplates.DarkIronDwarves);
@@ -238,7 +238,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.TombOfSeven
         public override bool OnGossipHello(Player player)
         {
             player.InitGossipMenu(TextIds.GossipMenuChallenge);
-            player.AddGossipItem(TextIds.GossipMenuChallenge, TextIds.GossipMenuIdChallenge, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+            player.AddGossipItem(TextIds.GossipMenuChallenge, TextIds.GossipMenuIdChallenge, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 1);
             player.SendGossipMenu(2601, me.GetGUID());
 
             return true;

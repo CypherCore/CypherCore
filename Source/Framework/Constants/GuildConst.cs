@@ -27,20 +27,9 @@ namespace Framework.Constants
         public const int EventLogMaxRecords = 100;
         public const int NewsLogMaxRecords = 250;
 
-        public static int[] ChallengeGoldReward =
-        {
-            0, 250, 1000, 500, 250, 500
-        };
-
-        public static int[] ChallengeMaxLevelGoldReward =
-        {
-            0, 125, 500, 250, 125, 250
-        };
-
-        public static int[] ChallengesMaxCount =
-        {
-            0, 7, 1, 3, 0, 3
-        };
+        public static int[] ChallengeGoldReward = { 0, 250, 1000, 500, 250, 500 };
+        public static int[] ChallengeMaxLevelGoldReward = { 0, 125, 500, 250, 125, 250 };
+        public static int[] ChallengesMaxCount = { 0, 7, 1, 3, 0, 3 };
 
         public static uint MinNewsItemLevel = 353;
 
@@ -70,10 +59,10 @@ namespace Framework.Constants
         ViewOffNote = 0x4000,
         EOffNote = 0x8000,
         ModifyGuildInfo = 0x10000,
-        WithdrawGoldLock = 0x20000,  // remove money withdraw capacity
-        WithdrawRepair = 0x40000,    // withdraw for repair
-        WithdrawGold = 0x80000,      // withdraw gold
-        CreateGuildEvent = 0x100000, // wotlk
+        WithdrawGoldLock = 0x20000,                   // remove money withdraw capacity
+        WithdrawRepair = 0x40000,                   // withdraw for repair
+        WithdrawGold = 0x80000,                   // withdraw gold
+        CreateGuildEvent = 0x100000,                   // wotlk
         InAuthenticatedRank = 0x200000,
         EditGuildBankTabInfo = 0x400000,
         Officer = 0x800000,
@@ -87,6 +76,7 @@ namespace Framework.Constants
 
     public enum GuildRankOrder
     {
+
     }
 
     [Flags]
@@ -103,7 +93,7 @@ namespace Framework.Constants
     {
         ZoneId,
         AchievementPoints,
-        Level
+        Level,
     }
 
     public enum GuildCommandType
@@ -169,7 +159,7 @@ namespace Framework.Constants
         PromotePlayer = 3,
         DemotePlayer = 4,
         UninvitePlayer = 5,
-        LeaveGuild = 6
+        LeaveGuild = 6,
     }
 
     public enum GuildBankEventLogTypes
@@ -247,7 +237,7 @@ namespace Framework.Constants
         Guild = 4,
         Arena2v2 = 2,
         Arena3v3 = 3,
-        Arena5v5 = 5
+        Arena5v5 = 5,
     }
 
     public struct CharterCosts

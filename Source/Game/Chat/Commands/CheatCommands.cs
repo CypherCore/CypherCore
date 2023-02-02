@@ -2,18 +2,18 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.IO;
 using Game.Entities;
 
 namespace Game.Chat.Commands
 {
     [CommandGroup("cheat")]
-    internal class CheatCommands
+    class CheatCommands
     {
         [Command("casttime", RBACPermissions.CommandCheatCasttime)]
-        private static bool HandleCasttimeCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleCasttimeCheatCommand(CommandHandler handler, bool? enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Casttime);
-
             if (enableArg.HasValue)
                 enable = enableArg.Value;
 
@@ -32,10 +32,9 @@ namespace Game.Chat.Commands
         }
 
         [Command("cooldown", RBACPermissions.CommandCheatCooldown)]
-        private static bool HandleCoolDownCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleCoolDownCheatCommand(CommandHandler handler, bool? enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Cooldown);
-
             if (enableArg.HasValue)
                 enable = enableArg.Value;
 
@@ -54,75 +53,70 @@ namespace Game.Chat.Commands
         }
 
         [Command("explore", RBACPermissions.CommandCheatExplore)]
-        private static bool HandleExploreCheatCommand(CommandHandler handler, bool reveal)
+        static bool HandleExploreCheatCommand(CommandHandler handler, bool reveal)
         {
             Player chr = handler.GetSelectedPlayer();
-
             if (!chr)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
-
                 return false;
             }
 
             if (reveal)
             {
                 handler.SendSysMessage(CypherStrings.YouSetExploreAll, handler.GetNameLink(chr));
-
                 if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursExploreSetAll, handler.GetNameLink());
             }
             else
             {
                 handler.SendSysMessage(CypherStrings.YouSetExploreNothing, handler.GetNameLink(chr));
-
                 if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursExploreSetNothing, handler.GetNameLink());
             }
 
             for (ushort i = 0; i < PlayerConst.ExploredZonesSize; ++i)
+            {
                 if (reveal)
                     handler.GetSession().GetPlayer().AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
                 else
                     handler.GetSession().GetPlayer().RemoveExploredZones(i, 0xFFFFFFFFFFFFFFFF);
+            }
 
             return true;
         }
 
         [Command("god", RBACPermissions.CommandCheatGod)]
-        private static bool HandleGodModeCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleGodModeCheatCommand(CommandHandler handler, bool? enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.God);
-
             if (enableArg.HasValue)
                 enable = enableArg.Value;
 
             if (enable)
             {
                 handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.God);
-                handler.SendSysMessage("Godmode is ON. You won't take Damage.");
+                handler.SendSysMessage("Godmode is ON. You won't take damage.");
             }
             else
             {
                 handler.GetSession().GetPlayer().SetCommandStatusOff(PlayerCommandStates.God);
-                handler.SendSysMessage("Godmode is OFF. You can take Damage.");
+                handler.SendSysMessage("Godmode is OFF. You can take damage.");
             }
 
             return true;
         }
 
         [Command("power", RBACPermissions.CommandCheatPower)]
-        private static bool HandlePowerCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandlePowerCheatCommand(CommandHandler handler, bool? enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Power);
-
             if (enableArg.HasValue)
                 enable = enableArg.Value;
 
             if (enable)
             {
                 Player player = handler.GetSession().GetPlayer();
-
                 // Set max power to all powers
                 for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
                     player.SetPower(powerType, player.GetMaxPower(powerType));
@@ -140,7 +134,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("status", RBACPermissions.CommandCheatStatus)]
-        private static bool HandleCheatStatusCommand(CommandHandler handler)
+        static bool HandleCheatStatusCommand(CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -154,22 +148,19 @@ namespace Game.Chat.Commands
             handler.SendSysMessage(CypherStrings.CommandCheatPower, player.GetCommandStatus(PlayerCommandStates.Power) ? enabled : disabled);
             handler.SendSysMessage(CypherStrings.CommandCheatWw, player.GetCommandStatus(PlayerCommandStates.Waterwalk) ? enabled : disabled);
             handler.SendSysMessage(CypherStrings.CommandCheatTaxinodes, player.IsTaxiCheater() ? enabled : disabled);
-
             return true;
         }
 
         [Command("taxi", RBACPermissions.CommandCheatTaxi)]
-        private static bool HandleTaxiCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleTaxiCheatCommand(CommandHandler handler, bool? enableArg)
         {
             Player chr = handler.GetSelectedPlayer();
-
             if (!chr)
                 chr = handler.GetSession().GetPlayer();
             else if (handler.HasLowerSecurity(chr, ObjectGuid.Empty)) // check online security
                 return false;
 
             bool enable = !chr.IsTaxiCheater();
-
             if (enableArg.HasValue)
                 enable = enableArg.Value;
 
@@ -177,7 +168,6 @@ namespace Game.Chat.Commands
             {
                 chr.SetTaxiCheater(true);
                 handler.SendSysMessage(CypherStrings.YouGiveTaxis, handler.GetNameLink(chr));
-
                 if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursTaxisAdded, handler.GetNameLink());
             }
@@ -185,7 +175,6 @@ namespace Game.Chat.Commands
             {
                 chr.SetTaxiCheater(false);
                 handler.SendSysMessage(CypherStrings.YouRemoveTaxis, handler.GetNameLink(chr));
-
                 if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursTaxisRemoved, handler.GetNameLink());
             }
@@ -194,10 +183,9 @@ namespace Game.Chat.Commands
         }
 
         [Command("waterwalk", RBACPermissions.CommandCheatWaterwalk)]
-        private static bool HandleWaterWalkCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleWaterWalkCheatCommand(CommandHandler handler, bool? enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Waterwalk);
-
             if (enableArg.HasValue)
                 enable = enableArg.Value;
 

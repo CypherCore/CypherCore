@@ -1,12 +1,13 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Framework.Dynamic;
+using Game.Entities;
+using Game.Movement;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Framework.Constants;
-using Game.Entities;
-using Game.Movement;
 
 namespace Game.Networking.Packets
 {
@@ -14,46 +15,46 @@ namespace Game.Networking.Packets
     {
         public static void ReadTransportInfo(WorldPacket data, ref MovementInfo.TransportInfo transportInfo)
         {
-            transportInfo.Guid = data.ReadPackedGuid(); // Transport Guid
-            transportInfo.Pos.X = data.ReadFloat();
-            transportInfo.Pos.Y = data.ReadFloat();
-            transportInfo.Pos.Z = data.ReadFloat();
-            transportInfo.Pos.Orientation = data.ReadFloat();
-            transportInfo.Seat = data.ReadInt8();   // VehicleSeatIndex
-            transportInfo.Time = data.ReadUInt32(); // MoveTime
+            transportInfo.guid = data.ReadPackedGuid();                 // Transport Guid
+            transportInfo.pos.posX = data.ReadFloat();
+            transportInfo.pos.posY = data.ReadFloat();
+            transportInfo.pos.posZ = data.ReadFloat();
+            transportInfo.pos.Orientation = data.ReadFloat();
+            transportInfo.seat = data.ReadInt8();                 // VehicleSeatIndex
+            transportInfo.time = data.ReadUInt32();                 // MoveTime
 
             bool hasPrevTime = data.HasBit();
             bool hasVehicleId = data.HasBit();
 
             if (hasPrevTime)
-                transportInfo.PrevTime = data.ReadUInt32(); // PrevMoveTime
+                transportInfo.prevTime = data.ReadUInt32();         // PrevMoveTime
 
             if (hasVehicleId)
-                transportInfo.VehicleId = data.ReadUInt32(); // VehicleRecID
+                transportInfo.vehicleId = data.ReadUInt32();        // VehicleRecID
         }
 
         public static void WriteTransportInfo(WorldPacket data, MovementInfo.TransportInfo transportInfo)
         {
-            bool hasPrevTime = transportInfo.PrevTime != 0;
-            bool hasVehicleId = transportInfo.VehicleId != 0;
+            bool hasPrevTime = transportInfo.prevTime != 0;
+            bool hasVehicleId = transportInfo.vehicleId != 0;
 
-            data.WritePackedGuid(transportInfo.Guid); // Transport Guid
-            data.WriteFloat(transportInfo.Pos.GetPositionX());
-            data.WriteFloat(transportInfo.Pos.GetPositionY());
-            data.WriteFloat(transportInfo.Pos.GetPositionZ());
-            data.WriteFloat(transportInfo.Pos.GetOrientation());
-            data.WriteInt8(transportInfo.Seat);   // VehicleSeatIndex
-            data.WriteUInt32(transportInfo.Time); // MoveTime
+            data.WritePackedGuid(transportInfo.guid);                 // Transport Guid
+            data.WriteFloat(transportInfo.pos.GetPositionX());
+            data.WriteFloat(transportInfo.pos.GetPositionY());
+            data.WriteFloat(transportInfo.pos.GetPositionZ());
+            data.WriteFloat(transportInfo.pos.GetOrientation());
+            data.WriteInt8(transportInfo.seat);                 // VehicleSeatIndex
+            data.WriteUInt32(transportInfo.time);                 // MoveTime
 
             data.WriteBit(hasPrevTime);
             data.WriteBit(hasVehicleId);
             data.FlushBits();
 
             if (hasPrevTime)
-                data.WriteUInt32(transportInfo.PrevTime); // PrevMoveTime
+                data.WriteUInt32(transportInfo.prevTime);         // PrevMoveTime
 
             if (hasVehicleId)
-                data.WriteUInt32(transportInfo.VehicleId); // VehicleRecID
+                data.WriteUInt32(transportInfo.vehicleId);        // VehicleRecID
         }
 
         public static MovementInfo ReadMovementInfo(WorldPacket data)
@@ -78,7 +79,9 @@ namespace Game.Networking.Packets
             uint moveIndex = data.ReadUInt32();
 
             for (uint i = 0; i < removeMovementForcesCount; ++i)
+            {
                 data.ReadPackedGuid();
+            }
 
             // ResetBitReader
 
@@ -92,41 +95,40 @@ namespace Game.Networking.Packets
             bool hasAdvFlying = data.HasBit();
 
             if (hasTransport)
-                ReadTransportInfo(data, ref movementInfo.Transport);
+                ReadTransportInfo(data, ref movementInfo.transport);
 
             if (hasInertia)
             {
-                MovementInfo.MovementInertia inertia = new();
-                inertia.Id = data.ReadInt32();
-                inertia.Force = data.ReadPosition();
-                inertia.Lifetime = data.ReadUInt32();
+                MovementInfo.Inertia inertia = new();
+                inertia.id = data.ReadInt32();
+                inertia.force = data.ReadPosition();
+                inertia.lifetime = data.ReadUInt32();
 
-                movementInfo.Inertia = inertia;
+                movementInfo.inertia = inertia;
             }
 
             if (hasAdvFlying)
             {
-                MovementInfo.AdvanFlying advFlying = new();
+                MovementInfo.AdvFlying advFlying = new();
 
-                advFlying.ForwardVelocity = data.ReadFloat();
-                advFlying.UpVelocity = data.ReadFloat();
-                movementInfo.AdvFlying = advFlying;
+                advFlying.forwardVelocity = data.ReadFloat();
+                advFlying.upVelocity = data.ReadFloat();
+                movementInfo.advFlying = advFlying;
             }
 
             if (hasFall)
             {
-                movementInfo.Jump.FallTime = data.ReadUInt32();
-                movementInfo.Jump.Zspeed = data.ReadFloat();
+                movementInfo.jump.fallTime = data.ReadUInt32();
+                movementInfo.jump.zspeed = data.ReadFloat();
 
                 // ResetBitReader
 
                 bool hasFallDirection = data.HasBit();
-
                 if (hasFallDirection)
                 {
-                    movementInfo.Jump.SinAngle = data.ReadFloat();
-                    movementInfo.Jump.CosAngle = data.ReadFloat();
-                    movementInfo.Jump.XYspeed = data.ReadFloat();
+                    movementInfo.jump.sinAngle = data.ReadFloat();
+                    movementInfo.jump.cosAngle = data.ReadFloat();
+                    movementInfo.jump.xyspeed = data.ReadFloat();
                 }
             }
 
@@ -135,12 +137,12 @@ namespace Game.Networking.Packets
 
         public static void WriteMovementInfo(WorldPacket data, MovementInfo movementInfo)
         {
-            bool hasTransportData = !movementInfo.Transport.Guid.IsEmpty();
+            bool hasTransportData = !movementInfo.transport.guid.IsEmpty();
             bool hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
-            bool hasFallData = hasFallDirection || movementInfo.Jump.FallTime != 0;
+            bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
             bool hasSpline = false; // todo 6.x send this infos
-            bool hasInertia = movementInfo.Inertia.HasValue;
-            bool hasAdvFlying = movementInfo.AdvFlying.HasValue;
+            bool hasInertia = movementInfo.inertia.HasValue;
+            bool hasAdvFlying = movementInfo.advFlying.HasValue;
 
             data.WritePackedGuid(movementInfo.Guid);
             data.WriteUInt32((uint)movementInfo.GetMovementFlags());
@@ -161,9 +163,9 @@ namespace Game.Networking.Packets
             data.WriteUInt32(moveIndex);
 
             /*for (public uint i = 0; i < removeMovementForcesCount; ++i)
-			{
-			    _worldPacket << ObjectGuid;
-			}*/
+            {
+                _worldPacket << ObjectGuid;
+            }*/
 
             data.WriteBit(hasTransportData);
             data.WriteBit(hasFallData);
@@ -175,43 +177,42 @@ namespace Game.Networking.Packets
             data.FlushBits();
 
             if (hasTransportData)
-                WriteTransportInfo(data, movementInfo.Transport);
+                WriteTransportInfo(data, movementInfo.transport);
 
             if (hasInertia)
             {
-                data.WriteInt32(movementInfo.Inertia.Value.Id);
-                data.WriteXYZ(movementInfo.Inertia.Value.Force);
-                data.WriteUInt32(movementInfo.Inertia.Value.Lifetime);
+                data.WriteInt32(movementInfo.inertia.Value.id);
+                data.WriteXYZ(movementInfo.inertia.Value.force);
+                data.WriteUInt32(movementInfo.inertia.Value.lifetime);
             }
 
             if (hasAdvFlying)
             {
-                data.WriteFloat(movementInfo.AdvFlying.Value.ForwardVelocity);
-                data.WriteFloat(movementInfo.AdvFlying.Value.UpVelocity);
+                data.WriteFloat(movementInfo.advFlying.Value.forwardVelocity);
+                data.WriteFloat(movementInfo.advFlying.Value.upVelocity);
             }
 
             if (hasFallData)
             {
-                data.WriteUInt32(movementInfo.Jump.FallTime);
-                data.WriteFloat(movementInfo.Jump.Zspeed);
+                data.WriteUInt32(movementInfo.jump.fallTime);
+                data.WriteFloat(movementInfo.jump.zspeed);
 
                 data.WriteBit(hasFallDirection);
                 data.FlushBits();
-
                 if (hasFallDirection)
                 {
-                    data.WriteFloat(movementInfo.Jump.SinAngle);
-                    data.WriteFloat(movementInfo.Jump.CosAngle);
-                    data.WriteFloat(movementInfo.Jump.XYspeed);
+                    data.WriteFloat(movementInfo.jump.sinAngle);
+                    data.WriteFloat(movementInfo.jump.cosAngle);
+                    data.WriteFloat(movementInfo.jump.xyspeed);
                 }
             }
         }
 
         public static void WriteCreateObjectSplineDataBlock(MoveSpline moveSpline, WorldPacket data)
         {
-            data.WriteUInt32(moveSpline.GetId()); // ID
+            data.WriteUInt32(moveSpline.GetId());                                         // ID
 
-            if (!moveSpline.IsCyclic()) // Destination
+            if (!moveSpline.IsCyclic())                                                 // Destination
                 data.WriteVector3(moveSpline.FinalDestination());
             else
                 data.WriteVector3(Vector3.Zero);
@@ -221,52 +222,49 @@ namespace Game.Networking.Packets
 
             if (hasSplineMove)
             {
-                data.WriteUInt32((uint)moveSpline.splineflags.Flags); // SplineFlags
-                data.WriteInt32(moveSpline.TimePassed());             // Elapsed
-                data.WriteInt32(moveSpline.Duration());               // Duration
-                data.WriteFloat(1.0f);                                // DurationModifier
-                data.WriteFloat(1.0f);                                // NextDurationModifier
-                data.WriteBits((byte)moveSpline.facing.type, 2);      // Face
+                data.WriteUInt32((uint)moveSpline.splineflags.Flags);   // SplineFlags
+                data.WriteInt32(moveSpline.TimePassed());               // Elapsed
+                data.WriteInt32(moveSpline.Duration());                // Duration
+                data.WriteFloat(1.0f);                                  // DurationModifier
+                data.WriteFloat(1.0f);                                  // NextDurationModifier
+                data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
                 bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
                 data.WriteBits(moveSpline.GetPath().Length, 16);
-                data.WriteBit(false);                                 // HasSplineFilter
-                data.WriteBit(moveSpline.spell_effect_extra != null); // HasSpellEffectExtraData
+                data.WriteBit(false);                                       // HasSplineFilter
+                data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
                 bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
-                data.WriteBit(moveSpline.anim_tier != null); // HasAnimTierTransition
-                data.WriteBit(false);                        // HasUnknown901
+                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
+                data.WriteBit(false);                                                   // HasUnknown901
                 data.FlushBits();
 
                 //if (HasSplineFilterKey)
                 //{
-                //    _data << uint32(FilterKeysCount);
+                //    data << uint32(FilterKeysCount);
                 //    for (var i = 0; i < FilterKeysCount; ++i)
                 //    {
-                //        _data << float(In);
-                //        _data << float(Out);
+                //        data << float(In);
+                //        data << float(Out);
                 //    }
 
-                //    _data.WriteBits(FilterFlags, 2);
-                //    _data.FlushBits();
+                //    data.WriteBits(FilterFlags, 2);
+                //    data.FlushBits();
                 //}
 
                 switch (moveSpline.facing.type)
                 {
                     case MonsterMoveType.FacingSpot:
-                        data.WriteVector3(moveSpline.facing.F); // FaceSpot
-
+                        data.WriteVector3(moveSpline.facing.f);         // FaceSpot
                         break;
                     case MonsterMoveType.FacingTarget:
-                        data.WritePackedGuid(moveSpline.facing.Target); // FaceGUID
-
+                        data.WritePackedGuid(moveSpline.facing.target); // FaceGUID
                         break;
                     case MonsterMoveType.FacingAngle:
-                        data.WriteFloat(moveSpline.facing.Angle); // FaceDirection
-
+                        data.WriteFloat(moveSpline.facing.angle);       // FaceDirection
                         break;
                 }
 
                 if (hasFadeObjectTime)
-                    data.WriteInt32(moveSpline.effect_start_time); // FadeObjectTime
+                    data.WriteInt32(moveSpline.effect_start_time);     // FadeObjectTime
 
                 foreach (var vec in moveSpline.GetPath())
                     data.WriteVector3(vec);
@@ -283,7 +281,7 @@ namespace Game.Networking.Packets
                 {
                     data.WriteFloat(moveSpline.vertical_acceleration);
                     data.WriteInt32(moveSpline.effect_start_time);
-                    data.WriteUInt32(0); // Duration (override)
+                    data.WriteUInt32(0);                                                  // Duration (override)
                 }
 
                 if (moveSpline.anim_tier != null)
@@ -298,10 +296,10 @@ namespace Game.Networking.Packets
                 //{
                 //    for (WorldPackets::Movement::MonsterSplineUnknown901::Inner const& unkInner : unk.Data) size = 16
                 //    {
-                //        _data << int32(unkInner.Unknown_1);
-                //        _data << int32(unkInner.Unknown_2);
-                //        _data << int32(unkInner.Unknown_3);
-                //        _data << uint32(unkInner.Unknown_4);
+                //        data << int32(unkInner.Unknown_1);
+                //        data << int32(unkInner.Unknown_2);
+                //        data << int32(unkInner.Unknown_3);
+                //        data << uint32(unkInner.Unknown_4);
                 //    }
                 //}
             }
@@ -310,7 +308,6 @@ namespace Game.Networking.Packets
         public static void WriteCreateObjectAreaTriggerSpline(Spline<int> spline, WorldPacket data)
         {
             data.WriteBits(spline.GetPoints().Length, 16);
-
             foreach (var point in spline.GetPoints())
                 data.WriteVector3(point);
         }
@@ -319,42 +316,33 @@ namespace Game.Networking.Packets
         {
             data.WritePackedGuid(movementForce.ID);
             data.WriteVector3(movementForce.Origin);
-
-            if (movementForce.Type == MovementForceType.Gravity &&
-                objectPosition != null) // gravity
+            if (movementForce.Type == MovementForceType.Gravity && objectPosition != null) // gravity
             {
                 Vector3 direction = Vector3.Zero;
-
                 if (movementForce.Magnitude != 0.0f)
                 {
                     Position tmp = new(movementForce.Origin.X - objectPosition.GetPositionX(),
-                                       movementForce.Origin.Y - objectPosition.GetPositionY(),
-                                       movementForce.Origin.Z - objectPosition.GetPositionZ());
-
+                        movementForce.Origin.Y - objectPosition.GetPositionY(),
+                        movementForce.Origin.Z - objectPosition.GetPositionZ());
                     float lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
-
                     if (lengthSquared > 0.0f)
                     {
                         float mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
-                        tmp.X *= mult;
-                        tmp.Y *= mult;
-                        tmp.Z *= mult;
-
+                        tmp.posX *= mult;
+                        tmp.posY *= mult;
+                        tmp.posZ *= mult;
                         float minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
-                                                 (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
-                                                 (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
-
+                            (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
+                            (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
                         if (lengthSquared > minLengthSquared)
-                            direction = new Vector3(tmp.X, tmp.Y, tmp.Z);
+                            direction = new Vector3(tmp.posX, tmp.posY, tmp.posZ);
                     }
                 }
 
                 data.WriteVector3(direction);
             }
             else
-            {
                 data.WriteVector3(movementForce.Direction);
-            }
 
             data.WriteUInt32(movementForce.TransportID);
             data.WriteFloat(movementForce.Magnitude);
@@ -366,39 +354,30 @@ namespace Game.Networking.Packets
 
     public class ClientPlayerMovement : ClientPacket
     {
-        public MovementInfo Status;
-
-        public ClientPlayerMovement(WorldPacket packet) : base(packet)
-        {
-        }
+        public ClientPlayerMovement(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Status = MovementExtensions.ReadMovementInfo(_worldPacket);
         }
+
+        public MovementInfo Status;
     }
 
     public class MoveUpdate : ServerPacket
     {
-        public MovementInfo Status;
-
-        public MoveUpdate() : base(ServerOpcodes.MoveUpdate, ConnectionType.Instance)
-        {
-        }
+        public MoveUpdate() : base(ServerOpcodes.MoveUpdate, ConnectionType.Instance) { }
 
         public override void Write()
         {
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
         }
+
+        public MovementInfo Status;
     }
 
     public class MonsterMove : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-        public Vector3 Pos;
-
-        public MovementMonsterSpline SplineData;
-
         public MonsterMove() : base(ServerOpcodes.OnMonsterMove, ConnectionType.Instance)
         {
             SplineData = new MovementMonsterSpline();
@@ -413,9 +392,9 @@ namespace Game.Networking.Packets
             splineFlags.SetUnsetFlag(SplineFlag.Cyclic, moveSpline.IsCyclic());
             movementSpline.Flags = (uint)(splineFlags.Flags & ~SplineFlag.MaskNoMonsterMove);
             movementSpline.Face = moveSpline.facing.type;
-            movementSpline.FaceDirection = moveSpline.facing.Angle;
-            movementSpline.FaceGUID = moveSpline.facing.Target;
-            movementSpline.FaceSpot = moveSpline.facing.F;
+            movementSpline.FaceDirection = moveSpline.facing.angle;
+            movementSpline.FaceGUID = moveSpline.facing.target;
+            movementSpline.FaceSpot = moveSpline.facing.f;
 
             if (splineFlags.HasFlag(SplineFlag.Animation))
             {
@@ -428,8 +407,7 @@ namespace Game.Networking.Packets
 
             movementSpline.MoveTime = (uint)moveSpline.Duration();
 
-            if (splineFlags.HasFlag(SplineFlag.Parabolic) &&
-                (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0))
+            if (splineFlags.HasFlag(SplineFlag.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0))
             {
                 MonsterSplineJumpExtraData jumpExtraData = new();
                 jumpExtraData.JumpGravity = moveSpline.vertical_acceleration;
@@ -459,7 +437,6 @@ namespace Game.Networking.Packets
                 if (!splineFlags.HasFlag(SplineFlag.Cyclic))
                 {
                     int count = spline.GetPointCount() - 3;
-
                     for (uint i = 0; i < count; ++i)
                         movementSpline.Points.Add(array[i + 2]);
                 }
@@ -467,7 +444,6 @@ namespace Game.Networking.Packets
                 {
                     int count = spline.GetPointCount() - 3;
                     movementSpline.Points.Add(array[1]);
-
                     for (uint i = 0; i < count; ++i)
                         movementSpline.Points.Add(array[i + 1]);
                 }
@@ -475,7 +451,7 @@ namespace Game.Networking.Packets
             else
             {
                 int lastIdx = spline.GetPointCount() - 3;
-                Span<Vector3> realPath = new Span<Vector3>(spline.GetPoints())[1..];
+                Span<Vector3> realPath = new Span<Vector3>(spline.GetPoints()).Slice(1);
 
                 movementSpline.Points.Add(realPath[lastIdx]);
 
@@ -496,49 +472,43 @@ namespace Game.Networking.Packets
             _worldPacket.WriteVector3(Pos);
             SplineData.Write(_worldPacket);
         }
+
+        public MovementMonsterSpline SplineData;
+        public ObjectGuid MoverGUID;
+        public Vector3 Pos;
     }
 
-    internal class FlightSplineSync : ServerPacket
+    class FlightSplineSync : ServerPacket
     {
-        public ObjectGuid Guid;
-        public float SplineDist;
-
-        public FlightSplineSync() : base(ServerOpcodes.FlightSplineSync, ConnectionType.Instance)
-        {
-        }
+        public FlightSplineSync() : base(ServerOpcodes.FlightSplineSync, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteFloat(SplineDist);
         }
+
+        public ObjectGuid Guid;
+        public float SplineDist;
     }
 
     public class MoveSplineSetSpeed : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-        public float Speed = 1.0f;
-
-        public MoveSplineSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
-        {
-        }
+        public MoveSplineSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
             _worldPacket.WriteFloat(Speed);
         }
+
+        public ObjectGuid MoverGUID;
+        public float Speed = 1.0f;
     }
 
     public class MoveSetSpeed : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-        public uint SequenceIndex; // Unit movement packet index, incremented each Time
-        public float Speed = 1.0f;
-
-        public MoveSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
-        {
-        }
+        public MoveSetSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -546,71 +516,55 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SequenceIndex);
             _worldPacket.WriteFloat(Speed);
         }
+
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex; // Unit movement packet index, incremented each time
+        public float Speed = 1.0f;
     }
 
     public class MoveUpdateSpeed : ServerPacket
     {
-        public float Speed = 1.0f;
-
-        public MovementInfo Status;
-
-        public MoveUpdateSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
-        {
-        }
+        public MoveUpdateSpeed(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
 
         public override void Write()
         {
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             _worldPacket.WriteFloat(Speed);
         }
+
+        public MovementInfo Status;
+        public float Speed = 1.0f;
     }
 
     public class MoveSplineSetFlag : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-
-        public MoveSplineSetFlag(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
-        {
-        }
+        public MoveSplineSetFlag(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
         }
+
+        public ObjectGuid MoverGUID;
     }
 
     public class MoveSetFlag : ServerPacket
     {
-        public ObjectGuid MoverGUID;
-        public uint SequenceIndex; // Unit movement packet index, incremented each Time
-
-        public MoveSetFlag(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance)
-        {
-        }
+        public MoveSetFlag(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
             _worldPacket.WriteUInt32(SequenceIndex);
         }
+
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex; // Unit movement packet index, incremented each time
     }
 
     public class TransferPending : ServerPacket
     {
-        public struct ShipTransferPending
-        {
-            public uint Id;         // gameobject_template.entry of the Transport the player is teleporting on
-            public int OriginMapID; // Map Id the player is currently on (before teleport)
-        }
-
-        public int MapID = -1;
-        public Position OldMapPosition;
-        public ShipTransferPending? Ship;
-        public int? TransferSpellID;
-
-        public TransferPending() : base(ServerOpcodes.TransferPending)
-        {
-        }
+        public TransferPending() : base(ServerOpcodes.TransferPending) { }
 
         public override void Write()
         {
@@ -618,7 +572,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteXYZ(OldMapPosition);
             _worldPacket.WriteBit(Ship.HasValue);
             _worldPacket.WriteBit(TransferSpellID.HasValue);
-
             if (Ship.HasValue)
             {
                 _worldPacket.WriteUInt32(Ship.Value.Id);
@@ -630,19 +583,22 @@ namespace Game.Networking.Packets
 
             _worldPacket.FlushBits();
         }
+
+        public int MapID = -1;
+        public Position OldMapPosition;
+        public ShipTransferPending? Ship;
+        public int? TransferSpellID;
+
+        public struct ShipTransferPending
+        {
+            public uint Id;              // gameobject_template.entry of the transport the player is teleporting on
+            public int OriginMapID;     // Map id the player is currently on (before teleport)
+        }
     }
 
     public class TransferAborted : ServerPacket
     {
-        public byte Arg;
-        public uint MapDifficultyXConditionID;
-
-        public uint MapID;
-        public TransferAbortReason TransfertAbort;
-
-        public TransferAborted() : base(ServerOpcodes.TransferAborted)
-        {
-        }
+        public TransferAborted() : base(ServerOpcodes.TransferAborted) { }
 
         public override void Write()
         {
@@ -652,19 +608,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(TransfertAbort, 6);
             _worldPacket.FlushBits();
         }
+
+        public uint MapID;
+        public byte Arg;
+        public uint MapDifficultyXConditionID;
+        public TransferAbortReason TransfertAbort;
     }
 
     public class NewWorld : ServerPacket
     {
-        public TeleportLocation Loc = new();
-
-        public uint MapID;
-        public Position MovementOffset; // Adjusts all pending movement events by this offset
-        public uint Reason;
-
-        public NewWorld() : base(ServerOpcodes.NewWorld)
-        {
-        }
+        public NewWorld() : base(ServerOpcodes.NewWorld) { }
 
         public override void Write()
         {
@@ -673,33 +626,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Reason);
             _worldPacket.WriteXYZ(MovementOffset);
         }
+
+        public uint MapID;
+        public uint Reason;
+        public TeleportLocation Loc = new();
+        public Position MovementOffset;    // Adjusts all pending movement events by this offset
     }
 
     public class WorldPortResponse : ClientPacket
     {
-        public WorldPortResponse(WorldPacket packet) : base(packet)
-        {
-        }
+        public WorldPortResponse(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
     public class MoveTeleport : ServerPacket
     {
-        public float Facing;
-        public ObjectGuid MoverGUID;
-
-        public Position Pos;
-        public byte PreloadWorld;
-        public uint SequenceIndex;
-        public ObjectGuid? TransportGUID;
-        public VehicleTeleport? Vehicle;
-
-        public MoveTeleport() : base(ServerOpcodes.MoveTeleport, ConnectionType.Instance)
-        {
-        }
+        public MoveTeleport() : base(ServerOpcodes.MoveTeleport, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -724,26 +667,19 @@ namespace Game.Networking.Packets
             if (TransportGUID.HasValue)
                 _worldPacket.WritePackedGuid(TransportGUID.Value);
         }
+
+        public Position Pos;
+        public VehicleTeleport? Vehicle;
+        public uint SequenceIndex;
+        public ObjectGuid MoverGUID;
+        public ObjectGuid? TransportGUID;
+        public float Facing;
+        public byte PreloadWorld;
     }
 
     public class MoveUpdateTeleport : ServerPacket
     {
-        public float? FlightBackSpeed;
-        public float? FlightSpeed;
-        public List<MovementForce> MovementForces;
-        public float? PitchRate;
-        public float? RunBackSpeed;
-        public float? RunSpeed;
-
-        public MovementInfo Status;
-        public float? SwimBackSpeed;
-        public float? SwimSpeed;
-        public float? TurnRate;
-        public float? WalkSpeed;
-
-        public MoveUpdateTeleport() : base(ServerOpcodes.MoveUpdateTeleport)
-        {
-        }
+        public MoveUpdateTeleport() : base(ServerOpcodes.MoveUpdateTeleport) { }
 
         public override void Write()
         {
@@ -792,18 +728,23 @@ namespace Game.Networking.Packets
             if (PitchRate.HasValue)
                 _worldPacket.WriteFloat(PitchRate.Value);
         }
+
+        public MovementInfo Status;
+        public List<MovementForce> MovementForces;
+        public float? SwimBackSpeed;
+        public float? FlightSpeed;
+        public float? SwimSpeed;
+        public float? WalkSpeed;
+        public float? TurnRate;
+        public float? RunSpeed;
+        public float? FlightBackSpeed;
+        public float? RunBackSpeed;
+        public float? PitchRate;
     }
 
-    internal class MoveApplyMovementForce : ServerPacket
+    class MoveApplyMovementForce : ServerPacket
     {
-        public MovementForce Force;
-
-        public ObjectGuid MoverGUID;
-        public int SequenceIndex;
-
-        public MoveApplyMovementForce() : base(ServerOpcodes.MoveApplyMovementForce, ConnectionType.Instance)
-        {
-        }
+        public MoveApplyMovementForce() : base(ServerOpcodes.MoveApplyMovementForce, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -811,34 +752,29 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SequenceIndex);
             Force.Write(_worldPacket);
         }
+
+        public ObjectGuid MoverGUID;
+        public int SequenceIndex;
+        public MovementForce Force;
     }
 
-    internal class MoveApplyMovementForceAck : ClientPacket
+    class MoveApplyMovementForceAck : ClientPacket
     {
-        public MovementAck Ack = new();
-        public MovementForce Force = new();
-
-        public MoveApplyMovementForceAck(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveApplyMovementForceAck(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Ack.Read(_worldPacket);
             Force.Read(_worldPacket);
         }
+
+        public MovementAck Ack = new();
+        public MovementForce Force = new();
     }
 
-    internal class MoveRemoveMovementForce : ServerPacket
+    class MoveRemoveMovementForce : ServerPacket
     {
-        public ObjectGuid ID;
-
-        public ObjectGuid MoverGUID;
-        public int SequenceIndex;
-
-        public MoveRemoveMovementForce() : base(ServerOpcodes.MoveRemoveMovementForce, ConnectionType.Instance)
-        {
-        }
+        public MoveRemoveMovementForce() : base(ServerOpcodes.MoveRemoveMovementForce, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -846,66 +782,57 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SequenceIndex);
             _worldPacket.WritePackedGuid(ID);
         }
+
+        public ObjectGuid MoverGUID;
+        public int SequenceIndex;
+        public ObjectGuid ID;
     }
 
-    internal class MoveRemoveMovementForceAck : ClientPacket
+    class MoveRemoveMovementForceAck : ClientPacket
     {
-        public MovementAck Ack = new();
-        public ObjectGuid ID;
-
-        public MoveRemoveMovementForceAck(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveRemoveMovementForceAck(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Ack.Read(_worldPacket);
             ID = _worldPacket.ReadPackedGuid();
         }
+
+        public MovementAck Ack = new();
+        public ObjectGuid ID;
     }
 
-    internal class MoveUpdateApplyMovementForce : ServerPacket
+    class MoveUpdateApplyMovementForce : ServerPacket
     {
-        public MovementForce Force = new();
-
-        public MovementInfo Status = new();
-
-        public MoveUpdateApplyMovementForce() : base(ServerOpcodes.MoveUpdateApplyMovementForce)
-        {
-        }
+        public MoveUpdateApplyMovementForce() : base(ServerOpcodes.MoveUpdateApplyMovementForce) { }
 
         public override void Write()
         {
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             Force.Write(_worldPacket);
         }
+
+        public MovementInfo Status = new();
+        public MovementForce Force = new();
     }
 
-    internal class MoveUpdateRemoveMovementForce : ServerPacket
+    class MoveUpdateRemoveMovementForce : ServerPacket
     {
-        public MovementInfo Status = new();
-        public ObjectGuid TriggerGUID;
-
-        public MoveUpdateRemoveMovementForce() : base(ServerOpcodes.MoveUpdateRemoveMovementForce)
-        {
-        }
+        public MoveUpdateRemoveMovementForce() : base(ServerOpcodes.MoveUpdateRemoveMovementForce) { }
 
         public override void Write()
         {
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             _worldPacket.WritePackedGuid(TriggerGUID);
         }
+
+        public MovementInfo Status = new();
+        public ObjectGuid TriggerGUID;
     }
 
-    internal class MoveTeleportAck : ClientPacket
+    class MoveTeleportAck : ClientPacket
     {
-        public ObjectGuid MoverGUID;
-        private int AckIndex;
-        private int MoveTime;
-
-        public MoveTeleportAck(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveTeleportAck(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -913,45 +840,43 @@ namespace Game.Networking.Packets
             AckIndex = _worldPacket.ReadInt32();
             MoveTime = _worldPacket.ReadInt32();
         }
+
+        public ObjectGuid MoverGUID;
+        int AckIndex;
+        int MoveTime;
     }
 
     public class MovementAckMessage : ClientPacket
     {
-        public MovementAck Ack;
-
-        public MovementAckMessage(WorldPacket packet) : base(packet)
-        {
-        }
+        public MovementAckMessage(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Ack.Read(_worldPacket);
         }
+
+        public MovementAck Ack;
     }
 
     public class MovementSpeedAck : ClientPacket
     {
-        public MovementAck Ack;
-        public float Speed;
-
-        public MovementSpeedAck(WorldPacket packet) : base(packet)
-        {
-        }
+        public MovementSpeedAck(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Ack.Read(_worldPacket);
             Speed = _worldPacket.ReadFloat();
         }
+
+        public MovementAck Ack;
+        public float Speed;
     }
 
     public class SetActiveMover : ClientPacket
     {
         public ObjectGuid ActiveMover;
 
-        public SetActiveMover(WorldPacket packet) : base(packet)
-        {
-        }
+        public SetActiveMover(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -963,9 +888,7 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid MoverGUID;
 
-        public MoveSetActiveMover() : base(ServerOpcodes.MoveSetActiveMover)
-        {
-        }
+        public MoveSetActiveMover() : base(ServerOpcodes.MoveSetActiveMover) { }
 
         public override void Write()
         {
@@ -973,17 +896,9 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class MoveKnockBack : ServerPacket
+    class MoveKnockBack : ServerPacket
     {
-        public Vector2 Direction;
-
-        public ObjectGuid MoverGUID;
-        public uint SequenceIndex;
-        public MoveKnockBackSpeeds Speeds;
-
-        public MoveKnockBack() : base(ServerOpcodes.MoveKnockBack, ConnectionType.Instance)
-        {
-        }
+        public MoveKnockBack() : base(ServerOpcodes.MoveKnockBack, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -992,57 +907,46 @@ namespace Game.Networking.Packets
             _worldPacket.WriteVector2(Direction);
             Speeds.Write(_worldPacket);
         }
+
+        public ObjectGuid MoverGUID;
+        public Vector2 Direction;
+        public MoveKnockBackSpeeds Speeds;
+        public uint SequenceIndex;
     }
 
     public class MoveUpdateKnockBack : ServerPacket
     {
-        public MovementInfo Status;
-
-        public MoveUpdateKnockBack() : base(ServerOpcodes.MoveUpdateKnockBack)
-        {
-        }
+        public MoveUpdateKnockBack() : base(ServerOpcodes.MoveUpdateKnockBack) { }
 
         public override void Write()
         {
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
         }
+
+        public MovementInfo Status;
     }
 
-    internal class MoveKnockBackAck : ClientPacket
+    class MoveKnockBackAck : ClientPacket
     {
-        public MovementAck Ack;
-        public MoveKnockBackSpeeds? Speeds;
-
-        public MoveKnockBackAck(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveKnockBackAck(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Ack.Read(_worldPacket);
-
             if (_worldPacket.HasBit())
             {
-                Speeds = new MoveKnockBackSpeeds();
+                Speeds = new();
                 Speeds.Value.Read(_worldPacket);
             }
         }
+
+        public MovementAck Ack;
+        public MoveKnockBackSpeeds? Speeds;
     }
 
-    internal class MoveSetCollisionHeight : ServerPacket
+    class MoveSetCollisionHeight : ServerPacket
     {
-        public float Height = 1.0f;
-        public uint MountDisplayID;
-        public ObjectGuid MoverGUID;
-        public UpdateCollisionHeightReason Reason;
-
-        public float Scale = 1.0f;
-        public int ScaleDuration;
-        public uint SequenceIndex;
-
-        public MoveSetCollisionHeight() : base(ServerOpcodes.MoveSetCollisionHeight)
-        {
-        }
+        public MoveSetCollisionHeight() : base(ServerOpcodes.MoveSetCollisionHeight) { }
 
         public override void Write()
         {
@@ -1054,18 +958,19 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(MountDisplayID);
             _worldPacket.WriteInt32(ScaleDuration);
         }
+
+        public float Scale = 1.0f;
+        public ObjectGuid MoverGUID;
+        public uint MountDisplayID;
+        public UpdateCollisionHeightReason Reason;
+        public uint SequenceIndex;
+        public int ScaleDuration;
+        public float Height = 1.0f;
     }
 
     public class MoveUpdateCollisionHeight : ServerPacket
     {
-        public float Height = 1.0f;
-        public float Scale = 1.0f;
-
-        public MovementInfo Status;
-
-        public MoveUpdateCollisionHeight() : base(ServerOpcodes.MoveUpdateCollisionHeight)
-        {
-        }
+        public MoveUpdateCollisionHeight() : base(ServerOpcodes.MoveUpdateCollisionHeight) { }
 
         public override void Write()
         {
@@ -1073,18 +978,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteFloat(Height);
             _worldPacket.WriteFloat(Scale);
         }
+
+        public MovementInfo Status;
+        public float Scale = 1.0f;
+        public float Height = 1.0f;
     }
 
     public class MoveSetCollisionHeightAck : ClientPacket
     {
-        public MovementAck Data;
-        public float Height = 1.0f;
-        public uint MountDisplayID;
-        public UpdateCollisionHeightReason Reason;
-
-        public MoveSetCollisionHeightAck(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveSetCollisionHeightAck(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -1093,65 +995,58 @@ namespace Game.Networking.Packets
             MountDisplayID = _worldPacket.ReadUInt32();
             Reason = (UpdateCollisionHeightReason)_worldPacket.ReadUInt8();
         }
+
+        public MovementAck Data;
+        public UpdateCollisionHeightReason Reason;
+        public uint MountDisplayID;
+        public float Height = 1.0f;
     }
 
-    internal class MoveTimeSkipped : ClientPacket
+    class MoveTimeSkipped : ClientPacket
     {
-        public ObjectGuid MoverGUID;
-        public uint TimeSkipped;
-
-        public MoveTimeSkipped(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveTimeSkipped(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             MoverGUID = _worldPacket.ReadPackedGuid();
             TimeSkipped = _worldPacket.ReadUInt32();
         }
-    }
 
-    internal class MoveSkipTime : ServerPacket
-    {
         public ObjectGuid MoverGUID;
         public uint TimeSkipped;
+    }
 
-        public MoveSkipTime() : base(ServerOpcodes.MoveSkipTime, ConnectionType.Instance)
-        {
-        }
+    class MoveSkipTime : ServerPacket
+    {
+        public MoveSkipTime() : base(ServerOpcodes.MoveSkipTime, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
             _worldPacket.WriteUInt32(TimeSkipped);
         }
+
+        public ObjectGuid MoverGUID;
+        public uint TimeSkipped;
     }
 
-    internal class SummonResponse : ClientPacket
+    class SummonResponse : ClientPacket
     {
-        public bool Accept;
-        public ObjectGuid SummonerGUID;
-
-        public SummonResponse(WorldPacket packet) : base(packet)
-        {
-        }
+        public SummonResponse(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             SummonerGUID = _worldPacket.ReadPackedGuid();
             Accept = _worldPacket.HasBit();
         }
+
+        public bool Accept;
+        public ObjectGuid SummonerGUID;
     }
 
     public class ControlUpdate : ServerPacket
     {
-        public ObjectGuid Guid;
-
-        public bool On;
-
-        public ControlUpdate() : base(ServerOpcodes.ControlUpdate)
-        {
-        }
+        public ControlUpdate() : base(ServerOpcodes.ControlUpdate) { }
 
         public override void Write()
         {
@@ -1159,43 +1054,28 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(On);
             _worldPacket.FlushBits();
         }
+
+        public bool On;
+        public ObjectGuid Guid;
     }
 
-    internal class MoveSplineDone : ClientPacket
+    class MoveSplineDone : ClientPacket
     {
-        public int SplineID;
-
-        public MovementInfo Status;
-
-        public MoveSplineDone(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveSplineDone(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Status = MovementExtensions.ReadMovementInfo(_worldPacket);
             SplineID = _worldPacket.ReadInt32();
         }
+
+        public MovementInfo Status;
+        public int SplineID;
     }
 
-    internal class SummonRequest : ServerPacket
+    class SummonRequest : ServerPacket
     {
-        public enum SummonReason
-        {
-            Spell = 0,
-            Scenario = 1
-        }
-
-        public int AreaID;
-        public SummonReason Reason;
-        public bool SkipStartingArea;
-
-        public ObjectGuid SummonerGUID;
-        public uint SummonerVirtualRealmAddress;
-
-        public SummonRequest() : base(ServerOpcodes.SummonRequest, ConnectionType.Instance)
-        {
-        }
+        public SummonRequest() : base(ServerOpcodes.SummonRequest, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -1206,17 +1086,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(SkipStartingArea);
             _worldPacket.FlushBits();
         }
+
+        public ObjectGuid SummonerGUID;
+        public uint SummonerVirtualRealmAddress;
+        public int AreaID;
+        public SummonReason Reason;
+        public bool SkipStartingArea;
+
+        public enum SummonReason
+        {
+            Spell = 0,
+            Scenario = 1
+        }
     }
 
-    internal class SuspendToken : ServerPacket
+    class SuspendToken : ServerPacket
     {
-        public uint Reason = 1;
-
-        public uint SequenceIndex = 1;
-
-        public SuspendToken() : base(ServerOpcodes.SuspendToken, ConnectionType.Instance)
-        {
-        }
+        public SuspendToken() : base(ServerOpcodes.SuspendToken, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -1224,31 +1110,26 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Reason, 2);
             _worldPacket.FlushBits();
         }
+
+        public uint SequenceIndex = 1;
+        public uint Reason = 1;
     }
 
-    internal class SuspendTokenResponse : ClientPacket
+    class SuspendTokenResponse : ClientPacket
     {
-        public uint SequenceIndex;
-
-        public SuspendTokenResponse(WorldPacket packet) : base(packet)
-        {
-        }
+        public SuspendTokenResponse(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             SequenceIndex = _worldPacket.ReadUInt32();
         }
+
+        public uint SequenceIndex;
     }
 
-    internal class ResumeToken : ServerPacket
+    class ResumeToken : ServerPacket
     {
-        public uint Reason = 1;
-
-        public uint SequenceIndex = 1;
-
-        public ResumeToken() : base(ServerOpcodes.ResumeToken, ConnectionType.Instance)
-        {
-        }
+        public ResumeToken() : base(ServerOpcodes.ResumeToken, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -1256,10 +1137,26 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Reason, 2);
             _worldPacket.FlushBits();
         }
+
+        public uint SequenceIndex = 1;
+        public uint Reason = 1;
     }
 
-    internal class MoveSetCompoundState : ServerPacket
+    class MoveSetCompoundState : ServerPacket
     {
+        public MoveSetCompoundState() : base(ServerOpcodes.MoveSetCompoundState, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteInt32(StateChanges.Count);
+            foreach (MoveStateChange stateChange in StateChanges)
+                stateChange.Write(_worldPacket);
+        }
+
+        public ObjectGuid MoverGUID;
+        public List<MoveStateChange> StateChanges = new();
+
         public struct CollisionHeightInfo
         {
             public float Height;
@@ -1276,25 +1173,12 @@ namespace Game.Networking.Packets
 
         public class SpeedRange
         {
-            public float Max;
             public float Min;
+            public float Max;
         }
 
         public class MoveStateChange
         {
-            public CollisionHeightInfo? CollisionHeight;
-            public KnockBackInfo? KnockBack;
-
-            public ServerOpcodes MessageID;
-            public MovementForce MovementForce;
-            public ObjectGuid? MovementForceGUID;
-            public int? MovementInertiaID;
-            public uint? MovementInertiaLifetimeMs;
-            public uint SequenceIndex;
-            public float? Speed;
-            public SpeedRange SpeedRange;
-            public int? VehicleRecID;
-
             public MoveStateChange(ServerOpcodes messageId, uint sequenceIndex)
             {
                 MessageID = messageId;
@@ -1316,7 +1200,8 @@ namespace Game.Networking.Packets
                 data.WriteBit(MovementInertiaLifetimeMs.HasValue);
                 data.FlushBits();
 
-                @MovementForce?.Write(data);
+                if (@MovementForce != null)
+                    @MovementForce.Write(data);
 
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
@@ -1354,39 +1239,33 @@ namespace Game.Networking.Packets
                 if (MovementInertiaLifetimeMs.HasValue)
                     data.WriteUInt32(MovementInertiaLifetimeMs.Value);
             }
-        }
 
-        public ObjectGuid MoverGUID;
-        public List<MoveStateChange> StateChanges = new();
-
-        public MoveSetCompoundState() : base(ServerOpcodes.MoveSetCompoundState, ConnectionType.Instance)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteInt32(StateChanges.Count);
-
-            foreach (MoveStateChange stateChange in StateChanges)
-                stateChange.Write(_worldPacket);
+            public ServerOpcodes MessageID;
+            public uint SequenceIndex;
+            public float? Speed;
+            public SpeedRange SpeedRange;
+            public KnockBackInfo? KnockBack;
+            public int? VehicleRecID;
+            public CollisionHeightInfo? CollisionHeight;
+            public MovementForce MovementForce;
+            public ObjectGuid? MovementForceGUID;
+            public int? MovementInertiaID;
+            public uint? MovementInertiaLifetimeMs;
         }
     }
 
-    internal class MoveInitActiveMoverComplete : ClientPacket
+    class MoveInitActiveMoverComplete : ClientPacket
     {
         public uint Ticks;
 
-        public MoveInitActiveMoverComplete(WorldPacket packet) : base(packet)
-        {
-        }
+        public MoveInitActiveMoverComplete(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Ticks = _worldPacket.ReadUInt32();
         }
     }
-
+    
     //Structs
     public struct MovementAck
     {
@@ -1414,14 +1293,6 @@ namespace Game.Networking.Packets
 
     public class MonsterSplineFilter
     {
-        public short AddedToStart;
-        public float BaseSpeed;
-        public float DistToPrevFilterKey;
-        public byte FilterFlags;
-
-        public List<MonsterSplineFilterKey> FilterKeys = new();
-        public short StartOffset;
-
         public void Write(WorldPacket data)
         {
             data.WriteInt32(FilterKeys.Count);
@@ -1435,6 +1306,13 @@ namespace Game.Networking.Packets
             data.WriteBits(FilterFlags, 2);
             data.FlushBits();
         }
+
+        public List<MonsterSplineFilterKey> FilterKeys = new();
+        public byte FilterFlags;
+        public float BaseSpeed;
+        public short StartOffset;
+        public float DistToPrevFilterKey;
+        public short AddedToStart;
     }
 
     public struct MonsterSplineSpellEffectExtraData
@@ -1479,21 +1357,14 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(TierTransitionID);
-            data.WriteUInt32(StartTime);
+            data .WriteUInt32(StartTime);
             data.WriteUInt32(EndTime);
             data.WriteUInt8(AnimTier);
         }
     }
 
     public class MonsterSplineUnknown901
-    {
-        public struct Inner
-        {
-            public int Unknown_1;
-            public SpellCastVisual Visual;
-            public uint Unknown_4;
-        }
-
+    {    
         public Array<Inner> Data = new(16);
 
         public void Write(WorldPacket data)
@@ -1504,6 +1375,13 @@ namespace Game.Networking.Packets
                 unkInner.Visual.Write(data);
                 data.WriteUInt32(unkInner.Unknown_4);
             }
+        }
+
+        public struct Inner
+        {
+            public int Unknown_1;
+            public SpellCastVisual Visual;
+            public uint Unknown_4;
         }
     }
 
@@ -1523,28 +1401,6 @@ namespace Game.Networking.Packets
 
     public class MovementSpline
     {
-        public MonsterSplineAnimTierTransition? AnimTierTransition;
-        public int Elapsed;
-        public MonsterMoveType Face; // Movement direction (see MonsterMoveType enum)
-        public float FaceDirection;
-        public ObjectGuid FaceGUID;
-        public Vector3 FaceSpot;
-        public uint FadeObjectTime;
-
-        public uint Flags; // Spline Flags
-        public bool Interpolate;
-        public MonsterSplineJumpExtraData? JumpExtraData;
-        public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by Flags
-        public uint MoveTime;
-        public List<Vector3> PackedDeltas = new();
-        public List<Vector3> Points = new(); // Spline path
-        public MonsterSplineSpellEffectExtraData? SpellEffectExtraData;
-        public MonsterSplineFilter SplineFilter;
-        public ObjectGuid TransportGUID;
-        public MonsterSplineUnknown901 Unknown901;
-        public bool VehicleExitVoluntary;
-        public sbyte VehicleSeat = -1;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Flags);
@@ -1566,22 +1422,20 @@ namespace Game.Networking.Packets
             data.WriteBit(Unknown901 != null);
             data.FlushBits();
 
-            SplineFilter?.Write(data);
+            if (SplineFilter != null)
+                SplineFilter.Write(data);
 
             switch (Face)
             {
                 case MonsterMoveType.FacingSpot:
                     data.WriteVector3(FaceSpot);
-
                     break;
                 case MonsterMoveType.FacingTarget:
                     data.WriteFloat(FaceDirection);
                     data.WritePackedGuid(FaceGUID);
-
                     break;
                 case MonsterMoveType.FacingAngle:
                     data.WriteFloat(FaceDirection);
-
                     break;
             }
 
@@ -1600,19 +1454,34 @@ namespace Game.Networking.Packets
             if (AnimTierTransition.HasValue)
                 AnimTierTransition.Value.Write(data);
 
-            Unknown901?.Write(data);
+            if (Unknown901 != null)
+                Unknown901.Write(data);
         }
+
+        public uint Flags; // Spline flags
+        public MonsterMoveType Face; // Movement direction (see MonsterMoveType enum)
+        public int Elapsed;
+        public uint MoveTime;
+        public uint FadeObjectTime;
+        public List<Vector3> Points = new(); // Spline path
+        public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by flags
+        public bool VehicleExitVoluntary;
+        public bool Interpolate;
+        public ObjectGuid TransportGUID;
+        public sbyte VehicleSeat = -1;
+        public List<Vector3> PackedDeltas = new();
+        public MonsterSplineFilter SplineFilter;
+        public MonsterSplineSpellEffectExtraData? SpellEffectExtraData;
+        public MonsterSplineJumpExtraData? JumpExtraData;
+        public MonsterSplineAnimTierTransition? AnimTierTransition;
+        public MonsterSplineUnknown901 Unknown901;
+        public float FaceDirection;
+        public ObjectGuid FaceGUID;
+        public Vector3 FaceSpot;
     }
 
     public class MovementMonsterSpline
     {
-        public bool CrzTeleport;
-        public Vector3 Destination;
-
-        public uint Id;
-        public MovementSpline Move;
-        public byte StopDistanceTolerance; // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)
-
         public MovementMonsterSpline()
         {
             Move = new MovementSpline();
@@ -1627,6 +1496,12 @@ namespace Game.Networking.Packets
 
             Move.Write(data);
         }
+
+        public uint Id;
+        public Vector3 Destination;
+        public bool CrzTeleport;
+        public byte StopDistanceTolerance;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)
+        public MovementSpline Move;
     }
 
     public struct VehicleTeleport

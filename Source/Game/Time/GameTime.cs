@@ -2,15 +2,15 @@
 
 public class GameTime
 {
-    private static readonly long StartTime = Time.UnixTime;
+    static long StartTime = Time.UnixTime;
 
-    private static long _gameTime = Time.UnixTime;
-    private static uint _gameMSTime = 0;
+    static long _gameTime = Time.UnixTime;
+    static uint _gameMSTime = 0;
 
-    private static DateTime _gameTimeSystemPoint = DateTime.MinValue;
-    private static DateTime _gameTimeSteadyPoint = DateTime.MinValue;
+    static DateTime _gameTimeSystemPoint = DateTime.MinValue;
+    static DateTime _gameTimeSteadyPoint = DateTime.MinValue;
 
-    private static DateTime _dateTime;
+    static DateTime _dateTime;
 
     public static long GetStartTime()
     {

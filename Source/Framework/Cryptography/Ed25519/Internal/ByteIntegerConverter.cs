@@ -1,4 +1,6 @@
-﻿namespace Framework.Cryptography.Ed25519.Internal
+﻿using System;
+
+namespace Framework.Cryptography.Ed25519.Internal
 {
     // Loops? Arrays? Never heard of that stuff
     // Library avoids unnecessary heap allocations and unsafe code
@@ -8,7 +10,14 @@
         public static ulong LoadBigEndian64(byte[] buf, int offset)
         {
             return
-                (ulong)(buf[offset + 7]) | (((ulong)(buf[offset + 6])) << 8) | (((ulong)(buf[offset + 5])) << 16) | (((ulong)(buf[offset + 4])) << 24) | (((ulong)(buf[offset + 3])) << 32) | (((ulong)(buf[offset + 2])) << 40) | (((ulong)(buf[offset + 1])) << 48) | (((ulong)(buf[offset + 0])) << 56);
+                (ulong)(buf[offset + 7])
+                | (((ulong)(buf[offset + 6])) << 8)
+                | (((ulong)(buf[offset + 5])) << 16)
+                | (((ulong)(buf[offset + 4])) << 24)
+                | (((ulong)(buf[offset + 3])) << 32)
+                | (((ulong)(buf[offset + 2])) << 40)
+                | (((ulong)(buf[offset + 1])) << 48)
+                | (((ulong)(buf[offset + 0])) << 56);
         }
 
         public static void StoreBigEndian64(byte[] buf, int offset, ulong value)

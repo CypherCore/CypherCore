@@ -8,13 +8,13 @@ namespace Framework.Networking
 {
     public class NetworkThread<TSocketType> where TSocketType : ISocket
     {
-        private readonly List<TSocketType> _newSockets = new();
+        int _connections;
+        volatile bool _stopped;
 
-        private readonly List<TSocketType> _Sockets = new();
-        private int _connections;
-        private volatile bool _stopped;
+        Thread _thread;
 
-        private Thread _thread;
+        List<TSocketType> _Sockets = new();
+        List<TSocketType> _newSockets = new();
 
         public void Stop()
         {
@@ -28,7 +28,6 @@ namespace Framework.Networking
 
             _thread = new Thread(Run);
             _thread.Start();
-
             return true;
         }
 
@@ -50,12 +49,17 @@ namespace Framework.Networking
             SocketAdded(sock);
         }
 
-        private void AddNewSockets()
+        protected virtual void SocketAdded(TSocketType sock) { }
+
+        protected virtual void SocketRemoved(TSocketType sock) { }
+
+        void AddNewSockets()
         {
             if (_newSockets.Empty())
                 return;
 
             foreach (var socket in _newSockets.ToArray())
+            {
                 if (!socket.IsOpen())
                 {
                     SocketRemoved(socket);
@@ -63,19 +67,17 @@ namespace Framework.Networking
                     Interlocked.Decrement(ref _connections);
                 }
                 else
-                {
                     _Sockets.Add(socket);
-                }
+            }
 
             _newSockets.Clear();
         }
 
-        private void Run()
+        void Run()
         {
             Log.outDebug(LogFilter.Network, "Network Thread Starting");
 
             int sleepTime = 1;
-
             while (!_stopped)
             {
                 Thread.Sleep(sleepTime);
@@ -84,10 +86,9 @@ namespace Framework.Networking
 
                 AddNewSockets();
 
-                for (var i = 0; i < _Sockets.Count; ++i)
+                for (var i =0; i < _Sockets.Count; ++i)
                 {
                     TSocketType socket = _Sockets[i];
-
                     if (!socket.Update())
                     {
                         if (socket.IsOpen())
@@ -107,14 +108,6 @@ namespace Framework.Networking
             Log.outDebug(LogFilter.Misc, "Network Thread exits");
             _newSockets.Clear();
             _Sockets.Clear();
-        }
-
-        protected virtual void SocketAdded(TSocketType sock)
-        {
-        }
-
-        protected virtual void SocketRemoved(TSocketType sock)
-        {
         }
     }
 }

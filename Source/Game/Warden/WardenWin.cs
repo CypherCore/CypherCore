@@ -1,32 +1,34 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 using Framework.Constants;
 using Framework.Cryptography;
 using Framework.IO;
 using Game.Networking.Packets;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 namespace Game
 {
-    internal class WardenWin : Warden
+    class WardenWin : Warden
     {
         // GUILD is the shortest string that has no client validation (RAID only sends if in a raid group)
-        private static readonly string _luaEvalPrefix = "local S,T,R=SendAddonMessage,function()";
-        private static readonly string _luaEvalMidfix = " end R=S and T()if R then S('_TW',";
-        private static readonly string _luaEvalPostfix = ",'GUILD')end";
-        private readonly CategoryCheck[] _checks = new CategoryCheck[(int)WardenCheckCategory.Max];
-        private List<ushort> _currentChecks = new();
+        static string _luaEvalPrefix = "local S,T,R=SendAddonMessage,function()";
+        static string _luaEvalMidfix = " end R=S and T()if R then S('_TW',";
+        static string _luaEvalPostfix = ",'GUILD')end";
 
-        private uint _serverTicks;
+        uint _serverTicks;
+        CategoryCheck[] _checks = new CategoryCheck[(int)WardenCheckCategory.Max];
+        List<ushort> _currentChecks = new();
 
         public WardenWin()
         {
             foreach (WardenCheckCategory category in Enum.GetValues<WardenCheckCategory>())
+            {
                 _checks[(int)category] = new CategoryCheck(Global.WardenCheckMgr.GetAvailableChecks(category).Shuffle().ToList());
+            }
         }
 
         public override void Init(WorldSession session, BigInteger k)
@@ -56,8 +58,8 @@ namespace Game
 
         public override void InitializeModuleForClient(out ClientWardenModule module)
         {
-            // _data assign
-            module = new ClientWardenModule();
+            // data assign
+            module = new();
             module.CompressedData = WardenModuleWin.Module;
             module.CompressedSize = (uint)WardenModuleWin.Module.Length;
             module.Key = WardenModuleWin.ModuleKey;
@@ -75,44 +77,29 @@ namespace Game
             Request.Unk2 = 0;
             Request.Type = 1;
             Request.String_library1 = 0;
-            Request.Function1[0] = 0x00024F80; // 0x00400000 + 0x00024F80 SFileOpenFile
-            Request.Function1[1] = 0x000218C0; // 0x00400000 + 0x000218C0 SFileGetFileSize
-            Request.Function1[2] = 0x00022530; // 0x00400000 + 0x00022530 SFileReadFile
-            Request.Function1[3] = 0x00022910; // 0x00400000 + 0x00022910 SFileCloseFile
-
-            Request.CheckSumm1 = BuildChecksum(new byte[]
-                                               {
-                                                   Request.Unk1
-                                               },
-                                               20);
+            Request.Function1[0] = 0x00024F80;                      // 0x00400000 + 0x00024F80 SFileOpenFile
+            Request.Function1[1] = 0x000218C0;                      // 0x00400000 + 0x000218C0 SFileGetFileSize
+            Request.Function1[2] = 0x00022530;                      // 0x00400000 + 0x00022530 SFileReadFile
+            Request.Function1[3] = 0x00022910;                      // 0x00400000 + 0x00022910 SFileCloseFile
+            Request.CheckSumm1 = BuildChecksum(new byte[] { Request.Unk1 }, 20);
 
             Request.Command2 = WardenOpcodes.SmsgModuleInitialize;
             Request.Size2 = 8;
             Request.Unk3 = 4;
             Request.Unk4 = 0;
             Request.String_library2 = 0;
-            Request.Function2 = 0x00419D40; // 0x00400000 + 0x00419D40 FrameScript::GetText
+            Request.Function2 = 0x00419D40;                         // 0x00400000 + 0x00419D40 FrameScript::GetText
             Request.Function2_set = 1;
-
-            Request.CheckSumm2 = BuildChecksum(new byte[]
-                                               {
-                                                   Request.Unk2
-                                               },
-                                               8);
+            Request.CheckSumm2 = BuildChecksum(new byte[] { Request.Unk2 }, 8);
 
             Request.Command3 = WardenOpcodes.SmsgModuleInitialize;
             Request.Size3 = 8;
             Request.Unk5 = 1;
             Request.Unk6 = 1;
             Request.String_library3 = 0;
-            Request.Function3 = 0x0046AE20; // 0x00400000 + 0x0046AE20 PerformanceCounter
+            Request.Function3 = 0x0046AE20;                         // 0x00400000 + 0x0046AE20 PerformanceCounter
             Request.Function3_set = 1;
-
-            Request.CheckSumm3 = BuildChecksum(new byte[]
-                                               {
-                                                   Request.Unk5
-                                               },
-                                               8);
+            Request.CheckSumm3 = BuildChecksum(new byte[] { Request.Unk5 }, 8);
 
             Warden3DataServer packet = new();
             packet.Data = EncryptData(Request);
@@ -140,7 +127,6 @@ namespace Game
             {
                 string penalty = ApplyPenalty();
                 Log.outWarn(LogFilter.Warden, "{0} failed hash reply. Action: {0}", _session.GetPlayerInfo(), penalty);
-
                 return;
             }
 
@@ -156,17 +142,38 @@ namespace Game
             _initialized = true;
         }
 
+        static byte GetCheckPacketBaseSize(WardenCheckType type) => type switch
+        {
+            WardenCheckType.Driver => 1,
+            WardenCheckType.LuaEval => (byte)(1 + _luaEvalPrefix.Length - 1 + _luaEvalMidfix.Length - 1 + 4 + _luaEvalPostfix.Length - 1),
+            WardenCheckType.Mpq => 1,
+            WardenCheckType.PageA => 4 + 1,
+            WardenCheckType.PageB => 4 + 1,
+            WardenCheckType.Module => 4 + 20,
+            WardenCheckType.Mem => 1 + 4 + 1,
+            _ => 0,
+        };
+
+        static ushort GetCheckPacketSize(WardenCheck check)
+        {
+            int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check type
+            if (!check.Str.IsEmpty())
+                size += (check.Str.Length + 1); // 1 byte string length
+            if (!check.Data.Empty())
+                size += check.Data.Length;
+
+            return (ushort)size;
+        }
+        
         public override void RequestChecks()
         {
-            Log.outDebug(LogFilter.Warden, $"Request _data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() && !_session.PlayerLoading()}");
+            Log.outDebug(LogFilter.Warden, $"Request data from {_session.GetPlayerName()} (account {_session.GetAccountId()}) - loaded: {_session.GetPlayer() && !_session.PlayerLoading()}");
 
             // If all checks for a category are done, fill its todo list again
             foreach (WardenCheckCategory category in Enum.GetValues<WardenCheckCategory>())
             {
                 var checks = _checks[(int)category];
-
-                if (checks.IsAtEnd() &&
-                    !checks.Empty())
+                if (checks.IsAtEnd() && !checks.Empty())
                 {
                     Log.outDebug(LogFilter.Warden, $"Finished all {category} checks, re-shuffling");
                     checks.Shuffle();
@@ -182,12 +189,10 @@ namespace Game
 
             foreach (var category in Enum.GetValues<WardenCheckCategory>())
             {
-                if (WardenCheckManager.IsWardenCategoryInWorldOnly(category) &&
-                    !_session.GetPlayer())
+                if (WardenCheckManager.IsWardenCategoryInWorldOnly(category) && !_session.GetPlayer())
                     continue;
 
                 var checks = _checks[(int)category];
-
                 for (uint i = 0, n = WorldConfig.GetUIntValue(WardenCheckManager.GetWardenCategoryCountConfig(category)); i < n; ++i)
                 {
                     if (checks.IsAtEnd()) // all checks were already sent, list will be re-filled on next Update() run
@@ -200,23 +205,18 @@ namespace Game
             _currentChecks = _currentChecks.Shuffle().ToList();
 
             ushort expectedSize = 4;
-
             _currentChecks.RemoveAll(id =>
-                                     {
-                                         ushort thisSize = GetCheckPacketSize(Global.WardenCheckMgr.GetCheckData(id));
-
-                                         if ((expectedSize + thisSize) > 450) // warden packets are truncated to 512 bytes clientside
-                                             return true;
-
-                                         expectedSize += thisSize;
-
-                                         return false;
-                                     });
+            {
+                ushort thisSize = GetCheckPacketSize(Global.WardenCheckMgr.GetCheckData(id));
+                if ((expectedSize + thisSize) > 450) // warden packets are truncated to 512 bytes clientside
+                    return true;
+                expectedSize += thisSize;
+                return false;
+            });
 
             foreach (var id in _currentChecks)
             {
                 WardenCheck check = Global.WardenCheckMgr.GetCheckData(id);
-
                 if (check.Type == WardenCheckType.LuaEval)
                 {
                     buff.WriteUInt8((byte)(_luaEvalPrefix.Length - 1 + check.Str.Length + _luaEvalMidfix.Length - 1 + check.IdStr.Length + _luaEvalPostfix.Length - 1));
@@ -247,68 +247,60 @@ namespace Game
 
                 var type = check.Type;
                 buff.WriteUInt8((byte)((int)type ^ xorByte));
-
                 switch (type)
                 {
                     case WardenCheckType.Mem:
-                        {
-                            buff.WriteUInt8(0x00);
-                            buff.WriteUInt32(check.Address);
-                            buff.WriteUInt8(check.Length);
-
-                            break;
-                        }
+                    {
+                        buff.WriteUInt8(0x00);
+                        buff.WriteUInt32(check.Address);
+                        buff.WriteUInt8(check.Length);
+                        break;
+                    }
                     case WardenCheckType.PageA:
                     case WardenCheckType.PageB:
-                        {
-                            buff.WriteBytes(check.Data);
-                            buff.WriteUInt32(check.Address);
-                            buff.WriteUInt8(check.Length);
-
-                            break;
-                        }
+                    {
+                        buff.WriteBytes(check.Data);
+                        buff.WriteUInt32(check.Address);
+                        buff.WriteUInt8(check.Length);
+                        break;
+                    }
                     case WardenCheckType.Mpq:
                     case WardenCheckType.LuaEval:
-                        {
-                            buff.WriteUInt8(index++);
-
-                            break;
-                        }
+                    {
+                        buff.WriteUInt8(index++);
+                        break;
+                    }
                     case WardenCheckType.Driver:
-                        {
-                            buff.WriteBytes(check.Data);
-                            buff.WriteUInt8(index++);
-
-                            break;
-                        }
+                    {
+                        buff.WriteBytes(check.Data);
+                        buff.WriteUInt8(index++);
+                        break;
+                    }
                     case WardenCheckType.Module:
-                        {
-                            uint seed = RandomHelper.Rand32();
-                            buff.WriteUInt32(seed);
-                            HmacHash hmac = new(BitConverter.GetBytes(seed));
-                            hmac.Finish(check.Str);
-                            buff.WriteBytes(hmac.Digest);
-
-                            break;
-                        }
+                    {
+                        uint seed = RandomHelper.Rand32();
+                        buff.WriteUInt32(seed);
+                        HmacHash hmac = new(BitConverter.GetBytes(seed));
+                        hmac.Finish(check.Str);
+                        buff.WriteBytes(hmac.Digest);
+                        break;
+                    }
                     /*case PROC_CHECK:
-					{
-					    buff.append(wd.i.AsByteArray(0, false).get(), wd.i.GetNumBytes());
-					    buff << uint8(index++);
-					    buff << uint8(index++);
-					    buff << uint32(wd.Address);
-					    buff << uint8(wd.Length);
-					    break;
-					}*/
+                    {
+                        buff.append(wd.i.AsByteArray(0, false).get(), wd.i.GetNumBytes());
+                        buff << uint8(index++);
+                        buff << uint8(index++);
+                        buff << uint32(wd.Address);
+                        buff << uint8(wd.Length);
+                        break;
+                    }*/
                     default:
-                        break; // Should never happen
+                        break;                                      // Should never happen
                 }
             }
-
             buff.WriteUInt8(xorByte);
 
             string idstring = "";
-
             foreach (var id in _currentChecks)
                 idstring += $"{id} ";
 
@@ -332,7 +324,7 @@ namespace Game
 
         public override void HandleCheckResult(ByteBuffer buff)
         {
-            Log.outDebug(LogFilter.Warden, "Handle _data");
+            Log.outDebug(LogFilter.Warden, "Handle data");
 
             _dataSent = false;
             _clientResponseTimer = 0;
@@ -344,20 +336,17 @@ namespace Game
             {
                 string penalty = ApplyPenalty();
                 Log.outWarn(LogFilter.Warden, "{0} failed checksum. Action: {1}", _session.GetPlayerInfo(), penalty);
-
                 return;
             }
 
             // TIMING_CHECK
             {
                 byte result = buff.ReadUInt8();
-
                 // @todo test it.
                 if (result == 0x00)
                 {
                     string penalty = ApplyPenalty();
                     Log.outWarn(LogFilter.Warden, "{0} failed timing check. Action: {1}", _session.GetPlayerInfo(), penalty);
-
                     return;
                 }
 
@@ -366,11 +355,15 @@ namespace Game
                 uint ticksNow = GameTime.GetGameTimeMS();
                 uint ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
-                Log.outDebug(LogFilter.Warden, "ServerTicks {0}", ticksNow);      // Now
-                Log.outDebug(LogFilter.Warden, "RequestTicks {0}", _serverTicks); // At request
-                Log.outDebug(LogFilter.Warden, "Ticks {0}", newClientTicks);      // At response
+                Log.outDebug(LogFilter.Warden, "ServerTicks {0}", ticksNow);         // Now
+                Log.outDebug(LogFilter.Warden, "RequestTicks {0}", _serverTicks);    // At request
+                Log.outDebug(LogFilter.Warden, "Ticks {0}", newClientTicks);         // At response
                 Log.outDebug(LogFilter.Warden, "Ticks diff {0}", ourTicks - newClientTicks);
             }
+
+            BigInteger rs;
+            WardenCheck rd;
+            WardenCheckType type;
             ushort checkFailed = 0;
 
             foreach (var id in _currentChecks)
@@ -380,84 +373,72 @@ namespace Game
                 switch (check.Type)
                 {
                     case WardenCheckType.Mem:
+                    {
+                        byte result = buff.ReadUInt8();
+                        if (result != 0)
                         {
-                            byte result = buff.ReadUInt8();
-
-                            if (result != 0)
-                            {
-                                Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK not 0x00, CheckId {id} account Id {_session.GetAccountId()}");
-                                checkFailed = id;
-
-                                continue;
-                            }
-
-                            byte[] expected = Global.WardenCheckMgr.GetCheckResult(id);
-
-                            if (buff.ReadBytes((uint)expected.Length).Compare(expected))
-                            {
-                                Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK fail CheckId {id} account Id {_session.GetAccountId()}");
-                                checkFailed = id;
-
-                                continue;
-                            }
-
-                            Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK passed CheckId {id} account Id {_session.GetAccountId()}");
-
-                            break;
+                            Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK not 0x00, CheckId {id} account Id {_session.GetAccountId()}");
+                            checkFailed = id;
+                            continue;
                         }
+
+                        byte[] expected = Global.WardenCheckMgr.GetCheckResult(id);
+
+                        if (buff.ReadBytes((uint)expected.Length).Compare(expected))
+                        {
+                            Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK fail CheckId {id} account Id {_session.GetAccountId()}");
+                            checkFailed = id;
+                            continue;
+                        }
+
+                        Log.outDebug(LogFilter.Warden, $"RESULT MEM_CHECK passed CheckId {id} account Id {_session.GetAccountId()}");
+                        break;
+                    }
                     case WardenCheckType.PageA:
                     case WardenCheckType.PageB:
                     case WardenCheckType.Driver:
                     case WardenCheckType.Module:
+                    {
+                        if (buff.ReadUInt8() != 0xE9)
                         {
-                            if (buff.ReadUInt8() != 0xE9)
-                            {
-                                Log.outDebug(LogFilter.Warden, $"RESULT {check.Type} fail, CheckId {id} account Id {_session.GetAccountId()}");
-                                checkFailed = id;
-
-                                continue;
-                            }
-
-                            Log.outDebug(LogFilter.Warden, $"RESULT {check.Type} passed CheckId {id} account Id {_session.GetAccountId()}");
-
-                            break;
+                            Log.outDebug(LogFilter.Warden, $"RESULT {check.Type} fail, CheckId {id} account Id {_session.GetAccountId()}");
+                            checkFailed = id;
+                            continue;
                         }
+
+                        Log.outDebug(LogFilter.Warden, $"RESULT {check.Type} passed CheckId {id} account Id {_session.GetAccountId()}");
+                        break;
+                    }
                     case WardenCheckType.LuaEval:
-                        {
-                            byte result = buff.ReadUInt8();
+                    {
+                        byte result = buff.ReadUInt8();
+                        if (result == 0)
+                            buff.Skip(buff.ReadUInt8()); // discard attached string
 
-                            if (result == 0)
-                                buff.Skip(buff.ReadUInt8()); // discard attached string
-
-                            Log.outDebug(LogFilter.Warden, $"LUA_EVAL_CHECK CheckId {id} account Id {_session.GetAccountId()} got in-warden dummy response ({result})");
-
-                            break;
-                        }
+                        Log.outDebug(LogFilter.Warden, $"LUA_EVAL_CHECK CheckId {id} account Id {_session.GetAccountId()} got in-warden dummy response ({result})");
+                        break;
+                    }
                     case WardenCheckType.Mpq:
+                    {
+                        byte result = buff.ReadUInt8();
+                        if (result != 0)
                         {
-                            byte result = buff.ReadUInt8();
-
-                            if (result != 0)
-                            {
-                                Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK not 0x00 account Id {_session.GetAccountId()}", _session.GetAccountId());
-                                checkFailed = id;
-
-                                continue;
-                            }
-
-                            if (!buff.ReadBytes(20).Compare(Global.WardenCheckMgr.GetCheckResult(id))) // SHA1
-                            {
-                                Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK fail, CheckId {id} account Id {_session.GetAccountId()}");
-                                checkFailed = id;
-
-                                continue;
-                            }
-
-                            Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK passed, CheckId {id} account Id {_session.GetAccountId()}");
-
-                            break;
+                            Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK not 0x00 account id {_session.GetAccountId()}", _session.GetAccountId());
+                            checkFailed = id;
+                            continue;
                         }
-                    default: // Should never happen
+
+                        if (!buff.ReadBytes(20).Compare(Global.WardenCheckMgr.GetCheckResult(id))) // SHA1
+                        {
+                            Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK fail, CheckId {id} account Id {_session.GetAccountId()}");
+                            checkFailed = id;
+                            continue;
+                        }
+
+                        Log.outDebug(LogFilter.Warden, $"RESULT MPQ_CHECK passed, CheckId {id} account Id {_session.GetAccountId()}");
+                        break;
+                    }
+                    default:                                        // Should never happen
                         break;
                 }
             }
@@ -473,68 +454,40 @@ namespace Game
             uint holdOff = WorldConfig.GetUIntValue(WorldCfg.WardenClientCheckHoldoff);
             _checkTimer = (holdOff < 1 ? 1 : holdOff) * Time.InMilliseconds;
         }
-
-        private static byte GetCheckPacketBaseSize(WardenCheckType type)
-        {
-            return type switch
-            {
-                WardenCheckType.Driver => 1,
-                WardenCheckType.LuaEval => (byte)(1 + _luaEvalPrefix.Length - 1 + _luaEvalMidfix.Length - 1 + 4 + _luaEvalPostfix.Length - 1),
-                WardenCheckType.Mpq => 1,
-                WardenCheckType.PageA => 4 + 1,
-                WardenCheckType.PageB => 4 + 1,
-                WardenCheckType.Module => 4 + 20,
-                WardenCheckType.Mem => 1 + 4 + 1,
-                _ => 0
-            };
-        }
-
-        private static ushort GetCheckPacketSize(WardenCheck check)
-        {
-            int size = 1 + GetCheckPacketBaseSize(check.Type); // 1 byte check Type
-
-            if (!check.Str.IsEmpty())
-                size += (check.Str.Length + 1); // 1 byte string length
-
-            if (!check.Data.Empty())
-                size += check.Data.Length;
-
-            return (ushort)size;
-        }
     }
 
-    internal class WardenInitModuleRequest
+    class WardenInitModuleRequest
     {
-        public uint CheckSumm1;
-        public uint CheckSumm2;
-        public uint CheckSumm3;
         public WardenOpcodes Command1;
-
-        public WardenOpcodes Command2;
-
-        public WardenOpcodes Command3;
-        public uint[] Function1 = new uint[4];
-        public uint Function2;
-        public byte Function2_set;
-        public uint Function3;
-        public byte Function3_set;
         public ushort Size1;
-        public ushort Size2;
-        public ushort Size3;
-        public byte String_library1;
-        public byte String_library2;
-        public byte String_library3;
-        public byte Type;
+        public uint CheckSumm1;
         public byte Unk1;
         public byte Unk2;
+        public byte Type;
+        public byte String_library1;
+        public uint[] Function1 = new uint[4];
+
+        public WardenOpcodes Command2;
+        public ushort Size2;
+        public uint CheckSumm2;
         public byte Unk3;
         public byte Unk4;
+        public byte String_library2;
+        public uint Function2;
+        public byte Function2_set;
+
+        public WardenOpcodes Command3;
+        public ushort Size3;
+        public uint CheckSumm3;
         public byte Unk5;
         public byte Unk6;
+        public byte String_library3;
+        public uint Function3;
+        public byte Function3_set;
 
         public static implicit operator byte[](WardenInitModuleRequest request)
         {
-            ByteBuffer buffer = new();
+            ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)request.Command1);
             buffer.WriteUInt16(request.Size1);
             buffer.WriteUInt32(request.CheckSumm1);
@@ -542,7 +495,6 @@ namespace Game
             buffer.WriteUInt8(request.Unk2);
             buffer.WriteUInt8(request.Type);
             buffer.WriteUInt8(request.String_library1);
-
             foreach (var function in request.Function1)
                 buffer.WriteUInt32(function);
 
@@ -568,7 +520,7 @@ namespace Game
         }
     }
 
-    internal class CategoryCheck
+    class CategoryCheck
     {
         public List<ushort> _checks = new();
         public ushort currentIndex;

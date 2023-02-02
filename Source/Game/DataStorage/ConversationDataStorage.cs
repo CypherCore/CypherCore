@@ -190,16 +190,16 @@ namespace Game.DataStorage
 
             public bool Invoke(ConversationActorTemplate template)
             {
-                if (template.WorldObjectTemplate != null)
+                if (template.WorldObjectTemplate == null)
                     return Invoke(template.WorldObjectTemplate);
 
-                if (template.NoObjectTemplate != null)
+                if (template.NoObjectTemplate == null)
                     return Invoke(template.NoObjectTemplate);
 
-                if (template.ActivePlayerTemplate != null)
+                if (template.ActivePlayerTemplate == null)
                     return Invoke(template.ActivePlayerTemplate);
 
-                if (template.TalkingHeadTemplate != null)
+                if (template.TalkingHeadTemplate == null)
                     return Invoke(template.TalkingHeadTemplate);
 
                 return false;
@@ -218,6 +218,12 @@ namespace Game.DataStorage
 
                 if (CreatureDisplayInfoId != 0)
                     Log.outError(LogFilter.Sql, $"Table `conversation_actors` with ConversationActorGuid cannot have CreatureDisplayInfoId ({CreatureDisplayInfoId}). Conversation {ConversationId} and Idx {ActorIndex}.");
+
+                if (worldObject == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `conversation_actors` references null world object (GUID: {SpawnId}) for Conversation {ConversationId} and Idx {ActorIndex}, skipped.");
+                    return false;
+                }
 
                 worldObject.SpawnId = SpawnId;
                 return true;

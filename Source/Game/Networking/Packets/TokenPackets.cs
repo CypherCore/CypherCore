@@ -1,44 +1,26 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    internal class CommerceTokenGetLog : ClientPacket
+    class CommerceTokenGetLog : ClientPacket
     {
-        public uint UnkInt;
-
-        public CommerceTokenGetLog(WorldPacket packet) : base(packet)
-        {
-        }
+        public CommerceTokenGetLog(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             UnkInt = _worldPacket.ReadUInt32();
         }
+
+        public uint UnkInt;
     }
 
-    internal class CommerceTokenGetLogResponse : ServerPacket
+    class CommerceTokenGetLogResponse : ServerPacket
     {
-        private struct AuctionableTokenInfo
-        {
-            public ulong UnkInt1;
-            public long UnkInt2;
-            public uint Owner;
-            public ulong BuyoutPrice;
-            public uint DurationLeft;
-        }
-
-        public TokenResult Result;
-
-        public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
-        private readonly List<AuctionableTokenInfo> AuctionableTokenAuctionableList = new();
-
-        public CommerceTokenGetLogResponse() : base(ServerOpcodes.CommerceTokenGetLogResponse, ConnectionType.Instance)
-        {
-        }
+        public CommerceTokenGetLogResponse() : base(ServerOpcodes.CommerceTokenGetLogResponse, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -55,33 +37,36 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.DurationLeft);
             }
         }
+
+        public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
+        public TokenResult Result;
+        List<AuctionableTokenInfo> AuctionableTokenAuctionableList = new();
+
+        struct AuctionableTokenInfo
+        {
+            public ulong UnkInt1;
+            public long UnkInt2;
+            public uint Owner;
+            public ulong BuyoutPrice;
+            public uint DurationLeft;
+        }
     }
 
-    internal class CommerceTokenGetMarketPrice : ClientPacket
+    class CommerceTokenGetMarketPrice : ClientPacket
     {
-        public uint UnkInt;
-
-        public CommerceTokenGetMarketPrice(WorldPacket packet) : base(packet)
-        {
-        }
+        public CommerceTokenGetMarketPrice(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             UnkInt = _worldPacket.ReadUInt32();
         }
+
+        public uint UnkInt;
     }
 
-    internal class CommerceTokenGetMarketPriceResponse : ServerPacket
+    class CommerceTokenGetMarketPriceResponse : ServerPacket
     {
-        public uint AuctionDuration; // preset auction duration enum
-
-        public ulong CurrentMarketPrice;
-        public TokenResult Result;
-        public uint UnkInt; // send CMSG_REQUEST_WOW_TOKEN_MARKET_PRICE
-
-        public CommerceTokenGetMarketPriceResponse() : base(ServerOpcodes.CommerceTokenGetMarketPriceResponse)
-        {
-        }
+        public CommerceTokenGetMarketPriceResponse() : base(ServerOpcodes.CommerceTokenGetMarketPriceResponse) { }
 
         public override void Write()
         {
@@ -90,5 +75,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(AuctionDuration);
         }
+
+        public ulong CurrentMarketPrice;
+        public uint UnkInt; // send CMSG_REQUEST_WOW_TOKEN_MARKET_PRICE
+        public TokenResult Result;
+        public uint AuctionDuration; // preset auction duration enum
     }
 }

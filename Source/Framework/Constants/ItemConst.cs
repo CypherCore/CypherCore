@@ -7,7 +7,7 @@ namespace Framework.Constants
 {
     public struct ItemConst
     {
-        public const int MaxDamages = 2; // changed in 3.1.0
+        public const int MaxDamages = 2;                           // changed in 3.1.0
         public const int MaxGemSockets = 3;
         public const int MaxSpells = 5;
         public const int MaxStats = 10;
@@ -29,33 +29,63 @@ namespace Framework.Constants
         public static uint[] ItemQualityColors =
         {
             0xff9d9d9d, // GREY
-			0xffffffff, // WHITE
-			0xff1eff00, // GREEN
-			0xff0070dd, // BLUE
-			0xffa335ee, // PURPLE
-			0xffff8000, // ORANGE
-			0xffe6cc80, // LIGHT YELLOW
-			0xffe6cc80  // LIGHT YELLOW
-		};
+            0xffffffff, // WHITE
+            0xff1eff00, // GREEN
+            0xff0070dd, // BLUE
+            0xffa335ee, // PURPLE
+            0xffff8000, // ORANGE
+            0xffe6cc80, // LIGHT YELLOW
+            0xffe6cc80  // LIGHT YELLOW
+        };
 
         public static SocketColor[] SocketColorToGemTypeMask =
         {
-            0, SocketColor.Meta, SocketColor.Red, SocketColor.Yellow, SocketColor.Blue, SocketColor.Hydraulic, SocketColor.Cogwheel, SocketColor.Prismatic, SocketColor.RelicIron, SocketColor.RelicBlood, SocketColor.RelicShadow, SocketColor.RelicFel, SocketColor.RelicArcane, SocketColor.RelicFrost, SocketColor.RelicFire, SocketColor.RelicWater, SocketColor.RelicLife, SocketColor.RelicWind, SocketColor.RelicHoly
+            0,
+            SocketColor.Meta,
+            SocketColor.Red,
+            SocketColor.Yellow,
+            SocketColor.Blue,
+            SocketColor.Hydraulic,
+            SocketColor.Cogwheel,
+            SocketColor.Prismatic,
+            SocketColor.RelicIron,
+            SocketColor.RelicBlood,
+            SocketColor.RelicShadow,
+            SocketColor.RelicFel,
+            SocketColor.RelicArcane,
+            SocketColor.RelicFrost,
+            SocketColor.RelicFire,
+            SocketColor.RelicWater,
+            SocketColor.RelicLife,
+            SocketColor.RelicWind,
+            SocketColor.RelicHoly
         };
 
         public static ItemModifier[] AppearanceModifierSlotBySpec =
         {
-            ItemModifier.TransmogAppearanceSpec1, ItemModifier.TransmogAppearanceSpec2, ItemModifier.TransmogAppearanceSpec3, ItemModifier.TransmogAppearanceSpec4, ItemModifier.TransmogAppearanceSpec5
+            ItemModifier.TransmogAppearanceSpec1,
+            ItemModifier.TransmogAppearanceSpec2,
+            ItemModifier.TransmogAppearanceSpec3,
+            ItemModifier.TransmogAppearanceSpec4,
+            ItemModifier.TransmogAppearanceSpec5
         };
 
         public static ItemModifier[] IllusionModifierSlotBySpec =
         {
-            ItemModifier.EnchantIllusionSpec1, ItemModifier.EnchantIllusionSpec2, ItemModifier.EnchantIllusionSpec3, ItemModifier.EnchantIllusionSpec4, ItemModifier.EnchantIllusionSpec5
+            ItemModifier.EnchantIllusionSpec1,
+            ItemModifier.EnchantIllusionSpec2,
+            ItemModifier.EnchantIllusionSpec3,
+            ItemModifier.EnchantIllusionSpec4,
+            ItemModifier.EnchantIllusionSpec5
         };
 
         public static ItemModifier[] SecondaryAppearanceModifierSlotBySpec =
         {
-            ItemModifier.TransmogSecondaryAppearanceSpec1, ItemModifier.TransmogSecondaryAppearanceSpec2, ItemModifier.TransmogSecondaryAppearanceSpec3, ItemModifier.TransmogSecondaryAppearanceSpec4, ItemModifier.TransmogSecondaryAppearanceSpec5
+            ItemModifier.TransmogSecondaryAppearanceSpec1,
+            ItemModifier.TransmogSecondaryAppearanceSpec2,
+            ItemModifier.TransmogSecondaryAppearanceSpec3,
+            ItemModifier.TransmogSecondaryAppearanceSpec4,
+            ItemModifier.TransmogSecondaryAppearanceSpec5
         };
     }
 
@@ -107,7 +137,7 @@ namespace Framework.Constants
         public const byte DefaultSize = 16;
     }
 
-    internal enum EquipableSpellSlots
+    enum EquipableSpellSlots
     {
         OffensiveSlot1 = 211,
         OffensiveSlot2 = 212,
@@ -174,7 +204,7 @@ namespace Framework.Constants
         RequireSeasonEarned2 = 0x04,
         RequireSeasonEarned3 = 0x08,
         RequireSeasonEarned4 = 0x10,
-        RequireSeasonEarned5 = 0x20
+        RequireSeasonEarned5 = 0x20,
     }
 
     public enum ItemModType
@@ -253,13 +283,13 @@ namespace Framework.Constants
 
     public enum ItemSpelltriggerType : sbyte
     {
-        OnUse = 0, // use after equip cooldown
+        OnUse = 0,                  // use after equip cooldown
         OnEquip = 1,
         OnProc = 2,
         SummonedBySpell = 3,
         OnDeath = 4,
         OnPickup = 5,
-        OnLearn = 6, // used in itemtemplate.spell2 with spellid with SPELLGENERICLEARN in spell1
+        OnLearn = 6,                   // used in itemtemplate.spell2 with spellid with SPELLGENERICLEARN in spell1
         OnLooted = 7,
         Max
     }
@@ -284,7 +314,7 @@ namespace Framework.Constants
         DisableInChallengeModes = 0x40,
         DisableInProvingGrounds = 0x80,
         AllowTransmog = 0x100,
-        HideUntilCollected = 0x200
+        HideUntilCollected = 0x200,
     }
 
     public enum ItemModifier
@@ -347,7 +377,7 @@ namespace Framework.Constants
         DisenchantLootId = 12,
         ScalingStatDistributionFixed = 13,
         ItemLevelCanIncrease = 14, // Displays a + next to item level indicating it can warforge
-        RandomEnchantment = 15,    // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
+        RandomEnchantment = 15, // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
         Bounding = 16,
         RelicType = 17,
         OverrideRequiredLevel = 18,
@@ -358,12 +388,12 @@ namespace Framework.Constants
         ItemEffectId = 23,
         ModifiedCraftingStat = 25,
         RequiredLevelCurve = 27,
-        DescriptionText = 30, // Item Description
-        OverrideName = 31,    // Itemnamedescription Id
+        DescriptionText = 30,             // Item Description
+        OverrideName = 31,             // Itemnamedescription Id
         ItemBonusListGroup = 34,
         ItemLimitCategory = 35,
         ItemConversion = 37,
-        ItemHistorySlot = 38
+        ItemHistorySlot = 38,
     }
 
     public enum ItemContext : byte
@@ -574,7 +604,7 @@ namespace Framework.Constants
         OnAcquire = 1,
         OnEquip = 2,
         OnUse = 3,
-        Quest = 4
+        Quest = 4,
     }
 
     public enum ItemClass : sbyte
@@ -638,17 +668,17 @@ namespace Framework.Constants
     public enum ItemSubClassWeapon
     {
         Axe = 0,  // One-Handed Axes
-        Axe2 = 1, // Two-Handed Axes
+        Axe2 = 1,  // Two-Handed Axes
         Bow = 2,
         Gun = 3,
         Mace = 4,  // One-Handed Maces
-        Mace2 = 5, // Two-Handed Maces
+        Mace2 = 5,  // Two-Handed Maces
         Polearm = 6,
         Sword = 7,  // One-Handed Swords
-        Sword2 = 8, // Two-Handed Swords
+        Sword2 = 8,  // Two-Handed Swords
         Warglaives = 9,
         Staff = 10,
-        Exotic = 11,  // One-Handed Exotics
+        Exotic = 11, // One-Handed Exotics
         Exotic2 = 12, // Two-Handed Exotics
         Fist = 13,
         Miscellaneous = 14,
@@ -662,6 +692,7 @@ namespace Framework.Constants
         MaskRanged = (1 << Bow) | (1 << Gun) | (1 << Crossbow),
 
         Max = 21
+
     }
 
     public enum ItemSubClassGem
@@ -712,7 +743,7 @@ namespace Framework.Constants
         Bolt = 1, // Obsolete
         Arrow = 2,
         Bullet = 3,
-        Thrown = 4, // Obsolete
+        Thrown = 4,  // Obsolete
         Max
     }
 
@@ -780,7 +811,7 @@ namespace Framework.Constants
 
     public enum ItemSubClassMoney
     {
-        Money = 0, // Obsolete
+        Money = 0,  // Obsolete
         Max = 1
     }
 
@@ -790,7 +821,7 @@ namespace Framework.Constants
         Quiver1 = 1, // Obsolete
         Quiver = 2,
         AmmoPouch = 3,
-        Max = 4
+        Max = 4,
     }
 
     public enum ItemSubClassQuest
@@ -876,51 +907,51 @@ namespace Framework.Constants
 
     public enum ItemQuality
     {
-        Poor = 0,      //Grey
-        Normal = 1,    //White
-        Uncommon = 2,  //Green
-        Rare = 3,      //Blue
-        Epic = 4,      //Purple
-        Legendary = 5, //Orange
-        Artifact = 6,  //Light Yellow
+        Poor = 0,                 //Grey
+        Normal = 1,                 //White
+        Uncommon = 2,                 //Green
+        Rare = 3,                 //Blue
+        Epic = 4,                 //Purple
+        Legendary = 5,                 //Orange
+        Artifact = 6,                 //Light Yellow
         Heirloom = 7,
         Max = 8
     }
 
     public enum ItemFieldFlags : uint
     {
-        Soulbound = 0x01,     // Item Is Soulbound And Cannot Be Traded <<--
-        Translated = 0x02,    // Item text will not read as garbage when player does not know the language
-        Unlocked = 0x04,      // Item Had Lock But Can Be Opened Now
-        Wrapped = 0x08,       // Item Is Wrapped And Contains Another Item
-        Unk2 = 0x10,          // ?
-        Unk3 = 0x20,          // ?
-        Unk4 = 0x40,          // ?
-        Unk5 = 0x80,          // ?
+        Soulbound = 0x01, // Item Is Soulbound And Cannot Be Traded <<--
+        Translated = 0x02, // Item text will not read as garbage when player does not know the language
+        Unlocked = 0x04, // Item Had Lock But Can Be Opened Now
+        Wrapped = 0x08, // Item Is Wrapped And Contains Another Item
+        Unk2 = 0x10, // ?
+        Unk3 = 0x20, // ?
+        Unk4 = 0x40, // ?
+        Unk5 = 0x80, // ?
         BopTradeable = 0x100, // Allows Trading Soulbound Items
-        Readable = 0x200,     // Opens Text Page When Right Clicked
-        Unk6 = 0x400,         // ?
-        Unk7 = 0x800,         // ?
-        Refundable = 0x1000,  // Item Can Be Returned To Vendor For Its Original Cost (Extended Cost)
-        Unk8 = 0x2000,        // ?
-        Unk9 = 0x4000,        // ?
-        Unk10 = 0x8000,       // ?
-        Unk11 = 0x00010000,   // ?
-        Unk12 = 0x00020000,   // ?
-        Unk13 = 0x00040000,   // ?
+        Readable = 0x200, // Opens Text Page When Right Clicked
+        Unk6 = 0x400, // ?
+        Unk7 = 0x800, // ?
+        Refundable = 0x1000, // Item Can Be Returned To Vendor For Its Original Cost (Extended Cost)
+        Unk8 = 0x2000, // ?
+        Unk9 = 0x4000, // ?
+        Unk10 = 0x8000, // ?
+        Unk11 = 0x00010000, // ?
+        Unk12 = 0x00020000, // ?
+        Unk13 = 0x00040000, // ?
         Child = 0x00080000,
-        Unk15 = 0x00100000,                      // ?
-        NewItem = 0x00200000,                    // Item glows in inventory
+        Unk15 = 0x00100000, // ?
+        NewItem = 0x00200000, // Item glows in inventory
         AzeriteEmpoweredItemViewed = 0x00400000, // Won't play azerite powers animation when viewing it
-        Unk18 = 0x00800000,                      // ?
-        Unk19 = 0x01000000,                      // ?
-        Unk20 = 0x02000000,                      // ?
-        Unk21 = 0x04000000,                      // ?
-        Unk22 = 0x08000000,                      // ?
-        Unk23 = 0x10000000,                      // ?
-        Unk24 = 0x20000000,                      // ?
-        Unk25 = 0x40000000,                      // ?
-        Unk26 = 0x80000000                       // ?
+        Unk18 = 0x00800000, // ?
+        Unk19 = 0x01000000, // ?
+        Unk20 = 0x02000000, // ?
+        Unk21 = 0x04000000, // ?
+        Unk22 = 0x08000000, // ?
+        Unk23 = 0x10000000, // ?
+        Unk24 = 0x20000000, // ?
+        Unk25 = 0x40000000, // ?
+        Unk26 = 0x80000000 // ?
     }
 
     public enum ItemFieldFlags2
@@ -932,35 +963,35 @@ namespace Framework.Constants
     public enum ItemFlags : long
     {
         NoPickup = 0x01,
-        Conjured = 0x02,        // Conjured Item
-        HasLoot = 0x04,         // Item Can Be Right Clicked To Open For Loot
-        HeroicTooltip = 0x08,   // Makes Green "Heroic" Text Appear On Item
-        Deprecated = 0x10,      // Cannot Equip Or Use
-        NoUserDestroy = 0x20,   // Item Can Not Be Destroyed, Except By Using Spell (Item Can Be Reagent For Spell)
-        Playercast = 0x40,      // Item's spells are castable by players
+        Conjured = 0x02, // Conjured Item
+        HasLoot = 0x04, // Item Can Be Right Clicked To Open For Loot
+        HeroicTooltip = 0x08, // Makes Green "Heroic" Text Appear On Item
+        Deprecated = 0x10, // Cannot Equip Or Use
+        NoUserDestroy = 0x20, // Item Can Not Be Destroyed, Except By Using Spell (Item Can Be Reagent For Spell)
+        Playercast = 0x40, // Item's spells are castable by players
         NoEquipCooldown = 0x80, // No Default 30 Seconds Cooldown When Equipped
-        Legacy = 0x100,         // Effects are disabled
-        IsWrapper = 0x200,      // Item Can Wrap Other Items
+        Legacy = 0x100, // Effects are disabled
+        IsWrapper = 0x200, // Item Can Wrap Other Items
         UsesResources = 0x400,
-        MultiDrop = 0x800,           // Looting This Item Does Not Remove It From Available Loot
+        MultiDrop = 0x800, // Looting This Item Does Not Remove It From Available Loot
         ItemPurchaseRecord = 0x1000, // Item Can Be Returned To Vendor For Its Original Cost (Extended Cost)
-        Petition = 0x2000,           // Item Is Guild Or Arena Charter
-        HasText = 0x4000,            // Only readable items have this (but not all)
+        Petition = 0x2000, // Item Is Guild Or Arena Charter
+        HasText = 0x4000, // Only readable items have this (but not all)
         NoDisenchant = 0x8000,
         RealDuration = 0x10000,
         NoCreator = 0x20000,
-        IsProspectable = 0x40000,                  // Item Can Be Prospected
-        UniqueEquippable = 0x80000,                // You Can Only Equip One Of These
-        DisableAutoQuotes = 0x100000,              // Disables quotes around item description in tooltip
+        IsProspectable = 0x40000, // Item Can Be Prospected
+        UniqueEquippable = 0x80000, // You Can Only Equip One Of These
+        DisableAutoQuotes = 0x100000, // Disables quotes around item description in tooltip
         IgnoreDefaultArenaRestrictions = 0x200000, // Item Can Be Used During Arena Match
-        NoDurabilityLoss = 0x400000,               // Some Thrown weapons have it (and only Thrown) but not all
-        UseWhenShapeshifted = 0x800000,            // Item Can Be Used In Shapeshift Forms
+        NoDurabilityLoss = 0x400000, // Some Thrown weapons have it (and only Thrown) but not all
+        UseWhenShapeshifted = 0x800000, // Item Can Be Used In Shapeshift Forms
         HasQuestGlow = 0x1000000,
         HideUnusableRecipe = 0x2000000, // Profession Recipes: Can Only Be Looted If You Meet Requirements And Don'T Already Know It
-        NotUseableInArena = 0x4000000,  // Item Cannot Be Used In Arena
-        IsBoundToAccount = 0x8000000,   // Item Binds To Account And Can Be Sent Only To Your Own Characters
-        NoReagentCost = 0x10000000,     // Spell Is Cast Ignoring Reagents
-        IsMillable = 0x20000000,        // Item Can Be Milled
+        NotUseableInArena = 0x4000000, // Item Cannot Be Used In Arena
+        IsBoundToAccount = 0x8000000, // Item Binds To Account And Can Be Sent Only To Your Own Characters
+        NoReagentCost = 0x10000000, // Spell Is Cast Ignoring Reagents
+        IsMillable = 0x20000000, // Item Can Be Milled
         ReportToGuildChat = 0x40000000,
         NoProgressiveLoot = 0x80000000
     }
@@ -1063,130 +1094,130 @@ namespace Framework.Constants
     public enum ItemFlagsCustom
     {
         Unused = 0x0001,
-        IgnoreQuestStatus = 0x0002, // No quest status will be checked when this item drops
+        IgnoreQuestStatus = 0x0002,   // No quest status will be checked when this item drops
         FollowLootRules = 0x0004    // Item will always follow group/master/need before greed looting rules
     }
 
     public enum InventoryResult
     {
         Ok = 0,
-        CantEquipLevelI = 1,               // You Must Reach Level %D To Use That Item.
-        CantEquipSkill = 2,                // You Aren'T Skilled Enough To Use That Item.
-        WrongSlot = 3,                     // That Item Does Not Go In That Slot.
-        BagFull = 4,                       // That Bag Is Full.
-        BagInBag = 5,                      // Can'T Put Non-Empty Bags In Other Bags.
-        TradeEquippedBag = 6,              // You Can'T Trade Equipped Bags.
-        AmmoOnly = 7,                      // Only Ammo Can Go There.
-        ProficiencyNeeded = 8,             // You Do Not Have The Required Proficiency For That Item.
-        NoSlotAvailable = 9,               // No Equipment Slot Is Available For That Item.
-        CantEquipEver = 10,                // You Can Never Use That Item.
-        CantEquipEver2 = 11,               // You Can Never Use That Item.
-        NoSlotAvailable2 = 12,             // No Equipment Slot Is Available For That Item.
-        Equipped2handed = 13,              // Cannot Equip That With A Two-Handed Weapon.
-        TwoHandSkillNotFound = 14,         // You Cannot Dual-Wield
-        WrongBagType = 15,                 // That Item Doesn'T Go In That Container.
-        WrongBagType2 = 16,                // That Item Doesn'T Go In That Container.
-        ItemMaxCount = 17,                 // You Can'T Carry Any More Of Those Items.
-        NoSlotAvailable3 = 18,             // No Equipment Slot Is Available For That Item.
-        CantStack = 19,                    // This Item Cannot Stack.
-        NotEquippable = 20,                // This Item Cannot Be Equipped.
-        CantSwap = 21,                     // These Items Can'T Be Swapped.
-        SlotEmpty = 22,                    // That Slot Is Empty.
-        ItemNotFound = 23,                 // The Item Was Not Found.
-        DropBoundItem = 24,                // You Can'T Drop A Soulbound Item.
-        OutOfRange = 25,                   // Out Of Range.
-        TooFewToSplit = 26,                // Tried To Split More Than Number In Stack.
-        SplitFailed = 27,                  // Couldn'T Split Those Items.
-        SpellFailedReagentsGeneric = 28,   // Missing Reagent
-        CantTradeGold = 29,                // Gold May Only Be Offered By One Trader.
-        NotEnoughMoney = 30,               // You Don'T Have Enough Money.
-        NotABag = 31,                      // Not A Bag.
-        DestroyNonemptyBag = 32,           // You Can Only Do That With Empty Bags.
-        NotOwner = 33,                     // You Don'T Own That Item.
-        OnlyOneQuiver = 34,                // You Can Only Equip One Quiver.
-        NoBankSlot = 35,                   // You Must Purchase That Bag Slot First
-        NoBankHere = 36,                   // You Are Too Far Away From A Bank.
-        ItemLocked = 37,                   // Item Is Locked.
-        GenericStunned = 38,               // You Are Stunned
-        PlayerDead = 39,                   // You Can'T Do That When You'Re Dead.
-        ClientLockedOut = 40,              // You Can'T Do That Right Now.
-        InternalBagError = 41,             // Internal Bag Error
-        OnlyOneBolt = 42,                  // You Can Only Equip One Quiver.
-        OnlyOneAmmo = 43,                  // You Can Only Equip One Ammo Pouch.
-        CantWrapStackable = 44,            // Stackable Items Can'T Be Wrapped.
-        CantWrapEquipped = 45,             // Equipped Items Can'T Be Wrapped.
-        CantWrapWrapped = 46,              // Wrapped Items Can'T Be Wrapped.
-        CantWrapBound = 47,                // Bound Items Can'T Be Wrapped.
-        CantWrapUnique = 48,               // Unique Items Can'T Be Wrapped.
-        CantWrapBags = 49,                 // Bags Can'T Be Wrapped.
-        LootGone = 50,                     // Already Looted
-        InvFull = 51,                      // Inventory Is Full.
-        BankFull = 52,                     // Your Bank Is Full
-        VendorSoldOut = 53,                // That Item Is Currently Sold Out.
-        BagFull2 = 54,                     // That Bag Is Full.
-        ItemNotFound2 = 55,                // The Item Was Not Found.
-        CantStack2 = 56,                   // This Item Cannot Stack.
-        BagFull3 = 57,                     // That Bag Is Full.
-        VendorSoldOut2 = 58,               // That Item Is Currently Sold Out.
-        ObjectIsBusy = 59,                 // That Object Is Busy.
-        CantBeDisenchanted = 60,           // Item Cannot Be Disenchanted
-        NotInCombat = 61,                  // You Can'T Do That While In Combat
-        NotWhileDisarmed = 62,             // You Can'T Do That While Disarmed
-        BagFull4 = 63,                     // That Bag Is Full.
-        CantEquipRank = 64,                // You Don'T Have The Required Rank For That Item
-        CantEquipReputation = 65,          // You Don'T Have The Required Reputation For That Item
-        TooManySpecialBags = 66,           // You Cannot Equip Another Bag Of That Type
-        LootCantLootThatNow = 67,          // You Can'T Loot That Item Now.
-        ItemUniqueEquippable = 68,         // You Cannot Equip More Than One Of Those.
-        VendorMissingTurnins = 69,         // You Do Not Have The Required Items For That Purchase
-        NotEnoughHonorPoints = 70,         // You Don'T Have Enough Honor Points
-        NotEnoughArenaPoints = 71,         // You Don'T Have Enough Arena Points
-        ItemMaxCountSocketed = 72,         // You Have The Maximum Number Of Those Gems In Your Inventory Or Socketed Into Items.
-        MailBoundItem = 73,                // You Can'T Mail Soulbound Items.
-        InternalBagError2 = 74,            // Internal Bag Error
-        BagFull5 = 75,                     // That Bag Is Full.
+        CantEquipLevelI = 1,  // You Must Reach Level %D To Use That Item.
+        CantEquipSkill = 2,  // You Aren'T Skilled Enough To Use That Item.
+        WrongSlot = 3,  // That Item Does Not Go In That Slot.
+        BagFull = 4,  // That Bag Is Full.
+        BagInBag = 5,  // Can'T Put Non-Empty Bags In Other Bags.
+        TradeEquippedBag = 6,  // You Can'T Trade Equipped Bags.
+        AmmoOnly = 7,  // Only Ammo Can Go There.
+        ProficiencyNeeded = 8,  // You Do Not Have The Required Proficiency For That Item.
+        NoSlotAvailable = 9,  // No Equipment Slot Is Available For That Item.
+        CantEquipEver = 10, // You Can Never Use That Item.
+        CantEquipEver2 = 11, // You Can Never Use That Item.
+        NoSlotAvailable2 = 12, // No Equipment Slot Is Available For That Item.
+        Equipped2handed = 13, // Cannot Equip That With A Two-Handed Weapon.
+        TwoHandSkillNotFound = 14, // You Cannot Dual-Wield
+        WrongBagType = 15, // That Item Doesn'T Go In That Container.
+        WrongBagType2 = 16, // That Item Doesn'T Go In That Container.
+        ItemMaxCount = 17, // You Can'T Carry Any More Of Those Items.
+        NoSlotAvailable3 = 18, // No Equipment Slot Is Available For That Item.
+        CantStack = 19, // This Item Cannot Stack.
+        NotEquippable = 20, // This Item Cannot Be Equipped.
+        CantSwap = 21, // These Items Can'T Be Swapped.
+        SlotEmpty = 22, // That Slot Is Empty.
+        ItemNotFound = 23, // The Item Was Not Found.
+        DropBoundItem = 24, // You Can'T Drop A Soulbound Item.
+        OutOfRange = 25, // Out Of Range.
+        TooFewToSplit = 26, // Tried To Split More Than Number In Stack.
+        SplitFailed = 27, // Couldn'T Split Those Items.
+        SpellFailedReagentsGeneric = 28, // Missing Reagent
+        CantTradeGold = 29, // Gold May Only Be Offered By One Trader.
+        NotEnoughMoney = 30, // You Don'T Have Enough Money.
+        NotABag = 31, // Not A Bag.
+        DestroyNonemptyBag = 32, // You Can Only Do That With Empty Bags.
+        NotOwner = 33, // You Don'T Own That Item.
+        OnlyOneQuiver = 34, // You Can Only Equip One Quiver.
+        NoBankSlot = 35, // You Must Purchase That Bag Slot First
+        NoBankHere = 36, // You Are Too Far Away From A Bank.
+        ItemLocked = 37, // Item Is Locked.
+        GenericStunned = 38, // You Are Stunned
+        PlayerDead = 39, // You Can'T Do That When You'Re Dead.
+        ClientLockedOut = 40, // You Can'T Do That Right Now.
+        InternalBagError = 41, // Internal Bag Error
+        OnlyOneBolt = 42, // You Can Only Equip One Quiver.
+        OnlyOneAmmo = 43, // You Can Only Equip One Ammo Pouch.
+        CantWrapStackable = 44, // Stackable Items Can'T Be Wrapped.
+        CantWrapEquipped = 45, // Equipped Items Can'T Be Wrapped.
+        CantWrapWrapped = 46, // Wrapped Items Can'T Be Wrapped.
+        CantWrapBound = 47, // Bound Items Can'T Be Wrapped.
+        CantWrapUnique = 48, // Unique Items Can'T Be Wrapped.
+        CantWrapBags = 49, // Bags Can'T Be Wrapped.
+        LootGone = 50, // Already Looted
+        InvFull = 51, // Inventory Is Full.
+        BankFull = 52, // Your Bank Is Full
+        VendorSoldOut = 53, // That Item Is Currently Sold Out.
+        BagFull2 = 54, // That Bag Is Full.
+        ItemNotFound2 = 55, // The Item Was Not Found.
+        CantStack2 = 56, // This Item Cannot Stack.
+        BagFull3 = 57, // That Bag Is Full.
+        VendorSoldOut2 = 58, // That Item Is Currently Sold Out.
+        ObjectIsBusy = 59, // That Object Is Busy.
+        CantBeDisenchanted = 60, // Item Cannot Be Disenchanted
+        NotInCombat = 61, // You Can'T Do That While In Combat
+        NotWhileDisarmed = 62, // You Can'T Do That While Disarmed
+        BagFull4 = 63, // That Bag Is Full.
+        CantEquipRank = 64, // You Don'T Have The Required Rank For That Item
+        CantEquipReputation = 65, // You Don'T Have The Required Reputation For That Item
+        TooManySpecialBags = 66, // You Cannot Equip Another Bag Of That Type
+        LootCantLootThatNow = 67, // You Can'T Loot That Item Now.
+        ItemUniqueEquippable = 68, // You Cannot Equip More Than One Of Those.
+        VendorMissingTurnins = 69, // You Do Not Have The Required Items For That Purchase
+        NotEnoughHonorPoints = 70, // You Don'T Have Enough Honor Points
+        NotEnoughArenaPoints = 71, // You Don'T Have Enough Arena Points
+        ItemMaxCountSocketed = 72, // You Have The Maximum Number Of Those Gems In Your Inventory Or Socketed Into Items.
+        MailBoundItem = 73, // You Can'T Mail Soulbound Items.
+        InternalBagError2 = 74, // Internal Bag Error
+        BagFull5 = 75, // That Bag Is Full.
         ItemMaxCountEquippedSocketed = 76, // You Have The Maximum Number Of Those Gems Socketed Into Equipped Items.
         ItemUniqueEquippableSocketed = 77, // You Cannot Socket More Than One Of Those Gems Into A Single Item.
-        TooMuchGold = 78,                  // At Gold Limit
-        NotDuringArenaMatch = 79,          // You Can'T Do That While In An Arena Match
-        TradeBoundItem = 80,               // You Can'T Trade A Soulbound Item.
-        CantEquipRating = 81,              // You Don'T Have The Personal, Team, Or Battleground Rating Required To Buy That Item
+        TooMuchGold = 78, // At Gold Limit
+        NotDuringArenaMatch = 79, // You Can'T Do That While In An Arena Match
+        TradeBoundItem = 80, // You Can'T Trade A Soulbound Item.
+        CantEquipRating = 81, // You Don'T Have The Personal, Team, Or Battleground Rating Required To Buy That Item
         EventAutoequipBindConfirm = 82,
         NotSameAccount = 83, // Account-Bound Items Can Only Be Given To Your Own Characters.
         EquipNone3 = 84,
-        ItemMaxLimitCategoryCountExceededIs = 85,    // You Can Only Carry %D %S
+        ItemMaxLimitCategoryCountExceededIs = 85, // You Can Only Carry %D %S
         ItemMaxLimitCategorySocketedExceededIs = 86, // You Can Only Equip %D |4item:Items In The %S Category
-        ScalingStatItemLevelExceeded = 87,           // Your Level Is Too High To Use That Item
-        PurchaseLevelTooLow = 88,                    // You Must Reach Level %D To Purchase That Item.
-        CantEquipNeedTalent = 89,                    // You Do Not Have The Required Talent To Equip That.
+        ScalingStatItemLevelExceeded = 87, // Your Level Is Too High To Use That Item
+        PurchaseLevelTooLow = 88, // You Must Reach Level %D To Purchase That Item.
+        CantEquipNeedTalent = 89, // You Do Not Have The Required Talent To Equip That.
         ItemMaxLimitCategoryEquippedExceededIs = 90, // You Can Only Equip %D |4item:Items In The %S Category
-        ShapeshiftFormCannotEquip = 91,              // Cannot Equip Item In This Form
-        ItemInventoryFullSatchel = 92,               // Your Inventory Is Full. Your Satchel Has Been Delivered To Your Mailbox.
-        ScalingStatItemLevelTooLow = 93,             // Your Level Is Too Low To Use That Item
-        CantBuyQuantity = 94,                        // You Can'T Buy The Specified Quantity Of That Item.
-        ItemIsBattlePayLocked = 95,                  // Your Purchased Item Is Still Waiting To Be Unlocked
-        ReagentBankFull = 96,                        // Your Reagent Bank Is Full
+        ShapeshiftFormCannotEquip = 91, // Cannot Equip Item In This Form
+        ItemInventoryFullSatchel = 92, // Your Inventory Is Full. Your Satchel Has Been Delivered To Your Mailbox.
+        ScalingStatItemLevelTooLow = 93, // Your Level Is Too Low To Use That Item
+        CantBuyQuantity = 94, // You Can'T Buy The Specified Quantity Of That Item.
+        ItemIsBattlePayLocked = 95, // Your Purchased Item Is Still Waiting To Be Unlocked
+        ReagentBankFull = 96, // Your Reagent Bank Is Full
         ReagentBankLocked = 97,
-        WrongBagType3 = 98,           // That Item Doesn'T Go In That Container.
-        CantUseItem = 99,             // You Can'T Use That Item.
-        CantBeObliterated = 100,      // You Can'T Obliterate That Item
-        GuildBankConjuredItem = 101,  // You Cannot Store Conjured Items In The Guild Bank
-        BagFull6 = 102,               // That bag is full.
-        BagFull7 = 103,               // That bag is full.
-        CantBeScrapped = 104,         // You can't scrap that item
-        BagFull8 = 105,               // That bag is full.
-        NotInPetBattle = 106,         // You cannot do that while in a pet battle
-        BagFull9 = 107,               // That bag is full.
-        CantDoThatRightNow = 108,     // You can't do that right now.
-        CantDoThatRightNow2 = 109,    // You can't do that right now.
-        NotInNPE = 110,               // Not available during the tutorial
-        ItemCooldown = 111,           // Item is not ready yet.
-        NotInRatedBattleground = 112, // You can't do that in a rated battleground.
+        WrongBagType3 = 98, // That Item Doesn'T Go In That Container.
+        CantUseItem = 99, // You Can'T Use That Item.
+        CantBeObliterated = 100,// You Can'T Obliterate That Item
+        GuildBankConjuredItem = 101,// You Cannot Store Conjured Items In The Guild Bank
+        BagFull6 = 102,// That bag is full.
+        BagFull7 = 103,// That bag is full.
+        CantBeScrapped = 104,// You can't scrap that item
+        BagFull8 = 105,// That bag is full.
+        NotInPetBattle = 106,// You cannot do that while in a pet battle
+        BagFull9 = 107,// That bag is full.
+        CantDoThatRightNow = 108,// You can't do that right now.
+        CantDoThatRightNow2 = 109,// You can't do that right now.
+        NotInNPE = 110,// Not available during the tutorial
+        ItemCooldown = 111,// Item is not ready yet.
+        NotInRatedBattleground = 112,// You can't do that in a rated battleground.
         EquipableSpellsSlotsFull = 113,
-        CantBeRecrafted = 114,     // You can't recraft that itemv
-        ReagentBagWrongSlot = 115, // Reagent Bags can only be placed in the reagent bag slot.
-        SlotOnlyReagentBag = 116,  // Only Reagent Bags can be placed in the reagent bag slot.
-        ReagentBagItemType = 117   // Only Reagents can be placed in Reagent Bags.
+        CantBeRecrafted = 114,// You can't recraft that itemv
+        ReagentBagWrongSlot = 115,// Reagent Bags can only be placed in the reagent bag slot.
+        SlotOnlyReagentBag = 116,// Only Reagent Bags can be placed in the reagent bag slot.
+        ReagentBagItemType = 117,// Only Reagents can be placed in Reagent Bags.
     }
 
     public enum BuyResult
@@ -1204,13 +1235,13 @@ namespace Framework.Constants
 
     public enum SellResult
     {
-        CantFindItem = 1,          // The item was not found.
-        CantSellItem = 2,          // The merchant doesn't want that item.
-        CantFindVendor = 3,        // The merchant doesn't like you.
-        YouDontOwnThatItem = 4,    // You don't own that item.
-        Unk = 5,                   // Nothing Appears...
-        OnlyEmptyBag = 6,          // You can only do that with empty bags.
-        CantSellToThisMerchant = 7 // You cannot sell items to this merchant.
+        CantFindItem = 1, // The item was not found.
+        CantSellItem = 2, // The merchant doesn't want that item.
+        CantFindVendor = 3, // The merchant doesn't like you.
+        YouDontOwnThatItem = 4, // You don't own that item.
+        Unk = 5,       // Nothing Appears...
+        OnlyEmptyBag = 6, // You can only do that with empty bags.
+        CantSellToThisMerchant = 7        // You cannot sell items to this merchant.
     }
 
     public enum EnchantmentSlot
@@ -1221,16 +1252,16 @@ namespace Framework.Constants
         Sock2 = 3,
         Sock3 = 4,
         Bonus = 5,
-        Prismatic = 6, // added at apply special permanent enchantment
+        Prismatic = 6,                    // added at apply special permanent enchantment
         Use = 7,
 
         MaxInspected = 8,
 
-        Prop0 = 8,  // used with RandomSuffix
-        Prop1 = 9,  // used with RandomSuffix
-        Prop2 = 10, // used with RandomSuffix and RandomProperty
-        Prop3 = 11, // used with RandomProperty
-        Prop4 = 12, // used with RandomProperty
+        Prop0 = 8,                   // used with RandomSuffix
+        Prop1 = 9,                   // used with RandomSuffix
+        Prop2 = 10,                   // used with RandomSuffix and RandomProperty
+        Prop3 = 11,                   // used with RandomProperty
+        Prop4 = 12,                   // used with RandomProperty
         Max = 13
     }
 
@@ -1254,9 +1285,8 @@ namespace Framework.Constants
     public enum CurrencyFlags
     {
         Tradeable = 0x01,
-
         // ...
-        HighPrecision = 0x08
+        HighPrecision = 0x08,
         // ...
     }
 
@@ -1273,7 +1303,7 @@ namespace Framework.Constants
         Unchanged = 0,
         Changed = 1,
         New = 2,
-        Removed = 3 //not removed just set count == 0
+        Removed = 3     //not removed just set count == 0
     }
 
     public enum ItemTransmogrificationWeaponCategory
@@ -1293,16 +1323,16 @@ namespace Framework.Constants
     public enum AzeriteEssenceActivateResult
     {
         None = 0,
-        EssenceNotUnlocked = 2, // Arg: AzeriteEssenceID
+        EssenceNotUnlocked = 2,    // Arg: AzeriteEssenceID
         CantDoThatRightNow = 3,
         AffectingCombat = 4,
-        CantRemoveEssence = 5, // Arg: SpellID of active essence on cooldown
+        CantRemoveEssence = 5,    // Arg: SpellID of active essence on cooldown
         ChallengeModeActive = 6,
         NotInRestArea = 7,
         ConditionFailed = 8,
         SlotLocked = 9,
         NotAtForge = 10,
-        HeartLevelTooLow = 11, // Arg: RequiredLevel
+        HeartLevelTooLow = 11,   // Arg: RequiredLevel
         NotEquipped = 12
     }
 }

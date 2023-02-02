@@ -18,8 +18,8 @@ namespace Framework.Constants
 
     public enum LfgUpdateType
     {
-        Default = 0,    // Internal Use
-        LeaderUnk1 = 1, // Fixme: At Group Leave
+        Default = 0,      // Internal Use
+        LeaderUnk1 = 1,      // Fixme: At Group Leave
         RolecheckAborted = 4,
         JoinQueue = 6,
         RolecheckFailed = 7,
@@ -32,7 +32,7 @@ namespace Framework.Constants
         ProposalBegin = 15,
         UpdateStatus = 16,
         GroupMemberOffline = 17,
-        GroupDisbandUnk16 = 18, // FIXME: Sometimes at group disband
+        GroupDisbandUnk16 = 18,     // FIXME: Sometimes at group disband
         JoinQueueInitial = 25,
         DungeonFinished = 26,
         PartyRoleNotAvailable = 46,
@@ -48,7 +48,6 @@ namespace Framework.Constants
         Rolecheck,
         Queued,
         Proposal,
-
         //Boot,
         Dungeon = 5,
         FinishedDungeon,
@@ -62,7 +61,7 @@ namespace Framework.Constants
         Scenario = 3,
         Flex = 4,
         WorldPvP = 5,
-        ScheduledPvp = 6 // pvp brawl
+        ScheduledPvp = 6,    // pvp brawl
     }
 
     public enum LfgLockStatusType
@@ -86,7 +85,7 @@ namespace Framework.Constants
     public enum LfgOptions
     {
         EnableDungeonFinder = 0x01,
-        EnableRaidBrowser = 0x02
+        EnableRaidBrowser = 0x02,
     }
 
     public enum LfgFlags
@@ -118,13 +117,13 @@ namespace Framework.Constants
     public enum LfgTeleportResult
     {
         // 7 = "You Can'T Do That Right Now" | 5 = No Client Reaction
-        None = 0, // Internal Use
+        None = 0,      // Internal Use
         Dead = 1,
         Falling = 2,
         OnTransport = 3,
         Exhaustion = 4,
         NoReturnLocation = 6,
-        ImmuneToSummons = 8 // Fixme - It Can Be 7 Or 8 (Need Proper Data)
+        ImmuneToSummons = 8       // Fixme - It Can Be 7 Or 8 (Need Proper Data)
 
         // unknown values
         //LFG_TELEPORT_RESULT_NOT_IN_DUNGEON,
@@ -135,41 +134,41 @@ namespace Framework.Constants
     public enum LfgJoinResult
     {
         // 3 = No client reaction | 18 = "Rolecheck failed"
-        Ok = 0x00,                              // Joined (No Client Msg)
-        GroupFull = 0x1f,                       // Your Group Is Already Full.
-        NoLfgObject = 0x21,                     // Internal Lfg Error.
-        NoSlots = 0x22,                         // You Do Not Meet The Requirements For The Chosen Dungeons.
-        MismatchedSlots = 0x23,                 // You Cannot Mix Dungeons, Raids, And Random When Picking Dungeons.
+        Ok = 0x00, // Joined (No Client Msg)
+        GroupFull = 0x1f, // Your Group Is Already Full.
+        NoLfgObject = 0x21, // Internal Lfg Error.
+        NoSlots = 0x22, // You Do Not Meet The Requirements For The Chosen Dungeons.
+        MismatchedSlots = 0x23, // You Cannot Mix Dungeons, Raids, And Random When Picking Dungeons.
         PartyPlayersFromDifferentRealms = 0x24, // The Dungeon You Chose Does Not Support Players From Multiple Realms.
-        MembersNotPresent = 0x25,               // One Or More Group Members Are Pending Invites Or Disconnected.
-        GetInfoTimeout = 0x26,                  // Could Not Retrieve Information About Some Party Members.
-        InvalidSlot = 0x27,                     // One Or More Dungeons Was Not Valid.
-        DeserterPlayer = 0x28,                  // You Can Not Queue For Dungeons Until Your Deserter Debuff Wears Off.
-        DeserterParty = 0x29,                   // One Or More Party Members Has A Deserter Debuff.
-        RandomCooldownPlayer = 0x2a,            // You Can Not Queue For Random Dungeons While On Random Dungeon Cooldown.
-        RandomCooldownParty = 0x2b,             // One Or More Party Members Are On Random Dungeon Cooldown.
-        TooManyMembers = 0x2c,                  // You Have Too Many Group Members To Queue For That.
-        CantUseDungeons = 0x2d,                 // You Cannot Queue For A Dungeon Or Raid While Using Battlegrounds Or Arenas.
-        RoleCheckFailed = 0x2e,                 // The Role Check Has Failed.
-        TooFewMembers = 0x34,                   // You Do Not Have Enough Group Members To Queue For That.
-        ReasonTooManyLfg = 0x35,                // You Are Queued For Too Many Instances.
-        MismatchedSlotsLocalXrealm = 0x37,      // You Cannot Mix Realm-Only And X-Realm Entries When Listing Your Name In Other Raids.
-        AlreadyUsingLfgList = 0x3f,             // You Can'T Do That While Using Premade Groups.
-        NotLeader = 0x45,                       // You Are Not The Party Leader.
+        MembersNotPresent = 0x25, // One Or More Group Members Are Pending Invites Or Disconnected.
+        GetInfoTimeout = 0x26, // Could Not Retrieve Information About Some Party Members.
+        InvalidSlot = 0x27, // One Or More Dungeons Was Not Valid.
+        DeserterPlayer = 0x28, // You Can Not Queue For Dungeons Until Your Deserter Debuff Wears Off.
+        DeserterParty = 0x29, // One Or More Party Members Has A Deserter Debuff.
+        RandomCooldownPlayer = 0x2a, // You Can Not Queue For Random Dungeons While On Random Dungeon Cooldown.
+        RandomCooldownParty = 0x2b, // One Or More Party Members Are On Random Dungeon Cooldown.
+        TooManyMembers = 0x2c, // You Have Too Many Group Members To Queue For That.
+        CantUseDungeons = 0x2d, // You Cannot Queue For A Dungeon Or Raid While Using Battlegrounds Or Arenas.
+        RoleCheckFailed = 0x2e, // The Role Check Has Failed.
+        TooFewMembers = 0x34, // You Do Not Have Enough Group Members To Queue For That.
+        ReasonTooManyLfg = 0x35, // You Are Queued For Too Many Instances.
+        MismatchedSlotsLocalXrealm = 0x37, // You Cannot Mix Realm-Only And X-Realm Entries When Listing Your Name In Other Raids.
+        AlreadyUsingLfgList = 0x3f, // You Can'T Do That While Using Premade Groups.
+        NotLeader = 0x45, // You Are Not The Party Leader.
         Dead = 0x49,
 
-        PartyNotMeetReqs = 6 // One Or More Party Members Do Not Meet The Requirements For The Chosen Dungeons (Fixme)
+        PartyNotMeetReqs = 6,      // One Or More Party Members Do Not Meet The Requirements For The Chosen Dungeons (Fixme)
     }
 
     public enum LfgRoleCheckState
     {
         Default = 0,      // Internal Use = Not Initialized.
-        Finished = 1,     // Role Check Finished
-        Initialiting = 2, // Role Check Begins
-        MissingRole = 3,  // Someone Didn'T Selected A Role After 2 Mins
-        WrongRoles = 4,   // Can'T Form A Group With That Role Selection
+        Finished = 1,      // Role Check Finished
+        Initialiting = 2,      // Role Check Begins
+        MissingRole = 3,      // Someone Didn'T Selected A Role After 2 Mins
+        WrongRoles = 4,      // Can'T Form A Group With That Role Selection
         Aborted = 5,      // Someone Leave The Group
-        NoRole = 6        // Someone Selected No Role
+        NoRole = 6       // Someone Selected No Role
     }
 
     public enum LfgAnswer
@@ -188,8 +187,8 @@ namespace Framework.Constants
         HasIgnores,
         NoRoles,
         NoDungeons,
-        WithLessPlayers, // Values Under This = Not Compatible (Do Not Modify Order)
+        WithLessPlayers,                     // Values Under This = Not Compatible (Do Not Modify Order)
         BadStates,
-        Match // Must Be The Last One
+        Match                                  // Must Be The Last One
     }
 }

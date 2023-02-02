@@ -32,52 +32,52 @@ namespace Framework.Constants
 
     public enum GossipOptionNpc
     {
-        None = 0,                                    // White chat bubble. Default
-        Vendor = 1,                                  // Brown bag
-        Taxinode = 2,                                // White wing
-        Trainer = 3,                                 // Brown book
-        SpiritHealer = 4,                            // Golden interaction wheel (with red center)
-        Binder = 5,                                  // Golden interaction wheel
-        Banker = 6,                                  // Brown bag (with gold coin in lower corner)
-        PetitionVendor = 7,                          // White chat bubble (with "..." inside)
-        TabardVendor = 8,                            // White tabard
-        Battlemaster = 9,                            // Two crossed swords
-        Auctioneer = 10,                             // Stack of gold coins
-        TalentMaster = 11,                           // White chat bubble
-        Stablemaster = 12,                           // White chat bubble
-        PetSpecializationMaster = 13, /*DEPRECATED*/ // White chat bubble
-        GuildBanker = 14,                            // White chat bubble
-        Spellclick = 15,                             // White chat bubble
-        DisableXPGain = 16,                          // White chat bubble
-        EnableXPGain = 17,                           // White chat bubble
-        Mailbox = 18,                                // White chat bubble
-        WorldPvPQueue = 19, /*NYI*/                  // White chat bubble
-        LFGDungeon = 20, /*NYI*/                     // White chat bubble
-        ArtifactRespec = 21, /*NYI*/                 // White chat bubble
-        CemeterySelect = 22, /*DEPRECATED*/          // White chat bubble
-        SpecializationMaster = 23, /*DEPRECATED*/    // White chat bubble
-        GlyphMaster = 24, /*DEPRECATED*/             // White chat bubble
-        QueueScenario = 25, /*NYI*/                  // White chat bubble
-        GarrisonArchitect = 26, /*NYI*/              // White chat bubble
-        GarrisonMissionNpc = 27, /*NYI*/             // White chat bubble
-        ShipmentCrafter = 28, /*NYI*/                // Brown document
-        GarrisonTradeskillNpc = 29, /*NYI*/          // White chat bubble
-        GarrisonRecruitment = 30, /*NYI*/            // White chat bubble
-        AdventureMap = 31, /*NYI*/                   // White chat bubble
-        GarrisonTalent = 32,                         // White chat bubble
-        ContributionCollector = 33, /*NYI*/          // White chat bubble
-        Transmogrify = 34,                           // Purple helm
-        AzeriteRespec = 35,                          // White chat bubble
-        IslandsMissionNpc = 36, /*NYI*/              // White chat bubble
-        UIItemInteraction = 37, /*NYI*/              // White chat bubble
-        WorldMap = 38, /*NYI*/                       // White chat bubble
-        Soulbind = 39, /*NYI*/                       // White chat bubble
-        ChromieTimeNpc = 40, /*NYI*/                 // White chat bubble
-        CovenantPreviewNpc = 41, /*NYI*/             // White chat bubble
-        RuneforgeLegendaryCrafting = 42, /*NYI*/     // White chat bubble
-        NewPlayerGuide = 43, /*NYI*/                 // White chat bubble
-        RuneforgeLegendaryUpgrade = 44, /*NYI*/      // White chat bubble
-        CovenantRenownNpc = 45, /*NYI*/              // White chat bubble
+        None = 0,    // White chat bubble. Default
+        Vendor = 1,    // Brown bag
+        Taxinode = 2,    // White wing
+        Trainer = 3,    // Brown book
+        SpiritHealer = 4,    // Golden interaction wheel (with red center)
+        Binder = 5,    // Golden interaction wheel
+        Banker = 6,    // Brown bag (with gold coin in lower corner)
+        PetitionVendor = 7,    // White chat bubble (with "..." inside)
+        TabardVendor = 8,    // White tabard
+        Battlemaster = 9,    // Two crossed swords
+        Auctioneer = 10,   // Stack of gold coins
+        TalentMaster = 11,   // White chat bubble
+        Stablemaster = 12,   // White chat bubble
+        PetSpecializationMaster = 13,   /*DEPRECATED*/ // White chat bubble
+        GuildBanker = 14,   // White chat bubble
+        Spellclick = 15,   // White chat bubble
+        DisableXPGain = 16,   // White chat bubble
+        EnableXPGain = 17,   // White chat bubble
+        Mailbox = 18,   // White chat bubble
+        WorldPvPQueue = 19,   /*NYI*/ // White chat bubble
+        LFGDungeon = 20,   /*NYI*/ // White chat bubble
+        ArtifactRespec = 21,   /*NYI*/ // White chat bubble
+        CemeterySelect = 22,   /*DEPRECATED*/ // White chat bubble
+        SpecializationMaster = 23,   /*DEPRECATED*/ // White chat bubble
+        GlyphMaster = 24,   /*DEPRECATED*/ // White chat bubble
+        QueueScenario = 25,   /*NYI*/ // White chat bubble
+        GarrisonArchitect = 26,   /*NYI*/ // White chat bubble
+        GarrisonMissionNpc = 27,   /*NYI*/ // White chat bubble
+        ShipmentCrafter = 28,   /*NYI*/ // Brown document
+        GarrisonTradeskillNpc = 29,   /*NYI*/ // White chat bubble
+        GarrisonRecruitment = 30,   /*NYI*/ // White chat bubble
+        AdventureMap = 31,   /*NYI*/ // White chat bubble
+        GarrisonTalent = 32,   // White chat bubble
+        ContributionCollector = 33,   /*NYI*/ // White chat bubble
+        Transmogrify = 34,   // Purple helm
+        AzeriteRespec = 35,   // White chat bubble
+        IslandsMissionNpc = 36,   /*NYI*/ // White chat bubble
+        UIItemInteraction = 37,   /*NYI*/ // White chat bubble
+        WorldMap = 38,   /*NYI*/ // White chat bubble
+        Soulbind = 39,   /*NYI*/ // White chat bubble
+        ChromieTimeNpc = 40,   /*NYI*/ // White chat bubble
+        CovenantPreviewNpc = 41,   /*NYI*/ // White chat bubble
+        RuneforgeLegendaryCrafting = 42,   /*NYI*/ // White chat bubble
+        NewPlayerGuide = 43,   /*NYI*/ // White chat bubble
+        RuneforgeLegendaryUpgrade = 44,   /*NYI*/ // White chat bubble
+        CovenantRenownNpc = 45,   /*NYI*/ // White chat bubble
         BlackMarketAuctionHouse = 46,
         PerksProgramVendor = 47,
         ProfessionsCraftingOrder = 48,
@@ -142,6 +142,40 @@ namespace Framework.Constants
         public const uint GossipSenderSecMailbox = 9;
         public const uint GossipSenderSecStablemaster = 10;
     }
+
+
+    public struct GossipAction
+    {
+        // Gossip Defines
+        public const uint GOSSIP_ACTION_TRADE = 1;
+        public const uint GOSSIP_ACTION_TRAIN = 2;
+        public const uint GOSSIP_ACTION_TAXI = 3;
+        public const uint GOSSIP_ACTION_GUILD = 4;
+        public const uint GOSSIP_ACTION_BATTLE = 5;
+        public const uint GOSSIP_ACTION_BANK = 6;
+        public const uint GOSSIP_ACTION_INN = 7;
+        public const uint GOSSIP_ACTION_HEAL = 8;
+        public const uint GOSSIP_ACTION_TABARD = 9;
+        public const uint GOSSIP_ACTION_AUCTION = 10;
+        public const uint GOSSIP_ACTION_INN_INFO = 11;
+        public const uint GOSSIP_ACTION_UNLEARN = 12;
+        public const uint GOSSIP_ACTION_INFO_DEF = 1000;
+    }
+
+    public struct GossipSender
+    {
+        public const uint GOSSIP_SENDER_MAIN = 1;
+        public const uint GOSSIP_SENDER_INN_INFO = 2;
+        public const uint GOSSIP_SENDER_INFO = 3;
+        public const uint GOSSIP_SENDER_SEC_PROFTRAIN = 4;
+        public const uint GOSSIP_SENDER_SEC_CLASSTRAIN = 5;
+        public const uint GOSSIP_SENDER_SEC_BATTLEINFO = 6;
+        public const uint GOSSIP_SENDER_SEC_BANK = 7;
+        public const uint GOSSIP_SENDER_SEC_INN = 8;
+        public const uint GOSSIP_SENDER_SEC_MAILBOX = 9;
+        public const uint GOSSIP_SENDER_SEC_STABLEMASTER = 10;
+    }
+
 
     public enum GossipOptionStatus
     {

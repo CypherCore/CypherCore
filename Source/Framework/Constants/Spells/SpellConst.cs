@@ -32,39 +32,39 @@ namespace Framework.Constants
     {
         HealthManaPotions = 4,
         DevourMagic = 12,
-        Judgement = 1210, // Judgement (seal trigger)
+        Judgement = 1210,               // Judgement (seal trigger)
         Food = 11,
         Drink = 59
     }
 
     public enum SpellLinkedType
     {
-        Cast = 0, // +: cast; -: remove
+        Cast = 0,   // +: cast; -: remove
         Hit = 1,
-        Aura = 2, // +: aura; -: immune
+        Aura = 2,   // +: aura; -: immune
         Remove = 3
     }
 
     //Spell targets used by SelectSpell
     public enum SelectTargetType
     {
-        DontCare = 0, //All target types allowed
-        Self,         //Only Self casting
-        SingleEnemy,  //Only Single Enemy
-        AoeEnemy,     //Only AoE Enemy
-        AnyEnemy,     //AoE or Single Enemy
-        SingleFriend, //Only Single Friend
-        AoeFriend,    //Only AoE Friend
-        AnyFriend     //AoE or Single Friend
+        DontCare = 0,   //All target types allowed
+        Self,           //Only Self casting
+        SingleEnemy,    //Only Single Enemy
+        AoeEnemy,       //Only AoE Enemy
+        AnyEnemy,       //AoE or Single Enemy
+        SingleFriend,   //Only Single Friend
+        AoeFriend,      //Only AoE Friend
+        AnyFriend       //AoE or Single Friend
     }
 
     //Spell Effects used by SelectSpell
     public enum SelectEffect
     {
-        DontCare = 0, //All spell effects allowed
-        Damage,       //Spell does damage
-        Healing,      //Spell does healing
-        Aura          //Spell applies an aura
+        DontCare = 0,   //All spell effects allowed
+        Damage,         //Spell does damage
+        Healing,        //Spell does healing
+        Aura            //Spell applies an aura
     }
 
     public enum SpellCastSource
@@ -75,14 +75,14 @@ namespace Framework.Constants
         Passive = 7,
         Pet = 9,
         Aura = 13,
-        Spell = 16
+        Spell = 16,
     }
 
     public enum SpellRangeFlag : byte
     {
         Default = 0,
-        Melee = 1, //melee
-        Ranged = 2 //hunter range and ranged weapon
+        Melee = 1,     //melee
+        Ranged = 2      //hunter range and ranged weapon
     }
 
     [Flags]
@@ -95,7 +95,7 @@ namespace Framework.Constants
         Combat = 0x08,
         DamageCancelsPlayerOnly = 0x10,
         MeleeCombat = 0x20, // NYI
-        Immunity = 0x40,    // NYI
+        Immunity = 0x40, // NYI
         DamageAbsorb = 0x80,
         ZeroDamageCancels = 0x100,
         DamagePushback = 0x200,
@@ -113,7 +113,7 @@ namespace Framework.Constants
         Turning = 0x10,
         Anim = 0x20,
         Dismount = 0x40,
-        UnderWater = 0x80,  // TODO: disallow casting when swimming (SPELL_FAILED_ONLY_ABOVEWATER)
+        UnderWater = 0x80, // TODO: disallow casting when swimming (SPELL_FAILED_ONLY_ABOVEWATER)
         AboveWater = 0x100, // TODO: disallow casting when not swimming (SPELL_FAILED_ONLY_UNDERWATER)
         Sheathing = 0x200,
         Interacting = 0x400, // TODO: more than gossip, replace all the feign death removals by aura type
@@ -153,21 +153,21 @@ namespace Framework.Constants
         Transform = 0x10, // NYI
         Jump = 0x20,
         ChangeSpec = 0x40,
-        AbandonVehicle = 0x80,             // NYI
-        StartOfEncounter = 0x100,          // NYI
-        EndOfEncounter = 0x200,            // NYI
-        Disconnect = 0x400,                // NYI
-        EnteringInstance = 0x800,          // NYI
-        DuelEnd = 0x1000,                  // NYI
+        AbandonVehicle = 0x80, // NYI
+        StartOfEncounter = 0x100, // NYI
+        EndOfEncounter = 0x200, // NYI
+        Disconnect = 0x400, // NYI
+        EnteringInstance = 0x800, // NYI
+        DuelEnd = 0x1000, // NYI
         LeaveArenaOrBattleground = 0x2000, // NYI
         ChangeTalent = 0x4000,
         ChangeGlyph = 0x8000,
-        SeamlessTransfer = 0x10000,          // NYI
-        WarModeLeave = 0x20000,              // NYI
-        TouchingGround = 0x40000,            // NYI
-        ChromieTime = 0x80000,               // NYI
+        SeamlessTransfer = 0x10000, // NYI
+        WarModeLeave = 0x20000, // NYI
+        TouchingGround = 0x40000, // NYI
+        ChromieTime = 0x80000, // NYI
         SplineFlightOrFreeFlight = 0x100000, // NYI
-        ProcOrPeriodicAttacking = 0x200000   // NYI
+        ProcOrPeriodicAttacking = 0x200000  // NYI
     }
 
     // Enum with EffectRadiusIndex and their actual radius
@@ -209,7 +209,7 @@ namespace Framework.Constants
         Yards150 = 41,
         Yards11 = 42,
         Yards16 = 43,
-        Yards0_5 = 44, // 0.5 Yards
+        Yards0_5 = 44,   // 0.5 Yards
         Yards10_2 = 45,
         Yards5_2 = 46,
         Yards15_2 = 47,
@@ -228,7 +228,7 @@ namespace Framework.Constants
         Yards14 = 61,
         Yards47 = 62,
         Yards23 = 63,
-        Yards3_5 = 64, // 3.5 Yards
+        Yards3_5 = 64,   // 3.5 Yards
         Yards80_2 = 65
     }
 
@@ -320,7 +320,7 @@ namespace Framework.Constants
         Interrupt = 26,
         Daze = 27,
         Discovery = 28,
-        ImmuneShield = 29, // Divine (Blessing) Shield/Protection And Ice Block
+        ImmuneShield = 29,                         // Divine (Blessing) Shield/Protection And Ice Block
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,
@@ -330,24 +330,11 @@ namespace Framework.Constants
         Taunted = 36,
         Max = 37,
 
-        ImmuneToMovementImpairmentAndLossControlMask = ((1 << Charm) |
-                                                        (1 << Disoriented) |
-                                                        (1 << Fear) |
-                                                        (1 << Root) |
-                                                        (1 << Sleep) |
-                                                        (1 << Snare) |
-                                                        (1 << Stun) |
-                                                        (1 << Freeze) |
-                                                        (1 << Silence) |
-                                                        (1 << Disarm) |
-                                                        (1 << Knockout) |
-                                                        (1 << Polymorph) |
-                                                        (1 << Banish) |
-                                                        (1 << Shackle) |
-                                                        (1 << Turn) |
-                                                        (1 << Horror) |
-                                                        (1 << Daze) |
-                                                        (1 << Sapped))
+        ImmuneToMovementImpairmentAndLossControlMask = ((1 << Charm) | (1 << Disoriented) |
+            (1 << Fear) | (1 << Root) | (1 << Sleep) | (1 << Snare) | (1 << Stun) |
+            (1 << Freeze) | (1 << Silence) | (1 << Disarm) | (1 << Knockout) |
+            (1 << Polymorph) | (1 << Banish) | (1 << Shackle) |
+            (1 << Turn) | (1 << Horror) | (1 << Daze) | (1 << Sapped))
     }
 
     public enum SpellModOp
@@ -398,10 +385,10 @@ namespace Framework.Constants
 
     public enum SpellModType
     {
-        Flat = 0,      // SPELL_AURA_ADD_FLAT_MODIFIER
-        Pct = 1,       // SPELL_AURA_ADD_PCT_MODIFIER
-        LabelFlat = 2, // SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL
-        LabelPct = 3,  // SPELL_AURA_ADD_PCT_MODIFIER_BY_SPELL_LABEL
+        Flat = 0,                            // SPELL_AURA_ADD_FLAT_MODIFIER
+        Pct = 1,                             // SPELL_AURA_ADD_PCT_MODIFIER
+        LabelFlat = 2,                            // SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL
+        LabelPct = 3,                            // SPELL_AURA_ADD_PCT_MODIFIER_BY_SPELL_LABEL
         End
     }
 
@@ -414,7 +401,6 @@ namespace Framework.Constants
         ElixirShattrath = 4,
         CoreRangeMax = 5
     }
-
     public enum SpellGroupStackRule
     {
         Default,
@@ -786,620 +772,620 @@ namespace Framework.Constants
     public enum SpellCustomErrors
     {
         None = 0,
-        CustomMsg = 1,                                                                      // Something Bad Happened, And We Want To Display A Custom Message!
-        AlexBrokeQuest = 2,                                                                 // Alex Broke Your Quest! Thank Him Later!
-        NeedHelplessVillager = 3,                                                           // This Spell May Only Be Used On Helpless Wintergarde Villagers That Have Not Been Rescued.
-        NeedWarsongDisguise = 4,                                                            // Requires That You Be Wearing The Warsong Orc Disguise.
-        RequiresPlagueWagon = 5,                                                            // You Must Be Closer To A Plague Wagon In Order To Drop Off Your 7th Legion Siege Engineer.
-        CantTargetFriendlyNonparty = 6,                                                     // You Cannot Target Friendly Units Outside Your Party.
-        NeedChillNymph = 7,                                                                 // You Must Target A Weakened Chill Nymph.
-        MustBeInEnkilah = 8,                                                                // The Imbued Scourge Shroud Will Only Work When Equipped In The Temple City Of En'Kilah.
-        RequiresCorpseDust = 9,                                                             // Requires Corpse Dust
-        CantSummonGargoyle = 10,                                                            // You Cannot Summon Another Gargoyle Yet.
-        NeedCorpseDustIfNoTarget = 11,                                                      // Requires Corpse Dust If The Target Is Not Dead And Humanoid.
-        MustBeAtShatterhorn = 12,                                                           // Can Only Be Placed Near Shatterhorn
-        MustTargetProtoDrakeEgg = 13,                                                       // You Must First Select A Proto-Drake Egg.
-        MustBeCloseToTree = 14,                                                             // You Must Be Close To A Marked Tree.
-        MustTargetTurkey = 15,                                                              // You Must Target A Fjord Turkey.
-        MustTargetHawk = 16,                                                                // You Must Target A Fjord Hawk.
-        TooFarFromBouy = 17,                                                                // You Are Too Far From The Bouy.
-        MustBeCloseToOilSlick = 18,                                                         // Must Be Used Near An Oil Slick.
-        MustBeCloseToBouy = 19,                                                             // You Must Be Closer To The Buoy!
-        WyrmrestVanquisher = 20,                                                            // You May Only Call For The Aid Of A Wyrmrest Vanquisher In Wyrmrest Temple, The Dragon Wastes, Galakrond'S Rest Or The Wicked Coil.
-        MustTargetIceHeartJormungar = 21,                                                   // That Can Only Be Used On A Ice Heart Jormungar Spawn.
-        MustBeCloseToSinkhole = 22,                                                         // You Must Be Closer To A Sinkhole To Use Your Map.
-        RequiresHaroldLane = 23,                                                            // You May Only Call Down A Stampede On Harold Lane.
-        RequiresGammothMagnataur = 24,                                                      // You May Only Use The Pouch Of Crushed Bloodspore On Gammothra Or Other Magnataur In The Bloodspore Plains And Gammoth.
-        MustBeInResurrectionChamber = 25,                                                   // Requires The Magmawyrm Resurrection Chamber In The Back Of The Maw Of Neltharion.
-        CantCallWintergardeHere = 26,                                                       // You May Only Call Down A Wintergarde Gryphon In Wintergarde Keep Or The Carrion Fields.
-        MustTargetWilhelm = 27,                                                             // What Are You Doing? Only Aim That Thing At Wilhelm!
-        NotEnoughHealth = 28,                                                               // Not Enough Health!
-        NoNearbyCorpses = 29,                                                               // There Are No Nearby Corpses To Use.
-        TooManyGhouls = 30,                                                                 // You'Ve Created Enough Ghouls. Return To Gothik The Harvester At Death'S Breach.
-        GoFurtherFromSunderedShard = 31,                                                    // Your Companion Does Not Want To Come Here.  Go Further From The Sundered Shard.
-        MustBeInCatForm = 32,                                                               // Must Be In Cat Form
-        MustBeDeathKnight = 33,                                                             // Only Death Knights May Enter Ebon Hold.
-        MustBeInBearForm = 34,                                                              // Must Be In Bear Form
-        MustBeNearHelplessVillager = 35,                                                    // You Must Be Within Range Of A Helpless Wintergarde Villager.
-        CantTargetElementalMechanical = 36,                                                 // You Cannot Target An Elemental Or Mechanical Corpse.
-        MustHaveUsedDalaranCrystal = 37,                                                    // This Teleport Crystal Cannot Be Used Until The Teleport Crystal In Dalaran Has Been Used At Least Once.
-        YouAlreadyHoldSomething = 38,                                                       // You Are Already Holding Something In Your Hand. You Must Throw The Creature In Your Hand Before Picking Up Another.
-        YouDontHoldAnything = 39,                                                           // You Don'T Have Anything To Throw! Find A Vargul And Use Gymer Grab To Pick One Up!
-        MustBeCloseToValduran = 40,                                                         // Bouldercrag'S War Horn Can Only Be Used Within 10 Yards Of Valduran The Stormborn.
-        NoPassenger = 41,                                                                   // You Are Not Carrying A Passenger. There Is Nobody To Drop Off.
-        CantBuildMoreVehicles = 42,                                                         // You Cannot Build Any More Siege Vehicles.
-        AlreadyCarryingCrusader = 43,                                                       // You Are Already Carrying A Captured Argent Crusader. You Must Return To The Argent Vanguard Infirmary And Drop Off Your Passenger Before You May Pick Up Another.
-        CantDoWhileRooted = 44,                                                             // You Can'T Do That While Rooted.
-        RequiresNearbyTarget = 45,                                                          // Requires A Nearby Target.
-        NothingToDiscover = 46,                                                             // Nothing Left To Discover.
-        NotEnoughTargets = 47,                                                              // No Targets Close Enough To Bluff.
-        ConstructTooFar = 48,                                                               // Your Iron Rune Construct Is Out Of Range.
-        RequiresGrandMasterEngineer = 49,                                                   // Requires Engineering (350)
-        CantUseThatMount = 50,                                                              // You Can'T Use That Mount.
-        NooneToEject = 51,                                                                  // There Is Nobody To Eject!
-        TargetMustBeBound = 52,                                                             // The Target Must Be Bound To You.
-        TargetMustBeUndead = 53,                                                            // Target Must Be Undead.
-        TargetTooFar = 54,                                                                  // You Have No Target Or Your Target Is Too Far Away.
-        MissingDarkMatter = 55,                                                             // Missing Reagents: Dark Matter
-        CantUseThatItem = 56,                                                               // You Can'T Use That Item
-        CantDoWhileCycyloned = 57,                                                          // You Can'T Do That While Cycloned
-        TargetHasScroll = 58,                                                               // Target Is Already Affected By A Similar Effect
-        PoisonTooStrong = 59,                                                               // That Anti-Venom Is Not Strong Enough To Dispel That Poison
-        MustHaveLanceEquipped = 60,                                                         // You Must Have A Lance Equipped.
-        MustBeCloseToMaiden = 61,                                                           // You Must Be Near The Maiden Of Winter'S Breath Lake.
-        LearnedEverything = 62,                                                             // You Have Learned Everything From That Book
-        PetIsDead = 63,                                                                     // Your Pet Is Dead
-        NoValidTargets = 64,                                                                // There Are No Valid Targets Within Range.
-        GmOnly = 65,                                                                        // Only Gms May Use That. Your Account Has Been Reported For Investigation.
-        RequiresLevel58 = 66,                                                               // You Must Reach Level 58 To Use This Portal.
-        AtHonorCap = 67,                                                                    // You Already Have The Maximum Amount Of Honor.
-        HaveHotRod = 68,                                                                    // You Already Have A Hot Rod.
-        PartygoerMoreBubbly = 69,                                                           // This Partygoer Wants Some More Bubbly.
-        PartygoerNeedBucket = 70,                                                           // This Partygoer Needs A Bucket!
-        PartygoerWantToDance = 71,                                                          // This Partygoer Wants To Dance With You.
-        PartygoerWantFireworks = 72,                                                        // This Partygoer Wants To See Some Fireworks.
-        PartygoerWantAppetizer = 73,                                                        // This Partygoer Wants Some More Hors D'Oeuvres.
-        GoblinBatteryDepleted = 74,                                                         // The Goblin All-In-1-Der Belt'S Battery Is Depleted.
-        MustHaveDemonicCircle = 75,                                                         // You Must Have A Demonic Circle Active.
-        AtMaxRage = 76,                                                                     // You Already Have Maximum Rage
-        Requires350Engineering = 77,                                                        // Requires Engineering (350)
-        SoulBelongsToLichKing = 78,                                                         // Your Soul Belongs To The Lich King
-        AttendantHasPony = 79,                                                              // Your Attendant Already Has An Argent Pony
-        GoblinStartingMission = 80,                                                         // First, Overload The Defective Generator, Activate The Leaky Stove, And Drop A Cigar On The Flammable Bed.
-        GasbotAlreadySent = 81,                                                             // You'Ve Already Sent In The Gasbot And Destroyed Headquarters!
-        GoblinIsPartiedOut = 82,                                                            // This Goblin Is All Partied Out!
-        MustHaveFireTotem = 83,                                                             // You Must Have A Magma, Flametongue, Or Fire Elemental Totem Active.
-        CantTargetVampires = 84,                                                            // You May Not Bite Other Vampires.
-        PetAlreadyAtYourLevel = 85,                                                         // Your Pet Is Already At Your Level.
-        MissingItemRequiremens = 86,                                                        // You Do Not Meet The Level Requirements For This Item.
-        TooManyAbominations = 87,                                                           // There Are Too Many Mutated Abominations.
-        AllPotionsUsed = 88,                                                                // The Potions Have All Been Depleted By Professor Putricide.
-        DefeatedEnoughAlready = 89,                                                         // You Have Already Defeated Enough Of Them.
-        RequiresLevel65 = 90,                                                               // Requires Level 65
-        DestroyedKtcOilPlatform = 91,                                                       // You Have Already Destroyed The Ktc Oil Platform.
-        LaunchedEnoughCages = 92,                                                           // You Have Already Launched Enough Cages.
-        RequiresBoosterRockets = 93,                                                        // Requires Single-Stage Booster Rockets. Return To Hobart Grapplehammer To Get More.
-        EnoughWildCluckers = 94,                                                            // You Have Already Captured Enough Wild Cluckers.
-        RequiresControlFireworks = 95,                                                      // Requires Remote Control Fireworks. Return To Hobart Grapplehammer To Get More.
-        MaxNumberOfRecruits = 96,                                                           // You Already Have The Max Number Of Recruits.
-        MaxNumberOfVolunteers = 97,                                                         // You Already Have The Max Number Of Volunteers.
-        FrostmourneRenderedResurrect = 98,                                                  // Frostmourne Has Rendered You Unable To Resurrect.
-        CantMountWithShapeshift = 99,                                                       // You Can'T Mount While Affected By That Shapeshift.
-        FawnsAlreadyFollowing = 100,                                                        // Three Fawns Are Already Following You!
-        AlreadyHaveRiverBoat = 101,                                                         // You Already Have A River Boat.
-        NoActiveEnchantment = 102,                                                          // You Have No Active Enchantment To Unleash.
-        EnoughHighbourneSouls = 103,                                                        // You Have Bound Enough Highborne Souls. Return To Arcanist Valdurian.
-        Atleast40ydFromOilDrilling = 104,                                                   // You Must Be At Least 40 Yards Away From All Other Oil Drilling Rigs.
-        AboveEnslavedPearlMiner = 106,                                                      // You Must Be Above The Enslaved Pearl Miner.
-        MustTargetCorpseSpecial1 = 107,                                                     // You Must Target The Corpse Of A Seabrush Terrapin, Scourgut Remora, Or Spinescale Hammerhead.
-        SlaghammerAlreadyPrisoner = 108,                                                    // Ambassador Slaghammer Is Already Your Prisoner.
-        RequireAttunedLocation1 = 109,                                                      // Requires A Location That Is Attuned With The Naz'Jar Battlemaiden.
-        NeedToFreeDrakeFirst = 110,                                                         // Free The Drake From The Net First!
-        DragonmawAlliesAlreadyFollow = 111,                                                 // You Already Have Three Dragonmaw Allies Following You.
-        RequireOpposableThumbs = 112,                                                       // Requires Opposable Thumbs.
-        NotEnoughHealth2 = 113,                                                             // Not Enough Health
-        EnoughForsakenTroopers = 114,                                                       // You Already Have Enough Forsaken Troopers.
-        CannotJumpToBoulder = 115,                                                          // You Cannot Jump To Another Boulder Yet.
-        SkillTooHigh = 116,                                                                 // Skill Too High.
-        Already6SurvivorsRescued = 117,                                                     // You Have Already Rescued 6 Survivors.
-        MustFaceShipsFromBalloon = 118,                                                     // You Need To Be Facing The Ships From The Rescue Balloon.
-        CannotSuperviseMoreCultists = 119,                                                  // You Cannot Supervise More Than 5 Arrested Cultists At A Time.
-        RequiresLevel85 = 120,                                                              // You Must Reach Level 85 To Use This Portal.
-        MustBeBelow35Health = 121,                                                          // Your Target Must Be Below 35% Health.
-        MustSelectSpecialization = 122,                                                     // You Must Select A Specialization First.
-        TooWiseAndPowerful = 123,                                                           // You Are Too Wise And Powerful To Gain Any Benefit From That Item.
-        TooCloseArgentLightwell = 124,                                                      // You Are Within 10 Yards Of Another Argent Lightwell.
-        NotWhileShapeshifted = 125,                                                         // You Can'T Do That While Shapeshifted.
-        ManaGemInBank = 126,                                                                // You Already Have A Mana Gem In Your Bank.
-        FlameShockNotActive = 127,                                                          // You Must Have At Least One Flame Shock Active.
-        CantTransform = 128,                                                                // You Cannot Transform Right Now
-        PetMustBeAttacking = 129,                                                           // Your Pet Must Be Attacking A Target.
-        GnomishEngineering = 130,                                                           // Requires Gnomish Engineering
-        GoblinEngineering = 131,                                                            // Requires Goblin Engineering
-        NoTarget = 132,                                                                     // You Have No Target.
-        PetOutOfRange = 133,                                                                // Your Pet Is Out Of Range Of The Target.
-        HoldingFlag = 134,                                                                  // You Can'T Do That While Holding The Flag.
-        TargetHoldingFlag = 135,                                                            // You Can'T Do That To Targets Holding The Flag.
-        PortalNotOpen = 136,                                                                // The Portal Is Not Yet Open.  Continue Helping The Druids At The Sanctuary Of Malorne.
-        AggraAirTotem = 137,                                                                // You Need To Be Closer To Aggra'S Air Totem, In The West.
-        AggraWaterTotem = 138,                                                              // You Need To Be Closer To Aggra'S Water Totem, In The North.
-        AggraEarthTotem = 139,                                                              // You Need To Be Closer To Aggra'S Earth Totem, In The East.
-        AggraFireTotem = 140,                                                               // You Need To Be Closer To Aggra'S Fire Totem, Near Thrall.
-        FacingWrongWay = 141,                                                               // You Are Facing The Wrong Way.
-        TooCloseToMakeshiftDynamite = 142,                                                  // You Are Within 10 Yards Of Another Makeshift Dynamite.
-        NotNearSapphireSunkenShip = 143,                                                    // You Must Be Near The Sunken Ship At Sapphire'S End In The Jade Forest.
-        DemonsHealthFull = 144,                                                             // That Demon'S Health Is Already Full.
-        OnyxSerpentNotOverhead = 145,                                                       // Wait Until The Onyx Serpent Is Directly Overhead.
-        ObjectiveAlreadyComplete = 146,                                                     // Your Objective Is Already Complete.
-        PushSadPandaTowardsTown = 147,                                                      // You Can Only Push Sad Panda Towards Sad Panda Town!
-        TargetHasStartdust2 = 148,                                                          // Target Is Already Affected By Stardust No. 2.
-        ElementiumGemClusters = 149,                                                        // You Cannot Deconstruct Elementium Gem Clusters While Collecting Them!
-        YouDontHaveEnoughHealth = 150,                                                      // You Don'T Have Enough Health.
-        YouCannotUseTheGatewayYet = 151,                                                    // You Cannot Use The Gateway Yet.
-        ChooseSpecForAscendance = 152,                                                      // You Must Choose A Specialization To Use Ascendance.
-        InsufficientBloodCharges = 153,                                                     // You Have Insufficient Blood Charges.
-        NoFullyDepletedRunes = 154,                                                         // No Fully Depleted Runes.
-        NoMoreCharges = 155,                                                                // No More Charges.
-        StatueIsOutOfRangeOfTarget = 156,                                                   // Statue Is Out Of Range Of The Target.
-        YouDontHaveAStatueSummoned = 157,                                                   // You Don'T Have A Statue Summoned.
-        YouHaveNoSpiritActive = 158,                                                        // You Have No Spirit Active.
-        BothDisesasesMustBeOnTarget = 159,                                                  // Both Frost Fever And Blood Plague Must Be Present On The Target.
-        CantDoThatWithOrbOfPower = 160,                                                     // You Can'T Do That While Holding An Orb Of Power.
-        CantDoThatWhileJumpingOrFalling = 161,                                              // You Can'T Do That While Jumping Or Falling.
-        MustBeTransformedByPolyformicAcid = 162,                                            // You Must Be Transformed By Polyformic Acid.
-        NotEnoughAcidToStoreTransformation = 163,                                           // There Isn'T Enough Acid Left To Store This Transformation.
-        MustHaveFlightMastersLicense = 164,                                                 // You Must Obtain A Flight Master'S License Before Using This Spell.
-        AlreadySampledSapFromFeeder = 165,                                                  // You Have Already Sampled Sap From This Feeder.
-        MustBeNewrMantidFeeder = 166,                                                       // Requires You To Be Near A Mantid Feeder In The Heart Of Fear.
-        TargetMustBeInDirectlyFront = 167,                                                  // Target Must Be Directly In Front Of You.
-        CantDoThatWhileMythicKeystoneIsActive = 168,                                        // You Can'T Do That While A Mythic Keystone Is Active.
-        WrongClassForMount = 169,                                                           // You Are Not The Correct Class For That Mount.
-        NothingLeftToDiscover = 170,                                                        // Nothing Left To Discover.
-        NoExplosivesAvailable = 171,                                                        // There Are No Explosives Available.
-        YouMustBeFlaggedForPvp = 172,                                                       // You Must Be Flagged For Pvp.
-        RequiresBattleRations = 173,                                                        // Requires Battle Rations Or Meaty Haunch
-        RequiresBrittleRoot = 174,                                                          // Requires Brittle Root
-        RequiresLaborersTool = 175,                                                         // Requires Laborer'S Tool
-        RequiresUnexplodedCannonball = 176,                                                 // Requires Unexploded Cannonball
-        RequiresMisplacedKeg = 177,                                                         // Requires Misplaced Keg
-        RequiresLiquidFire = 178,                                                           // Requires Liquid Fire, Jungle Hops, Or Spirit-Kissed Water
-        RequiresKrasariIron = 179,                                                          // Requires Krasari Iron
-        RequiresSpiritKissedWater = 180,                                                    // Requires Spirit-Kissed Water
-        RequiresSnakeOil = 181,                                                             // Requires Snake Oil
-        ScenarioIsInProgress = 182,                                                         // You Can'T Do That While A Scenario Is In Progress.
-        RequiresDarkmoonFaireOpen = 183,                                                    // Requires The Darkmoon Faire To Be Open.
-        AlreadyAtValorCap = 184,                                                            // Already At Valor Cap
-        AlreadyCommendedByThisFaction = 185,                                                // Already Commended By This Faction
-        OutOfCoins = 186,                                                                   // Out Of Coins! Pickpocket Humanoids To Get More.
-        OnlyOneElementalSpirit = 187,                                                       // Only One Elemental Spirit On A Target At A Time.
-        DontKnowHowToTameDirehorns = 188,                                                   // You Do Not Know How To Tame Direhorns.
-        MustBeNearBloodiedCourtGate = 189,                                                  // You Must Be Near The Bloodied Court Gate.
-        YouAreNotElectrified = 190,                                                         // You Are Not Electrified.
-        ThereIsNothingToBeFetched = 191,                                                    // There Is Nothing To Be Fetched.
-        RequiresTheThunderForge = 192,                                                      // Requires The Thunder Forge.
-        CannotUseTheDiceAgainYet = 193,                                                     // You Cannot Use The Dice Again Yet.
-        AlreadyMemberOfBrawlersGuild = 194,                                                 // You Are Already A Member Of The Brawler'S Guild.
-        CantChangeSpecInCelestialChallenge = 195,                                           // You May Not Change Talent Specializations During A Celestial Challenge.
-        SpecDoesMatchChallenge = 196,                                                       // Your Talent Specialization Does Not Match The Selected Challenge.
-        YouDontHaveEnoughCurrency = 197,                                                    // You Don'T Have Enough Currency To Do That.
-        TargetCannotBenefitFromSpell = 198,                                                 // Target Cannot Benefit From That Spell
-        YouCanOnlyHaveOneHealingRain = 199,                                                 // You Can Only Have One Healing Rain Active At A Time.
-        TheDoorIsLocked = 200,                                                              // The Door Is Locked.
-        YouNeedToSelectWaitingCustomer = 201,                                               // You Need To Select A Customer Who Is Waiting In Line First.
-        CantChangeSpecDuringTrial = 202,                                                    // You May Not Change Specialization While A Trial Is In Progress.
-        CustomerNeedToGetInLine = 203,                                                      // You Must Wait For Customers To Get In Line Before You Can Select Them To Be Seated.
-        MustBeCloserToGazloweObjective = 204,                                               // Must Be Closer To One Of Gazlowe'S Objectives To Deploy!
-        MustBeCloserToThaelinObjective = 205,                                               // Must Be Closer To One Of Thaelin'S Objectives To Deploy!
-        YourPackOfVolenIsFull = 206,                                                        // Your Pack Of Volen Is Already Full!
-        Requires600MiningOrBlacksmithing = 207,                                             // Requires 600 Mining Or Blacksmithing
-        ArkoniteProtectorNotInRange = 208,                                                  // The Arkonite Protector Is Not In Range.
-        TargetCannotHaveBothBeacons = 209,                                                  // You Are Unable To Have Both Beacon Of Light And Beacon Of Faith On The Same Target.
-        CanOnlyUseOnAfkPlayer = 210,                                                        // Can Only Be Used On Afk Players.
-        NoLootableCorpsesInRange = 211,                                                     // No Lootable Corpse In Range
-        ChimaeronTooCalmToTame = 212,                                                       // Chimaeron Is Too Calm To Tame Right Now.
-        CanOnlyCarryOneTypeOfMunitions = 213,                                               // You May Only Carry One Type Of Blackrock Munitions.
-        OutOfBlackrockMunitions = 214,                                                      // You Have Run Out Of Blackrock Munitions.
-        CarryingMaxAmountOfMunitions = 215,                                                 // You Are Carrying The Maximum Amount Of Blackrock Munitions.
-        TargetIsTooFarAway = 216,                                                           // Target Is Too Far Away.
-        CannotUseDuringBossEncounter = 217,                                                 // Cannot Use During A Boss Encounter.
-        MustHaveMeleeWeaponInBothHands = 218,                                               // Must Have A Melee Weapon Equipped In Both Hands
-        YourWeaponHasOverheated = 219,                                                      // Your Weapon Has Overheated.
-        MustBePartyLeaderToQueue = 220,                                                     // You Must Be A Party Leader To Queue Your Group.
-        NotEnoughFuel = 221,                                                                // Not Enough Fuel
-        YouAreAlreadyDisguised = 222,                                                       // You Are Already Disguised!
-        YouNeedToBeInShredder = 223,                                                        // You Need To Be In A Shredder To Chop This Up!
-        FoodCannotEatFood = 224,                                                            // Food Cannot Eat Food
-        MysteriousForcePreventsOpeningChest = 225,                                          // A Mysterious Force Prevents You From Opening The Chest.
-        CantDoThatWhileHoldingEmpoweredOre = 226,                                           // You Can'T Do That While Holding Empowered Ore.
-        NotEnoughAmmunition = 227,                                                          // Not Enough Ammunition!
-        YouNeedBeatfaceTheGladiator = 228,                                                  // You Need Beatface The Sparring Arena Gladiator To Break This!
-        YouCanOnlyHaveOneWaygate = 229,                                                     // You Can Only Have One Waygate Open. Disable An Activated Waygate First.
-        YouCanOnlyHaveTwoWaygates = 230,                                                    // You Can Only Have Two Waygates Open. Disable An Activated Waygate First.
-        YouCanOnlyHaveThreeWaygates = 231,                                                  // You Can Only Have Three Waygates Open. Disable An Activated Waygate First.
-        RequiresMageTower = 232,                                                            // Requires Mage Tower
-        RequiresSpiritLodge = 233,                                                          // Requires Spirit Lodge
-        FrostWyrmAlreadyActive = 234,                                                       // A Frost Wyrm Is Already Active.
-        NotEnoughRunicPower = 235,                                                          // Not Enough Runic Power
-        YouAreThePartyLeader = 236,                                                         // You Are The Party Leader.
-        YulonIsAlreadyActive = 237,                                                         // Yu'Lon Is Already Active.
-        AStampedeIsAlreadyActive = 238,                                                     // A Stampede Is Already Active.
-        YouAreAlreadyWellFed = 239,                                                         // You Are Already Well Fed.
-        CantDoThatUnderSuppressiveFire = 240,                                               // You Cannot Do That While Under Suppressive Fire.
-        YouAlreadyHaveMurlocSlop = 241,                                                     // You Already Have A Piece Of Murloc Slop.
-        YouDontHaveArtifactFragments = 242,                                                 // You Don'T Have Any Artifact Fragments.
-        YouArentInAParty = 243,                                                             // You Aren'T In A Party.
-        Requires20Ammunition = 244,                                                         // Requires 30 Ammunition!
-        Requires30Ammunition = 245,                                                         // Requires 20 Ammunition!
-        YouAlreadyHaveMaxOutcastFollowers = 246,                                            // You Already Have The Maximum Amount Of Outcasts Following You.
-        NotInWorldPvpZone = 247,                                                            // Not In World Pvp Zone.
-        AlreadyAtResourceCap = 248,                                                         // Already At Resource Cap
-        ApexisSentinelRequiresEnergy = 249,                                                 // This Apexis Sentinel Requires Energy From A Nearby Apexis Pylon To Be Powered Up.
-        YouMustHave3OrFewerPlayer = 250,                                                    // You Must Have 3 Or Fewer Players.
-        YouAlreadyReadTreasureMap = 251,                                                    // You Have Already Read That Treasure Map.
-        MayOnlyUseWhileGarrisonUnderAttack = 252,                                           // You May Only Use This Item While Your Garrison Is Under Attack.
-        RequiresActiveMushrooms = 253,                                                      // This Spell Requires Active Mushrooms For You To Detonate.
-        RequiresFasterTimeWithRacer = 254,                                                  // Requires A Faster Time With The Basic Racer
-        RequiresInfernoShotAmmo = 255,                                                      // Requires Inferno Shot Ammo!
-        YouCannotDoThatRightNow = 256,                                                      // You Cannot Do That Right Now.
-        ATrapIsAlreadyPlacedThere = 257,                                                    // A Trap Is Already Placed There.
-        YouAreAlreadyOnThatQuest = 258,                                                     // You Are Already On That Quest.
-        RequiresFelforgedCudgel = 259,                                                      // Requires A Felforged Cudgel!
-        CantTakeWhileBeingDamaged = 260,                                                    // Can'T Take While Being Damaged!
-        YouAreBoundToDraenor = 261,                                                         // You Are Bound To Draenor By Archimonde'S Magic.
-        AlreayHaveMaxNumberOfShips = 262,                                                   // You Already Have The Maximum Number Of Ships Your Shipyard Can Support.
-        MustBeAtShipyard = 263,                                                             // You Must Be At Your Shipyard.
-        RequiresLevel3MageTower = 264,                                                      // Requires A Level 3 Mage Tower.
-        RequiresLevel3SpiritLodge = 265,                                                    // Requires A Level 3 Spirit Lodge.
-        YouDoNotLikeFelEggsAndHam = 266,                                                    // You Do Not Like Fel Eggs And Ham.
-        AlreadyEnteredInThisAgreement = 267,                                                // You Have Already Entered In To This Trade Agreement.
-        CannotStealThatWhileGuardsAreOnDuty = 268,                                          // You Cannot Steal That While Guards Are On Duty.
-        YouAlreadyUsedVantusRune = 269,                                                     // You Have Already Used A Vantus Rune This Week.
-        ThatItemCannotBeObliterated = 270,                                                  // That Item Cannot Be Obliterated.
-        NoSkinnableCorpseInRange = 271,                                                     // No Skinnable Corpse In Range
-        MustBeMercenaryToUseTrinket = 272,                                                  // You Must Be A Mercenary To Use This Trinket.
-        YouMustBeInCombat = 273,                                                            // You Must Be In Combat.
-        NoEnemiesNearTarget = 274,                                                          // No Enemies Near Target.
-        RequiresLeyspineMissile = 275,                                                      // Requires A Leyspine Missile
-        RequiresBothCurrentsConnected = 276,                                                // Requires Both Currents Connected.
-        CantDoThatInDemonForm = 277,                                                        // Can'T Do That While In Demon Form (Yet)
-        YouDontKnowHowToTameMechs = 278,                                                    // You Do Not Know How To Tame Or Obtain Lore About Mechs.
-        CannotCharmAnyMoreWithered = 279,                                                   // You Cannot Charm Any More Withered.
-        RequiresActiveHealingRain = 280,                                                    // Requires An Active Healing Rain.
-        AlreadyCollectedAppearances = 281,                                                  // You'Ve Already Collected These Appearances
-        CannotResurrectSurrenderedToMadness = 282,                                          // Cannot Resurrect Someone Who Has Surrendered To Madness
-        YouMustBeInCatForm = 283,                                                           // You Must Be In Cat Form.
-        YouCannotReleaseSpiritYet = 284,                                                    // You Cannot Release Spirit Yet.
-        NoFishingNodesNearby = 285,                                                         // No Fishing Nodes Nearby.
-        YouAreNotInCorrectSpec = 286,                                                       // You Are Not The Correct Specialization.
-        UlthaleshHasNoPowerWithoutSouls = 287,                                              // Ulthalesh Has No Power Without Souls.
-        CannotCastThatWithVoodooTotem = 288,                                                // You Cannot Cast That While Talented Into Voodoo Totem.
-        AlreadyCollectedThisAppearance = 289,                                               // You'Ve Already Collected This Appearance.
-        YourPetMaximumIsAlreadyHigh = 290,                                                  // Your Total Pet Maximum Is Already This High.
-        YouDontHaveEnoughWithered = 291,                                                    // You Do Not Have Enough Withered To Do That.
-        RequiresNearbySoulFragment = 292,                                                   // Requires A Nearby Soul Fragment.
-        RequiresAtLeast10Withered = 293,                                                    // Requires At Least 10 Living Withered
-        RequiresAtLeast14Withered = 294,                                                    // Requires At Least 14 Living Withered
-        RequiresAtLeast18Withered = 295,                                                    // Requires At Least 18 Living Withered
-        Requires2WitheredManaRagers = 296,                                                  // Requires 2 Withered Mana-Ragers
-        Requires1WitheredBerserke = 297,                                                    // Requires 1 Withered Berserker
-        Requires2WitheredBerserker = 298,                                                   // Requires 2 Withered Berserkers
-        TargetHealthIsTooLow = 299,                                                         // Target'S Health Is Too Low
-        CannotShapeshiftWhileRidingStormtalon = 300,                                        // You Cannot Shapeshift While Riding Stormtalon
-        CannotChangeSpecInCombatTraining = 301,                                             // You Can Not Change Specializations While In Combat Training.
-        UnknownPhenomenonPreventsLeylineConnection = 302,                                   // Unknown Phenomenon Is Preventing A Connection To The Leyline.
-        TheNightmareObscuresYourVision = 303,                                               // The Nightmare Obscures Your Vision.
-        YouAreInWrongClassSpec = 304,                                                       // You Are In The Wrong Class Specialization.
-        ThereAreNoValidCorpsesNearby = 305,                                                 // There Are No Valid Corpses Nearby.
-        CantCastThatRightNow = 306,                                                         // Can'T Cast That Right Now.
-        NotEnoughAncientMan = 307,                                                          // Not Enough Ancient Mana.
-        RequiresSongScroll = 308,                                                           // Requires A Song Scroll To Function.
-        MustHaveArtifactEquipped = 309,                                                     // You Must Have An Artifact Weapon Equipped.
-        RequiresCatForm = 310,                                                              // Requires Cat Form.
-        RequiresBearForm = 311,                                                             // Requires Bear Form.
-        RequiresConjuredFood = 312,                                                         // Requires Either A Conjured Mana Pudding Or Conjured Mana Fritter.
-        RequiresArtifactWeapon = 313,                                                       // Requires An Artifact Weapon.
-        YouCantCastThatHere = 314,                                                          // You Can'T Cast That Here
-        CantDoThatOnClassTrial = 315,                                                       // You Cannot Do That While On A Class Trial.
-        RitualOfDoomOncePerDay = 316,                                                       // You Can Only Benefit From The Ritual Of Doom Once Per Day.
-        CannotRitualOfDoomWhileSummoningSiters = 317,                                       // You Cannot Perform The Ritual Of Doom While Attempting To Summon The Sisters.
-        LearnedAllThatYouCanAboutYourArtifact = 318,                                        // You Have Learned All That You Can About Your Artifact.
-        CantCallPetWithLoneWolf = 319,                                                      // You Cannot Use Call Pet While Lone Wolf Is Active.
-        TargetCannotAlreadyHaveOrbOfPower = 320,                                            // Target cannot already have a Orb of Power.
-        YouMustBeInAnInnToStrumThatGuitar = 321,                                            // You must be in an inn to strum that guitar.
-        YouCannotReachTheLatch = 322,                                                       // You cannot reach the latch.
-        RequiresABrimmingKeystone = 323,                                                    // Requires A Brimming Keystone.
-        YouMustBeWieldingTheUnderlightAngler = 324,                                         // You Must Be Wielding The Underlight Angler.
-        YourTargetMustBeShackled = 325,                                                     // Your Target Must Be Shackled.
-        YouAlreadyPossesAllOfTheKnowledgeContainedInThosePages = 326,                       // You Already Possess All Of The Knowledge Contained In These Pages.
-        YouCantRiskGettingTheGrummelsWet = 327,                                             // You Can'T Risk Getting The Grummels Wet!
-        YouCannotChangeSpecializationRightNow = 328,                                        // You Cannot Change Specializations Right Now.
-        YouveReachedTheMaximumNumberOfArtifactResearchNotesAvailable = 329,                 // You'Ve Reached The Maximum Number Of Artifact Research Notes Available.
-        YouDontHaveEnoughNethershards = 330,                                                // You Don'T Have Enough Nethershards.
-        TheSentinaxIsNotPatrollingThisArea = 331,                                           // The Sentinax Is Not Patrolling This Area.
-        TheSentinaxCannotOpenAnotherPortalRightNow = 332,                                   // The Sentinax Cannot Open Another Portal Right Now.
-        YouCannotGainAdditionalReputationWithThisItem = 333,                                // You Cannot Gain Additional Reputation With This Item.
-        CantDoThatWhileGhostWolfForm = 334,                                                 // Can'T Do That While In Ghost Wolf Form.
-        YourSuppliesAreFrozen = 335,                                                        // Your Supplies Are Frozen.
-        YouDoNotKnowHowToTameFeathermanes = 336,                                            // You Do Not Know How To Tame Feathermanes.
-        YouMustReachArtifactKnowledgeLevel25 = 337,                                         // You Must Reach Artifact Knowledge Level 25 To Use The Tome.
-        RequiresANetherPortalDisruptor = 338,                                               // Requires A Nether Portal Disruptor.
-        YouAreNotTheCorrectRankToUseThisItem = 339,                                         // You Are Not The Correct Rank To Use This Item.
-        MustBeStandingNearInjuredChromieInMountHyjal = 340,                                 // Must Be Standing Near The Injured Chromie In Mount Hyjal.
-        TheresNothingFurtherYouCanLearn = 341,                                              // There'S Nothing Further You Can Learn.
-        RemoveCannonsHeavyIronPlatingFirst = 342,                                           // You Should Remove The Cannon'S Heavy Iron Plating First.
-        RemoveCannonsElectrokineticDefenseGridFirst = 343,                                  // You Should Remove The Cannon'S Electrokinetic Defense Grid First.
-        RequiresTheArmoryKeyAndDendriteClusters = 344,                                      // You Are Missing Pieces Of The Armory Key Or Do Not Have Enough Dendrite Clusters.
-        ThisItemRequiresBasicObliterumToUpgrade = 345,                                      // This Item Requires Basic Obliterum To Upgrade.
-        ThisItemRequiresPrimalObliterumToUpgrade = 346,                                     // This Item Requires Primal Obliterum To Upgrade.
-        ThisItemRequiresFlightMastersWhistle = 347,                                         // This Item Requires A Flight Master'S Whistle.
-        RequiresMorrisonsMasterKey = 348,                                                   // Requires Morrison'S Master Key.
-        RequiresPowerThatEchoesThatOfTheAugari = 349,                                       // Will Only Open To One Wielding The Power That Echoes That Of The Augari.
-        ThatPlayerHasAPendingTotemicRevival = 350,                                          // That Player Has A Pending Totemic Revival.
-        YouHaveNoFireMinesDeployed = 351,                                                   // You Have No Fire Mines Deployed.
-        MustBeAffectedBySpiritPowder = 352,                                                 // You Must Be Affected By The Spirit Powder To Take The Phylactery.
-        YouAreBlockedByAStructureAboveYou = 353,                                            // You Are Blocked By A Structure Above You.
-        Requires100ImpMeat = 354,                                                           // Requires 100 Imp Meat.
-        YouHaveNotObtainedAnyBackgroundFilters = 355,                                       // You Have Not Obtained Any Background Filters.
-        NothingInterestingPostedHereRightNow = 356,                                         // There Is Nothing Interesting Posted Here Right Now.
-        ParagonReputationRequiresHigherLevel = 357,                                         // Paragon Reputation Is Not Available Until A Higher Level.
-        UunaIsMissing = 358,                                                                // Uuna Is Missing.
-        OnlyOtherHivemindMembersMayJoin = 359,                                              // Only Other Members Of Their Hivemind May Join With Them.
-        NoValidFlaskPresent = 360,                                                          // No Valid Flask Present.
-        NoWildImpsToSacrifice = 361,                                                        // There Are No Wild Imps To Sacrifice.
-        YouAreCarryingTooMuchIron = 362,                                                    // You Are Carrying Too Much Iron
-        YouHaveNoIronToCollect = 363,                                                       // You Have No Iron To Collect
-        YouHaveNoWildImps = 364,                                                            // You Have No Available Wild Imps.
-        NeedsRepairs = 365,                                                                 // Needs Repairs.
-        YouAreCarryingTooMuchWood = 366,                                                    // You'Re Carrying Too Much Wood.
-        YouAreAlreadyCarryingRepairParts = 367,                                             // You'Re Already Carrying Repair Parts.
-        YouHaveNotUnlockedFlightWhistleForZone = 368,                                       // You Have Not Unlocked The Flight Whistle For This Zone.
-        ThereAreNoUnlockedFlightPointsNearby = 369,                                         // There Are No Unlocked Flight Points Nearby To Take You To.
-        YouMustHaveAFelguard = 370,                                                         // You Must Have A Felguard.
-        TargetHasNoFesteringWounds = 371,                                                   // The Target Has No Festering Wounds.
-        YouDontHaveDeadlyOrWoundPoisonActive = 372,                                         // You Do Not Have Deadly Poison Or Wound Poison Active.
-        CannotReadSoldierDogTagWithoutHeadlampOn = 373,                                     // You Cannot Read The Soldier'S Dog Tag Without Your Headlamp On.
-        YouHaveNoWoodToCollect = 374,                                                       // You Have No Wood To Collect.
-        YouAreNotWearingAShirt = 375,                                                       // You Are Not Wearing A Shirt!
-        TargetMustBeDead = 376,                                                             // Target Must Be Dead.
-        YourTargetIsAlreadyEmbiggified = 377,                                               // Your Target Is Already Embiggified.
-        YouMustTargetASinisterGladiatorItem = 378,                                          // You Must Target A Sinister Gladiator'S Item To Upgrade.
-        ThisItemLevelIsTooHighForThisUpgrade = 379,                                         // This Item'S Level Is Too High For This Upgrade.
-        TheBallistaCannotBeUsedWhileOnFire = 380,                                           // The Ballista Cannot Be Used While On Fire.
-        YouMustTargetADreadGladiatorItem = 381,                                             // You Must Target A Dread Gladiator'S Item To Upgrade.
-        YouDoKnotKnowHowToTameBloodBeasts = 382,                                            // You Do Not Know How To Tame Blood Beasts.
-        CanOnlyBeUsedInTheEvening = 385,                                                    // Can Only Be Used In The Evening.
-        RequiresPakuToBeYourChosenLoa = 386,                                                // Requires Pa'Ku To Be Your Chosen Loa.
-        RequiresVigorEngaged = 387,                                                         // Requires V.I.G.O.R. Engaged.
-        YourTargetIsNotHungry = 388,                                                        // Your Target Is Not Hungry.
-        YouCanOnlyHaveOnTreasureMapMission = 389,                                           // You Can Only Have One Treasure Map Mission At A Time.
-        YouAlreadyHaveASilasSphereOfTransmutation = 390,                                    // You Already Have A Silas' Sphere Of Transmuation.
-        YouDoNotHaveTheMalletOfThunderousSkins = 391,                                       // You Do Not Have The Mallet Of Thunderous Skins.
-        YouMustHaveAnOpenStableSlot = 393,                                                  // You Must Have An Open Stable Slot.
-        DoesNotWorkOnCritters = 394,                                                        // Does Not Work On Critters.
-        CanOnlyBeUsedOnHati = 395,                                                          // Can Only Be Used On Hati.
-        YouAlreadyHaveIwensEnchantingRod = 396,                                             // You Already Have An Iwen'S Enchanting Rod.
-        YouAlreadyHaveMalletOfThunderousSkins = 397,                                        // You Already Have A Mallet Of Thunderous Skins.
-        CanOnlyBeUsedOnInertTideWatchersOrVoodooMasks = 398,                                // Can Only Be Used On Inert Tide Watchers Or Inert Voodoo Masks.
-        YouMustBeAtShrineToMakeOfferingToLoa = 399,                                         // You Must Be At A Shrine To Make An Offering To A Loa.
-        RequiresEmeraldEmpowerment = 400,                                                   // Requires Emerald Empowerment.
-        YouMustBeAnHonoredTauren = 401,                                                     // You Must Be An Honored Tauren.
-        RequiresChitterspineMeat = 402,                                                     // Requires Chitterspine Meat.
-        RequiresHeartForge = 403,                                                           // Requires Heart Forge.
-        NotAuthorizedToAccessChargingStation = 405,                                         // You Are Not Authorized To Access This Charging Station. Speak To Flux.
-        RequiresMardivasArcaneCoffer = 406,                                                 // Requires Mardivas'S Arcane Coffer
-        RequiresHeartOfAzerothAtopHeartForge = 407,                                         // Requires Heart Of Azeroth Placed Atop Heart Forge.
-        RequiresBrinestonePickaxe = 408,                                                    // Requires A Brinestone Pickaxe.
-        YouAlreadyCollectedDataOnThisTarget = 409,                                          // You Have Already Collected Data On This Target.
-        YouAlreadyHaveThisEssenceForCurrentSpec = 410,                                      // You Already Have This Essence For Your Current Loot Specialization
-        YouCannotSummonAnotherPetWhileRidingHati = 411,                                     // You Cannot Summon Another Pet While Riding Hati.
-        YouHaveAlreadyCollectedThisAzerothMini = 422,                                       // You Have Already Collected This Azeroth Mini
-        YourTargetIsAlreadyAffectedByTeaTime = 412,                                         // Your Target Is Already Affected By Tea Time!
-        YouMustCompleteQuestTheHeartForgeToInfuseEssence = 413,                             // You Must Complete The Quest "The Heart Forge" To Infuse An Essence
-        ThisTargetDoesNotHaveYourRazorCoral = 414,                                          // This Target Does Not Have Your Razor Coral.
-        YouDoNotHaveEnoughOfThatItem = 415,                                                 // You Do Not Have Enough Of That Item.
-        YourTargetIsNotWearingUnboundCursedLoversRing = 417,                                // Your Target Is Not Wearing An Unbound Cursed Lover'S Ring
-        YourCursedLoversRingIsAlredyBound = 418,                                            // Your Cursed Lover'S Ring Is Already Bound
-        YouMustTargetANotoriusGladiatorItem = 421,                                          // You Must Target A Notorious Gladiator'S Item To Upgrade.
-        YouCantCarryMorePickaxesChumSeeds = 423,                                            // You Can'T Carry Any More Brinestone Pickaxes, Chum, Or Germinating Seeds.
-        RequiresHolidayFeastOfWinterWeil = 424,                                             // Requires Holiday: Feast Of Winter Veil
-        RequiresAshjrakamasShroudOfResolve = 425,                                           // Requires Ashjra'Kamas, Shroud Of Resolve.
-        RequiresWarMode = 426,                                                              // Requires War Mode.
-        OnlyOneOfThisMaskMayBeWorn = 427,                                                   // Only One Of This Mask May Be Worn.
-        YouCannotAscendWhileTheTarragrueIsNearby = 428,                                     // You Cannot Ascend While The Tarragrue Is Nearby.
-        TargetDoesNotHaveAValidAzeriteEssence = 429,                                        // Target Does Not Have A Valid Azerite Essence.
-        YourMindIsStillRecoveringFromRecentVision = 430,                                    // Your Mind Is Still Recovering From A Recent Vision.
-        RequiresVesselOfHorrificVisions = 431,                                              // Requires Vessel Of Horrific Visions.
-        RequiresAllPartyMembersToBeWearingAshjrakamasShroudOfResolve = 432,                 // Requires All Party Members To Be Wearing Ashjra'Kamas, Shroud Of Resolve.
-        RequiresAllPartyMembersToPossessAVesselOfHorrificVisions = 434,                     // Requires All Party Members To Possess A Vessel Of Horrific Visions.
-        YouAlreadyHaveTheHighestRankedEssenceAvailableFromThisSource = 435,                 // You Already Have The Highest Ranked Essence Available From This Source.
-        RequiresDarkmoonGameToken = 436,                                                    // Requires Darkmoon Game Token.
-        YouAreNotTheRightProfession = 437,                                                  // You Are Not The Right Profession.
-        YouAlreadyKnowHowToCraftAVoidFocus = 438,                                           // You Already Know How To Craft A Void Focus.
-        YouAlreadyKnowTheRecipesInThisBook = 439,                                           // You Already Know The Recipes In This Book.
-        YouMustTargetACorruptedGladiatorsItem = 440,                                        // You Must Target A Corrupted Gladiator'S Item To Upgrade.
-        RequiresTheFixItStick = 441,                                                        // Requires The Fix-It-Stick.
-        ThatItemCannotReceiveAdditionalSockets = 442,                                       // That Item Cannot Receive Additional Sockets.
-        YouAlreadyHaveAContractedVeteranTroop = 443,                                        // You Already Have A Contracted Veteran Troop.
-        YouAreCurrentlyAtYourTroopCapacity = 444,                                           // You Are Currently At Your Troop Capacity.
-        YouDontHaveEnoughAnima = 445,                                                       // You Don'T Have Enough Anima
-        TargetAlreadyHoldingVoidTouchedSkull = 446,                                         // That Player Is Already Holding A Void-Touched Skull.
-        TargetsInventoryIsFull = 447,                                                       // Target'S Inventory Is Full.
-        TargetsMindIsProtectedByNeuralSilencer = 448,                                       // Your Target'S Mind Is Protected By A Neural Silencer.
-        AllTargetsMindsAreProtectedByNeuralSilencers = 449,                                 // All Of Your Targets' Minds Are Protected By Neural Silencers.
-        YouMustFindAMorePowerfulCoreToProgressYourCloakRanksFurther = 450,                  // You Must Find A More Powerful Core To Progress Your Cloak Ranks Further.
-        YouCannotUseThisItemInWarMode = 451,                                                // You Cannot Use This Item In War Mode.
-        YouCannotMakeYourCampHere = 452,                                                    // You Cannot Make Your Camp Here.
-        RequiresTitanicBeacon = 453,                                                        // Requires Titanic Beacon
-        ThatObjectIsLocked = 454,                                                           // That Object Is Locked.
-        InvalidCombination = 455,                                                           // Invalid Combination.
-        NoNearbyEnemyPlayersAreCorrupted = 456,                                             // No Nearby Enemy Players Are Corrupted.
-        ThatSpellIsAlreadyActive = 457,                                                     // That Spell Is Already Active
-        YouCannotUseThisWhenTheTarragrueHasBeenAlerted = 458,                               // You Cannot Use This When The Tarragrue Has Been Alerted.
-        ThatGuestAlreadyHasTea = 459,                                                       // That Guest Already Has Tea.
-        RequiresShadowlandsSkinning = 460,                                                  // Requires Shadowlands Skinning.
-        RequiresHuntersMarkOnATarget = 461,                                                 // Requires Hunter'S Mark On A Target.
-        HoundmasterLokseyIsBusy = 462,                                                      // Houndmaster Loksey Is Busy.
-        RequiresCoilOfRope = 463,                                                           // Requires Coil Of Rope.
-        MustBeInARestArea = 464,                                                            // Must Be In A Rest Area.
-        TargetIsLinkedToSomebodyElse = 465,                                                 // Target Is Linked To Somebody Else.
-        YouDontHaveASummonedGhoul = 466,                                                    // You Don'T Have A Summoned Ghoul.
-        OneOfYourPartyMembersIsAnIneligibleClass = 467,                                     // One Of Your Party Members Is An Ineligible Class.
-        YouMustSelectASoulbindBossAndTierFirst = 468,                                       // You Must Select A Soulbind, Boss, And Tier First.
-        ThatGuestDoesntWantThis = 469,                                                      // That Guest Doesn'T Want This.
-        YouMustDefeatTheEmpoweredGuardToAscend = 470,                                       // You Must Defeat The Empowered Guard To Ascend.
-        RequiresSoulsteelForge = 471,                                                       // Requires Soulsteel Forge.
-        RequiresProofOfPurity = 472,                                                        // Requires Proof Of Purity
-        RequiresProofOfHumility = 473,                                                      // Requires Proof Of Humility
-        RequiresProofOfCourage = 474,                                                       // Requires Proof Of Courage
-        RequiresProofOfWisdom = 475,                                                        // Requires Proof Of Wisdom
-        RequiresProofOfLoyalty = 476,                                                       // Requires Proof Of Loyalty
-        RequiresArcaneSpecilization = 477,                                                  // Requires Arcane Specilization.
-        PleaseGatherYourPartyBeforeQueuing = 478,                                           // Please Gather Your Party Before Queuing.
-        YouDoNotKnowHowToTameGargon = 479,                                                  // You Do Not Know How To Tame Gargon.
-        RequiresDeadSpriggan = 480,                                                         // Requires Dead Spriggan
-        YouAlreadyUsedAProfessionJournalThisWeek = 481,                                     // You Have Already Used A Profession Journal This Week.
-        RequiresMordretharTheDeathGate = 482,                                               // Requires Mord'Rethar: The Death Gate.
-        RequiresPlaguefallen = 483,                                                         // Requires Plaguefallen
-        YouCannotFitThroughThere = 484,                                                     // You Cannot Fit Through There.
-        ABindingRitualPreventsThisFromOpening = 485,                                        // A Binding Ritual Prevents This From Opening.
-        ThatCharmIsAlreadyApplied = 486,                                                    // That Charm Is Already Applied.
-        ThatSigilIsAlreadyApplied = 487,                                                    // That Sigil Is Already Applied.
-        AtLeastOneGuestMustRsvpBeforeYouOpenCourt = 488,                                    // At Least One Guest Must Rsvp Before You Open Court.
-        ThereIsNoTimeLimitToIncrease = 489,                                                 // There Is No Time Limit To Increase.
-        YourHeartOfAzerothIsCurrentlyDisabled = 490,                                        // Your Heart Of Azeroth Is Currently Disabled.
-        EssenceYouAreTryingToActivateIsInvalid = 491,                                       // The Essence You Are Trying To Activate Is Invalid.
-        RequiresMedallionOfService = 492,                                                   // Requires Medallion Of Service
-        AllPlayersMustHaveQuestTorghastTowerOfTheDamned = 493,                              // All Players Must Have Quest - Torghast: Tower Of The Damned.
-        RequiresShadowlandsEngineering = 494,                                               // Requires Shadowlands Engineering
-        YouAreNotInDeepEnoughWater = 495,                                                   // You Are Not In Deep Enough Water.
-        RequiresFreshWatersOfArdenwealdOrBastion = 496,                                     // Requires The Fresh Waters Of Ardenweald Or Bastion
-        Requires30InfusedRubies = 497,                                                      // Requires 30 Infused Rubies
-        TheCurseOfTeramaniksLegacyIsKeepingYourMountsFromHeedingYourCall = 498,             // The Curse Of Teramanik'S Legacy Is Keeping Your Mounts From Heeding Your Call.
-        YouDoNotKnowHowToTameCloudSerpents = 499,                                           // You Do Not Know How To Tame Cloud Serpents.
-        YouDoNotKnowHowToTameUndeadCreatures = 500,                                         // You Do Not Know How To Tame Undead Creatures.
-        RequiresTheForgeOfBonds = 501,                                                      // Requires The Forge Of Bonds
-        RequiresGatamatos = 502,                                                            // Requires Gatamatos
-        MustBeChannellingMindSear = 503,                                                    // Must Be Channelling Mind Sear.
-        YouDontHaveAnyPeriodicEffectsActive = 504,                                          // You Don'T Have Any Periodic Effects Active.
-        YouAreNotBestFriendsWithAnyEmberCourtGuests = 505,                                  // You Are Not Best Friends With Any Ember Court Guests.
-        YouMustObtainVenomousSolvents = 506,                                                // You Must Obtain Venomous Solvents.
-        YouMustObtainDreadPollen = 507,                                                     // You Must Obtain Dread Pollen.
-        APartyMemberDoesNotHaveThatLayerUnlocked = 508,                                     // A Party Member Does Not Have That Layer Unlocked
-        InventoryIsFull = 509,                                                              // Inventory Is Full.
-        YouHaveNoAnimaToDeposit = 510,                                                      // You Have No Anima To Deposit
-        YourMountIgnoresYourCallWithinTheMaw = 511,                                         // Your Mount Ignores Your Call Within The Maw.
-        YourButlerIsAlreadyPresentSomewhereInTheEmberCourt = 512,                           // Your Butler Is Already Present Somewhere In The Ember Court.
-        YouHaveAlreadyBuiltThisConstruct = 513,                                             // You Have Already Built This Construct
-        RequiresInnerAltarOfDomination = 514,                                               // Requires Inner Altar Of Domination
-        PartyMemberDoesNotMeetRequirementsToQueue = 515,                                    // A Party Member Does Not Meet The Requirements To Queue
-        NoConstructCurrentlyActive = 516,                                                   // No Construct Currently Active
-        CompleteTheQuestLineWelcomeToZandalar = 517,                                        // Complete The Quest Line "Welcome To Zandalar" To Use This Spell.
-        CompleteTheQuestLineANationDivided = 518,                                           // Complete The Quest Line "A Nation Divided" To Use This Spell.
-        CannotBeUsedOnCommonQualityItems = 519,                                             // Cannot Be Used On Common Quality Items.
-        YouMustBePledgedToTheVenthyr = 520,                                                 // You Must Be Pledged To The Venthyr.
-        YouMustBePledgedToTheNightFae = 521,                                                // You Must Be Pledged To The Night Fae.
-        YouMustBePledgedToTheKyrian = 522,                                                  // You Must Be Pledged To The Kyrian.
-        YouMustBePledgedToTheNecrolords = 523,                                              // You Must Be Pledged To The Necrolords.
-        YouMustBeInTheShadowlands = 524,                                                    // You Must Be In The Shadowlands.
-        RequiresSanctumReservoir = 525,                                                     // Requires Sanctum Reservoir.
-        ThisWildseedOfRegrowthIsStillIncubating = 526,                                      // This Wildseed Of Regrowth Is Still Incubating.
-        ThisWildseedOfRegrowthIsStillGrowing = 527,                                         // This Wildseed Of Regrowth Is Still Growing.
-        YouMustBePartyLeaderToStartThisEscort = 528,                                        // You Must Be The Party Leader To Start This Escort.
-        YouHaveFullyUpgradedAllOfYourConduits = 529,                                        // You Have Fully Upgraded All Of Your Conduits.
-        YouHaveAlreadyAddedThatConduit = 530,                                               // You Have Already Added That Conduit To The Forge Of Bonds.
-        TargetMustBeWeakened = 531,                                                         // Target Must Be Weakened.
-        YouCannotAddThatConduitToForgeOfBonds = 532,                                        // You Cannot Add That Conduit To The Forge Of Bonds.
-        YouCannotSoulshapeDuringLichborne = 533,                                            // You Cannot Soulshape During Lichborne.
-        YouCantDoThatWhileCarryingAnAnimacone = 534,                                        // You Can'T Do That While Carrying An Animacone.
-        NecessaryConstructNotPresent = 535,                                                 // Necessary Construct Not Present
-        ThatGuestIsAlreadyCoveredInGelatin = 536,                                           // That Guest Is Already Covered In Gelatin.
-        YouNeedToWaitToUseThisItem = 537,                                                   // You Need To Wait To Use This Item.
-        ThatAllyAlreadyHasTea = 538,                                                        // That Ally Already Has Tea.
-        TargetDoesNotNeedTea = 539,                                                         // The Target Does Not Need Tea.
-        TheyDontDeserveYourFancyTea = 540,                                                  // They Don'T Deserve Your Fancy Tea!
-        YourGormPrefersToEatDeadThings = 541,                                               // Your Gorm Prefers To Eat Dead Things.
-        YourGormHasAlreadyEatenThatCorpse = 542,                                            // Your Gorm Has Already Eaten That Corpse.
-        YouNeedAGormlingFromNiyaToDoThat = 543,                                             // You Need A Gormling From Niya To Do That.
-        TargetIsAlreadyShrunken = 544,                                                      // Target Is Already Shrunken.
-        TargetIsAlreadyEnlarged = 545,                                                      // Target Is Already Enlarged.
-        LadyMoonberrysWandIsForEnemiesAndMawrats = 546,                                     // Lady Moonberry'S Wand Is Meant For Enemies And Mawrats.
-        LadyMoonberrysWandIsForEnemies = 547,                                               // Lady Moonberry'S Wand Is Meant For Enemies.
-        TargetIsAlreadyTransformedIntoASnail = 548,                                         // Target Is Already Transformed Into A Snail.
-        YourTargetMustBeBelow50PctHealth = 549,                                             // Your Target Must Be Below 50% Health.
-        LadyMoonberrysWandIsDrainedOfPower = 550,                                           // Lady Moonberry'S Wand Is Drained Of Power.
-        ThisBookHoldsNoRecipesForYourProfession = 551,                                      // This Book Holds No Recipes For Your Profession.
-        YouHaveNoKorthianRelicsInYourInventory = 552,                                       // You Have No Korthian Relics In Your Inventory.
-        YouMustBeInTheRiftToInteractWithThis = 553,                                         // You Must Be In The Rift To Interact With This.
-        CannotSummonWhileInTheRift = 554,                                                   // Cannot Summon While In The Rift.
-        YouNeedAnActiveElementalShield = 600,                                               // You Need An Active Elemental Shield.
-        SpeakToArchivistToTurnInRelicFragments = 601,                                       // Speak To The Archivist To Turn In Relic Fragments.
-        RequiresResearchReportsAncientShrines = 602,                                        // Requires Knowledge From Research Reports: Ancient Shrines
-        YourStewardIsNotPresent = 603,                                                      // Your Steward Companion Is Not Present.
-        YourStewardHasAlreadyBeenTransformed = 604,                                         // Your Steward Companion Has Already Been Transformed.
-        RequiresKorthianRelics = 605,                                                       // Requires Korthian Relics
-        RequiresFullEmpoweredBar = 606,                                                     // Requires Full Empowered Bar
-        RequiresYouToBeRidingAYak = 607,                                                    // Requires You To Be Riding A Yak.
-        JaithysIsNotACannibal = 609,                                                        // Jaithys Is Many Things, But Jaithys Is Not A Cannibal.
-        ThatItemIsPunyUnworthyFindAnother = 610,                                            // That Item Is Puny. Unworthy. Find Another.
-        JaithysHungersOnlyForWeapons = 611,                                                 // Jaithys Hungers Only For Weapons. Only Weapons Will Do.
-        ReturnToReliquaryOfRememberanceToSubmitKorthianRelics = 612,                        // Return To The Reliquary Of Rememberance To Submit Korthian Relics To Archivist Roh-Suir.
-        ShardsOfDominationCanBeRemovedBySoulfireChisel = 615,                               // Shards Of Domination Can Only Be Removed By The Soulfire Chisel.
-        YouHaveLearnedEverythingFromThatMap = 616,                                          // You Have Learned Everything From That Map.
-        YouMustTargetACritterToHelpItAtoneForItsSins = 617,                                 // You Must Target A Critter To Help It Atone For Its Sins.
-        YouMustBeAMemberOfTheKyrianCovenantOrHaveReachedRenown80WithTheKyrian = 619,        // You Must Be A Member Of The Kyrian Covenant Or Have Reached Renown 80 With The Kyrian.
+        CustomMsg = 1,  // Something Bad Happened, And We Want To Display A Custom Message!
+        AlexBrokeQuest = 2,  // Alex Broke Your Quest! Thank Him Later!
+        NeedHelplessVillager = 3,  // This Spell May Only Be Used On Helpless Wintergarde Villagers That Have Not Been Rescued.
+        NeedWarsongDisguise = 4,  // Requires That You Be Wearing The Warsong Orc Disguise.
+        RequiresPlagueWagon = 5,  // You Must Be Closer To A Plague Wagon In Order To Drop Off Your 7th Legion Siege Engineer.
+        CantTargetFriendlyNonparty = 6,  // You Cannot Target Friendly Units Outside Your Party.
+        NeedChillNymph = 7,  // You Must Target A Weakened Chill Nymph.
+        MustBeInEnkilah = 8,  // The Imbued Scourge Shroud Will Only Work When Equipped In The Temple City Of En'Kilah.
+        RequiresCorpseDust = 9,  // Requires Corpse Dust
+        CantSummonGargoyle = 10,  // You Cannot Summon Another Gargoyle Yet.
+        NeedCorpseDustIfNoTarget = 11,  // Requires Corpse Dust If The Target Is Not Dead And Humanoid.
+        MustBeAtShatterhorn = 12,  // Can Only Be Placed Near Shatterhorn
+        MustTargetProtoDrakeEgg = 13,  // You Must First Select A Proto-Drake Egg.
+        MustBeCloseToTree = 14,  // You Must Be Close To A Marked Tree.
+        MustTargetTurkey = 15,  // You Must Target A Fjord Turkey.
+        MustTargetHawk = 16,  // You Must Target A Fjord Hawk.
+        TooFarFromBouy = 17,  // You Are Too Far From The Bouy.
+        MustBeCloseToOilSlick = 18,  // Must Be Used Near An Oil Slick.
+        MustBeCloseToBouy = 19,  // You Must Be Closer To The Buoy!
+        WyrmrestVanquisher = 20,  // You May Only Call For The Aid Of A Wyrmrest Vanquisher In Wyrmrest Temple, The Dragon Wastes, Galakrond'S Rest Or The Wicked Coil.
+        MustTargetIceHeartJormungar = 21,  // That Can Only Be Used On A Ice Heart Jormungar Spawn.
+        MustBeCloseToSinkhole = 22,  // You Must Be Closer To A Sinkhole To Use Your Map.
+        RequiresHaroldLane = 23,  // You May Only Call Down A Stampede On Harold Lane.
+        RequiresGammothMagnataur = 24,  // You May Only Use The Pouch Of Crushed Bloodspore On Gammothra Or Other Magnataur In The Bloodspore Plains And Gammoth.
+        MustBeInResurrectionChamber = 25,  // Requires The Magmawyrm Resurrection Chamber In The Back Of The Maw Of Neltharion.
+        CantCallWintergardeHere = 26,  // You May Only Call Down A Wintergarde Gryphon In Wintergarde Keep Or The Carrion Fields.
+        MustTargetWilhelm = 27,  // What Are You Doing? Only Aim That Thing At Wilhelm!
+        NotEnoughHealth = 28,  // Not Enough Health!
+        NoNearbyCorpses = 29,  // There Are No Nearby Corpses To Use.
+        TooManyGhouls = 30,  // You'Ve Created Enough Ghouls. Return To Gothik The Harvester At Death'S Breach.
+        GoFurtherFromSunderedShard = 31,  // Your Companion Does Not Want To Come Here.  Go Further From The Sundered Shard.
+        MustBeInCatForm = 32,  // Must Be In Cat Form
+        MustBeDeathKnight = 33,  // Only Death Knights May Enter Ebon Hold.
+        MustBeInBearForm = 34,  // Must Be In Bear Form
+        MustBeNearHelplessVillager = 35,  // You Must Be Within Range Of A Helpless Wintergarde Villager.
+        CantTargetElementalMechanical = 36,  // You Cannot Target An Elemental Or Mechanical Corpse.
+        MustHaveUsedDalaranCrystal = 37,  // This Teleport Crystal Cannot Be Used Until The Teleport Crystal In Dalaran Has Been Used At Least Once.
+        YouAlreadyHoldSomething = 38,  // You Are Already Holding Something In Your Hand. You Must Throw The Creature In Your Hand Before Picking Up Another.
+        YouDontHoldAnything = 39,  // You Don'T Have Anything To Throw! Find A Vargul And Use Gymer Grab To Pick One Up!
+        MustBeCloseToValduran = 40,  // Bouldercrag'S War Horn Can Only Be Used Within 10 Yards Of Valduran The Stormborn.
+        NoPassenger = 41,  // You Are Not Carrying A Passenger. There Is Nobody To Drop Off.
+        CantBuildMoreVehicles = 42,  // You Cannot Build Any More Siege Vehicles.
+        AlreadyCarryingCrusader = 43,  // You Are Already Carrying A Captured Argent Crusader. You Must Return To The Argent Vanguard Infirmary And Drop Off Your Passenger Before You May Pick Up Another.
+        CantDoWhileRooted = 44,  // You Can'T Do That While Rooted.
+        RequiresNearbyTarget = 45,  // Requires A Nearby Target.
+        NothingToDiscover = 46,  // Nothing Left To Discover.
+        NotEnoughTargets = 47,  // No Targets Close Enough To Bluff.
+        ConstructTooFar = 48,  // Your Iron Rune Construct Is Out Of Range.
+        RequiresGrandMasterEngineer = 49,  // Requires Engineering (350)
+        CantUseThatMount = 50,  // You Can'T Use That Mount.
+        NooneToEject = 51,  // There Is Nobody To Eject!
+        TargetMustBeBound = 52,  // The Target Must Be Bound To You.
+        TargetMustBeUndead = 53,  // Target Must Be Undead.
+        TargetTooFar = 54,  // You Have No Target Or Your Target Is Too Far Away.
+        MissingDarkMatter = 55,  // Missing Reagents: Dark Matter
+        CantUseThatItem = 56,  // You Can'T Use That Item
+        CantDoWhileCycyloned = 57,  // You Can'T Do That While Cycloned
+        TargetHasScroll = 58,  // Target Is Already Affected By A Similar Effect
+        PoisonTooStrong = 59,  // That Anti-Venom Is Not Strong Enough To Dispel That Poison
+        MustHaveLanceEquipped = 60,  // You Must Have A Lance Equipped.
+        MustBeCloseToMaiden = 61,  // You Must Be Near The Maiden Of Winter'S Breath Lake.
+        LearnedEverything = 62,  // You Have Learned Everything From That Book
+        PetIsDead = 63,  // Your Pet Is Dead
+        NoValidTargets = 64,  // There Are No Valid Targets Within Range.
+        GmOnly = 65,  // Only Gms May Use That. Your Account Has Been Reported For Investigation.
+        RequiresLevel58 = 66,  // You Must Reach Level 58 To Use This Portal.
+        AtHonorCap = 67,  // You Already Have The Maximum Amount Of Honor.
+        HaveHotRod = 68,  // You Already Have A Hot Rod.
+        PartygoerMoreBubbly = 69,  // This Partygoer Wants Some More Bubbly.
+        PartygoerNeedBucket = 70,  // This Partygoer Needs A Bucket!
+        PartygoerWantToDance = 71,  // This Partygoer Wants To Dance With You.
+        PartygoerWantFireworks = 72,  // This Partygoer Wants To See Some Fireworks.
+        PartygoerWantAppetizer = 73,  // This Partygoer Wants Some More Hors D'Oeuvres.
+        GoblinBatteryDepleted = 74,  // The Goblin All-In-1-Der Belt'S Battery Is Depleted.
+        MustHaveDemonicCircle = 75,  // You Must Have A Demonic Circle Active.
+        AtMaxRage = 76,  // You Already Have Maximum Rage
+        Requires350Engineering = 77,  // Requires Engineering (350)
+        SoulBelongsToLichKing = 78,  // Your Soul Belongs To The Lich King
+        AttendantHasPony = 79,  // Your Attendant Already Has An Argent Pony
+        GoblinStartingMission = 80,  // First, Overload The Defective Generator, Activate The Leaky Stove, And Drop A Cigar On The Flammable Bed.
+        GasbotAlreadySent = 81,  // You'Ve Already Sent In The Gasbot And Destroyed Headquarters!
+        GoblinIsPartiedOut = 82,  // This Goblin Is All Partied Out!
+        MustHaveFireTotem = 83,  // You Must Have A Magma, Flametongue, Or Fire Elemental Totem Active.
+        CantTargetVampires = 84,  // You May Not Bite Other Vampires.
+        PetAlreadyAtYourLevel = 85,  // Your Pet Is Already At Your Level.
+        MissingItemRequiremens = 86,  // You Do Not Meet The Level Requirements For This Item.
+        TooManyAbominations = 87,  // There Are Too Many Mutated Abominations.
+        AllPotionsUsed = 88,  // The Potions Have All Been Depleted By Professor Putricide.
+        DefeatedEnoughAlready = 89,  // You Have Already Defeated Enough Of Them.
+        RequiresLevel65 = 90,  // Requires Level 65
+        DestroyedKtcOilPlatform = 91,  // You Have Already Destroyed The Ktc Oil Platform.
+        LaunchedEnoughCages = 92,  // You Have Already Launched Enough Cages.
+        RequiresBoosterRockets = 93,  // Requires Single-Stage Booster Rockets. Return To Hobart Grapplehammer To Get More.
+        EnoughWildCluckers = 94,  // You Have Already Captured Enough Wild Cluckers.
+        RequiresControlFireworks = 95,  // Requires Remote Control Fireworks. Return To Hobart Grapplehammer To Get More.
+        MaxNumberOfRecruits = 96,  // You Already Have The Max Number Of Recruits.
+        MaxNumberOfVolunteers = 97,  // You Already Have The Max Number Of Volunteers.
+        FrostmourneRenderedResurrect = 98,  // Frostmourne Has Rendered You Unable To Resurrect.
+        CantMountWithShapeshift = 99,  // You Can'T Mount While Affected By That Shapeshift.
+        FawnsAlreadyFollowing = 100, // Three Fawns Are Already Following You!
+        AlreadyHaveRiverBoat = 101, // You Already Have A River Boat.
+        NoActiveEnchantment = 102, // You Have No Active Enchantment To Unleash.
+        EnoughHighbourneSouls = 103, // You Have Bound Enough Highborne Souls. Return To Arcanist Valdurian.
+        Atleast40ydFromOilDrilling = 104, // You Must Be At Least 40 Yards Away From All Other Oil Drilling Rigs.
+        AboveEnslavedPearlMiner = 106, // You Must Be Above The Enslaved Pearl Miner.
+        MustTargetCorpseSpecial1 = 107, // You Must Target The Corpse Of A Seabrush Terrapin, Scourgut Remora, Or Spinescale Hammerhead.
+        SlaghammerAlreadyPrisoner = 108, // Ambassador Slaghammer Is Already Your Prisoner.
+        RequireAttunedLocation1 = 109, // Requires A Location That Is Attuned With The Naz'Jar Battlemaiden.
+        NeedToFreeDrakeFirst = 110, // Free The Drake From The Net First!
+        DragonmawAlliesAlreadyFollow = 111, // You Already Have Three Dragonmaw Allies Following You.
+        RequireOpposableThumbs = 112, // Requires Opposable Thumbs.
+        NotEnoughHealth2 = 113, // Not Enough Health
+        EnoughForsakenTroopers = 114, // You Already Have Enough Forsaken Troopers.
+        CannotJumpToBoulder = 115, // You Cannot Jump To Another Boulder Yet.
+        SkillTooHigh = 116, // Skill Too High.
+        Already6SurvivorsRescued = 117, // You Have Already Rescued 6 Survivors.
+        MustFaceShipsFromBalloon = 118, // You Need To Be Facing The Ships From The Rescue Balloon.
+        CannotSuperviseMoreCultists = 119, // You Cannot Supervise More Than 5 Arrested Cultists At A Time.
+        RequiresLevel85 = 120, // You Must Reach Level 85 To Use This Portal.
+        MustBeBelow35Health = 121, // Your Target Must Be Below 35% Health.
+        MustSelectSpecialization = 122, // You Must Select A Specialization First.
+        TooWiseAndPowerful = 123, // You Are Too Wise And Powerful To Gain Any Benefit From That Item.
+        TooCloseArgentLightwell = 124, // You Are Within 10 Yards Of Another Argent Lightwell.
+        NotWhileShapeshifted = 125, // You Can'T Do That While Shapeshifted.
+        ManaGemInBank = 126, // You Already Have A Mana Gem In Your Bank.
+        FlameShockNotActive = 127, // You Must Have At Least One Flame Shock Active.
+        CantTransform = 128, // You Cannot Transform Right Now
+        PetMustBeAttacking = 129, // Your Pet Must Be Attacking A Target.
+        GnomishEngineering = 130, // Requires Gnomish Engineering
+        GoblinEngineering = 131, // Requires Goblin Engineering
+        NoTarget = 132, // You Have No Target.
+        PetOutOfRange = 133, // Your Pet Is Out Of Range Of The Target.
+        HoldingFlag = 134, // You Can'T Do That While Holding The Flag.
+        TargetHoldingFlag = 135, // You Can'T Do That To Targets Holding The Flag.
+        PortalNotOpen = 136, // The Portal Is Not Yet Open.  Continue Helping The Druids At The Sanctuary Of Malorne.
+        AggraAirTotem = 137, // You Need To Be Closer To Aggra'S Air Totem, In The West.
+        AggraWaterTotem = 138, // You Need To Be Closer To Aggra'S Water Totem, In The North.
+        AggraEarthTotem = 139, // You Need To Be Closer To Aggra'S Earth Totem, In The East.
+        AggraFireTotem = 140, // You Need To Be Closer To Aggra'S Fire Totem, Near Thrall.
+        FacingWrongWay = 141, // You Are Facing The Wrong Way.
+        TooCloseToMakeshiftDynamite = 142, // You Are Within 10 Yards Of Another Makeshift Dynamite.
+        NotNearSapphireSunkenShip = 143, // You Must Be Near The Sunken Ship At Sapphire'S End In The Jade Forest.
+        DemonsHealthFull = 144, // That Demon'S Health Is Already Full.
+        OnyxSerpentNotOverhead = 145, // Wait Until The Onyx Serpent Is Directly Overhead.
+        ObjectiveAlreadyComplete = 146, // Your Objective Is Already Complete.
+        PushSadPandaTowardsTown = 147, // You Can Only Push Sad Panda Towards Sad Panda Town!
+        TargetHasStartdust2 = 148, // Target Is Already Affected By Stardust No. 2.
+        ElementiumGemClusters = 149, // You Cannot Deconstruct Elementium Gem Clusters While Collecting Them!
+        YouDontHaveEnoughHealth = 150, // You Don'T Have Enough Health.
+        YouCannotUseTheGatewayYet = 151, // You Cannot Use The Gateway Yet.
+        ChooseSpecForAscendance = 152, // You Must Choose A Specialization To Use Ascendance.
+        InsufficientBloodCharges = 153, // You Have Insufficient Blood Charges.
+        NoFullyDepletedRunes = 154, // No Fully Depleted Runes.
+        NoMoreCharges = 155, // No More Charges.
+        StatueIsOutOfRangeOfTarget = 156, // Statue Is Out Of Range Of The Target.
+        YouDontHaveAStatueSummoned = 157, // You Don'T Have A Statue Summoned.
+        YouHaveNoSpiritActive = 158, // You Have No Spirit Active.
+        BothDisesasesMustBeOnTarget = 159, // Both Frost Fever And Blood Plague Must Be Present On The Target.
+        CantDoThatWithOrbOfPower = 160, // You Can'T Do That While Holding An Orb Of Power.
+        CantDoThatWhileJumpingOrFalling = 161, // You Can'T Do That While Jumping Or Falling.
+        MustBeTransformedByPolyformicAcid = 162, // You Must Be Transformed By Polyformic Acid.
+        NotEnoughAcidToStoreTransformation = 163, // There Isn'T Enough Acid Left To Store This Transformation.
+        MustHaveFlightMastersLicense = 164, // You Must Obtain A Flight Master'S License Before Using This Spell.
+        AlreadySampledSapFromFeeder = 165, // You Have Already Sampled Sap From This Feeder.
+        MustBeNewrMantidFeeder = 166, // Requires You To Be Near A Mantid Feeder In The Heart Of Fear.
+        TargetMustBeInDirectlyFront = 167, // Target Must Be Directly In Front Of You.
+        CantDoThatWhileMythicKeystoneIsActive = 168, // You Can'T Do That While A Mythic Keystone Is Active.
+        WrongClassForMount = 169, // You Are Not The Correct Class For That Mount.
+        NothingLeftToDiscover = 170, // Nothing Left To Discover.
+        NoExplosivesAvailable = 171, // There Are No Explosives Available.
+        YouMustBeFlaggedForPvp = 172, // You Must Be Flagged For Pvp.
+        RequiresBattleRations = 173, // Requires Battle Rations Or Meaty Haunch
+        RequiresBrittleRoot = 174, // Requires Brittle Root
+        RequiresLaborersTool = 175, // Requires Laborer'S Tool
+        RequiresUnexplodedCannonball = 176, // Requires Unexploded Cannonball
+        RequiresMisplacedKeg = 177, // Requires Misplaced Keg
+        RequiresLiquidFire = 178, // Requires Liquid Fire, Jungle Hops, Or Spirit-Kissed Water
+        RequiresKrasariIron = 179, // Requires Krasari Iron
+        RequiresSpiritKissedWater = 180, // Requires Spirit-Kissed Water
+        RequiresSnakeOil = 181, // Requires Snake Oil
+        ScenarioIsInProgress = 182, // You Can'T Do That While A Scenario Is In Progress.
+        RequiresDarkmoonFaireOpen = 183, // Requires The Darkmoon Faire To Be Open.
+        AlreadyAtValorCap = 184, // Already At Valor Cap
+        AlreadyCommendedByThisFaction = 185, // Already Commended By This Faction
+        OutOfCoins = 186, // Out Of Coins! Pickpocket Humanoids To Get More.
+        OnlyOneElementalSpirit = 187, // Only One Elemental Spirit On A Target At A Time.
+        DontKnowHowToTameDirehorns = 188, // You Do Not Know How To Tame Direhorns.
+        MustBeNearBloodiedCourtGate = 189, // You Must Be Near The Bloodied Court Gate.
+        YouAreNotElectrified = 190, // You Are Not Electrified.
+        ThereIsNothingToBeFetched = 191, // There Is Nothing To Be Fetched.
+        RequiresTheThunderForge = 192, // Requires The Thunder Forge.
+        CannotUseTheDiceAgainYet = 193, // You Cannot Use The Dice Again Yet.
+        AlreadyMemberOfBrawlersGuild = 194, // You Are Already A Member Of The Brawler'S Guild.
+        CantChangeSpecInCelestialChallenge = 195, // You May Not Change Talent Specializations During A Celestial Challenge.
+        SpecDoesMatchChallenge = 196, // Your Talent Specialization Does Not Match The Selected Challenge.
+        YouDontHaveEnoughCurrency = 197, // You Don'T Have Enough Currency To Do That.
+        TargetCannotBenefitFromSpell = 198, // Target Cannot Benefit From That Spell
+        YouCanOnlyHaveOneHealingRain = 199, // You Can Only Have One Healing Rain Active At A Time.
+        TheDoorIsLocked = 200, // The Door Is Locked.
+        YouNeedToSelectWaitingCustomer = 201, // You Need To Select A Customer Who Is Waiting In Line First.
+        CantChangeSpecDuringTrial = 202, // You May Not Change Specialization While A Trial Is In Progress.
+        CustomerNeedToGetInLine = 203, // You Must Wait For Customers To Get In Line Before You Can Select Them To Be Seated.
+        MustBeCloserToGazloweObjective = 204, // Must Be Closer To One Of Gazlowe'S Objectives To Deploy!
+        MustBeCloserToThaelinObjective = 205, // Must Be Closer To One Of Thaelin'S Objectives To Deploy!
+        YourPackOfVolenIsFull = 206, // Your Pack Of Volen Is Already Full!
+        Requires600MiningOrBlacksmithing = 207, // Requires 600 Mining Or Blacksmithing
+        ArkoniteProtectorNotInRange = 208, // The Arkonite Protector Is Not In Range.
+        TargetCannotHaveBothBeacons = 209, // You Are Unable To Have Both Beacon Of Light And Beacon Of Faith On The Same Target.
+        CanOnlyUseOnAfkPlayer = 210, // Can Only Be Used On Afk Players.
+        NoLootableCorpsesInRange = 211, // No Lootable Corpse In Range
+        ChimaeronTooCalmToTame = 212, // Chimaeron Is Too Calm To Tame Right Now.
+        CanOnlyCarryOneTypeOfMunitions = 213, // You May Only Carry One Type Of Blackrock Munitions.
+        OutOfBlackrockMunitions = 214, // You Have Run Out Of Blackrock Munitions.
+        CarryingMaxAmountOfMunitions = 215, // You Are Carrying The Maximum Amount Of Blackrock Munitions.
+        TargetIsTooFarAway = 216, // Target Is Too Far Away.
+        CannotUseDuringBossEncounter = 217, // Cannot Use During A Boss Encounter.
+        MustHaveMeleeWeaponInBothHands = 218, // Must Have A Melee Weapon Equipped In Both Hands
+        YourWeaponHasOverheated = 219, // Your Weapon Has Overheated.
+        MustBePartyLeaderToQueue = 220, // You Must Be A Party Leader To Queue Your Group.
+        NotEnoughFuel = 221, // Not Enough Fuel
+        YouAreAlreadyDisguised = 222, // You Are Already Disguised!
+        YouNeedToBeInShredder = 223, // You Need To Be In A Shredder To Chop This Up!
+        FoodCannotEatFood = 224, // Food Cannot Eat Food
+        MysteriousForcePreventsOpeningChest = 225, // A Mysterious Force Prevents You From Opening The Chest.
+        CantDoThatWhileHoldingEmpoweredOre = 226, // You Can'T Do That While Holding Empowered Ore.
+        NotEnoughAmmunition = 227, // Not Enough Ammunition!
+        YouNeedBeatfaceTheGladiator = 228, // You Need Beatface The Sparring Arena Gladiator To Break This!
+        YouCanOnlyHaveOneWaygate = 229, // You Can Only Have One Waygate Open. Disable An Activated Waygate First.
+        YouCanOnlyHaveTwoWaygates = 230, // You Can Only Have Two Waygates Open. Disable An Activated Waygate First.
+        YouCanOnlyHaveThreeWaygates = 231, // You Can Only Have Three Waygates Open. Disable An Activated Waygate First.
+        RequiresMageTower = 232, // Requires Mage Tower
+        RequiresSpiritLodge = 233, // Requires Spirit Lodge
+        FrostWyrmAlreadyActive = 234, // A Frost Wyrm Is Already Active.
+        NotEnoughRunicPower = 235, // Not Enough Runic Power
+        YouAreThePartyLeader = 236, // You Are The Party Leader.
+        YulonIsAlreadyActive = 237, // Yu'Lon Is Already Active.
+        AStampedeIsAlreadyActive = 238, // A Stampede Is Already Active.
+        YouAreAlreadyWellFed = 239, // You Are Already Well Fed.
+        CantDoThatUnderSuppressiveFire = 240, // You Cannot Do That While Under Suppressive Fire.
+        YouAlreadyHaveMurlocSlop = 241, // You Already Have A Piece Of Murloc Slop.
+        YouDontHaveArtifactFragments = 242, // You Don'T Have Any Artifact Fragments.
+        YouArentInAParty = 243, // You Aren'T In A Party.
+        Requires20Ammunition = 244, // Requires 30 Ammunition!
+        Requires30Ammunition = 245, // Requires 20 Ammunition!
+        YouAlreadyHaveMaxOutcastFollowers = 246, // You Already Have The Maximum Amount Of Outcasts Following You.
+        NotInWorldPvpZone = 247, // Not In World Pvp Zone.
+        AlreadyAtResourceCap = 248, // Already At Resource Cap
+        ApexisSentinelRequiresEnergy = 249, // This Apexis Sentinel Requires Energy From A Nearby Apexis Pylon To Be Powered Up.
+        YouMustHave3OrFewerPlayer = 250, // You Must Have 3 Or Fewer Players.
+        YouAlreadyReadTreasureMap = 251, // You Have Already Read That Treasure Map.
+        MayOnlyUseWhileGarrisonUnderAttack = 252, // You May Only Use This Item While Your Garrison Is Under Attack.
+        RequiresActiveMushrooms = 253, // This Spell Requires Active Mushrooms For You To Detonate.
+        RequiresFasterTimeWithRacer = 254, // Requires A Faster Time With The Basic Racer
+        RequiresInfernoShotAmmo = 255, // Requires Inferno Shot Ammo!
+        YouCannotDoThatRightNow = 256, // You Cannot Do That Right Now.
+        ATrapIsAlreadyPlacedThere = 257, // A Trap Is Already Placed There.
+        YouAreAlreadyOnThatQuest = 258, // You Are Already On That Quest.
+        RequiresFelforgedCudgel = 259, // Requires A Felforged Cudgel!
+        CantTakeWhileBeingDamaged = 260, // Can'T Take While Being Damaged!
+        YouAreBoundToDraenor = 261, // You Are Bound To Draenor By Archimonde'S Magic.
+        AlreayHaveMaxNumberOfShips = 262, // You Already Have The Maximum Number Of Ships Your Shipyard Can Support.
+        MustBeAtShipyard = 263, // You Must Be At Your Shipyard.
+        RequiresLevel3MageTower = 264, // Requires A Level 3 Mage Tower.
+        RequiresLevel3SpiritLodge = 265, // Requires A Level 3 Spirit Lodge.
+        YouDoNotLikeFelEggsAndHam = 266, // You Do Not Like Fel Eggs And Ham.
+        AlreadyEnteredInThisAgreement = 267, // You Have Already Entered In To This Trade Agreement.
+        CannotStealThatWhileGuardsAreOnDuty = 268, // You Cannot Steal That While Guards Are On Duty.
+        YouAlreadyUsedVantusRune = 269, // You Have Already Used A Vantus Rune This Week.
+        ThatItemCannotBeObliterated = 270, // That Item Cannot Be Obliterated.
+        NoSkinnableCorpseInRange = 271, // No Skinnable Corpse In Range
+        MustBeMercenaryToUseTrinket = 272, // You Must Be A Mercenary To Use This Trinket.
+        YouMustBeInCombat = 273, // You Must Be In Combat.
+        NoEnemiesNearTarget = 274, // No Enemies Near Target.
+        RequiresLeyspineMissile = 275, // Requires A Leyspine Missile
+        RequiresBothCurrentsConnected = 276, // Requires Both Currents Connected.
+        CantDoThatInDemonForm = 277, // Can'T Do That While In Demon Form (Yet)
+        YouDontKnowHowToTameMechs = 278, // You Do Not Know How To Tame Or Obtain Lore About Mechs.
+        CannotCharmAnyMoreWithered = 279, // You Cannot Charm Any More Withered.
+        RequiresActiveHealingRain = 280, // Requires An Active Healing Rain.
+        AlreadyCollectedAppearances = 281, // You'Ve Already Collected These Appearances
+        CannotResurrectSurrenderedToMadness = 282, // Cannot Resurrect Someone Who Has Surrendered To Madness
+        YouMustBeInCatForm = 283, // You Must Be In Cat Form.
+        YouCannotReleaseSpiritYet = 284, // You Cannot Release Spirit Yet.
+        NoFishingNodesNearby = 285, // No Fishing Nodes Nearby.
+        YouAreNotInCorrectSpec = 286, // You Are Not The Correct Specialization.
+        UlthaleshHasNoPowerWithoutSouls = 287, // Ulthalesh Has No Power Without Souls.
+        CannotCastThatWithVoodooTotem = 288, // You Cannot Cast That While Talented Into Voodoo Totem.
+        AlreadyCollectedThisAppearance = 289, // You'Ve Already Collected This Appearance.
+        YourPetMaximumIsAlreadyHigh = 290, // Your Total Pet Maximum Is Already This High.
+        YouDontHaveEnoughWithered = 291, // You Do Not Have Enough Withered To Do That.
+        RequiresNearbySoulFragment = 292, // Requires A Nearby Soul Fragment.
+        RequiresAtLeast10Withered = 293, // Requires At Least 10 Living Withered
+        RequiresAtLeast14Withered = 294, // Requires At Least 14 Living Withered
+        RequiresAtLeast18Withered = 295, // Requires At Least 18 Living Withered
+        Requires2WitheredManaRagers = 296, // Requires 2 Withered Mana-Ragers
+        Requires1WitheredBerserke = 297, // Requires 1 Withered Berserker
+        Requires2WitheredBerserker = 298, // Requires 2 Withered Berserkers
+        TargetHealthIsTooLow = 299, // Target'S Health Is Too Low
+        CannotShapeshiftWhileRidingStormtalon = 300, // You Cannot Shapeshift While Riding Stormtalon
+        CannotChangeSpecInCombatTraining = 301, // You Can Not Change Specializations While In Combat Training.
+        UnknownPhenomenonPreventsLeylineConnection = 302, // Unknown Phenomenon Is Preventing A Connection To The Leyline.
+        TheNightmareObscuresYourVision = 303, // The Nightmare Obscures Your Vision.
+        YouAreInWrongClassSpec = 304, // You Are In The Wrong Class Specialization.
+        ThereAreNoValidCorpsesNearby = 305, // There Are No Valid Corpses Nearby.
+        CantCastThatRightNow = 306, // Can'T Cast That Right Now.
+        NotEnoughAncientMan = 307, // Not Enough Ancient Mana.
+        RequiresSongScroll = 308, // Requires A Song Scroll To Function.
+        MustHaveArtifactEquipped = 309, // You Must Have An Artifact Weapon Equipped.
+        RequiresCatForm = 310, // Requires Cat Form.
+        RequiresBearForm = 311, // Requires Bear Form.
+        RequiresConjuredFood = 312, // Requires Either A Conjured Mana Pudding Or Conjured Mana Fritter.
+        RequiresArtifactWeapon = 313, // Requires An Artifact Weapon.
+        YouCantCastThatHere = 314, // You Can'T Cast That Here
+        CantDoThatOnClassTrial = 315, // You Cannot Do That While On A Class Trial.
+        RitualOfDoomOncePerDay = 316, // You Can Only Benefit From The Ritual Of Doom Once Per Day.
+        CannotRitualOfDoomWhileSummoningSiters = 317, // You Cannot Perform The Ritual Of Doom While Attempting To Summon The Sisters.
+        LearnedAllThatYouCanAboutYourArtifact = 318, // You Have Learned All That You Can About Your Artifact.
+        CantCallPetWithLoneWolf = 319, // You Cannot Use Call Pet While Lone Wolf Is Active.
+        TargetCannotAlreadyHaveOrbOfPower = 320, // Target cannot already have a Orb of Power.
+        YouMustBeInAnInnToStrumThatGuitar = 321, // You must be in an inn to strum that guitar.
+        YouCannotReachTheLatch = 322, // You cannot reach the latch.
+        RequiresABrimmingKeystone = 323, // Requires A Brimming Keystone.
+        YouMustBeWieldingTheUnderlightAngler = 324, // You Must Be Wielding The Underlight Angler.
+        YourTargetMustBeShackled = 325, // Your Target Must Be Shackled.
+        YouAlreadyPossesAllOfTheKnowledgeContainedInThosePages = 326, // You Already Possess All Of The Knowledge Contained In These Pages.
+        YouCantRiskGettingTheGrummelsWet = 327, // You Can'T Risk Getting The Grummels Wet!
+        YouCannotChangeSpecializationRightNow = 328, // You Cannot Change Specializations Right Now.
+        YouveReachedTheMaximumNumberOfArtifactResearchNotesAvailable = 329, // You'Ve Reached The Maximum Number Of Artifact Research Notes Available.
+        YouDontHaveEnoughNethershards = 330, // You Don'T Have Enough Nethershards.
+        TheSentinaxIsNotPatrollingThisArea = 331, // The Sentinax Is Not Patrolling This Area.
+        TheSentinaxCannotOpenAnotherPortalRightNow = 332, // The Sentinax Cannot Open Another Portal Right Now.
+        YouCannotGainAdditionalReputationWithThisItem = 333, // You Cannot Gain Additional Reputation With This Item.
+        CantDoThatWhileGhostWolfForm = 334, // Can'T Do That While In Ghost Wolf Form.
+        YourSuppliesAreFrozen = 335, // Your Supplies Are Frozen.
+        YouDoNotKnowHowToTameFeathermanes = 336, // You Do Not Know How To Tame Feathermanes.
+        YouMustReachArtifactKnowledgeLevel25 = 337, // You Must Reach Artifact Knowledge Level 25 To Use The Tome.
+        RequiresANetherPortalDisruptor = 338, // Requires A Nether Portal Disruptor.
+        YouAreNotTheCorrectRankToUseThisItem = 339, // You Are Not The Correct Rank To Use This Item.
+        MustBeStandingNearInjuredChromieInMountHyjal = 340, // Must Be Standing Near The Injured Chromie In Mount Hyjal.
+        TheresNothingFurtherYouCanLearn = 341, // There'S Nothing Further You Can Learn.
+        RemoveCannonsHeavyIronPlatingFirst = 342, // You Should Remove The Cannon'S Heavy Iron Plating First.
+        RemoveCannonsElectrokineticDefenseGridFirst = 343, // You Should Remove The Cannon'S Electrokinetic Defense Grid First.
+        RequiresTheArmoryKeyAndDendriteClusters = 344, // You Are Missing Pieces Of The Armory Key Or Do Not Have Enough Dendrite Clusters.
+        ThisItemRequiresBasicObliterumToUpgrade = 345, // This Item Requires Basic Obliterum To Upgrade.
+        ThisItemRequiresPrimalObliterumToUpgrade = 346, // This Item Requires Primal Obliterum To Upgrade.
+        ThisItemRequiresFlightMastersWhistle = 347, // This Item Requires A Flight Master'S Whistle.
+        RequiresMorrisonsMasterKey = 348, // Requires Morrison'S Master Key.
+        RequiresPowerThatEchoesThatOfTheAugari = 349, // Will Only Open To One Wielding The Power That Echoes That Of The Augari.
+        ThatPlayerHasAPendingTotemicRevival = 350, // That Player Has A Pending Totemic Revival.
+        YouHaveNoFireMinesDeployed = 351, // You Have No Fire Mines Deployed.
+        MustBeAffectedBySpiritPowder = 352, // You Must Be Affected By The Spirit Powder To Take The Phylactery.
+        YouAreBlockedByAStructureAboveYou = 353, // You Are Blocked By A Structure Above You.
+        Requires100ImpMeat = 354, // Requires 100 Imp Meat.
+        YouHaveNotObtainedAnyBackgroundFilters = 355, // You Have Not Obtained Any Background Filters.
+        NothingInterestingPostedHereRightNow = 356, // There Is Nothing Interesting Posted Here Right Now.
+        ParagonReputationRequiresHigherLevel = 357, // Paragon Reputation Is Not Available Until A Higher Level.
+        UunaIsMissing = 358, // Uuna Is Missing.
+        OnlyOtherHivemindMembersMayJoin = 359, // Only Other Members Of Their Hivemind May Join With Them.
+        NoValidFlaskPresent = 360, // No Valid Flask Present.
+        NoWildImpsToSacrifice = 361, // There Are No Wild Imps To Sacrifice.
+        YouAreCarryingTooMuchIron = 362, // You Are Carrying Too Much Iron
+        YouHaveNoIronToCollect = 363, // You Have No Iron To Collect
+        YouHaveNoWildImps = 364, // You Have No Available Wild Imps.
+        NeedsRepairs = 365, // Needs Repairs.
+        YouAreCarryingTooMuchWood = 366, // You'Re Carrying Too Much Wood.
+        YouAreAlreadyCarryingRepairParts = 367, // You'Re Already Carrying Repair Parts.
+        YouHaveNotUnlockedFlightWhistleForZone = 368, // You Have Not Unlocked The Flight Whistle For This Zone.
+        ThereAreNoUnlockedFlightPointsNearby = 369, // There Are No Unlocked Flight Points Nearby To Take You To.
+        YouMustHaveAFelguard = 370, // You Must Have A Felguard.
+        TargetHasNoFesteringWounds = 371, // The Target Has No Festering Wounds.
+        YouDontHaveDeadlyOrWoundPoisonActive = 372, // You Do Not Have Deadly Poison Or Wound Poison Active.
+        CannotReadSoldierDogTagWithoutHeadlampOn = 373, // You Cannot Read The Soldier'S Dog Tag Without Your Headlamp On.
+        YouHaveNoWoodToCollect = 374, // You Have No Wood To Collect.
+        YouAreNotWearingAShirt = 375, // You Are Not Wearing A Shirt!
+        TargetMustBeDead = 376, // Target Must Be Dead.
+        YourTargetIsAlreadyEmbiggified = 377, // Your Target Is Already Embiggified.
+        YouMustTargetASinisterGladiatorItem = 378, // You Must Target A Sinister Gladiator'S Item To Upgrade.
+        ThisItemLevelIsTooHighForThisUpgrade = 379, // This Item'S Level Is Too High For This Upgrade.
+        TheBallistaCannotBeUsedWhileOnFire = 380, // The Ballista Cannot Be Used While On Fire.
+        YouMustTargetADreadGladiatorItem = 381, // You Must Target A Dread Gladiator'S Item To Upgrade.
+        YouDoKnotKnowHowToTameBloodBeasts = 382, // You Do Not Know How To Tame Blood Beasts.
+        CanOnlyBeUsedInTheEvening = 385, // Can Only Be Used In The Evening.
+        RequiresPakuToBeYourChosenLoa = 386, // Requires Pa'Ku To Be Your Chosen Loa.
+        RequiresVigorEngaged = 387, // Requires V.I.G.O.R. Engaged.
+        YourTargetIsNotHungry = 388, // Your Target Is Not Hungry.
+        YouCanOnlyHaveOnTreasureMapMission = 389, // You Can Only Have One Treasure Map Mission At A Time.
+        YouAlreadyHaveASilasSphereOfTransmutation = 390, // You Already Have A Silas' Sphere Of Transmuation.
+        YouDoNotHaveTheMalletOfThunderousSkins = 391, // You Do Not Have The Mallet Of Thunderous Skins.
+        YouMustHaveAnOpenStableSlot = 393, // You Must Have An Open Stable Slot.
+        DoesNotWorkOnCritters = 394, // Does Not Work On Critters.
+        CanOnlyBeUsedOnHati = 395, // Can Only Be Used On Hati.
+        YouAlreadyHaveIwensEnchantingRod = 396, // You Already Have An Iwen'S Enchanting Rod.
+        YouAlreadyHaveMalletOfThunderousSkins = 397, // You Already Have A Mallet Of Thunderous Skins.
+        CanOnlyBeUsedOnInertTideWatchersOrVoodooMasks = 398, // Can Only Be Used On Inert Tide Watchers Or Inert Voodoo Masks.
+        YouMustBeAtShrineToMakeOfferingToLoa = 399, // You Must Be At A Shrine To Make An Offering To A Loa.
+        RequiresEmeraldEmpowerment = 400, // Requires Emerald Empowerment.
+        YouMustBeAnHonoredTauren = 401, // You Must Be An Honored Tauren.
+        RequiresChitterspineMeat = 402, // Requires Chitterspine Meat.
+        RequiresHeartForge = 403, // Requires Heart Forge.
+        NotAuthorizedToAccessChargingStation = 405, // You Are Not Authorized To Access This Charging Station. Speak To Flux.
+        RequiresMardivasArcaneCoffer = 406, // Requires Mardivas'S Arcane Coffer
+        RequiresHeartOfAzerothAtopHeartForge = 407, // Requires Heart Of Azeroth Placed Atop Heart Forge.
+        RequiresBrinestonePickaxe = 408, // Requires A Brinestone Pickaxe.
+        YouAlreadyCollectedDataOnThisTarget = 409, // You Have Already Collected Data On This Target.
+        YouAlreadyHaveThisEssenceForCurrentSpec = 410, // You Already Have This Essence For Your Current Loot Specialization
+        YouCannotSummonAnotherPetWhileRidingHati = 411, // You Cannot Summon Another Pet While Riding Hati.
+        YouHaveAlreadyCollectedThisAzerothMini = 422, // You Have Already Collected This Azeroth Mini
+        YourTargetIsAlreadyAffectedByTeaTime = 412, // Your Target Is Already Affected By Tea Time!
+        YouMustCompleteQuestTheHeartForgeToInfuseEssence = 413, // You Must Complete The Quest "The Heart Forge" To Infuse An Essence
+        ThisTargetDoesNotHaveYourRazorCoral = 414, // This Target Does Not Have Your Razor Coral.
+        YouDoNotHaveEnoughOfThatItem = 415, // You Do Not Have Enough Of That Item.
+        YourTargetIsNotWearingUnboundCursedLoversRing = 417, // Your Target Is Not Wearing An Unbound Cursed Lover'S Ring
+        YourCursedLoversRingIsAlredyBound = 418, // Your Cursed Lover'S Ring Is Already Bound
+        YouMustTargetANotoriusGladiatorItem = 421, // You Must Target A Notorious Gladiator'S Item To Upgrade.
+        YouCantCarryMorePickaxesChumSeeds = 423, // You Can'T Carry Any More Brinestone Pickaxes, Chum, Or Germinating Seeds.
+        RequiresHolidayFeastOfWinterWeil = 424, // Requires Holiday: Feast Of Winter Veil
+        RequiresAshjrakamasShroudOfResolve = 425, // Requires Ashjra'Kamas, Shroud Of Resolve.
+        RequiresWarMode = 426, // Requires War Mode.
+        OnlyOneOfThisMaskMayBeWorn = 427, // Only One Of This Mask May Be Worn.
+        YouCannotAscendWhileTheTarragrueIsNearby = 428, // You Cannot Ascend While The Tarragrue Is Nearby.
+        TargetDoesNotHaveAValidAzeriteEssence = 429, // Target Does Not Have A Valid Azerite Essence.
+        YourMindIsStillRecoveringFromRecentVision = 430, // Your Mind Is Still Recovering From A Recent Vision.
+        RequiresVesselOfHorrificVisions = 431, // Requires Vessel Of Horrific Visions.
+        RequiresAllPartyMembersToBeWearingAshjrakamasShroudOfResolve = 432, // Requires All Party Members To Be Wearing Ashjra'Kamas, Shroud Of Resolve.
+        RequiresAllPartyMembersToPossessAVesselOfHorrificVisions = 434, // Requires All Party Members To Possess A Vessel Of Horrific Visions.
+        YouAlreadyHaveTheHighestRankedEssenceAvailableFromThisSource = 435, // You Already Have The Highest Ranked Essence Available From This Source.
+        RequiresDarkmoonGameToken = 436, // Requires Darkmoon Game Token.
+        YouAreNotTheRightProfession = 437, // You Are Not The Right Profession.
+        YouAlreadyKnowHowToCraftAVoidFocus = 438, // You Already Know How To Craft A Void Focus.
+        YouAlreadyKnowTheRecipesInThisBook = 439, // You Already Know The Recipes In This Book.
+        YouMustTargetACorruptedGladiatorsItem = 440, // You Must Target A Corrupted Gladiator'S Item To Upgrade.
+        RequiresTheFixItStick = 441, // Requires The Fix-It-Stick.
+        ThatItemCannotReceiveAdditionalSockets = 442, // That Item Cannot Receive Additional Sockets.
+        YouAlreadyHaveAContractedVeteranTroop = 443, // You Already Have A Contracted Veteran Troop.
+        YouAreCurrentlyAtYourTroopCapacity = 444, // You Are Currently At Your Troop Capacity.
+        YouDontHaveEnoughAnima = 445, // You Don'T Have Enough Anima
+        TargetAlreadyHoldingVoidTouchedSkull = 446, // That Player Is Already Holding A Void-Touched Skull.
+        TargetsInventoryIsFull = 447, // Target'S Inventory Is Full.
+        TargetsMindIsProtectedByNeuralSilencer = 448, // Your Target'S Mind Is Protected By A Neural Silencer.
+        AllTargetsMindsAreProtectedByNeuralSilencers = 449, // All Of Your Targets' Minds Are Protected By Neural Silencers.
+        YouMustFindAMorePowerfulCoreToProgressYourCloakRanksFurther = 450, // You Must Find A More Powerful Core To Progress Your Cloak Ranks Further.
+        YouCannotUseThisItemInWarMode = 451, // You Cannot Use This Item In War Mode.
+        YouCannotMakeYourCampHere = 452, // You Cannot Make Your Camp Here.
+        RequiresTitanicBeacon = 453, // Requires Titanic Beacon
+        ThatObjectIsLocked = 454, // That Object Is Locked.
+        InvalidCombination = 455, // Invalid Combination.
+        NoNearbyEnemyPlayersAreCorrupted = 456, // No Nearby Enemy Players Are Corrupted.
+        ThatSpellIsAlreadyActive = 457, // That Spell Is Already Active
+        YouCannotUseThisWhenTheTarragrueHasBeenAlerted = 458, // You Cannot Use This When The Tarragrue Has Been Alerted.
+        ThatGuestAlreadyHasTea = 459, // That Guest Already Has Tea.
+        RequiresShadowlandsSkinning = 460, // Requires Shadowlands Skinning.
+        RequiresHuntersMarkOnATarget = 461, // Requires Hunter'S Mark On A Target.
+        HoundmasterLokseyIsBusy = 462, // Houndmaster Loksey Is Busy.
+        RequiresCoilOfRope = 463, // Requires Coil Of Rope.
+        MustBeInARestArea = 464, // Must Be In A Rest Area.
+        TargetIsLinkedToSomebodyElse = 465, // Target Is Linked To Somebody Else.
+        YouDontHaveASummonedGhoul = 466, // You Don'T Have A Summoned Ghoul.
+        OneOfYourPartyMembersIsAnIneligibleClass = 467, // One Of Your Party Members Is An Ineligible Class.
+        YouMustSelectASoulbindBossAndTierFirst = 468, // You Must Select A Soulbind, Boss, And Tier First.
+        ThatGuestDoesntWantThis = 469, // That Guest Doesn'T Want This.
+        YouMustDefeatTheEmpoweredGuardToAscend = 470, // You Must Defeat The Empowered Guard To Ascend.
+        RequiresSoulsteelForge = 471, // Requires Soulsteel Forge.
+        RequiresProofOfPurity = 472, // Requires Proof Of Purity
+        RequiresProofOfHumility = 473, // Requires Proof Of Humility
+        RequiresProofOfCourage = 474, // Requires Proof Of Courage
+        RequiresProofOfWisdom = 475, // Requires Proof Of Wisdom
+        RequiresProofOfLoyalty = 476, // Requires Proof Of Loyalty
+        RequiresArcaneSpecilization = 477, // Requires Arcane Specilization.
+        PleaseGatherYourPartyBeforeQueuing = 478, // Please Gather Your Party Before Queuing.
+        YouDoNotKnowHowToTameGargon = 479, // You Do Not Know How To Tame Gargon.
+        RequiresDeadSpriggan = 480, // Requires Dead Spriggan
+        YouAlreadyUsedAProfessionJournalThisWeek = 481, // You Have Already Used A Profession Journal This Week.
+        RequiresMordretharTheDeathGate = 482, // Requires Mord'Rethar: The Death Gate.
+        RequiresPlaguefallen = 483, // Requires Plaguefallen
+        YouCannotFitThroughThere = 484, // You Cannot Fit Through There.
+        ABindingRitualPreventsThisFromOpening = 485, // A Binding Ritual Prevents This From Opening.
+        ThatCharmIsAlreadyApplied = 486, // That Charm Is Already Applied.
+        ThatSigilIsAlreadyApplied = 487, // That Sigil Is Already Applied.
+        AtLeastOneGuestMustRsvpBeforeYouOpenCourt = 488, // At Least One Guest Must Rsvp Before You Open Court.
+        ThereIsNoTimeLimitToIncrease = 489, // There Is No Time Limit To Increase.
+        YourHeartOfAzerothIsCurrentlyDisabled = 490, // Your Heart Of Azeroth Is Currently Disabled.
+        EssenceYouAreTryingToActivateIsInvalid = 491, // The Essence You Are Trying To Activate Is Invalid.
+        RequiresMedallionOfService = 492, // Requires Medallion Of Service
+        AllPlayersMustHaveQuestTorghastTowerOfTheDamned = 493, // All Players Must Have Quest - Torghast: Tower Of The Damned.
+        RequiresShadowlandsEngineering = 494, // Requires Shadowlands Engineering
+        YouAreNotInDeepEnoughWater = 495, // You Are Not In Deep Enough Water.
+        RequiresFreshWatersOfArdenwealdOrBastion = 496, // Requires The Fresh Waters Of Ardenweald Or Bastion
+        Requires30InfusedRubies = 497, // Requires 30 Infused Rubies
+        TheCurseOfTeramaniksLegacyIsKeepingYourMountsFromHeedingYourCall = 498, // The Curse Of Teramanik'S Legacy Is Keeping Your Mounts From Heeding Your Call.
+        YouDoNotKnowHowToTameCloudSerpents = 499, // You Do Not Know How To Tame Cloud Serpents.
+        YouDoNotKnowHowToTameUndeadCreatures = 500, // You Do Not Know How To Tame Undead Creatures.
+        RequiresTheForgeOfBonds = 501, // Requires The Forge Of Bonds
+        RequiresGatamatos = 502, // Requires Gatamatos
+        MustBeChannellingMindSear = 503, // Must Be Channelling Mind Sear.
+        YouDontHaveAnyPeriodicEffectsActive = 504, // You Don'T Have Any Periodic Effects Active.
+        YouAreNotBestFriendsWithAnyEmberCourtGuests = 505, // You Are Not Best Friends With Any Ember Court Guests.
+        YouMustObtainVenomousSolvents = 506, // You Must Obtain Venomous Solvents.
+        YouMustObtainDreadPollen = 507, // You Must Obtain Dread Pollen.
+        APartyMemberDoesNotHaveThatLayerUnlocked = 508, // A Party Member Does Not Have That Layer Unlocked
+        InventoryIsFull = 509, // Inventory Is Full.
+        YouHaveNoAnimaToDeposit = 510, // You Have No Anima To Deposit
+        YourMountIgnoresYourCallWithinTheMaw = 511, // Your Mount Ignores Your Call Within The Maw.
+        YourButlerIsAlreadyPresentSomewhereInTheEmberCourt = 512, // Your Butler Is Already Present Somewhere In The Ember Court.
+        YouHaveAlreadyBuiltThisConstruct = 513, // You Have Already Built This Construct
+        RequiresInnerAltarOfDomination = 514, // Requires Inner Altar Of Domination
+        PartyMemberDoesNotMeetRequirementsToQueue = 515, // A Party Member Does Not Meet The Requirements To Queue
+        NoConstructCurrentlyActive = 516, // No Construct Currently Active
+        CompleteTheQuestLineWelcomeToZandalar = 517, // Complete The Quest Line "Welcome To Zandalar" To Use This Spell.
+        CompleteTheQuestLineANationDivided = 518, // Complete The Quest Line "A Nation Divided" To Use This Spell.
+        CannotBeUsedOnCommonQualityItems = 519, // Cannot Be Used On Common Quality Items.
+        YouMustBePledgedToTheVenthyr = 520, // You Must Be Pledged To The Venthyr.
+        YouMustBePledgedToTheNightFae = 521, // You Must Be Pledged To The Night Fae.
+        YouMustBePledgedToTheKyrian = 522, // You Must Be Pledged To The Kyrian.
+        YouMustBePledgedToTheNecrolords = 523, // You Must Be Pledged To The Necrolords.
+        YouMustBeInTheShadowlands = 524, // You Must Be In The Shadowlands.
+        RequiresSanctumReservoir = 525, // Requires Sanctum Reservoir.
+        ThisWildseedOfRegrowthIsStillIncubating = 526, // This Wildseed Of Regrowth Is Still Incubating.
+        ThisWildseedOfRegrowthIsStillGrowing = 527, // This Wildseed Of Regrowth Is Still Growing.
+        YouMustBePartyLeaderToStartThisEscort = 528, // You Must Be The Party Leader To Start This Escort.
+        YouHaveFullyUpgradedAllOfYourConduits = 529, // You Have Fully Upgraded All Of Your Conduits.
+        YouHaveAlreadyAddedThatConduit = 530, // You Have Already Added That Conduit To The Forge Of Bonds.
+        TargetMustBeWeakened = 531, // Target Must Be Weakened.
+        YouCannotAddThatConduitToForgeOfBonds = 532, // You Cannot Add That Conduit To The Forge Of Bonds.
+        YouCannotSoulshapeDuringLichborne = 533, // You Cannot Soulshape During Lichborne.
+        YouCantDoThatWhileCarryingAnAnimacone = 534, // You Can'T Do That While Carrying An Animacone.
+        NecessaryConstructNotPresent = 535, // Necessary Construct Not Present
+        ThatGuestIsAlreadyCoveredInGelatin = 536, // That Guest Is Already Covered In Gelatin.
+        YouNeedToWaitToUseThisItem = 537, // You Need To Wait To Use This Item.
+        ThatAllyAlreadyHasTea = 538, // That Ally Already Has Tea.
+        TargetDoesNotNeedTea = 539, // The Target Does Not Need Tea.
+        TheyDontDeserveYourFancyTea = 540, // They Don'T Deserve Your Fancy Tea!
+        YourGormPrefersToEatDeadThings = 541, // Your Gorm Prefers To Eat Dead Things.
+        YourGormHasAlreadyEatenThatCorpse = 542, // Your Gorm Has Already Eaten That Corpse.
+        YouNeedAGormlingFromNiyaToDoThat = 543, // You Need A Gormling From Niya To Do That.
+        TargetIsAlreadyShrunken = 544, // Target Is Already Shrunken.
+        TargetIsAlreadyEnlarged = 545, // Target Is Already Enlarged.
+        LadyMoonberrysWandIsForEnemiesAndMawrats = 546, // Lady Moonberry'S Wand Is Meant For Enemies And Mawrats.
+        LadyMoonberrysWandIsForEnemies = 547, // Lady Moonberry'S Wand Is Meant For Enemies.
+        TargetIsAlreadyTransformedIntoASnail = 548, // Target Is Already Transformed Into A Snail.
+        YourTargetMustBeBelow50PctHealth = 549, // Your Target Must Be Below 50% Health.
+        LadyMoonberrysWandIsDrainedOfPower = 550, // Lady Moonberry'S Wand Is Drained Of Power.
+        ThisBookHoldsNoRecipesForYourProfession = 551, // This Book Holds No Recipes For Your Profession.
+        YouHaveNoKorthianRelicsInYourInventory = 552, // You Have No Korthian Relics In Your Inventory.
+        YouMustBeInTheRiftToInteractWithThis = 553, // You Must Be In The Rift To Interact With This.
+        CannotSummonWhileInTheRift = 554, // Cannot Summon While In The Rift.
+        YouNeedAnActiveElementalShield = 600, // You Need An Active Elemental Shield.
+        SpeakToArchivistToTurnInRelicFragments = 601, // Speak To The Archivist To Turn In Relic Fragments.
+        RequiresResearchReportsAncientShrines = 602, // Requires Knowledge From Research Reports: Ancient Shrines
+        YourStewardIsNotPresent = 603, // Your Steward Companion Is Not Present.
+        YourStewardHasAlreadyBeenTransformed = 604, // Your Steward Companion Has Already Been Transformed.
+        RequiresKorthianRelics = 605, // Requires Korthian Relics
+        RequiresFullEmpoweredBar = 606, // Requires Full Empowered Bar
+        RequiresYouToBeRidingAYak = 607, // Requires You To Be Riding A Yak.
+        JaithysIsNotACannibal = 609, // Jaithys Is Many Things, But Jaithys Is Not A Cannibal.
+        ThatItemIsPunyUnworthyFindAnother = 610, // That Item Is Puny. Unworthy. Find Another.
+        JaithysHungersOnlyForWeapons = 611, // Jaithys Hungers Only For Weapons. Only Weapons Will Do.
+        ReturnToReliquaryOfRememberanceToSubmitKorthianRelics = 612, // Return To The Reliquary Of Rememberance To Submit Korthian Relics To Archivist Roh-Suir.
+        ShardsOfDominationCanBeRemovedBySoulfireChisel = 615, // Shards Of Domination Can Only Be Removed By The Soulfire Chisel.
+        YouHaveLearnedEverythingFromThatMap = 616, // You Have Learned Everything From That Map.
+        YouMustTargetACritterToHelpItAtoneForItsSins = 617, // You Must Target A Critter To Help It Atone For Its Sins.
+        YouMustBeAMemberOfTheKyrianCovenantOrHaveReachedRenown80WithTheKyrian = 619, // You Must Be A Member Of The Kyrian Covenant Or Have Reached Renown 80 With The Kyrian.
         YouMustBeAMemberOfTheNecrolordCovenantOrHaveReachedRenown80WithTheNecrolords = 620, // You Must Be A Member Of The Necrolord Covenant Or Have Reached Renown 80 With The Necrolords.
-        YouMustBeAMemberOfTheNightFaeCovenantOrHaveReachedRenown80WithTheNightFae = 621,    // You Must Be A Member Of The Night Fae Covenant Or Have Reached Renown 80 With The Night Fae.
-        YouMustBeAMemberOfTheVenthyrCovenantOrHaveReachedRenown80WithTheVenthyr = 622,      // You Must Be A Member Of The Venthyr Covenant Or Have Reached Renown 80 With The Venthyr.
-        YouAlreadyHaveThatMuchRenownWithYourActiveCovenant = 627,                           // You Already Have That Much Renown With Your Active Covenant.
-        CannotExceedTheMaximumForThatCurrency = 628,                                        // Cannot Exceed The Maximum For That Currency.
-        RequiresAdditionalCosmicEnergy = 629,                                               // Requires Additional Cosmic Energy.
-        RequiresArchitect = 630,                                                            // Requires Architect.
-        YouMustBeSittingToDoThat = 631,                                                     // You Must Be Sitting To Do That.
-        RequiresPollenCloud = 632,                                                          // Requires Pollen Cloud.
-        Requires5LostOvoids = 633,                                                          // Requires 5 Lost Ovoids.
-        YouHaveTooManyTemporaryEnhancements = 634,                                          // You Have Too Many Temporary Enhancements.
-        YouHaveOtherWaysToSummonPocopoc = 635,                                              // You Have Other Ways To Summon Pocopoc While In Zereth Mortis.
-        RequiresMoreSyllabicRecall = 636,                                                   // Requires More Syllabic Recall.
-        ThisBattlePetCannotRideOnMagicSaucer = 637,                                         // This Battle Pet Is Unable To Ride On The Magic Saucer.
-        YouCanOnlyDoThisWhileMidair = 638,                                                  // You Can Only Do This While Midair.
-        YouCannotDoThatWhileAirborne = 639,                                                 // You Cannot Do That While Airborne.
-        PocopocIsUnavailableOnQuestline = 640,                                              // Pocopoc Is Unavailable To Summon During The Questline A Means To An End.
-        RequiresSulfuronSlammer = 711,                                                      // Requires Sulfuron Slammer
-        NotReadyYet = 788,                                                                  // Not Ready Yet.
-        QualityOfTieredMedallionSettingIsTooLow = 789,                                      // The Quality Of Your Tiered Medallion Setting Is Too Low To Add Another Socket To This Item.
-        YouHaveNotLearnedBarrelRoll = 790,                                                  // You Have Not Learned Barrel Roll.
-        TargetMustBeAnEliteElemental = 791,                                                 // Target Must Be An Elite Elemental.
-        SkillCheckAlreadyFailed = 792,                                                      // Skill Check Already Failed.
-        YourTargetWasRecentlyFed = 793,                                                     // Your Target Was Recently Fed.
-        CannotLureElusiveCreatureTowardsTown = 794,                                         // You Cannot Lure An Elusive Creature Towards A Town.
-        NoWorthwhileCreaturesInAreaToLureOut = 795,                                         // There Are No Worthwhile Creatures In This Area To Lure Out.
-        CannotLureWildBeast = 796,                                                          // This Is A Daycare For Whelps. Why Would You Try To Lure A Wild Beast Here...?
-        YouHaveNoArcaneEssencesInYourInventory = 797,                                       // You Have No Arcane Essences In Your Inventory.
-        ThatPlayerIsCurrentlyNotInterestedInEngagingWithYourShenanigans = 798,              // That Player Is Currently Not Interested In Engaging With Your Shenanigans.
-        CantBeCastOnNonPlayerCharacters = 799,                                              // Can'T Be Cast On Non Player Characters.
-        ASignalFlareWasRecentlyFiredAtThisLocation = 800,                                   // A Signal Flare Was Recently Fired At This Location.
-        ThisTinkerIsTooComplicatedForYou = 801,                                             // This Tinker Is Too Complicated For You.
-        TheDuckRefusesToPlayWhileAnotherMaestroIsNearby = 802,                              // The Duck Refuses To Play While Another Maestro Is Nearby.
-        YouHaveStudiedTheseNotesExtensivelyandThereIsNothingNewToLearnFromThem = 803,       // You Have Studied These Notes Extensively And There Is Nothing New To Learn From Them.
-        YouDontHaveEnoughGold = 804,                                                        // You Don'T Have Enough Gold.
-        YouDoNotKnowHowToTameOttuk = 805,                                                   // You Do Not Know How To Tame Ottuk.
-        ClanAylaagIsCurrentlyTravellingandCannotBeTeleportedTo = 806,                       // Clan Aylaag Is Currently Travelling And Cannot Be Teleported To.
-        NotEnoughInsanity = 807,                                                            // Not Enough Insanity
-        YouMustWaitToAccessThisAgain = 808,                                                 // You Must Wait To Access This Again.
-        YouDoNotKnowHowToTameDragonkin = 809,                                               // You Do Not Know How To Tame Dragonkin.
-        RequiresAnEmptySoulCage = 810,                                                      // Requires An Empty Soul Cage.
-        YouAlreadyHaveACagedSoulOfThatType = 811,                                           // You Already Have A Caged Soul Of That Type.
-        YouCantDoThatHere = 812,                                                            // You Can'T Do That Here.
-        YouDoNotHaveAnyElementalGemsSocketed = 813,                                         // You Do Not Have Any Elemental Gems Socketed.
-        YouMustBeInTheDragonIsles = 814,                                                    // You Must Be In The Dragon Isles.
-        YouCannotDoThatWhileUnderwater = 815,                                               // You Cannot Do That While Underwater.
-        YouMustBeRidingAStolenTameMagmammoth = 816,                                         // You Must Be Riding A Stolen Tame Magmammoth.
-        YouMustBeFlyingAboveWaterInsideAnActiveTuskarrFishingHole = 817,                    // You Must Be Flying Above Water Inside An Active Tuskarr Fishing Hole.
-        YouAreAlreadyBraveEnoughToContinueWithYourExperimentation = 818,                    // You Are Already Brave Enough To Continue With Your Experimentation.
-        YouDontKnowHowToRepairThisItem = 819,                                               // You Don'T Know How To Repair This Item.
-        ThereIsNoMoreRoomOnThatHandhold = 820,                                              // There Is No More Room On That Handhold.
-        YouMustUnblockThisSpotByCompletingADailyQuest = 821,                                // You Must Unblock This Spot By Completing A Daily Quest.
-        YouMustBeCloserToAnIceHoleToDoThat = 822                                            // You Must Be Closer To An Ice Hole To Do That.
+        YouMustBeAMemberOfTheNightFaeCovenantOrHaveReachedRenown80WithTheNightFae = 621, // You Must Be A Member Of The Night Fae Covenant Or Have Reached Renown 80 With The Night Fae.
+        YouMustBeAMemberOfTheVenthyrCovenantOrHaveReachedRenown80WithTheVenthyr = 622, // You Must Be A Member Of The Venthyr Covenant Or Have Reached Renown 80 With The Venthyr.
+        YouAlreadyHaveThatMuchRenownWithYourActiveCovenant = 627, // You Already Have That Much Renown With Your Active Covenant.
+        CannotExceedTheMaximumForThatCurrency = 628, // Cannot Exceed The Maximum For That Currency.
+        RequiresAdditionalCosmicEnergy = 629, // Requires Additional Cosmic Energy.
+        RequiresArchitect = 630, // Requires Architect.
+        YouMustBeSittingToDoThat = 631, // You Must Be Sitting To Do That.
+        RequiresPollenCloud = 632, // Requires Pollen Cloud.
+        Requires5LostOvoids = 633, // Requires 5 Lost Ovoids.
+        YouHaveTooManyTemporaryEnhancements = 634, // You Have Too Many Temporary Enhancements.
+        YouHaveOtherWaysToSummonPocopoc = 635, // You Have Other Ways To Summon Pocopoc While In Zereth Mortis.
+        RequiresMoreSyllabicRecall = 636, // Requires More Syllabic Recall.
+        ThisBattlePetCannotRideOnMagicSaucer = 637, // This Battle Pet Is Unable To Ride On The Magic Saucer.
+        YouCanOnlyDoThisWhileMidair = 638, // You Can Only Do This While Midair.
+        YouCannotDoThatWhileAirborne = 639, // You Cannot Do That While Airborne.
+        PocopocIsUnavailableOnQuestline = 640, // Pocopoc Is Unavailable To Summon During The Questline A Means To An End.
+        RequiresSulfuronSlammer = 711, // Requires Sulfuron Slammer
+        NotReadyYet = 788, // Not Ready Yet.
+        QualityOfTieredMedallionSettingIsTooLow = 789, // The Quality Of Your Tiered Medallion Setting Is Too Low To Add Another Socket To This Item.
+        YouHaveNotLearnedBarrelRoll = 790, // You Have Not Learned Barrel Roll.
+        TargetMustBeAnEliteElemental = 791, // Target Must Be An Elite Elemental.
+        SkillCheckAlreadyFailed = 792, // Skill Check Already Failed.
+        YourTargetWasRecentlyFed = 793, // Your Target Was Recently Fed.
+        CannotLureElusiveCreatureTowardsTown = 794, // You Cannot Lure An Elusive Creature Towards A Town.
+        NoWorthwhileCreaturesInAreaToLureOut = 795, // There Are No Worthwhile Creatures In This Area To Lure Out.
+        CannotLureWildBeast = 796, // This Is A Daycare For Whelps. Why Would You Try To Lure A Wild Beast Here...?
+        YouHaveNoArcaneEssencesInYourInventory = 797, // You Have No Arcane Essences In Your Inventory.
+        ThatPlayerIsCurrentlyNotInterestedInEngagingWithYourShenanigans = 798, // That Player Is Currently Not Interested In Engaging With Your Shenanigans.
+        CantBeCastOnNonPlayerCharacters = 799, // Can'T Be Cast On Non Player Characters.
+        ASignalFlareWasRecentlyFiredAtThisLocation = 800, // A Signal Flare Was Recently Fired At This Location.
+        ThisTinkerIsTooComplicatedForYou = 801, // This Tinker Is Too Complicated For You.
+        TheDuckRefusesToPlayWhileAnotherMaestroIsNearby = 802, // The Duck Refuses To Play While Another Maestro Is Nearby.
+        YouHaveStudiedTheseNotesExtensivelyandThereIsNothingNewToLearnFromThem = 803, // You Have Studied These Notes Extensively And There Is Nothing New To Learn From Them.
+        YouDontHaveEnoughGold = 804, // You Don'T Have Enough Gold.
+        YouDoNotKnowHowToTameOttuk = 805, // You Do Not Know How To Tame Ottuk.
+        ClanAylaagIsCurrentlyTravellingandCannotBeTeleportedTo = 806, // Clan Aylaag Is Currently Travelling And Cannot Be Teleported To.
+        NotEnoughInsanity = 807, // Not Enough Insanity
+        YouMustWaitToAccessThisAgain = 808, // You Must Wait To Access This Again.
+        YouDoNotKnowHowToTameDragonkin = 809, // You Do Not Know How To Tame Dragonkin.
+        RequiresAnEmptySoulCage = 810, // Requires An Empty Soul Cage.
+        YouAlreadyHaveACagedSoulOfThatType = 811, // You Already Have A Caged Soul Of That Type.
+        YouCantDoThatHere = 812, // You Can'T Do That Here.
+        YouDoNotHaveAnyElementalGemsSocketed = 813, // You Do Not Have Any Elemental Gems Socketed.
+        YouMustBeInTheDragonIsles = 814, // You Must Be In The Dragon Isles.
+        YouCannotDoThatWhileUnderwater = 815, // You Cannot Do That While Underwater.
+        YouMustBeRidingAStolenTameMagmammoth = 816, // You Must Be Riding A Stolen Tame Magmammoth.
+        YouMustBeFlyingAboveWaterInsideAnActiveTuskarrFishingHole = 817, // You Must Be Flying Above Water Inside An Active Tuskarr Fishing Hole.
+        YouAreAlreadyBraveEnoughToContinueWithYourExperimentation = 818, // You Are Already Brave Enough To Continue With Your Experimentation.
+        YouDontKnowHowToRepairThisItem = 819, // You Don'T Know How To Repair This Item.
+        ThereIsNoMoreRoomOnThatHandhold = 820, // There Is No More Room On That Handhold.
+        YouMustUnblockThisSpotByCompletingADailyQuest = 821, // You Must Unblock This Spot By Completing A Daily Quest.
+        YouMustBeCloserToAnIceHoleToDoThat = 822, // You Must Be Closer To An Ice Hole To Do That.
     }
 
     public enum SpellMissInfo
@@ -1449,27 +1435,27 @@ namespace Framework.Constants
     public enum SpellCastTargetFlags
     {
         None = 0x0,
-        Unused1 = 0x01,           // Not Used
-        Unit = 0x02,              // Pguid
-        UnitRaid = 0x04,          // Not Sent, Used To Validate Target (If Raid Member)
-        UnitParty = 0x08,         // Not Sent, Used To Validate Target (If Party Member)
-        Item = 0x10,              // Pguid
-        SourceLocation = 0x20,    // Pguid, 3 Float
-        DestLocation = 0x40,      // Pguid, 3 Float
-        UnitEnemy = 0x80,         // Not Sent, Used To Validate Target (If Enemy)
-        UnitAlly = 0x100,         // Not Sent, Used To Validate Target (If Ally)
-        CorpseEnemy = 0x200,      // Pguid
-        UnitDead = 0x400,         // Not Sent, Used To Validate Target (If Dead Creature)
-        Gameobject = 0x800,       // Pguid, Used With TargetGameobjectTarget
-        TradeItem = 0x1000,       // Pguid
-        String = 0x2000,          // String
-        GameobjectItem = 0x4000,  // Not Sent, Used With TargetGameobjectItemTarget
-        CorpseAlly = 0x8000,      // Pguid
-        UnitMinipet = 0x10000,    // Pguid, Used To Validate Target (If Non Combat Pet)
-        GlyphSlot = 0x20000,      // Used In Glyph Spells
-        DestTarget = 0x40000,     // Sometimes Appears With DestTarget Spells (May Appear Or Not For A Given Spell)
-        ExtraTargets = 0x80000,   // Uint32 Counter, Loop { Vec3 - Screen Position (?), Guid }, Not Used So Far
-        UnitPassenger = 0x100000, // Guessed, Used To Validate Target (If Vehicle Passenger)\
+        Unused1 = 0x01,               // Not Used
+        Unit = 0x02,               // Pguid
+        UnitRaid = 0x04,               // Not Sent, Used To Validate Target (If Raid Member)
+        UnitParty = 0x08,               // Not Sent, Used To Validate Target (If Party Member)
+        Item = 0x10,               // Pguid
+        SourceLocation = 0x20,               // Pguid, 3 Float
+        DestLocation = 0x40,               // Pguid, 3 Float
+        UnitEnemy = 0x80,               // Not Sent, Used To Validate Target (If Enemy)
+        UnitAlly = 0x100,               // Not Sent, Used To Validate Target (If Ally)
+        CorpseEnemy = 0x200,               // Pguid
+        UnitDead = 0x400,               // Not Sent, Used To Validate Target (If Dead Creature)
+        Gameobject = 0x800,               // Pguid, Used With TargetGameobjectTarget
+        TradeItem = 0x1000,               // Pguid
+        String = 0x2000,               // String
+        GameobjectItem = 0x4000,               // Not Sent, Used With TargetGameobjectItemTarget
+        CorpseAlly = 0x8000,               // Pguid
+        UnitMinipet = 0x10000,               // Pguid, Used To Validate Target (If Non Combat Pet)
+        GlyphSlot = 0x20000,               // Used In Glyph Spells
+        DestTarget = 0x40000,               // Sometimes Appears With DestTarget Spells (May Appear Or Not For A Given Spell)
+        ExtraTargets = 0x80000,               // Uint32 Counter, Loop { Vec3 - Screen Position (?), Guid }, Not Used So Far
+        UnitPassenger = 0x100000,               // Guessed, Used To Validate Target (If Vehicle Passenger)\
         Unk400000 = 0x400000,
         Unk1000000 = 0X01000000,
         Unk4000000 = 0X04000000,
@@ -1485,8 +1471,7 @@ namespace Framework.Constants
     public enum SpellFamilyNames
     {
         Generic = 0,
-        Events = 1, // Events, Holidays
-
+        Events = 1,                            // Events, Holidays
         // 2 - Unused
         Mage = 3,
         Warrior = 4,
@@ -1497,12 +1482,10 @@ namespace Framework.Constants
         Hunter = 9,
         Paladin = 10,
         Shaman = 11,
-        Unk12 = 12, // 2 Spells (Silence Resistance)
+        Unk12 = 12,                           // 2 Spells (Silence Resistance)
         Potion = 13,
-
         // 14 - Unused
         Deathknight = 15,
-
         // 16 - Unused
         Pet = 17,
         Totems = 50,
@@ -1520,38 +1503,37 @@ namespace Framework.Constants
     [Flags]
     public enum TriggerCastFlags : uint
     {
-        None = 0x0,                              //! Not Triggered
-        IgnoreGCD = 0x01,                        //! Will Ignore Gcd
-        IgnoreSpellAndCategoryCD = 0x02,         //! Will Ignore Spell And Category Cooldowns
-        IgnorePowerAndReagentCost = 0x04,        //! Will Ignore Power And Reagent Cost
-        IgnoreCastItem = 0x08,                   //! Will Not Take Away Cast Item Or Update Related Achievement Criteria
-        IgnoreAuraScaling = 0x10,                //! Will Ignore Aura Scaling
-        IgnoreCastInProgress = 0x20,             //! Will Not Check If A Current Cast Is In Progress
-        IgnoreComboPoints = 0x40,                //! Will Ignore Combo Point Requirement
-        CastDirectly = 0x80,                     //! In Spell.Prepare, Will Be Cast Directly Without Setting Containers For Executed Spell
-        IgnoreAuraInterruptFlags = 0x100,        //! Will Ignore Interruptible Aura'S At Cast
-        IgnoreSetFacing = 0x200,                 //! Will Not Adjust Facing To Target (If Any)
-        IgnoreShapeshift = 0x400,                //! Will Ignore Shapeshift Checks
-        IgnoreCasterAurastate = 0x800,           //! Will Ignore Caster Aura States Including Combat Requirements And Death State
-        DisallowProcEvents = 0x1000,             //! Disallows proc events from triggered spell (default)
-        IgnoreCasterMountedOrOnVehicle = 0x2000, //! Will Ignore Mounted/On Vehicle Restrictions
-
+        None = 0x0,   //! Not Triggered
+        IgnoreGCD = 0x01,   //! Will Ignore Gcd
+        IgnoreSpellAndCategoryCD = 0x02,   //! Will Ignore Spell And Category Cooldowns
+        IgnorePowerAndReagentCost = 0x04,   //! Will Ignore Power And Reagent Cost
+        IgnoreCastItem = 0x08,   //! Will Not Take Away Cast Item Or Update Related Achievement Criteria
+        IgnoreAuraScaling = 0x10,   //! Will Ignore Aura Scaling
+        IgnoreCastInProgress = 0x20,   //! Will Not Check If A Current Cast Is In Progress
+        IgnoreComboPoints = 0x40,   //! Will Ignore Combo Point Requirement
+        CastDirectly = 0x80,   //! In Spell.Prepare, Will Be Cast Directly Without Setting Containers For Executed Spell
+        IgnoreAuraInterruptFlags = 0x100,   //! Will Ignore Interruptible Aura'S At Cast
+        IgnoreSetFacing = 0x200,   //! Will Not Adjust Facing To Target (If Any)
+        IgnoreShapeshift = 0x400,   //! Will Ignore Shapeshift Checks
+        IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
+        DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
+        IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
         // reuse                                        = 0x4000,
         // reuse                                        = 0x8000,
-        IgnoreCasterAuras = 0x10000,      //! Will Ignore Caster Aura Restrictions Or Requirements
-        DontResetPeriodicTimer = 0x20000, //! Will allow periodic aura timers to keep ticking (instead of resetting)
-        DontReportCastError = 0x40000,    //! Will Return SpellFailedDontReport In Checkcast Functions
-        FullMask = 0x0007FFFF,            //! Used when doing CastSpell with triggered == true
+        IgnoreCasterAuras = 0x10000,   //! Will Ignore Caster Aura Restrictions Or Requirements
+        DontResetPeriodicTimer = 0x20000,   //! Will allow periodic aura timers to keep ticking (instead of resetting)
+        DontReportCastError = 0x40000,   //! Will Return SpellFailedDontReport In Checkcast Functions
+        FullMask = 0x0007FFFF, //! Used when doing CastSpell with triggered == true
 
         // debug flags (used with .cast triggered commands)
         IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
-        IgnoreTargetCheck = 0x100000,            //! Will ignore most target checks (mostly DBC target checks)
+        IgnoreTargetCheck = 0x100000, //! Will ignore most target checks (mostly DBC target checks)
         FullDebugMask = 0xFFFFFFFF
     }
 
     public enum SpellSchoolMask
     {
-        None = 0x0,                          // Not Exist
+        None = 0x0,                       // Not Exist
         Normal = (1 << SpellSchools.Normal), // Physical (Armor)
         Holy = (1 << SpellSchools.Holy),
         Fire = (1 << SpellSchools.Fire),
@@ -1562,22 +1544,21 @@ namespace Framework.Constants
 
         // 124, Not Include Normal And Holy Damage
         Spell = (Fire | Nature | Frost | Shadow | Arcane),
-
         // 126
         Magic = (Holy | Spell),
 
         // 127
-        All = (Normal | Magic)
+        All = (Normal | Magic),
     }
 
     [Flags]
     public enum SpellCastFlags : uint
     {
         None = 0x0,
-        Pending = 0x01, // Aoe Combat Log?
+        Pending = 0x01,              // Aoe Combat Log?
         HasTrajectory = 0x02,
         Unk3 = 0x04,
-        Unk4 = 0x08, // Ignore Aoe Visual
+        Unk4 = 0x08,              // Ignore Aoe Visual
         Unk5 = 0x10,
         Projectile = 0x20,
         Unk7 = 0x40,
@@ -1608,7 +1589,7 @@ namespace Framework.Constants
         Unk32 = 0x80000000
     }
 
-    [Flags]
+    [System.Flags]
     public enum SpellCastFlagsEx
     {
         None = 0x0,
@@ -1635,547 +1616,531 @@ namespace Framework.Constants
     }
 
     #region Spell Attributes
-
     public enum SpellAttr0 : uint
     {
-        ProcFailureBurnsCharge = 0x01, /*Nyi*/         // Proc Failure Burns Charge
-        UsesRangedSlot = 0x02,                         // Uses Ranged Slot Description Use Ammo, Ranged Attack Range Modifiers, Ranged Haste, Etc.
-        OnNextSwingNoDamage = 0x04,                    // On Next Swing (No Damage) Description Both "On Next Swing" Attributes Have Identical Handling In Server & Client
-        DoNotLogImmuneMisses = 0x08,                   // Do Not Log Immune Misses (Client Only)
-        IsAbility = 0x10,                              // Is Ability Description Cannot Be Reflected, Not Affected By Cast Speed Modifiers, Etc.
-        IsTradeskill = 0x20,                           // Is Tradeskill Description Displayed In Recipe List, Not Affected By Cast Speed Modifiers
-        Passive = 0x40,                                // Passive Description Spell Is Automatically Cast On Self By Core
+        ProcFailureBurnsCharge = 0x01, /*Nyi*/ // Proc Failure Burns Charge
+        UsesRangedSlot = 0x02, // Uses Ranged Slot Description Use Ammo, Ranged Attack Range Modifiers, Ranged Haste, Etc.
+        OnNextSwingNoDamage = 0x04, // On Next Swing (No Damage) Description Both "On Next Swing" Attributes Have Identical Handling In Server & Client
+        DoNotLogImmuneMisses = 0x08, // Do Not Log Immune Misses (Client Only)
+        IsAbility = 0x10, // Is Ability Description Cannot Be Reflected, Not Affected By Cast Speed Modifiers, Etc.
+        IsTradeskill = 0x20, // Is Tradeskill Description Displayed In Recipe List, Not Affected By Cast Speed Modifiers
+        Passive = 0x40, // Passive Description Spell Is Automatically Cast On Self By Core
         DoNotDisplaySpellbookAuraIconCombatLog = 0x80, // Do Not Display (Spellbook, Aura Icon, Combat Log) (Client Only) Description Not Visible In Spellbook Or Aura Bar
-        DoNotLog = 0x100,                              // Do Not Log (Client Only) Description Spell Will Not Appear In Combat Logs
-        HeldItemOnly = 0x200,                          // Held Item Only (Client Only) Description Client Will Automatically Select Main-Hand Item As Cast Target
-        OnNextSwing = 0x400,                           // On Next Swing Description Both "On Next Swing" Attributes Have Identical Handling In Server & Client
-        WearerCastsProcTrigger = 0x800, /*Nyi*/        // Wearer Casts Proc Trigger
-        ServerOnly = 0x1000,                           // Server Only
-        AllowItemSpellInPvp = 0x2000,                  // Allow Item Spell In Pvp
-        OnlyIndoors = 0x4000,                          // Only Indoors
-        OnlyOutdoors = 0x8000,                         // Only Outdoors
-        NotShapeshifted = 0x10000,                     // Not Shapeshifted
-        OnlyStealthed = 0x20000,                       // Only Stealthed
-        DoNotSheath = 0x40000,                         // Do Not Sheath (Client Only)
-        ScalesWithCreatureLevel = 0x80000,             // Scales W/ Creature Level Description For Non-Player Casts, Scale Impact And Power Cost With Caster'S Level
-        CancelsAutoAttackCombat = 0x100000,            // Cancels Auto Attack Combat Description After Casting This, The Current Auto-Attack Will Be Interrupted
-        NoActiveDefense = 0x200000,                    // No Active Defense Description Spell Cannot Be Dodged, Parried Or Blocked
-        TrackTargetInCastPlayerOnly = 0x400000,        // Track Target In Cast (Player Only) (Client Only)
-        AllowCastWhileDead = 0x800000,                 // Allow Cast While Dead Description Spells Without This Flag Cannot Be Cast By Dead Units In Non-Triggered Contexts
-        AllowWhileMounted = 0x1000000,                 // Allow While Mounted
-        CooldownOnEvent = 0x2000000,                   // Cooldown On Event Description Spell Is Unusable While Already Active, And Cooldown Does Not Begin Until The Effects Have Worn Off
-        AuraIsDebuff = 0x4000000,                      // Aura Is Debuff Description Forces The Spell To Be Treated As A Negative Spell
-        AllowWhileSitting = 0x8000000,                 // Allow While Sitting
-        NotInCombatOnlyPeaceful = 0x10000000,          // Not In Combat (Only Peaceful)
-        NoImmunities = 0x20000000,                     // No Immunities Description Allows Spell To Pierce Invulnerability, Unless The Invulnerability Spell Also Has This Attribute
-        HeartbeatResist = 0x40000000,                  // Heartbeat Resist Description Periodically Re-Rolls Against Resistance To Potentially Expire Aura Early
-        NoAuraCancel = 0x80000000                      // No Aura Cancel Description Prevents The Player From Voluntarily Canceling A Positive Aura
+        DoNotLog = 0x100, // Do Not Log (Client Only) Description Spell Will Not Appear In Combat Logs
+        HeldItemOnly = 0x200, // Held Item Only (Client Only) Description Client Will Automatically Select Main-Hand Item As Cast Target
+        OnNextSwing = 0x400, // On Next Swing Description Both "On Next Swing" Attributes Have Identical Handling In Server & Client
+        WearerCastsProcTrigger = 0x800, /*Nyi*/ // Wearer Casts Proc Trigger
+        ServerOnly = 0x1000, // Server Only
+        AllowItemSpellInPvp = 0x2000, // Allow Item Spell In Pvp
+        OnlyIndoors = 0x4000, // Only Indoors
+        OnlyOutdoors = 0x8000, // Only Outdoors
+        NotShapeshifted = 0x10000, // Not Shapeshifted
+        OnlyStealthed = 0x20000, // Only Stealthed
+        DoNotSheath = 0x40000, // Do Not Sheath (Client Only)
+        ScalesWithCreatureLevel = 0x80000, // Scales W/ Creature Level Description For Non-Player Casts, Scale Impact And Power Cost With Caster'S Level
+        CancelsAutoAttackCombat = 0x100000, // Cancels Auto Attack Combat Description After Casting This, The Current Auto-Attack Will Be Interrupted
+        NoActiveDefense = 0x200000, // No Active Defense Description Spell Cannot Be Dodged, Parried Or Blocked
+        TrackTargetInCastPlayerOnly = 0x400000, // Track Target In Cast (Player Only) (Client Only)
+        AllowCastWhileDead = 0x800000, // Allow Cast While Dead Description Spells Without This Flag Cannot Be Cast By Dead Units In Non-Triggered Contexts
+        AllowWhileMounted = 0x1000000, // Allow While Mounted
+        CooldownOnEvent = 0x2000000, // Cooldown On Event Description Spell Is Unusable While Already Active, And Cooldown Does Not Begin Until The Effects Have Worn Off
+        AuraIsDebuff = 0x4000000, // Aura Is Debuff Description Forces The Spell To Be Treated As A Negative Spell
+        AllowWhileSitting = 0x8000000, // Allow While Sitting
+        NotInCombatOnlyPeaceful = 0x10000000, // Not In Combat (Only Peaceful)
+        NoImmunities = 0x20000000, // No Immunities Description Allows Spell To Pierce Invulnerability, Unless The Invulnerability Spell Also Has This Attribute
+        HeartbeatResist = 0x40000000, // Heartbeat Resist Description Periodically Re-Rolls Against Resistance To Potentially Expire Aura Early
+        NoAuraCancel = 0x80000000  // No Aura Cancel Description Prevents The Player From Voluntarily Canceling A Positive Aura
     }
-
     public enum SpellAttr1 : uint
     {
-        DismissPetFirst = 0x01,                                       // Dismiss Pet First Description Without This Attribute, Summoning Spells Will Fail If Caster Already Has A Pet
-        UseAllMana = 0x02,                                            // Use All Mana Description Ignores Listed Power Cost And Drains Entire Pool Instead
-        IsChannelled = 0x04,                                          // Is Channelled Description Both "Channeled" Attributes Have Identical Handling In Server & Client
-        NoRedirection = 0x08,                                         // No Redirection Description Spell Will Not Be Attracted By SpellMagnet Auras (Grounding Totem)
-        NoSkillIncrease = 0x10,                                       // No Skill Increase
-        AllowWhileStealthed = 0x20,                                   // Allow While Stealthed
-        IsSelfChannelled = 0x40,                                      // Is Self Channelled Description Both "Channeled" Attributes Have Identical Handling In Server & Client
-        NoReflection = 0x80,                                          // No Reflection Description Spell Will Pierce Through Spell Reflection And Similar
-        OnlyPeacefulTargets = 0x100,                                  // Only Peaceful Targets Description Target Cannot Be In Combat
-        InitiatesCombatEnablesAutoAttack = 0x200,                     // Initiates Combat (Enables Auto-Attack) (Client Only) Description Caster Will Begin Auto-Attacking The Target On Cast
-        NoThreat = 0x400,                                             // Does Not Generate Threat Description Also Does Not Cause Target To Engage
-        AuraUnique = 0x800,                                           // Aura Unique Description Aura Will Not Refresh Its Duration When Recast
-        FailureBreaksStealth = 0x1000,                                // Failure Breaks Stealth
-        ToggleFarSight = 0x2000,                                      // Toggle Far Sight (Client Only)
-        TrackTargetInChannel = 0x4000,                                // Track Target In Channel Description While Channeling, Adjust Facing To Face Target
-        ImmunityPurgesEffect = 0x8000,                                // Immunity Purges Effect Description For Immunity Spells, Cancel All Auras That This Spell Would Make You Immune To When The Spell Is Applied
+        DismissPetFirst = 0x01, // Dismiss Pet First Description Without This Attribute, Summoning Spells Will Fail If Caster Already Has A Pet
+        UseAllMana = 0x02, // Use All Mana Description Ignores Listed Power Cost And Drains Entire Pool Instead
+        IsChannelled = 0x04, // Is Channelled Description Both "Channeled" Attributes Have Identical Handling In Server & Client
+        NoRedirection = 0x08, // No Redirection Description Spell Will Not Be Attracted By SpellMagnet Auras (Grounding Totem)
+        NoSkillIncrease = 0x10, // No Skill Increase
+        AllowWhileStealthed = 0x20, // Allow While Stealthed
+        IsSelfChannelled = 0x40, // Is Self Channelled Description Both "Channeled" Attributes Have Identical Handling In Server & Client
+        NoReflection = 0x80, // No Reflection Description Spell Will Pierce Through Spell Reflection And Similar
+        OnlyPeacefulTargets = 0x100, // Only Peaceful Targets Description Target Cannot Be In Combat
+        InitiatesCombatEnablesAutoAttack = 0x200, // Initiates Combat (Enables Auto-Attack) (Client Only) Description Caster Will Begin Auto-Attacking The Target On Cast
+        NoThreat = 0x400, // Does Not Generate Threat Description Also Does Not Cause Target To Engage
+        AuraUnique = 0x800, // Aura Unique Description Aura Will Not Refresh Its Duration When Recast
+        FailureBreaksStealth = 0x1000, // Failure Breaks Stealth
+        ToggleFarSight = 0x2000, // Toggle Far Sight (Client Only)
+        TrackTargetInChannel = 0x4000, // Track Target In Channel Description While Channeling, Adjust Facing To Face Target
+        ImmunityPurgesEffect = 0x8000, // Immunity Purges Effect Description For Immunity Spells, Cancel All Auras That This Spell Would Make You Immune To When The Spell Is Applied
         ImmunityToHostileAndFriendlyEffects = 0x10000, /*Wrong Impl*/ // Immunity To Hostile & Friendly Effects Description Will Not Pierce Divine Shield, Ice Block And Other Full Invulnerabilities
-        NoAutocastAi = 0x20000,                                       // No Autocast (Ai)
-        PreventsAnim = 0x40000, /*Nyi*/                               // Prevents Anim Description Auras Apply UnitFlagPreventEmotesFromChatText
-        ExcludeCaster = 0x80000,                                      // Exclude Caster
-        FinishingMoveDamage = 0x100000,                               // Finishing Move - Damage
-        ThreatOnlyOnMiss = 0x200000, /*Nyi*/                          // Threat Only On Miss
-        FinishingMoveDuration = 0x400000,                             // Finishing Move - Duration
-        IgnoreOwnersDeath = 0x800000, /*Nyi*/                         // Ignore Owner'S Death
-        SpecialSkillup = 0x1000000,                                   // Special Skillup
-        AuraStaysAfterCombat = 0x2000000,                             // Aura Stays After Combat
-        RequireAllTargets = 0x4000000, /*Nyi, Unk*/                   // Require All Targets
-        DiscountPowerOnMiss = 0x8000000,                              // Discount Power On Miss
-        NoAuraIcon = 0x10000000,                                      // No Aura Icon (Client Only)
-        NameInChannelBar = 0x20000000,                                // Name In Channel Bar (Client Only)
-        DispelAllStacks = 0x40000000,                                 // Dispel All Stacks
-        CastWhenLearned = 0x80000000                                  // Cast When Learned
+        NoAutocastAi = 0x20000, // No Autocast (Ai)
+        PreventsAnim = 0x40000, /*Nyi*/ // Prevents Anim Description Auras Apply UnitFlagPreventEmotesFromChatText
+        ExcludeCaster = 0x80000, // Exclude Caster
+        FinishingMoveDamage = 0x100000, // Finishing Move - Damage
+        ThreatOnlyOnMiss = 0x200000, /*Nyi*/ // Threat Only On Miss
+        FinishingMoveDuration = 0x400000, // Finishing Move - Duration
+        IgnoreOwnersDeath = 0x800000, /*Nyi*/ // Ignore Owner'S Death
+        SpecialSkillup = 0x1000000, // Special Skillup
+        AuraStaysAfterCombat = 0x2000000, // Aura Stays After Combat
+        RequireAllTargets = 0x4000000, /*Nyi, Unk*/ // Require All Targets
+        DiscountPowerOnMiss = 0x8000000, // Discount Power On Miss
+        NoAuraIcon = 0x10000000, // No Aura Icon (Client Only)
+        NameInChannelBar = 0x20000000, // Name In Channel Bar (Client Only)
+        DispelAllStacks = 0x40000000, // Dispel All Stacks
+        CastWhenLearned = 0x80000000  // Cast When Learned
     }
-
     public enum SpellAttr2 : uint
     {
-        AllowDeadTarget = 0x01,                             // Allow Dead Target
-        NoShapeshiftUi = 0x02,                              // No Shapeshift Ui (Client Only) Description Does Not Replace Action Bar When Shapeshifted
-        IgnoreLineOfSight = 0x04,                           // Ignore Line Of Sight
-        AllowLowLevelBuff = 0x08,                           // Allow Low Level Buff
-        UseShapeshiftBar = 0x10,                            // Use Shapeshift Bar (Client Only)
-        AutoRepeat = 0x20,                                  // Auto Repeat
-        CannotCastOnTapped = 0x40,                          // Cannot Cast On Tapped Description Can Only Target Untapped Units, Or Those Tapped By Caster
-        DoNotReportSpellFailure = 0x80,                     // Do Not Report Spell Failure
-        IncludeInAdvancedCombatLog = 0x100,                 // Include In Advanced Combat Log (Client Only) Description Determines Whether To Include This Aura In List Of Auras In SmsgEncounterStart
-        AlwaysCastAsUnit = 0x200, /*Nyi, Unk*/              // Always Cast As Unit
-        SpecialTamingFlag = 0x400,                          // Special Taming Flag Description Related To Taming?
-        NoTargetPerSecondCosts = 0x800,                     // No Target Per-Second Costs
-        ChainFromCaster = 0x1000,                           // Chain From Caster
-        EnchantOwnItemOnly = 0x2000,                        // Enchant Own Item Only
-        AllowWhileInvisible = 0x4000,                       // Allow While Invisible
-        DoNotConsumeIfGainedDuringCast = 0x8000,            // Do Not Consume If Gained During Cast
-        NoActivePets = 0x10000,                             // No Active Pets
-        DoNotResetCombatTimers = 0x20000,                   // Do Not Reset Combat Timers Description Does Not Reset Melee/Ranged Autoattack Timer On Cast
-        NoJumpWhileCastPending = 0x40000,                   // No Jump While Cast Pending (Client Only)
-        AllowWhileNotShapeshiftedCasterForm = 0x80000,      // Allow While Not Shapeshifted (Caster Form) Description Even If Stances Are Nonzero, Allow Spell To Be Cast Outside Of Shapeshift (Though Not In A Different Shapeshift)
+        AllowDeadTarget = 0x01, // Allow Dead Target
+        NoShapeshiftUi = 0x02, // No Shapeshift Ui (Client Only) Description Does Not Replace Action Bar When Shapeshifted
+        IgnoreLineOfSight = 0x04, // Ignore Line Of Sight
+        AllowLowLevelBuff = 0x08, // Allow Low Level Buff
+        UseShapeshiftBar = 0x10, // Use Shapeshift Bar (Client Only)
+        AutoRepeat = 0x20, // Auto Repeat
+        CannotCastOnTapped = 0x40, // Cannot Cast On Tapped Description Can Only Target Untapped Units, Or Those Tapped By Caster
+        DoNotReportSpellFailure = 0x80, // Do Not Report Spell Failure
+        IncludeInAdvancedCombatLog = 0x100, // Include In Advanced Combat Log (Client Only) Description Determines Whether To Include This Aura In List Of Auras In SmsgEncounterStart
+        AlwaysCastAsUnit = 0x200, /*Nyi, Unk*/ // Always Cast As Unit
+        SpecialTamingFlag = 0x400, // Special Taming Flag Description Related To Taming?
+        NoTargetPerSecondCosts = 0x800, // No Target Per-Second Costs
+        ChainFromCaster = 0x1000, // Chain From Caster
+        EnchantOwnItemOnly = 0x2000, // Enchant Own Item Only
+        AllowWhileInvisible = 0x4000, // Allow While Invisible
+        DoNotConsumeIfGainedDuringCast = 0x8000, // Do Not Consume If Gained During Cast
+        NoActivePets = 0x10000, // No Active Pets
+        DoNotResetCombatTimers = 0x20000, // Do Not Reset Combat Timers Description Does Not Reset Melee/Ranged Autoattack Timer On Cast
+        NoJumpWhileCastPending = 0x40000, // No Jump While Cast Pending (Client Only)
+        AllowWhileNotShapeshiftedCasterForm = 0x80000, // Allow While Not Shapeshifted (Caster Form) Description Even If Stances Are Nonzero, Allow Spell To Be Cast Outside Of Shapeshift (Though Not In A Different Shapeshift)
         InitiateCombatPostCastEnablesAutoAttack = 0x100000, // Initiate Combat Post-Cast (Enables Auto-Attack)
-        FailOnAllTargetsImmune = 0x200000,                  // Fail On All Targets Immune Description Causes Bg Flags To Be Dropped If Combined With Attr1DispelAurasOnImmunity
-        NoInitialThreat = 0x400000,                         // No Initial Threat
-        ProcCooldownOnFailure = 0x800000,                   // Proc Cooldown On Failure
-        ItemCastWithOwnerSkill = 0x1000000,                 // Item Cast With Owner Skill
-        DontBlockManaRegen = 0x2000000,                     // Don'T Block Mana Regen
-        NoSchoolImmunities = 0x4000000,                     // No School Immunities Description Allow Aura To Be Applied Despite Target Being Immune To New Aura Applications
-        IgnoreWeaponskill = 0x8000000,                      // Ignore Weaponskill
-        NotAnAction = 0x10000000,                           // Not An Action
-        CantCrit = 0x20000000,                              // Can'T Crit
-        ActiveThreat = 0x40000000,                          // Active Threat
-        RetainItemCast = 0x80000000                         // Retain Item Cast Description Passes MCastitem To Triggered Spells
+        FailOnAllTargetsImmune = 0x200000, // Fail On All Targets Immune Description Causes Bg Flags To Be Dropped If Combined With Attr1DispelAurasOnImmunity
+        NoInitialThreat = 0x400000, // No Initial Threat
+        ProcCooldownOnFailure = 0x800000, // Proc Cooldown On Failure
+        ItemCastWithOwnerSkill = 0x1000000, // Item Cast With Owner Skill
+        DontBlockManaRegen = 0x2000000, // Don'T Block Mana Regen
+        NoSchoolImmunities = 0x4000000, // No School Immunities Description Allow Aura To Be Applied Despite Target Being Immune To New Aura Applications
+        IgnoreWeaponskill = 0x8000000, // Ignore Weaponskill
+        NotAnAction = 0x10000000, // Not An Action
+        CantCrit = 0x20000000, // Can'T Crit
+        ActiveThreat = 0x40000000, // Active Threat
+        RetainItemCast = 0x80000000  // Retain Item Cast Description Passes MCastitem To Triggered Spells
     }
-
     public enum SpellAttr3 : uint
     {
-        PvpEnabling = 0x01,                                                   // Pvp Enabling
-        NoProcEquipRequirement = 0x02,                                        // No Proc Equip Requirement Description Ignores Subclass Mask Check When Checking Proc
-        NoCastingBarText = 0x04,                                              // No Casting Bar Text
-        CompletelyBlocked = 0x08,                                             // Completely Blocked
-        NoResTimer = 0x10,                                                    // No Res Timer
-        NoDurabilityLoss = 0x20,                                              // No Durability Loss
-        NoAvoidance = 0x40,                                                   // No Avoidance
-        DotStackingRule = 0x80,                                               // Dot Stacking Rule Description Stack Separately For Each Caster
-        OnlyOnPlayer = 0x100,                                                 // Only On Player
-        NotAProc = 0x200,                                                     // Not A Proc Description Without This Attribute, Any Triggered Spell Will Be Unable To Trigger Other Auras' Procs
-        RequiresMainHandWeapon = 0x400,                                       // Requires Main-Hand Weapon
-        OnlyBattlegrounds = 0x800,                                            // Only Battlegrounds
-        OnlyOnGhosts = 0x1000,                                                // Only On Ghosts
-        HideChannelBar = 0x2000,                                              // Hide Channel Bar (Client Only)
-        HideInRaidFilter = 0x4000,                                            // Hide In Raid Filter (Client Only)
-        NormalRangedAttack = 0x8000,                                          // Normal Ranged Attack Description Auto Shoot, Shoot, Throw - Ranged Normal Attack Attribute?
-        SuppressCasterProcs = 0x10000,                                        // Suppress Caster Procs
-        SuppressTargetProcs = 0x20000,                                        // Suppress Target Procs
-        AlwaysHit = 0x40000,                                                  // Always Hit Description Spell Cannot Miss, Or Be Dodged/Parried/Blocked
-        InstantTargetProcs = 0x80000,                                         // Instant Target Procs Description Proc Events Are Triggered Before Spell Batching Processes The Spell Hit On Target
-        AllowAuraWhileDead = 0x100000,                                        // Allow Aura While Dead
-        OnlyProcOutdoors = 0x200000,                                          // Only Proc Outdoors
-        DoNotTriggerTargetStand = 0x400000,                                   // Do Not Trigger Target Stand
+        PvpEnabling = 0x01, // Pvp Enabling
+        NoProcEquipRequirement = 0x02, // No Proc Equip Requirement Description Ignores Subclass Mask Check When Checking Proc
+        NoCastingBarText = 0x04, // No Casting Bar Text
+        CompletelyBlocked = 0x08, // Completely Blocked
+        NoResTimer = 0x10, // No Res Timer
+        NoDurabilityLoss = 0x20, // No Durability Loss
+        NoAvoidance = 0x40, // No Avoidance
+        DotStackingRule = 0x80, // Dot Stacking Rule Description Stack Separately For Each Caster
+        OnlyOnPlayer = 0x100, // Only On Player
+        NotAProc = 0x200, // Not A Proc Description Without This Attribute, Any Triggered Spell Will Be Unable To Trigger Other Auras' Procs
+        RequiresMainHandWeapon = 0x400, // Requires Main-Hand Weapon
+        OnlyBattlegrounds = 0x800, // Only Battlegrounds
+        OnlyOnGhosts = 0x1000, // Only On Ghosts
+        HideChannelBar = 0x2000, // Hide Channel Bar (Client Only)
+        HideInRaidFilter = 0x4000, // Hide In Raid Filter (Client Only)
+        NormalRangedAttack = 0x8000, // Normal Ranged Attack Description Auto Shoot, Shoot, Throw - Ranged Normal Attack Attribute?
+        SuppressCasterProcs = 0x10000, // Suppress Caster Procs
+        SuppressTargetProcs = 0x20000, // Suppress Target Procs
+        AlwaysHit = 0x40000, // Always Hit Description Spell Cannot Miss, Or Be Dodged/Parried/Blocked
+        InstantTargetProcs = 0x80000, // Instant Target Procs Description Proc Events Are Triggered Before Spell Batching Processes The Spell Hit On Target
+        AllowAuraWhileDead = 0x100000, // Allow Aura While Dead
+        OnlyProcOutdoors = 0x200000, // Only Proc Outdoors
+        DoNotTriggerTargetStand = 0x400000, // Do Not Trigger Target Stand
         NoDamageHistory = 0x800000, /*Nyi, No Damage History Implementation*/ // No Damage History
-        RequiresOffHandWeapon = 0x1000000,                                    // Requires Off-Hand Weapon
-        TreatAsPeriodic = 0x2000000,                                          // Treat As Periodic
-        CanProcFromProcs = 0x4000000,                                         // Can Proc From Procs
-        OnlyProcOnCaster = 0x8000000,                                         // Only Proc On Caster
-        IgnoreCasterAndTargetRestrictions = 0x10000000, /*Nyi*/               // Ignore Caster & Target Restrictions
-        IgnoreCasterModifiers = 0x20000000,                                   // Ignore Caster Modifiers
-        DoNotDisplayRange = 0x40000000,                                       // Do Not Display Range (Client Only)
-        NotOnAoeImmune = 0x80000000 /*Nyi, No Aoe Immunity Implementation*/   // Not On Aoe Immune
+        RequiresOffHandWeapon = 0x1000000, // Requires Off-Hand Weapon
+        TreatAsPeriodic = 0x2000000, // Treat As Periodic
+        CanProcFromProcs = 0x4000000, // Can Proc From Procs
+        OnlyProcOnCaster = 0x8000000, // Only Proc On Caster
+        IgnoreCasterAndTargetRestrictions = 0x10000000, /*Nyi*/ // Ignore Caster & Target Restrictions
+        IgnoreCasterModifiers = 0x20000000, // Ignore Caster Modifiers
+        DoNotDisplayRange = 0x40000000, // Do Not Display Range (Client Only)
+        NotOnAoeImmune = 0x80000000  /*Nyi, No Aoe Immunity Implementation*/ // Not On Aoe Immune
     }
-
     public enum SpellAttr4 : uint
     {
-        NoCastLog = 0x01,                         // No Cast Log
-        ClassTriggerOnlyOnTarget = 0x02,          // Class Trigger Only On Target
-        AuraExpiresOffline = 0x04,                // Aura Expires Offline Description Debuffs (Except Resurrection Sickness) Will Automatically Do This
-        NoHelpfulThreat = 0x08,                   // No Helpful Threat
-        NoHarmfulThreat = 0x10,                   // No Harmful Threat
-        AllowClientTargeting = 0x20,              // Allow Client Targeting Description Allows Client To Send Spell Targets For This Spell. Applies Only To Pet Spells, Without This Attribute CmsgPetAction Is Sent Instead Of CmsgPetCastSpell
-        CannotBeStolen = 0x40,                    // Cannot Be Stolen
-        AllowCastWhileCasting = 0x80,             // Allow Cast While Casting Description Ignores Already In-Progress Cast And Still Casts
-        IgnoreDamageTakenModifiers = 0x100,       // Ignore Damage Taken Modifiers
-        CombatFeedbackWhenUsable = 0x200,         // Combat Feedback When Usable (Client Only)
-        WeaponSpeedCostScaling = 0x400,           // Weapon Speed Cost Scaling Description Adds 10 To Power Cost For Each 1s Of Weapon Speed
-        NoPartialImmunity = 0x800,                // No Partial Immunity
-        AuraIsBuff = 0x1000,                      // Aura Is Buff
-        DoNotLogCaster = 0x2000,                  // Do Not Log Caster
-        ReactiveDamageProc = 0x4000,              // Reactive Damage Proc Description Damage From Spells With This Attribute Doesn'T Break Auras That Normally Break On Damage Taken
-        NotInSpellbook = 0x8000,                  // Not In Spellbook
-        NotInArenaOrRatedBattleground = 0x10000,  // Not In Arena Or Rated Battleground Description Makes Spell Unusable Despite Cd <= 10min
+        NoCastLog = 0x01, // No Cast Log
+        ClassTriggerOnlyOnTarget = 0x02, // Class Trigger Only On Target
+        AuraExpiresOffline = 0x04, // Aura Expires Offline Description Debuffs (Except Resurrection Sickness) Will Automatically Do This
+        NoHelpfulThreat = 0x08, // No Helpful Threat
+        NoHarmfulThreat = 0x10, // No Harmful Threat
+        AllowClientTargeting = 0x20, // Allow Client Targeting Description Allows Client To Send Spell Targets For This Spell. Applies Only To Pet Spells, Without This Attribute CmsgPetAction Is Sent Instead Of CmsgPetCastSpell
+        CannotBeStolen = 0x40, // Cannot Be Stolen
+        AllowCastWhileCasting = 0x80, // Allow Cast While Casting Description Ignores Already In-Progress Cast And Still Casts
+        IgnoreDamageTakenModifiers = 0x100, // Ignore Damage Taken Modifiers
+        CombatFeedbackWhenUsable = 0x200, // Combat Feedback When Usable (Client Only)
+        WeaponSpeedCostScaling = 0x400, // Weapon Speed Cost Scaling Description Adds 10 To Power Cost For Each 1s Of Weapon Speed
+        NoPartialImmunity = 0x800, // No Partial Immunity
+        AuraIsBuff = 0x1000, // Aura Is Buff
+        DoNotLogCaster = 0x2000, // Do Not Log Caster
+        ReactiveDamageProc = 0x4000, // Reactive Damage Proc Description Damage From Spells With This Attribute Doesn'T Break Auras That Normally Break On Damage Taken
+        NotInSpellbook = 0x8000, // Not In Spellbook
+        NotInArenaOrRatedBattleground = 0x10000, // Not In Arena Or Rated Battleground Description Makes Spell Unusable Despite Cd <= 10min
         IgnoreDefaultArenaRestrictions = 0x20000, // Ignore Default Arena Restrictions Description Makes Spell Usable Despite Cd > 10min
-        BouncyChainMissiles = 0x40000,            // Bouncy Chain Missiles Description Hits Area Targets Over Time Instead Of All At Once
-        AllowProcWhileSitting = 0x80000,          // Allow Proc While Sitting
-        AuraNeverBounces = 0x100000,              // Aura Never Bounces
-        AllowEnteringArena = 0x200000,            // Allow Entering Arena
-        ProcSuppressSwingAnim = 0x400000,         // Proc Suppress Swing Anim
-        SuppressWeaponProcs = 0x800000,           // Suppress Weapon Procs
-        AutoRangedCombat = 0x1000000,             // Auto Ranged Combat
-        OwnerPowerScaling = 0x2000000,            // Owner Power Scaling
-        OnlyFlyingAreas = 0x4000000,              // Only Flying Areas
-        ForceDisplayCastbar = 0x8000000,          // Force Display Castbar
-        IgnoreCombatTimer = 0x10000000,           // Ignore Combat Timer
-        AuraBounceFailsSpell = 0x20000000,        // Aura Bounce Fails Spell
-        Obsolete = 0x40000000,                    // Obsolete
-        UseFacingFromSpell = 0x80000000           // Use Facing From Spell
+        BouncyChainMissiles = 0x40000, // Bouncy Chain Missiles Description Hits Area Targets Over Time Instead Of All At Once
+        AllowProcWhileSitting = 0x80000, // Allow Proc While Sitting
+        AuraNeverBounces = 0x100000, // Aura Never Bounces
+        AllowEnteringArena = 0x200000, // Allow Entering Arena
+        ProcSuppressSwingAnim = 0x400000, // Proc Suppress Swing Anim
+        SuppressWeaponProcs = 0x800000, // Suppress Weapon Procs
+        AutoRangedCombat = 0x1000000, // Auto Ranged Combat
+        OwnerPowerScaling = 0x2000000, // Owner Power Scaling
+        OnlyFlyingAreas = 0x4000000, // Only Flying Areas
+        ForceDisplayCastbar = 0x8000000, // Force Display Castbar
+        IgnoreCombatTimer = 0x10000000, // Ignore Combat Timer
+        AuraBounceFailsSpell = 0x20000000, // Aura Bounce Fails Spell
+        Obsolete = 0x40000000, // Obsolete
+        UseFacingFromSpell = 0x80000000  // Use Facing From Spell
     }
-
     public enum SpellAttr5 : uint
     {
-        AllowActionsDuringChannel = 0x01,                           // Allow Actions During Channel
-        NoReagentCostWithAura = 0x02,                               // No Reagent Cost With Aura
-        RemoveEnteringArena = 0x04,                                 // Remove Entering Arena Description Force This Aura To Be Removed On Entering Arena, Regardless Of Other Properties
-        AllowWhileStunned = 0x08,                                   // Allow While Stunned
-        TriggersChanneling = 0x10,                                  // Triggers Channeling
-        LimitN = 0x20,                                              // Limit N Description Remove Previous Application To Another Unit If Applied
-        IgnoreAreaEffectPvpCheck = 0x40,                            // Ignore Area Effect Pvp Check
-        NotOnPlayer = 0x80,                                         // Not On Player
-        NotOnPlayerControlledNpc = 0x100,                           // Not On Player Controlled Npc
-        ExtraInitialPeriod = 0x200,                                 // Extra Initial Period Description Immediately Do Periodic Tick On Apply
-        DoNotDisplayDuration = 0x400,                               // Do Not Display Duration
-        ImpliedTargeting = 0x800,                                   // Implied Targeting (Client Only)
-        MeleeChainTargeting = 0x1000,                               // Melee Chain Targeting
-        SpellHasteAffectsPeriodic = 0x2000,                         // Spell Haste Affects Periodic
-        NotAvailableWhileCharmed = 0x4000,                          // Not Available While Charmed
-        TreatAsAreaEffect = 0x8000,                                 // Treat As Area Effect
-        AuraAffectsNotJustReqEquippedItem = 0x10000,                // Aura Affects Not Just Req. Equipped Item
-        AllowWhileFleeing = 0x20000,                                // Allow While Fleeing
-        AllowWhileConfused = 0x40000,                               // Allow While Confused
-        AiDoesntFaceTarget = 0x80000,                               // Ai Doesn'T Face Target
+        AllowActionsDuringChannel = 0x01, // Allow Actions During Channel
+        NoReagentCostWithAura = 0x02, // No Reagent Cost With Aura
+        RemoveEnteringArena = 0x04, // Remove Entering Arena Description Force This Aura To Be Removed On Entering Arena, Regardless Of Other Properties
+        AllowWhileStunned = 0x08, // Allow While Stunned
+        TriggersChanneling = 0x10, // Triggers Channeling
+        LimitN = 0x20, // Limit N Description Remove Previous Application To Another Unit If Applied
+        IgnoreAreaEffectPvpCheck = 0x40, // Ignore Area Effect Pvp Check
+        NotOnPlayer = 0x80, // Not On Player
+        NotOnPlayerControlledNpc = 0x100, // Not On Player Controlled Npc
+        ExtraInitialPeriod = 0x200, // Extra Initial Period Description Immediately Do Periodic Tick On Apply
+        DoNotDisplayDuration = 0x400, // Do Not Display Duration
+        ImpliedTargeting = 0x800, // Implied Targeting (Client Only)
+        MeleeChainTargeting = 0x1000, // Melee Chain Targeting
+        SpellHasteAffectsPeriodic = 0x2000, // Spell Haste Affects Periodic
+        NotAvailableWhileCharmed = 0x4000, // Not Available While Charmed
+        TreatAsAreaEffect = 0x8000, // Treat As Area Effect
+        AuraAffectsNotJustReqEquippedItem = 0x10000, // Aura Affects Not Just Req. Equipped Item
+        AllowWhileFleeing = 0x20000, // Allow While Fleeing
+        AllowWhileConfused = 0x40000, // Allow While Confused
+        AiDoesntFaceTarget = 0x80000, // Ai Doesn'T Face Target
         DoNotAttemptAPetResummonWhenDismounting = 0x100000, /*Nyi*/ // Do Not Attempt A Pet Resummon When Dismounting
-        IgnoreTargetRequirements = 0x200000, /*Nyi*/                // Ignore Target Requirements
-        NotOnTrivial = 0x400000, /*Nyi*/                            // Not On Trivial
-        NoPartialResists = 0x800000, /*Nyi*/                        // No Partial Resists
-        IgnoreCasterRequirements = 0x1000000, /*Nyi*/               // Ignore Caster Requirements
-        AlwaysLineOfSight = 0x2000000,                              // Always Line Of Sight
-        AlwaysAoeLineOfSight = 0x4000000,                           // Always Aoe Line Of Sight Description Requires Line Of Sight Between Caster And Target In Addition To Between Dest And Target
-        NoCasterAuraIcon = 0x8000000,                               // No Caster Aura Icon (Client Only)
-        NoTargetAuraIcon = 0x10000000,                              // No Target Aura Icon (Client Only)
-        AuraUniquePerCaster = 0x20000000,                           // Aura Unique Per Caster
-        AlwaysShowGroundTexture = 0x40000000,                       // Always Show Ground Texture
-        AddMeleeHitRating = 0x80000000 /*Nyi*/                      // Add Melee Hit Rating
+        IgnoreTargetRequirements = 0x200000, /*Nyi*/ // Ignore Target Requirements
+        NotOnTrivial = 0x400000, /*Nyi*/ // Not On Trivial
+        NoPartialResists = 0x800000, /*Nyi*/ // No Partial Resists
+        IgnoreCasterRequirements = 0x1000000, /*Nyi*/ // Ignore Caster Requirements
+        AlwaysLineOfSight = 0x2000000, // Always Line Of Sight
+        AlwaysAoeLineOfSight = 0x4000000, // Always Aoe Line Of Sight Description Requires Line Of Sight Between Caster And Target In Addition To Between Dest And Target
+        NoCasterAuraIcon = 0x8000000, // No Caster Aura Icon (Client Only)
+        NoTargetAuraIcon = 0x10000000, // No Target Aura Icon (Client Only)
+        AuraUniquePerCaster = 0x20000000, // Aura Unique Per Caster
+        AlwaysShowGroundTexture = 0x40000000, // Always Show Ground Texture
+        AddMeleeHitRating = 0x80000000  /*Nyi*/ // Add Melee Hit Rating
     }
-
     public enum SpellAttr6 : uint
     {
-        NoCooldownOnTooltip = 0x01,                                     // No Cooldown On Tooltip (Client Only)
-        DoNotResetCooldownInArena = 0x02,                               // Do Not Reset Cooldown In Arena
-        NotAnAttack = 0x04, /*Nyi*/                                     // Not An Attack
-        CanAssistImmunePc = 0x08,                                       // Can Assist Immune Pc
+        NoCooldownOnTooltip = 0x01, // No Cooldown On Tooltip (Client Only)
+        DoNotResetCooldownInArena = 0x02, // Do Not Reset Cooldown In Arena
+        NotAnAttack = 0x04, /*Nyi*/ // Not An Attack
+        CanAssistImmunePc = 0x08, // Can Assist Immune Pc
         IgnoreForModTimeRate = 0x10, /*Nyi, Time Rate Not Implemented*/ // Ignore For Mod Time Rate
-        DoNotConsumeResources = 0x20,                                   // Do Not Consume Resources
-        FloatingCombatTextOnCast = 0x40,                                // Floating Combat Text On Cast (Client Only)
-        AuraIsWeaponProc = 0x80,                                        // Aura Is Weapon Proc
-        DoNotChainToCrowdControlledTargets = 0x100,                     // Do Not Chain To Crowd-Controlled Targets Description Implicit Targeting (Chaining And Area Targeting) Will Not Impact Crowd Controlled Targets
-        AllowOnCharmedTargets = 0x200, /*Nyi*/                          // Allow On Charmed Targets
-        NoAuraLog = 0x400,                                              // No Aura Log
-        NotInRaidInstances = 0x800,                                     // Not In Raid Instances
-        AllowWhileRidingVehicle = 0x1000,                               // Allow While Riding Vehicle
-        IgnorePhaseShift = 0x2000,                                      // Ignore Phase Shift
-        AiPrimaryRangedAttack = 0x4000, /*Nyi*/                         // Ai Primary Ranged Attack
-        NoPushback = 0x8000,                                            // No Pushback
-        NoJumpPathing = 0x10000, /*Nyi*/                                // No Jump Pathing
-        AllowEquipWhileCasting = 0x20000,                               // Allow Equip While Casting
-        OriginateFromController = 0x40000,                              // Originate From Controller Description Client Will Prevent Casting If Not Possessed, Charmer Will Be Caster For All Intents And Purposes
-        DelayCombatTimerDuringCast = 0x80000,                           // Delay Combat Timer During Cast
-        AuraIconOnlyForCasterLimit10 = 0x100000,                        // Aura Icon Only For Caster (Limit 10) (Client Only)
-        ShowMechanicAsCombatText = 0x200000,                            // Show Mechanic As Combat Text (Client Only)
-        AbsorbCannotBeIgnore = 0x400000,                                // Absorb Cannot Be Ignore
-        TapsImmediately = 0x800000,                                     // Taps Immediately
-        CanTargetUntargetable = 0x1000000,                              // Can Target Untargetable
-        DoesntResetSwingTimerIfInstant = 0x2000000,                     // Doesn'T Reset Swing Timer If Instant
-        VehicleImmunityCategory = 0x4000000, /*Nyi*/                    // Vehicle Immunity Category
-        IgnoreHealingModifiers = 0x8000000,                             // Ignore Healing Modifiers Description This Prevents Certain Healing Modifiers From Applying - See Implementation If You Really Care About Details
-        DoNotAutoSelectTargetWithInitiatesCombat = 0x10000000,          // Do Not Auto Select Target With Initiates Combat (Client Only)
-        IgnoreCasterDamageModifiers = 0x20000000,                       // Ignore Caster Damage Modifiers Description This Prevents Certain Damage Modifiers From Applying - See Implementation If You Really Care About Details
-        DisableTiedEffectPoints = 0x40000000, /*Nyi*/                   // Disable Tied Effect Points
-        NoCategoryCooldownMods = 0x80000000                             // No Category Cooldown Mods
+        DoNotConsumeResources = 0x20, // Do Not Consume Resources
+        FloatingCombatTextOnCast = 0x40, // Floating Combat Text On Cast (Client Only)
+        AuraIsWeaponProc = 0x80, // Aura Is Weapon Proc
+        DoNotChainToCrowdControlledTargets = 0x100, // Do Not Chain To Crowd-Controlled Targets Description Implicit Targeting (Chaining And Area Targeting) Will Not Impact Crowd Controlled Targets
+        AllowOnCharmedTargets = 0x200, /*Nyi*/ // Allow On Charmed Targets
+        NoAuraLog = 0x400, // No Aura Log
+        NotInRaidInstances = 0x800, // Not In Raid Instances
+        AllowWhileRidingVehicle = 0x1000, // Allow While Riding Vehicle
+        IgnorePhaseShift = 0x2000, // Ignore Phase Shift
+        AiPrimaryRangedAttack = 0x4000, /*Nyi*/ // Ai Primary Ranged Attack
+        NoPushback = 0x8000, // No Pushback
+        NoJumpPathing = 0x10000, /*Nyi*/ // No Jump Pathing
+        AllowEquipWhileCasting = 0x20000, // Allow Equip While Casting
+        OriginateFromController = 0x40000, // Originate From Controller Description Client Will Prevent Casting If Not Possessed, Charmer Will Be Caster For All Intents And Purposes
+        DelayCombatTimerDuringCast = 0x80000, // Delay Combat Timer During Cast
+        AuraIconOnlyForCasterLimit10 = 0x100000, // Aura Icon Only For Caster (Limit 10) (Client Only)
+        ShowMechanicAsCombatText = 0x200000, // Show Mechanic As Combat Text (Client Only)
+        AbsorbCannotBeIgnore = 0x400000, // Absorb Cannot Be Ignore
+        TapsImmediately = 0x800000, // Taps Immediately
+        CanTargetUntargetable = 0x1000000, // Can Target Untargetable
+        DoesntResetSwingTimerIfInstant = 0x2000000, // Doesn'T Reset Swing Timer If Instant
+        VehicleImmunityCategory = 0x4000000, /*Nyi*/ // Vehicle Immunity Category
+        IgnoreHealingModifiers = 0x8000000, // Ignore Healing Modifiers Description This Prevents Certain Healing Modifiers From Applying - See Implementation If You Really Care About Details
+        DoNotAutoSelectTargetWithInitiatesCombat = 0x10000000, // Do Not Auto Select Target With Initiates Combat (Client Only)
+        IgnoreCasterDamageModifiers = 0x20000000, // Ignore Caster Damage Modifiers Description This Prevents Certain Damage Modifiers From Applying - See Implementation If You Really Care About Details
+        DisableTiedEffectPoints = 0x40000000, /*Nyi*/ // Disable Tied Effect Points
+        NoCategoryCooldownMods = 0x80000000  // No Category Cooldown Mods
     }
-
     public enum SpellAttr7 : uint
     {
-        Unk0 = 0x01,                            //  0 Shaman'S New Spells (Call Of The ...), Feign Death.
-        IgnoreDurationMods = 0x02,              //  1 Duration is not affected by duration modifiers
-        ReactivateAtResurrect = 0x04,           //  2 Paladin'S Auras And 65607 Only.
-        IsCheatSpell = 0x08,                    //  3 Cannot Cast If Caster Doesn'T Have Unitflag2 & UnitFlag2AllowCheatSpells
-        Unk4 = 0x10,                            //  4 Only 47883 (Soulstone Resurrection) And Test Spell.
-        SummonTotem = 0x20,                     //  5 Only Shaman Player Totems.
-        NoPushbackOnDamage = 0x40,              //  6 Does not cause spell pushback on damage
-        Unk7 = 0x80,                            //  7 66218 (Launch) Spell.
-        HordeOnly = 0x100,                      //  8 Teleports, Mounts And Other Spells.
-        AllianceOnly = 0x200,                   //  9 Teleports, Mounts And Other Spells.
-        DispelCharges = 0x400,                  // 10 Dispel And Spellsteal Individual Charges Instead Of Whole Aura.
-        InterruptOnlyNonplayer = 0x800,         // 11 Only Non-Player Casts Interrupt, Though Feral Charge - Bear Has It.
-        SilenceOnlyNonplayer = 0x1000,          // 12 Not Set In 3.2.2a.
-        CanAlwaysBeInterrupted = 0x2000,        // 13 Can always be interrupted, even if caster is immune
-        Unk14 = 0x4000,                         // 14 Only 52150 (Raise Dead - Pet) Spell.
-        Unk15 = 0x8000,                         // 15 Exorcism. Usable On Players? 100% Crit Chance On Undead And Demons?
+        Unk0 = 0x01, //  0 Shaman'S New Spells (Call Of The ...), Feign Death.
+        IgnoreDurationMods = 0x02, //  1 Duration is not affected by duration modifiers
+        ReactivateAtResurrect = 0x04, //  2 Paladin'S Auras And 65607 Only.
+        IsCheatSpell = 0x08, //  3 Cannot Cast If Caster Doesn'T Have Unitflag2 & UnitFlag2AllowCheatSpells
+        Unk4 = 0x10, //  4 Only 47883 (Soulstone Resurrection) And Test Spell.
+        SummonTotem = 0x20, //  5 Only Shaman Player Totems.
+        NoPushbackOnDamage = 0x40, //  6 Does not cause spell pushback on damage
+        Unk7 = 0x80, //  7 66218 (Launch) Spell.
+        HordeOnly = 0x100, //  8 Teleports, Mounts And Other Spells.
+        AllianceOnly = 0x200, //  9 Teleports, Mounts And Other Spells.
+        DispelCharges = 0x400, // 10 Dispel And Spellsteal Individual Charges Instead Of Whole Aura.
+        InterruptOnlyNonplayer = 0x800, // 11 Only Non-Player Casts Interrupt, Though Feral Charge - Bear Has It.
+        SilenceOnlyNonplayer = 0x1000, // 12 Not Set In 3.2.2a.
+        CanAlwaysBeInterrupted = 0x2000, // 13 Can always be interrupted, even if caster is immune
+        Unk14 = 0x4000, // 14 Only 52150 (Raise Dead - Pet) Spell.
+        Unk15 = 0x8000, // 15 Exorcism. Usable On Players? 100% Crit Chance On Undead And Demons?
         HiddenInSpellbookWhenLearned = 0x10000, // 16 After learning these spells become hidden in spellbook (but are visible when not learned for low level characters)
-        Unk17 = 0x20000,                        // 17 Only 27965 (Suicide) Spell.
-        HasChargeEffect = 0x40000,              // 18 Only Spells That Have Charge Among Effects.
-        ZoneTeleport = 0x80000,                 // 19 Teleports To Specific Zones.
-        Unk20 = 0x100000,                       // 20 Blink, Divine Shield, Ice Block
-        Unk21 = 0x200000,                       // 21 Not Set
-        Unk22 = 0x400000,                       // 22
-        NoAttackDodge = 0x800000,               // 23 No Attack Dodge
-        NoAttackParry = 0x1000000,              // 24 No Attack Parry
-        NoAttackMiss = 0x2000000,               // No Attack Miss
-        Unk26 = 0x4000000,                      // 26
-        BypassNoResurrectAura = 0x8000000,      // 27 Bypass No Resurrect Aura
-        ConsolidatedRaidBuff = 0x10000000,      // 28 Related To Player Positive Buff
-        Unk29 = 0x20000000,                     // 29 Only 69028, 71237
-        Unk30 = 0x40000000,                     // 30 Burning Determination, Divine Sacrifice, Earth Shield, Prayer Of Mending
-        ClientIndicator = 0x80000000            // 31 Only 70769
+        Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
+        HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
+        ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
+        Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
+        Unk21 = 0x200000, // 21 Not Set
+        Unk22 = 0x400000, // 22
+        NoAttackDodge = 0x800000, // 23 No Attack Dodge
+        NoAttackParry = 0x1000000, // 24 No Attack Parry
+        NoAttackMiss = 0x2000000, // No Attack Miss
+        Unk26 = 0x4000000, // 26
+        BypassNoResurrectAura = 0x8000000, // 27 Bypass No Resurrect Aura
+        ConsolidatedRaidBuff = 0x10000000, // 28 Related To Player Positive Buff
+        Unk29 = 0x20000000, // 29 Only 69028, 71237
+        Unk30 = 0x40000000, // 30 Burning Determination, Divine Sacrifice, Earth Shield, Prayer Of Mending
+        ClientIndicator = 0x80000000  // 31 Only 70769
     }
-
     public enum SpellAttr8 : uint
     {
-        CantMiss = 0x01,                        // 0
-        Unk1 = 0x02,                            // 1
-        Unk2 = 0x04,                            // 2
-        Unk3 = 0x08,                            // 3
-        Unk4 = 0x10,                            // 4
-        Unk5 = 0x20,                            // 5
-        Unk6 = 0x40,                            // 6
-        Unk7 = 0x80,                            // 7
-        AffectPartyAndRaid = 0x100,             // 8
-        DontResetPeriodicTimer = 0x200,         // 9 Periodic Auras With This Flag Keep Old Periodic Timer When Refreshing At Close To One Tick Remaining (Kind Of Anti Dot Clipping)
-        NameChangedDuringTransofrm = 0x400,     // 10
-        Unk11 = 0x800,                          // 11
-        AuraSendAmount = 0x1000,                // 12 Aura Must Have Flag AflagAnyEffectAmountSent To Send Amount
-        Unk13 = 0x2000,                         // 13
-        Unk14 = 0x4000,                         // 14
-        WaterMount = 0x8000,                    // 15
-        Unk16 = 0x10000,                        // 16
-        HasteAffectsDuration = 0x20000,         // 17 Haste Affects Duration
-        RememberSpells = 0x40000,               // 18
-        UseComboPointsOnAnyTarget = 0x80000,    // 19
-        ArmorSpecialization = 0x100000,         // 20
-        Unk21 = 0x200000,                       // 21
-        Unk22 = 0x400000,                       // 22
-        BattleResurrection = 0x800000,          // 23
-        HealingSpell = 0x1000000,               // 24
-        Unk25 = 0x2000000,                      // 25
-        RaidMarker = 0x4000000,                 // 26 Probably Spell No Need Learn To Cast
-        Unk27 = 0x8000000,                      // 27
-        NotInBgOrArena = 0x10000000,            // 28
-        MasteryAffectPoints = 0x20000000,       // 29
-        Unk30 = 0x40000000,                     // 30
-        AttackIgnoreImmuneToPCFlag = 0x80000000 // 31
+        CantMiss = 0x01, // 0
+        Unk1 = 0x02, // 1
+        Unk2 = 0x04, // 2
+        Unk3 = 0x08, // 3
+        Unk4 = 0x10, // 4
+        Unk5 = 0x20, // 5
+        Unk6 = 0x40, // 6
+        Unk7 = 0x80, // 7
+        AffectPartyAndRaid = 0x100, // 8
+        DontResetPeriodicTimer = 0x200, // 9 Periodic Auras With This Flag Keep Old Periodic Timer When Refreshing At Close To One Tick Remaining (Kind Of Anti Dot Clipping)
+        NameChangedDuringTransofrm = 0x400, // 10
+        Unk11 = 0x800, // 11
+        AuraSendAmount = 0x1000, // 12 Aura Must Have Flag AflagAnyEffectAmountSent To Send Amount
+        Unk13 = 0x2000, // 13
+        Unk14 = 0x4000, // 14
+        WaterMount = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        HasteAffectsDuration = 0x20000, // 17 Haste Affects Duration
+        RememberSpells = 0x40000, // 18
+        UseComboPointsOnAnyTarget = 0x80000, // 19
+        ArmorSpecialization = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        BattleResurrection = 0x800000, // 23
+        HealingSpell = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        RaidMarker = 0x4000000, // 26 Probably Spell No Need Learn To Cast
+        Unk27 = 0x8000000, // 27
+        NotInBgOrArena = 0x10000000, // 28
+        MasteryAffectPoints = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        AttackIgnoreImmuneToPCFlag = 0x80000000  // 31
     }
-
     public enum SpellAttr9 : uint
     {
-        Unk0 = 0x01,                         // 0
-        Unk1 = 0x02,                         // 1
-        RestrictedFlightArea = 0x04,         // 2
-        Unk3 = 0x08,                         // 3
-        SpecialDelayCalculation = 0x10,      // 4
-        SummonPlayerTotem = 0x20,            // 5
-        Unk6 = 0x40,                         // 6
-        Unk7 = 0x80,                         // 7
-        AimedShot = 0x100,                   // 8
-        NotUsableInArena = 0x200,            // 9 Cannot Be Used In Arenas
-        Unk10 = 0x400,                       // 10
-        Unk11 = 0x800,                       // 11
-        Unk12 = 0x1000,                      // 12
-        Slam = 0x2000,                       // 13
+        Unk0 = 0x01, // 0
+        Unk1 = 0x02, // 1
+        RestrictedFlightArea = 0x04, // 2
+        Unk3 = 0x08, // 3
+        SpecialDelayCalculation = 0x10, // 4
+        SummonPlayerTotem = 0x20, // 5
+        Unk6 = 0x40, // 6
+        Unk7 = 0x80, // 7
+        AimedShot = 0x100, // 8
+        NotUsableInArena = 0x200, // 9 Cannot Be Used In Arenas
+        Unk10 = 0x400, // 10
+        Unk11 = 0x800, // 11
+        Unk12 = 0x1000, // 12
+        Slam = 0x2000, // 13
         UsableInRatedBattlegrounds = 0x4000, // 14 Can Be Used In Rated Battlegrounds
-        Unk15 = 0x8000,                      // 15
-        Unk16 = 0x10000,                     // 16
-        Unk17 = 0x20000,                     // 17
-        Unk18 = 0x40000,                     // 18
-        Unk19 = 0x80000,                     // 19
-        Unk20 = 0x100000,                    // 20
-        Unk21 = 0x200000,                    // 21
-        Unk22 = 0x400000,                    // 22
-        Unk23 = 0x800000,                    // 23
-        Unk24 = 0x1000000,                   // 24
-        Unk25 = 0x2000000,                   // 25
-        Unk26 = 0x4000000,                   // 26
-        Unk27 = 0x8000000,                   // 27
-        Unk28 = 0x10000000,                  // 28
-        Unk29 = 0x20000000,                  // 29
-        Unk30 = 0x40000000,                  // 30
-        Unk31 = 0x80000000                   // 31
+        Unk15 = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        Unk17 = 0x20000, // 17
+        Unk18 = 0x40000, // 18
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        Unk26 = 0x4000000, // 26
+        Unk27 = 0x8000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
-
     public enum SpellAttr10 : uint
     {
-        Unk0 = 0x01,                          // 0
-        Unk1 = 0x02,                          // 1
-        UsesRangedSlotCosmeticOnly = 0x04,    // 2
-        Unk3 = 0x08,                          // 3
-        WaterSpout = 0x10,                    // 4
-        Unk5 = 0x20,                          // 5
-        Unk6 = 0x40,                          // 6
-        TeleportPlayer = 0x80,                // 7
-        Unk8 = 0x100,                         // 8
-        Unk9 = 0x200,                         // 9
-        Unk10 = 0x400,                        // 10
-        HerbGatheringMining = 0x800,          // 11
+        Unk0 = 0x01, // 0
+        Unk1 = 0x02, // 1
+        UsesRangedSlotCosmeticOnly = 0x04, // 2
+        Unk3 = 0x08, // 3
+        WaterSpout = 0x10, // 4
+        Unk5 = 0x20, // 5
+        Unk6 = 0x40, // 6
+        TeleportPlayer = 0x80, // 7
+        Unk8 = 0x100, // 8
+        Unk9 = 0x200, // 9
+        Unk10 = 0x400, // 10
+        HerbGatheringMining = 0x800, // 11
         UseSpellBaseLevelForScaling = 0x1000, // 12
         ResetCooldownOnEncounterEnd = 0x2000, // 13
-        RollingPeriodic = 0x4000,             // 14
-        Unk15 = 0x8000,                       // 15
-        Unk16 = 0x10000,                      // 16
-        CanDodgeParryWhileCasting = 0x20000,  // 17
-        Unk18 = 0x40000,                      // 18
-        Unk19 = 0x80000,                      // 19
-        Unk20 = 0x100000,                     // 20
-        Unk21 = 0x200000,                     // 21
-        Unk22 = 0x400000,                     // 22
-        Unk23 = 0x800000,                     // 23
-        Unk24 = 0x1000000,                    // 24
-        Unk25 = 0x2000000,                    // 25
-        Unk26 = 0x4000000,                    // 26
-        Unk27 = 0x8000000,                    // 27
-        Unk28 = 0x10000000,                   // 28
-        MountIsNotAccountWide = 0x20000000,   // 29 This mount is stored per-character
-        Unk30 = 0x40000000,                   // 30
-        Unk31 = 0x80000000                    // 31
+        RollingPeriodic = 0x4000, // 14
+        Unk15 = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        CanDodgeParryWhileCasting = 0x20000, // 17
+        Unk18 = 0x40000, // 18
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        Unk26 = 0x4000000, // 26
+        Unk27 = 0x8000000, // 27
+        Unk28 = 0x10000000, // 28
+        MountIsNotAccountWide = 0x20000000, // 29 This mount is stored per-character
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
-
     public enum SpellAttr11 : uint
     {
-        Unk0 = 0x01,                        //  0
-        Unk1 = 0x02,                        //  1
-        ScalesWithItemLevel = 0x04,         //  2
-        Unk3 = 0x08,                        //  3
-        Unk4 = 0x10,                        //  4
-        AbsorbEnvironmentalDamage = 0x20,   //  5
-        Unk6 = 0x40,                        //  6
-        RankIgnoresCasterLevel = 0x80,      //  7 Spell_C_GetSpellRank returns SpellLevels.MaxLevel * 5 instead of std::min(SpellLevels.MaxLevel, caster.Level) * 5
-        Unk8 = 0x100,                       //  8
-        Unk9 = 0x200,                       //  9
-        Unk10 = 0x400,                      // 10
-        NotUsableInInstances = 0x800,       // 11
-        Unk12 = 0x1000,                     // 12
-        Unk13 = 0x2000,                     // 13
-        Unk14 = 0x4000,                     // 14
-        Unk15 = 0x8000,                     // 15
+        Unk0 = 0x01, //  0
+        Unk1 = 0x02, //  1
+        ScalesWithItemLevel = 0x04, //  2
+        Unk3 = 0x08, //  3
+        Unk4 = 0x10, //  4
+        AbsorbEnvironmentalDamage = 0x20, //  5
+        Unk6 = 0x40, //  6
+        RankIgnoresCasterLevel = 0x80, //  7 Spell_C_GetSpellRank returns SpellLevels.MaxLevel * 5 instead of std::min(SpellLevels.MaxLevel, caster.Level) * 5
+        Unk8 = 0x100, //  8
+        Unk9 = 0x200, //  9
+        Unk10 = 0x400, // 10
+        NotUsableInInstances = 0x800, // 11
+        Unk12 = 0x1000, // 12
+        Unk13 = 0x2000, // 13
+        Unk14 = 0x4000, // 14
+        Unk15 = 0x8000, // 15
         NotUsableInChallengeMode = 0x10000, // 16
-        Unk17 = 0x20000,                    // 17
-        Unk18 = 0x40000,                    // 18
-        Unk19 = 0x80000,                    // 19
-        Unk20 = 0x100000,                   // 20
-        Unk21 = 0x200000,                   // 21
-        Unk22 = 0x400000,                   // 22
-        Unk23 = 0x800000,                   // 23
-        Unk24 = 0x1000000,                  // 24
-        Unk25 = 0x2000000,                  // 25
-        Unk26 = 0x4000000,                  // 26
-        Unk27 = 0x8000000,                  // 27
-        Unk28 = 0x10000000,                 // 28
-        Unk29 = 0x20000000,                 // 29
-        Unk30 = 0x40000000,                 // 30
-        Unk31 = 0x80000000                  // 31
+        Unk17 = 0x20000, // 17
+        Unk18 = 0x40000, // 18
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        Unk26 = 0x4000000, // 26
+        Unk27 = 0x8000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
-
     public enum SpellAttr12 : uint
     {
-        Unk0 = 0x01,                            //  0
-        Unk1 = 0x02,                            //  1
-        Unk2 = 0x04,                            //  2
-        Unk3 = 0x08,                            //  3
-        Unk4 = 0x10,                            //  4
-        Unk5 = 0x20,                            //  5
-        Unk6 = 0x40,                            //  6
-        Unk7 = 0x80,                            //  7
-        Unk8 = 0x100,                           //  8
-        IgnoreCastingDisabled = 0x200,          //  9
-        Unk10 = 0x400,                          // 10
-        Unk11 = 0x800,                          // 11
-        Unk12 = 0x1000,                         // 12
-        Unk13 = 0x2000,                         // 13
-        Unk14 = 0x4000,                         // 14
-        Unk15 = 0x8000,                         // 15
-        Unk16 = 0x10000,                        // 16
-        Unk17 = 0x20000,                        // 17
-        Unk18 = 0x40000,                        // 18
-        Unk19 = 0x80000,                        // 19
-        Unk20 = 0x100000,                       // 20
-        Unk21 = 0x200000,                       // 21
-        Unk22 = 0x400000,                       // 22
-        StartCooldownOnCastStart = 0x800000,    // 23
-        IsGarrisonBuff = 0x1000000,             // 24
-        Unk25 = 0x2000000,                      // 25
-        Unk26 = 0x4000000,                      // 26
-        IsReadinessSpell = 0x8000000,           // 27
-        Unk28 = 0x10000000,                     // 28
-        Unk29 = 0x20000000,                     // 29
-        Unk30 = 0x40000000,                     // 30
-        OnlyProcFromClassAbilities = 0x80000000 // 31 Only Proc From Class Abilities
+        Unk0 = 0x01, //  0
+        Unk1 = 0x02, //  1
+        Unk2 = 0x04, //  2
+        Unk3 = 0x08, //  3
+        Unk4 = 0x10, //  4
+        Unk5 = 0x20, //  5
+        Unk6 = 0x40, //  6
+        Unk7 = 0x80, //  7
+        Unk8 = 0x100, //  8
+        IgnoreCastingDisabled = 0x200, //  9
+        Unk10 = 0x400, // 10
+        Unk11 = 0x800, // 11
+        Unk12 = 0x1000, // 12
+        Unk13 = 0x2000, // 13
+        Unk14 = 0x4000, // 14
+        Unk15 = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        Unk17 = 0x20000, // 17
+        Unk18 = 0x40000, // 18
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        StartCooldownOnCastStart = 0x800000, // 23
+        IsGarrisonBuff = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        Unk26 = 0x4000000, // 26
+        IsReadinessSpell = 0x8000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        OnlyProcFromClassAbilities = 0x80000000  // 31 Only Proc From Class Abilities
     }
-
     public enum SpellAttr13 : uint
     {
-        AllowClassAbilityProcs = 0x01,         //  0 Allow Class Ability Procs
-        Unk1 = 0x02,                           //  1
-        PassiveIsUpgrade = 0x04,               //  2 Displays "Upgrade" in spell tooltip instead of "Passive"
-        Unk3 = 0x08,                           //  3
-        Unk4 = 0x10,                           //  4
-        Unk5 = 0x20,                           //  5
-        Unk6 = 0x40,                           //  6
-        Unk7 = 0x80,                           //  7
-        Unk8 = 0x100,                          //  8
-        Unk9 = 0x200,                          //  9
-        Unk10 = 0x400,                         // 10
-        Unk11 = 0x800,                         // 11
-        Unk12 = 0x1000,                        // 12
-        Unk13 = 0x2000,                        // 13
-        Unk14 = 0x4000,                        // 14
-        Unk15 = 0x8000,                        // 15
-        Unk16 = 0x10000,                       // 16
-        Unk17 = 0x20000,                       // 17
+        AllowClassAbilityProcs = 0x01, //  0 Allow Class Ability Procs
+        Unk1 = 0x02, //  1
+        PassiveIsUpgrade = 0x04, //  2 Displays "Upgrade" in spell tooltip instead of "Passive"
+        Unk3 = 0x08, //  3
+        Unk4 = 0x10, //  4
+        Unk5 = 0x20, //  5
+        Unk6 = 0x40, //  6
+        Unk7 = 0x80, //  7
+        Unk8 = 0x100, //  8
+        Unk9 = 0x200, //  9
+        Unk10 = 0x400, // 10
+        Unk11 = 0x800, // 11
+        Unk12 = 0x1000, // 12
+        Unk13 = 0x2000, // 13
+        Unk14 = 0x4000, // 14
+        Unk15 = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        Unk17 = 0x20000, // 17
         ActivatesRequiredShapeshift = 0x40000, // 18
-        Unk19 = 0x80000,                       // 19
-        Unk20 = 0x100000,                      // 20
-        Unk21 = 0x200000,                      // 21
-        Unk22 = 0x400000,                      // 22
-        Unk23 = 0x800000,                      // 23
-        Unk24 = 0x01000000,                    // 24
-        Unk25 = 0x02000000,                    // 25
-        Unk26 = 0x04000000,                    // 26
-        Unk27 = 0x08000000,                    // 27
-        Unk28 = 0x10000000,                    // 28
-        Unk29 = 0x20000000,                    // 29
-        Unk30 = 0x40000000,                    // 30
-        Unk31 = 0x80000000                     // 31
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x01000000, // 24
+        Unk25 = 0x02000000, // 25
+        Unk26 = 0x04000000, // 26
+        Unk27 = 0x08000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
-
     public enum SpellAttr14 : uint
     {
-        Unk0 = 0x01,                       //  0
+        Unk0 = 0x01, //  0
         ReagentCostConsumesCharges = 0x02, //  1 Consumes item charges for reagent costs instead of whole items
-        Unk2 = 0x04,                       //  2
-        HidePassiveFromTooltip = 0x08,     //  3 Don't show "Passive" or "Upgrade" in tooltip
-        Unk4 = 0x10,                       //  4
-        Unk5 = 0x20,                       //  5
-        Unk6 = 0x40,                       //  6
-        Unk7 = 0x80,                       //  7
-        Unk8 = 0x100,                      //  8
-        Unk9 = 0x200,                      //  9
-        Unk10 = 0x400,                     // 10
-        Unk11 = 0x800,                     // 11
-        Unk12 = 0x1000,                    // 12
-        Unk13 = 0x2000,                    // 13
-        Unk14 = 0x4000,                    // 14
-        Unk15 = 0x8000,                    // 15
-        Unk16 = 0x10000,                   // 16
-        Unk17 = 0x20000,                   // 17
-        Unk18 = 0x40000,                   // 18
-        Unk19 = 0x80000,                   // 19
-        Unk20 = 0x100000,                  // 20
-        Unk21 = 0x200000,                  // 21
-        Unk22 = 0x400000,                  // 22
-        Unk23 = 0x800000,                  // 23
-        Unk24 = 0x1000000,                 // 24
-        Unk25 = 0x2000000,                 // 25
-        Unk26 = 0x4000000,                 // 26
-        Unk27 = 0x8000000,                 // 27
-        Unk28 = 0x10000000,                // 28
-        Unk29 = 0x20000000,                // 29
-        Unk30 = 0x40000000,                // 30
-        Unk31 = 0x80000000                 // 31
+        Unk2 = 0x04, //  2
+        HidePassiveFromTooltip = 0x08, //  3 Don't show "Passive" or "Upgrade" in tooltip
+        Unk4 = 0x10, //  4
+        Unk5 = 0x20, //  5
+        Unk6 = 0x40, //  6
+        Unk7 = 0x80, //  7
+        Unk8 = 0x100, //  8
+        Unk9 = 0x200, //  9
+        Unk10 = 0x400, // 10
+        Unk11 = 0x800, // 11
+        Unk12 = 0x1000, // 12
+        Unk13 = 0x2000, // 13
+        Unk14 = 0x4000, // 14
+        Unk15 = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        Unk17 = 0x20000, // 17
+        Unk18 = 0x40000, // 18
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        Unk26 = 0x4000000, // 26
+        Unk27 = 0x8000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
-
     public enum SpellCustomAttributes
     {
         EnchantProc = 0x01,
@@ -2190,9 +2155,9 @@ namespace Framework.Constants
         Charge = 0x200,
         PickPocket = 0x400,
         DeprecatedRollingPeriodic = 0x800, // DO NOT REUSE
-        DeprecatedNegativeEff0 = 0x1000,   // DO NOT REUSE
-        DeprecatedNegativeEff1 = 0x2000,   // DO NOT REUSE
-        DeprecatedNegativeEff2 = 0x4000,   // DO NOT REUSE
+        DeprecatedNegativeEff0 = 0x1000, // DO NOT REUSE
+        DeprecatedNegativeEff1 = 0x2000, // DO NOT REUSE
+        DeprecatedNegativeEff2 = 0x4000, // DO NOT REUSE
         IgnoreArmor = 0x8000,
         ReqTargetFacingCaster = 0x10000,
         ReqCasterBehindTarget = 0x20000,
@@ -2204,7 +2169,6 @@ namespace Framework.Constants
         IsTalent = 0x800000,
         AuraCannotBeSaved = 0x1000000
     }
-
     #endregion
 
     //Effects
@@ -2383,8 +2347,8 @@ namespace Framework.Constants
         DestroyItem = 169,
         UpdateZoneAurasPhases = 170,
         SummonPersonalGameobject = 171, // Summons Gameobject
-        ResurrectWithAura = 172,        // Aoe Ressurection
-        UnlockGuildVaultTab = 173,      // Guild Tab Unlocked (Guild Perk)
+        ResurrectWithAura = 172, // Aoe Ressurection
+        UnlockGuildVaultTab = 173, // Guild Tab Unlocked (Guild Perk)
         ApplyAuraOnPet = 174,
         Effect175 = 175,
         Sanctuary2 = 176,
@@ -2400,19 +2364,19 @@ namespace Framework.Constants
         Unk186 = 186,
         RandomizeArchaeologyDigsites = 187,
         SummonStabledPetAsGuardian = 188,
-        Loot = 189,               // NYI, lootid in MiscValue ?
+        Loot = 189, // NYI, lootid in MiscValue ?
         ChangePartyMembers = 190, // MiscValueA = 1 is join, MiscValueA = 0 is leave - used by NPCs
         TeleportToDigsite = 191,
         UncageBattlepet = 192,
         StartPetBattle = 193,
         Unk194 = 194,
         PlaySceneScriptPackage = 195,
-        CreateSceneObject = 196,         // MiscValueA = SceneId, goes into guid as entry, SceneScriptPackageId goes into ObjectData::Entry
+        CreateSceneObject = 196, // MiscValueA = SceneId, goes into guid as entry, SceneScriptPackageId goes into ObjectData::Entry
         CreatePersonalSceneObject = 197, // MiscValueA = SceneId, goes into guid as entry, SceneScriptPackageId goes into ObjectData::Entry
-        PlayScene = 198,                 // NYI
-        DespawnSummon = 199,             // MiscValueA is some kind of unknown internal id
-        HealBattlepetPct = 200,          // NYI
-        EnableBattlePets = 201,          // NYI
+        PlayScene = 198, // NYI
+        DespawnSummon = 199, // MiscValueA is some kind of unknown internal id
+        HealBattlepetPct = 200, // NYI
+        EnableBattlePets = 201, // NYI
         ApplyAreaAuraSummons = 202,
         RemoveAura2 = 203,
         ChangeBattlepetQuality = 204,
@@ -2495,19 +2459,19 @@ namespace Framework.Constants
         LearnSoulbindConduit = 281,
         ConvertItemsToCurrency = 282,
         CompleteCampaign = 283, // Flags all quests as completed that are assigned to campaign (MiscValueA)
-        SendChatMessage = 284,  // MiscValue[0] = BroadcastTextID, MiscValue[1] = ChatType
+        SendChatMessage = 284, // MiscValue[0] = BroadcastTextID, MiscValue[1] = ChatType
         ModifyKeystone2 = 285,
         GrantBattlepetExperience = 286,
         SetGarrisonFollowerLevel = 287,
-        CraftItem = 288,        // Miscvalue[0] = Craftingdataid
+        CraftItem = 288, // Miscvalue[0] = Craftingdataid
         ModifyAuraStacks = 289, // Miscvalue[0] = 0 Means Add, = 1 Means Set
         ModifyCooldown = 290,
-        ModifyCooldowns = 291,           // Miscvalue[0] = Spellfamily, Miscvalue[1] = Maybe Bit Index For Family Flags? Off By 1 For The Only Spell Using This Effect
+        ModifyCooldowns = 291, // Miscvalue[0] = Spellfamily, Miscvalue[1] = Maybe Bit Index For Family Flags? Off By 1 For The Only Spell Using This Effect
         ModifyCooldownsByCategory = 292, // Miscvalue[0] = Category
-        ModifyCharges = 293,             // Miscvalue[0] = Charge Category
-        CraftLoot = 294,                 // Miscvalue[0] = Craftingdataid
-        SalvageItem = 295,               // Miscvalue[0] = Itemsalvageid
-        CraftSalvageItem = 296,          // Miscvalue[0] = Itemsalvageid, Miscvalue[1] = Craftingdataid
+        ModifyCharges = 293, // Miscvalue[0] = Charge Category
+        CraftLoot = 294, // Miscvalue[0] = Craftingdataid
+        SalvageItem = 295, // Miscvalue[0] = Itemsalvageid
+        CraftSalvageItem = 296, // Miscvalue[0] = Itemsalvageid, Miscvalue[1] = Craftingdataid
         RecraftItem = 297,
         CancelAllPrivateConversations = 298,
         Unk299 = 299, // Something With Items, As Of 10.0.2 All Spells Are Named "Downgrading"
@@ -2532,79 +2496,81 @@ namespace Framework.Constants
     {
         None = 0x0,
 
-        Heartbeat = 0x01, // 00 Killed by agressor - not sure about this flag
-        Kill = 0x02,      // 01 Kill target (in most cases need XP/Honor reward)
+        Heartbeat = 0x01,    // 00 Killed by agressor - not sure about this flag
+        Kill = 0x02,    // 01 Kill target (in most cases need XP/Honor reward)
 
-        DealMeleeSwing = 0x04, // 02 Done melee auto attack
-        TakeMeleeSwing = 0x08, // 03 Taken melee auto attack
+        DealMeleeSwing = 0x04,    // 02 Done melee auto attack
+        TakeMeleeSwing = 0x08,    // 03 Taken melee auto attack
 
-        DealMeleeAbility = 0x10, // 04 Done attack by Spell that has dmg class melee
-        TakeMeleeAbility = 0x20, // 05 Taken attack by Spell that has dmg class melee
+        DealMeleeAbility = 0x10,    // 04 Done attack by Spell that has dmg class melee
+        TakeMeleeAbility = 0x20,    // 05 Taken attack by Spell that has dmg class melee
 
-        DealRangedAttack = 0x40, // 06 Done ranged auto attack
-        TakeRangedAttack = 0x80, // 07 Taken ranged auto attack
+        DealRangedAttack = 0x40,    // 06 Done ranged auto attack
+        TakeRangedAttack = 0x80,    // 07 Taken ranged auto attack
 
-        DealRangedAbility = 0x100, // 08 Done attack by Spell that has dmg class ranged
-        TakeRangedAbility = 0x200, // 09 Taken attack by Spell that has dmg class ranged
+        DealRangedAbility = 0x100,    // 08 Done attack by Spell that has dmg class ranged
+        TakeRangedAbility = 0x200,    // 09 Taken attack by Spell that has dmg class ranged
 
-        DealHelpfulAbility = 0x400, // 10 Done positive spell that has dmg class none
-        TakeHelpfulAbility = 0x800, // 11 Taken positive spell that has dmg class none
+        DealHelpfulAbility = 0x400,    // 10 Done positive spell that has dmg class none
+        TakeHelpfulAbility = 0x800,    // 11 Taken positive spell that has dmg class none
 
-        DealHarmfulAbility = 0x1000, // 12 Done negative spell that has dmg class none
-        TakeHarmfulAbility = 0x2000, // 13 Taken negative spell that has dmg class none
+        DealHarmfulAbility = 0x1000,    // 12 Done negative spell that has dmg class none
+        TakeHarmfulAbility = 0x2000,    // 13 Taken negative spell that has dmg class none
 
-        DealHelpfulSpell = 0x4000, // 14 Done positive spell that has dmg class magic
-        TakeHelpfulSpell = 0x8000, // 15 Taken positive spell that has dmg class magic
+        DealHelpfulSpell = 0x4000,    // 14 Done positive spell that has dmg class magic
+        TakeHelpfulSpell = 0x8000,    // 15 Taken positive spell that has dmg class magic
 
-        DealHarmfulSpell = 0x10000, // 16 Done negative spell that has dmg class magic
-        TakeHarmfulSpell = 0x20000, // 17 Taken negative spell that has dmg class magic
+        DealHarmfulSpell = 0x10000,    // 16 Done negative spell that has dmg class magic
+        TakeHarmfulSpell = 0x20000,    // 17 Taken negative spell that has dmg class magic
 
-        DealHarmfulPeriodic = 0x40000, // 18 Successful do periodic damage
-        TakeHarmfulPeriodic = 0x80000, // 19 Taken spell periodic damage
+        DealHarmfulPeriodic = 0x40000,    // 18 Successful do periodic damage
+        TakeHarmfulPeriodic = 0x80000,    // 19 Taken spell periodic damage
 
-        TakeAnyDamage = 0x100000, // 20 Taken any damage
+        TakeAnyDamage = 0x100000,    // 20 Taken any damage
 
-        DealHelpfulPeriodic = 0x200000, // 21 On trap activation (possibly needs name change to ONGAMEOBJECTCAST or USE)
+        DealHelpfulPeriodic = 0x200000,    // 21 On trap activation (possibly needs name change to ONGAMEOBJECTCAST or USE)
 
-        MainHandWeaponSwing = 0x400000, // 22 Done main-hand melee attacks (spell and autoattack)
-        OffHandWeaponSwing = 0x800000,  // 23 Done off-hand melee attacks (spell and autoattack)
+        MainHandWeaponSwing = 0x400000,    // 22 Done main-hand melee attacks (spell and autoattack)
+        OffHandWeaponSwing = 0x800000,    // 23 Done off-hand melee attacks (spell and autoattack)
 
-        Death = 0x1000000, // 24 Died in any way
-        Jump = 0x02000000, // 25 Jumped
+        Death = 0x1000000,    // 24 Died in any way
+        Jump = 0x02000000,    // 25 Jumped
 
-        CloneSpell = 0x4000000, // 26 Proc Clone Spell
+        CloneSpell = 0x4000000,    // 26 Proc Clone Spell
 
         EnterCombat = 0x08000000,    // 27 Entered combat
-        EncounterStart = 0x10000000, // 28 Encounter started
+        EncounterStart = 0x10000000,    // 28 Encounter started
 
-        CastEnded = 0x20000000, // 29 Cast Ended
+        CastEnded = 0x20000000,    // 29 Cast Ended
         Looted = 0x40000000,    // 30 Looted (took from loot, not opened loot window)
 
-        TakeHelpfulPeriodic = 0x80000000, // 31 Take Helpful Periodic
+        TakeHelpfulPeriodic = 0x80000000,    // 31 Take Helpful Periodic
 
         // flag masks
         AutoAttackMask = DealMeleeSwing | TakeMeleeSwing | DealRangedAttack | TakeRangedAttack,
 
-        MeleeMask = DealMeleeSwing | TakeMeleeSwing | DealMeleeAbility | TakeMeleeAbility | MainHandWeaponSwing | OffHandWeaponSwing,
+        MeleeMask = DealMeleeSwing | TakeMeleeSwing | DealMeleeAbility | TakeMeleeAbility
+            | MainHandWeaponSwing | OffHandWeaponSwing,
 
         RangedMask = DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility,
 
-        SpellMask = DealMeleeAbility | TakeMeleeAbility | DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility | DealHelpfulAbility | TakeHelpfulAbility | DealHarmfulAbility | TakeHarmfulAbility | DealHelpfulSpell | TakeHelpfulSpell | DealHarmfulSpell | TakeHarmfulSpell | DealHarmfulPeriodic | TakeHarmfulPeriodic | DealHelpfulPeriodic | TakeHelpfulPeriodic,
+        SpellMask = DealMeleeAbility | TakeMeleeAbility |  DealRangedAttack | TakeRangedAttack
+            | DealRangedAbility | TakeRangedAbility | DealHelpfulAbility | TakeHelpfulAbility
+            | DealHarmfulAbility | TakeHarmfulAbility | DealHelpfulSpell | TakeHelpfulSpell
+            | DealHarmfulSpell | TakeHarmfulSpell | DealHarmfulPeriodic | TakeHarmfulPeriodic | DealHelpfulPeriodic | TakeHelpfulPeriodic,
 
-        DoneHitMask = DealMeleeSwing | DealRangedAttack | DealMeleeAbility | DealRangedAbility | DealHelpfulAbility | DealHarmfulAbility | DealHelpfulSpell | DealHarmfulSpell | DealHarmfulPeriodic | DealHelpfulPeriodic | MainHandWeaponSwing | OffHandWeaponSwing,
+        DoneHitMask = DealMeleeSwing | DealRangedAttack | DealMeleeAbility | DealRangedAbility
+            | DealHelpfulAbility | DealHarmfulAbility | DealHelpfulSpell | DealHarmfulSpell
+            | DealHarmfulPeriodic | DealHelpfulPeriodic | MainHandWeaponSwing | OffHandWeaponSwing,
 
-        TakenHitMask = TakeMeleeSwing | TakeRangedAttack | TakeMeleeAbility | TakeRangedAbility | TakeHelpfulAbility | TakeHarmfulAbility | TakeHelpfulSpell | TakeHarmfulSpell | TakeHarmfulPeriodic | TakeAnyDamage,
+        TakenHitMask = TakeMeleeSwing | TakeRangedAttack | TakeMeleeAbility | TakeRangedAbility
+            | TakeHelpfulAbility | TakeHarmfulAbility | TakeHelpfulSpell | TakeHarmfulSpell
+            | TakeHarmfulPeriodic | TakeAnyDamage,
 
         ReqSpellPhaseMask = SpellMask & DoneHitMask,
 
-        MeleeBasedTriggerMask = (DealMeleeSwing |
-                                 TakeMeleeSwing |
-                                 DealMeleeAbility |
-                                 TakeMeleeAbility |
-                                 DealRangedAttack |
-                                 TakeRangedAttack |
-                                 DealRangedAbility |
-                                 TakeRangedAbility)
+        MeleeBasedTriggerMask = (DealMeleeSwing | TakeMeleeSwing | DealMeleeAbility | TakeMeleeAbility |
+                                  DealRangedAttack | TakeRangedAttack | DealRangedAbility | TakeRangedAbility)
     }
 
     public enum ProcFlags2
@@ -2627,7 +2593,7 @@ namespace Framework.Constants
     [Flags]
     public enum ProcFlagsHit
     {
-        None = 0x0,   // No Value - Proc_Hit_Normal | Proc_Hit_Critical For Taken Proc Type, Proc_Hit_Normal | Proc_Hit_Critical | Proc_Hit_Absorb For Done
+        None = 0x0, // No Value - Proc_Hit_Normal | Proc_Hit_Critical For Taken Proc Type, Proc_Hit_Normal | Proc_Hit_Critical | Proc_Hit_Absorb For Done
         Normal = 0x1, // Non-Critical Hits
         Critical = 0x2,
         Miss = 0x4,
@@ -2648,12 +2614,12 @@ namespace Framework.Constants
     [Flags]
     public enum ProcAttributes
     {
-        ReqExpOrHonor = 0x01,             // requires proc target to give exp or honor for aura proc
-        TriggeredCanProc = 0x02,          // aura can proc even with triggered spells
-        ReqPowerCost = 0x04,              // requires triggering spell to have a power cost for aura proc
-        ReqSpellmod = 0x08,               // requires triggering spell to be affected by proccing aura to drop charges
-        UseStacksForCharges = 0x10,       // consuming proc drops a stack from proccing aura instead of charge
-        ReduceProc60 = 0x80,              // aura should have a reduced chance to proc if level of proc Actor > 60
+        ReqExpOrHonor = 0x01, // requires proc target to give exp or honor for aura proc
+        TriggeredCanProc = 0x02, // aura can proc even with triggered spells
+        ReqPowerCost = 0x04, // requires triggering spell to have a power cost for aura proc
+        ReqSpellmod = 0x08,  // requires triggering spell to be affected by proccing aura to drop charges
+        UseStacksForCharges = 0x10, // consuming proc drops a stack from proccing aura instead of charge
+        ReduceProc60 = 0x80,  // aura should have a reduced chance to proc if level of proc Actor > 60
         CantProcFromItemCast = 0x0000100, // do not allow aura proc if proc is caused by a spell casted by item
 
         AllAllowed = ReqExpOrHonor | TriggeredCanProc | ReqPowerCost | ReqSpellmod | UseStacksForCharges | ReduceProc60 | CantProcFromItemCast
@@ -2661,34 +2627,33 @@ namespace Framework.Constants
 
     // Spell aura states
     public enum AuraStateType
-    {
-        // (C) used in caster aura state     (T) used in target aura state
+    {   // (C) used in caster aura state     (T) used in target aura state
         // (c) used in caster aura state-not (t) used in target aura state-not
-        None = 0,               // C   |
-        Defensive = 1,          // Cctt|
-        Wounded20Percent = 2,   // Cct |
-        Unbalanced = 3,         // Cct | Nyi
-        Frozen = 4,             //  C T|
-        Marked = 5,             // C  T| Nyi
-        Wounded25Percent = 6,   //   T |
-        Defensive2 = 7,         // Cc  | Nyi
-        Banished = 8,           //  C  | Nyi
-        Dazed = 9,              //    T|
-        Victorious = 10,        // C   |
+        None = 0,            // C   |
+        Defensive = 1,            // Cctt|
+        Wounded20Percent = 2,            // Cct |
+        Unbalanced = 3,            // Cct | Nyi
+        Frozen = 4,            //  C T|
+        Marked = 5,            // C  T| Nyi
+        Wounded25Percent = 6,            //   T |
+        Defensive2 = 7,            // Cc  | Nyi
+        Banished = 8,            //  C  | Nyi
+        Dazed = 9,            //    T|
+        Victorious = 10,           // C   |
         Rampage = 11,           //     | Nyi
-        FaerieFire = 12,        //  C T|
-        Wounded35Percent = 13,  // Cct |
-        RaidEncounter2 = 14,    //  Ct |
-        DruidPeriodicHeal = 15, //   T |
-        RoguePoisoned = 16,     //     |
+        FaerieFire = 12,           //  C T|
+        Wounded35Percent = 13,           // Cct |
+        RaidEncounter2 = 14,           //  Ct |
+        DruidPeriodicHeal = 15,           //   T |
+        RoguePoisoned = 16,           //     |
         Enraged = 17,           // C   |
-        Bleed = 18,             //   T |
-        Vulnerable = 19,        //     | Nyi
-        ArenaPreparation = 20,  //  C  |
-        WoundHealth20_80 = 21,  //   T |
-        RaidEncounter = 22,     // Cctt|
-        Healthy75Percent = 23,  // C   |
-        WoundHealth35_80 = 24,  //   T |
+        Bleed = 18,           //   T |
+        Vulnerable = 19,           //     | Nyi
+        ArenaPreparation = 20,           //  C  |
+        WoundHealth20_80 = 21,           //   T |
+        RaidEncounter = 22,           // Cctt|
+        Healthy75Percent = 23,           // C   |
+        WoundHealth35_80 = 24,            //   T |
         Max,
 
         PerCasterAuraStateMask = (1 << (RaidEncounter2 - 1)) | (1 << (RoguePoisoned - 1))
@@ -2818,7 +2783,7 @@ namespace Framework.Constants
         UnitAreaTapList = 123,
         UnitTargetTapList = 124,
         DestCasterGround2 = 125,
-        UnitCasterAreaEnemyClump = 126,     // NYI
+        UnitCasterAreaEnemyClump = 126, // NYI
         DestCasterEnemyClumpCentroid = 127, // NYI
         UnitRectCasterAlly = 128,
         UnitRectCasterEnemy = 129,
@@ -2847,7 +2812,6 @@ namespace Framework.Constants
         Unk152 = 152,
         TotalSpellTargets
     }
-
     public enum SpellTargetSelectionCategories
     {
         Nyi,
@@ -2881,7 +2845,6 @@ namespace Framework.Constants
         GobjItem,
         Item,
         Corpse,
-
         // Only For Effect Target Type
         CorpseEnemy,
         CorpseAlly
@@ -2920,8 +2883,8 @@ namespace Framework.Constants
     public enum ProcFlagsSpellType
     {
         None = 0x0,
-        Damage = 0x1,    // damage type of spell
-        Heal = 0x2,      // heal type of spell
+        Damage = 0x1, // damage type of spell
+        Heal = 0x2, // heal type of spell
         NoDmgHeal = 0x4, // other spells
         MaskAll = Damage | Heal | NoDmgHeal
     }
@@ -2929,23 +2892,23 @@ namespace Framework.Constants
     public enum SpellCooldownFlags
     {
         None = 0x0,
-        IncludeGCD = 0x1,            // Starts GCD in addition to normal cooldown specified in the packet
-        IncludeEventCooldowns = 0x2, // Starts GCD for spells that should start their cooldown on events, requires SPELL_COOLDOWN_FLAG_INCLUDE_GCD set
-        LossOfControlUi = 0x4,       // Shows interrupt cooldown in loss of control ui
-        OnHold = 0x8                 // Forces cooldown to behave as if SpellInfo::IsCooldownStartedOnEvent was true
+        IncludeGCD = 0x1,  // Starts GCD in addition to normal cooldown specified in the packet
+        IncludeEventCooldowns = 0x2,   // Starts GCD for spells that should start their cooldown on events, requires SPELL_COOLDOWN_FLAG_INCLUDE_GCD set
+        LossOfControlUi = 0x4,  // Shows interrupt cooldown in loss of control ui
+        OnHold = 0x8   // Forces cooldown to behave as if SpellInfo::IsCooldownStartedOnEvent was true
     }
 
     public enum SpellAreaFlag
     {
-        AutoCast = 0x1,                         // if has autocast, spell is applied on enter
-        AutoRemove = 0x2,                       // if has autoremove, spell is remove automatically inside zone/area (always removed on leaving area or zone)
-        IgnoreAutocastOnQuestStatusChange = 0x4 // if this flag is set then spell will not be applied automatically on quest status change
+        AutoCast = 0x1, // if has autocast, spell is applied on enter
+        AutoRemove = 0x2, // if has autoremove, spell is remove automatically inside zone/area (always removed on leaving area or zone)
+        IgnoreAutocastOnQuestStatusChange = 0x4, // if this flag is set then spell will not be applied automatically on quest status change
     }
 
     public enum EnchantProcAttributes
     {
         WhiteHit = 0x01, // enchant shall only proc off white hits (not abilities)
-        Limit60 = 0x02   // enchant effects shall be reduced past lvl 60
+        Limit60 = 0x02  // enchant effects shall be reduced past lvl 60
     }
 
     public enum MountResult

@@ -1,16 +1,31 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.Linq;
 using Framework.Constants;
 using Framework.IO;
+using System.Collections.Generic;
 using Game.DataStorage;
 
 namespace Game.Networking.Packets
 {
-    internal class DBQueryBulk : ClientPacket
+    class DBQueryBulk : ClientPacket
     {
+        public DBQueryBulk(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TableHash = _worldPacket.ReadUInt32();
+
+            uint count = _worldPacket.ReadBits<uint>(13);
+            for (uint i = 0; i < count; ++i)
+            {
+                Queries.Add(new DBQueryRecord(_worldPacket.ReadUInt32()));
+            }
+        }
+
+        public uint TableHash;
+        public List<DBQueryRecord> Queries = new();
+
         public struct DBQueryRecord
         {
             public DBQueryRecord(uint recordId)
@@ -20,38 +35,11 @@ namespace Game.Networking.Packets
 
             public uint RecordID;
         }
-
-        public List<DBQueryRecord> Queries = new();
-
-        public uint TableHash;
-
-        public DBQueryBulk(WorldPacket packet) : base(packet)
-        {
-        }
-
-        public override void Read()
-        {
-            TableHash = _worldPacket.ReadUInt32();
-
-            uint count = _worldPacket.ReadBits<uint>(13);
-
-            for (uint i = 0; i < count; ++i)
-                Queries.Add(new DBQueryRecord(_worldPacket.ReadUInt32()));
-        }
     }
 
     public class DBReply : ServerPacket
     {
-        public ByteBuffer Data = new();
-        public uint RecordID;
-        public HotfixRecord.Status Status = HotfixRecord.Status.Invalid;
-
-        public uint TableHash;
-        public uint Timestamp;
-
-        public DBReply() : base(ServerOpcodes.DbReply)
-        {
-        }
+        public DBReply() : base(ServerOpcodes.DbReply) { }
 
         public override void Write()
         {
@@ -62,14 +50,17 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data.GetData());
         }
+
+        public uint TableHash;
+        public uint Timestamp;
+        public uint RecordID;
+        public HotfixRecord.Status Status = HotfixRecord.Status.Invalid;
+
+        public ByteBuffer Data = new();
     }
 
-    internal class AvailableHotfixes : ServerPacket
+    class AvailableHotfixes : ServerPacket
     {
-        public MultiMap<int, HotfixRecord> Hotfixes;
-
-        public uint VirtualRealmAddress;
-
         public AvailableHotfixes(uint virtualRealmAddress, MultiMap<int, HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
             VirtualRealmAddress = virtualRealmAddress;
@@ -79,22 +70,19 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(VirtualRealmAddress);
-            _worldPacket.WriteInt32(Hotfixes.Keys.Count());
+            _worldPacket.WriteInt32(Hotfixes.Keys.Count);
 
             foreach (var key in Hotfixes.Keys)
                 Hotfixes[key][0].ID.Write(_worldPacket);
         }
+
+        public uint VirtualRealmAddress;
+        public MultiMap<int, HotfixRecord> Hotfixes;
     }
 
-    internal class HotfixRequest : ClientPacket
+    class HotfixRequest : ClientPacket
     {
-        public uint ClientBuild;
-        public uint DataBuild;
-        public List<int> Hotfixes = new();
-
-        public HotfixRequest(WorldPacket packet) : base(packet)
-        {
-        }
+        public HotfixRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -102,19 +90,34 @@ namespace Game.Networking.Packets
             DataBuild = _worldPacket.ReadUInt32();
 
             uint hotfixCount = _worldPacket.ReadUInt32();
-
             for (var i = 0; i < hotfixCount; ++i)
                 Hotfixes.Add(_worldPacket.ReadInt32());
         }
+
+        public uint ClientBuild;
+        public uint DataBuild;
+        public List<int> Hotfixes = new();
     }
 
-    internal class HotfixConnect : ServerPacket
+    class HotfixConnect : ServerPacket
     {
+        public HotfixConnect() : base(ServerOpcodes.HotfixConnect) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Hotfixes.Count);
+            foreach (HotfixData hotfix in Hotfixes)
+                hotfix.Write(_worldPacket);
+
+            _worldPacket.WriteUInt32(HotfixContent.GetSize());
+            _worldPacket.WriteBytes(HotfixContent);
+        }
+
+        public List<HotfixData> Hotfixes = new();
+        public ByteBuffer HotfixContent = new();
+
         public class HotfixData
         {
-            public HotfixRecord Record = new();
-            public uint Size;
-
             public void Write(WorldPacket data)
             {
                 Record.Write(data);
@@ -122,25 +125,9 @@ namespace Game.Networking.Packets
                 data.WriteBits((byte)Record.HotfixStatus, 3);
                 data.FlushBits();
             }
-        }
 
-        public ByteBuffer HotfixContent = new();
-
-        public List<HotfixData> Hotfixes = new();
-
-        public HotfixConnect() : base(ServerOpcodes.HotfixConnect)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(Hotfixes.Count);
-
-            foreach (HotfixData hotfix in Hotfixes)
-                hotfix.Write(_worldPacket);
-
-            _worldPacket.WriteUInt32(HotfixContent.GetSize());
-            _worldPacket.WriteBytes(HotfixContent);
+            public HotfixRecord Record = new();
+            public uint Size;
         }
     }
 }

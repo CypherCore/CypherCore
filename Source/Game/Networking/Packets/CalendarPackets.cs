@@ -1,48 +1,36 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
-    internal class CalendarGetCalendar : ClientPacket
+    class CalendarGetCalendar : ClientPacket
     {
-        public CalendarGetCalendar(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarGetCalendar(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class CalendarGetEvent : ClientPacket
+    class CalendarGetEvent : ClientPacket
     {
-        public ulong EventID;
-
-        public CalendarGetEvent(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarGetEvent(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             EventID = _worldPacket.ReadUInt64();
         }
+
+        public ulong EventID;
     }
 
-    internal class CalendarCommunityInviteRequest : ClientPacket
+    class CalendarCommunityInviteRequest : ClientPacket
     {
-        public ulong ClubId;
-        public byte MaxLevel = 100;
-        public byte MaxRankOrder;
-        public byte MinLevel = 1;
-
-        public CalendarCommunityInviteRequest(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarCommunityInviteRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -51,53 +39,44 @@ namespace Game.Networking.Packets
             MaxLevel = _worldPacket.ReadUInt8();
             MaxRankOrder = _worldPacket.ReadUInt8();
         }
+
+        public ulong ClubId;
+        public byte MinLevel = 1;
+        public byte MaxLevel = 100;
+        public byte MaxRankOrder;
     }
 
-    internal class CalendarAddEvent : ClientPacket
+    class CalendarAddEvent : ClientPacket
     {
-        public CalendarAddEventInfo EventInfo = new();
+        public CalendarAddEvent(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            EventInfo.Read(_worldPacket);
+            MaxSize = _worldPacket.ReadUInt32();
+        }
 
         public uint MaxSize = 100;
+        public CalendarAddEventInfo EventInfo = new();
+    }
 
-        public CalendarAddEvent(WorldPacket packet) : base(packet)
-        {
-        }
+    class CalendarUpdateEvent : ClientPacket
+    {
+        public CalendarUpdateEvent(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             EventInfo.Read(_worldPacket);
             MaxSize = _worldPacket.ReadUInt32();
         }
-    }
-
-    internal class CalendarUpdateEvent : ClientPacket
-    {
-        public CalendarUpdateEventInfo EventInfo;
 
         public uint MaxSize;
-
-        public CalendarUpdateEvent(WorldPacket packet) : base(packet)
-        {
-        }
-
-        public override void Read()
-        {
-            EventInfo.Read(_worldPacket);
-            MaxSize = _worldPacket.ReadUInt32();
-        }
+        public CalendarUpdateEventInfo EventInfo;
     }
 
-    internal class CalendarRemoveEvent : ClientPacket
+    class CalendarRemoveEvent : ClientPacket
     {
-        public ulong ClubID;
-        public ulong EventID;
-        public uint Flags;
-
-        public ulong ModeratorID;
-
-        public CalendarRemoveEvent(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarRemoveEvent(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -106,19 +85,16 @@ namespace Game.Networking.Packets
             ClubID = _worldPacket.ReadUInt64();
             Flags = _worldPacket.ReadUInt32();
         }
-    }
-
-    internal class CalendarCopyEvent : ClientPacket
-    {
-        public long Date;
-        public ulong EventClubID;
-        public ulong EventID;
 
         public ulong ModeratorID;
+        public ulong EventID;
+        public ulong ClubID;
+        public uint Flags;
+    }
 
-        public CalendarCopyEvent(WorldPacket packet) : base(packet)
-        {
-        }
+    class CalendarCopyEvent : ClientPacket
+    {
+        public CalendarCopyEvent(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -127,23 +103,16 @@ namespace Game.Networking.Packets
             EventClubID = _worldPacket.ReadUInt64();
             Date = _worldPacket.ReadPackedTime();
         }
+
+        public ulong ModeratorID;
+        public ulong EventID;
+        public ulong EventClubID;
+        public long Date;
     }
 
-    internal class CalendarInviteAdded : ServerPacket
+    class CalendarInviteAdded : ServerPacket
     {
-        public bool ClearPending;
-        public ulong EventID;
-        public ObjectGuid InviteGuid;
-
-        public ulong InviteID;
-        public byte Level = 100;
-        public long ResponseTime;
-        public CalendarInviteStatus Status;
-        public byte Type;
-
-        public CalendarInviteAdded() : base(ServerOpcodes.CalendarInviteAdded)
-        {
-        }
+        public CalendarInviteAdded() : base(ServerOpcodes.CalendarInviteAdded) { }
 
         public override void Write()
         {
@@ -158,19 +127,20 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
+
+        public ulong InviteID;
+        public long ResponseTime;
+        public byte Level = 100;
+        public ObjectGuid InviteGuid;
+        public ulong EventID;
+        public byte Type;
+        public bool ClearPending;
+        public CalendarInviteStatus Status;
     }
 
-    internal class CalendarSendCalendar : ServerPacket
+    class CalendarSendCalendar : ServerPacket
     {
-        public List<CalendarSendCalendarEventInfo> Events = new();
-        public List<CalendarSendCalendarInviteInfo> Invites = new();
-        public List<CalendarSendCalendarRaidLockoutInfo> RaidLockouts = new();
-
-        public long ServerTime;
-
-        public CalendarSendCalendar() : base(ServerOpcodes.CalendarSendCalendar)
-        {
-        }
+        public CalendarSendCalendar() : base(ServerOpcodes.CalendarSendCalendar) { }
 
         public override void Write()
         {
@@ -188,27 +158,16 @@ namespace Game.Networking.Packets
             foreach (var Event in Events)
                 Event.Write(_worldPacket);
         }
+
+        public long ServerTime;
+        public List<CalendarSendCalendarInviteInfo> Invites = new();
+        public List<CalendarSendCalendarRaidLockoutInfo> RaidLockouts = new();
+        public List<CalendarSendCalendarEventInfo> Events = new();
     }
 
-    internal class CalendarSendEvent : ServerPacket
+    class CalendarSendEvent : ServerPacket
     {
-        public long Date;
-        public string Description;
-        public ObjectGuid EventGuildID;
-        public ulong EventID;
-        public string EventName;
-        public CalendarSendEventType EventType;
-        public CalendarFlags Flags;
-        public CalendarEventType GetEventType;
-        public List<CalendarEventInviteInfo> Invites = new();
-        public long LockDate;
-
-        public ObjectGuid OwnerGuid;
-        public int TextureID;
-
-        public CalendarSendEvent() : base(ServerOpcodes.CalendarSendEvent)
-        {
-        }
+        public CalendarSendEvent() : base(ServerOpcodes.CalendarSendEvent) { }
 
         public override void Write()
         {
@@ -233,27 +192,24 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(EventName);
             _worldPacket.WriteString(Description);
         }
-    }
-
-    internal class CalendarInviteAlert : ServerPacket
-    {
-        public long Date;
-        public ObjectGuid EventGuildID;
-        public ulong EventID;
-        public string EventName;
-        public CalendarEventType EventType;
-        public CalendarFlags Flags;
-        public ObjectGuid InvitedByGuid;
-        public ulong InviteID;
-        public CalendarModerationRank ModeratorStatus;
 
         public ObjectGuid OwnerGuid;
-        public CalendarInviteStatus Status;
+        public ObjectGuid EventGuildID;
+        public ulong EventID;
+        public long Date;
+        public long LockDate;
+        public CalendarFlags Flags;
         public int TextureID;
+        public CalendarEventType GetEventType;
+        public CalendarSendEventType EventType;
+        public string Description;
+        public string EventName;
+        public List<CalendarEventInviteInfo> Invites = new();
+    }
 
-        public CalendarInviteAlert() : base(ServerOpcodes.CalendarInviteAlert)
-        {
-        }
+    class CalendarInviteAlert : ServerPacket
+    {
+        public CalendarInviteAlert() : base(ServerOpcodes.CalendarInviteAlert) { }
 
         public override void Write()
         {
@@ -275,21 +231,24 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(EventName);
         }
+
+        public ObjectGuid OwnerGuid;
+        public ObjectGuid EventGuildID;
+        public ObjectGuid InvitedByGuid;
+        public ulong InviteID;
+        public ulong EventID;
+        public CalendarFlags Flags;
+        public long Date;
+        public int TextureID;
+        public CalendarInviteStatus Status;
+        public CalendarEventType EventType;
+        public CalendarModerationRank ModeratorStatus;
+        public string EventName;
     }
 
-    internal class CalendarInvitePkt : ClientPacket
+    class CalendarInvitePkt : ClientPacket
     {
-        public ulong ClubID;
-        public bool Creating = true;
-        public ulong EventID;
-        public bool IsSignUp;
-
-        public ulong ModeratorID;
-        public string Name;
-
-        public CalendarInvitePkt(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarInvitePkt(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -303,18 +262,18 @@ namespace Game.Networking.Packets
 
             Name = _worldPacket.ReadString(nameLen);
         }
+
+        public ulong ModeratorID;
+        public bool IsSignUp;
+        public bool Creating = true;
+        public ulong EventID;
+        public ulong ClubID;
+        public string Name;
     }
 
-    internal class HandleCalendarRsvp : ClientPacket
+    class HandleCalendarRsvp : ClientPacket
     {
-        public ulong EventID;
-
-        public ulong InviteID;
-        public CalendarInviteStatus Status;
-
-        public HandleCalendarRsvp(WorldPacket packet) : base(packet)
-        {
-        }
+        public HandleCalendarRsvp(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -322,22 +281,15 @@ namespace Game.Networking.Packets
             InviteID = _worldPacket.ReadUInt64();
             Status = (CalendarInviteStatus)_worldPacket.ReadUInt8();
         }
+
+        public ulong InviteID;
+        public ulong EventID;
+        public CalendarInviteStatus Status;
     }
 
-    internal class CalendarInviteStatusPacket : ServerPacket
+    class CalendarInviteStatusPacket : ServerPacket
     {
-        public bool ClearPending;
-        public long Date;
-        public ulong EventID;
-
-        public CalendarFlags Flags;
-        public ObjectGuid InviteGuid;
-        public long ResponseTime;
-        public CalendarInviteStatus Status;
-
-        public CalendarInviteStatusPacket() : base(ServerOpcodes.CalendarInviteStatus)
-        {
-        }
+        public CalendarInviteStatusPacket() : base(ServerOpcodes.CalendarInviteStatus) { }
 
         public override void Write()
         {
@@ -351,19 +303,19 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
+
+        public CalendarFlags Flags;
+        public ulong EventID;
+        public CalendarInviteStatus Status;
+        public bool ClearPending;
+        public long ResponseTime;
+        public long Date;
+        public ObjectGuid InviteGuid;
     }
 
-    internal class CalendarInviteRemoved : ServerPacket
+    class CalendarInviteRemoved : ServerPacket
     {
-        public bool ClearPending;
-        public ulong EventID;
-        public uint Flags;
-
-        public ObjectGuid InviteGuid;
-
-        public CalendarInviteRemoved() : base(ServerOpcodes.CalendarInviteRemoved)
-        {
-        }
+        public CalendarInviteRemoved() : base(ServerOpcodes.CalendarInviteRemoved) { }
 
         public override void Write()
         {
@@ -374,19 +326,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
-    }
-
-    internal class CalendarModeratorStatus : ServerPacket
-    {
-        public bool ClearPending;
-        public ulong EventID;
 
         public ObjectGuid InviteGuid;
-        public CalendarInviteStatus Status;
+        public ulong EventID;
+        public uint Flags;
+        public bool ClearPending;
+    }
 
-        public CalendarModeratorStatus() : base(ServerOpcodes.CalendarModeratorStatus)
-        {
-        }
+    class CalendarModeratorStatus : ServerPacket
+    {
+        public CalendarModeratorStatus() : base(ServerOpcodes.CalendarModeratorStatus) { }
 
         public override void Write()
         {
@@ -397,19 +346,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
+
+        public ObjectGuid InviteGuid;
+        public ulong EventID;
+        public CalendarInviteStatus Status;
+        public bool ClearPending;
     }
 
-    internal class CalendarInviteRemovedAlert : ServerPacket
+    class CalendarInviteRemovedAlert : ServerPacket
     {
-        public long Date;
-
-        public ulong EventID;
-        public CalendarFlags Flags;
-        public CalendarInviteStatus Status;
-
-        public CalendarInviteRemovedAlert() : base(ServerOpcodes.CalendarInviteRemovedAlert)
-        {
-        }
+        public CalendarInviteRemovedAlert() : base(ServerOpcodes.CalendarInviteRemovedAlert) { }
 
         public override void Write()
         {
@@ -418,36 +364,23 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteUInt8((byte)Status);
         }
-    }
-
-    internal class CalendarClearPendingAction : ServerPacket
-    {
-        public CalendarClearPendingAction() : base(ServerOpcodes.CalendarClearPendingAction)
-        {
-        }
-
-        public override void Write()
-        {
-        }
-    }
-
-    internal class CalendarEventUpdatedAlert : ServerPacket
-    {
-        public bool ClearPending;
-        public long Date;
-        public string Description;
 
         public ulong EventID;
-        public string EventName;
-        public CalendarEventType EventType;
+        public long Date;
         public CalendarFlags Flags;
-        public long LockDate;
-        public long OriginalDate;
-        public int TextureID;
+        public CalendarInviteStatus Status;
+    }
 
-        public CalendarEventUpdatedAlert() : base(ServerOpcodes.CalendarEventUpdatedAlert)
-        {
-        }
+    class CalendarClearPendingAction : ServerPacket
+    {
+        public CalendarClearPendingAction() : base(ServerOpcodes.CalendarClearPendingAction) { }
+
+        public override void Write() { }
+    }
+
+    class CalendarEventUpdatedAlert : ServerPacket
+    {
+        public CalendarEventUpdatedAlert() : base(ServerOpcodes.CalendarEventUpdatedAlert) { }
 
         public override void Write()
         {
@@ -468,18 +401,22 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(EventName);
             _worldPacket.WriteString(Description);
         }
-    }
-
-    internal class CalendarEventRemovedAlert : ServerPacket
-    {
-        public bool ClearPending;
-        public long Date;
 
         public ulong EventID;
+        public long Date;
+        public CalendarFlags Flags;
+        public long LockDate;
+        public long OriginalDate;
+        public int TextureID;
+        public CalendarEventType EventType;
+        public bool ClearPending;
+        public string Description;
+        public string EventName;
+    }
 
-        public CalendarEventRemovedAlert() : base(ServerOpcodes.CalendarEventRemovedAlert)
-        {
-        }
+    class CalendarEventRemovedAlert : ServerPacket
+    {
+        public CalendarEventRemovedAlert() : base(ServerOpcodes.CalendarEventRemovedAlert) { }
 
         public override void Write()
         {
@@ -489,12 +426,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
         }
+
+        public ulong EventID;
+        public long Date;
+        public bool ClearPending;
     }
 
-    internal class CalendarSendNumPending : ServerPacket
+    class CalendarSendNumPending : ServerPacket
     {
-        public uint NumPending;
-
         public CalendarSendNumPending(uint numPending) : base(ServerOpcodes.CalendarSendNumPending)
         {
             NumPending = numPending;
@@ -504,29 +443,20 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(NumPending);
         }
+
+        public uint NumPending;
     }
 
-    internal class CalendarGetNumPending : ClientPacket
+    class CalendarGetNumPending : ClientPacket
     {
-        public CalendarGetNumPending(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarGetNumPending(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
-    internal class CalendarEventSignUp : ClientPacket
+    class CalendarEventSignUp : ClientPacket
     {
-        public ulong ClubID;
-        public ulong EventID;
-
-        public bool Tentative;
-
-        public CalendarEventSignUp(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarEventSignUp(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -534,19 +464,15 @@ namespace Game.Networking.Packets
             ClubID = _worldPacket.ReadUInt64();
             Tentative = _worldPacket.HasBit();
         }
+
+        public bool Tentative;
+        public ulong EventID;
+        public ulong ClubID;
     }
 
-    internal class CalendarRemoveInvite : ClientPacket
+    class CalendarRemoveInvite : ClientPacket
     {
-        public ulong EventID;
-
-        public ObjectGuid Guid;
-        public ulong InviteID;
-        public ulong ModeratorID;
-
-        public CalendarRemoveInvite(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarRemoveInvite(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -555,20 +481,16 @@ namespace Game.Networking.Packets
             ModeratorID = _worldPacket.ReadUInt64();
             EventID = _worldPacket.ReadUInt64();
         }
-    }
-
-    internal class CalendarStatus : ClientPacket
-    {
-        public ulong EventID;
 
         public ObjectGuid Guid;
-        public ulong InviteID;
+        public ulong EventID;
         public ulong ModeratorID;
-        public byte Status;
+        public ulong InviteID;
+    }
 
-        public CalendarStatus(WorldPacket packet) : base(packet)
-        {
-        }
+    class CalendarStatus : ClientPacket
+    {
+        public CalendarStatus(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -578,18 +500,17 @@ namespace Game.Networking.Packets
             ModeratorID = _worldPacket.ReadUInt64();
             Status = _worldPacket.ReadUInt8();
         }
+
+        public ObjectGuid Guid;
+        public ulong EventID;
+        public ulong ModeratorID;
+        public ulong InviteID;
+        public byte Status;
     }
 
-    internal class SetSavedInstanceExtend : ClientPacket
+    class SetSavedInstanceExtend : ClientPacket
     {
-        public uint DifficultyID;
-        public bool Extend;
-
-        public int MapID;
-
-        public SetSavedInstanceExtend(WorldPacket packet) : base(packet)
-        {
-        }
+        public SetSavedInstanceExtend(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -597,20 +518,15 @@ namespace Game.Networking.Packets
             DifficultyID = _worldPacket.ReadUInt32();
             Extend = _worldPacket.HasBit();
         }
+
+        public int MapID;
+        public bool Extend;
+        public uint DifficultyID;
     }
 
-    internal class CalendarModeratorStatusQuery : ClientPacket
+    class CalendarModeratorStatusQuery : ClientPacket
     {
-        public ulong EventID;
-
-        public ObjectGuid Guid;
-        public ulong InviteID;
-        public ulong ModeratorID;
-        public byte Status;
-
-        public CalendarModeratorStatusQuery(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarModeratorStatusQuery(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -620,18 +536,17 @@ namespace Game.Networking.Packets
             ModeratorID = _worldPacket.ReadUInt64();
             Status = _worldPacket.ReadUInt8();
         }
+
+        public ObjectGuid Guid;
+        public ulong EventID;
+        public ulong InviteID;
+        public ulong ModeratorID;
+        public byte Status;
     }
 
-    internal class CalendarCommandResult : ServerPacket
+    class CalendarCommandResult : ServerPacket
     {
-        public byte Command;
-        public string Name;
-        public CalendarError Result;
-
-        public CalendarCommandResult() : base(ServerOpcodes.CalendarCommandResult)
-        {
-        }
-
+        public CalendarCommandResult() : base(ServerOpcodes.CalendarCommandResult) { }
         public CalendarCommandResult(byte command, CalendarError result, string name) : base(ServerOpcodes.CalendarCommandResult)
         {
             Command = command;
@@ -648,20 +563,15 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Name);
         }
+
+        public byte Command;
+        public CalendarError Result;
+        public string Name;
     }
 
-    internal class CalendarRaidLockoutAdded : ServerPacket
+    class CalendarRaidLockoutAdded : ServerPacket
     {
-        public Difficulty DifficultyID;
-
-        public ulong InstanceID;
-        public int MapID;
-        public uint ServerTime;
-        public int TimeRemaining;
-
-        public CalendarRaidLockoutAdded() : base(ServerOpcodes.CalendarRaidLockoutAdded)
-        {
-        }
+        public CalendarRaidLockoutAdded() : base(ServerOpcodes.CalendarRaidLockoutAdded) { }
 
         public override void Write()
         {
@@ -671,18 +581,17 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)DifficultyID);
             _worldPacket.WriteInt32(TimeRemaining);
         }
-    }
-
-    internal class CalendarRaidLockoutRemoved : ServerPacket
-    {
-        public Difficulty DifficultyID;
 
         public ulong InstanceID;
+        public Difficulty DifficultyID;
+        public int TimeRemaining;
+        public uint ServerTime;
         public int MapID;
+    }
 
-        public CalendarRaidLockoutRemoved() : base(ServerOpcodes.CalendarRaidLockoutRemoved)
-        {
-        }
+    class CalendarRaidLockoutRemoved : ServerPacket
+    {
+        public CalendarRaidLockoutRemoved() : base(ServerOpcodes.CalendarRaidLockoutRemoved) { }
 
         public override void Write()
         {
@@ -690,20 +599,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
         }
+
+        public ulong InstanceID;
+        public int MapID;
+        public Difficulty DifficultyID;
     }
 
-    internal class CalendarRaidLockoutUpdated : ServerPacket
+    class CalendarRaidLockoutUpdated : ServerPacket
     {
-        public uint DifficultyID;
-        public int MapID;
-        public int NewTimeRemaining;
-        public int OldTimeRemaining;
-
-        public long ServerTime;
-
-        public CalendarRaidLockoutUpdated() : base(ServerOpcodes.CalendarRaidLockoutUpdated)
-        {
-        }
+        public CalendarRaidLockoutUpdated() : base(ServerOpcodes.CalendarRaidLockoutUpdated) { }
 
         public override void Write()
         {
@@ -713,39 +617,34 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(OldTimeRemaining);
             _worldPacket.WriteInt32(NewTimeRemaining);
         }
+
+        public long ServerTime;
+        public int MapID;
+        public uint DifficultyID;
+        public int NewTimeRemaining;
+        public int OldTimeRemaining;
     }
 
-    internal class CalendarCommunityInvite : ServerPacket
+    class CalendarCommunityInvite : ServerPacket
     {
-        public List<CalendarEventInitialInviteInfo> Invites = new();
-
-        public CalendarCommunityInvite() : base(ServerOpcodes.CalendarCommunityInvite)
-        {
-        }
+        public CalendarCommunityInvite() : base(ServerOpcodes.CalendarCommunityInvite) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(Invites.Count);
-
             foreach (var invite in Invites)
             {
                 _worldPacket.WritePackedGuid(invite.InviteGuid);
                 _worldPacket.WriteUInt8(invite.Level);
             }
         }
+
+        public List<CalendarEventInitialInviteInfo> Invites = new();
     }
 
-    internal class CalendarInviteStatusAlert : ServerPacket
+    class CalendarInviteStatusAlert : ServerPacket
     {
-        public long Date;
-
-        public ulong EventID;
-        public uint Flags;
-        public byte Status;
-
-        public CalendarInviteStatusAlert() : base(ServerOpcodes.CalendarInviteStatusAlert)
-        {
-        }
+        public CalendarInviteStatusAlert() : base(ServerOpcodes.CalendarInviteStatusAlert) { }
 
         public override void Write()
         {
@@ -754,13 +653,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WriteUInt8(Status);
         }
+
+        public ulong EventID;
+        public uint Flags;
+        public long Date;
+        public byte Status;
     }
 
-    internal class CalendarInviteNotesAlert : ServerPacket
+    class CalendarInviteNotesAlert : ServerPacket
     {
-        public ulong EventID;
-        public string Notes;
-
         public CalendarInviteNotesAlert(ulong eventID, string notes) : base(ServerOpcodes.CalendarInviteNotesAlert)
         {
             EventID = eventID;
@@ -775,19 +676,14 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
+
+        public ulong EventID;
+        public string Notes;
     }
 
-    internal class CalendarInviteNotes : ServerPacket
+    class CalendarInviteNotes : ServerPacket
     {
-        public bool ClearPending;
-        public ulong EventID;
-
-        public ObjectGuid InviteGuid;
-        public string Notes = "";
-
-        public CalendarInviteNotes() : base(ServerOpcodes.CalendarInviteNotes)
-        {
-        }
+        public CalendarInviteNotes() : base(ServerOpcodes.CalendarInviteNotes) { }
 
         public override void Write()
         {
@@ -799,18 +695,16 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
+
+        public ObjectGuid InviteGuid;
+        public ulong EventID;
+        public string Notes = "";
+        public bool ClearPending;
     }
 
-    internal class CalendarComplain : ClientPacket
+    class CalendarComplain : ClientPacket
     {
-        private ulong EventID;
-
-        private ObjectGuid InvitedByGUID;
-        private ulong InviteID;
-
-        public CalendarComplain(WorldPacket packet) : base(packet)
-        {
-        }
+        public CalendarComplain(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -818,10 +712,14 @@ namespace Game.Networking.Packets
             EventID = _worldPacket.ReadUInt64();
             InviteID = _worldPacket.ReadUInt64();
         }
+
+        ObjectGuid InvitedByGUID;
+        ulong InviteID;
+        ulong EventID;
     }
 
     //Structs
-    internal struct CalendarAddEventInviteInfo
+    struct CalendarAddEventInviteInfo
     {
         public void Read(WorldPacket data)
         {
@@ -835,10 +733,8 @@ namespace Game.Networking.Packets
 
             if (hasUnused801_1)
                 Unused801_1 = data.ReadPackedGuid();
-
             if (hasUnused801_2)
                 Unused801_2 = data.ReadUInt64();
-
             if (hasUnused801_3)
                 Unused801_3 = data.ReadUInt64();
         }
@@ -851,17 +747,8 @@ namespace Game.Networking.Packets
         public ulong? Unused801_3;
     }
 
-    internal class CalendarAddEventInfo
+    class CalendarAddEventInfo
     {
-        public ulong ClubId;
-        public string Description;
-        public byte EventType;
-        public uint Flags;
-        public CalendarAddEventInviteInfo[] Invites = new CalendarAddEventInviteInfo[(int)SharedConst.CalendarMaxInvites];
-        public int TextureID;
-        public long Time;
-        public string Title;
-
         public void Read(WorldPacket data)
         {
             ClubId = data.ReadUInt64();
@@ -884,9 +771,18 @@ namespace Game.Networking.Packets
             Title = data.ReadString(titleLength);
             Description = data.ReadString(descriptionLength);
         }
+
+        public ulong ClubId;
+        public string Title;
+        public string Description;
+        public byte EventType;
+        public int TextureID;
+        public long Time;
+        public uint Flags;
+        public CalendarAddEventInviteInfo[] Invites = new CalendarAddEventInviteInfo[(int)SharedConst.CalendarMaxInvites];
     }
 
-    internal struct CalendarUpdateEventInfo
+    struct CalendarUpdateEventInfo
     {
         public void Read(WorldPacket data)
         {
@@ -916,7 +812,7 @@ namespace Game.Networking.Packets
         public uint Flags;
     }
 
-    internal struct CalendarSendCalendarInviteInfo
+    struct CalendarSendCalendarInviteInfo
     {
         public void Write(WorldPacket data)
         {
@@ -935,8 +831,7 @@ namespace Game.Networking.Packets
         public CalendarModerationRank Moderator;
         public byte InviteType;
     }
-
-    internal struct CalendarSendCalendarRaidLockoutInfo
+    struct CalendarSendCalendarRaidLockoutInfo
     {
         public void Write(WorldPacket data)
         {
@@ -952,7 +847,7 @@ namespace Game.Networking.Packets
         public int ExpireTime;
     }
 
-    internal struct CalendarSendCalendarEventInfo
+    struct CalendarSendCalendarEventInfo
     {
         public void Write(WorldPacket data)
         {
@@ -979,17 +874,8 @@ namespace Game.Networking.Packets
         public ObjectGuid OwnerGuid;
     }
 
-    internal class CalendarEventInviteInfo
+    class CalendarEventInviteInfo
     {
-        public ObjectGuid Guid;
-        public ulong InviteID;
-        public byte InviteType;
-        public byte Level = 1;
-        public CalendarModerationRank Moderator;
-        public string Notes;
-        public long ResponseTime;
-        public CalendarInviteStatus Status;
-
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(Guid);
@@ -1006,17 +892,26 @@ namespace Game.Networking.Packets
             data.FlushBits();
             data.WriteString(Notes);
         }
+
+        public ObjectGuid Guid;
+        public ulong InviteID;
+        public long ResponseTime;
+        public byte Level = 1;
+        public CalendarInviteStatus Status;
+        public CalendarModerationRank Moderator;
+        public byte InviteType;
+        public string Notes;
     }
 
-    internal class CalendarEventInitialInviteInfo
+    class CalendarEventInitialInviteInfo
     {
-        public ObjectGuid InviteGuid;
-        public byte Level = 100;
-
         public CalendarEventInitialInviteInfo(ObjectGuid inviteGuid, byte level)
         {
             InviteGuid = inviteGuid;
             Level = level;
         }
+
+        public ObjectGuid InviteGuid;
+        public byte Level = 100;
     }
 }

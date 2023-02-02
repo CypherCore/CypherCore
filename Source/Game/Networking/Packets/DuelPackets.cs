@@ -1,35 +1,27 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.Networking.Packets
 {
     public class CanDuel : ClientPacket
     {
-        public ObjectGuid TargetGUID;
-
-        public CanDuel(WorldPacket packet) : base(packet)
-        {
-        }
+        public CanDuel(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid TargetGUID;
     }
 
     public class CanDuelResult : ServerPacket
     {
-        public bool Result;
-
-        public ObjectGuid TargetGUID;
-
-        public CanDuelResult() : base(ServerOpcodes.CanDuelResult)
-        {
-        }
+        public CanDuelResult() : base(ServerOpcodes.CanDuelResult) { }
 
         public override void Write()
         {
@@ -37,27 +29,26 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Result);
             _worldPacket.FlushBits();
         }
+
+        public ObjectGuid TargetGUID;
+        public bool Result;
     }
 
     public class DuelComplete : ServerPacket
     {
-        public bool Started;
-
-        public DuelComplete() : base(ServerOpcodes.DuelComplete, ConnectionType.Instance)
-        {
-        }
+        public DuelComplete() : base(ServerOpcodes.DuelComplete, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteBit(Started);
             _worldPacket.FlushBits();
         }
+
+        public bool Started;
     }
 
     public class DuelCountdown : ServerPacket
     {
-        private readonly uint Countdown;
-
         public DuelCountdown(uint countdown) : base(ServerOpcodes.DuelCountdown)
         {
             Countdown = countdown;
@@ -67,39 +58,27 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(Countdown);
         }
+
+        uint Countdown;
     }
 
     public class DuelInBounds : ServerPacket
     {
-        public DuelInBounds() : base(ServerOpcodes.DuelInBounds, ConnectionType.Instance)
-        {
-        }
+        public DuelInBounds() : base(ServerOpcodes.DuelInBounds, ConnectionType.Instance) { }
 
-        public override void Write()
-        {
-        }
+        public override void Write() { }
     }
 
     public class DuelOutOfBounds : ServerPacket
     {
-        public DuelOutOfBounds() : base(ServerOpcodes.DuelOutOfBounds, ConnectionType.Instance)
-        {
-        }
+        public DuelOutOfBounds() : base(ServerOpcodes.DuelOutOfBounds, ConnectionType.Instance) { }
 
-        public override void Write()
-        {
-        }
+        public override void Write() { }
     }
 
     public class DuelRequested : ServerPacket
     {
-        public ObjectGuid ArbiterGUID;
-        public ObjectGuid RequestedByGUID;
-        public ObjectGuid RequestedByWowAccount;
-
-        public DuelRequested() : base(ServerOpcodes.DuelRequested, ConnectionType.Instance)
-        {
-        }
+        public DuelRequested() : base(ServerOpcodes.DuelRequested, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -107,18 +86,15 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(RequestedByGUID);
             _worldPacket.WritePackedGuid(RequestedByWowAccount);
         }
+
+        public ObjectGuid ArbiterGUID;
+        public ObjectGuid RequestedByGUID;
+        public ObjectGuid RequestedByWowAccount;
     }
 
     public class DuelResponse : ClientPacket
     {
-        public bool Accepted;
-
-        public ObjectGuid ArbiterGUID;
-        public bool Forfeited;
-
-        public DuelResponse(WorldPacket packet) : base(packet)
-        {
-        }
+        public DuelResponse(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -126,19 +102,15 @@ namespace Game.Networking.Packets
             Accepted = _worldPacket.HasBit();
             Forfeited = _worldPacket.HasBit();
         }
+
+        public ObjectGuid ArbiterGUID;
+        public bool Accepted;
+        public bool Forfeited;
     }
 
     public class DuelWinner : ServerPacket
     {
-        public string BeatenName;
-        public uint BeatenVirtualRealmAddress;
-        public bool Fled;
-        public string WinnerName;
-        public uint WinnerVirtualRealmAddress;
-
-        public DuelWinner() : base(ServerOpcodes.DuelWinner, ConnectionType.Instance)
-        {
-        }
+        public DuelWinner() : base(ServerOpcodes.DuelWinner, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -150,5 +122,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(BeatenName);
             _worldPacket.WriteString(WinnerName);
         }
+
+        public string BeatenName;
+        public string WinnerName;
+        public uint BeatenVirtualRealmAddress;
+        public uint WinnerVirtualRealmAddress;
+        public bool Fled;
     }
 }

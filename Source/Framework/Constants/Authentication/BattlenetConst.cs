@@ -649,6 +649,6 @@ namespace Framework.Constants
         WowServicesLoginFailedOnChallenge = 0x80000145,
         WowServicesNoPrepaidTime = 0x80000146,
         WowServicesSubscriptionExpired = 0x80000147,
-        WowServicesCantConnect = 0x80000148
+        WowServicesCantConnect = 0x80000148,
     }
 }

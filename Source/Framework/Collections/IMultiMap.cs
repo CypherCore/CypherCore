@@ -8,9 +8,9 @@ namespace System.Collections.Generic
         List<TValue> this[TKey key] { get; set; }
 
         int Count { get; }
-        IEnumerable<TKey> Keys { get; }
+        ICollection<TKey> Keys { get; }
         IEnumerable<KeyValuePair<TKey, TValue>> KeyValueList { get; }
-        IEnumerable<TValue> Values { get; }
+        ICollection<TValue> Values { get; }
 
         void Add(KeyValuePair<TKey, TValue> item);
         void Add(TKey key, TValue value);

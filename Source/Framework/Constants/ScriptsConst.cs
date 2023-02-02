@@ -8,7 +8,7 @@ namespace Framework.Constants
         None = 0,
         Registration,
         Loading,
-        Unloading
+        Unloading,
     }
 
     // SpellScript interface - enum used for runtime checks of script function calls
@@ -57,7 +57,6 @@ namespace Framework.Constants
         Dispel,
         AfterDispel,
         EnterLeaveCombat,
-
         // Spell Proc Hooks
         CheckProc,
         CheckEffectProc,
@@ -66,10 +65,9 @@ namespace Framework.Constants
         EffectProc,
         EffectAfterProc,
         AfterProc,
-
         //Apply,
         //Remove
         EffectAbsorbHeal,
-        EffectAfterAbsorbHeal
+        EffectAfterAbsorbHeal,
     }
 }

@@ -10,13 +10,13 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
-using Game.Maps.Checks;
+
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Mage
 {
@@ -472,7 +472,7 @@ namespace Scripts.Spells.Mage
             if (_count >= 7)
                 return true;
 
-            _caster.Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+            _caster.m_Events.AddEvent(this, TimeSpan.FromMilliseconds(time) + RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
 
             return false;
         }
@@ -495,7 +495,7 @@ namespace Scripts.Spells.Mage
 
         private void EffectHit(uint effIndex)
         {
-            GetCaster().Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().CastId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
+            GetCaster().m_Events.AddEventAtOffset(new CometStormEvent(GetCaster(), GetSpell().m_castId, GetHitDest()), RandomHelper.RandTime(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(275)));
         }
     }
 
@@ -516,7 +516,7 @@ namespace Scripts.Spells.Mage
 
         private void HandleEffectHitTarget(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitDest(), SpellIds.CometStormDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(GetSpell().OriginalCastId));
+            GetCaster().CastSpell(GetHitDest(), SpellIds.CometStormDamage, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetOriginalCastId(GetSpell().m_originalCastId));
         }
     }
 
@@ -1253,7 +1253,7 @@ namespace Scripts.Spells.Mage
             if (GetExplTargetUnit() == GetHitUnit())
             {
                 int damage = GetHitDamage();
-                damage = MathFunctions.AddPct(damage, GetEffectInfo(0).CalcValue());
+                MathFunctions.AddPct(ref damage, GetEffectInfo(0).CalcValue());
                 SetHitDamage(damage);
             }
         }

@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Activators
 {
-    internal class SpellScriptActivator : IScriptActivator
+    public class SpellScriptActivator : IScriptActivator
     {
         public List<string> ScriptBaseTypes => new()
                                                {
                                                    nameof(SpellScript)
                                                };
 
-        public void Activate(Type type, string name, ScriptAttribute attribute)
+        public IScriptObject Activate(Type type, string name, ScriptAttribute attribute)
         {
             name = name.Replace("_SpellScript", "");
-            Activator.CreateInstance(typeof(GenericSpellScriptLoader<>).MakeGenericType(type), name, attribute.Args);
+            return (IScriptObject)Activator.CreateInstance(typeof(GenericSpellScriptLoader<>).MakeGenericType(type), name, attribute.Args);
         }
     }
 }

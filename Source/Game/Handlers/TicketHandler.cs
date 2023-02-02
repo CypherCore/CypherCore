@@ -12,7 +12,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.GmTicketGetCaseStatus, Processing = PacketProcessing.Inplace)]
-        private void HandleGMTicketGetCaseStatus(GMTicketGetCaseStatus packet)
+        void HandleGMTicketGetCaseStatus(GMTicketGetCaseStatus packet)
         {
             //TODO: Implement GmCase and handle this packet correctly
             GMTicketCaseStatus status = new();
@@ -20,17 +20,17 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GmTicketGetSystemStatus, Processing = PacketProcessing.Inplace)]
-        private void HandleGMTicketSystemStatusOpcode(GMTicketGetSystemStatus packet)
+        void HandleGMTicketSystemStatusOpcode(GMTicketGetSystemStatus packet)
         {
             // Note: This only disables the ticket UI at client side and is not fully reliable
-            // Note: This disables the whole customer support UI after trying to send a ticket in disabled State (MessageBox: "GM Help Tickets are currently unavaiable."). UI remains disabled until the character relogs.
+            // Note: This disables the whole customer support UI after trying to send a ticket in disabled state (MessageBox: "GM Help Tickets are currently unavaiable."). UI remains disabled until the character relogs.
             GMTicketSystemStatusPkt response = new();
             response.Status = Global.SupportMgr.GetSupportSystemStatus() ? 1 : 0;
             SendPacket(response);
         }
 
         [WorldPacketHandler(ClientOpcodes.SubmitUserFeedback)]
-        private void HandleSubmitUserFeedback(SubmitUserFeedback userFeedback)
+        void HandleSubmitUserFeedback(SubmitUserFeedback userFeedback)
         {
             if (userFeedback.IsSuggestion)
             {
@@ -59,7 +59,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SupportTicketSubmitComplaint)]
-        private void HandleSupportTicketSubmitComplaint(SupportTicketSubmitComplaint packet)
+        void HandleSupportTicketSubmitComplaint(SupportTicketSubmitComplaint packet)
         {
             if (!Global.SupportMgr.GetComplaintSystemStatus())
                 return;
@@ -78,7 +78,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BugReport)]
-        private void HandleBugReport(BugReport bugReport)
+        void HandleBugReport(BugReport bugReport)
         {
             // Note: There is no way to trigger this with standard UI except /script ReportBug("text")
             if (!Global.SupportMgr.GetBugSystemStatus())
@@ -91,10 +91,9 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.Complaint)]
-        private void HandleComplaint(Complaint packet)
-        {
-            // NOTE: all chat messages from this spammer are automatically ignored by the spam reporter until logout in case of chat spam.
-            // if it's mail spam - ALL mails from this spammer are automatically removed by client
+        void HandleComplaint(Complaint packet)
+        {    // NOTE: all chat messages from this spammer are automatically ignored by the spam reporter until logout in case of chat spam.
+             // if it's mail spam - ALL mails from this spammer are automatically removed by client
 
             ComplaintResult result = new();
             result.ComplaintType = packet.ComplaintType;

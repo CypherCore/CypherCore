@@ -7,14 +7,7 @@ namespace Game.Networking.Packets
 {
     public class UpdateObject : ServerPacket
     {
-        public byte[] Data;
-        public ushort MapID;
-
-        public uint NumObjUpdates;
-
-        public UpdateObject() : base(ServerOpcodes.UpdateObject, ConnectionType.Instance)
-        {
-        }
+        public UpdateObject() : base(ServerOpcodes.UpdateObject, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -22,5 +15,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16(MapID);
             _worldPacket.WriteBytes(Data);
         }
+
+        public uint NumObjUpdates;
+        public ushort MapID;
+        public byte[] Data;
     }
 }

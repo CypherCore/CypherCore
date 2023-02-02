@@ -12,7 +12,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.DeathKnight
 {
@@ -243,7 +243,7 @@ namespace Scripts.Spells.DeathKnight
 
             Unit drw = null;
 
-            foreach (Unit controlled in caster.Controlled)
+            foreach (Unit controlled in caster.m_Controlled)
                 if (controlled.GetEntry() == CreatureIds.DancingRuneWeapon)
                 {
                     drw = controlled;
@@ -268,7 +268,7 @@ namespace Scripts.Spells.DeathKnight
 
             int amount = (int)damageInfo.GetDamage() / 2;
             SpellNonMeleeDamage log = new(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
-            log.Damage = (uint)amount;
+            log.damage = (uint)amount;
             Unit.DealDamage(drw, drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);
         }

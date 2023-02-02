@@ -9,6 +9,7 @@ namespace Framework.Web
     [DataContract]
     public class RealmListServerIPAddresses
     {
-        [DataMember(Name = "families")] public IList<AddressFamily> Families { get; set; } = new List<AddressFamily>();
+        [DataMember(Name = "families")]
+        public IList<AddressFamily> Families { get; set; } = new List<AddressFamily>();
     }
 }

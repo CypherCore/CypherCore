@@ -1,19 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Net.Sockets;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Networking;
+using System.Net.Sockets;
 
 namespace Game.Networking
 {
     public class WorldSocketManager : SocketManager<WorldSocket>
     {
-        private AsyncAcceptor _instanceAcceptor;
-        private int _socketSendBufferSize;
-        private bool _tcpNoDelay;
-
         public override bool StartNetwork(string bindIp, int port, int threadCount)
         {
             _tcpNoDelay = ConfigMgr.GetDefaultValue("Network.TcpNodelay", true);
@@ -27,11 +23,9 @@ namespace Game.Networking
                 return false;
 
             _instanceAcceptor = new AsyncAcceptor();
-
             if (!_instanceAcceptor.Start(bindIp, WorldConfig.GetIntValue(WorldCfg.PortInstance)))
             {
                 Log.outError(LogFilter.Network, "StartNetwork failed to start instance AsyncAcceptor");
-
                 return false;
             }
 
@@ -62,11 +56,14 @@ namespace Game.Networking
             catch (SocketException ex)
             {
                 Log.outException(ex);
-
                 return;
             }
 
             base.OnSocketOpen(sock);
         }
+
+        AsyncAcceptor _instanceAcceptor;
+        int _socketSendBufferSize;
+        bool _tcpNoDelay;
     }
 }

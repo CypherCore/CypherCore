@@ -12,7 +12,7 @@ using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
 
-namespace Scripts.Events.LunarFestival
+namespace Scripts.m_Events.LunarFestival
 {
     internal struct SpellIds
     {

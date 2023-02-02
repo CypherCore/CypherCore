@@ -7,6 +7,11 @@ namespace System.Collections.Generic
 {
     public static class CollectionExtensions
     {
+        public static bool Empty<T>(this Queue<T> queue)
+        {
+            return queue.Count == 0;
+        }
+
         public static bool Empty<TValue>(this ICollection<TValue> collection)
         {
             return collection.Count == 0;
@@ -217,6 +222,20 @@ namespace System.Collections.Generic
                 values.Remove(v);
         }
 
+        public static void RemoveIf<T>(this List<T> values, ICheck<T> check)
+        {
+            RemoveIf(values, check.Invoke);
+        }
+
+        public static void RemoveIf<T>(this LinkedList<T> values, ICheck<T> check)
+        {
+            RemoveIf(values, check.Invoke);
+        }
+
+        public static bool has_value(this object obj)
+        { 
+            return obj != null; 
+        }
     }
 
     public interface ICheck<in T>

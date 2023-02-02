@@ -10,7 +10,7 @@ namespace Framework.Cryptography.Ed25519.Internal.Ed25519Ref10
             int i;
 
             Array.Copy(seed, seedoffset, sk, skoffset, 32);
-            byte[] h = Sha512.Hash(sk, skoffset, 32); //ToDo: Remove alloc
+            byte[] h = Sha512.Hash(sk, skoffset, 32);//ToDo: Remove alloc
             ScalarOperations.sc_clamp(h, 0);
 
             GroupOperations.ge_scalarmult_base(out A, h, 0);

@@ -1,24 +1,18 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Mails;
 using Game.Networking.Packets;
+using System.Collections.Generic;
 
 namespace Game.BlackMarket
 {
     public class BlackMarketManager : Singleton<BlackMarketManager>
     {
-        private readonly Dictionary<uint, BlackMarketEntry> _auctions = new();
-        private readonly Dictionary<uint, BlackMarketTemplate> _templates = new();
-        private long _lastUpdate;
-
-        private BlackMarketManager()
-        {
-        }
+        BlackMarketManager() { }
 
         public void LoadTemplates()
         {
@@ -28,11 +22,9 @@ namespace Game.BlackMarket
             _templates.Clear();
 
             SQLResult result = DB.World.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, chance, bonusListIDs FROM blackmarket_template");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
-
                 return;
             }
 
@@ -58,18 +50,15 @@ namespace Game.BlackMarket
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_BLACKMARKET_AUCTIONS);
             SQLResult result = DB.Characters.Query(stmt);
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");
-
                 return;
             }
 
-            _lastUpdate = GameTime.GetGameTime(); //Set update Time before loading
+            _lastUpdate = GameTime.GetGameTime(); //Set update time before loading
 
             SQLTransaction trans = new();
-
             do
             {
                 BlackMarketEntry auction = new();
@@ -77,14 +66,12 @@ namespace Game.BlackMarket
                 if (!auction.LoadFromDB(result.GetFields()))
                 {
                     auction.DeleteFromDB(trans);
-
                     continue;
                 }
 
                 if (auction.IsCompleted())
                 {
                     auction.DeleteFromDB(trans);
-
                     continue;
                 }
 
@@ -100,11 +87,9 @@ namespace Game.BlackMarket
         {
             SQLTransaction trans = new();
             long now = GameTime.GetGameTime();
-
             foreach (var entry in _auctions.Values)
             {
-                if (entry.IsCompleted() &&
-                    entry.GetBidder() != 0)
+                if (entry.IsCompleted() && entry.GetBidder() != 0)
                     SendAuctionWonMail(entry, trans);
 
                 if (updateTime)
@@ -120,7 +105,6 @@ namespace Game.BlackMarket
         public void RefreshAuctions()
         {
             SQLTransaction trans = new();
-
             // Delete completed auctions
             foreach (var pair in _auctions)
             {
@@ -135,12 +119,10 @@ namespace Game.BlackMarket
             trans = new SQLTransaction();
 
             List<BlackMarketTemplate> templates = new();
-
             foreach (var pair in _templates)
             {
                 if (GetAuctionByID(pair.Value.MarketID) != null)
                     continue;
-
                 if (!RandomHelper.randChance(pair.Value.Chance))
                     continue;
 
@@ -170,7 +152,6 @@ namespace Game.BlackMarket
         public void BuildItemsResponse(BlackMarketRequestItemsResult packet, Player player)
         {
             packet.LastUpdateID = (int)_lastUpdate;
-
             foreach (var pair in _auctions)
             {
                 BlackMarketTemplate templ = pair.Value.GetTemplate();
@@ -221,20 +202,19 @@ namespace Game.BlackMarket
             uint bidderAccId;
             ObjectGuid bidderGuid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
             Player bidder = Global.ObjAccessor.FindConnectedPlayer(bidderGuid);
-            // _data for gm.log
+            // data for gm.log
             string bidderName = "";
             bool logGmTrade;
 
             if (bidder)
             {
-                bidderAccId = bidder.Session.GetAccountId();
+                bidderAccId = bidder.GetSession().GetAccountId();
                 bidderName = bidder.GetName();
-                logGmTrade = bidder.Session.HasPermission(RBACPermissions.LogGmTrade);
+                logGmTrade = bidder.GetSession().HasPermission(RBACPermissions.LogGmTrade);
             }
             else
             {
                 bidderAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(bidderGuid);
-
                 if (bidderAccId == 0) // Account exists
                     return;
 
@@ -244,16 +224,17 @@ namespace Game.BlackMarket
                     bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
             }
 
-            // Create Item
+            // Create item
             BlackMarketTemplate templ = entry.GetTemplate();
             Item item = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
-
             if (!item)
                 return;
 
             if (templ.Item.ItemBonus != null)
+            {
                 foreach (uint bonusList in templ.Item.ItemBonus.BonusListIDs)
                     item.AddBonuses(bonusList);
+            }
 
             item.SetOwnerGUID(bidderGuid);
 
@@ -261,21 +242,15 @@ namespace Game.BlackMarket
 
             // Log trade
             if (logGmTrade)
-                Log.outCommand(bidderAccId,
-                               "GM {0} (Account: {1}) won Item in blackmarket auction: {2} (Entry: {3} Count: {4}) and payed gold : {5}.",
-                               bidderName,
-                               bidderAccId,
-                               item.GetTemplate().GetName(),
-                               item.GetEntry(),
-                               item.GetCount(),
-                               entry.GetCurrentBid() / MoneyConstants.Gold);
+                Log.outCommand(bidderAccId, "GM {0} (Account: {1}) won item in blackmarket auction: {2} (Entry: {3} Count: {4}) and payed gold : {5}.",
+                    bidderName, bidderAccId, item.GetTemplate().GetName(), item.GetEntry(), item.GetCount(), entry.GetCurrentBid() / MoneyConstants.Gold);
 
             if (bidder)
-                bidder.Session.SendBlackMarketWonNotification(entry, item);
+                bidder.GetSession().SendBlackMarketWonNotification(entry, item);
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Won), entry.BuildAuctionMailBody())
                 .AddItem(item)
-                .SendMailTo(trans, new MailReceiver(bidder, entry.GetBidder()), new MailSender(entry), MailCheckMask.Copied);
+                .SendMailTo(trans, new MailReceiver(bidder, entry.GetBidder()),new MailSender(entry), MailCheckMask.Copied);
 
             entry.MailSent();
         }
@@ -286,17 +261,15 @@ namespace Game.BlackMarket
             Player oldBidder = Global.ObjAccessor.FindConnectedPlayer(oldBidder_guid);
 
             uint oldBidder_accId = 0;
-
             if (!oldBidder)
                 oldBidder_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(oldBidder_guid);
 
             // old bidder exist
-            if (!oldBidder &&
-                oldBidder_accId == 0)
+            if (!oldBidder && oldBidder_accId == 0)
                 return;
 
             if (oldBidder)
-                oldBidder.Session.SendBlackMarketOutbidNotification(entry.GetTemplate());
+                oldBidder.GetSession().SendBlackMarketOutbidNotification(entry.GetTemplate());
 
             new MailDraft(entry.BuildAuctionMailSubject(BMAHMailAuctionAnswers.Outbid), entry.BuildAuctionMailBody())
                 .AddMoney(entry.GetCurrentBid())
@@ -313,9 +286,10 @@ namespace Game.BlackMarket
             return _templates.LookupByKey(marketId);
         }
 
-        public long GetLastUpdate()
-        {
-            return _lastUpdate;
-        }
+        public long GetLastUpdate() { return _lastUpdate; }
+
+        Dictionary<uint, BlackMarketEntry> _auctions = new();
+        Dictionary<uint, BlackMarketTemplate> _templates = new();
+        long _lastUpdate;
     }
 }

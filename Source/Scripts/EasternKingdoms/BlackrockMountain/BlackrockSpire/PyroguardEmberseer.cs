@@ -64,8 +64,8 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             _scheduler.Schedule(TimeSpan.FromSeconds(5),
                                 task =>
                                 {
-                                    Instance.SetData(DataTypes.BlackhandIncarcerator, 1);
-                                    Instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.NotStarted);
+                                    instance.SetData(DataTypes.BlackhandIncarcerator, 1);
+                                    instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.NotStarted);
                                 });
 
             // Hack for missing trigger spell
@@ -126,7 +126,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
                                                                                           });
                                                               });
 
-                                                Instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.InProgress);
+                                                instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.InProgress);
                                             }
                                         });
 
@@ -170,7 +170,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
             // Activate all the runes
             UpdateRunes(GameObjectState.Ready);
             // Complete encounter
-            Instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.Done);
+            instance.SetBossState(DataTypes.PyrogaurdEmberseer, EncounterState.Done);
         }
 
         public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
@@ -213,37 +213,37 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire.PyroguardEmbe
         private void UpdateRunes(GameObjectState state)
         {
             // update all runes
-            GameObject rune1 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune1));
+            GameObject rune1 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune1));
 
             if (rune1)
                 rune1.SetGoState(state);
 
-            GameObject rune2 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune2));
+            GameObject rune2 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune2));
 
             if (rune2)
                 rune2.SetGoState(state);
 
-            GameObject rune3 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune3));
+            GameObject rune3 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune3));
 
             if (rune3)
                 rune3.SetGoState(state);
 
-            GameObject rune4 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune4));
+            GameObject rune4 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune4));
 
             if (rune4)
                 rune4.SetGoState(state);
 
-            GameObject rune5 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune5));
+            GameObject rune5 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune5));
 
             if (rune5)
                 rune5.SetGoState(state);
 
-            GameObject rune6 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune6));
+            GameObject rune6 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune6));
 
             if (rune6)
                 rune6.SetGoState(state);
 
-            GameObject rune7 = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(GameObjectsIds.EmberseerRune7));
+            GameObject rune7 = ObjectAccessor.GetGameObject(me, instance.GetGuidData(GameObjectsIds.EmberseerRune7));
 
             if (rune7)
                 rune7.SetGoState(state);

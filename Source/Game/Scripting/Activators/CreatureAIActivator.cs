@@ -2,19 +2,32 @@
 using System.Collections.Generic;
 using Game.AI;
 using Game.Scripting.BaseScripts;
+using Game.Scripting.Interfaces;
 
 namespace Game.Scripting.Activators
 {
-    internal class CreatureAIActivator : IScriptActivator
+    public class CreatureAIActivator : IScriptActivator
     {
         public List<string> ScriptBaseTypes => new()
                                                {
-                                                   nameof(ScriptedAI)
+                                                   nameof(ScriptedAI),
+                                                   nameof(BossAI),
+                                                   nameof(CreatureAI),
+                                                   nameof(TurretAI),
+                                                   nameof(ArcherAI),
+                                                   nameof(AggressorAI),
+                                                   nameof(NullCreatureAI),
+                                                   nameof(PassiveAI),
+                                                   nameof(PetAI),
+                                                   nameof(ReactorAI),
+                                                   nameof(ScheduledChangeAI),
+                                                   nameof(SmartAI),
+                                                   nameof(VehicleAI)
                                                };
 
-        public void Activate(Type type, string name, ScriptAttribute attribute)
+        public IScriptObject Activate(Type type, string name, ScriptAttribute attribute)
         {
-            Activator.CreateInstance(typeof(GenericCreatureScript<>).MakeGenericType(type), name, attribute.Args);
+            return (IScriptObject)Activator.CreateInstance(typeof(GenericCreatureScript<>).MakeGenericType(type), name, attribute.Args);
         }
     }
 }

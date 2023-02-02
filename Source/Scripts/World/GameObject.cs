@@ -423,7 +423,7 @@ namespace Scripts.World.GameObjects
             if (player.GetQuestRewardStatus(QuestIds.TeleCrystalFlag))
                 return false;
 
-            player.Session.SendNotification(GossipConst.GoTeleToDalaranCrystalFailed);
+            player.GetSession().SendNotification(GossipConst.GoTeleToDalaranCrystalFailed);
 
             return true;
         }
@@ -497,7 +497,7 @@ namespace Scripts.World.GameObjects
                 status == QuestStatus.Complete ||
                 status == QuestStatus.Rewarded)
             {
-                player.AddGossipItem(GossipOptionNpc.None, GossipConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipOptionNpc.None, GossipConst.GossipUseOuthouse, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 1);
                 player.SendGossipMenu(GossipConst.GossipOuthouseVacant, me.GetGUID());
             }
             else
@@ -513,7 +513,7 @@ namespace Scripts.World.GameObjects
             uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
 
-            if (action == eTradeskill.GossipActionInfoDef + 1)
+            if (action == GossipAction.GOSSIP_ACTION_INFO_DEF + 1)
             {
                 player.CloseGossipMenu();
                 Creature target = ScriptedAI.GetClosestCreatureWithEntry(player, CreatureIds.OuthouseBunny, 3.0f);
@@ -534,7 +534,7 @@ namespace Scripts.World.GameObjects
             else
             {
                 player.CloseGossipMenu();
-                player.Session.SendNotification(GossipConst.AnderholsSliderCiderNotFound);
+                player.GetSession().SendNotification(GossipConst.AnderholsSliderCiderNotFound);
 
                 return false;
             }

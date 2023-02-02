@@ -1,22 +1,16 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
     public class EquipmentSetID : ServerPacket
     {
-        public ulong GUID; // Set Identifier
-        public uint SetID; // Index
-        public int Type;
-
-        public EquipmentSetID() : base(ServerOpcodes.EquipmentSetId, ConnectionType.Instance)
-        {
-        }
+        public EquipmentSetID() : base(ServerOpcodes.EquipmentSetId, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -24,15 +18,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Type);
             _worldPacket.WriteUInt32(SetID);
         }
+
+        public ulong GUID; // Set Identifier
+        public int Type;
+        public uint SetID; // Index
     }
 
     public class LoadEquipmentSet : ServerPacket
     {
-        public List<EquipmentSetInfo.EquipmentSetData> SetData = new();
-
-        public LoadEquipmentSet() : base(ServerOpcodes.LoadEquipmentSet, ConnectionType.Instance)
-        {
-        }
+        public LoadEquipmentSet() : base(ServerOpcodes.LoadEquipmentSet, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -70,12 +64,12 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteString(equipSet.SetIcon);
             }
         }
+
+        public List<EquipmentSetInfo.EquipmentSetData> SetData = new();
     }
 
     public class SaveEquipmentSet : ClientPacket
     {
-        public EquipmentSetInfo.EquipmentSetData Set;
-
         public SaveEquipmentSet(WorldPacket packet) : base(packet)
         {
             Set = new EquipmentSetInfo.EquipmentSetData();
@@ -83,9 +77,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Set.Type       = (EquipmentSetInfo.EquipmentSetType)_worldPacket.ReadInt32();
-            Set.Guid       = _worldPacket.ReadUInt64();
-            Set.SetID      = _worldPacket.ReadUInt32();
+            Set.Type = (EquipmentSetInfo.EquipmentSetType)_worldPacket.ReadInt32();
+            Set.Guid = _worldPacket.ReadUInt64();
+            Set.SetID = _worldPacket.ReadUInt32();
             Set.IgnoreMask = _worldPacket.ReadUInt32();
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
@@ -113,39 +107,25 @@ namespace Game.Networking.Packets
             Set.SetName = _worldPacket.ReadString(setNameLength);
             Set.SetIcon = _worldPacket.ReadString(setIconLength);
         }
+
+        public EquipmentSetInfo.EquipmentSetData Set;
     }
 
-    internal class DeleteEquipmentSet : ClientPacket
+    class DeleteEquipmentSet : ClientPacket
     {
-        public ulong ID;
-
-        public DeleteEquipmentSet(WorldPacket packet) : base(packet)
-        {
-        }
+        public DeleteEquipmentSet(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             ID = _worldPacket.ReadUInt64();
         }
+
+        public ulong ID;
     }
 
-    internal class UseEquipmentSet : ClientPacket
+    class UseEquipmentSet : ClientPacket
     {
-        public struct EquipmentSetItem
-        {
-            public ObjectGuid Item;
-            public byte ContainerSlot;
-            public byte Slot;
-        }
-
-        public ulong GUID; //Set Identifier
-
-        public InvUpdate Inv;
-        public EquipmentSetItem[] Items = new EquipmentSetItem[EquipmentSlot.End];
-
-        public UseEquipmentSet(WorldPacket packet) : base(packet)
-        {
-        }
+        public UseEquipmentSet(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -160,21 +140,30 @@ namespace Game.Networking.Packets
 
             GUID = _worldPacket.ReadUInt64();
         }
+
+        public InvUpdate Inv;
+        public EquipmentSetItem[] Items = new EquipmentSetItem[EquipmentSlot.End];
+        public ulong GUID; //Set Identifier
+
+        public struct EquipmentSetItem
+        {
+            public ObjectGuid Item;
+            public byte ContainerSlot;
+            public byte Slot;
+        }
     }
 
-    internal class UseEquipmentSetResult : ServerPacket
+    class UseEquipmentSetResult : ServerPacket
     {
-        public ulong GUID; //Set Identifier
-        public byte Reason;
-
-        public UseEquipmentSetResult() : base(ServerOpcodes.UseEquipmentSetResult)
-        {
-        }
+        public UseEquipmentSetResult() : base(ServerOpcodes.UseEquipmentSetResult) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt64(GUID);
             _worldPacket.WriteUInt8(Reason);
         }
+
+        public ulong GUID; //Set Identifier
+        public byte Reason;
     }
 }

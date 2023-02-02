@@ -1,19 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
+using System.Collections.Generic;
 
 namespace Game.Garrisons
 {
-    internal class GarrisonMap : Map
+    class GarrisonMap : Map
     {
-        private Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
-
-        private ObjectGuid _owner;
-
         public GarrisonMap(uint id, long expiry, uint instanceId, ObjectGuid owner) : base(id, expiry, instanceId, Difficulty.Normal)
         {
             _owner = owner;
@@ -34,7 +30,6 @@ namespace Game.Garrisons
                 return _loadingPlayer.GetGarrison();
 
             Player owner = Global.ObjAccessor.FindConnectedPlayer(_owner);
-
             if (owner)
                 return owner.GetGarrison();
 
@@ -44,8 +39,8 @@ namespace Game.Garrisons
         public override void InitVisibilityDistance()
         {
             //init visibility distance for instances
-            _VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
-            _VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
+            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
+            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
         }
 
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)
@@ -60,17 +55,13 @@ namespace Game.Garrisons
 
             return result;
         }
+
+        ObjectGuid _owner;
+        Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
     }
 
-    internal class GarrisonGridLoader : Notifier
+    class GarrisonGridLoader : Notifier
     {
-        private readonly Cell i_cell;
-        private readonly uint i_creatures;
-        private readonly Garrison i_garrison;
-        private readonly Grid i_grid;
-        private readonly GarrisonMap i_map;
-        private uint i_gameObjects;
-
         public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
         {
             i_cell = cell;
@@ -83,15 +74,13 @@ namespace Game.Garrisons
         {
             if (i_garrison != null)
             {
-                i_cell.Data.Cell_y = 0;
-
+                i_cell.data.cell_y = 0;
                 for (uint x = 0; x < MapConst.MaxCells; ++x)
                 {
-                    i_cell.Data.Cell_x = x;
-
+                    i_cell.data.cell_x = x;
                     for (uint y = 0; y < MapConst.MaxCells; ++y)
                     {
-                        i_cell.Data.Cell_y = y;
+                        i_cell.data.cell_y = y;
 
                         //Load creatures and game objects
                         var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
@@ -106,20 +95,16 @@ namespace Game.Garrisons
         public override void Visit(IList<GameObject> objs)
         {
             ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
-
             if (!plots.Empty())
             {
                 CellCoord cellCoord = i_cell.GetCellCoord();
-
                 foreach (Garrison.Plot plot in plots)
                 {
                     Position spawn = plot.PacketInfo.PlotPos;
-
                     if (cellCoord != GridDefines.ComputeCellCoord(spawn.GetPositionX(), spawn.GetPositionY()))
                         continue;
 
                     GameObject go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
-
                     if (!go)
                         continue;
 
@@ -131,8 +116,13 @@ namespace Game.Garrisons
             }
         }
 
-        public override void Visit(IList<Creature> objs)
-        {
-        }
+        public override void Visit(IList<Creature> objs) { }
+
+        Cell i_cell;
+        Grid i_grid;
+        GarrisonMap i_map;
+        Garrison i_garrison;
+        uint i_gameObjects;
+        uint i_creatures;
     }
 }

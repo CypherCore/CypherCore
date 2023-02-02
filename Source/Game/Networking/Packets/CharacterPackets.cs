@@ -1,90 +1,78 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Framework.Database;
+using Framework.Dynamic;
+using Framework.IO;
+using Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Framework.Constants;
-using Framework.Database;
-using Framework.IO;
-using Game.Entities;
 
 namespace Game.Networking.Packets
 {
     public class EnumCharacters : ClientPacket
     {
-        public EnumCharacters(WorldPacket packet) : base(packet)
-        {
-        }
+        public EnumCharacters(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
     public class EnumCharactersResult : ServerPacket
     {
+        public EnumCharactersResult() : base(ServerOpcodes.EnumCharactersResult) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(Success);
+            _worldPacket.WriteBit(IsDeletedCharacters);
+            _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
+            _worldPacket.WriteBit(IsNewPlayerRestricted);
+            _worldPacket.WriteBit(IsNewPlayer);
+            _worldPacket.WriteBit(IsTrialAccountRestricted);
+            _worldPacket.WriteBit(DisabledClassesMask.HasValue);
+            _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
+            _worldPacket.WriteInt32(Characters.Count);
+            _worldPacket.WriteInt32(MaxCharacterLevel);
+            _worldPacket.WriteInt32(RaceUnlockData.Count);
+            _worldPacket.WriteInt32(UnlockedConditionalAppearances.Count);
+            _worldPacket.WriteInt32(RaceLimitDisables.Count);
+
+            if (DisabledClassesMask.HasValue)
+                _worldPacket.WriteUInt32(DisabledClassesMask.Value);
+
+            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
+                unlockedConditionalAppearance.Write(_worldPacket);
+
+            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
+                raceLimitDisableInfo.Write(_worldPacket);
+
+            foreach (CharacterInfo charInfo in Characters)
+                charInfo.Write(_worldPacket);
+
+            foreach (RaceUnlock raceUnlock in RaceUnlockData)
+                raceUnlock.Write(_worldPacket);
+        }
+
+        public bool Success;
+        public bool IsDeletedCharacters; // used for character undelete list
+        public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
+        public bool IsNewPlayerRestricted; // forbids using level boost and class trials
+        public bool IsNewPlayer; // forbids hero classes and allied races
+        public bool IsTrialAccountRestricted;
+        public bool IsAlliedRacesCreationAllowed;
+
+        public int MaxCharacterLevel = 1;
+        public uint? DisabledClassesMask = new();
+
+        public List<CharacterInfo> Characters = new(); // all characters on the list
+        public List<RaceUnlock> RaceUnlockData = new(); //
+        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
+        public List<RaceLimitDisableInfo> RaceLimitDisables = new();
+
         public class CharacterInfo
         {
-            public struct VisualItemInfo
-            {
-                public void Write(WorldPacket data)
-                {
-                    data.WriteUInt32(DisplayId);
-                    data.WriteUInt32(DisplayEnchantId);
-                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
-                    data.WriteUInt8(InvType);
-                    data.WriteUInt8(Subclass);
-                }
-
-                public uint DisplayId;
-                public uint DisplayEnchantId;
-                public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value
-                public byte InvType;
-                public byte Subclass;
-            }
-
-            public struct PetInfo
-            {
-                public uint CreatureDisplayId; // PetCreatureDisplayID
-                public uint Level;             // PetExperienceLevel
-                public uint CreatureFamily;    // PetCreatureFamilyID
-            }
-
-            public bool BoostInProgress; // @todo
-            public Class ClassId;
-            public Array<ChrCustomizationChoice> Customizations = new(72);
-            public byte ExperienceLevel;
-            public bool FirstLogin;
-            public CharacterFlags Flags;           // Character flag @see enum CharacterFlags
-            public CharacterCustomizeFlags Flags2; // Character customization Flags @see enum CharacterCustomizeFlags
-            public uint Flags3;                    // Character Flags 3 @todo research
-            public uint Flags4;
-
-            public ObjectGuid Guid;
-            public ulong GuildClubMemberID; // same as bgs.protocol.club.v1.MemberId.unique_id, guessed basing on SMSG_QUERY_PLAYER_NAME_RESPONSE (that one is known)
-            public ObjectGuid GuildGuid;
-            public int LastLoginVersion;
-            public long LastPlayedTime;
-            public byte ListPosition; // Order of the characters in list
-            public List<string> MailSenders = new();
-            public List<uint> MailSenderTypes = new();
-            public uint MapId;
-            public string Name;
-            public uint OverrideSelectScreenFileDataID;
-            public uint PetCreatureDisplayId;
-            public uint PetCreatureFamilyId;
-            public uint PetExperienceLevel;
-            public Vector3 PreloadPos;
-            public uint[] ProfessionIds = new uint[2]; // @todo
-            public byte RaceId;
-            public byte SexId;
-            public short SpecID;
-            public int Unknown703;
-            public byte unkWod61x;
-            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.ReagentBagEnd];
-            public uint ZoneId;
-
             public CharacterInfo(SQLFields fields)
             {
                 Guid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(0));
@@ -98,7 +86,6 @@ namespace Game.Networking.Packets
                 PreloadPos = new Vector3(fields.Read<float>(8), fields.Read<float>(9), fields.Read<float>(10));
 
                 ulong guildId = fields.Read<ulong>(11);
-
                 if (guildId != 0)
                     GuildGuid = ObjectGuid.Create(HighGuid.Guild, guildId);
 
@@ -117,8 +104,7 @@ namespace Game.Networking.Packets
                 if (fields.Read<uint>(18) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) &&
-                    !string.IsNullOrEmpty(fields.Read<string>(23)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(23)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -133,11 +119,9 @@ namespace Game.Networking.Packets
                 FirstLogin = atLoginFlags.HasAnyFlag(AtLoginFlags.FirstLogin);
 
                 // show pet at selection character in character list only for non-ghost character
-                if (!playerFlags.HasAnyFlag(PlayerFlags.Ghost) &&
-                    (ClassId == Class.Warlock || ClassId == Class.Hunter || ClassId == Class.Deathknight))
+                if (!playerFlags.HasAnyFlag(PlayerFlags.Ghost) && (ClassId == Class.Warlock || ClassId == Class.Hunter || ClassId == Class.Deathknight))
                 {
                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<uint>(14));
-
                     if (creatureInfo != null)
                     {
                         PetCreatureDisplayId = fields.Read<uint>(15);
@@ -155,7 +139,6 @@ namespace Game.Networking.Packets
                 LastPlayedTime = fields.Read<long>(20);
 
                 var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
-
                 if (spec != null)
                     SpecID = (short)spec.Id;
 
@@ -233,6 +216,64 @@ namespace Game.Networking.Packets
 
                 data.WriteString(Name);
             }
+
+            public ObjectGuid Guid;
+            public ulong GuildClubMemberID; // same as bgs.protocol.club.v1.MemberId.unique_id, guessed basing on SMSG_QUERY_PLAYER_NAME_RESPONSE (that one is known)
+            public string Name;
+            public byte ListPosition; // Order of the characters in list
+            public byte RaceId;
+            public Class ClassId;
+            public byte SexId;
+            public Array<ChrCustomizationChoice> Customizations = new(72);
+            public byte ExperienceLevel;
+            public uint ZoneId;
+            public uint MapId;
+            public Vector3 PreloadPos;
+            public ObjectGuid GuildGuid;
+            public CharacterFlags Flags; // Character flag @see enum CharacterFlags
+            public CharacterCustomizeFlags Flags2; // Character customization flags @see enum CharacterCustomizeFlags
+            public uint Flags3; // Character flags 3 @todo research
+            public uint Flags4;
+            public bool FirstLogin;
+            public byte unkWod61x;
+            public long LastPlayedTime;
+            public short SpecID;
+            public int Unknown703;
+            public int LastLoginVersion;
+            public uint OverrideSelectScreenFileDataID;
+            public uint PetCreatureDisplayId;
+            public uint PetExperienceLevel;
+            public uint PetCreatureFamilyId;
+            public bool BoostInProgress; // @todo
+            public uint[] ProfessionIds = new uint[2];      // @todo
+            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.ReagentBagEnd];
+            public List<string> MailSenders = new();
+            public List<uint> MailSenderTypes = new();
+
+            public struct VisualItemInfo
+            {
+                public void Write(WorldPacket data)
+                {
+                    data.WriteUInt32(DisplayId);
+                    data.WriteUInt32(DisplayEnchantId);
+                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
+                    data.WriteUInt8(InvType);
+                    data.WriteUInt8(Subclass);
+                }
+
+                public uint DisplayId;
+                public uint DisplayEnchantId;
+                public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value
+                public byte InvType;
+                public byte Subclass;
+            }
+
+            public struct PetInfo
+            {
+                public uint CreatureDisplayId; // PetCreatureDisplayID
+                public uint Level; // PetExperienceLevel
+                public uint CreatureFamily; // PetCreatureFamilyID
+            }
         }
 
         public struct RaceUnlock
@@ -266,7 +307,7 @@ namespace Game.Networking.Packets
 
         public struct RaceLimitDisableInfo
         {
-            private enum blah
+            enum blah
             {
                 Server,
                 Level
@@ -281,68 +322,14 @@ namespace Game.Networking.Packets
                 data.WriteInt32(BlockReason);
             }
         }
-
-        public List<CharacterInfo> Characters = new(); // all characters on the list
-        public uint? DisabledClassesMask = new();
-        public bool IsAlliedRacesCreationAllowed;
-        public bool IsDeletedCharacters;           // used for character undelete list
-        public bool IsNewPlayer;                   // forbids hero classes and allied races
-        public bool IsNewPlayerRestricted;         // forbids using level boost and class trials
-        public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
-        public bool IsTrialAccountRestricted;
-
-        public int MaxCharacterLevel = 1;
-        public List<RaceLimitDisableInfo> RaceLimitDisables = new();
-        public List<RaceUnlock> RaceUnlockData = new(); //
-
-        public bool Success;
-        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
-
-        public EnumCharactersResult() : base(ServerOpcodes.EnumCharactersResult)
-        {
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBit(Success);
-            _worldPacket.WriteBit(IsDeletedCharacters);
-            _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
-            _worldPacket.WriteBit(IsNewPlayerRestricted);
-            _worldPacket.WriteBit(IsNewPlayer);
-            _worldPacket.WriteBit(IsTrialAccountRestricted);
-            _worldPacket.WriteBit(DisabledClassesMask.HasValue);
-            _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
-            _worldPacket.WriteInt32(Characters.Count);
-            _worldPacket.WriteInt32(MaxCharacterLevel);
-            _worldPacket.WriteInt32(RaceUnlockData.Count);
-            _worldPacket.WriteInt32(UnlockedConditionalAppearances.Count);
-            _worldPacket.WriteInt32(RaceLimitDisables.Count);
-
-            if (DisabledClassesMask.HasValue)
-                _worldPacket.WriteUInt32(DisabledClassesMask.Value);
-
-            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
-                unlockedConditionalAppearance.Write(_worldPacket);
-
-            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
-                raceLimitDisableInfo.Write(_worldPacket);
-
-            foreach (CharacterInfo charInfo in Characters)
-                charInfo.Write(_worldPacket);
-
-            foreach (RaceUnlock raceUnlock in RaceUnlockData)
-                raceUnlock.Write(_worldPacket);
-        }
     }
 
-    internal class CheckCharacterNameAvailability : ClientPacket
-    {
-        public string Name;
+    class CheckCharacterNameAvailability : ClientPacket
+    {     
         public uint SequenceIndex;
+        public string Name;
 
-        public CheckCharacterNameAvailability(WorldPacket packet) : base(packet)
-        {
-        }
+        public CheckCharacterNameAvailability(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -351,10 +338,10 @@ namespace Game.Networking.Packets
         }
     }
 
-    internal class CheckCharacterNameAvailabilityResult : ServerPacket
+    class CheckCharacterNameAvailabilityResult : ServerPacket
     {
-        public ResponseCodes Result;
         public uint SequenceIndex;
+        public ResponseCodes Result;
 
         public CheckCharacterNameAvailabilityResult(uint sequenceIndex, ResponseCodes result) : base(ServerOpcodes.CheckCharacterNameAvailabilityResult)
         {
@@ -368,14 +355,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
         }
     }
-
+    
     public class CreateCharacter : ClientPacket
     {
-        public CharacterCreateInfo CreateInfo;
-
-        public CreateCharacter(WorldPacket packet) : base(packet)
-        {
-        }
+        public CreateCharacter(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -391,72 +374,65 @@ namespace Game.Networking.Packets
             var customizationCount = _worldPacket.ReadUInt32();
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
-
             if (CreateInfo.TemplateSet.HasValue)
                 CreateInfo.TemplateSet = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < customizationCount; ++i)
+            {
                 CreateInfo.Customizations[i] = new ChrCustomizationChoice()
                 {
                     ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
                     ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
                 };
+            }
 
             CreateInfo.Customizations.Sort();
         }
+
+        public CharacterCreateInfo CreateInfo;
     }
 
     public class CreateChar : ServerPacket
     {
-        public ResponseCodes Code;
-        public ObjectGuid Guid;
-
-        public CreateChar() : base(ServerOpcodes.CreateChar)
-        {
-        }
+        public CreateChar() : base(ServerOpcodes.CreateChar) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8((byte)Code);
             _worldPacket.WritePackedGuid(Guid);
         }
+
+        public ResponseCodes Code;
+        public ObjectGuid Guid;
     }
 
     public class CharDelete : ClientPacket
     {
-        public ObjectGuid Guid; // Guid of the character to delete
-
-        public CharDelete(WorldPacket packet) : base(packet)
-        {
-        }
+        public CharDelete(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid Guid; // Guid of the character to delete
     }
 
     public class DeleteChar : ServerPacket
     {
-        public ResponseCodes Code;
-
-        public DeleteChar() : base(ServerOpcodes.DeleteChar)
-        {
-        }
+        public DeleteChar() : base(ServerOpcodes.DeleteChar) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8((byte)Code);
         }
+
+        public ResponseCodes Code;
     }
 
     public class CharacterRenameRequest : ClientPacket
     {
-        public CharacterRenameInfo RenameInfo;
-
-        public CharacterRenameRequest(WorldPacket packet) : base(packet)
-        {
-        }
+        public CharacterRenameRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -464,18 +440,13 @@ namespace Game.Networking.Packets
             RenameInfo.Guid = _worldPacket.ReadPackedGuid();
             RenameInfo.NewName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
+
+        public CharacterRenameInfo RenameInfo;
     }
 
     public class CharacterRenameResult : ServerPacket
     {
-        public ObjectGuid? Guid;
-
-        public string Name;
-        public ResponseCodes Result;
-
-        public CharacterRenameResult() : base(ServerOpcodes.CharacterRenameResult)
-        {
-        }
+        public CharacterRenameResult() : base(ServerOpcodes.CharacterRenameResult) { }
 
         public override void Write()
         {
@@ -489,15 +460,15 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteString(Name);
         }
+
+        public string Name;
+        public ResponseCodes Result;
+        public ObjectGuid? Guid;
     }
 
     public class CharCustomize : ClientPacket
     {
-        public CharCustomizeInfo CustomizeInfo;
-
-        public CharCustomize(WorldPacket packet) : base(packet)
-        {
-        }
+        public CharCustomize(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -507,27 +478,27 @@ namespace Game.Networking.Packets
             var customizationCount = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < customizationCount; ++i)
+            {
                 CustomizeInfo.Customizations[i] = new ChrCustomizationChoice()
                 {
                     ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
                     ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
                 };
+            }
 
             CustomizeInfo.Customizations.Sort();
 
             CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
+
+        public CharCustomizeInfo CustomizeInfo;
     }
 
     // @todo: CharCustomizeResult
 
     public class CharRaceOrFactionChange : ClientPacket
     {
-        public CharRaceOrFactionChangeInfo RaceOrFactionChangeInfo;
-
-        public CharRaceOrFactionChange(WorldPacket packet) : base(packet)
-        {
-        }
+        public CharRaceOrFactionChange(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -545,34 +516,23 @@ namespace Game.Networking.Packets
             RaceOrFactionChangeInfo.Name = _worldPacket.ReadString(nameLength);
 
             for (var i = 0; i < customizationCount; ++i)
+            {
                 RaceOrFactionChangeInfo.Customizations[i] = new ChrCustomizationChoice()
                 {
                     ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
                     ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
                 };
+            }
 
             RaceOrFactionChangeInfo.Customizations.Sort();
         }
+
+        public CharRaceOrFactionChangeInfo RaceOrFactionChangeInfo;
     }
 
     public class CharFactionChangeResult : ServerPacket
     {
-        public class CharFactionChangeDisplayInfo
-        {
-            public Array<ChrCustomizationChoice> Customizations = new(72);
-            public string Name;
-            public byte RaceID;
-            public byte SexID;
-        }
-
-        public CharFactionChangeDisplayInfo Display;
-        public ObjectGuid Guid;
-
-        public ResponseCodes Result = 0;
-
-        public CharFactionChangeResult() : base(ServerOpcodes.CharFactionChangeResult)
-        {
-        }
+        public CharFactionChangeResult() : base(ServerOpcodes.CharFactionChangeResult) { }
 
         public override void Write()
         {
@@ -596,33 +556,37 @@ namespace Game.Networking.Packets
                 }
             }
         }
+
+        public ResponseCodes Result = 0;
+        public ObjectGuid Guid;
+        public CharFactionChangeDisplayInfo Display;
+
+        public class CharFactionChangeDisplayInfo
+        {
+            public string Name;
+            public byte SexID;
+            public byte RaceID;
+            public Array<ChrCustomizationChoice> Customizations = new(72);
+        }
     }
 
     public class GenerateRandomCharacterName : ClientPacket
     {
-        public byte Race;
-
-        public byte Sex;
-
-        public GenerateRandomCharacterName(WorldPacket packet) : base(packet)
-        {
-        }
+        public GenerateRandomCharacterName(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Race = _worldPacket.ReadUInt8();
             Sex = _worldPacket.ReadUInt8();
         }
+
+        public byte Sex;
+        public byte Race;
     }
 
     public class GenerateRandomCharacterNameResult : ServerPacket
     {
-        public string Name;
-        public bool Success;
-
-        public GenerateRandomCharacterNameResult() : base(ServerOpcodes.GenerateRandomCharacterNameResult)
-        {
-        }
+        public GenerateRandomCharacterNameResult() : base(ServerOpcodes.GenerateRandomCharacterNameResult) { }
 
         public override void Write()
         {
@@ -631,26 +595,18 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteString(Name);
         }
+
+        public string Name;
+        public bool Success;
     }
 
     public class ReorderCharacters : ClientPacket
     {
-        public struct ReorderInfo
-        {
-            public ObjectGuid PlayerGUID;
-            public byte NewPosition;
-        }
-
-        public ReorderInfo[] Entries = new ReorderInfo[200];
-
-        public ReorderCharacters(WorldPacket packet) : base(packet)
-        {
-        }
+        public ReorderCharacters(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             uint count = _worldPacket.ReadBits<uint>(9);
-
             for (var i = 0; i < count && i < WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm); ++i)
             {
                 ReorderInfo reorderInfo;
@@ -659,15 +615,19 @@ namespace Game.Networking.Packets
                 Entries[i] = reorderInfo;
             }
         }
+
+        public ReorderInfo[] Entries = new ReorderInfo[200];
+
+        public struct ReorderInfo
+        {
+            public ObjectGuid PlayerGUID;
+            public byte NewPosition;
+        }
     }
 
     public class UndeleteCharacter : ClientPacket
     {
-        public CharacterUndeleteInfo UndeleteInfo;
-
-        public UndeleteCharacter(WorldPacket packet) : base(packet)
-        {
-        }
+        public UndeleteCharacter(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -675,17 +635,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(UndeleteInfo.ClientToken);
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);
         }
+
+        public CharacterUndeleteInfo UndeleteInfo;
     }
 
     public class UndeleteCharacterResponse : ServerPacket
     {
-        public CharacterUndeleteResult Result;
-
-        public CharacterUndeleteInfo UndeleteInfo;
-
-        public UndeleteCharacterResponse() : base(ServerOpcodes.UndeleteCharacterResponse)
-        {
-        }
+        public UndeleteCharacterResponse() : base(ServerOpcodes.UndeleteCharacterResponse) { }
 
         public override void Write()
         {
@@ -694,29 +650,21 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);
         }
+
+        public CharacterUndeleteInfo UndeleteInfo;
+        public CharacterUndeleteResult Result;
     }
 
     public class GetUndeleteCharacterCooldownStatus : ClientPacket
     {
-        public GetUndeleteCharacterCooldownStatus(WorldPacket packet) : base(packet)
-        {
-        }
+        public GetUndeleteCharacterCooldownStatus(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
     public class UndeleteCooldownStatusResponse : ServerPacket
     {
-        public uint CurrentCooldown; // Current cooldown until next free character restoration. (in sec)
-        public uint MaxCooldown;     // Max. cooldown until next free character restoration. Displayed in undelete confirm message. (in sec)
-
-        public bool OnCooldown; //
-
-        public UndeleteCooldownStatusResponse() : base(ServerOpcodes.UndeleteCooldownStatusResponse)
-        {
-        }
+        public UndeleteCooldownStatusResponse() : base(ServerOpcodes.UndeleteCooldownStatusResponse) { }
 
         public override void Write()
         {
@@ -724,34 +672,29 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(MaxCooldown);
             _worldPacket.WriteUInt32(CurrentCooldown);
         }
+
+        public bool OnCooldown; //
+        public uint MaxCooldown; // Max. cooldown until next free character restoration. Displayed in undelete confirm message. (in sec)
+        public uint CurrentCooldown; // Current cooldown until next free character restoration. (in sec)
     }
 
     public class PlayerLogin : ClientPacket
     {
-        public float FarClip; // Visibility distance (for terrain)
-
-        public ObjectGuid Guid; // Guid of the player that is logging in
-
-        public PlayerLogin(WorldPacket packet) : base(packet)
-        {
-        }
+        public PlayerLogin(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
             FarClip = _worldPacket.ReadFloat();
         }
+
+        public ObjectGuid Guid;      // Guid of the player that is logging in
+        public float FarClip; // Visibility distance (for terrain)
     }
 
     public class LoginVerifyWorld : ServerPacket
     {
-        public int MapID = -1;
-        public Position Pos;
-        public uint Reason = 0;
-
-        public LoginVerifyWorld() : base(ServerOpcodes.LoginVerifyWorld, ConnectionType.Instance)
-        {
-        }
+        public LoginVerifyWorld() : base(ServerOpcodes.LoginVerifyWorld, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -762,12 +705,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteFloat(Pos.GetOrientation());
             _worldPacket.WriteUInt32(Reason);
         }
+
+        public int MapID = -1;
+        public Position Pos;
+        public uint Reason = 0;
     }
 
     public class CharacterLoginFailed : ServerPacket
     {
-        private readonly LoginFailureReason Code;
-
         public CharacterLoginFailed(LoginFailureReason code) : base(ServerOpcodes.CharacterLoginFailed)
         {
             Code = code;
@@ -777,31 +722,25 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt8((byte)Code);
         }
+
+        LoginFailureReason Code;
     }
 
     public class LogoutRequest : ClientPacket
     {
-        public bool IdleLogout;
-
-        public LogoutRequest(WorldPacket packet) : base(packet)
-        {
-        }
+        public LogoutRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             IdleLogout = _worldPacket.HasBit();
         }
+
+        public bool IdleLogout;
     }
 
     public class LogoutResponse : ServerPacket
     {
-        public bool Instant = false;
-
-        public int LogoutResult;
-
-        public LogoutResponse() : base(ServerOpcodes.LogoutResponse, ConnectionType.Instance)
-        {
-        }
+        public LogoutResponse() : base(ServerOpcodes.LogoutResponse, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -809,112 +748,87 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Instant);
             _worldPacket.FlushBits();
         }
+
+        public int LogoutResult;
+        public bool Instant = false;
     }
 
     public class LogoutComplete : ServerPacket
     {
-        public LogoutComplete() : base(ServerOpcodes.LogoutComplete)
-        {
-        }
+        public LogoutComplete() : base(ServerOpcodes.LogoutComplete) { }
 
-        public override void Write()
-        {
-        }
+        public override void Write() { }
     }
 
     public class LogoutCancel : ClientPacket
     {
-        public LogoutCancel(WorldPacket packet) : base(packet)
-        {
-        }
+        public LogoutCancel(WorldPacket packet) : base(packet) { }
 
-        public override void Read()
-        {
-        }
+        public override void Read() { }
     }
 
     public class LogoutCancelAck : ServerPacket
     {
-        public LogoutCancelAck() : base(ServerOpcodes.LogoutCancelAck, ConnectionType.Instance)
-        {
-        }
+        public LogoutCancelAck() : base(ServerOpcodes.LogoutCancelAck, ConnectionType.Instance) { }
 
-        public override void Write()
-        {
-        }
+        public override void Write() { }
     }
 
     public class LoadingScreenNotify : ClientPacket
     {
-        public int MapID = -1;
-        public bool Showing;
-
-        public LoadingScreenNotify(WorldPacket packet) : base(packet)
-        {
-        }
+        public LoadingScreenNotify(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             MapID = _worldPacket.ReadInt32();
             Showing = _worldPacket.HasBit();
         }
+
+        public int MapID = -1;
+        public bool Showing;
     }
 
     public class InitialSetup : ServerPacket
     {
-        public byte ServerExpansionLevel;
-
-        public byte ServerExpansionTier;
-
-        public InitialSetup() : base(ServerOpcodes.InitialSetup, ConnectionType.Instance)
-        {
-        }
+        public InitialSetup() : base(ServerOpcodes.InitialSetup, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8(ServerExpansionLevel);
             _worldPacket.WriteUInt8(ServerExpansionTier);
         }
+
+        public byte ServerExpansionTier;
+        public byte ServerExpansionLevel;
     }
 
     public class SetActionBarToggles : ClientPacket
     {
-        public byte Mask;
-
-        public SetActionBarToggles(WorldPacket packet) : base(packet)
-        {
-        }
+        public SetActionBarToggles(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Mask = _worldPacket.ReadUInt8();
         }
+
+        public byte Mask;
     }
 
     public class RequestPlayedTime : ClientPacket
     {
-        public bool TriggerScriptEvent;
-
-        public RequestPlayedTime(WorldPacket packet) : base(packet)
-        {
-        }
+        public RequestPlayedTime(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             TriggerScriptEvent = _worldPacket.HasBit();
         }
+
+        public bool TriggerScriptEvent;
     }
 
     public class PlayedTime : ServerPacket
     {
-        public uint LevelTime;
-
-        public uint TotalTime;
-        public bool TriggerEvent;
-
-        public PlayedTime() : base(ServerOpcodes.PlayedTime, ConnectionType.Instance)
-        {
-        }
+        public PlayedTime() : base(ServerOpcodes.PlayedTime, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -923,15 +837,17 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(TriggerEvent);
             _worldPacket.FlushBits();
         }
+
+        public uint TotalTime;
+        public uint LevelTime;
+        public bool TriggerEvent;
     }
 
     public class SetTitle : ClientPacket
     {
         public int TitleID;
 
-        public SetTitle(WorldPacket packet) : base(packet)
-        {
-        }
+        public SetTitle(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -941,14 +857,7 @@ namespace Game.Networking.Packets
 
     public class AlterApperance : ClientPacket
     {
-        public Array<ChrCustomizationChoice> Customizations = new(72);
-        public int CustomizedRace;
-
-        public byte NewSex;
-
-        public AlterApperance(WorldPacket packet) : base(packet)
-        {
-        }
+        public AlterApperance(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -957,28 +866,24 @@ namespace Game.Networking.Packets
             CustomizedRace = _worldPacket.ReadInt32();
 
             for (var i = 0; i < customizationCount; ++i)
+            {
                 Customizations[i] = new ChrCustomizationChoice()
                 {
                     ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
                     ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
                 };
+            }
 
             Customizations.Sort();
         }
+
+        public byte NewSex;
+        public Array<ChrCustomizationChoice> Customizations = new(72);
+        public int CustomizedRace;
     }
 
     public class BarberShopResult : ServerPacket
     {
-        public enum ResultEnum
-        {
-            Success = 0,
-            NoMoney = 1,
-            NotOnChair = 2,
-            NoMoney2 = 3
-        }
-
-        public ResultEnum Result;
-
         public BarberShopResult(ResultEnum result) : base(ServerOpcodes.BarberShopResult)
         {
             Result = result;
@@ -988,20 +893,21 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32((int)Result);
         }
+
+        public ResultEnum Result;
+
+        public enum ResultEnum
+        {
+            Success = 0,
+            NoMoney = 1,
+            NotOnChair = 2,
+            NoMoney2 = 3
+        }
     }
 
-    internal class LogXPGain : ServerPacket
+    class LogXPGain : ServerPacket
     {
-        public int Amount;
-        public float GroupBonus;
-        public int Original;
-        public PlayerLogXPReason Reason;
-
-        public ObjectGuid Victim;
-
-        public LogXPGain() : base(ServerOpcodes.LogXpGain)
-        {
-        }
+        public LogXPGain() : base(ServerOpcodes.LogXpGain) { }
 
         public override void Write()
         {
@@ -1011,101 +917,90 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Amount);
             _worldPacket.WriteFloat(GroupBonus);
         }
+
+        public ObjectGuid Victim;
+        public int Original;
+        public PlayerLogXPReason Reason;
+        public int Amount;
+        public float GroupBonus;
     }
 
-    internal class TitleEarned : ServerPacket
+    class TitleEarned : ServerPacket
     {
-        public uint Index;
-
-        public TitleEarned(ServerOpcodes opcode) : base(opcode)
-        {
-        }
+        public TitleEarned(ServerOpcodes opcode) : base(opcode) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(Index);
         }
-    }
 
-    internal class SetFactionAtWar : ClientPacket
-    {
-        public byte FactionIndex;
-
-        public SetFactionAtWar(WorldPacket packet) : base(packet)
-        {
-        }
-
-        public override void Read()
-        {
-            FactionIndex = _worldPacket.ReadUInt8();
-        }
-    }
-
-    internal class SetFactionNotAtWar : ClientPacket
-    {
-        public byte FactionIndex;
-
-        public SetFactionNotAtWar(WorldPacket packet) : base(packet)
-        {
-        }
-
-        public override void Read()
-        {
-            FactionIndex = _worldPacket.ReadUInt8();
-        }
-    }
-
-    internal class SetFactionInactive : ClientPacket
-    {
         public uint Index;
-        public bool State;
+    }
 
-        public SetFactionInactive(WorldPacket packet) : base(packet)
+    class SetFactionAtWar : ClientPacket
+    {
+        public SetFactionAtWar(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
         {
+            FactionIndex = _worldPacket.ReadUInt8();
         }
+
+        public byte FactionIndex;
+    }
+
+    class SetFactionNotAtWar : ClientPacket
+    {
+        public SetFactionNotAtWar(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            FactionIndex = _worldPacket.ReadUInt8();
+        }
+
+        public byte FactionIndex;
+    }
+
+    class SetFactionInactive : ClientPacket
+    {
+        public SetFactionInactive(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Index = _worldPacket.ReadUInt32();
             State = _worldPacket.HasBit();
         }
+
+        public uint Index;
+        public bool State;
     }
 
-    internal class SetWatchedFaction : ClientPacket
+    class SetWatchedFaction : ClientPacket
     {
-        public uint FactionIndex;
-
-        public SetWatchedFaction(WorldPacket packet) : base(packet)
-        {
-        }
+        public SetWatchedFaction(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             FactionIndex = _worldPacket.ReadUInt32();
         }
+
+        public uint FactionIndex;
     }
 
-    internal class SetFactionVisible : ServerPacket
+    class SetFactionVisible : ServerPacket
     {
-        public uint FactionIndex;
-
-        public SetFactionVisible(bool visible) : base(visible ? ServerOpcodes.SetFactionVisible : ServerOpcodes.SetFactionNotVisible, ConnectionType.Instance)
-        {
-        }
+        public SetFactionVisible(bool visible) : base(visible ? ServerOpcodes.SetFactionVisible : ServerOpcodes.SetFactionNotVisible, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(FactionIndex);
         }
+
+        public uint FactionIndex;
     }
 
-    internal class CharCustomizeSuccess : ServerPacket
+    class CharCustomizeSuccess : ServerPacket
     {
-        private readonly string CharName = "";
-        private readonly Array<ChrCustomizationChoice> Customizations = new(72);
-        private readonly byte SexID;
-        private ObjectGuid CharGUID;
-
         public CharCustomizeSuccess(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomizeSuccess)
         {
             CharGUID = customizeInfo.CharGUID;
@@ -1119,7 +1014,6 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CharGUID);
             _worldPacket.WriteUInt8(SexID);
             _worldPacket.WriteInt32(Customizations.Count);
-
             foreach (ChrCustomizationChoice customization in Customizations)
             {
                 _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
@@ -1130,31 +1024,29 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
             _worldPacket.WriteString(CharName);
         }
+
+        ObjectGuid CharGUID;
+        string CharName = "";
+        byte SexID;
+        Array<ChrCustomizationChoice> Customizations = new(72);
     }
 
-    internal class CharCustomizeFailure : ServerPacket
+    class CharCustomizeFailure : ServerPacket
     {
-        public ObjectGuid CharGUID;
-
-        public byte Result;
-
-        public CharCustomizeFailure() : base(ServerOpcodes.CharCustomizeFailure)
-        {
-        }
+        public CharCustomizeFailure() : base(ServerOpcodes.CharCustomizeFailure) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt8(Result);
             _worldPacket.WritePackedGuid(CharGUID);
         }
+
+        public byte Result;
+        public ObjectGuid CharGUID;
     }
 
-    internal class SetPlayerDeclinedNames : ClientPacket
+    class SetPlayerDeclinedNames : ClientPacket
     {
-        public DeclinedName DeclinedNames;
-
-        public ObjectGuid Player;
-
         public SetPlayerDeclinedNames(WorldPacket packet) : base(packet)
         {
             DeclinedNames = new DeclinedName();
@@ -1170,76 +1062,75 @@ namespace Game.Networking.Packets
                 stringLengths[i] = _worldPacket.ReadBits<byte>(7);
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                DeclinedNames.Name[i] = _worldPacket.ReadString(stringLengths[i]);
+                DeclinedNames.name[i] = _worldPacket.ReadString(stringLengths[i]);
         }
+
+        public ObjectGuid Player;
+        public DeclinedName DeclinedNames;
     }
 
-    internal class SetPlayerDeclinedNamesResult : ServerPacket
+    class SetPlayerDeclinedNamesResult : ServerPacket
     {
-        public ObjectGuid Player;
-        public DeclinedNameResult ResultCode;
-
-        public SetPlayerDeclinedNamesResult() : base(ServerOpcodes.SetPlayerDeclinedNamesResult)
-        {
-        }
+        public SetPlayerDeclinedNamesResult() : base(ServerOpcodes.SetPlayerDeclinedNamesResult) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32((int)ResultCode);
             _worldPacket.WritePackedGuid(Player);
         }
+
+        public ObjectGuid Player;
+        public DeclinedNameResult ResultCode;
     }
 
     //Structs
     public class CharacterCreateInfo
     {
-        // Server side _data
-        public byte CharCount = 0;
-        public Class ClassId = Class.None;
-        public Array<ChrCustomizationChoice> Customizations = new(72);
-        public bool IsTrialBoost;
-
-        public string Name;
-
         // User specified variables
         public Race RaceId = Race.None;
+        public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
+        public Array<ChrCustomizationChoice> Customizations = new(72);
         public uint? TemplateSet;
+        public bool IsTrialBoost;
         public bool UseNPE;
+        public string Name;
+
+        // Server side data
+        public byte CharCount = 0;
     }
 
     public class CharacterRenameInfo
     {
-        public ObjectGuid Guid;
         public string NewName;
+        public ObjectGuid Guid;
     }
 
     public class CharCustomizeInfo
     {
         public ObjectGuid CharGUID;
+        public Gender SexID = Gender.None;
         public string CharName;
         public Array<ChrCustomizationChoice> Customizations = new(72);
-        public Gender SexID = Gender.None;
     }
 
     public class CharRaceOrFactionChangeInfo
     {
-        public Array<ChrCustomizationChoice> Customizations = new(72);
-        public bool FactionChange;
-        public ObjectGuid Guid;
-        public Race InitialRaceID = Race.None;
-        public string Name;
         public Race RaceID = Race.None;
+        public Race InitialRaceID = Race.None;
         public Gender SexID = Gender.None;
+        public ObjectGuid Guid;
+        public bool FactionChange;
+        public string Name;
+        public Array<ChrCustomizationChoice> Customizations = new(72);
     }
 
     public class CharacterUndeleteInfo
-    {
-        // User specified variables
+    {            // User specified variables
         public ObjectGuid CharacterGuid; // Guid of the character to restore
-        public int ClientToken = 0;      // @todo: research
+        public int ClientToken = 0; // @todo: research
 
-        // Server side _data
+        // Server side data
         public string Name;
     }
 }

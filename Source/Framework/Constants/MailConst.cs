@@ -18,10 +18,10 @@ namespace Framework.Constants
     {
         None = 0x00,
         Read = 0x01,
-        Returned = 0x02, // This Mail Was Returned. Do Not Allow Returning Mail Back Again.
-        Copied = 0x04,   // This Mail Was Copied. Do Not Allow Making A Copy Of Items In Mail.
+        Returned = 0x02,                     // This Mail Was Returned. Do Not Allow Returning Mail Back Again.
+        Copied = 0x04,                     // This Mail Was Copied. Do Not Allow Making A Copy Of Items In Mail.
         CodPayment = 0x08,
-        HasBody = 0x10 // This Mail Has Body Text.
+        HasBody = 0x10                      // This Mail Has Body Text.
     }
 
     public enum MailStationery
@@ -30,9 +30,9 @@ namespace Framework.Constants
         Default = 41,
         Gm = 61,
         Auction = 62,
-        Val = 64, // Valentine
-        Chr = 65, // Christmas
-        Orp = 67  // Orphan
+        Val = 64,                           // Valentine
+        Chr = 65,                           // Christmas
+        Orp = 67                            // Orphan
     }
 
     public enum MailState
@@ -45,9 +45,9 @@ namespace Framework.Constants
     public enum MailShowFlags
     {
         Unk0 = 0x0001,
-        Delete = 0x0002,  // Forced Show Delete Button Instead Return Button
-        Auction = 0x0004, // From Old Comment
-        Unk2 = 0x0008,    // Unknown, Cod Will Be Shown Even Without That Flag
+        Delete = 0x0002,                             // Forced Show Delete Button Instead Return Button
+        Auction = 0x0004,                             // From Old Comment
+        Unk2 = 0x0008,                             // Unknown, Cod Will Be Shown Even Without That Flag
         Return = 0x0010
     }
 

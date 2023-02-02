@@ -10,14 +10,14 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
-using Game.Maps.Checks;
+
 using Game.Movement;
 using Game.Scripting;
 using Game.Scripting.Interfaces;
 using Game.Scripting.Interfaces.IAura;
 using Game.Scripting.Interfaces.ISpell;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.Spells.Priest
 {
@@ -1019,20 +1019,20 @@ namespace Scripts.Spells.Priest
 
                 if (player != null)
                 {
-                    amountF = MathFunctions.AddPct(amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
+                    MathFunctions.AddPct(ref amountF, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
 
                     AuraEffect mastery = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
 
                     if (mastery != null)
                         if (GetUnitOwner().HasAura(SpellIds.AtonementTriggered) ||
                             GetUnitOwner().HasAura(SpellIds.AtonementTriggeredPowerTrinity))
-                            amountF = MathFunctions.AddPct(amountF, mastery.GetAmount());
+                            MathFunctions.AddPct(ref amountF, mastery.GetAmount());
                 }
 
                 AuraEffect rapture = caster.GetAuraEffect(SpellIds.Rapture, 1);
 
                 if (rapture != null)
-                    amountF = MathFunctions.AddPct(amountF, rapture.GetAmount());
+                    MathFunctions.AddPct(ref amountF, rapture.GetAmount());
 
                 amount = (int)amountF;
             }

@@ -1,99 +1,88 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Framework.IO;
 using Game.Networking;
 using Game.Networking.Packets;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
     public class UpdateData
     {
-        private readonly ByteBuffer _data = new();
-        private readonly List<ObjectGuid> _destroyGUIDs = new();
-        private readonly List<ObjectGuid> _outOfRangeGUIDs = new();
-        private uint _blockCount;
-        private uint _mapId;
+        uint MapId;
+        uint BlockCount;
+        List<ObjectGuid> destroyGUIDs = new();
+        List<ObjectGuid> outOfRangeGUIDs = new();
+        ByteBuffer data = new();
 
         public UpdateData(uint mapId)
         {
-            _mapId = mapId;
+            MapId = mapId;
         }
 
         public void AddDestroyObject(ObjectGuid guid)
         {
-            _destroyGUIDs.Add(guid);
+            destroyGUIDs.Add(guid);
         }
 
         public void AddOutOfRangeGUID(List<ObjectGuid> guids)
         {
-            _outOfRangeGUIDs.AddRange(guids);
+            outOfRangeGUIDs.AddRange(guids);
         }
 
         public void AddOutOfRangeGUID(ObjectGuid guid)
         {
-            _outOfRangeGUIDs.Add(guid);
+            outOfRangeGUIDs.Add(guid);
         }
 
         public void AddUpdateBlock(ByteBuffer block)
         {
-            _data.WriteBytes(block.GetData());
-            ++_blockCount;
+            data.WriteBytes(block.GetData());
+            ++BlockCount;
         }
 
         public bool BuildPacket(out UpdateObject packet)
         {
             packet = new UpdateObject();
 
-            packet.NumObjUpdates = _blockCount;
-            packet.MapID = (ushort)_mapId;
+            packet.NumObjUpdates = BlockCount;
+            packet.MapID = (ushort)MapId;
 
             WorldPacket buffer = new();
-
-            if (buffer.WriteBit(!_outOfRangeGUIDs.Empty() || !_destroyGUIDs.Empty()))
+            if (buffer.WriteBit(!outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty()))
             {
-                buffer.WriteUInt16((ushort)_destroyGUIDs.Count);
-                buffer.WriteInt32(_destroyGUIDs.Count + _outOfRangeGUIDs.Count);
+                buffer.WriteUInt16((ushort)destroyGUIDs.Count);
+                buffer.WriteInt32(destroyGUIDs.Count + outOfRangeGUIDs.Count);
 
-                foreach (var destroyGuid in _destroyGUIDs)
+                foreach (var destroyGuid in destroyGUIDs)
                     buffer.WritePackedGuid(destroyGuid);
 
-                foreach (var outOfRangeGuid in _outOfRangeGUIDs)
+                foreach (var outOfRangeGuid in outOfRangeGUIDs)
                     buffer.WritePackedGuid(outOfRangeGuid);
             }
 
-            var bytes = _data.GetData();
+            var bytes = data.GetData();
             buffer.WriteInt32(bytes.Length);
             buffer.WriteBytes(bytes);
 
             packet.Data = buffer.GetData();
-
             return true;
         }
 
         public void Clear()
         {
-            _data.Clear();
-            _destroyGUIDs.Clear();
-            _outOfRangeGUIDs.Clear();
-            _blockCount = 0;
-            _mapId = 0;
+            data.Clear();
+            destroyGUIDs.Clear();
+            outOfRangeGUIDs.Clear();
+            BlockCount = 0;
+            MapId = 0;
         }
 
-        public bool HasData()
-        {
-            return _blockCount > 0 || !_outOfRangeGUIDs.Empty() || !_destroyGUIDs.Empty();
-        }
+        public bool HasData() { return BlockCount > 0 || !outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty(); }
 
-        public List<ObjectGuid> GetOutOfRangeGUIDs()
-        {
-            return _outOfRangeGUIDs;
-        }
+        public List<ObjectGuid> GetOutOfRangeGUIDs() { return outOfRangeGUIDs; }
 
-        public void SetMapId(ushort mapId)
-        {
-            _mapId = mapId;
-        }
+        public void SetMapId(ushort mapId) { MapId = mapId; }
     }
 }

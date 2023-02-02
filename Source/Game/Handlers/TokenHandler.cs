@@ -10,7 +10,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.CommerceTokenGetLog)]
-        private void HandleCommerceTokenGetLog(CommerceTokenGetLog commerceTokenGetLog)
+        void HandleCommerceTokenGetLog(CommerceTokenGetLog commerceTokenGetLog)
         {
             CommerceTokenGetLogResponse response = new();
 
@@ -22,7 +22,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CommerceTokenGetMarketPrice)]
-        private void HandleCommerceTokenGetMarketPrice(CommerceTokenGetMarketPrice commerceTokenGetMarketPrice)
+        void HandleCommerceTokenGetMarketPrice(CommerceTokenGetMarketPrice commerceTokenGetMarketPrice)
         {
             CommerceTokenGetMarketPriceResponse response = new();
 

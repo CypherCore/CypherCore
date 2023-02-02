@@ -58,7 +58,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockSpire
 
         public override void JustDied(Unit killer)
         {
-            Instance.SetBossState(DataTypes.LordValthalak, EncounterState.Done);
+            instance.SetBossState(DataTypes.LordValthalak, EncounterState.Done);
         }
 
         public override void UpdateAI(uint diff)

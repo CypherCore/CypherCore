@@ -13,10 +13,10 @@ namespace Framework.Networking
 {
     public abstract class SSLSocket : ISocket, IDisposable
     {
+        Socket _socket;
         internal SslStream _stream;
-        private readonly IPEndPoint _remoteEndPoint;
-        private readonly Socket _socket;
-        private byte[] _receiveBuffer;
+        IPEndPoint _remoteEndPoint;
+        byte[] _receiveBuffer;
 
         protected SSLSocket(Socket socket)
         {
@@ -40,24 +40,6 @@ namespace Framework.Networking
             return _socket.Connected;
         }
 
-        public void CloseSocket()
-        {
-            try
-            {
-                _socket.Shutdown(SocketShutdown.Both);
-                _socket.Close();
-            }
-            catch (Exception ex)
-            {
-                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpEndPoint()} errored when shutting down socket: {ex.Message}");
-            }
-        }
-
-        public bool IsOpen()
-        {
-            return _socket.Connected;
-        }
-
         public IPEndPoint GetRemoteIpEndPoint()
         {
             return _remoteEndPoint;
@@ -71,11 +53,9 @@ namespace Framework.Networking
             try
             {
                 var result = await _stream.ReadAsync(_receiveBuffer, 0, _receiveBuffer.Length);
-
                 if (result == 0)
                 {
                     CloseSocket();
-
                     return;
                 }
 
@@ -93,11 +73,10 @@ namespace Framework.Networking
             {
                 await _stream.AuthenticateAsServerAsync(certificate, false, SslProtocols.Tls12, false);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Log.outException(ex);
                 CloseSocket();
-
                 return;
             }
 
@@ -121,10 +100,22 @@ namespace Framework.Networking
             }
         }
 
-        public virtual void OnClose()
+        public void CloseSocket()
         {
-            Dispose();
+            try
+            {
+                _socket.Shutdown(SocketShutdown.Both);
+                _socket.Close();
+            }
+            catch (Exception ex)
+            {
+                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpEndPoint()} errored when shutting down socket: {ex.Message}");
+            }
         }
+
+        public virtual void OnClose() { Dispose(); }
+
+        public bool IsOpen() { return _socket.Connected; }
 
         public void SetNoDelay(bool enable)
         {

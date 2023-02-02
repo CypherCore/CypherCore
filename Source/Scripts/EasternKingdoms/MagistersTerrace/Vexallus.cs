@@ -100,7 +100,7 @@ namespace Scripts.EasternKingdoms.MagistersTerrace.Vexallus
             if (temp)
                 summoned.GetMotionMaster().MoveFollow(temp, 0, 0);
 
-            Summons.Summon(summoned);
+            summons.Summon(summoned);
         }
 
         public override void DamageTaken(Unit who, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)

@@ -10,7 +10,7 @@ using Game.Maps;
 using Game.Scripting;
 using Game.Scripting.Interfaces.IAura;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 {
@@ -93,7 +93,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
             _flyCount = 0;
             me.SetDisableGravity(true);
             HandleTerraceDoors(true);
-            GameObject urn = ObjectAccessor.GetGameObject(me, Instance.GetGuidData(DataTypes.GoBlackenedUrn));
+            GameObject urn = ObjectAccessor.GetGameObject(me, instance.GetGuidData(DataTypes.GoBlackenedUrn));
 
             if (urn)
                 urn.RemoveFlag(GameObjectFlags.InUse);
@@ -349,8 +349,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Nightbane
 
         private void HandleTerraceDoors(bool open)
         {
-            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
-            Instance.HandleGameObject(Instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
+            instance.HandleGameObject(instance.GetGuidData(DataTypes.MastersTerraceDoor1), open);
+            instance.HandleGameObject(instance.GetGuidData(DataTypes.MastersTerraceDoor2), open);
         }
 
         private void StartPhaseFly()

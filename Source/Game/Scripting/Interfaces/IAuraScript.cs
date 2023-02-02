@@ -4,7 +4,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
-using Game.Spells.Auras.EffectHandlers;
+using Game.Spells;
 
 namespace Game.Scripting.Interfaces
 {

@@ -90,7 +90,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
         {
             _scheduler.Update(diff);
 
-            if (Instance.GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
+            if (instance.GetBossState(DataTypes.MajordomoExecutus) != EncounterState.Done)
             {
                 if (!UpdateVictim())
                     return;
@@ -98,7 +98,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
                 if (!me.FindNearestCreature(MCCreatureIds.FlamewakerHealer, 100.0f) &&
                     !me.FindNearestCreature(MCCreatureIds.FlamewakerElite, 100.0f))
                 {
-                    Instance.UpdateEncounterStateForKilledCreature(me.GetEntry(), me);
+                    instance.UpdateEncounterStateForKilledCreature(me.GetEntry(), me);
                     me.SetFaction((uint)FactionTemplates.Friendly);
                     EnterEvadeMode();
                     Talk(TextIds.SayDefeat);
@@ -131,7 +131,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.Majordomo
                 me.RemoveNpcFlag(NPCFlags.Gossip);
                 Talk(TextIds.SaySummonMaj);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), task => { Instance.Instance.SummonCreature(MCCreatureIds.Ragnaros, MCMiscConst.RagnarosSummonPos); });
+                _scheduler.Schedule(TimeSpan.FromSeconds(8), task => { instance.instance.SummonCreature(MCCreatureIds.Ragnaros, MCMiscConst.RagnarosSummonPos); });
                 _scheduler.Schedule(TimeSpan.FromSeconds(24), task => { Talk(TextIds.SayArrival2Maj); });
             }
             else if (action == ActionIds.StartRagnarosAlt)

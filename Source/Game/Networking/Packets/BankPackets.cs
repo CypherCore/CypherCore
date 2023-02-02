@@ -7,13 +7,11 @@ namespace Game.Networking.Packets
 {
     public class AutoBankItem : ClientPacket
     {
-        public byte Bag;
         public InvUpdate Inv;
+        public byte Bag;
         public byte Slot;
 
-        public AutoBankItem(WorldPacket packet) : base(packet)
-        {
-        }
+        public AutoBankItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -25,13 +23,11 @@ namespace Game.Networking.Packets
 
     public class AutoStoreBankItem : ClientPacket
     {
-        public byte Bag;
         public InvUpdate Inv;
+        public byte Bag;
         public byte Slot;
 
-        public AutoStoreBankItem(WorldPacket packet) : base(packet)
-        {
-        }
+        public AutoStoreBankItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -43,67 +39,59 @@ namespace Game.Networking.Packets
 
     public class BuyBankSlot : ClientPacket
     {
-        public ObjectGuid Guid;
-
-        public BuyBankSlot(WorldPacket packet) : base(packet)
-        {
-        }
+        public BuyBankSlot(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid Guid;
     }
 
-    internal class AutoBankReagent : ClientPacket
+    class AutoBankReagent : ClientPacket
     {
-        public InvUpdate Inv;
-        public byte PackSlot;
-        public byte Slot;
-
-        public AutoBankReagent(WorldPacket packet) : base(packet)
-        {
-        }
+        public AutoBankReagent(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            Inv = new InvUpdate(_worldPacket);
+            Inv = new(_worldPacket);
             PackSlot = _worldPacket.ReadUInt8();
             Slot = _worldPacket.ReadUInt8();
         }
+
+        public InvUpdate Inv;
+        public byte Slot;
+        public byte PackSlot;
     }
 
-    internal class AutoStoreBankReagent : ClientPacket
+    class AutoStoreBankReagent : ClientPacket
     {
-        public InvUpdate Inv;
-        public byte PackSlot;
-        public byte Slot;
-
-        public AutoStoreBankReagent(WorldPacket packet) : base(packet)
-        {
-        }
+        public AutoStoreBankReagent(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            Inv = new InvUpdate(_worldPacket);
+            Inv = new(_worldPacket);
             Slot = _worldPacket.ReadUInt8();
             PackSlot = _worldPacket.ReadUInt8();
         }
+
+        public InvUpdate Inv;
+        public byte Slot;
+        public byte PackSlot;
     }
 
     // CMSG_BUY_REAGENT_BANK
     // CMSG_REAGENT_BANK_DEPOSIT
-    internal class ReagentBank : ClientPacket
+    class ReagentBank : ClientPacket
     {
-        public ObjectGuid Banker;
-
-        public ReagentBank(WorldPacket packet) : base(packet)
-        {
-        }
+        public ReagentBank(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
         }
+
+        public ObjectGuid Banker;
     }
 }

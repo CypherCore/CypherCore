@@ -10,8 +10,8 @@ using Game;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
-using Game.Maps.Checks;
-using Game.Maps.Notifiers;
+
+
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
@@ -1513,14 +1513,14 @@ namespace Scripts.World.NpcSpecial
             if (me.IsSummon())
                 if (player == me.ToTempSummon().GetSummoner())
                 {
-                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 1);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 2);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 3);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 4);
+                    player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 5);
 
                     if (_showUnderground)
-                        player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
+                        player.AddGossipItem(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, GossipSender.GOSSIP_SENDER_MAIN, GossipAction.GOSSIP_ACTION_INFO_DEF + 6);
 
                     player.SendGossipMenu(TextIds.Wormhole, me.GetGUID());
                 }
@@ -1535,32 +1535,32 @@ namespace Scripts.World.NpcSpecial
 
             switch (action)
             {
-                case eTradeskill.GossipActionInfoDef + 1: // Borean Tundra
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 1: // Borean Tundra
                     player.CloseGossipMenu();
                     DoCast(player, SpellIds.BoreanTundra, new CastSpellExtraArgs(false));
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 2: // Howling Fjord
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 2: // Howling Fjord
                     player.CloseGossipMenu();
                     DoCast(player, SpellIds.HowlingFjord, new CastSpellExtraArgs(false));
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 3: // Sholazar Basin
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 3: // Sholazar Basin
                     player.CloseGossipMenu();
                     DoCast(player, SpellIds.SholazarBasin, new CastSpellExtraArgs(false));
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 4: // Icecrown
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 4: // Icecrown
                     player.CloseGossipMenu();
                     DoCast(player, SpellIds.Icecrown, new CastSpellExtraArgs(false));
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 5: // Storm peaks
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 5: // Storm peaks
                     player.CloseGossipMenu();
                     DoCast(player, SpellIds.StormPeaks, new CastSpellExtraArgs(false));
 
                     break;
-                case eTradeskill.GossipActionInfoDef + 6: // Underground
+                case GossipAction.GOSSIP_ACTION_INFO_DEF + 6: // Underground
                     player.CloseGossipMenu();
                     DoCast(player, SpellIds.Underground, new CastSpellExtraArgs(false));
 
@@ -2050,7 +2050,7 @@ namespace Scripts.World.NpcSpecial
                               };
 
             who.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
-            who.Events.AddEvent(new CastFoodSpell(who, ChairSpells[who.GetEntry()]), who.Events.CalculateTime(TimeSpan.FromSeconds(1)));
+            who.m_Events.AddEvent(new CastFoodSpell(who, ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(TimeSpan.FromSeconds(1)));
             Creature creature = who.ToCreature();
 
             if (creature)

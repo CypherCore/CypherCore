@@ -1,57 +1,19 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Garrisons
 {
     public class GarrisonManager : Singleton<GarrisonManager>
     {
-        private readonly Dictionary<uint, FinalizeGarrisonPlotGOInfo> _finalizePlotGOInfo = new();
-        private readonly Dictionary<ulong, uint> _garrisonBuildingPlotInstances = new();
-        private readonly MultiMap<uint, uint> _garrisonBuildingsByPlot = new();
-        private readonly MultiMap<uint, uint> _garrisonBuildingsByType = new();
-        private readonly Dictionary<uint, GarrAbilities>[] _garrisonFollowerAbilities = new Dictionary<uint, GarrAbilities>[2];
-        private readonly MultiMap<uint, GarrAbilityRecord> _garrisonFollowerClassSpecAbilities = new();
-        private readonly List<GarrAbilityRecord> _garrisonFollowerRandomTraits = new();
-
-        private readonly MultiMap<uint, GarrSiteLevelPlotInstRecord> _garrisonPlotInstBySiteLevel = new();
-        private readonly Dictionary<uint, Dictionary<uint, GameObjectsRecord>> _garrisonPlots = new();
-
-        // Counters, Traits
-        private readonly uint[,] AbilitiesForQuality =
-        {
-            {
-                0, 0
-            },
-            {
-                1, 0
-            },
-            {
-                1, 1
-            }, // Uncommon
-			{
-                1, 2
-            }, // Rare
-			{
-                2, 3
-            }, // Epic
-			{
-                2, 3
-            } // Legendary
-		};
-
-        private ulong _followerDbIdGenerator = 1;
-
-        private GarrisonManager()
-        {
-        }
+        GarrisonManager() { }
 
         public void Initialize()
         {
@@ -59,6 +21,7 @@ namespace Game.Garrisons
                 _garrisonPlotInstBySiteLevel.Add(siteLevelPlotInst.GarrSiteLevelID, siteLevelPlotInst);
 
             foreach (GameObjectsRecord gameObject in CliDB.GameObjectsStorage.Values)
+            {
                 if (gameObject.TypeID == GameObjectTypes.GarrisonPlot)
                 {
                     if (!_garrisonPlots.ContainsKey(gameObject.OwnerID))
@@ -66,6 +29,7 @@ namespace Game.Garrisons
 
                     _garrisonPlots[gameObject.OwnerID][(uint)gameObject.PropValue[0]] = gameObject;
                 }
+            }
 
             foreach (GarrPlotBuildingRecord plotBuilding in CliDB.GarrPlotBuildingStorage.Values)
                 _garrisonBuildingsByPlot.Add(plotBuilding.GarrPlotID, plotBuilding.GarrBuildingID);
@@ -82,14 +46,12 @@ namespace Game.Garrisons
             foreach (GarrFollowerXAbilityRecord followerAbility in CliDB.GarrFollowerXAbilityStorage.Values)
             {
                 GarrAbilityRecord ability = CliDB.GarrAbilityStorage.LookupByKey(followerAbility.GarrAbilityID);
-
                 if (ability != null)
                 {
                     if (ability.GarrFollowerTypeID != (uint)GarrisonFollowerType.Garrison)
                         continue;
 
-                    if (!ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRoll) &&
-                        ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                    if (!ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRoll) && ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
                         _garrisonFollowerRandomTraits.Add(ability);
 
                     if (followerAbility.FactionIndex < 2)
@@ -115,8 +77,7 @@ namespace Game.Garrisons
         public GarrSiteLevelRecord GetGarrSiteLevelEntry(uint garrSiteId, uint level)
         {
             foreach (GarrSiteLevelRecord siteLevel in CliDB.GarrSiteLevelStorage.Values)
-                if (siteLevel.GarrSiteID == garrSiteId &&
-                    siteLevel.GarrLevel == level)
+                if (siteLevel.GarrSiteID == garrSiteId && siteLevel.GarrLevel == level)
                     return siteLevel;
 
             return null;
@@ -130,11 +91,9 @@ namespace Game.Garrisons
         public GameObjectsRecord GetPlotGameObject(uint mapId, uint garrPlotInstanceId)
         {
             var pair = _garrisonPlots.LookupByKey(mapId);
-
             if (pair != null)
             {
                 var gameobjectsRecord = pair.LookupByKey(garrPlotInstanceId);
-
                 if (gameobjectsRecord != null)
                     return gameobjectsRecord;
             }
@@ -145,7 +104,6 @@ namespace Game.Garrisons
         public bool IsPlotMatchingBuilding(uint garrPlotId, uint garrBuildingId)
         {
             var plotList = _garrisonBuildingsByPlot.LookupByKey(garrPlotId);
-
             if (!plotList.Empty())
                 return plotList.Contains(garrBuildingId);
 
@@ -160,11 +118,12 @@ namespace Game.Garrisons
         public uint GetPreviousLevelBuilding(uint buildingType, uint currentLevel)
         {
             var list = _garrisonBuildingsByType.LookupByKey(buildingType);
-
             if (!list.Empty())
+            {
                 foreach (uint buildingId in list)
                     if (CliDB.GarrBuildingStorage.LookupByKey(buildingId).UpgradeLevel == currentLevel - 1)
                         return buildingId;
+            }
 
             return 0;
         }
@@ -178,29 +137,35 @@ namespace Game.Garrisons
         {
             if (_followerDbIdGenerator >= ulong.MaxValue)
             {
-                Log.outFatal(LogFilter.Server, "Garrison follower db Id overflow! Can't continue, shutting down server. ");
+                Log.outFatal(LogFilter.Server, "Garrison follower db id overflow! Can't continue, shutting down server. ");
                 Global.WorldMgr.StopNow();
             }
 
             return _followerDbIdGenerator++;
         }
 
+        // Counters, Traits
+        uint[,] AbilitiesForQuality =
+        {
+            { 0, 0 },
+            { 1, 0 },
+            { 1, 1 },   // Uncommon
+            { 1, 2 },   // Rare
+            { 2, 3 },   // Epic
+            { 2, 3 }    // Legendary
+        };
+
         //todo check this method, might be slow.....
         public List<GarrAbilityRecord> RollFollowerAbilities(uint garrFollowerId, GarrFollowerRecord follower, uint quality, uint faction, bool initial)
         {
-            Cypher.Assert(faction < 2);
+            Cypher.Assert(faction< 2);
 
             bool hasForcedExclusiveTrait = false;
             List<GarrAbilityRecord> result = new();
-
-            uint[] slots =
-            {
-                AbilitiesForQuality[quality, 0], AbilitiesForQuality[quality, 1]
-            };
+            uint[] slots = { AbilitiesForQuality[quality, 0], AbilitiesForQuality[quality, 1] };
 
             GarrAbilities garrAbilities = null;
             var abilities = _garrisonFollowerAbilities[faction].LookupByKey(garrFollowerId);
-
             if (abilities != null)
                 garrAbilities = abilities;
 
@@ -208,16 +173,13 @@ namespace Game.Garrisons
             List<GarrAbilityRecord> forcedAbilities = new();
             List<GarrAbilityRecord> traitList = new();
             List<GarrAbilityRecord> forcedTraits = new();
-
             if (garrAbilities != null)
             {
                 foreach (GarrAbilityRecord ability in garrAbilities.Counters)
                 {
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) &&
-                        faction != GarrisonFactionIndex.Horde)
+                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
                         continue;
-                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) &&
-                             faction != GarrisonFactionIndex.Alliance)
+                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
                         continue;
 
                     if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRemove))
@@ -228,11 +190,9 @@ namespace Game.Garrisons
 
                 foreach (GarrAbilityRecord ability in garrAbilities.Traits)
                 {
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) &&
-                        faction != GarrisonFactionIndex.Horde)
+                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
                         continue;
-                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) &&
-                             faction != GarrisonFactionIndex.Alliance)
+                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
                         continue;
 
                     if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRemove))
@@ -259,12 +219,13 @@ namespace Game.Garrisons
 
             // check if we have a trait from exclusive category
             foreach (GarrAbilityRecord ability in forcedTraits)
+            {
                 if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
                 {
                     hasForcedExclusiveTrait = true;
-
                     break;
                 }
+            }
 
             if (slots[0] > forcedAbilities.Count + abilityList.Count)
             {
@@ -278,14 +239,11 @@ namespace Game.Garrisons
             if (slots[1] > forcedTraits.Count + traitList.Count)
             {
                 List<GarrAbilityRecord> genericTraitsTemp = new();
-
                 foreach (GarrAbilityRecord ability in _garrisonFollowerRandomTraits)
                 {
-                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) &&
-                        faction != GarrisonFactionIndex.Horde)
+                    if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
                         continue;
-                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) &&
-                             faction != GarrisonFactionIndex.Alliance)
+                    else if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.AllianceOnly) && faction != GarrisonFactionIndex.Alliance)
                         continue;
 
                     // forced exclusive trait exists, skip other ones entirely
@@ -297,23 +255,19 @@ namespace Game.Garrisons
 
                 List<GarrAbilityRecord> genericTraits = genericTraitsTemp.Except(forcedTraits).ToList();
                 genericTraits.AddRange(traitList);
-
                 genericTraits.Sort((GarrAbilityRecord a1, GarrAbilityRecord a2) =>
-                                   {
-                                       int e1 = (int)(a1.Flags & GarrisonAbilityFlags.Exclusive);
-                                       int e2 = (int)(a2.Flags & GarrisonAbilityFlags.Exclusive);
+                {
+                    int e1 = (int)(a1.Flags & GarrisonAbilityFlags.Exclusive);
+                    int e2 = (int)(a2.Flags & GarrisonAbilityFlags.Exclusive);
+                    if (e1 != e2)
+                        return e1.CompareTo(e2);
 
-                                       if (e1 != e2)
-                                           return e1.CompareTo(e2);
-
-                                       return a1.Id.CompareTo(a2.Id);
-                                   });
-
+                    return a1.Id.CompareTo(a2.Id);
+                });
                 genericTraits = genericTraits.Distinct().ToList();
 
                 int firstExclusive = 0;
                 int total = genericTraits.Count;
-
                 for (var i = 0; i < total; ++i, ++firstExclusive)
                     if (genericTraits[i].Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
                         break;
@@ -321,7 +275,6 @@ namespace Game.Garrisons
                 while (traitList.Count < Math.Max(0, slots[1] - forcedTraits.Count) && total != 0)
                 {
                     var garrAbility = genericTraits[RandomHelper.IRand(0, total-- - 1)];
-
                     if (garrAbility.Flags.HasAnyFlag(GarrisonAbilityFlags.Exclusive))
                         total = firstExclusive; // selected exclusive trait - no other can be selected now
                     else
@@ -340,20 +293,17 @@ namespace Game.Garrisons
             return result;
         }
 
-        private List<GarrAbilityRecord> GetClassSpecAbilities(GarrFollowerRecord follower, uint faction)
+        List<GarrAbilityRecord> GetClassSpecAbilities(GarrFollowerRecord follower, uint faction)
         {
             List<GarrAbilityRecord> abilities = new();
             uint classSpecId;
-
             switch (faction)
             {
                 case GarrisonFactionIndex.Horde:
                     classSpecId = follower.HordeGarrClassSpecID;
-
                     break;
                 case GarrisonFactionIndex.Alliance:
                     classSpecId = follower.AllianceGarrClassSpecID;
-
                     break;
                 default:
                     return abilities;
@@ -363,37 +313,33 @@ namespace Game.Garrisons
                 return abilities;
 
             var garrAbility = _garrisonFollowerClassSpecAbilities.LookupByKey(classSpecId);
-
             if (!garrAbility.Empty())
                 abilities = garrAbility;
 
             return abilities;
         }
 
-        private void InitializeDbIdSequences()
+        void InitializeDbIdSequences()
         {
             SQLResult result = DB.Characters.Query("SELECT MAX(dbId) FROM character_garrison_followers");
-
             if (!result.IsEmpty())
                 _followerDbIdGenerator = result.Read<ulong>(0) + 1;
         }
 
-        private void LoadPlotFinalizeGOInfo()
+        void LoadPlotFinalizeGOInfo()
         {
             //                                                                0                  1       2       3       4       5               6
             SQLResult result = DB.World.Query("SELECT garrPlotInstanceId, hordeGameObjectId, hordeX, hordeY, hordeZ, hordeO, hordeAnimKitId, " +
-                                              //                      7          8          9         10         11                 12
-                                              "allianceGameObjectId, allianceX, allianceY, allianceZ, allianceO, allianceAnimKitId FROM garrison_plot_finalize_info");
+                //                      7          8          9         10         11                 12
+                "allianceGameObjectId, allianceX, allianceY, allianceZ, allianceO, allianceAnimKitId FROM garrison_plot_finalize_info");
 
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 garrison follower class spec abilities. DB table `garrison_plot_finalize_info` is empty.");
-
                 return;
             }
 
             uint msTime = Time.GetMSTime();
-
             do
             {
                 uint garrPlotInstanceId = result.Read<uint>(0);
@@ -405,75 +351,50 @@ namespace Game.Garrisons
                 if (!CliDB.GarrPlotInstanceStorage.ContainsKey(garrPlotInstanceId))
                 {
                     Log.outError(LogFilter.Sql, "Non-existing GarrPlotInstance.db2 entry {0} was referenced in `garrison_plot_finalize_info`.", garrPlotInstanceId);
-
                     continue;
                 }
 
                 GameObjectTemplate goTemplate = Global.ObjectMgr.GetGameObjectTemplate(hordeGameObjectId);
-
                 if (goTemplate == null)
                 {
-                    Log.outError(LogFilter.Sql,
-                                 "Non-existing gameobject_template entry {0} was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId {1}.",
-                                 hordeGameObjectId,
-                                 garrPlotInstanceId);
-
+                    Log.outError(LogFilter.Sql, "Non-existing gameobject_template entry {0} was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId {1}.",
+                        hordeGameObjectId, garrPlotInstanceId);
                     continue;
                 }
 
                 if (goTemplate.type != GameObjectTypes.Goober)
                 {
-                    Log.outError(LogFilter.Sql,
-                                 "Invalid gameobject Type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId {2}.",
-                                 goTemplate.type,
-                                 hordeGameObjectId,
-                                 garrPlotInstanceId);
-
+                    Log.outError(LogFilter.Sql, "Invalid gameobject type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId {2}.",
+                        goTemplate.type, hordeGameObjectId, garrPlotInstanceId);
                     continue;
                 }
 
                 goTemplate = Global.ObjectMgr.GetGameObjectTemplate(allianceGameObjectId);
-
                 if (goTemplate == null)
                 {
-                    Log.outError(LogFilter.Sql,
-                                 "Non-existing gameobject_template entry {0} was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId {1}.",
-                                 allianceGameObjectId,
-                                 garrPlotInstanceId);
-
+                    Log.outError(LogFilter.Sql, "Non-existing gameobject_template entry {0} was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId {1}.",
+                        allianceGameObjectId, garrPlotInstanceId);
                     continue;
                 }
 
                 if (goTemplate.type != GameObjectTypes.Goober)
                 {
-                    Log.outError(LogFilter.Sql,
-                                 "Invalid gameobject Type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId {2}.",
-                                 goTemplate.type,
-                                 allianceGameObjectId,
-                                 garrPlotInstanceId);
-
+                    Log.outError(LogFilter.Sql, "Invalid gameobject type {0} (entry {1}) was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId {2}.",
+                        goTemplate.type, allianceGameObjectId, garrPlotInstanceId);
                     continue;
                 }
 
-                if (hordeAnimKitId != 0 &&
-                    !CliDB.AnimKitStorage.ContainsKey(hordeAnimKitId))
+                if (hordeAnimKitId != 0 && !CliDB.AnimKitStorage.ContainsKey(hordeAnimKitId))
                 {
-                    Log.outError(LogFilter.Sql,
-                                 "Non-existing AnimKit.dbc entry {0} was referenced in `garrison_plot_finalize_info`.`hordeAnimKitId` for garrPlotInstanceId {1}.",
-                                 hordeAnimKitId,
-                                 garrPlotInstanceId);
-
+                    Log.outError(LogFilter.Sql, "Non-existing AnimKit.dbc entry {0} was referenced in `garrison_plot_finalize_info`.`hordeAnimKitId` for garrPlotInstanceId {1}.",
+                        hordeAnimKitId, garrPlotInstanceId);
                     continue;
                 }
 
-                if (allianceAnimKitId != 0 &&
-                    !CliDB.AnimKitStorage.ContainsKey(allianceAnimKitId))
+                if (allianceAnimKitId != 0 && !CliDB.AnimKitStorage.ContainsKey(allianceAnimKitId))
                 {
-                    Log.outError(LogFilter.Sql,
-                                 "Non-existing AnimKit.dbc entry {0} was referenced in `garrison_plot_finalize_info`.`allianceAnimKitId` for garrPlotInstanceId {1}.",
-                                 allianceAnimKitId,
-                                 garrPlotInstanceId);
-
+                    Log.outError(LogFilter.Sql, "Non-existing AnimKit.dbc entry {0} was referenced in `garrison_plot_finalize_info`.`allianceAnimKitId` for garrPlotInstanceId {1}.",
+                        allianceAnimKitId, garrPlotInstanceId);
                     continue;
                 }
 
@@ -487,25 +408,23 @@ namespace Game.Garrisons
                 info.factionInfo[GarrisonFactionIndex.Alliance].AnimKitId = allianceAnimKitId;
 
                 _finalizePlotGOInfo[garrPlotInstanceId] = info;
+
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} garrison plot finalize entries in {1}.", _finalizePlotGOInfo.Count, Time.GetMSTimeDiffToNow(msTime));
         }
 
-        private void LoadFollowerClassSpecAbilities()
+        void LoadFollowerClassSpecAbilities()
         {
             SQLResult result = DB.World.Query("SELECT classSpecId, abilityId FROM garrison_follower_class_spec_abilities");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 garrison follower class spec abilities. DB table `garrison_follower_class_spec_abilities` is empty.");
-
                 return;
             }
 
             uint msTime = Time.GetMSTime();
             uint count = 0;
-
             do
             {
                 uint classSpecId = result.Read<uint>(0);
@@ -514,21 +433,19 @@ namespace Game.Garrisons
                 if (!CliDB.GarrClassSpecStorage.ContainsKey(classSpecId))
                 {
                     Log.outError(LogFilter.Sql, "Non-existing GarrClassSpec.db2 entry {0} was referenced in `garrison_follower_class_spec_abilities` by row ({1}, {2}).", classSpecId, classSpecId, abilityId);
-
                     continue;
                 }
 
                 GarrAbilityRecord ability = CliDB.GarrAbilityStorage.LookupByKey(abilityId);
-
                 if (ability == null)
                 {
                     Log.outError(LogFilter.Sql, "Non-existing GarrAbility.db2 entry {0} was referenced in `garrison_follower_class_spec_abilities` by row ({1}, {2}).", abilityId, classSpecId, abilityId);
-
                     continue;
                 }
 
                 _garrisonFollowerClassSpecAbilities.Add(classSpecId, ability);
                 ++count;
+
             } while (result.NextRow());
 
             //foreach (var key in _garrisonFollowerClassSpecAbilities.Keys)
@@ -536,9 +453,21 @@ namespace Game.Garrisons
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} garrison follower class spec abilities in {1}.", count, Time.GetMSTimeDiffToNow(msTime));
         }
+
+        MultiMap<uint, GarrSiteLevelPlotInstRecord> _garrisonPlotInstBySiteLevel = new();
+        Dictionary<uint, Dictionary<uint, GameObjectsRecord>> _garrisonPlots = new();
+        MultiMap<uint, uint> _garrisonBuildingsByPlot = new();
+        Dictionary<ulong, uint> _garrisonBuildingPlotInstances = new();
+        MultiMap<uint, uint> _garrisonBuildingsByType = new();
+        Dictionary<uint, FinalizeGarrisonPlotGOInfo> _finalizePlotGOInfo = new();
+        Dictionary<uint, GarrAbilities>[] _garrisonFollowerAbilities = new Dictionary<uint, GarrAbilities>[2];
+        MultiMap<uint, GarrAbilityRecord> _garrisonFollowerClassSpecAbilities = new();
+        List<GarrAbilityRecord> _garrisonFollowerRandomTraits = new();
+
+        ulong _followerDbIdGenerator = 1;
     }
 
-    internal class GarrAbilities
+    class GarrAbilities
     {
         public List<GarrAbilityRecord> Counters = new();
         public List<GarrAbilityRecord> Traits = new();
@@ -546,13 +475,13 @@ namespace Game.Garrisons
 
     public class FinalizeGarrisonPlotGOInfo
     {
+        public FactionInfo[] factionInfo = new FactionInfo[2];
+
         public struct FactionInfo
         {
             public uint GameObjectId;
             public Position Pos;
             public ushort AnimKitId;
         }
-
-        public FactionInfo[] factionInfo = new FactionInfo[2];
     }
 }

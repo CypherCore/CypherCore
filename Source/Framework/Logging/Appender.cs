@@ -1,21 +1,25 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Database;
 using System;
 using System.IO;
 using System.Text;
-using Framework.Database;
 
-internal class ConsoleAppender : Appender
+class ConsoleAppender : Appender
 {
-    private readonly ConsoleColor[] _consoleColor;
-
     public ConsoleAppender(byte id, string name, LogLevel level, AppenderFlags flags) : base(id, name, level, flags)
     {
         _consoleColor = new[]
-                        {
-                            ConsoleColor.White, ConsoleColor.White, ConsoleColor.Gray, ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Red, ConsoleColor.Blue
-                        };
+        {
+            ConsoleColor.White,
+            ConsoleColor.White,
+            ConsoleColor.Gray,
+            ConsoleColor.Green,
+            ConsoleColor.Yellow,
+            ConsoleColor.Red,
+            ConsoleColor.Blue
+        };
     }
 
     public override void _write(LogMessage message)
@@ -29,17 +33,12 @@ internal class ConsoleAppender : Appender
     {
         return AppenderType.Console;
     }
+
+    ConsoleColor[] _consoleColor;
 }
 
-internal class FileAppender : Appender, IDisposable
+class FileAppender : Appender, IDisposable
 {
-    private readonly bool _dynamicName;
-
-    private readonly string _fileName;
-    private readonly string _logDir;
-    private readonly FileStream _logStream;
-    private readonly object locker = new();
-
     public FileAppender(byte id, string name, LogLevel level, string fileName, string logDir, AppenderFlags flags) : base(id, name, level, flags)
     {
         Directory.CreateDirectory(logDir);
@@ -49,12 +48,16 @@ internal class FileAppender : Appender, IDisposable
 
         if (_dynamicName)
         {
-            Directory.CreateDirectory(logDir + "/" + _fileName[..(_fileName.IndexOf('/') + 1)]);
-
+            Directory.CreateDirectory(logDir + "/" + _fileName.Substring(0, _fileName.IndexOf('/') + 1));
             return;
         }
 
         _logStream = OpenFile(_fileName, FileMode.Create);
+    }
+
+    FileStream OpenFile(string filename, FileMode mode)
+    {
+        return new FileStream(_logDir + "/" + filename, mode, FileAccess.Write, FileShare.ReadWrite);
     }
 
     public override void _write(LogMessage message)
@@ -69,7 +72,6 @@ internal class FileAppender : Appender, IDisposable
                 logStream.Write(logBytes, 0, logBytes.Length);
                 logStream.Flush();
                 logStream.Close();
-
                 return;
             }
 
@@ -83,13 +85,7 @@ internal class FileAppender : Appender, IDisposable
         return AppenderType.File;
     }
 
-    private FileStream OpenFile(string filename, FileMode mode)
-    {
-        return new FileStream(_logDir + "/" + filename, mode, FileAccess.Write, FileShare.ReadWrite);
-    }
-
     #region IDisposable Support
-
     private bool disposedValue;
 
     private void Dispose(bool disposing)
@@ -97,7 +93,9 @@ internal class FileAppender : Appender, IDisposable
         if (!disposedValue)
         {
             if (disposing)
+            {
                 _logStream.Dispose();
+            }
 
             disposedValue = true;
         }
@@ -107,25 +105,23 @@ internal class FileAppender : Appender, IDisposable
     {
         Dispose(true);
     }
-
     #endregion
+
+    string _fileName;
+    string _logDir;
+    bool _dynamicName;
+    FileStream _logStream;
+    object locker = new();
 }
 
-internal class DBAppender : Appender
+class DBAppender : Appender
 {
-    private bool enabled;
-
-    private uint realmId;
-
-    public DBAppender(byte id, string name, LogLevel level) : base(id, name, level)
-    {
-    }
+    public DBAppender(byte id, string name, LogLevel level) : base(id, name, level) { }
 
     public override void _write(LogMessage message)
     {
         // Avoid infinite loop, PExecute triggers Logging with "sql.sql" type
-        if (!enabled ||
-            message.type == LogFilter.Sql)
+        if (!enabled || message.type == LogFilter.Sql)
             return;
 
         PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_LOG);
@@ -147,16 +143,13 @@ internal class DBAppender : Appender
         enabled = true;
         realmId = _realmId;
     }
+
+    uint realmId;
+    bool enabled;
 }
 
-internal abstract class Appender
+abstract class Appender
 {
-    private readonly AppenderFlags _flags;
-
-    private readonly byte _id;
-    private readonly string _name;
-    private LogLevel _level;
-
     protected Appender(byte id, string name, LogLevel level = LogLevel.Disabled, AppenderFlags flags = AppenderFlags.None)
     {
         _id = id;
@@ -167,8 +160,7 @@ internal abstract class Appender
 
     public void Write(LogMessage message)
     {
-        if (_level == LogLevel.Disabled ||
-            (_level != LogLevel.Fatal && _level > message.level))
+        if (_level == LogLevel.Disabled || (_level != LogLevel.Fatal && _level > message.level))
             return;
 
         StringBuilder ss = new();
@@ -200,26 +192,21 @@ internal abstract class Appender
 
     public abstract AppenderType GetAppenderType();
 
-    public virtual void setRealmId(uint realmId)
-    {
-    }
+    public virtual void setRealmId(uint realmId) { }
 
     public void setLogLevel(LogLevel level)
     {
         _level = level;
     }
+
+    byte _id;
+    string _name;
+    LogLevel _level;
+    AppenderFlags _flags;
 }
 
-internal class LogMessage
+class LogMessage
 {
-    public string dynamicName;
-
-    public LogLevel level;
-    public DateTime mtime;
-    public string prefix;
-    public string text;
-    public LogFilter type;
-
     public LogMessage(LogLevel _level, LogFilter _type, string _text)
     {
         level = _level;
@@ -227,4 +214,11 @@ internal class LogMessage
         text = _text;
         mtime = DateTime.Now;
     }
+
+    public LogLevel level;
+    public LogFilter type;
+    public string text;
+    public string prefix;
+    public string dynamicName;
+    public DateTime mtime;
 }
