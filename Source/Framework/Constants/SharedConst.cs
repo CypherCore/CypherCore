@@ -970,7 +970,14 @@ namespace Framework.Constants
         LFR15thAnniversary = 151,
 
         VisionsOfNzoth = 152,
-        TeemingIsland = 153
+        TeemingIsland = 153,
+        DIFFICULTY_TORGHAST = 167,
+        DIFFICULTY_PATH_OF_ASCENSION_COURAGE = 168,
+        DIFFICULTY_PATH_OF_ASCENSION_LOYALTY = 169,
+        DIFFICULTY_PATH_OF_ASCENSION_WISDOM = 170,
+        DIFFICULTY_PATH_OF_ASCENSION_HUMILITY = 171,
+        DIFFICULTY_WORLD_BOSS = 173,
+        DIFFICULTY_CHALLANGE_LEVEL_1 = 192
     }
 
     public enum DifficultyFlags : ushort
@@ -982,7 +989,8 @@ namespace Framework.Constants
 
         Legacy = 0x20,
         DisplayHeroic = 0x40, // Controls icon displayed on minimap when inside the instance
-        DisplayMythic = 0x80  // Controls icon displayed on minimap when inside the instance
+        DisplayMythic = 0x80,  // Controls icon displayed on minimap when inside the instance
+        DIFFICULTY_FLAG_UNK = 0x100 // Pvp and teeming island use
     }
 
     [Flags]
